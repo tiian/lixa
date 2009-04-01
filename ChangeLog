@@ -1,0 +1,9 @@
+LOG:
+20090330 - 0.1.0 first very early release, the daemon compiles and run, but is
+           useless
+
+TODO:
+2009032901
+liblixacommon is compiled with POSIX thread enabled; when a non POSIX
+thread enable version of "client" will be released, liblixacommon must be
+double compiled (single and multithread)

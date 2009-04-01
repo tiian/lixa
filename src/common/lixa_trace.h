@@ -1,0 +1,177 @@
+/*
+ * Copyright (c) 2009, Christian Ferrari
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the names of the copyright holders nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * Alternatively, this software may be distributed under the terms of the
+ * GNU General Public License ("GPL") version 2 as published by the Free 
+ * Software Foundation.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+#ifndef LIXA_TRACE_H
+#define LIXA_TRACE_H
+
+
+
+#include <config.h>
+
+
+
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif /* HAVE_STDIO_H */
+
+#include <lixa_defines.h>
+
+
+
+/**
+ * Name of the environment variable must be used to set the trace mask
+ */
+#define LIXA_TRACE_MASK_ENV_VAR    "LIXA_TRACE_MASK"
+
+
+
+/**
+ * trace module for generic server functions
+ */
+#define LIXA_TRACE_MOD_SERVER           0x00000001
+
+/**
+ * trace module for server configuration functions
+ */
+#define LIXA_TRACE_MOD_SERVER_CONFIG    0x00000002
+
+
+
+/**
+ * LIXA_TRACE_INIT macro is used to compile @ref lixa_trace_init function
+ * only if _DEBUG macro is defined
+ */
+#ifdef _DEBUG
+# define LIXA_TRACE_INIT lixa_trace_init()
+#else
+# define LIXA_TRACE_INIT
+#endif
+
+
+
+/**
+ * LIXA_TRACE macro is used to compile trace messages only if _DEBUG macro is
+ * defined
+ * trace message is printed only for modules (LIXA_TRACE_MODULE) covered by
+ * trace mask (LIXA_TRACE_MASK) specified as environment variable
+ */
+#ifdef _DEBUG
+# define LIXA_TRACE(a)   ((LIXA_TRACE_MODULE & \
+                        (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL ? \
+                         strtoul(getenv(LIXA_TRACE_MASK_ENV_VAR), NULL, 0) : \
+                          0x0)) ? lixa_trace a : 0)
+#else
+# define LIXA_TRACE(a)
+#endif /* _DEBUG */
+
+
+
+/**
+ * This mutex is used to avoid contention (bad output) on trace file
+ */
+extern pthread_mutex_t lixa_trace_mutex;
+
+/**
+ * This flag is used to check the mutex @ref lixa_trace_mutex has been
+ * initialized
+ */
+extern int lixa_trace_mutex_init;
+
+
+/**
+ * LIXA_TRACE_HEX_DATA macro is used to compile trace messages only if _DEBUG
+ * macro is defined;
+ * trace message is printed only for modules (LIXA_TRACE_MODULE) covered by
+ * trace mask (LIXA_TRACE_MASK) specified as environment variable
+ */
+#ifdef _DEBUG
+# define LIXA_TRACE_HEX_DATA(a,b)   ((LIXA_TRACE_MODULE & \
+                        (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL ? \
+                         strtoul(getenv(LIXA_TRACE_MASK_ENV_VAR), NULL, 0) : \
+                          0x0)) ? lixa_trace_hex_data(a,b,stderr) : 0)
+#else
+# define LIXA_TRACE_HEX_DATA(a,b)
+#endif /* _DEBUG */
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
+    /**
+     * This method MUST be called BEFORE first log call to avoid lock
+     * contention in multithread environments
+     */
+    void lixa_trace_init(void);
+    
+
+    
+    /**
+     * Send trace record to stderr
+     * @param fmt IN record format
+     * @param ... IN record data
+     */
+    void lixa_trace(const char *fmt, ...);
+
+        
+
+    /**
+     * Dump the content of a piece of memory to a stream (hex format)
+     * @param data IN pointer to base memory
+     * @param size IN number of bytes to dump
+     * @param out_stream IN destination standard I/O stream
+     */
+    void lixa_trace_hex_data(const byte_t *data , lixa_word_t size,
+                             FILE *out_stream);
+
+
+      
+    /**
+     * Dump the content of a piece of memory to a stream (text format)
+     * @param data IN pointer to base memory
+     * @param size IN number of bytes to dump
+     * @param out_stream IN destination standard I/O stream
+     */
+    void lixa_trace_text_data(const byte_t *data, lixa_word_t size,
+                              FILE *out_stream);
+
+
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+
+
+#endif /* LIXA_TRACE_H */
