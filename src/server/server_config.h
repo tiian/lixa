@@ -51,16 +51,10 @@
 
 
 /**
- * This is the path of the first config file to search for (local
+ * This is the path of the default config file to search for (system
  * configuration)
  */
-extern const char *LIXA_SERVER_CONFIG_DEFAULT_FILE1;
-
-/**
- * This is the path of the second config file to search for (system
- * configuration)
- */
-extern const char *LIXA_SERVER_CONFIG_DEFAULT_FILE2;
+extern const char *LIXA_SERVER_CONFIG_DEFAULT_FILE;
 
 
 
@@ -72,9 +66,12 @@ extern "C" {
 
     /**
      * Read and parse server config file
+     * @param config_filename IN a filename PATH must looked at before
+     *                           searching default system config file
+     *                           default = NULL
      * @return a return code
      */
-    int server_config(void);
+    int server_config(const char *config_filename);
 
     
 

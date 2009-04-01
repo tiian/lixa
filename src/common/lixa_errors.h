@@ -207,6 +207,11 @@ define LIXA_RC_GETTIMEOFDAY_ERROR            -128
 define LIXA_RC_UNLINK_ERROR                  -129
  */
 
+/**
+ * "xmlReadFile" function error
+ */
+#define LIXA_RC_XML_READ_FILE_ERROR          -200
+
 
 
 /***********************************************************************

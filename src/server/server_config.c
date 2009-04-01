@@ -66,37 +66,58 @@
 
 
 
-const char *LIXA_SERVER_CONFIG_DEFAULT_FILE1 = "lixad.conf";
-const char *LIXA_SERVER_CONFIG_DEFAULT_FILE2 = "/etc/lixad.conf";
+const char *LIXA_SERVER_CONFIG_DEFAULT_FILE = "/etc/lixad_conf.xml";
 
 
 
-int server_config(void)
+int server_config(const char *config_filename)
 {
     enum Exception { OPEN_CONFIG_ERROR
+                     , XML_READ_FILE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     int fd = 0;
+    const char *file_name = NULL;
+    xmlDocPtr doc;
     
     LIXA_TRACE(("server_config\n"));
     TRY {
-        /* checking if available the first config file */
-        if (-1 == (fd = open(LIXA_SERVER_CONFIG_DEFAULT_FILE1, O_RDONLY))) {
-            LIXA_TRACE(("server_config/file %s is not readable, looking for "
-                        "next one\n", LIXA_SERVER_CONFIG_DEFAULT_FILE1));
-            if (-1 == (fd = open(LIXA_SERVER_CONFIG_DEFAULT_FILE2, O_RDONLY))) {
+        /* checking if available the custom config file */
+        if (NULL != config_filename &&
+            -1 != (fd = open(config_filename, O_RDONLY))) {
+            file_name = config_filename;
+        } else {
+            if (-1 == (fd = open(LIXA_SERVER_CONFIG_DEFAULT_FILE, O_RDONLY))) {
                 LIXA_TRACE(("server_config/file %s is not readable, throwing "
-                            "error\n", LIXA_SERVER_CONFIG_DEFAULT_FILE2));
+                            "error\n", LIXA_SERVER_CONFIG_DEFAULT_FILE));
                 THROW(OPEN_CONFIG_ERROR);
+            } else {
+                file_name = LIXA_SERVER_CONFIG_DEFAULT_FILE;
             }
         }
+
+        /* initialize libxml2 library */
+        LIBXML_TEST_VERSION;
+        
+        /* loading config file */
+        if (NULL == (doc = xmlReadFile(file_name, NULL, 0)))
+            THROW(XML_READ_FILE_ERROR);
+
+        /* free parsed document */
+        xmlFreeDoc(doc);
+
+        /* release libxml2 stuff */
+        xmlCleanupParser();
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case OPEN_CONFIG_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case XML_READ_FILE_ERROR:
+                ret_cod = LIXA_RC_XML_READ_FILE_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
