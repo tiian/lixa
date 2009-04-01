@@ -7,3 +7,7 @@ TODO:
 liblixacommon is compiled with POSIX thread enabled; when a non POSIX
 thread enable version of "client" will be released, liblixacommon must be
 double compiled (single and multithread)
+
+2009040101
+lixad command line should be able to specify a custom config file instead of
+default system configuration file; server_config() is already enabled
