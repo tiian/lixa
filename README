@@ -1,0 +1,26 @@
+                        LIXA (LIbre XA)
+
+LIXA is a software libre implementation of a transaction manager XA compliant.
+
+LIBXML2 dependency:
+This software needs libxml2 to be compiled and executed.
+If your libxml2 headers are not in standard include directory, use the
+command
+	export CPPFLAGS=-I/path/to/libxml2
+before configure.
+Example: my libxml2 header files are rooted at /usr/include/libxml2
+	export CPPFLAGS=-I/usr/include/libxml2
+	./configure
+	make
+
+DEBUG messages:
+Enabling debug messages (for developers only):
+	./configure --enable-debug
+	make
+
+Debug build is generally not suggested for production environments.
+You must set LIXA_TRACE_MASK environment variable according to values 
+described in file src/common/lixa_trace.h to see debug output messages
+	export LIXA_TRACE_MASK="0xffff"
+to enable all trace messages (very verbose)
+
