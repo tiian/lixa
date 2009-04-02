@@ -210,8 +210,11 @@ define LIXA_RC_UNLINK_ERROR                  -129
 /**
  * "xmlReadFile" function error
  */
-#define LIXA_RC_XML_READ_FILE_ERROR          -200
-
+#define LIXA_RC_XML_READ_FILE_ERROR            -200
+/**
+ * "xmlDocGetRootElement" function error
+ */
+#define LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR -201
 
 
 /***********************************************************************

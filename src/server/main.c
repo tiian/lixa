@@ -56,6 +56,11 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_LIBXML_PARSER_H
+# include <libxml/parser.h>
+#endif /* HAVE_LIBXML_PARSER.H */
+
+
 
 /* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
@@ -89,6 +94,10 @@ int main(int argc, char *argv[])
     openlog("lixad", LOG_PID, LOG_DAEMON);
     syslog(LOG_NOTICE, "starting");
     daemonize();
+
+    /* initialize libxml2 library */
+    LIBXML_TEST_VERSION;
+        
     /* do something */
     if (LIXA_RC_OK != (rc = server_config())) {
         LIXA_TRACE(("main/server_config: rc = %d\n", rc));
