@@ -69,9 +69,18 @@ extern "C" {
      * @param config_filename IN a filename PATH must looked at before
      *                           searching default system config file
      *                           default = NULL
-     * @return a return code
+     * @return a standardized return code
      */
     int server_config(const char *config_filename);
+
+
+
+    /**
+     * Parse the configuration tree
+     * @param a_node IN the current subtree must be parsed
+     * @return a standardized return code
+     */
+    int parse_config(xmlNode *a_node);
 
     
 

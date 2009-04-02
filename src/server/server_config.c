@@ -74,12 +74,15 @@ int server_config(const char *config_filename)
 {
     enum Exception { OPEN_CONFIG_ERROR
                      , XML_READ_FILE_ERROR
+                     , XML_DOC_GET_ROOT_ELEMENT_ERROR
+                     , PARSE_CONFIG_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     int fd = 0;
     const char *file_name = NULL;
     xmlDocPtr doc;
+    xmlNode *root_element = NULL;
     
     LIXA_TRACE(("server_config\n"));
     TRY {
@@ -97,13 +100,17 @@ int server_config(const char *config_filename)
             }
         }
 
-        /* initialize libxml2 library */
-        LIBXML_TEST_VERSION;
-        
         /* loading config file */
         if (NULL == (doc = xmlReadFile(file_name, NULL, 0)))
             THROW(XML_READ_FILE_ERROR);
 
+        /* walking tree */
+        if (NULL == (root_element = xmlDocGetRootElement(doc)))
+            THROW(XML_DOC_GET_ROOT_ELEMENT_ERROR);
+
+        if (LIXA_RC_OK != (ret_cod = parse_config(root_element)))
+            THROW(PARSE_CONFIG_ERROR);
+        
         /* free parsed document */
         xmlFreeDoc(doc);
 
@@ -119,6 +126,11 @@ int server_config(const char *config_filename)
             case XML_READ_FILE_ERROR:
                 ret_cod = LIXA_RC_XML_READ_FILE_ERROR;
                 break;
+            case XML_DOC_GET_ROOT_ELEMENT_ERROR:
+                ret_cod = LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR;
+                break;
+            case PARSE_CONFIG_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -127,6 +139,40 @@ int server_config(const char *config_filename)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_config/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int parse_config(xmlNode *a_node)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    xmlNode *cur_node = NULL;
+
+    LIXA_TRACE(("parse_config\n"));
+    TRY {
+        for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
+            if (cur_node->type == XML_ELEMENT_NODE) 
+                LIXA_TRACE(("parse_config: tag %s\n", cur_node->name));
+            parse_config(cur_node->children);
+        }        
+
+        
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("parse_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
