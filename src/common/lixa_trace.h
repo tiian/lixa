@@ -67,6 +67,25 @@
 
 
 /**
+ * This is the mask retrieved from environment var LIXA_TRACE_MASK and
+ * determines which modules are traced
+ */
+extern unsigned long lixa_trace_mask;
+
+/**
+ * This mutex is used to avoid contention (bad output) on trace file
+ */
+extern pthread_mutex_t lixa_trace_mutex;
+
+/**
+ * This flag is used to check the mutex @ref lixa_trace_mutex has been
+ * initialized
+ */
+extern int lixa_trace_mutex_init;
+
+
+
+/**
  * LIXA_TRACE_INIT macro is used to compile @ref lixa_trace_init function
  * only if _DEBUG macro is defined
  */
@@ -85,26 +104,19 @@
  * trace mask (LIXA_TRACE_MASK) specified as environment variable
  */
 #ifdef _DEBUG
+/* this implementation is less efficient, but does not need library
+ * initializazion
 # define LIXA_TRACE(a)   ((LIXA_TRACE_MODULE & \
                         (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL ? \
                          strtoul(getenv(LIXA_TRACE_MASK_ENV_VAR), NULL, 0) : \
                           0x0)) ? lixa_trace a : 0)
+*/
+# define LIXA_TRACE(a)    (LIXA_TRACE_MODULE & lixa_trace_mask ? \
+                           lixa_trace a : 0)
 #else
 # define LIXA_TRACE(a)
 #endif /* _DEBUG */
 
-
-
-/**
- * This mutex is used to avoid contention (bad output) on trace file
- */
-extern pthread_mutex_t lixa_trace_mutex;
-
-/**
- * This flag is used to check the mutex @ref lixa_trace_mutex has been
- * initialized
- */
-extern int lixa_trace_mutex_init;
 
 
 /**

@@ -23,7 +23,7 @@ AC_CHECK_HEADERS(errno.h fcntl.h pthread.h)
 AC_CHECK_HEADERS(signal.h stdarg.h stdio.h stdlib.h string.h syslog.h)
 AC_CHECK_HEADERS(sys/time.h sys/types.h sys/stat.h)
 AC_CHECK_HEADERS(unistd.h)
-AC_CHECK_HEADERS(libxml/tree.h libxml/parser.h)
+AC_CHECK_HEADERS(libxml/xmlversion.h libxml/tree.h libxml/parser.h)
 
 AC_CHECK_TYPES(uint8_t)
 AC_CHECK_TYPES(uint32_t)

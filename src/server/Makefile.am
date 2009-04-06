@@ -1,5 +1,6 @@
 include_HEADERS = ../common/lixa_trace.h server_config.h
 AM_CPPFLAGS = -I$(srcdir)/../common
+AM_CFLAGS = -Wall
 AM_LDFLAGS = -lxml2
 LDADD = ../common/liblixacommon.a
 bin_PROGRAMS = lixad

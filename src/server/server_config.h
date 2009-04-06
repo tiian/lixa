@@ -31,7 +31,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #ifndef SERVER_CONFIG_H
-#define SERVER_CONFIG_H
+# define SERVER_CONFIG_H
 
 
 
@@ -58,6 +58,67 @@ extern const char *LIXA_SERVER_CONFIG_DEFAULT_FILE;
 
 
 
+/**
+ * It contains the configuration of a listener
+ */
+struct listener_config_s {
+    /**
+     * Type of listeners
+     */
+    xmlChar *type;
+    /**
+     * Address used to listen by this listener
+     */
+    xmlChar *ip_address;
+    /**
+     * Port used to listen by this listener
+     */
+    xmlChar *port;
+};
+
+/*
+ * Convenience type to avoid struct keywork
+ */
+typedef struct listener_config_s listener_config_t;
+
+/**
+ * It contains the configuration of all listeners
+ */
+struct listener_config_array_s {
+    /**
+     * Number of elements
+     */
+    int n;
+    /**
+     * Elements
+     */
+    listener_config_t *array;
+};
+
+/*
+ * Convenience type to avoid struct keywork
+ */
+typedef struct listener_config_array_s listener_config_array_t;
+
+
+
+/**
+ * It contains the configuration of a whole server
+ */
+struct server_config_s {
+    /**
+     * Listeners' configuration
+     */
+    listener_config_array_t      listeners;
+};
+
+/*
+ * Convenience type to avoid struct keywork
+ */
+typedef struct server_config_s server_config_t;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -69,9 +130,11 @@ extern "C" {
      * @param config_filename IN a filename PATH must looked at before
      *                           searching default system config file
      *                           default = NULL
+     * @param sc OUT the object containing the server configuration
      * @return a standardized return code
      */
-    int server_config(const char *config_filename);
+    int server_config(const char *config_filename,
+                      server_config_t *sc);
 
 
 
@@ -84,6 +147,22 @@ extern "C" {
 
     
 
+    /**
+     * Initialize an array of listener config elements
+     * @param lca OUT the object must be initialized
+     */
+    void listener_config_array_init(listener_config_array_t *lca);
+
+
+
+    /**
+     * Initialize the configuration of the server
+     * @param sc OUT the object must be initialized
+     */
+    void server_config_init(server_config_t *sc);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

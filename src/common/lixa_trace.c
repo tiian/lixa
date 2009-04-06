@@ -49,12 +49,20 @@
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+
 
 
 #include "lixa_trace.h"
 
 
 
+unsigned long lixa_trace_mask = 0;
 pthread_mutex_t lixa_trace_mutex;
 int lixa_trace_mutex_init = FALSE;
 
@@ -62,6 +70,12 @@ int lixa_trace_mutex_init = FALSE;
 
 void lixa_trace_init(void)
 {
+    /* retrieve environemnt variable */
+    if (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL)
+        lixa_trace_mask = strtoul(getenv(LIXA_TRACE_MASK_ENV_VAR), NULL, 0);
+    else
+        lixa_trace_mask = 0x0;    
+    /* initialize mutex */
     if (0 != pthread_mutex_init(&lixa_trace_mutex, NULL))
         perror("lixa_trace_init/pthread_mutex_init\n");
     lixa_trace_mutex_init = TRUE;
@@ -88,8 +102,8 @@ void lixa_trace(const char *fmt, ...)
                 "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [%d/%ld] ",
                 broken_time.tm_year + 1900, broken_time.tm_mon + 1,
                 broken_time.tm_mday, broken_time.tm_hour,
-                broken_time.tm_min, broken_time.tm_sec, tv.tv_usec,
-                getpid(), pthread_self(), args);
+                broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
+                getpid(), pthread_self());
     } /* if (lixa_trace_mutex_init) */
     /* custom message */
     vfprintf(stderr, fmt, args);

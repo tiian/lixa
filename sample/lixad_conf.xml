@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <server>
-	<network ip_address="0.0.0.0" port="2345"/>
-	<task threads="4"/>
+  <listeners>
+    <listener type="PF_INET" ip_address="0.0.0.0" port="2345"/>
+    <listener type="PF_UNIX"/>
+  </listeners>
+  <managers>
+    <manager file="/tmp/lixad_status1"/>
+    <manager file="/tmp/lixad_status2"/>
+    <manager file="/tmp/lixad_status3"/>
+  </managers>
+  <profiles>
+    <profile>
+    </profile>
+    <profile>
+    </profile>
+  </profiles>
 </server>

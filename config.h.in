@@ -15,6 +15,9 @@
 /* Define to 1 if you have the <libxml/tree.h> header file. */
 #undef HAVE_LIBXML_TREE_H
 
+/* Define to 1 if you have the <libxml/xmlversion.h> header file. */
+#undef HAVE_LIBXML_XMLVERSION_H
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
