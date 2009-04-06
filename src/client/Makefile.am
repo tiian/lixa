@@ -1,2 +1,1 @@
-
-
+AM_CFLAGS = -Wall

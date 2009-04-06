@@ -154,6 +154,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 include_HEADERS = ../common/lixa_trace.h server_config.h
 AM_CPPFLAGS = -I$(srcdir)/../common
+AM_CFLAGS = -Wall
 AM_LDFLAGS = -lxml2
 LDADD = ../common/liblixacommon.a
 lixad_SOURCES = main.c server_config.c

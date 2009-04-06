@@ -4752,7 +4752,8 @@ done
 
 
 
-for ac_header in libxml/tree.h libxml/parser.h
+
+for ac_header in libxml/xmlversion.h libxml/tree.h libxml/parser.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then

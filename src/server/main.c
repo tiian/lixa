@@ -56,9 +56,18 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_LIBXML_XMLVERSION_H
+# include <libxml/xmlversion.h>
+#endif /* HAVE_LIBXML_XMLVERSION_H */
 #ifdef HAVE_LIBXML_PARSER_H
 # include <libxml/parser.h>
 #endif /* HAVE_LIBXML_PARSER.H */
+
+
+
+#include <lixa_errors.h>
+#include <lixa_trace.h>
+#include <server_config.h>
 
 
 
@@ -67,11 +76,6 @@
 # undef LIXA_TRACE_MODULE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_SERVER
-
-
-
-#include <lixa_errors.h>
-#include <lixa_trace.h>
 
 
 
@@ -88,6 +92,7 @@ void daemonize(void);
 int main(int argc, char *argv[])
 {
     int rc = LIXA_RC_OK;
+    server_config_t sc;
     
     LIXA_TRACE_INIT;
     LIXA_TRACE(("main: starting\n"));
@@ -99,7 +104,7 @@ int main(int argc, char *argv[])
     LIBXML_TEST_VERSION;
         
     /* do something */
-    if (LIXA_RC_OK != (rc = server_config())) {
+    if (LIXA_RC_OK != (rc = server_config("", &sc))) {
         LIXA_TRACE(("main/server_config: rc = %d\n", rc));
         syslog(LOG_ERR, "configuration error, premature exit");
         return rc;
@@ -107,6 +112,7 @@ int main(int argc, char *argv[])
         
     /* it's time to exit */
     syslog(LOG_NOTICE, "exiting");
+
     LIXA_TRACE(("lixad/main: exiting\n"));    
     return 0;
 }

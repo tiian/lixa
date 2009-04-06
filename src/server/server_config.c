@@ -43,12 +43,15 @@
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
 #ifdef HAVE_LIBXML_TREE_H
 # include <libxml/tree.h>
-#endif /* HAVE_LIBXML_TREE_H */
+#endif
 #ifdef HAVE_LIBXML_PARSER_H
 # include <libxml/parser.h>
-#endif /* HAVE_LIBXML_PARSER.H */
+#endif
 
 
 
@@ -70,7 +73,8 @@ const char *LIXA_SERVER_CONFIG_DEFAULT_FILE = "/etc/lixad_conf.xml";
 
 
 
-int server_config(const char *config_filename)
+int server_config(const char *config_filename,
+                  server_config_t *sc)
 {
     enum Exception { OPEN_CONFIG_ERROR
                      , XML_READ_FILE_ERROR
@@ -155,12 +159,17 @@ int parse_config(xmlNode *a_node)
     LIXA_TRACE(("parse_config\n"));
     TRY {
         for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
-            if (cur_node->type == XML_ELEMENT_NODE) 
+            if (cur_node->type == XML_ELEMENT_NODE) {
                 LIXA_TRACE(("parse_config: tag %s\n", cur_node->name));
+                if (!strcmp(cur_node->name, (xmlChar *)"listener")) {
+                    LIXA_TRACE(("parse_config: type='%s'\n",
+                                xmlGetProp(cur_node, "type")));
+                }
+                    
+            }
+            
             parse_config(cur_node->children);
         }        
-
-        
         
         THROW(NONE);
     } CATCH {
@@ -175,4 +184,23 @@ int parse_config(xmlNode *a_node)
     LIXA_TRACE(("parse_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+void listener_config_array_init(listener_config_array_t *lca)
+{
+    LIXA_TRACE(("listener_config_array_init/start\n"));
+    lca->n = 0;
+    lca->array = NULL;
+    LIXA_TRACE(("listener_config_array_init/end\n"));
+}
+
+
+
+void server_config_init(server_config_t *sc)
+{
+    LIXA_TRACE(("server_config_init/start\n"));
+    listener_config_array_init(&(sc->listeners));
+    LIXA_TRACE(("server_config_init/end\n"));
 }
