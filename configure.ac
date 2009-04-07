@@ -13,8 +13,12 @@ AC_CONFIG_FILES([
 AC_PRESERVE_HELP_ORDER
 AC_ARG_ENABLE([debug],
         AS_HELP_STRING([--enable-debug],
-                [enable debug symbols and stderr trace]),
+                [enable debug code normally skipped]),
         [_DEBUG="yes"; CPPFLAGS="$CPPFLAGS -D_DEBUG"], [_DEBUG="no"] )
+AC_ARG_ENABLE([trace],
+        AS_HELP_STRING([--disable-trace],
+                [disable trace feature (not suggested)]),
+        [_TRACE="no"], [_TRACE="yes"; CPPFLAGS="$CPPFLAGS -D_TRACE"] )
 
 AM_PROG_CC_C_O
 AC_PROG_RANLIB

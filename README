@@ -13,14 +13,16 @@ Example: my libxml2 header files are rooted at /usr/include/libxml2
 	./configure
 	make
 
-DEBUG messages:
-Enabling debug messages (for developers only):
-	./configure --enable-debug
-	make
-
-Debug build is generally not suggested for production environments.
 You must set LIXA_TRACE_MASK environment variable according to values 
 described in file src/common/lixa_trace.h to see debug output messages
 	export LIXA_TRACE_MASK="0xffff"
 to enable all trace messages (very verbose)
+
+If you really want to disable trace messages at source code level, use
+	./configure --disable-trace
+this option is not suggested until the software will be very stable and your
+operating environment too :-)
+
+If you want to insert extra debug code at source code level, use
+	./configure --enable-debug
 

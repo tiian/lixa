@@ -89,7 +89,7 @@ extern int lixa_trace_mutex_init;
  * LIXA_TRACE_INIT macro is used to compile @ref lixa_trace_init function
  * only if _DEBUG macro is defined
  */
-#ifdef _DEBUG
+#ifdef _TRACE
 # define LIXA_TRACE_INIT lixa_trace_init()
 #else
 # define LIXA_TRACE_INIT
@@ -103,7 +103,7 @@ extern int lixa_trace_mutex_init;
  * trace message is printed only for modules (LIXA_TRACE_MODULE) covered by
  * trace mask (LIXA_TRACE_MASK) specified as environment variable
  */
-#ifdef _DEBUG
+#ifdef _TRACE
 /* this implementation is less efficient, but does not need library
  * initializazion
 # define LIXA_TRACE(a)   ((LIXA_TRACE_MODULE & \
@@ -115,24 +115,24 @@ extern int lixa_trace_mutex_init;
                            lixa_trace a : 0)
 #else
 # define LIXA_TRACE(a)
-#endif /* _DEBUG */
+#endif /* _TRACE */
 
 
 
 /**
- * LIXA_TRACE_HEX_DATA macro is used to compile trace messages only if _DEBUG
+ * LIXA_TRACE_HEX_DATA macro is used to compile trace messages only if _TRACE
  * macro is defined;
  * trace message is printed only for modules (LIXA_TRACE_MODULE) covered by
  * trace mask (LIXA_TRACE_MASK) specified as environment variable
  */
-#ifdef _DEBUG
+#ifdef _TRACE
 # define LIXA_TRACE_HEX_DATA(a,b)   ((LIXA_TRACE_MODULE & \
                         (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL ? \
                          strtoul(getenv(LIXA_TRACE_MASK_ENV_VAR), NULL, 0) : \
                           0x0)) ? lixa_trace_hex_data(a,b,stderr) : 0)
 #else
 # define LIXA_TRACE_HEX_DATA(a,b)
-#endif /* _DEBUG */
+#endif /* _TRACE */
 
 
 

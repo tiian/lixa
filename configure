@@ -1287,7 +1287,8 @@ Optional Features and Packages:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --enable-debug          enable debug symbols and stderr trace
+  --enable-debug          enable debug code normally skipped
+  --disable-trace         disable trace feature (not suggested)
 
 Some influential environment variables:
   CC          C compiler command
@@ -3299,6 +3300,13 @@ if test "${enable_debug+set}" = set; then
   enableval=$enable_debug; _DEBUG="yes"; CPPFLAGS="$CPPFLAGS -D_DEBUG"
 else
   _DEBUG="no"
+fi
+
+# Check whether --enable-trace was given.
+if test "${enable_trace+set}" = set; then
+  enableval=$enable_trace; _TRACE="no"
+else
+  _TRACE="yes"; CPPFLAGS="$CPPFLAGS -D_TRACE"
 fi
 
 

@@ -65,21 +65,16 @@ struct listener_config_s {
     /**
      * Type of listeners
      */
-    xmlChar *type;
+    char *type;
     /**
      * Address used to listen by this listener
      */
-    xmlChar *ip_address;
+    char *ip_address;
     /**
      * Port used to listen by this listener
      */
-    xmlChar *port;
+    char *port;
 };
-
-/*
- * Convenience type to avoid struct keywork
- */
-typedef struct listener_config_s listener_config_t;
 
 /**
  * It contains the configuration of all listeners
@@ -92,15 +87,8 @@ struct listener_config_array_s {
     /**
      * Elements
      */
-    listener_config_t *array;
+    struct listener_config_s *array;
 };
-
-/*
- * Convenience type to avoid struct keywork
- */
-typedef struct listener_config_array_s listener_config_array_t;
-
-
 
 /**
  * It contains the configuration of a whole server
@@ -109,13 +97,8 @@ struct server_config_s {
     /**
      * Listeners' configuration
      */
-    listener_config_array_t      listeners;
+    struct listener_config_array_s      listeners;
 };
-
-/*
- * Convenience type to avoid struct keywork
- */
-typedef struct server_config_s server_config_t;
 
 
 
@@ -133,8 +116,8 @@ extern "C" {
      * @param sc OUT the object containing the server configuration
      * @return a standardized return code
      */
-    int server_config(const char *config_filename,
-                      server_config_t *sc);
+    int server_config(struct server_config_s *sc,
+                      const char *config_filename);
 
 
 
@@ -143,23 +126,27 @@ extern "C" {
      * @param a_node IN the current subtree must be parsed
      * @return a standardized return code
      */
-    int parse_config(xmlNode *a_node);
+    int parse_config(struct server_config_s *sc,
+                     xmlNode *a_node);
 
     
 
     /**
-     * Initialize an array of listener config elements
-     * @param lca OUT the object must be initialized
+     * Parse a "listener" node tree
+     * @param sc IN/OUT configuration structure
+     * @param a_node IN listener node
+     * @return a standardized return code
      */
-    void listener_config_array_init(listener_config_array_t *lca);
-
-
-
+    int parse_config_listener(struct server_config_s *sc,
+                              xmlNode *a_node);
+    
+    
+    
     /**
      * Initialize the configuration of the server
      * @param sc OUT the object must be initialized
      */
-    void server_config_init(server_config_t *sc);
+    void server_config_init(struct server_config_s *sc);
 
 
     
