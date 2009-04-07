@@ -92,7 +92,7 @@ void daemonize(void);
 int main(int argc, char *argv[])
 {
     int rc = LIXA_RC_OK;
-    server_config_t sc;
+    struct server_config_s sc;
     
     LIXA_TRACE_INIT;
     LIXA_TRACE(("main: starting\n"));
@@ -104,7 +104,8 @@ int main(int argc, char *argv[])
     LIBXML_TEST_VERSION;
         
     /* do something */
-    if (LIXA_RC_OK != (rc = server_config("", &sc))) {
+    server_config_init(&sc);
+    if (LIXA_RC_OK != (rc = server_config(&sc, ""))) {
         LIXA_TRACE(("main/server_config: rc = %d\n", rc));
         syslog(LOG_ERR, "configuration error, premature exit");
         return rc;

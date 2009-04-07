@@ -15,7 +15,7 @@
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-        LIXA_TRACE(("/excp=%d/"
-                    "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-        return ret_cod;
+    LIXA_TRACE(("/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }

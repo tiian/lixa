@@ -12,3 +12,11 @@ double compiled (single and multithread)
 lixad command line should be able to specify a custom config file instead of
 default system configuration file; server_config() is already enabled
 
+2009040701
+lixad_conf.xml should be validated against a DTD or a schema to detect
+malformed configuration files
+
+2009040702
+lixad should be able to run as a console process, not only as a daemon, for
+debug purpouses. It's sufficient to skip "daemonize()" function and it seems
+all works in console environment

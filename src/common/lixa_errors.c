@@ -55,6 +55,8 @@ const char *lixa_strerror(int ret_cod)
                         "code bug";
             case LIXA_RC_OUT_OF_RANGE:
                 return "ERROR: an argument is out of range";
+            case LIXA_RC_CONFIG_ERROR:
+                return "ERROR: configuration file is broken";
                 /*
             case LIXA_RC_NULL_OBJECT:
                 return "ERROR: an argument is null";
@@ -81,9 +83,9 @@ const char *lixa_strerror(int ret_cod)
                         "passed data";
             case LIXA_RC_MALLOC_ERROR:
                 return "ERROR: 'malloc' function returned an error condition";
+                */
             case LIXA_RC_REALLOC_ERROR:
                 return "ERROR: 'realloc' function returned an error condition";
-                */
             case LIXA_RC_OPEN_ERROR:
                 return "ERROR: 'open' function returned an error condition";
                 /*
