@@ -132,8 +132,8 @@ define LIXA_RC_DESTINATION_TOO_SMALL          -16
 
 /**
  * "malloc" function error
-define LIXA_RC_MALLOC_ERROR                  -100
  */
+#define LIXA_RC_MALLOC_ERROR                  -100
 /**
  * "realloc" function error
  */
@@ -210,7 +210,14 @@ define LIXA_RC_GETTIMEOFDAY_ERROR            -128
  * "unlink" function error
 define LIXA_RC_UNLINK_ERROR                  -129
  */
-
+/**
+ * "socket" function error
+ */
+#define LIXA_RC_SOCKET_ERROR                 -130
+/**
+ * "setsockopt" function error
+ */
+#define LIXA_RC_SETSOCKOPT_ERROR             -131
 /**
  * "xmlReadFile" function error
  */

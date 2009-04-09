@@ -57,12 +57,17 @@
 /**
  * trace module for generic server functions
  */
-#define LIXA_TRACE_MOD_SERVER           0x00000001
+#define LIXA_TRACE_MOD_SERVER             0x00000001
 
 /**
  * trace module for server configuration functions
  */
-#define LIXA_TRACE_MOD_SERVER_CONFIG    0x00000002
+#define LIXA_TRACE_MOD_SERVER_CONFIG      0x00000002
+
+/**
+ * trace module for server listener functions
+ */
+#define LIXA_TRACE_MOD_SERVER_LISTENER    0x00000004
 
 
 

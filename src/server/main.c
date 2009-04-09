@@ -68,6 +68,7 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <server_config.h>
+#include <server_listener.h>
 
 
 
@@ -93,24 +94,37 @@ int main(int argc, char *argv[])
 {
     int rc = LIXA_RC_OK;
     struct server_config_s sc;
+    struct listener_status_array_s lsa;
     
     LIXA_TRACE_INIT;
     LIXA_TRACE(("main: starting\n"));
     openlog("lixad", LOG_PID, LOG_DAEMON);
     syslog(LOG_NOTICE, "starting");
+    /* */
     daemonize();
+    /* */
 
     /* initialize libxml2 library */
     LIBXML_TEST_VERSION;
         
-    /* do something */
+    /* initialize configuration structure */
     server_config_init(&sc);
     if (LIXA_RC_OK != (rc = server_config(&sc, ""))) {
         LIXA_TRACE(("main/server_config: rc = %d\n", rc));
-        syslog(LOG_ERR, "configuration error, premature exit");
+        syslog(LOG_ERR, "configuration error (%s), premature exit",
+               lixa_strerror(rc));
         return rc;
     }
-        
+
+    /* start configured listener(s) */
+    if (LIXA_RC_OK != (rc = server_listener(&sc, &lsa))) {
+        LIXA_TRACE(("main/server_listener: rc = %d\n", rc));
+        syslog(LOG_ERR, "error (%s) while starting listener(s), "
+               "premature exit", lixa_strerror(rc));
+        return rc;
+    }
+
+    
     /* it's time to exit */
     syslog(LOG_NOTICE, "exiting");
 
@@ -153,9 +167,7 @@ void daemonize(void)
 
         syslog(LOG_NOTICE, "entered daemon status");
 
-#ifdef _DEBUG
-        freopen("/tmp/lixad.trace", "w", stderr);
-#endif /* _DEBUG */
+        freopen("/tmp/lixad.stderr", "w", stderr);
 
         LIXA_TRACE(("lixad/daemonize: now daemonized!\n"));
 
