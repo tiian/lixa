@@ -81,9 +81,9 @@ const char *lixa_strerror(int ret_cod)
             case LIXA_RC_DESTINATION_TOO_SMALL:
                 return "ERROR: destination object is too small to store "
                         "passed data";
+                */
             case LIXA_RC_MALLOC_ERROR:
                 return "ERROR: 'malloc' function returned an error condition";
-                */
             case LIXA_RC_REALLOC_ERROR:
                 return "ERROR: 'realloc' function returned an error condition";
             case LIXA_RC_OPEN_ERROR:
@@ -130,6 +130,11 @@ const char *lixa_strerror(int ret_cod)
             case LIXA_RC_UNLINK_ERROR:
                 return "ERROR: 'unlink' function returned an error condition";
                 */
+            case LIXA_RC_SOCKET_ERROR:
+                return "ERROR: 'socket' function returned an error condition";
+            case LIXA_RC_SETSOCKOPT_ERROR:
+                return "ERROR: 'setsockopt' function returned an error "
+                    "condition";
             case LIXA_RC_XML_READ_FILE_ERROR:
                 return "ERROR: 'xmlReadFile' function returned an error "
                     "condition";

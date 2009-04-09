@@ -39,6 +39,15 @@
 
 
 
+#ifdef HAVE_LIBXML_TREE_H
+# include <libxml/tree.h>
+#endif
+#ifdef HAVE_LIBXML_PARSER_H
+# include <libxml/parser.h>
+#endif
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -56,6 +65,31 @@
  */
 extern const char *LIXA_SERVER_CONFIG_DEFAULT_FILE;
 
+/**
+ * Label used to specify "listener" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_LISTENER;
+
+/**
+ * Label used to specify "domain" property in "listener" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_LISTENER_DOMAIN;
+
+/**
+ * Label used to specify "address" property in "listener" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_LISTENER_ADDRESS;
+
+/**
+ * Label used to specify "port" property in "listener" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_LISTENER_PORT;
+
+/**
+ * Label used to specify "AF_INET" value for "domain" property in "listener" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_LISTENER_DOMAIN_AF_INET;
+
 
 
 /**
@@ -63,13 +97,13 @@ extern const char *LIXA_SERVER_CONFIG_DEFAULT_FILE;
  */
 struct listener_config_s {
     /**
-     * Type of listeners
+     * Socket domain for the listener
      */
-    char *type;
+    int domain;
     /**
      * Address used to listen by this listener
      */
-    char *ip_address;
+    char *address;
     /**
      * Port used to listen by this listener
      */
