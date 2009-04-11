@@ -216,7 +216,7 @@ int parse_config_listener(struct server_config_s *sc,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int i = 0;
-    xmlChar *attr;
+    xmlChar *attr = NULL;
     
     LIXA_TRACE(("parse_config_listener\n"));
     TRY {
@@ -231,7 +231,7 @@ int parse_config_listener(struct server_config_s *sc,
         /* reset new element */
         sc->listeners.array[i].domain = 0;
         sc->listeners.array[i].address = NULL;
-        sc->listeners.array[i].port = NULL;
+        sc->listeners.array[i].port = 0;
 
         /* look/check/set listener domain */
         if (NULL == (attr = xmlGetProp(a_node,
@@ -245,16 +245,23 @@ int parse_config_listener(struct server_config_s *sc,
             THROW(INVALID_DOMAIN_ERROR);
         }
         xmlFree(attr);
+        attr = NULL;
         
         if (NULL == (sc->listeners.array[i].address = (char *)xmlGetProp(
                          a_node, LIXA_XML_CONFIG_LISTENER_ADDRESS)))
             THROW(ADDRESS_NOT_AVAILABLE_ERROR);
-        if (NULL == (sc->listeners.array[i].port = (char *)xmlGetProp(
-                         a_node, LIXA_XML_CONFIG_LISTENER_PORT)))
+        if (NULL == (attr = xmlGetProp(a_node,
+                                       LIXA_XML_CONFIG_LISTENER_PORT))) {
             THROW(PORT_NOT_AVAILABLE_ERROR);
+        } else {
+            sc->listeners.array[i].port = (in_port_t)strtoul(
+                (char *)attr, NULL, 0);
+            xmlFree(attr);
+            attr = NULL;
+        }
         
         LIXA_TRACE(("parse_config_listener: %s %d, %s = %d, "
-                    "%s = '%s', %s = '%s'\n",
+                    "%s = '%s', %s = " IN_PORT_T_FORMAT  "\n",
                     (char *)LIXA_XML_CONFIG_LISTENER, i,
                     (char *)LIXA_XML_CONFIG_LISTENER_DOMAIN,
                     sc->listeners.array[i].domain,
@@ -293,8 +300,7 @@ int parse_config_listener(struct server_config_s *sc,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* release memory */
-        if (ret_cod > DOMAIN_NOT_AVAILABLE_ERROR &&
-            ret_cod <= INVALID_DOMAIN_ERROR)
+        if (NULL != attr)
             xmlFree(attr);
         
     } /* TRY-CATCH */

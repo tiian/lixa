@@ -132,6 +132,14 @@
 
 
 
+#if SIZEOF_IN_PORT_T == SIZEOF_SHORT_INT
+# define IN_PORT_T_FORMAT "%hu"
+#else
+# error Unable to determine format for in_port_t
+#endif
+
+
+
 #define LIXA_PATH_SEPARATOR '/'
 
 

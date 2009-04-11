@@ -219,6 +219,14 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_SETSOCKOPT_ERROR             -131
 /**
+ * "bind" function error
+ */
+#define LIXA_RC_BIND_ERROR                   -132
+/**
+ * "bind" function error
+ */
+#define LIXA_RC_LISTEN_ERROR                 -133
+/**
  * "xmlReadFile" function error
  */
 #define LIXA_RC_XML_READ_FILE_ERROR            -200

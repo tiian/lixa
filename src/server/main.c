@@ -34,34 +34,34 @@
 
 #ifdef HAVE_ERRNO_H
 # include <errno.h>
-#endif /* HAVE_ERRNO_H */
+#endif
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
-#endif /* HAVE_STDIO_H */
+#endif
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
-#endif /* HAVE_SIGNAL_H */
+#endif
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
+#endif
 #ifdef HAVE_SYSLOG_H
 # include <syslog.h>
-#endif /* HAVE_SYSLOG_H */
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
-#endif /* HAVE_SYS_TYPES_H */
+#endif
 #ifdef HAVE_SYS_STAT_H
 # include <sys/stat.h>
-#endif /* HAVE_SYS_STAT_H */
+#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#endif
 #ifdef HAVE_LIBXML_XMLVERSION_H
 # include <libxml/xmlversion.h>
-#endif /* HAVE_LIBXML_XMLVERSION_H */
+#endif
 #ifdef HAVE_LIBXML_PARSER_H
 # include <libxml/parser.h>
-#endif /* HAVE_LIBXML_PARSER.H */
+#endif
 
 
 
@@ -100,9 +100,9 @@ int main(int argc, char *argv[])
     LIXA_TRACE(("main: starting\n"));
     openlog("lixad", LOG_PID, LOG_DAEMON);
     syslog(LOG_NOTICE, "starting");
-    /* */
+    /* 
     daemonize();
-    /* */
+    */
 
     /* initialize libxml2 library */
     LIBXML_TEST_VERSION;
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
         return rc;
     }
 
-    
+    sleep(30);
     /* it's time to exit */
     syslog(LOG_NOTICE, "exiting");
 
