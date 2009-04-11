@@ -45,6 +45,9 @@
 #ifdef HAVE_LIBXML_PARSER_H
 # include <libxml/parser.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
 
 
 
@@ -107,7 +110,7 @@ struct listener_config_s {
     /**
      * Port used to listen by this listener
      */
-    char *port;
+    in_port_t port;
 };
 
 /**

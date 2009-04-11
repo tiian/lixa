@@ -135,9 +135,13 @@ const char *lixa_strerror(int ret_cod)
             case LIXA_RC_SETSOCKOPT_ERROR:
                 return "ERROR: 'setsockopt' function returned an error "
                     "condition";
+            case LIXA_RC_BIND_ERROR:
+                return "ERROR: 'bind' function returned an error condition";
             case LIXA_RC_XML_READ_FILE_ERROR:
                 return "ERROR: 'xmlReadFile' function returned an error "
                     "condition";
+            case LIXA_RC_LISTEN_ERROR:
+                return "ERROR: 'listen' function returned an error condition";
             case LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR:
                 return "ERROR: 'xmlDocGetRootElement' function returned an "
                     "error condition";

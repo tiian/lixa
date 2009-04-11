@@ -23,15 +23,22 @@ AC_ARG_ENABLE([trace],
 AM_PROG_CC_C_O
 AC_PROG_RANLIB
 
-AC_CHECK_HEADERS(errno.h fcntl.h pthread.h)
+AC_CHECK_HEADERS(arpa/inet.h)
+AC_CHECK_HEADERS(errno.h)
+AC_CHECK_HEADERS(fcntl.h)
+AC_CHECK_HEADERS(libxml/xmlversion.h libxml/tree.h libxml/parser.h)
+AC_CHECK_HEADERS(netdb.h netinet/in.h)
+AC_CHECK_HEADERS(pthread.h)
 AC_CHECK_HEADERS(signal.h stdarg.h stdio.h stdlib.h string.h syslog.h)
 AC_CHECK_HEADERS(sys/socket.h sys/stat.h)
 AC_CHECK_HEADERS(sys/time.h sys/types.h)
 AC_CHECK_HEADERS(unistd.h)
-AC_CHECK_HEADERS(libxml/xmlversion.h libxml/tree.h libxml/parser.h)
 
 AC_CHECK_TYPES(uint8_t)
 AC_CHECK_TYPES(uint32_t)
+AC_CHECK_TYPES([in_addr_t], [], [], [[#include <netinet/in.h>]])
+AC_CHECK_TYPES([in_port_t], [], [], [[#include <netinet/in.h>]])
+
 
 AC_CHECK_FUNCS(vfprintf)
 
