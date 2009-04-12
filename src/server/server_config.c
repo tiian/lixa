@@ -49,6 +49,9 @@
 #ifdef HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
 #endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 #ifdef HAVE_LIBXML_TREE_H
 # include <libxml/tree.h>
 #endif
@@ -78,15 +81,18 @@ const xmlChar *LIXA_XML_CONFIG_LISTENER = (xmlChar *)"listener";
 const xmlChar *LIXA_XML_CONFIG_LISTENER_DOMAIN = (xmlChar *)"domain";
 const xmlChar *LIXA_XML_CONFIG_LISTENER_ADDRESS = (xmlChar *)"address";
 const xmlChar *LIXA_XML_CONFIG_LISTENER_PORT = (xmlChar *)"port";
-
 const xmlChar *LIXA_XML_CONFIG_LISTENER_DOMAIN_AF_INET = (xmlChar *)"AF_INET";
+const xmlChar *LIXA_XML_CONFIG_MANAGER = (xmlChar *)"manager";
 
 
 
 int server_config(struct server_config_s *sc,
+                  struct thread_status_array_s *tsa,
                   const char *config_filename)
 {
     enum Exception { OPEN_CONFIG_ERROR
+                     , REALLOC_ERROR
+                     , PIPE_ERROR
                      , XML_READ_FILE_ERROR
                      , XML_DOC_GET_ROOT_ELEMENT_ERROR
                      , PARSE_CONFIG_ERROR
@@ -114,6 +120,18 @@ int server_config(struct server_config_s *sc,
             }
         }
 
+        /* initialize the first fifo: it's for the listeners thread; it may
+           be it works in a different position, but for the sake of simplicity
+           it's better to use first thread for listeners */
+        if (NULL == (tsa->array = realloc(
+                         tsa->array, sizeof(struct thread_status_s))))
+            THROW(REALLOC_ERROR);
+        tsa->n++;
+        if (0 != pipe(tsa->array[0].pipefd))
+            THROW(PIPE_ERROR);
+        LIXA_TRACE(("server_config: pipe for manager 0 is [%d,%d]\n",
+                    tsa->array[0].pipefd[0], tsa->array[0].pipefd[1]));
+        
         /* loading config file */
         if (NULL == (doc = xmlReadFile(file_name, NULL, 0)))
             THROW(XML_READ_FILE_ERROR);
@@ -136,6 +154,12 @@ int server_config(struct server_config_s *sc,
         switch (excp) {
             case OPEN_CONFIG_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case REALLOC_ERROR:
+                ret_cod = LIXA_RC_REALLOC_ERROR;
+                break;
+            case PIPE_ERROR:
+                ret_cod = LIXA_RC_PIPE_ERROR;
                 break;
             case XML_READ_FILE_ERROR:
                 ret_cod = LIXA_RC_XML_READ_FILE_ERROR;
@@ -163,6 +187,7 @@ int parse_config(struct server_config_s *sc,
                  xmlNode *a_node)
 {
     enum Exception { PARSE_LISTENER_ERROR
+                     , PARSE_MANAGER_ERROR
                      , PARSE_CONFIG_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -178,8 +203,13 @@ int parse_config(struct server_config_s *sc,
                     if (LIXA_RC_OK != (ret_cod = parse_config_listener(
                                            sc, cur_node)))
                         THROW(PARSE_LISTENER_ERROR);
+                } else if (!xmlStrcmp(cur_node->name,
+                                      LIXA_XML_CONFIG_MANAGER)) {
+                    if (LIXA_RC_OK != (ret_cod = parse_config_manager(
+                                           sc, cur_node)))
+                        THROW(PARSE_MANAGER_ERROR);
                 }
-            }            
+            }
             if (LIXA_RC_OK != (ret_cod = parse_config(sc, cur_node->children)))
                 THROW(PARSE_CONFIG_ERROR);
         }        
@@ -188,7 +218,7 @@ int parse_config(struct server_config_s *sc,
     } CATCH {
         switch (excp) {
             case PARSE_LISTENER_ERROR:
-                break;
+            case PARSE_MANAGER_ERROR:
             case PARSE_CONFIG_ERROR:
                 break;
             case NONE:
@@ -311,10 +341,62 @@ int parse_config_listener(struct server_config_s *sc,
 
 
     
+int parse_config_manager(struct server_config_s *sc,
+                          xmlNode *a_node)
+{
+    enum Exception { REALLOC_ERROR
+                     , PIPE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("parse_config_listener\n"));
+    TRY {
+        int i = 0;
+        /* [...]
+         * check the status file is OK
+         */
+        
+        /* initialize the fifo: it's for the this manager thread */
+        if (NULL == (sc->threads.array = realloc(
+                         sc->threads.array,
+                         ++sc->threads.n * sizeof(struct thread_config_s))))
+            THROW(REALLOC_ERROR);
+        i = sc->threads.n - 1;
+        if (0 != pipe(sc->threads.array[i].pipefd))
+            THROW(PIPE_ERROR);
+        LIXA_TRACE(("parse_config_listener: pipe for manager %d is [%d,%d]\n",
+                    i, sc->threads.array[i].pipefd[0],
+                    sc->threads.array[i].pipefd[1]));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case REALLOC_ERROR:
+                ret_cod = LIXA_RC_REALLOC_ERROR;
+                break;
+            case PIPE_ERROR:
+                ret_cod = LIXA_RC_PIPE_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("parse_config_listener/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+    
 void server_config_init(struct server_config_s *sc)
 {
     LIXA_TRACE(("server_config_init/start\n"));
     sc->listeners.n = 0;
     sc->listeners.array = NULL;
+    sc->threads.n = 0;
+    sc->threads.array = NULL;
     LIXA_TRACE(("server_config_init/end\n"));
 }

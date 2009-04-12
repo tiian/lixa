@@ -30,18 +30,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEMPLATE_H
-#define TEMPLATE_H
+#ifndef SERVER_MANAGER_H
+# define SERVER_MANAGER_H
 
 
 
 #include <config.h>
-
-
-
-#ifdef HAVE_ARPA_INET_H
-# include <arpa/inet.h>
-#endif
 
 
 
@@ -52,61 +46,13 @@
 #else
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_SERVER_LISTENER
-
-
-
-/**
- * It contains the status of a listener
- */
-struct listener_status_s {
-    /**
-     * file descriptor associated to the socket used to listen
-     */
-    int                  fd;
-    /**
-     * Broken down address
-     */
-    struct sockaddr_in   servaddr;
-};
-
-
-
-/**
- * It contains the status of all listeners
- */
-struct listener_status_array_s {
-    /**
-     * Number of elements
-     */
-    int n;
-    /**
-     * Elements
-     */
-    struct listener_status_s *array;
-    /**
-     * This pointer is a reference to a structure allocated in a different
-     * place: the pointed structure is common to listeners and managers
-     */
-    struct thread_status_array_s  *tsa;
-};
+#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_SERVER_MANAGER
 
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-
-
-    /**
-     * Start the listener(s) configured for the server in configuration file
-     * @param sc IN server configuration structure
-     * @param lsa OUT status of all the listeners
-     * @return a standardized return code
-     */
-    int server_listener(const struct server_config_s *sc,
-                        struct listener_status_array_s *lsa);
 
 
 
@@ -125,4 +71,4 @@ extern "C" {
 
 
 
-#endif /* TEMPLATE_H */
+#endif /* SERVER_MANAGER_H */

@@ -51,6 +51,10 @@
 
 
 
+#include <server_status.h>
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -93,6 +97,11 @@ extern const xmlChar *LIXA_XML_CONFIG_LISTENER_PORT;
  */
 extern const xmlChar *LIXA_XML_CONFIG_LISTENER_DOMAIN_AF_INET;
 
+/**
+ * Label used to specify "manager" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_MANAGER;
+
 
 
 /**
@@ -128,6 +137,38 @@ struct listener_config_array_s {
 };
 
 /**
+ * It contains the configuration of a manager
+ */
+struct manager_config_s {
+    /**
+     * Socket domain for the manager
+     */
+    int domain;
+    /**
+     * Address used to listen by this manager
+     */
+    char *address;
+    /**
+     * Port used to listen by this manager
+     */
+    in_port_t port;
+};
+
+/**
+ * It contains the configuration of all managers
+ */
+struct manager_config_array_s {
+    /**
+     * Number of elements
+     */
+    int n;
+    /**
+     * Elements
+     */
+    struct manager_config_s *array;
+};
+
+/**
  * It contains the configuration of a whole server
  */
 struct server_config_s {
@@ -135,6 +176,10 @@ struct server_config_s {
      * Listeners' configuration
      */
     struct listener_config_array_s      listeners;
+    /**
+     * Managers's configuration
+     */
+    struct manager_config_array_s       managers;
 };
 
 
@@ -151,9 +196,12 @@ extern "C" {
      *                           searching default system config file
      *                           default = NULL
      * @param sc OUT the object containing the server configuration
+     * @param tsa IN/OUT the objects containing the status common to all
+     *                   threads
      * @return a standardized return code
      */
     int server_config(struct server_config_s *sc,
+                      struct thread_status_array_s *tsa,
                       const char *config_filename);
 
 
@@ -175,6 +223,17 @@ extern "C" {
      * @return a standardized return code
      */
     int parse_config_listener(struct server_config_s *sc,
+                              xmlNode *a_node);
+    
+    
+    
+    /**
+     * Parse a "manager" node tree
+     * @param sc IN/OUT configuration structure
+     * @param a_node IN listener node
+     * @return a standardized return code
+     */
+    int parse_config_manager(struct server_config_s *sc,
                               xmlNode *a_node);
     
     
