@@ -83,6 +83,7 @@ const xmlChar *LIXA_XML_CONFIG_LISTENER_ADDRESS = (xmlChar *)"address";
 const xmlChar *LIXA_XML_CONFIG_LISTENER_PORT = (xmlChar *)"port";
 const xmlChar *LIXA_XML_CONFIG_LISTENER_DOMAIN_AF_INET = (xmlChar *)"AF_INET";
 const xmlChar *LIXA_XML_CONFIG_MANAGER = (xmlChar *)"manager";
+const xmlChar *LIXA_XML_CONFIG_MANAGER_STATUS = (xmlChar *)"status_file";
 
 
 
@@ -344,17 +345,35 @@ int parse_config_listener(struct server_config_s *sc,
 
     
 int parse_config_manager(struct server_config_s *sc,
-			 struct thread_pipe_array_s *tpa,
-			 xmlNode *a_node)
+                         struct thread_pipe_array_s *tpa,
+                         xmlNode *a_node)
 {
-    enum Exception { REALLOC_ERROR
+    enum Exception { REALLOC_ERROR1
+                     , STATUS_NOT_AVAILABLE_ERROR
+                     , REALLOC_ERROR2
                      , PIPE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("parse_config_manager\n"));
     TRY {
-        int i = 0;
+        int i = 0, j = 0;
+
+        /* realloc array */
+        if (NULL == (sc->managers.array = realloc(
+                         sc->managers.array,
+                         ++sc->managers.n * sizeof(struct maanger_config_s))))
+            THROW(REALLOC_ERROR1);
+        i = sc->managers.n - 1;
+
+        /* reset new element */
+        sc->listeners.array[i].domain = 0;
+        sc->listeners.array[i].address = NULL;
+        if (NULL == (sc->listeners.array[i].address = (char *)xmlGetProp(
+                         a_node, LIXA_XML_CONFIG_MANAGER_STATUS)))
+            THROW(STATUS_NOT_AVAILABLE_ERROR);
+
+
         /* [...]
          * check the status file is OK
          */
@@ -362,18 +381,22 @@ int parse_config_manager(struct server_config_s *sc,
         /* initialize the fifo: it's for the this manager thread */
         if (NULL == (tpa->array = realloc
 		     (tpa->array, ++tpa->n * sizeof(struct thread_pipe_s))))
-            THROW(REALLOC_ERROR);
-        i = tpa->n - 1;
-        if (0 != pipe(tpa->array[i].pipefd))
+            THROW(REALLOC_ERROR2);
+        j = tpa->n - 1;
+        if (0 != pipe(tpa->array[j].pipefd))
             THROW(PIPE_ERROR);
         LIXA_TRACE(("parse_config_manager: pipe for manager %d is [%d,%d]\n",
-                    i, tpa->array[i].pipefd[0], tpa->array[i].pipefd[1]));
+                    j, tpa->array[j].pipefd[0], tpa->array[j].pipefd[1]));
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case REALLOC_ERROR:
+            case REALLOC_ERROR1:
+            case REALLOC_ERROR2:
                 ret_cod = LIXA_RC_REALLOC_ERROR;
+                break;
+            case STATUS_NOT_AVAILABLE_ERROR:
+                ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;
             case PIPE_ERROR:
                 ret_cod = LIXA_RC_PIPE_ERROR;

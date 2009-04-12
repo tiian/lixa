@@ -39,6 +39,12 @@
 
 
 
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -79,6 +85,56 @@ struct thread_pipe_array_s {
      * Elements
      */
     struct thread_pipe_s *array;
+};
+
+
+
+/**
+ * It's the struct used as argument to every created thread
+ */
+struct thread_status_s {
+    /**
+     * This id is not the system thread id, but an internal identificator
+     * in the server scope (0 = listeners thread, 1..N = manager threads)
+     */
+    int id;
+    /**
+     * This is the system identificator of the thread
+     */
+    pthread_t tid;
+    /**
+     * This pointer is used a reference to the array of pipes must be used
+     * for communication
+     */
+    struct thread_pipe_array_s *tpa;
+    /**
+     * Exception reported by the thread (after exit)
+     */
+    int excp;
+    /**
+     * Return code reported by the thread (after exit)
+     */
+    int ret_cod;
+    /**
+     * Errno reported by the thread (after exit)
+     */
+    int last_errno;
+};
+
+
+
+/**
+ * It contains the argument passed to all the thread
+ */
+struct thread_status_array_s {
+    /**
+     * Number of elements
+     */
+    int n;
+    /**
+     * Elements
+     */
+    struct thread_status_s *array;
 };
 
 

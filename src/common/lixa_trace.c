@@ -99,7 +99,8 @@ void lixa_trace(const char *fmt, ...)
             perror("lixa_trace/pthread_mutex_lock");
         /* default header */
         fprintf(stderr,
-                "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [%d/%ld] ",
+                "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [%d/"
+                PTHREAD_T_FORMAT "] ",
                 broken_time.tm_year + 1900, broken_time.tm_mon + 1,
                 broken_time.tm_mday, broken_time.tm_hour,
                 broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,

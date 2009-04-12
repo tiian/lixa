@@ -34,6 +34,7 @@ AC_CHECK_HEADERS(sys/socket.h sys/stat.h)
 AC_CHECK_HEADERS(sys/time.h sys/types.h)
 AC_CHECK_HEADERS(unistd.h)
 
+AC_CHECK_TYPES(pthread_t)
 AC_CHECK_TYPES(uint8_t)
 AC_CHECK_TYPES(uint32_t)
 AC_CHECK_TYPES([in_addr_t], [], [], [[#include <netinet/in.h>]])

@@ -69,6 +69,7 @@
 #include <lixa_trace.h>
 #include <server_config.h>
 #include <server_listener.h>
+#include <server_manager.h>
 #include <server_status.h>
 
 
@@ -97,15 +98,15 @@ int main(int argc, char *argv[])
     struct server_config_s sc;
     struct listener_status_array_s lsa;
     struct thread_pipe_array_s tpa;
+    struct thread_status_array_s tsa;
     
     LIXA_TRACE_INIT;
     LIXA_TRACE(("main: starting\n"));
     openlog("lixad", LOG_PID, LOG_DAEMON);
     syslog(LOG_NOTICE, "starting");
-    /* 
+    /*
     daemonize();
     */
-
     /* initialize libxml2 library */
     LIBXML_TEST_VERSION;
         
@@ -118,6 +119,14 @@ int main(int argc, char *argv[])
         return rc;
     }
 
+    /* start configured manager(s) */
+    if (LIXA_RC_OK != (rc = server_manager(&sc, &tpa, &tsa))) {
+        LIXA_TRACE(("main/server_manager: rc = %d\n", rc));
+        syslog(LOG_ERR, "error (%s) while starting manager(s), "
+               "premature exit", lixa_strerror(rc));
+        return rc;
+    }
+
     /* start configured listener(s) */
     if (LIXA_RC_OK != (rc = server_listener(&sc, &lsa))) {
         LIXA_TRACE(("main/server_listener: rc = %d\n", rc));
@@ -125,9 +134,9 @@ int main(int argc, char *argv[])
                "premature exit", lixa_strerror(rc));
         return rc;
     }
-/*
+
     sleep(30);
-*/
+    
     /* it's time to exit */
     syslog(LOG_NOTICE, "exiting");
 

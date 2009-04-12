@@ -102,6 +102,11 @@ extern const xmlChar *LIXA_XML_CONFIG_LISTENER_DOMAIN_AF_INET;
  */
 extern const xmlChar *LIXA_XML_CONFIG_MANAGER;
 
+/**
+ * Label used to specify "status_file" property in "manager" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_MANAGER_STATUS;
+
 
 
 /**
@@ -141,17 +146,9 @@ struct listener_config_array_s {
  */
 struct manager_config_s {
     /**
-     * Socket domain for the manager
+     * Path of the file containing the status
      */
-    int domain;
-    /**
-     * Address used to listen by this manager
-     */
-    char *address;
-    /**
-     * Port used to listen by this manager
-     */
-    in_port_t port;
+    char *status_path;
 };
 
 /**

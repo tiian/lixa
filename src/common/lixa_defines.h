@@ -93,6 +93,14 @@
 
 
 
+#if SIZEOF_PTHREAD_T == SIZEOF_LONG_INT
+# define PTHREAD_T_FORMAT "%lu"
+#else
+# error Unable to determine sizeof(pthread_t)
+#endif
+
+
+
 #if SIZEOF_SIZE_T == SIZEOF_INT
 # define SIZE_T_FORMAT "%u"
 #elif SIZEOF_SIZE_T == SIZEOF_LONG_INT
