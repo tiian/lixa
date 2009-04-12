@@ -69,6 +69,7 @@
 #include <lixa_trace.h>
 #include <server_config.h>
 #include <server_listener.h>
+#include <server_status.h>
 
 
 
@@ -95,6 +96,7 @@ int main(int argc, char *argv[])
     int rc = LIXA_RC_OK;
     struct server_config_s sc;
     struct listener_status_array_s lsa;
+    struct thread_status_array_s tsa;
     
     LIXA_TRACE_INIT;
     LIXA_TRACE(("main: starting\n"));
@@ -109,7 +111,7 @@ int main(int argc, char *argv[])
         
     /* initialize configuration structure */
     server_config_init(&sc);
-    if (LIXA_RC_OK != (rc = server_config(&sc, ""))) {
+    if (LIXA_RC_OK != (rc = server_config(&sc, &tsa, ""))) {
         LIXA_TRACE(("main/server_config: rc = %d\n", rc));
         syslog(LOG_ERR, "configuration error (%s), premature exit",
                lixa_strerror(rc));
@@ -123,8 +125,9 @@ int main(int argc, char *argv[])
                "premature exit", lixa_strerror(rc));
         return rc;
     }
-
+/*
     sleep(30);
+*/
     /* it's time to exit */
     syslog(LOG_NOTICE, "exiting");
 

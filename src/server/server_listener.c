@@ -132,6 +132,8 @@ int server_listener(const struct server_config_s *sc,
             if (0 > (lsa->array[i].fd = socket(
                          sc->listeners.array[i].domain, SOCK_STREAM, 0)))
                 THROW(SOCKET_ERROR);
+            LIXA_TRACE(("server_listener: socket for listener %d is %d\n",
+                        i, lsa->array[i].fd));
             /* set reuse option */
             LIXA_TRACE(("server_listener: setting SO_REUSE option for "
                         "listener # %d\n", i));

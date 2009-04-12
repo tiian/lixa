@@ -69,6 +69,11 @@
  */
 #define LIXA_TRACE_MOD_SERVER_LISTENER    0x00000004
 
+/**
+ * trace module for server manager functions
+ */
+#define LIXA_TRACE_MOD_SERVER_MANAGER     0x00000008
+
 
 
 /**

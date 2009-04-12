@@ -15,7 +15,7 @@
  *    this software without specific prior written permission.
  *
  * Alternatively, this software may be distributed under the terms of the
- * GNU General Public License ("GPL") version 2 as published by the Free 
+ * GNU General Public License ("GPL") version 2 as published by the Free
  * Software Foundation.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -30,99 +30,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEMPLATE_H
-#define TEMPLATE_H
-
-
-
 #include <config.h>
 
 
 
-#ifdef HAVE_ARPA_INET_H
-# include <arpa/inet.h>
-#endif
-
-
-
-/* save old LIXA_TRACE_MODULE and set a new value */
+/* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
 # undef LIXA_TRACE_MODULE
-#else
-# undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_SERVER_LISTENER
-
-
-
-/**
- * It contains the status of a listener
- */
-struct listener_status_s {
-    /**
-     * file descriptor associated to the socket used to listen
-     */
-    int                  fd;
-    /**
-     * Broken down address
-     */
-    struct sockaddr_in   servaddr;
-};
-
-
-
-/**
- * It contains the status of all listeners
- */
-struct listener_status_array_s {
-    /**
-     * Number of elements
-     */
-    int n;
-    /**
-     * Elements
-     */
-    struct listener_status_s *array;
-    /**
-     * This pointer is a reference to a structure allocated in a different
-     * place: the pointed structure is common to listeners and managers
-     */
-    struct thread_status_array_s  *tsa;
-};
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-
-
-    /**
-     * Start the listener(s) configured for the server in configuration file
-     * @param sc IN server configuration structure
-     * @param lsa OUT status of all the listeners
-     * @return a standardized return code
-     */
-    int server_listener(const struct server_config_s *sc,
-                        struct listener_status_array_s *lsa);
-
-
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-
-
-/* restore old value of LIXA_TRACE_MODULE */
-#ifdef LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE_SAVE
-#endif /* LIXA_TRACE_MODULE_SAVE */
-
-
-
-#endif /* TEMPLATE_H */
+#define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_SERVER_MANAGER
