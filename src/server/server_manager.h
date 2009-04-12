@@ -39,6 +39,10 @@
 
 
 
+#include <server_config.h>
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -56,6 +60,27 @@ extern "C" {
 
 
 
+    /**
+     * Start the managers configured for this server
+     * @param sc IN server configuration structure
+     * @param tpa IN threads' communication pipes
+     * @param tsa OUT status of all threads
+     * @return a standardized return code
+     */
+    int server_manager(struct server_config_s *sc,
+                       struct thread_pipe_array_s *tpa,
+                       struct thread_status_array_s *tsa);
+
+
+
+    /**
+     * This is the initial function of every new manager thread
+     * @param void_ts IN status of this thread
+     */
+    void *server_manager_thread(void *void_ts);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

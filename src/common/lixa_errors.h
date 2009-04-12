@@ -217,19 +217,23 @@ define LIXA_RC_UNLINK_ERROR                  -129
 /**
  * "socket" function error
  */
-#define LIXA_RC_SOCKET_ERROR                 -130
+#define LIXA_RC_SOCKET_ERROR                   -130
 /**
  * "setsockopt" function error
  */
-#define LIXA_RC_SETSOCKOPT_ERROR             -131
+#define LIXA_RC_SETSOCKOPT_ERROR               -131
 /**
  * "bind" function error
  */
-#define LIXA_RC_BIND_ERROR                   -132
+#define LIXA_RC_BIND_ERROR                     -132
 /**
  * "bind" function error
  */
-#define LIXA_RC_LISTEN_ERROR                 -133
+#define LIXA_RC_LISTEN_ERROR                   -133
+/**
+ * "pthread_create" function error
+ */
+#define LIXA_RC_PTHREAD_CREATE_ERROR           -140
 /**
  * "xmlReadFile" function error
  */

@@ -87,6 +87,7 @@ int server_listener(const struct server_config_s *sc,
         if (NULL == (lsa->array = (struct listener_status_s *)malloc(
                          sizeof(struct listener_status_s) * n)))
             THROW(MALLOC_ERROR);
+        lsa->n = n;
 
         for (i=0; i<n; ++i) {
             /* reset listeners status */
