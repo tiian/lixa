@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     int rc = LIXA_RC_OK;
     struct server_config_s sc;
     struct listener_status_array_s lsa;
-    struct thread_status_array_s tsa;
+    struct thread_pipe_array_s tpa;
     
     LIXA_TRACE_INIT;
     LIXA_TRACE(("main: starting\n"));
@@ -110,8 +110,8 @@ int main(int argc, char *argv[])
     LIBXML_TEST_VERSION;
         
     /* initialize configuration structure */
-    server_config_init(&sc);
-    if (LIXA_RC_OK != (rc = server_config(&sc, &tsa, ""))) {
+    server_config_init(&sc, &tpa);
+    if (LIXA_RC_OK != (rc = server_config(&sc, &tpa, ""))) {
         LIXA_TRACE(("main/server_config: rc = %d\n", rc));
         syslog(LOG_ERR, "configuration error (%s), premature exit",
                lixa_strerror(rc));

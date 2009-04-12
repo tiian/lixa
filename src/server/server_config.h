@@ -201,17 +201,20 @@ extern "C" {
      * @return a standardized return code
      */
     int server_config(struct server_config_s *sc,
-                      struct thread_status_array_s *tsa,
+                      struct thread_pipe_array_s *tpa,
                       const char *config_filename);
 
 
 
     /**
      * Parse the configuration tree
+     * @param sc OUT server configuration structure
+     * @param tpa OUT thread pipe array
      * @param a_node IN the current subtree must be parsed
      * @return a standardized return code
      */
     int parse_config(struct server_config_s *sc,
+                     struct thread_pipe_array_s *tpa,
                      xmlNode *a_node);
 
     
@@ -234,15 +237,18 @@ extern "C" {
      * @return a standardized return code
      */
     int parse_config_manager(struct server_config_s *sc,
-                              xmlNode *a_node);
+			     struct thread_pipe_array_s *tpa,
+			     xmlNode *a_node);
     
     
     
     /**
      * Initialize the configuration of the server
      * @param sc OUT the object must be initialized
+     * @param tpa OUT the array of pipes used for thread communication
      */
-    void server_config_init(struct server_config_s *sc);
+    void server_config_init(struct server_config_s *sc,
+                            struct thread_pipe_array_s *tpa);
 
 
     
