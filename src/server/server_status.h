@@ -46,14 +46,14 @@
 #else
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_LIB_
+#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_SERVER_STATUS
 
 
 
 /**
  * It contains the configuration common to any thread
  */
-struct thread_status_s {
+struct thread_pipe_s {
     /**
      * This pipe is used to receive commands from other threads
      * as specified by POSIX
@@ -70,7 +70,7 @@ struct thread_status_s {
  * It contains the common configuration of all activated threads
  * thread 0 is the listener thread, threads 1..n are the serving threads
  */
-struct thread_status_array_s {
+struct thread_pipe_array_s {
     /**
      * Number of elements
      */
@@ -78,7 +78,7 @@ struct thread_status_array_s {
     /**
      * Elements
      */
-    struct thread_status_s *array;
+    struct thread_pipe_s *array;
 };
 
 

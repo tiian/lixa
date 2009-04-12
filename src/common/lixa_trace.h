@@ -74,6 +74,11 @@
  */
 #define LIXA_TRACE_MOD_SERVER_MANAGER     0x00000008
 
+/**
+ * trace module for server status functions
+ */
+#define LIXA_TRACE_MOD_SERVER_STATUS      0x00000010
+
 
 
 /**
