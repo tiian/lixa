@@ -28,12 +28,15 @@ AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_HEADERS(libxml/xmlversion.h libxml/tree.h libxml/parser.h)
 AC_CHECK_HEADERS(netdb.h netinet/in.h)
-AC_CHECK_HEADERS(pthread.h)
+AC_CHECK_HEADERS(poll.h pthread.h)
 AC_CHECK_HEADERS(signal.h stdarg.h stdio.h stdlib.h string.h syslog.h)
 AC_CHECK_HEADERS(sys/socket.h sys/stat.h)
 AC_CHECK_HEADERS(sys/time.h sys/types.h)
 AC_CHECK_HEADERS(unistd.h)
 
+
+
+AC_CHECK_TYPES([nfds_t], [], [], [[#include <poll.h>]])
 AC_CHECK_TYPES(pthread_t)
 AC_CHECK_TYPES(uint8_t)
 AC_CHECK_TYPES(uint32_t)

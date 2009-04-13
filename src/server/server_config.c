@@ -362,17 +362,19 @@ int parse_config_manager(struct server_config_s *sc,
         /* realloc array */
         if (NULL == (sc->managers.array = realloc(
                          sc->managers.array,
-                         ++sc->managers.n * sizeof(struct maanger_config_s))))
+                         ++sc->managers.n * sizeof(struct manager_config_s))))
             THROW(REALLOC_ERROR1);
         i = sc->managers.n - 1;
 
         /* reset new element */
-        sc->listeners.array[i].domain = 0;
-        sc->listeners.array[i].address = NULL;
-        if (NULL == (sc->listeners.array[i].address = (char *)xmlGetProp(
+        sc->managers.array[i].status_file = NULL;
+        if (NULL == (sc->managers.array[i].status_file = (char *)xmlGetProp(
                          a_node, LIXA_XML_CONFIG_MANAGER_STATUS)))
             THROW(STATUS_NOT_AVAILABLE_ERROR);
-
+        LIXA_TRACE(("parse_config_manager: %s %d, %s = %s\n",
+                    (char *)LIXA_XML_CONFIG_MANAGER, i,
+                    (char *)LIXA_XML_CONFIG_MANAGER_STATUS,
+                    sc->managers.array[i].status_file));
 
         /* [...]
          * check the status file is OK
@@ -385,8 +387,8 @@ int parse_config_manager(struct server_config_s *sc,
         j = tpa->n - 1;
         if (0 != pipe(tpa->array[j].pipefd))
             THROW(PIPE_ERROR);
-        LIXA_TRACE(("parse_config_manager: pipe for manager %d is [%d,%d]\n",
-                    j, tpa->array[j].pipefd[0], tpa->array[j].pipefd[1]));
+        LIXA_TRACE(("parse_config_manager: pipe %d for manager %d is [%d,%d]\n",
+                    j, i, tpa->array[j].pipefd[0], tpa->array[j].pipefd[1]));
         
         THROW(NONE);
     } CATCH {
@@ -421,6 +423,8 @@ void server_config_init(struct server_config_s *sc,
     LIXA_TRACE(("server_config_init/start\n"));
     sc->listeners.n = 0;
     sc->listeners.array = NULL;
+    sc->managers.n = 0;
+    sc->managers.array = NULL;
     tpa->n = 0;
     tpa->array = NULL;
     LIXA_TRACE(("server_config_init/end\n"));

@@ -148,7 +148,7 @@ struct manager_config_s {
     /**
      * Path of the file containing the status
      */
-    char *status_path;
+    char *status_file;
 };
 
 /**

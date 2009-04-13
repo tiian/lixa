@@ -39,6 +39,9 @@
 
 
 
+#ifdef HAVE_POLL_H
+# include <poll.h>
+#endif
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
@@ -107,6 +110,14 @@ struct thread_status_s {
      * for communication
      */
     struct thread_pipe_array_s *tpa;
+    /**
+     * Number of clients + 1 (control pipe) connected to this manager
+     */
+    nfds_t          poll_size;
+    /**
+     * Elements used for polling file descriptors
+     */
+    struct pollfd  *poll_array;
     /**
      * Exception reported by the thread (after exit)
      */
