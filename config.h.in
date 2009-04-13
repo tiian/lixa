@@ -36,6 +36,12 @@
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
 
+/* Define to 1 if the system has the type `nfds_t'. */
+#undef HAVE_NFDS_T
+
+/* Define to 1 if you have the <poll.h> header file. */
+#undef HAVE_POLL_H
+
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H
 

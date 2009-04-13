@@ -80,6 +80,17 @@ extern "C" {
     void *server_manager_thread(void *void_ts);
 
 
+
+    /**
+     * Prepare the data structure used for calling poll system function
+     * @param ts IN thread status structure
+     * @param new_fd IN the new file descriptor must be polled
+     * @return a standardized return code
+     */
+    int server_manager_add_poll(struct thread_status_s *ts,
+                                int new_fd);
+
+    
     
 #ifdef __cplusplus
 }

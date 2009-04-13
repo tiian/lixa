@@ -86,17 +86,26 @@
 
 
 
-/**
- * @ref lixa_word_t is defined as uint32_t, so the format string is the same
- */
-#define LIXA_WORD_T_FORMAT UINT32_T_FORMAT
-
-
-
-#if SIZEOF_PTHREAD_T == SIZEOF_LONG_INT
-# define PTHREAD_T_FORMAT "%lu"
+#ifdef HAVE_NFDS_T
+# if SIZEOF_NFDS_T == SIZEOF_LONG_INT
+#  define NFDS_T_FORMAT "%lu"
+# else
+#  error Unable to determine sizeof(nfds_t)
+# endif
 #else
-# error Unable to determine sizeof(pthread_t)
+# error nfds_t type is not available
+#endif
+
+
+
+#ifdef HAVE_PTHREAD_T
+# if SIZEOF_PTHREAD_T == SIZEOF_LONG_INT
+#  define PTHREAD_T_FORMAT "%lu"
+# else
+#  error Unable to determine sizeof(pthread_t)
+# endif
+#else
+# error pthread_t type is not available
 #endif
 
 

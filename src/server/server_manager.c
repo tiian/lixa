@@ -71,28 +71,24 @@ int server_manager(struct server_config_s *sc,
         tsa->n = tpa->n;
 
         /* first thread slot is for listener: it's the main thread of the
-         * process, it's IMPLICITLY created; probably this slot is useless,
-         * but the saving does not worth the entropy */
-        tsa->array[0].id = 0;
-        tsa->array[0].tid = pthread_self();
-        tsa->array[0].tpa = tpa;
-        tsa->array[0].excp = tsa->array[0].ret_cod =
-            tsa->array[0].last_errno = 0;
-
-        /* other thread slots are for managers */
-        for (i = 1; i < tsa->n; ++i) {
-            /*
-            LIXA_TRACE(("server_manager: i = %d, n = %d\n", i, tsa->n));
-            */
+         * process, it's IMPLICITLY created */
+        for (i = 0; i < tsa->n; ++i) {
             tsa->array[i].id = i;
-            tsa->array[i].tid = 0; /* it will be fixed by the thread itself */
             tsa->array[i].tpa = tpa;
+            tsa->array[i].poll_size = 0;
+            tsa->array[i].poll_array = NULL;
             tsa->array[i].excp = tsa->array[i].ret_cod =
                 tsa->array[i].last_errno = 0;
-            if (0 != (ret_cod = pthread_create(
-                          &(tsa->array[i].tid), NULL, server_manager_thread,
-                          tsa->array + i)))
-                THROW(PTHREAD_CREATE_ERROR);
+            if (i == 0) { /* listener */
+                tsa->array[i].tid = pthread_self();
+            } else {
+                /* it will be fixed by the thread itself */
+                tsa->array[i].tid = 0;
+                if (0 != (ret_cod = pthread_create(
+                              &(tsa->array[i].tid), NULL, server_manager_thread,
+                              tsa->array + i)))
+                    THROW(PTHREAD_CREATE_ERROR);
+            }
         }
         
         THROW(NONE);
@@ -120,20 +116,32 @@ int server_manager(struct server_config_s *sc,
 
 void *server_manager_thread(void *void_ts)
 {
-    enum Exception { NONE } excp;
+    enum Exception { ADD_POLL_ERROR
+                     , POLL_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     struct thread_status_s *ts = (struct thread_status_s *)void_ts;
     
     LIXA_TRACE(("server_manager_thread\n"));
     TRY {
-
         LIXA_TRACE(("server_manager_thread: id = %d, "
                     "tid = " PTHREAD_T_FORMAT "\n", ts->id, ts->tid));
-        
+
+        if (LIXA_RC_OK != (ret_cod = server_manager_add_poll(
+                               ts,
+                               ts->tpa->array[ts->id].pipefd[0])))
+            THROW(ADD_POLL_ERROR);
+        if (0 != (ret_cod = poll(ts->poll_array, ts->poll_size, -1)))
+            THROW(POLL_ERROR);
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case ADD_POLL_ERROR:
+                break;
+            case POLL_ERROR:
+                ret_cod = LIXA_RC_POLL_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -149,3 +157,45 @@ void *server_manager_thread(void *void_ts)
     pthread_exit(void_ts);
 }
 
+
+
+int server_manager_add_poll(struct thread_status_s *ts,
+                            int new_fd)
+{
+    enum Exception { REALLOC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_manager_add_poll\n"));
+    TRY {
+        nfds_t last = 0;
+        
+        if (NULL == (ts->poll_array = realloc(
+                         ts->poll_array,
+                         ++ts->poll_size * sizeof(struct pollfd))))
+            THROW(REALLOC_ERROR);
+        last = ts->poll_size - 1;
+        ts->poll_array[last].fd = new_fd;
+        ts->poll_array[last].events = POLLIN | POLLERR | POLLHUP;
+        ts->poll_array[last].revents = 0;
+        LIXA_TRACE(("server_panager_add_poll: added file descriptor %d "
+                    "at position " NFDS_T_FORMAT "\n",
+                    ts->poll_array[last].fd, last));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case REALLOC_ERROR:
+                ret_cod = LIXA_RC_REALLOC_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_manager_add_poll/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
