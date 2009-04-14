@@ -111,7 +111,7 @@ struct thread_status_s {
      */
     struct thread_pipe_array_s *tpa;
     /**
-     * Number of clients + 1 (control pipe) connected to this manager
+     * Number of sockets + 1 (control pipe) connected to this thread
      */
     nfds_t          poll_size;
     /**

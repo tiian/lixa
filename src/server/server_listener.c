@@ -46,6 +46,12 @@
 #ifdef HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+# include <arpa/inet.h>
+#endif
 
 
 
@@ -65,7 +71,8 @@
 
 
 int server_listener(const struct server_config_s *sc,
-                    struct listener_status_array_s *lsa)
+                    struct listener_status_array_s *lsa,
+                    struct thread_status_s *ts)
 {
     enum Exception { MALLOC_ERROR
                      , INVALID_ADDRESS_ERROR
@@ -73,6 +80,7 @@ int server_listener(const struct server_config_s *sc,
                      , SETSOCKOPT_ERROR
                      , BIND_ERROR
                      , LISTEN_ERROR
+                     , LISTENER_LOOP_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -152,6 +160,9 @@ int server_listener(const struct server_config_s *sc,
             if (0 != listen(lsa->array[i].fd, SOMAXCONN))
                 THROW(LISTEN_ERROR);
         } /* for (i=0; i<n; ++i) */
+
+        if (LIXA_RC_OK != (ret_cod = server_listener_loop(sc, lsa, ts)))
+            THROW(LISTENER_LOOP_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -174,6 +185,8 @@ int server_listener(const struct server_config_s *sc,
             case LISTEN_ERROR:
                 ret_cod = LIXA_RC_LISTEN_ERROR;
                 break;
+            case LISTENER_LOOP_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -182,6 +195,107 @@ int server_listener(const struct server_config_s *sc,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_listener/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_listener_loop(const struct server_config_s *sc,
+                         struct listener_status_array_s *lsa,
+                         struct thread_status_s *ts)
+{
+    enum Exception { MALLOC_ERROR
+                     , ACCEPT_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_listener_loop\n"));
+    TRY {
+        /* prepare pool array */
+        nfds_t n = (nfds_t)lsa->n + 1;
+        nfds_t i;
+        int ready_fd, found_fd;
+
+        if (NULL == (ts->poll_array = malloc(n * sizeof(struct pollfd))))
+            THROW(MALLOC_ERROR);
+        ts->poll_size = n;
+        
+        for (i = 0; i < n; ++i) {
+            if (i == 0)
+                /* control pipe */
+                ts->poll_array[i].fd = ts->tpa->array[ts->id].pipefd[0];
+            else
+                /* listening socket */
+                ts->poll_array[i].fd = lsa->array[i - 1].fd;
+            ts->poll_array[i].events = POLLIN;
+        }
+
+        while (TRUE) {
+            LIXA_TRACE(("server_listener_loop: entering poll...\n"));
+            ready_fd = poll(ts->poll_array, ts->poll_size, -1);
+            LIXA_TRACE(("server_listener_loop: ready file descriptors = %d\n",
+                        ready_fd));
+            /* look for ready file descriptors */
+            found_fd = 0;
+            for (i = 0; i < n; ++i) {
+                struct sockaddr_in cliaddr;
+                socklen_t clilen;
+                int conn_fd;
+                
+                LIXA_TRACE(("server_listener_loop: slot = " NFDS_T_FORMAT
+                            ", fd = %d, POLLIN = %d, POLLERR = %d, "
+                            "POLLHUP = %d, POLLNVAL = %d\n",
+                            i, ts->poll_array[i].fd,
+                            ts->poll_array[i].revents & POLLIN,
+                            ts->poll_array[i].revents & POLLERR,
+                            ts->poll_array[i].revents & POLLHUP,
+                            ts->poll_array[i].revents & POLLNVAL));
+
+                if (ts->poll_array[i].revents &
+                    (POLLERR | POLLHUP | POLLNVAL)) {
+                    LIXA_TRACE(("server_listener_loop: non blocking error "
+                                "condition on slot " NFDS_T_FORMAT
+                                ", fd = %d\n", i, ts->poll_array[i].fd));
+                }
+                
+                if (ts->poll_array[i].revents & POLLIN) {
+                    clilen = sizeof(cliaddr);
+                    if (0 > (conn_fd = accept(ts->poll_array[i].fd,
+                                              (struct sockaddr *)&cliaddr,
+                                              &clilen)))
+                        THROW(ACCEPT_ERROR);
+                    LIXA_TRACE(("server_listener_loop: accepted new incoming "
+                                "connection from address '%s', port "
+                                IN_PORT_T_FORMAT ", fd = %d\n",
+                                inet_ntoa(cliaddr.sin_addr),
+                                ntohs(cliaddr.sin_port), conn_fd));
+                }
+
+                /* @@@ */
+                
+                if (ready_fd == found_fd)
+                    break; /* the loop is now useless */
+            } /* for (i = 0; i < n; ++i) */
+        } /* while (TRUE) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case ACCEPT_ERROR:
+                ret_cod = LIXA_RC_ACCEPT_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_listener_loop/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

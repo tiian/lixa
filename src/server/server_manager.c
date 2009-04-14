@@ -169,15 +169,16 @@ int server_manager_add_poll(struct thread_status_s *ts,
     LIXA_TRACE(("server_manager_add_poll\n"));
     TRY {
         nfds_t last = 0;
-        
+
+        /* this algorithm must be reviewed: look for an available slot, and
+           then allocate a new one */
         if (NULL == (ts->poll_array = realloc(
                          ts->poll_array,
                          ++ts->poll_size * sizeof(struct pollfd))))
             THROW(REALLOC_ERROR);
         last = ts->poll_size - 1;
         ts->poll_array[last].fd = new_fd;
-        ts->poll_array[last].events = POLLIN | POLLERR | POLLHUP;
-        ts->poll_array[last].revents = 0;
+        ts->poll_array[last].events = POLLIN;
         LIXA_TRACE(("server_panager_add_poll: added file descriptor %d "
                     "at position " NFDS_T_FORMAT "\n",
                     ts->poll_array[last].fd, last));

@@ -235,6 +235,10 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_LISTEN_ERROR                   -133
 /**
+ * "accept" function error
+ */
+#define LIXA_RC_ACCEPT_ERROR                   -134
+/**
  * "pthread_create" function error
  */
 #define LIXA_RC_PTHREAD_CREATE_ERROR           -140
