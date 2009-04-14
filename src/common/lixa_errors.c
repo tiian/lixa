@@ -146,6 +146,8 @@ const char *lixa_strerror(int ret_cod)
                     "condition";
             case LIXA_RC_LISTEN_ERROR:
                 return "ERROR: 'listen' function returned an error condition";
+            case LIXA_RC_ACCEPT_ERROR:
+                return "ERROR: 'accept' function returned an error condition";
             case LIXA_RC_PTHREAD_CREATE_ERROR:
                 return "ERROR: 'pthread_create' function returned an error "
                     "condition";

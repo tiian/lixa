@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     }
 
     /* start configured listener(s) */
-    if (LIXA_RC_OK != (rc = server_listener(&sc, &lsa))) {
+    if (LIXA_RC_OK != (rc = server_listener(&sc, &lsa, &(tsa.array[0])))) {
         LIXA_TRACE(("main/server_listener: rc = %d\n", rc));
         syslog(LOG_ERR, "error (%s) while starting listener(s), "
                "premature exit", lixa_strerror(rc));
