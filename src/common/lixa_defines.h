@@ -71,6 +71,13 @@
 
 
 /**
+ * This value is the null file descriptor convention
+ */
+#define LIXA_NULL_FD    -1
+
+
+
+/**
  * Format must be used in *printf family function to print a "uint32_t"
  * value
  */

@@ -367,8 +367,8 @@ int server_listener_find_manager(const struct thread_status_array_s *tsa,
         for (i = 1; i < tsa->n; ++i) {
             LIXA_TRACE(("server_listener_find_manager: id = %i, "
                         "active_clients = " SIZE_T_FORMAT "\n",
-                        i, tsa->array[current_pos].active_clients));
-            if (tsa->array[current_pos].active_clients < current_min) {
+                        i, tsa->array[i].active_clients));
+            if (tsa->array[i].active_clients < current_min) {
                 current_pos = i;
                 current_min = tsa->array[current_pos].active_clients;
             }

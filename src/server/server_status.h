@@ -93,6 +93,15 @@ struct thread_pipe_array_s {
 
 
 /**
+ * It's the struct used to keep the status of a client
+ */
+struct server_client_status_s {
+    int foo;
+};
+    
+
+
+/**
  * It's the struct used as argument to every created thread
  */
 struct thread_status_s {
@@ -127,6 +136,10 @@ struct thread_status_s {
      *       at least che control pipe
      */
     size_t          active_clients;
+    /**
+     * Array of active and not active clients
+     */
+    struct server_client_status_s *client_array;
     /**
      * Exception reported by the thread (after exit)
      */
