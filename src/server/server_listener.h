@@ -103,12 +103,12 @@ extern "C" {
      * Start the listener(s) configured for the server in configuration file
      * @param sc IN server configuration structure
      * @param lsa OUT status of all the listeners
-     * @param ts IN/OUT status of listener thread
+     * @param tsa IN/OUT status of listener thread
      * @return a standardized return code
      */
     int server_listener(const struct server_config_s *sc,
                         struct listener_status_array_s *lsa,
-                        struct thread_status_s *ts);
+                        struct thread_status_array_s *tsa);
 
 
 
@@ -116,15 +116,26 @@ extern "C" {
      * Cicle on poll to receive incoming clients and dispatching to managers
      * @param sc IN server configuration structure
      * @param lsa IN/OUT status of all the listeners
-     * @param ts IN/OUT thread status of the listener
+     * @param tsa IN/OUT thread status of the listener
      * @return a standardized return code     
      */
     int server_listener_loop(const struct server_config_s *sc,
                              struct listener_status_array_s *lsa,
-                             struct thread_status_s *ts);
+                             struct thread_status_array_s *tsa);
 
 
 
+    /**
+     * Find out the first available manager
+     * @param tsa IN listener thread status
+     * @param manager_id OUT id of the manager will receive the client
+     * @return a standardized return code
+     */
+    int server_listener_find_manager(const struct thread_status_array_s *tsa,
+                                     int *manager_id);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

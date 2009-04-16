@@ -77,6 +77,7 @@ int server_manager(struct server_config_s *sc,
             tsa->array[i].tpa = tpa;
             tsa->array[i].poll_size = 0;
             tsa->array[i].poll_array = NULL;
+            tsa->array[i].active_clients = 0;
             tsa->array[i].excp = tsa->array[i].ret_cod =
                 tsa->array[i].last_errno = 0;
             if (i == 0) { /* listener */
@@ -118,6 +119,7 @@ void *server_manager_thread(void *void_ts)
 {
     enum Exception { ADD_POLL_ERROR
                      , POLL_ERROR
+                     , NETWORK_EVENT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -125,6 +127,9 @@ void *server_manager_thread(void *void_ts)
     
     LIXA_TRACE(("server_manager_thread\n"));
     TRY {
+        int ready_fd, found_fd;
+        nfds_t i, n;
+        
         LIXA_TRACE(("server_manager_thread: id = %d, "
                     "tid = " PTHREAD_T_FORMAT "\n", ts->id, ts->tid));
 
@@ -132,8 +137,44 @@ void *server_manager_thread(void *void_ts)
                                ts,
                                ts->tpa->array[ts->id].pipefd[0])))
             THROW(ADD_POLL_ERROR);
-        if (0 != (ret_cod = poll(ts->poll_array, ts->poll_size, -1)))
-            THROW(POLL_ERROR);
+        while (TRUE) {
+            LIXA_TRACE(("server_manager_thread: id = %d, entering poll...\n",
+                        ts->id));
+            if (0 >= (ready_fd = poll(ts->poll_array, ts->poll_size, -1)))
+                THROW(POLL_ERROR);
+            LIXA_TRACE(("server_manager_thread: id = %d, ready file "
+                        "descriptors = %d\n", ts->id, ready_fd));
+            found_fd = 0;
+            n = ts->poll_size;
+            for (i = 0; i < n; ++i) {
+                LIXA_TRACE(("server_manager_thread: slot = " NFDS_T_FORMAT
+                            ", fd = %d, POLLIN = %d, POLLERR = %d, "
+                            "POLLHUP = %d, POLLNVAL = %d\n",
+                            i, ts->poll_array[i].fd,
+                            ts->poll_array[i].revents & POLLIN,
+                            ts->poll_array[i].revents & POLLERR,
+                            ts->poll_array[i].revents & POLLHUP,
+                            ts->poll_array[i].revents & POLLNVAL));
+                if (ts->poll_array[i].revents &
+                    (POLLERR | POLLHUP | POLLNVAL)) {
+                    LIXA_TRACE(("server_manager_thread: unespected "
+                                "network event on slot " NFDS_T_FORMAT
+                                ", fd = %d\n", i, ts->poll_array[i].fd));
+                    /* @@@ this piece of code must be improved */
+                    THROW(NETWORK_EVENT_ERROR);
+                }
+                if (ts->poll_array[i].revents & POLLIN) {
+                    if (i == 0)
+                        ;
+                    else
+                        ;
+                }
+            } /* for (i = 0; i < n; ++i) */
+
+            THROW(NONE);
+            
+        } /* while (TRUE) */
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -141,6 +182,9 @@ void *server_manager_thread(void *void_ts)
                 break;
             case POLL_ERROR:
                 ret_cod = LIXA_RC_POLL_ERROR;
+                break;
+            case NETWORK_EVENT_ERROR:
+                ret_cod = LIXA_RC_NETWORK_EVENT_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
