@@ -100,9 +100,9 @@ const char *lixa_strerror(int ret_cod)
                 */
             case LIXA_RC_WRITE_ERROR:
                 return "ERROR: 'write' function returned an error condition";
+            case LIXA_RC_READ_ERROR:
+                return "ERROR: 'read' function returned an error condition";
                 /*
-            case LIXA_RC_FREAD_ERROR:
-                return "ERROR: 'fread' function returned an error condition";
             case LIXA_RC_FFLUSH_ERROR:
                 return "ERROR: 'fflush' function returned an error condition";
             case LIXA_RC_FSYNC_ERROR:

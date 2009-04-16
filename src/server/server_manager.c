@@ -34,9 +34,16 @@
 
 
 
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+
+
+
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <server_manager.h>
+#include <server_messages.h>
 
 
 
@@ -78,6 +85,7 @@ int server_manager(struct server_config_s *sc,
             tsa->array[i].poll_size = 0;
             tsa->array[i].poll_array = NULL;
             tsa->array[i].active_clients = 0;
+            tsa->array[i].client_array = NULL;
             tsa->array[i].excp = tsa->array[i].ret_cod =
                 tsa->array[i].last_errno = 0;
             if (i == 0) { /* listener */
@@ -120,6 +128,8 @@ void *server_manager_thread(void *void_ts)
     enum Exception { ADD_POLL_ERROR
                      , POLL_ERROR
                      , NETWORK_EVENT_ERROR
+                     , READ_ERROR
+                     , INVALID_MESSAGE
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -147,6 +157,8 @@ void *server_manager_thread(void *void_ts)
             found_fd = 0;
             n = ts->poll_size;
             for (i = 0; i < n; ++i) {
+                struct srv_msg_s msg;
+                
                 LIXA_TRACE(("server_manager_thread: slot = " NFDS_T_FORMAT
                             ", fd = %d, POLLIN = %d, POLLERR = %d, "
                             "POLLHUP = %d, POLLNVAL = %d\n",
@@ -164,15 +176,25 @@ void *server_manager_thread(void *void_ts)
                     THROW(NETWORK_EVENT_ERROR);
                 }
                 if (ts->poll_array[i].revents & POLLIN) {
-                    if (i == 0)
-                        ;
-                    else
-                        ;
+                    if (i == 0) {
+                        if (sizeof(msg) != read(ts->poll_array[i].fd,
+                                                &msg, sizeof(msg)))
+                            THROW(READ_ERROR);
+                        switch (msg.type) {
+                            case SRV_MSG_TYPE_NEW_CLIENT:
+                                ret_cod = server_manager_add_poll(
+                                    ts, msg.body.nc.fd);
+                                break;
+                            default:
+                                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                        } /* switch (msg.type) */
+                        if (LIXA_RC_OK != ret_cod)
+                            THROW(INVALID_MESSAGE);
+                    } else
+                        ; /* @@@ manage protocol */
                 }
             } /* for (i = 0; i < n; ++i) */
 
-            THROW(NONE);
-            
         } /* while (TRUE) */
         
         THROW(NONE);
@@ -185,6 +207,11 @@ void *server_manager_thread(void *void_ts)
                 break;
             case NETWORK_EVENT_ERROR:
                 ret_cod = LIXA_RC_NETWORK_EVENT_ERROR;
+                break;
+            case READ_ERROR:
+                ret_cod = LIXA_RC_READ_ERROR;
+                break;
+            case INVALID_MESSAGE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -206,23 +233,44 @@ void *server_manager_thread(void *void_ts)
 int server_manager_add_poll(struct thread_status_s *ts,
                             int new_fd)
 {
-    enum Exception { REALLOC_ERROR
+    enum Exception { REALLOC_ERROR1
+                     , REALLOC_ERROR2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("server_manager_add_poll\n"));
     TRY {
         nfds_t last = 0;
+        int first_add = ts->poll_array == NULL;
 
-        /* this algorithm must be reviewed: look for an available slot, and
-           then allocate a new one */
-        if (NULL == (ts->poll_array = realloc(
-                         ts->poll_array,
-                         ++ts->poll_size * sizeof(struct pollfd))))
-            THROW(REALLOC_ERROR);
-        last = ts->poll_size - 1;
+        /* look for a free slot */
+        if (ts->poll_size > 1 && ts->active_clients + 1 < ts->poll_size) {
+            /* there must be at least one free slot */
+            nfds_t i, n = ts->poll_size;
+            for (i = 1; i < n; ++i) {
+                if (LIXA_NULL_FD == ts->poll_array[i].fd) {
+                    last = i;
+                    break;
+                }
+            }
+        } else {
+            /* no free slot, allocate a new slot at the end of the array */
+            if (NULL == (ts->poll_array = realloc(
+                             ts->poll_array,
+                             ++ts->poll_size * sizeof(struct pollfd))))
+                THROW(REALLOC_ERROR1);
+            if (NULL == (ts->client_array = realloc(
+                             ts->client_array,
+                             ts->poll_size * sizeof(
+                                 struct server_client_status_s))))
+                THROW(REALLOC_ERROR2);
+            last = ts->poll_size - 1;
+        }
         ts->poll_array[last].fd = new_fd;
         ts->poll_array[last].events = POLLIN;
+        if (!first_add)
+            ts->active_clients++;
+        /* @@@ initialize server_client_status_s of client_array */
         LIXA_TRACE(("server_panager_add_poll: added file descriptor %d "
                     "at position " NFDS_T_FORMAT "\n",
                     ts->poll_array[last].fd, last));
@@ -230,7 +278,8 @@ int server_manager_add_poll(struct thread_status_s *ts,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case REALLOC_ERROR:
+            case REALLOC_ERROR1:
+            case REALLOC_ERROR2:
                 ret_cod = LIXA_RC_REALLOC_ERROR;
                 break;
             case NONE:

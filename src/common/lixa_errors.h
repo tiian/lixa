@@ -164,8 +164,8 @@ define LIXA_RC_FCLOSE_ERROR                  -111
 #define LIXA_RC_WRITE_ERROR                  -112
 /**
  * "fread" function error
-define LIXA_RC_FREAD_ERROR                   -113
  */
+#define LIXA_RC_READ_ERROR                   -113
 /**
  * "fflush" function error
 define LIXA_RC_FFLUSH_ERROR                  -116
