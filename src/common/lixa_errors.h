@@ -85,6 +85,10 @@ define LIXA_RC_BYPASSED_OPERATION              +2
  */
 #define LIXA_RC_CONFIG_ERROR                    -3
 /**
+ * Unespected network event
+ */
+#define LIXA_RC_NETWORK_EVENT_ERROR             -4
+/**
  * A passed object/option/arg is NULL and it can NOT be inferred from a default
  * value
 define LIXA_RC_NULL_OBJECT                     -5
@@ -155,9 +159,9 @@ define LIXA_RC_DESTINATION_TOO_SMALL          -16
 define LIXA_RC_FCLOSE_ERROR                  -111
  */
 /**
- * "fwrite" function error
-define LIXA_RC_FWRITE_ERROR                  -112
+ * "write" function error
  */
+#define LIXA_RC_WRITE_ERROR                  -112
 /**
  * "fread" function error
 define LIXA_RC_FREAD_ERROR                   -113

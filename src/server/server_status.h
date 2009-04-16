@@ -111,13 +111,22 @@ struct thread_status_s {
      */
     struct thread_pipe_array_s *tpa;
     /**
-     * Number of sockets + 1 (control pipe) connected to this thread
+     * Size of polling array. Note: some slots may be unused because array
+     * reclamation does not happen every time a client disconnects
      */
     nfds_t          poll_size;
     /**
-     * Elements used for polling file descriptors
+     * Elements used for polling file descriptors. Note: some slots may be
+     * unused because array reclamation does not happen every time a client
+     * disconnects
      */
     struct pollfd  *poll_array;
+    /**
+     * Number of clients active for this manager
+     * Note: MUST BE active_clients < poll_size because poll array contains
+     *       at least che control pipe
+     */
+    size_t          active_clients;
     /**
      * Exception reported by the thread (after exit)
      */

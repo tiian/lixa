@@ -97,6 +97,8 @@ int server_config(struct server_config_s *sc,
                      , XML_READ_FILE_ERROR
                      , XML_DOC_GET_ROOT_ELEMENT_ERROR
                      , PARSE_CONFIG_ERROR
+                     , ZERO_LISTENTERS
+                     , ZERO_MANAGERS
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -149,6 +151,11 @@ int server_config(struct server_config_s *sc,
 
         /* release libxml2 stuff */
         xmlCleanupParser();
+
+        if (sc->listeners.n == 0)
+            THROW(ZERO_LISTENTERS);
+        if (sc->managers.n == 0)
+            THROW(ZERO_MANAGERS);
         
         THROW(NONE);
     } CATCH {
@@ -169,6 +176,16 @@ int server_config(struct server_config_s *sc,
                 ret_cod = LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR;
                 break;
             case PARSE_CONFIG_ERROR:
+                break;
+            case ZERO_LISTENTERS:
+                LIXA_TRACE(("server_config: 0 listeners configured, this "
+                            "server is useless...\n"));
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;
+            case ZERO_MANAGERS:
+                LIXA_TRACE(("server_config: 0 managers configured, this "
+                            "server is useless...\n"));
+                ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -46,6 +46,9 @@
 #ifdef HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
 #endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
@@ -59,6 +62,7 @@
 #include <lixa_trace.h>
 #include <server_config.h>
 #include <server_listener.h>
+#include <server_messages.h>
 
 
 
@@ -72,7 +76,7 @@
 
 int server_listener(const struct server_config_s *sc,
                     struct listener_status_array_s *lsa,
-                    struct thread_status_s *ts)
+                    struct thread_status_array_s *tsa)
 {
     enum Exception { MALLOC_ERROR
                      , INVALID_ADDRESS_ERROR
@@ -161,7 +165,7 @@ int server_listener(const struct server_config_s *sc,
                 THROW(LISTEN_ERROR);
         } /* for (i=0; i<n; ++i) */
 
-        if (LIXA_RC_OK != (ret_cod = server_listener_loop(sc, lsa, ts)))
+        if (LIXA_RC_OK != (ret_cod = server_listener_loop(sc, lsa, tsa)))
             THROW(LISTENER_LOOP_ERROR);
         
         THROW(NONE);
@@ -203,10 +207,14 @@ int server_listener(const struct server_config_s *sc,
 
 int server_listener_loop(const struct server_config_s *sc,
                          struct listener_status_array_s *lsa,
-                         struct thread_status_s *ts)
+                         struct thread_status_array_s *tsa)
 {
     enum Exception { MALLOC_ERROR
+                     , POLL_ERROR
+                     , NETWORK_EVENT_ERROR
                      , ACCEPT_ERROR
+                     , FIND_MANAGER_ERROR
+                     , WRITE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -216,8 +224,10 @@ int server_listener_loop(const struct server_config_s *sc,
         nfds_t n = (nfds_t)lsa->n + 1;
         nfds_t i;
         int ready_fd, found_fd;
+        struct thread_status_s *ts = &(tsa->array[0]);
 
-        if (NULL == (ts->poll_array = malloc(n * sizeof(struct pollfd))))
+        if (NULL == (ts->poll_array = malloc(
+                         n * sizeof(struct pollfd))))
             THROW(MALLOC_ERROR);
         ts->poll_size = n;
         
@@ -229,11 +239,12 @@ int server_listener_loop(const struct server_config_s *sc,
                 /* listening socket */
                 ts->poll_array[i].fd = lsa->array[i - 1].fd;
             ts->poll_array[i].events = POLLIN;
-        }
+        } /* for (i = 0; i < n; ++i) */
 
         while (TRUE) {
             LIXA_TRACE(("server_listener_loop: entering poll...\n"));
-            ready_fd = poll(ts->poll_array, ts->poll_size, -1);
+            if (0 >= (ready_fd = poll(ts->poll_array, ts->poll_size, -1)))
+                THROW(POLL_ERROR);
             LIXA_TRACE(("server_listener_loop: ready file descriptors = %d\n",
                         ready_fd));
             /* look for ready file descriptors */
@@ -254,12 +265,17 @@ int server_listener_loop(const struct server_config_s *sc,
 
                 if (ts->poll_array[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL)) {
-                    LIXA_TRACE(("server_listener_loop: non blocking error "
-                                "condition on slot " NFDS_T_FORMAT
+                    LIXA_TRACE(("server_listener_loop: unespected "
+                                "network event on slot " NFDS_T_FORMAT
                                 ", fd = %d\n", i, ts->poll_array[i].fd));
+                    /* @@@ this piece of code must be improved */
+                    THROW(NETWORK_EVENT_ERROR);
                 }
                 
                 if (ts->poll_array[i].revents & POLLIN) {
+                    int manager_id = 0;
+                    struct srv_msg_s msg;
+                    
                     clilen = sizeof(cliaddr);
                     if (0 > (conn_fd = accept(ts->poll_array[i].fd,
                                               (struct sockaddr *)&cliaddr,
@@ -270,6 +286,21 @@ int server_listener_loop(const struct server_config_s *sc,
                                 IN_PORT_T_FORMAT ", fd = %d\n",
                                 inet_ntoa(cliaddr.sin_addr),
                                 ntohs(cliaddr.sin_port), conn_fd));
+                    /* choose a manager for this client */
+                    if (LIXA_RC_OK != (ret_cod = server_listener_find_manager(
+                                           tsa, &manager_id)))
+                        THROW(FIND_MANAGER_ERROR);
+
+                    /* prepare the message to signal the manager */
+                    msg.type = SRV_MSG_TYPE_NEW_CLIENT;
+                    msg.body.nc.fd = conn_fd;
+
+                    if (sizeof(msg) != write(
+                            ts->tpa->array[manager_id].pipefd[1], &msg,
+                            sizeof(msg)))
+                        THROW(WRITE_ERROR);
+                    
+                    found_fd++;
                 }
 
                 /* @@@ */
@@ -285,8 +316,19 @@ int server_listener_loop(const struct server_config_s *sc,
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
                 break;
+            case POLL_ERROR:
+                ret_cod = LIXA_RC_POLL_ERROR;
+                break;
+            case NETWORK_EVENT_ERROR:
+                ret_cod = LIXA_RC_NETWORK_EVENT_ERROR;
+                break;
             case ACCEPT_ERROR:
                 ret_cod = LIXA_RC_ACCEPT_ERROR;
+                break;
+            case FIND_MANAGER_ERROR:
+                break;
+            case WRITE_ERROR:
+                ret_cod = LIXA_RC_WRITE_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -300,3 +342,59 @@ int server_listener_loop(const struct server_config_s *sc,
     return ret_cod;
 }
 
+
+
+int server_listener_find_manager(const struct thread_status_array_s *tsa,
+                                 int *manager_id)
+{
+    enum Exception { OUT_OF_RANGE
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_listener_find_manager\n"));
+    TRY {
+        int i;
+        size_t current_min;
+        int    current_pos;
+
+        if (tsa->n <= 1)
+            THROW(OUT_OF_RANGE);
+        
+        current_pos = 1;
+        current_min = tsa->array[current_pos].active_clients;
+
+        /* first slot is skipped because contains listener thread */
+        for (i = 1; i < tsa->n; ++i) {
+            LIXA_TRACE(("server_listener_find_manager: id = %i, "
+                        "active_clients = " SIZE_T_FORMAT "\n",
+                        i, tsa->array[current_pos].active_clients));
+            if (tsa->array[current_pos].active_clients < current_min) {
+                current_pos = i;
+                current_min = tsa->array[current_pos].active_clients;
+            }
+        }
+        LIXA_TRACE(("server_listener_find_manager: choosed id = %i, "
+                    "active_clients = " SIZE_T_FORMAT "\n",
+                    current_pos, current_min));
+        *manager_id = current_pos;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OUT_OF_RANGE:
+                LIXA_TRACE(("server_listener_find_manager: thread status "
+                            "array has less than 2 elements, no manager "
+                            "can be choosed\n"));
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_listener_find_manager/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}

@@ -57,6 +57,8 @@ const char *lixa_strerror(int ret_cod)
                 return "ERROR: an argument is out of range";
             case LIXA_RC_CONFIG_ERROR:
                 return "ERROR: configuration file is broken";
+            case LIXA_RC_NETWORK_EVENT_ERROR:
+                return "ERROR: an unespected network event raised";
                 /*
             case LIXA_RC_NULL_OBJECT:
                 return "ERROR: an argument is null";
@@ -95,8 +97,10 @@ const char *lixa_strerror(int ret_cod)
                 /*
             case LIXA_RC_FCLOSE_ERROR:
                 return "ERROR: 'fclose' function returned an error condition";
-            case LIXA_RC_FWRITE_ERROR:
-                return "ERROR: 'fwrite' function returned an error condition";
+                */
+            case LIXA_RC_WRITE_ERROR:
+                return "ERROR: 'write' function returned an error condition";
+                /*
             case LIXA_RC_FREAD_ERROR:
                 return "ERROR: 'fread' function returned an error condition";
             case LIXA_RC_FFLUSH_ERROR:
