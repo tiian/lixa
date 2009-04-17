@@ -54,6 +54,10 @@
 
 
 
+#define READ_BUFFER_SIZE 4096
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -81,6 +85,39 @@ extern "C" {
 
 
 
+    /**
+     * This method manages POLLIN event on file descriptors when it happens
+     * due to internal control actions
+     * @param ts IN/OUT thread status
+     * @param fd IN file descriptor raised the POLLIN event
+     * @return a standardized return code
+     */
+    int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd);
+
+    
+    
+    /**
+     * This method manages POLLIN event on file descriptors when it happens
+     * due to client actions
+     * @param ts IN/OUT thread status
+     * @param slot_id IN the slot associated to the file descriptor raised
+     *                   the POLLIN event
+     * @return a standardized return code
+     */
+    int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id);
+
+
+
+    /**
+     * Free a unused slot in thread status structure
+     * @param ts IN/OUT thread status structure
+     * @param slot_id IN id of the slot must be freed
+     * @return a standardized return code
+     */
+    int server_manager_free_slot(struct thread_status_s *ts, size_t slot_id);
+
+    
+    
     /**
      * Prepare the data structure used for calling poll system function
      * @param ts IN thread status structure
