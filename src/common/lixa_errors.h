@@ -156,8 +156,8 @@ define LIXA_RC_DESTINATION_TOO_SMALL          -16
 #define LIXA_RC_OPEN_ERROR                   -110
 /**
  * "fclose" function error
-define LIXA_RC_FCLOSE_ERROR                  -111
  */
+#define LIXA_RC_CLOSE_ERROR                  -111
 /**
  * "write" function error
  */
@@ -242,6 +242,10 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * "accept" function error
  */
 #define LIXA_RC_ACCEPT_ERROR                   -134
+/**
+ * "shutdown" function error
+ */
+#define LIXA_RC_SHUTDOWN_ERROR                 -135
 /**
  * "pthread_create" function error
  */

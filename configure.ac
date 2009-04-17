@@ -35,7 +35,6 @@ AC_CHECK_HEADERS(sys/time.h sys/types.h)
 AC_CHECK_HEADERS(unistd.h)
 
 
-
 AC_CHECK_TYPES([nfds_t], [], [], [[#include <poll.h>]])
 AC_CHECK_TYPES(pthread_t)
 AC_CHECK_TYPES(uint8_t)

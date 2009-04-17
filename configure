@@ -5650,7 +5650,6 @@ done
 
 
 
-
 { echo "$as_me:$LINENO: checking for nfds_t" >&5
 echo $ECHO_N "checking for nfds_t... $ECHO_C" >&6; }
 if test "${ac_cv_type_nfds_t+set}" = set; then

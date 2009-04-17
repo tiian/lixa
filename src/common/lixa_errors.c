@@ -94,10 +94,8 @@ const char *lixa_strerror(int ret_cod)
                 return "ERROR: 'pipe' function returned an error condition";
             case LIXA_RC_OPEN_ERROR:
                 return "ERROR: 'open' function returned an error condition";
-                /*
-            case LIXA_RC_FCLOSE_ERROR:
-                return "ERROR: 'fclose' function returned an error condition";
-                */
+            case LIXA_RC_CLOSE_ERROR:
+                return "ERROR: 'close' function returned an error condition";
             case LIXA_RC_WRITE_ERROR:
                 return "ERROR: 'write' function returned an error condition";
             case LIXA_RC_READ_ERROR:
@@ -145,15 +143,17 @@ const char *lixa_strerror(int ret_cod)
                     "condition";
             case LIXA_RC_BIND_ERROR:
                 return "ERROR: 'bind' function returned an error condition";
-            case LIXA_RC_XML_READ_FILE_ERROR:
-                return "ERROR: 'xmlReadFile' function returned an error "
-                    "condition";
             case LIXA_RC_LISTEN_ERROR:
                 return "ERROR: 'listen' function returned an error condition";
             case LIXA_RC_ACCEPT_ERROR:
                 return "ERROR: 'accept' function returned an error condition";
+            case LIXA_RC_SHUTDOWN_ERROR:
+                return "ERROR: 'shutdown' function returned an error condition";
             case LIXA_RC_PTHREAD_CREATE_ERROR:
                 return "ERROR: 'pthread_create' function returned an error "
+                    "condition";
+            case LIXA_RC_XML_READ_FILE_ERROR:
+                return "ERROR: 'xmlReadFile' function returned an error "
                     "condition";
             case LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR:
                 return "ERROR: 'xmlDocGetRootElement' function returned an "
