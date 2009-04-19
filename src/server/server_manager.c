@@ -276,7 +276,8 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                      , SHUTDOWN_ERROR1
                      , SHUTDOWN_ERROR2
                      , CLOSE_ERROR
-                     , FREE_SLOT
+                     , FREE_SLOTS
+                     , XML_PROC
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -285,7 +286,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
         char buf[READ_BUFFER_SIZE];
         ssize_t read_bytes;
 
-        if (0 > (read_bytes = recv(ts->poll_array[slot_id].fd, &buf,
+        if (0 > (read_bytes = recv(ts->poll_array[slot_id].fd, buf,
                                    sizeof(buf), 0)))
             THROW(READ_ERROR);
         LIXA_TRACE(("server_manager_pollin_data: fd = %d returned %u bytes\n",
@@ -303,8 +304,14 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                 THROW(SHUTDOWN_ERROR2);
             if (0 != close(ts->poll_array[slot_id].fd))
                 THROW(CLOSE_ERROR);
-            if (LIXA_RC_OK != (ret_cod = server_manager_free_slot(ts, slot_id)))
-                THROW(FREE_SLOT);
+            if (LIXA_RC_OK != (ret_cod =
+                               server_manager_free_slots(ts, slot_id)))
+                THROW(FREE_SLOTS);
+        } else {
+            /* XML message to process from client */
+            if (LIXA_RC_OK != (ret_cod = server_manager_XML_proc(
+                                   ts, slot_id, buf, read_bytes)))
+                THROW(XML_PROC);
         }
         
         THROW(NONE);
@@ -320,7 +327,8 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
                 break;
-            case FREE_SLOT:
+            case FREE_SLOTS:
+            case XML_PROC:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -336,36 +344,58 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 
 
 
-int server_manager_free_slot(struct thread_status_s *ts, size_t slot_id)
+int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id)
 {
-    enum Exception { REALLOC_ERROR1
+    enum Exception { INTERNAL_ERROR
+                     , REALLOC_ERROR1
                      , REALLOC_ERROR2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("server_manager_free_slot\n"));
+    LIXA_TRACE(("server_manager_free_slots\n"));
     TRY {
+        size_t i = ts->poll_size - 1;
+        size_t new_poll_size = ts->poll_size;
+        
         /* slot reset */
         ts->poll_array[slot_id].fd = LIXA_NULL_FD;
         ts->poll_array[slot_id].events = 0;
         ts->active_clients--;
+
+        while (i > 0 && ts->poll_array[i].fd == LIXA_NULL_FD) {
+            new_poll_size--;
+            i--;
+        }
+
+        if (new_poll_size <= ts->active_clients) {
+            LIXA_TRACE(("server_manager_free_slots: new_poll_size = "
+                        SIZE_T_FORMAT ", ts->active_clients = "
+                        SIZE_T_FORMAT "\n", new_poll_size, ts->active_clients));
+            THROW(INTERNAL_ERROR);
+        }
+        
         /* can we free the slot? */
-        if (slot_id == ts->poll_size - 1) {
-            LIXA_TRACE(("server_manager_free_slot: releasing slot_id = "
-                        SIZE_T_FORMAT "\n", slot_id));
+        if (new_poll_size != ts->poll_size) {
+            LIXA_TRACE(("server_manager_free_slots: old poll_size = "
+                        SIZE_T_FORMAT ", new poll_size = "
+                        SIZE_T_FORMAT "\n", ts->poll_size, new_poll_size));
             if (NULL == (ts->poll_array = realloc(
                              ts->poll_array,
-                             --ts->poll_size * sizeof(struct pollfd))))
+                             new_poll_size * sizeof(struct pollfd))))
                 THROW(REALLOC_ERROR1);
             if (NULL == (ts->client_array = realloc(
                              ts->client_array,
-                             ts->poll_size * sizeof(
+                             new_poll_size * sizeof(
                                  struct server_client_status_s))))
                 THROW(REALLOC_ERROR2);
+            ts->poll_size = new_poll_size;
         }
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
             case REALLOC_ERROR1:
             case REALLOC_ERROR2:
                 ret_cod = LIXA_RC_REALLOC_ERROR;
@@ -377,7 +407,34 @@ int server_manager_free_slot(struct thread_status_s *ts, size_t slot_id)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("server_manager_free_slot/excp=%d/"
+    LIXA_TRACE(("server_manager_free_slots/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
+                            const char *buf, ssize_t read_bytes)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_manager_XML_proc\n"));
+    TRY {
+        LIXA_TRACE(("server_manager_XML_proc: message is %*.*s\n",
+                    read_bytes, read_bytes, buf));
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_manager_XML_proc/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
