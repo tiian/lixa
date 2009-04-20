@@ -53,8 +53,11 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixac_la_LIBADD =
-liblixac_la_SOURCES = liblixac.c
-liblixac_la_OBJECTS = liblixac.lo
+am_liblixac_la_OBJECTS = client_conn.lo
+liblixac_la_OBJECTS = $(am_liblixac_la_OBJECTS)
+liblixac_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(liblixac_la_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -67,8 +70,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = liblixac.c
-DIST_SOURCES = liblixac.c
+SOURCES = $(liblixac_la_SOURCES)
+DIST_SOURCES = $(liblixac_la_SOURCES)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -113,6 +116,9 @@ LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+LT_AGE = @LT_AGE@
+LT_CURRENT = @LT_CURRENT@
+LT_REVISION = @LT_REVISION@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 OBJEXT = @OBJEXT@
@@ -182,8 +188,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 include_HEADERS = client_conn.h
 lib_LTLIBRARIES = liblixac.la
-liblixac_la_SOURCE = client_conn.c
+liblixac_la_SOURCES = client_conn.c
 AM_CFLAGS = -Wall
+liblixac_la_LDFLAGS = -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
 all: all-am
 
 .SUFFIXES:
@@ -245,7 +252,7 @@ clean-libLTLIBRARIES:
 	  rm -f "$${dir}/so_locations"; \
 	done
 liblixac.la: $(liblixac_la_OBJECTS) $(liblixac_la_DEPENDENCIES) 
-	$(LINK) -rpath $(libdir) $(liblixac_la_OBJECTS) $(liblixac_la_LIBADD) $(LIBS)
+	$(liblixac_la_LINK) -rpath $(libdir) $(liblixac_la_OBJECTS) $(liblixac_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -253,7 +260,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client_conn.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
