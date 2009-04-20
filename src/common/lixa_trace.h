@@ -80,9 +80,14 @@
 #define LIXA_TRACE_MOD_SERVER_STATUS      0x00000010
 
 /**
- * trace module for server status functions
+ * trace module for server messages functions
  */
 #define LIXA_TRACE_MOD_SERVER_MESSAGES    0x00000020
+
+/**
+ * trace module for client connection functions
+ */
+#define LIXA_TRACE_MOD_CLIENT_CONN        0X00001000
 
 
 
