@@ -43,6 +43,8 @@
 # include <stdio.h>
 #endif /* HAVE_STDIO_H */
 
+
+
 #include <lixa_defines.h>
 
 
@@ -87,7 +89,12 @@
 /**
  * trace module for client connection functions
  */
-#define LIXA_TRACE_MOD_CLIENT_CONN        0X00001000
+#define LIXA_TRACE_MOD_CLIENT_CONN        0x00001000
+
+/**
+ * trace module for client connection functions
+ */
+#define LIXA_TRACE_MOD_COMMON_CONFIG      0x01000000
 
 
 

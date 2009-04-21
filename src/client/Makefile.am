@@ -1,5 +1,9 @@
-include_HEADERS = client_conn.h
-lib_LTLIBRARIES = liblixac.la
+include_HEADERS = client_conn.h tx.h
+lib_LTLIBRARIES = liblixac.la liblixacmt.la
 liblixac_la_SOURCES = client_conn.c
+liblixacmt_la_SOURCES = client_conn.c
+AM_CPPFLAGS = -I$(srcdir)/../common
 AM_CFLAGS = -Wall
+AM_LDFLAGS = -lxml2
 liblixac_la_LDFLAGS = -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
+liblixacmt_la_LDFLAGS = -lpthread -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@

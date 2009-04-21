@@ -30,12 +30,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef CLIENT_CONN_H
-#define CLIENT_CONN_H
+#ifndef LIXA_CONFIG_H
+#define LIXA_CONFIG_H
 
 
 
 #include <config.h>
+
+
+
+#ifdef HAVE_LIBXML_TREE_H
+# include <libxml/tree.h>
+#endif
+#ifdef HAVE_LIBXML_PARSER_H
+# include <libxml/parser.h>
+#endif
 
 
 
@@ -46,7 +55,61 @@
 #else
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_CLIENT_CONN
+#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_COMMON_CONFIG
+
+
+
+/**
+ * This is the path of the default server config file to search for (system
+ * configuration)
+ */
+extern const char *LIXA_SERVER_CONFIG_DEFAULT_FILE;
+
+/**
+ * This is the path of the default client config file to search for (system
+ * configuration)
+ */
+extern const char *LIXA_CLIENT_CONFIG_DEFAULT_FILE;
+
+/**
+ * Label used to specify "listener" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_LISTENER;
+
+/**
+ * Label used to specify "server" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_SERVER;
+
+/**
+ * Label used to specify "domain" property
+ */
+extern const xmlChar *LIXA_XML_CONFIG_DOMAIN_PROPERTY;
+
+/**
+ * Label used to specify "address" property
+ */
+extern const xmlChar *LIXA_XML_CONFIG_ADDRESS_PROPERTY;
+
+/**
+ * Label used to specify "port" property
+ */
+extern const xmlChar *LIXA_XML_CONFIG_PORT_PROPERTY;
+
+/**
+ * Label used to specify "AF_INET" value for "domain" property
+ */
+extern const xmlChar *LIXA_XML_CONFIG_DOMAIN_AF_INET_VALUE;
+
+/**
+ * Label used to specify "manager" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_MANAGER;
+
+/**
+ * Label used to specify "status_file" property in "manager" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_MANAGER_STATUS;
 
 
 
@@ -54,14 +117,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-
-
-    /**
-     * Client library initialization internal stuff
-     * @return a standardized return code
-     */
-    int client_init(void);
-    
 
 
 #ifdef __cplusplus
@@ -79,4 +134,4 @@ extern "C" {
 
 
 
-#endif /* CLIENT_CONN_H */
+#endif /* LIXA_CONFIG_H */
