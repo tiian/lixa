@@ -3510,7 +3510,7 @@ fi
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/common/Makefile src/client/Makefile src/server/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/common/Makefile src/client/Makefile src/server/Makefile src/sample/Makefile"
 
 
 # LT Version numbers, remember to change them just *before* a release.
@@ -22161,6 +22161,7 @@ do
     "src/common/Makefile") CONFIG_FILES="$CONFIG_FILES src/common/Makefile" ;;
     "src/client/Makefile") CONFIG_FILES="$CONFIG_FILES src/client/Makefile" ;;
     "src/server/Makefile") CONFIG_FILES="$CONFIG_FILES src/server/Makefile" ;;
+    "src/sample/Makefile") CONFIG_FILES="$CONFIG_FILES src/sample/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

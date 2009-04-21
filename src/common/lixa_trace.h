@@ -92,6 +92,11 @@
 #define LIXA_TRACE_MOD_CLIENT_CONN        0x00001000
 
 /**
+ * trace module for client TX standard functions
+ */
+#define LIXA_TRACE_MOD_CLIENT_TX          0x00002000
+
+/**
  * trace module for client connection functions
  */
 #define LIXA_TRACE_MOD_COMMON_CONFIG      0x01000000

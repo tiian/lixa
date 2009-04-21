@@ -8,6 +8,7 @@ AC_CONFIG_FILES([
   src/common/Makefile
   src/client/Makefile
   src/server/Makefile
+  src/sample/Makefile
 ])
 
 # LT Version numbers, remember to change them just *before* a release.
