@@ -58,6 +58,12 @@ liblixac_la_OBJECTS = $(am_liblixac_la_OBJECTS)
 liblixac_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(liblixac_la_LDFLAGS) $(LDFLAGS) -o $@
+liblixacmt_la_LIBADD =
+am_liblixacmt_la_OBJECTS = client_conn.lo
+liblixacmt_la_OBJECTS = $(am_liblixacmt_la_OBJECTS)
+liblixacmt_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(liblixacmt_la_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -70,8 +76,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(liblixac_la_SOURCES)
-DIST_SOURCES = $(liblixac_la_SOURCES)
+SOURCES = $(liblixac_la_SOURCES) $(liblixacmt_la_SOURCES)
+DIST_SOURCES = $(liblixac_la_SOURCES) $(liblixacmt_la_SOURCES)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -186,11 +192,15 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-include_HEADERS = client_conn.h
-lib_LTLIBRARIES = liblixac.la
+include_HEADERS = client_conn.h tx.h
+lib_LTLIBRARIES = liblixac.la liblixacmt.la
 liblixac_la_SOURCES = client_conn.c
+liblixacmt_la_SOURCES = client_conn.c
+AM_CPPFLAGS = -I$(srcdir)/../common
 AM_CFLAGS = -Wall
+AM_LDFLAGS = -lxml2
 liblixac_la_LDFLAGS = -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
+liblixacmt_la_LDFLAGS = -lpthread -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
 all: all-am
 
 .SUFFIXES:
@@ -253,6 +263,8 @@ clean-libLTLIBRARIES:
 	done
 liblixac.la: $(liblixac_la_OBJECTS) $(liblixac_la_DEPENDENCIES) 
 	$(liblixac_la_LINK) -rpath $(libdir) $(liblixac_la_OBJECTS) $(liblixac_la_LIBADD) $(LIBS)
+liblixacmt.la: $(liblixacmt_la_OBJECTS) $(liblixacmt_la_DEPENDENCIES) 
+	$(liblixacmt_la_LINK) -rpath $(libdir) $(liblixacmt_la_OBJECTS) $(liblixacmt_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

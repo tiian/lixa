@@ -47,8 +47,8 @@ LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
 liblixacommon_a_AR = $(AR) $(ARFLAGS)
 liblixacommon_a_LIBADD =
-am_liblixacommon_a_OBJECTS = lixa_errors.$(OBJEXT) \
-	lixa_trace.$(OBJEXT)
+am_liblixacommon_a_OBJECTS = lixa_config.$(OBJEXT) \
+	lixa_errors.$(OBJEXT) lixa_trace.$(OBJEXT)
 liblixacommon_a_OBJECTS = $(am_liblixacommon_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -185,9 +185,9 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-include_HEADERS = lixa_defines.h lixa_errors.h lixa_trace.h
+include_HEADERS = lixa_config.h lixa_defines.h lixa_errors.h lixa_trace.h
 noinst_LIBRARIES = liblixacommon.a
-liblixacommon_a_SOURCES = lixa_errors.c lixa_trace.c
+liblixacommon_a_SOURCES = lixa_config.c lixa_errors.c lixa_trace.c
 AM_CFLAGS = -Wall
 all: all-am
 
@@ -236,6 +236,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_errors.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_trace.Po@am__quote@
 

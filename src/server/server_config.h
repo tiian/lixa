@@ -67,49 +67,6 @@
 
 
 /**
- * This is the path of the default config file to search for (system
- * configuration)
- */
-extern const char *LIXA_SERVER_CONFIG_DEFAULT_FILE;
-
-/**
- * Label used to specify "listener" tag
- */
-extern const xmlChar *LIXA_XML_CONFIG_LISTENER;
-
-/**
- * Label used to specify "domain" property in "listener" tag
- */
-extern const xmlChar *LIXA_XML_CONFIG_LISTENER_DOMAIN;
-
-/**
- * Label used to specify "address" property in "listener" tag
- */
-extern const xmlChar *LIXA_XML_CONFIG_LISTENER_ADDRESS;
-
-/**
- * Label used to specify "port" property in "listener" tag
- */
-extern const xmlChar *LIXA_XML_CONFIG_LISTENER_PORT;
-
-/**
- * Label used to specify "AF_INET" value for "domain" property in "listener" tag
- */
-extern const xmlChar *LIXA_XML_CONFIG_LISTENER_DOMAIN_AF_INET;
-
-/**
- * Label used to specify "manager" tag
- */
-extern const xmlChar *LIXA_XML_CONFIG_MANAGER;
-
-/**
- * Label used to specify "status_file" property in "manager" tag
- */
-extern const xmlChar *LIXA_XML_CONFIG_MANAGER_STATUS;
-
-
-
-/**
  * It contains the configuration of a listener
  */
 struct listener_config_s {

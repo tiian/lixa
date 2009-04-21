@@ -15,7 +15,7 @@
  *    this software without specific prior written permission.
  *
  * Alternatively, this software may be distributed under the terms of the
- * GNU General Public License ("GPL") version 2 as published by the Free 
+ * GNU General Public License ("GPL") version 2 as published by the Free
  * Software Foundation.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -30,53 +30,38 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef CLIENT_CONN_H
-#define CLIENT_CONN_H
-
-
-
 #include <config.h>
 
 
 
-/* save old LIXA_TRACE_MODULE and set a new value */
+#ifdef HAVE_LIBXML_TREE_H
+# include <libxml/tree.h>
+#endif
+#ifdef HAVE_LIBXML_PARSER_H
+# include <libxml/parser.h>
+#endif
+
+
+
+/* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
 # undef LIXA_TRACE_MODULE
-#else
-# undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_CLIENT_CONN
+#define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_COMMON_CONFIG
 
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+
+const char *LIXA_CLIENT_CONFIG_DEFAULT_FILE = "/etc/lixac_conf.xml";
+const char *LIXA_SERVER_CONFIG_DEFAULT_FILE = "/etc/lixad_conf.xml";
+
+const xmlChar *LIXA_XML_CONFIG_LISTENER = (xmlChar *)"listener";
+const xmlChar *LIXA_XML_CONFIG_SERVER = (xmlChar *)"server";
+const xmlChar *LIXA_XML_CONFIG_DOMAIN_PROPERTY = (xmlChar *)"domain";
+const xmlChar *LIXA_XML_CONFIG_ADDRESS_PROPERTY = (xmlChar *)"address";
+const xmlChar *LIXA_XML_CONFIG_PORT_PROPERTY = (xmlChar *)"port";
+const xmlChar *LIXA_XML_CONFIG_DOMAIN_AF_INET_VALUE = (xmlChar *)"AF_INET";
+const xmlChar *LIXA_XML_CONFIG_MANAGER = (xmlChar *)"manager";
+const xmlChar *LIXA_XML_CONFIG_MANAGER_STATUS = (xmlChar *)"status_file";
 
 
-
-    /**
-     * Client library initialization internal stuff
-     * @return a standardized return code
-     */
-    int client_init(void);
-    
-
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-
-
-/* restore old value of LIXA_TRACE_MODULE */
-#ifdef LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE_SAVE
-#endif /* LIXA_TRACE_MODULE_SAVE */
-
-
-
-#endif /* CLIENT_CONN_H */

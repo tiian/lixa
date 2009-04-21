@@ -63,6 +63,7 @@
 
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_config.h>
 #include <server_config.h>
 
 
@@ -72,18 +73,6 @@
 # undef LIXA_TRACE_MODULE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_SERVER_CONFIG
-
-
-
-const char *LIXA_SERVER_CONFIG_DEFAULT_FILE = "/etc/lixad_conf.xml";
-
-const xmlChar *LIXA_XML_CONFIG_LISTENER = (xmlChar *)"listener";
-const xmlChar *LIXA_XML_CONFIG_LISTENER_DOMAIN = (xmlChar *)"domain";
-const xmlChar *LIXA_XML_CONFIG_LISTENER_ADDRESS = (xmlChar *)"address";
-const xmlChar *LIXA_XML_CONFIG_LISTENER_PORT = (xmlChar *)"port";
-const xmlChar *LIXA_XML_CONFIG_LISTENER_DOMAIN_AF_INET = (xmlChar *)"AF_INET";
-const xmlChar *LIXA_XML_CONFIG_MANAGER = (xmlChar *)"manager";
-const xmlChar *LIXA_XML_CONFIG_MANAGER_STATUS = (xmlChar *)"status_file";
 
 
 
@@ -285,9 +274,9 @@ int parse_config_listener(struct server_config_s *sc,
 
         /* look/check/set listener domain */
         if (NULL == (attr = xmlGetProp(a_node,
-                                       LIXA_XML_CONFIG_LISTENER_DOMAIN)))
+                                       LIXA_XML_CONFIG_DOMAIN_PROPERTY)))
             THROW(DOMAIN_NOT_AVAILABLE_ERROR);
-        if (!xmlStrcmp(attr, LIXA_XML_CONFIG_LISTENER_DOMAIN_AF_INET)) {
+        if (!xmlStrcmp(attr, LIXA_XML_CONFIG_DOMAIN_AF_INET_VALUE)) {
             sc->listeners.array[i].domain = AF_INET;
         } else {
             LIXA_TRACE(("parse_config_listener: socket domain '%s' is not "
@@ -298,10 +287,10 @@ int parse_config_listener(struct server_config_s *sc,
         attr = NULL;
         
         if (NULL == (sc->listeners.array[i].address = (char *)xmlGetProp(
-                         a_node, LIXA_XML_CONFIG_LISTENER_ADDRESS)))
+                         a_node, LIXA_XML_CONFIG_ADDRESS_PROPERTY)))
             THROW(ADDRESS_NOT_AVAILABLE_ERROR);
         if (NULL == (attr = xmlGetProp(a_node,
-                                       LIXA_XML_CONFIG_LISTENER_PORT))) {
+                                       LIXA_XML_CONFIG_PORT_PROPERTY))) {
             THROW(PORT_NOT_AVAILABLE_ERROR);
         } else {
             sc->listeners.array[i].port = (in_port_t)strtoul(
@@ -313,11 +302,11 @@ int parse_config_listener(struct server_config_s *sc,
         LIXA_TRACE(("parse_config_listener: %s %d, %s = %d, "
                     "%s = '%s', %s = " IN_PORT_T_FORMAT  "\n",
                     (char *)LIXA_XML_CONFIG_LISTENER, i,
-                    (char *)LIXA_XML_CONFIG_LISTENER_DOMAIN,
+                    (char *)LIXA_XML_CONFIG_DOMAIN_PROPERTY,
                     sc->listeners.array[i].domain,
-                    (char *)LIXA_XML_CONFIG_LISTENER_ADDRESS,
+                    (char *)LIXA_XML_CONFIG_ADDRESS_PROPERTY,
                     sc->listeners.array[i].address,
-                    (char *)LIXA_XML_CONFIG_LISTENER_PORT,
+                    (char *)LIXA_XML_CONFIG_PORT_PROPERTY,
                     sc->listeners.array[i].port));
         THROW(NONE);
     } CATCH {

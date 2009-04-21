@@ -34,8 +34,50 @@
 
 
 
+#ifdef HAVE_LIBXML_TREE_H
+# include <libxml/tree.h>
+#endif
+#ifdef HAVE_LIBXML_PARSER_H
+# include <libxml/parser.h>
+#endif
+
+
+
+#include <tx.h>
+#include <lixa_errors.h>
+#include <lixa_config.h>
+#include <lixa_trace.h>
+
+
+
 /* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
 # undef LIXA_TRACE_MODULE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_CONN
+
+
+
+int client_init(void)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("client_init\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
