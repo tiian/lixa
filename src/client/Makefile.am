@@ -1,7 +1,7 @@
-include_HEADERS = client_conn.h tx.h
+include_HEADERS = client_conn.h client_status.h tx.h
 lib_LTLIBRARIES = liblixac.la liblixacmt.la
-liblixac_la_SOURCES = client_conn.c tx.c
-liblixacmt_la_SOURCES = client_conn.c tx.c
+liblixac_la_SOURCES = client_conn.c client_status.c tx.c
+liblixacmt_la_SOURCES = client_conn.c client_status.c tx.c
 AM_CPPFLAGS = -I$(srcdir)/../common
 AM_CFLAGS = -Wall
 AM_LDFLAGS = -lxml2

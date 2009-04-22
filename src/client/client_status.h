@@ -30,12 +30,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef CLIENT_CONN_H
-#define CLIENT_CONN_H
+#ifndef CLIENT_STATUS_H
+#define CLIENT_STATUS_H
 
 
 
 #include <config.h>
+
+
+
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
+
+
+
+#include <lixa_trace.h>
 
 
 
@@ -46,15 +56,38 @@
 #else
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_CLIENT_CONN
+#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_CLIENT_STATUS
 
 
 
 /**
- * Name of the environment variable must be used to specify the profile
-@@@
+ * It's contain the status of a thread connected to a lixa transaction
+ * manager
  */
-#define LIXA_PROFILE_ENV_VAR "LIXA_PROFILE"
+struct client_status_s {
+    int foo;
+};
+
+
+
+/**
+ * It's used to store the status of all the thread connected to a
+ * lixa transaction manager
+ */
+struct client_status_array_s {
+    /**
+     * This mutex is used to serialize update access to the array
+     */
+    pthread_mutex_t    mutex;
+    /**
+     * Number of elements
+     */
+    int                n;
+    /**
+     * Elements
+     */
+    struct client_status_s *array;
+};
 
 
 
@@ -62,14 +95,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-
-
-    /**
-     * Client library initialization internal stuff
-     * @return a standardized return code
-     */
-    int client_init(void);
-    
 
 
 #ifdef __cplusplus
@@ -87,4 +112,4 @@ extern "C" {
 
 
 
-#endif /* CLIENT_CONN_H */
+#endif /* CLIENT_STATUS_H */

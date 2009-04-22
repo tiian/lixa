@@ -48,22 +48,28 @@
 
 
 
-extern int tx_open(void)
+int tx_open(void)
 {
-    enum Exception { NONE } excp;
+    enum Exception { CLIENT_INIT_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-
+    
     LIXA_TRACE(("tx_open\n"));
     TRY {
+        if (LIXA_RC_OK != (ret_cod = client_init()))
+            THROW(CLIENT_INIT_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_INIT_ERROR:
+                ret_cod = TX_ERROR;
+                break;
             case NONE:
-                ret_cod = LIXA_RC_OK;
+                ret_cod = TX_OK;
                 break;
             default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                ret_cod = TX_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("tx_open/excp=%d/"
