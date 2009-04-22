@@ -53,13 +53,13 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixac_la_DEPENDENCIES = ../common/liblixab.la
-am_liblixac_la_OBJECTS = client_conn.lo tx.lo
+am_liblixac_la_OBJECTS = client_conn.lo client_status.lo tx.lo
 liblixac_la_OBJECTS = $(am_liblixac_la_OBJECTS)
 liblixac_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(liblixac_la_LDFLAGS) $(LDFLAGS) -o $@
 liblixacmt_la_DEPENDENCIES = ../common/liblixabmt.la
-am_liblixacmt_la_OBJECTS = client_conn.lo tx.lo
+am_liblixacmt_la_OBJECTS = client_conn.lo client_status.lo tx.lo
 liblixacmt_la_OBJECTS = $(am_liblixacmt_la_OBJECTS)
 liblixacmt_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -195,10 +195,10 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-include_HEADERS = client_conn.h tx.h
+include_HEADERS = client_conn.h client_status.h tx.h
 lib_LTLIBRARIES = liblixac.la liblixacmt.la
-liblixac_la_SOURCES = client_conn.c tx.c
-liblixacmt_la_SOURCES = client_conn.c tx.c
+liblixac_la_SOURCES = client_conn.c client_status.c tx.c
+liblixacmt_la_SOURCES = client_conn.c client_status.c tx.c
 AM_CPPFLAGS = -I$(srcdir)/../common
 AM_CFLAGS = -Wall
 AM_LDFLAGS = -lxml2
@@ -278,6 +278,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client_conn.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client_status.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tx.Plo@am__quote@
 
 .c.o:

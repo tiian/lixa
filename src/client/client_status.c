@@ -15,7 +15,7 @@
  *    this software without specific prior written permission.
  *
  * Alternatively, this software may be distributed under the terms of the
- * GNU General Public License ("GPL") version 2 as published by the Free 
+ * GNU General Public License ("GPL") version 2 as published by the Free
  * Software Foundation.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -30,61 +30,39 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef CLIENT_CONN_H
-#define CLIENT_CONN_H
-
-
-
 #include <config.h>
 
 
 
-/* save old LIXA_TRACE_MODULE and set a new value */
+#include <client_status.h>
+
+
+
+/* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
 # undef LIXA_TRACE_MODULE
-#else
-# undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_CLIENT_CONN
+#define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_STATUS
+
+
+
+struct client_status_array_s csa;
 
 
 
 /**
- * Name of the environment variable must be used to specify the profile
-@@@
+ * Initialize the library when the library is loaded.
+ * This piece of code is GNU/Linux + GCC specific: it will need some
+ * rework for different platforms (probably it will not compile at all)
  */
-#define LIXA_PROFILE_ENV_VAR "LIXA_PROFILE"
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-
-
-    /**
-     * Client library initialization internal stuff
-     * @return a standardized return code
-     */
-    int client_init(void);
-    
-
-
-#ifdef __cplusplus
+void __attribute__ ((constructor)) lixac_init(void)
+{
+    int ret_cod = 0;
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("lixac_init: initializing sequentialization mutex\n"));
+    ret_cod = pthread_mutex_init(&csa.mutex, NULL);
+    LIXA_TRACE(("lixac_init: mutex initialization return code: %d\n",
+                ret_cod));
+    csa.n = 0;
+    csa.array = NULL;
 }
-#endif /* __cplusplus */
-
-
-
-/* restore old value of LIXA_TRACE_MODULE */
-#ifdef LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE_SAVE
-#endif /* LIXA_TRACE_MODULE_SAVE */
-
-
-
-#endif /* CLIENT_CONN_H */
