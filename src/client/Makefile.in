@@ -52,14 +52,14 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
-liblixac_la_DEPENDENCIES = ../common/liblixacommon.a
+liblixac_la_DEPENDENCIES = ../common/liblixab.la
 am_liblixac_la_OBJECTS = client_conn.lo tx.lo
 liblixac_la_OBJECTS = $(am_liblixac_la_OBJECTS)
 liblixac_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(liblixac_la_LDFLAGS) $(LDFLAGS) -o $@
-liblixacmt_la_DEPENDENCIES = ../common/liblixacommon.a
-am_liblixacmt_la_OBJECTS = client_conn.lo
+liblixacmt_la_DEPENDENCIES = ../common/liblixabmt.la
+am_liblixacmt_la_OBJECTS = client_conn.lo tx.lo
 liblixacmt_la_OBJECTS = $(am_liblixacmt_la_OBJECTS)
 liblixacmt_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -122,9 +122,12 @@ LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-LT_AGE = @LT_AGE@
-LT_CURRENT = @LT_CURRENT@
-LT_REVISION = @LT_REVISION@
+LT_LIXAB_AGE = @LT_LIXAB_AGE@
+LT_LIXAB_CURRENT = @LT_LIXAB_CURRENT@
+LT_LIXAB_REVISION = @LT_LIXAB_REVISION@
+LT_LIXAC_AGE = @LT_LIXAC_AGE@
+LT_LIXAC_CURRENT = @LT_LIXAC_CURRENT@
+LT_LIXAC_REVISION = @LT_LIXAC_REVISION@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 OBJEXT = @OBJEXT@
@@ -195,14 +198,14 @@ top_srcdir = @top_srcdir@
 include_HEADERS = client_conn.h tx.h
 lib_LTLIBRARIES = liblixac.la liblixacmt.la
 liblixac_la_SOURCES = client_conn.c tx.c
-liblixacmt_la_SOURCES = client_conn.c
+liblixacmt_la_SOURCES = client_conn.c tx.c
 AM_CPPFLAGS = -I$(srcdir)/../common
 AM_CFLAGS = -Wall
 AM_LDFLAGS = -lxml2
-liblixac_la_LIBADD = ../common/liblixacommon.a
-liblixacmt_la_LIBADD = ../common/liblixacommon.a
-liblixac_la_LDFLAGS = -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
-liblixacmt_la_LDFLAGS = -lpthread -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
+liblixac_la_LIBADD = ../common/liblixab.la
+liblixacmt_la_LIBADD = ../common/liblixabmt.la
+liblixac_la_LDFLAGS = -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
+liblixacmt_la_LDFLAGS = -lpthread -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
 all: all-am
 
 .SUFFIXES:

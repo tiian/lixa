@@ -15,9 +15,15 @@ AC_CONFIG_FILES([
 #   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)
 #   (Interfaces added:      CURRENT++, AGE++, REVISION=0)
 #   (No interfaces changed:                   REVISION++)
-LT_CURRENT=0
-LT_AGE=0
-LT_REVISION=0
+#
+# liblixac and liblixacmt libraries version
+LT_LIXAC_CURRENT=0
+LT_LIXAC_AGE=0
+LT_LIXAC_REVISION=0
+# liblixab and liblixbcmt libraries version
+LT_LIXAB_CURRENT=0
+LT_LIXAB_AGE=0
+LT_LIXAB_REVISION=0
 
 AC_PRESERVE_HELP_ORDER
 AC_ARG_ENABLE([debug],
@@ -54,9 +60,12 @@ AC_CHECK_TYPES([in_port_t], [], [], [[#include <netinet/in.h>]])
 
 AC_CHECK_FUNCS(vfprintf)
 
-AC_SUBST(LT_CURRENT)
-AC_SUBST(LT_REVISION)
-AC_SUBST(LT_AGE)
+AC_SUBST(LT_LIXAC_CURRENT)
+AC_SUBST(LT_LIXAC_REVISION)
+AC_SUBST(LT_LIXAC_AGE)
+AC_SUBST(LT_LIXAB_CURRENT)
+AC_SUBST(LT_LIXAB_REVISION)
+AC_SUBST(LT_LIXAB_AGE)
 
 AC_OUTPUT
 
