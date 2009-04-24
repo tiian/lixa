@@ -55,8 +55,8 @@
 
 /**
  * Object not found
-define LIXA_RC_OBJ_NOT_FOUND                   +1
  */
+#define LIXA_RC_OBJ_NOT_FOUND                   +1
 /**
  * An operation can not been performed but can safely bypassed has been
  * requested: the program can go on as no operation was requested
@@ -108,8 +108,8 @@ define LIXA_RC_OBJ_NOT_INITIALIZED             -8
  */
 /**
  * A corrupted object has been passed to a function
-define LIXA_RC_OBJ_CORRUPTED                   -9
  */
+#define LIXA_RC_OBJ_CORRUPTED                   -9
 /**
  * A specified option is not valid for method and/or object status
 define LIXA_RC_INVALID_OPTION                 -10
@@ -252,20 +252,32 @@ define LIXA_RC_UNLINK_ERROR                  -129
 #define LIXA_RC_PTHREAD_CREATE_ERROR           -140
 /**
  * "pthread_mutex_lock" function error
+define LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR       -141
  */
-#define LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR       -141
 /**
  * "pthread_mutex_unlock" function error
+define LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR     -142
  */
-#define LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR     -142
+/**
+ * "pthread_rwlock_wrlock" function error
+ */
+#define LIXA_RC_PTHREAD_RWLOCK_WRLOCK_ERROR     -143
+/**
+ * "pthread_rwlock_rlock" function error
+ */
+#define LIXA_RC_PTHREAD_RWLOCK_RDLOCK_ERROR      -144
+/**
+ * "pthread_rwlock_unlock" function error
+ */
+#define LIXA_RC_PTHREAD_RWLOCK_UNLOCK_ERROR     -145
 /**
  * "xmlReadFile" function error
  */
-#define LIXA_RC_XML_READ_FILE_ERROR            -200
+#define LIXA_RC_XML_READ_FILE_ERROR             -200
 /**
  * "xmlDocGetRootElement" function error
  */
-#define LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR -201
+#define LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR  -201
 
 
 /***********************************************************************

@@ -65,6 +65,14 @@
  * manager
  */
 struct client_status_s {
+    /**
+     * This boolean flag is used to verify if the instantiated object is active
+     * or not (garbage can be removed)
+     */
+    int   active;
+    /**
+     * Transactional profile associated to the thread
+     */
     char *profile;
 };
 
@@ -103,7 +111,7 @@ struct client_status_set_s {
     /**
      * This mutex is used to serialize update access to the array
      */
-    pthread_mutex_t               mutex;
+    pthread_rwlock_t              rwlock;
     /**
      * Number of elements allocated in index data array
      */
@@ -113,9 +121,13 @@ struct client_status_set_s {
      */
     struct client_status_index_s *index_data;
     /**
-     * Number of data elements
+     * Number of allocated data elements
      */
     int                           status_size;
+    /**
+     * Number of used data elements
+     */
+    int                           status_used;
     /**
      * Elements
      */
@@ -141,14 +153,32 @@ extern "C" {
 
 
     /**
-     * Create a new "object" of type client status
+     * Initialize a new "object" of type client status
      * @param cs OUT object reference
-     * @return a standardized return code
      */
-    int client_status_create(client_status_t *cs);
+    void client_status_init(client_status_t *cs);
 
     
 
+    /**
+     * Is the client status an active slot?
+     * @param cs ON object reference
+     * @return a boolean condition
+     */
+    static inline int client_status_is_active(const client_status_t *cs) {
+        return cs->active; }
+
+
+    
+    /**
+     * Set active status for slot
+     * @param cs ON object reference
+     */
+    static inline void client_status_active(client_status_t *cs) {
+        cs->active = TRUE; }
+
+
+    
     /**
      * Initialize the client status object; this object should be istantiated
      * only once, should be static, initialized at library load, protected
@@ -172,20 +202,20 @@ extern "C" {
     /**
      * Add a new client status to the set
      * @param css IN/OUT object reference
+     * @param status_pos OUT the position of the slot added and reserved
      * @return a standardized return code
      */
-    int client_status_set_add(client_status_set_t *css);
+    int client_status_set_add(client_status_set_t *css, int *status_pos);
 
 
     
     /**
      * Search the position of the current thread inside the index
      * @param css IN object reference
-     * @return the position inside status data or -1 if the thread is not yet
-     *         registered (not found) or -2 if there is an error in the
-     *         set status (incongruence)
+     * @param pos PUT the position inside status
+     * @return a standardized return code
      */
-    int client_status_set_search(client_status_set_t *css);
+    int client_status_set_search(client_status_set_t *css, int *pos);
 
 
     
