@@ -40,6 +40,9 @@
 #ifdef HAVE_LIBXML_PARSER_H
 # include <libxml/parser.h>
 #endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 
 
 
@@ -47,6 +50,8 @@
 #include <lixa_errors.h>
 #include <lixa_config.h>
 #include <lixa_trace.h>
+#include <client_conn.h>
+#include <client_status.h>
 
 
 
@@ -60,15 +65,26 @@
 
 int client_init(void)
 {
-    enum Exception { NONE } excp;
+    enum Exception { REGISTER_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("client_init\n"));
     TRY {
+        char *profile = NULL;
+
+        /* register this thread in library status */
+        if (LIXA_RC_OK != (ret_cod = client_status_set_register(&css)))
+            THROW(REGISTER_ERROR);
         
+        if (NULL == (profile = getenv(LIXA_PROFILE_ENV_VAR)))
+            ;
+                
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case REGISTER_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
