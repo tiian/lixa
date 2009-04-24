@@ -56,7 +56,7 @@
 #else
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_CLIENT_STATUS
+#define LIXA_TRACE_MODULE       LIXA_TRACE_MOD_CLIENT_STATUS
 
 
 
@@ -65,7 +65,32 @@
  * manager
  */
 struct client_status_s {
-    int foo;
+    char *profile;
+};
+
+typedef struct client_status_s client_status_t;
+
+
+
+#define KEY_NOT_FOUND -1
+#define KEY_ERROR     -2
+
+
+
+/**
+ * This structure is used to create an index (key,value) couples necessary
+ * to efficiently manage the client status set; it's a private structure
+ * not exposed to the world
+ */
+struct client_status_index_s {
+    /**
+     * thread_id returned by pthread_self is the search key
+     */
+    pthread_t          key;
+    /**
+     * position inside array is the value associated to the key
+     */
+    int                value;
 };
 
 
@@ -74,20 +99,38 @@ struct client_status_s {
  * It's used to store the status of all the thread connected to a
  * lixa transaction manager
  */
-struct client_status_array_s {
+struct client_status_set_s {
     /**
      * This mutex is used to serialize update access to the array
      */
-    pthread_mutex_t    mutex;
+    pthread_mutex_t               mutex;
     /**
-     * Number of elements
+     * Number of elements allocated in index data array
      */
-    int                n;
+    int                           index_size;
+    /**
+     * Index elements
+     */
+    struct client_status_index_s *index_data;
+    /**
+     * Number of data elements
+     */
+    int                           status_size;
     /**
      * Elements
      */
-    struct client_status_s *array;
+    client_status_t              *status_data;
 };
+
+typedef struct client_status_set_s client_status_set_t;
+
+
+
+/**
+ * This is a static structure used by all the threads of the program
+ * linking the library; the structure i protected by a mutex to avoid
+ * concurrency issues */
+extern client_status_set_t css;
 
 
 
@@ -97,6 +140,55 @@ extern "C" {
 
 
 
+    /**
+     * Create a new "object" of type client status
+     * @param cs OUT object reference
+     * @return a standardized return code
+     */
+    int client_status_create(client_status_t *cs);
+
+    
+
+    /**
+     * Initialize the client status object; this object should be istantiated
+     * only once, should be static, initialized at library load, protected
+     * against race conditions by a mutex
+     * @param css OUT object reference
+     * @return a standardized return code
+     */
+    int client_status_set_init(client_status_set_t *css);
+
+
+
+    /**
+     * Register the current thread in the status set
+     * @param css IN/OUT object reference
+     * @return a standardized return code
+     */
+    int client_status_set_register(client_status_set_t *css);
+
+
+
+    /**
+     * Add a new client status to the set
+     * @param css IN/OUT object reference
+     * @return a standardized return code
+     */
+    int client_status_set_add(client_status_set_t *css);
+
+
+    
+    /**
+     * Search the position of the current thread inside the index
+     * @param css IN object reference
+     * @return the position inside status data or -1 if the thread is not yet
+     *         registered (not found) or -2 if there is an error in the
+     *         set status (incongruence)
+     */
+    int client_status_set_search(client_status_set_t *css);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

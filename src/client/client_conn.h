@@ -52,7 +52,6 @@
 
 /**
  * Name of the environment variable must be used to specify the profile
-@@@
  */
 #define LIXA_PROFILE_ENV_VAR "LIXA_PROFILE"
 
@@ -69,8 +68,8 @@ extern "C" {
      * @return a standardized return code
      */
     int client_init(void);
-    
 
+    
 
 #ifdef __cplusplus
 }

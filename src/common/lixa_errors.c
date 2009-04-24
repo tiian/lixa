@@ -148,10 +148,17 @@ const char *lixa_strerror(int ret_cod)
             case LIXA_RC_ACCEPT_ERROR:
                 return "ERROR: 'accept' function returned an error condition";
             case LIXA_RC_SHUTDOWN_ERROR:
-                return "ERROR: 'shutdown' function returned an error condition";
+                return "ERROR: 'shutdown' function returned an error "
+                    "condition";
             case LIXA_RC_PTHREAD_CREATE_ERROR:
                 return "ERROR: 'pthread_create' function returned an error "
                     "condition";
+            case LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR:
+                return "ERROR: 'pthread_mutex_lock' function returned an "
+                    "error condition";
+            case LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR:
+                return "ERROR: 'pthread_mutex_unlock' function returned an "
+                    "error condition";
             case LIXA_RC_XML_READ_FILE_ERROR:
                 return "ERROR: 'xmlReadFile' function returned an error "
                     "condition";
