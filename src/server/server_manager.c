@@ -94,8 +94,8 @@ int server_manager(struct server_config_s *sc,
                 /* it will be fixed by the thread itself */
                 tsa->array[i].tid = 0;
                 if (0 != (ret_cod = pthread_create(
-                              &(tsa->array[i].tid), NULL, server_manager_thread,
-                              tsa->array + i)))
+                              &(tsa->array[i].tid), NULL,
+                              server_manager_thread, tsa->array + i)))
                     THROW(PTHREAD_CREATE_ERROR);
             }
         }

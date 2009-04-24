@@ -41,15 +41,15 @@
 const char *lixa_strerror(int ret_cod)
 {
         switch (ret_cod) {
-            case LIXA_RC_OK:
-                return "OK: no error";
 /*
-            case LIXA_RC_OBJ_NOT_FOUND:
-                return "WARNING: object not found";
             case LIXA_RC_BYPASSED_OPERATION:
                 return "WARNING: operation was not performed because it can "
                         "not be requested";
 */              
+            case LIXA_RC_OBJ_NOT_FOUND:
+                return "WARNING: object not found";
+            case LIXA_RC_OK:
+                return "OK: no error";
             case LIXA_RC_INTERNAL_ERROR:
                 return "ERROR: internal error / unexpected condition / "
                         "code bug";
@@ -69,8 +69,10 @@ const char *lixa_strerror(int ret_cod)
                 return "ERROR: object is not void";
             case LIXA_RC_OBJ_NOT_INITIALIZED:
                 return "ERROR: object is not initialized";
+                */
             case  LIXA_RC_OBJ_CORRUPTED:
                 return "ERROR: object is corrupted";
+                /*
             case LIXA_RC_INVALID_OPTION:
                 return "ERROR: a specified option is not valid";
             case LIXA_RC_INVALID_STATUS:
@@ -153,11 +155,22 @@ const char *lixa_strerror(int ret_cod)
             case LIXA_RC_PTHREAD_CREATE_ERROR:
                 return "ERROR: 'pthread_create' function returned an error "
                     "condition";
+                /*
             case LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR:
                 return "ERROR: 'pthread_mutex_lock' function returned an "
                     "error condition";
             case LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR:
                 return "ERROR: 'pthread_mutex_unlock' function returned an "
+                    "error condition";
+                */
+            case LIXA_RC_PTHREAD_RWLOCK_WRLOCK_ERROR:
+                return "ERROR: 'pthread_rwlock_wrlock' function returned an "
+                    "error condition";
+            case LIXA_RC_PTHREAD_RWLOCK_RDLOCK_ERROR:
+                return "ERROR: 'pthread_rwlock_rdlock' function returned an "
+                    "error condition";
+            case LIXA_RC_PTHREAD_RWLOCK_UNLOCK_ERROR:
+                return "ERROR: 'pthread_rwlock_unlock' function returned an "
                     "error condition";
             case LIXA_RC_XML_READ_FILE_ERROR:
                 return "ERROR: 'xmlReadFile' function returned an error "

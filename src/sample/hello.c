@@ -34,11 +34,19 @@
 #include <stdio.h>
 #include <tx.h>
 
+#include <pthread.h>
 
 
 int main(int argc, char *argv[])
 {
+    pthread_t foo;
     printf("Hello world linked lixac library\n");
-    tx_open();
+
+    pthread_create(&foo, NULL, tx_open, NULL);
+    pthread_create(&foo, NULL, tx_open, NULL);
+    pthread_create(&foo, NULL, tx_open, NULL);
+    pthread_create(&foo, NULL, tx_open, NULL);
+    pthread_create(&foo, NULL, tx_open, NULL);
+    sleep(5);
     return 0;
 }
