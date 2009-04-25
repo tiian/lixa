@@ -81,6 +81,7 @@ int server_config(struct server_config_s *sc,
                   const char *config_filename)
 {
     enum Exception { OPEN_CONFIG_ERROR
+                     , CLOSE_ERROR
                      , REALLOC_ERROR
                      , PIPE_ERROR
                      , XML_READ_FILE_ERROR
@@ -111,7 +112,9 @@ int server_config(struct server_config_s *sc,
                 file_name = LIXA_SERVER_CONFIG_DEFAULT_FILE;
             }
         }
-
+        if (-1 == (ret_cod = close(fd)))
+            THROW(CLOSE_ERROR);
+        
         /* initialize the first fifo: it's for the listeners thread; it may
            be it works in a different position, but for the sake of simplicity
            it's better to use first thread for listeners */
@@ -132,7 +135,7 @@ int server_config(struct server_config_s *sc,
         if (NULL == (root_element = xmlDocGetRootElement(doc)))
             THROW(XML_DOC_GET_ROOT_ELEMENT_ERROR);
 
-        if (LIXA_RC_OK != (ret_cod = parse_config(sc, tpa, root_element)))
+        if (LIXA_RC_OK != (ret_cod = server_parse(sc, tpa, root_element)))
             THROW(PARSE_CONFIG_ERROR);
         
         /* free parsed document */
@@ -151,6 +154,9 @@ int server_config(struct server_config_s *sc,
         switch (excp) {
             case OPEN_CONFIG_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case CLOSE_ERROR:
+                ret_cod = LIXA_RC_CLOSE_ERROR;
                 break;
             case REALLOC_ERROR:
                 ret_cod = LIXA_RC_REALLOC_ERROR;
@@ -190,37 +196,37 @@ int server_config(struct server_config_s *sc,
 
 
 
-int parse_config(struct server_config_s *sc,
+int server_parse(struct server_config_s *sc,
                  struct thread_pipe_array_s *tpa,
                  xmlNode *a_node)
 {
     enum Exception { PARSE_LISTENER_ERROR
                      , PARSE_MANAGER_ERROR
-                     , PARSE_CONFIG_ERROR
+                     , SERVER_PARSE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     xmlNode *cur_node = NULL;
 
-    LIXA_TRACE(("parse_config\n"));
+    LIXA_TRACE(("server_parse\n"));
     TRY {
         for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
             if (cur_node->type == XML_ELEMENT_NODE) {
-                LIXA_TRACE(("parse_config: tag %s\n", cur_node->name));
+                LIXA_TRACE(("server_parse: tag %s\n", cur_node->name));
                 if (!xmlStrcmp(cur_node->name, LIXA_XML_CONFIG_LISTENER)) {
-                    if (LIXA_RC_OK != (ret_cod = parse_config_listener(
+                    if (LIXA_RC_OK != (ret_cod = server_parse_listener(
                                            sc, cur_node)))
                         THROW(PARSE_LISTENER_ERROR);
                 } else if (!xmlStrcmp(cur_node->name,
                                       LIXA_XML_CONFIG_MANAGER)) {
-		  if (LIXA_RC_OK != (ret_cod = parse_config_manager(
+		  if (LIXA_RC_OK != (ret_cod = server_parse_manager(
 								    sc, tpa, cur_node)))
                         THROW(PARSE_MANAGER_ERROR);
                 }
             }
-            if (LIXA_RC_OK != (ret_cod = parse_config(
+            if (LIXA_RC_OK != (ret_cod = server_parse(
                                    sc, tpa, cur_node->children)))
-                THROW(PARSE_CONFIG_ERROR);
+                THROW(SERVER_PARSE_ERROR);
         }        
         
         THROW(NONE);
@@ -228,7 +234,7 @@ int parse_config(struct server_config_s *sc,
         switch (excp) {
             case PARSE_LISTENER_ERROR:
             case PARSE_MANAGER_ERROR:
-            case PARSE_CONFIG_ERROR:
+            case SERVER_PARSE_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -237,14 +243,14 @@ int parse_config(struct server_config_s *sc,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("parse_config/excp=%d/"
+    LIXA_TRACE(("server_parse/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int parse_config_listener(struct server_config_s *sc,
+int server_parse_listener(struct server_config_s *sc,
                           xmlNode *a_node)
 {
     enum Exception { REALLOC_ERROR
@@ -257,7 +263,7 @@ int parse_config_listener(struct server_config_s *sc,
     int i = 0;
     xmlChar *attr = NULL;
     
-    LIXA_TRACE(("parse_config_listener\n"));
+    LIXA_TRACE(("server_parse_listener\n"));
     TRY {
         
         /* realloc array */
@@ -279,7 +285,7 @@ int parse_config_listener(struct server_config_s *sc,
         if (!xmlStrcmp(attr, LIXA_XML_CONFIG_DOMAIN_AF_INET_VALUE)) {
             sc->listeners.array[i].domain = AF_INET;
         } else {
-            LIXA_TRACE(("parse_config_listener: socket domain '%s' is not "
+            LIXA_TRACE(("server_parse_listener: socket domain '%s' is not "
                         "valid\n", (char *)attr));
             THROW(INVALID_DOMAIN_ERROR);
         }
@@ -299,7 +305,7 @@ int parse_config_listener(struct server_config_s *sc,
             attr = NULL;
         }
         
-        LIXA_TRACE(("parse_config_listener: %s %d, %s = %d, "
+        LIXA_TRACE(("server_parse_listener: %s %d, %s = %d, "
                     "%s = '%s', %s = " IN_PORT_T_FORMAT  "\n",
                     (char *)LIXA_XML_CONFIG_LISTENER, i,
                     (char *)LIXA_XML_CONFIG_DOMAIN_PROPERTY,
@@ -315,7 +321,7 @@ int parse_config_listener(struct server_config_s *sc,
                 ret_cod = LIXA_RC_REALLOC_ERROR;
                 break;
             case DOMAIN_NOT_AVAILABLE_ERROR:
-                LIXA_TRACE(("parse_config_listener: unable to find listener "
+                LIXA_TRACE(("server_parse_listener: unable to find listener "
                             "domain for listener %d\n", i));
                 ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;
@@ -323,12 +329,12 @@ int parse_config_listener(struct server_config_s *sc,
                 ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;
             case ADDRESS_NOT_AVAILABLE_ERROR:
-                LIXA_TRACE(("parse_config_listener: unable to find listener "
+                LIXA_TRACE(("server_parse_listener: unable to find listener "
                             "ip_address for listener %d\n", i));
                 ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;
             case PORT_NOT_AVAILABLE_ERROR:
-                LIXA_TRACE(("parse_config_listener: unable to find listener "
+                LIXA_TRACE(("server_parse_listener: unable to find listener "
                             "port for listener %d\n", i));
                 ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;                
@@ -343,14 +349,14 @@ int parse_config_listener(struct server_config_s *sc,
             xmlFree(attr);
         
     } /* TRY-CATCH */
-    LIXA_TRACE(("parse_config_listener/excp=%d/"
+    LIXA_TRACE(("server_parse_listener/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
     
-int parse_config_manager(struct server_config_s *sc,
+int server_parse_manager(struct server_config_s *sc,
                          struct thread_pipe_array_s *tpa,
                          xmlNode *a_node)
 {
@@ -361,7 +367,7 @@ int parse_config_manager(struct server_config_s *sc,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("parse_config_manager\n"));
+    LIXA_TRACE(("server_parse_manager\n"));
     TRY {
         int i = 0, j = 0;
 
@@ -377,7 +383,7 @@ int parse_config_manager(struct server_config_s *sc,
         if (NULL == (sc->managers.array[i].status_file = (char *)xmlGetProp(
                          a_node, LIXA_XML_CONFIG_MANAGER_STATUS)))
             THROW(STATUS_NOT_AVAILABLE_ERROR);
-        LIXA_TRACE(("parse_config_manager: %s %d, %s = %s\n",
+        LIXA_TRACE(("server_parse_manager: %s %d, %s = %s\n",
                     (char *)LIXA_XML_CONFIG_MANAGER, i,
                     (char *)LIXA_XML_CONFIG_MANAGER_STATUS,
                     sc->managers.array[i].status_file));
@@ -393,7 +399,7 @@ int parse_config_manager(struct server_config_s *sc,
         j = tpa->n - 1;
         if (0 != pipe(tpa->array[j].pipefd))
             THROW(PIPE_ERROR);
-        LIXA_TRACE(("parse_config_manager: pipe %d for manager %d is [%d,%d]\n",
+        LIXA_TRACE(("server_parse_manager: pipe %d for manager %d is [%d,%d]\n",
                     j, i, tpa->array[j].pipefd[0], tpa->array[j].pipefd[1]));
         
         THROW(NONE);
@@ -416,7 +422,7 @@ int parse_config_manager(struct server_config_s *sc,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("parse_config_manager/excp=%d/"
+    LIXA_TRACE(("server_parse_manager/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

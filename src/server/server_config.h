@@ -131,7 +131,7 @@ struct server_config_s {
      */
     struct listener_config_array_s      listeners;
     /**
-     * Managers's configuration
+     * Managers' configuration
      */
     struct manager_config_array_s       managers;
 };
@@ -146,12 +146,12 @@ extern "C" {
 
     /**
      * Read and parse server config file
-     * @param config_filename IN a filename PATH must looked at before
-     *                           searching default system config file
-     *                           default = NULL
      * @param sc OUT the object containing the server configuration
      * @param tsa IN/OUT the objects containing the status common to all
      *                   threads
+     * @param config_filename IN a filename PATH must looked at before
+     *                           searching default system config file
+     *                           default = NULL
      * @return a standardized return code
      */
     int server_config(struct server_config_s *sc,
@@ -167,7 +167,7 @@ extern "C" {
      * @param a_node IN the current subtree must be parsed
      * @return a standardized return code
      */
-    int parse_config(struct server_config_s *sc,
+    int server_parse(struct server_config_s *sc,
                      struct thread_pipe_array_s *tpa,
                      xmlNode *a_node);
 
@@ -179,7 +179,7 @@ extern "C" {
      * @param a_node IN listener node
      * @return a standardized return code
      */
-    int parse_config_listener(struct server_config_s *sc,
+    int server_parse_listener(struct server_config_s *sc,
                               xmlNode *a_node);
     
     
@@ -190,9 +190,9 @@ extern "C" {
      * @param a_node IN listener node
      * @return a standardized return code
      */
-    int parse_config_manager(struct server_config_s *sc,
-			     struct thread_pipe_array_s *tpa,
-			     xmlNode *a_node);
+    int server_parse_manager(struct server_config_s *sc,
+                             struct thread_pipe_array_s *tpa,
+                             xmlNode *a_node);
     
     
     

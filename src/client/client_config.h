@@ -39,6 +39,18 @@
 
 
 
+#ifdef HAVE_LIBXML_TREE_H
+# include <libxml/tree.h>
+#endif
+#ifdef HAVE_LIBXML_PARSER_H
+# include <libxml/parser.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -50,12 +62,86 @@
 
 
 
+/**
+ * It contains the configuration of a transaction manager (how to reach and
+ * use it)
+ */
+struct trnmgr_config_s {
+    /**
+     * Socket domain for the socket connection
+     */
+    int domain;
+    /**
+     * Address used to reach the transaction manager
+     */
+    char *address;
+    /**
+     * Port used to reach the transaction manager
+     */
+    in_port_t port;
+    /**
+     * Transactional profile associated to this entry
+     */
+    char *profile;
+};
+
+/**
+ * It contains the configuration of all the transaction managers
+ */
+struct trnmgr_config_array_s {
+    /**
+     * Number of elements
+     */
+    int n;
+    /**
+     * Elements
+     */
+    struct trnmgr_config_s *array;
+};
+
+
+
+/**
+ * It contains the configuration for the client
+ */
+struct client_config_s {
+    /**
+     * Transaction managers' configuration
+     */
+    struct trnmgr_config_s       trnmgrs;
+};
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 
 
+    /**
+     * Read and parse client config file
+     * @param cc OUT the object containing the client configuration
+     * @param config_filename IN a filename PATH must looked at before
+     *                           searching default system config file
+     *                           default = NULL
+     * @return a standardized return code
+     */
+    int client_config(struct client_config_s *cc,
+                      const char *config_filename);
+
+    
+
+    /**
+     * Parse the configuration tree
+     * @param cc OUT server configuration structure
+     * @param a_node IN the current subtree must be parsed
+     * @return a standardized return code
+     */
+    int client_parse(struct client_config_s *cc,
+                     xmlNode *a_node);
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
