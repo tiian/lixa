@@ -31,7 +31,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #ifndef CLIENT_STATUS_H
-#define CLIENT_STATUS_H
+# define CLIENT_STATUS_H
 
 
 
@@ -71,7 +71,8 @@ struct client_status_s {
      */
     int   active;
     /**
-     * Transactional profile associated to the thread
+     * Transactional profile associated to the thread (it must be an heap
+     * allocated variable)
      */
     char *profile;
 };
@@ -107,7 +108,7 @@ struct client_status_index_s {
  * It's used to store the status of all the thread connected to a
  * lixa transaction manager
  */
-struct client_status_set_s {
+struct client_status_coll_s {
     /**
      * This mutex is used to serialize update access to the array
      */
@@ -134,7 +135,7 @@ struct client_status_set_s {
     client_status_t              *status_data;
 };
 
-typedef struct client_status_set_s client_status_set_t;
+typedef struct client_status_coll_s client_status_coll_t;
 
 
 
@@ -142,7 +143,7 @@ typedef struct client_status_set_s client_status_set_t;
  * This is a static structure used by all the threads of the program
  * linking the library; the structure i protected by a mutex to avoid
  * concurrency issues */
-extern client_status_set_t css;
+extern client_status_coll_t csc;
 
 
 
@@ -183,39 +184,39 @@ extern "C" {
      * Initialize the client status object; this object should be istantiated
      * only once, should be static, initialized at library load, protected
      * against race conditions by a mutex
-     * @param css OUT object reference
+     * @param csc OUT object reference
      * @return a standardized return code
      */
-    int client_status_set_init(client_status_set_t *css);
+    int client_status_coll_init(client_status_coll_t *csc);
 
 
 
     /**
      * Register the current thread in the status set
-     * @param css IN/OUT object reference
+     * @param csc IN/OUT object reference
      * @return a standardized return code
      */
-    int client_status_set_register(client_status_set_t *css);
+    int client_status_coll_register(client_status_coll_t *csc);
 
 
 
     /**
      * Add a new client status to the set
-     * @param css IN/OUT object reference
+     * @param csc IN/OUT object reference
      * @param status_pos OUT the position of the slot added and reserved
      * @return a standardized return code
      */
-    int client_status_set_add(client_status_set_t *css, int *status_pos);
+    int client_status_coll_add(client_status_coll_t *csc, int *status_pos);
 
 
     
     /**
      * Search the position of the current thread inside the index
-     * @param css IN object reference
+     * @param csc IN object reference
      * @param pos PUT the position inside status
      * @return a standardized return code
      */
-    int client_status_set_search(client_status_set_t *css, int *pos);
+    int client_status_coll_search(client_status_coll_t *csc, int *pos);
 
 
     

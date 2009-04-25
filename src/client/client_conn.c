@@ -43,6 +43,9 @@
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
 
 
 
@@ -68,18 +71,25 @@ int client_init(void)
     enum Exception { REGISTER_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
+
     LIXA_TRACE(("client_init\n"));
     TRY {
         char *profile = NULL;
 
         /* register this thread in library status */
-        if (LIXA_RC_OK != (ret_cod = client_status_set_register(&css)))
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_register(&csc)))
             THROW(REGISTER_ERROR);
         
-        if (NULL == (profile = getenv(LIXA_PROFILE_ENV_VAR)))
-            ;
-                
+        if (NULL == (profile = getenv(LIXA_PROFILE_ENV_VAR))) {
+            /* use empty string instead of NULL to avoid allocation issues */
+            profile = "";
+            LIXA_TRACE(("client_init: '%s' environment variable not found, "
+                        "using default profile for this client\n",
+                        LIXA_PROFILE_ENV_VAR));
+        }
+        LIXA_TRACE(("client_init: using transactional profile '%s' for "
+                    "subsequent operations\n", profile));
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {

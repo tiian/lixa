@@ -143,6 +143,10 @@ define LIXA_RC_DESTINATION_TOO_SMALL          -16
  */
 #define LIXA_RC_REALLOC_ERROR                 -101
 /**
+ * "strdup" function error
+define LIXA_RC_STRDUP_ERROR                  -102
+ */
+/**
  * "poll" function error
  */
 #define LIXA_RC_POLL_ERROR                   -108

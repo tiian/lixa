@@ -97,9 +97,14 @@
 #define LIXA_TRACE_MOD_CLIENT_CONN        0x00002000
 
 /**
+ * trace module for client config functions
+ */
+#define LIXA_TRACE_MOD_CLIENT_CONFIG      0x00004000
+
+/**
  * trace module for client status functions
  */
-#define LIXA_TRACE_MOD_CLIENT_STATUS      0x00004000
+#define LIXA_TRACE_MOD_CLIENT_STATUS      0x00010000
 
 /**
  * trace module for common functions

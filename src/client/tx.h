@@ -127,10 +127,24 @@ extern "C" {
 
 
 extern int tx_begin(void);
-extern int tx_close(void);
+
+    /**
+     * Close a set of resource managers.
+     * Calling this function you free the resource allocated and locked by
+     * @ref tx_open
+     */
+    extern int tx_close(void);
+    
 extern int tx_commit(void);
 extern int tx_info(TXINFO *);
-extern int tx_open(void);
+
+    /**
+     * Open a set of resource managers.
+     * You MUST call @ref tx_close from the same thread issued tx_open
+     * (memory leaks and other unpleasant effetcs may happen otherwise!)
+     */
+    extern int tx_open(void);
+    
 extern int tx_rollback(void);
 extern int tx_set_commit_return(COMMIT_RETURN);
 extern int tx_set_transaction_control(TRANSACTION_CONTROL);
