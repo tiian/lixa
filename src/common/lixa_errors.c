@@ -90,6 +90,10 @@ const char *lixa_strerror(int ret_cod)
                 return "ERROR: 'malloc' function returned an error condition";
             case LIXA_RC_REALLOC_ERROR:
                 return "ERROR: 'realloc' function returned an error condition";
+                /*
+            case LIXA_RC_STRDUP_ERROR:
+                return "ERROR: 'strdup' function returned an error condition";
+                */
             case LIXA_RC_POLL_ERROR:
                 return "ERROR: 'poll' function returned an error condition";
             case LIXA_RC_PIPE_ERROR:

@@ -37,6 +37,7 @@
 #include <tx.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <client_conn.h>
 
 
 

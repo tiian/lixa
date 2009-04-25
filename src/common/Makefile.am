@@ -1,4 +1,4 @@
-include_HEADERS = lixa_config.h lixa_defines.h lixa_errors.h lixa_trace.h
+noinst_HEADERS = lixa_config.h lixa_defines.h lixa_errors.h lixa_trace.h
 lib_LTLIBRARIES = liblixab.la liblixabmt.la
 liblixab_la_SOURCES = lixa_config.c lixa_errors.c lixa_trace.c
 liblixabmt_la_SOURCES = lixa_config.c lixa_errors.c lixa_trace.c

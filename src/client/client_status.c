@@ -60,7 +60,7 @@
 /* this is a static structure used by all the threads of the program
  * linking the library; the structure i protected by a mutex to avoid
  * concurrency issues */
-client_status_set_t css;
+client_status_coll_t csc;
 
 
 
@@ -72,7 +72,7 @@ client_status_set_t css;
 void __attribute__ ((constructor)) lixac_init(void)
 {
     LIXA_TRACE_INIT;
-    client_status_set_init(&css);
+    client_status_coll_init(&csc);
 }
 
 
@@ -88,23 +88,23 @@ void client_status_init(client_status_t *cs)
 
 
 
-int client_status_set_init(client_status_set_t *css)    
+int client_status_coll_init(client_status_coll_t *csc)    
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("client_status_set_init\n"));
+    LIXA_TRACE(("client_status_coll_init\n"));
     TRY {
-        LIXA_TRACE(("client_status_set_init: initializing sequentialization "
+        LIXA_TRACE(("client_status_coll_init: initializing sequentialization "
                     "mutex\n"));
-        ret_cod = pthread_rwlock_init(&(css->rwlock), NULL);
-        LIXA_TRACE(("client_status_set_init: mutex initialization return "
+        ret_cod = pthread_rwlock_init(&(csc->rwlock), NULL);
+        LIXA_TRACE(("client_status_coll_init: mutex initialization return "
                     "code: %d\n", ret_cod));
-        css->index_size = 0;
-        css->index_data = NULL;
-        css->status_size = 0;
-        css->status_used = 0;
-        css->status_data = NULL;
+        csc->index_size = 0;
+        csc->index_data = NULL;
+        csc->status_size = 0;
+        csc->status_used = 0;
+        csc->status_data = NULL;
         
         THROW(NONE);
     } CATCH {
@@ -116,34 +116,34 @@ int client_status_set_init(client_status_set_t *css)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_status_set_init/excp=%d/"
+    LIXA_TRACE(("client_status_coll_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int client_status_set_register(client_status_set_t *css)
+int client_status_coll_register(client_status_coll_t *csc)
 {
     enum Exception { INTERNAL_ERROR
                      , REGISTER_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("client_status_set_register\n"));
+    LIXA_TRACE(("client_status_coll_register\n"));
     TRY {
         int pos = 0;
         int slot = 0;
 
-        switch (ret_cod = client_status_set_search(css, &pos)) {
+        switch (ret_cod = client_status_coll_search(csc, &pos)) {
             case LIXA_RC_OK:
-                LIXA_TRACE(("client_status_set_register: thread already "
+                LIXA_TRACE(("client_status_coll_register: thread already "
                             "registered.\n"));
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 /* register the new thread */
-                if (LIXA_RC_OK != (ret_cod = client_status_set_add(
-                                       css, &slot)))
+                if (LIXA_RC_OK != (ret_cod = client_status_coll_add(
+                                       csc, &slot)))
                     THROW(REGISTER_ERROR);
                 break;
             default:
@@ -165,14 +165,14 @@ int client_status_set_register(client_status_set_t *css)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_status_set_register/excp=%d/"
+    LIXA_TRACE(("client_status_coll_register/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int client_status_set_add(client_status_set_t *css, int *status_pos)
+int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
 {
     enum Exception { RWLOCK_WRLOCK_ERROR
                      , MALLOC_ERROR
@@ -185,33 +185,33 @@ int client_status_set_add(client_status_set_t *css, int *status_pos)
     struct client_status_index_s *new_index_data = NULL;
     client_status_t *new_status_data = NULL;
     
-    LIXA_TRACE(("client_status_set_add\n"));
+    LIXA_TRACE(("client_status_coll_add\n"));
     TRY {
         pthread_t key = pthread_self();
         int new_index_size = 0, i = 0;
         int free_slot = 0;
-        int new_status_size = css->status_size;
+        int new_status_size = csc->status_size;
 
         /* take an exclusive lock to avoid collisions */
-        if (0 != pthread_rwlock_wrlock(&(css->rwlock)))
+        if (0 != pthread_rwlock_wrlock(&(csc->rwlock)))
             THROW(RWLOCK_WRLOCK_ERROR);
 
         /* allocate a new index */
-        new_index_size = css->index_size + 1;
+        new_index_size = csc->index_size + 1;
         if (NULL == (new_index_data = malloc(sizeof(client_status_t) *
                                              new_index_size)))
             THROW(MALLOC_ERROR);
 
         /* copy & insert */
-        if (css->index_size > 0) {
+        if (csc->index_size > 0) {
             while (i < new_index_size) {
-                if (css->index_data[i].key < key)
-                    new_index_data[i] = css->index_data[i];
+                if (csc->index_data[i].key < key)
+                    new_index_data[i] = csc->index_data[i];
                 else {
                     /* insert new key */
                     new_index_data[i].key = key;
-                    memcpy(new_index_data + i + 1, css->index_data + i,
-                           (css->index_size - i) *
+                    memcpy(new_index_data + i + 1, csc->index_data + i,
+                           (csc->index_size - i) *
                            sizeof(struct client_status_index_s));
                     break;
                 }
@@ -222,23 +222,23 @@ int client_status_set_add(client_status_set_t *css, int *status_pos)
         }
         /* now i is the pos in index of the new key */
 
-        if (css->status_used < css->status_size) {
+        if (csc->status_used < csc->status_size) {
             /* there must be at least one free slot */
             int j;
-            for (j = 0; j < css->status_size; ++j) {
-                if (!client_status_is_active(&(css->status_data[j])))
+            for (j = 0; j < csc->status_size; ++j) {
+                if (!client_status_is_active(&(csc->status_data[j])))
                     break;
             }
-            if (client_status_is_active(&(css->status_data[j])))
+            if (client_status_is_active(&(csc->status_data[j])))
                 THROW(OBJ_CORRUPTED);
             free_slot = j;
         } else {
-            new_status_size = css->status_size + 1;
+            new_status_size = csc->status_size + 1;
             if (NULL == (new_status_data = realloc(
-                             css->status_data,
+                             csc->status_data,
                              sizeof(client_status_t) * new_status_size)))
                 THROW(REALLOC_ERROR);
-            free_slot = css->status_size;
+            free_slot = csc->status_size;
         }
         /* reset & set slot */
         client_status_init(new_status_data + free_slot);
@@ -246,18 +246,18 @@ int client_status_set_add(client_status_set_t *css, int *status_pos)
 
         /* finalize operations */
         *status_pos = free_slot;
-        css->status_size = new_status_size;
-        css->status_used++;
-        css->index_size = new_index_size;
-        free(css->index_data);
-        css->index_data = new_index_data;
-        css->index_data[i].value = free_slot;
+        csc->status_size = new_status_size;
+        csc->status_used++;
+        csc->index_size = new_index_size;
+        free(csc->index_data);
+        csc->index_data = new_index_data;
+        csc->index_data[i].value = free_slot;
         
-        LIXA_TRACE(("client_status_set_add: index key = " PTHREAD_T_FORMAT ", "
+        LIXA_TRACE(("client_status_coll_add: index key = " PTHREAD_T_FORMAT ", "
                     "index value = %d\n", key, free_slot));
         
         /* release exclusive lock */
-        if (0 != pthread_rwlock_unlock(&(css->rwlock)))
+        if (0 != pthread_rwlock_unlock(&(csc->rwlock)))
             THROW(RWLOCK_UNLOCK_ERROR);
         
         THROW(NONE);
@@ -287,26 +287,26 @@ int client_status_set_add(client_status_set_t *css, int *status_pos)
         
         /* recovery actions */
         if (NONE != excp)
-            LIXA_TRACE(("client_status_set_add: values before recovery "
+            LIXA_TRACE(("client_status_coll_add: values before recovery "
                         "actions excp=%d/ret_cod=%d/errno=%d\n",
                         excp, ret_cod, errno));
         if (excp > RWLOCK_WRLOCK_ERROR && excp < RWLOCK_UNLOCK_ERROR) {
-            ret_cod = pthread_rwlock_unlock(&(css->rwlock));
+            ret_cod = pthread_rwlock_unlock(&(csc->rwlock));
             if (0 != ret_cod)
-                LIXA_TRACE(("client_status_set_add/pthread_mutex_unlock: "
+                LIXA_TRACE(("client_status_coll_add/pthread_mutex_unlock: "
                             "ret_cod=%d/errno=%d\n", ret_cod, errno));
         }
         if (excp > MALLOC_ERROR && excp < RWLOCK_UNLOCK_ERROR)
             free(new_index_data);
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_status_set_add/excp=%d/"
+    LIXA_TRACE(("client_status_coll_add/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int client_status_set_search(client_status_set_t *css, int *pos)
+int client_status_coll_search(client_status_coll_t *csc, int *pos)
 {
     enum Exception { RWLOCK_RDLOCK_ERROR
                      , NOT_FOUND1
@@ -315,28 +315,28 @@ int client_status_set_search(client_status_set_t *css, int *pos)
                      , NOT_FOUND2 } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("client_status_set_search\n"));
+    LIXA_TRACE(("client_status_coll_search\n"));
     TRY {
         int p,u,m;
         pthread_t key = pthread_self();
 
         /* take an exclusive lock to avoid collisions */
-        if (0 != pthread_rwlock_rdlock(&(css->rwlock)))
+        if (0 != pthread_rwlock_rdlock(&(csc->rwlock)))
             THROW(RWLOCK_RDLOCK_ERROR);
 
-        if (NULL == css->index_data)
+        if (NULL == csc->index_data)
             THROW(NOT_FOUND1);
-        if (1 > css->index_size)
+        if (1 > csc->index_size)
             THROW(OBJ_CORRUPTED);
         p = 0;
-        u = css->index_size - 1;
+        u = csc->index_size - 1;
         while (p <= u) {
             m = (p+u)/2;
-            if (css->index_data[m].key == key) {
+            if (csc->index_data[m].key == key) {
                 *pos = m;
                 THROW(NONE);
             }
-            if (css->index_data[m].key < key)
+            if (csc->index_data[m].key < key)
                 p = m + 1;
             else
                 u = m - 1;
@@ -362,17 +362,17 @@ int client_status_set_search(client_status_set_t *css, int *pos)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         if (NONE != excp)
-            LIXA_TRACE(("client_status_set_search: values before recovery "
+            LIXA_TRACE(("client_status_coll_search: values before recovery "
                         "actions excp=%d/ret_cod=%d/errno=%d\n",
                         excp, ret_cod, errno));
         if (excp > RWLOCK_RDLOCK_ERROR) {
-            int ret_cod2 = pthread_rwlock_unlock(&(css->rwlock));
+            int ret_cod2 = pthread_rwlock_unlock(&(csc->rwlock));
             if (0 != ret_cod2)
-                LIXA_TRACE(("client_status_set_add/pthread_mutex_unlock: "
+                LIXA_TRACE(("client_status_coll_add/pthread_mutex_unlock: "
                             "ret_cod=%d/errno=%d\n", ret_cod2, errno));
         }
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_status_set_search/excp=%d/"
+    LIXA_TRACE(("client_status_coll_search/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
