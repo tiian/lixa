@@ -77,18 +77,8 @@ int client_init(void)
         char *profile = NULL;
 
         /* register this thread in library status */
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_register(&csc)))
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_register(&global_csc)))
             THROW(REGISTER_ERROR);
-        
-        if (NULL == (profile = getenv(LIXA_PROFILE_ENV_VAR))) {
-            /* use empty string instead of NULL to avoid allocation issues */
-            profile = "";
-            LIXA_TRACE(("client_init: '%s' environment variable not found, "
-                        "using default profile for this client\n",
-                        LIXA_PROFILE_ENV_VAR));
-        }
-        LIXA_TRACE(("client_init: using transactional profile '%s' for "
-                    "subsequent operations\n", profile));
         
         THROW(NONE);
     } CATCH {

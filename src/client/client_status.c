@@ -45,6 +45,7 @@
 
 #include <lixa_trace.h>
 #include <lixa_errors.h>
+#include <client_config.h>
 #include <client_status.h>
 
 
@@ -57,10 +58,17 @@
 
 
 
-/* this is a static structure used by all the threads of the program
+/* this static structure is used by all the threads of the program
  * linking the library; the structure i protected by a mutex to avoid
  * concurrency issues */
-client_status_coll_t csc;
+client_status_coll_t global_csc;
+
+
+
+/* this static structure is used by all the threads of the program and contains
+ * the configuration read by the first thread and used by all the thread
+ * hosted by the same process */
+client_config_coll_t global_ccc;
 
 
 
@@ -72,7 +80,8 @@ client_status_coll_t csc;
 void __attribute__ ((constructor)) lixac_init(void)
 {
     LIXA_TRACE_INIT;
-    client_status_coll_init(&csc);
+    client_status_coll_init(&global_csc);
+    client_config_coll_init(&global_ccc);
 }
 
 
@@ -81,7 +90,6 @@ void client_status_init(client_status_t *cs)
 {
     LIXA_TRACE(("client_status_init: begin\n"));
     cs->active = FALSE;
-    cs->profile = NULL;
     LIXA_TRACE(("client_status_init: end\n"));
     return;
 }
@@ -96,9 +104,9 @@ int client_status_coll_init(client_status_coll_t *csc)
     LIXA_TRACE(("client_status_coll_init\n"));
     TRY {
         LIXA_TRACE(("client_status_coll_init: initializing sequentialization "
-                    "mutex\n"));
+                    "rwlock\n"));
         ret_cod = pthread_rwlock_init(&(csc->rwlock), NULL);
-        LIXA_TRACE(("client_status_coll_init: mutex initialization return "
+        LIXA_TRACE(("client_status_coll_init: rwlock initialization return "
                     "code: %d\n", ret_cod));
         csc->index_size = 0;
         csc->index_data = NULL;
@@ -293,7 +301,7 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
         if (excp > RWLOCK_WRLOCK_ERROR && excp < RWLOCK_UNLOCK_ERROR) {
             ret_cod = pthread_rwlock_unlock(&(csc->rwlock));
             if (0 != ret_cod)
-                LIXA_TRACE(("client_status_coll_add/pthread_mutex_unlock: "
+                LIXA_TRACE(("client_status_coll_add/pthread_rwunlock_unlock: "
                             "ret_cod=%d/errno=%d\n", ret_cod, errno));
         }
         if (excp > MALLOC_ERROR && excp < RWLOCK_UNLOCK_ERROR)
