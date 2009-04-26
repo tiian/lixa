@@ -78,7 +78,7 @@ int client_config_coll_init(client_config_coll_t *ccc)
         LIXA_TRACE(("client_config_coll_init: initializing sequentialization "
                     "mutex\n"));
         ret_cod = pthread_mutex_init(&(ccc->mutex), NULL);
-        LIXA_TRACE(("client_status_coll_init: mutex initialization return "
+        LIXA_TRACE(("client_config_coll_init: mutex initialization return "
                     "code: %d\n", ret_cod));
         ccc->profile = NULL;
         ccc->trnmgrs.n = 0;
@@ -122,38 +122,44 @@ int client_config(void)
     
     LIXA_TRACE(("client_config\n"));
     TRY {
-        char *profile;
+        const char *tmp_str;
         /* lock mutex to start configuration activity */
         if (0 != (ret_cod = pthread_mutex_lock(&global_ccc.mutex)))
             THROW(PTHREAD_MUTEX_LOCK_ERROR);
 
-        if (NULL != global_ccc.profile)
+        if (NULL != global_ccc.profile) {
+            LIXA_TRACE(("client_config: already configured, skipping...\n"));
             THROW(ALREADY_CONFIGURED);
+        }
         
-        if (NULL == (profile = getenv(LIXA_PROFILE_ENV_VAR))) {
+        if (NULL == (tmp_str = getenv(LIXA_PROFILE_ENV_VAR))) {
             /* use empty string instead of NULL to avoid allocation issues */
-            profile = "";
-            LIXA_TRACE(("client_init: '%s' environment variable not found, "
+            tmp_str = "";
+            LIXA_TRACE(("client_config: '%s' environment variable not found, "
                         "using default profile for this client\n",
                         LIXA_PROFILE_ENV_VAR));
         }
-        LIXA_TRACE(("client_init: using transactional profile '%s' for "
-                    "subsequent operations\n", profile));        
+        LIXA_TRACE(("client_config: using transactional profile '%s' for "
+                    "subsequent operations\n", tmp_str));        
 
-        if (NULL == (global_ccc.profile = strdup(profile)))
+        if (NULL == (global_ccc.profile = strdup(tmp_str)))
             THROW(STRDUP_ERROR);
-        
+
         /* checking if available the custom config file */
-        if (NULL != config_filename &&
-            -1 != (fd = open(config_filename, O_RDONLY))) {
-            file_name = config_filename;
+        tmp_str = getenv(LIXA_CONFIG_FILE_ENV_VAR);
+        if (NULL != tmp_str && -1 != (fd = open(tmp_str, O_RDONLY))) {
+            file_name = tmp_str;
         } else {
-            if (-1 == (fd = open(LIXA_CLIENT_CONFIG_DEFAULT_FILE, O_RDONLY))) {
-                LIXA_TRACE(("server_config/file %s is not readable, throwing "
+            tmp_str = LIXA_CLIENT_CONFIG_DEFAULT_FILE;
+            LIXA_TRACE(("client_config: '%s' environment variable not found, "
+                        "using default config file '%s' for this client\n",
+                        LIXA_CONFIG_FILE_ENV_VAR, tmp_str));
+            if (-1 == (fd = open(tmp_str, O_RDONLY))) {
+                LIXA_TRACE(("client_config: file %s is not readable, throwing "
                             "error\n", LIXA_CLIENT_CONFIG_DEFAULT_FILE));
                 THROW(OPEN_CONFIG_ERROR);
             } else {
-                file_name = LIXA_SERVER_CONFIG_DEFAULT_FILE;
+                file_name = tmp_str;
             }
         }
         if (-1 == (ret_cod = close(fd)))
@@ -167,7 +173,7 @@ int client_config(void)
         if (NULL == (root_element = xmlDocGetRootElement(doc)))
             THROW(XML_DOC_GET_ROOT_ELEMENT_ERROR);
 
-        if (LIXA_RC_OK != (ret_cod = client_parse(global_ccc, root_element)))
+        if (LIXA_RC_OK != (ret_cod = client_parse(&global_ccc, root_element)))
             THROW(PARSE_CONFIG_ERROR);
         
         /* unlock mutex to start configuration activity */

@@ -241,23 +241,29 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
                 THROW(OBJ_CORRUPTED);
             free_slot = j;
         } else {
+            LIXA_TRACE(("client_status_coll_add: before realloc, "
+                        "csc->status_data = %p\n", csc->status_data));
             new_status_size = csc->status_size + 1;
             if (NULL == (new_status_data = realloc(
                              csc->status_data,
                              sizeof(client_status_t) * new_status_size)))
                 THROW(REALLOC_ERROR);
+            csc->status_data = new_status_data;
             free_slot = csc->status_size;
+            LIXA_TRACE(("client_status_coll_add: after realloc, "
+                        "csc->status_data = %p\n", csc->status_data));
         }
         /* reset & set slot */
-        client_status_init(new_status_data + free_slot);
-        client_status_active(new_status_data + free_slot);
+        client_status_init(&(csc->status_data[free_slot]));
+        client_status_active(&(csc->status_data[free_slot]));
 
         /* finalize operations */
         *status_pos = free_slot;
         csc->status_size = new_status_size;
         csc->status_used++;
         csc->index_size = new_index_size;
-        free(csc->index_data);
+        if (NULL != csc->index_data)
+            free(csc->index_data);
         csc->index_data = new_index_data;
         csc->index_data[i].value = free_slot;
         

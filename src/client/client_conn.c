@@ -74,8 +74,6 @@ int client_init(void)
 
     LIXA_TRACE(("client_init\n"));
     TRY {
-        char *profile = NULL;
-
         /* register this thread in library status */
         if (LIXA_RC_OK != (ret_cod = client_status_coll_register(&global_csc)))
             THROW(REGISTER_ERROR);

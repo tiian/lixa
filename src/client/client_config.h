@@ -73,6 +73,14 @@
 
 
 /**
+ * Name of the environment variable must be uset to specify che client config
+ * file name
+ */
+#define LIXA_CONFIG_FILE_ENV_VAR "LIXA_CONFIG_FILE"
+
+
+
+/**
  * It contains the configuration of a transaction manager (how to reach and
  * use it)
  */
