@@ -38,6 +38,7 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <client_conn.h>
+#include <client_config.h>
 
 
 
@@ -51,18 +52,25 @@
 
 int tx_open(void)
 {
-    enum Exception { CLIENT_INIT_ERROR
+    enum Exception { CLIENT_CONFIG_ERROR
+                     , CLIENT_INIT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("tx_open\n"));
     TRY {
+        if (LIXA_RC_OK != (ret_cod = client_config()))
+            THROW(CLIENT_CONFIG_ERROR);
+        
         if (LIXA_RC_OK != (ret_cod = client_init()))
             THROW(CLIENT_INIT_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_CONFIG_ERROR:
+                ret_cod = TX_FAIL;
+                break;
             case CLIENT_INIT_ERROR:
                 ret_cod = TX_ERROR;
                 break;

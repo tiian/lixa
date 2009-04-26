@@ -50,13 +50,6 @@
 
 
 
-/**
- * Name of the environment variable must be used to specify the profile
- */
-#define LIXA_PROFILE_ENV_VAR "LIXA_PROFILE"
-
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

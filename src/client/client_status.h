@@ -46,6 +46,7 @@
 
 
 #include <lixa_trace.h>
+#include <client_config.h>
 
 
 
@@ -70,11 +71,6 @@ struct client_status_s {
      * or not (garbage can be removed)
      */
     int   active;
-    /**
-     * Transactional profile associated to the thread (it must be an heap
-     * allocated variable)
-     */
-    char *profile;
 };
 
 typedef struct client_status_s client_status_t;
@@ -110,7 +106,7 @@ struct client_status_index_s {
  */
 struct client_status_coll_s {
     /**
-     * This mutex is used to serialize update access to the array
+     * This lock is used to serialize read & update access to the array
      */
     pthread_rwlock_t              rwlock;
     /**
@@ -143,7 +139,15 @@ typedef struct client_status_coll_s client_status_coll_t;
  * This is a static structure used by all the threads of the program
  * linking the library; the structure i protected by a mutex to avoid
  * concurrency issues */
-extern client_status_coll_t csc;
+extern client_status_coll_t global_csc;
+
+
+
+/*
+ * This static structure is used by all the threads of the program and contains
+ * the configuration read by the first thread and used by all the thread
+ * hosted by the same process */
+extern client_config_coll_t global_ccc;
 
 
 

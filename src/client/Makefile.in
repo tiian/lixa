@@ -206,11 +206,10 @@ liblixac_la_SOURCES = client_config.c client_conn.c client_status.c tx.c
 liblixacmt_la_SOURCES = client_config.c client_conn.c client_status.c tx.c
 AM_CPPFLAGS = -I$(srcdir)/../common
 AM_CFLAGS = -Wall
-AM_LDFLAGS = -lxml2
 liblixac_la_LIBADD = ../common/liblixab.la
 liblixacmt_la_LIBADD = ../common/liblixabmt.la
-liblixac_la_LDFLAGS = -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
-liblixacmt_la_LDFLAGS = -lpthread -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
+liblixac_la_LDFLAGS = -lxml2 -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
+liblixacmt_la_LDFLAGS = -lpthread -lxml2 -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
 all: all-am
 
 .SUFFIXES:

@@ -256,12 +256,12 @@ define LIXA_RC_UNLINK_ERROR                  -129
 #define LIXA_RC_PTHREAD_CREATE_ERROR           -140
 /**
  * "pthread_mutex_lock" function error
-define LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR       -141
  */
+#define LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR       -141
 /**
  * "pthread_mutex_unlock" function error
-define LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR     -142
  */
+#define LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR     -142
 /**
  * "pthread_rwlock_wrlock" function error
  */

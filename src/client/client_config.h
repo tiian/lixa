@@ -48,6 +48,9 @@
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
 
 
 
@@ -59,6 +62,13 @@
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_CLIENT_CONFIG
+
+
+
+/**
+ * Name of the environment variable must be used to specify the profile
+ */
+#define LIXA_PROFILE_ENV_VAR "LIXA_PROFILE"
 
 
 
@@ -103,15 +113,28 @@ struct trnmgr_config_array_s {
 
 /**
  * It contains the configuration for the client
+ * if (profile == NULL) the configuration must be loaded
+ * else the configuration has already been loaded
  */
-struct client_config_s {
+struct client_config_coll_s {
+    /**
+     * This mutex is used to assure only the first thread load the
+     * configuration for all the following threads
+     */
+    pthread_mutex_t              mutex;
+    /**
+     * Transactional profile associated to the threads of this process (it
+     * must be an heap allocated variable)
+     * It works like a flag: NULL means the configuration must be loaded
+     */
+    char                        *profile;
     /**
      * Transaction managers' configuration
      */
-    struct trnmgr_config_s       trnmgrs;
+    struct trnmgr_config_array_s trnmgrs;
 };
 
-
+typedef struct client_config_coll_s client_config_coll_t;
 
 #ifdef __cplusplus
 extern "C" {
@@ -120,15 +143,18 @@ extern "C" {
 
 
     /**
-     * Read and parse client config file
-     * @param cc OUT the object containing the client configuration
-     * @param config_filename IN a filename PATH must looked at before
-     *                           searching default system config file
-     *                           default = NULL
+     * Initialize a new "object" of type client config
+     * @param cc OUT object reference
+     */
+    int client_config_coll_init(client_config_coll_t *ccc);
+
+    
+
+    /**
+     * Load configuration from environment vars and XML files
      * @return a standardized return code
      */
-    int client_config(struct client_config_s *cc,
-                      const char *config_filename);
+    int client_config();
 
     
 
@@ -138,7 +164,7 @@ extern "C" {
      * @param a_node IN the current subtree must be parsed
      * @return a standardized return code
      */
-    int client_parse(struct client_config_s *cc,
+    int client_parse(struct client_config_coll_s *ccc,
                      xmlNode *a_node);
 
     
