@@ -40,13 +40,21 @@
 int main(int argc, char *argv[])
 {
     pthread_t foo;
-    printf("Hello world linked lixac library\n");
+
+    tx_open();
+    tx_open();
+    tx_open();
 
     pthread_create(&foo, NULL, tx_open, NULL);
     pthread_create(&foo, NULL, tx_open, NULL);
     pthread_create(&foo, NULL, tx_open, NULL);
     pthread_create(&foo, NULL, tx_open, NULL);
     pthread_create(&foo, NULL, tx_open, NULL);
+
+    tx_open();
+    tx_open();
+    tx_open();
+    
     sleep(5);
     return 0;
 }
