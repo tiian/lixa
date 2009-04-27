@@ -206,8 +206,9 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
 
         /* allocate a new index */
         new_index_size = csc->index_size + 1;
-        if (NULL == (new_index_data = malloc(sizeof(client_status_t) *
-                                             new_index_size)))
+        if (NULL == (new_index_data = malloc(
+                         sizeof(struct client_status_index_s) *
+                         new_index_size)))
             THROW(MALLOC_ERROR);
 
         /* copy & insert */
@@ -338,6 +339,7 @@ int client_status_coll_search(client_status_coll_t *csc, int *pos)
         if (0 != pthread_rwlock_rdlock(&(csc->rwlock)))
             THROW(RWLOCK_RDLOCK_ERROR);
 
+        /* temporarily removed due to a suspected bug in reallocation */
         if (NULL == csc->index_data)
             THROW(NOT_FOUND1);
         if (1 > csc->index_size)
@@ -355,7 +357,7 @@ int client_status_coll_search(client_status_coll_t *csc, int *pos)
             else
                 u = m - 1;
         }
-        
+
         THROW(NOT_FOUND2);
     } CATCH {
         switch (excp) {
