@@ -59,9 +59,10 @@ int tx_open(void)
     
     LIXA_TRACE(("tx_open\n"));
     TRY {
+        /*
         if (LIXA_RC_OK != (ret_cod = client_config()))
             THROW(CLIENT_CONFIG_ERROR);
-        
+        */
         if (LIXA_RC_OK != (ret_cod = client_init()))
             THROW(CLIENT_INIT_ERROR);
         
