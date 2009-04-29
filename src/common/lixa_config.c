@@ -40,6 +40,18 @@
 #ifdef HAVE_LIBXML_PARSER_H
 # include <libxml/parser.h>
 #endif
+#ifdef HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
+
+
+
+#include <lixa_config.h>
+#include <lixa_errors.h>
+#include <lixa_trace.h>
 
 
 
@@ -63,5 +75,96 @@ const xmlChar *LIXA_XML_CONFIG_PORT_PROPERTY = (xmlChar *)"port";
 const xmlChar *LIXA_XML_CONFIG_DOMAIN_AF_INET_VALUE = (xmlChar *)"AF_INET";
 const xmlChar *LIXA_XML_CONFIG_MANAGER = (xmlChar *)"manager";
 const xmlChar *LIXA_XML_CONFIG_MANAGER_STATUS = (xmlChar *)"status_file";
+const xmlChar *LIXA_XML_CONFIG_TRNMGR = (xmlChar *)"trnmgr";
+const xmlChar *LIXA_XML_CONFIG_PROFILE_PROPERTY = (xmlChar *)"profile";
 
+
+
+int lixa_config_retrieve_domain(xmlNode *cur_node, int *domain)
+{
+    enum Exception { DOMAIN_NOT_AVAILABLE_ERROR
+                     , INVALID_DOMAIN_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    xmlChar *attr = NULL;
+    
+    LIXA_TRACE(("lixa_config_retrieve_domain\n"));
+    TRY {
+        if (NULL == (attr = xmlGetProp(cur_node,
+                                       LIXA_XML_CONFIG_DOMAIN_PROPERTY)))
+            THROW(DOMAIN_NOT_AVAILABLE_ERROR);
+        if (!xmlStrcmp(attr, LIXA_XML_CONFIG_DOMAIN_AF_INET_VALUE)) {
+            *domain = AF_INET;
+        } else {
+            LIXA_TRACE(("lixa_config_retrieve_domain: socket domain '%s' "
+                        "is not valid\n", (char *)attr));
+            THROW(INVALID_DOMAIN_ERROR);
+        }
+        xmlFree(attr);
+        attr = NULL;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case DOMAIN_NOT_AVAILABLE_ERROR:
+            case INVALID_DOMAIN_ERROR:
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* release useless memory */
+        if (NULL != attr)
+            xmlFree(attr);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_config_retrieve_domain/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_config_retrieve_port(xmlNode *cur_node, in_port_t *port)
+{
+    enum Exception { PORT_NOT_AVAILABLE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    xmlChar *attr = NULL;
+    
+    LIXA_TRACE(("lixa_config_retrieve_port\n"));
+    TRY {
+        if (NULL == (attr = xmlGetProp(cur_node,
+                                       LIXA_XML_CONFIG_PORT_PROPERTY))) {
+            THROW(PORT_NOT_AVAILABLE_ERROR);
+        } else {
+            *port = (in_port_t)strtoul((char *)attr, NULL, 0);
+            xmlFree(attr);
+            attr = NULL;
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case PORT_NOT_AVAILABLE_ERROR:
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;                                
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* release useless memory */
+        if (NULL != attr)
+            xmlFree(attr);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_config_retrieve_port/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
 
