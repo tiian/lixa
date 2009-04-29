@@ -45,6 +45,9 @@
 #ifdef HAVE_LIBXML_PARSER_H
 # include <libxml/parser.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
 
 
 
@@ -111,11 +114,41 @@ extern const xmlChar *LIXA_XML_CONFIG_MANAGER;
  */
 extern const xmlChar *LIXA_XML_CONFIG_MANAGER_STATUS;
 
+/**
+ * Label used to specify "trnmgr" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_TRNMGR;
+
+/**
+ * Label used to specify "profile" property in "trnmgr" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_PROFILE_PROPERTY;
+
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+
+
+    /**
+     * Retrieve the value of the "domain" property from configuration
+     * @param cur_node IN a valid node of the XML tree
+     * @param domain OUT the domain value retrieved by the function
+     * @return a standardized return code
+     */
+    int lixa_config_retrieve_domain(xmlNode *cur_node, int *domain);
+
+
+
+    /**
+     * Retrieve the value of the "port" property from configuration
+     * @param cur_node IN a valid node of the XML tree
+     * @param port OUT the domain value retrieved by the function
+     * @return a standardized return code
+     */
+    int lixa_config_retrieve_port(xmlNode *cur_node, in_port_t *port);
 
 
 

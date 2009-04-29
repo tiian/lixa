@@ -219,8 +219,8 @@ int server_parse(struct server_config_s *sc,
                         THROW(PARSE_LISTENER_ERROR);
                 } else if (!xmlStrcmp(cur_node->name,
                                       LIXA_XML_CONFIG_MANAGER)) {
-		  if (LIXA_RC_OK != (ret_cod = server_parse_manager(
-								    sc, tpa, cur_node)))
+                    if (LIXA_RC_OK != (ret_cod = server_parse_manager(
+                                           sc, tpa, cur_node)))
                         THROW(PARSE_MANAGER_ERROR);
                 }
             }
@@ -255,7 +255,9 @@ int server_parse_listener(struct server_config_s *sc,
 {
     enum Exception { REALLOC_ERROR
                      , DOMAIN_NOT_AVAILABLE_ERROR
+                     /*
                      , INVALID_DOMAIN_ERROR
+                     */
                      , ADDRESS_NOT_AVAILABLE_ERROR
                      , PORT_NOT_AVAILABLE_ERROR
                      , NONE } excp;
@@ -279,31 +281,17 @@ int server_parse_listener(struct server_config_s *sc,
         sc->listeners.array[i].port = 0;
 
         /* look/check/set listener domain */
-        if (NULL == (attr = xmlGetProp(a_node,
-                                       LIXA_XML_CONFIG_DOMAIN_PROPERTY)))
+        if (LIXA_RC_OK != (ret_cod = lixa_config_retrieve_domain(
+                               a_node, &(sc->listeners.array[i].domain))))
             THROW(DOMAIN_NOT_AVAILABLE_ERROR);
-        if (!xmlStrcmp(attr, LIXA_XML_CONFIG_DOMAIN_AF_INET_VALUE)) {
-            sc->listeners.array[i].domain = AF_INET;
-        } else {
-            LIXA_TRACE(("server_parse_listener: socket domain '%s' is not "
-                        "valid\n", (char *)attr));
-            THROW(INVALID_DOMAIN_ERROR);
-        }
-        xmlFree(attr);
-        attr = NULL;
         
         if (NULL == (sc->listeners.array[i].address = (char *)xmlGetProp(
                          a_node, LIXA_XML_CONFIG_ADDRESS_PROPERTY)))
             THROW(ADDRESS_NOT_AVAILABLE_ERROR);
-        if (NULL == (attr = xmlGetProp(a_node,
-                                       LIXA_XML_CONFIG_PORT_PROPERTY))) {
+        /* retrieve port */
+        if (LIXA_RC_OK != (ret_cod = lixa_config_retrieve_port(
+                               a_node, &(sc->listeners.array[i].port))))
             THROW(PORT_NOT_AVAILABLE_ERROR);
-        } else {
-            sc->listeners.array[i].port = (in_port_t)strtoul(
-                (char *)attr, NULL, 0);
-            xmlFree(attr);
-            attr = NULL;
-        }
         
         LIXA_TRACE(("server_parse_listener: %s %d, %s = %d, "
                     "%s = '%s', %s = " IN_PORT_T_FORMAT  "\n",
@@ -323,10 +311,6 @@ int server_parse_listener(struct server_config_s *sc,
             case DOMAIN_NOT_AVAILABLE_ERROR:
                 LIXA_TRACE(("server_parse_listener: unable to find listener "
                             "domain for listener %d\n", i));
-                ret_cod = LIXA_RC_CONFIG_ERROR;
-                break;
-            case INVALID_DOMAIN_ERROR:
-                ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;
             case ADDRESS_NOT_AVAILABLE_ERROR:
                 LIXA_TRACE(("server_parse_listener: unable to find listener "
@@ -336,7 +320,6 @@ int server_parse_listener(struct server_config_s *sc,
             case PORT_NOT_AVAILABLE_ERROR:
                 LIXA_TRACE(("server_parse_listener: unable to find listener "
                             "port for listener %d\n", i));
-                ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;                
             case NONE:
                 ret_cod = LIXA_RC_OK;

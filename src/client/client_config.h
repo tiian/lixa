@@ -126,6 +126,10 @@ struct trnmgr_config_array_s {
  */
 struct client_config_coll_s {
     /**
+     * TRUE if the configuration has been successfully loaded, FALSE otherwise
+     */
+    int                          configured;
+    /**
      * This mutex is used to assure only the first thread load the
      * configuration for all the following threads
      */
@@ -133,7 +137,6 @@ struct client_config_coll_s {
     /**
      * Transactional profile associated to the threads of this process (it
      * must be an heap allocated variable)
-     * It works like a flag: NULL means the configuration must be loaded
      */
     char                        *profile;
     /**
@@ -168,14 +171,26 @@ extern "C" {
 
     /**
      * Parse the configuration tree
-     * @param cc OUT server configuration structure
+     * @param ccc OUT server configuration structure
      * @param a_node IN the current subtree must be parsed
      * @return a standardized return code
      */
     int client_parse(struct client_config_coll_s *ccc,
                      xmlNode *a_node);
 
-    
+
+
+    /**
+     * Parse a "trnmgr" node tree
+     * @param ccc OUT server configuration structure
+     * @param a_node IN the current subtree must be parsed
+     * @return a standardized return code
+     */
+    int client_parse_trnmgr(struct client_config_coll_s *ccc,
+                            xmlNode *a_node);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
