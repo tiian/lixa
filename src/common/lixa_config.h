@@ -31,7 +31,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #ifndef LIXA_CONFIG_H
-#define LIXA_CONFIG_H
+# define LIXA_CONFIG_H
 
 
 

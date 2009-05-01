@@ -154,6 +154,12 @@ const char *lixa_strerror(int ret_cod)
             case LIXA_RC_SHUTDOWN_ERROR:
                 return "ERROR: 'shutdown' function returned an error "
                     "condition";
+            case LIXA_RC_GETADDRINFO_ERROR:
+                return "ERROR: 'getaddrinfo' function returned an error "
+                    "condition";
+            case LIXA_RC_CONNECT_ERROR:
+                return "ERROR: 'connect' function returned an error "
+                    "condition";
             case LIXA_RC_PTHREAD_CREATE_ERROR:
                 return "ERROR: 'pthread_create' function returned an error "
                     "condition";

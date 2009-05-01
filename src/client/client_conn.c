@@ -46,6 +46,15 @@
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
+#ifdef HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#ifdef HAVE_NETDB_H
+# include <netdb.h>
+#endif
 
 
 
@@ -66,22 +75,74 @@
 
 
 
-int client_init(void)
+int client_connect(client_status_coll_t *csc,
+                   client_config_coll_t *ccc)
 {
     enum Exception { REGISTER_ERROR
+                     , GET_TRNMGR_ERROR
+                     , GETADDRINFO_ERROR
+                     , SOCKET_ERROR
+                     , CONNECT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    LIXA_TRACE(("client_init\n"));
+    int out_socket;
+    struct trnmgr_config_s *tc;
+    struct addrinfo hints, *res;
+    
+    LIXA_TRACE(("client_connect\n"));
     TRY {
+        struct sockaddr_in *serv_addr = NULL;
+        
         /* register this thread in library status */
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_register(&global_csc)))
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_register(csc)))
             THROW(REGISTER_ERROR);
         
+        /* search connection parameters */
+        if (LIXA_RC_OK != (ret_cod = client_config_coll_get_trnmgr(
+                               ccc, &tc)))
+            THROW(GET_TRNMGR_ERROR);
+
+        /* resolve address */
+        LIXA_TRACE(("client_connect: resolving address for '%s'\n",
+                    tc->address));
+
+        memset(&hints, 0, sizeof(struct addrinfo));
+        hints.ai_flags = AI_CANONNAME;
+        hints.ai_family = tc->domain;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_protocol = IPPROTO_TCP;
+        
+        if (0 != getaddrinfo(tc->address, NULL, &hints, &res))
+            THROW(GETADDRINFO_ERROR);
+        /* set port */
+        serv_addr = (struct sockaddr_in *)res->ai_addr;
+        serv_addr->sin_port = htons(tc->port);
+                                 
+        /* create new socket */
+        if (LIXA_NULL_FD == (out_socket = socket(tc->domain, SOCK_STREAM, 0)))
+            THROW(SOCKET_ERROR);
+
+        LIXA_TRACE(("client_connect: connecting to server '%s' port "
+                    IN_PORT_T_FORMAT "\n", tc->address, tc->port));
+        if (0 != connect(out_socket, (struct sockaddr *)serv_addr,
+                         sizeof(struct sockaddr_in)))
+            THROW(CONNECT_ERROR);
+    
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case REGISTER_ERROR:
+                break;
+            case GET_TRNMGR_ERROR:
+                break;
+            case GETADDRINFO_ERROR:
+                ret_cod = LIXA_RC_GETADDRINFO_ERROR;
+                break;
+            case SOCKET_ERROR:
+                break;
+            case CONNECT_ERROR:
+                ret_cod = LIXA_RC_CONNECT_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -89,8 +150,11 @@ int client_init(void)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* free memory allocated by getadrinfo function */
+        if (excp > GETADDRINFO_ERROR)
+            freeaddrinfo(res);
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_init/excp=%d/"
+    LIXA_TRACE(("client_connect/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
