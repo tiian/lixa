@@ -156,16 +156,30 @@ extern "C" {
     /**
      * Initialize a new "object" of type client config
      * @param cc OUT object reference
+     * @return a standardized return code
      */
     int client_config_coll_init(client_config_coll_t *ccc);
 
     
 
     /**
-     * Load configuration from environment vars and XML files
+     * The retrieve the configuration of the transaction manager must be
+     * used by the calling thread
+     * @param ccc IN configuration object reference
+     * @param tc OUT reference to the configuration of the transaction manager
      * @return a standardized return code
      */
-    int client_config();
+    int client_config_coll_get_trnmgr(const client_config_coll_t *ccc,
+                                      struct trnmgr_config_s **tc);
+
+
+    
+    /**
+     * Load configuration from environment vars and XML files
+     * @param ccc OUT the object will contain the client configuration
+     * @return a standardized return code
+     */
+    int client_config(client_config_coll_t *ccc);
 
     
 

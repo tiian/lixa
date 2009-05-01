@@ -101,8 +101,56 @@ int client_config_coll_init(client_config_coll_t *ccc)
 }
 
 
+
+int client_config_coll_get_trnmgr(const client_config_coll_t *ccc,
+                                  struct trnmgr_config_s **tc)
+{
+    enum Exception { OBJ_NOT_FOUND
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-int client_config(void)
+    LIXA_TRACE(("client_config_coll_get_trnmgr\n"));
+    TRY {
+        int i;
+        *tc = NULL;
+        for (i = 0; i < ccc->trnmgrs.n; ++i) {
+            if (0 == strcmp(ccc->trnmgrs.array[i].profile,
+                            ccc->profile) ||
+                0 == strlen(ccc->profile)) {
+                LIXA_TRACE(("client_config_coll_get_trnmgr: profile '%s' "
+                            "matches with transaction manager # %d\n",
+                            ccc->profile, i));
+                break;
+            }
+        }
+        if (i == ccc->trnmgrs.n)
+            THROW(OBJ_NOT_FOUND);
+        *tc = &(ccc->trnmgrs.array[i]);
+            
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OBJ_NOT_FOUND:
+                LIXA_TRACE(("client_config_coll_get_trnmgr: profile '%s' "
+                            "does not match any transaction manager\n",
+                            ccc->profile));
+                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_config_coll_get_trnmgr/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+    
+int client_config(client_config_coll_t *ccc)
 {
     enum Exception { PTHREAD_MUTEX_LOCK_ERROR
                      , ALREADY_CONFIGURED
@@ -125,10 +173,10 @@ int client_config(void)
     TRY {
         const char *tmp_str;
         /* lock mutex to start configuration activity */
-        if (0 != (ret_cod = pthread_mutex_lock(&global_ccc.mutex)))
+        if (0 != (ret_cod = pthread_mutex_lock(&ccc->mutex)))
             THROW(PTHREAD_MUTEX_LOCK_ERROR);
 
-        if (global_ccc.configured) {
+        if (ccc->configured) {
             LIXA_TRACE(("client_config: already configured, skipping...\n"));
             THROW(ALREADY_CONFIGURED);
         }
@@ -143,7 +191,7 @@ int client_config(void)
         LIXA_TRACE(("client_config: using transactional profile '%s' for "
                     "subsequent operations\n", tmp_str));        
 
-        if (NULL == (global_ccc.profile = strdup(tmp_str)))
+        if (NULL == (ccc->profile = strdup(tmp_str)))
             THROW(STRDUP_ERROR);
 
         /* checking if available the custom config file */
@@ -174,14 +222,14 @@ int client_config(void)
         if (NULL == (root_element = xmlDocGetRootElement(doc)))
             THROW(XML_DOC_GET_ROOT_ELEMENT_ERROR);
 
-        if (LIXA_RC_OK != (ret_cod = client_parse(&global_ccc, root_element)))
+        if (LIXA_RC_OK != (ret_cod = client_parse(ccc, root_element)))
             THROW(PARSE_CONFIG_ERROR);
 
         /* now the client is CONFIGURED */
-        global_ccc.configured = TRUE;
+        ccc->configured = TRUE;
 
         /* unlock mutex to start configuration activity */
-        if (0 != (ret_cod = pthread_mutex_unlock(&global_ccc.mutex)))
+        if (0 != (ret_cod = pthread_mutex_unlock(&ccc->mutex)))
             THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
 
         /* free parsed document */
@@ -231,7 +279,7 @@ int client_config(void)
                         excp, ret_cod, errno));
         if (excp > PTHREAD_MUTEX_LOCK_ERROR &&
             excp < PTHREAD_MUTEX_UNLOCK_ERROR) {
-            if (0 != pthread_mutex_unlock(&global_ccc.mutex))
+            if (0 != pthread_mutex_unlock(&ccc->mutex))
                 LIXA_TRACE(("client_config/pthread_mutex_unlock: "
                             "errno=%d\n", errno));
         }

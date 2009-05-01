@@ -41,6 +41,8 @@
 # include <errno.h>
 #endif /* HAVE_ERRNO_H */
 
+
+
 #include <lixa_defines.h>
 
 
@@ -250,6 +252,14 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * "shutdown" function error
  */
 #define LIXA_RC_SHUTDOWN_ERROR                 -135
+/**
+ * "getaddrinfo" function error
+ */
+#define LIXA_RC_GETADDRINFO_ERROR              -136
+/**
+ * "connect" function error
+ */
+#define LIXA_RC_CONNECT_ERROR                  -137
 /**
  * "pthread_create" function error
  */

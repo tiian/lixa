@@ -39,6 +39,10 @@
 
 
 
+#include <client_status.h>
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -57,10 +61,13 @@ extern "C" {
 
 
     /**
-     * Client library initialization internal stuff
+     * Connect this client to the transaction manager
+     * @param csc OUT object containing the status of this client
+     * @param ccc OUT object containing the configuration of this client
      * @return a standardized return code
      */
-    int client_init(void);
+    int client_connect(client_status_coll_t *csc,
+                       client_config_coll_t *ccc);
 
     
 
