@@ -140,6 +140,20 @@ struct client_config_coll_s {
      */
     char                        *profile;
     /**
+     * These are the parameters will be used by all the clients of this
+     * process to reach the transaction manager.
+     * This structure is filled once, and all the connection from all the
+     * thread inside the same process, are using it:
+     * 1 process -> 1 value for environment variabile LIXA_PROFILE ->
+     * 1 transaction manager will serve
+     * It's useless to resolve the transaction manager address every time
+     * a client want to connect to it.
+     * If the DNS is updated, the client process must be recycled in order to
+     * reach the server process (transaction manager): this is not so
+     * strange.
+     */
+    struct sockaddr_in           serv_addr;
+    /**
      * Transaction managers' configuration
      */
     struct trnmgr_config_array_s trnmgrs;
