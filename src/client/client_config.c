@@ -34,6 +34,9 @@
 
 
 
+#ifdef HAVE_NETDB_H
+# include <netdb.h>
+#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -83,6 +86,7 @@ int client_config_coll_init(client_config_coll_t *ccc)
         ccc->configured = FALSE;
         ccc->profile = NULL;
         ccc->trnmgrs.n = 0;
+        memset(&ccc->serv_addr, 0, sizeof(struct sockaddr_in));
         ccc->trnmgrs.array = NULL;
      
         THROW(NONE);
@@ -160,14 +164,18 @@ int client_config(client_config_coll_t *ccc)
                      , XML_READ_FILE_ERROR
                      , XML_DOC_GET_ROOT_ELEMENT_ERROR
                      , PARSE_CONFIG_ERROR
+                     , GET_TRNMGR_ERROR
+                     , GETADDRINFO_ERROR
                      , PTHREAD_MUTEX_UNLOCK_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     int fd = 0;
     const char *file_name = NULL;
-    xmlDocPtr doc;
+    xmlDocPtr doc = NULL;
     xmlNode *root_element = NULL;
+    struct trnmgr_config_s *tc;
+    struct addrinfo hints, *res;
     
     LIXA_TRACE(("client_config\n"));
     TRY {
@@ -218,25 +226,45 @@ int client_config(client_config_coll_t *ccc)
         if (NULL == (doc = xmlReadFile(file_name, NULL, 0)))
             THROW(XML_READ_FILE_ERROR);
 
-        /* walking tree */
+        /* walking tree & parse */
         if (NULL == (root_element = xmlDocGetRootElement(doc)))
             THROW(XML_DOC_GET_ROOT_ELEMENT_ERROR);
 
         if (LIXA_RC_OK != (ret_cod = client_parse(ccc, root_element)))
             THROW(PARSE_CONFIG_ERROR);
 
+        /* free parsed document */
+        xmlFreeDoc(doc);
+
+        /* release libxml2 stuff */
+        xmlCleanupParser();
+
+        /* search connection parameters */
+        if (LIXA_RC_OK != (ret_cod = client_config_coll_get_trnmgr(ccc, &tc)))
+            THROW(GET_TRNMGR_ERROR);
+
+        /* resolve address */
+        LIXA_TRACE(("client_config: resolving address for '%s'\n",
+                    tc->address));
+        memset(&hints, 0, sizeof(struct addrinfo));
+        hints.ai_flags = AI_CANONNAME;
+        hints.ai_family = tc->domain;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_protocol = IPPROTO_TCP;
+        
+        if (0 != getaddrinfo(tc->address, NULL, &hints, &res))
+            THROW(GETADDRINFO_ERROR);
+        /* set port */
+        memcpy(&ccc->serv_addr, (struct sockaddr_in *)res->ai_addr,
+               sizeof(struct sockaddr_in));
+        ccc->serv_addr.sin_port = htons(tc->port);
+        
         /* now the client is CONFIGURED */
         ccc->configured = TRUE;
 
         /* unlock mutex to start configuration activity */
         if (0 != (ret_cod = pthread_mutex_unlock(&ccc->mutex)))
             THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
-
-        /* free parsed document */
-        xmlFreeDoc(doc);
-
-        /* release libxml2 stuff */
-        xmlCleanupParser();
 
         THROW(NONE);
     } CATCH {
@@ -263,6 +291,10 @@ int client_config(client_config_coll_t *ccc)
                 ret_cod = LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR;
                 break;
             case PARSE_CONFIG_ERROR:
+            case GET_TRNMGR_ERROR:
+                break;
+            case GETADDRINFO_ERROR:
+                ret_cod = LIXA_RC_GETADDRINFO_ERROR;
                 break;
             case PTHREAD_MUTEX_UNLOCK_ERROR:
                 ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
@@ -283,6 +315,15 @@ int client_config(client_config_coll_t *ccc)
                 LIXA_TRACE(("client_config/pthread_mutex_unlock: "
                             "errno=%d\n", errno));
         }
+        if (excp < NONE && excp > XML_READ_FILE_ERROR) {
+            /* free parsed document */
+            xmlFreeDoc(doc);
+            /* release libxml2 stuff */
+            xmlCleanupParser();
+        }
+        /* free memory allocated by getadrinfo function */
+        if (excp < NONE && excp > GETADDRINFO_ERROR)
+            freeaddrinfo(res);
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
