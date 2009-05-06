@@ -60,6 +60,10 @@
  */
 #define LIXA_RC_OBJ_NOT_FOUND                   +1
 /**
+ * The container is empty
+ */
+#define LIXA_RC_EMPTY_CONTAINER                 +2
+/**
  * An operation can not been performed but can safely bypassed has been
  * requested: the program can go on as no operation was requested
 define LIXA_RC_BYPASSED_OPERATION              +2
@@ -261,37 +265,41 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_CONNECT_ERROR                  -137
 /**
+ * "recv" function error
+ */
+#define LIXA_RC_RECV_ERROR                     -138
+/**
  * "pthread_create" function error
  */
-#define LIXA_RC_PTHREAD_CREATE_ERROR           -140
+#define LIXA_RC_PTHREAD_CREATE_ERROR           -150
 /**
  * "pthread_mutex_lock" function error
  */
-#define LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR       -141
+#define LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR       -151
 /**
  * "pthread_mutex_unlock" function error
  */
-#define LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR     -142
+#define LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR     -152
 /**
  * "pthread_rwlock_wrlock" function error
  */
-#define LIXA_RC_PTHREAD_RWLOCK_WRLOCK_ERROR     -143
+#define LIXA_RC_PTHREAD_RWLOCK_WRLOCK_ERROR    -153
 /**
  * "pthread_rwlock_rlock" function error
  */
-#define LIXA_RC_PTHREAD_RWLOCK_RDLOCK_ERROR      -144
+#define LIXA_RC_PTHREAD_RWLOCK_RDLOCK_ERROR    -154
 /**
  * "pthread_rwlock_unlock" function error
  */
-#define LIXA_RC_PTHREAD_RWLOCK_UNLOCK_ERROR     -145
+#define LIXA_RC_PTHREAD_RWLOCK_UNLOCK_ERROR    -155
 /**
  * "xmlReadFile" function error
  */
-#define LIXA_RC_XML_READ_FILE_ERROR             -200
+#define LIXA_RC_XML_READ_FILE_ERROR            -200
 /**
  * "xmlDocGetRootElement" function error
  */
-#define LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR  -201
+#define LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR -201
 
 
 /***********************************************************************

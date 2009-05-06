@@ -83,12 +83,15 @@ int client_connect(client_status_coll_t *csc,
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     int out_socket;
+    int pos;
     struct trnmgr_config_s *tc;
     
     LIXA_TRACE(("client_connect\n"));
     TRY {
+        client_status_t *cs;
+        
         /* register this thread in library status */
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_register(csc)))
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_register(csc, &pos)))
             THROW(REGISTER_ERROR);
         
         /* search connection parameters */
@@ -105,7 +108,10 @@ int client_connect(client_status_coll_t *csc,
         if (0 != connect(out_socket, (struct sockaddr *)&ccc->serv_addr,
                          sizeof(struct sockaddr_in)))
             THROW(CONNECT_ERROR);
-    
+
+        cs = client_status_coll_get_status(csc, pos);
+        client_status_set_sockfd(cs, out_socket);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -126,6 +132,73 @@ int client_connect(client_status_coll_t *csc,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("client_connect/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int client_disconnect(client_status_coll_t *csc)
+{
+    enum Exception { COLL_SEARCH_ERROR
+                     , SHUTDOWN_WR_ERROR
+                     , RECV_ERROR
+                     , SHUTDOWN_RD_ERROR
+                     , COLL_DEL_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("client_disconnect\n"));
+    TRY {
+        int pos, fd;
+        client_status_t *cs;
+        char dummy_buffer[1000];
+
+        /* retrieve the socket */
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_search(csc, &pos)))
+            THROW(COLL_SEARCH_ERROR);
+        cs = client_status_coll_get_status(csc, pos);
+        fd = client_status_get_sockfd(cs);
+        
+        /* close write half socket */
+        if (0 != shutdown(fd, SHUT_WR))
+            THROW(SHUTDOWN_WR_ERROR);
+
+        /* wait server reply */
+        if (0 != (recv(fd, dummy_buffer, sizeof(dummy_buffer), 0)))
+            THROW(RECV_ERROR);
+
+        /* close read half socket */
+        if (0 != shutdown(fd, SHUT_RD) && ENOTCONN != errno)
+            THROW(SHUTDOWN_RD_ERROR);
+
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_del(csc, pos)))
+            THROW(COLL_DEL_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case COLL_SEARCH_ERROR:
+                break;
+            case SHUTDOWN_WR_ERROR:
+                ret_cod = LIXA_RC_SHUTDOWN_ERROR;
+                break;
+            case RECV_ERROR:
+                ret_cod = LIXA_RC_RECV_ERROR;
+                break;
+            case SHUTDOWN_RD_ERROR:
+                ret_cod = LIXA_RC_SHUTDOWN_ERROR;
+                break;
+            case COLL_DEL_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_disconnect/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
