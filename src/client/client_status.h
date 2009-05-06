@@ -62,7 +62,7 @@
 
 
 /**
- * It's contain the status of a thread connected to a lixa transaction
+ * It contains the status of a thread connected to a lixa transaction
  * manager
  */
 struct client_status_s {
@@ -71,6 +71,10 @@ struct client_status_s {
      * or not (garbage can be removed)
      */
     int   active;
+    /**
+     * The file descriptor associated to the socket connected to the server
+     */
+    int   sockfd;
 };
 
 typedef struct client_status_s client_status_t;
@@ -177,10 +181,32 @@ extern "C" {
     
     /**
      * Set active status for slot
-     * @param cs ON object reference
+     * @param cs IN/OUT object reference
      */
     static inline void client_status_active(client_status_t *cs) {
         cs->active = TRUE; }
+
+
+
+    /**
+     * Set the file descriptor associated to the socket used for client/server
+     * communication
+     * @param cs IN/OUT object reference
+     * @param fd IN a valid file descriptor
+     */
+    static inline void client_status_set_sockfd(client_status_t *cs, int fd) {
+        cs->sockfd = fd; }
+    
+    
+
+    /**
+     * Get the file descriptor associated to the socket used for client/server
+     * communication
+     * @param cs IN object reference
+     * @return the file descriptor
+     */
+    static inline int client_status_get_sockfd(const client_status_t *cs) {
+        return cs->sockfd; }
 
 
     
@@ -196,11 +222,25 @@ extern "C" {
 
 
     /**
+     * Return the status of a specific thread
+     * @param csc IN object reference
+     * @param pos IN position of the desired thread
+     *               (@ref client_status_coll_search)
+     * @return a reference to the desired object
+     */
+    static inline client_status_t *client_status_coll_get_status(
+        client_status_coll_t *csc, int pos) {
+        return &csc->status_data[pos]; }
+
+    
+
+    /**
      * Register the current thread in the status set
      * @param csc IN/OUT object reference
+     * @param pos OUT the position of the slot assigned to this thread
      * @return a standardized return code
      */
-    int client_status_coll_register(client_status_coll_t *csc);
+    int client_status_coll_register(client_status_coll_t *csc, int *pos);
 
 
 
@@ -211,6 +251,16 @@ extern "C" {
      * @return a standardized return code
      */
     int client_status_coll_add(client_status_coll_t *csc, int *status_pos);
+
+
+
+    /**
+     * Remove a client status from the set
+     * @param csc IN/OUT object reference
+     * @param pos IN the position of the slot must be released
+     * @return a standardize return code
+     */
+    int client_status_coll_del(client_status_coll_t *csc, int pos);
 
 
     

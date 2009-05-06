@@ -46,6 +46,8 @@ const char *lixa_strerror(int ret_cod)
                 return "WARNING: operation was not performed because it can "
                         "not be requested";
 */              
+            case LIXA_RC_EMPTY_CONTAINER:
+                return "WARNING: the container is empty";
             case LIXA_RC_OBJ_NOT_FOUND:
                 return "WARNING: object not found";
             case LIXA_RC_OK:
@@ -159,6 +161,9 @@ const char *lixa_strerror(int ret_cod)
                     "condition";
             case LIXA_RC_CONNECT_ERROR:
                 return "ERROR: 'connect' function returned an error "
+                    "condition";
+            case LIXA_RC_RECV_ERROR:
+                return "ERROR: 'recv' function returned an error "
                     "condition";
             case LIXA_RC_PTHREAD_CREATE_ERROR:
                 return "ERROR: 'pthread_create' function returned an error "

@@ -90,6 +90,7 @@ void client_status_init(client_status_t *cs)
 {
     LIXA_TRACE(("client_status_init: begin\n"));
     cs->active = FALSE;
+    cs->sockfd = LIXA_NULL_FD;
     LIXA_TRACE(("client_status_init: end\n"));
     return;
 }
@@ -131,7 +132,7 @@ int client_status_coll_init(client_status_coll_t *csc)
 
 
 
-int client_status_coll_register(client_status_coll_t *csc)
+int client_status_coll_register(client_status_coll_t *csc, int *pos)
 {
     enum Exception { INTERNAL_ERROR
                      , REGISTER_ERROR
@@ -140,18 +141,16 @@ int client_status_coll_register(client_status_coll_t *csc)
     
     LIXA_TRACE(("client_status_coll_register\n"));
     TRY {
-        int pos = 0;
-        int slot = 0;
+        *pos = 0;
 
-        switch (ret_cod = client_status_coll_search(csc, &pos)) {
+        switch (ret_cod = client_status_coll_search(csc, pos)) {
             case LIXA_RC_OK:
                 LIXA_TRACE(("client_status_coll_register: thread already "
                             "registered.\n"));
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 /* register the new thread */
-                if (LIXA_RC_OK != (ret_cod = client_status_coll_add(
-                                       csc, &slot)))
+                if (LIXA_RC_OK != (ret_cod = client_status_coll_add(csc, pos)))
                     THROW(REGISTER_ERROR);
                 break;
             default:
@@ -315,6 +314,88 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
             free(new_index_data);
     } /* TRY-CATCH */
     LIXA_TRACE(("client_status_coll_add/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int client_status_coll_del(client_status_coll_t *csc, int pos)
+{
+    enum Exception { RWLOCK_WRLOCK_ERROR
+                     , EMPTY_INDEX
+                     , MALLOC_ERROR
+                     , RWLOCK_UNLOCK_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    struct client_status_index_s *new_index_data = NULL;
+
+    LIXA_TRACE(("client_status_coll_del\n"));
+    TRY {
+        int new_index_size = 0, i = 0;
+        
+        /* reset the status slot */
+        client_status_init(&(csc->status_data[pos]));
+        
+        /* take an exclusive lock to avoid collisions */
+        if (0 != pthread_rwlock_wrlock(&(csc->rwlock)))
+            THROW(RWLOCK_WRLOCK_ERROR);
+
+        if (csc->index_size < 1)
+            THROW(EMPTY_INDEX);
+
+        new_index_size = csc->index_size - 1;
+        if (new_index_size > 0) {
+            if (NULL == (new_index_data = malloc(
+                         sizeof(struct client_status_index_s) *
+                         new_index_size)))
+                THROW(MALLOC_ERROR);
+            /* @@@ copy from old to new using 2 memcpy ... */
+        }
+        
+        /* release exclusive lock */
+        if (0 != pthread_rwlock_unlock(&(csc->rwlock)))
+            THROW(RWLOCK_UNLOCK_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case RWLOCK_WRLOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_RWLOCK_WRLOCK_ERROR;
+                break;
+            case EMPTY_INDEX:
+                LIXA_TRACE(("client_status_coll_del: the index is empty (%d), "
+                            "no client status can be removed from the "
+                            "container\n", csc->index_size));
+                ret_cod = LIXA_RC_EMPTY_CONTAINER;
+                break;
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case RWLOCK_UNLOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_RWLOCK_UNLOCK_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        
+        /* recovery actions */
+        if (NONE != excp)
+            LIXA_TRACE(("client_status_coll_del: values before recovery "
+                        "actions excp=%d/ret_cod=%d/errno=%d\n",
+                        excp, ret_cod, errno));
+        if (excp > RWLOCK_WRLOCK_ERROR && excp < RWLOCK_UNLOCK_ERROR) {
+            ret_cod = pthread_rwlock_unlock(&(csc->rwlock));
+            if (0 != ret_cod)
+                LIXA_TRACE(("client_status_coll_del/pthread_rwunlock_unlock: "
+                            "ret_cod=%d/errno=%d\n", ret_cod, errno));
+        }
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_status_coll_del/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

@@ -71,6 +71,15 @@ extern "C" {
 
     
 
+    /**
+     * Disconnect this client from the transaction manager
+     * @param csc OUT object containing the status of this client
+     * @return a standardized return code
+     */     
+    int client_disconnect(client_status_coll_t *csc);
+
+    
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -32,29 +32,45 @@
  */
 
 #include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
 #include <tx.h>
 
-#include <pthread.h>
+
+
+void *a_thread(void *useless)
+{
+    tx_open();
+    sleep(3);
+    tx_close();
+}
+
 
 
 int main(int argc, char *argv[])
 {
     pthread_t foo;
+    int i;
 
-    tx_open();
-    tx_open();
-    tx_open();
+        /*
+    for (i = 0; i < 99999; ++i) {
+        pthread_create(&foo, NULL, a_thread, NULL);
+        pthread_create(&foo, NULL, a_thread, NULL);
+        pthread_create(&foo, NULL, a_thread, NULL);
+        pthread_create(&foo, NULL, a_thread, NULL);
+        pthread_create(&foo, NULL, a_thread, NULL);
+        pthread_create(&foo, NULL, a_thread, NULL);
+        pthread_create(&foo, NULL, a_thread, NULL);
+        pthread_create(&foo, NULL, a_thread, NULL);
+        pthread_create(&foo, NULL, a_thread, NULL);
+        sleep(1);
+    }
+        */
 
-    pthread_create(&foo, NULL, tx_open, NULL);
-    pthread_create(&foo, NULL, tx_open, NULL);
-    pthread_create(&foo, NULL, tx_open, NULL);
-    pthread_create(&foo, NULL, tx_open, NULL);
-    pthread_create(&foo, NULL, tx_open, NULL);
-
-    tx_open();
-    tx_open();
-    tx_open();
+    a_thread(&foo);
     
-    sleep(5);
+    sleep(10);
+    
     return 0;
 }
