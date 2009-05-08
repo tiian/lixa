@@ -333,7 +333,7 @@ int client_status_coll_del(client_status_coll_t *csc, int pos)
 
     LIXA_TRACE(("client_status_coll_del\n"));
     TRY {
-        int new_index_size = 0, i = 0;
+        int new_index_size = 0;
         
         /* reset the status slot */
         client_status_init(&(csc->status_data[pos]));
@@ -351,7 +351,18 @@ int client_status_coll_del(client_status_coll_t *csc, int pos)
                          sizeof(struct client_status_index_s) *
                          new_index_size)))
                 THROW(MALLOC_ERROR);
-            /* @@@ copy from old to new using 2 memcpy ... */
+            if (pos > 0)
+                memcpy(new_index_data, csc->index_data, pos);
+            if (pos < csc->index_size - 1)
+                memcpy(new_index_data + pos, csc->index_data + pos + 1,
+                       csc->index_size - pos - 1);
+            csc->index_size = new_index_size;
+            free(csc->index_data);
+            csc->index_data = new_index_data;
+        } else {
+            csc->index_size = 0;
+            free(csc->index_data);
+            csc->index_data = NULL;
         }
         
         /* release exclusive lock */
