@@ -228,6 +228,9 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
         } else {
             new_index_data[i].key = key;
         }
+        LIXA_TRACE(("client_status_coll_add: index key inserted ad pos %d, "
+                    "old index size = %d, new index size = %d\n",
+                    i, csc->index_size, new_index_size));
         /* now i is the pos in index of the new key */
 
         if (csc->status_used < csc->status_size) {
@@ -241,8 +244,6 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
                 THROW(OBJ_CORRUPTED);
             free_slot = j;
         } else {
-            LIXA_TRACE(("client_status_coll_add: before realloc, "
-                        "csc->status_data = %p\n", csc->status_data));
             new_status_size = csc->status_size + 1;
             if (NULL == (new_status_data = realloc(
                              csc->status_data,
@@ -250,9 +251,11 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
                 THROW(REALLOC_ERROR);
             csc->status_data = new_status_data;
             free_slot = csc->status_size;
-            LIXA_TRACE(("client_status_coll_add: after realloc, "
-                        "csc->status_data = %p\n", csc->status_data));
         }
+        LIXA_TRACE(("client_status_coll_add: status inserted at pos %d, "
+                    "old status size = %d, new status size = %d, "
+                    "old used status = %d\n", free_slot, csc->status_size,
+                    new_status_size, csc->status_used));
         /* reset & set slot */
         client_status_init(&(csc->status_data[free_slot]));
         client_status_active(&(csc->status_data[free_slot]));
