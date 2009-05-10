@@ -140,7 +140,7 @@ int client_connect(client_status_coll_t *csc,
 
 int client_disconnect(client_status_coll_t *csc)
 {
-    enum Exception { COLL_SEARCH_ERROR
+    enum Exception { COLL_GET_CS_ERROR
                      , SHUTDOWN_WR_ERROR
                      , RECV_ERROR
                      , SHUTDOWN_RD_ERROR
@@ -150,15 +150,14 @@ int client_disconnect(client_status_coll_t *csc)
     
     LIXA_TRACE(("client_disconnect\n"));
     TRY {
-        int pos, fd;
-        client_status_t *cs;
+        int fd;
+        client_status_t cs;
         char dummy_buffer[1000];
 
         /* retrieve the socket */
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_search(csc, &pos)))
-            THROW(COLL_SEARCH_ERROR);
-        cs = client_status_coll_get_status(csc, pos);
-        fd = client_status_get_sockfd(cs);
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(csc, &cs)))
+            THROW(COLL_GET_CS_ERROR);
+        fd = client_status_get_sockfd(&cs);
         
         /* close write half socket */
         if (0 != shutdown(fd, SHUT_WR))
@@ -172,13 +171,13 @@ int client_disconnect(client_status_coll_t *csc)
         if (0 != shutdown(fd, SHUT_RD) && ENOTCONN != errno)
             THROW(SHUTDOWN_RD_ERROR);
 
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_del(csc, pos)))
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_del(csc)))
             THROW(COLL_DEL_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case COLL_SEARCH_ERROR:
+            case COLL_GET_CS_ERROR:
                 break;
             case SHUTDOWN_WR_ERROR:
                 ret_cod = LIXA_RC_SHUTDOWN_ERROR;
