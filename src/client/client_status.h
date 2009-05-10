@@ -222,7 +222,8 @@ extern "C" {
 
 
     /**
-     * Return the status of a specific thread
+     * Return the status of a specific thread; this method MUST be protected
+     * by a rdlock because the array can change while the method is in progress
      * @param csc IN object reference
      * @param pos IN position of the desired thread
      *               (@ref client_status_coll_search)
@@ -234,6 +235,19 @@ extern "C" {
 
     
 
+    /**
+     * Retrieve a COPY of the current thread client status; this method is
+     * safe because it's internally lock protected
+     * @param csc IN object reference
+     * @param cs OUT reference to the output object (current thread client
+     *               status)
+     * @return a standardized return code
+     */
+    int client_status_coll_get_cs(client_status_coll_t *csc,
+                                  client_status_t *cs);
+
+
+    
     /**
      * Register the current thread in the status set
      * @param csc IN/OUT object reference
@@ -257,10 +271,9 @@ extern "C" {
     /**
      * Remove a client status from the set
      * @param csc IN/OUT object reference
-     * @param pos IN the position of the slot must be released
      * @return a standardize return code
      */
-    int client_status_coll_del(client_status_coll_t *csc, int pos);
+    int client_status_coll_del(client_status_coll_t *csc);
 
 
     
