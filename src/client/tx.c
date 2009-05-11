@@ -34,6 +34,12 @@
 
 
 
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
+
+
+
 #include <tx.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
@@ -85,6 +91,7 @@ int tx_open(void)
     } /* TRY-CATCH */
     LIXA_TRACE(("tx_open/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    assert(ret_cod == TX_OK);
     return ret_cod;
 }
 
@@ -116,6 +123,7 @@ int tx_close(void)
     } /* TRY-CATCH */
     LIXA_TRACE(("tx_close/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    assert(ret_cod == TX_OK);
     return ret_cod;
 }
 

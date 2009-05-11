@@ -28,8 +28,8 @@ LT_LIXAB_REVISION=0
 AC_PRESERVE_HELP_ORDER
 AC_ARG_ENABLE([debug],
         AS_HELP_STRING([--enable-debug],
-                [enable debug code normally skipped]),
-        [_DEBUG="yes"; CPPFLAGS="$CPPFLAGS -D_DEBUG"], [_DEBUG="no"] )
+                [enable debug code (assert statements)]),
+        [NDEBUG="no"], [NDEBUG="yes"; CPPFLAGS="$CPPFLAGS -DNDEBUG"] )
 AC_ARG_ENABLE([trace],
         AS_HELP_STRING([--disable-trace],
                 [disable trace feature (not suggested)]),
@@ -39,7 +39,7 @@ AM_PROG_CC_C_O
 AC_PROG_RANLIB
 AC_PROG_LIBTOOL
 
-AC_CHECK_HEADERS(arpa/inet.h)
+AC_CHECK_HEADERS(arpa/inet.h assert.h)
 AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_HEADERS(libxml/xmlversion.h libxml/tree.h libxml/parser.h)

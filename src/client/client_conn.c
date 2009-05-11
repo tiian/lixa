@@ -52,6 +52,9 @@
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 
 
 
@@ -103,8 +106,8 @@ int client_connect(client_status_coll_t *csc,
         if (LIXA_NULL_FD == (out_socket = socket(tc->domain, SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
 
-        LIXA_TRACE(("client_connect: connecting to server '%s' port "
-                    IN_PORT_T_FORMAT "\n", tc->address, tc->port));
+        LIXA_TRACE(("client_connect: connecting socket %d to server '%s' port "
+                    IN_PORT_T_FORMAT "\n", out_socket, tc->address, tc->port));
         if (0 != connect(out_socket, (struct sockaddr *)&ccc->serv_addr,
                          sizeof(struct sockaddr_in)))
             THROW(CONNECT_ERROR);
@@ -144,6 +147,7 @@ int client_disconnect(client_status_coll_t *csc)
                      , SHUTDOWN_WR_ERROR
                      , RECV_ERROR
                      , SHUTDOWN_RD_ERROR
+                     , CLOSE_ERROR
                      , COLL_DEL_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -171,6 +175,9 @@ int client_disconnect(client_status_coll_t *csc)
         if (0 != shutdown(fd, SHUT_RD) && ENOTCONN != errno)
             THROW(SHUTDOWN_RD_ERROR);
 
+        if (0 != close(fd))
+            THROW(CLOSE_ERROR);
+        
         if (LIXA_RC_OK != (ret_cod = client_status_coll_del(csc)))
             THROW(COLL_DEL_ERROR);
         
@@ -187,6 +194,9 @@ int client_disconnect(client_status_coll_t *csc)
                 break;
             case SHUTDOWN_RD_ERROR:
                 ret_cod = LIXA_RC_SHUTDOWN_ERROR;
+                break;
+            case CLOSE_ERROR:
+                ret_cod = LIXA_RC_CLOSE_ERROR;
                 break;
             case COLL_DEL_ERROR:
                 break;
