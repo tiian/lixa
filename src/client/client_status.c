@@ -34,6 +34,9 @@
 
 
 
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
@@ -366,7 +369,7 @@ int client_status_coll_del(client_status_coll_t *csc)
                         PTHREAD_T_FORMAT ", csc->index_data[pos].key = "
                         PTHREAD_T_FORMAT "\n", whoami,
                         csc->index_data[pos].key));
-            exit(1);
+            assert(0);
         }
     }
 #endif /* NDEBUG */
