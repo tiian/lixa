@@ -143,7 +143,7 @@ int client_status_coll_register(client_status_coll_t *csc, int *pos)
     TRY {
         *pos = 0;
 
-        switch (ret_cod = client_status_coll_search(csc, pos)) {
+        switch (ret_cod = client_status_coll_search(csc, pos, TRUE)) {
             case LIXA_RC_OK:
                 LIXA_TRACE(("client_status_coll_register: thread already "
                             "registered.\n"));
@@ -351,13 +351,14 @@ int client_status_coll_del(client_status_coll_t *csc)
         if (csc->index_size < 1)
             THROW(EMPTY_INDEX);
 
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_search(csc, &pos)))
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_search(
+                               csc, &pos, FALSE)))
             THROW(COLL_SEARCH);
         
         if (pos >= csc->index_size)
             THROW(OBJ_CORRUPTED);
 
-#ifdef _DEBUG
+#ifndef NDEBUG
     {
         pthread_t whoami = pthread_self();
         if (csc->index_data[pos].key != whoami) {
@@ -368,7 +369,7 @@ int client_status_coll_del(client_status_coll_t *csc)
             exit(1);
         }
     }
-#endif /* _DEBUG */
+#endif /* NDEBUG */
         
         /* reset the status slot */
         client_status_init(&(csc->status_data[csc->index_data[pos].value]));
@@ -451,7 +452,7 @@ int client_status_coll_del(client_status_coll_t *csc)
 
 
 
-int client_status_coll_search(client_status_coll_t *csc, int *pos)
+int client_status_coll_search(client_status_coll_t *csc, int *pos, int lock)
 {
     enum Exception { RWLOCK_RDLOCK_ERROR
                      , NOT_FOUND1
@@ -466,7 +467,7 @@ int client_status_coll_search(client_status_coll_t *csc, int *pos)
         pthread_t key = pthread_self();
 
         /* take a shared lock to avoid collisions */
-        if (0 != pthread_rwlock_rdlock(&(csc->rwlock)))
+        if (lock && 0 != pthread_rwlock_rdlock(&(csc->rwlock)))
             THROW(RWLOCK_RDLOCK_ERROR);
 
         if (NULL == csc->index_data)
@@ -510,7 +511,7 @@ int client_status_coll_search(client_status_coll_t *csc, int *pos)
             LIXA_TRACE(("client_status_coll_search: values before recovery "
                         "actions excp=%d/ret_cod=%d/errno=%d\n",
                         excp, ret_cod, errno));
-        if (excp > RWLOCK_RDLOCK_ERROR) {
+        if (lock && excp > RWLOCK_RDLOCK_ERROR) {
             int ret_cod2 = pthread_rwlock_unlock(&(csc->rwlock));
             if (0 != ret_cod2)
                 LIXA_TRACE(("client_status_coll_search/pthread_mutex_unlock: "
@@ -540,7 +541,8 @@ int client_status_coll_get_cs(client_status_coll_t *csc,
         if (0 != pthread_rwlock_rdlock(&(csc->rwlock)))
             THROW(RWLOCK_RDLOCK_ERROR);
 
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_search(csc, &pos)))
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_search(
+                               csc, &pos, FALSE)))
             THROW(COLL_SEARCH_ERROR);
 
         *cs = csc->status_data[csc->index_data[pos].value];

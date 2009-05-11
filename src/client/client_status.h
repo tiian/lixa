@@ -280,10 +280,13 @@ extern "C" {
     /**
      * Search the position of the current thread inside the index
      * @param csc IN object reference
-     * @param pos PUT the position inside status
+     * @param pos OUT the position inside status
+     * @param lock IN should the method lock the container: FALSE if the
+     *                container is already locked, TRUE otherwise
      * @return a standardized return code
      */
-    int client_status_coll_search(client_status_coll_t *csc, int *pos);
+    int client_status_coll_search(client_status_coll_t *csc, int *pos,
+                                  int lock);
 
 
     

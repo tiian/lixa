@@ -1483,7 +1483,7 @@ Optional Features and Packages:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --enable-debug          enable debug code normally skipped
+  --enable-debug          enable debug code (assert statements)
   --disable-trace         disable trace feature (not suggested)
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
@@ -3537,9 +3537,9 @@ LT_LIXAB_REVISION=0
 
 # Check whether --enable-debug was given.
 if test "${enable_debug+set}" = set; then
-  enableval=$enable_debug; _DEBUG="yes"; CPPFLAGS="$CPPFLAGS -D_DEBUG"
+  enableval=$enable_debug; NDEBUG="no"
 else
-  _DEBUG="no"
+  NDEBUG="yes"; CPPFLAGS="$CPPFLAGS -DNDEBUG"
 fi
 
 # Check whether --enable-trace was given.
@@ -20021,7 +20021,8 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 
 
 
-for ac_header in arpa/inet.h
+
+for ac_header in arpa/inet.h assert.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then

@@ -108,7 +108,7 @@ void lixa_trace(const char *fmt, ...)
     } /* if (lixa_trace_mutex_init) */
     /* custom message */
     vfprintf(stderr, fmt, args);
-#ifdef _DEBUG
+#ifndef NDEBUG
     fflush(stderr);
 #endif
     /* remove the lock from mutex */
