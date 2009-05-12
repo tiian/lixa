@@ -20,3 +20,7 @@ malformed configuration files
 lixad should be able to run as a console process, not only as a daemon, for
 debug purpouses. It's sufficient to skip "daemonize()" function and it seems
 all works in console environment
+
+2009051201
+client status collection index could use a double array instead of allocating
+and freeing the array every time insert/delete operation is asked

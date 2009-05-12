@@ -201,6 +201,7 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
         int new_index_size = 0, i = 0;
         int free_slot = 0;
         int new_status_size = csc->status_size;
+        int inserted = FALSE;
 
         /* take an exclusive lock to avoid collisions */
         if (0 != pthread_rwlock_wrlock(&(csc->rwlock)))
@@ -215,12 +216,14 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
 
         /* copy & insert */
         if (csc->index_size > 0) {
-            while (i < new_index_size) {
+            while (i < csc->index_size) {
+                assert(csc->index_data[i].key != key);
                 if (csc->index_data[i].key < key)
                     new_index_data[i] = csc->index_data[i];
                 else {
                     /* insert new key */
                     new_index_data[i].key = key;
+                    inserted = TRUE;
                     memcpy(new_index_data + i + 1, csc->index_data + i,
                            (csc->index_size - i) *
                            sizeof(struct client_status_index_s));
@@ -228,9 +231,9 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
                 }
                 ++i;
             } /* while (i < new_index_size) */
-        } else {
-            new_index_data[i].key = key;
         }
+        if (!inserted)
+            new_index_data[i].key = key;
         LIXA_TRACE(("client_status_coll_add: index key inserted at pos %d, "
                     "old index size = %d, new index size = %d\n",
                     i, csc->index_size, new_index_size));
@@ -277,8 +280,8 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
         csc->index_data = new_index_data;
         csc->index_data[i].value = free_slot;
         
-        LIXA_TRACE(("client_status_coll_add: index key = " PTHREAD_T_FORMAT ", "
-                    "index value = %d\n", key, free_slot));
+        LIXA_TRACE(("client_status_coll_add: index key = "
+                    PTHREAD_T_FORMAT ", index value = %d\n", key, free_slot));
         
         /* release exclusive lock */
         if (0 != pthread_rwlock_unlock(&(csc->rwlock)))
@@ -369,7 +372,7 @@ int client_status_coll_del(client_status_coll_t *csc)
                         PTHREAD_T_FORMAT ", csc->index_data[pos].key = "
                         PTHREAD_T_FORMAT "\n", whoami,
                         csc->index_data[pos].key));
-            assert(0);
+            assert(csc->index_data[pos].key != whoami);
         }
     }
 #endif /* NDEBUG */
