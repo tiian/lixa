@@ -146,7 +146,6 @@ int client_disconnect(client_status_coll_t *csc)
     enum Exception { COLL_GET_CS_ERROR
                      , SHUTDOWN_WR_ERROR
                      , RECV_ERROR
-                     , SHUTDOWN_RD_ERROR
                      , CLOSE_ERROR
                      , COLL_DEL_ERROR
                      , NONE } excp;
@@ -164,17 +163,15 @@ int client_disconnect(client_status_coll_t *csc)
         fd = client_status_get_sockfd(&cs);
         
         /* close write half socket */
+        LIXA_TRACE(("client_disconnect: shutdown write, fd = %d\n", fd));
         if (0 != shutdown(fd, SHUT_WR))
             THROW(SHUTDOWN_WR_ERROR);
-
+        
         /* wait server reply */
         if (0 != (recv(fd, dummy_buffer, sizeof(dummy_buffer), 0)))
             THROW(RECV_ERROR);
-
-        /* close read half socket */
-        if (0 != shutdown(fd, SHUT_RD) && ENOTCONN != errno)
-            THROW(SHUTDOWN_RD_ERROR);
-
+        
+        LIXA_TRACE(("client_disconnect: close socket, fd = %d\n", fd));
         if (0 != close(fd))
             THROW(CLOSE_ERROR);
         
@@ -191,9 +188,6 @@ int client_disconnect(client_status_coll_t *csc)
                 break;
             case RECV_ERROR:
                 ret_cod = LIXA_RC_RECV_ERROR;
-                break;
-            case SHUTDOWN_RD_ERROR:
-                ret_cod = LIXA_RC_SHUTDOWN_ERROR;
                 break;
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
