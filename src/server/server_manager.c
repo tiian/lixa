@@ -273,8 +273,6 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
 int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 {
     enum Exception { READ_ERROR
-                     , SHUTDOWN_ERROR1
-                     , SHUTDOWN_ERROR2
                      , CLOSE_ERROR
                      , FREE_SLOTS
                      , XML_PROC
@@ -296,12 +294,8 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
             /* @@@ check what happens to current transaction */
 
             /* close socket, release file descriptor and thread status slot */
-            if (0 > shutdown(ts->poll_array[slot_id].fd, SHUT_RD) &&
-                ENOTCONN != errno)
-                THROW(SHUTDOWN_ERROR1);
-            if (0 > shutdown(ts->poll_array[slot_id].fd, SHUT_WR) &&
-                ENOTCONN != errno)
-                THROW(SHUTDOWN_ERROR2);
+            LIXA_TRACE(("server_manager_pollin_data: close socket, "
+                        "fd = %d\n", ts->poll_array[slot_id].fd));
             if (0 != close(ts->poll_array[slot_id].fd))
                 THROW(CLOSE_ERROR);
             if (LIXA_RC_OK != (ret_cod =
@@ -319,10 +313,6 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
         switch (excp) {
             case READ_ERROR:
                 ret_cod = LIXA_RC_READ_ERROR;
-                break;
-            case SHUTDOWN_ERROR1:
-            case SHUTDOWN_ERROR2:
-                ret_cod = LIXA_RC_SHUTDOWN_ERROR;
                 break;
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;

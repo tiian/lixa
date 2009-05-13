@@ -42,7 +42,7 @@
 void *a_thread(void *useless)
 {
     int i;
-    for (i = 0; i < 1000; ++i) {
+    for (i = 0; i < 1; ++i) {
         tx_open();
         tx_close();
     }
@@ -63,12 +63,12 @@ int main(int argc, char *argv[])
     pthread_create(&foo, NULL, a_thread, NULL);
     pthread_create(&foo, NULL, a_thread, NULL);
     pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
     sleep(300);
     */
     
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
     
     a_thread(&foo);
     /*
