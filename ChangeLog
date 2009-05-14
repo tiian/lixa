@@ -24,3 +24,10 @@ all works in console environment
 2009051201
 client status collection index could use a double array instead of allocating
 and freeing the array every time insert/delete operation is asked
+
+2009051401
+a client that performs a lot of tx_open/tx_close can saturate all the available
+TCP/IP connection and "connect" functions fail.
+SO_LINGER could be a "solution", but this may generate different issues as
+W. Richard Stevens explained in "UNIX network programming".
+
