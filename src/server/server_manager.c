@@ -60,10 +60,11 @@ int server_manager(struct server_config_s *sc,
                    struct thread_status_array_s *tsa)
 {
     enum Exception { MALLOC_ERROR
+                     , STATUS_FILE_ERROR
                      , PTHREAD_CREATE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
+
     LIXA_TRACE(("server_manager\n"));
     TRY {
         int i;
@@ -86,6 +87,10 @@ int server_manager(struct server_config_s *sc,
             tsa->array[i].poll_array = NULL;
             tsa->array[i].active_clients = 0;
             tsa->array[i].client_array = NULL;
+            tsa->array[i].status = NULL;
+            if (LIXA_RC_OK != (ret_cod = status_record_load(
+                                   &tsa->array[i].status)))
+                THROW(STATUS_FILE_ERROR);
             tsa->array[i].excp = tsa->array[i].ret_cod =
                 tsa->array[i].last_errno = 0;
             if (i == 0) { /* listener */
@@ -105,6 +110,8 @@ int server_manager(struct server_config_s *sc,
         switch (excp) {
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case STATUS_FILE_ERROR:
                 break;
             case PTHREAD_CREATE_ERROR:
                 ret_cod = LIXA_RC_PTHREAD_CREATE_ERROR;
@@ -144,8 +151,7 @@ void *server_manager_thread(void *void_ts)
                     "tid = " PTHREAD_T_FORMAT "\n", ts->id, ts->tid));
 
         if (LIXA_RC_OK != (ret_cod = server_manager_add_poll(
-                               ts,
-                               ts->tpa->array[ts->id].pipefd[0])))
+                               ts, ts->tpa->array[ts->id].pipefd[0])))
             THROW(ADD_POLL_ERROR);
         while (TRUE) {
             LIXA_TRACE(("server_manager_thread: id = %d, entering poll...\n",

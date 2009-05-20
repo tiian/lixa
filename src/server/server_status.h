@@ -94,11 +94,82 @@ struct thread_pipe_array_s {
 
 /**
  * It's the struct used to keep the status of a client
+ * @@@ is this useful or can it be removed?
  */
 struct server_client_status_s {
     int foo;
 };
-    
+
+
+
+/**
+ * This is the control record type and is used for first record only
+ */
+struct status_record_ctrl_s {
+    /**
+     * It's the signature of the first 4 bytes and can be used
+     * by "file" utility to discover a file is a lixa status file
+     */
+    uint32_t magic_number;
+    /**
+     * Used to distinguish status files produced and used by different
+     * versions of the software
+     */
+    uint32_t level;
+    /**
+     * First record of the used blocks chain (0 means the chain is empty)
+     */
+    uint32_t first_used_block;
+    /**
+     * First record of the free blocks chain (0 means the chain is empty)
+     */
+    uint32_t first_free_block;
+};
+
+
+
+/**
+ * This struct is used to separate scaffolding from payload in data records;
+ * all the payload data are kept by this structure
+ */
+struct status_record_data_payload_s {
+    int foo;
+};
+
+
+
+/**
+ * This is the data record type and is used for all but first records
+ */
+struct status_record_data_s {
+    /**
+     * Index of the first record in the chain (0 means the record is the last
+     * in the chain)
+     */
+    uint32_t next_block;
+    /**
+     * It contains the interesting data, the persistent status of the client
+     */
+    struct status_record_data_payload_s payload;
+};
+
+
+
+/**
+ * This union is used to store and retrieve a record from the status file
+ */
+union status_record_u {
+    /**
+     * This type of record applies to first record only: it's the control
+     * block
+     */
+    struct status_record_ctrl_s src;
+    /**
+     * This type of record applies to all but first record: it's the data block
+     */
+    struct status_record_data_s srd;
+};
+
 
 
 /**
@@ -109,49 +180,53 @@ struct thread_status_s {
      * This id is not the system thread id, but an internal identificator
      * in the server scope (0 = listeners thread, 1..N = manager threads)
      */
-    int id;
+    int                            id;
     /**
      * This is the system identificator of the thread
      */
-    pthread_t tid;
+    pthread_t                      tid;
     /**
      * This pointer is used a reference to the array of pipes must be used
      * for communication
      */
-    struct thread_pipe_array_s *tpa;
+    struct thread_pipe_array_s    *tpa;
     /**
      * Size of polling array. Note: some slots may be unused because array
      * reclamation does not happen every time a client disconnects
      */
-    nfds_t          poll_size;
+    nfds_t                         poll_size;
     /**
      * Elements used for polling file descriptors. Note: some slots may be
      * unused because array reclamation does not happen every time a client
      * disconnects
      */
-    struct pollfd  *poll_array;
+    struct pollfd                 *poll_array;
     /**
      * Number of clients active for this manager
      * Note: MUST BE active_clients < poll_size because poll array contains
      *       at least che control pipe
      */
-    size_t          active_clients;
+    size_t                         active_clients;
     /**
      * Array of active and not active clients
      */
     struct server_client_status_s *client_array;
     /**
+     * Memory mapped file accessed as an array
+     */
+    union record_status_u         *status;
+    /**
      * Exception reported by the thread (after exit)
      */
-    int excp;
+    int                            excp;
     /**
      * Return code reported by the thread (after exit)
      */
-    int ret_cod;
+    int                            ret_cod;
     /**
      * Errno reported by the thread (after exit)
      */
-    int last_errno;
+    int                            last_errno;
 };
 
 
@@ -178,6 +253,15 @@ extern "C" {
 
 
 
+    /**
+     * Load status records from status file
+     * @param sr OUT the pointer of the mapped file
+     * @return a standardized return code
+     */
+    int status_record_load(union record_status_u **sr);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
