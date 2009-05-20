@@ -4,4 +4,4 @@ AM_CFLAGS = -Wall
 AM_LDFLAGS = -lxml2 -lpthread
 bin_PROGRAMS = lixad
 lixad_LDADD = ../common/liblixabmt.la
-lixad_SOURCES = main.c server_config.c server_listener.c server_manager.c
+lixad_SOURCES = main.c server_config.c server_listener.c server_manager.c server_status.c
