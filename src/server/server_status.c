@@ -34,6 +34,9 @@
 
 
 
+#ifdef HAVE_SYS_MMAN_H
+# include <sys/mman.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -66,16 +69,21 @@
 
 
 
-int status_record_load(union record_status_u **sr,
+int status_record_load(union status_record_u **sr,
                        const char *status_file)
 {
     enum Exception { OPEN_ERROR1
                      , OPEN_ERROR2
                      , WRITE_ERROR
+                     , FSTAT_ERROR
+                     , MMAP_ERROR
+                     , CLOSE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    int fd;
+    int fd = LIXA_NULL_FD;
+    struct stat fd_stat;
+    union status_record_u *tmp_sra = NULL;
     
     LIXA_TRACE(("status_record_load\n"));
     TRY {
@@ -96,28 +104,41 @@ int status_record_load(union record_status_u **sr,
                         "with file descriptor %d\n",
                         status_file, fd));
             for (i = 0; i < STATUS_FILE_INIT_SIZE; ++i) {
-                union status_record_u sr;
+                union status_record_u tmp_sr;
 
-                LIXA_TRACE(("status_record_load: writing " SIZE_T_FORMAT
-                            " bytes on file descriptor %d\n",
-                            sizeof(sr), fd));
-                memset(&sr, 0, sizeof(sr));
+                memset(&tmp_sr, 0, sizeof(tmp_sr));
                 if (i == 0) {
                     /* write control record */
-                    sr.ctrl.magic_number = STATUS_FILE_MAGIC_NUMBER;
-                    sr.ctrl.level = STATUS_FILE_LEVEL;
-                    sr.ctrl.first_used_block = 0;
-                    sr.ctrl.first_free_block = 1;
+                    tmp_sr.ctrl.magic_number = STATUS_FILE_MAGIC_NUMBER;
+                    tmp_sr.ctrl.level = STATUS_FILE_LEVEL;
+                    tmp_sr.ctrl.first_used_block = 0;
+                    tmp_sr.ctrl.first_free_block = 1;
                 } else {
                     if (i == STATUS_FILE_INIT_SIZE - 1)
-                        sr.data.next_block = 0;
+                        tmp_sr.data.next_block = 0;
                     else
-                        sr.data.next_block = i + 1;
+                        tmp_sr.data.next_block = i + 1;
                 }
-                if (sizeof(sr) != write(fd, &sr, sizeof(sr)))
+                if (sizeof(tmp_sr) != write(fd, &tmp_sr, sizeof(tmp_sr)))
                     THROW(WRITE_ERROR);
             }
         }
+
+        /* retrieve size */
+        if (0 != fstat(fd, &fd_stat))
+            THROW(FSTAT_ERROR);
+
+        if (NULL == (tmp_sra = mmap(NULL, fd_stat.st_size,
+                                    PROT_READ | PROT_WRITE,
+                                    MAP_SHARED, fd, 0)))
+            THROW(MMAP_ERROR);
+        LIXA_TRACE(("status_record_load: status file '%s' mapped at "
+                    "address %p\n", status_file, tmp_sra));
+        *sr = tmp_sra;
+
+        if (0 != close(fd))
+            THROW(CLOSE_ERROR);
+        fd = LIXA_NULL_FD;
         
         THROW(NONE);
     } CATCH {
@@ -129,6 +150,15 @@ int status_record_load(union record_status_u **sr,
             case WRITE_ERROR:
                 ret_cod = LIXA_RC_WRITE_ERROR;
                 break;
+            case FSTAT_ERROR:
+                ret_cod = LIXA_RC_FSTAT_ERROR;
+                break;
+            case MMAP_ERROR:
+                ret_cod = LIXA_RC_MMAP_ERROR;
+                break;
+            case CLOSE_ERROR:
+                ret_cod = LIXA_RC_CLOSE_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -136,9 +166,63 @@ int status_record_load(union record_status_u **sr,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* recovery actions */
+    if (NONE != excp) {
+        LIXA_TRACE(("status_record_load: values before recovery actions "
+                    "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+        if (LIXA_NULL_FD != fd) {
+            LIXA_TRACE(("status_record_load: closing file descriptor %d\n",
+                        fd));
+            close(fd);
+        }
+    }
     LIXA_TRACE(("status_record_load/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
+
+
+int status_record_get_free(union status_record_u *sr,
+                           uint32_t *slot)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("status_record_get_free\n"));
+    TRY {
+        if (sr[0].ctrl.first_free_block != 0) {
+            LIXA_TRACE(("status_record_get_free: first_free_block = "
+                        UINT32_T_FORMAT ", first_used_block = "
+                        UINT32_T_FORMAT "\n",
+                        sr[0].ctrl.first_free_block,
+                        sr[0].ctrl.first_used_block));
+            *slot = sr[0].ctrl.first_free_block;
+            sr[0].ctrl.first_free_block = sr[*slot].data.next_block;
+            sr[*slot].data.next_block = sr[0].ctrl.first_used_block;
+            sr[0].ctrl.first_used_block = *slot;
+            LIXA_TRACE(("status_record_get_free: first_free_block = "
+                        UINT32_T_FORMAT ", first_used_block = "
+                        UINT32_T_FORMAT "\n",
+                        sr[0].ctrl.first_free_block,
+                        sr[0].ctrl.first_used_block));
+        } else {
+            /* resize status file @@@ */
+            
+        }
+            
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("status_record_get_free/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
 
