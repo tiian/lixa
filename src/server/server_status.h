@@ -274,11 +274,22 @@ extern "C" {
      * @param status_file IN the name of the status file to be loaded
      * @return a standardized return code
      */
-    int status_record_load(union record_status_u **sr,
+    int status_record_load(union status_record_u **sr,
                            const char *status_file);
 
 
+
+    /**
+     * Get a free slot in record status mapped file
+     * @param sr IN record status mapped file
+     * @param slot OUT the index of the found free slot
+     * @return a standardized return code
+     */
+    int status_record_get_free(union status_record_u *rs,
+                               uint32_t *slot);
+
     
+                               
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

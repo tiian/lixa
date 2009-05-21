@@ -210,8 +210,13 @@ define LIXA_RC_RENAME_ERROR                  -123
  */
 /**
  * "fstat" function error
-define LIXA_RC_FSTAT_ERROR                   -124
  */
+#define LIXA_RC_FSTAT_ERROR                   -124
+/**
+ * "mmap" function error
+ */
+#define LIXA_RC_MMAP_ERROR                    -125
+
 /**
  * "vsnprintf" function error
 define LIXA_RC_VSNPRINTF_ERROR               -125

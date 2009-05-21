@@ -126,9 +126,14 @@ const char *lixa_strerror(int ret_cod)
             case LIXA_RC_RENAME_ERROR:
                 return "ERROR: 'rename' function returned an error "
                         "condition";
+                */
             case LIXA_RC_FSTAT_ERROR:
                 return "ERROR: 'fstat' function returned an error "
                         "condition";
+            case LIXA_RC_MMAP_ERROR:
+                return "ERROR: 'mmap' function returned an error "
+                        "condition";
+                /*
             case LIXA_RC_VSNPRINTF_ERROR:
                 return "ERROR: 'vsnprintf' function returned an error "
                         "condition";
