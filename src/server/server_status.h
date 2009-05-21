@@ -60,6 +60,21 @@
 
 
 /**
+ * Initial size of the status file
+ */
+#define STATUS_FILE_INIT_SIZE 100
+/**
+ * Magic number of the lixa status files
+ */
+#define STATUS_FILE_MAGIC_NUMBER 0x6110
+/**
+ * Level (versione) of the lixa status files
+ */
+#define STATUS_FILE_LEVEL 0x0001
+
+
+
+/**
  * It contains the configuration common to any thread
  */
 struct thread_pipe_s {
@@ -163,11 +178,11 @@ union status_record_u {
      * This type of record applies to first record only: it's the control
      * block
      */
-    struct status_record_ctrl_s src;
+    struct status_record_ctrl_s ctrl;
     /**
      * This type of record applies to all but first record: it's the data block
      */
-    struct status_record_data_s srd;
+    struct status_record_data_s data;
 };
 
 
@@ -256,9 +271,11 @@ extern "C" {
     /**
      * Load status records from status file
      * @param sr OUT the pointer of the mapped file
+     * @param status_file IN the name of the status file to be loaded
      * @return a standardized return code
      */
-    int status_record_load(union record_status_u **sr);
+    int status_record_load(union record_status_u **sr,
+                           const char *status_file);
 
 
     
