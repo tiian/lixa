@@ -88,14 +88,16 @@ int server_manager(struct server_config_s *sc,
             tsa->array[i].active_clients = 0;
             tsa->array[i].client_array = NULL;
             tsa->array[i].status = NULL;
-            if (LIXA_RC_OK != (ret_cod = status_record_load(
-                                   &tsa->array[i].status)))
-                THROW(STATUS_FILE_ERROR);
             tsa->array[i].excp = tsa->array[i].ret_cod =
                 tsa->array[i].last_errno = 0;
             if (i == 0) { /* listener */
                 tsa->array[i].tid = pthread_self();
             } else {
+                /* load status file */
+                if (LIXA_RC_OK != (ret_cod = status_record_load(
+                                       &tsa->array[i].status,
+                                       sc->managers.array[i-1].status_file)))
+                    THROW(STATUS_FILE_ERROR);
                 /* it will be fixed by the thread itself */
                 tsa->array[i].tid = 0;
                 if (0 != (ret_cod = pthread_create(
