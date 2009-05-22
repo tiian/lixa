@@ -64,6 +64,10 @@
  */
 #define STATUS_FILE_INIT_SIZE 100
 /**
+ * Percentual increment change of the status file
+ */
+#define STATUS_FILE_DELTA_SIZE 10
+/**
  * Magic number of the lixa status files
  */
 #define STATUS_FILE_MAGIC_NUMBER 0x6110
@@ -139,6 +143,12 @@ struct status_record_ctrl_s {
      * First record of the free blocks chain (0 means the chain is empty)
      */
     uint32_t first_free_block;
+    /**
+     * Status file name; this is a reference to the string allocated in
+     * configuration struct. This reference must be updated every time the
+     * server boots up
+     */
+    const char *status_file;
 };
 
 
@@ -281,11 +291,12 @@ extern "C" {
 
     /**
      * Get a free slot in record status mapped file
-     * @param sr IN record status mapped file
+     * @param sr IN/OUT record status mapped file; the pointer may change if
+     *                  status file resizing happens
      * @param slot OUT the index of the found free slot
      * @return a standardized return code
      */
-    int status_record_get_free(union status_record_u *rs,
+    int status_record_get_free(union status_record_u **sr,
                                uint32_t *slot);
 
     

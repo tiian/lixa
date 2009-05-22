@@ -101,8 +101,8 @@ define LIXA_RC_NULL_OBJECT                     -5
  */
 /**
  * The container is full and can NOT store more elements
-define LIXA_RC_CONTAINER_FULL                  -6
  */
+#define LIXA_RC_CONTAINER_FULL                  -6
 /**
  * A used object (not void) has been passed to a function requiring a fresh
  * one
@@ -216,6 +216,10 @@ define LIXA_RC_RENAME_ERROR                  -123
  * "mmap" function error
  */
 #define LIXA_RC_MMAP_ERROR                    -125
+/**
+ * "munmap" function error
+ */
+#define LIXA_RC_MUNMAP_ERROR                  -126
 
 /**
  * "vsnprintf" function error

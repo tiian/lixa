@@ -64,9 +64,11 @@ const char *lixa_strerror(int ret_cod)
                 /*
             case LIXA_RC_NULL_OBJECT:
                 return "ERROR: an argument is null";
+                */
             case LIXA_RC_CONTAINER_FULL:
                 return "ERROR: the container is full and cannot store more "
                         "elements";
+                /*
             case LIXA_RC_OBJ_NOT_VOID:
                 return "ERROR: object is not void";
             case LIXA_RC_OBJ_NOT_INITIALIZED:
@@ -132,6 +134,9 @@ const char *lixa_strerror(int ret_cod)
                         "condition";
             case LIXA_RC_MMAP_ERROR:
                 return "ERROR: 'mmap' function returned an error "
+                        "condition";
+            case LIXA_RC_MUNMAP_ERROR:
+                return "ERROR: 'munmap' function returned an error "
                         "condition";
                 /*
             case LIXA_RC_VSNPRINTF_ERROR:
