@@ -62,7 +62,7 @@
 /**
  * Initial size of the status file
  */
-#define STATUS_FILE_INIT_SIZE 100
+#define STATUS_FILE_INIT_SIZE 10
 /**
  * Percentual increment change of the status file
  */
@@ -239,7 +239,7 @@ struct thread_status_s {
     /**
      * Memory mapped file accessed as an array
      */
-    union record_status_u         *status;
+    union status_record_u         *status;
     /**
      * Exception reported by the thread (after exit)
      */
