@@ -224,8 +224,12 @@ int status_record_get_free(union status_record_u **sr,
                 THROW(MUNMAP_ERROR);
             *sr = NULL;
             curr_size = fd_stat.st_size / sizeof(union status_record_u);
-            new_size = fd_stat.st_size / sizeof(union status_record_u) *
+            delta_size = fd_stat.st_size / sizeof(union status_record_u) *
                 STATUS_FILE_DELTA_SIZE / 100;
+            new_size = curr_size + delta_size;
+            LIXA_TRACE(("status_record_get_free: curr_size = " OFF_T_FORMAT
+                        ", new_size = " OFF_T_FORMAT "\n",
+                        curr_size, new_size));
             if (new_size > UINT32_MAX) {
                 LIXA_TRACE(("status_record_get_free: new size after resizing "
                             "would exceed " UINT32_T_FORMAT " max value; "
@@ -234,7 +238,6 @@ int status_record_get_free(union status_record_u **sr,
                 if (curr_size == UINT32_MAX)
                     THROW(CONTAINER_FULL)
             }
-            delta_size = new_size - curr_size;
             for (i = 0; i < delta_size; ++i) {
                 union status_record_u tmp_sr;
 
@@ -252,7 +255,7 @@ int status_record_get_free(union status_record_u **sr,
                                         MAP_SHARED, fd, 0)))
                 THROW(MMAP_ERROR);
             /* update free block list */
-            tmp_sra[0].ctrl.first_free_block = new_size;
+            tmp_sra[0].ctrl.first_free_block = curr_size;
             LIXA_TRACE(("status_record_get_free: status file '%s' mapped at "
                         "address %p\n", status_file, tmp_sra));
             *sr = tmp_sra;

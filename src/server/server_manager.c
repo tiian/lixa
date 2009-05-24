@@ -93,11 +93,27 @@ int server_manager(struct server_config_s *sc,
             if (i == 0) { /* listener */
                 tsa->array[i].tid = pthread_self();
             } else {
+                int k;
+                uint32_t slot;
+                
                 /* load status file */
                 if (LIXA_RC_OK != (ret_cod = status_record_load(
                                        &tsa->array[i].status,
                                        sc->managers.array[i-1].status_file)))
                     THROW(STATUS_FILE_ERROR);
+
+                /* @@@ DEBUG CODE, PLEASE REMOVE ME */
+                for (k = 0; k < 12; ++k) {
+                    ret_cod = status_record_get_free(&tsa->array[i].status,
+                                                     &slot);
+                    LIXA_TRACE(("server_manager: status_record_get_free, "
+                                "ret_cod = %d, slot = " UINT32_T_FORMAT "\n",
+                                ret_cod, slot));
+                    if (LIXA_RC_OK != ret_cod)
+                        exit(1);
+                }
+                /* END DEBUG CODE */
+                
                 /* it will be fixed by the thread itself */
                 tsa->array[i].tid = 0;
                 if (0 != (ret_cod = pthread_create(
