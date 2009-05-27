@@ -290,17 +290,30 @@ extern "C" {
 
 
     /**
-     * Get a free slot in record status mapped file
+     * Insert a new element in the used slot list
      * @param sr IN/OUT record status mapped file; the pointer may change if
      *                  status file resizing happens
      * @param slot OUT the index of the found free slot
      * @return a standardized return code
      */
-    int status_record_get_free(union status_record_u **sr,
-                               uint32_t *slot);
+    int status_record_insert(union status_record_u **sr,
+                             uint32_t *slot);
+
+
+
+    /**
+     * Remove an element from the used slot list
+     * @param sr IN/OUT record status mapped file; the pointer may change if
+     *                  status file resizing happens
+     * @param slot IN the index of the slot must be released
+     * @return a standardized return code
+     *
+     */
+    int status_record_delete(union status_record_u **sr,
+                             uint32_t slot);
+
 
     
-                               
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
