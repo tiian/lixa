@@ -34,6 +34,9 @@
 
 
 
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
 #ifdef HAVE_SYS_MMAN_H
 # include <sys/mman.h>
 #endif
@@ -187,7 +190,7 @@ int status_record_load(union status_record_u **sr,
 
 
 
-int status_record_get_free(union status_record_u **sr,
+int status_record_insert(union status_record_u **sr,
                            uint32_t *slot)
 {
     enum Exception { OPEN_ERROR
@@ -202,7 +205,7 @@ int status_record_get_free(union status_record_u **sr,
     int fd = LIXA_NULL_FD;
     union status_record_u *tmp_sra = NULL;
     
-    LIXA_TRACE(("status_record_get_free\n"));
+    LIXA_TRACE(("status_record_insert\n"));
     TRY {
         union status_record_u *csr = *sr;
         if (csr[0].ctrl.first_free_block == 0) {
@@ -210,7 +213,7 @@ int status_record_get_free(union status_record_u **sr,
             off_t curr_size, new_size, delta_size, i;
             const char *status_file = csr[0].ctrl.status_file;
 
-            LIXA_TRACE(("status_record_get_free: free block list is "
+            LIXA_TRACE(("status_record_insert: free block list is "
                         "empty, status file resize in progres...\n"));
             
             /* open the file for append: we must add new records */
@@ -227,11 +230,11 @@ int status_record_get_free(union status_record_u **sr,
             delta_size = fd_stat.st_size / sizeof(union status_record_u) *
                 STATUS_FILE_DELTA_SIZE / 100;
             new_size = curr_size + delta_size;
-            LIXA_TRACE(("status_record_get_free: curr_size = " OFF_T_FORMAT
+            LIXA_TRACE(("status_record_insert: curr_size = " OFF_T_FORMAT
                         ", new_size = " OFF_T_FORMAT "\n",
                         curr_size, new_size));
             if (new_size > UINT32_MAX) {
-                LIXA_TRACE(("status_record_get_free: new size after resizing "
+                LIXA_TRACE(("status_record_insert: new size after resizing "
                             "would exceed " UINT32_T_FORMAT " max value; "
                             "resized to max value only\n", UINT32_MAX));
                 new_size = UINT32_MAX;
@@ -256,7 +259,7 @@ int status_record_get_free(union status_record_u **sr,
                 THROW(MMAP_ERROR);
             /* update free block list */
             tmp_sra[0].ctrl.first_free_block = curr_size;
-            LIXA_TRACE(("status_record_get_free: status file '%s' mapped at "
+            LIXA_TRACE(("status_record_insert: status file '%s' mapped at "
                         "address %p\n", status_file, tmp_sra));
             *sr = tmp_sra;
             
@@ -267,7 +270,7 @@ int status_record_get_free(union status_record_u **sr,
 
         /* update pointer */
         csr = *sr;
-        LIXA_TRACE(("status_record_get_free: first_free_block = "
+        LIXA_TRACE(("status_record_insert: first_free_block = "
                     UINT32_T_FORMAT ", first_used_block = "
                     UINT32_T_FORMAT "\n",
                     csr[0].ctrl.first_free_block,
@@ -276,7 +279,7 @@ int status_record_get_free(union status_record_u **sr,
         csr[0].ctrl.first_free_block = csr[*slot].data.next_block;
         csr[*slot].data.next_block = csr[0].ctrl.first_used_block;
         csr[0].ctrl.first_used_block = *slot;
-        LIXA_TRACE(("status_record_get_free: first_free_block = "
+        LIXA_TRACE(("status_record_insert: first_free_block = "
                     UINT32_T_FORMAT ", first_used_block = "
                     UINT32_T_FORMAT "\n",
                     csr[0].ctrl.first_free_block,
@@ -313,18 +316,108 @@ int status_record_get_free(union status_record_u **sr,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         if (NONE != excp) {
-            LIXA_TRACE(("status_record_get_free: values before recovery "
+            LIXA_TRACE(("status_record_insert: values before recovery "
                         "actions excp=%d/ret_cod=%d/errno=%d\n",
                         excp, ret_cod, errno));
             if (LIXA_NULL_FD != fd) {
-                LIXA_TRACE(("status_record_get_free: closing file "
+                LIXA_TRACE(("status_record_insert: closing file "
                             "descriptor %d\n", fd));
                 close(fd);
             }
             
         }
     } /* TRY-CATCH */
-    LIXA_TRACE(("status_record_get_free/excp=%d/"
+    LIXA_TRACE(("status_record_insert/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int status_record_delete(union status_record_u **sr,
+                         uint32_t slot)
+{
+    enum Exception { USED_BLOCK_NOT_FOUND
+                     , OBJ_CORRUPTED
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("status_record_delete\n"));
+    TRY {
+        union status_record_u *csr = *sr;
+        uint32_t ul; /* used list left block */
+        uint32_t ur; /* used list right block */
+        uint32_t fl; /* free list left block */
+        uint32_t fr; /* free list right block */
+        
+        /* find ul and ur positions */
+        ul = 0;
+        ur = csr[0].ctrl.first_used_block;
+        while (ur > 0) {
+            if (ur == slot)
+                break;
+            ul = ur;
+            ur = csr[ur].data.next_block;
+        }
+        if (ur == 0)
+            THROW(USED_BLOCK_NOT_FOUND);
+        
+        /* find fl and fr positions */
+        fl = 0;
+        fr = csr[0].ctrl.first_free_block;
+        while (fr > 0) {
+            if (fr > slot)
+                break;
+            else if (fr == slot)
+                THROW(OBJ_CORRUPTED);
+            fl = fr;
+            fr = csr[fr].data.next_block;
+        }
+
+        LIXA_TRACE(("status_record_delete: ul = " UINT32_T_FORMAT
+                    ", ur = " UINT32_T_FORMAT ", fl = " UINT32_T_FORMAT
+                    ", fr = " UINT32_T_FORMAT "\n", ul, ur, fl, fr));
+        
+        /* remove block from used block list */
+        if (ul == 0) {
+            /* first block in used block list */
+            csr[0].ctrl.first_used_block = csr[ur].data.next_block;
+        } else {
+            /* central or last block in used block list */
+            csr[ul].data.next_block = csr[ur].data.next_block;
+        }
+        csr[ur].data.next_block = 0;
+
+        /* insert block in free block list */
+        if (fl == 0) {
+            /* insertion happens at list head or list is empty */
+            if (fr != 0)
+                /* list is not empty */
+                csr[ur].data.next_block = fr;
+            csr[0].ctrl.first_free_block = ur;
+        } else {
+            /* insertion happens in the middle or at list tail */
+            csr[ur].data.next_block = fr;
+            csr[fl].data.next_block = ur;
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case USED_BLOCK_NOT_FOUND:
+                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
+                break;
+            case OBJ_CORRUPTED:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("status_record_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

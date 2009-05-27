@@ -104,14 +104,62 @@ int server_manager(struct server_config_s *sc,
 
                 /* @@@ DEBUG CODE, PLEASE REMOVE ME */
                 for (k = 0; k < 12; ++k) {
-                    ret_cod = status_record_get_free(&tsa->array[i].status,
-                                                     &slot);
-                    LIXA_TRACE(("server_manager: status_record_get_free, "
+                    ret_cod = status_record_insert(&tsa->array[i].status,
+                                                   &slot);
+                    LIXA_TRACE(("server_manager: status_record_insert, "
                                 "ret_cod = %d, slot = " UINT32_T_FORMAT "\n",
                                 ret_cod, slot));
                     if (LIXA_RC_OK != ret_cod)
                         exit(1);
                 }
+                for (k = 12; k > 0; --k) {
+                    ret_cod = status_record_delete(&tsa->array[i].status,
+                                                   k);
+                    LIXA_TRACE(("server_manager: status_record_delete, "
+                                "ret_cod = %d, slot = " UINT32_T_FORMAT "\n",
+                                ret_cod, k));
+                    if (LIXA_RC_OK != ret_cod)
+                        exit(1);
+                }
+                for (k = 0; k < 12; ++k) {
+                    ret_cod = status_record_insert(&tsa->array[i].status,
+                                                   &slot);
+                    LIXA_TRACE(("server_manager: status_record_insert, "
+                                "ret_cod = %d, slot = " UINT32_T_FORMAT "\n",
+                                ret_cod, slot));
+                    if (LIXA_RC_OK != ret_cod)
+                        exit(1);
+                }
+                for (k = 1; k < 13; ++k) {
+                    ret_cod = status_record_delete(&tsa->array[i].status,
+                                                   k);
+                    LIXA_TRACE(("server_manager: status_record_delete, "
+                                "ret_cod = %d, slot = " UINT32_T_FORMAT "\n",
+                                ret_cod, k));
+                    if (LIXA_RC_OK != ret_cod)
+                        exit(1);
+                }
+                for (k = 0; k < 12; ++k) {
+                    ret_cod = status_record_insert(&tsa->array[i].status,
+                                                   &slot);
+                    LIXA_TRACE(("server_manager: status_record_insert, "
+                                "ret_cod = %d, slot = " UINT32_T_FORMAT "\n",
+                                ret_cod, slot));
+                    if (LIXA_RC_OK != ret_cod)
+                        exit(1);
+                }
+                ret_cod = status_record_delete(&tsa->array[i].status, 5);
+                ret_cod = status_record_delete(&tsa->array[i].status, 7);
+                ret_cod = status_record_delete(&tsa->array[i].status, 1);
+                ret_cod = status_record_delete(&tsa->array[i].status, 12);
+                ret_cod = status_record_delete(&tsa->array[i].status, 4);
+                ret_cod = status_record_delete(&tsa->array[i].status, 9);
+                ret_cod = status_record_delete(&tsa->array[i].status, 6);
+                ret_cod = status_record_delete(&tsa->array[i].status, 2);
+                ret_cod = status_record_delete(&tsa->array[i].status, 10);
+                ret_cod = status_record_delete(&tsa->array[i].status, 11);
+                ret_cod = status_record_delete(&tsa->array[i].status, 3);
+                ret_cod = status_record_delete(&tsa->array[i].status, 8);
                 /* END DEBUG CODE */
                 
                 /* it will be fixed by the thread itself */
