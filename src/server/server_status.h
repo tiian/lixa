@@ -45,6 +45,9 @@
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
 
 
 
@@ -75,8 +78,15 @@
  * Level (versione) of the lixa status files
  */
 #define STATUS_FILE_LEVEL 0x0001
+/**
+ * Maximum number of blocks in a chain used by a session
+ */
+#define CHAIN_MAX_SIZE 20
 
-
+/**
+ * The data record is an header
+ */
+#define DATA_PAYLOAD_TYPE_HEADER  1
 
 /**
  * It contains the configuration common to any thread
@@ -129,20 +139,20 @@ struct status_record_ctrl_s {
      * It's the signature of the first 4 bytes and can be used
      * by "file" utility to discover a file is a lixa status file
      */
-    uint32_t magic_number;
+    uint32_t    magic_number;
     /**
      * Used to distinguish status files produced and used by different
      * versions of the software
      */
-    uint32_t level;
+    uint32_t    level;
     /**
      * First record of the used blocks chain (0 means the chain is empty)
      */
-    uint32_t first_used_block;
+    uint32_t    first_used_block;
     /**
      * First record of the free blocks chain (0 means the chain is empty)
      */
-    uint32_t first_free_block;
+    uint32_t    first_free_block;
     /**
      * Status file name; this is a reference to the string allocated in
      * configuration struct. This reference must be updated every time the
@@ -154,11 +164,42 @@ struct status_record_ctrl_s {
 
 
 /**
+ * This struct is used as header to concatenate other records; the header
+ * must be defined for every client session. Different type of records are
+ * not mandatory
+ */
+struct payload_header {
+    /**
+     * Number of elements in the block array
+     */
+    int                n;
+    /**
+     * Array of "pointers" to the blocks of this logical concatenation
+     */
+    uint32_t           block_array[CHAIN_MAX_SIZE];
+    /**
+     * TCP/IP coordinates of the peer
+     */
+    struct sockaddr_in serv_addr;
+};
+
+    
+
+/**
  * This struct is used to separate scaffolding from payload in data records;
  * all the payload data are kept by this structure
  */
 struct status_record_data_payload_s {
-    int foo;
+    /**
+     * Type of payload of this record
+     */
+    int type;
+    /**
+     * The data stored by the records depend from the value of the field type
+     */
+    union {
+        struct payload_header ph;
+    };
 };
 
 
@@ -175,7 +216,7 @@ struct status_record_data_s {
     /**
      * It contains the interesting data, the persistent status of the client
      */
-    struct status_record_data_payload_s payload;
+    struct status_record_data_payload_s pld;
 };
 
 
@@ -276,6 +317,10 @@ struct thread_status_array_s {
 extern "C" {
 #endif /* __cplusplus */
 
+
+
+    void payload_header_reset(struct payload_header *ph);
+    
 
 
     /**

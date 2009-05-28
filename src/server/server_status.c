@@ -72,6 +72,15 @@
 
 
 
+void payload_header_reset(struct payload_header *ph)
+{
+    ph->n = 0;
+    memset(&ph->block_array, 0, sizeof(uint32_t) * CHAIN_MAX_SIZE);
+    memset(&ph->serv_addr, 0, sizeof(struct sockaddr_in));
+}
+
+
+
 int status_record_load(union status_record_u **sr,
                        const char *status_file)
 {
