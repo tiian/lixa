@@ -365,6 +365,8 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
             /* client has closed the connection */
             /* @@@ check what happens to current transaction */
 
+            /* @@@ release all allocated blocks */
+            llll
             /* close socket, release file descriptor and thread status slot */
             LIXA_TRACE(("server_manager_pollin_data: close socket, "
                         "fd = %d\n", ts->poll_array[slot_id].fd));
@@ -508,6 +510,7 @@ int server_manager_add_poll(struct thread_status_s *ts,
 {
     enum Exception { REALLOC_ERROR1
                      , REALLOC_ERROR2
+                     , RECORD_INSERT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -515,6 +518,7 @@ int server_manager_add_poll(struct thread_status_s *ts,
     TRY {
         nfds_t last = 0;
         int first_add = ts->poll_array == NULL;
+        uint32_t slot = 0;
 
         /* look for a free slot */
         if (ts->poll_size > 1 && ts->active_clients + 1 < ts->poll_size) {
@@ -544,6 +548,15 @@ int server_manager_add_poll(struct thread_status_s *ts,
         ts->poll_array[last].events = POLLIN;
         if (!first_add)
             ts->active_clients++;
+
+        /* get a free block from status file and insert in used list */
+        if (LIXA_RC_OK != (ret_cod = status_record_insert(&ts->status, &slot)))
+            THROW(RECORD_INSERT_ERROR);
+
+        /* create the header and reset it */
+        ts->status[slot].data.next_block = 0;
+        ts->status[slot].data.pld.type = DATA_PAYLOAD_TYPE_HEADER;
+        payload_header_reset(&ts->status[slot].data.pld.ph);
         /* @@@ initialize server_client_status_s of client_array */
         LIXA_TRACE(("server_panager_add_poll: added file descriptor %d "
                     "at position " NFDS_T_FORMAT "\n",
@@ -555,6 +568,8 @@ int server_manager_add_poll(struct thread_status_s *ts,
             case REALLOC_ERROR1:
             case REALLOC_ERROR2:
                 ret_cod = LIXA_RC_REALLOC_ERROR;
+                break;
+            case RECORD_INSERT_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
