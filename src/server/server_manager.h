@@ -135,12 +135,28 @@ extern "C" {
      * Prepare the data structure used for calling poll system function
      * @param ts IN thread status structure
      * @param new_fd IN the new file descriptor must be polled
+     * @param place OUT the place inside poll_array and client_array assigned
+     *                  to the new session
      * @return a standardized return code
      */
     int server_manager_add_poll(struct thread_status_s *ts,
-                                int new_fd);
+                                int new_fd, nfds_t *place);
 
     
+
+    /**
+     * Do all stuff necessary to initialize the status for the new incoming
+     * client
+     * @param ts IN thread status structure
+     * @param fd IN the new file descriptor must be polled
+     * @param place IN the place inside client_array will be used to store
+     *                 the reference to mapped memory status
+     * @return a standardized return code     
+     */
+    int server_manager_new_client(struct thread_status_s *ts, int fd,
+                                  nfds_t place);
+
+
     
 #ifdef __cplusplus
 }

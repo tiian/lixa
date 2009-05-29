@@ -71,9 +71,9 @@ const char *lixa_strerror(int ret_cod)
                 /*
             case LIXA_RC_OBJ_NOT_VOID:
                 return "ERROR: object is not void";
+                */
             case LIXA_RC_OBJ_NOT_INITIALIZED:
                 return "ERROR: object is not initialized";
-                */
             case  LIXA_RC_OBJ_CORRUPTED:
                 return "ERROR: object is corrupted";
                 /*
@@ -174,6 +174,12 @@ const char *lixa_strerror(int ret_cod)
                     "condition";
             case LIXA_RC_RECV_ERROR:
                 return "ERROR: 'recv' function returned an error "
+                    "condition";
+            case LIXA_RC_GETSOCKNAME_ERROR:
+                return "ERROR: 'getsockname' function returned an error "
+                    "condition";
+            case LIXA_RC_GETPEERNAME_ERROR:
+                return "ERROR: 'getpeername' function returned an error "
                     "condition";
             case LIXA_RC_PTHREAD_CREATE_ERROR:
                 return "ERROR: 'pthread_create' function returned an error "

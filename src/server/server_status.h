@@ -123,10 +123,13 @@ struct thread_pipe_array_s {
 
 /**
  * It's the struct used to keep the status of a client
- * @@@ is this useful or can it be removed?
  */
 struct server_client_status_s {
-    int foo;
+    /**
+     * Place inside the persistent status (memory mapped records) used to store
+     * the status of this client
+     */
+    uint32_t pers_status_slot_id;
 };
 
 
@@ -178,9 +181,13 @@ struct payload_header {
      */
     uint32_t           block_array[CHAIN_MAX_SIZE];
     /**
-     * TCP/IP coordinates of the peer
+     * TCP/IP coordinates of the local socket
      */
-    struct sockaddr_in serv_addr;
+    struct sockaddr_in local_sock_addr;
+    /**
+     * TCP/IP coordinates of the peer socket
+     */
+    struct sockaddr_in peer_sock_addr;
 };
 
     
@@ -252,7 +259,7 @@ struct thread_status_s {
      */
     pthread_t                      tid;
     /**
-     * This pointer is used a reference to the array of pipes must be used
+     * This pointer is used as a reference to the array of pipes must be used
      * for communication
      */
     struct thread_pipe_array_s    *tpa;
@@ -319,10 +326,29 @@ extern "C" {
 
 
 
-    void payload_header_reset(struct payload_header *ph);
+    /**
+     * Initialize a block as an header (first block of a chain)
+     * @param srd IN reference to the record must be initialized
+     * @param fd IN file descriptor of the session associated to this header
+     *              record
+     * @return a standardized return code
+     */
+    int payload_header_init(struct status_record_data_s *srd, int fd);
     
 
 
+    /**
+     * Release a chain of records allocated inside the status record
+     * memory mapped array. It must start from an header initialized with
+     * @ref payload_heade_init
+     * @param sr IN/OUT status record array
+     * @param slot IN index of the header chain block
+     * @return a standardized return code
+     */
+    int payload_chain_release(union status_record_u **sr, uint32_t slot);
+    
+
+    
     /**
      * Load status records from status file
      * @param sr OUT the pointer of the mapped file

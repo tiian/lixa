@@ -55,6 +55,9 @@
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
+#ifdef HAVE_ARPA_INET_H
+# include <arpa/inet.h>
+#endif
 
 
 
@@ -72,11 +75,130 @@
 
 
 
-void payload_header_reset(struct payload_header *ph)
+int payload_header_init(struct status_record_data_s *srd, int fd)
 {
-    ph->n = 0;
-    memset(&ph->block_array, 0, sizeof(uint32_t) * CHAIN_MAX_SIZE);
-    memset(&ph->serv_addr, 0, sizeof(struct sockaddr_in));
+    enum Exception { GETSOCKNAME_ERROR
+                     , GETPEERNAME_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("payload_header_init\n"));
+    TRY {
+        socklen_t serv_addr_len;
+        
+        srd->next_block = 0;
+        srd->pld.type = DATA_PAYLOAD_TYPE_HEADER;
+        srd->pld.ph.n = 0;
+        memset(&srd->pld.ph.block_array, 0, sizeof(uint32_t) * CHAIN_MAX_SIZE);
+        memset(&srd->pld.ph.local_sock_addr, 0, sizeof(struct sockaddr_in));
+        memset(&srd->pld.ph.peer_sock_addr, 0, sizeof(struct sockaddr_in));
+
+        /* retrieve properties from TCP socket; this code will not work
+           for IP6 based or LOCAL sockets */
+        serv_addr_len = sizeof(struct sockaddr_in);
+        if (0 != getsockname(fd,
+                             (struct sockaddr *)&srd->pld.ph.local_sock_addr,
+                             &serv_addr_len))
+            THROW(GETSOCKNAME_ERROR);
+        serv_addr_len = sizeof(struct sockaddr_in);
+        if (0 != getpeername(fd,
+                             (struct sockaddr *)&srd->pld.ph.peer_sock_addr,
+                             &serv_addr_len))
+            THROW(GETPEERNAME_ERROR);
+        LIXA_TRACE(("payload_header_init: initialized header block "
+                    "socket file descriptor = %d, "
+                    "local address = '%s', local port = '%hu', "
+                    "peer address = '%s', peer port = '%hu'\n",
+                    fd, inet_ntoa(srd->pld.ph.local_sock_addr.sin_addr),
+                    ntohs(srd->pld.ph.local_sock_addr.sin_port),
+                    inet_ntoa(srd->pld.ph.peer_sock_addr.sin_addr),
+                    ntohs(srd->pld.ph.peer_sock_addr.sin_port)));
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GETSOCKNAME_ERROR:
+                ret_cod = LIXA_RC_GETSOCKNAME_ERROR;
+                break;
+            case GETPEERNAME_ERROR:
+                ret_cod = LIXA_RC_GETPEERNAME_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("payload_header_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int payload_chain_release(union status_record_u **sr, uint32_t slot)
+{
+    enum Exception { SLOT_IS_ZERO
+                     , INVALID_BLOCK_TYPE
+                     , STATUS_RECORD_DELETE1
+                     , STATUS_RECORD_DELETE2
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("payload_chain_release\n"));
+    TRY {
+        int i;
+        union status_record_u *csr = *sr;
+        
+        if (slot == 0)
+            THROW(SLOT_IS_ZERO);
+        if (csr[slot].data.pld.type != DATA_PAYLOAD_TYPE_HEADER)
+            THROW(INVALID_BLOCK_TYPE);
+        /* release chained blocks */
+        for (i = 0; i < csr[slot].data.pld.ph.n; ++i) {
+#ifndef NDEBUG
+            LIXA_TRACE(("payload_chain_release: releasing chained block "
+                        UINT32_T_FORMAT "\n",
+                        csr[slot].data.pld.ph.block_array[i]));
+#endif            
+            if (LIXA_RC_OK != (ret_cod = status_record_delete(
+                                   sr, csr[slot].data.pld.ph.block_array[i])))
+                THROW(STATUS_RECORD_DELETE1);
+        }
+        /* release current block */
+        LIXA_TRACE(("payload_chain_release: releasing header block "
+                    UINT32_T_FORMAT "\n", slot));
+        if (LIXA_RC_OK != (ret_cod = status_record_delete(sr, slot)))
+            THROW(STATUS_RECORD_DELETE2);
+        /* PAY ATTENTION NO DATA IS CLEANED: ONLY BLOCK REMOVAL HAPPENS
+           THIS IS INTENTIONALLY DID BECAUSE WE DON'T WANT TO ERASE THE
+           INFORMATION CONTAINED IN THE BLOCKS IMMEDIATELY
+           THIS IS A CHALLENGE FOR THE PROGRAM BECAUSE A REMOVED BLOCK CAN
+           BE DISTINGUISHED ONLY BECAUSE IT'S IN THE FREE BLOCK LIST INSTEAD
+           OF USED BLOCK LIST */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case SLOT_IS_ZERO:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case INVALID_BLOCK_TYPE:
+                ret_cod = LIXA_RC_OBJ_NOT_INITIALIZED;
+                break;
+            case STATUS_RECORD_DELETE1:
+            case STATUS_RECORD_DELETE2:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("payload_chain_release/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 
