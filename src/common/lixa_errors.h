@@ -64,7 +64,7 @@
  */
 #define LIXA_RC_EMPTY_CONTAINER                 +2
 /**
- * An operation can not been performed but can safely bypassed has been
+ * An operation that can not be performed and can safely bypassed has been
  * requested: the program can go on as no operation was requested
 define LIXA_RC_BYPASSED_OPERATION              +2
  */
@@ -110,8 +110,8 @@ define LIXA_RC_OBJ_NOT_VOID                    -7
  */
 /**
  * A NOT initialized object has been passed to a method/function
-define LIXA_RC_OBJ_NOT_INITIALIZED             -8
  */
+#define LIXA_RC_OBJ_NOT_INITIALIZED             -8
 /**
  * A corrupted object has been passed to a function
  */
@@ -277,6 +277,14 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * "recv" function error
  */
 #define LIXA_RC_RECV_ERROR                     -138
+/**
+ * "getsockname" function error
+ */
+#define LIXA_RC_GETSOCKNAME_ERROR              -139
+/**
+ * "getsockname" function error
+ */
+#define LIXA_RC_GETPEERNAME_ERROR              -140
 /**
  * "pthread_create" function error
  */
