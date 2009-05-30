@@ -43,6 +43,7 @@
 #include <tx.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_xml_msg.h>
 #include <client_conn.h>
 #include <client_config.h>
 #include <client_status.h>
@@ -61,17 +62,36 @@ int tx_open(void)
 {
     enum Exception { CLIENT_CONFIG_ERROR
                      , CLIENT_CONNECT_ERROR
+                     , COLL_GET_CS_ERROR
+                     , BUFFER_TOO_SMALL
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("tx_open\n"));
     TRY {
+        int fd;
+        client_status_t cs;
+        char xml_buffer[XML_BUFFER_SIZE];
+        
         if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc)))
             THROW(CLIENT_CONFIG_ERROR);
         if (LIXA_RC_OK != (ret_cod = client_connect(&global_csc, &global_ccc)))
             THROW(CLIENT_CONNECT_ERROR);
 
+        /* retrive the socket */
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(
+                               &global_csc, &cs)))
+            THROW(COLL_GET_CS_ERROR);
+        fd = client_status_get_sockfd(&cs);
+
         /* @@@ the real logic must be put here */
+        
+        if (sizeof(xml_buffer) <= snprintf(
+                xml_buffer, XML_BUFFER_SIZE, XML_MSG_EX_OPEN1, 
+                global_ccc.profile)) {
+            LIXA_TRACE(("tx_open: xml_buffer to small. INTERNAL ERROR\n"));
+            THROW(BUFFER_TOO_SMALL);
+        }
         
         THROW(NONE);
     } CATCH {
@@ -81,6 +101,11 @@ int tx_open(void)
                 break;
             case CLIENT_CONNECT_ERROR:
                 ret_cod = TX_ERROR;
+                break;
+            case COLL_GET_CS_ERROR:
+                break;
+            case BUFFER_TOO_SMALL:
+                ret_cod = TX_FAIL;
                 break;
             case NONE:
                 ret_cod = TX_OK;

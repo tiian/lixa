@@ -235,8 +235,8 @@ define LIXA_RC_SYSCONF_ERROR                 -127
  */
 /**
  * "gettimeofday" function error
-define LIXA_RC_GETTIMEOFDAY_ERROR            -128
  */
+#define LIXA_RC_GETTIMEOFDAY_ERROR            -128
 /**
  * "unlink" function error
 define LIXA_RC_UNLINK_ERROR                  -129

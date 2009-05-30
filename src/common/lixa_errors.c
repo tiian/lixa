@@ -146,9 +146,11 @@ const char *lixa_strerror(int ret_cod)
                 return "ERROR: 'times' function returned an error condition";
             case LIXA_RC_SYSCONF_ERROR:
                 return "ERROR: 'sysconf' function returned an error condition";
+                */
             case LIXA_RC_GETTIMEOFDAY_ERROR:
                 return "ERROR: 'gettimeofday' function returned an error "
                         "condition";
+                /*
             case LIXA_RC_UNLINK_ERROR:
                 return "ERROR: 'unlink' function returned an error condition";
                 */
