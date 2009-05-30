@@ -181,6 +181,10 @@ struct payload_header {
      */
     uint32_t           block_array[CHAIN_MAX_SIZE];
     /**
+     * Timestamp of the client's arrival time
+     */
+    struct timeval     arrival_time;
+    /**
      * TCP/IP coordinates of the local socket
      */
     struct sockaddr_in local_sock_addr;

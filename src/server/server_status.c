@@ -40,6 +40,9 @@
 #ifdef HAVE_SYS_MMAN_H
 # include <sys/mman.h>
 #endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -77,7 +80,8 @@
 
 int payload_header_init(struct status_record_data_s *srd, int fd)
 {
-    enum Exception { GETSOCKNAME_ERROR
+    enum Exception { GETTIMEOFDAY_ERROR
+                     , GETSOCKNAME_ERROR
                      , GETPEERNAME_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -93,6 +97,10 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
         memset(&srd->pld.ph.local_sock_addr, 0, sizeof(struct sockaddr_in));
         memset(&srd->pld.ph.peer_sock_addr, 0, sizeof(struct sockaddr_in));
 
+        /* set the timestamp of the client arrival */
+        if (0 != gettimeofday(&srd->pld.ph.arrival_time, NULL))
+            THROW(GETTIMEOFDAY_ERROR);
+        
         /* retrieve properties from TCP socket; this code will not work
            for IP6 based or LOCAL sockets */
         serv_addr_len = sizeof(struct sockaddr_in);
@@ -116,6 +124,9 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case GETTIMEOFDAY_ERROR:
+                ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
+                break;
             case GETSOCKNAME_ERROR:
                 ret_cod = LIXA_RC_GETSOCKNAME_ERROR;
                 break;
