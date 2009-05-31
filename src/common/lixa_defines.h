@@ -156,6 +156,10 @@
 
 
 
+#define SSIZE_T_FORMAT "%ld"
+
+
+
 #if SIZEOF_IN_PORT_T == SIZEOF_SHORT_INT
 # define IN_PORT_T_FORMAT "%hu"
 #else
@@ -189,10 +193,10 @@ extern "C" {
 
 
       
-      /**
-       * A byte is the fundamental I/O unit
-       */
-      typedef uint8_t byte_t;
+    /**
+     * A byte is the fundamental I/O unit
+     */
+    typedef uint8_t byte_t;
 
       
 

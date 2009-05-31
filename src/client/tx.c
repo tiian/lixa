@@ -74,6 +74,8 @@ int tx_open(void)
         client_status_t cs;
         char xml_buffer[XML_BUFFER_SIZE];
         ssize_t buffer_len;
+
+        int i;
         
         if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc)))
             THROW(CLIENT_CONFIG_ERROR);
@@ -96,6 +98,8 @@ int tx_open(void)
             THROW(BUFFER_TOO_SMALL);
         }
 
+        LIXA_TRACE(("tx_open: sending " SSIZE_T_FORMAT " bytes to the "
+                    "server\n", buffer_len));
         /* send XML message to server */
         if (buffer_len != send(fd, xml_buffer, buffer_len, 0))
             THROW(SEND_ERROR);

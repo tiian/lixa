@@ -204,6 +204,9 @@ const char *lixa_strerror(int ret_cod)
             case LIXA_RC_XML_READ_FILE_ERROR:
                 return "ERROR: 'xmlReadFile' function returned an error "
                     "condition";
+            case LIXA_RC_XML_READ_MEMORY_ERROR:
+                return "ERROR: 'xmlReadMemory' function returned an error "
+                    "condition";
             case LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR:
                 return "ERROR: 'xmlDocGetRootElement' function returned an "
                     "error condition";
