@@ -442,7 +442,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
     
     LIXA_TRACE(("server_manager_XML_proc\n"));
     TRY {
-        LIXA_TRACE(("server_manager_XML_proc: message is %*.*s\n",
+        LIXA_TRACE(("server_manager_XML_proc: message is |%*.*s|\n",
                     read_bytes, read_bytes, buf));
         THROW(NONE);
     } CATCH {
