@@ -61,10 +61,9 @@
  */
 #define XML_MSG_TX_OPEN1 XML_MSG_HEADER \
     "<" XML_MSG_TAG_FUNCTION " " XML_MSG_PROP_NAME "=\"tx_open\">" \
-    "<" XML_MSG_ARGS ">" \
-    "<" XML_MSG_TAG_PROFILE \
-    ">%s</" XML_MSG_TAG_PROFILE ">" \
-    "</" XML_MSG_ARGS ">" \
+    "<" XML_MSG_TAG_ARGS ">" \
+    "<" XML_MSG_TAG_PROFILE ">%s</" XML_MSG_TAG_PROFILE ">" \
+    "</" XML_MSG_TAG_ARGS ">" \
     "</" XML_MSG_TAG_FUNCTION ">"
 
 
