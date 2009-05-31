@@ -314,9 +314,13 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_XML_READ_FILE_ERROR            -200
 /**
+ * "xmlReadMemory" function error
+ */
+#define LIXA_RC_XML_READ_MEMORY_ERROR          -201
+/**
  * "xmlDocGetRootElement" function error
  */
-#define LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR -201
+#define LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR -202
 
 
 /***********************************************************************

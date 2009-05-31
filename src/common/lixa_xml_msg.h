@@ -54,7 +54,7 @@
 /**
  * This is the standard header must be prepended to every XML message
  */
-#define XML_MSG_HEADER "<?xml versione=\"1.0\" encoding=\"UTF-8\" ?>"
+#define XML_MSG_HEADER "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
 
 /**
  * First message sent by tx_open function to the server
