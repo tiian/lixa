@@ -42,7 +42,9 @@
 #define XML_MSG_PROP_NAME "name"
 #define XML_MSG_TAG_ARGS "args"
 #define XML_MSG_TAG_FUNCTION "function"
+#define XML_MSG_TAG_MSG "msg"
 #define XML_MSG_TAG_PROFILE "profile"
+#define XML_MSG_TAG_TYPE "type"
 
 
 
@@ -60,11 +62,32 @@
  * First message sent by tx_open function to the server
  */
 #define XML_MSG_TX_OPEN1 XML_MSG_HEADER \
+    "<" XML_MSG_TAG_MSG ">" \
+    "<" XML_MSG_TAG_TYPE ">%s</" XML_MSG_TAG_TYPE ">" \
     "<" XML_MSG_TAG_FUNCTION " " XML_MSG_PROP_NAME "=\"tx_open\">" \
     "<" XML_MSG_TAG_ARGS ">" \
     "<" XML_MSG_TAG_PROFILE ">%s</" XML_MSG_TAG_PROFILE ">" \
     "</" XML_MSG_TAG_ARGS ">" \
-    "</" XML_MSG_TAG_FUNCTION ">"
+    "</" XML_MSG_TAG_FUNCTION ">" \
+    "</" XML_MSG_TAG_MSG ">"
+
+#define XML_MSG_TX_OPEN1_TYPE "TX_OPEN1"
+
+
+/**
+ * Struct used to map a message of type @ref XML_MSG_TX_OPEN1
+ */
+struct xml_msg_tx_open1_s {
+    char *profile;
+};
+
+
+/**
+ * Union used to map a generic message
+ */
+union xml_msg_generic_u {
+    struct xml_msg_tx_open1_s   tx_open1;
+};
 
 
 

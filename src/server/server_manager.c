@@ -462,7 +462,9 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
         if (NULL == (root_element = xmlDocGetRootElement(doc)))
             THROW(XML_DOC_GET_ROOT_ELEMENT_ERROR);
 
+        /*
         parse the document...
+        */
         
         /* free parsed document */
         xmlFreeDoc(doc);
@@ -485,6 +487,10 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (excp > XML_READ_MEMORY_ERROR && excp < NONE) {
+            xmlFreeDoc(doc);
+            xmlCleanupParser();
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_XML_proc/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

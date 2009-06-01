@@ -271,7 +271,8 @@ int server_parse_listener(struct server_config_s *sc,
         /* realloc array */
         if (NULL == (sc->listeners.array = realloc(
                          sc->listeners.array,
-                         ++sc->listeners.n * sizeof(struct listener_config_s))))
+                         ++sc->listeners.n *
+                         sizeof(struct listener_config_s))))
             THROW(REALLOC_ERROR);
         i = sc->listeners.n - 1;
 

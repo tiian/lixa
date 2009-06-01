@@ -74,8 +74,6 @@ int tx_open(void)
         client_status_t cs;
         char xml_buffer[XML_BUFFER_SIZE];
         ssize_t buffer_len;
-
-        int i;
         
         if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc)))
             THROW(CLIENT_CONFIG_ERROR);
@@ -93,7 +91,8 @@ int tx_open(void)
         /* prepare XML message */
         if (sizeof(xml_buffer) <= (
                 buffer_len = snprintf(xml_buffer, XML_BUFFER_SIZE,
-                                      XML_MSG_TX_OPEN1, global_ccc.profile))) {
+                                      XML_MSG_TX_OPEN1, XML_MSG_TX_OPEN1_TYPE,
+                                      global_ccc.profile))) {
             LIXA_TRACE(("tx_open: xml_buffer to small. INTERNAL ERROR\n"));
             THROW(BUFFER_TOO_SMALL);
         }
