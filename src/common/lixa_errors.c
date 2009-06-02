@@ -90,6 +90,11 @@ const char *lixa_strerror(int ret_cod)
                 return "ERROR: destination object is too small to store "
                         "passed data";
                 */
+            case LIXA_RC_MALFORMED_XML_MSG:
+                return "ERROR: the XML message is malformed and cannot be "
+                    "interpreted";
+            case LIXA_RC_UNKNOWN_XML_MSG_TYPE:
+                return "ERROR: the XML message type is unknown";
             case LIXA_RC_MALLOC_ERROR:
                 return "ERROR: 'malloc' function returned an error condition";
             case LIXA_RC_REALLOC_ERROR:

@@ -39,12 +39,30 @@
 
 
 
-#define XML_MSG_PROP_NAME "name"
-#define XML_MSG_TAG_ARGS "args"
-#define XML_MSG_TAG_FUNCTION "function"
-#define XML_MSG_TAG_MSG "msg"
-#define XML_MSG_TAG_PROFILE "profile"
-#define XML_MSG_TAG_TYPE "type"
+#ifdef HAVE_LIBXML_TREE_H
+# include <libxml/tree.h>
+#endif
+#ifdef HAVE_LIBXML_PARSER_H
+# include <libxml/parser.h>
+#endif
+
+
+
+/* save old LIXA_TRACE_MODULE and set a new value */
+#ifdef LIXA_TRACE_MODULE
+# define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
+# undef LIXA_TRACE_MODULE
+#else
+# undef LIXA_TRACE_MODULE_SAVE
+#endif /* LIXA_TRACE_MODULE */
+#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_COMMON_XML_MSG
+
+
+
+#define XML_MSG_PROP_TYPE           "type"
+#define XML_MSG_TAG_ARGS            "args"
+#define XML_MSG_TAG_MSG             "msg"
+#define XML_MSG_TAG_PROFILE         "profile"
 
 
 
@@ -58,36 +76,97 @@
  */
 #define XML_MSG_HEADER "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
 
+
+
 /**
- * First message sent by tx_open function to the server
+ * Type of the first message sent by tx_open function to the server
+ */
+#define XML_MSG_TX_OPEN1_TYPE (long)1
+
+
+
+/**
+ * Text of the first message sent by tx_open function to the server
  */
 #define XML_MSG_TX_OPEN1 XML_MSG_HEADER \
-    "<" XML_MSG_TAG_MSG ">" \
-    "<" XML_MSG_TAG_TYPE ">%s</" XML_MSG_TAG_TYPE ">" \
-    "<" XML_MSG_TAG_FUNCTION " " XML_MSG_PROP_NAME "=\"tx_open\">" \
+    "<" XML_MSG_TAG_MSG " " XML_MSG_PROP_TYPE "=\"%ld\">" \
     "<" XML_MSG_TAG_ARGS ">" \
     "<" XML_MSG_TAG_PROFILE ">%s</" XML_MSG_TAG_PROFILE ">" \
     "</" XML_MSG_TAG_ARGS ">" \
-    "</" XML_MSG_TAG_FUNCTION ">" \
     "</" XML_MSG_TAG_MSG ">"
 
-#define XML_MSG_TX_OPEN1_TYPE "TX_OPEN1"
 
 
 /**
  * Struct used to map a message of type @ref XML_MSG_TX_OPEN1
  */
 struct xml_msg_tx_open1_s {
+    /**
+     * Dynamically allocated, it must be released after usage
+     */
     char *profile;
 };
 
 
+
 /**
- * Union used to map a generic message
+ * Struct used to map a generic message
  */
-union xml_msg_generic_u {
-    struct xml_msg_tx_open1_s   tx_open1;
+struct xml_msg_generic_s {
+    /**
+     * The string associated to the type carried by XML "<type>" tag
+     */
+    long  type;
+    /**
+     * Content: it depends on type
+     */
+    union {
+        struct xml_msg_tx_open1_s   tx_open1;
+    } cntnt;
 };
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
+
+    /**
+     * Translate a message from XML encoding to native C structure
+     * @param root_element IN the root of the XML parsed tree
+     * @param xmg OUT the reference to the native C structure
+     * @return a standardized return code
+     */
+    int xml_msg_translate(xmlNode *root_element,
+                          struct xml_msg_generic_s *xmg);
+
+
+
+    /**
+     * Translate args from an XML message to a native C structure
+     * @param node IN the root of the XML parsed tree
+     * @param xmg OUT the reference to the native C structure
+     * @return a standardized return code
+     */
+    int xml_msg_translate_args(xmlNode *node,
+                               struct xml_msg_generic_s *xmg);
+
+    
+    
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+
+
+/* restore old value of LIXA_TRACE_MODULE */
+#ifdef LIXA_TRACE_MODULE_SAVE
+# undef LIXA_TRACE_MODULE
+# define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
+# undef LIXA_TRACE_MODULE_SAVE
+#endif /* LIXA_TRACE_MODULE_SAVE */
 
 
 

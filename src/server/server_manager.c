@@ -45,6 +45,7 @@
 
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_xml_msg.h>
 #include <server_manager.h>
 #include <server_messages.h>
 
@@ -442,6 +443,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
 {
     enum Exception { XML_READ_MEMORY_ERROR
                      , XML_DOC_GET_ROOT_ELEMENT_ERROR
+                     , SERVER_TRANSLATE_MSG
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -450,6 +452,8 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
     
     LIXA_TRACE(("server_manager_XML_proc\n"));
     TRY {
+        struct xml_msg_generic_s xmg;
+        
         LIXA_TRACE(("server_manager_XML_proc: message is |%*.*s|\n",
                     read_bytes, read_bytes, buf));
 
@@ -462,9 +466,9 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
         if (NULL == (root_element = xmlDocGetRootElement(doc)))
             THROW(XML_DOC_GET_ROOT_ELEMENT_ERROR);
 
-        /*
-        parse the document...
-        */
+        /* translate the message from XML to native C ... */
+        if (LIXA_RC_OK != (ret_cod = xml_msg_translate(root_element, &xmg)))
+            THROW(SERVER_TRANSLATE_MSG);
         
         /* free parsed document */
         xmlFreeDoc(doc);
@@ -480,6 +484,8 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                 break;
             case XML_DOC_GET_ROOT_ELEMENT_ERROR:
                 ret_cod = LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR;
+                break;
+            case SERVER_TRANSLATE_MSG:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

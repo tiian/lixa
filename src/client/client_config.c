@@ -235,7 +235,8 @@ int client_config(client_config_coll_t *ccc)
 
         /* free parsed document */
         xmlFreeDoc(doc);
-
+        doc = NULL;
+        
         /* release libxml2 stuff */
         xmlCleanupParser();
 
@@ -315,14 +316,14 @@ int client_config(client_config_coll_t *ccc)
                 LIXA_TRACE(("client_config/pthread_mutex_unlock: "
                             "errno=%d\n", errno));
         }
-        if (excp < NONE && excp > XML_READ_FILE_ERROR) {
+        if (excp < NONE && doc != NULL) {
             /* free parsed document */
             xmlFreeDoc(doc);
             /* release libxml2 stuff */
             xmlCleanupParser();
         }
         /* free memory allocated by getadrinfo function */
-        if (excp < NONE && excp > GETADDRINFO_ERROR)
+        if (excp > GETADDRINFO_ERROR)
             freeaddrinfo(res);
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config/excp=%d/"
