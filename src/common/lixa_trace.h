@@ -107,9 +107,14 @@
 #define LIXA_TRACE_MOD_CLIENT_STATUS      0x00010000
 
 /**
- * trace module for common functions
+ * trace module for common config functions
  */
 #define LIXA_TRACE_MOD_COMMON_CONFIG      0x01000000
+
+/**
+ * trace module for common xml_msg functions
+ */
+#define LIXA_TRACE_MOD_COMMON_XML_MSG     0x02000000
 
 
 
