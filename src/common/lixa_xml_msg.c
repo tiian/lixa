@@ -120,15 +120,38 @@ int xml_msg_translate(xmlNode *root_element,
 int xml_msg_translate_args(xmlNode *node,
                            struct xml_msg_generic_s *xmg)
 {
-    enum Exception { NONE } excp;
+    enum Exception { MSG_TAG_NOT_FOUND
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    xmlNode *cur_node = NULL;
     
     LIXA_TRACE(("xml_msg_translate_args\n"));
     TRY {
-        restart from here
+        /* check the higher level tag is "msg" */
+        if (node->type != XML_ELEMENT_NODE ||
+            xmlStrcmp(node->name, (xmlChar *)XML_MSG_TAG_ARGS))
+            THROW(MSG_TAG_NOT_FOUND);
+
+        for (cur_node = node->children; cur_node; cur_node = cur_node->next) {
+            if (cur_node->type == XML_ELEMENT_NODE) {
+                LIXA_TRACE(("xml_msg_translate_args: tag %s\n",
+                            cur_node->name));
+                if (!xmlStrcmp(cur_node->name, XML_MSG_TAG_PROFILE)) {
+                    /* retrieve profile value */
+                    xmlChar *profile;
+                    profile = xmlNodeListGetString()
+                }
+            }
+        }
+
+                
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case MSG_TAG_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;                
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

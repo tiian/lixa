@@ -467,6 +467,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
             THROW(XML_DOC_GET_ROOT_ELEMENT_ERROR);
 
         /* translate the message from XML to native C ... */
+        pass doc instead of root_element here, because it's needed inside
         if (LIXA_RC_OK != (ret_cod = xml_msg_translate(root_element, &xmg)))
             THROW(SERVER_TRANSLATE_MSG);
         
