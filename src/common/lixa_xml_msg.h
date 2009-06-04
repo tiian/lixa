@@ -122,7 +122,7 @@ struct xml_msg_generic_s {
      */
     union {
         struct xml_msg_tx_open1_s   tx_open1;
-    } cntnt;
+    };
 };
 
 
@@ -135,22 +135,23 @@ extern "C" {
 
     /**
      * Translate a message from XML encoding to native C structure
-     * @param root_element IN the root of the XML parsed tree
+     * @param doc IN the XML parsed document
      * @param xmg OUT the reference to the native C structure
      * @return a standardized return code
      */
-    int xml_msg_translate(xmlNode *root_element,
+    int xml_msg_translate(xmlDocPtr doc,
                           struct xml_msg_generic_s *xmg);
 
 
 
     /**
      * Translate args from an XML message to a native C structure
+     * @param doc IN the XML parsed document
      * @param node IN the root of the XML parsed tree
      * @param xmg OUT the reference to the native C structure
      * @return a standardized return code
      */
-    int xml_msg_translate_args(xmlNode *node,
+    int xml_msg_translate_args(xmlDocPtr doc, xmlNode *node,
                                struct xml_msg_generic_s *xmg);
 
     

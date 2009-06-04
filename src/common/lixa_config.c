@@ -77,6 +77,8 @@ const xmlChar *LIXA_XML_CONFIG_MANAGER = (xmlChar *)"manager";
 const xmlChar *LIXA_XML_CONFIG_MANAGER_STATUS = (xmlChar *)"status_file";
 const xmlChar *LIXA_XML_CONFIG_TRNMGR = (xmlChar *)"trnmgr";
 const xmlChar *LIXA_XML_CONFIG_PROFILE_PROPERTY = (xmlChar *)"profile";
+const xmlChar *LIXA_XML_CONFIG_PROFILE = (xmlChar *)"profile";
+const xmlChar *LIXA_XML_CONFIG_NAME_PROPERTY = (xmlChar *)"name";
 
 
 

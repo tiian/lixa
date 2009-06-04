@@ -10,9 +10,9 @@
     <manager status_file="/tmp/lixad_status3"/>
   </managers>
   <profiles>
-    <profile>
+    <profile name="AG71">
     </profile>
-    <profile>
+    <profile name="VZ67">
     </profile>
   </profiles>
 </server>
