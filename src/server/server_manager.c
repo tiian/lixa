@@ -442,13 +442,11 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                             const char *buf, ssize_t read_bytes)
 {
     enum Exception { XML_READ_MEMORY_ERROR
-                     , XML_DOC_GET_ROOT_ELEMENT_ERROR
                      , SERVER_TRANSLATE_MSG
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     xmlDocPtr doc;
-    xmlNode *root_element = NULL;
     
     LIXA_TRACE(("server_manager_XML_proc\n"));
     TRY {
@@ -462,13 +460,8 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                                          NULL, 0)))
             THROW(XML_READ_MEMORY_ERROR);
 
-        /* retrieve root element from XML tree */
-        if (NULL == (root_element = xmlDocGetRootElement(doc)))
-            THROW(XML_DOC_GET_ROOT_ELEMENT_ERROR);
-
         /* translate the message from XML to native C ... */
-        pass doc instead of root_element here, because it's needed inside
-        if (LIXA_RC_OK != (ret_cod = xml_msg_translate(root_element, &xmg)))
+        if (LIXA_RC_OK != (ret_cod = xml_msg_translate(doc, &xmg)))
             THROW(SERVER_TRANSLATE_MSG);
         
         /* free parsed document */
@@ -482,9 +475,6 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
         switch (excp) {
             case XML_READ_MEMORY_ERROR:
                 ret_cod = LIXA_RC_XML_READ_MEMORY_ERROR;
-                break;
-            case XML_DOC_GET_ROOT_ELEMENT_ERROR:
-                ret_cod = LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR;
                 break;
             case SERVER_TRANSLATE_MSG:
                 break;

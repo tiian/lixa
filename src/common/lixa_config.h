@@ -124,6 +124,16 @@ extern const xmlChar *LIXA_XML_CONFIG_TRNMGR;
  */
 extern const xmlChar *LIXA_XML_CONFIG_PROFILE_PROPERTY;
 
+/**
+ * Label used to specify "profile" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_PROFILE;
+
+/**
+ * Label used to specify "name" property
+ */
+extern const xmlChar *LIXA_XML_CONFIG_NAME_PROPERTY;
+
 
 
 #ifdef __cplusplus

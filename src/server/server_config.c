@@ -202,6 +202,7 @@ int server_parse(struct server_config_s *sc,
 {
     enum Exception { PARSE_LISTENER_ERROR
                      , PARSE_MANAGER_ERROR
+                     , PROFILE_MANAGER_ERROR
                      , SERVER_PARSE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -222,6 +223,11 @@ int server_parse(struct server_config_s *sc,
                     if (LIXA_RC_OK != (ret_cod = server_parse_manager(
                                            sc, tpa, cur_node)))
                         THROW(PARSE_MANAGER_ERROR);
+                } else if (!xmlStrcmp(cur_node->name,
+                                      LIXA_XML_CONFIG_PROFILE)) {
+                    if (LIXA_RC_OK != (ret_cod = server_parse_profile(
+                                           sc, tpa, cur_node)))
+                        THROW(PROFILE_MANAGER_ERROR);
                 }
             }
             if (LIXA_RC_OK != (ret_cod = server_parse(
@@ -234,6 +240,7 @@ int server_parse(struct server_config_s *sc,
         switch (excp) {
             case PARSE_LISTENER_ERROR:
             case PARSE_MANAGER_ERROR:
+            case PROFILE_MANAGER_ERROR:
             case SERVER_PARSE_ERROR:
                 break;
             case NONE:
@@ -383,7 +390,8 @@ int server_parse_manager(struct server_config_s *sc,
         j = tpa->n - 1;
         if (0 != pipe(tpa->array[j].pipefd))
             THROW(PIPE_ERROR);
-        LIXA_TRACE(("server_parse_manager: pipe %d for manager %d is [%d,%d]\n",
+        LIXA_TRACE(("server_parse_manager: pipe %d for manager %d is "
+                    "[%d,%d]\n",
                     j, i, tpa->array[j].pipefd[0], tpa->array[j].pipefd[1]));
         
         THROW(NONE);
@@ -413,6 +421,33 @@ int server_parse_manager(struct server_config_s *sc,
 
 
     
+int server_parse_profile(struct server_config_s *sc,
+                         struct thread_pipe_array_s *tpa,
+                         xmlNode *a_node)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_parse_profile\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_parse_profile/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 void server_config_init(struct server_config_s *sc,
                         struct thread_pipe_array_s *tpa)
 {
