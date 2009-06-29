@@ -1,3 +1,4 @@
+SUBDIRS = switch
 include_HEADERS = tx.h
 noinst_HEADERS = client_config.h client_conn.h client_status.h
 lib_LTLIBRARIES = liblixac.la liblixacmt.la

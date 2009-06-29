@@ -7,9 +7,14 @@ AC_CONFIG_FILES([
   src/Makefile
   src/common/Makefile
   src/client/Makefile
+  src/client/switch/Makefile
   src/server/Makefile
   src/sample/Makefile
 ])
+
+# Include Oracle test
+m4_include(m4include/ax_lib_oracle_oci.m4)
+AX_LIB_ORACLE_OCI
 
 # LT Version numbers, remember to change them just *before* a release.
 #   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)
