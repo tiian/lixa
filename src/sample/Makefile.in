@@ -33,6 +33,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = hello$(EXEEXT)
+bin_PROGRAMS = cdemo81$(EXEEXT)
 subdir = src/sample
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -43,7 +44,16 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-PROGRAMS = $(noinst_PROGRAMS)
+am__installdirs = "$(DESTDIR)$(bindir)"
+binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+am_cdemo81_OBJECTS = cdemo81-cdemo81.$(OBJEXT)
+cdemo81_OBJECTS = $(am_cdemo81_OBJECTS)
+cdemo81_LDADD = $(LDADD)
+cdemo81_DEPENDENCIES = ../client/liblixacmt.la
+cdemo81_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(cdemo81_CFLAGS) $(CFLAGS) \
+	$(cdemo81_LDFLAGS) $(LDFLAGS) -o $@
 am_hello_OBJECTS = hello.$(OBJEXT)
 hello_OBJECTS = $(am_hello_OBJECTS)
 hello_LDADD = $(LDADD)
@@ -60,8 +70,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(hello_SOURCES)
-DIST_SOURCES = $(hello_SOURCES)
+SOURCES = $(cdemo81_SOURCES) $(hello_SOURCES)
+DIST_SOURCES = $(cdemo81_SOURCES) $(hello_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -185,8 +195,12 @@ top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I$(srcdir)/../client
 AM_CFLAGS = -Wall
 AM_LDFLAGS = -lpthread
+cdemo81_CPPFLAGS = -I/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public/
+cdemo81_CFLAGS = 
+cdemo81_LDFLAGS = -L/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -lclntsh -lnnz10 -lpthread 
 LDADD = ../client/liblixacmt.la
 hello_SOURCES = hello.c
+cdemo81_SOURCES = cdemo81.c
 all: all-am
 
 .SUFFIXES:
@@ -220,6 +234,34 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	     || test -f $$p1 \
+	  ; then \
+	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(binPROGRAMS_INSTALL) '$$p' '$(DESTDIR)$(bindir)/$$f'"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(binPROGRAMS_INSTALL) "$$p" "$(DESTDIR)$(bindir)/$$f" || exit 1; \
+	  else :; fi; \
+	done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f '$(DESTDIR)$(bindir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(bindir)/$$f"; \
+	done
+
+clean-binPROGRAMS:
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  echo " rm -f $$p $$f"; \
+	  rm -f $$p $$f ; \
+	done
 
 clean-noinstPROGRAMS:
 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
@@ -227,6 +269,9 @@ clean-noinstPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+cdemo81$(EXEEXT): $(cdemo81_OBJECTS) $(cdemo81_DEPENDENCIES) 
+	@rm -f cdemo81$(EXEEXT)
+	$(cdemo81_LINK) $(cdemo81_OBJECTS) $(cdemo81_LDADD) $(LIBS)
 hello$(EXEEXT): $(hello_OBJECTS) $(hello_DEPENDENCIES) 
 	@rm -f hello$(EXEEXT)
 	$(LINK) $(hello_OBJECTS) $(hello_LDADD) $(LIBS)
@@ -237,6 +282,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdemo81-cdemo81.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hello.Po@am__quote@
 
 .c.o:
@@ -259,6 +305,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+cdemo81-cdemo81.o: cdemo81.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cdemo81_CPPFLAGS) $(CPPFLAGS) $(cdemo81_CFLAGS) $(CFLAGS) -MT cdemo81-cdemo81.o -MD -MP -MF $(DEPDIR)/cdemo81-cdemo81.Tpo -c -o cdemo81-cdemo81.o `test -f 'cdemo81.c' || echo '$(srcdir)/'`cdemo81.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cdemo81-cdemo81.Tpo $(DEPDIR)/cdemo81-cdemo81.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdemo81.c' object='cdemo81-cdemo81.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cdemo81_CPPFLAGS) $(CPPFLAGS) $(cdemo81_CFLAGS) $(CFLAGS) -c -o cdemo81-cdemo81.o `test -f 'cdemo81.c' || echo '$(srcdir)/'`cdemo81.c
+
+cdemo81-cdemo81.obj: cdemo81.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cdemo81_CPPFLAGS) $(CPPFLAGS) $(cdemo81_CFLAGS) $(CFLAGS) -MT cdemo81-cdemo81.obj -MD -MP -MF $(DEPDIR)/cdemo81-cdemo81.Tpo -c -o cdemo81-cdemo81.obj `if test -f 'cdemo81.c'; then $(CYGPATH_W) 'cdemo81.c'; else $(CYGPATH_W) '$(srcdir)/cdemo81.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cdemo81-cdemo81.Tpo $(DEPDIR)/cdemo81-cdemo81.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdemo81.c' object='cdemo81-cdemo81.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cdemo81_CPPFLAGS) $(CPPFLAGS) $(cdemo81_CFLAGS) $(CFLAGS) -c -o cdemo81-cdemo81.obj `if test -f 'cdemo81.c'; then $(CYGPATH_W) 'cdemo81.c'; else $(CYGPATH_W) '$(srcdir)/cdemo81.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -343,6 +403,9 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(PROGRAMS)
 installdirs:
+	for dir in "$(DESTDIR)$(bindir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -369,8 +432,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
-	mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -392,7 +455,7 @@ install-data-am:
 
 install-dvi: install-dvi-am
 
-install-exec-am:
+install-exec-am: install-binPROGRAMS
 
 install-html: install-html-am
 
@@ -424,22 +487,23 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-binPROGRAMS
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-noinstPROGRAMS ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
+	clean-generic clean-libtool clean-noinstPROGRAMS ctags \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-binPROGRAMS
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

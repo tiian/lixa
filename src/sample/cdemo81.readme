@@ -1,0 +1,9 @@
+I can NOT distribute Oracle software.
+Please install Oracle XE 10.2
+then use this command to make a symbolic link from Oracle stuff to lixa 
+directory:
+ 
+ln -s /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/demo/cdemo81.c .
+
+then, you will be able to compile the Oracle supplied OCI sample.
+
