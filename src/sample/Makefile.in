@@ -32,8 +32,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = hello$(EXEEXT)
 bin_PROGRAMS = cdemo81$(EXEEXT)
+noinst_PROGRAMS = hello$(EXEEXT)
 subdir = src/sample
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -195,11 +195,14 @@ top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I$(srcdir)/../client
 AM_CFLAGS = -Wall
 AM_LDFLAGS = -lpthread
-cdemo81_CPPFLAGS = -I/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public/
-cdemo81_CFLAGS = 
-cdemo81_LDFLAGS = -L/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -lclntsh -lnnz10 -lpthread 
+# remove this legacy stuff (2009-08-16)
+#cdemo81_CPPFLAGS = -I/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public/
+#cdemo81_LDFLAGS = -L/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -lclntsh -lnnz10 -lpthread 
 LDADD = ../client/liblixacmt.la
 hello_SOURCES = hello.c
+cdemo81_CPPFLAGS = @ORACLE_OCI_CFLAGS@
+cdemo81_CFLAGS = 
+cdemo81_LDFLAGS = @ORACLE_OCI_LDFLAGS@
 cdemo81_SOURCES = cdemo81.c
 all: all-am
 
