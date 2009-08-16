@@ -31,3 +31,8 @@ TCP/IP connection and "connect" functions fail.
 SO_LINGER could be a "solution", but this may generate different issues as
 W. Richard Stevens explained in "UNIX network programming".
 
+2009081601
+conditional compilation should allow to compile/not compile Oracle related
+stuff; unfortunately I was not able to set AM_CONDITIONAL properly to address
+the result. It must be reworked later.
+
