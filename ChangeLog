@@ -35,4 +35,6 @@ W. Richard Stevens explained in "UNIX network programming".
 conditional compilation should allow to compile/not compile Oracle related
 stuff; unfortunately I was not able to set AM_CONDITIONAL properly to address
 the result. It must be reworked later.
+*** SOLVED *** 20090925: now conditional compilation works fine for Oracle
+related stuff.
 
