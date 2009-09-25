@@ -8,15 +8,16 @@ AC_CONFIG_FILES([
   src/common/Makefile
   src/client/Makefile
   src/client/switch/Makefile
+  src/client/switch/oracle/Makefile
   src/server/Makefile
   src/sample/Makefile
+  src/sample/oracle/Makefile
 ])
 
 # Include Oracle test
 m4_include(m4include/ax_lib_oracle_oci.m4)
 AX_LIB_ORACLE_OCI
-# This stuff unfortunately does not work... it must be reworked later
-#AM_CONDITIONAL([COMPILE_ORACLE_STUFF], [test -d $oracle_home_dir])
+AM_CONDITIONAL([COMPILE_ORACLE_STUFF], [test -n "$oracle_home_dir"])
 
 # LT Version numbers, remember to change them just *before* a release.
 #   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)

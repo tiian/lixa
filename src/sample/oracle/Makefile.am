@@ -1,0 +1,7 @@
+AM_CPPFLAGS = -I$(srcdir)/../client @ORACLE_OCI_CFLAGS@
+AM_CFLAGS =
+AM_LDFLAGS = -lpthread @ORACLE_OCI_LDFLAGS@
+LDADD = ../../client/liblixacmt.la
+cdemo81_SOURCES = cdemo81.c
+bin_PROGRAMS = cdemo81
+
