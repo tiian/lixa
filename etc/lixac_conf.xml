@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <client>
+  <trnmgr domain="AF_INET" address="127.0.0.1" port="2345" profile="VZ67"/>
   <trnmgr domain="AF_INET" address="127.0.0.1" port="3456" profile="AG71"/>
   <trnmgr domain="AF_INET" address="127.0.0.1" port="2345" profile="CF70"/>
   <trnmgr domain="AF_INET" address="127.0.0.1" port="3456" profile="GT71"/>
-  <trnmgr domain="AF_INET" address="127.0.0.1" port="2345" profile="VZ67"/>
 </client>
