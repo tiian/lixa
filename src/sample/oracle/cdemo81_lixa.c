@@ -490,8 +490,16 @@ sword status;
  */
 void cleanup()
 {
+  int txrc; /* return code of tx_* functions */
+
   if (envhp)
     (void) OCIHandleFree((dvoid *) envhp, OCI_HTYPE_ENV);
+
+  if (TX_OK != (txrc = tx_close())) {
+      fprintf(stderr, "tx_close error: %d\n", txrc);
+      exit(txrc);
+  }
+  
   return;
 }
 
