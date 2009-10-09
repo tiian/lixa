@@ -9,10 +9,17 @@ AC_CONFIG_FILES([
   src/client/Makefile
   src/client/switch/Makefile
   src/client/switch/oracle/Makefile
+  src/extra/Makefile
   src/server/Makefile
   src/sample/Makefile
   src/sample/oracle/Makefile
 ])
+
+# Include libltdl stuff
+AC_LIBLTDL_INSTALLABLE
+AC_LIBTOOL_DLOPEN
+AC_PROG_LIBTOOL
+AC_CONFIG_SUBDIRS([src/extra/libltdl])
 
 # Include Oracle test
 m4_include(m4include/ax_lib_oracle_oci.m4)
@@ -44,7 +51,6 @@ AC_ARG_ENABLE([trace],
         [_TRACE="no"], [_TRACE="yes"; CPPFLAGS="$CPPFLAGS -D_TRACE"] )
 
 AM_PROG_CC_C_O
-AC_PROG_RANLIB
 AC_PROG_LIBTOOL
 
 AC_CHECK_HEADERS(arpa/inet.h assert.h)
