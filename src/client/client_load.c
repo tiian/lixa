@@ -49,6 +49,6 @@
 int foo()
 {
     lt_dlinit();
-    lt_dlhandle pippo;
-    pippo = lt_dlopenext("paperino");
+    lt_dlhandle goofy;
+    goofy = lt_dlopenext("duck");
 }

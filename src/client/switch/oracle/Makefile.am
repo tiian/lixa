@@ -1,5 +1,5 @@
-lib_LTLIBRARIES = oracle_switch.la
-oracle_switch_la_SOURCES = oracle.c
-oracle_switch_la_CPPFLAGS = @ORACLE_OCI_CFLAGS@
+lib_LTLIBRARIES = switch_oracle.la
+switch_oracle_la_SOURCES = oracle.c
+switch_oracle_la_CPPFLAGS = @ORACLE_OCI_CFLAGS@
 AM_CFLAGS = -Wall
-oracle_switch_la_LDFLAGS = @ORACLE_OCI_LDFLAGS@ -module
+switch_oracle_la_LDFLAGS = @ORACLE_OCI_LDFLAGS@ -module

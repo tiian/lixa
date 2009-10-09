@@ -1,0 +1,80 @@
+This document is a draft and contains ideas, issues, possible solutions.
+Nothing else then work in progress stuff...
+
+******************************************
+
+JOB and PROFILE
+
+The PROFILE concept describes a set of resource managers and the way they
+must be reached. Example: network addresses and ports, switch load files must
+be used, users & passwords for authentication and so on...
+
+The JOB concept is related to the logical container of a set of transactions.
+Examples.
+The default JOB associated to a transaction is the fully qualified path name
+of the program is executing the JOB.
+If the JOB crashes, the recovery will happen only when the same JOB will
+start again.
+If you are working in a cluster environment, probably you need some flexibility
+and the default JOB may be something related to "program name", but not
+depending on "directory name". It maybe.
+If you are working in some configuration with many different program 
+supplying a service, probably you may be interested in specifying a logical
+label instead of accepting the default program name. Imagine you can set-up
+an environment variable, like this:
+      export LIXA_JOB_NAME="payroll"
+and then programs "pay01", "pay02", "pay54", "pay55" are all executed in an
+environment with the variable set-up. Every job can recover the data of a
+previous one.
+If your transactions are inside "apache", you may likely leave "apache" as
+the default JOB name.
+
+This concept moves a lot of responsability on Lixa client library, relegating
+the server to the only precious task of available and secure transaction
+"register".
+One consequence of this idea is the long term of transaction status inside
+the server: a failed transaction could be "silently managed" for "infinite"
+time.
+The server can NOT use a linear journal, but a different non circular 
+structure.
+
+******************************************
+
+TRANSACTION MANAGERS, RESOURCE MANAGERS and PROFILES
+
+All the information related to the RESOURCE MANAGERS is stored in client
+configuration. 
+A client application use a PROFILE to:
+- specify the resource manager parameters (switch load file, open options,
+  close options, etc...)
+- specify the transaction manager will help the client to perform the XA
+  stuff
+The relation between PROFILES and TRANSACTION MANAGERS is N:1
+A profile can be associated to only one transaction manager
+A transaction manager can be associated to many profiles
+
+The lixac_conf.xml file must radically change:
+1. <trnmgr> tag must be enriched with an ID property
+2. <trnmgr> tag must not contain a PROFILE property
+3. <trnmgr> tags must be enclosed inside <trnmgrs> tag
+4. <profiles> tag must be created
+5. <profile> tags must be created inside <profiles>
+6. <profile> tag must store switch load file and resource manager stuff
+
+All these changes are necessary due to the different strategy: the server
+becomes a "passive" component used only to manage XA status of all the 
+managed transactions in a centralized manner. All the information needed to
+interface the resource managers are stored in client side.
+This prevent a double configuration issue but exposes to different issues
+like: every client must be correctly configured to reach all the resource
+managers.
+Some information on server side will be in the wrong place:
+- switch load file is a property of the system is hosting the client (the
+  module could be installed everywhere)
+- resource manager open strings many times contain user/password related to
+  access credentials: these data are already stored client side because they
+  are used by the client application. Why should we store them server side too?
+- resource manager trace options can be very different from system to system
+  (disk space, number of transaction performed, and so on...). Why should we
+  centralize and risk to break a system only because another one need more
+  tracing messages?

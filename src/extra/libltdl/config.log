@@ -491,7 +491,7 @@ configure:20635: checking whether libtool supports -dlopen/-dlpreopen
 configure:20647: result: yes
 configure:20666: checking for shl_load
 configure:20722: gcc -o conftest -g -O2 -I/usr/include/libxml2  conftest.c  >&5
-/tmp/ccq2t9dl.o: In function `main':
+/tmp/ccAkclr8.o: In function `main':
 /home/tiian/lixa/src/extra/libltdl/conftest.c:59: undefined reference to `shl_load'
 collect2: ld returned 1 exit status
 configure:20728: $? = 1
