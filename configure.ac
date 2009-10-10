@@ -16,9 +16,9 @@ AC_CONFIG_FILES([
 ])
 
 # Include libltdl stuff
-AC_LIBLTDL_INSTALLABLE
+AC_LIBLTDL_INSTALLABLE([src/extra/libltdl])
 AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
+AC_PROG_LIBTOOL([src/extra/libltdl])
 AC_CONFIG_SUBDIRS([src/extra/libltdl])
 
 # Include Oracle test
@@ -80,6 +80,10 @@ AC_SUBST(LT_LIXAC_AGE)
 AC_SUBST(LT_LIXAB_CURRENT)
 AC_SUBST(LT_LIXAB_REVISION)
 AC_SUBST(LT_LIXAB_AGE)
+# These substitutions should not be necessary, but... Without them it does not
+# work as desired
+AC_SUBST(LTDLINCL)
+AC_SUBST(LIBLTDL)
 
 AC_OUTPUT
 

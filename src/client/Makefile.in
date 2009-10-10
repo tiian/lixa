@@ -132,10 +132,12 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LIBLTDL = @LIBLTDL@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
+LTDLINCL = @LTDLINCL@
 LTLIBOBJS = @LTLIBOBJS@
 LT_LIXAB_AGE = @LT_LIXAB_AGE@
 LT_LIXAB_CURRENT = @LT_LIXAB_CURRENT@
@@ -225,12 +227,12 @@ liblixac_la_SOURCES = client_config.c client_conn.c client_load.c \
 liblixacmt_la_SOURCES = client_config.c client_conn.c client_load.c \
 	client_status.c tx.c
 
-AM_CPPFLAGS = -I$(srcdir)/../common
+AM_CPPFLAGS = -I$(srcdir)/../common @LTDLINCL@
 AM_CFLAGS = -Wall
 liblixac_la_LIBADD = ../common/liblixab.la
 liblixacmt_la_LIBADD = ../common/liblixabmt.la
-liblixac_la_LDFLAGS = -lxml2 -lltdl -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
-liblixacmt_la_LDFLAGS = -lpthread -lltdl -lxml2 -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
+liblixac_la_LDFLAGS = -lxml2 @LIBLTDL@ -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
+liblixacmt_la_LDFLAGS = -lpthread -lxml2 @LIBLTDL@ -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
 all: all-recursive
 
 .SUFFIXES:
