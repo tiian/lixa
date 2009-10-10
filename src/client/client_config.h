@@ -209,6 +209,17 @@ extern "C" {
 
 
     /**
+     * Parse a "trnmgrs" node tree
+     * @param ccc OUT server configuration structure
+     * @param a_node IN the current subtree must be parsed
+     * @return a standardized return code
+     */
+    int client_parse_trnmgrs(struct client_config_coll_s *ccc,
+                             xmlNode *a_node);
+
+
+
+    /**
      * Parse a "trnmgr" node tree
      * @param ccc OUT server configuration structure
      * @param a_node IN the current subtree must be parsed
@@ -216,6 +227,17 @@ extern "C" {
      */
     int client_parse_trnmgr(struct client_config_coll_s *ccc,
                             xmlNode *a_node);
+
+
+
+    /**
+     * Parse a "profiles" node tree
+     * @param ccc OUT server configuration structure
+     * @param a_node IN the current subtree must be parsed
+     * @return a standardized return code
+     */
+    int client_parse_profiles(struct client_config_coll_s *ccc,
+                             xmlNode *a_node);
 
 
 

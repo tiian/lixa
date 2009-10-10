@@ -50,11 +50,13 @@ PROGRAMS = $(bin_PROGRAMS)
 am_cdemo81_OBJECTS = cdemo81.$(OBJEXT)
 cdemo81_OBJECTS = $(am_cdemo81_OBJECTS)
 cdemo81_LDADD = $(LDADD)
-cdemo81_DEPENDENCIES = ../../client/liblixacmt.la
+cdemo81_DEPENDENCIES = ../../common/liblixabmt.la \
+	../../client/liblixacmt.la
 am_cdemo81_lixa_OBJECTS = cdemo81_lixa.$(OBJEXT)
 cdemo81_lixa_OBJECTS = $(am_cdemo81_lixa_OBJECTS)
 cdemo81_lixa_LDADD = $(LDADD)
-cdemo81_lixa_DEPENDENCIES = ../../client/liblixacmt.la
+cdemo81_lixa_DEPENDENCIES = ../../common/liblixabmt.la \
+	../../client/liblixacmt.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -195,7 +197,7 @@ top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I$(srcdir)/../../client @ORACLE_OCI_CFLAGS@
 AM_CFLAGS = 
 AM_LDFLAGS = -lpthread @ORACLE_OCI_LDFLAGS@
-LDADD = ../../client/liblixacmt.la
+LDADD = ../../common/liblixabmt.la ../../client/liblixacmt.la
 cdemo81_SOURCES = cdemo81.c
 cdemo81_lixa_SOURCES = cdemo81_lixa.c
 all: all-am
