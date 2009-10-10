@@ -48,7 +48,7 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_hello_OBJECTS = hello.$(OBJEXT)
 hello_OBJECTS = $(am_hello_OBJECTS)
 hello_LDADD = $(LDADD)
-hello_DEPENDENCIES = ../client/liblixacmt.la
+hello_DEPENDENCIES = ../common/liblixabmt.la ../client/liblixacmt.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -201,7 +201,7 @@ SUBDIRS = $(MAYBE_ORACLE)
 AM_CPPFLAGS = -I$(srcdir)/../client
 AM_CFLAGS = -Wall
 AM_LDFLAGS = -lpthread
-LDADD = ../client/liblixacmt.la
+LDADD = ../common/liblixabmt.la ../client/liblixacmt.la
 hello_SOURCES = hello.c
 all: all-recursive
 

@@ -68,6 +68,7 @@ const char *LIXA_CLIENT_CONFIG_DEFAULT_FILE = "/etc/lixac_conf.xml";
 const char *LIXA_SERVER_CONFIG_DEFAULT_FILE = "/etc/lixad_conf.xml";
 
 const xmlChar *LIXA_XML_CONFIG_LISTENER = (xmlChar *)"listener";
+const xmlChar *LIXA_XML_CONFIG_CLIENT = (xmlChar *)"client";
 const xmlChar *LIXA_XML_CONFIG_SERVER = (xmlChar *)"server";
 const xmlChar *LIXA_XML_CONFIG_DOMAIN_PROPERTY = (xmlChar *)"domain";
 const xmlChar *LIXA_XML_CONFIG_ADDRESS_PROPERTY = (xmlChar *)"address";
@@ -76,8 +77,10 @@ const xmlChar *LIXA_XML_CONFIG_DOMAIN_AF_INET_VALUE = (xmlChar *)"AF_INET";
 const xmlChar *LIXA_XML_CONFIG_MANAGER = (xmlChar *)"manager";
 const xmlChar *LIXA_XML_CONFIG_MANAGER_STATUS = (xmlChar *)"status_file";
 const xmlChar *LIXA_XML_CONFIG_TRNMGR = (xmlChar *)"trnmgr";
+const xmlChar *LIXA_XML_CONFIG_TRNMGRS = (xmlChar *)"trnmgrs";
 const xmlChar *LIXA_XML_CONFIG_PROFILE_PROPERTY = (xmlChar *)"profile";
 const xmlChar *LIXA_XML_CONFIG_PROFILE = (xmlChar *)"profile";
+const xmlChar *LIXA_XML_CONFIG_PROFILES = (xmlChar *)"profiles";
 const xmlChar *LIXA_XML_CONFIG_NAME_PROPERTY = (xmlChar *)"name";
 
 

@@ -80,6 +80,11 @@ extern const char *LIXA_CLIENT_CONFIG_DEFAULT_FILE;
 extern const xmlChar *LIXA_XML_CONFIG_LISTENER;
 
 /**
+ * Label used to specify "client" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_CLIENT;
+
+/**
  * Label used to specify "server" tag
  */
 extern const xmlChar *LIXA_XML_CONFIG_SERVER;
@@ -120,6 +125,11 @@ extern const xmlChar *LIXA_XML_CONFIG_MANAGER_STATUS;
 extern const xmlChar *LIXA_XML_CONFIG_TRNMGR;
 
 /**
+ * Label used to specify "trnmgrs" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_TRNMGRS;
+
+/**
  * Label used to specify "profile" property in "trnmgr" tag
  */
 extern const xmlChar *LIXA_XML_CONFIG_PROFILE_PROPERTY;
@@ -128,6 +138,11 @@ extern const xmlChar *LIXA_XML_CONFIG_PROFILE_PROPERTY;
  * Label used to specify "profile" tag
  */
 extern const xmlChar *LIXA_XML_CONFIG_PROFILE;
+
+/**
+ * Label used to specify "profiles" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_PROFILES;
 
 /**
  * Label used to specify "name" property

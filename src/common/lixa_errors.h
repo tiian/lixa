@@ -145,6 +145,10 @@ define LIXA_RC_DESTINATION_TOO_SMALL          -16
  * The XML message is malformed and can not be processed
  */
 #define LIXA_RC_UNKNOWN_XML_MSG_TYPE           -18
+/**
+ * The XML contains a tag is not known or is in the wrong place
+ */
+#define LIXA_RC_XML_UNRECOGNIZED_TAG           -19
 
 /**
  * "malloc" function error
