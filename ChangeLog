@@ -38,3 +38,11 @@ the result. It must be reworked later.
 *** SOLVED *** 20090925: now conditional compilation works fine for Oracle
 related stuff.
 
+2009101001
+libxml2 include and library path should be specified using configure standards
+and not with an exported shell variable (include files and library can be at
+different rooted path, so 3 configure options must be implemented):
+--with-libxml2=[DIR]
+--with-libxml2-include=[DIR]
+--with-libxml2-lib=[DIR]
+
