@@ -7,5 +7,9 @@
     <trnmgr domain="AF_INET" address="127.0.0.1" port="3456" profile="GT71"/>
   </trnmgrs>
   <profiles>
+    <profile />
+    <profile />
+    <profile />
+    <profile />
   </profiles>
 </client>

@@ -241,6 +241,17 @@ extern "C" {
 
 
 
+    /**
+     * Parse a "profile" node tree
+     * @param ccc OUT server configuration structure
+     * @param a_node IN the current subtree must be parsed
+     * @return a standardized return code
+     */
+    int client_parse_profile(struct client_config_coll_s *ccc,
+                             xmlNode *a_node);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
