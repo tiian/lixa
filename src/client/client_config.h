@@ -97,11 +97,9 @@ struct trnmgr_config_s {
      * Port used to reach the transaction manager
      */
     in_port_t port;
-    /**
-     * Transactional profile associated to this entry
-     */
-    char *profile;
 };
+
+
 
 /**
  * It contains the configuration of all the transaction managers
@@ -115,6 +113,67 @@ struct trnmgr_config_array_s {
      * Elements
      */
     struct trnmgr_config_s *array;
+};
+
+
+
+/**
+ * It contains the configuration of a resource manager (how to reach and
+ * use it)
+ */
+struct rsrmgr_config_s {
+    /**
+     * Name associated to the resource manager
+     */
+    char *name;
+    /**
+     * Switch file must be used to interact with the resource manager
+     */
+    char *switch_file;
+};
+
+
+
+/**
+ * It contains the configuration of all the resource managers
+ */
+struct rsrmgr_config_array_s {
+    /**
+     * Number of elements
+     */
+    int n;
+    /**
+     * Elements
+     */
+    struct rsrmgr_config_s *array;
+};
+
+
+
+/**
+ * It contains the configuration of a profile
+ */
+struct profile_config_s {
+    /**
+     * Name associated to the resource manager
+     */
+    char *name;
+};
+
+
+
+/**
+ * It contains the configuration of all the resource managers
+ */
+struct profile_config_array_s {
+    /**
+     * Number of elements
+     */
+    int n;
+    /**
+     * Elements
+     */
+    struct profile_config_s *array;
 };
 
 
@@ -157,9 +216,21 @@ struct client_config_coll_s {
      * Transaction managers' configuration
      */
     struct trnmgr_config_array_s trnmgrs;
+    /**
+     * Resource managers' configuration
+     */
+    struct rsrmgr_config_array_s rsrmgrs;
+    /**
+     * Profiles' configuration
+     */
+    struct profile_config_array_s profiles;
 };
 
+
+
 typedef struct client_config_coll_s client_config_coll_t;
+
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -182,10 +253,11 @@ extern "C" {
      * @param ccc IN configuration object reference
      * @param tc OUT reference to the configuration of the transaction manager
      * @return a standardized return code
-     */
+     * Must be reviewed!!!!!!!!!
     int client_config_coll_get_trnmgr(const client_config_coll_t *ccc,
                                       struct trnmgr_config_s **tc);
-
+    */
+    
 
     
     /**
@@ -226,6 +298,28 @@ extern "C" {
      * @return a standardized return code
      */
     int client_parse_trnmgr(struct client_config_coll_s *ccc,
+                            xmlNode *a_node);
+
+
+
+    /**
+     * Parse a "rsrmgrs" node tree
+     * @param ccc OUT server configuration structure
+     * @param a_node IN the current subtree must be parsed
+     * @return a standardized return code
+     */
+    int client_parse_rsrmgrs(struct client_config_coll_s *ccc,
+                             xmlNode *a_node);
+
+
+
+    /**
+     * Parse a "rsrmgr" node tree
+     * @param ccc OUT server configuration structure
+     * @param a_node IN the current subtree must be parsed
+     * @return a standardized return code
+     */
+    int client_parse_rsrmgr(struct client_config_coll_s *ccc,
                             xmlNode *a_node);
 
 

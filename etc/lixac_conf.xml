@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <client>
   <trnmgrs>
-    <trnmgr domain="AF_INET" address="127.0.0.1" port="2345" profile="VZ67"/>
-    <trnmgr domain="AF_INET" address="127.0.0.1" port="3456" profile="AG71"/>
-    <trnmgr domain="AF_INET" address="127.0.0.1" port="2345" profile="CF70"/>
-    <trnmgr domain="AF_INET" address="127.0.0.1" port="3456" profile="GT71"/>
+    <trnmgr domain="AF_INET" address="127.0.0.1" port="2345" />
+    <trnmgr domain="AF_INET" address="127.0.0.1" port="3456" />
+    <trnmgr domain="AF_INET" address="127.0.0.1" port="2345" />
+    <trnmgr domain="AF_INET" address="127.0.0.1" port="3456" />
   </trnmgrs>
+  <rsrmgrs>
+    <rsrmgr name="OracleXE" switch_file="foo.so" />
+    <rsrmgr name="Informix" switch_file="bar.so" />
+  </rsrmgrs>
   <profiles>
-    <profile />
-    <profile />
-    <profile />
-    <profile />
+    <profile name="VZ67">
+    </profile>
+    <profile name="AG71">
+    </profile>
+    <profile name="GT71">
+    </profile>
+    <profile name="CF70">
+    </profile>
   </profiles>
 </client>
