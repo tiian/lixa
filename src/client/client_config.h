@@ -86,6 +86,10 @@
  */
 struct trnmgr_config_s {
     /**
+     * Name associated to the transaction manager
+     */
+    char *name;
+    /**
      * Socket domain for the socket connection
      */
     int domain;
@@ -253,10 +257,9 @@ extern "C" {
      * @param ccc IN configuration object reference
      * @param tc OUT reference to the configuration of the transaction manager
      * @return a standardized return code
-     * Must be reviewed!!!!!!!!!
+    */
     int client_config_coll_get_trnmgr(const client_config_coll_t *ccc,
                                       struct trnmgr_config_s **tc);
-    */
     
 
     
