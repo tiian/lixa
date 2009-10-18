@@ -51,11 +51,40 @@ AC_ARG_ENABLE([trace],
         [_TRACE="no"], [_TRACE="yes"; CPPFLAGS="$CPPFLAGS -D_TRACE"] )
 
 AM_PROG_CC_C_O
-AC_PROG_LIBTOOL
+
+# Checking pkg-config is available
+AC_CHECK_PROGS(PKG_CONFIG, [pkg-config], [])
+if test -z $PKG_CONFIG 
+then
+	AC_MSG_ERROR([cannot find pkg-config program])
+fi
+# Checking libxml2 is configured with pkg-config
+AC_MSG_CHECKING([if libxml2 is pkg-config configured])
+$PKG_CONFIG libxml-2.0
+if test $? -ne 0
+then
+	AC_MSG_ERROR([it seems libxml-2.0 is not configured with pkg-config])
+else
+	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags libxml-2.0)"
+	LDFLAGS="$LDFLAGS $($PKG_CONFIG --libs libxml-2.0)"
+	AC_MSG_RESULT([yes])
+fi
+# Checking glib2 is configured with pkg-config
+AC_MSG_CHECKING([if glib2 is pkg-config configured])
+$PKG_CONFIG glib-2.0
+if test $? -ne 0
+then
+	AC_MSG_ERROR([it seems glib-2.0 is not configured with pkg-config])
+else
+	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0)"
+	LDFLAGS="$LDFLAGS $($PKG_CONFIG --libs glib-2.0)"
+	AC_MSG_RESULT([yes])
+fi
 
 AC_CHECK_HEADERS(arpa/inet.h assert.h)
 AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
+AC_CHECK_HEADERS(glib.h)
 AC_CHECK_HEADERS(libxml/xmlversion.h libxml/tree.h libxml/parser.h)
 AC_CHECK_HEADERS(netdb.h netinet/in.h)
 AC_CHECK_HEADERS(poll.h pthread.h)
@@ -80,6 +109,7 @@ AC_SUBST(LT_LIXAC_AGE)
 AC_SUBST(LT_LIXAB_CURRENT)
 AC_SUBST(LT_LIXAB_REVISION)
 AC_SUBST(LT_LIXAB_AGE)
+AC_SUBST(PKG_CONFIG)
 # These substitutions should not be necessary, but... Without them it does not
 # work as desired
 AC_SUBST(LTDLINCL)

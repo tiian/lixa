@@ -3,9 +3,15 @@
 LIXA is a software libre implementation of a transaction manager XA compliant.
 
 LIBXML2 dependency:
-This software needs libxml2 to be compiled and executed.
-If your libxml2 headers are not in standard include directory, use the
-command
+This software needs libxml2 and glib2 to be compiled and executed.
+Just for the sake of "simplicity" LIXA uses pkg-config tool to retrieve
+libxml2 and glib2 configuration.
+If your libxml2 and/or glib2 are not configured with pkg-config, you could try
+to export standard Automake shell variables to supply include and library
+paths.
+
+This is an example if the libxml2 headers are not in standard include 
+directory and it's not pkg-config configured: use this command
 	export CPPFLAGS=-I/path/to/libxml2
 before configure.
 Example: my libxml2 header files are rooted at /usr/include/libxml2
@@ -28,12 +34,10 @@ If you want to insert extra debug code at source code level, use
 
 On my Ubuntu systems, to build Oracle XE cdemo81 sample, I use something like 
 this:
-	export CPPFLAGS=-I/usr/include/libxml2
 	./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
 	make
 
 but to execute the sample too, the path is longer:
-	export CPPFLAGS=-I/usr/include/libxml2
 	./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --prefix=/tmp/lixa
 	make
 	make install
