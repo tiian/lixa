@@ -108,7 +108,7 @@ int client_config_coll_init(client_config_coll_t *ccc)
 
 
 
-/* must be reviewed!!!
+
 int client_config_coll_get_trnmgr(const client_config_coll_t *ccc,
                                   struct trnmgr_config_s **tc)
 {
@@ -118,6 +118,8 @@ int client_config_coll_get_trnmgr(const client_config_coll_t *ccc,
     
     LIXA_TRACE(("client_config_coll_get_trnmgr\n"));
     TRY {
+        exit(1);
+        /*
         int i;
         *tc = NULL;
         for (i = 0; i < ccc->trnmgrs.n; ++i) {
@@ -133,7 +135,7 @@ int client_config_coll_get_trnmgr(const client_config_coll_t *ccc,
         if (i == ccc->trnmgrs.n)
             THROW(OBJ_NOT_FOUND);
         *tc = &(ccc->trnmgrs.array[i]);
-            
+        */  
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -154,7 +156,7 @@ int client_config_coll_get_trnmgr(const client_config_coll_t *ccc,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
-*/
+
 
     
 int client_config(client_config_coll_t *ccc)
@@ -454,6 +456,7 @@ int client_parse_trnmgr(struct client_config_coll_s *ccc,
                         xmlNode *a_node)
 {
     enum Exception { REALLOC_ERROR
+                     , NAME_NOT_AVAILABLE_ERROR
                      , DOMAIN_NOT_AVAILABLE_ERROR
                      , ADDRESS_NOT_AVAILABLE_ERROR
                      , PORT_NOT_AVAILABLE_ERROR
@@ -471,10 +474,15 @@ int client_parse_trnmgr(struct client_config_coll_s *ccc,
         i = ccc->trnmgrs.n - 1;
 
         /* reset new element */
+        ccc->trnmgrs.array[i].name = NULL;
         ccc->trnmgrs.array[i].domain = 0;
         ccc->trnmgrs.array[i].address = NULL;
         ccc->trnmgrs.array[i].port = 0;
 
+        /* retrieve transaction manager name */
+        if (NULL == (ccc->trnmgrs.array[i].name = (char *)xmlGetProp(
+                         a_node, LIXA_XML_CONFIG_NAME_PROPERTY)))
+            THROW(NAME_NOT_AVAILABLE_ERROR);
         /* look/check/set listener domain */
         if (LIXA_RC_OK != (ret_cod = lixa_config_retrieve_domain(
                                a_node, &(ccc->trnmgrs.array[i].domain))))
@@ -488,9 +496,11 @@ int client_parse_trnmgr(struct client_config_coll_s *ccc,
                                a_node, &(ccc->trnmgrs.array[i].port))))
             THROW(PORT_NOT_AVAILABLE_ERROR);
 
-        LIXA_TRACE(("client_parse_trnmgr: %s %d, %s = %d, "
+        LIXA_TRACE(("client_parse_trnmgr: %s %d, %s = '%s', %s = %d, "
                     "%s = '%s', %s = " IN_PORT_T_FORMAT  "\n",
                     (char *)LIXA_XML_CONFIG_TRNMGR, i,
+                    (char *)LIXA_XML_CONFIG_NAME_PROPERTY,
+                    ccc->trnmgrs.array[i].name,
                     (char *)LIXA_XML_CONFIG_DOMAIN_PROPERTY,
                     ccc->trnmgrs.array[i].domain,
                     (char *)LIXA_XML_CONFIG_ADDRESS_PROPERTY,
@@ -504,6 +514,11 @@ int client_parse_trnmgr(struct client_config_coll_s *ccc,
             case REALLOC_ERROR:
                 ret_cod = LIXA_RC_REALLOC_ERROR;
                 break;
+            case NAME_NOT_AVAILABLE_ERROR:
+                LIXA_TRACE(("client_parse_trnmgr: unable to find trnmgr "
+                            "name for trnmgr %d\n", i));
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;                
             case DOMAIN_NOT_AVAILABLE_ERROR:
                 LIXA_TRACE(("client_parse_trnmgr: unable to find trnmgr "
                             "domain for trnmgr %d\n", i));
@@ -601,7 +616,7 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
         ccc->rsrmgrs.array[i].name = NULL;
         ccc->rsrmgrs.array[i].switch_file = NULL;
 
-        /* retrieve name */
+        /* retrieve resource manager name */
         if (NULL == (ccc->rsrmgrs.array[i].name = (char *)xmlGetProp(
                          a_node, LIXA_XML_CONFIG_NAME_PROPERTY)))
             THROW(NAME_NOT_AVAILABLE_ERROR);
