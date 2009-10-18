@@ -51,6 +51,9 @@
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 
 
 
@@ -227,7 +230,7 @@ struct client_config_coll_s {
     /**
      * Profiles' configuration
      */
-    struct profile_config_array_s profiles;
+    GArray *profiles;
 };
 
 

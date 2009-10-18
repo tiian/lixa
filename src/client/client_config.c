@@ -90,6 +90,8 @@ int client_config_coll_init(client_config_coll_t *ccc)
         ccc->trnmgrs.array = NULL;
         ccc->rsrmgrs.n = 0;
         ccc->rsrmgrs.array = NULL;
+        ccc->profiles = g_array_new(FALSE, FALSE, sizeof(
+                                        struct profile_config_array_s));
      
         THROW(NONE);
     } CATCH {
@@ -722,26 +724,23 @@ int client_parse_profile(struct client_config_coll_s *ccc,
     
     LIXA_TRACE(("client_parse_profile\n"));
     TRY {
-        /* expand array */
-        if (NULL == (ccc->profiles.array = realloc(
-                         ccc->profiles.array,
-                         ++ccc->profiles.n * sizeof(struct profile_config_s))))
-            THROW(REALLOC_ERROR);
-        i = ccc->profiles.n - 1;
-
+        struct profile_config_s record;
+        
         /* reset new element */
-        ccc->profiles.array[i].name = NULL;
+        record.name = NULL;
 
         /* retrieve name */
-        if (NULL == (ccc->profiles.array[i].name = (char *)xmlGetProp(
+        if (NULL == (record.name = (char *)xmlGetProp(
                          a_node, LIXA_XML_CONFIG_NAME_PROPERTY)))
             THROW(NAME_NOT_AVAILABLE_ERROR);
 
+        g_array_append_val(ccc->profiles, record);
+        
         LIXA_TRACE(("client_parse_profile: %s %d, "
                     "%s = '%s'\n",
-                    (char *)LIXA_XML_CONFIG_PROFILE, i,
+                    (char *)LIXA_XML_CONFIG_PROFILE, ccc->profiles->len,
                     (char *)LIXA_XML_CONFIG_NAME_PROPERTY,
-                    ccc->profiles.array[i].name));
+                    record.name));
         
         THROW(NONE);
     } CATCH {
