@@ -91,7 +91,7 @@ struct trnmgr_config_s {
     /**
      * Name associated to the transaction manager
      */
-    char *name;
+    xmlChar *name;
     /**
      * Socket domain for the socket connection
      */
@@ -99,27 +99,11 @@ struct trnmgr_config_s {
     /**
      * Address used to reach the transaction manager
      */
-    char *address;
+    xmlChar *address;
     /**
      * Port used to reach the transaction manager
      */
     in_port_t port;
-};
-
-
-
-/**
- * It contains the configuration of all the transaction managers
- */
-struct trnmgr_config_array_s {
-    /**
-     * Number of elements
-     */
-    int n;
-    /**
-     * Elements
-     */
-    struct trnmgr_config_s *array;
 };
 
 
@@ -132,27 +116,11 @@ struct rsrmgr_config_s {
     /**
      * Name associated to the resource manager
      */
-    char *name;
+    xmlChar *name;
     /**
      * Switch file must be used to interact with the resource manager
      */
-    char *switch_file;
-};
-
-
-
-/**
- * It contains the configuration of all the resource managers
- */
-struct rsrmgr_config_array_s {
-    /**
-     * Number of elements
-     */
-    int n;
-    /**
-     * Elements
-     */
-    struct rsrmgr_config_s *array;
+    xmlChar *switch_file;
 };
 
 
@@ -164,23 +132,7 @@ struct profile_config_s {
     /**
      * Name associated to the resource manager
      */
-    char *name;
-};
-
-
-
-/**
- * It contains the configuration of all the resource managers
- */
-struct profile_config_array_s {
-    /**
-     * Number of elements
-     */
-    int n;
-    /**
-     * Elements
-     */
-    struct profile_config_s *array;
+    xmlChar *name;
 };
 
 
@@ -222,11 +174,11 @@ struct client_config_coll_s {
     /**
      * Transaction managers' configuration
      */
-    struct trnmgr_config_array_s trnmgrs;
+    GArray *trnmgrs;
     /**
      * Resource managers' configuration
      */
-    struct rsrmgr_config_array_s rsrmgrs;
+    GArray *rsrmgrs;
     /**
      * Profiles' configuration
      */
