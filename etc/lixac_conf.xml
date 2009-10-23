@@ -12,6 +12,7 @@
     <profile name="VZ67">
       <trnmgrs>
         <trnmgr>local_1</trnmgr>
+        <trnmgr>local_2</trnmgr>
       </trnmgrs>
       <rsrmgrs>
         <rsrmgr>OracleXE</rsrmgr>

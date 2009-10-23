@@ -133,6 +133,15 @@ struct profile_config_s {
      * Name associated to the resource manager
      */
     xmlChar *name;
+    /**
+     * Array of transaction managers defined for the profile
+     */
+    GArray  *trnmgrs;
+    /**
+     * Array of resource managers will be used for the transactions associated
+     * to this profile
+     */
+    GArray  *rsrmgrs;
 };
 
 
@@ -158,6 +167,10 @@ struct client_config_coll_s {
      */
     char                        *profile;
     /**
+     * XML document representing lixac_conf.xml file
+     */
+    xmlDocPtr                    lixac_conf;
+    /**
      * These are the parameters will be used by all the clients of this
      * process to reach the transaction manager.
      * This structure is filled once, and all the connection from all the
@@ -174,15 +187,15 @@ struct client_config_coll_s {
     /**
      * Transaction managers' configuration
      */
-    GArray *trnmgrs;
+    GArray                      *trnmgrs;
     /**
      * Resource managers' configuration
      */
-    GArray *rsrmgrs;
+    GArray                      *rsrmgrs;
     /**
      * Profiles' configuration
      */
-    GArray *profiles;
+    GArray                      *profiles;
 };
 
 
@@ -228,6 +241,15 @@ extern "C" {
     
 
     /**
+     * Display configuration read from XML config file
+     * @param ccc IN the object will contain the client configuration
+     * @return a standardized return code
+     */
+    int client_config_display(client_config_coll_t *ccc);
+
+    
+
+    /**
      * Parse the configuration tree
      * @param ccc OUT server configuration structure
      * @param a_node IN the current subtree must be parsed
@@ -237,7 +259,7 @@ extern "C" {
                      xmlNode *a_node);
 
 
-
+ 
     /**
      * Parse a "trnmgrs" node tree
      * @param ccc OUT server configuration structure
@@ -249,7 +271,7 @@ extern "C" {
 
 
 
-    /**
+   /**
      * Parse a "trnmgr" node tree
      * @param ccc OUT server configuration structure
      * @param a_node IN the current subtree must be parsed
@@ -301,6 +323,32 @@ extern "C" {
      */
     int client_parse_profile(struct client_config_coll_s *ccc,
                              xmlNode *a_node);
+
+
+
+    /**
+     * Parse a "trnmgrs" node inside a "profile" node tree
+     * @param ccc OUT server configuration structure
+     * @param a_node IN the current subtree must be parsed
+     * @param trnmgrs IN/OUT the array with all the transaction managers
+     *                       defined for a profile
+     * @return a standardized return code
+     */
+    int client_parse_profile_trnmgrs(struct client_config_coll_s *ccc,
+                                     xmlNode *a_node, GArray *trnmgrs);
+
+
+
+    /**
+     * Parse a "rsrmgrs" node inside a "profile" node tree
+     * @param ccc OUT server configuration structure
+     * @param a_node IN the current subtree must be parsed
+     * @param rsrmgrs IN/OUT the array with all the resource managers
+                             defined for a profile
+     * @return a standardized return code
+     */
+    int client_parse_profile_rsrmgrs(struct client_config_coll_s *ccc,
+                                     xmlNode *a_node, GArray *rsrmgrs);
 
 
 

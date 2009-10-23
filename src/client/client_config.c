@@ -171,6 +171,7 @@ int client_config(client_config_coll_t *ccc)
                      , XML_READ_FILE_ERROR
                      , XML_DOC_GET_ROOT_ELEMENT_ERROR
                      , PARSE_CONFIG_ERROR
+                     , CLIENT_CONFIG_DISPLAY_ERROR
                      , GET_TRNMGR_ERROR
                      , GETADDRINFO_ERROR
                      , PTHREAD_MUTEX_UNLOCK_ERROR
@@ -179,15 +180,18 @@ int client_config(client_config_coll_t *ccc)
 
     int fd = 0;
     const char *file_name = NULL;
+    /*
     xmlDocPtr doc = NULL;
+    */
     xmlNode *root_element = NULL;
     struct trnmgr_config_s *tc;
     struct addrinfo hints, *res;
+
+    ccc->lixac_conf = NULL;
     
     LIXA_TRACE(("client_config\n"));
     TRY {
         const char *tmp_str;
-        guint i;
         
         /* lock mutex to start configuration activity */
         if (0 != (ret_cod = pthread_mutex_lock(&ccc->mutex)))
@@ -232,57 +236,25 @@ int client_config(client_config_coll_t *ccc)
             THROW(CLOSE_ERROR);
         
         /* loading config file */
-        if (NULL == (doc = xmlReadFile(file_name, NULL, 0)))
+        if (NULL == (ccc->lixac_conf = xmlReadFile(file_name, NULL, 0)))
             THROW(XML_READ_FILE_ERROR);
 
         /* walking tree & parse */
-        if (NULL == (root_element = xmlDocGetRootElement(doc)))
+        if (NULL == (root_element = xmlDocGetRootElement(ccc->lixac_conf)))
             THROW(XML_DOC_GET_ROOT_ELEMENT_ERROR);
 
         if (LIXA_RC_OK != (ret_cod = client_parse(ccc, root_element)))
             THROW(PARSE_CONFIG_ERROR);
 
         /* free parsed document */
-        xmlFreeDoc(doc);
-        doc = NULL;
+        xmlFreeDoc(ccc->lixac_conf);
+        ccc->lixac_conf = NULL;
         
         /* release libxml2 stuff */
         xmlCleanupParser();
 
-        /* dump configuration */
-        for (i=0; i<ccc->trnmgrs->len; ++i) {
-            LIXA_TRACE(("client_config: transaction manager # %u, name='%s'"
-                        ", domain=%d, switch_file='%s', port="
-                        IN_PORT_T_FORMAT "\n",
-                        i, g_array_index(ccc->trnmgrs,
-                                         struct trnmgr_config_s,
-                                         i).name,
-                        g_array_index(ccc->trnmgrs,
-                                      struct trnmgr_config_s,
-                                      i).domain,
-                        g_array_index(ccc->trnmgrs,
-                                      struct trnmgr_config_s,
-                                      i).address,
-                        g_array_index(ccc->trnmgrs,
-                                      struct trnmgr_config_s,
-                                      i).port));
-        }
-        for (i=0; i<ccc->rsrmgrs->len; ++i) {
-            LIXA_TRACE(("client_config: resource manager # %u, name='%s'"
-                        ", switch_file='%s'\n",
-                        i, g_array_index(ccc->rsrmgrs,
-                                         struct rsrmgr_config_s,
-                                         i).name,
-                        g_array_index(ccc->rsrmgrs,
-                                      struct rsrmgr_config_s,
-                                      i).switch_file));
-        }
-        for (i=0; i<ccc->profiles->len; ++i) {
-            LIXA_TRACE(("client_config: profile # %u, name='%s'\n",
-                        i, g_array_index(ccc->profiles,
-                                         struct profile_config_s,
-                                         i).name ));
-        }
+        if (LIXA_RC_OK != (ret_cod = client_config_display(ccc)))
+            THROW(CLIENT_CONFIG_DISPLAY_ERROR);
         
         /* search connection parameters */
         if (LIXA_RC_OK != (ret_cod = client_config_coll_get_trnmgr(ccc, &tc)))
@@ -336,6 +308,7 @@ int client_config(client_config_coll_t *ccc)
                 ret_cod = LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR;
                 break;
             case PARSE_CONFIG_ERROR:
+            case CLIENT_CONFIG_DISPLAY_ERROR:
             case GET_TRNMGR_ERROR:
                 break;
             case GETADDRINFO_ERROR:
@@ -360,9 +333,9 @@ int client_config(client_config_coll_t *ccc)
                 LIXA_TRACE(("client_config/pthread_mutex_unlock: "
                             "errno=%d\n", errno));
         }
-        if (excp < NONE && doc != NULL) {
+        if (excp < NONE && ccc->lixac_conf != NULL) {
             /* free parsed document */
-            xmlFreeDoc(doc);
+            xmlFreeDoc(ccc->lixac_conf);
             /* release libxml2 stuff */
             xmlCleanupParser();
         }
@@ -371,6 +344,80 @@ int client_config(client_config_coll_t *ccc)
             freeaddrinfo(res);
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int client_config_display(client_config_coll_t *ccc)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("client_config_display\n"));
+    TRY {
+        guint i;
+        
+        /* dump configuration */
+        for (i=0; i<ccc->trnmgrs->len; ++i) {
+            LIXA_TRACE(("client_config: transaction manager # %u, name='%s'"
+                        ", domain=%d, switch_file='%s', port="
+                        IN_PORT_T_FORMAT "\n",
+                        i, g_array_index(ccc->trnmgrs,
+                                         struct trnmgr_config_s,
+                                         i).name,
+                        g_array_index(ccc->trnmgrs,
+                                      struct trnmgr_config_s,
+                                      i).domain,
+                        g_array_index(ccc->trnmgrs,
+                                      struct trnmgr_config_s,
+                                      i).address,
+                        g_array_index(ccc->trnmgrs,
+                                      struct trnmgr_config_s,
+                                      i).port));
+        }
+        for (i=0; i<ccc->rsrmgrs->len; ++i) {
+            LIXA_TRACE(("client_config: resource manager # %u, name='%s'"
+                        ", switch_file='%s'\n",
+                        i, g_array_index(ccc->rsrmgrs,
+                                         struct rsrmgr_config_s,
+                                         i).name,
+                        g_array_index(ccc->rsrmgrs,
+                                      struct rsrmgr_config_s,
+                                      i).switch_file));
+        }
+        for (i=0; i<ccc->profiles->len; ++i) {
+            guint j;
+            struct profile_config_s *profile = &g_array_index(
+                ccc->profiles, struct profile_config_s, i); 
+            LIXA_TRACE(("client_config: profile # %u, name='%s'\n",
+                        i, profile->name));
+            for (j=0; j<profile->trnmgrs->len; ++j) {
+                LIXA_TRACE(("client_config: transaction manager # %u, "
+                            "name='%s'\n",
+                            j, g_array_index(profile->trnmgrs, xmlChar *,
+                                             j)));
+            }
+            for (j=0; j<profile->rsrmgrs->len; ++j) {
+                LIXA_TRACE(("client_config: resource manager # %u, "
+                            "name='%s'\n",
+                            j, g_array_index(profile->rsrmgrs, xmlChar *,
+                                             j)));
+            }
+        }
+                
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_config_display/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -390,11 +437,12 @@ int client_parse(struct client_config_coll_s *ccc,
 
     xmlNode *cur_node = NULL;
     
-    LIXA_TRACE(("client_parse\n"));
+    LIXA_TRACE(("client_parse/%p\n", a_node));
     TRY {
         for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
             if (cur_node->type == XML_ELEMENT_NODE) {
-                LIXA_TRACE(("client_parse: tag %s\n", cur_node->name));
+                LIXA_TRACE(("client_parse/%p: tag %s\n",
+                            a_node, cur_node->name));
                 if (!xmlStrcmp(cur_node->name, LIXA_XML_CONFIG_CLIENT)) {
                     /* parse child */
                     if (LIXA_RC_OK != (ret_cod = client_parse(
@@ -438,8 +486,8 @@ int client_parse(struct client_config_coll_s *ccc,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_parse/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE(("client_parse/%p/excp=%d/"
+                "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -455,18 +503,20 @@ int client_parse_trnmgrs(struct client_config_coll_s *ccc,
 
     xmlNode *cur_node = NULL;
     
-    LIXA_TRACE(("client_parse_trnmgrs\n"));
+    LIXA_TRACE(("client_parse_trnmgrs/%p\n", a_node));
     TRY {
         for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
             if (cur_node->type == XML_ELEMENT_NODE) {
-                LIXA_TRACE(("client_parse_trnmgrs: tag %s\n", cur_node->name));
+                LIXA_TRACE(("client_parse_trnmgrs/%p: tag %s\n",
+                            a_node, cur_node->name));
                 if (!xmlStrcmp(cur_node->name, LIXA_XML_CONFIG_TRNMGR)) {
                     if (LIXA_RC_OK != (ret_cod = client_parse_trnmgr(
                                            ccc, cur_node)))
                         THROW(PARSE_TRNMGR_ERROR);
                 }
             }
-            if (LIXA_RC_OK != (ret_cod = client_parse_trnmgrs(
+            if (NULL != cur_node->children &&
+                LIXA_RC_OK != (ret_cod = client_parse_trnmgrs(
                                    ccc, cur_node->children)))
                 THROW(CLIENT_PARSE_TRNMGRS_ERROR);
         }        
@@ -484,8 +534,8 @@ int client_parse_trnmgrs(struct client_config_coll_s *ccc,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_parse_trnmgrs/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE(("client_parse_trnmgrs/%p/excp=%d/"
+                "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -494,8 +544,7 @@ int client_parse_trnmgrs(struct client_config_coll_s *ccc,
 int client_parse_trnmgr(struct client_config_coll_s *ccc,
                         xmlNode *a_node)
 {
-    enum Exception { REALLOC_ERROR
-                     , NAME_NOT_AVAILABLE_ERROR
+    enum Exception { NAME_NOT_AVAILABLE_ERROR
                      , DOMAIN_NOT_AVAILABLE_ERROR
                      , ADDRESS_NOT_AVAILABLE_ERROR
                      , PORT_NOT_AVAILABLE_ERROR
@@ -503,7 +552,7 @@ int client_parse_trnmgr(struct client_config_coll_s *ccc,
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int i = 0;
     
-    LIXA_TRACE(("client_parse_trnmgr\n"));
+    LIXA_TRACE(("client_parse_trnmgr/%p\n", a_node));
     TRY {
         struct trnmgr_config_s record;
         
@@ -532,8 +581,8 @@ int client_parse_trnmgr(struct client_config_coll_s *ccc,
 
         g_array_append_val(ccc->trnmgrs, record);
         
-        LIXA_TRACE(("client_parse_trnmgr: %s %d, %s = '%s', %s = %d, "
-                    "%s = '%s', %s = " IN_PORT_T_FORMAT  "\n",
+        LIXA_TRACE(("client_parse_trnmgr/%p: %s %d, %s = '%s', %s = %d, "
+                    "%s = '%s', %s = " IN_PORT_T_FORMAT  "\n", a_node,
                     (char *)LIXA_XML_CONFIG_TRNMGR, ccc->trnmgrs->len-1,
                     (char *)LIXA_XML_CONFIG_NAME_PROPERTY,
                     (char *)record.name,
@@ -547,9 +596,6 @@ int client_parse_trnmgr(struct client_config_coll_s *ccc,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case REALLOC_ERROR:
-                ret_cod = LIXA_RC_REALLOC_ERROR;
-                break;
             case NAME_NOT_AVAILABLE_ERROR:
                 LIXA_TRACE(("client_parse_trnmgr: unable to find trnmgr "
                             "name for trnmgr %d\n", i));
@@ -575,8 +621,8 @@ int client_parse_trnmgr(struct client_config_coll_s *ccc,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_parse_trnmgr/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE(("client_parse_trnmgr/%p/excp=%d/"
+                "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -592,18 +638,20 @@ int client_parse_rsrmgrs(struct client_config_coll_s *ccc,
 
     xmlNode *cur_node = NULL;
     
-    LIXA_TRACE(("client_parse_rsrmgrs\n"));
+    LIXA_TRACE(("client_parse_rsrmgrs/%p\n", a_node));
     TRY {
         for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
             if (cur_node->type == XML_ELEMENT_NODE) {
-                LIXA_TRACE(("client_parse_rsrmgrs: tag %s\n", cur_node->name));
+                LIXA_TRACE(("client_parse_rsrmgrs/%p: tag %s\n",
+                            a_node, cur_node->name));
                 if (!xmlStrcmp(cur_node->name, LIXA_XML_CONFIG_RSRMGR)) {
                     if (LIXA_RC_OK != (ret_cod = client_parse_rsrmgr(
                                            ccc, cur_node)))
                         THROW(PARSE_RSRMGR_ERROR);
                 }
             }
-            if (LIXA_RC_OK != (ret_cod = client_parse_rsrmgrs(
+            if (NULL != cur_node->children &&
+                LIXA_RC_OK != (ret_cod = client_parse_rsrmgrs(
                                    ccc, cur_node->children)))
                 THROW(CLIENT_PARSE_RSRMGRS_ERROR);
         }        
@@ -621,8 +669,8 @@ int client_parse_rsrmgrs(struct client_config_coll_s *ccc,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_parse_rsrmgrs/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE(("client_parse_rsrmgrs/%p/excp=%d/"
+                "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -631,15 +679,14 @@ int client_parse_rsrmgrs(struct client_config_coll_s *ccc,
 int client_parse_rsrmgr(struct client_config_coll_s *ccc,
                         xmlNode *a_node)
 {
-    enum Exception { REALLOC_ERROR
-                     , NAME_NOT_AVAILABLE_ERROR
+    enum Exception { NAME_NOT_AVAILABLE_ERROR
                      , PORT_NOT_AVAILABLE_ERROR
                      , SWITCH_FILE_NOT_AVAILABLE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int i = 0;
     
-    LIXA_TRACE(("client_parse_rsrmgr\n"));
+    LIXA_TRACE(("client_parse_rsrmgr/%p\n", a_node));
     TRY {
         struct rsrmgr_config_s record;
         
@@ -658,8 +705,8 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
 
         g_array_append_val(ccc->rsrmgrs, record);
         
-        LIXA_TRACE(("client_parse_rsrmgr: %s %d, "
-                    "%s = '%s', %s = '%s'\n",
+        LIXA_TRACE(("client_parse_rsrmgr/%p: %s %d, "
+                    "%s = '%s', %s = '%s'\n", a_node,
                     (char *)LIXA_XML_CONFIG_RSRMGR, ccc->rsrmgrs->len-1,
                     (char *)LIXA_XML_CONFIG_NAME_PROPERTY,
                     (char *)record.name,
@@ -669,9 +716,6 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case REALLOC_ERROR:
-                ret_cod = LIXA_RC_REALLOC_ERROR;
-                break;
             case NAME_NOT_AVAILABLE_ERROR:
                 LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrmgr "
                             "name for rsrmgr %d\n", i));
@@ -689,8 +733,8 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_parse_rsrmgr/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE(("client_parse_rsrmgr/%p/excp=%d/"
+                "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -700,33 +744,39 @@ int client_parse_profiles(struct client_config_coll_s *ccc,
                          xmlNode *a_node)
 {
     enum Exception { PARSE_PROFILE_ERROR
-                     , CLIENT_PARSE_PROFILES_ERROR
+                     /* , CLIENT_PARSE_PROFILES_ERROR */
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     xmlNode *cur_node = NULL;
     
-    LIXA_TRACE(("client_parse_profiles\n"));
+    LIXA_TRACE(("client_parse_profiles/%p\n", a_node));
     TRY {
         for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
             if (cur_node->type == XML_ELEMENT_NODE) {
-                LIXA_TRACE(("client_parse_profiles: tag %s\n", cur_node->name));
+                LIXA_TRACE(("client_parse_profiles/%p: tag %s\n",
+                            a_node, cur_node->name));
                 if (!xmlStrcmp(cur_node->name, LIXA_XML_CONFIG_PROFILE)) {
                     if (LIXA_RC_OK != (ret_cod = client_parse_profile(
                                            ccc, cur_node)))
                         THROW(PARSE_PROFILE_ERROR);
                 }
             }
-            if (LIXA_RC_OK != (ret_cod = client_parse_profiles(
+            /*
+            if (NULL != cur_node->children &&
+                LIXA_RC_OK != (ret_cod = client_parse_profiles(
                                    ccc, cur_node->children)))
                 THROW(CLIENT_PARSE_PROFILES_ERROR);
+            */
         }        
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case PARSE_PROFILE_ERROR:
+                /*
             case CLIENT_PARSE_PROFILES_ERROR:
+                */
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -735,8 +785,8 @@ int client_parse_profiles(struct client_config_coll_s *ccc,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_parse_profiles/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE(("client_parse_profiles/%p/excp=%d/"
+                "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -745,20 +795,25 @@ int client_parse_profiles(struct client_config_coll_s *ccc,
 int client_parse_profile(struct client_config_coll_s *ccc,
                         xmlNode *a_node)
 {
-    enum Exception { REALLOC_ERROR
-                     , NAME_NOT_AVAILABLE_ERROR
+    enum Exception { NAME_NOT_AVAILABLE_ERROR
                      , PORT_NOT_AVAILABLE_ERROR
                      , SWITCH_FILE_NOT_AVAILABLE_ERROR
+                     , PARSE_PROFILE_TRNMGRS_ERROR
+                     , PARSE_PROFILE_RSRMGRS_ERROR
+                     , UNRECOGNIZED_TAG
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int i = 0;
+    int i = 0;    
+    xmlNode *cur_node = NULL;
     
-    LIXA_TRACE(("client_parse_profile\n"));
+    LIXA_TRACE(("client_parse_profile/%p\n", a_node));
     TRY {
         struct profile_config_s record;
         
         /* reset new element */
         record.name = NULL;
+        record.trnmgrs = g_array_new(FALSE, FALSE, sizeof(xmlChar *));
+        record.rsrmgrs = g_array_new(FALSE, FALSE, sizeof(xmlChar *));
 
         /* retrieve name */
         if (NULL == (record.name = xmlGetProp(
@@ -767,23 +822,48 @@ int client_parse_profile(struct client_config_coll_s *ccc,
 
         g_array_append_val(ccc->profiles, record);
         
-        LIXA_TRACE(("client_parse_profile: %s %d, "
-                    "%s = '%s'\n",
+        LIXA_TRACE(("client_parse_profile/%p: %s %d, "
+                    "%s = '%s'\n", a_node,
                     (char *)LIXA_XML_CONFIG_PROFILE, ccc->profiles->len-1,
                     (char *)LIXA_XML_CONFIG_NAME_PROPERTY,
                     (char *)record.name));
 
+        for (cur_node = a_node->children; cur_node;
+             cur_node = cur_node->next) {
+            if (cur_node->type == XML_ELEMENT_NODE) {
+                LIXA_TRACE(("client_parse_profile/%p: tag %s\n",
+                            a_node, cur_node->name));
+                if (!xmlStrcmp(cur_node->name,
+                               LIXA_XML_CONFIG_TRNMGRS)) {
+                    if (LIXA_RC_OK != (ret_cod = client_parse_profile_trnmgrs(
+                                           ccc, cur_node->children,
+                                           record.trnmgrs)))
+                        THROW(PARSE_PROFILE_TRNMGRS_ERROR);
+                } else if (!xmlStrcmp(cur_node->name,
+                                      LIXA_XML_CONFIG_RSRMGRS)) {
+                    if (LIXA_RC_OK != (ret_cod = client_parse_profile_rsrmgrs(
+                                           ccc, cur_node->children,
+                                           record.rsrmgrs)))
+                        THROW(PARSE_PROFILE_RSRMGRS_ERROR);
+                } else
+                    THROW(UNRECOGNIZED_TAG);
+            }
+        }        
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case REALLOC_ERROR:
-                ret_cod = LIXA_RC_REALLOC_ERROR;
-                break;
             case NAME_NOT_AVAILABLE_ERROR:
                 LIXA_TRACE(("client_parse_profile: unable to find profile "
                             "name for profile %d\n", i));
                 ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;                
+            case PARSE_PROFILE_TRNMGRS_ERROR:
+            case PARSE_PROFILE_RSRMGRS_ERROR:
+                break;
+            case UNRECOGNIZED_TAG:
+                ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -791,8 +871,96 @@ int client_parse_profile(struct client_config_coll_s *ccc,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_parse_profile/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE(("client_parse_profile/%p/excp=%d/"
+                "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int client_parse_profile_trnmgrs(struct client_config_coll_s *ccc,
+                                 xmlNode *a_node, GArray *trnmgrs)
+{
+    enum Exception { CLIENT_PARSE_PROFILE_TRNMGRS_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    xmlNode *cur_node = NULL;
+    
+    LIXA_TRACE(("client_parse_profile_trnmgrs/%p\n", a_node));
+    TRY {
+        for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
+            if (cur_node->type == XML_ELEMENT_NODE) {
+                LIXA_TRACE(("client_parse_profile_trnmgrs/%p: tag %s\n",
+                            a_node, cur_node->name));
+                if (!xmlStrcmp(cur_node->name, LIXA_XML_CONFIG_TRNMGR)) {
+                    xmlChar *key= xmlNodeListGetString(
+                        ccc->lixac_conf, cur_node->xmlChildrenNode, 1);
+                    LIXA_TRACE(("client_parse_profile_trnmgrs/%p: key='%s'\n",
+                                a_node, key));
+                    g_array_append_val(trnmgrs, key);
+                }
+            }
+        }        
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case CLIENT_PARSE_PROFILE_TRNMGRS_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_parse_profile_trnmgrs/%p/excp=%d/"
+                "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int client_parse_profile_rsrmgrs(struct client_config_coll_s *ccc,
+                                 xmlNode *a_node, GArray *rsrmgrs)
+{
+    enum Exception { CLIENT_PARSE_PROFILE_RSRMGRS_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    xmlNode *cur_node = NULL;
+    
+    LIXA_TRACE(("client_parse_profile_rsrmgrs/%p\n", a_node));
+    TRY {
+        for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
+            if (cur_node->type == XML_ELEMENT_NODE) {
+                LIXA_TRACE(("client_parse_profile_rsrmgrs/%p: tag %s\n",
+                            a_node, cur_node->name));
+                if (!xmlStrcmp(cur_node->name, LIXA_XML_CONFIG_RSRMGR)) {
+                    xmlChar *key = xmlNodeListGetString(
+                        ccc->lixac_conf, cur_node->xmlChildrenNode, 1);
+                    LIXA_TRACE(("client_parse_profile_rsrmgrs/%p: key='%s'\n",
+                                a_node, key));
+                    g_array_append_val(rsrmgrs, key);
+                }
+            }
+        }        
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case CLIENT_PARSE_PROFILE_RSRMGRS_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_parse_profile_rsrmgrs/%p/excp=%d/"
+                "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
     return ret_cod;
 }
 
