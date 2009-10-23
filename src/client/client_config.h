@@ -143,9 +143,6 @@ struct profile_config_s {
      */
     GArray  *rsrmgrs;
 };
-
-
-
 /**
  * It contains the configuration for the client
  * if (profile == NULL) the configuration must be loaded
