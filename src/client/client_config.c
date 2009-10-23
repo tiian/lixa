@@ -114,38 +114,80 @@ int client_config_coll_init(client_config_coll_t *ccc)
 int client_config_coll_get_trnmgr(const client_config_coll_t *ccc,
                                   struct trnmgr_config_s **tc)
 {
-    enum Exception { OBJ_NOT_FOUND
+    enum Exception { TRNMGR_NOT_DEFINED
+                     , TRNMGR_NOT_FOUND
+                     , PROFILE_NOT_FOUND
                      , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;    
     
     LIXA_TRACE(("client_config_coll_get_trnmgr\n"));
     TRY {
-        exit(1);
-        /*
-        int i;
+        guint i, j;
+
         *tc = NULL;
-        for (i = 0; i < ccc->trnmgrs.n; ++i) {
-            if (0 == strcmp(ccc->profiles.array[i].name,
-                            ccc->profile) ||
-                0 == strlen(ccc->profile)) {
-                LIXA_TRACE(("client_config_coll_get_profile: profile '%s' "
-                            "matches with profile # %d\n",
-                            ccc->profile, i));
+        /* look-up profile */
+        for (i=0; i<ccc->profiles->len; ++i) {
+            struct profile_config_s *profile = &g_array_index(
+                ccc->profiles, struct profile_config_s, i);
+            xmlChar *prof_trnmgr;
+            if (0 == strlen(ccc->profile) ||
+                0 == xmlStrcmp(profile->name,
+                               (const xmlChar *)ccc->profile)) {
+                LIXA_TRACE(("client_config_coll_get_trnmgr: profile '%s' "
+                            "matches with profile # %u ('%s')\n",
+                            ccc->profile, i, profile->name));
+                if (profile->trnmgrs->len > 1)
+                    LIXA_TRACE(("client_config_coll_get_trnmgr: profile '%s' "
+                                "specifies more than one transaction manager "
+                                "(%u) but only one is supported in the "
+                                "current version\n",
+                                profile->name, profile->trnmgrs->len));
+                else if (profile->trnmgrs->len == 0) {
+                    LIXA_TRACE(("client_config_coll_get_trnmgr: profile '%s' "
+                                "does not specify any transaction manager\n",
+                                profile->name));
+                    THROW(TRNMGR_NOT_DEFINED);
+                }
+                prof_trnmgr = g_array_index(profile->trnmgrs, xmlChar *, 0);
+                LIXA_TRACE(("client_config_coll_get_trnmgr: associated "
+                            "transaction manager name is '%s'\n",
+                            prof_trnmgr));
+                /* look-up transaction manager */
+                for (j=0; j<ccc->trnmgrs->len; ++j) {
+                    struct trnmgr_config_s *trnmgr = &g_array_index(
+                        ccc->trnmgrs, struct trnmgr_config_s, j);
+                    if (0 == xmlStrcmp(prof_trnmgr, trnmgr->name)) {
+                        LIXA_TRACE(("client_config_coll_get_trnmgr: "
+                                    "transaction manager '%s' found at "
+                                    "position # %u\n",
+                                    prof_trnmgr, j));
+                        *tc = trnmgr;
+                        break;
+                    }
+                }
+                if (j == ccc->trnmgrs->len) {
+                    LIXA_TRACE(("client_config_coll_get_trnmgr: "
+                                "transaction manager '%s' not found\n",
+                                prof_trnmgr));
+                    THROW(TRNMGR_NOT_FOUND);
+                }
                 break;
             }
         }
-        if (i == ccc->trnmgrs.n)
-            THROW(OBJ_NOT_FOUND);
-        *tc = &(ccc->trnmgrs.array[i]);
-        */  
+        if (i == ccc->profiles->len) {
+            LIXA_TRACE(("client_config_coll_get_profile: profile '%s' "
+                        "does not match any configured profiles\n",
+                        ccc->profile));
+            THROW(PROFILE_NOT_FOUND);
+        }
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case OBJ_NOT_FOUND:
-                LIXA_TRACE(("client_config_coll_get_profile: profile '%s' "
-                            "does not match any transaction manager\n",
-                            ccc->profile));
-                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
+            case TRNMGR_NOT_DEFINED:
+            case TRNMGR_NOT_FOUND:
+            case PROFILE_NOT_FOUND:
+                ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -180,9 +222,6 @@ int client_config(client_config_coll_t *ccc)
 
     int fd = 0;
     const char *file_name = NULL;
-    /*
-    xmlDocPtr doc = NULL;
-    */
     xmlNode *root_element = NULL;
     struct trnmgr_config_s *tc;
     struct addrinfo hints, *res;
@@ -361,8 +400,8 @@ int client_config_display(client_config_coll_t *ccc)
         
         /* dump configuration */
         for (i=0; i<ccc->trnmgrs->len; ++i) {
-            LIXA_TRACE(("client_config: transaction manager # %u, name='%s'"
-                        ", domain=%d, switch_file='%s', port="
+            LIXA_TRACE(("client_config_display: transaction manager # %u, "
+                        "name='%s', domain=%d, switch_file='%s', port="
                         IN_PORT_T_FORMAT "\n",
                         i, g_array_index(ccc->trnmgrs,
                                          struct trnmgr_config_s,
@@ -378,8 +417,8 @@ int client_config_display(client_config_coll_t *ccc)
                                       i).port));
         }
         for (i=0; i<ccc->rsrmgrs->len; ++i) {
-            LIXA_TRACE(("client_config: resource manager # %u, name='%s'"
-                        ", switch_file='%s'\n",
+            LIXA_TRACE(("client_config_display: resource manager # %u, "
+                        "name='%s', switch_file='%s'\n",
                         i, g_array_index(ccc->rsrmgrs,
                                          struct rsrmgr_config_s,
                                          i).name,
@@ -391,16 +430,16 @@ int client_config_display(client_config_coll_t *ccc)
             guint j;
             struct profile_config_s *profile = &g_array_index(
                 ccc->profiles, struct profile_config_s, i); 
-            LIXA_TRACE(("client_config: profile # %u, name='%s'\n",
+            LIXA_TRACE(("client_config_display: profile # %u, name='%s'\n",
                         i, profile->name));
             for (j=0; j<profile->trnmgrs->len; ++j) {
-                LIXA_TRACE(("client_config: transaction manager # %u, "
+                LIXA_TRACE(("client_config_display: transaction manager # %u, "
                             "name='%s'\n",
                             j, g_array_index(profile->trnmgrs, xmlChar *,
                                              j)));
             }
             for (j=0; j<profile->rsrmgrs->len; ++j) {
-                LIXA_TRACE(("client_config: resource manager # %u, "
+                LIXA_TRACE(("client_config_display: resource manager # %u, "
                             "name='%s'\n",
                             j, g_array_index(profile->rsrmgrs, xmlChar *,
                                              j)));
