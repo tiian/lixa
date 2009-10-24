@@ -97,8 +97,8 @@ define LIXA_RC_BYPASSED_OPERATION              +2
 /**
  * A passed object/option/arg is NULL and it can NOT be inferred from a default
  * value
-define LIXA_RC_NULL_OBJECT                     -5
  */
+#define LIXA_RC_NULL_OBJECT                     -5
 /**
  * The container is full and can NOT store more elements
  */

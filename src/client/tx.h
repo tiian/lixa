@@ -34,7 +34,7 @@
 
 
 /*
- * This header is not original but it's derived from this official
+ * This header is NOT original but it's derived from this official
  * documentation:
  *
  * X/Open CAE Specification

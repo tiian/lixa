@@ -61,10 +61,8 @@ const char *lixa_strerror(int ret_cod)
                 return "ERROR: configuration file is broken";
             case LIXA_RC_NETWORK_EVENT_ERROR:
                 return "ERROR: an unespected network event raised";
-                /*
             case LIXA_RC_NULL_OBJECT:
                 return "ERROR: an argument is null";
-                */
             case LIXA_RC_CONTAINER_FULL:
                 return "ERROR: the container is full and cannot store more "
                         "elements";

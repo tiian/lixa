@@ -98,8 +98,7 @@ int client_connect(client_status_coll_t *csc,
             THROW(REGISTER_ERROR);
         
         /* search connection parameters */
-        if (LIXA_RC_OK != (ret_cod = client_config_coll_get_trnmgr(
-                               ccc, &tc)))
+        if (NULL == (tc = client_config_get_trnmgr(ccc)))
             THROW(GET_TRNMGR_ERROR);
 
         /* create new socket */
@@ -121,6 +120,7 @@ int client_connect(client_status_coll_t *csc,
             case REGISTER_ERROR:
                 break;
             case GET_TRNMGR_ERROR:
+                ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case SOCKET_ERROR:
                 break;
