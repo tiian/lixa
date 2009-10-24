@@ -311,6 +311,7 @@ int client_config_validate(client_config_coll_t *ccc)
 {
     enum Exception { TRNMGR_NOT_DEFINED
                      , TRNMGR_NOT_FOUND
+                     , RSRMGR_NOT_FOUND
                      , PROFILE_NOT_FOUND
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -368,26 +369,37 @@ int client_config_validate(client_config_coll_t *ccc)
                 }
                 /* scan the resource managers defined for the profile */
                 for (j=0; j<profile->rsrmgrs->len; ++j) {
-                    xmlChar *rsrmgr = &g_array_index(
+                    xmlChar *rsrmgr = g_array_index(
                         profile->rsrmgrs, xmlChar *, j);
-                    LIXA_TRACE(("client_config_validate: resource manager "
-                                "# %u defined inside profile is '%s'\n",
-                                j, rsrmgr));
+                    LIXA_TRACE(("client_config_validate: this profile "
+                                "requires resource manager '%s' at pos %u\n",
+                                rsrmgr, j));
                     for (k=0; k<ccc->rsrmgrs->len; ++k) {
                         struct rsrmgr_config_s *conf_rsrmgr = &g_array_index(
                             ccc->rsrmgrs, struct rsrmgr_config_s, k);
                         if (0 == xmlStrcmp(rsrmgr, conf_rsrmgr->name)) {
                             g_ptr_array_add(ccc->instance.rsrmgrs,
                                             (gpointer)conf_rsrmgr);
+                            LIXA_TRACE(("client_config_validate: resource "
+                                        "manager '%s' found at pos %u in "
+                                        "global list\n",
+                                        conf_rsrmgr->name, k));
                             break;
                         }
+                    }
+                    if (k == ccc->rsrmgrs->len) {
+                        LIXA_TRACE(("client_config_validate: resource manager "
+                                    "'%s' was not previously defined and can "
+                                    "not be associated to a profile\n",
+                                    rsrmgr));
+                        THROW(RSRMGR_NOT_FOUND);
                     }
                 }
                 break;
             }
         }
         if (i == ccc->profiles->len) {
-            LIXA_TRACE(("client_config_coll_get_profile: profile '%s' "
+            LIXA_TRACE(("client_config_validate: profile '%s' "
                         "does not match any configured profiles\n",
                         ccc->profile));
             THROW(PROFILE_NOT_FOUND);
@@ -398,6 +410,7 @@ int client_config_validate(client_config_coll_t *ccc)
         switch (excp) {
             case TRNMGR_NOT_DEFINED:
             case TRNMGR_NOT_FOUND:
+            case RSRMGR_NOT_FOUND:
             case PROFILE_NOT_FOUND:
                 ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;
@@ -423,7 +436,18 @@ int client_config_load_switch(const client_config_coll_t *ccc)
     LIXA_TRACE(("client_config_load_switch\n"));
     TRY {
         GModule *module;
+        guint i;
         module = g_module_open("foo", G_MODULE_BIND_LAZY);
+
+        /* scan all the resource manager of the instance */
+        for (i=0; i<ccc->instance.rsrmgrs->len; ++i) {
+            struct rsrmgr_config_s *rsrmgr = g_ptr_array_index(
+                ccc->instance.rsrmgrs, i); 
+            LIXA_TRACE(("client_config_load_switch: resource manager # %u, "
+                        "name='%s', switch_file='%s'\n", i,
+                        rsrmgr->name, rsrmgr->switch_file));
+            
+        }
         
         THROW(NONE);
     } CATCH {
