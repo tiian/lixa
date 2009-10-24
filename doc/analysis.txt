@@ -78,3 +78,17 @@ Some information on server side will be in the wrong place:
   (disk space, number of transaction performed, and so on...). Why should we
   centralize and risk to break a system only because another one need more
   tracing messages?
+
+******************************************
+
+PROFILE, PROCESS, THREADS
+
+All the THREADS inside a PROCESS use the same PROFILE.
+There's no way to specify different PROFILEs from distinct THREADs of the same
+PROCESS.
+This is partially due environment variable LIXA_PROFILE: an environment var
+is a PROCESS property, not a THREAD property.
+
+
+
+

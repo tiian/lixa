@@ -6,9 +6,9 @@ liblixac_la_SOURCES = client_config.c client_conn.c client_load.c \
 	client_status.c tx.c
 liblixacmt_la_SOURCES = client_config.c client_conn.c client_load.c \
 	client_status.c tx.c
-AM_CPPFLAGS = -I$(srcdir)/../common @LTDLINCL@
+AM_CPPFLAGS = -I$(srcdir)/../common 
 AM_CFLAGS = -Wall
 liblixac_la_LIBADD = ../common/liblixab.la
 liblixacmt_la_LIBADD = ../common/liblixabmt.la
-liblixac_la_LDFLAGS = -lxml2 @LIBLTDL@ -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
-liblixacmt_la_LDFLAGS = -lpthread -lxml2 @LIBLTDL@ -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
+liblixac_la_LDFLAGS = @LDFLAGS_XML2@ @LDFLAGS_GLIB@ @LDFLAGS_GMODULE@ -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
+liblixacmt_la_LDFLAGS = -lpthread @LDFLAGS_XML2@ @LDFLAGS_GLIB@ @LDFLAGS_GMODULE@ -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@

@@ -143,6 +143,28 @@ struct profile_config_s {
      */
     GArray  *rsrmgrs;
 };
+
+
+
+/**
+ * This struct is used to keep the configuration stuff retrived from
+ * config file and restricted to stuff related to the current profile.
+ * The struct is a set of pointers to data already stored in the global
+ * config
+ */
+struct instance_config_s {
+    /**
+     * Current transaction manager
+     */
+    struct trnmgr_config_s *trnmgr;
+    /**
+     * Current resource managers
+     */
+    GPtrArray              *rsrmgrs;
+};
+
+
+
 /**
  * It contains the configuration for the client
  * if (profile == NULL) the configuration must be loaded
@@ -182,6 +204,10 @@ struct client_config_coll_s {
      */
     struct sockaddr_in           serv_addr;
     /**
+     * It contains the subset configuration for this client instance
+     */
+    struct instance_config_s     instance;
+    /**
      * Transaction managers' configuration
      */
     GArray                      *trnmgrs;
@@ -208,6 +234,17 @@ extern "C" {
 
 
     /**
+     * Retrieve a reference to the current transaction manager properties
+     * @param ccc IN configuration reference
+     * @return a pointer to the current transaction manager
+     */
+    static inline struct trnmgr_config_s *client_config_get_trnmgr(
+        const client_config_coll_t *ccc) {
+        return ccc->instance.trnmgr; }
+
+
+    
+    /**
      * Initialize a new "object" of type client config
      * @param cc OUT object reference
      * @return a standardized return code
@@ -217,18 +254,6 @@ extern "C" {
     
 
     /**
-     * The retrieve the configuration of the transaction manager must be
-     * used by the calling thread
-     * @param ccc IN configuration object reference
-     * @param tc OUT reference to the configuration of the transaction manager
-     * @return a standardized return code
-    */
-    int client_config_coll_get_trnmgr(const client_config_coll_t *ccc,
-                                      struct trnmgr_config_s **tc);
-    
-
-    
-    /**
      * Load configuration from environment vars and XML files
      * @param ccc OUT the object will contain the client configuration
      * @return a standardized return code
@@ -237,6 +262,24 @@ extern "C" {
 
     
 
+    /**
+     * Validate configuration: fix the transaction and resource managers
+     * @param ccc IN/OUT the object will contain the client configuration
+     * @return a standardized return code
+     */
+    int client_config_validate(client_config_coll_t *ccc);
+
+    
+
+    /**
+     * Load the configured switch file
+     * @param ccc IN configuration object reference
+     * @return a standardized return code
+     */
+    int client_config_load_switch(const client_config_coll_t *ccc);
+
+
+    
     /**
      * Display configuration read from XML config file
      * @param ccc IN the object will contain the client configuration

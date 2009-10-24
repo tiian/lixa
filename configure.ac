@@ -66,7 +66,7 @@ then
 	AC_MSG_ERROR([it seems libxml-2.0 is not configured with pkg-config])
 else
 	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags libxml-2.0)"
-	LDFLAGS="$LDFLAGS $($PKG_CONFIG --libs libxml-2.0)"
+	LDFLAGS_XML2="$LDFLAGS $($PKG_CONFIG --libs libxml-2.0)"
 	AC_MSG_RESULT([yes])
 fi
 # Checking glib2 is configured with pkg-config
@@ -76,15 +76,16 @@ if test $? -ne 0
 then
 	AC_MSG_ERROR([it seems glib-2.0 is not configured with pkg-config])
 else
-	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0)"
-	LDFLAGS="$LDFLAGS $($PKG_CONFIG --libs glib-2.0)"
+	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0) $($PKG_CONFIG --cflags gmodule-no-export-2.0)"
+	LDFLAGS_GLIB="$($PKG_CONFIG --libs glib-2.0)"
+	LDFLAGS_GMODULE="$($PKG_CONFIG --libs gmodule-no-export-2.0)"
 	AC_MSG_RESULT([yes])
 fi
 
 AC_CHECK_HEADERS(arpa/inet.h assert.h)
 AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
-AC_CHECK_HEADERS(glib.h)
+AC_CHECK_HEADERS(glib.h gmodule.h)
 AC_CHECK_HEADERS(libxml/xmlversion.h libxml/tree.h libxml/parser.h)
 AC_CHECK_HEADERS(netdb.h netinet/in.h)
 AC_CHECK_HEADERS(poll.h pthread.h)
@@ -109,9 +110,9 @@ AC_SUBST(LT_LIXAC_AGE)
 AC_SUBST(LT_LIXAB_CURRENT)
 AC_SUBST(LT_LIXAB_REVISION)
 AC_SUBST(LT_LIXAB_AGE)
-AC_SUBST(PKG_CONFIG)
-# These substitutions should not be necessary, but... Without them it does not
-# work as desired
+AC_SUBST(LDFLAGS_GMODULE)
+AC_SUBST(LDFLAGS_GLIB)
+AC_SUBST(LDFLAGS_XML2)
 AC_SUBST(LTDLINCL)
 AC_SUBST(LIBLTDL)
 
