@@ -430,14 +430,16 @@ int client_config_validate(client_config_coll_t *ccc)
 
 int client_config_load_switch(const client_config_coll_t *ccc)   
 {
-    enum Exception { NONE } excp;
+    enum Exception { G_MODULE_OPEN_ERROR
+                     , G_MODULE_SYMBOL_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("client_config_load_switch\n"));
     TRY {
         GModule *module;
+        lixa_get_switch_f get_switch;
         guint i;
-        module = g_module_open("foo", G_MODULE_BIND_LAZY);
 
         /* scan all the resource manager of the instance */
         for (i=0; i<ccc->instance.rsrmgrs->len; ++i) {
@@ -446,12 +448,34 @@ int client_config_load_switch(const client_config_coll_t *ccc)
             LIXA_TRACE(("client_config_load_switch: resource manager # %u, "
                         "name='%s', switch_file='%s'\n", i,
                         rsrmgr->name, rsrmgr->switch_file));
-            
+            if (NULL == (module = g_module_open((gchar *)rsrmgr->switch_file,
+                                                G_MODULE_BIND_LAZY))) {
+                LIXA_TRACE(("client_config_load_switch: switch_file='%s', "
+                            "g_module_error='%s'\n", rsrmgr->switch_file,
+                            g_module_error()));
+                THROW(G_MODULE_OPEN_ERROR);
+            }
+            if (!g_module_symbol(module, "get_switch",
+                                 (gpointer *)&get_switch)) {
+                LIXA_TRACE(("client_config_load_switch: symbol='%s', "
+                            "g_module_error='%s'\n", "lixa_switch",
+                            g_module_error()));
+                THROW(G_MODULE_SYMBOL_ERROR);
+            } else {
+                LIXA_TRACE(("client_config_load_switch: get_switch found at "
+                            "%p\n", get_switch));
+            }
         }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case G_MODULE_OPEN_ERROR:
+                ret_cod = LIXA_RC_G_MODULE_OPEN_ERROR;
+                break;
+            case G_MODULE_SYMBOL_ERROR:
+                ret_cod = LIXA_RC_G_MODULE_SYMBOL_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

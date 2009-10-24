@@ -111,6 +111,10 @@ struct xa_switch_t {
 
 
 
+typedef struct xa_switch_t * (* lixa_get_switch_f) (void);
+
+
+
 /*
  * Flag definitions for the RM switch
  */

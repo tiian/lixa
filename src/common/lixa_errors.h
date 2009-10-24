@@ -331,6 +331,15 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * "xmlDocGetRootElement" function error
  */
 #define LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR -202
+/**
+ * "g_module_open" function error
+ */
+#define LIXA_RC_G_MODULE_OPEN_ERROR            -300
+/**
+ * "g_module_symbol" function error
+ */
+#define LIXA_RC_G_MODULE_SYMBOL_ERROR          -301
+
 
 
 /***********************************************************************
