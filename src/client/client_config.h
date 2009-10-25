@@ -54,6 +54,9 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+#ifdef HAVE_GMODULE_H
+# include <gmodule.h>
+#endif
 
 
 
@@ -126,6 +129,30 @@ struct rsrmgr_config_s {
 
 
 /**
+ * It contains the properties of a resource manager has been specified inside
+ * the actual transactional profile; this is a reacher struct than
+ * @ref struct rsrmgr_config_s
+ */
+struct act_rsrmgr_config_s {
+    /**
+     * This is a reference to the struct as parsed from XML config file
+     */
+    struct rsrmgr_config_s *generic;
+    /**
+     * This is a pointer to the dynamically loaded module containing the
+     * interface wrapped by @ref xa_switch
+     */
+    GModule                *module;
+    /**
+     * Pointer to the structure must be used to interface the resource
+     * manager
+     */
+    struct xa_switch_t     *xa_switch;
+};
+
+
+
+/**
  * It contains the configuration of a profile
  */
 struct profile_config_s {
@@ -152,7 +179,7 @@ struct profile_config_s {
  * The struct is a set of pointers to data already stored in the global
  * config
  */
-struct instance_config_s {
+struct actual_config_s {
     /**
      * Current transaction manager
      */
@@ -160,7 +187,7 @@ struct instance_config_s {
     /**
      * Current resource managers
      */
-    GPtrArray              *rsrmgrs;
+    GArray                 *rsrmgrs;
 };
 
 
@@ -204,9 +231,9 @@ struct client_config_coll_s {
      */
     struct sockaddr_in           serv_addr;
     /**
-     * It contains the subset configuration for this client instance
+     * It contains the subset of actual configuration for this client
      */
-    struct instance_config_s     instance;
+    struct actual_config_s       actconf;
     /**
      * Transaction managers' configuration
      */
@@ -240,7 +267,7 @@ extern "C" {
      */
     static inline struct trnmgr_config_s *client_config_get_trnmgr(
         const client_config_coll_t *ccc) {
-        return ccc->instance.trnmgr; }
+        return ccc->actconf.trnmgr; }
 
 
     
@@ -277,6 +304,15 @@ extern "C" {
      * @return a standardized return code
      */
     int client_config_load_switch(const client_config_coll_t *ccc);
+
+
+    
+    /**
+     * Unload the configured switch file
+     * @param ccc IN configuration object reference
+     * @return a standardized return code
+     */
+    int client_config_unload_switch(const client_config_coll_t *ccc);
 
 
     
