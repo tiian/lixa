@@ -439,6 +439,7 @@ int client_config_load_switch(const client_config_coll_t *ccc)
     TRY {
         GModule *module;
         lixa_get_switch_f get_switch;
+        struct xa_switch_t *xa_switch;
         guint i;
 
         /* scan all the resource manager of the instance */
@@ -458,12 +459,15 @@ int client_config_load_switch(const client_config_coll_t *ccc)
             if (!g_module_symbol(module, "get_switch",
                                  (gpointer *)&get_switch)) {
                 LIXA_TRACE(("client_config_load_switch: symbol='%s', "
-                            "g_module_error='%s'\n", "lixa_switch",
+                            "g_module_error='%s'\n", "get_switch",
                             g_module_error()));
                 THROW(G_MODULE_SYMBOL_ERROR);
             } else {
                 LIXA_TRACE(("client_config_load_switch: get_switch found at "
                             "%p\n", get_switch));
+                LIXA_TRACE(("client_config_laod_switch: name = '%s', "
+                            "flags = %ld\n", get_switch()->name,
+                            get_switch()->flags));
             }
         }
         
