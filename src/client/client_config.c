@@ -479,6 +479,17 @@ int client_config_load_switch(const client_config_coll_t *ccc)
                 act_rsrmgr->module = module;
                 act_rsrmgr->xa_switch = xa_switch();
             }
+
+            /* this code is temporary and must be moved in a more appropriate
+               place !!! */
+            /* try xa_open function... */
+        {
+            int rc;
+            rc = act_rsrmgr->xa_switch->xa_open_entry(
+                (char *)act_rsrmgr->generic->xa_open_info, 5, TMNOFLAGS);
+            LIXA_TRACE(("client_config_load_switch: xa_open rc=%d\n", rc));
+            
+        }
         }
         
         THROW(NONE);
@@ -566,7 +577,7 @@ int client_config_display(client_config_coll_t *ccc)
         /* dump configuration */
         for (i=0; i<ccc->trnmgrs->len; ++i) {
             LIXA_TRACE(("client_config_display: transaction manager # %u, "
-                        "name='%s', domain=%d, switch_file='%s', port="
+                        "name='%s', domain=%d, address='%s', port="
                         IN_PORT_T_FORMAT "\n",
                         i, g_array_index(ccc->trnmgrs,
                                          struct trnmgr_config_s,
@@ -582,14 +593,12 @@ int client_config_display(client_config_coll_t *ccc)
                                       i).port));
         }
         for (i=0; i<ccc->rsrmgrs->len; ++i) {
+            struct rsrmgr_config_s *rsrmgr = &g_array_index(
+                ccc->rsrmgrs, struct rsrmgr_config_s, i);
             LIXA_TRACE(("client_config_display: resource manager # %u, "
-                        "name='%s', switch_file='%s'\n",
-                        i, g_array_index(ccc->rsrmgrs,
-                                         struct rsrmgr_config_s,
-                                         i).name,
-                        g_array_index(ccc->rsrmgrs,
-                                      struct rsrmgr_config_s,
-                                      i).switch_file));
+                        "name='%s', switch_file='%s', xa_open_info='%s'\n",
+                        i, rsrmgr->name, rsrmgr->switch_file,
+                        rsrmgr->xa_open_info));
         }
         for (i=0; i<ccc->profiles->len; ++i) {
             guint j;
@@ -886,9 +895,9 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
     enum Exception { NAME_NOT_AVAILABLE_ERROR
                      , PORT_NOT_AVAILABLE_ERROR
                      , SWITCH_FILE_NOT_AVAILABLE_ERROR
+                     , XA_OPEN_INFO_NOT_AVAILABLE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int i = 0;
     
     LIXA_TRACE(("client_parse_rsrmgr/%p\n", a_node));
     TRY {
@@ -897,6 +906,7 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
         /* reset new element */
         record.name = NULL;
         record.switch_file = NULL;
+        record.xa_open_info = NULL;
 
         /* retrieve resource manager name */
         if (NULL == (record.name = xmlGetProp(
@@ -906,28 +916,43 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
         if (NULL == (record.switch_file = xmlGetProp(
                          a_node, LIXA_XML_CONFIG_SWITCH_FILE_PROPERTY)))
             THROW(SWITCH_FILE_NOT_AVAILABLE_ERROR);
+        /* retrieve xa_open_info */
+        if (NULL == (record.xa_open_info = xmlGetProp(
+                         a_node, LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY)))
+            THROW(XA_OPEN_INFO_NOT_AVAILABLE_ERROR);
 
         g_array_append_val(ccc->rsrmgrs, record);
         
         LIXA_TRACE(("client_parse_rsrmgr/%p: %s %d, "
-                    "%s = '%s', %s = '%s'\n", a_node,
+                    "%s = '%s', %s = '%s', %s = '%s'\n",
+                    a_node,
                     (char *)LIXA_XML_CONFIG_RSRMGR, ccc->rsrmgrs->len-1,
                     (char *)LIXA_XML_CONFIG_NAME_PROPERTY,
                     (char *)record.name,
                     (char *)LIXA_XML_CONFIG_SWITCH_FILE_PROPERTY,
-                    (char *)record.switch_file));
+                    (char *)record.switch_file,
+                    (char *)LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY,
+                    (char *)record.xa_open_info));
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NAME_NOT_AVAILABLE_ERROR:
                 LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrmgr "
-                            "name for rsrmgr %d\n", i));
+                            "property '%s' for current  resource manager\n",
+                            LIXA_XML_CONFIG_NAME_PROPERTY));
                 ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;                
             case SWITCH_FILE_NOT_AVAILABLE_ERROR:
+                LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrngr "
+                            "property '%s' for current resource manager\n",
+                            LIXA_XML_CONFIG_SWITCH_FILE_PROPERTY));
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;
+            case XA_OPEN_INFO_NOT_AVAILABLE_ERROR:
                 LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrmgr "
-                            "switch_file for rsrmgr %d\n", i));
+                            "property '%s' for current resource manager\n",
+                            LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY));
                 ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;                
             case NONE:
@@ -995,7 +1020,6 @@ int client_parse_profile(struct client_config_coll_s *ccc,
 {
     enum Exception { NAME_NOT_AVAILABLE_ERROR
                      , PORT_NOT_AVAILABLE_ERROR
-                     , SWITCH_FILE_NOT_AVAILABLE_ERROR
                      , PARSE_PROFILE_TRNMGRS_ERROR
                      , PARSE_PROFILE_RSRMGRS_ERROR
                      , UNRECOGNIZED_TAG
