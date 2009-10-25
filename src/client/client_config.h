@@ -124,6 +124,11 @@ struct rsrmgr_config_s {
      * Switch file must be used to interact with the resource manager
      */
     xmlChar *switch_file;
+    /**
+     * xa_info string must be passed to the resource manager at xa_open
+     * invocation
+     */
+    xmlChar *xa_open_info;
 };
 
 

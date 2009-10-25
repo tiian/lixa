@@ -5,8 +5,8 @@
     <trnmgr name="local_2" domain="AF_INET" address="127.0.0.1" port="3456" />
   </trnmgrs>
   <rsrmgrs>
-    <rsrmgr name="OracleXE" switch_file="/tmp/lixa/lib/switch_oracle.so" />
-    <rsrmgr name="Informix" switch_file="bar.so" />
+    <rsrmgr name="OracleXE" switch_file="/tmp/lixa/lib/switch_oracle.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" />
+    <rsrmgr name="Informix" switch_file="bar.so" xa_open_info="" />
   </rsrmgrs>
   <profiles>
     <profile name="VZ67">
