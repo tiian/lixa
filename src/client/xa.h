@@ -111,7 +111,7 @@ struct xa_switch_t {
 
 
 
-typedef struct xa_switch_t * (* lixa_get_switch_f) (void);
+typedef struct xa_switch_t * (* lixa_get_xa_switch_f) (void);
 
 
 

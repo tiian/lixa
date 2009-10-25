@@ -138,6 +138,7 @@ int tx_open(void)
 int tx_close(void)
 {
     enum Exception { CLIENT_DISCONNECT_ERROR
+                     , CLIENT_CONFIG_UNLOAD_SWITCH_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -145,11 +146,15 @@ int tx_close(void)
     TRY {
         if (LIXA_RC_OK != (ret_cod = client_disconnect(&global_csc)))
             THROW(CLIENT_DISCONNECT_ERROR);
+
+        if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))
+            THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case CLIENT_DISCONNECT_ERROR:
+            case CLIENT_CONFIG_UNLOAD_SWITCH_ERROR:
                 ret_cod = TX_ERROR;
                 break;
             case NONE:
