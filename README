@@ -48,3 +48,13 @@ because the application must be executed by "oracle" user or you have to deal
 with Oracle's own permission (this is not a source for Oracle info
 unfortunately, so only very basic set-up is explained)
 
+Doxygen documentation.
+There is a minimal configuration for Doxygen inside LIXA.
+Please update doxygen.conf.in and change /var/www/lixa to a suitable 
+destination in your system.
+Use "configure" (see above) to produce "doxygen.conf" file.
+Strike:
+doxygen doxygen.conf 
+to publish the project code auto-documentation.
+Have fun!
+
