@@ -232,7 +232,7 @@ int client_config(client_config_coll_t *ccc)
         /* now the client is CONFIGURED */
         ccc->configured = TRUE;
 
-        /* unlock mutex to start configuration activity */
+        /* unlock mutex (locked for configuration activity) */
         if (0 != (ret_cod = pthread_mutex_unlock(&ccc->mutex)))
             THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
 
@@ -973,7 +973,6 @@ int client_parse_profiles(struct client_config_coll_s *ccc,
                          xmlNode *a_node)
 {
     enum Exception { PARSE_PROFILE_ERROR
-                     /* , CLIENT_PARSE_PROFILES_ERROR */
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 

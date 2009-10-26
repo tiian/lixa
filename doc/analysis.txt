@@ -165,3 +165,58 @@ is a PROCESS property, not a THREAD property.
 
 ******************************************
 
+STATUS files
+
+To preserve integrity the status file of every thread must be mirrored and
+updated with an "integrity preserving" protocol.
+
+These facts are true:
+- memory mapped pages can be transferred to disk before synch is requested
+- power supply can vanish in the middle of a disk block writing
+
+These protocol is safe:
+- there are two physical files for every logical status file
+- every file is an array of records
+- every record is delimited by two special fields:
+  - record head is a 32 bit unsigned integer
+  - record tail is a 16 bytes array 
+
+Initial status: file 0 is OK, just synched to disk
+Copy all changed blocks to file 1.
+Use file 1.
+Every time a record must be modified, check the head special field:
+  if (! head % 2)
+    head++;
+  Explanation:
+  - if head is even, it's yet unmodified, increment it
+  - if head is odd, it's already modified, keep it
+  then add the record in the changed block list
+When a synch of file 1 must be performed, do:
+  for every modified block
+    head++;  /* if head is already even, this is an internal error!! */
+    compute MD5 digest of the block without tail special field
+    put MD5 digest in tail special field
+  synch file 1
+  copy all changed blocks to file 0
+  Use file 0
+ 
+[... and so on ...]
+
+At server restart, the two images must be analyzed in parallel.
+Starting with some record, one of the two may be non integral.
+
+These conditions may happen:
+- 2 integral (identical) files: server shutdown happened without issues
+- 1 integral file: server crashed, but the integral file is the good one and
+    transaction recovery can be performed
+- 0 integral files: critical situation
+    - a software bug
+    - someone damaged at least one file
+
+Corollary: the initial formatting must sign with MD5 digest all records before
+usage.
+
+MD5 digest cost: few microseconds, 20% of a TRACE(( )) statement
+
+Interesting thing: this crash safe status saving does not require a double
+                   sync on disk, the worst case in terms of performances
