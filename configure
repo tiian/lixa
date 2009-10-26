@@ -3536,7 +3536,7 @@ fi
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/common/Makefile src/client/Makefile src/client/switch/Makefile src/client/switch/oracle/Makefile src/extra/Makefile src/server/Makefile src/sample/Makefile src/sample/oracle/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/common/Makefile src/client/Makefile src/client/switch/Makefile src/client/switch/oracle/Makefile src/extra/Makefile src/server/Makefile src/sample/Makefile src/sample/oracle/Makefile doxygen.conf"
 
 
 # Include libltdl stuff
@@ -23107,6 +23107,7 @@ do
     "src/server/Makefile") CONFIG_FILES="$CONFIG_FILES src/server/Makefile" ;;
     "src/sample/Makefile") CONFIG_FILES="$CONFIG_FILES src/sample/Makefile" ;;
     "src/sample/oracle/Makefile") CONFIG_FILES="$CONFIG_FILES src/sample/oracle/Makefile" ;;
+    "doxygen.conf") CONFIG_FILES="$CONFIG_FILES doxygen.conf" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

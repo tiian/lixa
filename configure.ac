@@ -13,6 +13,7 @@ AC_CONFIG_FILES([
   src/server/Makefile
   src/sample/Makefile
   src/sample/oracle/Makefile
+  doxygen.conf
 ])
 
 # Include libltdl stuff
