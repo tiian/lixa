@@ -344,7 +344,7 @@ extern "C" {
     /**
      * Release a chain of records allocated inside the status record
      * memory mapped array. It must start from an header initialized with
-     * @ref payload_heade_init
+     * @ref payload_header_init
      * @param sr IN/OUT status record array
      * @param slot IN index of the header chain block
      * @return a standardized return code

@@ -136,7 +136,7 @@ struct rsrmgr_config_s {
 /**
  * It contains the properties of a resource manager has been specified inside
  * the actual transactional profile; this is a reacher struct than
- * @ref struct rsrmgr_config_s
+ * @ref rsrmgr_config_s
  */
 struct act_rsrmgr_config_s {
     /**
@@ -278,7 +278,7 @@ extern "C" {
     
     /**
      * Initialize a new "object" of type client config
-     * @param cc OUT object reference
+     * @param ccc OUT object reference
      * @return a standardized return code
      */
     int client_config_coll_init(client_config_coll_t *ccc);
