@@ -40,6 +40,80 @@ structure.
 
 ******************************************
 
+RECOVERY PENDING status
+
+A transaction enters "recovery pending" status when two different circumstances
+happen:
+- the client breaks the connection: the link between the Application Program
+  and the Transaction Manager breaks, the in-flight transaction currently
+  executed by the Application Program becomes "recovery pending"
+- the server crashes: at restart, all the transactions was in-flight at
+  crash time, are marked as "recovery pending"
+
+Due to the intrinsic parallelism of client activities there could be many
+transaction running with the same JOB attribute, inside different server
+thread.
+This is OK until a recovery pending status happens.
+To recover a transaction on the client side, is NECESSARY, the same Application
+Program from the same host, comes back and contact the Transaction Manager.
+Apache may be a good example.
+This is the scenario:
+Apache is configured with max 20 servers.
+The Transaction Manager is configured with 4 threads.
+Apache is fully loaded, 20 servers are running, 20 Application Programs are
+running, 20 transactions are in-flight.
+From a Transaction Manager perspective, imagine every thread is serving 5
+apache Application Program clients.
+One Application Program crashes and breaks TCP/IP connection.
+The Transaction Manager flags the in-flight transaction as "RECOVERY PENDING".
+Another Application Program running inside Apache contacts the Transaction
+Manager.
+The listener chooses the thread with the minimum load: it may be different
+from the thread is keeping the "RECOVERY PENDING" transaction.
+To avoid races conditions and statistical locks (the right job is served by
+the wrong thread forever...), the first thing a thread must check for an 
+incoming client is:
+1. check if I (thread) have got a "RECOVERY PENDING" transaction for this job
+   - answer = NO, go 2
+   - answer = YES: perform recovery and go 2
+2. check in a shared table if any thread has "RECOVERY PENDING" transaction
+for this job
+   - answer = NO, go 3
+   - answer = YES, create a message and route the client connection to the
+                   first thread has a RECOVERY PENDING transaction
+3. perform Application Program request...
+
+These are true:
+- if a thread has more than one transaction in recovery pending status, the
+  thread has to recover all the transaction in recovery pending status (this
+  happens due to point 1, it's an implicit loop)
+- recovery may happen in parallel if many Application Programs come "at the
+  same time": every thread will process one recovery pending transactions
+  atomically before another one can be performed. This should avoid last
+  arrivals start to process normal activity before all the recovery pending
+  transactions are in charge. It may happen normal activity will start before
+  the last recovery pending transaction has been recovered, but not before it
+  started. This behaviour can produce some extra lock in Resource Managers
+  and some extra rollback due to lock will disappear later...
+
+The shared table must be protected by a mutex to avoid contention between
+threads.
+The search keys are:
+"job": are there recovery pending transactions for this job?
+"job+thread": are there recovery pending transactions for this job I have to
+              perform?
+
+These rules must be applied to shared table:
+- Transaction Manager crash: at restart, every thread insert a record for
+  every in-flight transaction inside the table
+- Application Program crash: the serving thread insert a record if there was
+  an in-flight transaction for the broken connection
+- Thread recovers a transaction: at recovery time start, the record is removed
+  from the shared table; it's responsability of the thread to complete the 
+  recovery or insert a new record...  
+
+******************************************
+
 TRANSACTION MANAGERS, RESOURCE MANAGERS and PROFILES
 
 All the information related to the RESOURCE MANAGERS is stored in client
@@ -68,7 +142,7 @@ interface the resource managers are stored in client side.
 This prevent a double configuration issue but exposes to different issues
 like: every client must be correctly configured to reach all the resource
 managers.
-Some information on server side will be in the wrong place:
+Some information on server side would be in the wrong place:
 - switch load file is a property of the system is hosting the client (the
   module could be installed everywhere)
 - resource manager open strings many times contain user/password related to
@@ -86,9 +160,8 @@ PROFILE, PROCESS, THREADS
 All the THREADS inside a PROCESS use the same PROFILE.
 There's no way to specify different PROFILEs from distinct THREADs of the same
 PROCESS.
-This is partially due environment variable LIXA_PROFILE: an environment var
+This is partially due to environment variable LIXA_PROFILE: an environment var
 is a PROCESS property, not a THREAD property.
 
-
-
+******************************************
 
