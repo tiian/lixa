@@ -147,8 +147,7 @@ extern "C" {
     /**
      * Read and parse server config file
      * @param sc OUT the object containing the server configuration
-     * @param tsa IN/OUT the objects containing the status common to all
-     *                   threads
+     * @param tpa OUT thread pipe array
      * @param config_filename IN a filename PATH must looked at before
      *                           searching default system config file
      *                           default = NULL
@@ -187,6 +186,7 @@ extern "C" {
     /**
      * Parse a "manager" node tree
      * @param sc IN/OUT configuration structure
+     * @param tpa IN/OUT thread pipe array
      * @param a_node IN listener node
      * @return a standardized return code
      */
@@ -199,6 +199,7 @@ extern "C" {
     /**
      * Parse a "profile" node tree
      * @param sc IN/OUT configuration structure
+     * @param tpa IN thread pipe array
      * @param a_node IN listener node
      * @return a standardized return code
      */
