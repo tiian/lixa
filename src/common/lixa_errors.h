@@ -343,7 +343,10 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * "g_module_symbol" function error
  */
 #define LIXA_RC_G_MODULE_SYMBOL_ERROR          -302
-
+/**
+ * "g_checksum_new" function error
+ */
+#define LIXA_RC_G_CHECKSUM_NEW_ERROR           -303
 
 
 /***********************************************************************

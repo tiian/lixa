@@ -564,3 +564,59 @@ int status_record_delete(union status_record_u **sr,
     return ret_cod;
 }
 
+
+
+int status_record_sync(status_record_t *sr)
+{
+    enum Exception { G_CHECKSUM_NEW_ERROR
+                     , DIGEST_SIZE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("status_record_sync\n"));
+    TRY {
+        GChecksum *checksum;
+        gsize digest_len = MD5_DIGEST_LENGTH;
+        if (sr->counter%2) {
+            sr->counter++;
+        } else {
+            LIXA_TRACE(("status_record_sync: WARNING! record %p already even "
+                        "it was NOT updated before!\n", sr));
+        }
+        if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))
+            THROW(G_CHECKSUM_NEW_ERROR);
+        g_checksum_update(checksum, (const guchar *)sr,
+                          STATUS_RECORD_CHECKSUM_SIZE);
+        g_checksum_get_digest(checksum, sr->digest, &digest_len);
+#ifndef NDEBUG
+        if (digest_len != MD5_DIGEST_LENGTH) {
+            LIXA_TRACE(("status_record_sync: internal error in digest size "
+                        "expected=" SIZE_T_FORMAT ", returned=" SIZE_T_FORMAT
+                        "\n", MD5_DIGEST_LENGTH, digest_len));
+            THROW(DIGEST_SIZE_ERROR);
+        }
+#endif /* NDEBUG */
+        g_checksum_free(checksum);
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_CHECKSUM_NEW_ERROR:
+                ret_cod = LIXA_RC_G_CHECKSUM_NEW_ERROR;
+                break;
+#ifndef NDEBUG
+            case DIGEST_SIZE_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;         
+#endif /* NDEBUG */
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("status_record_sync/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

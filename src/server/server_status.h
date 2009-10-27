@@ -48,6 +48,9 @@
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 
 
 
@@ -87,6 +90,22 @@
  * The data record is an header
  */
 #define DATA_PAYLOAD_TYPE_HEADER  1
+
+
+
+/**
+ * Number of bytes necessary to store an MD5 digest
+ */
+#define MD5_DIGEST_LENGTH   16
+
+
+
+/**
+ * This type is used to store an MD5 digest inside a status file record
+ */
+typedef guint8 md5_digest_t[MD5_DIGEST_LENGTH];
+
+
 
 /**
  * It contains the configuration common to any thread
@@ -250,6 +269,47 @@ union status_record_u {
 
 
 /**
+ * This struct is the basic type of a status record: it contains two control
+ * fields and one payload field
+ */
+struct status_record_s {
+    /**
+     * This field is incremented twice between a couple of sync:
+     * if the value is even, the record is synched
+     * if the value is odd, the record is modified
+     * This is the lifetime:
+     * - increment once for first update after synch
+     * - increment before compute the record digest and successive synch
+     */
+    uint32_t               counter;
+    /**
+     * This field contains usefull control or data information
+     */
+    union status_record_u  sr;
+    /**
+     * This field contains the digest of the previous fields
+     */
+    md5_digest_t           digest;
+};
+
+
+
+/**
+ * Number of bytes must be signed to check integrity
+ */
+#define STATUS_RECORD_CHECKSUM_SIZE (sizeof(status_record_t) -  \
+                                     sizeof(md5_digest_t))
+
+
+
+/**
+ * It's defined as a type because it's used in an object oriented fashion
+ */
+typedef struct status_record_s status_record_t;
+
+
+
+/**
  * It's the struct used as argument to every created thread
  */
 struct thread_status_s {
@@ -386,6 +446,26 @@ extern "C" {
      */
     int status_record_delete(union status_record_u **sr,
                              uint32_t slot);
+
+
+
+    /**
+     * Mark a record for update
+     * @param sr IN/OUT reference to the record must be marked for update
+     */
+    static inline void status_record_update(status_record_t *sr) {
+        if (!sr->counter%2) sr->counter++;
+    }
+
+
+
+    /**
+     * Prepare a record for synchronization: counter is changed from odd to
+     * even, digest is computed
+     * @param sr IN/OUT reference to the record must be marked for update
+     * @return a reason code
+     */
+    int status_record_sync(status_record_t *sr);
 
 
     
