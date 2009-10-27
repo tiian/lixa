@@ -580,7 +580,7 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
 
         /* create the header and reset it */
         if (LIXA_RC_OK != (ret_cod = payload_header_init(
-                               &ts->status[slot].data, fd)))
+                               &ts->status[slot].sr.data, fd)))
             THROW(PAYLOAD_HEADER_INIT);
 
         /* save a reference to the slot */
