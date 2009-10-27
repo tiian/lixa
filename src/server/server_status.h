@@ -270,7 +270,8 @@ union status_record_u {
 
 /**
  * This struct is the basic type of a status record: it contains two control
- * fields and one payload field
+ * fields and one payload field.
+ * THE POSITION OF THE FIELDS MUST NOT BE CHANGED INSIDE THE RECORD 
  */
 struct status_record_s {
     /**
@@ -351,7 +352,7 @@ struct thread_status_s {
     /**
      * Memory mapped file accessed as an array
      */
-    union status_record_u         *status;
+    status_record_t               *status;
     /**
      * Exception reported by the thread (after exit)
      */
@@ -409,17 +410,14 @@ extern "C" {
      * @param slot IN index of the header chain block
      * @return a standardized return code
      */
-    int payload_chain_release(union status_record_u **sr, uint32_t slot);
-    
-
-    
+    int payload_chain_release(status_record_t **sr, uint32_t slot);
     /**
      * Load status records from status file
      * @param sr OUT the pointer of the mapped file
      * @param status_file IN the name of the status file to be loaded
      * @return a standardized return code
      */
-    int status_record_load(union status_record_u **sr,
+    int status_record_load(status_record_t **sr,
                            const char *status_file);
 
 
@@ -431,7 +429,7 @@ extern "C" {
      * @param slot OUT the index of the found free slot
      * @return a standardized return code
      */
-    int status_record_insert(union status_record_u **sr,
+    int status_record_insert(status_record_t **sr,
                              uint32_t *slot);
 
 
@@ -444,7 +442,7 @@ extern "C" {
      * @return a standardized return code
      *
      */
-    int status_record_delete(union status_record_u **sr,
+    int status_record_delete(status_record_t **sr,
                              uint32_t slot);
 
 
