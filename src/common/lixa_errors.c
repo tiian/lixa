@@ -144,6 +144,9 @@ const char *lixa_strerror(int ret_cod)
             case LIXA_RC_MUNMAP_ERROR:
                 return "ERROR: 'munmap' function returned an error "
                         "condition";
+            case LIXA_RC_MSYNC_ERROR:
+                return "ERROR: 'msync' function returned an error "
+                        "condition";
                 /*
             case LIXA_RC_VSNPRINTF_ERROR:
                 return "ERROR: 'vsnprintf' function returned an error "

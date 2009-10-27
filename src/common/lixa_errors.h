@@ -230,6 +230,10 @@ define LIXA_RC_RENAME_ERROR                  -123
  * "munmap" function error
  */
 #define LIXA_RC_MUNMAP_ERROR                  -126
+/**
+ * "msync" function error
+ */
+#define LIXA_RC_MSYNC_ERROR                   -127
 
 /**
  * "vsnprintf" function error

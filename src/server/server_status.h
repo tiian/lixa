@@ -82,6 +82,17 @@
  */
 #define STATUS_FILE_LEVEL 0x0001
 /**
+ * Suffix for the first status file
+ */
+#define STATUS_FILE_SUFFIX_1  "_1"
+/**
+ * Suffix for the second status file
+ */
+#define STATUS_FILE_SUFFIX_2  "_2"
+
+
+
+/**
  * Maximum number of blocks in a chain used by a session
  */
 #define CHAIN_MAX_SIZE 20
@@ -161,26 +172,30 @@ struct status_record_ctrl_s {
      * It's the signature of the first 4 bytes and can be used
      * by "file" utility to discover a file is a lixa status file
      */
-    uint32_t    magic_number;
+    uint32_t        magic_number;
     /**
      * Used to distinguish status files produced and used by different
      * versions of the software
      */
-    uint32_t    level;
+    uint32_t        level;
+    /**
+     * Timestamp (seconds and microseconds) of the last sync operation
+     */
+    struct timeval  last_sync;
     /**
      * First record of the used blocks chain (0 means the chain is empty)
      */
-    uint32_t    first_used_block;
+    uint32_t        first_used_block;
     /**
      * First record of the free blocks chain (0 means the chain is empty)
      */
-    uint32_t    first_free_block;
+    uint32_t        first_free_block;
     /**
      * Status file name; this is a reference to the string allocated in
      * configuration struct. This reference must be updated every time the
      * server boots up
      */
-    const char *status_file;
+    const char     *status_file;
 };
 
 
@@ -350,9 +365,23 @@ struct thread_status_s {
      */
     struct server_client_status_s *client_array;
     /**
-     * Memory mapped file accessed as an array
+     * First instance of memory mapped file accessed as an array
      */
-    status_record_t               *status;
+    status_record_t               *status1;
+    /**
+     * Second instance of memory mapped file accessed as an array
+     */
+    status_record_t               *status2;
+    /**
+     * Current status file: it MUST be one of the previous two (@ref status1,
+     * @ref status2)
+     */
+    status_record_t               *curr_status;
+    /**
+     * A (sorted) tree containing all the updated records: these are the
+     * records must be copied from one status file to the other one
+     */
+    GTree                         *updated_records;
     /**
      * Exception reported by the thread (after exit)
      */
@@ -411,14 +440,21 @@ extern "C" {
      * @return a standardized return code
      */
     int payload_chain_release(status_record_t **sr, uint32_t slot);
+
+
+
     /**
      * Load status records from status file
-     * @param sr OUT the pointer of the mapped file
+     * @param sr OUT pointer to the mapped file
      * @param status_file IN the name of the status file to be loaded
+     * @param updated_records IN set of record has been updated since last
+     *                           synchronization
      * @return a standardized return code
      */
     int status_record_load(status_record_t **sr,
-                           const char *status_file);
+                           const char *status_file,
+                           GTree *updated_records);
+
 
 
 
@@ -451,8 +487,16 @@ extern "C" {
      * Mark a record for update
      * @param sr IN/OUT reference to the record must be marked for update
      */
-    static inline void status_record_update(status_record_t *sr) {
-        if (!sr->counter%2) sr->counter++;
+    static inline void status_record_update(status_record_t *sr,
+                                            GTree *updated_records) {
+        if (!(sr->counter%2)) {
+            sr->counter++;
+            g_tree_insert(updated_records, (gpointer)sr, NULL);
+            LIXA_TRACE(("status_record_update: inserted record %p (counter = "
+                        UINT32_T_FORMAT") in updated records tree "
+                        "(number of nodes now is %d)\n",
+                        sr, sr->counter, g_tree_nnodes(updated_records)));
+        }
     }
 
 
@@ -464,6 +508,65 @@ extern "C" {
      * @return a reason code
      */
     int status_record_sync(status_record_t *sr);
+
+
+
+    /**
+     * This is a convenience function used as comparison call back function
+     * for GTree
+     * @param a IN pointer to first arg
+     * @param b IN pointer to second arg
+     * @return a<b => -1, a>b => +1, a=b =>0
+     */
+    int size_t_compare_func(gconstpointer a, gconstpointer b);
+
+
+
+    /**
+     * This is a convenience function used as delete call back function for
+     * GTree
+     * @param key IN the key of the traversed node, it's the key must be
+     *               deleted from GTree
+     * @param value IN useless for updated_records use case
+     * @param data IN references the GTree object itself
+     * @return FALSE because TRUE would break tree traversal
+     */
+    gboolean traverse_and_delete(gpointer key, gpointer value, gpointer data);
+
+    
+    
+    /**
+     * Initialize a structure of type @ref thread_status_s
+     * @param ts OUT reference to the structure must be initialized
+     * @param id IN thread id must assigned
+     * @param tpa IN reference to the thread pipe array
+     */
+    void thread_status_init(struct thread_status_s *ts,
+                            int id,
+                            struct thread_pipe_array_s *tpa);
+
+
+    
+    /**
+     * Load the files associated to memory mapped status
+     * @param ts IN/OUT pointer to the thread status structure
+     * @param status_file_prefix IN the prefix used for status files
+     * @return a reason code
+     */
+    int thread_status_load_files(struct thread_status_s *ts,
+                                 const char *status_file_prefix);
+
+    
+
+    /**
+     * Remove all records from an updated records tree
+     * @param ur IN/OUT the reference to updated records GTree structure
+     */
+    static inline void thread_status_updated_records_clean(GTree *ur) {
+        LIXA_TRACE(("thread_status_updated_records_clean: cleaning "
+                    "tree allocated at %p\n", ur));
+        g_tree_foreach(ur, traverse_and_delete, ur);
+    }
 
 
     
