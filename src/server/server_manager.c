@@ -64,7 +64,7 @@ int server_manager(struct server_config_s *sc,
                    struct thread_status_array_s *tsa)
 {
     enum Exception { MALLOC_ERROR
-                     , STATUS_FILE_ERROR
+                     , THREAD_STATUS_LOAD_FILES_ERROR
                      , PTHREAD_CREATE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -85,26 +85,23 @@ int server_manager(struct server_config_s *sc,
         /* first thread slot is for listener: it's the main thread of the
          * process, it's IMPLICITLY created */
         for (i = 0; i < tsa->n; ++i) {
-            tsa->array[i].id = i;
-            tsa->array[i].tpa = tpa;
-            tsa->array[i].poll_size = 0;
-            tsa->array[i].poll_array = NULL;
-            tsa->array[i].active_clients = 0;
-            tsa->array[i].client_array = NULL;
-            tsa->array[i].status = NULL;
-            tsa->array[i].excp = tsa->array[i].ret_cod =
-                tsa->array[i].last_errno = 0;
-            if (i == 0) { /* listener */
-                tsa->array[i].tid = pthread_self();
-            } else {
-                /* load status file */
+            thread_status_init(&(tsa->array[i]), i, tpa);
+            if (i != 0) {
+                /* load status file for thread != listener */
+                /*
                 if (LIXA_RC_OK != (ret_cod = status_record_load(
-                                       &tsa->array[i].status,
+                                       &tsa->array[i].status1,
+                                       &tsa->array[i].status2,
+                                       &tsa->array[i].curr_status,
                                        sc->managers.array[i-1].status_file)))
                     THROW(STATUS_FILE_ERROR);
-                
+                */
+                if (LIXA_RC_OK != (
+                        ret_cod = thread_status_load_files(
+                            &(tsa->array[i]),
+                            sc->managers.array[i-1].status_file)))
+                    THROW(THREAD_STATUS_LOAD_FILES_ERROR);
                 /* it will be fixed by the thread itself */
-                tsa->array[i].tid = 0;
                 if (0 != (ret_cod = pthread_create(
                               &(tsa->array[i].tid), NULL,
                               server_manager_thread, tsa->array + i)))
@@ -118,7 +115,7 @@ int server_manager(struct server_config_s *sc,
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
                 break;
-            case STATUS_FILE_ERROR:
+            case THREAD_STATUS_LOAD_FILES_ERROR:
                 break;
             case PTHREAD_CREATE_ERROR:
                 ret_cod = LIXA_RC_PTHREAD_CREATE_ERROR;
@@ -320,7 +317,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 
             /* release all allocated blocks */
             if (LIXA_RC_OK != (ret_cod = payload_chain_release(
-                                   &ts->status,
+                                   &ts->curr_status,
                                    ts->client_array[slot_id].
                                    pers_status_slot_id)))
                 THROW(PAYLOAD_CHAIN_RELEASE);
@@ -575,12 +572,13 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
         uint32_t slot = 0;
         
         /* get a free block from status file and insert in used list */
-        if (LIXA_RC_OK != (ret_cod = status_record_insert(&ts->status, &slot)))
+        if (LIXA_RC_OK != (ret_cod = status_record_insert(
+                               &ts->curr_status, &slot)))
             THROW(RECORD_INSERT_ERROR);
 
         /* create the header and reset it */
         if (LIXA_RC_OK != (ret_cod = payload_header_init(
-                               &ts->status[slot].sr.data, fd)))
+                               &ts->curr_status[slot].sr.data, fd)))
             THROW(PAYLOAD_HEADER_INIT);
 
         /* save a reference to the slot */

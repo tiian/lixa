@@ -89,6 +89,8 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
     LIXA_TRACE(("payload_header_init\n"));
     TRY {
         socklen_t serv_addr_len;
+
+        exit(1); /* update the record !!! */
         
         srd->next_block = 0;
         srd->pld.type = DATA_PAYLOAD_TYPE_HEADER;
@@ -216,13 +218,17 @@ int payload_chain_release(status_record_t **sr, uint32_t slot)
 
 
 int status_record_load(status_record_t **sr,
-                       const char *status_file)
+                       const char *status_file,
+                       GTree *updated_records)
 {
     enum Exception { OPEN_ERROR1
                      , OPEN_ERROR2
+                     , STATUS_RECORD_SYNC_ERROR1
                      , WRITE_ERROR
                      , FSTAT_ERROR
                      , MMAP_ERROR
+                     , STATUS_RECORD_SYNC_ERROR2
+                     , MSYNC_ERROR
                      , CLOSE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -250,26 +256,33 @@ int status_record_load(status_record_t **sr,
                         "with file descriptor %d\n",
                         status_file, fd));
             for (i = 0; i < STATUS_FILE_INIT_SIZE; ++i) {
-                union status_record_u tmp_sr;
+                struct status_record_s tmp_sr;
 
                 memset(&tmp_sr, 0, sizeof(tmp_sr));
+                tmp_sr.counter = 0;
                 if (i == 0) {
                     /* write control record */
-                    tmp_sr.ctrl.magic_number = STATUS_FILE_MAGIC_NUMBER;
-                    tmp_sr.ctrl.level = STATUS_FILE_LEVEL;
-                    tmp_sr.ctrl.first_used_block = 0;
-                    tmp_sr.ctrl.first_free_block = 1;
+                    tmp_sr.sr.ctrl.magic_number = STATUS_FILE_MAGIC_NUMBER;
+                    tmp_sr.sr.ctrl.level = STATUS_FILE_LEVEL;
+                    gettimeofday(&tmp_sr.sr.ctrl.last_sync, NULL);
+                    tmp_sr.sr.ctrl.first_used_block = 0;
+                    tmp_sr.sr.ctrl.first_free_block = 1;
                 } else {
                     if (i == STATUS_FILE_INIT_SIZE - 1)
-                        tmp_sr.data.next_block = 0;
+                        tmp_sr.sr.data.next_block = 0;
                     else
-                        tmp_sr.data.next_block = i + 1;
+                        tmp_sr.sr.data.next_block = i + 1;
                 }
+                status_record_update(&tmp_sr, updated_records);
+                if (LIXA_RC_OK != (ret_cod = status_record_sync(&tmp_sr)))
+                    THROW(STATUS_RECORD_SYNC_ERROR1);
                 if (sizeof(tmp_sr) != write(fd, &tmp_sr, sizeof(tmp_sr)))
                     THROW(WRITE_ERROR);
             }
         }
-
+        /* clean updated records set */
+        thread_status_updated_records_clean(updated_records);
+        
         /* retrieve size */
         if (0 != fstat(fd, &fd_stat))
             THROW(FSTAT_ERROR);
@@ -278,13 +291,21 @@ int status_record_load(status_record_t **sr,
                                     PROT_READ | PROT_WRITE,
                                     MAP_SHARED, fd, 0)))
             THROW(MMAP_ERROR);
-        /* set the status file name reference for future usage */
-        tmp_sra[0].sr.ctrl.status_file = status_file;
-        
         LIXA_TRACE(("status_record_load: status file '%s' mapped at "
                     "address %p\n", status_file, tmp_sra));
-        *sr = tmp_sra;
 
+        /* set the status file name reference for future usage */
+        tmp_sra[0].sr.ctrl.status_file = status_file;
+        status_record_update(tmp_sra, updated_records);
+        if (LIXA_RC_OK != (ret_cod = status_record_sync(tmp_sra)))
+            THROW(STATUS_RECORD_SYNC_ERROR2);
+        if (0 != msync(tmp_sra, fd_stat.st_size, MS_SYNC))
+            THROW(MSYNC_ERROR);
+        /* clean updated records set */
+        thread_status_updated_records_clean(updated_records);
+        /* point the status record array to the prepared memory mapped file */
+        *sr = tmp_sra;
+        
         if (0 != close(fd))
             THROW(CLOSE_ERROR);
         fd = LIXA_NULL_FD;
@@ -296,6 +317,8 @@ int status_record_load(status_record_t **sr,
             case OPEN_ERROR2:
                 ret_cod = LIXA_RC_OPEN_ERROR;
                 break;
+            case STATUS_RECORD_SYNC_ERROR1:
+                break;
             case WRITE_ERROR:
                 ret_cod = LIXA_RC_WRITE_ERROR;
                 break;
@@ -304,6 +327,11 @@ int status_record_load(status_record_t **sr,
                 break;
             case MMAP_ERROR:
                 ret_cod = LIXA_RC_MMAP_ERROR;
+                break;
+            case STATUS_RECORD_SYNC_ERROR2:
+                break;
+            case MSYNC_ERROR:
+                ret_cod = LIXA_RC_MSYNC_ERROR;
                 break;
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
@@ -351,6 +379,9 @@ int status_record_insert(status_record_t **sr,
     LIXA_TRACE(("status_record_insert\n"));
     TRY {
         status_record_t *csr = *sr;
+
+        exit(1); /* update the modified block! */
+        
         if (csr[0].sr.ctrl.first_free_block == 0) {
             struct stat fd_stat;
             off_t curr_size, new_size, delta_size, i;
@@ -621,3 +652,111 @@ int status_record_sync(status_record_t *sr)
     return ret_cod;
 }
 
+
+
+int size_t_compare_func(gconstpointer a, gconstpointer b) {
+    if (a < b)
+        return -1;
+    else if (a > b)
+        return 1;
+    else
+        return 0;
+}
+
+
+
+gboolean traverse_and_delete(gpointer key, gpointer value, gpointer data) {
+    /* ignore value, data is the GTree... */
+    g_tree_remove((GTree *)data, key);
+    return FALSE;
+}
+
+
+
+void thread_status_init(struct thread_status_s *ts,
+                        int id,
+                        struct thread_pipe_array_s *tpa)
+{
+    LIXA_TRACE(("thread_status_init: initializing thread status (id = %d)\n",
+                id));
+    ts->id = id;
+    ts->tpa = tpa;
+    ts->poll_size = 0;
+    ts->poll_array = NULL;
+    ts->active_clients = 0;
+    ts->client_array = NULL;
+    ts->status1 = ts->status2 = NULL;
+    ts->curr_status = NULL;
+    ts->updated_records = g_tree_new(size_t_compare_func);
+    ts->excp = ts->ret_cod = ts->last_errno = 0;
+    if (id == 0)
+        ts->tid = pthread_self();
+    else
+        ts->tid = 0;
+    LIXA_TRACE(("thread_status_init: end initialization (id = %d)\n", id));
+}
+
+
+
+int thread_status_load_files(struct thread_status_s *ts,
+                             const char *status_file_prefix)
+{
+    enum Exception { STATUS_RECORD_LOAD_1_ERROR
+                     , STATUS_RECORD_LOAD_2_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    gchar *file_name = NULL;
+    LIXA_TRACE(("thread_status_load_files\n"));
+    TRY {
+        /* first file */
+        file_name = g_strconcat(status_file_prefix, STATUS_FILE_SUFFIX_1,
+                                NULL);
+        LIXA_TRACE(("thread_status_load_files: first status file is '%s'\n",
+                    file_name));
+        if (LIXA_RC_OK != (ret_cod = status_record_load(
+                               &(ts->status1), (const char *)file_name,
+                               ts->updated_records)))
+            THROW(STATUS_RECORD_LOAD_1_ERROR);
+        g_free(file_name);
+        file_name = NULL;
+        
+        /* second file */
+        file_name = g_strconcat(status_file_prefix, STATUS_FILE_SUFFIX_2,
+                                NULL);
+        LIXA_TRACE(("thread_status_load_files: second status file is '%s'\n",
+                    file_name));
+        if (LIXA_RC_OK != (ret_cod = status_record_load(
+                               &(ts->status2), (const char *)file_name,
+                               ts->updated_records)))
+            THROW(STATUS_RECORD_LOAD_2_ERROR);
+        g_free(file_name);
+        file_name = NULL;
+
+        /* now the right file must be choosed */
+        exit(1);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case STATUS_RECORD_LOAD_1_ERROR:
+            case STATUS_RECORD_LOAD_2_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* recovery memory if necessary */
+        if (NULL != file_name)
+            g_free(file_name);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("thread_status_load_files/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+    
+        
