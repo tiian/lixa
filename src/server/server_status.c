@@ -49,6 +49,9 @@
 #ifdef HAVE_SYS_STAT_H
 # include <sys/stat.h>
 #endif
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
+#endif
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
@@ -426,7 +429,7 @@ int status_record_check_integrity(status_record_t *sr)
         for (i=1; i<first_block->sr.ctrl.number_of_blocks; ++i) {
             struct status_record_s *curr_block = sr + i;
             LIXA_TRACE(("status_record_check_integrity: checking block # "
-                        UINT32_T_FORMAT ", address %p\n", i, curr_block));
+                        UINT32_T_FORMAT " address %p\n", i, curr_block));
             LIXA_TRACE(("status_record_check_integrity: checking block # "
                         UINT32_T_FORMAT " parity...\n"));
             if (curr_block->counter%2) {
@@ -836,6 +839,35 @@ int status_record_sync(status_record_t *sr)
 
 
 
+int status_record_copy(status_record_t *dest, const status_record_t *src,
+                       const struct thread_status_s *ts)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("status_record_copy\n"));
+    TRY {
+        /* @@@ */
+        /* compare length before copy: it may be the destination file is
+           shorter then the source file */ 
+        exit(1);
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("status_record_copy/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int size_t_compare_func(gconstpointer a, gconstpointer b) {
     if (a < b)
         return -1;
@@ -886,6 +918,11 @@ int thread_status_load_files(struct thread_status_s *ts,
 {
     enum Exception { STATUS_RECORD_LOAD_1_ERROR
                      , STATUS_RECORD_LOAD_2_ERROR
+                     , DAMAGED_STATUS_FILES
+                     , STATUS_RECORD_COPY_ERROR1
+                     , STATUS_RECORD_COPY_ERROR2
+                     , STATUS_RECORD_COPY_ERROR3
+                     , STATUS_RECORD_COPY_ERROR4
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -905,8 +942,9 @@ int thread_status_load_files(struct thread_status_s *ts,
             THROW(STATUS_RECORD_LOAD_1_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status1)))
-            LIXA_TRACE(("thread_status_load_files: first status file did not "
-                        "pass integrity check\n"));
+            syslog(LOG_WARNING, "thread_status_load_files: first status file "
+                   "('%s') did not pass integrity check\n",
+                   ts->status1_filename);
         else
             s1ii = TRUE;
         
@@ -922,10 +960,67 @@ int thread_status_load_files(struct thread_status_s *ts,
             THROW(STATUS_RECORD_LOAD_2_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status2)))
-            LIXA_TRACE(("thread_status_load_files: second status file did not "
-                        "pass integrity check\n"));
+            syslog(LOG_WARNING, "thread_status_load_files: second status file "
+                   "('%s') did not pass integrity check\n",
+                   ts->status2_filename);
         else
             s2ii = TRUE;
+
+        if (!s1ii && !s2ii) {
+            /* two damaged files! */
+            syslog(LOG_ERR, "thread_status_load_files: both status files "
+                   "did not pass integrity check; the server can not "
+                   "start-up");
+            THROW(DAMAGED_STATUS_FILES);
+        } else if (s1ii && s2ii) {
+            /* two integral files, check timestamp */
+            if ((ts->status1->sr.ctrl.last_sync.tv_sec <
+                 ts->status2->sr.ctrl.last_sync.tv_sec) ||
+                ((ts->status1->sr.ctrl.last_sync.tv_sec ==
+                  ts->status2->sr.ctrl.last_sync.tv_sec) &&
+                 (ts->status1->sr.ctrl.last_sync.tv_usec <
+                  ts->status2->sr.ctrl.last_sync.tv_usec))) {
+                /* second file is newer */
+                LIXA_TRACE(("thread_status_load_files: second status file is "
+                            "the more recent\n"));
+                /* copying second file over first one, and point first as
+                   the current file */
+                if (LIXA_RC_OK != (ret_cod = status_record_copy(
+                                       ts->status1, ts->status2, ts)))
+                    THROW(STATUS_RECORD_COPY_ERROR1);
+                ts->curr_status = ts->status1;
+            } else {
+                /* first file is newer */
+                LIXA_TRACE(("thread_status_load_files: first status file is "
+                            "the more recent\n"));
+                /* copying first file over second one, and point second as
+                   the current file */
+                if (LIXA_RC_OK != (ret_cod = status_record_copy(
+                                       ts->status2, ts->status1, ts)))
+                    THROW(STATUS_RECORD_COPY_ERROR2);
+                ts->curr_status = ts->status2;
+            }
+        } if (s1ii) {
+            /* only first file is integral */
+            LIXA_TRACE(("thread_status_load_files: first status file is OK, "
+                        "second status file is damanged: oveeriding it...\n"));
+            /* copying first file over second one, and point second as
+               the current file */
+            if (LIXA_RC_OK != (ret_cod = status_record_copy(
+                                   ts->status2, ts->status1, ts)))
+                THROW(STATUS_RECORD_COPY_ERROR3);
+            ts->curr_status = ts->status2;
+        } else {
+            /* only second file is integral */
+            LIXA_TRACE(("thread_status_load_files: second status file is OK, "
+                        "first status file is damanged: oveeriding it...\n"));
+            /* copying second file over first one, and point first as
+               the current file */
+            if (LIXA_RC_OK != (ret_cod = status_record_copy(
+                                   ts->status1, ts->status2, ts)))
+                THROW(STATUS_RECORD_COPY_ERROR4);
+            ts->curr_status = ts->status1;
+        }
         
         /* now the right file must be choosed */
         exit(1);
@@ -935,6 +1030,14 @@ int thread_status_load_files(struct thread_status_s *ts,
         switch (excp) {
             case STATUS_RECORD_LOAD_1_ERROR:
             case STATUS_RECORD_LOAD_2_ERROR:
+                break;
+            case DAMAGED_STATUS_FILES:
+                ret_cod = LIXA_RC_CORRUPTED_STATUS_FILE;
+                break;
+            case STATUS_RECORD_COPY_ERROR1:
+            case STATUS_RECORD_COPY_ERROR2:
+            case STATUS_RECORD_COPY_ERROR3:
+            case STATUS_RECORD_COPY_ERROR4:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -117,6 +117,10 @@ define LIXA_RC_OBJ_NOT_VOID                    -7
  */
 #define LIXA_RC_OBJ_CORRUPTED                   -9
 /**
+ * Status files are corrupted and the server can not start-up
+ */
+#define LIXA_RC_CORRUPTED_STATUS_FILE          -10
+/**
  * A specified option is not valid for method and/or object status
 define LIXA_RC_INVALID_OPTION                 -10
  */

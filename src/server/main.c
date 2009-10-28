@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     struct listener_status_array_s lsa;
     struct thread_pipe_array_s tpa;
     struct thread_status_array_s tsa;
-    
+
     LIXA_TRACE_INIT;
     LIXA_TRACE(("main: starting\n"));
     openlog("lixad", LOG_PID, LOG_DAEMON);

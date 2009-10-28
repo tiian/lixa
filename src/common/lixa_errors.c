@@ -74,6 +74,9 @@ const char *lixa_strerror(int ret_cod)
                 return "ERROR: object is not initialized";
             case  LIXA_RC_OBJ_CORRUPTED:
                 return "ERROR: object is corrupted";
+            case LIXA_RC_CORRUPTED_STATUS_FILE:
+                return "ERROR: the status file is corrupted and can not be "
+                    "used";
                 /*
             case LIXA_RC_INVALID_OPTION:
                 return "ERROR: a specified option is not valid";
