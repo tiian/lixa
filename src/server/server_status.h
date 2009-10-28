@@ -536,6 +536,18 @@ extern "C" {
 
 
     /**
+     * Copy status record mapped file from source to target
+     * @param dest OUT the mapped file will receive status
+     * @param src IN the mapped file will supply status
+     * @param ts IN reference to thread status
+     * @return a reason code
+     */
+    int status_record_copy(status_record_t *dest, const status_record_t *src,
+                           const struct thread_status_s *ts);
+                       
+
+    
+    /**
      * This is a convenience function used as comparison call back function
      * for GTree
      * @param a IN pointer to first arg
