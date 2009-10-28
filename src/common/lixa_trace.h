@@ -197,8 +197,6 @@ extern int lixa_trace_mutex_init;
 extern "C" {
 #endif /* __cplusplus */
 
-    
-
     /**
      * This method MUST be called BEFORE first log call to avoid lock
      * contention in multithread environments

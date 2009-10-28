@@ -223,12 +223,10 @@ int status_record_load(status_record_t **sr,
 {
     enum Exception { OPEN_ERROR1
                      , OPEN_ERROR2
-                     , STATUS_RECORD_SYNC_ERROR1
+                     , STATUS_RECORD_SYNC_ERROR
                      , WRITE_ERROR
                      , FSTAT_ERROR
                      , MMAP_ERROR
-                     , STATUS_RECORD_SYNC_ERROR2
-                     , MSYNC_ERROR
                      , CLOSE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -265,6 +263,7 @@ int status_record_load(status_record_t **sr,
                     tmp_sr.sr.ctrl.magic_number = STATUS_FILE_MAGIC_NUMBER;
                     tmp_sr.sr.ctrl.level = STATUS_FILE_LEVEL;
                     gettimeofday(&tmp_sr.sr.ctrl.last_sync, NULL);
+                    tmp_sr.sr.ctrl.number_of_blocks = STATUS_FILE_INIT_SIZE;
                     tmp_sr.sr.ctrl.first_used_block = 0;
                     tmp_sr.sr.ctrl.first_free_block = 1;
                 } else {
@@ -275,7 +274,7 @@ int status_record_load(status_record_t **sr,
                 }
                 status_record_update(&tmp_sr, updated_records);
                 if (LIXA_RC_OK != (ret_cod = status_record_sync(&tmp_sr)))
-                    THROW(STATUS_RECORD_SYNC_ERROR1);
+                    THROW(STATUS_RECORD_SYNC_ERROR);
                 if (sizeof(tmp_sr) != write(fd, &tmp_sr, sizeof(tmp_sr)))
                     THROW(WRITE_ERROR);
             }
@@ -294,15 +293,6 @@ int status_record_load(status_record_t **sr,
         LIXA_TRACE(("status_record_load: status file '%s' mapped at "
                     "address %p\n", status_file, tmp_sra));
 
-        /* set the status file name reference for future usage */
-        tmp_sra[0].sr.ctrl.status_file = status_file;
-        status_record_update(tmp_sra, updated_records);
-        if (LIXA_RC_OK != (ret_cod = status_record_sync(tmp_sra)))
-            THROW(STATUS_RECORD_SYNC_ERROR2);
-        if (0 != msync(tmp_sra, fd_stat.st_size, MS_SYNC))
-            THROW(MSYNC_ERROR);
-        /* clean updated records set */
-        thread_status_updated_records_clean(updated_records);
         /* point the status record array to the prepared memory mapped file */
         *sr = tmp_sra;
         
@@ -317,7 +307,7 @@ int status_record_load(status_record_t **sr,
             case OPEN_ERROR2:
                 ret_cod = LIXA_RC_OPEN_ERROR;
                 break;
-            case STATUS_RECORD_SYNC_ERROR1:
+            case STATUS_RECORD_SYNC_ERROR:
                 break;
             case WRITE_ERROR:
                 ret_cod = LIXA_RC_WRITE_ERROR;
@@ -327,11 +317,6 @@ int status_record_load(status_record_t **sr,
                 break;
             case MMAP_ERROR:
                 ret_cod = LIXA_RC_MMAP_ERROR;
-                break;
-            case STATUS_RECORD_SYNC_ERROR2:
-                break;
-            case MSYNC_ERROR:
-                ret_cod = LIXA_RC_MSYNC_ERROR;
                 break;
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
@@ -361,8 +346,201 @@ int status_record_load(status_record_t **sr,
 
 
 
+int status_record_check_integrity(status_record_t *sr)
+{
+    enum Exception { FIRST_BLOCK_COUNTER_IS_ODD
+                     , G_CHECKSUM_NEW_ERROR1
+                     , DIGEST_SIZE_ERROR
+                     , DIGEST_DOES_NOT_MATCH1
+                     , BLOCK_COUNTER_IS_ODD
+                     , G_CHECKSUM_NEW_ERROR2
+                     , DIGEST_DOES_NOT_MATCH2
+                     , DAMAGED_CHAINS
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    GChecksum *checksum = NULL;
+
+    LIXA_TRACE(("status_record_check_integrity\n"));
+    TRY {
+        struct status_record_s *first_block = sr;
+        md5_digest_t digest;
+        gsize digest_len = MD5_DIGEST_LENGTH;
+        uint32_t i, free_blocks, used_blocks;
+        
+        /* check the integrity of the first block */
+        /* check block counter is even */
+        LIXA_TRACE(("status_record_check_integrity: checking first block "
+                    "parity...\n"));
+        if (first_block->counter%2) {
+            LIXA_TRACE(("status_record_check_integrity: first block counter "
+                        "is odd (" UINT32_T_FORMAT ") the status file was "
+                        "NOT synchronized\n", first_block->counter));
+            THROW(FIRST_BLOCK_COUNTER_IS_ODD);
+        }
+        LIXA_TRACE(("status_record_check_integrity: checking first block "
+                    "signature...\n"));
+        if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))
+            THROW(G_CHECKSUM_NEW_ERROR1);
+        g_checksum_update(checksum, (const guchar *)first_block,
+                          STATUS_RECORD_CHECKSUM_SIZE);
+        g_checksum_get_digest(checksum, digest, &digest_len);
+#ifndef NDEBUG
+        if (digest_len != MD5_DIGEST_LENGTH) {
+            LIXA_TRACE(("status_record_check_integrity: internal error in "
+                        "digest size expected=" SIZE_T_FORMAT ", returned="
+                        SIZE_T_FORMAT "\n", MD5_DIGEST_LENGTH, digest_len));
+            THROW(DIGEST_SIZE_ERROR);
+        }
+#endif /* NDEBUG */
+        /* @@@ substitute with g_checksum_reset when available */
+        g_checksum_free(checksum);
+        checksum = NULL;
+        LIXA_TRACE(("status_record_check_integrity: first block digest is: "));
+        LIXA_TRACE_HEX_DATA(first_block->digest, digest_len);        
+        LIXA_TRACE(("status_record_check_integrity: checksum digest is:    "));
+        LIXA_TRACE_HEX_DATA(digest, digest_len);        
+        /* check digest */
+        if (memcmp(digest, first_block->digest, digest_len)) {
+            LIXA_TRACE(("status_record_check_integrity: the signature of the "
+                        "first block is corrupted\n"));
+            THROW(DIGEST_DOES_NOT_MATCH2);
+        }
+        LIXA_TRACE(("status_record_check_integrity: first block contains:\n"));
+        LIXA_TRACE(("status_record_check_integrity:   [magic_number] = "
+                    UINT32_T_FORMAT "\n", first_block->sr.ctrl.magic_number));
+        LIXA_TRACE(("status_record_check_integrity:   [level] = "
+                    UINT32_T_FORMAT "\n", first_block->sr.ctrl.level));
+        LIXA_TRACE(("status_record_check_integrity:   [last_sync] = "));
+        LIXA_TRACE_HEX_DATA((byte_t *)&(first_block->sr.ctrl.last_sync),
+                            sizeof(first_block->sr.ctrl.last_sync));
+        LIXA_TRACE(("status_record_check_integrity:   [number_of_blocks] = "
+                    UINT32_T_FORMAT "\n",
+                    first_block->sr.ctrl.number_of_blocks));
+        LIXA_TRACE(("status_record_check_integrity:   [first_used_block] = "
+                    UINT32_T_FORMAT "\n",
+                    first_block->sr.ctrl.first_used_block));
+        LIXA_TRACE(("status_record_check_integrity:   [first_free_block] = "
+                    UINT32_T_FORMAT "\n",
+                    first_block->sr.ctrl.first_free_block));
+        for (i=1; i<first_block->sr.ctrl.number_of_blocks; ++i) {
+            struct status_record_s *curr_block = sr + i;
+            LIXA_TRACE(("status_record_check_integrity: checking block # "
+                        UINT32_T_FORMAT ", address %p\n", i, curr_block));
+            LIXA_TRACE(("status_record_check_integrity: checking block # "
+                        UINT32_T_FORMAT " parity...\n"));
+            if (curr_block->counter%2) {
+                LIXA_TRACE(("status_record_check_integrity: block # "
+                            UINT32_T_FORMAT " counter "
+                            "is odd (" UINT32_T_FORMAT ") the status file was "
+                            "NOT synchronized\n", i, curr_block->counter));
+                THROW(BLOCK_COUNTER_IS_ODD);
+            }
+            LIXA_TRACE(("status_record_check_integrity: checking block # "
+                        UINT32_T_FORMAT " signature...\n"));
+            if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))
+                THROW(G_CHECKSUM_NEW_ERROR2);
+            g_checksum_update(checksum, (const guchar *)curr_block,
+                              STATUS_RECORD_CHECKSUM_SIZE);
+            g_checksum_get_digest(checksum, digest, &digest_len);
+            /* @@@ substitute with g_checksum_reset when available */
+            g_checksum_free(checksum);
+            checksum = NULL;
+            
+            LIXA_TRACE(("status_record_check_integrity: block # "
+                        UINT32_T_FORMAT " digest is:          ", i));
+            LIXA_TRACE_HEX_DATA(curr_block->digest, digest_len);        
+            LIXA_TRACE(("status_record_check_integrity: block # "
+                        UINT32_T_FORMAT " checksum digest is: ", i));
+            LIXA_TRACE_HEX_DATA(digest, digest_len);        
+            /* check digest */
+            if (memcmp(digest, curr_block->digest, digest_len)) {
+                LIXA_TRACE(("status_record_check_integrity: block # "
+                            UINT32_T_FORMAT " is corrupted (signatures do not "
+                            "match)\n", i));
+                THROW(DIGEST_DOES_NOT_MATCH2);
+            }
+        }
+        /* check used blocks chain */
+        LIXA_TRACE(("status_record_check_integrity: checking used blocks "
+                    "chain...\n"));
+        used_blocks = 0;
+        if (0 != (i = first_block->sr.ctrl.first_used_block)) {
+            used_blocks++;
+            /* traverse the chain */
+            while (0 != (i = sr[i].sr.data.next_block))
+                used_blocks++;
+        }
+        LIXA_TRACE(("status_record_check_integrity: there are "
+                    UINT32_T_FORMAT " data used blocks\n", used_blocks));
+        
+        /* check free blocks chain */
+        LIXA_TRACE(("status_record_check_integrity: checking free blocks "
+                    "chain...\n"));
+        free_blocks = 0;
+        if (0 != (i = first_block->sr.ctrl.first_free_block)) {
+            free_blocks++;
+            /* traverse the chain */
+            while (0 != (i = sr[i].sr.data.next_block))
+                free_blocks++;
+        }
+        LIXA_TRACE(("status_record_check_integrity: there are "
+                    UINT32_T_FORMAT " data free blocks\n", free_blocks));
+        if (used_blocks + free_blocks + 1 !=
+            first_block->sr.ctrl.number_of_blocks) {
+            LIXA_TRACE(("status_record_check_integrity: used blocks ("
+                        UINT32_T_FORMAT ") + free blocks (" UINT32_T_FORMAT
+                        ") + 1 != number of blocks (" UINT32_T_FORMAT ")\n",
+                        used_blocks, free_blocks,
+                        first_block->sr.ctrl.number_of_blocks));
+            THROW(DAMAGED_CHAINS);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case FIRST_BLOCK_COUNTER_IS_ODD:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case G_CHECKSUM_NEW_ERROR1:
+                ret_cod = LIXA_RC_G_CHECKSUM_NEW_ERROR;
+                break;
+#ifndef NDEBUG
+            case DIGEST_SIZE_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+#endif /* NDEBUG */
+            case DIGEST_DOES_NOT_MATCH1:
+            case BLOCK_COUNTER_IS_ODD:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case G_CHECKSUM_NEW_ERROR2:
+                ret_cod = LIXA_RC_G_CHECKSUM_NEW_ERROR;
+                break;
+            case DIGEST_DOES_NOT_MATCH2:
+            case DAMAGED_CHAINS:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* memory recovery */
+        if (NULL != checksum)
+            g_checksum_free(checksum);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("status_record_check_integrity/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int status_record_insert(status_record_t **sr,
-                         uint32_t *slot)
+                         uint32_t *slot,
+                         const struct thread_status_s *ts)
 {
     enum Exception { OPEN_ERROR
                      , FSTAT_ERROR
@@ -380,18 +558,19 @@ int status_record_insert(status_record_t **sr,
     TRY {
         status_record_t *csr = *sr;
 
-        exit(1); /* update the modified block! */
+        /* both the file must be enlarged, not only FIRST!!! */
+        exit(1); /* update the modified block don't forget number_of_blocks
+                    information!!! */
         
         if (csr[0].sr.ctrl.first_free_block == 0) {
             struct stat fd_stat;
             off_t curr_size, new_size, delta_size, i;
-            const char *status_file = csr[0].sr.ctrl.status_file;
 
             LIXA_TRACE(("status_record_insert: free block list is "
                         "empty, status file resize in progres...\n"));
             
             /* open the file for append: we must add new records */
-            if (-1 == (fd = open(status_file, O_RDWR | O_APPEND)))
+            if (-1 == (fd = open(ts->status1_filename, O_RDWR | O_APPEND)))
                 THROW(OPEN_ERROR);
             /* retrieve size */
             if (0 != fstat(fd, &fd_stat))
@@ -434,7 +613,7 @@ int status_record_insert(status_record_t **sr,
             /* update free block list */
             tmp_sra[0].sr.ctrl.first_free_block = curr_size;
             LIXA_TRACE(("status_record_insert: status file '%s' mapped at "
-                        "address %p\n", status_file, tmp_sra));
+                        "address %p\n", ts->status1_filename, tmp_sra));
             *sr = tmp_sra;
             
             if (0 != close(fd))
@@ -574,6 +753,9 @@ int status_record_delete(status_record_t **sr,
             csr[ur].sr.data.next_block = fr;
             csr[fl].sr.data.next_block = ur;
         }
+
+        /* update the record status !!! */
+        exit(1);
         
         THROW(NONE);
     } CATCH {
@@ -687,6 +869,7 @@ void thread_status_init(struct thread_status_s *ts,
     ts->client_array = NULL;
     ts->status1 = ts->status2 = NULL;
     ts->curr_status = NULL;
+    ts->status1_filename = ts->status2_filename = NULL;
     ts->updated_records = g_tree_new(size_t_compare_func);
     ts->excp = ts->ret_cod = ts->last_errno = 0;
     if (id == 0)
@@ -706,33 +889,44 @@ int thread_status_load_files(struct thread_status_s *ts,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    gchar *file_name = NULL;
     LIXA_TRACE(("thread_status_load_files\n"));
     TRY {
+        int s1ii = FALSE, s2ii = FALSE;
+        
         /* first file */
-        file_name = g_strconcat(status_file_prefix, STATUS_FILE_SUFFIX_1,
-                                NULL);
+        ts->status1_filename = g_strconcat(status_file_prefix,
+                                           STATUS_FILE_SUFFIX_1, NULL);
         LIXA_TRACE(("thread_status_load_files: first status file is '%s'\n",
-                    file_name));
+                    ts->status1_filename));
         if (LIXA_RC_OK != (ret_cod = status_record_load(
-                               &(ts->status1), (const char *)file_name,
+                               &(ts->status1),
+                               (const char *)ts->status1_filename,
                                ts->updated_records)))
             THROW(STATUS_RECORD_LOAD_1_ERROR);
-        g_free(file_name);
-        file_name = NULL;
+        if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
+                               ts->status1)))
+            LIXA_TRACE(("thread_status_load_files: first status file did not "
+                        "pass integrity check\n"));
+        else
+            s1ii = TRUE;
         
         /* second file */
-        file_name = g_strconcat(status_file_prefix, STATUS_FILE_SUFFIX_2,
-                                NULL);
+        ts->status2_filename = g_strconcat(status_file_prefix,
+                                           STATUS_FILE_SUFFIX_2, NULL);
         LIXA_TRACE(("thread_status_load_files: second status file is '%s'\n",
-                    file_name));
+                    ts->status2_filename));
         if (LIXA_RC_OK != (ret_cod = status_record_load(
-                               &(ts->status2), (const char *)file_name,
+                               &(ts->status2),
+                               (const char *)ts->status2_filename,
                                ts->updated_records)))
             THROW(STATUS_RECORD_LOAD_2_ERROR);
-        g_free(file_name);
-        file_name = NULL;
-
+        if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
+                               ts->status2)))
+            LIXA_TRACE(("thread_status_load_files: second status file did not "
+                        "pass integrity check\n"));
+        else
+            s2ii = TRUE;
+        
         /* now the right file must be choosed */
         exit(1);
         
@@ -748,9 +942,6 @@ int thread_status_load_files(struct thread_status_s *ts,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        /* recovery memory if necessary */
-        if (NULL != file_name)
-            g_free(file_name);
     } /* TRY-CATCH */
     LIXA_TRACE(("thread_status_load_files/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

@@ -125,19 +125,20 @@ void lixa_trace(const char *fmt, ...)
 
 
 void lixa_trace_hex_data(const byte_t *data, lixa_word_t size,
-                       FILE *out_stream)
+                         FILE *out_stream)
 {
         lixa_word_t i;
 
         for (i = 0; i < size; ++i) {
                 fprintf(out_stream, "%02x ", (data[i] & 0xff));
         } /* for (i = 0; i < size; ++i) */
+        fprintf(out_stream, "\n");
 }
 
 
 
 void lixa_trace_text_data(const byte_t *data, lixa_word_t size,
-                        FILE *out_stream)
+                          FILE *out_stream)
 {
         lixa_word_t i;
 
@@ -147,6 +148,7 @@ void lixa_trace_text_data(const byte_t *data, lixa_word_t size,
                 else
                         putc((int)' ', out_stream);
         } /* for (i = 0; i < size; ++i) */
+        fprintf(out_stream, "\n");
 }
 
 

@@ -183,6 +183,11 @@ struct status_record_ctrl_s {
      */
     struct timeval  last_sync;
     /**
+     * The total number of blocks kept by the status file. The control block
+     * itself (block_id = 0) is computed.
+     */
+    uint32_t        number_of_blocks;
+    /**
      * First record of the used blocks chain (0 means the chain is empty)
      */
     uint32_t        first_used_block;
@@ -195,7 +200,6 @@ struct status_record_ctrl_s {
      * configuration struct. This reference must be updated every time the
      * server boots up
      */
-    const char     *status_file;
 };
 
 
@@ -365,6 +369,14 @@ struct thread_status_s {
      */
     struct server_client_status_s *client_array;
     /**
+     * Filename of the first status file
+     */
+    gchar                         *status1_filename;
+    /**
+     * Filename of the second status file
+     */
+    gchar                         *status2_filename;
+    /**
      * First instance of memory mapped file accessed as an array
      */
     status_record_t               *status1;
@@ -457,16 +469,28 @@ extern "C" {
 
 
 
+    /**
+     * Check status integrity
+     * @param sr IN memory mapped status file
+     * @return LIXA_RC_OK if the status file is OK, an error otherwise
+     */
+    int status_record_check_integrity(status_record_t *sr);
 
+
+    
     /**
      * Insert a new element in the used slot list
      * @param sr IN/OUT record status mapped file; the pointer may change if
      *                  status file resizing happens
      * @param slot OUT the index of the found free slot
+     * @param ts IN a reference to thread status: it's used to retrieve the
+     *              filenames of status files when a dynamic resize is
+     *              necessary
      * @return a standardized return code
      */
     int status_record_insert(status_record_t **sr,
-                             uint32_t *slot);
+                             uint32_t *slot,
+                             const struct thread_status_s *ts);
 
 
 
