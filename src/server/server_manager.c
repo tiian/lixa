@@ -573,7 +573,7 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
         
         /* get a free block from status file and insert in used list */
         if (LIXA_RC_OK != (ret_cod = status_record_insert(
-                               &ts->curr_status, &slot)))
+                               &ts->curr_status, &slot, ts)))
             THROW(RECORD_INSERT_ERROR);
 
         /* create the header and reset it */
