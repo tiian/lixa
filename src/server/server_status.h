@@ -510,6 +510,8 @@ extern "C" {
     /**
      * Mark a record for update
      * @param sr IN/OUT reference to the record must be marked for update
+     * @param updated_records IN/OUT the tree containing all the modified
+     *                               records (blocks) since last synch
      */
     static inline void status_record_update(status_record_t *sr,
                                             GTree *updated_records) {
@@ -543,7 +545,7 @@ extern "C" {
      * @return a reason code
      */
     int status_record_copy(status_record_t *dest, const status_record_t *src,
-                           const struct thread_status_s *ts);
+                           struct thread_status_s *ts);
                        
 
     
@@ -602,6 +604,23 @@ extern "C" {
         LIXA_TRACE(("thread_status_updated_records_clean: cleaning "
                     "tree allocated at %p\n", ur));
         g_tree_foreach(ur, traverse_and_delete, ur);
+    }
+
+
+
+    /**
+     * Get method to pick-up the filename associated to the current status
+     * memory mapped file
+     * @param ts IN reference to thread status
+     * @return the desired filename of NULL if there is a logical error
+     */
+    static inline gchar *thread_status_get_curr_filename(
+        const struct thread_status_s *ts) {
+        if (ts->curr_status == ts->status1)
+            return ts->status1_filename;
+        else if (ts->curr_status == ts->status2)
+            return ts->status2_filename;
+        else return NULL;
     }
 
 
