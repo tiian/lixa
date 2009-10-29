@@ -77,9 +77,9 @@ const char *lixa_strerror(int ret_cod)
             case LIXA_RC_CORRUPTED_STATUS_FILE:
                 return "ERROR: the status file is corrupted and can not be "
                     "used";
-                /*
             case LIXA_RC_INVALID_OPTION:
                 return "ERROR: a specified option is not valid";
+                /*
             case LIXA_RC_INVALID_STATUS:
                 return "ERROR: invalid object status";
             case LIXA_RC_INVALID_PATH_NAME:
@@ -113,6 +113,9 @@ const char *lixa_strerror(int ret_cod)
                 return "ERROR: 'open' function returned an error condition";
             case LIXA_RC_CLOSE_ERROR:
                 return "ERROR: 'close' function returned an error condition";
+            case LIXA_RC_TRUNCATE_ERROR:
+                return "ERROR: 'truncate' function returned an error "
+                    "condition";
             case LIXA_RC_WRITE_ERROR:
                 return "ERROR: 'write' function returned an error condition";
             case LIXA_RC_READ_ERROR:
@@ -138,6 +141,9 @@ const char *lixa_strerror(int ret_cod)
                 return "ERROR: 'rename' function returned an error "
                         "condition";
                 */
+            case LIXA_RC_STAT_ERROR:
+                return "ERROR: 'stat' function returned an error "
+                        "condition";
             case LIXA_RC_FSTAT_ERROR:
                 return "ERROR: 'fstat' function returned an error "
                         "condition";

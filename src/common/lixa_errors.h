@@ -122,8 +122,8 @@ define LIXA_RC_OBJ_NOT_VOID                    -7
 #define LIXA_RC_CORRUPTED_STATUS_FILE          -10
 /**
  * A specified option is not valid for method and/or object status
-define LIXA_RC_INVALID_OPTION                 -10
  */
+#define LIXA_RC_INVALID_OPTION                 -11
 /**
  * The status (value of any properties) of an object is invalid due to a bug
  * located elsewhere (a complex "internal error" condition)
@@ -179,17 +179,21 @@ define LIXA_RC_DESTINATION_TOO_SMALL          -16
  */
 #define LIXA_RC_OPEN_ERROR                   -110
 /**
- * "fclose" function error
+ * "close" function error
  */
 #define LIXA_RC_CLOSE_ERROR                  -111
 /**
+ * "truncate" function error
+ */
+#define LIXA_RC_TRUNCATE_ERROR               -112
+/**
  * "write" function error
  */
-#define LIXA_RC_WRITE_ERROR                  -112
+#define LIXA_RC_WRITE_ERROR                  -113
 /**
  * "fread" function error
  */
-#define LIXA_RC_READ_ERROR                   -113
+#define LIXA_RC_READ_ERROR                   -114
 /**
  * "fflush" function error
 define LIXA_RC_FFLUSH_ERROR                  -116
@@ -222,6 +226,10 @@ define LIXA_RC_FILENO_ERROR                  -122
  * "rename" function error
 define LIXA_RC_RENAME_ERROR                  -123
  */
+/**
+ * "stat" function error
+ */
+#define LIXA_RC_STAT_ERROR                    -123
 /**
  * "fstat" function error
  */

@@ -93,8 +93,6 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
     TRY {
         socklen_t serv_addr_len;
 
-        exit(1); /* update the record !!! */
-        
         srd->next_block = 0;
         srd->pld.type = DATA_PAYLOAD_TYPE_HEADER;
         srd->pld.ph.n = 0;
@@ -840,20 +838,92 @@ int status_record_sync(status_record_t *sr)
 
 
 int status_record_copy(status_record_t *dest, const status_record_t *src,
-                       const struct thread_status_s *ts)
+                       struct thread_status_s *ts)
 {
-    enum Exception { NONE } excp;
+    enum Exception { DEST_EQUAL_SRC
+                     , DEST_DOES_NOT_POINT_STATUS
+                     , STAT_ERROR
+                     , MUNMAP_ERROR
+                     , TRUNCATE_ERROR
+                     , OPEN_ERROR
+                     , MMAP_ERROR
+                     , CLOSE_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("status_record_copy\n"));
     TRY {
-        /* @@@ */
-        /* compare length before copy: it may be the destination file is
-           shorter then the source file */ 
-        exit(1);
+        gchar *dest_filename = NULL;
+        struct stat fstat;
+        off_t src_size = 0;
+        int dest_fd = 0;
+        status_record_t **dest_is = NULL;
+        if (dest == src)
+            THROW(DEST_EQUAL_SRC);
+        if (dest == ts->status1) {
+            dest_is = &(ts->status1);
+            dest_filename = ts->status1_filename;
+        } else if (dest == ts->status2) {
+            dest_is = &(ts->status2);
+            dest_filename = ts->status2_filename;
+        } else
+            THROW(DEST_DOES_NOT_POINT_STATUS);
+        /* retrieve destination file size */
+        if (-1 == stat((const char *)dest_filename, &fstat))
+            THROW(STAT_ERROR);
+        src_size = src[0].sr.ctrl.number_of_blocks * sizeof(status_record_t);
+        if (fstat.st_size != src_size) {
+            LIXA_TRACE(("status_record_copy: source status file is "
+                        OFF_T_FORMAT " bytes long (" UINT32_T_FORMAT
+                        " blocks) while destination status file is "
+                        OFF_T_FORMAT " bytes long; I must perform file "
+                        "enlargment before content copy\n",
+                        src_size, src[0].sr.ctrl.number_of_blocks,
+                        fstat.st_size));
+            /* reset the pointer in thread status structure... */
+            *dest_is = NULL;
+            if (0 != munmap(dest, fstat.st_size))
+                THROW(MUNMAP_ERROR);
+            if (-1 == truncate((const char *)dest_filename, src_size))
+                THROW(TRUNCATE_ERROR);
+            if (-1 == (dest_fd = open((const char *)dest_filename, O_RDWR)))
+                THROW(OPEN_ERROR);
+            if (NULL == (dest = mmap(NULL, src_size, PROT_READ | PROT_WRITE,
+                                     MAP_SHARED, dest_fd, 0)))
+                THROW(MMAP_ERROR);
+            /* recover the pointer in thread status structure... */
+            *dest_is = dest;
+            if (0 != close(dest_fd))
+                THROW(CLOSE_ERROR);
+        }
+        LIXA_TRACE(("status_record_copy: copying " OFF_T_FORMAT " bytes from "
+                    "source (%p) to destination (%p)\n", src_size, src, dest));
+        memcpy(dest, src, src_size);
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case DEST_EQUAL_SRC:
+                ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case DEST_DOES_NOT_POINT_STATUS:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case STAT_ERROR:
+                ret_cod = LIXA_RC_STAT_ERROR;
+                break;
+            case MUNMAP_ERROR:
+                ret_cod = LIXA_RC_MUNMAP_ERROR;
+                break;
+            case TRUNCATE_ERROR:
+                ret_cod = LIXA_RC_TRUNCATE_ERROR;
+                break;
+            case MMAP_ERROR:
+                ret_cod = LIXA_RC_MMAP_ERROR;
+                break;
+            case CLOSE_ERROR:
+                ret_cod = LIXA_RC_CLOSE_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -974,7 +1044,15 @@ int thread_status_load_files(struct thread_status_s *ts,
             THROW(DAMAGED_STATUS_FILES);
         } else if (s1ii && s2ii) {
             /* two integral files, check timestamp */
-            if ((ts->status1->sr.ctrl.last_sync.tv_sec <
+            if ((ts->status1->sr.ctrl.last_sync.tv_sec ==
+                 ts->status2->sr.ctrl.last_sync.tv_sec) &&
+                (ts->status1->sr.ctrl.last_sync.tv_usec ==
+                 ts->status2->sr.ctrl.last_sync.tv_usec)) {
+                LIXA_TRACE(("thread_status_load_files: first and second "
+                            "status file were synchronized at the same "
+                            "time\n"));
+                ts->curr_status = ts->status1;
+            } else if ((ts->status1->sr.ctrl.last_sync.tv_sec <
                  ts->status2->sr.ctrl.last_sync.tv_sec) ||
                 ((ts->status1->sr.ctrl.last_sync.tv_sec ==
                   ts->status2->sr.ctrl.last_sync.tv_sec) &&
@@ -1000,7 +1078,7 @@ int thread_status_load_files(struct thread_status_s *ts,
                     THROW(STATUS_RECORD_COPY_ERROR2);
                 ts->curr_status = ts->status2;
             }
-        } if (s1ii) {
+        } else if (s1ii) {
             /* only first file is integral */
             LIXA_TRACE(("thread_status_load_files: first status file is OK, "
                         "second status file is damanged: oveeriding it...\n"));
@@ -1013,7 +1091,7 @@ int thread_status_load_files(struct thread_status_s *ts,
         } else {
             /* only second file is integral */
             LIXA_TRACE(("thread_status_load_files: second status file is OK, "
-                        "first status file is damanged: oveeriding it...\n"));
+                        "first status file is damanged: overriding it...\n"));
             /* copying second file over first one, and point first as
                the current file */
             if (LIXA_RC_OK != (ret_cod = status_record_copy(
@@ -1021,9 +1099,6 @@ int thread_status_load_files(struct thread_status_s *ts,
                 THROW(STATUS_RECORD_COPY_ERROR4);
             ts->curr_status = ts->status1;
         }
-        
-        /* now the right file must be choosed */
-        exit(1);
         
         THROW(NONE);
     } CATCH {
