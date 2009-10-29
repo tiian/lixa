@@ -156,6 +156,21 @@
 
 
 
+/**
+ * format for printing uintptr_t
+ */
+#if (SIZEOF_UINTPTR_T == SIZEOF_INT)
+# define UINTPTR_T_FORMAT "%u"
+#elif SIZEOF_UINTPTR_T == SIZEOF_LONG_INT
+# define UINTPTR_T_FORMAT "%lu"
+#elif SIZEOF_UINTPTR_T == SIZEOF_LONG_LONG_INT
+# define UINTPTR_T_FORMAT "%llu"
+#else
+# error Unable to determine sizeof(uintptr_t)
+#endif
+
+
+
 #define SSIZE_T_FORMAT "%ld"
 
 

@@ -317,7 +317,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 
             /* release all allocated blocks */
             if (LIXA_RC_OK != (ret_cod = payload_chain_release(
-                                   &ts->curr_status,
+                                   ts,
                                    ts->client_array[slot_id].
                                    pers_status_slot_id)))
                 THROW(PAYLOAD_CHAIN_RELEASE);
@@ -572,8 +572,7 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
         uint32_t slot = 0;
         
         /* get a free block from status file and insert in used list */
-        if (LIXA_RC_OK != (ret_cod = status_record_insert(
-                               &ts->curr_status, &slot, ts)))
+        if (LIXA_RC_OK != (ret_cod = status_record_insert(ts, &slot)))
             THROW(RECORD_INSERT_ERROR);
 
         /* create the header and reset it */

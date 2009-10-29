@@ -48,6 +48,9 @@
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
@@ -447,12 +450,14 @@ extern "C" {
      * Release a chain of records allocated inside the status record
      * memory mapped array. It must start from an header initialized with
      * @ref payload_header_init
-     * @param sr IN/OUT status record array
+     * @param ts IN/OUT a reference to thread status: it's used to retrieve the
+     *                  status files and change them when a dynamic resize is
+     *                  necessary
      * @param slot IN index of the header chain block
      * @return a standardized return code
      */
-    int payload_chain_release(status_record_t **sr, uint32_t slot);
-
+    int payload_chain_release(struct thread_status_s *ts, uint32_t slot);
+    
 
 
     /**
@@ -480,29 +485,27 @@ extern "C" {
     
     /**
      * Insert a new element in the used slot list
-     * @param sr IN/OUT record status mapped file; the pointer may change if
-     *                  status file resizing happens
+     * @param ts IN/OUT a reference to thread status: it's used to retrieve the
+     *                  status files and change them when a dynamic resize is
+     *                  necessary
      * @param slot OUT the index of the found free slot
-     * @param ts IN a reference to thread status: it's used to retrieve the
-     *              filenames of status files when a dynamic resize is
-     *              necessary
      * @return a standardized return code
      */
-    int status_record_insert(status_record_t **sr,
-                             uint32_t *slot,
-                             const struct thread_status_s *ts);
+    int status_record_insert(struct thread_status_s *ts,
+                             uint32_t *slot);
 
 
 
     /**
      * Remove an element from the used slot list
-     * @param sr IN/OUT record status mapped file; the pointer may change if
-     *                  status file resizing happens
+     * @param ts IN/OUT a reference to thread status: it's used to retrieve the
+     *                  status files and change them when a dynamic resize is
+     *                  necessary
      * @param slot IN the index of the slot must be released
      * @return a standardized return code
      *
      */
-    int status_record_delete(status_record_t **sr,
+    int status_record_delete(struct thread_status_s *ts,
                              uint32_t slot);
 
 
@@ -513,6 +516,7 @@ extern "C" {
      * @param updated_records IN/OUT the tree containing all the modified
      *                               records (blocks) since last synch
      */
+    /*
     static inline void status_record_update(status_record_t *sr,
                                             GTree *updated_records) {
         if (!(sr->counter%2)) {
@@ -522,6 +526,28 @@ extern "C" {
                         UINT32_T_FORMAT") in updated records tree "
                         "(number of nodes now is %d)\n",
                         sr, sr->counter, g_tree_nnodes(updated_records)));
+        }
+    }
+    */
+    /**
+     * Mark a record for update
+     * @param sr IN/OUT reference to the record must be marked for update
+     * @param index IN position of the record in the status file (first = 0)
+     * @param updated_records IN/OUT the tree containing all the modified
+     *                               records (blocks) since last synch
+     */
+    static inline void status_record_update(status_record_t *sr,
+                                            uintptr_t index,
+                                            GTree *updated_records) {
+        if (!(sr->counter%2)) {
+            sr->counter++;
+            g_tree_insert(updated_records, (gpointer)index, NULL);
+            LIXA_TRACE(("status_record_update: inserted "
+                        "index " UINTPTR_T_FORMAT " (counter="
+                        UINT32_T_FORMAT", address=%p) in updated records tree "
+                        "(number of nodes now is %d)\n",
+                        index, sr->counter, sr,
+                        g_tree_nnodes(updated_records)));
         }
     }
 
@@ -608,12 +634,13 @@ extern "C" {
 
 
 
-    /**
+    /*
      * Get method to pick-up the filename associated to the current status
      * memory mapped file
      * @param ts IN reference to thread status
      * @return the desired filename of NULL if there is a logical error
      */
+    /*
     static inline gchar *thread_status_get_curr_filename(
         const struct thread_status_s *ts) {
         if (ts->curr_status == ts->status1)
@@ -622,7 +649,7 @@ extern "C" {
             return ts->status2_filename;
         else return NULL;
     }
-
+    */
 
     
 #ifdef __cplusplus

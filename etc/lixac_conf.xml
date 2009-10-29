@@ -35,6 +35,9 @@
       </rsrmgrs>
     </profile>
     <profile name="CF70">
+      <trnmgrs>
+        <trnmgr>local_1</trnmgr>
+      </trnmgrs>
     </profile>
   </profiles>
 </client>
