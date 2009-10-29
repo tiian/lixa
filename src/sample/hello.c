@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #include <tx.h>
 
@@ -44,6 +45,7 @@ void *a_thread(void *useless)
     int i;
     for (i = 0; i < 1; ++i) {
         tx_open();
+        sleep(1);
         tx_close();
     }
 }
@@ -53,7 +55,14 @@ void *a_thread(void *useless)
 int main(int argc, char *argv[])
 {
     pthread_t foo;
+    int load = 1, i;
 
+    for (load=0; load<100; ++load) {
+        for (i=0; i<load; ++i) {
+            pthread_create(&foo, NULL, a_thread, NULL);
+        }
+        sleep(2);
+    }
     /*
     pthread_create(&foo, NULL, a_thread, NULL);
     pthread_create(&foo, NULL, a_thread, NULL);
@@ -66,17 +75,18 @@ int main(int argc, char *argv[])
     pthread_create(&foo, NULL, a_thread, NULL);
     pthread_create(&foo, NULL, a_thread, NULL);
     pthread_create(&foo, NULL, a_thread, NULL);
-    sleep(300);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
     */
     
-    
-    a_thread(&foo);
-    /*
-    a_thread(&foo);
-    a_thread(&foo);
+    sleep(30);
+
+/*    
     a_thread(&foo);
     a_thread(&foo);
-    */
-        
+    a_thread(&foo);
+    a_thread(&foo);
+    a_thread(&foo);
+*/  
     return 0;
 }

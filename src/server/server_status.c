@@ -93,7 +93,6 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
     TRY {
         socklen_t serv_addr_len;
 
-        srd->next_block = 0;
         srd->pld.type = DATA_PAYLOAD_TYPE_HEADER;
         srd->pld.ph.n = 0;
         memset(&srd->pld.ph.block_array, 0, sizeof(uint32_t) * CHAIN_MAX_SIZE);
@@ -150,7 +149,7 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
 
 
 
-int payload_chain_release(status_record_t **sr, uint32_t slot)
+int payload_chain_release(struct thread_status_s *ts, uint32_t slot)
 {
     enum Exception { SLOT_IS_ZERO
                      , INVALID_BLOCK_TYPE
@@ -162,7 +161,7 @@ int payload_chain_release(status_record_t **sr, uint32_t slot)
     LIXA_TRACE(("payload_chain_release\n"));
     TRY {
         int i;
-        status_record_t *csr = *sr;
+        status_record_t *csr = ts->curr_status;
         
         if (slot == 0)
             THROW(SLOT_IS_ZERO);
@@ -176,14 +175,14 @@ int payload_chain_release(status_record_t **sr, uint32_t slot)
                         csr[slot].sr.data.pld.ph.block_array[i]));
 #endif            
             if (LIXA_RC_OK != (ret_cod = status_record_delete(
-                                   sr,
+                                   ts,
                                    csr[slot].sr.data.pld.ph.block_array[i])))
                 THROW(STATUS_RECORD_DELETE1);
         }
         /* release current block */
         LIXA_TRACE(("payload_chain_release: releasing header block "
                     UINT32_T_FORMAT "\n", slot));
-        if (LIXA_RC_OK != (ret_cod = status_record_delete(sr, slot)))
+        if (LIXA_RC_OK != (ret_cod = status_record_delete(ts, slot)))
             THROW(STATUS_RECORD_DELETE2);
         /* PAY ATTENTION NO DATA IS CLEANED: ONLY BLOCK REMOVAL HAPPENS
            THIS IS INTENTIONALLY DID BECAUSE WE DON'T WANT TO ERASE THE
@@ -258,7 +257,7 @@ int status_record_load(status_record_t **sr,
                 struct status_record_s tmp_sr;
 
                 memset(&tmp_sr, 0, sizeof(tmp_sr));
-                tmp_sr.counter = 0;
+                tmp_sr.counter = 1;
                 if (i == 0) {
                     /* write control record */
                     tmp_sr.sr.ctrl.magic_number = STATUS_FILE_MAGIC_NUMBER;
@@ -273,7 +272,6 @@ int status_record_load(status_record_t **sr,
                     else
                         tmp_sr.sr.data.next_block = i + 1;
                 }
-                status_record_update(&tmp_sr, updated_records);
                 if (LIXA_RC_OK != (ret_cod = status_record_sync(&tmp_sr)))
                     THROW(STATUS_RECORD_SYNC_ERROR);
                 if (sizeof(tmp_sr) != write(fd, &tmp_sr, sizeof(tmp_sr)))
@@ -539,9 +537,8 @@ int status_record_check_integrity(status_record_t *sr)
 
 
 
-int status_record_insert(status_record_t **sr,
-                         uint32_t *slot,
-                         const struct thread_status_s *ts)
+int status_record_insert(struct thread_status_s *ts,
+                         uint32_t *slot)
 {
     enum Exception { OPEN_ERROR
                      , FSTAT_ERROR
@@ -557,11 +554,17 @@ int status_record_insert(status_record_t **sr,
     
     LIXA_TRACE(("status_record_insert\n"));
     TRY {
-        status_record_t *csr = *sr;
+        status_record_t *csr = ts->curr_status;
+        gchar *status_filename = NULL;
+        status_record_t **status_is = NULL;
 
-        /* both the file must be enlarged, not only FIRST!!! */
-        exit(1); /* update the modified block don't forget number_of_blocks
-                    information!!! */
+        if (csr == ts->status1) {
+            status_is = &(ts->status1);
+            status_filename = ts->status1_filename;
+        } else if (csr == ts->status2) {
+            status_is = &(ts->status2);
+            status_filename = ts->status2_filename;
+        }
         
         if (csr[0].sr.ctrl.first_free_block == 0) {
             struct stat fd_stat;
@@ -571,17 +574,20 @@ int status_record_insert(status_record_t **sr,
                         "empty, status file resize in progres...\n"));
             
             /* open the file for append: we must add new records */
-            if (-1 == (fd = open(ts->status1_filename, O_RDWR | O_APPEND)))
+            if (-1 == (fd = open(status_filename, O_RDWR | O_APPEND)))
                 THROW(OPEN_ERROR);
             /* retrieve size */
             if (0 != fstat(fd, &fd_stat))
                 THROW(FSTAT_ERROR);
             /* unmap the current mapping */
-            if (0 != munmap(*sr, fd_stat.st_size))
+            if (0 != munmap(csr, fd_stat.st_size))
                 THROW(MUNMAP_ERROR);
-            *sr = NULL;
-            curr_size = fd_stat.st_size / sizeof(union status_record_u);
-            delta_size = fd_stat.st_size / sizeof(union status_record_u) *
+            csr = NULL;
+            ts->curr_status = NULL;
+            *status_is = NULL;
+
+            curr_size = fd_stat.st_size / sizeof(status_record_t);
+            delta_size = fd_stat.st_size / sizeof(status_record_t) *
                 STATUS_FILE_DELTA_SIZE / 100;
             new_size = curr_size + delta_size;
             LIXA_TRACE(("status_record_insert: curr_size = " OFF_T_FORMAT
@@ -596,13 +602,15 @@ int status_record_insert(status_record_t **sr,
                     THROW(CONTAINER_FULL)
             }
             for (i = 0; i < delta_size; ++i) {
-                union status_record_u tmp_sr;
+                struct status_record_s tmp_sr;
 
                 memset(&tmp_sr, 0, sizeof(tmp_sr));
+                status_record_update(&tmp_sr, curr_size + i,
+                                     ts->updated_records);
                 if (i == delta_size - 1)
-                    tmp_sr.data.next_block = 0;
+                    tmp_sr.sr.data.next_block = 0;
                 else
-                    tmp_sr.data.next_block = curr_size + i + 1;
+                    tmp_sr.sr.data.next_block = curr_size + i + 1;
                 if (sizeof(tmp_sr) != write(fd, &tmp_sr, sizeof(tmp_sr)))
                     THROW(WRITE_ERROR);
             }
@@ -612,10 +620,11 @@ int status_record_insert(status_record_t **sr,
                                         MAP_SHARED, fd, 0)))
                 THROW(MMAP_ERROR);
             /* update free block list */
+            status_record_update(tmp_sra, 0, ts->updated_records);
             tmp_sra[0].sr.ctrl.first_free_block = curr_size;
             LIXA_TRACE(("status_record_insert: status file '%s' mapped at "
                         "address %p\n", ts->status1_filename, tmp_sra));
-            *sr = tmp_sra;
+            *status_is = ts->curr_status = csr = tmp_sra;
             
             if (0 != close(fd))
                 THROW(CLOSE_ERROR);
@@ -623,21 +632,24 @@ int status_record_insert(status_record_t **sr,
         }
 
         /* update pointer */
-        csr = *sr;
         LIXA_TRACE(("status_record_insert: first_free_block = "
                     UINT32_T_FORMAT ", first_used_block = "
                     UINT32_T_FORMAT "\n",
                     csr[0].sr.ctrl.first_free_block,
                     csr[0].sr.ctrl.first_used_block));
         *slot = csr[0].sr.ctrl.first_free_block;
+        status_record_update(csr, 0, ts->updated_records);
         csr[0].sr.ctrl.first_free_block = csr[*slot].sr.data.next_block;
+        status_record_update(csr + *slot, *slot, ts->updated_records);
         csr[*slot].sr.data.next_block = csr[0].sr.ctrl.first_used_block;
         csr[0].sr.ctrl.first_used_block = *slot;
         LIXA_TRACE(("status_record_insert: first_free_block = "
                     UINT32_T_FORMAT ", first_used_block = "
+                    UINT32_T_FORMAT ", last inserted next block = "
                     UINT32_T_FORMAT "\n",
                     csr[0].sr.ctrl.first_free_block,
-                        csr[0].sr.ctrl.first_used_block));
+                    csr[0].sr.ctrl.first_used_block,
+                    csr[*slot].sr.data.next_block));
         
         THROW(NONE);
     } CATCH {
@@ -688,7 +700,7 @@ int status_record_insert(status_record_t **sr,
 
 
 
-int status_record_delete(status_record_t **sr,
+int status_record_delete(struct thread_status_s *ts,
                          uint32_t slot)
 {
     enum Exception { USED_BLOCK_NOT_FOUND
@@ -698,7 +710,7 @@ int status_record_delete(status_record_t **sr,
     
     LIXA_TRACE(("status_record_delete\n"));
     TRY {
-        status_record_t *csr = *sr;
+        status_record_t *csr = ts->curr_status;
         uint32_t ul; /* used list left block */
         uint32_t ur; /* used list right block */
         uint32_t fl; /* free list left block */
@@ -707,11 +719,17 @@ int status_record_delete(status_record_t **sr,
         /* find ul and ur positions */
         ul = 0;
         ur = csr[0].sr.ctrl.first_used_block;
+        LIXA_TRACE(("status_record_delete: ul=" UINT32_T_FORMAT
+                    ", ur=" UINT32_T_FORMAT "\n", ul, ur));
         while (ur > 0) {
             if (ur == slot)
                 break;
             ul = ur;
             ur = csr[ur].sr.data.next_block;
+#ifndef NDEBUG
+            LIXA_TRACE(("status_record_delete: ul=" UINT32_T_FORMAT
+                        ", ur=" UINT32_T_FORMAT "\n", ul, ur));
+#endif /* NDEBUG */
         }
         if (ur == 0)
             THROW(USED_BLOCK_NOT_FOUND);
@@ -735,29 +753,34 @@ int status_record_delete(status_record_t **sr,
         /* remove block from used block list */
         if (ul == 0) {
             /* first block in used block list */
+            status_record_update(csr, 0, ts->updated_records);
             csr[0].sr.ctrl.first_used_block = csr[ur].sr.data.next_block;
         } else {
             /* central or last block in used block list */
+            status_record_update(csr + ul, ul, ts->updated_records);
             csr[ul].sr.data.next_block = csr[ur].sr.data.next_block;
         }
+        status_record_update(csr + ur, ur, ts->updated_records);
         csr[ur].sr.data.next_block = 0;
 
         /* insert block in free block list */
         if (fl == 0) {
             /* insertion happens at list head or list is empty */
-            if (fr != 0)
+            if (fr != 0) {
                 /* list is not empty */
+                status_record_update(csr + ur, ur, ts->updated_records);
                 csr[ur].sr.data.next_block = fr;
+            }
+            status_record_update(csr, 0, ts->updated_records);
             csr[0].sr.ctrl.first_free_block = ur;
         } else {
             /* insertion happens in the middle or at list tail */
+            status_record_update(csr + ur, ur, ts->updated_records);
             csr[ur].sr.data.next_block = fr;
+            status_record_update(csr + fl, fl, ts->updated_records);
             csr[fl].sr.data.next_block = ur;
         }
 
-        /* update the record status !!! */
-        exit(1);
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
