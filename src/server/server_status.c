@@ -81,20 +81,39 @@
 
 
 
-gboolean traverse_and_delete(gpointer key, gpointer value, gpointer data) {
+gboolean traverse_and_delete(gpointer key, gpointer value, gpointer data)
+{
     /* ignore value, data is the GTree... */
+    LIXA_TRACE(("traverse_and_delete: removing block " UINTPTR_T_FORMAT "\n",
+                (uintptr_t)key));
     g_tree_remove((GTree *)data, key);
     return FALSE;
 }
 
 
 
-gboolean traverse_and_sync(gpointer key, gpointer value, gpointer data) {
+gboolean traverse_and_sync(gpointer key, gpointer value, gpointer data)
+{
     /* ignore value, data is the thread status */
     status_record_t *sr = (status_record_t *)data + (uintptr_t)key;
     LIXA_TRACE(("traverse_and_sync: synchronizing block " UINTPTR_T_FORMAT
                 " (%p)\n", (uintptr_t)key, sr));
     return status_record_sync(sr);
+}
+
+
+
+gboolean traverse_and_copy(gpointer key, gpointer value, gpointer data)
+{
+    struct two_status_record_s *tsr = (struct two_status_record_s *)data;
+    status_record_t *src = tsr->first;
+    status_record_t *dest = tsr->second;
+    LIXA_TRACE(("traverse_and_copy: copying block # " UINTPTR_T_FORMAT
+                " from source status file (%p) to destination status file "
+                "(%p)\n", (uintptr_t)key, src, dest));
+    memcpy(dest + (uintptr_t)key, src + (uintptr_t)key,
+           sizeof(status_record_t));
+    return FALSE;
 }
 
 
@@ -378,6 +397,7 @@ int status_record_check_integrity(status_record_t *sr)
                      , BLOCK_COUNTER_IS_ODD
                      , G_CHECKSUM_NEW_ERROR2
                      , DIGEST_DOES_NOT_MATCH2
+                     , NEXT_BLOCK_OUT_OF_RANGE
                      , DAMAGED_CHAINS
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -483,6 +503,16 @@ int status_record_check_integrity(status_record_t *sr)
                             "match)\n", i));
                 THROW(DIGEST_DOES_NOT_MATCH2);
             }
+            LIXA_TRACE(("status_record_check_integrity:   [next_block] = "
+                        UINT32_T_FORMAT "\n",
+                        curr_block->sr.data.next_block));
+            if (curr_block->sr.data.next_block >=
+                first_block->sr.ctrl.number_of_blocks) {
+                LIXA_TRACE(("status_record_check_integrity: next_block "
+                            "is out of range (max = " UINT32_T_FORMAT ")\n",
+                            first_block->sr.ctrl.number_of_blocks - 1));
+                THROW(NEXT_BLOCK_OUT_OF_RANGE);
+            }
         }
         /* check used blocks chain */
         LIXA_TRACE(("status_record_check_integrity: checking used blocks "
@@ -534,6 +564,7 @@ int status_record_check_integrity(status_record_t *sr)
                 break;
 #endif /* NDEBUG */
             case DIGEST_DOES_NOT_MATCH1:
+            case NEXT_BLOCK_OUT_OF_RANGE:
             case BLOCK_COUNTER_IS_ODD:
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
                 break;
@@ -622,7 +653,8 @@ int status_record_insert(struct thread_status_s *ts,
                             "would exceed " UINT32_T_FORMAT " max value; "
                             "resized to max value only\n", UINT32_MAX));
                 new_size = UINT32_MAX;
-                if (curr_size == UINT32_MAX)
+                delta_size = new_size - curr_size;
+                if (delta_size == 0)
                     THROW(CONTAINER_FULL)
             }
             for (i = 0; i < delta_size; ++i) {
@@ -646,6 +678,7 @@ int status_record_insert(struct thread_status_s *ts,
             /* update free block list */
             status_record_update(tmp_sra, 0, ts->updated_records);
             tmp_sra[0].sr.ctrl.first_free_block = curr_size;
+            tmp_sra[0].sr.ctrl.number_of_blocks = new_size;
             LIXA_TRACE(("status_record_insert: status file '%s' mapped at "
                         "address %p\n", ts->status1_filename, tmp_sra));
             *status_is = ts->curr_status = csr = tmp_sra;
@@ -1191,6 +1224,7 @@ int thread_status_sync_files(struct thread_status_s *ts)
                      , OPEN_ERROR
                      , MMAP_ERROR
                      , CLOSE_ERROR
+                     , MEMCMP_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -1201,6 +1235,8 @@ int thread_status_sync_files(struct thread_status_s *ts)
         status_record_t *alt_status;
         status_record_t **status_is;
         gchar *alt_filename;
+        struct two_status_record_s tsr;
+        off_t curr_status_size = 0;
         
         if (LIXA_RC_OK != (ret_cod = gettimeofday(
                                &ts->curr_status->sr.ctrl.last_sync, NULL)))
@@ -1230,11 +1266,13 @@ int thread_status_sync_files(struct thread_status_s *ts)
             status_is = &(ts->status1);
             alt_filename = ts->status1_filename;
         }
+
+        curr_status_size = sizeof(status_record_t) *
+            ts->curr_status->sr.ctrl.number_of_blocks;
+        
         /* compare size */
         if (ts->curr_status->sr.ctrl.number_of_blocks >
             alt_status->sr.ctrl.number_of_blocks) {
-            off_t curr_status_size = sizeof(status_record_t) *
-                ts->curr_status->sr.ctrl.number_of_blocks;
             off_t alt_status_size = sizeof(status_record_t) *
                 alt_status->sr.ctrl.number_of_blocks;
             /* elarge alternate status file */
@@ -1258,14 +1296,36 @@ int thread_status_sync_files(struct thread_status_s *ts)
                                            PROT_READ | PROT_WRITE,
                                            MAP_SHARED, alt_fd, 0)))
                 THROW(MMAP_ERROR);
-            /* recover the pointer in thread status structure... */
-            *status_is = alt_status;
             if (0 != close(alt_fd)) {
                 alt_fd = LIXA_NULL_FD;
                 THROW(CLOSE_ERROR);
             }
             alt_fd = LIXA_NULL_FD;
         }
+        /* copy modified records */
+        tsr.first = ts->curr_status;
+        tsr.second = alt_status;
+        g_tree_foreach(ts->updated_records, traverse_and_copy, &tsr);
+#ifndef NDEBUG
+        /* the memory mapped status file must be equal */
+        if (0 != memcmp(ts->curr_status, alt_status, curr_status_size)) {
+            LIXA_TRACE(("thread_status_sync_files: memory mapped status "
+                        "files are different after copy. INTERNAL ERROR\n"));
+            syslog(LOG_ERR, "thread_status_sync_files: memory mapped status "
+                   "files are different after copy. INTERNAL ERROR");
+            THROW(MEMCMP_ERROR);
+        }
+#endif /* NDEBUG */
+        /* clean updated records set */
+        thread_status_updated_records_clean(ts->updated_records);
+        /* recover the pointer in thread status structure... */
+        *status_is = alt_status;
+        /* switch to alternate status mapped file */
+        LIXA_TRACE(("thread_status_sync_files: switching current memory "
+                    "mapped status file from %p...\n", ts->curr_status));
+        ts->curr_status = alt_status;
+        LIXA_TRACE(("thread_status_sync_files: ... switching current memory "
+                    "mapped status file to %p...\n", ts->curr_status));
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -1292,6 +1352,8 @@ int thread_status_sync_files(struct thread_status_s *ts)
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
                 break;
+            case MEMCMP_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

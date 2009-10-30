@@ -333,6 +333,24 @@ typedef struct status_record_s status_record_t;
 
 
 /**
+ * It is used to code two ordered references to two different memory mapped
+ * status files; for example, @ref traverse_and_copy uses this struct as
+ * data argument to copy from first to second status file
+ */
+struct two_status_record_s {
+    /**
+     * First reference; @ref traverse_and_copy uses it as the source
+     */
+    status_record_t *first;
+    /**
+     * Second reference; @ref traverse_and_copy uses it as the destination
+     */
+    status_record_t *second;
+};
+    
+
+
+/**
  * It's the struct used as argument to every created thread
  */
 struct thread_status_s {
@@ -462,7 +480,23 @@ extern "C" {
     gboolean traverse_and_sync(gpointer key, gpointer value, gpointer data);
 
 
-    
+
+    /**
+     * This is a callback function used for traversing and copying blocks
+     * stored in the tree structure
+     * @param key IN the key of the traversed node, it is casted to
+     *               uintptr_t because it's the index inside a status record
+     *               array
+     * @param value IN unused
+     * @param data IN reference to the special struct
+     *                (@ref two_status_record_s) used to store the pointers to
+     *                two memory mapped files
+     * @return FALSE
+     */
+    gboolean traverse_and_copy(gpointer key, gpointer value, gpointer data);
+
+
+        
     /**
      * Initialize a block as an header (first block of a chain)
      * @param srd IN reference to the record must be initialized
