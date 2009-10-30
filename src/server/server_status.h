@@ -436,6 +436,34 @@ extern "C" {
 
 
     /**
+     * This is a convenience function used as delete call back function for
+     * GTree
+     * @param key IN the key of the traversed node, it's the key must be
+     *               deleted from GTree
+     * @param value IN useless for updated_records use case
+     * @param data IN references the GTree object itself
+     * @return FALSE because TRUE would break tree traversal
+     */
+    gboolean traverse_and_delete(gpointer key, gpointer value, gpointer data);
+
+    
+
+    /**
+     * This is a callback function used for traversing and synchronizing all
+     * the records stored in the tree structure
+     * @param key IN the key of the traversed node, it is casted to
+     *               uintptr_t because it's the index inside a status record
+     *               array
+     * @param value IN unused
+     * @param data IN/OUT reference to the status record array (@ref
+     *                    status_record_t)
+     * @return TRUE (!LIXA_RC_OK) only in an error happens
+     */
+    gboolean traverse_and_sync(gpointer key, gpointer value, gpointer data);
+
+
+    
+    /**
      * Initialize a block as an header (first block of a chain)
      * @param srd IN reference to the record must be initialized
      * @param fd IN file descriptor of the session associated to this header
@@ -513,25 +541,6 @@ extern "C" {
     /**
      * Mark a record for update
      * @param sr IN/OUT reference to the record must be marked for update
-     * @param updated_records IN/OUT the tree containing all the modified
-     *                               records (blocks) since last synch
-     */
-    /*
-    static inline void status_record_update(status_record_t *sr,
-                                            GTree *updated_records) {
-        if (!(sr->counter%2)) {
-            sr->counter++;
-            g_tree_insert(updated_records, (gpointer)sr, NULL);
-            LIXA_TRACE(("status_record_update: inserted record %p (counter = "
-                        UINT32_T_FORMAT") in updated records tree "
-                        "(number of nodes now is %d)\n",
-                        sr, sr->counter, g_tree_nnodes(updated_records)));
-        }
-    }
-    */
-    /**
-     * Mark a record for update
-     * @param sr IN/OUT reference to the record must be marked for update
      * @param index IN position of the record in the status file (first = 0)
      * @param updated_records IN/OUT the tree containing all the modified
      *                               records (blocks) since last synch
@@ -587,19 +596,6 @@ extern "C" {
 
 
     /**
-     * This is a convenience function used as delete call back function for
-     * GTree
-     * @param key IN the key of the traversed node, it's the key must be
-     *               deleted from GTree
-     * @param value IN useless for updated_records use case
-     * @param data IN references the GTree object itself
-     * @return FALSE because TRUE would break tree traversal
-     */
-    gboolean traverse_and_delete(gpointer key, gpointer value, gpointer data);
-
-    
-    
-    /**
      * Initialize a structure of type @ref thread_status_s
      * @param ts OUT reference to the structure must be initialized
      * @param id IN thread id must assigned
@@ -623,6 +619,16 @@ extern "C" {
     
 
     /**
+     * Synchronize status files: this is the atomic operation necessary to
+     * guarantee transactionality property of the system
+     * @param ts IN thread status reference
+     * @return a reason code
+     */
+    int thread_status_sync_files(struct thread_status_s *ts);
+
+
+    
+    /**
      * Remove all records from an updated records tree
      * @param ur IN/OUT the reference to updated records GTree structure
      */
@@ -634,24 +640,6 @@ extern "C" {
 
 
 
-    /*
-     * Get method to pick-up the filename associated to the current status
-     * memory mapped file
-     * @param ts IN reference to thread status
-     * @return the desired filename of NULL if there is a logical error
-     */
-    /*
-    static inline gchar *thread_status_get_curr_filename(
-        const struct thread_status_s *ts) {
-        if (ts->curr_status == ts->status1)
-            return ts->status1_filename;
-        else if (ts->curr_status == ts->status2)
-            return ts->status2_filename;
-        else return NULL;
-    }
-    */
-
-    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

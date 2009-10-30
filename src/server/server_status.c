@@ -81,6 +81,24 @@
 
 
 
+gboolean traverse_and_delete(gpointer key, gpointer value, gpointer data) {
+    /* ignore value, data is the GTree... */
+    g_tree_remove((GTree *)data, key);
+    return FALSE;
+}
+
+
+
+gboolean traverse_and_sync(gpointer key, gpointer value, gpointer data) {
+    /* ignore value, data is the thread status */
+    status_record_t *sr = (status_record_t *)data + (uintptr_t)key;
+    LIXA_TRACE(("traverse_and_sync: synchronizing block " UINTPTR_T_FORMAT
+                " (%p)\n", (uintptr_t)key, sr));
+    return status_record_sync(sr);
+}
+
+
+
 int payload_header_init(struct status_record_data_s *srd, int fd)
 {
     enum Exception { GETTIMEOFDAY_ERROR
@@ -223,6 +241,7 @@ int status_record_load(status_record_t **sr,
 {
     enum Exception { OPEN_ERROR1
                      , OPEN_ERROR2
+                     , GETTIMEOFDAY_ERROR
                      , STATUS_RECORD_SYNC_ERROR
                      , WRITE_ERROR
                      , FSTAT_ERROR
@@ -262,7 +281,9 @@ int status_record_load(status_record_t **sr,
                     /* write control record */
                     tmp_sr.sr.ctrl.magic_number = STATUS_FILE_MAGIC_NUMBER;
                     tmp_sr.sr.ctrl.level = STATUS_FILE_LEVEL;
-                    gettimeofday(&tmp_sr.sr.ctrl.last_sync, NULL);
+                    if (LIXA_RC_OK != (ret_cod = gettimeofday(
+                                           &tmp_sr.sr.ctrl.last_sync, NULL)))
+                        THROW(GETTIMEOFDAY_ERROR);
                     tmp_sr.sr.ctrl.number_of_blocks = STATUS_FILE_INIT_SIZE;
                     tmp_sr.sr.ctrl.first_used_block = 0;
                     tmp_sr.sr.ctrl.first_free_block = 1;
@@ -305,6 +326,9 @@ int status_record_load(status_record_t **sr,
             case OPEN_ERROR1:
             case OPEN_ERROR2:
                 ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case GETTIMEOFDAY_ERROR:
+                ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
                 break;
             case STATUS_RECORD_SYNC_ERROR:
                 break;
@@ -874,12 +898,13 @@ int status_record_copy(status_record_t *dest, const status_record_t *src,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
+    int dest_fd = LIXA_NULL_FD;
+
     LIXA_TRACE(("status_record_copy\n"));
     TRY {
         gchar *dest_filename = NULL;
         struct stat fstat;
         off_t src_size = 0;
-        int dest_fd = 0;
         status_record_t **dest_is = NULL;
         if (dest == src)
             THROW(DEST_EQUAL_SRC);
@@ -916,8 +941,11 @@ int status_record_copy(status_record_t *dest, const status_record_t *src,
                 THROW(MMAP_ERROR);
             /* recover the pointer in thread status structure... */
             *dest_is = dest;
-            if (0 != close(dest_fd))
+            if (0 != close(dest_fd)) {
+                dest_fd = LIXA_NULL_FD;
                 THROW(CLOSE_ERROR);
+            }
+            dest_fd = LIXA_NULL_FD;
         }
         LIXA_TRACE(("status_record_copy: copying " OFF_T_FORMAT " bytes from "
                     "source (%p) to destination (%p)\n", src_size, src, dest));
@@ -953,6 +981,17 @@ int status_record_copy(status_record_t *dest, const status_record_t *src,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* recovery actions */
+        if (LIXA_NULL_FD  != dest_fd) {
+            LIXA_TRACE(("status_record_copy: values before recovery "
+                        "actions excp=%d/ret_cod=%d/errno=%d\n",
+                        excp, ret_cod, errno));
+            if (LIXA_NULL_FD != dest_fd) {
+                LIXA_TRACE(("status_record_copy: closing file "
+                            "descriptor %d\n", dest_fd));
+                close(dest_fd);
+            }
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("status_record_copy/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -968,14 +1007,6 @@ int size_t_compare_func(gconstpointer a, gconstpointer b) {
         return 1;
     else
         return 0;
-}
-
-
-
-gboolean traverse_and_delete(gpointer key, gpointer value, gpointer data) {
-    /* ignore value, data is the GTree... */
-    g_tree_remove((GTree *)data, key);
-    return FALSE;
 }
 
 
@@ -1122,7 +1153,6 @@ int thread_status_load_files(struct thread_status_s *ts,
                 THROW(STATUS_RECORD_COPY_ERROR4);
             ts->curr_status = ts->status1;
         }
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -1151,4 +1181,138 @@ int thread_status_load_files(struct thread_status_s *ts,
 
 
     
+int thread_status_sync_files(struct thread_status_s *ts)
+{
+    enum Exception { GETTIMEOFDAY_ERROR
+                     , STATUS_RECORD_CHECK_INTEGRITY_ERROR
+                     , MSYNC_ERROR
+                     , MUNMAP_ERROR
+                     , TRUNCATE_ERROR
+                     , OPEN_ERROR
+                     , MMAP_ERROR
+                     , CLOSE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    int alt_fd = LIXA_NULL_FD;
+    
+    LIXA_TRACE(("thread_status_sync_files\n"));
+    TRY {
+        status_record_t *alt_status;
+        status_record_t **status_is;
+        gchar *alt_filename;
+        
+        if (LIXA_RC_OK != (ret_cod = gettimeofday(
+                               &ts->curr_status->sr.ctrl.last_sync, NULL)))
+            THROW(GETTIMEOFDAY_ERROR);
+        status_record_update(ts->curr_status, 0, ts->updated_records);
+        g_tree_foreach(ts->updated_records, traverse_and_sync,
+                       ts->curr_status);
+#ifndef NDEBUG
+        if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
+                               ts->curr_status)))
+            THROW(STATUS_RECORD_CHECK_INTEGRITY_ERROR);
+#endif /* NDEBUG */
+        LIXA_TRACE(("thread_status_sync_files: before msync\n"));
+        if (-1 == msync(ts->curr_status,
+                        ts->curr_status->sr.ctrl.number_of_blocks *
+                        sizeof(status_record_t), MS_SYNC))
+            THROW(MSYNC_ERROR);
+        LIXA_TRACE(("thread_status_sync_files: after first msync\n"));
+        /* current status file can become the baseline, discover and process
+           alternate status file */
+        if (ts->curr_status == ts->status1) {
+            alt_status = ts->status2;
+            status_is = &(ts->status2);
+            alt_filename = ts->status2_filename;
+        } else {
+            alt_status = ts->status1;
+            status_is = &(ts->status1);
+            alt_filename = ts->status1_filename;
+        }
+        /* compare size */
+        if (ts->curr_status->sr.ctrl.number_of_blocks >
+            alt_status->sr.ctrl.number_of_blocks) {
+            off_t curr_status_size = sizeof(status_record_t) *
+                ts->curr_status->sr.ctrl.number_of_blocks;
+            off_t alt_status_size = sizeof(status_record_t) *
+                alt_status->sr.ctrl.number_of_blocks;
+            /* elarge alternate status file */
+            LIXA_TRACE(("thread_status_sync_files: current status file "
+                        "contains " UINT32_T_FORMAT
+                        " blocks while alternate status file contains "
+                        UINT32_T_FORMAT " blocks; I must perform file "
+                        "enlargment before content copy\n",
+                        ts->curr_status->sr.ctrl.number_of_blocks,
+                        alt_status->sr.ctrl.number_of_blocks));
+            /* reset the pointer in thread status structure... */
+            *status_is = NULL;
+            if (0 != munmap(alt_status, alt_status_size))
+                THROW(MUNMAP_ERROR);
+            if (-1 == truncate((const char *)alt_filename,
+                               curr_status_size))
+                THROW(TRUNCATE_ERROR);
+            if (-1 == (alt_fd = open((const char *)alt_filename, O_RDWR)))
+                THROW(OPEN_ERROR);
+            if (NULL == (alt_status = mmap(NULL, curr_status_size,
+                                           PROT_READ | PROT_WRITE,
+                                           MAP_SHARED, alt_fd, 0)))
+                THROW(MMAP_ERROR);
+            /* recover the pointer in thread status structure... */
+            *status_is = alt_status;
+            if (0 != close(alt_fd)) {
+                alt_fd = LIXA_NULL_FD;
+                THROW(CLOSE_ERROR);
+            }
+            alt_fd = LIXA_NULL_FD;
+        }
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GETTIMEOFDAY_ERROR:
+                ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
+                break;
+            case STATUS_RECORD_CHECK_INTEGRITY_ERROR:
+                break;
+            case MSYNC_ERROR:
+                ret_cod = LIXA_RC_MSYNC_ERROR;
+                break;
+            case MUNMAP_ERROR:
+                ret_cod = LIXA_RC_MUNMAP_ERROR;
+                break;
+            case TRUNCATE_ERROR:
+                ret_cod = LIXA_RC_TRUNCATE_ERROR;
+                break;
+            case OPEN_ERROR:
+                ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case MMAP_ERROR:
+                ret_cod = LIXA_RC_MMAP_ERROR;
+                break;
+            case CLOSE_ERROR:
+                ret_cod = LIXA_RC_CLOSE_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* recovery actions */
+        if (LIXA_NULL_FD  != alt_fd) {
+            LIXA_TRACE(("thread_status_sync_files: values before recovery "
+                        "actions excp=%d/ret_cod=%d/errno=%d\n",
+                        excp, ret_cod, errno));
+            if (LIXA_NULL_FD != alt_fd) {
+                LIXA_TRACE(("thread_status_sync_files: closing file "
+                            "descriptor %d\n", alt_fd));
+                close(alt_fd);
+            }
+        }
+    } /* TRY-CATCH */
+    LIXA_TRACE(("thread_status_sync_files/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
         
