@@ -88,14 +88,6 @@ int server_manager(struct server_config_s *sc,
             thread_status_init(&(tsa->array[i]), i, tpa);
             if (i != 0) {
                 /* load status file for thread != listener */
-                /*
-                if (LIXA_RC_OK != (ret_cod = status_record_load(
-                                       &tsa->array[i].status1,
-                                       &tsa->array[i].status2,
-                                       &tsa->array[i].curr_status,
-                                       sc->managers.array[i-1].status_file)))
-                    THROW(STATUS_FILE_ERROR);
-                */
                 if (LIXA_RC_OK != (
                         ret_cod = thread_status_load_files(
                             &(tsa->array[i]),
@@ -137,6 +129,7 @@ int server_manager(struct server_config_s *sc,
 void *server_manager_thread(void *void_ts)
 {
     enum Exception { ADD_POLL_ERROR
+                     , THREAD_STATUS_SYNC_FILES_ERROR
                      , POLL_ERROR
                      , NETWORK_EVENT_ERROR
                      , POLLIN_CTRL
@@ -153,11 +146,12 @@ void *server_manager_thread(void *void_ts)
         
         LIXA_TRACE(("server_manager_thread: id = %d, "
                     "tid = " PTHREAD_T_FORMAT "\n", ts->id, ts->tid));
-
         if (LIXA_RC_OK != (ret_cod = server_manager_add_poll(
                                ts, ts->tpa->array[ts->id].pipefd[0], &place)))
             THROW(ADD_POLL_ERROR);
         while (TRUE) {
+            if (LIXA_RC_OK != (ret_cod = thread_status_sync_files(ts)))
+                THROW(THREAD_STATUS_SYNC_FILES_ERROR);
             LIXA_TRACE(("server_manager_thread: id = %d, entering poll...\n",
                         ts->id));
             if (0 >= (ready_fd = poll(ts->poll_array, ts->poll_size, -1)))
@@ -208,6 +202,8 @@ void *server_manager_thread(void *void_ts)
     } CATCH {
         switch (excp) {
             case ADD_POLL_ERROR:
+                break;
+            case THREAD_STATUS_SYNC_FILES_ERROR:
                 break;
             case POLL_ERROR:
                 ret_cod = LIXA_RC_POLL_ERROR;

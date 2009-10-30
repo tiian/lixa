@@ -45,4 +45,4 @@ different rooted path, so 3 configure options must be implemented):
 --with-libxml2=[DIR]
 --with-libxml2-include=[DIR]
 --with-libxml2-lib=[DIR]
-
+*** SOLVED *** 20091030: now pkg-config is used instead of command line options

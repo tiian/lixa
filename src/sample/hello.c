@@ -55,6 +55,7 @@ void *a_thread(void *useless)
 int main(int argc, char *argv[])
 {
     pthread_t foo;
+    /*
     int load = 1, i;
 
     for (load=0; load<100; ++load) {
@@ -63,8 +64,9 @@ int main(int argc, char *argv[])
         }
         sleep(2);
     }
-    /*
+    */
     pthread_create(&foo, NULL, a_thread, NULL);
+/*
     pthread_create(&foo, NULL, a_thread, NULL);
     pthread_create(&foo, NULL, a_thread, NULL);
     pthread_create(&foo, NULL, a_thread, NULL);
