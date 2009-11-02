@@ -61,6 +61,7 @@
 int tx_open(void)
 {
     enum Exception { CLIENT_CONFIG_ERROR
+                     , CLIENT_CONFIG_LOAD_SWITCH_ERROR
                      , CLIENT_CONNECT_ERROR
                      , COLL_GET_CS_ERROR
                      , BUFFER_TOO_SMALL
@@ -77,6 +78,8 @@ int tx_open(void)
         
         if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc)))
             THROW(CLIENT_CONFIG_ERROR);
+        if (LIXA_RC_OK != (ret_cod = client_config_load_switch(&global_ccc)))
+            THROW(CLIENT_CONFIG_LOAD_SWITCH_ERROR);        
         if (LIXA_RC_OK != (ret_cod = client_connect(&global_csc, &global_ccc)))
             THROW(CLIENT_CONNECT_ERROR);
 
@@ -107,6 +110,7 @@ int tx_open(void)
     } CATCH {
         switch (excp) {
             case CLIENT_CONFIG_ERROR:
+            case CLIENT_CONFIG_LOAD_SWITCH_ERROR:
                 ret_cod = TX_FAIL;
                 break;
             case CLIENT_CONNECT_ERROR:

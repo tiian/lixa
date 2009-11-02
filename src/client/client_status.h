@@ -39,8 +39,8 @@
 
 
 
-#ifdef HAVE_PTHREAD_H
-# include <pthread.h>
+#ifdef HAVE_GLIB_H
+# include <glib.h>
 #endif
 
 
@@ -112,7 +112,7 @@ struct client_status_coll_s {
     /**
      * This lock is used to serialize read & update access to the array
      */
-    pthread_rwlock_t              rwlock;
+    GStaticRWLock                 rwlock;
     /**
      * Number of elements allocated in index data array
      */

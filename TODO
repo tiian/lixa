@@ -1,8 +1,3 @@
-The case test src/sample/hello exploits a consistence error when there are
-28 blocks in status file.
-The problem is related to next_block value of the last block.
-The bug must be fixed as the first activity.
-
 Establish where new code for xa_open must be put (xa.c ?!?!)
 Generate a unique rmid...
 implement tx_open and xa_open...

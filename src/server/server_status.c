@@ -592,6 +592,70 @@ int status_record_check_integrity(status_record_t *sr)
 
 
 
+void status_record_display_chains(const status_record_t *sr)
+{
+    uint32_t i, used_blocks = 0, free_blocks  = 0;
+
+    LIXA_TRACE(("status_record_display_chains\n"));
+        
+    LIXA_TRACE(("status_record_display_chains: first block contains:\n"));
+    LIXA_TRACE(("status_record_display_chains:   [magic_number] = "
+                UINT32_T_FORMAT "\n", sr->sr.ctrl.magic_number));
+    LIXA_TRACE(("status_record_display_chains:   [level] = "
+                UINT32_T_FORMAT "\n", sr->sr.ctrl.level));
+    LIXA_TRACE(("status_record_display_chains:   [last_sync] = "));
+    LIXA_TRACE_HEX_DATA((byte_t *)&(sr->sr.ctrl.last_sync),
+                        sizeof(sr->sr.ctrl.last_sync));
+    LIXA_TRACE(("status_record_display_chains:   [number_of_blocks] = "
+                UINT32_T_FORMAT "\n",
+                sr->sr.ctrl.number_of_blocks));
+    LIXA_TRACE(("status_record_display_chains:   [first_used_block] = "
+                UINT32_T_FORMAT "\n",
+                sr->sr.ctrl.first_used_block));
+    LIXA_TRACE(("status_record_display_chains:   [first_free_block] = "
+                UINT32_T_FORMAT "\n",
+                sr->sr.ctrl.first_free_block));
+    /* display used blocks chain */
+    LIXA_TRACE(("status_record_display_chains: traversing used blocks "
+                "chain...\n"));
+    if (0 != (i = sr->sr.ctrl.first_used_block)) {
+        LIXA_TRACE(("status_record_display_chains: block = " UINT32_T_FORMAT
+                    " next_block = " UINT32_T_FORMAT "\n",
+                    i, sr[i].sr.data.next_block));
+        used_blocks++;
+        /* traverse the chain */
+        while (0 != (i = sr[i].sr.data.next_block)) {
+            LIXA_TRACE(("status_record_display_chains: block = "
+                        UINT32_T_FORMAT " next_block = " UINT32_T_FORMAT "\n",
+                        i, sr[i].sr.data.next_block));
+            used_blocks++;
+        }
+    }
+    LIXA_TRACE(("status_record_display_chains: there are "
+                UINT32_T_FORMAT " data used blocks\n", used_blocks));
+    
+    /* display free blocks chain */
+    LIXA_TRACE(("status_record_display_chains: traversing free blocks "
+                "chain...\n"));
+    if (0 != (i = sr->sr.ctrl.first_free_block)) {
+        LIXA_TRACE(("status_record_display_chains: block = " UINT32_T_FORMAT
+                    " next_block = " UINT32_T_FORMAT "\n",
+                    i, sr[i].sr.data.next_block));
+        free_blocks++;
+        /* traverse the chain */
+        while (0 != (i = sr[i].sr.data.next_block)) {
+            LIXA_TRACE(("status_record_display_chains: block = "
+                        UINT32_T_FORMAT " next_block = " UINT32_T_FORMAT "\n",
+                        i, sr[i].sr.data.next_block));
+            free_blocks++;
+        }
+    }
+    LIXA_TRACE(("status_record_display_chains: there are "
+                UINT32_T_FORMAT " data free blocks\n", free_blocks));
+}
+
+
+
 int status_record_insert(struct thread_status_s *ts,
                          uint32_t *slot)
 {
@@ -667,14 +731,20 @@ int status_record_insert(struct thread_status_s *ts,
                     tmp_sr.sr.data.next_block = 0;
                 else
                     tmp_sr.sr.data.next_block = curr_size + i + 1;
+                LIXA_TRACE(("status_record_insert: new block "
+                            UINT32_T_FORMAT " (" UINT32_T_FORMAT ") "
+                            "next_block = " UINT32_T_FORMAT "\n",
+                            i, i + curr_size, tmp_sr.sr.data.next_block));
                 if (sizeof(tmp_sr) != write(fd, &tmp_sr, sizeof(tmp_sr)))
                     THROW(WRITE_ERROR);
             }
             /* map the status file again */
-            if (NULL == (tmp_sra = mmap(NULL, fd_stat.st_size,
+            if (NULL == (tmp_sra = mmap(NULL,
+                                        new_size * sizeof(status_record_t),
                                         PROT_READ | PROT_WRITE,
                                         MAP_SHARED, fd, 0)))
                 THROW(MMAP_ERROR);
+
             /* update free block list */
             status_record_update(tmp_sra, 0, ts->updated_records);
             tmp_sra[0].sr.ctrl.first_free_block = curr_size;
@@ -707,7 +777,7 @@ int status_record_insert(struct thread_status_s *ts,
                     csr[0].sr.ctrl.first_free_block,
                     csr[0].sr.ctrl.first_used_block,
                     csr[*slot].sr.data.next_block));
-        
+
         THROW(NONE);
     } CATCH {
         switch (excp) {

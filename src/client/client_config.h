@@ -48,9 +48,6 @@
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
-#ifdef HAVE_PTHREAD_H
-# include <pthread.h>
-#endif
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
@@ -209,9 +206,10 @@ struct client_config_coll_s {
     int                          configured;
     /**
      * This mutex is used to assure only the first thread load the
-     * configuration for all the following threads
+     * configuration for all the following threads. It must be statically
+     * initialized because this code is a library fetched by something else.
      */
-    pthread_mutex_t              mutex;
+    GStaticMutex                 mutex;
     /**
      * Transactional profile associated to the threads of this process (it
      * must be an heap allocated variable)

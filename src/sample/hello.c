@@ -35,6 +35,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include <tx.h>
 
@@ -45,7 +46,7 @@ void *a_thread(void *useless)
     int i;
     for (i = 0; i < 1; ++i) {
         tx_open();
-        sleep(100);
+        sleep(10);
         tx_close();
     }
 }
@@ -57,11 +58,14 @@ int main(int argc, char *argv[])
     pthread_t foo;
     int load = 1, i;
 
-    for (load=0; load<100; ++load) {
+    fprintf(stderr, "pathconf -> %ld\n", pathconf("/home/tiian/lixa", _PC_PATH_MAX));
+    
+    for (load=0; load<1; ++load) {
         for (i=0; i<load; ++i) {
             pthread_create(&foo, NULL, a_thread, NULL);
         }
-        sleep(i);
+        fprintf(stderr, "***************** %d *******************", load);
+        sleep(3);
     }
 /*
     pthread_create(&foo, NULL, a_thread, NULL);
@@ -78,9 +82,9 @@ int main(int argc, char *argv[])
     pthread_create(&foo, NULL, a_thread, NULL);
     pthread_create(&foo, NULL, a_thread, NULL);
     pthread_create(&foo, NULL, a_thread, NULL);
+    sleep(30);
     */
     
-    sleep(30);
 
 /*    
     a_thread(&foo);

@@ -79,11 +79,6 @@ int client_config_coll_init(client_config_coll_t *ccc)
     
     LIXA_TRACE(("client_config_coll_init\n"));
     TRY {
-        LIXA_TRACE(("client_config_coll_init: initializing sequentialization "
-                    "mutex\n"));
-        ret_cod = pthread_mutex_init(&(ccc->mutex), NULL);
-        LIXA_TRACE(("client_config_coll_init: mutex initialization return "
-                    "code: %d\n", ret_cod));
         ccc->configured = FALSE;
         ccc->profile = NULL;
         memset(&ccc->serv_addr, 0, sizeof(struct sockaddr_in));
@@ -116,8 +111,7 @@ int client_config_coll_init(client_config_coll_t *ccc)
 
 int client_config(client_config_coll_t *ccc)
 {
-    enum Exception { PTHREAD_MUTEX_LOCK_ERROR
-                     , ALREADY_CONFIGURED
+    enum Exception { ALREADY_CONFIGURED
                      , STRDUP_ERROR
                      , OPEN_CONFIG_ERROR
                      , CLOSE_ERROR
@@ -127,8 +121,6 @@ int client_config(client_config_coll_t *ccc)
                      , CLIENT_CONFIG_DISPLAY_ERROR
                      , CLIENT_CONFIG_VALIDATE_ERROR
                      , GETADDRINFO_ERROR
-                     , CLIENT_CONFIG_LOAD_SWITCH_ERROR
-                     , PTHREAD_MUTEX_UNLOCK_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -144,8 +136,8 @@ int client_config(client_config_coll_t *ccc)
         const char *tmp_str;
         
         /* lock mutex to start configuration activity */
-        if (0 != (ret_cod = pthread_mutex_lock(&ccc->mutex)))
-            THROW(PTHREAD_MUTEX_LOCK_ERROR);
+        LIXA_TRACE(("client_config: acquiring exclusive mutex\n"));
+        g_static_mutex_lock(&ccc->mutex);
 
         if (ccc->configured) {
             LIXA_TRACE(("client_config: already configured, skipping...\n"));
@@ -226,22 +218,12 @@ int client_config(client_config_coll_t *ccc)
                sizeof(struct sockaddr_in));
         ccc->serv_addr.sin_port = htons(ccc->actconf.trnmgr->port);
 
-        if (LIXA_RC_OK != (ret_cod = client_config_load_switch(ccc)))
-            THROW(CLIENT_CONFIG_LOAD_SWITCH_ERROR);
-        
         /* now the client is CONFIGURED */
         ccc->configured = TRUE;
-
-        /* unlock mutex (locked for configuration activity) */
-        if (0 != (ret_cod = pthread_mutex_unlock(&ccc->mutex)))
-            THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
 
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case PTHREAD_MUTEX_LOCK_ERROR:
-                ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
-                break;
             case ALREADY_CONFIGURED:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -267,11 +249,6 @@ int client_config(client_config_coll_t *ccc)
             case GETADDRINFO_ERROR:
                 ret_cod = LIXA_RC_GETADDRINFO_ERROR;
                 break;
-            case CLIENT_CONFIG_LOAD_SWITCH_ERROR:
-                break;
-            case PTHREAD_MUTEX_UNLOCK_ERROR:
-                ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
-                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -282,12 +259,6 @@ int client_config(client_config_coll_t *ccc)
             LIXA_TRACE(("client_config: values before recovery "
                         "actions excp=%d/ret_cod=%d/errno=%d\n",
                         excp, ret_cod, errno));
-        if (excp > PTHREAD_MUTEX_LOCK_ERROR &&
-            excp < PTHREAD_MUTEX_UNLOCK_ERROR) {
-            if (0 != pthread_mutex_unlock(&ccc->mutex))
-                LIXA_TRACE(("client_config/pthread_mutex_unlock: "
-                            "errno=%d\n", errno));
-        }
         if (excp < NONE && ccc->lixac_conf != NULL) {
             /* free parsed document */
             xmlFreeDoc(ccc->lixac_conf);
@@ -297,6 +268,10 @@ int client_config(client_config_coll_t *ccc)
         /* free memory allocated by getadrinfo function */
         if (excp > GETADDRINFO_ERROR)
             freeaddrinfo(res);
+        /* unlock mutex (locked for configuration activity) */
+        LIXA_TRACE(("client_config: releasing exclusive mutex\n"));
+        g_static_mutex_unlock(&ccc->mutex);
+
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -469,11 +444,12 @@ int client_config_load_switch(const client_config_coll_t *ccc)
                 THROW(G_MODULE_SYMBOL_ERROR);
             } else {
                 LIXA_TRACE(("client_config_load_switch: module address %p, "
-                            "function xa_switch found at address %p\n",
+                            "function lixa_get_xa_switch found at "
+                            "address %p\n",
                             module, xa_switch));
-                LIXA_TRACE(("client_config_laod_switch: "
-                            "xa_switch()->name = '%s', "
-                            "xa_switch()->flags = %ld\n",
+                LIXA_TRACE(("client_config_load_switch: "
+                            "lixa_getxa_switch()->name = '%s', "
+                            "lixa_get_xa_switch()->flags = %ld\n",
                             xa_switch()->name,
                             xa_switch()->flags));
                 act_rsrmgr->module = module;
@@ -528,6 +504,15 @@ int client_config_unload_switch(const client_config_coll_t *ccc)
         for (i=0; i<ccc->actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 ccc->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
+            LIXA_TRACE(("client_config_unload_switch: resource manager # %u\n",
+                        i));
+            LIXA_TRACE(("client_config_unload_switch: resource manager # %u, "
+                        "defined in config as '%s'\n", i,
+                        act_rsrmgr->generic->name));
+            LIXA_TRACE(("client_config_unload_switch: resource manager # %u, "
+                        "defined in config as '%s', module address %p\n", i,
+                        act_rsrmgr->generic->name,
+                        act_rsrmgr->module));
             LIXA_TRACE(("client_config_unload_switch: resource manager # %u, "
                         "defined in config as '%s', module address %p, "
                         "xa_switch->name='%s', xa_switch->flags=%ld\n", i,
@@ -541,8 +526,6 @@ int client_config_unload_switch(const client_config_coll_t *ccc)
                             g_module_error()));
                 THROW(G_MODULE_CLOSE_ERROR);
             }
-            act_rsrmgr->module = NULL;
-            act_rsrmgr->xa_switch = NULL;
         }
         
         THROW(NONE);

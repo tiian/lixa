@@ -55,7 +55,7 @@ RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = oracle
+DIST_SUBDIRS = lixa oracle
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -94,6 +94,7 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
 LDFLAGS_GLIB = @LDFLAGS_GLIB@
 LDFLAGS_GMODULE = @LDFLAGS_GMODULE@
+LDFLAGS_GTHREAD = @LDFLAGS_GTHREAD@
 LDFLAGS_XML2 = @LDFLAGS_XML2@
 LIBLTDL = @LIBLTDL@
 LIBOBJS = @LIBOBJS@
@@ -182,7 +183,7 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @COMPILE_ORACLE_STUFF_TRUE@MAYBE_ORACLE = oracle
-SUBDIRS = $(MAYBE_ORACLE)
+SUBDIRS = lixa $(MAYBE_ORACLE)
 all: all-recursive
 
 .SUFFIXES:
