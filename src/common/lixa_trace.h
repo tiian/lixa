@@ -31,7 +31,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #ifndef LIXA_TRACE_H
-#define LIXA_TRACE_H
+# define LIXA_TRACE_H
 
 
 

@@ -58,3 +58,9 @@ doxygen doxygen.conf
 to publish the project code auto-documentation.
 Have fun!
 
+Pre-requisites: 
+libxml2-0
+glib2-0
+libuuid
+libltdl
+
