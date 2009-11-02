@@ -58,7 +58,9 @@ int main(int argc, char *argv[])
     pthread_t foo;
     int load = 1, i;
 
+    /*
     fprintf(stderr, "pathconf -> %ld\n", pathconf("/home/tiian/lixa", _PC_PATH_MAX));
+   
     
     for (load=0; load<1; ++load) {
         for (i=0; i<load; ++i) {
@@ -91,7 +93,8 @@ int main(int argc, char *argv[])
     a_thread(&foo);
     a_thread(&foo);
     a_thread(&foo);
+*/
     a_thread(&foo);
-*/  
+  
     return 0;
 }
