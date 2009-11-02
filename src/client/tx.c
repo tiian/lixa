@@ -44,6 +44,7 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_xml_msg.h>
+#include <lixa_tx.h>
 #include <client_conn.h>
 #include <client_config.h>
 #include <client_status.h>
@@ -68,8 +69,8 @@ int tx_open(void)
                      , SEND_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("tx_open\n"));
+
+    LIXA_TRACE(("tx_open\n"));    
     TRY {
         int fd;
         client_status_t cs;
