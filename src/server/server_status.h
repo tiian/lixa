@@ -544,6 +544,14 @@ extern "C" {
     int status_record_check_integrity(status_record_t *sr);
 
 
+
+    /**
+     * Travel and display the free block chain and used block chain
+     * @param sr IN memory mapped status file
+     */
+    void status_record_display_chains(const status_record_t *sr);
+
+
     
     /**
      * Insert a new element in the used slot list

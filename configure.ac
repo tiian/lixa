@@ -8,6 +8,7 @@ AC_CONFIG_FILES([
   src/common/Makefile
   src/client/Makefile
   src/client/switch/Makefile
+  src/client/switch/lixa/Makefile
   src/client/switch/oracle/Makefile
   src/extra/Makefile
   src/server/Makefile
@@ -80,6 +81,7 @@ else
 	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0) $($PKG_CONFIG --cflags gmodule-no-export-2.0)"
 	LDFLAGS_GLIB="$($PKG_CONFIG --libs glib-2.0)"
 	LDFLAGS_GMODULE="$($PKG_CONFIG --libs gmodule-no-export-2.0)"
+	LDFLAGS_GTHREAD="$($PKG_CONFIG --libs gthread-2.0)"
 	AC_MSG_RESULT([yes])
 fi
 
@@ -111,8 +113,9 @@ AC_SUBST(LT_LIXAC_AGE)
 AC_SUBST(LT_LIXAB_CURRENT)
 AC_SUBST(LT_LIXAB_REVISION)
 AC_SUBST(LT_LIXAB_AGE)
-AC_SUBST(LDFLAGS_GMODULE)
 AC_SUBST(LDFLAGS_GLIB)
+AC_SUBST(LDFLAGS_GMODULE)
+AC_SUBST(LDFLAGS_GTHREAD)
 AC_SUBST(LDFLAGS_XML2)
 AC_SUBST(LTDLINCL)
 AC_SUBST(LIBLTDL)

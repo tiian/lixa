@@ -6,7 +6,8 @@
   </trnmgrs>
   <rsrmgrs>
     <rsrmgr name="OracleXE" switch_file="/tmp/lixa/lib/switch_oracle.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" />
-    <rsrmgr name="Informix" switch_file="bar.so" xa_open_info="" />
+    <rsrmgr name="LIXAdummyRM" switch_file="/tmp/lixa/lib/switch_lixa_dummyrm.so" xa_open_info="" />
+    <rsrmgr name="LIXArandomRM" switch_file="/tmp/lixa/lib/switch_lixa_randomrm.so" xa_open_info="" />
   </rsrmgrs>
   <profiles>
     <profile name="VZ67">
@@ -16,6 +17,7 @@
       </trnmgrs>
       <rsrmgrs>
         <rsrmgr>OracleXE</rsrmgr>
+        <rsrmgr>LIXAdummyRM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="AG71">
@@ -31,7 +33,8 @@
         <trnmgr>local_1</trnmgr>
       </trnmgrs>
       <rsrmgrs>
-        <rsrmgr>Informix</rsrmgr>
+        <rsrmgr>LIXAdummyRM</rsrmgr>
+        <rsrmgr>LIXArandomRM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="CF70">

@@ -161,13 +161,6 @@ extern int lixa_trace_mutex_init;
  * trace mask (LIXA_TRACE_MASK) specified as environment variable
  */
 #ifdef _TRACE
-/* this implementation is less efficient, but does not need library
- * initializazion
-# define LIXA_TRACE(a)   ((LIXA_TRACE_MODULE & \
-                        (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL ? \
-                         strtoul(getenv(LIXA_TRACE_MASK_ENV_VAR), NULL, 0) : \
-                          0x0)) ? lixa_trace a : 0)
-*/
 # define LIXA_TRACE(a)    (LIXA_TRACE_MODULE & lixa_trace_mask ? \
                            lixa_trace a : 0)
 #else
@@ -183,10 +176,8 @@ extern int lixa_trace_mutex_init;
  * trace mask (LIXA_TRACE_MASK) specified as environment variable
  */
 #ifdef _TRACE
-# define LIXA_TRACE_HEX_DATA(a,b)   ((LIXA_TRACE_MODULE & \
-                        (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL ? \
-                         strtoul(getenv(LIXA_TRACE_MASK_ENV_VAR), NULL, 0) : \
-                          0x0)) ? lixa_trace_hex_data(a,b,stderr) : 0)
+# define LIXA_TRACE_HEX_DATA(a,b)   (LIXA_TRACE_MODULE & lixa_trace_mask ? \
+                                     lixa_trace_hex_data(a,b,stderr) : 0)
 #else
 # define LIXA_TRACE_HEX_DATA(a,b)
 #endif /* _TRACE */
