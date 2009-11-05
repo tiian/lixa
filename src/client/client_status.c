@@ -100,6 +100,7 @@ void client_status_init(client_status_t *cs)
     LIXA_TRACE(("client_status_init: begin\n"));
     cs->active = FALSE;
     cs->sockfd = LIXA_NULL_FD;
+    cs->txstate = TX_STATE_S0;
     LIXA_TRACE(("client_status_init: end\n"));
     return;
 }

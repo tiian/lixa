@@ -34,12 +34,22 @@
 
 
 
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
 
 
+
+#include <lixa_errors.h>
+#include <lixa_trace.h>
 #include <lixa_tx.h>
+#include <lixa_xml_msg.h>
+#include <client_conn.h>
+#include <client_config.h>
+#include <client_status.h>
 
 
 
@@ -101,3 +111,176 @@ char *xid_get_bqual_ascii(const XID *xid)
     return bqual;
     
 }
+
+
+
+int lixa_tx_open(int *txrc)
+{
+    enum Exception { CLIENT_CONFIG_ERROR
+                     , CLIENT_CONFIG_LOAD_SWITCH_ERROR
+                     , CLIENT_CONNECT_ERROR
+                     , COLL_GET_CS_ERROR
+                     , ALREADY_OPENED
+                     , BUFFER_TOO_SMALL
+                     , SEND_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    *txrc = TX_FAIL;
+
+    LIXA_TRACE(("lixa_tx_open\n"));    
+    TRY {
+        int fd, txstate;
+        client_status_t cs;
+        char xml_buffer[XML_BUFFER_SIZE];
+        ssize_t buffer_len;
+        
+        if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc)))
+            THROW(CLIENT_CONFIG_ERROR);
+        if (LIXA_RC_OK != (ret_cod = client_config_load_switch(&global_ccc)))
+            THROW(CLIENT_CONFIG_LOAD_SWITCH_ERROR);        
+        if (LIXA_RC_OK != (ret_cod = client_connect(&global_csc, &global_ccc)))
+            THROW(CLIENT_CONNECT_ERROR);
+
+        /* retrieve a read-only copy of the thread status */
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(
+                               &global_csc, &cs)))
+            THROW(COLL_GET_CS_ERROR);
+
+        /* check TX state (see Table 7-1) */
+        txstate = client_status_get_txstate(&cs);
+        if (txstate != TX_STATE_S0) { /* already opened, nothing to do */
+            LIXA_TRACE(("lixa_tx_open: already opened (txstate = %d), "
+                        "bypassing...\n", txstate));    
+            THROW(ALREADY_OPENED);
+        }
+        
+        /* retrieve the socket */
+        fd = client_status_get_sockfd(&cs);
+
+        /* @@@ the real logic must be put here */
+
+        /* prepare XML message */
+        if (sizeof(xml_buffer) <= (
+                buffer_len = snprintf(xml_buffer, XML_BUFFER_SIZE,
+                                      XML_MSG_TX_OPEN1,
+                                      XML_MSG_TX_OPEN1_TYPE,
+                                      global_ccc.profile))) {
+            LIXA_TRACE(("lixa_tx_open: xml_buffer to small. INTERNAL ERROR\n"));
+            THROW(BUFFER_TOO_SMALL);
+        }
+
+        LIXA_TRACE(("lixa_tx_open: sending " SSIZE_T_FORMAT " bytes to the "
+                    "server\n", buffer_len));
+        /* send XML message to server */
+        if (buffer_len != send(fd, xml_buffer, buffer_len, 0))
+            THROW(SEND_ERROR);
+
+        /* @@@ set new state after RMs are open... */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case CLIENT_CONFIG_ERROR:
+            case CLIENT_CONFIG_LOAD_SWITCH_ERROR:
+                break;
+            case CLIENT_CONNECT_ERROR:
+                *txrc = TX_ERROR;
+                break;
+            case COLL_GET_CS_ERROR:
+                break;
+            case ALREADY_OPENED:
+                ret_cod = LIXA_RC_BYPASSED_OPERATION;
+                *txrc = TX_OK;
+                break;
+            case BUFFER_TOO_SMALL:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case SEND_ERROR:
+                *txrc = TX_ERROR;
+                ret_cod = LIXA_RC_SEND_ERROR;
+                break;
+            case NONE:
+                *txrc = TX_OK;
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_tx_open/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    assert(ret_cod == TX_OK);
+    return ret_cod;
+}
+
+
+
+int lixa_tx_close(int *txrc)
+{
+    enum Exception { COLL_GET_CS_ERROR
+                     , CLIENT_DISCONNECT_ERROR
+                     , CLIENT_CONFIG_UNLOAD_SWITCH_ERROR
+                     , PROTOCOL_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    *txrc = TX_FAIL;
+    
+    LIXA_TRACE(("lixa_tx_close\n"));
+    TRY {
+        int txstate;
+        client_status_t cs;
+        
+        /* retrieve a read-only copy of the thread status */
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(
+                               &global_csc, &cs)))
+            THROW(COLL_GET_CS_ERROR);
+
+        /* check TX state (see Table 7-1) */
+        txstate = client_status_get_txstate(&cs);
+
+        switch (txstate) {
+            case TX_STATE_S0:
+            case TX_STATE_S1:
+            case TX_STATE_S2:
+                break;
+            default:
+                THROW(PROTOCOL_ERROR);
+        }
+        
+        if (LIXA_RC_OK != (ret_cod = client_disconnect(&global_csc)))
+            THROW(CLIENT_DISCONNECT_ERROR);
+
+        if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))
+            THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
+
+        /* @@@ update the TX state, now TX_STATE_S0 */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case COLL_GET_CS_ERROR:
+                break;
+            case CLIENT_DISCONNECT_ERROR:
+            case CLIENT_CONFIG_UNLOAD_SWITCH_ERROR:
+                *txrc = TX_ERROR;
+                break;
+            case PROTOCOL_ERROR:
+                *txrc = TX_PROTOCOL_ERROR;
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case NONE:
+                *txrc = TX_OK;
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_tx_close/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    assert(ret_cod == LIXA_RC_OK);
+    return ret_cod;
+}
+
+

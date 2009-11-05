@@ -66,8 +66,8 @@
 /**
  * An operation that can not be performed and can safely bypassed has been
  * requested: the program can go on as no operation was requested
-define LIXA_RC_BYPASSED_OPERATION              +2
  */
+#define LIXA_RC_BYPASSED_OPERATION              +3
 
 
 
@@ -124,6 +124,10 @@ define LIXA_RC_OBJ_NOT_VOID                    -7
  * A specified option is not valid for method and/or object status
  */
 #define LIXA_RC_INVALID_OPTION                 -11
+/**
+ * A routine has been invoked in an improper context
+ */
+#define LIXA_RC_PROTOCOL_ERROR                 -12
 /**
  * The status (value of any properties) of an object is invalid due to a bug
  * located elsewhere (a complex "internal error" condition)
@@ -302,15 +306,19 @@ define LIXA_RC_UNLINK_ERROR                  -129
 /**
  * "recv" function error
  */
-#define LIXA_RC_RECV_ERROR                     -138
+#define LIXA_RC_SEND_ERROR                     -138
+/**
+ * "recv" function error
+ */
+#define LIXA_RC_RECV_ERROR                     -139
 /**
  * "getsockname" function error
  */
-#define LIXA_RC_GETSOCKNAME_ERROR              -139
+#define LIXA_RC_GETSOCKNAME_ERROR              -140
 /**
  * "getsockname" function error
  */
-#define LIXA_RC_GETPEERNAME_ERROR              -140
+#define LIXA_RC_GETPEERNAME_ERROR              -141
 /**
  * "pthread_create" function error
  */
