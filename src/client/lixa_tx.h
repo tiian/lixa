@@ -105,6 +105,26 @@ extern "C" {
     char *xid_get_bqual_ascii(const XID *xid);
 
 
+
+    /**
+     * This function implements the real logic underlaying @ref tx_open
+     * X/Open function
+     * @param txrc OUT tx_* return code
+     * @return a return code 
+     */
+    int lixa_tx_open(int *txrc);
+
+
+    
+    /**
+     * This function implements the real logic underlaying @ref tx_close
+     * X/Open function
+     * @param txrc OUT tx_* return code
+     * @return a return code 
+     */
+    int lixa_tx_close(int *txrc);
+
+
     
 #ifdef __cplusplus
 }

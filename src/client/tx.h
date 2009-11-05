@@ -120,47 +120,6 @@ typedef struct tx_info_t TXINFO;
 
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-
-
-extern int tx_begin(void);
-
-    /**
-     * Close a set of resource managers.
-     * Calling this function you free the resource allocated and locked by
-     * @ref tx_open
-     */
-    extern int tx_close(void);
-    
-extern int tx_commit(void);
-extern int tx_info(TXINFO *);
-
-    /**
-     * Open a set of resource managers.
-     * You MUST call @ref tx_close from the same thread issued tx_open
-     * (memory leaks and other unpleasant effetcs may happen otherwise!)
-     */
-    extern int tx_open(void);
-    
-extern int tx_rollback(void);
-extern int tx_set_commit_return(COMMIT_RETURN);
-extern int tx_set_transaction_control(TRANSACTION_CONTROL);
-extern int tx_set_transaction_timeout(TRANSACTION_TIMEOUT);
-
-
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-
-
-/*
- * Declarations of routines by which Applications call TMs:
- */
 /*
  * tx_*() return codes (transaction manager reports to application)
  */
@@ -194,6 +153,54 @@ extern int tx_set_transaction_timeout(TRANSACTION_TIMEOUT);
 #define TX_COMMITTED_NO_BEGIN (TX_COMMITTED+TX_NO_BEGIN)
 /* heuristically committed plus new
    transaction could not be started */
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
+
+/*
+ * Declarations of routines by which Applications call TMs:
+ */
+
+
+
+    extern int tx_begin(void);
+
+    /**
+     * Close a set of resource managers.
+     * Calling this function you free the resource allocated and locked by
+     * @ref tx_open
+     */
+    extern int tx_close(void);
+    
+    extern int tx_commit(void);
+    extern int tx_info(TXINFO *);
+    
+    /**
+     * Open a set of resource managers; this function is the X/Open compliant
+     * wrapper for @ref lixa_tx_open function
+     * You MUST call @ref tx_close from the same thread issued tx_open
+     * (memory leaks and other unpleasant effetcs may happen otherwise!)
+     * @return a X/Open standard return value
+     */
+    extern int tx_open(void);
+
+    
+    
+    extern int tx_rollback(void);
+    extern int tx_set_commit_return(COMMIT_RETURN);
+    extern int tx_set_transaction_control(TRANSACTION_CONTROL);
+    extern int tx_set_transaction_timeout(TRANSACTION_TIMEOUT);
+    
+
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 
 

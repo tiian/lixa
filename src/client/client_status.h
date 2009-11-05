@@ -62,6 +62,35 @@
 
 
 /**
+ * No RMs have been opened or initialized. An application thread of control
+ * cannot start a global transaction until it has successfully opened its RMs
+ * via @ref tx_open().
+ */
+#define TX_STATE_S0    0
+/**
+ * The thread haso opened its RMs but is not in a transaction. Its transaction
+ * control characteristics is TX_UNCHAINED
+ */
+#define TX_STATE_S1    1
+/**
+ * The thread haso opened its RMs but is not in a transaction. Its transaction
+ * control characteristics is TX_CHAINED
+ */
+#define TX_STATE_S2    2
+/**
+ * The thread has opened its RMs and is in a transaction. Its transaction
+ * control characteristics is TX_UNCHAINED
+ */
+#define TX_STATE_S3    3
+/**
+ * The thread has opened its RMs and is in a transaction. Its transaction
+ * control characteristics is TX_CHAINED
+ */
+#define TX_STATE_S4    4
+
+
+
+/**
  * It contains the status of a thread connected to a lixa transaction
  * manager
  */
@@ -75,6 +104,12 @@ struct client_status_s {
      * The file descriptor associated to the socket connected to the server
      */
     int   sockfd;
+    /**
+     * Status as described in table 7-1 ("C-language State Tables", chapter 7,
+     * X/Open CAE Specification, Distributed Transaction Processing:
+     * The TX (Transaction Demarcation) Specification
+     */
+    int   txstate;
 };
 
 typedef struct client_status_s client_status_t;
@@ -196,6 +231,27 @@ extern "C" {
      */
     static inline void client_status_set_sockfd(client_status_t *cs, int fd) {
         cs->sockfd = fd; }
+    
+    
+
+    /**
+     * Get the TX state associated to the thread
+     * @param cs IN object reference
+     * @return the TX state
+     */
+    static inline int client_status_get_txstate(const client_status_t *cs) {
+        return cs->txstate; }
+
+
+    
+    /**
+     * Set the TX state associated to the thread
+     * @param cs IN/OUT object reference
+     * @param txstate IN a valid TX state
+     */
+    static inline void client_status_set_txstate(client_status_t *cs,
+                                                 int txstate) {
+        cs->txstate = txstate; }
     
     
 
