@@ -15,7 +15,7 @@
  *    this software without specific prior written permission.
  *
  * Alternatively, this software may be distributed under the terms of the
- * GNU General Public License ("GPL") version 2 as published by the Free
+ * GNU General Public License ("GPL") version 2 as published by the Free 
  * Software Foundation.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -30,73 +30,53 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include <stdio.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <stdlib.h>
-
-#include <tx.h>
+#ifndef LIXA_XA_H
+# define LIXA_XA_H
 
 
 
-void *a_thread(void *useless)
-{
-    int i;
-    for (i = 0; i < 1; ++i) {
-        tx_open();
-        tx_close();
-        tx_open();  
-        sleep(10);
-        tx_close();
-/*        tx_close();   */
-    }
-}
+#include <config.h>
 
 
 
-int main(int argc, char *argv[])
-{
-    pthread_t foo;
-    int load = 1, i;
+/* save old LIXA_TRACE_MODULE and set a new value */
+#ifdef LIXA_TRACE_MODULE
+# define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
+# undef LIXA_TRACE_MODULE
+#else
+# undef LIXA_TRACE_MODULE_SAVE
+#endif /* LIXA_TRACE_MODULE */
+#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_CLIENT_XA
 
-    /*
-    fprintf(stderr, "pathconf -> %ld\n", pathconf("/home/tiian/lixa", _PC_PATH_MAX));
- 
-    for (load=0; load<10; ++load) {
-        for (i=0; i<load; ++i) {
-            pthread_create(&foo, NULL, a_thread, NULL);
-        }
-        fprintf(stderr, "***************** %d *******************", load);
-        sleep(3);
-    }
-/*
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    sleep(30);
-    */
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
+
+    /**
+     * Open all the resource managers necessary for the transaction
+     * @return a reason code
+     */
+    int lixa_xa_open();
+
+
     
-
-/*    
-    a_thread(&foo);
-    a_thread(&foo);
-    a_thread(&foo);
-    a_thread(&foo);
-*/
-    a_thread(&foo);
-  
-    return 0;
+#ifdef __cplusplus
 }
+#endif /* __cplusplus */
+
+
+
+/* restore old value of LIXA_TRACE_MODULE */
+#ifdef LIXA_TRACE_MODULE_SAVE
+# undef LIXA_TRACE_MODULE
+# define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
+# undef LIXA_TRACE_MODULE_SAVE
+#endif /* LIXA_TRACE_MODULE_SAVE */
+
+
+
+#endif /* LIXA_XA_H */

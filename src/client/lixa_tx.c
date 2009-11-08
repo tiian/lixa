@@ -116,7 +116,9 @@ char *xid_get_bqual_ascii(const XID *xid)
 
 int lixa_tx_open(int *txrc)
 {
-    enum Exception { CLIENT_CONFIG_ERROR
+    enum Exception { CLIENT_STATUS_COLL_GET_CS_ERROR
+                     , CLIENT_STATUS_COLL_REGISTER_ERROR
+                     , CLIENT_CONFIG_ERROR
                      , CLIENT_CONFIG_LOAD_SWITCH_ERROR
                      , CLIENT_CONNECT_ERROR
                      , COLL_GET_CS_ERROR
@@ -129,57 +131,76 @@ int lixa_tx_open(int *txrc)
 
     LIXA_TRACE(("lixa_tx_open\n"));    
     TRY {
-        int fd, txstate;
-        client_status_t cs;
+        int fd, txstate, pos = 0;
+        client_status_t *cs;
         char xml_buffer[XML_BUFFER_SIZE];
         ssize_t buffer_len;
         
-        if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc)))
-            THROW(CLIENT_CONFIG_ERROR);
-        if (LIXA_RC_OK != (ret_cod = client_config_load_switch(&global_ccc)))
-            THROW(CLIENT_CONFIG_LOAD_SWITCH_ERROR);        
-        if (LIXA_RC_OK != (ret_cod = client_connect(&global_csc, &global_ccc)))
-            THROW(CLIENT_CONNECT_ERROR);
-
-        /* retrieve a read-only copy of the thread status */
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(
-                               &global_csc, &cs)))
-            THROW(COLL_GET_CS_ERROR);
-
+        /* check if the thread is already registered and
+         * retrieve a reference to the status of the current thread */
+        ret_cod = client_status_coll_get_cs(&global_csc, &cs);
+        switch (ret_cod) {
+            case LIXA_RC_OK: /* already registered, nothing to do */
+                break;
+            case LIXA_RC_OBJ_NOT_FOUND: /* first time, it must be registered */
+                /* register this thread in library status */
+                if (LIXA_RC_OK != (ret_cod = client_status_coll_register(
+                                       &global_csc, &pos)))
+                    THROW(CLIENT_STATUS_COLL_REGISTER_ERROR);
+                cs = client_status_coll_get_status(&global_csc, pos);
+                break;
+            default:
+                THROW(CLIENT_STATUS_COLL_GET_CS_ERROR);
+        }
+        
         /* check TX state (see Table 7-1) */
-        txstate = client_status_get_txstate(&cs);
-        if (txstate != TX_STATE_S0) { /* already opened, nothing to do */
+        txstate = client_status_get_txstate(cs);
+        if (txstate == TX_STATE_S0) {
+            if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc)))
+                THROW(CLIENT_CONFIG_ERROR);
+            if (LIXA_RC_OK != (ret_cod =
+                               client_config_load_switch(&global_ccc)))
+                THROW(CLIENT_CONFIG_LOAD_SWITCH_ERROR);        
+            if (LIXA_RC_OK != (ret_cod =
+                               client_connect(&global_csc, &global_ccc)))
+                THROW(CLIENT_CONNECT_ERROR);
+
+            /* retrieve the socket */
+            fd = client_status_get_sockfd(cs);
+
+            /* @@@ the real logic must be put here */
+
+            /* prepare XML message */
+            if (sizeof(xml_buffer) <= (
+                    buffer_len = snprintf(xml_buffer, XML_BUFFER_SIZE,
+                                          XML_MSG_TX_OPEN1,
+                                          XML_MSG_TX_OPEN1_TYPE,
+                                          global_ccc.profile))) {
+                LIXA_TRACE(("lixa_tx_open: xml_buffer to small. "
+                            "INTERNAL ERROR\n"));
+                THROW(BUFFER_TOO_SMALL);
+            }
+
+            LIXA_TRACE(("lixa_tx_open: sending " SSIZE_T_FORMAT " bytes to the "
+                        "server\n", buffer_len));
+            /* send XML message to server */
+            if (buffer_len != send(fd, xml_buffer, buffer_len, 0))
+                THROW(SEND_ERROR);
+
+            /* set new state after RMs are open... */
+            client_status_set_txstate(cs, TX_STATE_S1);
+        } else { /* already opened, nothing to do */
             LIXA_TRACE(("lixa_tx_open: already opened (txstate = %d), "
                         "bypassing...\n", txstate));    
             THROW(ALREADY_OPENED);
         }
         
-        /* retrieve the socket */
-        fd = client_status_get_sockfd(&cs);
-
-        /* @@@ the real logic must be put here */
-
-        /* prepare XML message */
-        if (sizeof(xml_buffer) <= (
-                buffer_len = snprintf(xml_buffer, XML_BUFFER_SIZE,
-                                      XML_MSG_TX_OPEN1,
-                                      XML_MSG_TX_OPEN1_TYPE,
-                                      global_ccc.profile))) {
-            LIXA_TRACE(("lixa_tx_open: xml_buffer to small. INTERNAL ERROR\n"));
-            THROW(BUFFER_TOO_SMALL);
-        }
-
-        LIXA_TRACE(("lixa_tx_open: sending " SSIZE_T_FORMAT " bytes to the "
-                    "server\n", buffer_len));
-        /* send XML message to server */
-        if (buffer_len != send(fd, xml_buffer, buffer_len, 0))
-            THROW(SEND_ERROR);
-
-        /* @@@ set new state after RMs are open... */
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_STATUS_COLL_GET_CS_ERROR:
+            case CLIENT_STATUS_COLL_REGISTER_ERROR:
+                break;
             case CLIENT_CONFIG_ERROR:
             case CLIENT_CONFIG_LOAD_SWITCH_ERROR:
                 break;
@@ -228,15 +249,22 @@ int lixa_tx_close(int *txrc)
     LIXA_TRACE(("lixa_tx_close\n"));
     TRY {
         int txstate;
-        client_status_t cs;
+        client_status_t *cs;
         
         /* retrieve a read-only copy of the thread status */
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(
-                               &global_csc, &cs)))
-            THROW(COLL_GET_CS_ERROR);
+        ret_cod = client_status_coll_get_cs(&global_csc, &cs);
+        switch (ret_cod) {
+            case LIXA_RC_OK: /* nothing to do */
+                break;
+            case LIXA_RC_OBJ_NOT_FOUND:
+                *txrc = TX_OK;
+                /* break intentionally missed */
+            default:
+                THROW(COLL_GET_CS_ERROR);
+        }
 
         /* check TX state (see Table 7-1) */
-        txstate = client_status_get_txstate(&cs);
+        txstate = client_status_get_txstate(cs);
 
         switch (txstate) {
             case TX_STATE_S0:
@@ -253,7 +281,8 @@ int lixa_tx_close(int *txrc)
         if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))
             THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
 
-        /* @@@ update the TX state, now TX_STATE_S0 */
+        /* update the TX state, now TX_STATE_S0 */
+        client_status_set_txstate(cs, TX_STATE_S0);
         
         THROW(NONE);
     } CATCH {

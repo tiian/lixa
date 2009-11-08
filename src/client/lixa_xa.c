@@ -30,73 +30,52 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include <stdio.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <stdlib.h>
-
-#include <tx.h>
+#include <config.h>
 
 
 
-void *a_thread(void *useless)
+#include <lixa_trace.h>
+#include <lixa_errors.h>
+
+
+
+/* set module trace flag */
+#ifdef LIXA_TRACE_MODULE
+# undef LIXA_TRACE_MODULE
+#endif /* LIXA_TRACE_MODULE */
+#define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_XA
+
+
+
+int lixa_xa_open()
 {
-    int i;
-    for (i = 0; i < 1; ++i) {
-        tx_open();
-        tx_close();
-        tx_open();  
-        sleep(10);
-        tx_close();
-/*        tx_close();   */
-    }
-}
-
-
-
-int main(int argc, char *argv[])
-{
-    pthread_t foo;
-    int load = 1, i;
-
-    /*
-    fprintf(stderr, "pathconf -> %ld\n", pathconf("/home/tiian/lixa", _PC_PATH_MAX));
- 
-    for (load=0; load<10; ++load) {
-        for (i=0; i<load; ++i) {
-            pthread_create(&foo, NULL, a_thread, NULL);
-        }
-        fprintf(stderr, "***************** %d *******************", load);
-        sleep(3);
-    }
-/*
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    pthread_create(&foo, NULL, a_thread, NULL);
-    sleep(30);
-    */
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-
-/*    
-    a_thread(&foo);
-    a_thread(&foo);
-    a_thread(&foo);
-    a_thread(&foo);
-*/
-    a_thread(&foo);
-  
-    return 0;
+    LIXA_TRACE(("lixa_xa_open\n"));
+    TRY {
+        /* @@@ a lot of stuff:
+           1. send a msg to the server with the characteristic of the
+              transaction, the number and the type of resource manager
+           2. the server must allocate the blocks for the transaction
+           3. wait the answer from the server
+           4. loop on all the resource managers
+              4a. xa_open the resource manager
+              4b. send the result (asynchronously) to the server
+           5. return a value to the caller
+        */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_xa_open/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }

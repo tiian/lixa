@@ -78,25 +78,20 @@
 int client_connect(client_status_coll_t *csc,
                    client_config_coll_t *ccc)
 {
-    enum Exception { REGISTER_ERROR
-                     , GET_TRNMGR_ERROR
+    enum Exception { GET_TRNMGR_ERROR
                      , SOCKET_ERROR
                      , CONNECT_ERROR
+                     , CLIENT_STATUS_COLL_GET_CS_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     int out_socket;
-    int pos;
     struct trnmgr_config_s *tc;
     
     LIXA_TRACE(("client_connect\n"));
     TRY {
         client_status_t *cs;
-        
-        /* register this thread in library status */
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_register(csc, &pos)))
-            THROW(REGISTER_ERROR);
-        
+
         /* search connection parameters */
         if (NULL == (tc = client_config_get_trnmgr(ccc)))
             THROW(GET_TRNMGR_ERROR);
@@ -111,14 +106,13 @@ int client_connect(client_status_coll_t *csc,
                          sizeof(struct sockaddr_in)))
             THROW(CONNECT_ERROR);
 
-        cs = client_status_coll_get_status(csc, pos);
+        if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(csc, &cs)))
+            THROW(CLIENT_STATUS_COLL_GET_CS_ERROR);
         client_status_set_sockfd(cs, out_socket);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case REGISTER_ERROR:
-                break;
             case GET_TRNMGR_ERROR:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
@@ -126,6 +120,8 @@ int client_connect(client_status_coll_t *csc,
                 break;
             case CONNECT_ERROR:
                 ret_cod = LIXA_RC_CONNECT_ERROR;
+                break;
+            case CLIENT_STATUS_COLL_GET_CS_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -154,13 +150,13 @@ int client_disconnect(client_status_coll_t *csc)
     LIXA_TRACE(("client_disconnect\n"));
     TRY {
         int fd;
-        client_status_t cs;
+        client_status_t *cs;
         char dummy_buffer[1000];
 
         /* retrieve the socket */
         if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(csc, &cs)))
             THROW(COLL_GET_CS_ERROR);
-        fd = client_status_get_sockfd(&cs);
+        fd = client_status_get_sockfd(cs);
         
         /* close write half socket */
         LIXA_TRACE(("client_disconnect: shutdown write, fd = %d\n", fd));

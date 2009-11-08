@@ -456,8 +456,11 @@ int client_status_coll_search(client_status_coll_t *csc, int *pos, int lock)
         pthread_t key = pthread_self();
 
         /* take a shared lock to avoid collisions */
-        LIXA_TRACE(("client_status_coll_search: acquiring shared rwlock\n"));
-        g_static_rw_lock_reader_lock(&(csc->rwlock));
+        if (lock) {
+            LIXA_TRACE(("client_status_coll_search: acquiring shared "
+                        "rwlock\n"));
+            g_static_rw_lock_reader_lock(&(csc->rwlock));
+        }
 
         if (NULL == csc->index_data)
             THROW(NOT_FOUND1);
@@ -497,8 +500,11 @@ int client_status_coll_search(client_status_coll_t *csc, int *pos, int lock)
             LIXA_TRACE(("client_status_coll_search: values before recovery "
                         "actions excp=%d/ret_cod=%d/errno=%d\n",
                         excp, ret_cod, errno));
-        LIXA_TRACE(("client_status_coll_search: releasing shared rwlock\n"));
-        g_static_rw_lock_reader_unlock(&(csc->rwlock));
+        if (lock) {
+            LIXA_TRACE(("client_status_coll_search: releasing shared "
+                        "rwlock\n"));
+            g_static_rw_lock_reader_unlock(&(csc->rwlock));
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("client_status_coll_search/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -508,7 +514,7 @@ int client_status_coll_search(client_status_coll_t *csc, int *pos, int lock)
 
 
 int client_status_coll_get_cs(client_status_coll_t *csc,
-                              client_status_t *cs)
+                              client_status_t **cs)
 {
     enum Exception { COLL_SEARCH_ERROR
                      , NONE } excp;
@@ -526,7 +532,7 @@ int client_status_coll_get_cs(client_status_coll_t *csc,
                                csc, &pos, FALSE)))
             THROW(COLL_SEARCH_ERROR);
 
-        *cs = csc->status_data[csc->index_data[pos].value];
+        *cs = csc->status_data + csc->index_data[pos].value;
         
         THROW(NONE);
     } CATCH {

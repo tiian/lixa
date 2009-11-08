@@ -300,7 +300,7 @@ extern "C" {
      * @return a standardized return code
      */
     int client_status_coll_get_cs(client_status_coll_t *csc,
-                                  client_status_t *cs);
+                                  client_status_t **cs);
 
 
     
