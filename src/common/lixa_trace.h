@@ -92,24 +92,29 @@
 #define LIXA_TRACE_MOD_CLIENT_TX          0x00001000
 
 /**
+ * trace module for client XA standard functions
+ */
+#define LIXA_TRACE_MOD_CLIENT_XA          0x00002000
+
+/**
  * trace module for client connection functions
  */
-#define LIXA_TRACE_MOD_CLIENT_CONN        0x00002000
+#define LIXA_TRACE_MOD_CLIENT_CONN        0x00004000
 
 /**
  * trace module for client config functions
  */
-#define LIXA_TRACE_MOD_CLIENT_CONFIG      0x00004000
+#define LIXA_TRACE_MOD_CLIENT_CONFIG      0x00008000
 
 /**
  * trace module for client load functions
  */
-#define LIXA_TRACE_MOD_CLIENT_LOAD        0x00008000
+#define LIXA_TRACE_MOD_CLIENT_LOAD        0x00010000
 
 /**
  * trace module for client status functions
  */
-#define LIXA_TRACE_MOD_CLIENT_STATUS      0x00010000
+#define LIXA_TRACE_MOD_CLIENT_STATUS      0x00020000
 
 /**
  * trace module for common config functions
