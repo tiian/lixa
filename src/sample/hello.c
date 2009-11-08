@@ -60,9 +60,9 @@ int main(int argc, char *argv[])
 
     /*
     fprintf(stderr, "pathconf -> %ld\n", pathconf("/home/tiian/lixa", _PC_PATH_MAX));
-   
+    */   
     
-    for (load=0; load<1; ++load) {
+    for (load=0; load<10; ++load) {
         for (i=0; i<load; ++i) {
             pthread_create(&foo, NULL, a_thread, NULL);
         }
