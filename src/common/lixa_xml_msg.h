@@ -85,6 +85,28 @@
 
 
 
+/*
+  level: message level, version
+  verb:  xa_open -> open; xa_begin ->begin, ...
+  step:  1, 2, 3, ... as necessary
+  wait:  0=async message, 1=sync message = the client is waiting reply
+  sync:  0 do not synchronize status file, 1 status file must be synchronized
+
+  client->server message (question)
+  <msg level="1" verb="open" step="1" wait="1" sync="0">
+    <client profile="VZ67"/>
+    <rsrmgrs>
+      <rsrmgr rmid="1" name="dummyrm"/>
+      <rsrmgr rmid="2" name="randomrm"/>
+    </rsrmgrs>
+  </msg>
+
+  server -> client message (answer)
+  <msg level="1" verb="open" step="2" rc="0"/>
+ */
+
+
+
 /**
  * Text of the first message sent by tx_open function to the server
  */
