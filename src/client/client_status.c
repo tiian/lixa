@@ -67,7 +67,12 @@
 /* this static structure is used by all the threads of the program
  * linking the library; the structure i protected by a mutex to avoid
  * concurrency issues */
-client_status_coll_t global_csc = { G_STATIC_RW_LOCK_INIT };
+client_status_coll_t global_csc = { G_STATIC_RW_LOCK_INIT,
+                                    0,
+                                    NULL,
+                                    0,
+                                    0,
+                                    NULL};
 
 
 
@@ -77,21 +82,25 @@ client_status_coll_t global_csc = { G_STATIC_RW_LOCK_INIT };
 client_config_coll_t global_ccc = { FALSE,
                                     G_STATIC_MUTEX_INIT,
                                     NULL,
+                                    NULL,
+                                    {NULL, NULL},
+                                    NULL,
+                                    NULL,
                                     NULL };
 
 
 
-/**
+/* @@@ obsolete, remove!
  * Initialize the library when the library is loaded.
  * This piece of code is GNU/Linux + GCC specific: it will need some
  * rework for different platforms (probably it will not compile at all)
- */
 void __attribute__ ((constructor)) lixac_init(void)
 {
     LIXA_TRACE_INIT;
     client_status_coll_init(&global_csc);
     client_config_coll_init(&global_ccc);
 }
+*/
 
 
 
@@ -107,6 +116,7 @@ void client_status_init(client_status_t *cs)
 
 
 
+/* @@@ obsolete, remove!
 int client_status_coll_init(client_status_coll_t *csc)    
 {
     enum Exception { NONE } excp;
@@ -128,12 +138,13 @@ int client_status_coll_init(client_status_coll_t *csc)
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        }
+    }
     LIXA_TRACE(("client_status_coll_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+*/
 
 
 

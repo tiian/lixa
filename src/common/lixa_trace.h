@@ -129,17 +129,6 @@
  */
 extern unsigned long lixa_trace_mask;
 
-/**
- * This mutex is used to avoid contention (bad output) on trace file
- */
-extern pthread_mutex_t lixa_trace_mutex;
-
-/**
- * This flag is used to check the mutex @ref lixa_trace_mutex has been
- * initialized
- */
-extern int lixa_trace_mutex_init;
-
 
 
 /**

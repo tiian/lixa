@@ -55,6 +55,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 
 
 
@@ -63,23 +66,32 @@
 
 
 unsigned long lixa_trace_mask = 0;
-pthread_mutex_t lixa_trace_mutex;
-int lixa_trace_mutex_init = FALSE;
 
 
 
-void lixa_trace_init(void)
+/**
+ * This mutex is used to avoid contention (bad output) on trace file
+ */
+GStaticMutex lixa_trace_mutex = G_STATIC_MUTEX_INIT;
+
+
+
+/**
+ * Initialize the library when the library is loaded.
+ * This piece of code is GNU/Linux + GCC specific: it will need some
+ * rework for different platforms (probably it will not compile at all).
+ * An alternative way is to put LIXA_TRACE_INIT macro in program code and
+ * avoid this automatic library loading function
+ */
+void __attribute__ ((constructor)) lixa_trace_init(void)
 {
     /* retrieve environemnt variable */
     if (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL)
         lixa_trace_mask = strtoul(getenv(LIXA_TRACE_MASK_ENV_VAR), NULL, 0);
     else
         lixa_trace_mask = 0x0;    
-    /* initialize mutex */
-    if (0 != pthread_mutex_init(&lixa_trace_mutex, NULL))
-        perror("lixa_trace_init/pthread_mutex_init\n");
-    lixa_trace_mutex_init = TRUE;
 }
+
 
 
 void lixa_trace(const char *fmt, ...)
@@ -92,30 +104,23 @@ void lixa_trace(const char *fmt, ...)
 #ifdef HAVE_VFPRINTF
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
-    /* check the mutex has been initialized before a mutex lock will be
-       performed */
-    if (lixa_trace_mutex_init) {
-        if (0 != pthread_mutex_lock(&lixa_trace_mutex))
-            perror("lixa_trace/pthread_mutex_lock");
-        /* default header */
-        fprintf(stderr,
-                "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [%d/"
-                PTHREAD_T_FORMAT "] ",
-                broken_time.tm_year + 1900, broken_time.tm_mon + 1,
-                broken_time.tm_mday, broken_time.tm_hour,
-                broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
-                getpid(), pthread_self());
-    } /* if (lixa_trace_mutex_init) */
+
+    g_static_mutex_lock(&lixa_trace_mutex);
+    /* default header */
+    fprintf(stderr,
+            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [%d/"
+            PTHREAD_T_FORMAT "] ",
+            broken_time.tm_year + 1900, broken_time.tm_mon + 1,
+            broken_time.tm_mday, broken_time.tm_hour,
+            broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
+            getpid(), pthread_self());
     /* custom message */
     vfprintf(stderr, fmt, args);
 #ifndef NDEBUG
     fflush(stderr);
 #endif
     /* remove the lock from mutex */
-    if (lixa_trace_mutex_init) {
-        if (0 != pthread_mutex_unlock(&lixa_trace_mutex))
-            perror("lixa_trace/pthread_mutex_unlock");
-    } /* if (lixa_trace_mutex_init) */
+    g_static_mutex_unlock(&lixa_trace_mutex);
 #else
 # error "vfprintf is necessary for lixa_trace function!"
 #endif
@@ -127,12 +132,12 @@ void lixa_trace(const char *fmt, ...)
 void lixa_trace_hex_data(const byte_t *data, lixa_word_t size,
                          FILE *out_stream)
 {
-        lixa_word_t i;
+    lixa_word_t i;
 
-        for (i = 0; i < size; ++i) {
-                fprintf(out_stream, "%02x ", (data[i] & 0xff));
-        } /* for (i = 0; i < size; ++i) */
-        fprintf(out_stream, "\n");
+    for (i = 0; i < size; ++i) {
+        fprintf(out_stream, "%02x ", (data[i] & 0xff));
+    } /* for (i = 0; i < size; ++i) */
+    fprintf(out_stream, "\n");
 }
 
 
@@ -140,15 +145,15 @@ void lixa_trace_hex_data(const byte_t *data, lixa_word_t size,
 void lixa_trace_text_data(const byte_t *data, lixa_word_t size,
                           FILE *out_stream)
 {
-        lixa_word_t i;
-
-        for (i = 0; i < size; ++i) {
-                if (data[i] >= (byte_t)' ' && data[i] < (byte_t)0x80)
-                        putc((int)(data[i] & 0xff), out_stream);
-                else
-                        putc((int)' ', out_stream);
-        } /* for (i = 0; i < size; ++i) */
-        fprintf(out_stream, "\n");
+    lixa_word_t i;
+    
+    for (i = 0; i < size; ++i) {
+        if (data[i] >= (byte_t)' ' && data[i] < (byte_t)0x80)
+            putc((int)(data[i] & 0xff), out_stream);
+        else
+            putc((int)' ', out_stream);
+    } /* for (i = 0; i < size; ++i) */
+    fprintf(out_stream, "\n");
 }
 
 

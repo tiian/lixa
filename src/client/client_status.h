@@ -266,14 +266,14 @@ extern "C" {
 
 
     
-    /**
+    /* @@@ obsolete, remove!
      * Initialize the client status object; this object should be istantiated
      * only once, should be static, initialized at library load, protected
      * against race conditions by a mutex
      * @param csc OUT object reference
      * @return a standardized return code
-     */
     int client_status_coll_init(client_status_coll_t *csc);
+     */
 
 
 

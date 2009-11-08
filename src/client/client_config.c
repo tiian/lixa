@@ -72,6 +72,7 @@
 
 
 
+/* @@@ obsolete, remove
 int client_config_coll_init(client_config_coll_t *ccc)
 {
     enum Exception { NONE } excp;
@@ -90,8 +91,7 @@ int client_config_coll_init(client_config_coll_t *ccc)
         ccc->rsrmgrs = g_array_new(FALSE, FALSE, sizeof(
                                        struct rsrmgr_config_s));
         ccc->profiles = g_array_new(FALSE, FALSE, sizeof(
-                                        struct profile_config_s));
-     
+                                        struct profile_config_s));     
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -100,13 +100,13 @@ int client_config_coll_init(client_config_coll_t *ccc)
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        }
+    }
     LIXA_TRACE(("client_config_coll_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
-
+*/
 
 
 int client_config(client_config_coll_t *ccc)
@@ -142,6 +142,20 @@ int client_config(client_config_coll_t *ccc)
         if (ccc->configured) {
             LIXA_TRACE(("client_config: already configured, skipping...\n"));
             THROW(ALREADY_CONFIGURED);
+        } else {
+            memset(&ccc->serv_addr, 0, sizeof(struct sockaddr_in));
+            if (NULL == ccc->actconf.rsrmgrs)
+                ccc->actconf.rsrmgrs = g_array_new(
+                    FALSE, FALSE, sizeof(struct act_rsrmgr_config_s));
+            if (NULL == ccc->trnmgrs)
+                ccc->trnmgrs = g_array_new(FALSE, FALSE, sizeof(
+                                               struct trnmgr_config_s));
+            if (NULL == ccc->rsrmgrs)
+                ccc->rsrmgrs = g_array_new(FALSE, FALSE, sizeof(
+                                           struct rsrmgr_config_s));
+            if (NULL == ccc->profiles)
+                ccc->profiles = g_array_new(FALSE, FALSE, sizeof(
+                                                struct profile_config_s));
         }
         
         if (NULL == (tmp_str = getenv(LIXA_PROFILE_ENV_VAR))) {
