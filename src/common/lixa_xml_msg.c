@@ -57,64 +57,32 @@
 
 
 
-int xml_msg_translate(xmlDocPtr doc,
-                      struct xml_msg_generic_s *xmg)
+const xmlChar *LIXA_XML_MSG_PROP_LEVEL =  (xmlChar *)"level";
+const xmlChar *LIXA_XML_MSG_PROP_NAME =   (xmlChar *)"name";
+const xmlChar *LIXA_XML_MSG_PROP_RMID =   (xmlChar *)"rmid";
+const xmlChar *LIXA_XML_MSG_PROP_STEP =   (xmlChar *)"step";
+const xmlChar *LIXA_XML_MSG_PROP_SYNC =   (xmlChar *)"sync";
+const xmlChar *LIXA_XML_MSG_PROP_VERB =   (xmlChar *)"verb";
+const xmlChar *LIXA_XML_MSG_PROP_WAIT =   (xmlChar *)"wait";
+const xmlChar *LIXA_XML_MSG_TAG_CLIENT =  (xmlChar *)"client";
+const xmlChar *LIXA_XML_MSG_TAG_MSG =     (xmlChar *)"msg";
+const xmlChar *LIXA_XML_MSG_TAG_RSRMGR =  (xmlChar *)"rsrmgr";
+const xmlChar *LIXA_XML_MSG_TAG_RSRMGRS = (xmlChar *)"rsrmgrs";
+
+
+
+int lixa_msg_serialize(const struct lixa_msg_s msg,
+                       char *buffer)
 {
-    enum Exception { XML_DOC_GET_ROOT_ELEMENT_ERROR
-                     , MSG_TAG_NOT_FOUND
-                     , TYPE_PROP_NOT_FOUND
-                     , TRANSLATE_ARGS
-                     , UNKNOWN_XML_MSG_TYPE
-                     , NONE } excp;
+    enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("xml_msg_translate\n"));
+    LIXA_TRACE(("lixa_msg_serialize\n"));
     TRY {
-        char *type_str;
-        xmlNode *root_element = NULL;
-        
-        /* retrieve root element from XML tree */
-        if (NULL == (root_element = xmlDocGetRootElement(doc)))
-            THROW(XML_DOC_GET_ROOT_ELEMENT_ERROR);
-
-        /* check the higher level tag is "msg" */
-        if (root_element->type != XML_ELEMENT_NODE ||
-            xmlStrcmp(root_element->name, (xmlChar *)XML_MSG_TAG_MSG))
-            THROW(MSG_TAG_NOT_FOUND);
-        /* retrieve the "type" property value */
-        if (NULL == (type_str = (char *)xmlGetProp(
-                         root_element, (xmlChar *)XML_MSG_PROP_TYPE)))
-            THROW(TYPE_PROP_NOT_FOUND);
-        xmg->type = strtol(type_str, NULL, 0);
-        xmlFree(type_str);
-
-        /* parse specific message */
-        switch (xmg->type) {
-            case XML_MSG_TX_OPEN1_TYPE:
-                if (LIXA_RC_OK != (ret_cod = xml_msg_translate_args(
-                                       doc, root_element->children, xmg)))
-                    THROW(TRANSLATE_ARGS);
-                break;
-            default:
-                THROW(UNKNOWN_XML_MSG_TYPE);
-                break;
-        };
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case XML_DOC_GET_ROOT_ELEMENT_ERROR:
-                ret_cod = LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR;
-                break;
-            case MSG_TAG_NOT_FOUND:
-            case TYPE_PROP_NOT_FOUND:
-                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
-                break;
-            case TRANSLATE_ARGS:
-                break;
-            case UNKNOWN_XML_MSG_TYPE:
-                ret_cod = LIXA_RC_UNKNOWN_XML_MSG_TYPE;
-                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -122,63 +90,51 @@ int xml_msg_translate(xmlDocPtr doc,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xml_msg_translate/excp=%d/"
+    LIXA_TRACE(("lixa_msg_serialize/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int xml_msg_translate_args(xmlDocPtr doc, xmlNode *node,
-                           struct xml_msg_generic_s *xmg)
+int lixa_msg_deserialize(const char *buffer, size_t buffer_len,
+                         struct lixa_msg_s *msg)
 {
-    enum Exception { MSG_TAG_NOT_FOUND
+    enum Exception { XML_READ_MEMORY_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    xmlNode *cur_node = NULL;
+    xmlDocPtr doc = NULL;
     
-    LIXA_TRACE(("xml_msg_translate_args\n"));
+    LIXA_TRACE(("lixa_msg_deserialize\n"));
     TRY {
-        /* check the higher level tag is "msg" */
-        if (node->type != XML_ELEMENT_NODE ||
-            xmlStrcmp(node->name, (xmlChar *)XML_MSG_TAG_ARGS))
-            THROW(MSG_TAG_NOT_FOUND);
+        if (NULL == (doc = xmlReadMemory(buffer, (int)buffer_len, "buffer.xml",
+                                         NULL, 0)))
+            THROW(XML_READ_MEMORY_ERROR);
 
-        for (cur_node = node->children; cur_node; cur_node = cur_node->next) {
-            if (cur_node->type == XML_ELEMENT_NODE) {
-                LIXA_TRACE(("xml_msg_translate_args: tag %s\n",
-                            cur_node->name));
-                if (!xmlStrcmp(cur_node->name,
-                               (xmlChar *)XML_MSG_TAG_PROFILE)) {
-                    /* retrieve profile value */
-                    xmlChar *profile;
-                    profile = xmlNodeListGetString(
-                        doc, cur_node->xmlChildrenNode, 1);
-                    xmg->tx_open1.profile = profile == NULL ?
-                        strdup("") : strdup((char *)profile);
-                    LIXA_TRACE(("xml_msg_translate_args: profile = '%s'\n",
-                                xmg->tx_open1.profile));
-                    xmlFree(profile);
-                }
-            }
-        }
+        /* @@@ perform deserialization logic (tree navigation) */
 
-                
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case MSG_TAG_NOT_FOUND:
-                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
-                break;                
+            case XML_READ_MEMORY_ERROR:
+                ret_cod = LIXA_RC_XML_READ_MEMORY_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* recover resources */
+        if (NULL != doc) {
+            /* free parsed document */
+            xmlFreeDoc(doc);
+            /* release libxml2 stuff */
+            xmlCleanupParser();
+        }
     } /* TRY-CATCH */
-    LIXA_TRACE(("xml_msg_translate_args/excp=%d/"
+    LIXA_TRACE(("lixa_msg_deserialize/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

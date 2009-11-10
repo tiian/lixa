@@ -434,42 +434,26 @@ int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id)
 int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                             const char *buf, ssize_t read_bytes)
 {
-    enum Exception { XML_READ_MEMORY_ERROR
-                     , SERVER_TRANSLATE_MSG
+    enum Exception { LIXA_MSG_DESERIALIZE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    xmlDocPtr doc;
-    
     LIXA_TRACE(("server_manager_XML_proc\n"));
     TRY {
-        struct xml_msg_generic_s xmg;
+        struct lixa_msg_s lm;
         
         LIXA_TRACE(("server_manager_XML_proc: message is |%*.*s|\n",
                     read_bytes, read_bytes, buf));
 
-        /* load XML tree */
-        if (NULL == (doc = xmlReadMemory(buf, (int)read_bytes, "buffer.xml",
-                                         NULL, 0)))
-            THROW(XML_READ_MEMORY_ERROR);
-
-        /* translate the message from XML to native C ... */
-        if (LIXA_RC_OK != (ret_cod = xml_msg_translate(doc, &xmg)))
-            THROW(SERVER_TRANSLATE_MSG);
+        /* @@@ deserialize the message from XML to native C ... */
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
+                               buf, read_bytes, &lm)))
+            THROW(LIXA_MSG_DESERIALIZE_ERROR);
         
-        /* free parsed document */
-        xmlFreeDoc(doc);
-
-        /* release libxml2 stuff */
-        xmlCleanupParser();
-
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case XML_READ_MEMORY_ERROR:
-                ret_cod = LIXA_RC_XML_READ_MEMORY_ERROR;
-                break;
-            case SERVER_TRANSLATE_MSG:
+            case LIXA_MSG_DESERIALIZE_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -477,10 +461,6 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        if (excp > XML_READ_MEMORY_ERROR && excp < NONE) {
-            xmlFreeDoc(doc);
-            xmlCleanupParser();
-        }
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_XML_proc/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
