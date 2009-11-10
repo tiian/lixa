@@ -45,6 +45,9 @@
 #ifdef HAVE_LIBXML_PARSER_H
 # include <libxml/parser.h>
 #endif
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 
 
 
@@ -149,12 +152,140 @@ struct xml_msg_generic_s {
 
 
 
+/**
+ * Default buffer size for XML messages (used for serialization/
+ * deserialization)
+ **/
+#define LIXA_MSG_XML_BUFFER_SIZE 4096
+
+
+
+/**
+ * Current protocol level; it's used to recognize incompatible client/server
+ * configuration at run-time
+ */
+#define LIXA_MSG_LEVEL        0
+/**
+ * Id assigned to verb "open"
+ */
+#define LIXA_MSG_VERB_OPEN    1
+/**
+ * Id assigned to verb "open"
+ */
+#define LIXA_MSG_VERB_CLOSE   2
+
+
+
+/**
+ * Mandatory header for every message encoded as @ref lixa_msg_s
+ */
+struct lixa_msg_header_s {
+    /**
+     * Protocol level must be applied to this message
+     */
+    int level;
+    /**
+     * Specifies the verb (open, close, begin, commit, ecc...)
+     */
+    int verb;
+    /**
+     * Specifies the step inside the verb (1, 2, 3, ...)
+     */
+    int step; 
+    /**
+     * The sender is waiting an answer
+     */
+    int wait;
+    /**
+     * The server must synchronize the received data as soon as possible
+     */
+    int sync;
+};
+
+    
+
+/**
+ * Convenience struct for @ref lixa_msg_body_open_1_s
+ */
+struct lixa_msg_body_open_1_client_s {
+    xmlChar   *profile;
+};
+
+    
+
+/**
+ * Convenience struct for @ref lixa_msg_body_open_1_s
+ */
+struct lixa_msg_body_open_1_rsrmgr_s {
+    int        rmid;
+    xmlChar   *name;
+};
+
+    
+
+/**
+ * Message body for verb "open", step "1"
+ */
+struct lixa_msg_body_open_1_s {
+    struct lixa_msg_body_open_1_client_s   client;
+    GArray                                *rsrmgrs;
+};
+
+
+
+/**
+ * This structure maps the messages flowing between LIXA client (lixac) and
+ * LIXA server (lixad). The struct is not used for the transmission over the
+ * network, but only inside the client and the server.
+ * This is a "fake" object; it's defined and used in the hope of simplicity
+ */
+struct lixa_msg_s {
+    /**
+     * Message header, common to all messages
+     */
+    struct lixa_msg_header_s            header;
+    /**
+     * Message body, it depends from header
+     */
+    union {
+        struct lixa_msg_body_open_1_s   open_1;
+    } body;
+};
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 
 
+    /**
+     * Serialize a message struct to an XML buffer for external transmission
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @return a reason code
+     */
+    int lixa_msg_serialize(const struct lixa_msg_s msg,
+                           char *buffer);
+
+    
+
+    /**
+     * Deserialize a buffer containing XML to a message struct
+     * @param buffer IN the buffer contains the XML serialized object (it must
+     *                  be null terminated)
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize(const char *buffer,
+                             struct lixa_msg_s *msg);
+    
+
+    
     /**
      * Translate a message from XML encoding to native C structure
      * @param doc IN the XML parsed document
