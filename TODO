@@ -1,5 +1,4 @@
-delete "xml_msg_* XML_MSG_*" and implement "lixa_msg_* LIXA_MSG_*"
-implement tx_open and xa_open...: see lixa_xa_open function!
+implement tx_open and xa_open...: see *** lixa_xa_open *** function!
 Generate a unique rmid...
 
 When server_manager_thread exits, the listener must be aware of this... 

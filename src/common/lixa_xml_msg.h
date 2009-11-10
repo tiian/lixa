@@ -62,32 +62,6 @@
 
 
 
-#define XML_MSG_PROP_TYPE           "type"
-#define XML_MSG_TAG_ARGS            "args"
-#define XML_MSG_TAG_MSG             "msg"
-#define XML_MSG_TAG_PROFILE         "profile"
-
-
-
-/**
- * Default buffer size for XML messages
- **/
-#define XML_BUFFER_SIZE 4096
-
-/**
- * This is the standard header must be prepended to every XML message
- */
-#define XML_MSG_HEADER "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
-
-
-
-/**
- * Type of the first message sent by tx_open function to the server
- */
-#define XML_MSG_TX_OPEN1_TYPE (long)1
-
-
-
 /*
   level: message level, version
   verb:  xa_open -> open; xa_begin ->begin, ...
@@ -107,48 +81,6 @@
   server -> client message (answer)
   <msg level="1" verb="open" step="2" rc="0"/>
  */
-
-
-
-/**
- * Text of the first message sent by tx_open function to the server
- */
-#define XML_MSG_TX_OPEN1 XML_MSG_HEADER \
-    "<" XML_MSG_TAG_MSG " " XML_MSG_PROP_TYPE "=\"%ld\">" \
-    "<" XML_MSG_TAG_ARGS ">" \
-    "<" XML_MSG_TAG_PROFILE ">%s</" XML_MSG_TAG_PROFILE ">" \
-    "</" XML_MSG_TAG_ARGS ">" \
-    "</" XML_MSG_TAG_MSG ">"
-
-
-
-/**
- * Struct used to map a message of type @ref XML_MSG_TX_OPEN1
- */
-struct xml_msg_tx_open1_s {
-    /**
-     * Dynamically allocated, it must be released after usage
-     */
-    char *profile;
-};
-
-
-
-/**
- * Struct used to map a generic message
- */
-struct xml_msg_generic_s {
-    /**
-     * The string associated to the type carried by XML "<type>" tag
-     */
-    long  type;
-    /**
-     * Content: it depends on type
-     */
-    union {
-        struct xml_msg_tx_open1_s   tx_open1;
-    };
-};
 
 
 
@@ -173,6 +105,53 @@ struct xml_msg_generic_s {
  * Id assigned to verb "open"
  */
 #define LIXA_MSG_VERB_CLOSE   2
+
+
+
+/**
+ * Label used to specify "level" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_LEVEL;
+/**
+ * Label used to specify "name" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_NAME;
+/**
+ * Label used to specify "rmid" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_RMID;
+/**
+ * Label used to specify "step" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_STEP;
+/**
+ * Label used to specify "sync" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_SYNC;
+/**
+ * Label used to specify "verb" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_VERB;
+/**
+ * Label used to specify "wait" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_WAIT;
+/**
+ * Label used to specify "client" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_CLIENT;
+/**
+ * Label used to specify "msg" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_MSG;
+/**
+ * Label used to specify "rsrmgr" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_RSRMGR;
+/**
+ * Label used to specify "rsrmgrs" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_RSRMGRS;
 
 
 
@@ -275,39 +254,17 @@ extern "C" {
     
 
     /**
-     * Deserialize a buffer containing XML to a message struct
-     * @param buffer IN the buffer contains the XML serialized object (it must
-     *                  be null terminated)
+     * Deserialize a buffer containing the XML to a message struct
+     * @param buffer IN the buffer that's containing the serialized object
+     *                  (it must be null terminated)
+     * @param buffer_len IN number of significative bytes of buffer
      * @param msg OUT the object after deserialization
      * @return a reason code
      */
-    int lixa_msg_deserialize(const char *buffer,
+    int lixa_msg_deserialize(const char *buffer, size_t buffer_len,
                              struct lixa_msg_s *msg);
     
 
-    
-    /**
-     * Translate a message from XML encoding to native C structure
-     * @param doc IN the XML parsed document
-     * @param xmg OUT the reference to the native C structure
-     * @return a standardized return code
-     */
-    int xml_msg_translate(xmlDocPtr doc,
-                          struct xml_msg_generic_s *xmg);
-
-
-
-    /**
-     * Translate args from an XML message to a native C structure
-     * @param doc IN the XML parsed document
-     * @param node IN the root of the XML parsed tree
-     * @param xmg OUT the reference to the native C structure
-     * @return a standardized return code
-     */
-    int xml_msg_translate_args(xmlDocPtr doc, xmlNode *node,
-                               struct xml_msg_generic_s *xmg);
-
-    
     
 #ifdef __cplusplus
 }

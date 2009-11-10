@@ -122,19 +122,16 @@ int lixa_tx_open(int *txrc)
                      , CLIENT_CONFIG_LOAD_SWITCH_ERROR
                      , CLIENT_CONNECT_ERROR
                      , COLL_GET_CS_ERROR
+                     , LIXA_XA_OPEN_ERROR
                      , ALREADY_OPENED
-                     , BUFFER_TOO_SMALL
-                     , SEND_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     *txrc = TX_FAIL;
 
     LIXA_TRACE(("lixa_tx_open\n"));    
     TRY {
-        int fd, txstate, pos = 0;
+        int txstate, pos = 0;
         client_status_t *cs;
-        char xml_buffer[XML_BUFFER_SIZE];
-        ssize_t buffer_len;
         
         /* check if the thread is already registered and
          * retrieve a reference to the status of the current thread */
@@ -165,28 +162,11 @@ int lixa_tx_open(int *txrc)
                                client_connect(&global_csc, &global_ccc)))
                 THROW(CLIENT_CONNECT_ERROR);
 
-            /* retrieve the socket */
-            fd = client_status_get_sockfd(cs);
-
-            /* @@@ the real logic must be put here */
-
-            /* prepare XML message */
-            if (sizeof(xml_buffer) <= (
-                    buffer_len = snprintf(xml_buffer, XML_BUFFER_SIZE,
-                                          XML_MSG_TX_OPEN1,
-                                          XML_MSG_TX_OPEN1_TYPE,
-                                          global_ccc.profile))) {
-                LIXA_TRACE(("lixa_tx_open: xml_buffer to small. "
-                            "INTERNAL ERROR\n"));
-                THROW(BUFFER_TOO_SMALL);
-            }
-
-            LIXA_TRACE(("lixa_tx_open: sending " SSIZE_T_FORMAT " bytes to the "
-                        "server\n", buffer_len));
-            /* send XML message to server */
-            if (buffer_len != send(fd, xml_buffer, buffer_len, 0))
-                THROW(SEND_ERROR);
-
+            /* the real logic must be put here */
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_open(cs)))
+                THROW(LIXA_XA_OPEN_ERROR);
+            /* @@@ some logic mapping XA -> TX return code should put here */
+            
             /* set new state after RMs are open... */
             client_status_set_txstate(cs, TX_STATE_S1);
         } else { /* already opened, nothing to do */
@@ -208,17 +188,11 @@ int lixa_tx_open(int *txrc)
                 *txrc = TX_ERROR;
                 break;
             case COLL_GET_CS_ERROR:
+            case LIXA_XA_OPEN_ERROR:
                 break;
             case ALREADY_OPENED:
                 ret_cod = LIXA_RC_BYPASSED_OPERATION;
                 *txrc = TX_OK;
-                break;
-            case BUFFER_TOO_SMALL:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-                break;
-            case SEND_ERROR:
-                *txrc = TX_ERROR;
-                ret_cod = LIXA_RC_SEND_ERROR;
                 break;
             case NONE:
                 *txrc = TX_OK;

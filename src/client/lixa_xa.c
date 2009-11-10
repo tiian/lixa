@@ -36,6 +36,8 @@
 
 #include <lixa_trace.h>
 #include <lixa_errors.h>
+#include <lixa_xml_msg.h>
+#include <client_status.h>
 
 
 
@@ -47,13 +49,29 @@
 
 
 
-int lixa_xa_open()
+int lixa_xa_open(client_status_t *cs)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_xa_open\n"));
     TRY {
+        struct lixa_msg_s msg;
+        int fd;
+
+        /* retrieve the socket */
+        fd = client_status_get_sockfd(cs);
+
+        /* build the message */
+        msg.header.level = LIXA_MSG_LEVEL;
+        msg.header.verb = LIXA_MSG_VERB_OPEN;
+        msg.header.step = 1;
+        msg.header.wait = TRUE;
+        msg.header.sync = FALSE;
+
+        msg.body.open_1.client.profile = (xmlChar *)global_ccc.profile;
+        /* @@@ now put resource managers will be opened... */
+        
         /* @@@ a lot of stuff:
            1. send a msg to the server with the characteristic of the
               transaction, the number and the type of resource manager
