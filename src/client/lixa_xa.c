@@ -51,13 +51,17 @@
 
 int lixa_xa_open(client_status_t *cs)
 {
-    enum Exception { NONE } excp;
+    enum Exception { MSG_SERIALIZE_ERROR
+                     , SEND_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_xa_open\n"));
     TRY {
         struct lixa_msg_s msg;
-        int fd;
+        int fd, buffer_size = 0;
+        guint i;
+        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -70,7 +74,27 @@ int lixa_xa_open(client_status_t *cs)
         msg.header.sync = FALSE;
 
         msg.body.open_1.client.profile = (xmlChar *)global_ccc.profile;
-        /* @@@ now put resource managers will be opened... */
+        msg.body.open_1.rsrmgrs = g_array_sized_new(
+            FALSE, FALSE,
+            sizeof(struct lixa_msg_body_open_1_rsrmgr_s),
+            global_ccc.actconf.rsrmgrs->len);
+        for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+            struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
+                global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
+            struct lixa_msg_body_open_1_rsrmgr_s record;
+            record.rmid = i;
+            record.name = act_rsrmgr->generic->name;
+            g_array_append_val(msg.body.open_1.rsrmgrs, record);
+        }
+
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
+                               &msg, buffer, sizeof(buffer), &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR);
+        
+        LIXA_TRACE(("lixa_xa_open: sending %d bytes to the server\n",
+                    buffer_size));
+        if (buffer_size != send(fd, buffer, buffer_size, 0))
+            THROW(SEND_ERROR);
         
         /* @@@ a lot of stuff:
            1. send a msg to the server with the characteristic of the
@@ -86,6 +110,11 @@ int lixa_xa_open(client_status_t *cs)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case MSG_SERIALIZE_ERROR:
+                break;
+            case SEND_ERROR:
+                ret_cod = LIXA_RC_SEND_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

@@ -70,7 +70,7 @@
   sync:  0 do not synchronize status file, 1 status file must be synchronized
 
   client->server message (question)
-  <msg level="1" verb="open" step="1" wait="1" sync="0">
+  <msg level="1" verb="1" step="1" wait="1" sync="0">
     <client profile="VZ67"/>
     <rsrmgrs>
       <rsrmgr rmid="1" name="dummyrm"/>
@@ -116,6 +116,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_LEVEL;
  * Label used to specify "name" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_NAME;
+/**
+ * Label used to specify "profile" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_PROFILE;
 /**
  * Label used to specify "rmid" property
  */
@@ -246,10 +250,13 @@ extern "C" {
      *                   (the size has fixed size of
      *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
      *                   null terminated
+     * @param buffer_len IN the space allocated for buffer
+     * @param msg_len OUT number of chars used in buffer for serializing msg
      * @return a reason code
      */
-    int lixa_msg_serialize(const struct lixa_msg_s msg,
-                           char *buffer);
+    int lixa_msg_serialize(const struct lixa_msg_s *msg,
+                           char *buffer, size_t buffer_len,
+                           int *msg_len);
 
     
 
