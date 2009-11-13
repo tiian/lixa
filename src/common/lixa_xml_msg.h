@@ -62,28 +62,6 @@
 
 
 
-/*
-  level: message level, version
-  verb:  xa_open -> open; xa_begin ->begin, ...
-  step:  1, 2, 3, ... as necessary
-  wait:  0=async message, 1=sync message = the client is waiting reply
-  sync:  0 do not synchronize status file, 1 status file must be synchronized
-
-  client->server message (question)
-  <msg level="1" verb="1" step="1" wait="1" sync="0">
-    <client profile="VZ67"/>
-    <rsrmgrs>
-      <rsrmgr rmid="1" name="dummyrm"/>
-      <rsrmgr rmid="2" name="randomrm"/>
-    </rsrmgrs>
-  </msg>
-
-  server -> client message (answer)
-  <msg level="1" verb="open" step="2" rc="0"/>
- */
-
-
-
 /**
  * Default buffer size for XML messages (used for serialization/
  * deserialization)
@@ -129,17 +107,9 @@ extern const xmlChar *LIXA_XML_MSG_PROP_RMID;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_STEP;
 /**
- * Label used to specify "sync" property
- */
-extern const xmlChar *LIXA_XML_MSG_PROP_SYNC;
-/**
  * Label used to specify "verb" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_VERB;
-/**
- * Label used to specify "wait" property
- */
-extern const xmlChar *LIXA_XML_MSG_PROP_WAIT;
 /**
  * Label used to specify "client" tag
  */
@@ -175,14 +145,6 @@ struct lixa_msg_header_s {
      * Specifies the step inside the verb (1, 2, 3, ...)
      */
     int step; 
-    /**
-     * The sender is waiting an answer
-     */
-    int wait;
-    /**
-     * The server must synchronize the received data as soon as possible
-     */
-    int sync;
 };
 
     
@@ -271,6 +233,37 @@ extern "C" {
     int lixa_msg_deserialize(const char *buffer, size_t buffer_len,
                              struct lixa_msg_s *msg);
     
+
+    
+    /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=open, step=1
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_open_1(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
+    /**
+     * Free all the dynamically allocated strings previously allocated by
+     * @ref lixa_msg_deserialize using xmlGetProp method
+     * @param msg IN/OUT the message must be massaged
+     * @return a reason code
+     */
+    int lixa_msg_free(struct lixa_msg_s *msg);
+
+
+    
+    /**
+     * Display the content of a previously deserialized message with
+     * @ref lixa_msg_deserialize method
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int lixa_msg_trace(const struct lixa_msg_s *msg);
+
 
     
 #ifdef __cplusplus

@@ -1,0 +1,47 @@
+This file contains documentation related to the LIXA client/server protocol
+
+The protocol is based on XML messages exchange.
+No validation is performed against XML.
+XML parsing is "static": only expected tags/attributes are searched and
+retrieved.
+XML generation is "static": from a composite struct, a serialization function
+able to understand the struct, generates the resulting XML document.
+The usage of XML is possibly not strictly compliant with standards; it's used
+as a serialization/deserialization tool to avoid portability nightmares and
+cross platform issues (server is big endian, client is little endian or server
+is ASCII, client is EBCDIC...).
+
+Every message must have two distinctive fields in the header:
+- verb: the operation correlated to the data contained in the XML document
+- step: the progress inside the operation
+an optional field is
+- level: the level of implemented protocol
+
+This documentations contains: state tables for transitions of client/server
+messages and some message samples.
+
+***************************************************************************
+
+verb=1 (xa_open)
+
+  level: message level, version
+  verb:  xa_open -> 1
+  step:  1, 2, 3, ... as necessary
+
+  client->server message (question)
+  <msg level="1" verb="1" step="1">
+    <client profile="VZ67"/>
+    <rsrmgrs>
+      <rsrmgr rmid="1" name="dummyrm"/>
+      <rsrmgr rmid="2" name="randomrm"/>
+    </rsrmgrs>
+  </msg>
+
+  server -> client message (answer)
+  <msg verb="1" step="2" rc="0"/>
+
+
+client 			 server		description
+verb=1,step=1 -->			send list of resource managers
+	      				allocate blocks & synch
+		<-- verb=1,step=2	confirm block allocation

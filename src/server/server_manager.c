@@ -435,6 +435,8 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                             const char *buf, ssize_t read_bytes)
 {
     enum Exception { LIXA_MSG_DESERIALIZE_ERROR
+                     , LIXA_MSG_TRACE_ERROR
+                     , LIXA_MSG_FREE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -445,15 +447,25 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
         LIXA_TRACE(("server_manager_XML_proc: message is |%*.*s|\n",
                     read_bytes, read_bytes, buf));
 
-        /* @@@ deserialize the message from XML to native C ... */
+        /* deserialize the message from XML to native C ... */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
                                buf, read_bytes, &lm)))
             THROW(LIXA_MSG_DESERIALIZE_ERROR);
-        
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_trace(&lm)))
+            THROW(LIXA_MSG_TRACE_ERROR);
+
+        /* @@@ put logic here */
+
+        /* release dynamically allocated strings */
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_free(&lm)))
+            THROW(LIXA_MSG_FREE_ERROR);
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case LIXA_MSG_DESERIALIZE_ERROR:
+            case LIXA_MSG_TRACE_ERROR:
+            case LIXA_MSG_FREE_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
