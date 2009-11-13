@@ -46,6 +46,7 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_tx.h>
+#include <lixa_xa.h>
 #include <lixa_xml_msg.h>
 #include <client_conn.h>
 #include <client_config.h>

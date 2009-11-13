@@ -146,13 +146,17 @@ define LIXA_RC_FILE_ALREADY_EXISTS            -15
 define LIXA_RC_DESTINATION_TOO_SMALL          -16
  */
 /**
+ * The XML message is empty and can not be processed
+ */
+#define LIXA_RC_EMPTY_XML_MSG                  -16
+/**
  * The XML message is malformed and can not be processed
  */
 #define LIXA_RC_MALFORMED_XML_MSG              -17
 /**
  * The XML message is malformed and can not be processed
  */
-#define LIXA_RC_UNKNOWN_XML_MSG_TYPE           -18
+#define LIXA_RC_PROPERTY_INVALID_VALUE         -18
 /**
  * The XML contains a tag is not known or is in the wrong place
  */

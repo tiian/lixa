@@ -62,9 +62,7 @@ const xmlChar *LIXA_XML_MSG_PROP_NAME =    (xmlChar *)"name";
 const xmlChar *LIXA_XML_MSG_PROP_PROFILE = (xmlChar *)"profile";
 const xmlChar *LIXA_XML_MSG_PROP_RMID =    (xmlChar *)"rmid";
 const xmlChar *LIXA_XML_MSG_PROP_STEP =    (xmlChar *)"step";
-const xmlChar *LIXA_XML_MSG_PROP_SYNC =    (xmlChar *)"sync";
 const xmlChar *LIXA_XML_MSG_PROP_VERB =    (xmlChar *)"verb";
-const xmlChar *LIXA_XML_MSG_PROP_WAIT =    (xmlChar *)"wait";
 const xmlChar *LIXA_XML_MSG_TAG_CLIENT =   (xmlChar *)"client";
 const xmlChar *LIXA_XML_MSG_TAG_MSG =      (xmlChar *)"msg";
 const xmlChar *LIXA_XML_MSG_TAG_RSRMGR =   (xmlChar *)"rsrmgr";
@@ -102,19 +100,14 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
         free_chars -= used_chars;
         offset += used_chars;
         used_chars = snprintf(buffer + offset, free_chars,
-                              "<%s %s=\"%d\" %s=\"%d\" %s=\"%d\" %s=\"%d\" "
-                              "%s=\"%d\">",
+                              "<%s %s=\"%d\" %s=\"%d\" %s=\"%d\">",
                               LIXA_XML_MSG_TAG_MSG,
                               LIXA_XML_MSG_PROP_LEVEL,
                               msg->header.level,
                               LIXA_XML_MSG_PROP_VERB,
                               msg->header.verb,
                               LIXA_XML_MSG_PROP_STEP,
-                              msg->header.step,
-                              LIXA_XML_MSG_PROP_WAIT,
-                              msg->header.wait,
-                              LIXA_XML_MSG_PROP_SYNC,
-                              msg->header.sync);
+                              msg->header.step);
         if (used_chars >= free_chars)
             THROW(BUFFER_TOO_SHORT2);
         free_chars -= used_chars;
@@ -224,24 +217,94 @@ int lixa_msg_deserialize(const char *buffer, size_t buffer_len,
                          struct lixa_msg_s *msg)
 {
     enum Exception { XML_READ_MEMORY_ERROR
+                     , EMPTY_XML_MSG
+                     , ROOT_TAG_IS_NOT_MSG
+                     , MISSING_TAGS
+                     , VERB_NOT_FOUND
+                     , STEP_NOT_FOUND
+                     , LEVEL_NOT_FOUND
+                     , INVALID_STEP1
+                     , INVALID_VERB
+                     , CHILD_LEVEL_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     xmlDocPtr doc = NULL;
+    xmlNodePtr cur = NULL;
     
     LIXA_TRACE(("lixa_msg_deserialize\n"));
     TRY {
+        xmlChar *tmp;
+        
         if (NULL == (doc = xmlReadMemory(buffer, (int)buffer_len, "buffer.xml",
                                          NULL, 0)))
             THROW(XML_READ_MEMORY_ERROR);
 
-        /* @@@ perform deserialization logic (tree navigation) */
-
+        /* retrieve header message properties */
+        if (NULL == (cur = xmlDocGetRootElement(doc)))
+            THROW(EMPTY_XML_MSG);
+        if (xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_MSG))
+            THROW(ROOT_TAG_IS_NOT_MSG);
+        /* check there is at least a child */
+        if (NULL == cur->xmlChildrenNode)
+            THROW(MISSING_TAGS);
+        /* reset output message */
+        memset(msg, 0, sizeof(struct lixa_msg_s));
+        /* retrieve verb */
+        if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_VERB)))
+            THROW(VERB_NOT_FOUND);
+        msg->header.verb = (int)strtol((char *)tmp, NULL, 0);
+        xmlFree(tmp);
+        /* retrieve step */
+        if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_STEP)))
+            THROW(STEP_NOT_FOUND);
+        msg->header.step = (int)strtol((char *)tmp, NULL, 0);
+        xmlFree(tmp);
+        /* retrieve level */
+        if (msg->header.step == 1) {
+            if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_LEVEL)))
+                THROW(LEVEL_NOT_FOUND);
+            msg->header.level = (int)strtol((char *)tmp, NULL, 0);
+            xmlFree(tmp);
+        }
+        switch (msg->header.verb) {
+            case 1: /* open */
+                switch (msg->header.step) {
+                    case 1:
+                        ret_cod = lixa_msg_deserialize_open_1(
+                            cur->xmlChildrenNode, msg);
+                        break;
+                    default:
+                        THROW(INVALID_STEP1);
+                }
+                break;
+            default:
+                THROW(INVALID_VERB);
+        }
+        if (LIXA_RC_OK != ret_cod)
+            THROW(CHILD_LEVEL_ERROR);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case XML_READ_MEMORY_ERROR:
                 ret_cod = LIXA_RC_XML_READ_MEMORY_ERROR;
+                break;
+            case EMPTY_XML_MSG:
+                ret_cod = LIXA_RC_EMPTY_XML_MSG;
+                break;
+            case ROOT_TAG_IS_NOT_MSG:
+            case MISSING_TAGS:
+            case VERB_NOT_FOUND:
+            case STEP_NOT_FOUND:
+            case LEVEL_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
+            case INVALID_STEP1:
+            case INVALID_VERB:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case CHILD_LEVEL_ERROR: /* propagate child's ret_cod */
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -253,11 +316,208 @@ int lixa_msg_deserialize(const char *buffer, size_t buffer_len,
         if (NULL != doc) {
             /* free parsed document */
             xmlFreeDoc(doc);
-            /* release libxml2 stuff */
+            /* release libxml2 stuff
             xmlCleanupParser();
+            */
         }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_deserialize_open_1(xmlNodePtr cur, struct lixa_msg_s *msg)
+{
+    enum Exception { PROFILE_NOT_FOUND
+                     , RMID_NOT_FOUND
+                     , NAME_NOT_FOUND
+                     , XML_UNRECOGNIZED_TAG
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_deserialize_open_1\n"));
+    TRY {
+        while (NULL != cur) {
+            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CLIENT)) {
+                /* retrieve client properties */
+                if (NULL == (msg->body.open_1.client.profile =
+                             xmlGetProp(cur, LIXA_XML_MSG_PROP_PROFILE)))
+                    THROW(PROFILE_NOT_FOUND);
+            } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_RSRMGRS)) {
+                xmlNodePtr cur2 = cur->xmlChildrenNode;
+                /* initialize array (3 slots may be a good choice for
+                   initial size) */
+                msg->body.open_1.rsrmgrs = g_array_sized_new(
+                    FALSE, FALSE,
+                    sizeof(struct lixa_msg_body_open_1_rsrmgr_s), 3);
+                /* retrieve resource managers */
+                while (NULL != cur2) {
+                    if (!xmlStrcmp(cur2->name, LIXA_XML_MSG_TAG_RSRMGR)) {
+                        xmlChar *tmp;
+                        struct lixa_msg_body_open_1_rsrmgr_s rsrmgr;
+                        /* retrieve rmid */
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_RMID)))
+                            THROW(RMID_NOT_FOUND);
+                        rsrmgr.rmid = (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                        /* retrieve name */
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_NAME)))
+                            THROW(NAME_NOT_FOUND);
+                        rsrmgr.name = tmp;
+                        g_array_append_val(msg->body.open_1.rsrmgrs, rsrmgr);
+                    }
+                    cur2 = cur2->next;
+                } /* while (NULL != child) */
+            } else
+                THROW(XML_UNRECOGNIZED_TAG);
+            cur = cur->next;
+        } /* while (NULL != cur) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case XML_UNRECOGNIZED_TAG:
+            case RMID_NOT_FOUND:
+            case NAME_NOT_FOUND:
+                ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
+                break;
+            case PROFILE_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_deserialize_open_1/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_free(struct lixa_msg_s *msg)
+{
+    enum Exception { INVALID_STEP1
+                     , INVALID_VERB
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_free\n"));
+    TRY {
+        guint i;
+        switch (msg->header.verb) {
+            case 1: /* open */
+                switch (msg->header.step) {
+                    case 1:
+                        xmlFree(msg->body.open_1.client.profile);
+                        msg->body.open_1.client.profile = NULL;
+                        for (i=0; i<msg->body.open_1.rsrmgrs->len; ++i) {
+                            struct lixa_msg_body_open_1_rsrmgr_s *rsrmgr =
+                                &g_array_index(
+                                    msg->body.open_1.rsrmgrs,
+                                    struct lixa_msg_body_open_1_rsrmgr_s, i);
+                            xmlFree(rsrmgr->name);
+                        }
+                        g_array_free(msg->body.open_1.rsrmgrs, TRUE);
+                        msg->body.open_1.rsrmgrs = NULL;
+                        break;
+                    default:
+                        THROW(INVALID_STEP1);
+                }
+                break;
+            default:
+                THROW(INVALID_VERB);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP1:
+            case INVALID_VERB:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_free/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_trace(const struct lixa_msg_s *msg)
+{
+    enum Exception { INVALID_STEP1
+                     , INVALID_VERB
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_trace\n"));
+    TRY {
+        guint i;
+        static const xmlChar *nil_str = (xmlChar *)"(nil)";
+        
+        LIXA_TRACE(("lixa_msg_trace: header[level=%d,verb=%d,step=%d]\n",
+                    msg->header.level, msg->header.verb, msg->header.step));
+        switch (msg->header.verb) {
+            case 1: /* open */
+                switch (msg->header.step) {
+                    case 1:
+                        LIXA_TRACE(("lixa_msg_trace: body[client[profile["
+                                    "%s]]]\n",
+                                    msg->body.open_1.client.profile ?
+                                    msg->body.open_1.client.profile :
+                                    nil_str));
+                        if (NULL != msg->body.open_1.rsrmgrs) {
+                            for (i=0; i<msg->body.open_1.rsrmgrs->len; ++i) {
+                                struct lixa_msg_body_open_1_rsrmgr_s *rsrmgr =
+                                    &g_array_index(
+                                        msg->body.open_1.rsrmgrs,
+                                        struct lixa_msg_body_open_1_rsrmgr_s,
+                                        i);
+                                LIXA_TRACE(("lixa_msg_trace: body[rsrmgrs["
+                                            "rsrmgr[rmid=%d,name='%s']]]\n",
+                                            rsrmgr->rmid,
+                                            rsrmgr->name ?
+                                            rsrmgr->name : nil_str));
+                            }
+                        }
+                        break;
+                    default:
+                        THROW(INVALID_STEP1);
+                }
+                break;
+            default:
+                THROW(INVALID_VERB);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP1:
+            case INVALID_VERB:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_trace/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
