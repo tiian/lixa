@@ -134,9 +134,9 @@ define LIXA_RC_OBJ_NOT_VOID                    -7
  */
 #define LIXA_RC_INVALID_STATUS                 -13
 /**
- * An invalid path/file name has been passed
-define LIXA_RC_INVALID_PATH_NAME              -14
+ * Too many resource managers
  */
+#define LIXA_RC_TOO_MANY_RSRMGRS               -14
 /**
  * The file should not exist and a new one can not be safely created
 define LIXA_RC_FILE_ALREADY_EXISTS            -15

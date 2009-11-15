@@ -446,6 +446,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
     LIXA_TRACE(("server_manager_XML_proc\n"));
     TRY {
         struct lixa_msg_s lm;
+        uint32_t block_id;
         
         LIXA_TRACE(("server_manager_XML_proc: message is |%*.*s|\n",
                     read_bytes, read_bytes, buf));
@@ -458,11 +459,15 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
         if (LIXA_RC_OK != (ret_cod = lixa_msg_trace(&lm)))
             THROW(LIXA_MSG_TRACE_ERROR);
 #endif
+        /* retrieve the block is storing the status of the client inside
+           memory mapped status file */
+        block_id = ts->client_array[slot_id].pers_status_slot_id;
         
-        /* @@@ put logic here */
+        /* process the message */
         switch (lm.header.verb) {
             case LIXA_MSG_VERB_OPEN:
-                if (LIXA_RC_OK != (ret_cod = server_xa_open(ts, &lm)))
+                if (LIXA_RC_OK != (ret_cod = server_xa_open(
+                                       ts, &lm, block_id)))
                     THROW(SERVER_XA_OPEN_ERROR)
                 break;
             default:

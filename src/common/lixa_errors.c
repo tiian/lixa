@@ -79,9 +79,9 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: a routine has been invoked in an improper context";
         case LIXA_RC_INVALID_STATUS:
                   return "ERROR: invalid object status";
+        case LIXA_RC_TOO_MANY_RSRMGRS:
+            return "ERROR: too many resource managers";
             /*
-              case LIXA_RC_INVALID_PATH_NAME:
-              return "ERROR: invalid path name";
               case LIXA_RC_FILE_ALREADY_EXISTS:
               return "ERROR: file can not be created because it already "
               "exists";

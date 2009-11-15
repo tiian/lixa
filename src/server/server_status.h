@@ -522,6 +522,21 @@ extern "C" {
     
 
 
+
+    /**
+     * Allocate a chain of records inside the status record memory mapped
+     * array. The allocation is atomically: all or none of the records are
+     * allocated at exit
+     * @param ts IN/OUT reference to thread status
+     * @param slot IN index of the block will have a chain
+     * @param size IN number of blocks must be allocated
+     * @return a reason code
+     */
+    int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
+                               int size);
+    
+    
+    
     /**
      * Load status records from status file
      * @param sr OUT pointer to the mapped file
@@ -590,7 +605,7 @@ extern "C" {
     static inline void status_record_update(status_record_t *sr,
                                             uintptr_t index,
                                             GTree *updated_records) {
-        if (!(sr->counter%2)) {
+        if (!(sr->counter & 0x1)) {
             sr->counter++;
             g_tree_insert(updated_records, (gpointer)index, NULL);
             LIXA_TRACE(("status_record_update: inserted "
