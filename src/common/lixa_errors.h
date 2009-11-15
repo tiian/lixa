@@ -131,8 +131,8 @@ define LIXA_RC_OBJ_NOT_VOID                    -7
 /**
  * The status (value of any properties) of an object is invalid due to a bug
  * located elsewhere (a complex "internal error" condition)
-define LIXA_RC_INVALID_STATUS                 -11
  */
+#define LIXA_RC_INVALID_STATUS                 -13
 /**
  * An invalid path/file name has been passed
 define LIXA_RC_INVALID_PATH_NAME              -14

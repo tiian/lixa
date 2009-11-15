@@ -77,9 +77,9 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: a specified option is not valid";
         case LIXA_RC_PROTOCOL_ERROR:
             return "ERROR: a routine has been invoked in an improper context";
+        case LIXA_RC_INVALID_STATUS:
+                  return "ERROR: invalid object status";
             /*
-              case LIXA_RC_INVALID_STATUS:
-              return "ERROR: invalid object status";
               case LIXA_RC_INVALID_PATH_NAME:
               return "ERROR: invalid path name";
               case LIXA_RC_FILE_ALREADY_EXISTS:
