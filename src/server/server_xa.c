@@ -48,17 +48,34 @@
 
 
 int server_xa_open(struct thread_status_s *ts,
-                   const struct lixa_msg_s *lm)
+                   const struct lixa_msg_s *lm,
+                   uint32_t block_id)
 {
-    enum Exception { NONE } excp;
+    enum Exception { SERVER_XA_OPEN_1_ERROR
+                     , INVALID_STEP
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("server_xa_open\n"));
     TRY {
+        switch (lm->header.step) {
+            case 1:
+                if (LIXA_RC_OK != (ret_cod = server_xa_open_1(
+                                       ts, lm, block_id)))
+                    THROW(SERVER_XA_OPEN_1_ERROR);
+                break;
+            default:
+                THROW(INVALID_STEP);
+        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case SERVER_XA_OPEN_1_ERROR:
+                break;
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -71,3 +88,59 @@ int server_xa_open(struct thread_status_s *ts,
     return ret_cod;
 }
 
+
+
+int server_xa_open_1(struct thread_status_s *ts,
+                     const struct lixa_msg_s *lm,
+                     uint32_t block_id)
+{
+    enum Exception { RSRMGRS_ARRAY_NULL
+                     , TOO_MANY_RSRMGRS
+                     , PAYLOAD_CHAIN_ALLOCATE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_open_1\n"));
+    TRY {
+#ifndef NDEBUG
+        /* check the resource manager array is OK */
+        if (NULL == lm->body.open_1.rsrmgrs)
+            THROW(RSRMGRS_ARRAY_NULL);
+#endif /* NDEBUG */
+        if (lm->body.open_1.rsrmgrs->len > CHAIN_MAX_SIZE) {
+            LIXA_TRACE(("server_xa_open_1: message arrived from client "
+                        "would use %u (max is %u)\n",
+                        lm->body.open_1.rsrmgrs->len,
+                        CHAIN_MAX_SIZE));
+            THROW(TOO_MANY_RSRMGRS);
+        }
+
+        if (LIXA_RC_OK != (ret_cod = payload_chain_allocate(
+                               ts, block_id, lm->body.open_1.rsrmgrs->len)))
+            THROW(PAYLOAD_CHAIN_ALLOCATE_ERROR);
+
+        /* @@@ go on with implementation... */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+#ifndef NDEBUG
+            case RSRMGRS_ARRAY_NULL:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+#endif /* NDEBUG */
+            case TOO_MANY_RSRMGRS:
+                ret_cod = LIXA_RC_TOO_MANY_RSRMGRS;
+            case PAYLOAD_CHAIN_ALLOCATE_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_open_1/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}

@@ -206,11 +206,9 @@ int payload_chain_release(struct thread_status_s *ts, uint32_t slot)
             THROW(INVALID_BLOCK_TYPE);
         /* release chained blocks */
         for (i = 0; i < csr[slot].sr.data.pld.ph.n; ++i) {
-#ifndef NDEBUG
-            LIXA_TRACE(("payload_chain_release: releasing chained block "
-                        UINT32_T_FORMAT "\n",
-                        csr[slot].sr.data.pld.ph.block_array[i]));
-#endif            
+            LIXA_TRACE(("payload_chain_release: child # %d, releasing chained "
+                        "block " UINT32_T_FORMAT "\n",
+                        i, csr[slot].sr.data.pld.ph.block_array[i]));
             if (LIXA_RC_OK != (ret_cod = status_record_delete(
                                    ts,
                                    csr[slot].sr.data.pld.ph.block_array[i])))
@@ -248,6 +246,93 @@ int payload_chain_release(struct thread_status_s *ts, uint32_t slot)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("payload_chain_release/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
+                           int size)
+{
+    enum Exception { OUT_OF_RANGE
+                     , INVALID_BLOCK_TYPE
+                     , SLOT_ALREADY_CHAINED
+                     , STATUS_RECORD_INSERT_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("payload_chain_allocate\n"));
+    TRY {
+        int i;
+        
+        /* check the request can be feasible */
+        if (size > CHAIN_MAX_SIZE) {
+            LIXA_TRACE(("payload_chain_allocate: size=%d, max=%d\n",
+                        size, CHAIN_MAX_SIZE));
+            THROW(OUT_OF_RANGE);
+        }
+
+        /* check this is a payload header */
+        if (ts->curr_status[slot].sr.data.pld.type != DATA_PAYLOAD_TYPE_HEADER)
+            THROW(INVALID_BLOCK_TYPE);
+        
+        /* check the slot is not already chained */
+        if (ts->curr_status[slot].sr.data.pld.ph.n > 0) {
+            LIXA_TRACE(("payload_chain_allocate: slot " UINT32_T_FORMAT
+                        "is already chained with %d children blocks\n",
+                        slot, ts->curr_status[slot].sr.data.pld.ph.n));
+            THROW(SLOT_ALREADY_CHAINED);
+        }
+
+        /* allocate the blocks */
+        for (i=0; i<size; ++i) {
+            uint32_t new_slot;;
+            if (LIXA_RC_OK != (ret_cod = status_record_insert(
+                                   ts, &new_slot))) {
+                LIXA_TRACE(("payload_chain_allocate: error while allocating "
+                            "%d of %d slot\n", i, size));
+                THROW(STATUS_RECORD_INSERT_ERROR);
+            }
+            /* reset block payload content */
+            memset(&(ts->curr_status[new_slot].sr.data.pld), 0,
+                   sizeof(struct status_record_data_payload_s));
+            /* point the new block from chain */
+            status_record_update(ts->curr_status + slot, slot,
+                                 ts->updated_records);
+            ts->curr_status[slot].sr.data.pld.ph.block_array[i] = new_slot;
+            ts->curr_status[slot].sr.data.pld.ph.n++;
+            LIXA_TRACE(("payload_chain_allocate: number of children is now "
+                        "%d, last children is " UINT32_T_FORMAT "\n",
+                        ts->curr_status[slot].sr.data.pld.ph.n,
+                        ts->curr_status[slot].sr.data.pld.ph.block_array[i]));
+        }
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OUT_OF_RANGE:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case INVALID_BLOCK_TYPE:
+                ret_cod = LIXA_RC_OBJ_NOT_INITIALIZED;
+                break;
+            case SLOT_ALREADY_CHAINED:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case STATUS_RECORD_INSERT_ERROR:
+                LIXA_TRACE(("payload_chain_allocate: unable to allocate "
+                            "%d children blocks, releasing all...\n", size));
+                if (LIXA_RC_OK == (ret_cod = payload_chain_release(ts, slot)))
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("payload_chain_allocate/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
