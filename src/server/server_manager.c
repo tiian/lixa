@@ -48,6 +48,7 @@
 #include <lixa_xml_msg.h>
 #include <server_manager.h>
 #include <server_messages.h>
+#include <server_xa.h>
 
 
 
@@ -437,6 +438,8 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
     enum Exception { LIXA_MSG_DESERIALIZE_ERROR
                      , LIXA_MSG_TRACE_ERROR
                      , LIXA_MSG_FREE_ERROR
+                     , SERVER_XA_OPEN_ERROR
+                     , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -451,11 +454,21 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
                                buf, read_bytes, &lm)))
             THROW(LIXA_MSG_DESERIALIZE_ERROR);
+#ifdef _TRACE
         if (LIXA_RC_OK != (ret_cod = lixa_msg_trace(&lm)))
             THROW(LIXA_MSG_TRACE_ERROR);
-
+#endif
+        
         /* @@@ put logic here */
-
+        switch (lm.header.verb) {
+            case LIXA_MSG_VERB_OPEN:
+                if (LIXA_RC_OK != (ret_cod = server_xa_open(ts, &lm)))
+                    THROW(SERVER_XA_OPEN_ERROR)
+                break;
+            default:
+                THROW(INVALID_VERB);
+        }
+        
         /* release dynamically allocated strings */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_free(&lm)))
             THROW(LIXA_MSG_FREE_ERROR);
@@ -466,6 +479,10 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
             case LIXA_MSG_DESERIALIZE_ERROR:
             case LIXA_MSG_TRACE_ERROR:
             case LIXA_MSG_FREE_ERROR:
+            case SERVER_XA_OPEN_ERROR:
+                break;
+            case INVALID_VERB:
+                ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
