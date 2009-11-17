@@ -958,9 +958,9 @@ int status_record_delete(struct thread_status_s *ts,
             fr = csr[fr].sr.data.next_block;
         }
 
-        LIXA_TRACE(("status_record_delete: ul = " UINT32_T_FORMAT
-                    ", ur = " UINT32_T_FORMAT ", fl = " UINT32_T_FORMAT
-                    ", fr = " UINT32_T_FORMAT "\n", ul, ur, fl, fr));
+        LIXA_TRACE(("status_record_delete: ul=" UINT32_T_FORMAT
+                    ", ur=" UINT32_T_FORMAT ", fl=" UINT32_T_FORMAT
+                    ", fr=" UINT32_T_FORMAT "\n", ul, ur, fl, fr));
         
         /* remove block from used block list */
         if (ul == 0) {

@@ -34,6 +34,12 @@
 
 
 
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+
+
+
 #include <lixa_errors.h>
 #include <server_xa.h>
 
@@ -102,6 +108,8 @@ int server_xa_open_1(struct thread_status_s *ts,
     
     LIXA_TRACE(("server_xa_open_1\n"));
     TRY {
+        uint32_t i;
+        
 #ifndef NDEBUG
         /* check the resource manager array is OK */
         if (NULL == lm->body.open_1.rsrmgrs)
@@ -119,7 +127,21 @@ int server_xa_open_1(struct thread_status_s *ts,
                                ts, block_id, lm->body.open_1.rsrmgrs->len)))
             THROW(PAYLOAD_CHAIN_ALLOCATE_ERROR);
 
-        /* @@@ go on with implementation... */
+        for (i=0; i<lm->body.open_1.rsrmgrs->len; ++i) {
+            status_record_t *sr;
+            struct lixa_msg_body_open_1_rsrmgr_s *rsrmgr;
+            sr = ts->curr_status +
+                ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
+            rsrmgr = &g_array_index(lm->body.open_1.rsrmgrs,
+                                    struct lixa_msg_body_open_1_rsrmgr_s,
+                                    i);
+            sr->sr.data.pld.rm.rmid = rsrmgr->rmid;
+            strncpy(sr->sr.data.pld.rm.name, (char *)rsrmgr->name,
+                    PAYLOAD_RSRMGR_NAME_MAX);
+            sr->sr.data.pld.rm.name[PAYLOAD_RSRMGR_NAME_MAX - 1] = '\0';
+        }
+        /* @@@ go on with implementation... reply to client the records
+         are allocated */
         
         THROW(NONE);
     } CATCH {

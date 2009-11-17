@@ -104,8 +104,15 @@
  * The data record is an header
  */
 #define DATA_PAYLOAD_TYPE_HEADER  1
+/**
+ * The data record is a resource manager block
+ */
+#define DATA_PAYLOAD_TYPE_RSRMGR  2
 
-
+/**
+ * Maximum lenght (null char terminator included) of resource manager name
+ */
+#define PAYLOAD_RSRMGR_NAME_MAX   30
 
 /**
  * Number of bytes necessary to store an MD5 digest
@@ -212,7 +219,7 @@ struct status_record_ctrl_s {
  * must be defined for every client session. Different type of records are
  * not mandatory
  */
-struct payload_header {
+struct payload_header_s {
     /**
      * Number of elements in the block array
      */
@@ -238,6 +245,22 @@ struct payload_header {
     
 
 /**
+ * This struct is the used to store the status of a resource manager
+ */
+struct payload_rsrmgr_s {
+    /**
+     * Resource Manager ID
+     */
+    int         rmid;
+    /**
+     * Name of the resource manager as defined in lixac_conf.xml
+     */
+    char        name[PAYLOAD_RSRMGR_NAME_MAX];
+};
+
+
+    
+/**
  * This struct is used to separate scaffolding from payload in data records;
  * all the payload data are kept by this structure
  */
@@ -250,7 +273,8 @@ struct status_record_data_payload_s {
      * The data stored by the records depend from the value of the field type
      */
     union {
-        struct payload_header ph;
+        struct payload_header_s ph;
+        struct payload_rsrmgr_s rm;
     };
 };
 
