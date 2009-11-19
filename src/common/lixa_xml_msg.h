@@ -76,6 +76,10 @@
  */
 #define LIXA_MSG_LEVEL        0
 /**
+ * Id reserved for a null message
+ */
+#define LIXA_MSG_VERB_NULL    0
+/**
  * Id assigned to verb "open"
  */
 #define LIXA_MSG_VERB_OPEN    1
@@ -99,6 +103,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_NAME;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_PROFILE;
 /**
+ * Label used to specify "rc" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_RC;
+/**
  * Label used to specify "rmid" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_RMID;
@@ -110,6 +118,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_STEP;
  * Label used to specify "verb" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_VERB;
+/**
+ * Label used to specify "answer" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_ANSWER;
 /**
  * Label used to specify "client" tag
  */
@@ -147,7 +159,19 @@ struct lixa_msg_header_s {
     int step; 
 };
 
-    
+ 
+
+/**
+ * Generic answer message struct
+ */
+struct lixa_msg_body_answer_s {
+    /**
+     * Return code of the invoked operation
+     */
+    int ret_cod;
+};
+
+
 
 /**
  * Convenience struct for @ref lixa_msg_body_open_1_s
@@ -193,6 +217,7 @@ struct lixa_msg_s {
      * Message body, it depends from header
      */
     union {
+        struct lixa_msg_body_answer_s   answer;
         struct lixa_msg_body_open_1_s   open_1;
     } body;
 };
@@ -218,10 +243,46 @@ extern "C" {
      */
     int lixa_msg_serialize(const struct lixa_msg_s *msg,
                            char *buffer, size_t buffer_len,
-                           int *msg_len);
+                           size_t *msg_len);
 
     
 
+    /**
+     * Serialize the "open_1" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int lixa_msg_serialize_open_1(const struct lixa_msg_s *msg,
+                                  char *buffer,
+                                  size_t *offset, size_t *free_chars);
+
+
+    
+    /**
+     * Serialize the "open_2" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int lixa_msg_serialize_open_2(const struct lixa_msg_s *msg,
+                                  char *buffer,
+                                  size_t *offset, size_t *free_chars);
+
+    
+    
     /**
      * Deserialize a buffer containing the XML to a message struct
      * @param buffer IN the buffer that's containing the serialized object

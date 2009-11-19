@@ -170,6 +170,15 @@ struct server_client_status_s {
      * the status of this client
      */
     uint32_t pers_status_slot_id;
+    /**
+     * Buffer must be sent to the client: if NULL, no buffer needs to be sent
+     */ 
+    char    *output_buffer;
+    /**
+     * Size of the buffer must be sent to the client; if @output_buffer is
+     * NULL, this field is meaningless
+     */
+    size_t   output_buffer_size;
 };
 
 
@@ -273,7 +282,13 @@ struct status_record_data_payload_s {
      * The data stored by the records depend from the value of the field type
      */
     union {
+        /**
+         * Payload used for header
+         */
         struct payload_header_s ph;
+        /**
+         * Payload used for resource manager
+         */
         struct payload_rsrmgr_s rm;
     };
 };

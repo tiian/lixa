@@ -54,7 +54,8 @@
 
 
 int server_xa_open(struct thread_status_s *ts,
-                   const struct lixa_msg_s *lm,
+                   const struct lixa_msg_s *lmi,
+                   struct lixa_msg_s *lmo,
                    uint32_t block_id)
 {
     enum Exception { SERVER_XA_OPEN_1_ERROR
@@ -64,10 +65,10 @@ int server_xa_open(struct thread_status_s *ts,
     
     LIXA_TRACE(("server_xa_open\n"));
     TRY {
-        switch (lm->header.step) {
+        switch (lmi->header.step) {
             case 1:
                 if (LIXA_RC_OK != (ret_cod = server_xa_open_1(
-                                       ts, lm, block_id)))
+                                       ts, lmi, lmo, block_id)))
                     THROW(SERVER_XA_OPEN_1_ERROR);
                 break;
             default:
@@ -97,7 +98,8 @@ int server_xa_open(struct thread_status_s *ts,
 
 
 int server_xa_open_1(struct thread_status_s *ts,
-                     const struct lixa_msg_s *lm,
+                     const struct lixa_msg_s *lmi,
+                     struct lixa_msg_s *lmo,
                      uint32_t block_id)
 {
     enum Exception { RSRMGRS_ARRAY_NULL
@@ -112,27 +114,27 @@ int server_xa_open_1(struct thread_status_s *ts,
         
 #ifndef NDEBUG
         /* check the resource manager array is OK */
-        if (NULL == lm->body.open_1.rsrmgrs)
+        if (NULL == lmi->body.open_1.rsrmgrs)
             THROW(RSRMGRS_ARRAY_NULL);
 #endif /* NDEBUG */
-        if (lm->body.open_1.rsrmgrs->len > CHAIN_MAX_SIZE) {
+        if (lmi->body.open_1.rsrmgrs->len > CHAIN_MAX_SIZE) {
             LIXA_TRACE(("server_xa_open_1: message arrived from client "
                         "would use %u (max is %u)\n",
-                        lm->body.open_1.rsrmgrs->len,
+                        lmi->body.open_1.rsrmgrs->len,
                         CHAIN_MAX_SIZE));
             THROW(TOO_MANY_RSRMGRS);
         }
 
         if (LIXA_RC_OK != (ret_cod = payload_chain_allocate(
-                               ts, block_id, lm->body.open_1.rsrmgrs->len)))
+                               ts, block_id, lmi->body.open_1.rsrmgrs->len)))
             THROW(PAYLOAD_CHAIN_ALLOCATE_ERROR);
 
-        for (i=0; i<lm->body.open_1.rsrmgrs->len; ++i) {
+        for (i=0; i<lmi->body.open_1.rsrmgrs->len; ++i) {
             status_record_t *sr;
             struct lixa_msg_body_open_1_rsrmgr_s *rsrmgr;
             sr = ts->curr_status +
                 ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
-            rsrmgr = &g_array_index(lm->body.open_1.rsrmgrs,
+            rsrmgr = &g_array_index(lmi->body.open_1.rsrmgrs,
                                     struct lixa_msg_body_open_1_rsrmgr_s,
                                     i);
             sr->sr.data.pld.rm.rmid = rsrmgr->rmid;
@@ -140,6 +142,9 @@ int server_xa_open_1(struct thread_status_s *ts,
                     PAYLOAD_RSRMGR_NAME_MAX);
             sr->sr.data.pld.rm.name[PAYLOAD_RSRMGR_NAME_MAX - 1] = '\0';
         }
+
+        /* prepare output message */
+        lmo->header.verb = lmi->header.verb;
         /* @@@ go on with implementation... reply to client the records
          are allocated */
         

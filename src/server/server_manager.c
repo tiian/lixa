@@ -443,9 +443,10 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
+    struct lixa_msg_s lmi, lmo;
+
     LIXA_TRACE(("server_manager_XML_proc\n"));
     TRY {
-        struct lixa_msg_s lm;
         uint32_t block_id;
         
         LIXA_TRACE(("server_manager_XML_proc: message is |%*.*s|\n",
@@ -453,21 +454,26 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
 
         /* deserialize the message from XML to native C ... */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                               buf, read_bytes, &lm)))
+                               buf, read_bytes, &lmi)))
             THROW(LIXA_MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_trace(&lm)))
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_trace(&lmi)))
             THROW(LIXA_MSG_TRACE_ERROR);
 #endif
         /* retrieve the block is storing the status of the client inside
            memory mapped status file */
         block_id = ts->client_array[slot_id].pers_status_slot_id;
+
+        /* set output message */
+        lmo.header.level = LIXA_MSG_LEVEL;
+        lmo.header.verb = LIXA_MSG_VERB_NULL;
+        lmo.header.step = lmi.header.step + 1;
         
         /* process the message */
-        switch (lm.header.verb) {
+        switch (lmi.header.verb) {
             case LIXA_MSG_VERB_OPEN:
                 if (LIXA_RC_OK != (ret_cod = server_xa_open(
-                                       ts, &lm, block_id)))
+                                       ts, &lmi, &lmo, block_id)))
                     THROW(SERVER_XA_OPEN_ERROR)
                 break;
             default:
@@ -475,7 +481,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
         }
         
         /* release dynamically allocated strings */
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_free(&lm)))
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_free(&lmi)))
             THROW(LIXA_MSG_FREE_ERROR);
 
         THROW(NONE);
@@ -495,6 +501,36 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        
+        /* prepare output message */
+        if (lmo.header.verb != LIXA_MSG_VERB_NULL) {
+            /* allocate the output buffer */
+            if (NULL == (ts->client_array[slot_id].output_buffer = malloc(
+                             LIXA_MSG_XML_BUFFER_SIZE))) {
+                LIXA_TRACE(("server_manager_XML_proc: error while allocating "
+                            "the buffer to reply to client\n"));
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+            }
+            lmo.body.answer.ret_cod = ret_cod;
+            if (LIXA_RC_OK != (
+                    ret_cod = lixa_msg_serialize(
+                        &lmo,
+                        ts->client_array[slot_id].output_buffer,
+                        LIXA_MSG_XML_BUFFER_SIZE,
+                        &ts->client_array[slot_id].output_buffer_size))) {
+                LIXA_TRACE(("server_manager_XML_proc: error while serializing "
+                            "reply message to client\n"));
+            }
+            if (LIXA_RC_OK == ret_cod) {
+                LIXA_TRACE(("server_manager_XML_proc: reply message is "
+                            "|%*.*s|\n",
+                            ts->client_array[slot_id].output_buffer_size,
+                            ts->client_array[slot_id].output_buffer_size,
+                            ts->client_array[slot_id].output_buffer));
+            }
+
+        }
+            
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_XML_proc/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -592,7 +628,11 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
 
         /* save a reference to the slot */
         ts->client_array[place].pers_status_slot_id = place;
-        
+        /* reset the output buffer pointer (it msy be garbage if unused
+           before */
+        ts->client_array[place].output_buffer = NULL;
+        ts->client_array[place].output_buffer_size = 0;
+                
         THROW(NONE);
     } CATCH {
         switch (excp) {
