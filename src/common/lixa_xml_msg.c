@@ -60,9 +60,11 @@
 const xmlChar *LIXA_XML_MSG_PROP_LEVEL =   (xmlChar *)"level";
 const xmlChar *LIXA_XML_MSG_PROP_NAME =    (xmlChar *)"name";
 const xmlChar *LIXA_XML_MSG_PROP_PROFILE = (xmlChar *)"profile";
+const xmlChar *LIXA_XML_MSG_PROP_RC =      (xmlChar *)"rc";
 const xmlChar *LIXA_XML_MSG_PROP_RMID =    (xmlChar *)"rmid";
 const xmlChar *LIXA_XML_MSG_PROP_STEP =    (xmlChar *)"step";
 const xmlChar *LIXA_XML_MSG_PROP_VERB =    (xmlChar *)"verb";
+const xmlChar *LIXA_XML_MSG_TAG_ANSWER =   (xmlChar *)"answer";
 const xmlChar *LIXA_XML_MSG_TAG_CLIENT =   (xmlChar *)"client";
 const xmlChar *LIXA_XML_MSG_TAG_MSG =      (xmlChar *)"msg";
 const xmlChar *LIXA_XML_MSG_TAG_RSRMGR =   (xmlChar *)"rsrmgr";
@@ -72,26 +74,23 @@ const xmlChar *LIXA_XML_MSG_TAG_RSRMGRS =  (xmlChar *)"rsrmgrs";
 
 int lixa_msg_serialize(const struct lixa_msg_s *msg,
                        char *buffer, size_t buffer_len,
-                       int *msg_len)
+                       size_t *msg_len)
 {
     enum Exception { BUFFER_TOO_SHORT1
                      , BUFFER_TOO_SHORT2
-                     , BUFFER_TOO_SHORT3
-                     , BUFFER_TOO_SHORT4
-                     , BUFFER_TOO_SHORT5
-                     , BUFFER_TOO_SHORT6
+                     , SERIALIZE_OPEN_1_ERROR
+                     , SERIALIZE_OPEN_2_ERROR
                      , INVALID_OPEN_STEP
                      , INVALID_VERB
-                     , BUFFER_TOO_SHORT999
+                     , BUFFER_TOO_SHORT3
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    int used_chars = 0, offset = 0;
-    size_t free_chars = buffer_len;
+    int used_chars = 0;
+    size_t free_chars = buffer_len, offset = 0;
     
     LIXA_TRACE(("lixa_msg_serialize\n"));
     TRY {
-        guint i;
         used_chars = snprintf(buffer, free_chars,
                               "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
         if (used_chars >= free_chars)
@@ -117,50 +116,18 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
             case LIXA_MSG_VERB_OPEN:
                 switch (msg->header.step) {
                     case 1:
-                        /* <client> */
-                        used_chars = snprintf(buffer + offset, free_chars,
-                                              "<%s %s=\"%s\"/>",
-                                              LIXA_XML_MSG_TAG_CLIENT,
-                                              LIXA_XML_MSG_PROP_PROFILE,
-                                              msg->body.open_1.client.profile);
-                        if (used_chars >= free_chars)
-                            THROW(BUFFER_TOO_SHORT3);
-                        free_chars -= used_chars;
-                        offset += used_chars;
-                        /* <rsrmgrs> */
-                        used_chars = snprintf(buffer + offset, free_chars,
-                                              "<%s>",
-                                              LIXA_XML_MSG_TAG_RSRMGRS);
-                        if (used_chars >= free_chars)
-                            THROW(BUFFER_TOO_SHORT4);
-                        free_chars -= used_chars;
-                        offset += used_chars;
-                        /* <rsrmgr> */
-                        for (i=0; i<msg->body.open_1.rsrmgrs->len; ++i) {
-                            struct lixa_msg_body_open_1_rsrmgr_s *rsrmgr;
-                            rsrmgr = &g_array_index(
-                                msg->body.open_1.rsrmgrs,
-                                struct lixa_msg_body_open_1_rsrmgr_s, i);
-                            used_chars = snprintf(buffer + offset, free_chars,
-                                                  "<%s %s=\"%d\" %s=\"%s\"/>",
-                                                  LIXA_XML_MSG_TAG_RSRMGR,
-                                                  LIXA_XML_MSG_PROP_RMID,
-                                                  rsrmgr->rmid,
-                                                  LIXA_XML_MSG_PROP_NAME,
-                                                  rsrmgr->name);
-                            if (used_chars >= free_chars)
-                                THROW(BUFFER_TOO_SHORT5);
-                            free_chars -= used_chars;
-                            offset += used_chars;
-                        }
-                        /* </rsrmgrs> */
-                        used_chars = snprintf(buffer + offset, free_chars,
-                                              "</%s>",
-                                              LIXA_XML_MSG_TAG_RSRMGRS);
-                        if (used_chars >= free_chars)
-                            THROW(BUFFER_TOO_SHORT6);
-                        free_chars -= used_chars;
-                        offset += used_chars;
+                        if (LIXA_RC_OK != (
+                                ret_cod =
+                                lixa_msg_serialize_open_1(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_OPEN_1_ERROR);
+                        break;
+                    case 2:
+                        if (LIXA_RC_OK != (
+                                ret_cod =
+                                lixa_msg_serialize_open_2(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_OPEN_2_ERROR);
                         break;
                     default:
                         THROW(INVALID_OPEN_STEP);
@@ -176,7 +143,7 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
         used_chars = snprintf(buffer + offset, free_chars,
                               "</%s>", LIXA_XML_MSG_TAG_MSG);
         if (used_chars >= free_chars)
-            THROW(BUFFER_TOO_SHORT999);
+            THROW(BUFFER_TOO_SHORT3);
         free_chars -= used_chars;
         offset += used_chars;
 
@@ -186,17 +153,16 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
         switch (excp) {
             case BUFFER_TOO_SHORT1:
             case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-            case BUFFER_TOO_SHORT5:
-            case BUFFER_TOO_SHORT6:
                 ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case SERIALIZE_OPEN_1_ERROR:
+            case SERIALIZE_OPEN_2_ERROR:
                 break;
             case INVALID_OPEN_STEP:
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
-            case BUFFER_TOO_SHORT999:
+            case BUFFER_TOO_SHORT3:
                 ret_cod = LIXA_RC_CONTAINER_FULL;
                 break;
             case NONE:
@@ -207,6 +173,131 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_serialize_open_1(const struct lixa_msg_s *msg,
+                              char *buffer,
+                              size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT1
+                     , BUFFER_TOO_SHORT2
+                     , BUFFER_TOO_SHORT3
+                     , BUFFER_TOO_SHORT4
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_serialize_open_1\n"));
+    TRY {
+        int used_chars;
+        guint i;
+        
+        /* <client> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%s\"/>",
+                              LIXA_XML_MSG_TAG_CLIENT,
+                              LIXA_XML_MSG_PROP_PROFILE,
+                              msg->body.open_1.client.profile);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT1);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        /* <rsrmgrs> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s>",
+                              LIXA_XML_MSG_TAG_RSRMGRS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT2);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        /* <rsrmgr> */
+        for (i=0; i<msg->body.open_1.rsrmgrs->len; ++i) {
+            struct lixa_msg_body_open_1_rsrmgr_s *rsrmgr;
+            rsrmgr = &g_array_index(
+                msg->body.open_1.rsrmgrs,
+                struct lixa_msg_body_open_1_rsrmgr_s, i);
+            used_chars = snprintf(buffer + *offset, *free_chars,
+                                  "<%s %s=\"%d\" %s=\"%s\"/>",
+                                  LIXA_XML_MSG_TAG_RSRMGR,
+                                  LIXA_XML_MSG_PROP_RMID,
+                                  rsrmgr->rmid,
+                                  LIXA_XML_MSG_PROP_NAME,
+                                  rsrmgr->name);
+            if (used_chars >= *free_chars)
+                THROW(BUFFER_TOO_SHORT3);
+            *free_chars -= used_chars;
+            *offset += used_chars;
+        }
+        /* </rsrmgrs> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "</%s>",
+                              LIXA_XML_MSG_TAG_RSRMGRS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT4);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT1:
+            case BUFFER_TOO_SHORT2:
+            case BUFFER_TOO_SHORT3:
+            case BUFFER_TOO_SHORT4:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_serialize_open_1/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+int lixa_msg_serialize_open_2(const struct lixa_msg_s *msg,
+                              char *buffer,
+                              size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_serialize_open_2\n"));
+    TRY {
+        int used_chars;
+        
+        /* <answer> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%d\"/>",
+                              LIXA_XML_MSG_TAG_ANSWER,
+                              LIXA_XML_MSG_PROP_RC,
+                              msg->body.answer.ret_cod);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_serialize_open_2/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

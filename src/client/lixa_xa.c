@@ -59,7 +59,8 @@ int lixa_xa_open(client_status_t *cs)
     LIXA_TRACE(("lixa_xa_open\n"));
     TRY {
         struct lixa_msg_s msg;
-        int fd, buffer_size = 0;
+        int fd;
+        size_t buffer_size = 0;
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
 
@@ -89,8 +90,8 @@ int lixa_xa_open(client_status_t *cs)
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
         
-        LIXA_TRACE(("lixa_xa_open: sending %d bytes to the server\n",
-                    buffer_size));
+        LIXA_TRACE(("lixa_xa_open: sending " SIZE_T_FORMAT
+                    " bytes to the server\n", buffer_size));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
         

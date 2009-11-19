@@ -38,7 +38,10 @@ verb=1 (xa_open)
   </msg>
 
   server -> client message (answer)
-  <msg verb="1" step="2" rc="0"/>
+  <msg level="1" verb="1" step="2">
+    <answer rc="0"/>
+  </msg>
+
 
 
 client 			 server		description
