@@ -1,5 +1,5 @@
-if server_manager_XML_proc allocated the buffer, sent the buffer back to the
-client...
+go on with lixa_xa_open
+IT SEEMS THERE'S A MEMORY LEAK ON THE CLIENT SIDE... inspect the behaviour
 implement tx_open and xa_open...: see *** server_xa_open_1 *** function!
 Generate a unique rmid...
 

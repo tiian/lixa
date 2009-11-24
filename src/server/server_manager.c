@@ -131,10 +131,12 @@ void *server_manager_thread(void *void_ts)
 {
     enum Exception { ADD_POLL_ERROR
                      , THREAD_STATUS_SYNC_FILES_ERROR
+                     , FIX_POLL_ERROR
                      , POLL_ERROR
                      , NETWORK_EVENT_ERROR
-                     , POLLIN_CTRL
-                     , POLLIN_DATA
+                     , POLLIN_CTRL_ERROR
+                     , POLLIN_DATA_ERROR
+                     , POLLOUT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -151,8 +153,15 @@ void *server_manager_thread(void *void_ts)
                                ts, ts->tpa->array[ts->id].pipefd[0], &place)))
             THROW(ADD_POLL_ERROR);
         while (TRUE) {
-            if (LIXA_RC_OK != (ret_cod = thread_status_sync_files(ts)))
-                THROW(THREAD_STATUS_SYNC_FILES_ERROR);
+            if (ts->asked_sync > 0) {
+                LIXA_TRACE(("server_manager_thread: %d sessions asked file "
+                            "status synchronization\n", ts->asked_sync));
+                if (LIXA_RC_OK != (ret_cod = thread_status_sync_files(ts)))
+                    THROW(THREAD_STATUS_SYNC_FILES_ERROR);
+                ts->asked_sync = 0;
+            }
+            if (LIXA_RC_OK != (ret_cod = server_manager_fix_poll(ts)))
+                THROW(FIX_POLL_ERROR);
             LIXA_TRACE(("server_manager_thread: id = %d, entering poll...\n",
                         ts->id));
             if (0 >= (ready_fd = poll(ts->poll_array, ts->poll_size, -1)))
@@ -162,11 +171,12 @@ void *server_manager_thread(void *void_ts)
             found_fd = 0;
             n = ts->poll_size;
             for (i = 0; i < n; ++i) {
-                LIXA_TRACE(("server_manager_thread: slot = " NFDS_T_FORMAT
-                            ", fd = %d, POLLIN = %d, POLLERR = %d, "
-                            "POLLHUP = %d, POLLNVAL = %d\n",
+                LIXA_TRACE(("server_manager_thread: slot=" NFDS_T_FORMAT
+                            ", fd=%d, POLLIN=%d, POLLOUT=%d, POLLERR=%d, "
+                            "POLLHUP=%d, POLLNVAL=%d\n",
                             i, ts->poll_array[i].fd,
                             ts->poll_array[i].revents & POLLIN,
+                            ts->poll_array[i].revents & POLLOUT,
                             ts->poll_array[i].revents & POLLERR,
                             ts->poll_array[i].revents & POLLHUP,
                             ts->poll_array[i].revents & POLLNVAL));
@@ -185,13 +195,18 @@ void *server_manager_thread(void *void_ts)
                         if (LIXA_RC_OK != (
                                 ret_cod = server_manager_pollin_ctrl(
                                     ts, ts->poll_array[i].fd)))
-                            THROW(POLLIN_CTRL);
+                            THROW(POLLIN_CTRL_ERROR);
                     } else {
                         if (LIXA_RC_OK != (
                                 ret_cod = server_manager_pollin_data(
                                     ts, i)))
-                            THROW(POLLIN_DATA);
+                            THROW(POLLIN_DATA_ERROR);
                     }
+                } else if (ts->poll_array[i].revents & POLLOUT) {
+                    found_fd++;
+                    if (LIXA_RC_OK != (ret_cod = server_manager_pollout(
+                                           ts, i)))
+                        THROW(POLLOUT_ERROR);
                 }
                 if (found_fd == ready_fd)
                     break;
@@ -205,6 +220,7 @@ void *server_manager_thread(void *void_ts)
             case ADD_POLL_ERROR:
                 break;
             case THREAD_STATUS_SYNC_FILES_ERROR:
+            case FIX_POLL_ERROR:
                 break;
             case POLL_ERROR:
                 ret_cod = LIXA_RC_POLL_ERROR;
@@ -212,8 +228,9 @@ void *server_manager_thread(void *void_ts)
             case NETWORK_EVENT_ERROR:
                 ret_cod = LIXA_RC_NETWORK_EVENT_ERROR;
                 break;
-            case POLLIN_DATA:
-            case POLLIN_CTRL:
+            case POLLIN_DATA_ERROR:
+            case POLLIN_CTRL_ERROR:
+            case POLLOUT_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -290,7 +307,7 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
 
 int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 {
-    enum Exception { READ_ERROR
+    enum Exception { RECV_ERROR
                      , PAYLOAD_CHAIN_RELEASE
                      , CLOSE_ERROR
                      , FREE_SLOTS
@@ -305,7 +322,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 
         if (0 > (read_bytes = recv(ts->poll_array[slot_id].fd, buf,
                                    sizeof(buf), 0)))
-            THROW(READ_ERROR);
+            THROW(RECV_ERROR);
         LIXA_TRACE(("server_manager_pollin_data: fd = %d returned %u bytes\n",
                     ts->poll_array[slot_id].fd, read_bytes));
         if (0 == read_bytes) {
@@ -337,8 +354,8 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case READ_ERROR:
-                ret_cod = LIXA_RC_READ_ERROR;
+            case RECV_ERROR:
+                ret_cod = LIXA_RC_RECV_ERROR;
                 break;
             case PAYLOAD_CHAIN_RELEASE:
                 break;
@@ -356,6 +373,46 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_pollin_data/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
+{
+    enum Exception { SEND_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_manager_pollout\n"));
+    TRY {
+        ssize_t wrote_bytes;
+        
+        if (ts->client_array[slot_id].output_buffer_size >
+            (wrote_bytes = send(ts->poll_array[slot_id].fd,
+                                ts->client_array[slot_id].output_buffer,
+                                ts->client_array[slot_id].output_buffer_size,
+                                0)))
+            THROW(SEND_ERROR);
+        free(ts->client_array[slot_id].output_buffer);
+        ts->client_array[slot_id].output_buffer = NULL;
+        ts->client_array[slot_id].output_buffer_size = 0;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case SEND_ERROR:
+                ret_cod = LIXA_RC_SEND_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_manager_pollout/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -600,6 +657,42 @@ int server_manager_add_poll(struct thread_status_s *ts,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_add_poll/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_manager_fix_poll(struct thread_status_s *ts)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_manager_fix_poll\n"));
+    TRY {
+        nfds_t i;
+
+        for (i=1; i<ts->poll_size; ++i) {
+            /* skip records are not used */
+            if (ts->poll_array[i].fd == LIXA_NULL_FD)
+                continue;
+            if (ts->client_array[i].output_buffer == NULL)
+                ts->poll_array[i].events = POLLIN;
+            else
+                ts->poll_array[i].events = POLLOUT;
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_manager_fix_poll/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
