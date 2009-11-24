@@ -145,8 +145,8 @@ int server_xa_open_1(struct thread_status_s *ts,
 
         /* prepare output message */
         lmo->header.verb = lmi->header.verb;
-        /* @@@ go on with implementation... reply to client the records
-         are allocated */
+        /* ask a file status synchronization */
+        ts->asked_sync++;
         
         THROW(NONE);
     } CATCH {

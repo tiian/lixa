@@ -53,6 +53,7 @@ int lixa_xa_open(client_status_t *cs)
 {
     enum Exception { MSG_SERIALIZE_ERROR
                      , SEND_ERROR
+                     , RECV_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -63,6 +64,7 @@ int lixa_xa_open(client_status_t *cs)
         size_t buffer_size = 0;
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        ssize_t read_bytes;
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -95,17 +97,19 @@ int lixa_xa_open(client_status_t *cs)
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
         
+        if (0 > (read_bytes = recv(fd, buffer, buffer_size, 0)))
+            THROW(RECV_ERROR);
+        LIXA_TRACE(("lixa_xa_open: receiving %d"
+                    " bytes from the server |%*.*s|\n",
+                    read_bytes, read_bytes, read_bytes, buffer));
+        
         /* @@@ a lot of stuff:
-           1. send a msg to the server with the characteristic of the
-              transaction, the number and the type of resource manager
-           2. the server must allocate the blocks for the transaction
-           3. wait the answer from the server
            4. loop on all the resource managers
               4a. xa_open the resource manager
               4b. send the result (asynchronously) to the server
            5. return a value to the caller
         */
-        
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -113,6 +117,9 @@ int lixa_xa_open(client_status_t *cs)
                 break;
             case SEND_ERROR:
                 ret_cod = LIXA_RC_SEND_ERROR;
+                break;
+            case RECV_ERROR:
+                ret_cod = LIXA_RC_RECV_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

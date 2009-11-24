@@ -50,7 +50,6 @@ void *a_thread(void *useless)
         tx_close();
         */
         tx_open();  
-        sleep(10);
         tx_close();
 /*        tx_close();   */
     }

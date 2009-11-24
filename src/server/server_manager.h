@@ -109,6 +109,18 @@ extern "C" {
 
 
     /**
+     * This method manages POLLOUT event on file descriptors when a session
+     * previously asked to send back data to its client
+     * @param ts IN/OUT thread status
+     * @param slot_id IN the slot associated to the file descriptor raised
+     *                   the POLLOUT event
+     * @return a standardized return code
+     */
+    int server_manager_pollout(struct thread_status_s *ts, size_t slot_id);
+
+
+
+    /**
      * Free unused tail slot in thread status structure
      * @param ts IN/OUT thread status structure
      * @param slot_id IN id of the slot must be freed
@@ -144,6 +156,17 @@ extern "C" {
 
     
 
+    /**
+     * Fix the status of poll_array: sessions must send back data to client
+     * will be input disabled; sessions don't have to send back data to client
+     * will be output disabled
+     * @param ts IN/OUT thread status structure
+     * @return a standardized return code
+     */
+    int server_manager_fix_poll(struct thread_status_s *ts);
+
+    
+    
     /**
      * Do all stuff necessary to initialize the status for the new incoming
      * client

@@ -429,6 +429,10 @@ struct thread_status_s {
      */
     struct server_client_status_s *client_array;
     /**
+     * One or more sessions asked a file status synchronization
+     */
+    int                            asked_sync;
+    /**
      * Filename of the first status file
      */
     gchar                         *status1_filename;
