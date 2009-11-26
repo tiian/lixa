@@ -32,18 +32,72 @@
  */
 
 #include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include <tx.h>
 
 
 
+void *a_thread(void *useless)
+{
+    int i;
+    for (i = 0; i < 6; ++i) {
+        /*
+        tx_open();
+        tx_close();
+        */
+        tx_open();  
+        tx_close();
+/*        tx_close();   */
+    }
+}
+
+
+
 int main(int argc, char *argv[])
 {
-    printf("lixa hello before tx_open()\n");
-    tx_open();  
-    tx_close();
-    tx_open();  
-    tx_close();
-    printf("lixa hello after tx_close()\n");
+    pthread_t foo;
+    int load = 1, i;
+
+    /*
+    fprintf(stderr, "pathconf -> %ld\n", pathconf("/home/tiian/lixa", _PC_PATH_MAX));
+ 
+    for (load=0; load<10; ++load) {
+        for (i=0; i<load; ++i) {
+            pthread_create(&foo, NULL, a_thread, NULL);
+        }
+        fprintf(stderr, "***************** %d *******************", load);
+        sleep(3);
+    }
+/*
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    pthread_create(&foo, NULL, a_thread, NULL);
+    sleep(30);
+    */
+    
+
+/*    
+    a_thread(&foo);
+    a_thread(&foo);
+    a_thread(&foo);
+    a_thread(&foo);
+*/
+    a_thread(&foo);
+  
     return 0;
 }

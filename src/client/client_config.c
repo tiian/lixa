@@ -441,6 +441,10 @@ int client_config_load_switch(const client_config_coll_t *ccc)
                         "name='%s', switch_file='%s'\n", i,
                         act_rsrmgr->generic->name,
                         act_rsrmgr->generic->switch_file));
+            
+            g_module_open((gchar *)"/tmp/lixa/lib/switch_lixa_dummyrm.so",
+                          G_MODULE_BIND_LAZY);
+            
             if (NULL == (module = g_module_open(
                              (gchar *)act_rsrmgr->generic->switch_file,
                              G_MODULE_BIND_LAZY))) {

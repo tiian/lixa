@@ -20171,6 +20171,7 @@ else
 fi
 
 
+LT_INIT
 # LT Version numbers, remember to change them just *before* a release.
 #   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)
 #   (Interfaces added:      CURRENT++, AGE++, REVISION=0)
@@ -20190,9 +20191,10 @@ LT_LIXAB_REVISION=0
 
 # Check whether --enable-debug was given.
 if test "${enable_debug+set}" = set; then
-  enableval=$enable_debug; NDEBUG="no"
+  enableval=$enable_debug; NDEBUG="no" CFLAGS="-g"
 else
-  NDEBUG="yes"; CPPFLAGS="$CPPFLAGS -DNDEBUG"
+  \
+	NDEBUG="yes"; CPPFLAGS="$CPPFLAGS -DNDEBUG"; CFLAGS="-g -O2"
 fi
 
 # Check whether --enable-trace was given.
