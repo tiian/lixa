@@ -28,6 +28,7 @@ m4_include(m4include/ax_lib_oracle_oci.m4)
 AX_LIB_ORACLE_OCI
 AM_CONDITIONAL([COMPILE_ORACLE_STUFF], [test -n "$oracle_home_dir"])
 
+LT_INIT
 # LT Version numbers, remember to change them just *before* a release.
 #   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)
 #   (Interfaces added:      CURRENT++, AGE++, REVISION=0)
@@ -46,7 +47,8 @@ AC_PRESERVE_HELP_ORDER
 AC_ARG_ENABLE([debug],
         AS_HELP_STRING([--enable-debug],
                 [enable debug code (assert statements)]),
-        [NDEBUG="no"], [NDEBUG="yes"; CPPFLAGS="$CPPFLAGS -DNDEBUG"] )
+        [NDEBUG="no" CFLAGS="-g" ], \
+	[NDEBUG="yes"; CPPFLAGS="$CPPFLAGS -DNDEBUG"; CFLAGS="-g -O2" ] )
 AC_ARG_ENABLE([trace],
         AS_HELP_STRING([--disable-trace],
                 [disable trace feature (not suggested)]),
