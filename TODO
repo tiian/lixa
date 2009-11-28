@@ -1,6 +1,13 @@
 go on with lixa_xa_open
 IT SEEMS THERE'S A MEMORY LEAK ON THE CLIENT SIDE... inspect the behaviour
 implement tx_open and xa_open...: see *** server_xa_open_1 *** function!
-Generate a unique rmid...
+
+Memory leaks seem to be inside client_status_coll_add 
+and
+array of actual resource managers
+
+There's a freeze bug if the client is launched with LIXA_TRACE_MASK=0x0 (the
+bug happens only the first time)
+
 
 When server_manager_thread exits, the listener must be aware of this... 

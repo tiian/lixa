@@ -44,7 +44,7 @@ available_tags=" CXX"
 
 # ### BEGIN LIBTOOL CONFIG
 
-# Libtool was configured on host ubuntu:
+# Libtool was configured on host mojan:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/bash"
@@ -85,7 +85,7 @@ AR_FLAGS="cru"
 LTCC="gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-g"
+LTCFLAGS="-g -O2"
 
 # A language-specific compiler.
 CC="gcc"
@@ -7320,7 +7320,7 @@ disable_libs=static
 # End:
 # ### BEGIN LIBTOOL TAG CONFIG: CXX
 
-# Libtool was configured on host ubuntu:
+# Libtool was configured on host mojan:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/bash"
@@ -7361,7 +7361,7 @@ AR_FLAGS="cru"
 LTCC="gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-g"
+LTCFLAGS="-g -O2"
 
 # A language-specific compiler.
 CC="g++"
