@@ -280,7 +280,7 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
         /* check the slot is not already chained */
         if (ts->curr_status[slot].sr.data.pld.ph.n > 0) {
             LIXA_TRACE(("payload_chain_allocate: slot " UINT32_T_FORMAT
-                        "is already chained with %d children blocks\n",
+                        " is already chained with %d children blocks\n",
                         slot, ts->curr_status[slot].sr.data.pld.ph.n));
             THROW(SLOT_ALREADY_CHAINED);
         }

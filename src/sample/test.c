@@ -40,11 +40,10 @@
 #include <tx.h>
 
 
-
 void *a_thread(void *useless)
 {
     int i;
-    for (i = 0; i < 100; ++i) {
+    for (i = 0; i < 10000; ++i) {
         /*
         tx_open();
         tx_close();
@@ -59,8 +58,7 @@ void *a_thread(void *useless)
 
 int main(int argc, char *argv[])
 {
-    pthread_t foo;
-    int load = 1, i;
+    int foo;
 
     /*
     fprintf(stderr, "pathconf -> %ld\n", pathconf("/home/tiian/lixa", _PC_PATH_MAX));
@@ -97,7 +95,8 @@ int main(int argc, char *argv[])
     a_thread(&foo);
     a_thread(&foo);
 */
+
     a_thread(&foo);
-  
+    
     return 0;
 }

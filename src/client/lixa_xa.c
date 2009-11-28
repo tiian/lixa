@@ -91,6 +91,12 @@ int lixa_xa_open(client_status_t *cs)
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
+
+        /* this object contains a lot of references to external stuff and
+           cannot be freed using standard lixa_msg_free; we are freeing the
+           array to avoid memory leaks */
+        g_array_free(msg.body.open_1.rsrmgrs, TRUE);
+        memset(msg.body.open_1.rsrmgrs, 0, sizeof(msg));
         
         LIXA_TRACE(("lixa_xa_open: sending " SIZE_T_FORMAT
                     " bytes to the server\n", buffer_size));

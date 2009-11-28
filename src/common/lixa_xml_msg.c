@@ -261,6 +261,8 @@ int lixa_msg_serialize_open_1(const struct lixa_msg_s *msg,
     return ret_cod;
 }
 
+
+
 int lixa_msg_serialize_open_2(const struct lixa_msg_s *msg,
                               char *buffer,
                               size_t *offset, size_t *free_chars)
