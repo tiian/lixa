@@ -120,7 +120,6 @@ int lixa_tx_open(int *txrc)
     enum Exception { CLIENT_STATUS_COLL_GET_CS_ERROR
                      , CLIENT_STATUS_COLL_REGISTER_ERROR
                      , CLIENT_CONFIG_ERROR
-                     , CLIENT_CONFIG_LOAD_SWITCH_ERROR
                      , CLIENT_CONNECT_ERROR
                      , COLL_GET_CS_ERROR
                      , LIXA_XA_OPEN_ERROR
@@ -157,9 +156,6 @@ int lixa_tx_open(int *txrc)
             if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc)))
                 THROW(CLIENT_CONFIG_ERROR);
             if (LIXA_RC_OK != (ret_cod =
-                               client_config_load_switch(&global_ccc)))
-                THROW(CLIENT_CONFIG_LOAD_SWITCH_ERROR);        
-            if (LIXA_RC_OK != (ret_cod =
                                client_connect(&global_csc, &global_ccc)))
                 THROW(CLIENT_CONNECT_ERROR);
 
@@ -183,7 +179,6 @@ int lixa_tx_open(int *txrc)
             case CLIENT_STATUS_COLL_REGISTER_ERROR:
                 break;
             case CLIENT_CONFIG_ERROR:
-            case CLIENT_CONFIG_LOAD_SWITCH_ERROR:
                 break;
             case CLIENT_CONNECT_ERROR:
                 *txrc = TX_ERROR;
@@ -253,9 +248,12 @@ int lixa_tx_close(int *txrc)
         if (LIXA_RC_OK != (ret_cod = client_disconnect(&global_csc)))
             THROW(CLIENT_DISCONNECT_ERROR);
 
+        /* @@@ due to a memory leak inside glib discovered with valgrind, the
+           modules are no more unloaded: only process exit will unload them...
         if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))
             THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
-
+        */
+            
         /* update the TX state, now TX_STATE_S0 */
         client_status_set_txstate(cs, TX_STATE_S0);
         

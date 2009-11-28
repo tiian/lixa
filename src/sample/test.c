@@ -44,7 +44,7 @@
 void *a_thread(void *useless)
 {
     int i;
-    for (i = 0; i < 6; ++i) {
+    for (i = 0; i < 100; ++i) {
         /*
         tx_open();
         tx_close();

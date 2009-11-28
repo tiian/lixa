@@ -111,8 +111,7 @@ int client_config_coll_init(client_config_coll_t *ccc)
 
 int client_config(client_config_coll_t *ccc)
 {
-    enum Exception { ALREADY_CONFIGURED
-                     , STRDUP_ERROR
+    enum Exception { STRDUP_ERROR
                      , OPEN_CONFIG_ERROR
                      , CLOSE_ERROR
                      , XML_READ_FILE_ERROR
@@ -121,13 +120,14 @@ int client_config(client_config_coll_t *ccc)
                      , CLIENT_CONFIG_DISPLAY_ERROR
                      , CLIENT_CONFIG_VALIDATE_ERROR
                      , GETADDRINFO_ERROR
+                     , CLIENT_CONFIG_LOAD_SWITCH_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     int fd = 0;
     const char *file_name = NULL;
     xmlNode *root_element = NULL;
-    struct addrinfo hints, *res;
+    struct addrinfo hints, *res = NULL;
 
     ccc->lixac_conf = NULL;
     
@@ -141,23 +141,23 @@ int client_config(client_config_coll_t *ccc)
 
         if (ccc->configured) {
             LIXA_TRACE(("client_config: already configured, skipping...\n"));
-            THROW(ALREADY_CONFIGURED);
-        } else {
-            memset(&ccc->serv_addr, 0, sizeof(struct sockaddr_in));
-            if (NULL == ccc->actconf.rsrmgrs)
-                ccc->actconf.rsrmgrs = g_array_new(
-                    FALSE, FALSE, sizeof(struct act_rsrmgr_config_s));
-            if (NULL == ccc->trnmgrs)
-                ccc->trnmgrs = g_array_new(FALSE, FALSE, sizeof(
-                                               struct trnmgr_config_s));
-            if (NULL == ccc->rsrmgrs)
-                ccc->rsrmgrs = g_array_new(FALSE, FALSE, sizeof(
+            THROW(NONE);
+        } 
+
+        memset(&ccc->serv_addr, 0, sizeof(struct sockaddr_in));
+        if (NULL == ccc->actconf.rsrmgrs)
+            ccc->actconf.rsrmgrs = g_array_new(
+                FALSE, FALSE, sizeof(struct act_rsrmgr_config_s));
+        if (NULL == ccc->trnmgrs)
+            ccc->trnmgrs = g_array_new(FALSE, FALSE, sizeof(
+                                           struct trnmgr_config_s));
+        if (NULL == ccc->rsrmgrs)
+            ccc->rsrmgrs = g_array_new(FALSE, FALSE, sizeof(
                                            struct rsrmgr_config_s));
-            if (NULL == ccc->profiles)
-                ccc->profiles = g_array_new(FALSE, FALSE, sizeof(
-                                                struct profile_config_s));
-        }
-        
+        if (NULL == ccc->profiles)
+            ccc->profiles = g_array_new(FALSE, FALSE, sizeof(
+                                            struct profile_config_s));
+     
         if (NULL == (tmp_str = getenv(LIXA_PROFILE_ENV_VAR))) {
             /* use empty string instead of NULL to avoid allocation issues */
             tmp_str = "";
@@ -167,10 +167,10 @@ int client_config(client_config_coll_t *ccc)
         }
         LIXA_TRACE(("client_config: using transactional profile '%s' for "
                     "subsequent operations\n", tmp_str));        
-
+        
         if (NULL == (ccc->profile = strdup(tmp_str)))
             THROW(STRDUP_ERROR);
-
+        
         /* checking if available the custom config file */
         tmp_str = getenv(LIXA_CONFIG_FILE_ENV_VAR);
         if (NULL != tmp_str && -1 != (fd = open(tmp_str, O_RDONLY))) {
@@ -194,27 +194,27 @@ int client_config(client_config_coll_t *ccc)
         /* loading config file */
         if (NULL == (ccc->lixac_conf = xmlReadFile(file_name, NULL, 0)))
             THROW(XML_READ_FILE_ERROR);
-
+        
         /* walking tree & parse */
         if (NULL == (root_element = xmlDocGetRootElement(ccc->lixac_conf)))
             THROW(XML_DOC_GET_ROOT_ELEMENT_ERROR);
-
+        
         if (LIXA_RC_OK != (ret_cod = client_parse(ccc, root_element)))
             THROW(PARSE_CONFIG_ERROR);
-
+        
         if (LIXA_RC_OK != (ret_cod = client_config_display(ccc)))
             THROW(CLIENT_CONFIG_DISPLAY_ERROR);
         
         if (LIXA_RC_OK != (ret_cod = client_config_validate(ccc)))
             THROW(CLIENT_CONFIG_VALIDATE_ERROR);
-
+        
         /* free parsed document */
         xmlFreeDoc(ccc->lixac_conf);
         ccc->lixac_conf = NULL;
         
         /* release libxml2 stuff */
         xmlCleanupParser();
-
+        
         /* resolve address */
         LIXA_TRACE(("client_config: resolving address for '%s'\n",
                     ccc->actconf.trnmgr->address));
@@ -231,16 +231,16 @@ int client_config(client_config_coll_t *ccc)
         memcpy(&ccc->serv_addr, (struct sockaddr_in *)res->ai_addr,
                sizeof(struct sockaddr_in));
         ccc->serv_addr.sin_port = htons(ccc->actconf.trnmgr->port);
-
+        
+        if (LIXA_RC_OK != (ret_cod = client_config_load_switch(&global_ccc)))
+            THROW(CLIENT_CONFIG_LOAD_SWITCH_ERROR);
+        
         /* now the client is CONFIGURED */
         ccc->configured = TRUE;
-
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case ALREADY_CONFIGURED:
-                ret_cod = LIXA_RC_OK;
-                break;
             case STRDUP_ERROR:
                 ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
@@ -263,6 +263,8 @@ int client_config(client_config_coll_t *ccc)
             case GETADDRINFO_ERROR:
                 ret_cod = LIXA_RC_GETADDRINFO_ERROR;
                 break;
+            case CLIENT_CONFIG_LOAD_SWITCH_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -280,7 +282,7 @@ int client_config(client_config_coll_t *ccc)
             xmlCleanupParser();
         }
         /* free memory allocated by getadrinfo function */
-        if (excp > GETADDRINFO_ERROR)
+        if (NULL != res)
             freeaddrinfo(res);
         /* unlock mutex (locked for configuration activity) */
         LIXA_TRACE(("client_config: releasing exclusive mutex\n"));
@@ -442,9 +444,6 @@ int client_config_load_switch(const client_config_coll_t *ccc)
                         act_rsrmgr->generic->name,
                         act_rsrmgr->generic->switch_file));
             
-            g_module_open((gchar *)"/tmp/lixa/lib/switch_lixa_dummyrm.so",
-                          G_MODULE_BIND_LAZY);
-            
             if (NULL == (module = g_module_open(
                              (gchar *)act_rsrmgr->generic->switch_file,
                              G_MODULE_BIND_LAZY))) {
@@ -477,6 +476,7 @@ int client_config_load_switch(const client_config_coll_t *ccc)
             /* this code is temporary and must be moved in a more appropriate
                place !!! */
             /* try xa_open function... */
+            /*
         {
             int rc;
             rc = act_rsrmgr->xa_switch->xa_open_entry(
@@ -484,6 +484,7 @@ int client_config_load_switch(const client_config_coll_t *ccc)
             LIXA_TRACE(("client_config_load_switch: xa_open rc=%d\n", rc));
             
         }
+            */
         }
         
         THROW(NONE);
@@ -522,15 +523,6 @@ int client_config_unload_switch(const client_config_coll_t *ccc)
         for (i=0; i<ccc->actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 ccc->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            LIXA_TRACE(("client_config_unload_switch: resource manager # %u\n",
-                        i));
-            LIXA_TRACE(("client_config_unload_switch: resource manager # %u, "
-                        "defined in config as '%s'\n", i,
-                        act_rsrmgr->generic->name));
-            LIXA_TRACE(("client_config_unload_switch: resource manager # %u, "
-                        "defined in config as '%s', module address %p\n", i,
-                        act_rsrmgr->generic->name,
-                        act_rsrmgr->module));
             LIXA_TRACE(("client_config_unload_switch: resource manager # %u, "
                         "defined in config as '%s', module address %p, "
                         "xa_switch->name='%s', xa_switch->flags=%ld\n", i,
