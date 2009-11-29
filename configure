@@ -20190,10 +20190,10 @@ LT_LIXAB_REVISION=0
 
 # Check whether --enable-debug was given.
 if test "${enable_debug+set}" = set; then
-  enableval=$enable_debug; NDEBUG="no" CFLAGS="-g"
+  enableval=$enable_debug; LIXA_DEBUG="yes" CPPFLAGS="$CPPFLAGS -DLIXA_DEBUG"; CFLAGS="-g"
 else
   \
-	NDEBUG="yes"; CPPFLAGS="$CPPFLAGS -DNDEBUG"; CFLAGS="-g -O2"
+	LIXA_DEBUG="no"; CFLAGS="-g -O2"
 fi
 
 # Check whether --enable-trace was given.

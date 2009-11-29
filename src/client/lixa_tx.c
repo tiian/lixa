@@ -128,6 +128,7 @@ int lixa_tx_open(int *txrc)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     *txrc = TX_FAIL;
 
+    LIXA_TRACE_INIT;
     LIXA_TRACE(("lixa_tx_open\n"));    
     TRY {
         int txstate, pos = 0;
@@ -216,6 +217,7 @@ int lixa_tx_close(int *txrc)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     *txrc = TX_FAIL;
     
+    LIXA_TRACE_INIT;
     LIXA_TRACE(("lixa_tx_close\n"));
     TRY {
         int txstate;

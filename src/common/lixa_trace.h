@@ -134,6 +134,13 @@
 
 
 /**
+ * Status of the trace: TRUE = initialized, FALSE = uninitialized
+ */
+extern int lixa_trace_initialized;
+
+
+
+/**
  * This is the mask retrieved from environment var LIXA_TRACE_MASK and
  * determines which modules are traced
  */

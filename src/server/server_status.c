@@ -513,14 +513,14 @@ int status_record_check_integrity(status_record_t *sr)
         g_checksum_update(checksum, (const guchar *)first_block,
                           STATUS_RECORD_CHECKSUM_SIZE);
         g_checksum_get_digest(checksum, digest, &digest_len);
-#ifndef NDEBUG
+#ifdef LIXA_DEBUG
         if (digest_len != MD5_DIGEST_LENGTH) {
             LIXA_TRACE(("status_record_check_integrity: internal error in "
                         "digest size expected=" SIZE_T_FORMAT ", returned="
                         SIZE_T_FORMAT "\n", MD5_DIGEST_LENGTH, digest_len));
             THROW(DIGEST_SIZE_ERROR);
         }
-#endif /* NDEBUG */
+#endif /* LIXA_DEBUG */
         /* @@@ substitute with g_checksum_reset when available */
         g_checksum_free(checksum);
         checksum = NULL;
@@ -643,11 +643,11 @@ int status_record_check_integrity(status_record_t *sr)
             case G_CHECKSUM_NEW_ERROR1:
                 ret_cod = LIXA_RC_G_CHECKSUM_NEW_ERROR;
                 break;
-#ifndef NDEBUG
+#ifdef LIXA_DEBUG
             case DIGEST_SIZE_ERROR:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
-#endif /* NDEBUG */
+#endif /* LIXA_DEBUG */
             case DIGEST_DOES_NOT_MATCH1:
             case NEXT_BLOCK_OUT_OF_RANGE:
             case BLOCK_COUNTER_IS_ODD:
@@ -938,10 +938,10 @@ int status_record_delete(struct thread_status_s *ts,
                 break;
             ul = ur;
             ur = csr[ur].sr.data.next_block;
-#ifndef NDEBUG
+#ifdef LIXA_DEBUG
             LIXA_TRACE(("status_record_delete: ul=" UINT32_T_FORMAT
                         ", ur=" UINT32_T_FORMAT "\n", ul, ur));
-#endif /* NDEBUG */
+#endif /* LIXA_DEBUG */
         }
         if (ur == 0)
             THROW(USED_BLOCK_NOT_FOUND);
@@ -1038,14 +1038,14 @@ int status_record_sync(status_record_t *sr)
         g_checksum_update(checksum, (const guchar *)sr,
                           STATUS_RECORD_CHECKSUM_SIZE);
         g_checksum_get_digest(checksum, sr->digest, &digest_len);
-#ifndef NDEBUG
+#ifdef LIXA_DEBUG
         if (digest_len != MD5_DIGEST_LENGTH) {
             LIXA_TRACE(("status_record_sync: internal error in digest size "
                         "expected=" SIZE_T_FORMAT ", returned=" SIZE_T_FORMAT
                         "\n", MD5_DIGEST_LENGTH, digest_len));
             THROW(DIGEST_SIZE_ERROR);
         }
-#endif /* NDEBUG */
+#endif /* LIXA_DEBUG */
         g_checksum_free(checksum);
         THROW(NONE);
     } CATCH {
@@ -1053,11 +1053,11 @@ int status_record_sync(status_record_t *sr)
             case G_CHECKSUM_NEW_ERROR:
                 ret_cod = LIXA_RC_G_CHECKSUM_NEW_ERROR;
                 break;
-#ifndef NDEBUG
+#ifdef LIXA_DEBUG
             case DIGEST_SIZE_ERROR:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;         
-#endif /* NDEBUG */
+#endif /* LIXA_DEBUG */
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -1400,11 +1400,11 @@ int thread_status_sync_files(struct thread_status_s *ts)
         status_record_update(ts->curr_status, 0, ts->updated_records);
         g_tree_foreach(ts->updated_records, traverse_and_sync,
                        ts->curr_status);
-#ifndef NDEBUG
+#ifdef LIXA_DEBUG
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->curr_status)))
             THROW(STATUS_RECORD_CHECK_INTEGRITY_ERROR);
-#endif /* NDEBUG */
+#endif /* LIXA_DEBUG */
         LIXA_TRACE(("thread_status_sync_files: before msync\n"));
         if (-1 == msync(ts->curr_status,
                         ts->curr_status->sr.ctrl.number_of_blocks *
@@ -1462,7 +1462,7 @@ int thread_status_sync_files(struct thread_status_s *ts)
         tsr.first = ts->curr_status;
         tsr.second = alt_status;
         g_tree_foreach(ts->updated_records, traverse_and_copy, &tsr);
-#ifndef NDEBUG
+#ifdef LIXA_DEBUG
         /* the memory mapped status file must be equal */
         if (0 != memcmp(ts->curr_status, alt_status, curr_status_size)) {
             LIXA_TRACE(("thread_status_sync_files: memory mapped status "
@@ -1471,7 +1471,7 @@ int thread_status_sync_files(struct thread_status_s *ts)
                    "files are different after copy. INTERNAL ERROR");
             THROW(MEMCMP_ERROR);
         }
-#endif /* NDEBUG */
+#endif /* LIXA_DEBUG */
         /* clean updated records set */
         thread_status_updated_records_clean(ts->updated_records);
         /* recover the pointer in thread status structure... */

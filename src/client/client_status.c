@@ -361,7 +361,7 @@ int client_status_coll_del(client_status_coll_t *csc)
         if (pos >= csc->index_size)
             THROW(OBJ_CORRUPTED);
 
-#ifndef NDEBUG
+#ifdef LIXA_DEBUG
     {
         pthread_t whoami = pthread_self();
         if (csc->index_data[pos].key != whoami) {
@@ -372,7 +372,7 @@ int client_status_coll_del(client_status_coll_t *csc)
             assert(csc->index_data[pos].key != whoami);
         }
     }
-#endif /* NDEBUG */
+#endif /* LIXA_DEBUG */
         
         /* reset the status slot */
         client_status_init(&(csc->status_data[csc->index_data[pos].value]));
