@@ -34,6 +34,12 @@
 
 
 
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
+
+
 #include <lixa_trace.h>
 #include <lixa_errors.h>
 #include <lixa_xml_msg.h>
@@ -54,6 +60,8 @@ int lixa_xa_open(client_status_t *cs)
     enum Exception { MSG_SERIALIZE_ERROR
                      , SEND_ERROR
                      , RECV_ERROR
+                     , MSG_DESERIALIZE_ERROR
+                     , ERROR_FROM_SERVER
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -72,20 +80,20 @@ int lixa_xa_open(client_status_t *cs)
         /* build the message */
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.verb = LIXA_MSG_VERB_OPEN;
-        msg.header.step = 1;
+        msg.header.step = 8;
 
-        msg.body.open_1.client.profile = (xmlChar *)global_ccc.profile;
-        msg.body.open_1.rsrmgrs = g_array_sized_new(
+        msg.body.open_8.client.profile = (xmlChar *)global_ccc.profile;
+        msg.body.open_8.rsrmgrs = g_array_sized_new(
             FALSE, FALSE,
-            sizeof(struct lixa_msg_body_open_1_rsrmgr_s),
+            sizeof(struct lixa_msg_body_open_8_rsrmgr_s),
             global_ccc.actconf.rsrmgrs->len);
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            struct lixa_msg_body_open_1_rsrmgr_s record;
+            struct lixa_msg_body_open_8_rsrmgr_s record;
             record.rmid = i;
             record.name = act_rsrmgr->generic->name;
-            g_array_append_val(msg.body.open_1.rsrmgrs, record);
+            g_array_append_val(msg.body.open_8.rsrmgrs, record);
         }
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
@@ -95,8 +103,8 @@ int lixa_xa_open(client_status_t *cs)
         /* this object contains a lot of references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
-        g_array_free(msg.body.open_1.rsrmgrs, TRUE);
-        memset(msg.body.open_1.rsrmgrs, 0, sizeof(msg));
+        g_array_free(msg.body.open_8.rsrmgrs, TRUE);
+        memset(msg.body.open_8.rsrmgrs, 0, sizeof(msg));
         
         LIXA_TRACE(("lixa_xa_open: sending " SIZE_T_FORMAT
                     " bytes to the server\n", buffer_size));
@@ -109,12 +117,28 @@ int lixa_xa_open(client_status_t *cs)
                     " bytes from the server |%*.*s|\n",
                     read_bytes, read_bytes, read_bytes, buffer));
         
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
+                               buffer, read_bytes, &msg)))
+            THROW(MSG_DESERIALIZE_ERROR);
+#ifdef _TRACE
+        lixa_msg_trace(&msg);
+#endif
+        /* check the answer from the server */
+        if (LIXA_RC_OK != (ret_cod = msg.body.open_16.answer.rc))
+            THROW(ERROR_FROM_SERVER);
+
+        /* loop on all the resource managers and call xa_open function */
+        for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+            struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
+                global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
         /* @@@ a lot of stuff:
            4. loop on all the resource managers
               4a. xa_open the resource manager
               4b. send the result (asynchronously) to the server
            5. return a value to the caller
         */
+        } /* for (i=0; ...) */
+        
 
         THROW(NONE);
     } CATCH {
@@ -126,6 +150,11 @@ int lixa_xa_open(client_status_t *cs)
                 break;
             case RECV_ERROR:
                 ret_cod = LIXA_RC_RECV_ERROR;
+                break;
+            case MSG_DESERIALIZE_ERROR:
+                break;
+            case ERROR_FROM_SERVER:
+                ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

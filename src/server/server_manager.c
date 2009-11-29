@@ -524,7 +524,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
         /* set output message */
         lmo.header.level = LIXA_MSG_LEVEL;
         lmo.header.verb = LIXA_MSG_VERB_NULL;
-        lmo.header.step = lmi.header.step + 1;
+        lmo.header.step = lmi.header.step + LIXA_MSG_STEP_INCR;
         
         /* process the message */
         switch (lmi.header.verb) {
@@ -568,7 +568,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                             "the buffer to reply to client\n"));
                 ret_cod = LIXA_RC_MALLOC_ERROR;
             }
-            lmo.body.answer.ret_cod = ret_cod;
+            lmo.body.open_16.answer.rc = ret_cod;
             if (LIXA_RC_OK != (
                     ret_cod = lixa_msg_serialize(
                         &lmo,

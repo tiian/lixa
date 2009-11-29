@@ -88,7 +88,7 @@ extern "C" {
      *                    client is calling the server
      * @return a reason code
      */
-    int server_xa_open_1(struct thread_status_s *ts,
+    int server_xa_open_8(struct thread_status_s *ts,
                          const struct lixa_msg_s *lmi,
                          struct lixa_msg_s *lmo,
                          uint32_t block_id);

@@ -87,7 +87,10 @@
  * Id assigned to verb "open"
  */
 #define LIXA_MSG_VERB_CLOSE   2
-
+/**
+ * Default increment for message step
+ */
+#define LIXA_MSG_STEP_INCR    8
 
 
 /**
@@ -168,24 +171,24 @@ struct lixa_msg_body_answer_s {
     /**
      * Return code of the invoked operation
      */
-    int ret_cod;
+    int rc;
 };
 
 
 
 /**
- * Convenience struct for @ref lixa_msg_body_open_1_s
+ * Convenience struct for @ref lixa_msg_body_open_8_s
  */
-struct lixa_msg_body_open_1_client_s {
+struct lixa_msg_body_open_8_client_s {
     xmlChar   *profile;
 };
 
     
 
 /**
- * Convenience struct for @ref lixa_msg_body_open_1_s
+ * Convenience struct for @ref lixa_msg_body_open_8_s
  */
-struct lixa_msg_body_open_1_rsrmgr_s {
+struct lixa_msg_body_open_8_rsrmgr_s {
     int        rmid;
     xmlChar   *name;
 };
@@ -193,11 +196,20 @@ struct lixa_msg_body_open_1_rsrmgr_s {
     
 
 /**
- * Message body for verb "open", step "1"
+ * Message body for verb "open", step "8"
  */
-struct lixa_msg_body_open_1_s {
-    struct lixa_msg_body_open_1_client_s   client;
+struct lixa_msg_body_open_8_s {
+    struct lixa_msg_body_open_8_client_s   client;
     GArray                                *rsrmgrs;
+};
+
+
+
+/**
+ * Message body for verb "open", step "16"
+ */
+struct lixa_msg_body_open_16_s {
+    struct lixa_msg_body_answer_s   answer;
 };
 
 
@@ -217,8 +229,8 @@ struct lixa_msg_s {
      * Message body, it depends from header
      */
     union {
-        struct lixa_msg_body_answer_s   answer;
-        struct lixa_msg_body_open_1_s   open_1;
+        struct lixa_msg_body_open_8_s   open_8;
+        struct lixa_msg_body_open_16_s  open_16;
     } body;
 };
 
@@ -248,7 +260,7 @@ extern "C" {
     
 
     /**
-     * Serialize the "open_1" specific body part of a message
+     * Serialize the "open_8" specific body part of a message
      * @param msg IN the object must be serialized
      * @param buffer OUT the buffer will contain the XML serialized object
      *                   (the size has fixed size of
@@ -259,14 +271,14 @@ extern "C" {
      * @param free_chars IN/OUT remaing free chars inside the buffer
      * @return a reason code
      */
-    int lixa_msg_serialize_open_1(const struct lixa_msg_s *msg,
+    int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg,
                                   char *buffer,
                                   size_t *offset, size_t *free_chars);
 
 
     
     /**
-     * Serialize the "open_2" specific body part of a message
+     * Serialize the "open_16" specific body part of a message
      * @param msg IN the object must be serialized
      * @param buffer OUT the buffer will contain the XML serialized object
      *                   (the size has fixed size of
@@ -277,9 +289,9 @@ extern "C" {
      * @param free_chars IN/OUT remaing free chars inside the buffer
      * @return a reason code
      */
-    int lixa_msg_serialize_open_2(const struct lixa_msg_s *msg,
-                                  char *buffer,
-                                  size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_open_16(const struct lixa_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
 
     
     
@@ -298,12 +310,23 @@ extern "C" {
     
     /**
      * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=open, step=1
+     * a message with verb=open, step=8
      * @param cur IN pointer to XML subtree
      * @param msg OUT the object after deserialization
      * @return a reason code
      */
-    int lixa_msg_deserialize_open_1(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
+    /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=open, step=16
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_open_16(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 
