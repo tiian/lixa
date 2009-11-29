@@ -58,7 +58,7 @@ int server_xa_open(struct thread_status_s *ts,
                    struct lixa_msg_s *lmo,
                    uint32_t block_id)
 {
-    enum Exception { SERVER_XA_OPEN_1_ERROR
+    enum Exception { SERVER_XA_OPEN_8_ERROR
                      , INVALID_STEP
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -66,10 +66,10 @@ int server_xa_open(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_open\n"));
     TRY {
         switch (lmi->header.step) {
-            case 1:
-                if (LIXA_RC_OK != (ret_cod = server_xa_open_1(
+            case 8:
+                if (LIXA_RC_OK != (ret_cod = server_xa_open_8(
                                        ts, lmi, lmo, block_id)))
-                    THROW(SERVER_XA_OPEN_1_ERROR);
+                    THROW(SERVER_XA_OPEN_8_ERROR);
                 break;
             default:
                 THROW(INVALID_STEP);
@@ -78,7 +78,7 @@ int server_xa_open(struct thread_status_s *ts,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case SERVER_XA_OPEN_1_ERROR:
+            case SERVER_XA_OPEN_8_ERROR:
                 break;
             case INVALID_STEP:
                 ret_cod = LIXA_RC_INVALID_STATUS;
@@ -97,7 +97,7 @@ int server_xa_open(struct thread_status_s *ts,
 
 
 
-int server_xa_open_1(struct thread_status_s *ts,
+int server_xa_open_8(struct thread_status_s *ts,
                      const struct lixa_msg_s *lmi,
                      struct lixa_msg_s *lmo,
                      uint32_t block_id)
@@ -108,34 +108,34 @@ int server_xa_open_1(struct thread_status_s *ts,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("server_xa_open_1\n"));
+    LIXA_TRACE(("server_xa_open_8\n"));
     TRY {
         uint32_t i;
         
 #ifdef LIXA_DEBUG
         /* check the resource manager array is OK */
-        if (NULL == lmi->body.open_1.rsrmgrs)
+        if (NULL == lmi->body.open_8.rsrmgrs)
             THROW(RSRMGRS_ARRAY_NULL);
 #endif /* LIXA_DEBUG */
-        if (lmi->body.open_1.rsrmgrs->len > CHAIN_MAX_SIZE) {
-            LIXA_TRACE(("server_xa_open_1: message arrived from client "
+        if (lmi->body.open_8.rsrmgrs->len > CHAIN_MAX_SIZE) {
+            LIXA_TRACE(("server_xa_open_8: message arrived from client "
                         "would use %u (max is %u)\n",
-                        lmi->body.open_1.rsrmgrs->len,
+                        lmi->body.open_8.rsrmgrs->len,
                         CHAIN_MAX_SIZE));
             THROW(TOO_MANY_RSRMGRS);
         }
 
         if (LIXA_RC_OK != (ret_cod = payload_chain_allocate(
-                               ts, block_id, lmi->body.open_1.rsrmgrs->len)))
+                               ts, block_id, lmi->body.open_8.rsrmgrs->len)))
             THROW(PAYLOAD_CHAIN_ALLOCATE_ERROR);
 
-        for (i=0; i<lmi->body.open_1.rsrmgrs->len; ++i) {
+        for (i=0; i<lmi->body.open_8.rsrmgrs->len; ++i) {
             status_record_t *sr;
-            struct lixa_msg_body_open_1_rsrmgr_s *rsrmgr;
+            struct lixa_msg_body_open_8_rsrmgr_s *rsrmgr;
             sr = ts->curr_status +
                 ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
-            rsrmgr = &g_array_index(lmi->body.open_1.rsrmgrs,
-                                    struct lixa_msg_body_open_1_rsrmgr_s,
+            rsrmgr = &g_array_index(lmi->body.open_8.rsrmgrs,
+                                    struct lixa_msg_body_open_8_rsrmgr_s,
                                     i);
             sr->sr.data.pld.rm.rmid = rsrmgr->rmid;
             strncpy(sr->sr.data.pld.rm.name, (char *)rsrmgr->name,
@@ -167,7 +167,7 @@ int server_xa_open_1(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("server_xa_open_1/excp=%d/"
+    LIXA_TRACE(("server_xa_open_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

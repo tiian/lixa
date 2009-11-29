@@ -56,6 +56,15 @@
 
 
 /**
+ * This is not a proper error, but an offset: when the client receive an
+ * error from the server, it adds this offset to distinguish the reason as an
+ * error generated in the server side
+ */
+#define LIXA_RC_ERROR_FROM_SERVER_OFFSET       1000
+
+
+
+/**
  * Object not found
  */
 #define LIXA_RC_OBJ_NOT_FOUND                   +1
@@ -375,6 +384,7 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * "g_checksum_new" function error
  */
 #define LIXA_RC_G_CHECKSUM_NEW_ERROR           -303
+
 
 
 /***********************************************************************
