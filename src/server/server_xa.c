@@ -59,6 +59,7 @@ int server_xa_open(struct thread_status_s *ts,
                    uint32_t block_id)
 {
     enum Exception { SERVER_XA_OPEN_8_ERROR
+                     , SERVER_XA_OPEN_24_ERROR
                      , INVALID_STEP
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -71,6 +72,11 @@ int server_xa_open(struct thread_status_s *ts,
                                        ts, lmi, lmo, block_id)))
                     THROW(SERVER_XA_OPEN_8_ERROR);
                 break;
+            case 24:
+                if (LIXA_RC_OK != (ret_cod = server_xa_open_24(
+                                       ts, lmi, lmo, block_id)))
+                    THROW(SERVER_XA_OPEN_24_ERROR);
+                break;
             default:
                 THROW(INVALID_STEP);
         }
@@ -79,6 +85,7 @@ int server_xa_open(struct thread_status_s *ts,
     } CATCH {
         switch (excp) {
             case SERVER_XA_OPEN_8_ERROR:
+            case SERVER_XA_OPEN_24_ERROR:
                 break;
             case INVALID_STEP:
                 ret_cod = LIXA_RC_INVALID_STATUS;
@@ -171,3 +178,32 @@ int server_xa_open_8(struct thread_status_s *ts,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int server_xa_open_24(struct thread_status_s *ts,
+                      const struct lixa_msg_s *lmi,
+                      struct lixa_msg_s *lmo,
+                      uint32_t block_id)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_open_24\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_open_24/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

@@ -1,5 +1,3 @@
-see lixa_xa_open...
-
-implement tx_open and xa_open...: see *** server_xa_open_1 *** function!
+implement server_xa_open_24 and then lixa_xa_open 
 
 When server_manager_thread exits, the listener must be aware of this... 
