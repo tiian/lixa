@@ -46,8 +46,8 @@ AC_PRESERVE_HELP_ORDER
 AC_ARG_ENABLE([debug],
         AS_HELP_STRING([--enable-debug],
                 [enable debug code (assert statements)]),
-        [NDEBUG="no" CFLAGS="-g" ], \
-	[NDEBUG="yes"; CPPFLAGS="$CPPFLAGS -DNDEBUG"; CFLAGS="-g -O2" ] )
+        [LIXA_DEBUG="yes" CPPFLAGS="$CPPFLAGS -DLIXA_DEBUG"; CFLAGS="-g" ], \
+	[LIXA_DEBUG="no"; CFLAGS="-g -O2" ] )
 AC_ARG_ENABLE([trace],
         AS_HELP_STRING([--disable-trace],
                 [disable trace feature (not suggested)]),

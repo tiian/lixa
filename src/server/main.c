@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     struct thread_pipe_array_s tpa;
     struct thread_status_array_s tsa;
 
-    /* LIXA_TRACE_INIT; */
+    LIXA_TRACE_INIT;
     LIXA_TRACE(("main: starting\n"));
     openlog("lixad", LOG_PID, LOG_DAEMON);
     syslog(LOG_NOTICE, "starting");

@@ -65,6 +65,8 @@
 
 
 
+int lixa_trace_initialized = FALSE;
+
 unsigned long lixa_trace_mask = 0;
 
 
@@ -78,18 +80,18 @@ GStaticMutex lixa_trace_mutex = G_STATIC_MUTEX_INIT;
 
 /**
  * Initialize the library when the library is loaded.
- * This piece of code is GNU/Linux + GCC specific: it will need some
- * rework for different platforms (probably it will not compile at all).
- * An alternative way is to put LIXA_TRACE_INIT macro in program code and
- * avoid this automatic library loading function
  */
-void __attribute__ ((constructor)) lixa_trace_init(void)
+void lixa_trace_init(void)
 {
-    /* retrieve environemnt variable */
-    if (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL)
-        lixa_trace_mask = strtoul(getenv(LIXA_TRACE_MASK_ENV_VAR), NULL, 0);
-    else
-        lixa_trace_mask = 0x0;    
+    if (!lixa_trace_initialized) {
+        /* retrieve environemnt variable */
+        if (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL)
+            lixa_trace_mask = strtoul(
+                getenv(LIXA_TRACE_MASK_ENV_VAR), NULL, 0);
+        else
+            lixa_trace_mask = 0x0;
+        lixa_trace_initialized = TRUE;
+    }
 }
 
 
@@ -116,7 +118,7 @@ void lixa_trace(const char *fmt, ...)
             getpid(), pthread_self());
     /* custom message */
     vfprintf(stderr, fmt, args);
-#ifndef NDEBUG
+#ifdef LIXA_DEBUG
     fflush(stderr);
 #endif
     /* remove the lock from mutex */

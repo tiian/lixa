@@ -112,11 +112,11 @@ int server_xa_open_1(struct thread_status_s *ts,
     TRY {
         uint32_t i;
         
-#ifndef NDEBUG
+#ifdef LIXA_DEBUG
         /* check the resource manager array is OK */
         if (NULL == lmi->body.open_1.rsrmgrs)
             THROW(RSRMGRS_ARRAY_NULL);
-#endif /* NDEBUG */
+#endif /* LIXA_DEBUG */
         if (lmi->body.open_1.rsrmgrs->len > CHAIN_MAX_SIZE) {
             LIXA_TRACE(("server_xa_open_1: message arrived from client "
                         "would use %u (max is %u)\n",
@@ -151,11 +151,11 @@ int server_xa_open_1(struct thread_status_s *ts,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-#ifndef NDEBUG
+#ifdef LIXA_DEBUG
             case RSRMGRS_ARRAY_NULL:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
-#endif /* NDEBUG */
+#endif /* LIXA_DEBUG */
             case TOO_MANY_RSRMGRS:
                 ret_cod = LIXA_RC_TOO_MANY_RSRMGRS;
             case PAYLOAD_CHAIN_ALLOCATE_ERROR:
