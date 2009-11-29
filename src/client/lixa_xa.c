@@ -44,6 +44,7 @@
 #include <lixa_errors.h>
 #include <lixa_xml_msg.h>
 #include <client_status.h>
+#include <xa.h>
 
 
 
@@ -57,11 +58,13 @@
 
 int lixa_xa_open(client_status_t *cs)
 {
-    enum Exception { MSG_SERIALIZE_ERROR
-                     , SEND_ERROR
+    enum Exception { MSG_SERIALIZE_ERROR1
+                     , SEND_ERROR1
                      , RECV_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , ERROR_FROM_SERVER
+                     , MSG_SERIALIZE_ERROR2
+                     , SEND_ERROR2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -98,18 +101,18 @@ int lixa_xa_open(client_status_t *cs)
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
-            THROW(MSG_SERIALIZE_ERROR);
+            THROW(MSG_SERIALIZE_ERROR1);
 
         /* this object contains a lot of references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
         g_array_free(msg.body.open_8.rsrmgrs, TRUE);
-        memset(msg.body.open_8.rsrmgrs, 0, sizeof(msg));
+        memset(&msg, 0, sizeof(msg));
         
         LIXA_TRACE(("lixa_xa_open: sending " SIZE_T_FORMAT
-                    " bytes to the server\n", buffer_size));
+                    " bytes to the server for step 8\n", buffer_size));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR);
+            THROW(SEND_ERROR1);
         
         if (0 > (read_bytes = recv(fd, buffer, buffer_size, 0)))
             THROW(RECV_ERROR);
@@ -127,25 +130,60 @@ int lixa_xa_open(client_status_t *cs)
         if (LIXA_RC_OK != (ret_cod = msg.body.open_16.answer.rc))
             THROW(ERROR_FROM_SERVER);
 
+        /* prepare the next message */
+        msg.header.level = LIXA_MSG_LEVEL;
+        msg.header.verb = LIXA_MSG_VERB_OPEN;
+        msg.header.step = 24;
+        msg.body.open_24.xa_open_execs = g_array_sized_new(
+            FALSE, FALSE,
+            sizeof(struct lixa_msg_body_open_24_xa_open_execs_s),
+            global_ccc.actconf.rsrmgrs->len);
+        
         /* loop on all the resource managers and call xa_open function */
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-        /* @@@ a lot of stuff:
-           4. loop on all the resource managers
-              4a. xa_open the resource manager
-              4b. send the result (asynchronously) to the server
-           5. return a value to the caller
-        */
+            struct lixa_msg_body_open_24_xa_open_execs_s record;
+            long xa_open_flags = TMNOFLAGS;
+            int rc;
+            
+            record.xa_info = act_rsrmgr->generic->xa_open_info;
+            record.rmid = i;
+            record.flags = xa_open_flags;
+            record.rc = rc = act_rsrmgr->xa_switch->xa_open_entry(
+                (char *)record.xa_info, record.rmid, record.flags);
+            LIXA_TRACE(("lixa_xa_open: xa_open_entry('%s', %d, %ld) = %d\n",
+                        (char *)record.xa_info, record.rmid, record.flags,
+                        record.rc));
+            g_array_append_val(msg.body.open_24.xa_open_execs, record);
         } /* for (i=0; ...) */
         
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
+                               &msg, buffer, sizeof(buffer), &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR2);
 
+        /* @@@ decide a value to return the caller before releasing the
+           structure ... */
+        
+        /* this object contains a lot of references to external stuff and
+           cannot be freed using standard lixa_msg_free; we are freeing the
+           array to avoid memory leaks */
+        g_array_free(msg.body.open_24.xa_open_execs, TRUE);
+        memset(&msg, 0, sizeof(msg));
+        
+        LIXA_TRACE(("lixa_xa_open: sending " SIZE_T_FORMAT
+                    " bytes to the server for step 24\n", buffer_size));
+        if (buffer_size != send(fd, buffer, buffer_size, 0))
+            THROW(SEND_ERROR2);
+
+        /* @@@ return the output value to the caller */
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case MSG_SERIALIZE_ERROR:
+            case MSG_SERIALIZE_ERROR1:
                 break;
-            case SEND_ERROR:
+            case SEND_ERROR1:
                 ret_cod = LIXA_RC_SEND_ERROR;
                 break;
             case RECV_ERROR:
@@ -155,6 +193,11 @@ int lixa_xa_open(client_status_t *cs)
                 break;
             case ERROR_FROM_SERVER:
                 ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
+                break;
+            case MSG_SERIALIZE_ERROR2:
+                break;
+            case SEND_ERROR2:
+                ret_cod = LIXA_RC_SEND_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

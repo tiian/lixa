@@ -6,8 +6,8 @@
   </trnmgrs>
   <rsrmgrs>
     <rsrmgr name="OracleXE" switch_file="/tmp/lixa/lib/switch_oracle.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" />
-    <rsrmgr name="LIXAdummyRM" switch_file="/tmp/lixa/lib/switch_lixa_dummyrm.so" xa_open_info="" />
-    <rsrmgr name="LIXArandomRM" switch_file="/tmp/lixa/lib/switch_lixa_randomrm.so" xa_open_info="" />
+    <rsrmgr name="LIXAdummyRM" switch_file="/tmp/lixa/lib/switch_lixa_dummyrm.so" xa_open_info="dummy open string" />
+    <rsrmgr name="LIXArandomRM" switch_file="/tmp/lixa/lib/switch_lixa_randomrm.so" xa_open_info="random open string" />
   </rsrmgrs>
   <profiles>
     <profile name="VZ67">

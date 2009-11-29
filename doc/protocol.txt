@@ -26,25 +26,35 @@ verb=1 (xa_open)
 
   level: message level, version
   verb:  xa_open -> 1
-  step:  1, 2, 3, ... as necessary
+  step:  8, 16, 24, ... as necessary
 
   client->server message (question)
-  <msg level="1" verb="1" step="1">
+  <msg level="1" verb="1" step="8">
     <client profile="VZ67"/>
     <rsrmgrs>
-      <rsrmgr rmid="1" name="dummyrm"/>
-      <rsrmgr rmid="2" name="randomrm"/>
+      <rsrmgr rmid="0" name="dummyrm"/>
+      <rsrmgr rmid="1" name="randomrm"/>
     </rsrmgrs>
   </msg>
 
   server -> client message (answer)
-  <msg level="1" verb="1" step="2">
+  <msg level="1" verb="1" step="16">
     <answer rc="0"/>
   </msg>
 
-
+  client -> server message
+  <msg level="1" verb="1" step="24">
+    <xa_open_execs>
+      <xa_open_exec xa_info="xa_open string" rmid="0" flags="0" rc="0"/>
+      <xa_open_exec xa_info="xa_open string" rmid="1" flags="0" rc="0"/>
+    </xa_open_execs>
+  </msg>
+  
 
 client 			 server		description
-verb=1,step=1 -->			send list of resource managers
+verb=1,step=8 -->			send list of resource managers
 	      				allocate blocks & synch
-		<-- verb=1,step=2	confirm block allocation
+		<-- verb=1,step=16	confirm block allocation
+verb=1,step=24 -->  			send list of executions of xa_open
+	       				routine (store xa_open results on 
+					transaction manager server)
