@@ -104,6 +104,9 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_XML_UNRECOGNIZED_TAG:
             return "ERROR: the XML contains a tag is not known or is "
                 "in the wrong place";
+        case LIXA_RC_ASYNC_NOT_IMPLEMENTED:
+            return "ERROR: an operation is referring to asynchronous mode "
+                "that is not yet implemented";
         case LIXA_RC_MALLOC_ERROR:
             return "ERROR: 'malloc' function returned an error condition";
         case LIXA_RC_REALLOC_ERROR:

@@ -39,6 +39,11 @@
 
 
 
+#include <lixa_trace.h>
+#include <client_status.h>
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -54,15 +59,17 @@
 extern "C" {
 #endif /* __cplusplus */
 
-
-
+    
+    
     /**
      * Open all the resource managers necessary for the transaction
+     * @param cs IN reference to the status of the calling client
+     * @param tx_rc OUT return code prepared for tx_open call
      * @return a reason code
      */
-    int lixa_xa_open();
-
-
+    int lixa_xa_open(client_status_t *cs, int *txrc);
+    
+    
     
 #ifdef __cplusplus
 }

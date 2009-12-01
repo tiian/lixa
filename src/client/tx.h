@@ -76,6 +76,8 @@
  * Transaction identifier
  */
 #define XIDDATASIZE 128 /* size in bytes */
+#ifndef XID_T_TYPE
+# define XID_T_TYPE
 struct xid_t {
     long formatID; /* format identifier */
     long gtrid_length; /* value from 1 through 64 */
@@ -83,6 +85,7 @@ struct xid_t {
     char data[XIDDATASIZE];
 };
 typedef struct xid_t XID;
+#endif /* XID_T_TYPE */
 
 
 
@@ -176,6 +179,8 @@ extern "C" {
      * @ref tx_open
      */
     extern int tx_close(void);
+
+
     
     extern int tx_commit(void);
     extern int tx_info(TXINFO *);

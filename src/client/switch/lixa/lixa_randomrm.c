@@ -148,8 +148,8 @@ int lixa_dummyrm_complete(int *handle, int *retval, int rmid, long flags) {
 /*
  * This is the struct pointing to dummy functions
  */
-struct xa_switch_t lixa_dummyrm_sw = {
-    "lixa_dummyrm",
+struct xa_switch_t lixa_randomrm_sw = {
+    "lixa_randomrm",
     TMNOFLAGS,
     0,
     lixa_dummyrm_open,
@@ -172,5 +172,5 @@ struct xa_switch_t lixa_dummyrm_sw = {
  */
 struct xa_switch_t *lixa_get_xa_switch()
 {
-    return &lixa_dummyrm_sw;
+    return &lixa_randomrm_sw;
 }

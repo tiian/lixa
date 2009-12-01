@@ -62,6 +62,8 @@
 #define XIDDATASIZE 128 /* size in bytes */
 #define MAXGTRIDSIZE 64 /* maximum size in bytes of gtrid */
 #define MAXBQUALSIZE 64 /* maximum size in bytes of bqual */
+#ifndef XID_T_TYPE
+# define XID_T_TYPE
 struct xid_t {
     long formatID; /* format identifier */
     long gtrid_length; /* value from 1 through 64 */
@@ -69,6 +71,7 @@ struct xid_t {
     char data[XIDDATASIZE];
 };
 typedef struct xid_t XID;
+#endif /* XID_T_TYPE */
 
 
 

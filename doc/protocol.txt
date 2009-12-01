@@ -32,8 +32,8 @@ verb=1 (xa_open)
   <msg level="1" verb="1" step="8">
     <client profile="VZ67"/>
     <rsrmgrs>
-      <rsrmgr rmid="0" name="dummyrm"/>
-      <rsrmgr rmid="1" name="randomrm"/>
+      <rsrmgr rmid="0" name="dummyrm" xa_name="lixa_dummyrm"/>
+      <rsrmgr rmid="1" name="randomrm" xa_name="lixa_randomrm"/>
     </rsrmgrs>
   </msg>
 

@@ -57,6 +57,11 @@
 
 
 
+#include <lixa_trace.h>
+#include <xa.h>
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -125,7 +130,7 @@ struct rsrmgr_config_s {
      * xa_info string must be passed to the resource manager at xa_open
      * invocation
      */
-    xmlChar *xa_open_info;
+    char     xa_open_info[MAXINFOSIZE];
 };
 
 
