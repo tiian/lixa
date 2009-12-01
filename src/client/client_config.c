@@ -472,19 +472,6 @@ int client_config_load_switch(const client_config_coll_t *ccc)
                 act_rsrmgr->module = module;
                 act_rsrmgr->xa_switch = xa_switch();
             }
-
-            /* this code is temporary and must be moved in a more appropriate
-               place !!! */
-            /* try xa_open function... */
-            /*
-        {
-            int rc;
-            rc = act_rsrmgr->xa_switch->xa_open_entry(
-                (char *)act_rsrmgr->generic->xa_open_info, 5, TMNOFLAGS);
-            LIXA_TRACE(("client_config_load_switch: xa_open rc=%d\n", rc));
-            
-        }
-            */
         }
         
         THROW(NONE);
@@ -895,11 +882,12 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
     LIXA_TRACE(("client_parse_rsrmgr/%p\n", a_node));
     TRY {
         struct rsrmgr_config_s record;
+        xmlChar *tmp;
         
         /* reset new element */
         record.name = NULL;
         record.switch_file = NULL;
-        record.xa_open_info = NULL;
+        record.xa_open_info[0] = '\0';
 
         /* retrieve resource manager name */
         if (NULL == (record.name = xmlGetProp(
@@ -910,10 +898,12 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
                          a_node, LIXA_XML_CONFIG_SWITCH_FILE_PROPERTY)))
             THROW(SWITCH_FILE_NOT_AVAILABLE_ERROR);
         /* retrieve xa_open_info */
-        if (NULL == (record.xa_open_info = xmlGetProp(
+        if (NULL == (tmp = xmlGetProp(
                          a_node, LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY)))
             THROW(XA_OPEN_INFO_NOT_AVAILABLE_ERROR);
-
+        strncpy(record.xa_open_info, (char *)tmp, MAXINFOSIZE);
+        record.xa_open_info[MAXINFOSIZE - 1] = '\0';
+        xmlFree(tmp);
         g_array_append_val(ccc->rsrmgrs, record);
         
         LIXA_TRACE(("client_parse_rsrmgr/%p: %s %d, "
@@ -925,7 +915,7 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
                     (char *)LIXA_XML_CONFIG_SWITCH_FILE_PROPERTY,
                     (char *)record.switch_file,
                     (char *)LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY,
-                    (char *)record.xa_open_info));
+                    record.xa_open_info));
         
         THROW(NONE);
     } CATCH {

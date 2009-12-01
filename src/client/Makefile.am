@@ -1,5 +1,5 @@
 SUBDIRS = switch
-include_HEADERS = tx.h xa.h 
+include_HEADERS = tx.h
 noinst_HEADERS = client_config.h client_conn.h client_status.h lixa_tx.h \
 	lixa_xa.h
 lib_LTLIBRARIES = liblixac.la liblixacmt.la

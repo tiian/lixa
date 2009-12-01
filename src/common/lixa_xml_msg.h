@@ -136,6 +136,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_VERB;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_XA_INFO;
 /**
+ * Label used to specify "xa_name" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_XA_NAME;
+/**
  * Label used to specify "answer" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_ANSWER;
@@ -211,8 +215,18 @@ struct lixa_msg_body_open_8_client_s {
  * Convenience struct for @ref lixa_msg_body_open_8_s
  */
 struct lixa_msg_body_open_8_rsrmgr_s {
+    /**
+     * rmid parameter as passed to xa_open routine
+     */
     int        rmid;
+    /**
+     * name of the resource manager as configured for Lixa
+     */
     xmlChar   *name;
+    /**
+     * name of the resource manager as stored in XA switch data structure
+     */
+    xmlChar   *xa_name;
 };
 
     
@@ -241,13 +255,13 @@ struct lixa_msg_body_open_16_s {
  */
 struct lixa_msg_body_open_24_xa_open_execs_s {
     /**
-     * xa_info parameter as passed to xa_open routine
-     */
-    xmlChar        *xa_info;
-    /**
      * rmid parameter as passed to xa_open routine
      */
     int             rmid;
+    /**
+     * xa_info parameter as passed to xa_open routine
+     */
+    xmlChar        *xa_info;
     /**
      * flags parameter as passed to xa_open routine
      */

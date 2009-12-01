@@ -57,6 +57,10 @@
 
 
 
+#include <xa.h>
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -265,6 +269,22 @@ struct payload_rsrmgr_s {
      * Name of the resource manager as defined in lixac_conf.xml
      */
     char        name[PAYLOAD_RSRMGR_NAME_MAX];
+    /**
+     * Name of the resource manager as returned by XA switch data structure
+     */
+    char        xa_name[RMNAMESZ];
+    /**
+     * xa_info string configured for xa_open
+     */
+    char        xa_open_info[MAXINFOSIZE];
+    /**
+     * flags value as passed to xa_open
+     */
+    long        xa_open_flags;
+    /**
+     * rc value as returned from xa_open
+     */
+    int         xa_open_rc;
 };
 
 

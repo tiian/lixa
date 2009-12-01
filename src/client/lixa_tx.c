@@ -126,6 +126,8 @@ int lixa_tx_open(int *txrc)
                      , ALREADY_OPENED
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int tmp_txrc;
+    
     *txrc = TX_FAIL;
 
     LIXA_TRACE_INIT;
@@ -161,9 +163,8 @@ int lixa_tx_open(int *txrc)
                 THROW(CLIENT_CONNECT_ERROR);
 
             /* the real logic must be put here */
-            if (LIXA_RC_OK != (ret_cod = lixa_xa_open(cs)))
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_open(cs, &tmp_txrc)))
                 THROW(LIXA_XA_OPEN_ERROR);
-            /* @@@ some logic mapping XA -> TX return code should put here */
             
             /* set new state after RMs are open... */
             client_status_set_txstate(cs, TX_STATE_S1);
@@ -182,7 +183,6 @@ int lixa_tx_open(int *txrc)
             case CLIENT_CONFIG_ERROR:
                 break;
             case CLIENT_CONNECT_ERROR:
-                *txrc = TX_ERROR;
                 break;
             case COLL_GET_CS_ERROR:
             case LIXA_XA_OPEN_ERROR:
@@ -192,16 +192,15 @@ int lixa_tx_open(int *txrc)
                 *txrc = TX_OK;
                 break;
             case NONE:
-                *txrc = TX_OK;
+                *txrc = tmp_txrc;
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_tx_open/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    assert(ret_cod == TX_OK);
+    LIXA_TRACE(("lixa_tx_open/TX_*=%d/excp=%d/"
+                "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -281,8 +280,8 @@ int lixa_tx_close(int *txrc)
                 break;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_tx_close/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE(("lixa_tx_close/TX_*=%d/excp=%d/"
+                "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
     assert(ret_cod == LIXA_RC_OK);
     return ret_cod;
 }

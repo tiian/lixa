@@ -74,7 +74,7 @@ int server_xa_open(struct thread_status_s *ts,
                 break;
             case 24:
                 if (LIXA_RC_OK != (ret_cod = server_xa_open_24(
-                                       ts, lmi, lmo, block_id)))
+                                       ts, lmi, block_id)))
                     THROW(SERVER_XA_OPEN_24_ERROR);
                 break;
             default:
@@ -148,6 +148,9 @@ int server_xa_open_8(struct thread_status_s *ts,
             strncpy(sr->sr.data.pld.rm.name, (char *)rsrmgr->name,
                     PAYLOAD_RSRMGR_NAME_MAX);
             sr->sr.data.pld.rm.name[PAYLOAD_RSRMGR_NAME_MAX - 1] = '\0';
+            strncpy(sr->sr.data.pld.rm.xa_name, (char *)rsrmgr->xa_name,
+                    RMNAMESZ);
+            sr->sr.data.pld.rm.xa_name[RMNAMESZ - 1] = '\0';
         }
 
         /* prepare output message */
@@ -183,18 +186,61 @@ int server_xa_open_8(struct thread_status_s *ts,
 
 int server_xa_open_24(struct thread_status_s *ts,
                       const struct lixa_msg_s *lmi,
-                      struct lixa_msg_s *lmo,
                       uint32_t block_id)
 {
-    enum Exception { NONE } excp;
+    enum Exception { INVALID_BLOCK_ID
+                     , NUMBER_OF_RSRMGRS_MISMATCH
+                     , INVALID_RMID
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("server_xa_open_24\n"));
     TRY {
+        uint32_t i;
+        
+        /* check block_id is a valid block */
+        if (ts->curr_status[block_id].sr.data.pld.type !=
+            DATA_PAYLOAD_TYPE_HEADER)
+            THROW(INVALID_BLOCK_ID);
+        /* check children blocks match with the arrived update */
+        if (lmi->body.open_24.xa_open_execs->len >
+            ts->curr_status[block_id].sr.data.pld.ph.n)
+            THROW(NUMBER_OF_RSRMGRS_MISMATCH);
+        /* store data in the children blocks... */
+        for (i=0; i<lmi->body.open_24.xa_open_execs->len; ++i) {
+            status_record_t *sr;
+            struct lixa_msg_body_open_24_xa_open_execs_s *xa_open_execs;
+            uint32_t slot =
+                ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
+            sr = ts->curr_status + slot;
+            xa_open_execs = &g_array_index(
+                lmi->body.open_24.xa_open_execs,
+                struct lixa_msg_body_open_24_xa_open_execs_s, i);
+            /* check rmid: this check should be useless... */
+            if (sr->sr.data.pld.rm.rmid != xa_open_execs->rmid)
+                THROW(INVALID_RMID);
+            /* update the block */
+            status_record_update(ts->curr_status + slot, slot,
+                                 ts->updated_records);
+            strncpy(sr->sr.data.pld.rm.xa_open_info,
+                    (char *)xa_open_execs->xa_info, MAXINFOSIZE);
+            sr->sr.data.pld.rm.xa_open_info[MAXINFOSIZE - 1] = '\0';
+            sr->sr.data.pld.rm.xa_open_flags = xa_open_execs->flags;
+            sr->sr.data.pld.rm.xa_open_rc = xa_open_execs->rc;
+        } /* for (i=0; ... */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INVALID_BLOCK_ID:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NUMBER_OF_RSRMGRS_MISMATCH:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case INVALID_RMID:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

@@ -170,6 +170,10 @@ define LIXA_RC_DESTINATION_TOO_SMALL          -16
  * The XML contains a tag is not known or is in the wrong place
  */
 #define LIXA_RC_XML_UNRECOGNIZED_TAG           -19
+/**
+ * An operation is referring to asynchronous mode that is not yet implemented
+ */
+#define LIXA_RC_ASYNC_NOT_IMPLEMENTED          -20
 
 /**
  * "malloc" function error
