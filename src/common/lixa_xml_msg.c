@@ -110,17 +110,17 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                               LIXA_XML_MSG_PROP_LEVEL,
                               msg->header.level,
                               LIXA_XML_MSG_PROP_VERB,
-                              msg->header.verb,
+                              msg->header.pvs.verb,
                               LIXA_XML_MSG_PROP_STEP,
-                              msg->header.step);
+                              msg->header.pvs.step);
         if (used_chars >= free_chars)
             THROW(BUFFER_TOO_SHORT2);
         free_chars -= used_chars;
         offset += used_chars;
 
-        switch (msg->header.verb) {
+        switch (msg->header.pvs.verb) {
             case LIXA_MSG_VERB_OPEN:
-                switch (msg->header.step) {
+                switch (msg->header.pvs.step) {
                     case 8:
                         if (LIXA_RC_OK != (
                                 ret_cod =
@@ -439,23 +439,23 @@ int lixa_msg_deserialize(const char *buffer, size_t buffer_len,
         /* retrieve verb */
         if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_VERB)))
             THROW(VERB_NOT_FOUND);
-        msg->header.verb = (int)strtol((char *)tmp, NULL, 0);
+        msg->header.pvs.verb = (int)strtol((char *)tmp, NULL, 0);
         xmlFree(tmp);
         /* retrieve step */
         if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_STEP)))
             THROW(STEP_NOT_FOUND);
-        msg->header.step = (int)strtol((char *)tmp, NULL, 0);
+        msg->header.pvs.step = (int)strtol((char *)tmp, NULL, 0);
         xmlFree(tmp);
         /* retrieve level */
-        if (msg->header.step == 1) {
+        if (msg->header.pvs.step == LIXA_MSG_STEP_INCR) {
             if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_LEVEL)))
                 THROW(LEVEL_NOT_FOUND);
             msg->header.level = (int)strtol((char *)tmp, NULL, 0);
             xmlFree(tmp);
         }
-        switch (msg->header.verb) {
+        switch (msg->header.pvs.verb) {
             case LIXA_MSG_VERB_OPEN: /* open */
-                switch (msg->header.step) {
+                switch (msg->header.pvs.step) {
                     case 8:
                         ret_cod = lixa_msg_deserialize_open_8(
                             cur->xmlChildrenNode, msg);
@@ -748,9 +748,9 @@ int lixa_msg_free(struct lixa_msg_s *msg)
     LIXA_TRACE(("lixa_msg_free\n"));
     TRY {
         guint i;
-        switch (msg->header.verb) {
+        switch (msg->header.pvs.verb) {
             case LIXA_MSG_VERB_OPEN: /* open */
-                switch (msg->header.step) {
+                switch (msg->header.pvs.step) {
                     case 8:
                         xmlFree(msg->body.open_8.client.profile);
                         msg->body.open_8.client.profile = NULL;
@@ -820,11 +820,13 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
         guint i;
         static const xmlChar *nil_str = (xmlChar *)"(nil)";
         
-        LIXA_TRACE(("lixa_msg_trace: header[level=%d,verb=%d,step=%d]\n",
-                    msg->header.level, msg->header.verb, msg->header.step));
-        switch (msg->header.verb) {
+        LIXA_TRACE(("lixa_msg_trace: header[level=%d,pvs.verb=%d,"
+                    "pvs.step=%d]\n",
+                    msg->header.level, msg->header.pvs.verb,
+                    msg->header.pvs.step));
+        switch (msg->header.pvs.verb) {
             case LIXA_MSG_VERB_OPEN: /* open */
-                switch (msg->header.step) {
+                switch (msg->header.pvs.step) {
                     case 8:
                         LIXA_TRACE(("lixa_msg_trace: body[client[profile["
                                     "%s]]]\n",

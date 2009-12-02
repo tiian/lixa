@@ -47,11 +47,10 @@
 
 
 
-int tx_open(void)
+int tx_begin(void)
 {
-    int txrc = TX_FAIL;
-    lixa_tx_open(&txrc);
-    return txrc;
+    /** @@@ must be fixed see bug 2907537 */
+    return TX_OK;
 }
 
 
@@ -62,5 +61,63 @@ int tx_close(void)
     lixa_tx_close(&txrc);
     return txrc;
 }
+
+
+
+int tx_commit(void)
+{
+    /** @@@ must be fixed see bug 2907542 */
+    return TX_OK;
+}
+
+
+
+int tx_info(TXINFO *info)
+{
+    /** @@@ must be fixed see bug 2907545 */
+    return TX_OK;
+}
+
+
+
+int tx_open(void)
+{
+    int txrc = TX_FAIL;
+    lixa_tx_open(&txrc);
+    return txrc;
+}
+
+
+
+int tx_rollback(void)
+{
+    /** @@@ must be fixed see bug 2907548 */
+    return TX_OK;
+}
+
+
+
+int tx_set_commit_return(COMMIT_RETURN when_return)
+{
+    /** @@@ must be fixed see bug 2907552 */
+    return TX_OK;
+}
+
+
+
+int tx_set_transaction_control(TRANSACTION_CONTROL control)
+{
+    /** @@@ must be fixed see bug 2907554 */
+    return TX_OK;
+}
+
+
+
+int tx_set_transaction_timeout(TRANSACTION_TIMEOUT timeout)
+{
+    /** @@@ must be fixed see bug 2907562 */
+    return TX_OK;
+}
+    
 
 

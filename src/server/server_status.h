@@ -57,6 +57,7 @@
 
 
 
+#include <lixa_xml_msg.h>
 #include <xa.h>
 
 
@@ -119,6 +120,11 @@
 #define PAYLOAD_RSRMGR_NAME_MAX   30
 
 /**
+ * Number of (verb,step) values are stored by the server
+ */
+#define PAYLOAD_HEADER_VERB_STEP  5
+
+/**
  * Number of bytes necessary to store an MD5 digest
  */
 #define MD5_DIGEST_LENGTH   16
@@ -173,16 +179,20 @@ struct server_client_status_s {
      * Place inside the persistent status (memory mapped records) used to store
      * the status of this client
      */
-    uint32_t pers_status_slot_id;
+    uint32_t                      pers_status_slot_id;
     /**
      * Buffer must be sent to the client: if NULL, no buffer needs to be sent
      */ 
-    char    *output_buffer;
+    char                         *output_buffer;
     /**
      * Size of the buffer must be sent to the client; if @output_buffer is
      * NULL, this field is meaningless
      */
-    size_t   output_buffer_size;
+    size_t                        output_buffer_size;
+    /**
+     * (verb,step) related to the output_buffer
+     */
+    struct lixa_msg_verb_step_s   last_verb_step;
 };
 
 
@@ -236,23 +246,29 @@ struct payload_header_s {
     /**
      * Number of elements in the block array
      */
-    int                n;
+    int                           n;
     /**
      * Array of "pointers" to the blocks of this logical concatenation
      */
-    uint32_t           block_array[CHAIN_MAX_SIZE];
+    uint32_t                      block_array[CHAIN_MAX_SIZE];
     /**
      * Timestamp of the client's arrival time
      */
-    struct timeval     arrival_time;
+    struct timeval                arrival_time;
     /**
      * TCP/IP coordinates of the local socket
      */
-    struct sockaddr_in local_sock_addr;
+    struct sockaddr_in            local_sock_addr;
     /**
      * TCP/IP coordinates of the peer socket
      */
-    struct sockaddr_in peer_sock_addr;
+    struct sockaddr_in            peer_sock_addr;
+    /**
+     * Sequence of last (verb,step) stored for the client.
+     * This array is used as a circular buffer and position 0 contains ever
+     * the last (verb,step)
+     */
+    struct lixa_msg_verb_step_s   last_verb_step[PAYLOAD_HEADER_VERB_STEP];
 };
 
     
@@ -571,6 +587,20 @@ extern "C" {
     
 
 
+    /**
+     * Store last (verb,step) value inside the payload header; oldest value
+     * is erased if necessary
+     * @param ts IN/OUT a reference to thread status
+     * @param slot IN index of the header chain block
+     * @param vs IN reference to a (verb,step) value
+     * @return a standardized return code
+     */
+    int payload_header_store_verb_step(struct thread_status_s *ts,
+                                       uint32_t slot,
+                                       const struct lixa_msg_verb_step_s *vs);
+
+    
+    
     /**
      * Release a chain of records allocated inside the status record
      * memory mapped array. It must start from an header initialized with

@@ -171,35 +171,81 @@ extern "C" {
 
 
 
+    /**
+     * Begin a global transaction.
+     * @return a standardized TX return code (TX_*)
+     */
     extern int tx_begin(void);
 
+
+    
     /**
      * Close a set of resource managers.
      * Calling this function you free the resource allocated and locked by
      * @ref tx_open
+     * @return a standardized TX return code (TX_*)
      */
     extern int tx_close(void);
 
 
-    
+
+    /**
+     * Commit a global transaction.
+     * @return a standardized TX return code (TX_*)
+     */
     extern int tx_commit(void);
-    extern int tx_info(TXINFO *);
+
+
+
+    /**
+     * Return global transaction information.
+     * @param info OUT global transaction information returned
+     * @return a standardized TX return code (TX_*)
+     */
+    extern int tx_info(TXINFO *info);
+
+
     
     /**
      * Open a set of resource managers; this function is the X/Open compliant
      * wrapper for @ref lixa_tx_open function
      * You MUST call @ref tx_close from the same thread issued tx_open
      * (memory leaks and other unpleasant effetcs may happen otherwise!)
-     * @return a X/Open standard return value
+     * @return a standardized TX return code (TX_*)
      */
     extern int tx_open(void);
 
-    
-    
+
+     
+    /**
+     * Roll back a global transaction.
+     * @return a standardized TX return code (TX_*)
+     */
     extern int tx_rollback(void);
-    extern int tx_set_commit_return(COMMIT_RETURN);
-    extern int tx_set_transaction_control(TRANSACTION_CONTROL);
-    extern int tx_set_transaction_timeout(TRANSACTION_TIMEOUT);
+
+
+     
+    /**
+     * Set commit_return characteristic
+     * @return a standardized TX return code (TX_*)
+     */
+    extern int tx_set_commit_return(COMMIT_RETURN when_return);
+
+
+     
+    /**
+     * Set transaction_control chracteristic
+     * @return a standardized TX return code (TX_*)
+     */
+    extern int tx_set_transaction_control(TRANSACTION_CONTROL control);
+
+
+     
+    /**
+     * Set transaction_timeout characteristic
+     * @return a standardized TX return code (TX_*)
+     */
+    extern int tx_set_transaction_timeout(TRANSACTION_TIMEOUT timeout);
     
 
 
