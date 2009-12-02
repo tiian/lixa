@@ -382,6 +382,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
 {
     enum Exception { SEND_ERROR
+                     , STORE_VERB_STEP_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -395,15 +396,25 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
                                 ts->client_array[slot_id].output_buffer_size,
                                 0)))
             THROW(SEND_ERROR);
+        LIXA_TRACE(("server_manager_pollout: sent " SSIZE_T_FORMAT " bytes "
+                    "to client\n", wrote_bytes));
         free(ts->client_array[slot_id].output_buffer);
         ts->client_array[slot_id].output_buffer = NULL;
         ts->client_array[slot_id].output_buffer_size = 0;
+        if (LIXA_RC_OK != (ret_cod = payload_header_store_verb_step(
+                               ts, slot_id,
+                               &ts->client_array[slot_id].last_verb_step)))
+            THROW(STORE_VERB_STEP_ERROR);
+        ts->client_array[slot_id].last_verb_step.verb = 0;
+        ts->client_array[slot_id].last_verb_step.step = 0;
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case SEND_ERROR:
                 ret_cod = LIXA_RC_SEND_ERROR;
+                break;
+            case STORE_VERB_STEP_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -523,11 +534,11 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
 
         /* set output message */
         lmo.header.level = LIXA_MSG_LEVEL;
-        lmo.header.verb = LIXA_MSG_VERB_NULL;
-        lmo.header.step = lmi.header.step + LIXA_MSG_STEP_INCR;
+        lmo.header.pvs.verb = LIXA_MSG_VERB_NULL;
+        lmo.header.pvs.step = lmi.header.pvs.step + LIXA_MSG_STEP_INCR;
         
         /* process the message */
-        switch (lmi.header.verb) {
+        switch (lmi.header.pvs.verb) {
             case LIXA_MSG_VERB_OPEN:
                 if (LIXA_RC_OK != (ret_cod = server_xa_open(
                                        ts, &lmi, &lmo, block_id)))
@@ -560,7 +571,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
         } /* switch (excp) */
         
         /* prepare output message */
-        if (lmo.header.verb != LIXA_MSG_VERB_NULL) {
+        if (lmo.header.pvs.verb != LIXA_MSG_VERB_NULL) {
             /* allocate the output buffer */
             if (NULL == (ts->client_array[slot_id].output_buffer = malloc(
                              LIXA_MSG_XML_BUFFER_SIZE))) {
@@ -721,10 +732,12 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
 
         /* save a reference to the slot */
         ts->client_array[place].pers_status_slot_id = place;
-        /* reset the output buffer pointer (it msy be garbage if unused
+        /* reset the output buffer pointer (it may be garbage if unused
            before */
         ts->client_array[place].output_buffer = NULL;
         ts->client_array[place].output_buffer_size = 0;
+        ts->client_array[place].last_verb_step.verb = 0;
+        ts->client_array[place].last_verb_step.step = 0;
                 
         THROW(NONE);
     } CATCH {

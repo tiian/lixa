@@ -171,13 +171,10 @@ extern const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXECS;
 
 
 /**
- * Mandatory header for every message encoded as @ref lixa_msg_s
+ * The communication protocol is discrete and the values are in the set
+ * (verb x step)
  */
-struct lixa_msg_header_s {
-    /**
-     * Protocol level must be applied to this message
-     */
-    int level;
+struct lixa_msg_verb_step_s {
     /**
      * Specifies the verb (open, close, begin, commit, ecc...)
      */
@@ -186,6 +183,22 @@ struct lixa_msg_header_s {
      * Specifies the step inside the verb (1, 2, 3, ...)
      */
     int step; 
+};
+
+
+
+/**
+ * Mandatory header for every message encoded as @ref lixa_msg_s
+ */
+struct lixa_msg_header_s {
+    /**
+     * Protocol level must be applied to this message
+     */
+    int                         level;
+    /**
+     * Protocol verb and step of the message
+     */
+    struct lixa_msg_verb_step_s pvs;
 };
 
  

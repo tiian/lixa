@@ -86,8 +86,8 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
 
         /* build the message */
         msg.header.level = LIXA_MSG_LEVEL;
-        msg.header.verb = LIXA_MSG_VERB_OPEN;
-        msg.header.step = 8;
+        msg.header.pvs.verb = LIXA_MSG_VERB_OPEN;
+        msg.header.pvs.step = 8;
 
         msg.body.open_8.client.profile = (xmlChar *)global_ccc.profile;
         msg.body.open_8.rsrmgrs = g_array_sized_new(
@@ -137,8 +137,8 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
 
         /* prepare the next message */
         msg.header.level = LIXA_MSG_LEVEL;
-        msg.header.verb = LIXA_MSG_VERB_OPEN;
-        msg.header.step = 24;
+        msg.header.pvs.verb = LIXA_MSG_VERB_OPEN;
+        msg.header.pvs.step = 24;
         msg.body.open_24.xa_open_execs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_open_24_xa_open_execs_s),

@@ -135,7 +135,9 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
         memset(&srd->pld.ph.block_array, 0, sizeof(uint32_t) * CHAIN_MAX_SIZE);
         memset(&srd->pld.ph.local_sock_addr, 0, sizeof(struct sockaddr_in));
         memset(&srd->pld.ph.peer_sock_addr, 0, sizeof(struct sockaddr_in));
-
+        memset(&srd->pld.ph.last_verb_step, 0,
+               sizeof(struct lixa_msg_verb_step_s) * PAYLOAD_HEADER_VERB_STEP);
+        
         /* set the timestamp of the client arrival */
         if (0 != gettimeofday(&srd->pld.ph.arrival_time, NULL))
             THROW(GETTIMEOFDAY_ERROR);
@@ -180,6 +182,66 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("payload_header_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int payload_header_store_verb_step(struct thread_status_s *ts, uint32_t slot,
+                                   const struct lixa_msg_verb_step_s *vs)
+{
+    enum Exception { INVALID_RECORD
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("payload_header_store_verb_step\n"));
+    TRY {
+        int i;
+        struct status_record_data_payload_s *pld =
+            &(ts->curr_status[slot].sr.data.pld);
+
+        /* check the record is a payload header */
+        if (pld->type != DATA_PAYLOAD_TYPE_HEADER)
+            THROW(INVALID_RECORD);
+        for (i=0; i<PAYLOAD_HEADER_VERB_STEP-1; ++i) {
+            LIXA_TRACE(("payload_header_store_verb_step:"
+                        "(verb,step): (%d,%d) --> (%d,%d)\n",
+                        pld->ph.last_verb_step[
+                            PAYLOAD_HEADER_VERB_STEP-i-2].verb,
+                        pld->ph.last_verb_step[
+                            PAYLOAD_HEADER_VERB_STEP-i-2].step,
+                        pld->ph.last_verb_step[
+                            PAYLOAD_HEADER_VERB_STEP-i-1].verb,
+                        pld->ph.last_verb_step[
+                            PAYLOAD_HEADER_VERB_STEP-i-1].step));
+            pld->ph.last_verb_step[PAYLOAD_HEADER_VERB_STEP-i-1] =
+                pld->ph.last_verb_step[PAYLOAD_HEADER_VERB_STEP-i-2];
+        } /* for (i=0; ... */
+        LIXA_TRACE(("payload_header_store_verb_step:"
+                    "(verb,step): (%d,%d) --> (%d,%d)\n",
+                    vs->verb, vs->step,
+                    pld->ph.last_verb_step[0].verb,
+                    pld->ph.last_verb_step[0].step));
+        pld->ph.last_verb_step[0] = *vs;
+        /* update the record */
+        status_record_update(ts->curr_status + slot, slot,
+                             ts->updated_records);
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_RECORD:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("payload_header_store_verb_step/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
