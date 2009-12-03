@@ -300,6 +300,27 @@ struct lixa_msg_body_open_24_s {
 
 
 /**
+ * Convenience struct for @ref lixa_msg_body_open_8_s
+ */
+struct lixa_msg_body_close_8_rsrmgr_s {
+    /**
+     * rmid parameter as passed to xa_close routine
+     */
+    int        rmid;
+};
+
+    
+
+/**
+ * Message body for verb "open", step "8"
+ */
+struct lixa_msg_body_close_8_s {
+    GArray                   *rsrmgrs;
+};
+
+
+
+/**
  * This structure maps the messages flowing between LIXA client (lixac) and
  * LIXA server (lixad). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
@@ -317,6 +338,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_open_8_s   open_8;
         struct lixa_msg_body_open_16_s  open_16;
         struct lixa_msg_body_open_24_s  open_24;
+        struct lixa_msg_body_close_8_s  close_8;
     } body;
 };
 
@@ -400,6 +422,24 @@ extern "C" {
     
     
     /**
+     * Serialize the "close_8" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int lixa_msg_serialize_close_8(const struct lixa_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
+
+
+    
+    /**
      * Deserialize a buffer containing the XML to a message struct
      * @param buffer IN the buffer that's containing the serialized object
      *                  (it must be null terminated)
@@ -442,6 +482,17 @@ extern "C" {
      * @return a reason code
      */
     int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
+    /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=close, step=8
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_close_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 

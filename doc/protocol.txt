@@ -42,7 +42,7 @@ verb=1 (xa_open)
     <answer rc="0"/>
   </msg>
 
-  client -> server message
+  client -> server message (async assertion)
   <msg level="1" verb="1" step="24">
     <xa_open_execs>
       <xa_open_exec xa_info="xa_open string" rmid="0" flags="0" rc="0"/>
@@ -58,3 +58,26 @@ verb=1,step=8 -->			send list of resource managers
 verb=1,step=24 -->  			send list of executions of xa_open
 	       				routine (store xa_open results on 
 					transaction manager server)
+
+***************************************************************************
+
+verb=2 (xa_close)
+
+  level: message level, version
+  verb:  xa_close -> 1
+  step:  8, 16, 24, ... as necessary
+
+  client->server message (async assertion)
+  <msg verb="2" step="8">
+    <rsrmgrs>
+      <rsrmgr rmid="0"/>
+      <rsrmgr rmid="1"/>
+    </rsrmgrs>
+  </msg>
+
+client 			 server		description
+verb=2,step=8 -->			send list of resource managers
+	      				free now useless blocks
+
+***************************************************************************
+

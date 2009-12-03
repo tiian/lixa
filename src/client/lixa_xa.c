@@ -87,7 +87,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
         /* build the message */
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.pvs.verb = LIXA_MSG_VERB_OPEN;
-        msg.header.pvs.step = 8;
+        msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
         msg.body.open_8.client.profile = (xmlChar *)global_ccc.profile;
         msg.body.open_8.rsrmgrs = g_array_sized_new(
@@ -236,3 +236,79 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int lixa_xa_close(client_status_t *cs, int *txrc)
+{
+    enum Exception { MSG_SERIALIZE_ERROR
+                     , SEND_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_xa_close\n"));
+    TRY {
+        struct lixa_msg_s msg;
+        int fd;
+        size_t buffer_size = 0;
+        guint i;
+        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+
+        /* retrieve the socket */
+        fd = client_status_get_sockfd(cs);
+
+        /* build the message */
+        msg.header.level = LIXA_MSG_LEVEL;
+        msg.header.pvs.verb = LIXA_MSG_VERB_CLOSE;
+        msg.header.pvs.step = LIXA_MSG_STEP_INCR;
+
+        msg.body.close_8.rsrmgrs = g_array_sized_new(
+            FALSE, FALSE,
+            sizeof(struct lixa_msg_body_close_8_rsrmgr_s),
+            global_ccc.actconf.rsrmgrs->len);
+        for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+            struct lixa_msg_body_close_8_rsrmgr_s record;
+            record.rmid = i;
+            g_array_append_val(msg.body.close_8.rsrmgrs, record);
+        }
+
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
+                               &msg, buffer, sizeof(buffer), &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR);
+
+        /* this object contains a lot of references to external stuff and
+           cannot be freed using standard lixa_msg_free; we are freeing the
+           array to avoid memory leaks */
+        g_array_free(msg.body.close_8.rsrmgrs, TRUE);
+        memset(&msg, 0, sizeof(msg));
+        
+        LIXA_TRACE(("lixa_xa_close: sending " SIZE_T_FORMAT
+                    " bytes to the server for step 8\n", buffer_size));
+        if (buffer_size != send(fd, buffer, buffer_size, 0))
+            THROW(SEND_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case MSG_SERIALIZE_ERROR:
+                *txrc = TX_FAIL;
+                break;
+            case SEND_ERROR:
+                *txrc = TX_ERROR;
+                ret_cod = LIXA_RC_SEND_ERROR;
+                break;
+            case NONE:
+                *txrc = TX_OK;
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_xa_close/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+

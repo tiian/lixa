@@ -209,11 +209,14 @@ int lixa_tx_open(int *txrc)
 int lixa_tx_close(int *txrc)
 {
     enum Exception { COLL_GET_CS_ERROR
+                     , LIXA_XA_CLOSE_ERROR
                      , CLIENT_DISCONNECT_ERROR
                      , CLIENT_CONFIG_UNLOAD_SWITCH_ERROR
                      , PROTOCOL_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int tmp_txrc;
+    
     *txrc = TX_FAIL;
     
     LIXA_TRACE_INIT;
@@ -246,6 +249,10 @@ int lixa_tx_close(int *txrc)
                 THROW(PROTOCOL_ERROR);
         }
         
+        /* the real logic must be put here */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_close(cs, &tmp_txrc)))
+            THROW(LIXA_XA_CLOSE_ERROR);
+            
         if (LIXA_RC_OK != (ret_cod = client_disconnect(&global_csc)))
             THROW(CLIENT_DISCONNECT_ERROR);
 
@@ -262,6 +269,9 @@ int lixa_tx_close(int *txrc)
     } CATCH {
         switch (excp) {
             case COLL_GET_CS_ERROR:
+                break;
+            case LIXA_XA_CLOSE_ERROR:
+                *txrc = tmp_txrc;
                 break;
             case CLIENT_DISCONNECT_ERROR:
             case CLIENT_CONFIG_UNLOAD_SWITCH_ERROR:
@@ -282,7 +292,6 @@ int lixa_tx_close(int *txrc)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_close/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
-    assert(ret_cod == LIXA_RC_OK);
     return ret_cod;
 }
 

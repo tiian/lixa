@@ -71,6 +71,16 @@ extern "C" {
     
     
     
+    /**
+     * Close all the resource managers necessary for the transaction
+     * @param cs IN reference to the status of the calling client
+     * @param tx_rc OUT return code prepared for tx_close call
+     * @return a reason code
+     */
+    int lixa_xa_close(client_status_t *cs, int *txrc);
+    
+    
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
