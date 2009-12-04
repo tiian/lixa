@@ -105,8 +105,9 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
         }
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
+                               &msg, buffer, sizeof(buffer)-1, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR1);
+        buffer[buffer_size] = '\0';
 
         /* this object contains a lot of references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
