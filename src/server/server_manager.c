@@ -321,8 +321,9 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
         ssize_t read_bytes;
 
         if (0 > (read_bytes = recv(ts->poll_array[slot_id].fd, buf,
-                                   sizeof(buf), 0)))
+                                   sizeof(buf)-1, 0)))
             THROW(RECV_ERROR);
+        buf[read_bytes] = '\0'; /* null terminate the buffer... */
         LIXA_TRACE(("server_manager_pollin_data: fd = %d returned %u bytes\n",
                     ts->poll_array[slot_id].fd, read_bytes));
         if (0 == read_bytes) {
@@ -501,7 +502,7 @@ int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id)
 
 
 int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
-                            const char *buf, ssize_t read_bytes)
+                            char *buf, ssize_t read_bytes)
 {
     enum Exception { LIXA_MSG_DESERIALIZE_ERROR
                      , LIXA_MSG_TRACE_ERROR
