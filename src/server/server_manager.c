@@ -307,28 +307,22 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
 
 int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 {
-    enum Exception { RECV_ERROR1
-                     , PAYLOAD_CHAIN_RELEASE
+    enum Exception { PAYLOAD_CHAIN_RELEASE
                      , CLOSE_ERROR
                      , FREE_SLOTS
-                     , INVALID_PREFIX_SIZE
-                     , RECV_ERROR2
-                     , INVALID_LENGTH_XML_MSG
                      , XML_PROC
+                     , MSG_RETRIEVE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("server_manager_pollin_data\n"));
     TRY {
-        char prefix[LIXA_MSG_XML_PREFIX_DIGITS+1];
         char buf[READ_BUFFER_SIZE];
-        ssize_t read_bytes, to_read = 0;
+        ssize_t read_bytes;
 
-        /* read the prefix to determine message size */
-        if (0 > (read_bytes = recv(ts->poll_array[slot_id].fd, prefix,
-                                   LIXA_MSG_XML_PREFIX_DIGITS, 0))) {
-            THROW(RECV_ERROR1);
-        } else if (0 == read_bytes) {
+        ret_cod = lixa_msg_retrieve(ts->poll_array[slot_id].fd,
+                                    buf, sizeof(buf), &read_bytes);
+        if (LIXA_RC_CONNECTION_CLOSED == ret_cod) {
             /* client has closed the connection */
             /* @@@ check what happens to current transaction */
 
@@ -347,62 +341,25 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
             if (LIXA_RC_OK != (ret_cod =
                                server_manager_free_slots(ts, slot_id)))
                 THROW(FREE_SLOTS);
-        } else if (LIXA_MSG_XML_PREFIX_DIGITS != read_bytes) {
-            /* retrieve XML message size */
-            LIXA_TRACE(("server_manager_pollin_data: client sent "
-                        SSIZE_T_FORMAT " bytes, expected %d bytes for "
-                        "XML message prefix\n", read_bytes,
-                        LIXA_MSG_XML_PREFIX_DIGITS));
-            THROW(INVALID_PREFIX_SIZE);
-        } else {
-            prefix[LIXA_MSG_XML_PREFIX_DIGITS] = '\0';
-            to_read = strtol(prefix, NULL, 10);
-            LIXA_TRACE(("server_manager_pollin_data: XML message prefix "
-                        "is '%s' (" SSIZE_T_FORMAT ")\n", prefix, to_read));
-        }
-        
-        if (0 > (read_bytes = recv(ts->poll_array[slot_id].fd, buf,
-                                   sizeof(buf)-1, 0)))
-            THROW(RECV_ERROR2);
-        buf[read_bytes] = '\0'; /* null terminate the buffer... */
-        LIXA_TRACE(("server_manager_pollin_data: fd = %d returned "
-                    SSIZE_T_FORMAT " bytes\n",
-                    ts->poll_array[slot_id].fd, read_bytes));
-        if (to_read != read_bytes) {
-            LIXA_TRACE(("server_manager_pollin_data: expected " SSIZE_T_FORMAT
-                        " bytes, received " SSIZE_T_FORMAT " bytes\n",
-                        to_read, read_bytes));
-            THROW(INVALID_LENGTH_XML_MSG);
-        } else {
+        } else if (LIXA_RC_OK == ret_cod) {
             /* XML message to process from client */
             if (LIXA_RC_OK != (ret_cod = server_manager_XML_proc(
                                    ts, slot_id, buf, read_bytes)))
                 THROW(XML_PROC);
-        }
+        } else
+            THROW(MSG_RETRIEVE_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case RECV_ERROR1:
-                ret_cod = LIXA_RC_RECV_ERROR;
-                break;
             case PAYLOAD_CHAIN_RELEASE:
                 break;
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
                 break;
             case FREE_SLOTS:
-                break;
-            case INVALID_PREFIX_SIZE:
-                ret_cod = LIXA_RC_INVALID_PREFIX_SIZE;
-                break;
-            case RECV_ERROR2:
-                ret_cod = LIXA_RC_RECV_ERROR;
-                break;
-            case INVALID_LENGTH_XML_MSG:
-                ret_cod = LIXA_RC_INVALID_LENGTH_XML_MSG;
-                break;
             case XML_PROC:
+            case MSG_RETRIEVE_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -546,6 +503,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                      , LIXA_MSG_TRACE_ERROR
                      , LIXA_MSG_FREE_ERROR
                      , SERVER_XA_OPEN_ERROR
+                     , SERVER_XA_CLOSE_ERROR
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -583,6 +541,11 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                                        ts, &lmi, &lmo, block_id)))
                     THROW(SERVER_XA_OPEN_ERROR)
                 break;
+            case LIXA_MSG_VERB_CLOSE:
+                if (LIXA_RC_OK != (ret_cod = server_xa_close(
+                                       ts, &lmi, block_id)))
+                    THROW(SERVER_XA_CLOSE_ERROR)
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -598,6 +561,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
             case LIXA_MSG_TRACE_ERROR:
             case LIXA_MSG_FREE_ERROR:
             case SERVER_XA_OPEN_ERROR:
+            case SERVER_XA_CLOSE_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INVALID_STATUS;

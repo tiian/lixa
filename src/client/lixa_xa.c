@@ -62,7 +62,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
 {
     enum Exception { MSG_SERIALIZE_ERROR1
                      , SEND_ERROR1
-                     , RECV_ERROR
+                     , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , ERROR_FROM_SERVER
                      , MSG_SERIALIZE_ERROR2
@@ -119,9 +119,10 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
                     buffer_size, buffer));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR1);
-        
-        if (0 > (read_bytes = recv(fd, buffer, buffer_size, 0)))
-            THROW(RECV_ERROR);
+
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(fd, buffer, buffer_size,
+                                                       &read_bytes)))
+            THROW(MSG_RETRIEVE_ERROR);
         LIXA_TRACE(("lixa_xa_open: receiving %d"
                     " bytes from the server |%*.*s|\n",
                     read_bytes, read_bytes, read_bytes, buffer));
@@ -205,11 +206,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
         switch (excp) {
             case MSG_SERIALIZE_ERROR1:
                 break;
-            case SEND_ERROR1:
-                ret_cod = LIXA_RC_SEND_ERROR;
-                break;
-            case RECV_ERROR:
-                ret_cod = LIXA_RC_RECV_ERROR;
+            case MSG_RETRIEVE_ERROR:
                 break;
             case MSG_DESERIALIZE_ERROR:
                 break;

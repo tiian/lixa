@@ -77,7 +77,10 @@
  * requested: the program can go on as no operation was requested
  */
 #define LIXA_RC_BYPASSED_OPERATION              +3
-
+/**
+ * Peer has closed TCP/IP connection
+ */
+#define LIXA_RC_CONNECTION_CLOSED               +4
 
 
 /**
@@ -113,10 +116,9 @@
  */
 #define LIXA_RC_CONTAINER_FULL                  -6
 /**
- * A used object (not void) has been passed to a function requiring a fresh
- * one
-define LIXA_RC_OBJ_NOT_VOID                    -7
+ * The process has been stopped to avoid a buffer overflow
  */
+#define LIXA_RC_BUFFER_OVERFLOW                 -7
 /**
  * A NOT initialized object has been passed to a method/function
  */
@@ -369,9 +371,13 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_XML_READ_DOC_ERROR             -201
 /**
+ * "xmlReadMemory" function error
+ */
+#define LIXA_RC_XML_READ_MEMORY_ERROR          -202
+/**
  * "xmlDocGetRootElement" function error
  */
-#define LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR -202
+#define LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR -203
 /**
  * "g_module_open" function error
  */
