@@ -73,6 +73,10 @@
  * configured resource managers
  */
 #define LIXA_MSG_XML_START_RSRMGRS  3
+/**
+ * Number of digits prefix an XML message
+ */
+#define LIXA_MSG_XML_PREFIX_DIGITS  6
 
 
 

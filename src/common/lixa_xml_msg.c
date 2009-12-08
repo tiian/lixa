@@ -97,10 +97,15 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
 
     int used_chars = 0;
     size_t free_chars = buffer_len, offset = 0;
+    char prefix[LIXA_MSG_XML_PREFIX_DIGITS + 1];
     
     LIXA_TRACE(("lixa_msg_serialize\n"));
     TRY {
-        used_chars = snprintf(buffer, free_chars,
+        /* reserving space for prefix size */
+        free_chars -= LIXA_MSG_XML_PREFIX_DIGITS;
+        offset += LIXA_MSG_XML_PREFIX_DIGITS;
+        /* <xml ... > */
+        used_chars = snprintf(buffer + offset, free_chars,
                               "%s version=\"1.0\" encoding=\"UTF-8\" ?>",
                               LIXA_XML_MSG_HEADER);
         if (used_chars >= free_chars)
@@ -166,7 +171,6 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
             default:
                 THROW(INVALID_VERB);
         }
-
         /* </msg> */
         used_chars = snprintf(buffer + offset, free_chars,
                               "</%s>", LIXA_XML_MSG_TAG_MSG);
@@ -175,6 +179,13 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
         free_chars -= used_chars;
         offset += used_chars;
 
+        /* writing prefix size at buffer head */
+        snprintf(prefix, sizeof(prefix), "%*.*d",
+                 LIXA_MSG_XML_PREFIX_DIGITS,
+                 LIXA_MSG_XML_PREFIX_DIGITS,
+                 (int)(offset - LIXA_MSG_XML_PREFIX_DIGITS));
+        strncpy(buffer, prefix, LIXA_MSG_XML_PREFIX_DIGITS);
+        
         *msg_len = offset;
         THROW(NONE);
     } CATCH {

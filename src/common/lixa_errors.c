@@ -86,19 +86,16 @@ const char *lixa_strerror(int ret_cod)
                   return "ERROR: invalid object status";
         case LIXA_RC_TOO_MANY_RSRMGRS:
             return "ERROR: too many resource managers";
-            /*
-              case LIXA_RC_FILE_ALREADY_EXISTS:
-              return "ERROR: file can not be created because it already "
-              "exists";
-              case LIXA_RC_DESTINATION_TOO_SMALL:
-              return "ERROR: destination object is too small to store "
-              "passed data";
-            */
+        case LIXA_RC_INVALID_PREFIX_SIZE:
+            return "ERROR: the number of chars of the prefix of the XML "
+                "message";
         case LIXA_RC_EMPTY_XML_MSG:
             return "ERROR: the XML message is empty";
         case LIXA_RC_MALFORMED_XML_MSG:
             return "ERROR: the XML message is malformed and cannot be "
                 "interpreted";
+        case LIXA_RC_INVALID_LENGTH_XML_MSG:
+            return "ERROR: the length of the XML message differs from prefix";
         case LIXA_RC_PROPERTY_INVALID_VALUE:
             return "ERROR: a value of a property is invalid";
         case LIXA_RC_XML_UNRECOGNIZED_TAG:

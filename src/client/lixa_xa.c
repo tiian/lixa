@@ -107,7 +107,6 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer)-1, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR1);
-        buffer[buffer_size] = '\0';
 
         /* this object contains a lot of references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
@@ -116,7 +115,8 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
         memset(&msg, 0, sizeof(msg));
         
         LIXA_TRACE(("lixa_xa_open: sending " SIZE_T_FORMAT
-                    " bytes to the server for step 8\n", buffer_size));
+                    " bytes ('%s') to the server for step 8\n",
+                    buffer_size, buffer));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR1);
         
