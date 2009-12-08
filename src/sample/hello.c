@@ -42,8 +42,10 @@ int main(int argc, char *argv[])
     printf("lixa hello before first tx_open()\n");
     printf("lixa hello: tx_open(): %d\n", tx_open());
     printf("lixa hello: tx_close(): %d\n", tx_close());
+    /*
     printf("lixa hello: tx_open(): %d\n", tx_open());
     printf("lixa hello: tx_close(): %d\n", tx_close());
+    */
     printf("lixa hello after second tx_close()\n");
     return 0;
 }

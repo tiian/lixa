@@ -147,13 +147,9 @@ define LIXA_RC_OBJ_NOT_VOID                    -7
  */
 #define LIXA_RC_TOO_MANY_RSRMGRS               -14
 /**
- * The file should not exist and a new one can not be safely created
-define LIXA_RC_FILE_ALREADY_EXISTS            -15
+ * The number of chars of the prefix of the XML message 
  */
-/**
- * The destination object is too small to store passed data
-define LIXA_RC_DESTINATION_TOO_SMALL          -16
- */
+#define LIXA_RC_INVALID_PREFIX_SIZE            -15
 /**
  * The XML message is empty and can not be processed
  */
@@ -163,17 +159,21 @@ define LIXA_RC_DESTINATION_TOO_SMALL          -16
  */
 #define LIXA_RC_MALFORMED_XML_MSG              -17
 /**
+ * The length of the XML message differs from prefix 
+ */
+#define LIXA_RC_INVALID_LENGTH_XML_MSG         -18
+/**
  * The XML message is malformed and can not be processed
  */
-#define LIXA_RC_PROPERTY_INVALID_VALUE         -18
+#define LIXA_RC_PROPERTY_INVALID_VALUE         -19
 /**
  * The XML contains a tag is not known or is in the wrong place
  */
-#define LIXA_RC_XML_UNRECOGNIZED_TAG           -19
+#define LIXA_RC_XML_UNRECOGNIZED_TAG           -20
 /**
  * An operation is referring to asynchronous mode that is not yet implemented
  */
-#define LIXA_RC_ASYNC_NOT_IMPLEMENTED          -20
+#define LIXA_RC_ASYNC_NOT_IMPLEMENTED          -21
 
 /**
  * "malloc" function error
