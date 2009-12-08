@@ -355,6 +355,20 @@ extern "C" {
 
 
     /**
+     * Retrieve the first XML message from a TCP/IP socket (file descriptor)
+     * @param fd IN file descriptor associated to the TCP/IP socket
+     * @param buf OUT buffer will be used to store the XML message
+     * @param buf_size IN size of buf
+     * @param read_bytes OUT number of bytes read, XML message length
+     * @return a reason code
+     */
+    int lixa_msg_retrieve(int fd,
+                          char *buf, size_t buf_size,
+                          ssize_t *read_bytes);
+
+
+    
+    /**
      * Serialize a message struct to an XML buffer for external transmission
      * @param msg IN the object must be serialized
      * @param buffer OUT the buffer will contain the XML serialized object

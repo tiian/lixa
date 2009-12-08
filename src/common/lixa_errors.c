@@ -46,6 +46,8 @@ const char *lixa_strerror(int ret_cod)
         ret_cod -= LIXA_RC_ERROR_FROM_SERVER_OFFSET;
     
     switch (ret_cod) {
+        case LIXA_RC_CONNECTION_CLOSED:
+            return "WARNING: peer has closed TCP/IP connection";
         case LIXA_RC_BYPASSED_OPERATION:
             return "WARNING: operation was not performed because it can "
                 "not be requested";
@@ -68,10 +70,9 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_CONTAINER_FULL:
             return "ERROR: the container is full and cannot store more "
                 "elements";
-            /*
-              case LIXA_RC_OBJ_NOT_VOID:
-              return "ERROR: object is not void";
-            */
+        case LIXA_RC_BUFFER_OVERFLOW:
+            return "ERROR: the process has been stopped to avoid a buffer "
+                "overflow";
         case LIXA_RC_OBJ_NOT_INITIALIZED:
             return "ERROR: object is not initialized";
         case  LIXA_RC_OBJ_CORRUPTED:
@@ -217,6 +218,9 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: 'xmlReadFile' function returned an error condition";
         case LIXA_RC_XML_READ_DOC_ERROR:
             return "ERROR: 'xmlReadDoc' function returned an error "
+                "condition";
+        case LIXA_RC_XML_READ_MEMORY_ERROR:
+            return "ERROR: 'xmlReadMemory' function returned an error "
                 "condition";
         case LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR:
             return "ERROR: 'xmlDocGetRootElement' function returned an "

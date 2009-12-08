@@ -1,3 +1,5 @@
-implement server_xa_open_24 and then lixa_xa_open 
+Something wrong happened between 0.3.1 and 0.3.2 (probably uncommitted code
+from other workstation).
+Check it ASAP!
 
 When server_manager_thread exits, the listener must be aware of this... 
