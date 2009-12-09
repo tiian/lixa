@@ -307,8 +307,7 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
 
 int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 {
-    enum Exception { PAYLOAD_CHAIN_RELEASE
-                     , CLOSE_ERROR
+    enum Exception { CLOSE_ERROR
                      , FREE_SLOTS
                      , XML_PROC
                      , MSG_RETRIEVE_ERROR
@@ -326,13 +325,6 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
             /* client has closed the connection */
             /* @@@ check what happens to current transaction */
 
-            /* release all allocated blocks */
-            if (LIXA_RC_OK != (ret_cod = payload_chain_release(
-                                   ts,
-                                   ts->client_array[slot_id].
-                                   pers_status_slot_id)))
-                THROW(PAYLOAD_CHAIN_RELEASE);
-            
             /* close socket, release file descriptor and thread status slot */
             LIXA_TRACE(("server_manager_pollin_data: close socket, "
                         "fd = %d\n", ts->poll_array[slot_id].fd));
@@ -352,8 +344,6 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case PAYLOAD_CHAIN_RELEASE:
-                break;
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
                 break;

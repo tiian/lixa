@@ -319,7 +319,6 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
 {
     enum Exception { OUT_OF_RANGE
                      , INVALID_BLOCK_TYPE
-                     , SLOT_ALREADY_CHAINED
                      , STATUS_RECORD_INSERT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -339,14 +338,6 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
         if (ts->curr_status[slot].sr.data.pld.type != DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_TYPE);
         
-        /* check the slot is not already chained */
-        if (ts->curr_status[slot].sr.data.pld.ph.n > 0) {
-            LIXA_TRACE(("payload_chain_allocate: slot " UINT32_T_FORMAT
-                        " is already chained with %d children blocks\n",
-                        slot, ts->curr_status[slot].sr.data.pld.ph.n));
-            THROW(SLOT_ALREADY_CHAINED);
-        }
-
         /* allocate the blocks */
         for (i=0; i<size; ++i) {
             uint32_t new_slot;;
@@ -377,9 +368,6 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
                 break;
             case INVALID_BLOCK_TYPE:
                 ret_cod = LIXA_RC_OBJ_NOT_INITIALIZED;
-                break;
-            case SLOT_ALREADY_CHAINED:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
                 break;
             case STATUS_RECORD_INSERT_ERROR:
                 LIXA_TRACE(("payload_chain_allocate: unable to allocate "
