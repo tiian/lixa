@@ -164,9 +164,6 @@ int server_xa_open_8(struct thread_status_s *ts,
         ts->client_array[block_id].last_verb_step.verb = lmo->header.pvs.verb;
         ts->client_array[block_id].last_verb_step.step = lmo->header.pvs.step;
 
-        /* ask a file status synchronization */
-        ts->asked_sync++;
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -277,15 +274,23 @@ int server_xa_close(struct thread_status_s *ts,
                     const struct lixa_msg_s *lmi,
                     uint32_t block_id)
 {
-    enum Exception { NONE } excp;
+    enum Exception { PAYLOAD_CHAIN_RELEASE
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("server_xa_close\n"));
     TRY {
+        /* release all allocated blocks */
+        if (LIXA_RC_OK != (
+                ret_cod = payload_chain_release(
+                    ts, ts->client_array[block_id].pers_status_slot_id)))
+            THROW(PAYLOAD_CHAIN_RELEASE);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PAYLOAD_CHAIN_RELEASE:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -297,4 +302,3 @@ int server_xa_close(struct thread_status_s *ts,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
-

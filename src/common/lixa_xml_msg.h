@@ -461,7 +461,7 @@ extern "C" {
      * Deserialize a buffer containing the XML to a message struct
      * @param buffer IN/OUT the buffer that's containing the serialized object
      *                  (it must be null terminated)
-     * @param buffer_len IN number of significative bytes of buffer
+     * @param buffer_len OUT number of significative bytes of buffer
      * @param msg OUT the object after deserialization
      * @return a reason code
      */
