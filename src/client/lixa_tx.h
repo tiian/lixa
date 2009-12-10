@@ -137,6 +137,18 @@ extern "C" {
 
 
 
+    /**
+     * This function implements the real logic underlaying
+     * @ref tx_set_transaction_control X/Open function
+     * @param txrc OUT tx_* return code
+     * @param control IN transaction control characteristic
+     * @return a return code 
+     */
+    int lixa_tx_set_transaction_control(int *txrc,
+                                        TRANSACTION_CONTROL control);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

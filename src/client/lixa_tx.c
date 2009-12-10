@@ -399,3 +399,132 @@ int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return)
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int lixa_tx_set_transaction_control(int *txrc,
+                                    TRANSACTION_CONTROL control)
+{
+    enum Exception { COLL_GET_CS_ERROR
+                     , PROTOCOL_ERROR
+                     , INVALID_STATUS
+                     , INTERNAL_ERROR1
+                     , INTERNAL_ERROR2
+                     , INVALID_OPTION
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    *txrc = TX_FAIL;
+
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("lixa_tx_set_transaction_control\n"));
+    TRY {
+        int txstate, new_txstate;
+        client_status_t *cs;
+        
+        /* retrieve a read-only copy of the thread status */
+        ret_cod = client_status_coll_get_cs(&global_csc, &cs);
+        switch (ret_cod) {
+            case LIXA_RC_OK: /* nothing to do */
+                break;
+            case LIXA_RC_OBJ_NOT_FOUND:
+                /* status not found -> tx_open did not succed -> protocol
+                   error */
+                THROW(PROTOCOL_ERROR);
+            default:
+                THROW(COLL_GET_CS_ERROR);
+        }
+
+        /* check TX state (see Table 7-1) */
+        txstate = client_status_get_txstate(cs);
+
+        switch (txstate) {
+            case TX_STATE_S0:
+                THROW(PROTOCOL_ERROR);
+            case TX_STATE_S1:
+            case TX_STATE_S2:
+            case TX_STATE_S3:
+            case TX_STATE_S4:
+                break;
+            default:
+                THROW(INVALID_STATUS);
+        }
+                
+        new_txstate = txstate;
+        switch (control) {
+            case TX_UNCHAINED:
+                switch (txstate) {
+                    case TX_STATE_S1:
+                        break;
+                    case TX_STATE_S2:
+                        new_txstate = TX_STATE_S1;
+                        break;
+                    case TX_STATE_S3:
+                        break;
+                    case TX_STATE_S4:
+                        new_txstate = TX_STATE_S3;
+                        break;
+                    default:
+                        THROW(INTERNAL_ERROR1);
+                } /* switch (txstate) */
+                break;
+            case TX_CHAINED:
+                switch (txstate) {
+                    case TX_STATE_S1:
+                        new_txstate = TX_STATE_S2;
+                        break;
+                    case TX_STATE_S2:
+                        break;
+                    case TX_STATE_S3:
+                        new_txstate = TX_STATE_S4;
+                        break;
+                    case TX_STATE_S4:
+                        break;
+                    default:
+                        THROW(INTERNAL_ERROR2);
+                } /* switch (txstate) */
+                break;
+            default:
+                THROW(INVALID_OPTION);
+        } /* switch (when_return) */
+        
+        LIXA_TRACE(("lixa_tx_set_transaction_control: old status = S%d, "
+                    "new status = S%d\n", txstate, new_txstate));
+        /* set new state... */
+        client_status_set_txstate(cs, new_txstate);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case COLL_GET_CS_ERROR:
+                break;
+            case PROTOCOL_ERROR:
+                *txrc = TX_PROTOCOL_ERROR;
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case INTERNAL_ERROR1:
+            case INTERNAL_ERROR2:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case INVALID_OPTION:
+                *txrc = TX_EINVAL;
+                ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case NONE:
+                *txrc = TX_OK;
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_tx_set_transaction_control/TX_*=%d/excp=%d/"
+                "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+

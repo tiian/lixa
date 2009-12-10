@@ -102,15 +102,15 @@ int tx_set_commit_return(COMMIT_RETURN when_return)
     int txrc = TX_FAIL;
     lixa_tx_set_commit_return(&txrc, when_return);
     return txrc;
-    return TX_OK;
 }
 
 
 
 int tx_set_transaction_control(TRANSACTION_CONTROL control)
 {
-    /** @@@ must be fixed see bug 2907554 */
-    return TX_OK;
+    int txrc = TX_FAIL;
+    lixa_tx_set_transaction_control(&txrc, control);
+    return txrc;
 }
 
 
