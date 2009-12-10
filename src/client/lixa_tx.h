@@ -107,6 +107,16 @@ extern "C" {
 
 
     /**
+     * This function implements the real logic underlaying @ref tx_close
+     * X/Open function
+     * @param txrc OUT tx_* return code
+     * @return a return code 
+     */
+    int lixa_tx_close(int *txrc);
+
+
+    
+    /**
      * This function implements the real logic underlaying @ref tx_open
      * X/Open function
      * @param txrc OUT tx_* return code
@@ -117,15 +127,16 @@ extern "C" {
 
     
     /**
-     * This function implements the real logic underlaying @ref tx_close
-     * X/Open function
+     * This function implements the real logic underlaying
+     * @ref tx_set_commit_return X/Open function
      * @param txrc OUT tx_* return code
+     * @param when_return IN commit_return characteristic
      * @return a return code 
      */
-    int lixa_tx_close(int *txrc);
+    int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return);
 
 
-    
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

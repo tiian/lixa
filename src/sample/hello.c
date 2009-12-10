@@ -41,6 +41,12 @@ int main(int argc, char *argv[])
 {
     printf("lixa hello before first tx_open()\n");
     printf("lixa hello: tx_open(): %d\n", tx_open());
+    /* this is a supported characteristic */
+    printf("lxia hello: tx_set_commit_return(): %d\n",
+           tx_set_commit_return(TX_COMMIT_COMPLETED));
+    /* this is an unsupported characteristic */
+    printf("lxia hello: tx_set_commit_return(): %d\n",
+           tx_set_commit_return(TX_COMMIT_DECISION_LOGGED));
     printf("lixa hello: tx_close(): %d\n", tx_close());
     printf("lixa hello: tx_open(): %d\n", tx_open());
     printf("lixa hello: tx_close(): %d\n", tx_close());

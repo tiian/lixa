@@ -64,7 +64,7 @@ extern "C" {
     /**
      * Open all the resource managers necessary for the transaction
      * @param cs IN reference to the status of the calling client
-     * @param tx_rc OUT return code prepared for tx_open call
+     * @param txrc OUT return code prepared for tx_open call
      * @return a reason code
      */
     int lixa_xa_open(client_status_t *cs, int *txrc);
@@ -74,7 +74,7 @@ extern "C" {
     /**
      * Close all the resource managers necessary for the transaction
      * @param cs IN reference to the status of the calling client
-     * @param tx_rc OUT return code prepared for tx_close call
+     * @param txrc OUT return code prepared for tx_close call
      * @return a reason code
      */
     int lixa_xa_close(client_status_t *cs, int *txrc);
