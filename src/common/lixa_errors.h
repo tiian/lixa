@@ -176,6 +176,10 @@
  * An operation is referring to asynchronous mode that is not yet implemented
  */
 #define LIXA_RC_ASYNC_NOT_IMPLEMENTED          -21
+/**
+ * The specified option might be valid, but it's not (yet) supported by LIXA
+ */
+#define LIXA_RC_UNSUPPORTED_OPTION             -22
 
 /**
  * "malloc" function error

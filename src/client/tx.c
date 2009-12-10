@@ -99,7 +99,9 @@ int tx_rollback(void)
 
 int tx_set_commit_return(COMMIT_RETURN when_return)
 {
-    /** @@@ must be fixed see bug 2907552 */
+    int txrc = TX_FAIL;
+    lixa_tx_set_commit_return(&txrc, when_return);
+    return txrc;
     return TX_OK;
 }
 

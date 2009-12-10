@@ -115,6 +115,105 @@ char *xid_get_bqual_ascii(const XID *xid)
 
 
 
+int lixa_tx_close(int *txrc)
+{
+    enum Exception { COLL_GET_CS_ERROR
+                     , PROTOCOL_ERROR
+                     , INVALID_STATUS
+                     , LIXA_XA_CLOSE_ERROR
+                     , CLIENT_DISCONNECT_ERROR
+                     , CLIENT_CONFIG_UNLOAD_SWITCH_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int tmp_txrc;
+    
+    *txrc = TX_FAIL;
+    
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("lixa_tx_close\n"));
+    TRY {
+        int txstate;
+        client_status_t *cs;
+        
+        /* retrieve a read-only copy of the thread status */
+        ret_cod = client_status_coll_get_cs(&global_csc, &cs);
+        switch (ret_cod) {
+            case LIXA_RC_OK: /* nothing to do */
+                break;
+            case LIXA_RC_OBJ_NOT_FOUND:
+                *txrc = TX_OK;
+                /* break intentionally missed */
+            default:
+                THROW(COLL_GET_CS_ERROR);
+        }
+
+        /* check TX state (see Table 7-1) */
+        txstate = client_status_get_txstate(cs);
+
+        switch (txstate) {
+            case TX_STATE_S0:
+            case TX_STATE_S1:
+            case TX_STATE_S2:
+                break;
+            case TX_STATE_S3:
+            case TX_STATE_S4:
+                THROW(PROTOCOL_ERROR);                
+            default:
+                THROW(INVALID_STATUS);
+        }
+        
+        /* the real logic must be put here */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_close(cs, &tmp_txrc)))
+            THROW(LIXA_XA_CLOSE_ERROR);
+            
+        if (LIXA_RC_OK != (ret_cod = client_disconnect(&global_csc)))
+            THROW(CLIENT_DISCONNECT_ERROR);
+
+        /* @@@ due to a suspected memory leak inside glib discovered with
+           valgrind, the modules are not unloaded: only process exit will
+           unload them...
+        if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))
+            THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
+        */
+            
+        /* update the TX state, now TX_STATE_S0 */
+        client_status_set_txstate(cs, TX_STATE_S0);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case COLL_GET_CS_ERROR:
+                break;
+            case PROTOCOL_ERROR:
+                *txrc = TX_PROTOCOL_ERROR;
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case LIXA_XA_CLOSE_ERROR:
+                *txrc = tmp_txrc;
+                break;
+            case CLIENT_DISCONNECT_ERROR:
+            case CLIENT_CONFIG_UNLOAD_SWITCH_ERROR:
+                *txrc = TX_ERROR;
+                break;
+            case NONE:
+                *txrc = TX_OK;
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_tx_close/TX_*=%d/excp=%d/"
+                "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_tx_open(int *txrc)
 {
     enum Exception { CLIENT_STATUS_COLL_GET_CS_ERROR
@@ -135,7 +234,7 @@ int lixa_tx_open(int *txrc)
     TRY {
         int txstate, pos = 0;
         client_status_t *cs;
-        
+
         /* check if the thread is already registered and
          * retrieve a reference to the status of the current thread */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -206,21 +305,20 @@ int lixa_tx_open(int *txrc)
 
 
 
-int lixa_tx_close(int *txrc)
+int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return)
 {
     enum Exception { COLL_GET_CS_ERROR
-                     , LIXA_XA_CLOSE_ERROR
-                     , CLIENT_DISCONNECT_ERROR
-                     , CLIENT_CONFIG_UNLOAD_SWITCH_ERROR
                      , PROTOCOL_ERROR
+                     , INVALID_STATUS
+                     , UNSUPPORTED_OPTION
+                     , INVALID_OPTION
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int tmp_txrc;
     
     *txrc = TX_FAIL;
-    
+
     LIXA_TRACE_INIT;
-    LIXA_TRACE(("lixa_tx_close\n"));
+    LIXA_TRACE(("lixa_tx_set_commit_return\n"));
     TRY {
         int txstate;
         client_status_t *cs;
@@ -231,8 +329,9 @@ int lixa_tx_close(int *txrc)
             case LIXA_RC_OK: /* nothing to do */
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
-                *txrc = TX_OK;
-                /* break intentionally missed */
+                /* status not found -> tx_open did not succed -> protocol
+                   error */
+                THROW(PROTOCOL_ERROR);
             default:
                 THROW(COLL_GET_CS_ERROR);
         }
@@ -242,44 +341,51 @@ int lixa_tx_close(int *txrc)
 
         switch (txstate) {
             case TX_STATE_S0:
+                THROW(PROTOCOL_ERROR);
             case TX_STATE_S1:
             case TX_STATE_S2:
+            case TX_STATE_S3:
+            case TX_STATE_S4:
                 break;
             default:
-                THROW(PROTOCOL_ERROR);
+                THROW(INVALID_STATUS);
         }
-        
-        /* the real logic must be put here */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_close(cs, &tmp_txrc)))
-            THROW(LIXA_XA_CLOSE_ERROR);
-            
-        if (LIXA_RC_OK != (ret_cod = client_disconnect(&global_csc)))
-            THROW(CLIENT_DISCONNECT_ERROR);
-
-        /* @@@ due to a memory leak inside glib discovered with valgrind, the
-           modules are no more unloaded: only process exit will unload them...
-        if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))
-            THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
-        */
-            
-        /* update the TX state, now TX_STATE_S0 */
-        client_status_set_txstate(cs, TX_STATE_S0);
+                
+        /* LIXA support only TX_COMMIT_COMPLETED; it does not support
+         * TX_COMMIT_DECISION_LOGGED. This behavior does not violate standard
+         * (see page 29 of "DTP: The TX (Transaction Demarcation) Specification
+         */
+        switch (when_return) {
+            case TX_COMMIT_COMPLETED:
+                /* this is the default and only supported characteristic */
+                break;
+            case TX_COMMIT_DECISION_LOGGED:
+                THROW(UNSUPPORTED_OPTION);
+                break;
+            default:
+                THROW(INVALID_OPTION);
+                break;
+        } /* switch (when_return) */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case COLL_GET_CS_ERROR:
                 break;
-            case LIXA_XA_CLOSE_ERROR:
-                *txrc = tmp_txrc;
-                break;
-            case CLIENT_DISCONNECT_ERROR:
-            case CLIENT_CONFIG_UNLOAD_SWITCH_ERROR:
-                *txrc = TX_ERROR;
-                break;
             case PROTOCOL_ERROR:
                 *txrc = TX_PROTOCOL_ERROR;
                 ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case UNSUPPORTED_OPTION:
+                *txrc = TX_NOT_SUPPORTED;
+                ret_cod = LIXA_RC_UNSUPPORTED_OPTION;
+                break;
+            case INVALID_OPTION:
+                *txrc = TX_EINVAL;
+                ret_cod = LIXA_RC_INVALID_OPTION;
                 break;
             case NONE:
                 *txrc = TX_OK;
@@ -287,12 +393,9 @@ int lixa_tx_close(int *txrc)
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
-                break;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_tx_close/TX_*=%d/excp=%d/"
+    LIXA_TRACE(("lixa_tx_set_commit_return/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
     return ret_cod;
 }
-
-

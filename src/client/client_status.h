@@ -292,8 +292,8 @@ extern "C" {
     
 
     /**
-     * Retrieve a COPY of the current thread client status; this method is
-     * safe because it's internally lock protected
+     * Retrieve a (stable) reference to the current thread client status; this
+     * method is safe because it's internally lock protected
      * @param csc IN object reference
      * @param cs OUT reference to the output object (current thread client
      *               status)
