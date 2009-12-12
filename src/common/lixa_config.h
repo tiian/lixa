@@ -165,6 +165,11 @@ extern const xmlChar *LIXA_XML_CONFIG_NAME_PROPERTY;
 extern const xmlChar *LIXA_XML_CONFIG_SWITCH_FILE_PROPERTY;
 
 /**
+ * Label used to specify "xa_close_info" property
+ */
+extern const xmlChar *LIXA_XML_CONFIG_XA_CLOSE_INFO_PROPERTY;
+
+/**
  * Label used to specify "xa_open_info" property
  */
 extern const xmlChar *LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY;

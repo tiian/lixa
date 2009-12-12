@@ -576,9 +576,10 @@ int client_config_display(client_config_coll_t *ccc)
             struct rsrmgr_config_s *rsrmgr = &g_array_index(
                 ccc->rsrmgrs, struct rsrmgr_config_s, i);
             LIXA_TRACE(("client_config_display: resource manager # %u, "
-                        "name='%s', switch_file='%s', xa_open_info='%s'\n",
+                        "name='%s', switch_file='%s', xa_open_info='%s', "
+                        "xa_close_info='%s'\n",
                         i, rsrmgr->name, rsrmgr->switch_file,
-                        rsrmgr->xa_open_info));
+                        rsrmgr->xa_open_info, rsrmgr->xa_close_info));
         }
         for (i=0; i<ccc->profiles->len; ++i) {
             guint j;
@@ -876,6 +877,7 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
                      , PORT_NOT_AVAILABLE_ERROR
                      , SWITCH_FILE_NOT_AVAILABLE_ERROR
                      , XA_OPEN_INFO_NOT_AVAILABLE_ERROR
+                     , XA_CLOSE_INFO_NOT_AVAILABLE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -888,6 +890,7 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
         record.name = NULL;
         record.switch_file = NULL;
         record.xa_open_info[0] = '\0';
+        record.xa_close_info[0] = '\0';
 
         /* retrieve resource manager name */
         if (NULL == (record.name = xmlGetProp(
@@ -904,10 +907,18 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
         strncpy(record.xa_open_info, (char *)tmp, MAXINFOSIZE);
         record.xa_open_info[MAXINFOSIZE - 1] = '\0';
         xmlFree(tmp);
+        /* retrieve xa_close_info */
+        if (NULL == (tmp = xmlGetProp(
+                         a_node, LIXA_XML_CONFIG_XA_CLOSE_INFO_PROPERTY)))
+            THROW(XA_CLOSE_INFO_NOT_AVAILABLE_ERROR);
+        strncpy(record.xa_close_info, (char *)tmp, MAXINFOSIZE);
+        record.xa_close_info[MAXINFOSIZE - 1] = '\0';
+        xmlFree(tmp);
+        /* add the record to the array */
         g_array_append_val(ccc->rsrmgrs, record);
         
         LIXA_TRACE(("client_parse_rsrmgr/%p: %s %d, "
-                    "%s = '%s', %s = '%s', %s = '%s'\n",
+                    "%s = '%s', %s = '%s', %s = '%s', %s = '%s'\n",
                     a_node,
                     (char *)LIXA_XML_CONFIG_RSRMGR, ccc->rsrmgrs->len-1,
                     (char *)LIXA_XML_CONFIG_NAME_PROPERTY,
@@ -915,7 +926,9 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
                     (char *)LIXA_XML_CONFIG_SWITCH_FILE_PROPERTY,
                     (char *)record.switch_file,
                     (char *)LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY,
-                    record.xa_open_info));
+                    record.xa_open_info,
+                    (char *)LIXA_XML_CONFIG_XA_CLOSE_INFO_PROPERTY,
+                    record.xa_close_info));
         
         THROW(NONE);
     } CATCH {
@@ -938,6 +951,12 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
                             LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY));
                 ret_cod = LIXA_RC_CONFIG_ERROR;
                 break;                
+            case XA_CLOSE_INFO_NOT_AVAILABLE_ERROR:
+                LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrmgr "
+                            "property '%s' for current resource manager\n",
+                            LIXA_XML_CONFIG_XA_CLOSE_INFO_PROPERTY));
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;                
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -953,7 +972,7 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
 
 
 int client_parse_profiles(struct client_config_coll_s *ccc,
-                         xmlNode *a_node)
+                          xmlNode *a_node)
 {
     enum Exception { PARSE_PROFILE_ERROR
                      , NONE } excp;

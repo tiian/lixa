@@ -85,7 +85,10 @@ const xmlChar *LIXA_XML_CONFIG_PROFILE = (xmlChar *)"profile";
 const xmlChar *LIXA_XML_CONFIG_PROFILES = (xmlChar *)"profiles";
 const xmlChar *LIXA_XML_CONFIG_NAME_PROPERTY = (xmlChar *)"name";
 const xmlChar *LIXA_XML_CONFIG_SWITCH_FILE_PROPERTY = (xmlChar *)"switch_file";
-const xmlChar *LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY = (xmlChar *)"xa_open_info";
+const xmlChar *LIXA_XML_CONFIG_XA_CLOSE_INFO_PROPERTY =
+    (xmlChar *)"xa_close_info";
+const xmlChar *LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY =
+    (xmlChar *)"xa_open_info";
 
 
 

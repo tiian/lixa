@@ -125,7 +125,7 @@ int lixa_tx_close(int *txrc)
                      , CLIENT_CONFIG_UNLOAD_SWITCH_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int tmp_txrc;
+    int tmp_txrc = TX_OK;
     
     *txrc = TX_FAIL;
     
@@ -199,7 +199,7 @@ int lixa_tx_close(int *txrc)
                 *txrc = TX_ERROR;
                 break;
             case NONE:
-                *txrc = TX_OK;
+                *txrc = tmp_txrc;
                 ret_cod = LIXA_RC_OK;
                 break;
             default:

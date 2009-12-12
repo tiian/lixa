@@ -179,9 +179,10 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
                     *txrc = TX_FAIL;
                     break;
                 case XAER_ASYNC:
+                    *txrc = TX_FAIL;
                     THROW(ASYNC_NOT_IMPLEMENTED);
-                    break;
                 default:
+                    *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
         } /* for (i=0; ...) */
@@ -219,7 +220,8 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
                 ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
                 break;
             case UNEXPECTED_XA_RC:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;                
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
             case SEND_ERROR2:
                 ret_cod = LIXA_RC_SEND_ERROR;
                 break;
@@ -239,7 +241,9 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
 
 int lixa_xa_close(client_status_t *cs, int *txrc)
 {
-    enum Exception { MSG_SERIALIZE_ERROR
+    enum Exception { ASYNC_NOT_IMPLEMENTED
+                     , UNEXPECTED_XA_RC
+                     , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -251,7 +255,41 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
         size_t buffer_size = 0;
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        long xa_close_flags = TMNOFLAGS;
 
+        /* it seems there's no reason to send info to the server about xa_close
+           completion code; the message is sent only to free the slots
+           reserved for the current thread of control */
+        *txrc = TX_OK;
+        for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+            int rc;
+            struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
+                global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
+            rc = act_rsrmgr->xa_switch->xa_close_entry(
+                act_rsrmgr->generic->xa_close_info, i, xa_close_flags);
+            LIXA_TRACE(("lixa_xa_close: xa_close_entry('%s', %d, %ld) = %d\n",
+                        act_rsrmgr->generic->xa_close_info,
+                        i, xa_close_flags, rc));
+            switch (rc) {
+                case XA_OK:
+                    break;
+                case XAER_RMERR:
+                    if (*txrc == TX_OK)
+                        *txrc = TX_ERROR;
+                    break;
+                case XAER_INVAL:
+                case XAER_PROTO:
+                    *txrc = TX_FAIL;
+                    break;
+                case XAER_ASYNC:
+                    *txrc = TX_FAIL;
+                    THROW(ASYNC_NOT_IMPLEMENTED);
+                default:
+                    *txrc = TX_FAIL;
+                    THROW(UNEXPECTED_XA_RC);                    
+            } /* switch (rc) */
+        }
+                
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
 
@@ -288,6 +326,12 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case ASYNC_NOT_IMPLEMENTED:
+                ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
+                break;
+            case UNEXPECTED_XA_RC:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
             case MSG_SERIALIZE_ERROR:
                 *txrc = TX_FAIL;
                 break;
@@ -296,7 +340,6 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
                 ret_cod = LIXA_RC_SEND_ERROR;
                 break;
             case NONE:
-                *txrc = TX_OK;
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
