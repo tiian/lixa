@@ -1,4 +1,12 @@
 LOG:
+20091212 - 0.3.4 bug # 2912287 fix
+
+20091210 - 0.3.3 bug # 2907554 fix
+
+20091208 - 0.3.2 bug # 2909089 fix
+
+20091202 - 0.3.0 release; all "tx_" functions are available, many are dummies
+
 20090330 - 0.1.0 first very early release, the daemon compiles and run, but is
            useless
 

@@ -131,6 +131,11 @@ struct rsrmgr_config_s {
      * invocation
      */
     char     xa_open_info[MAXINFOSIZE];
+    /**
+     * xa_info string must be passed to the resource manager at xa_close
+     * invocation
+     */
+    char     xa_close_info[MAXINFOSIZE];
 };
 
 
