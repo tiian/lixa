@@ -51,8 +51,7 @@ int main(int argc, char *argv[])
            tx_set_transaction_control(TX_CHAINED));
     printf("lixa hello: tx_set_transaction_control(): %d\n",
            tx_set_transaction_control(TX_UNCHAINED));
-    printf("lixa hello: tx_close(): %d\n", tx_close());
-    printf("lixa hello: tx_open(): %d\n", tx_open());
+    printf("lixa hello: tx_begin(): %d\n", tx_begin());
     printf("lixa hello: tx_close(): %d\n", tx_close());
     printf("lixa hello after second tx_close()\n");
     return 0;

@@ -116,38 +116,6 @@ void client_status_init(client_status_t *cs)
 
 
 
-/* @@@ obsolete, remove!
-int client_status_coll_init(client_status_coll_t *csc)    
-{
-    enum Exception { NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("client_status_coll_init\n"));
-    TRY {
-        csc->index_size = 0;
-        csc->index_data = NULL;
-        csc->status_size = 0;
-        csc->status_used = 0;
-        csc->status_data = NULL;
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        }
-    }
-    LIXA_TRACE(("client_status_coll_init/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-*/
-
-
-
 int client_status_coll_register(client_status_coll_t *csc, int *pos)
 {
     enum Exception { INTERNAL_ERROR

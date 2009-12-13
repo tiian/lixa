@@ -62,21 +62,28 @@
 
 
 
+#define ZERO_GLOBAL_BQUAL "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+uuid_t global_bqual = ZERO_GLOBAL_BQUAL;
+
+
+
 void xid_create_new(XID *xid)
 {
     uuid_t uuid_obj;
     char *gtrid, *bqual;
     
     xid->formatID = LIXA_XID_FORMAT_ID;
-    xid->gtrid_length = 2 * sizeof(uuid_t);
+    xid->gtrid_length = sizeof(uuid_t);
     xid->bqual_length = sizeof(uuid_t);
     memset(xid->data, 0, XIDDATASIZE); /* this is not necessary, but... */
-    uuid_generate_time(uuid_obj);
-    memcpy(xid->data, uuid_obj, sizeof(uuid_t));
-    uuid_generate_random(uuid_obj);
-    memcpy(xid->data + sizeof(uuid_t), uuid_obj, sizeof(uuid_t));
     uuid_generate(uuid_obj);
-    memcpy(xid->data + 2 * sizeof(uuid_t), uuid_obj, sizeof(uuid_t));    
+    memcpy(xid->data, uuid_obj, sizeof(uuid_t));
+    if (!memcmp(global_bqual, ZERO_GLOBAL_BQUAL, sizeof(uuid_t))) {
+        /* branch qualifier is generated only once for every thread of control
+           (standard states it can be unique for a transaction manager) */
+        uuid_generate(global_bqual);
+    }
+    memcpy(xid->data + sizeof(uuid_t), global_bqual, sizeof(uuid_t));
 #ifdef _TRACE
     gtrid = xid_get_gtrid_ascii(xid);
     bqual = xid_get_bqual_ascii(xid);
@@ -91,13 +98,10 @@ void xid_create_new(XID *xid)
 
 char *xid_get_gtrid_ascii(const XID *xid)
 {
-    char *gtrid;    
-    if (NULL == (gtrid = (char *)malloc(2*(2*sizeof(uuid_t)+4)+2)))
+    char *gtrid;
+    if (NULL == (gtrid = (char *)malloc(2*sizeof(uuid_t)+4+1)))
         return NULL;
     uuid_unparse((unsigned char *)xid->data, gtrid);
-    gtrid[2*sizeof(uuid_t)+4] = '+';
-    uuid_unparse((unsigned char *)xid->data + sizeof(uuid_t),
-                 gtrid + 2 * sizeof(uuid_t) + 5);
     return gtrid;
 }
 
@@ -106,11 +110,114 @@ char *xid_get_gtrid_ascii(const XID *xid)
 char *xid_get_bqual_ascii(const XID *xid)
 {
     char *bqual;
-    if (NULL == (bqual = (char *)malloc(2*sizeof(uuid_t)+5)))
+    if (NULL == (bqual = (char *)malloc(2*sizeof(uuid_t)+4+1)))
         return NULL;
-    uuid_unparse((unsigned char *)xid->data + 2 * sizeof(uuid_t), bqual);
+    uuid_unparse((unsigned char *)xid->data + sizeof(uuid_t), bqual);
     return bqual;
     
+}
+
+
+
+int lixa_tx_begin(int *txrc)
+{
+    enum Exception { STATUS_NOT_FOUND
+                     , COLL_GET_CS_ERROR
+                     , PROTOCOL_ERROR
+                     , INVALID_STATUS1
+                     , INVALID_STATUS2
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int tmp_txrc = TX_OK;
+    
+    *txrc = TX_FAIL;
+    
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("lixa_tx_begin\n"));
+    TRY {
+        int txstate, new_txstate;
+        client_status_t *cs;
+        XID xid;
+        
+        /* retrieve a reference to the thread status */
+        ret_cod = client_status_coll_get_cs(&global_csc, &cs);
+        switch (ret_cod) {
+            case LIXA_RC_OK: /* nothing to do */
+                break;
+            case LIXA_RC_OBJ_NOT_FOUND:
+                THROW(STATUS_NOT_FOUND);
+            default:
+                THROW(COLL_GET_CS_ERROR);
+        }
+
+        /* check TX state (see Table 7-1) */
+        txstate = client_status_get_txstate(cs);
+
+        switch (txstate) {
+            case TX_STATE_S1:
+            case TX_STATE_S2:
+                break;
+            case TX_STATE_S0:
+            case TX_STATE_S3:
+            case TX_STATE_S4:
+                THROW(PROTOCOL_ERROR);                
+            default:
+                THROW(INVALID_STATUS1);
+        }
+
+        /* generate the transction id */
+        xid_create_new(&xid);
+        client_status_set_xid(cs, &xid);
+        
+        /* the real logic must be put here */
+        /* @@@ go on from here... */ go on from here...
+        
+        /* update the TX state, now TX_STATE_S0 */
+        switch (txstate) {
+            case TX_STATE_S1:
+                new_txstate = TX_STATE_S3;
+                break;
+            case TX_STATE_S2:
+                new_txstate = TX_STATE_S4;
+                break;
+            default:
+                THROW(INVALID_STATUS2);
+        }        
+        LIXA_TRACE(("lixa_tx_begin: old status = S%d, "
+                    "new status = S%d\n", txstate, new_txstate));
+        client_status_set_txstate(cs, new_txstate);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case STATUS_NOT_FOUND:
+                *txrc = TX_PROTOCOL_ERROR;
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case COLL_GET_CS_ERROR:
+                break;
+            case PROTOCOL_ERROR:
+                *txrc = TX_PROTOCOL_ERROR;
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case INVALID_STATUS1:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case INVALID_STATUS2:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case NONE:
+                *txrc = tmp_txrc;
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_tx_begin/TX_*=%d/excp=%d/"
+                "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
+    return ret_cod;
 }
 
 
@@ -135,7 +242,7 @@ int lixa_tx_close(int *txrc)
         int txstate;
         client_status_t *cs;
         
-        /* retrieve a read-only copy of the thread status */
+        /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* nothing to do */
@@ -323,7 +430,7 @@ int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return)
         int txstate;
         client_status_t *cs;
         
-        /* retrieve a read-only copy of the thread status */
+        /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* nothing to do */
@@ -422,7 +529,7 @@ int lixa_tx_set_transaction_control(int *txrc,
         int txstate, new_txstate;
         client_status_t *cs;
         
-        /* retrieve a read-only copy of the thread status */
+        /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* nothing to do */
