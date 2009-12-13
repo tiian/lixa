@@ -110,6 +110,10 @@ struct client_status_s {
      * The TX (Transaction Demarcation) Specification
      */
     int   txstate;
+    /**
+     * Transaction ID
+     */
+    XID   xid;
 };
 
 typedef struct client_status_s client_status_t;
@@ -224,6 +228,17 @@ extern "C" {
 
 
     /**
+     * Get the file descriptor associated to the socket used for client/server
+     * communication
+     * @param cs IN object reference
+     * @return the file descriptor
+     */
+    static inline int client_status_get_sockfd(const client_status_t *cs) {
+        return cs->sockfd; }
+
+
+    
+    /**
      * Set the file descriptor associated to the socket used for client/server
      * communication
      * @param cs IN/OUT object reference
@@ -256,27 +271,26 @@ extern "C" {
     
 
     /**
-     * Get the file descriptor associated to the socket used for client/server
-     * communication
+     * Get the transaction ID associated to the thread
      * @param cs IN object reference
-     * @return the file descriptor
+     * @return a reference to the transaction ID
      */
-    static inline int client_status_get_sockfd(const client_status_t *cs) {
-        return cs->sockfd; }
+    static inline const XID *client_status_get_xid(const client_status_t *cs) {
+        return &cs->xid; }
 
 
     
-    /* @@@ obsolete, remove!
-     * Initialize the client status object; this object should be istantiated
-     * only once, should be static, initialized at library load, protected
-     * against race conditions by a mutex
-     * @param csc OUT object reference
-     * @return a standardized return code
-    int client_status_coll_init(client_status_coll_t *csc);
+    /**
+     * Get the transaction ID associated to the thread
+     * @param cs IN/OUT object reference
+     * @param xid IN a transaction ID 
      */
+    static inline void client_status_set_xid(client_status_t *cs,
+                                             const XID *xid) {
+        cs->xid = *xid; }
 
 
-
+    
     /**
      * Return the status of a specific thread; this method MUST be protected
      * by a rdlock because the array can change while the method is in progress

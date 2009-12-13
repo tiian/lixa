@@ -117,6 +117,16 @@ extern "C" {
 
     
     /**
+     * This function implements the real logic underlaying @ref tx_begin
+     * X/Open function
+     * @param txrc OUT tx_* return code
+     * @return a return code 
+     */
+    int lixa_tx_begin(int *txrc);
+
+
+    
+    /**
      * This function implements the real logic underlaying @ref tx_open
      * X/Open function
      * @param txrc OUT tx_* return code

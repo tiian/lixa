@@ -469,6 +469,18 @@ int client_config_load_switch(const client_config_coll_t *ccc)
                             "lixa_get_xa_switch()->flags = %ld\n",
                             xa_switch()->name,
                             xa_switch()->flags));
+                LIXA_TRACE(("client_config_load_switch: resource manager "
+                            "dynamically registers: %s\n",
+                            xa_switch()->flags & TMREGISTER ?
+                            "true" : "false"));
+                LIXA_TRACE(("client_config_load_switch: resource manager "
+                            "does not support association migration: %s\n",
+                            xa_switch()->flags & TMNOMIGRATE ?
+                            "true" : "false"));
+                LIXA_TRACE(("client_config_load_switch: resource manager "
+                            "supports asynchronous operations: %s\n",
+                            xa_switch()->flags & TMUSEASYNC ?
+                            "true" : "false"));
                 act_rsrmgr->module = module;
                 act_rsrmgr->xa_switch = xa_switch();
             }
