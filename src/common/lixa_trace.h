@@ -57,6 +57,11 @@
 
 
 /**
+ * trace module for files do not need trace feature
+ */
+#define LIXA_TRACE_MOD_NO_TRACE           0x00000000
+
+/**
  * trace module for generic server functions
  */
 #define LIXA_TRACE_MOD_SERVER             0x00000001

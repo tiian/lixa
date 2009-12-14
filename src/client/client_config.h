@@ -54,6 +54,9 @@
 #ifdef HAVE_GMODULE_H
 # include <gmodule.h>
 #endif
+#ifdef HAVE_UUID_UUID_H
+# include <uuid/uuid.h>
+#endif
 
 
 
@@ -259,6 +262,11 @@ struct client_config_coll_s {
      * strange.
      */
     struct sockaddr_in           serv_addr;
+    /**
+     * Global branch qualifier: it's unique for every thread of a process;
+     * every process acts as a distinct transaction manager
+     */
+    uuid_t                       global_bqual;
 };
 
 

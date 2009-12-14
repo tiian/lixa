@@ -62,11 +62,6 @@
 
 
 
-#define ZERO_GLOBAL_BQUAL "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
-uuid_t global_bqual = ZERO_GLOBAL_BQUAL;
-
-
-
 void xid_create_new(XID *xid)
 {
     uuid_t uuid_obj;
@@ -78,12 +73,8 @@ void xid_create_new(XID *xid)
     memset(xid->data, 0, XIDDATASIZE); /* this is not necessary, but... */
     uuid_generate(uuid_obj);
     memcpy(xid->data, uuid_obj, sizeof(uuid_t));
-    if (!memcmp(global_bqual, ZERO_GLOBAL_BQUAL, sizeof(uuid_t))) {
-        /* branch qualifier is generated only once for every thread of control
-           (standard states it can be unique for a transaction manager) */
-        uuid_generate(global_bqual);
-    }
-    memcpy(xid->data + sizeof(uuid_t), global_bqual, sizeof(uuid_t));
+    memcpy(xid->data + sizeof(uuid_t), global_ccc.global_bqual,
+           sizeof(uuid_t));
 #ifdef _TRACE
     gtrid = xid_get_gtrid_ascii(xid);
     bqual = xid_get_bqual_ascii(xid);
@@ -170,7 +161,7 @@ int lixa_tx_begin(int *txrc)
         client_status_set_xid(cs, &xid);
         
         /* the real logic must be put here */
-        /* @@@ go on from here... */ go on from here...
+        /* @@@ go on from here... */
         
         /* update the TX state, now TX_STATE_S0 */
         switch (txstate) {
