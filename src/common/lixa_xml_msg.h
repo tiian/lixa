@@ -128,6 +128,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_RC;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_RMID;
 /**
+ * Label used to specify "state" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_STATE;
+/**
  * Label used to specify "step" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_STEP;
@@ -287,6 +291,10 @@ struct lixa_msg_body_open_24_xa_open_execs_s {
      * return code of xa_open routine
      */
     int             rc;
+    /**
+     * the new state associated to the resource manager after xa_open execution
+     */
+    int             state;
 };
 
 

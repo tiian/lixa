@@ -46,6 +46,7 @@
 
 
 #include <lixa_trace.h>
+#include <lixa_common_status.h>
 #include <client_config.h>
 
 
@@ -62,35 +63,6 @@
 
 
 /**
- * No RMs have been opened or initialized. An application thread of control
- * cannot start a global transaction until it has successfully opened its RMs
- * via @ref tx_open().
- */
-#define TX_STATE_S0    0
-/**
- * The thread haso opened its RMs but is not in a transaction. Its transaction
- * control characteristics is TX_UNCHAINED
- */
-#define TX_STATE_S1    1
-/**
- * The thread haso opened its RMs but is not in a transaction. Its transaction
- * control characteristics is TX_CHAINED
- */
-#define TX_STATE_S2    2
-/**
- * The thread has opened its RMs and is in a transaction. Its transaction
- * control characteristics is TX_UNCHAINED
- */
-#define TX_STATE_S3    3
-/**
- * The thread has opened its RMs and is in a transaction. Its transaction
- * control characteristics is TX_CHAINED
- */
-#define TX_STATE_S4    4
-
-
-
-/**
  * It contains the status of a thread connected to a lixa transaction
  * manager
  */
@@ -99,21 +71,19 @@ struct client_status_s {
      * This boolean flag is used to verify if the instantiated object is active
      * or not (garbage can be removed)
      */
-    int   active;
+    int                             active;
     /**
      * The file descriptor associated to the socket connected to the server
      */
-    int   sockfd;
+    int                             sockfd;
     /**
-     * Status as described in table 7-1 ("C-language State Tables", chapter 7,
-     * X/Open CAE Specification, Distributed Transaction Processing:
-     * The TX (Transaction Demarcation) Specification
+     * State of the control thread
      */
-    int   txstate;
+    struct common_status_conthr_s   state;
     /**
-     * Transaction ID
+     * State of the partecipating resource managers
      */
-    XID   xid;
+    GArray                         *rmstates;
 };
 
 typedef struct client_status_s client_status_t;
@@ -209,6 +179,14 @@ extern "C" {
     
 
     /**
+     * Free the dynamic memory associated to a client status
+     * @param cs OUT object reference
+     */
+    void client_status_free(client_status_t *cs);
+
+
+    
+    /**
      * Is the client status an active slot?
      * @param cs ON object reference
      * @return a boolean condition
@@ -255,7 +233,7 @@ extern "C" {
      * @return the TX state
      */
     static inline int client_status_get_txstate(const client_status_t *cs) {
-        return cs->txstate; }
+        return cs->state.txstate; }
 
 
     
@@ -266,7 +244,7 @@ extern "C" {
      */
     static inline void client_status_set_txstate(client_status_t *cs,
                                                  int txstate) {
-        cs->txstate = txstate; }
+        cs->state.txstate = txstate; }
     
     
 
@@ -276,7 +254,7 @@ extern "C" {
      * @return a reference to the transaction ID
      */
     static inline const XID *client_status_get_xid(const client_status_t *cs) {
-        return &cs->xid; }
+        return &cs->state.xid; }
 
 
     
@@ -287,7 +265,7 @@ extern "C" {
      */
     static inline void client_status_set_xid(client_status_t *cs,
                                              const XID *xid) {
-        cs->xid = *xid; }
+        cs->state.xid = *xid; }
 
 
     
