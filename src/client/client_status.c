@@ -109,9 +109,20 @@ void client_status_init(client_status_t *cs)
     LIXA_TRACE(("client_status_init: begin\n"));
     cs->active = FALSE;
     cs->sockfd = LIXA_NULL_FD;
-    cs->txstate = TX_STATE_S0;
+    common_status_conthr_init(&cs->state);
+    cs->rmstates = g_array_new(FALSE, FALSE,
+                               sizeof(struct common_status_rsrmgr_s));
     LIXA_TRACE(("client_status_init: end\n"));
     return;
+}
+
+
+
+void client_status_free(client_status_t *cs)
+{
+    LIXA_TRACE(("client_status_free: begin\n"));
+    g_array_free(cs->rmstates, TRUE);
+    LIXA_TRACE(("client_status_free: end\n"));
 }
 
 
@@ -341,7 +352,9 @@ int client_status_coll_del(client_status_coll_t *csc)
         }
     }
 #endif /* LIXA_DEBUG */
-        
+
+        /* free dynamic memory */
+        client_status_free(&(csc->status_data[csc->index_data[pos].value]));
         /* reset the status slot */
         client_status_init(&(csc->status_data[csc->index_data[pos].value]));
         csc->status_used--;

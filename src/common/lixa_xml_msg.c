@@ -70,6 +70,7 @@ const xmlChar *LIXA_XML_MSG_PROP_NAME =         (xmlChar *)"name";
 const xmlChar *LIXA_XML_MSG_PROP_PROFILE =      (xmlChar *)"profile";
 const xmlChar *LIXA_XML_MSG_PROP_RC =           (xmlChar *)"rc";
 const xmlChar *LIXA_XML_MSG_PROP_RMID =         (xmlChar *)"rmid";
+const xmlChar *LIXA_XML_MSG_PROP_STATE =        (xmlChar *)"state";
 const xmlChar *LIXA_XML_MSG_PROP_STEP =         (xmlChar *)"step";
 const xmlChar *LIXA_XML_MSG_PROP_VERB =         (xmlChar *)"verb";
 const xmlChar *LIXA_XML_MSG_PROP_XA_INFO =      (xmlChar *)"xa_info";
@@ -472,7 +473,7 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
                 struct lixa_msg_body_open_24_xa_open_execs_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%s\" %s=\"%d\" %s=\"%ld\" "
-                                  "%s=\"%d\"/>",
+                                  "%s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_XA_OPEN_EXEC,
                                   LIXA_XML_MSG_PROP_XA_INFO,
                                   (char *)xa_open_exec->xa_info,
@@ -481,7 +482,9 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
                                   LIXA_XML_MSG_PROP_FLAGS,
                                   xa_open_exec->flags,
                                   LIXA_XML_MSG_PROP_RC,
-                                  xa_open_exec->rc);
+                                  xa_open_exec->rc,
+                                  LIXA_XML_MSG_PROP_STATE,
+                                  xa_open_exec->state);
             if (used_chars >= *free_chars)
                 THROW(BUFFER_TOO_SHORT2);
             *free_chars -= used_chars;
@@ -858,6 +861,7 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
                      , RMID_NOT_FOUND
                      , FLAGS_NOT_FOUND
                      , RC_NOT_FOUND
+                     , STATE_NOT_FOUND
                      , XML_UNRECOGNIZED_TAG
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -903,6 +907,12 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
                             THROW(RC_NOT_FOUND);
                         xa_open_exec.rc = (int)strtol((char *)tmp, NULL, 0);
                         xmlFree(tmp);
+                        /* retrieve state */
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_STATE)))
+                            THROW(STATE_NOT_FOUND);
+                        xa_open_exec.state = (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
                         g_array_append_val(msg->body.open_24.xa_open_execs,
                                            xa_open_exec);
                     }
@@ -920,6 +930,7 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
             case RMID_NOT_FOUND:
             case FLAGS_NOT_FOUND:
             case RC_NOT_FOUND:
+            case STATE_NOT_FOUND:
                 ret_cod = LIXA_RC_MALFORMED_XML_MSG;
                 break;
             case XML_UNRECOGNIZED_TAG:
@@ -1145,11 +1156,12 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
                                             "xa_open_execs["
                                             "xa_open_exec["
                                             "xa_info='%s',rmid=%d,flags=%ld,"
-                                            "rc=%d]]]\n",
+                                            "rc=%d,state=%d]]]\n",
                                             (char *)xa_open_exec->xa_info,
                                             xa_open_exec->rmid,
                                             xa_open_exec->flags,
-                                            xa_open_exec->rc));
+                                            xa_open_exec->rc,
+                                            xa_open_exec->state));
                             }
                         }
                         break;

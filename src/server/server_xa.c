@@ -148,6 +148,7 @@ int server_xa_open_8(struct thread_status_s *ts,
             sr->sr.data.pld.rm.rmid = rsrmgr->rmid;
             strncpy(sr->sr.data.pld.rm.name, (char *)rsrmgr->name,
                     PAYLOAD_RSRMGR_NAME_MAX);
+            common_status_rsrmgr_init(&sr->sr.data.pld.rm.state);
             sr->sr.data.pld.rm.name[PAYLOAD_RSRMGR_NAME_MAX - 1] = '\0';
             strncpy(sr->sr.data.pld.rm.xa_name, (char *)rsrmgr->xa_name,
                     RMNAMESZ);
@@ -230,6 +231,7 @@ int server_xa_open_24(struct thread_status_s *ts,
             /* update the block */
             status_record_update(ts->curr_status + slot, slot,
                                  ts->updated_records);
+            sr->sr.data.pld.rm.state.xastate = xa_open_execs->state;
             strncpy(sr->sr.data.pld.rm.xa_open_info,
                     (char *)xa_open_execs->xa_info, MAXINFOSIZE);
             sr->sr.data.pld.rm.xa_open_info[MAXINFOSIZE - 1] = '\0';

@@ -30,12 +30,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef COMMON_STATUS_H
-# define COMMON_STATUS_H
+#ifndef LIXA_COMMON_STATUS_H
+# define LIXA_COMMON_STATUS_H
 
 
 
 #include <config.h>
+
+
+
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+
+
+
+#include <xa.h>
 
 
 
@@ -47,6 +57,66 @@
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_NO_TRACE
+
+
+
+/**
+ * No RMs have been opened or initialized. An application thread of control
+ * cannot start a global transaction until it has successfully opened its RMs
+ * via @ref tx_open().
+ */
+#define TX_STATE_S0    0
+/**
+ * The thread haso opened its RMs but is not in a transaction. Its transaction
+ * control characteristics is TX_UNCHAINED
+ */
+#define TX_STATE_S1    1
+/**
+ * The thread haso opened its RMs but is not in a transaction. Its transaction
+ * control characteristics is TX_CHAINED
+ */
+#define TX_STATE_S2    2
+/**
+ * The thread has opened its RMs and is in a transaction. Its transaction
+ * control characteristics is TX_UNCHAINED
+ */
+#define TX_STATE_S3    3
+/**
+ * The thread has opened its RMs and is in a transaction. Its transaction
+ * control characteristics is TX_CHAINED
+ */
+#define TX_STATE_S4    4
+
+
+
+/**
+ * Resource manager state un-initialized
+ */
+#define XA_STATE_R0    0
+/**
+ * Resource manager state initialized
+ */
+#define XA_STATE_R1    1
+
+
+
+/**
+ * Store the status of the current control thread is partecipating in the
+ * transaction; this is the volatile local copy, the persistent remote copy
+ * is stored on the server side
+ */
+struct common_status_conthr_s {
+    /**
+     * State of the control thread as in "X/Open CAE Specification -
+     * Distribute Transaction Processing: The TX (Transaction Demarcation)
+     * Specification - chapter 7
+     */
+    int   txstate;
+    /**
+     * Transaction ID
+     */
+    XID   xid;
+};
 
 
 
@@ -71,6 +141,23 @@ extern "C" {
 
 
 
+    static inline void common_status_conthr_init(
+        struct common_status_conthr_s *csc) {
+        csc->txstate = TX_STATE_S0;
+        memset(&csc->xid, 0, sizeof(XID));
+        return;
+    }
+
+
+    
+    static inline void common_status_rsrmgr_init(
+        struct common_status_rsrmgr_s *csr) {
+        csr->xastate = XA_STATE_R0;
+        return;
+    }
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
@@ -86,4 +173,4 @@ extern "C" {
 
 
 
-#endif /* COMMON_STATUS_H */
+#endif /* LIXA_COMMON_STATUS_H */

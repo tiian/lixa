@@ -1,5 +1,8 @@
-Something wrong happened between 0.3.1 and 0.3.2 (probably uncommitted code
-from other workstation).
-Check it ASAP!
+lixa_tx_open should pass next (thread of control) state to lixa_xa_open
+lixa_xa_open must put the next state in a proper XML tag and send with step 24
+to the server
+the server must store the status of the thread of control 
+
+restart lixa_tx_begin development... :)
 
 When server_manager_thread exits, the listener must be aware of this... 
