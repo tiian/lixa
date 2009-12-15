@@ -215,6 +215,9 @@ int server_xa_open_24(struct thread_status_s *ts,
         if (lmi->body.open_24.xa_open_execs->len >
             ts->curr_status[block_id].sr.data.pld.ph.n)
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
+        /* retrieve and save control thread status */
+        ts->curr_status[block_id].sr.data.pld.ph.state.txstate =
+            lmi->body.open_24.conthr.state;
         /* store data in the children blocks... */
         for (i=0; i<lmi->body.open_24.xa_open_execs->len; ++i) {
             status_record_t *sr;

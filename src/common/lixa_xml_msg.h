@@ -156,6 +156,10 @@ extern const xmlChar *LIXA_XML_MSG_TAG_ANSWER;
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_CLIENT;
 /**
+ * Label used to specify "conthr" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_CONTHR;
+/**
  * Label used to specify "msg" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_MSG;
@@ -272,6 +276,18 @@ struct lixa_msg_body_open_16_s {
 
 
 /**
+ * Control thread status
+ */
+struct lixa_msg_body_open_24_conthr_s {
+    /**
+     * State of the control thread
+     */
+    int                       state;
+};
+
+
+
+/**
  * Convenience struct for @ref lixa_msg_body_open_24_s
  */
 struct lixa_msg_body_open_24_xa_open_execs_s {
@@ -304,9 +320,13 @@ struct lixa_msg_body_open_24_xa_open_execs_s {
  */
 struct lixa_msg_body_open_24_s {
     /**
+     * Control thread information
+     */
+    struct lixa_msg_body_open_24_conthr_s   conthr;
+    /**
      * Parameters and return value of xa_open executions
      */
-    GArray                   *xa_open_execs;
+    GArray                                 *xa_open_execs;
 };
 
 

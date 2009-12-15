@@ -62,22 +62,24 @@ extern "C" {
     
     
     /**
-     * Open all the resource managers necessary for the transaction
-     * @param cs IN reference to the status of the calling client
-     * @param txrc OUT return code prepared for tx_open call
-     * @return a reason code
-     */
-    int lixa_xa_open(client_status_t *cs, int *txrc);
-    
-    
-    
-    /**
      * Close all the resource managers necessary for the transaction
      * @param cs IN reference to the status of the calling client
      * @param txrc OUT return code prepared for tx_close call
      * @return a reason code
      */
     int lixa_xa_close(client_status_t *cs, int *txrc);
+    
+    
+    
+    /**
+     * Open all the resource managers necessary for the transaction
+     * @param cs IN reference to the status of the calling client
+     * @param txrc OUT return code prepared for tx_open call
+     * @param next_txstate IN the txstate will be reached by the control thread
+     *                        after executing this function
+     * @return a reason code
+     */
+    int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate);
     
     
     

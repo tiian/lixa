@@ -137,6 +137,7 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
         memset(&srd->pld.ph.peer_sock_addr, 0, sizeof(struct sockaddr_in));
         memset(&srd->pld.ph.last_verb_step, 0,
                sizeof(struct lixa_msg_verb_step_s) * PAYLOAD_HEADER_VERB_STEP);
+        memset(&srd->pld.ph.state, 0, sizeof(struct common_status_conthr_s));
         
         /* set the timestamp of the client arrival */
         if (0 != gettimeofday(&srd->pld.ph.arrival_time, NULL))

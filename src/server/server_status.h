@@ -270,6 +270,10 @@ struct payload_header_s {
      * the last (verb,step)
      */
     struct lixa_msg_verb_step_s   last_verb_step[PAYLOAD_HEADER_VERB_STEP];
+    /**
+     * Status of the control thread is managing the transaction
+     */
+    struct common_status_conthr_s state;
 };
 
     

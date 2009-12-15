@@ -77,6 +77,7 @@ const xmlChar *LIXA_XML_MSG_PROP_XA_INFO =      (xmlChar *)"xa_info";
 const xmlChar *LIXA_XML_MSG_PROP_XA_NAME =      (xmlChar *)"xa_name";
 const xmlChar *LIXA_XML_MSG_TAG_ANSWER =        (xmlChar *)"answer";
 const xmlChar *LIXA_XML_MSG_TAG_CLIENT =        (xmlChar *)"client";
+const xmlChar *LIXA_XML_MSG_TAG_CONTHR =        (xmlChar *)"conthr";
 const xmlChar *LIXA_XML_MSG_TAG_MSG =           (xmlChar *)"msg";
 const xmlChar *LIXA_XML_MSG_TAG_RSRMGR =        (xmlChar *)"rsrmgr";
 const xmlChar *LIXA_XML_MSG_TAG_RSRMGRS =       (xmlChar *)"rsrmgrs";
@@ -449,6 +450,7 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
     enum Exception { BUFFER_TOO_SHORT1
                      , BUFFER_TOO_SHORT2
                      , BUFFER_TOO_SHORT3
+                     , BUFFER_TOO_SHORT4
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -457,12 +459,22 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
         int used_chars;
         guint i;
         
+        /* <conthr> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%d\"/>",
+                              LIXA_XML_MSG_TAG_CONTHR,
+                              LIXA_XML_MSG_PROP_STATE,
+                              msg->body.open_24.conthr.state);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT1);
+        *free_chars -= used_chars;
+        *offset += used_chars;
         /* <xa_open_execs> */
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "<%s>",
                               LIXA_XML_MSG_TAG_XA_OPEN_EXECS);
         if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT1);
+            THROW(BUFFER_TOO_SHORT2);
         *free_chars -= used_chars;
         *offset += used_chars;
         /* <xa_open_exec> */
@@ -486,7 +498,7 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
                                   LIXA_XML_MSG_PROP_STATE,
                                   xa_open_exec->state);
             if (used_chars >= *free_chars)
-                THROW(BUFFER_TOO_SHORT2);
+                THROW(BUFFER_TOO_SHORT3);
             *free_chars -= used_chars;
             *offset += used_chars;
         }
@@ -495,7 +507,7 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
                               "</%s>",
                               LIXA_XML_MSG_TAG_XA_OPEN_EXECS);
         if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT3);
+            THROW(BUFFER_TOO_SHORT4);
         *free_chars -= used_chars;
         *offset += used_chars;
         
@@ -505,6 +517,7 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
             case BUFFER_TOO_SHORT1:
             case BUFFER_TOO_SHORT2:
             case BUFFER_TOO_SHORT3:
+            case BUFFER_TOO_SHORT4:
                 ret_cod = LIXA_RC_CONTAINER_FULL;
                 break;
             case NONE:
@@ -857,7 +870,8 @@ int lixa_msg_deserialize_open_16(xmlNodePtr cur, struct lixa_msg_s *msg)
 
 int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
-    enum Exception { XA_INFO_NOT_FOUND
+    enum Exception { CONTHR_NOT_FOUND
+                     , XA_INFO_NOT_FOUND
                      , RMID_NOT_FOUND
                      , FLAGS_NOT_FOUND
                      , RC_NOT_FOUND
@@ -869,7 +883,15 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
     LIXA_TRACE(("lixa_msg_deserialize_open_24\n"));
     TRY {
         while (NULL != cur) {
-            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_XA_OPEN_EXECS)) {
+            xmlChar *tmp;
+            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CONTHR)) {
+                /* retrieve control thread properties */
+                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_STATE)))
+                    THROW(CONTHR_NOT_FOUND);
+                msg->body.open_24.conthr.state =
+                    (int)strtol((char *)tmp, NULL, 0);
+                xmlFree(tmp);
+            } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_XA_OPEN_EXECS)) {
                 xmlNodePtr cur2 = cur->xmlChildrenNode;
                 /* initialize array (3 slots may be a good choice for
                    initial size) */
@@ -881,7 +903,6 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
                 while (NULL != cur2) {
                     if (!xmlStrcmp(cur2->name,
                                    LIXA_XML_MSG_TAG_XA_OPEN_EXEC)) {
-                        xmlChar *tmp;
                         struct lixa_msg_body_open_24_xa_open_execs_s
                             xa_open_exec;
                         /* retrieve xa_info */
@@ -926,6 +947,7 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CONTHR_NOT_FOUND:
             case XA_INFO_NOT_FOUND:
             case RMID_NOT_FOUND:
             case FLAGS_NOT_FOUND:
@@ -1143,6 +1165,9 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
                         break;
                     case 24:
                         if (NULL != msg->body.open_24.xa_open_execs) {
+                            LIXA_TRACE(("lixa_msg_trace: body["
+                                        "conthr[state=%d]]\n",
+                                        msg->body.open_24.conthr.state));
                             for (i=0; i<msg->body.open_24.xa_open_execs->len;
                                  ++i) {
                                 struct lixa_msg_body_open_24_xa_open_execs_s
