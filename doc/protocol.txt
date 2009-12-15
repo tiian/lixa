@@ -44,6 +44,7 @@ verb=1 (xa_open)
 
   client -> server message (async assertion)
   <msg level="1" verb="1" step="24">
+    <conthr state="1"/>
     <xa_open_execs>
       <xa_open_exec xa_info="xa_open string" rmid="0" flags="0" rc="0" state="1"/>
       <xa_open_exec xa_info="xa_open string" rmid="1" flags="0" rc="0" state="1"/>

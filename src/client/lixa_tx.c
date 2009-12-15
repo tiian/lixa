@@ -330,7 +330,7 @@ int lixa_tx_open(int *txrc)
     LIXA_TRACE_INIT;
     LIXA_TRACE(("lixa_tx_open\n"));    
     TRY {
-        int txstate, pos = 0;
+        int txstate, next_txstate, pos = 0;
         client_status_t *cs;
 
         /* check if the thread is already registered and
@@ -359,12 +359,15 @@ int lixa_tx_open(int *txrc)
                                client_connect(&global_csc, &global_ccc)))
                 THROW(CLIENT_CONNECT_ERROR);
 
+            next_txstate = TX_STATE_S1;
+            
             /* the real logic must be put here */
-            if (LIXA_RC_OK != (ret_cod = lixa_xa_open(cs, &tmp_txrc)))
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_open(
+                                   cs, &tmp_txrc, next_txstate)))
                 THROW(LIXA_XA_OPEN_ERROR);
             
             /* set new state after RMs are open... */
-            client_status_set_txstate(cs, TX_STATE_S1);
+            client_status_set_txstate(cs, next_txstate);
         } else { /* already opened, nothing to do */
             LIXA_TRACE(("lixa_tx_open: already opened (txstate = %d), "
                         "bypassing...\n", txstate));    

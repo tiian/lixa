@@ -173,7 +173,7 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
 
 
 
-int lixa_xa_open(client_status_t *cs, int *txrc)
+int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
 {
     enum Exception { OBJ_CORRUPTED
                      , MSG_SERIALIZE_ERROR1
@@ -279,6 +279,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc)
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.pvs.verb = LIXA_MSG_VERB_OPEN;
         msg.header.pvs.step = 24;
+        msg.body.open_24.conthr.state = next_txstate;
         msg.body.open_24.xa_open_execs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_open_24_xa_open_execs_s),
