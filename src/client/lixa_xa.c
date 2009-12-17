@@ -387,3 +387,62 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
 
 
 
+int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid)
+{
+    enum Exception { MSG_SERIALIZE_ERROR1
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_xa_start\n"));
+    TRY {
+        struct lixa_msg_s msg; 
+        size_t buffer_size = 0;
+        guint i;
+        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        
+        /* build the message */
+        msg.header.level = LIXA_MSG_LEVEL;
+        msg.header.pvs.verb = LIXA_MSG_VERB_START;
+        msg.header.pvs.step = LIXA_MSG_STEP_INCR;
+
+        msg.body.start_8.conthr.xid = xid;
+        msg.body.start_8.rsrmgrs = g_array_sized_new(
+            FALSE, FALSE,
+            sizeof(struct lixa_msg_body_start_8_rsrmgr_s),
+            global_ccc.actconf.rsrmgrs->len);
+        for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+            struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
+                global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
+            struct lixa_msg_body_open_8_rsrmgr_s record;
+            /* if resource manager supports dynamic registration, xa_start
+               must not be performed */
+            if (act_rsrmgr->xa_switch->flags & TMREGISTER) {
+                LIXA_TRACE(("lixa_xa_start: resource manager # %d registers "
+                            "dynamically, skipped...\n", i));
+                break;
+            }
+            record.rmid = i;
+            g_array_append_val(msg.body.start_8.rsrmgrs, record);
+        }
+
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
+                               &msg, buffer, sizeof(buffer)-1, &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR1);
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case MSG_SERIALIZE_ERROR1:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_xa_start/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

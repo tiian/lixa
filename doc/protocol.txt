@@ -65,8 +65,8 @@ verb=1,step=24 -->  			send list of executions of xa_open
 verb=2 (xa_close)
 
   level: message level, version
-  verb:  xa_close -> 1
-  step:  8, 16, 24, ... as necessary
+  verb:  xa_close -> 2
+  step:  8
 
   client->server message (async assertion)
   <msg verb="2" step="8">
@@ -81,4 +81,48 @@ verb=2,step=8 -->			send list of resource managers
 	      				free now useless blocks
 
 ***************************************************************************
+
+verb=3 (xa_start)
+
+  level: message level, version
+  verb:  xa_start -> 3
+  step:  8, 16, 24, ... as necessary
+
+  client->server message (send the XID - transaction id - and the resource
+                          managers will receive xa_start)
+  <msg level="1" verb="3" step="8">
+    <conthr xid="xid string in ASCII form"/>
+    <rsrmgrs>
+      <rsrmgr rmid="0"/>
+      <rsrmgr rmid="1"/>
+    </rsrmgrs>
+  </msg>
+
+  server -> client message (answer)
+  <msg level="1" verb="3" step="16">
+    <answer rc="0"/>
+  </msg>
+
+  client -> server message (async assertion)
+  <msg level="1" verb="3" step="24">
+    <conthr state="?"/>
+    <xa_start_execs>
+      <xa_start_exec rmid="0" flags="0" rc="0" state="?"/>
+      <xa_start_exec rmid="1" flags="0" rc="0" state="?"/>
+    </xa_start_execs>
+  </msg>
+
+client 			 server		description
+verb=3,step=8 -->			send XID (transaction id)
+					send list of resource managers
+	      				will receive xa_start
+		<-- verb=3,step=16	synchronize status file
+		    			confirm operation
+verb=3,step=24 -->  			send list of executions of xa_start
+	       				routine (store xa_start results and
+					new states on transaction manager 
+					server)
+
+***************************************************************************
+
 

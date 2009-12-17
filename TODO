@@ -1,3 +1,4 @@
 restart lixa_tx_begin development... :)
+    lixa_msg_serialize_start_xx
 
 When server_manager_thread exits, the listener must be aware of this... 

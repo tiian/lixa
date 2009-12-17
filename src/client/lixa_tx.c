@@ -116,6 +116,7 @@ int lixa_tx_begin(int *txrc)
                      , COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
                      , INVALID_STATUS1
+                     , LIXA_XA_START_ERROR
                      , INVALID_STATUS2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -161,6 +162,9 @@ int lixa_tx_begin(int *txrc)
         client_status_set_xid(cs, &xid);
         
         /* the real logic must be put here */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_start(cs, txrc, &xid)))
+            THROW(LIXA_XA_START_ERROR);
+        
         /* @@@ go on from here... */
         
         /* update the TX state, now TX_STATE_S0 */
@@ -193,6 +197,8 @@ int lixa_tx_begin(int *txrc)
                 break;
             case INVALID_STATUS1:
                 ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case LIXA_XA_START_ERROR:
                 break;
             case INVALID_STATUS2:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
