@@ -82,7 +82,19 @@ extern "C" {
     int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate);
     
     
-    
+
+    /**
+     * Send xa_start to all the resource manager does not support dynamic
+     * registration
+     * @param cs IN reference to the status of the calling client
+     * @param txrc OUT return code prepared for tx_open call
+     * @param xid IN transaction id of the new transaction
+     * @return a reason code
+     */
+    int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

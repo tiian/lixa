@@ -52,7 +52,7 @@ int tx_begin(void)
     /** @@@ must be fixed see bug 2907537 */
     int txrc = TX_FAIL;
     lixa_tx_begin(&txrc);
-    return TX_OK;
+    return txrc;
 }
 
 

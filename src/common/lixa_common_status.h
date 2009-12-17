@@ -46,6 +46,7 @@
 
 
 #include <xa.h>
+#include <lixa_xml_msg.h>
 
 
 
@@ -131,6 +132,12 @@ struct common_status_rsrmgr_s {
      * Distribute Transaction Processing: The XA Specification - chapter 6
      */
     int   xastate;
+    /**
+     * This is the next verb will be issued against the resource manager;
+     * @ref xastate shows the reached state, this property is used to trace
+     * a tentative to a new state
+     */
+    int   next_verb;
 };
 
 
@@ -153,6 +160,7 @@ extern "C" {
     static inline void common_status_rsrmgr_init(
         struct common_status_rsrmgr_s *csr) {
         csr->xastate = XA_STATE_R0;
+        csr->next_verb = LIXA_MSG_VERB_NULL;
         return;
     }
 

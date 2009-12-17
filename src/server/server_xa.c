@@ -53,6 +53,41 @@
 
 
 
+int server_xa_close(struct thread_status_s *ts,
+                    const struct lixa_msg_s *lmi,
+                    uint32_t block_id)
+{
+    enum Exception { PAYLOAD_CHAIN_RELEASE
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_close\n"));
+    TRY {
+        /* release all allocated blocks */
+        if (LIXA_RC_OK != (
+                ret_cod = payload_chain_release(
+                    ts, ts->client_array[block_id].pers_status_slot_id)))
+            THROW(PAYLOAD_CHAIN_RELEASE);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case PAYLOAD_CHAIN_RELEASE:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_close/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int server_xa_open(struct thread_status_s *ts,
                    const struct lixa_msg_s *lmi,
                    struct lixa_msg_s *lmo,
@@ -153,6 +188,7 @@ int server_xa_open_8(struct thread_status_s *ts,
             strncpy(sr->sr.data.pld.rm.xa_name, (char *)rsrmgr->xa_name,
                     RMNAMESZ);
             sr->sr.data.pld.rm.xa_name[RMNAMESZ - 1] = '\0';
+            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_OPEN;
         }
 
         /* register protocol step */
@@ -235,6 +271,7 @@ int server_xa_open_24(struct thread_status_s *ts,
             status_record_update(ts->curr_status + slot, slot,
                                  ts->updated_records);
             sr->sr.data.pld.rm.state.xastate = xa_open_execs->state;
+            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
             strncpy(sr->sr.data.pld.rm.xa_open_info,
                     (char *)xa_open_execs->xa_info, MAXINFOSIZE);
             sr->sr.data.pld.rm.xa_open_info[MAXINFOSIZE - 1] = '\0';
@@ -275,35 +312,3 @@ int server_xa_open_24(struct thread_status_s *ts,
 
 
 
-int server_xa_close(struct thread_status_s *ts,
-                    const struct lixa_msg_s *lmi,
-                    uint32_t block_id)
-{
-    enum Exception { PAYLOAD_CHAIN_RELEASE
-                     , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("server_xa_close\n"));
-    TRY {
-        /* release all allocated blocks */
-        if (LIXA_RC_OK != (
-                ret_cod = payload_chain_release(
-                    ts, ts->client_array[block_id].pers_status_slot_id)))
-            THROW(PAYLOAD_CHAIN_RELEASE);
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case PAYLOAD_CHAIN_RELEASE:
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("server_xa_close/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
