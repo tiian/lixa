@@ -145,7 +145,7 @@ int client_config(client_config_coll_t *ccc)
         } 
 
         memset(&ccc->serv_addr, 0, sizeof(struct sockaddr_in));
-        uuid_generate(ccc->global_bqual);
+        uuid_generate(lixa_xid_global_bqual);
         if (NULL == ccc->actconf.rsrmgrs)
             ccc->actconf.rsrmgrs = g_array_new(
                 FALSE, FALSE, sizeof(struct act_rsrmgr_config_s));

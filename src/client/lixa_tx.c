@@ -62,54 +62,6 @@
 
 
 
-void xid_create_new(XID *xid)
-{
-    uuid_t uuid_obj;
-    char *gtrid, *bqual;
-    
-    xid->formatID = LIXA_XID_FORMAT_ID;
-    xid->gtrid_length = sizeof(uuid_t);
-    xid->bqual_length = sizeof(uuid_t);
-    memset(xid->data, 0, XIDDATASIZE); /* this is not necessary, but... */
-    uuid_generate(uuid_obj);
-    memcpy(xid->data, uuid_obj, sizeof(uuid_t));
-    memcpy(xid->data + sizeof(uuid_t), global_ccc.global_bqual,
-           sizeof(uuid_t));
-#ifdef _TRACE
-    gtrid = xid_get_gtrid_ascii(xid);
-    bqual = xid_get_bqual_ascii(xid);
-    if (NULL != gtrid && NULL != bqual)
-        LIXA_TRACE(("xid_create_new: gtrid='%s'; bqual='%s'\n", gtrid, bqual));
-    if (NULL != bqual) free(bqual);
-    if (NULL != gtrid) free(gtrid);
-#endif /* _TRACE */
-}
-
-
-
-char *xid_get_gtrid_ascii(const XID *xid)
-{
-    char *gtrid;
-    if (NULL == (gtrid = (char *)malloc(2*sizeof(uuid_t)+4+1)))
-        return NULL;
-    uuid_unparse((unsigned char *)xid->data, gtrid);
-    return gtrid;
-}
-
-
-
-char *xid_get_bqual_ascii(const XID *xid)
-{
-    char *bqual;
-    if (NULL == (bqual = (char *)malloc(2*sizeof(uuid_t)+4+1)))
-        return NULL;
-    uuid_unparse((unsigned char *)xid->data + sizeof(uuid_t), bqual);
-    return bqual;
-    
-}
-
-
-
 int lixa_tx_begin(int *txrc)
 {
     enum Exception { STATUS_NOT_FOUND

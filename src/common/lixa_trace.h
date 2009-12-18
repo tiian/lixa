@@ -136,6 +136,11 @@
  */
 #define LIXA_TRACE_MOD_COMMON_XML_MSG     0x02000000
 
+/**
+ * trace module for common status functions
+ */
+#define LIXA_TRACE_MOD_COMMON_STATUS      0x04000000
+
 
 
 /**

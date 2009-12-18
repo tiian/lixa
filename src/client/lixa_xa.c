@@ -390,6 +390,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
 int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid)
 {
     enum Exception { MSG_SERIALIZE_ERROR1
+                     , SEND_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -398,8 +399,12 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid)
         struct lixa_msg_s msg; 
         size_t buffer_size = 0;
         guint i;
+        int fd;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         
+        /* retrieve the socket */
+        fd = client_status_get_sockfd(cs);
+
         /* build the message */
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.pvs.verb = LIXA_MSG_VERB_START;
@@ -429,10 +434,22 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid)
                                &msg, buffer, sizeof(buffer)-1, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR1);
 
+        /* only the GArray needs to be released to avoid memory leaks */
+        g_array_free(msg.body.start_8.rsrmgrs, TRUE);
+        memset(&msg, 0, sizeof(msg));
+        
+        LIXA_TRACE(("lixa_xa_start: sending " SIZE_T_FORMAT
+                    " bytes to the server for step 8\n", buffer_size));
+        if (buffer_size != send(fd, buffer, buffer_size, 0))
+            THROW(SEND_ERROR);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case MSG_SERIALIZE_ERROR1:
+                break;
+            case SEND_ERROR:
+                ret_cod = LIXA_RC_SEND_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

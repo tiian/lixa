@@ -644,6 +644,39 @@ extern "C" {
 
 
     /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=start, step=8
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_start_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
+    /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=start, step=16
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_start_16(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
+    /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=start, step=24
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_start_24(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
+    /**
      * Free all the dynamically allocated strings previously allocated by
      * @ref lixa_msg_deserialize using xmlGetProp method
      * @param msg IN/OUT the message must be massaged
