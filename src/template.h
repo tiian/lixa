@@ -46,7 +46,7 @@
 #else
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_LIB_
+#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_
 
 
 
