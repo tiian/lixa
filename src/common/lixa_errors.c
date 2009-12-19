@@ -165,9 +165,9 @@ const char *lixa_strerror(int ret_cod)
               "condition";
               case LIXA_RC_TIMES_ERROR:
               return "ERROR: 'times' function returned an error condition";
-              case LIXA_RC_SYSCONF_ERROR:
-              return "ERROR: 'sysconf' function returned an error condition";
             */
+        case LIXA_RC_UUID_PARSE_ERROR:
+            return "ERROR: 'uuid_parse' function returned an error condition";
         case LIXA_RC_GETTIMEOFDAY_ERROR:
             return "ERROR: 'gettimeofday' function returned an error "
                 "condition";

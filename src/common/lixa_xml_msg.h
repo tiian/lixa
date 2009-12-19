@@ -371,7 +371,7 @@ struct lixa_msg_body_start_8_conthr_s {
     /**
      * Transaction id
      */
-    XID   *xid;
+    XID   xid;
 };
 
     
@@ -693,6 +693,36 @@ extern "C" {
      * @return a reason code
      */
     int lixa_msg_trace(const struct lixa_msg_s *msg);
+
+
+
+    /**
+     * Convenience function for @ref lixa_msg_trace: it display the content
+     * of a "close" message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int lixa_msg_trace_close(const struct lixa_msg_s *msg);
+
+
+    
+    /**
+     * Convenience function for @ref lixa_msg_trace: it display the content
+     * of a "open" message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int lixa_msg_trace_open(const struct lixa_msg_s *msg);
+
+
+    
+    /**
+     * Convenience function for @ref lixa_msg_trace: it display the content
+     * of a "start" message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int lixa_msg_trace_start(const struct lixa_msg_s *msg);
 
 
     

@@ -410,7 +410,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid)
         msg.header.pvs.verb = LIXA_MSG_VERB_START;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
-        msg.body.start_8.conthr.xid = xid;
+        memcpy(&msg.body.start_8.conthr.xid, xid, sizeof(XID));
         msg.body.start_8.rsrmgrs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_start_8_rsrmgr_s),

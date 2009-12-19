@@ -34,6 +34,7 @@
 
 
 
+#include <lixa_errors.h>
 #include <lixa_common_status.h>
 
 
@@ -95,3 +96,75 @@ char *xid_get_bqual_ascii(const XID *xid)
 }
 
 
+
+char *xid_serialize(const XID *xid)
+{
+    char *ser;
+    if (NULL == (ser = (char *)malloc(2*(2*sizeof(uuid_t)+4)+2)))
+        return NULL;
+    uuid_unparse((unsigned char *)xid->data, ser);
+    uuid_unparse((unsigned char *)xid->data + sizeof(uuid_t),
+                 ser + (2*sizeof(uuid_t)+4+1));
+    ser[2*sizeof(uuid_t)+4] = LIXA_XID_SEPARATOR;
+    return ser;
+}
+
+
+
+int xid_deserialize(char *ser_xid, XID *xid)
+{
+    enum Exception { SEPARATOR_NOT_FOUND
+                     , UUID_PARSE_ERROR1
+                     , UUID_PARSE_ERROR2
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xid_deserialize\n"));
+    TRY {
+        uuid_t uuid_obj;
+        
+        /* check separator */
+        if (LIXA_XID_SEPARATOR != ser_xid[2*sizeof(uuid_t)+4])
+            THROW(SEPARATOR_NOT_FOUND);
+        /* initialize the format */
+        xid->formatID = LIXA_XID_FORMAT_ID;
+        /* separates gtrid from bqual strings */
+        ser_xid[2*sizeof(uuid_t)+4] = '\0';
+        /* parse & store gtrid */
+        LIXA_TRACE(("xid_deserialize: gtrid='%s'\n", ser_xid));
+        if (0 != uuid_parse(ser_xid, uuid_obj))
+            THROW(UUID_PARSE_ERROR1);
+        memcpy(xid->data, uuid_obj, sizeof(uuid_t));
+        xid->gtrid_length = sizeof(uuid_t);
+        /* parse & store bqual */
+        LIXA_TRACE(("xid_deserialize: bqual='%s'\n",
+                    ser_xid + (2*sizeof(uuid_t)+4+1)));
+        if (0 != uuid_parse(ser_xid + (2*sizeof(uuid_t)+4+1), uuid_obj))
+            THROW(UUID_PARSE_ERROR2);
+        memcpy(xid->data + sizeof(uuid_t), uuid_obj, sizeof(uuid_t));
+        xid->bqual_length = sizeof(uuid_t);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case SEPARATOR_NOT_FOUND:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case UUID_PARSE_ERROR1:
+            case UUID_PARSE_ERROR2:
+                ret_cod = LIXA_RC_UUID_PARSE_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* restore original separator */
+        if (SEPARATOR_NOT_FOUND < ret_cod)
+            ser_xid[2*sizeof(uuid_t)+4] = LIXA_XID_SEPARATOR;
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xid_deserialize/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
