@@ -88,6 +88,10 @@ const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXECS = (xmlChar *)"xa_open_execs";
 
 
 
+static const xmlChar *nil_str = (xmlChar *)"(nil)";
+
+
+
 int lixa_msg_retrieve(int fd,
                       char *buf, size_t buf_size,
                       ssize_t *read_bytes)
@@ -645,8 +649,7 @@ int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
                                char *buffer,
                                size_t *offset, size_t *free_chars)
 {
-    enum Exception { INVALID_GTRID
-                     , INVALID_BQUAL
+    enum Exception { XID_SERIALIZE_ERROR
                      , BUFFER_TOO_SHORT1
                      , BUFFER_TOO_SHORT2
                      , BUFFER_TOO_SHORT3
@@ -654,24 +657,21 @@ int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    char *gtrid = NULL, *bqual = NULL;
+    char *ser_xid = NULL;
     
     LIXA_TRACE(("lixa_msg_serialize_start_8\n"));
     TRY {
         int used_chars;
         guint i;
 
-        if (NULL == (gtrid = xid_get_gtrid_ascii(msg->body.start_8.conthr.xid)))
-            THROW(INVALID_GTRID);
-        if (NULL == (bqual = xid_get_bqual_ascii(msg->body.start_8.conthr.xid)))
-            THROW(INVALID_BQUAL);
+        if (NULL == (ser_xid = xid_serialize(&msg->body.start_8.conthr.xid)))
+            THROW(XID_SERIALIZE_ERROR);
         
         /* <conthr> */
         used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%s.%s\"/>",
-                              LIXA_XML_MSG_TAG_CONTHR,
-                              LIXA_XML_MSG_PROP_XID,
-                              gtrid, bqual);
+                              "<%s %s=\"%s\"/>",
+                              LIXA_XML_MSG_TAG_CONTHR, LIXA_XML_MSG_PROP_XID,
+                              ser_xid);
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT1);
         *free_chars -= used_chars;
@@ -712,8 +712,7 @@ int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case INVALID_GTRID:
-            case INVALID_BQUAL:
+            case XID_SERIALIZE_ERROR:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case BUFFER_TOO_SHORT1:
@@ -730,10 +729,8 @@ int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
         } /* switch (excp) */
 
         /* memory recovery */
-        if (NULL != gtrid)
-            free(gtrid);
-        if (NULL != bqual)
-            free(bqual);
+        if (NULL != ser_xid)
+            free(ser_xid);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_start_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -1012,10 +1009,10 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROFILE_NOT_FOUND:
             case RMID_NOT_FOUND:
             case NAME_NOT_FOUND:
             case XA_NAME_NOT_FOUND:
-            case PROFILE_NOT_FOUND:
                 ret_cod = LIXA_RC_MALFORMED_XML_MSG;
                 break;
             case XML_UNRECOGNIZED_TAG:
@@ -1249,16 +1246,68 @@ int lixa_msg_deserialize_close_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 
 int lixa_msg_deserialize_start_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
-    enum Exception { NONE } excp;
+    enum Exception { XID_NOT_FOUND
+                     , XID_DESERIALIZE_ERROR
+                     , RMID_NOT_FOUND
+                     , XML_UNRECOGNIZED_TAG
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_msg_deserialize_start_8\n"));
     TRY {
-        /* @@@ implement me... */
-        exit(1);
+        while (NULL != cur) {
+            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CONTHR)) {
+                xmlChar *tmp;
+                /* retrieve xid properties */
+                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_XID)))
+                    THROW(XID_NOT_FOUND);
+                if (LIXA_RC_OK != (ret_cod = xid_deserialize(
+                                       (char *)tmp, 
+                                       &msg->body.start_8.conthr.xid))) {
+                    xmlFree(tmp);
+                    THROW(XID_DESERIALIZE_ERROR);
+                } else
+                    xmlFree(tmp);
+            } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_RSRMGRS)) {
+                xmlNodePtr cur2 = cur->xmlChildrenNode;
+                /* initialize array (3 slots may be a good choice for
+                   initial size) */
+                msg->body.start_8.rsrmgrs = g_array_sized_new(
+                    FALSE, FALSE,
+                    sizeof(struct lixa_msg_body_start_8_rsrmgr_s),
+                    LIXA_MSG_XML_START_RSRMGRS);
+                /* retrieve resource managers */
+                while (NULL != cur2) {
+                    if (!xmlStrcmp(cur2->name, LIXA_XML_MSG_TAG_RSRMGR)) {
+                        xmlChar *tmp;
+                        struct lixa_msg_body_start_8_rsrmgr_s rsrmgr;
+                        /* retrieve rmid */
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_RMID)))
+                            THROW(RMID_NOT_FOUND);
+                        rsrmgr.rmid = (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                        g_array_append_val(msg->body.start_8.rsrmgrs, rsrmgr);
+                        cur2 = cur2->next;
+                    }
+                } /* while (NULL != child) */
+            } else
+                THROW(XML_UNRECOGNIZED_TAG);
+            cur = cur->next;
+        } /* while (NULL != cur) */
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case XID_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
+            case XID_DESERIALIZE_ERROR:
+                break;
+            case RMID_NOT_FOUND:
+            case XML_UNRECOGNIZED_TAG:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -1331,6 +1380,7 @@ int lixa_msg_free(struct lixa_msg_s *msg)
 {
     enum Exception { INVALID_STEP1
                      , INVALID_STEP2
+                     , INVALID_STEP3
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1383,6 +1433,16 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                         THROW(INVALID_STEP2);
                 }
                 break;
+            case LIXA_MSG_VERB_START: /* start */
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        g_array_free(msg->body.start_8.rsrmgrs, TRUE);
+                        msg->body.start_8.rsrmgrs = NULL;
+                        break;
+                    default:
+                        THROW(INVALID_STEP3);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -1392,6 +1452,7 @@ int lixa_msg_free(struct lixa_msg_s *msg)
         switch (excp) {
             case INVALID_STEP1:
             case INVALID_STEP2:
+            case INVALID_STEP3:
             case INVALID_VERB:
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
                 break;
@@ -1411,102 +1472,31 @@ int lixa_msg_free(struct lixa_msg_s *msg)
 
 int lixa_msg_trace(const struct lixa_msg_s *msg)
 {
-    enum Exception { INVALID_STEP1
-                     , INVALID_STEP2
+    enum Exception { TRACE_OPEN_ERROR
+                     , TRACE_CLOSE_ERROR
+                     , TRACE_START_ERROR
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_msg_trace\n"));
     TRY {
-        guint i;
-        static const xmlChar *nil_str = (xmlChar *)"(nil)";
-        
         LIXA_TRACE(("lixa_msg_trace: header[level=%d,pvs.verb=%d,"
                     "pvs.step=%d]\n",
                     msg->header.level, msg->header.pvs.verb,
                     msg->header.pvs.step));
         switch (msg->header.pvs.verb) {
             case LIXA_MSG_VERB_OPEN: /* open */
-                switch (msg->header.pvs.step) {
-                    case 8:
-                        LIXA_TRACE(("lixa_msg_trace: body[client[profile["
-                                    "%s]]]\n",
-                                    msg->body.open_8.client.profile ?
-                                    msg->body.open_8.client.profile :
-                                    nil_str));
-                        if (NULL != msg->body.open_8.rsrmgrs) {
-                            for (i=0; i<msg->body.open_8.rsrmgrs->len; ++i) {
-                                struct lixa_msg_body_open_8_rsrmgr_s *rsrmgr =
-                                    &g_array_index(
-                                        msg->body.open_8.rsrmgrs,
-                                        struct lixa_msg_body_open_8_rsrmgr_s,
-                                        i);
-                                LIXA_TRACE(("lixa_msg_trace: body[rsrmgrs["
-                                            "rsrmgr[rmid=%d,name='%s',"
-                                            "xa_name='%s']]]\n",
-                                            rsrmgr->rmid,
-                                            rsrmgr->name ?
-                                            rsrmgr->name : nil_str,
-                                            rsrmgr->xa_name ?
-                                            rsrmgr->xa_name : nil_str));
-                            }
-                        }
-                        break;
-                    case 16:
-                        LIXA_TRACE(("lixa_msg_trace: body[answer[rc[%d]]]\n",
-                                    msg->body.open_16.answer.rc));
-                        break;
-                    case 24:
-                        if (NULL != msg->body.open_24.xa_open_execs) {
-                            LIXA_TRACE(("lixa_msg_trace: body["
-                                        "conthr[state=%d]]\n",
-                                        msg->body.open_24.conthr.state));
-                            for (i=0; i<msg->body.open_24.xa_open_execs->len;
-                                 ++i) {
-                                struct lixa_msg_body_open_24_xa_open_execs_s
-                                    *xa_open_exec =
-                                    &g_array_index(
-                                        msg->body.open_24.xa_open_execs,
-                                        struct
-                                        lixa_msg_body_open_24_xa_open_execs_s,
-                                        i);
-                                LIXA_TRACE(("lixa_msg_trace: body["
-                                            "xa_open_execs["
-                                            "xa_open_exec["
-                                            "xa_info='%s',rmid=%d,flags=%ld,"
-                                            "rc=%d,state=%d]]]\n",
-                                            (char *)xa_open_exec->xa_info,
-                                            xa_open_exec->rmid,
-                                            xa_open_exec->flags,
-                                            xa_open_exec->rc,
-                                            xa_open_exec->state));
-                            }
-                        }
-                        break;
-                    default:
-                        THROW(INVALID_STEP1);
-                }
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_open(msg)))
+                    THROW(TRACE_OPEN_ERROR);
                 break;
             case LIXA_MSG_VERB_CLOSE: /* close */
-                switch (msg->header.pvs.step) {
-                    case 8:
-                        if (NULL != msg->body.close_8.rsrmgrs) {
-                            for (i=0; i<msg->body.close_8.rsrmgrs->len; ++i) {
-                                struct lixa_msg_body_close_8_rsrmgr_s *rsrmgr =
-                                    &g_array_index(
-                                        msg->body.close_8.rsrmgrs,
-                                        struct lixa_msg_body_close_8_rsrmgr_s,
-                                        i);
-                                LIXA_TRACE(("lixa_msg_trace: body[rsrmgrs["
-                                            "rsrmgr[rmid=%d]]]\n",
-                                            rsrmgr->rmid));
-                            }
-                        }
-                        break;
-                    default:
-                        THROW(INVALID_STEP2);
-                }
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_close(msg)))
+                    THROW(TRACE_CLOSE_ERROR);
+                break;
+            case LIXA_MSG_VERB_START: /* start */
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_start(msg)))
+                    THROW(TRACE_START_ERROR);
                 break;
             default:
                 THROW(INVALID_VERB);
@@ -1515,8 +1505,10 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case INVALID_STEP1:
-            case INVALID_STEP2:
+            case TRACE_OPEN_ERROR:
+            case TRACE_CLOSE_ERROR:
+            case TRACE_START_ERROR:
+                break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
                 break;
@@ -1532,3 +1524,230 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
     return ret_cod;
 }
 
+
+
+int lixa_msg_trace_close(const struct lixa_msg_s *msg)
+{
+    enum Exception { INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_trace_close\n"));
+    TRY {
+        guint i;
+
+        switch (msg->header.pvs.step) {
+            case 8:
+                if (NULL != msg->body.close_8.rsrmgrs) {
+                    for (i=0; i<msg->body.close_8.rsrmgrs->len; ++i) {
+                        struct lixa_msg_body_close_8_rsrmgr_s *rsrmgr =
+                            &g_array_index(
+                                msg->body.close_8.rsrmgrs,
+                                struct lixa_msg_body_close_8_rsrmgr_s,
+                                i);
+                        LIXA_TRACE(("lixa_msg_trace_close: body[rsrmgrs["
+                                    "rsrmgr[rmid=%d]]]\n",
+                                    rsrmgr->rmid));
+                    }
+                }
+                break;
+            default:
+                THROW(INVALID_STEP);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_trace_close/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_trace_open(const struct lixa_msg_s *msg)
+{
+    enum Exception { INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_trace_open\n"));
+    TRY {
+        guint i;
+
+        switch (msg->header.pvs.step) {
+            case 8:
+                LIXA_TRACE(("lixa_msg_trace: body[client[profile["
+                            "%s]]]\n",
+                            msg->body.open_8.client.profile ?
+                            msg->body.open_8.client.profile :
+                            nil_str));
+                if (NULL != msg->body.open_8.rsrmgrs) {
+                    for (i=0; i<msg->body.open_8.rsrmgrs->len; ++i) {
+                        struct lixa_msg_body_open_8_rsrmgr_s *rsrmgr =
+                            &g_array_index(
+                                msg->body.open_8.rsrmgrs,
+                                struct lixa_msg_body_open_8_rsrmgr_s,
+                                i);
+                        LIXA_TRACE(("lixa_msg_trace: body[rsrmgrs["
+                                    "rsrmgr[rmid=%d,name='%s',"
+                                    "xa_name='%s']]]\n",
+                                    rsrmgr->rmid,
+                                    rsrmgr->name ?
+                                    rsrmgr->name : nil_str,
+                                    rsrmgr->xa_name ?
+                                    rsrmgr->xa_name : nil_str));
+                    }
+                }
+                break;
+            case 16:
+                LIXA_TRACE(("lixa_msg_trace: body[answer[rc[%d]]]\n",
+                            msg->body.open_16.answer.rc));
+                break;
+            case 24:
+                if (NULL != msg->body.open_24.xa_open_execs) {
+                    LIXA_TRACE(("lixa_msg_trace: body["
+                                "conthr[state=%d]]\n",
+                                msg->body.open_24.conthr.state));
+                    for (i=0; i<msg->body.open_24.xa_open_execs->len;
+                         ++i) {
+                        struct lixa_msg_body_open_24_xa_open_execs_s
+                            *xa_open_exec =
+                            &g_array_index(
+                                msg->body.open_24.xa_open_execs,
+                                struct
+                                lixa_msg_body_open_24_xa_open_execs_s,
+                                i);
+                        LIXA_TRACE(("lixa_msg_trace: body["
+                                    "xa_open_execs["
+                                    "xa_open_exec["
+                                    "xa_info='%s',rmid=%d,flags=%ld,"
+                                    "rc=%d,state=%d]]]\n",
+                                    (char *)xa_open_exec->xa_info,
+                                    xa_open_exec->rmid,
+                                    xa_open_exec->flags,
+                                    xa_open_exec->rc,
+                                    xa_open_exec->state));
+                    }
+                }
+                break;
+            default:
+                THROW(INVALID_STEP);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_trace_open/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+    
+int lixa_msg_trace_start(const struct lixa_msg_s *msg)
+{
+    enum Exception { INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_trace_start\n"));
+    TRY {
+        guint i;
+        char *xid_str = NULL;
+        switch (msg->header.pvs.step) {
+            case 8:
+#ifdef _TRACE
+                xid_str = xid_serialize(&msg->body.start_8.conthr.xid);
+                LIXA_TRACE(("lixa_msg_trace_start: body[conthr[xid["
+                            "%s]]]\n", xid_str != NULL ?
+                            xid_str : (char *)nil_str));
+                free(xid_str);
+#endif /* _TRACE */
+                if (NULL != msg->body.start_8.rsrmgrs) {
+                    for (i=0; i<msg->body.start_8.rsrmgrs->len; ++i) {
+                        struct lixa_msg_body_start_8_rsrmgr_s *rsrmgr =
+                            &g_array_index(
+                                msg->body.start_8.rsrmgrs,
+                                struct lixa_msg_body_start_8_rsrmgr_s,
+                                i);
+                        LIXA_TRACE(("lixa_msg_trace_start: body[rsrmgrs["
+                                    "rsrmgr[rmid=%d]]]\n",
+                                    rsrmgr->rmid));
+                    }
+                }
+                break;
+                /*
+            case 16:
+                LIXA_TRACE(("lixa_msg_trace_start: body[answer[rc[%d]]]\n",
+                            msg->body.start_16.answer.rc));
+                break;
+            case 24:
+                if (NULL != msg->body.start_24.xa_open_execs) {
+                    LIXA_TRACE(("lixa_msg_trace_start: body["
+                                "conthr[state=%d]]\n",
+                                msg->body.open_24.conthr.state));
+                    for (i=0; i<msg->body.open_24.xa_open_execs->len;
+                         ++i) {
+                        struct lixa_msg_body_open_24_xa_open_execs_s
+                            *xa_open_exec =
+                            &g_array_index(
+                                msg->body.open_24.xa_open_execs,
+                                struct
+                                lixa_msg_body_open_24_xa_open_execs_s,
+                                i);
+                        LIXA_TRACE(("lixa_msg_trace: body["
+                                    "xa_open_execs["
+                                    "xa_open_exec["
+                                    "xa_info='%s',rmid=%d,flags=%ld,"
+                                    "rc=%d,state=%d]]]\n",
+                                    (char *)xa_open_exec->xa_info,
+                                    xa_open_exec->rmid,
+                                    xa_open_exec->flags,
+                                    xa_open_exec->rc,
+                                    xa_open_exec->state));
+                    }
+                }
+                break;
+                */
+            default:
+                THROW(INVALID_STEP);
+        } /* switch (msg->header.pvs.step) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_trace_start/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}

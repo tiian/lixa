@@ -494,6 +494,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                      , LIXA_MSG_FREE_ERROR
                      , SERVER_XA_OPEN_ERROR
                      , SERVER_XA_CLOSE_ERROR
+                     , SERVER_XA_START_ERROR
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -536,6 +537,11 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                                        ts, &lmi, block_id)))
                     THROW(SERVER_XA_CLOSE_ERROR)
                 break;
+            case LIXA_MSG_VERB_START:
+                if (LIXA_RC_OK != (ret_cod = server_xa_start(
+                                       ts, &lmi, &lmo, block_id)))
+                    THROW(SERVER_XA_START_ERROR)
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -552,6 +558,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
             case LIXA_MSG_FREE_ERROR:
             case SERVER_XA_OPEN_ERROR:
             case SERVER_XA_CLOSE_ERROR:
+            case SERVER_XA_START_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INVALID_STATUS;

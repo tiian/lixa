@@ -115,6 +115,13 @@
 
 
 /**
+ * Character separator used when serializing/deserializing a xid
+ */
+#define LIXA_XID_SEPARATOR   '.'
+
+
+
+/**
  * Store the status of the current control thread is partecipating in the
  * transaction; this is the volatile local copy, the persistent remote copy
  * is stored on the server side
@@ -216,6 +223,28 @@ extern "C" {
     char *xid_get_bqual_ascii(const XID *xid);
 
 
+
+    /**
+     * Retrieve an ASCII string with the human readable version of the 
+     * transaction id; the serialized string can be transmitted over a network
+     * without encoding issues
+     * @param xid IN unique transaction id
+     * @return a string MUST be freed by the caller using "free" function or
+     *         NULL if an error happens
+     */
+    char *xid_serialize(const XID *xid);
+
+
+
+    /**
+     * Retrieve a XID object from a serialized version
+     * @param ser_xid IN string containing a serialized XID (@ref xid_serialize)
+     * @param xid OUT transaction id object
+     * @return a standardized return code
+     */
+    int xid_deserialize(char *ser_xid, XID *xid);
+
+    
 
 #ifdef __cplusplus
 }

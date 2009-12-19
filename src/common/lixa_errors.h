@@ -283,13 +283,13 @@ define LIXA_RC_VSNPRINTF_ERROR               -125
 define LIXA_RC_TIMES_ERROR                   -126
  */
 /**
- * "sysconf" function error
-define LIXA_RC_SYSCONF_ERROR                 -127
+ * "uuid_parse" function error
  */
+#define LIXA_RC_UUID_PARSE_ERROR              -128
 /**
  * "gettimeofday" function error
  */
-#define LIXA_RC_GETTIMEOFDAY_ERROR            -128
+#define LIXA_RC_GETTIMEOFDAY_ERROR            -129
 /**
  * "unlink" function error
 define LIXA_RC_UNLINK_ERROR                  -129

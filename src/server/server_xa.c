@@ -312,3 +312,29 @@ int server_xa_open_24(struct thread_status_s *ts,
 
 
 
+int server_xa_start(struct thread_status_s *ts,
+                    const struct lixa_msg_s *lmi,
+                    struct lixa_msg_s *lmo,
+                    uint32_t block_id)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_start\n"));
+    TRY {
+        /* @@@ implement me !!! */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_start/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
