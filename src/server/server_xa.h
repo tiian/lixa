@@ -140,6 +140,23 @@ extern "C" {
 
     
 
+    /**
+     * Executes the logic related to the first step of "xa_start" on the
+     * server side
+     * @param ts IN/OUT a reference to the current thread status
+     * @param lmi IN a reference to the message received from the client
+     * @param lmo OUT a reference to the message must be sent to the client
+     * @param block_id IN position of the block is storing the status of the
+     *                    client is calling the server
+     * @return a reason code
+     */
+    int server_xa_start_8(struct thread_status_s *ts,
+                          const struct lixa_msg_s *lmi,
+                          struct lixa_msg_s *lmo,
+                          uint32_t block_id);
+
+    
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
