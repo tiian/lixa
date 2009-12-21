@@ -491,11 +491,12 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
 {
     enum Exception { LIXA_MSG_DESERIALIZE_ERROR
                      , LIXA_MSG_TRACE_ERROR
-                     , LIXA_MSG_FREE_ERROR
                      , SERVER_XA_OPEN_ERROR
                      , SERVER_XA_CLOSE_ERROR
                      , SERVER_XA_START_ERROR
                      , INVALID_VERB
+                     , STORE_VERB_STEP_ERROR
+                     , LIXA_MSG_FREE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -546,6 +547,11 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                 THROW(INVALID_VERB);
         }
         
+        /* register protocol step */
+        if (LIXA_RC_OK != (ret_cod = payload_header_store_verb_step(
+                               ts, block_id, &lmi.header.pvs)))
+            THROW(STORE_VERB_STEP_ERROR);
+        
         /* release dynamically allocated strings */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_free(&lmi)))
             THROW(LIXA_MSG_FREE_ERROR);
@@ -562,6 +568,8 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                 break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case STORE_VERB_STEP_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

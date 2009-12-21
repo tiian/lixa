@@ -1,4 +1,5 @@
 restart lixa_tx_begin development... :)
-from function server_xa_start (synchronize status file after start_8 ...)
+from function server_xa_start (reply with message start_16; pay attention to
+last_verb_step fields (see server_xa_open_8 ...)
 
 When server_manager_thread exits, the listener must be aware of this... 
