@@ -147,7 +147,6 @@ int server_xa_open_8(struct thread_status_s *ts,
     enum Exception { RSRMGRS_ARRAY_NULL
                      , TOO_MANY_RSRMGRS
                      , PAYLOAD_CHAIN_ALLOCATE_ERROR
-                     , STORE_VERB_STEP_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -191,10 +190,6 @@ int server_xa_open_8(struct thread_status_s *ts,
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_OPEN;
         }
 
-        /* register protocol step */
-        if (LIXA_RC_OK != (ret_cod = payload_header_store_verb_step(
-                               ts, block_id, &lmi->header.pvs)))
-            THROW(STORE_VERB_STEP_ERROR);
         /* prepare output message */
         lmo->header.pvs.verb = lmi->header.pvs.verb;
         /* prepare next protocol step */
@@ -212,7 +207,6 @@ int server_xa_open_8(struct thread_status_s *ts,
             case TOO_MANY_RSRMGRS:
                 ret_cod = LIXA_RC_TOO_MANY_RSRMGRS;
             case PAYLOAD_CHAIN_ALLOCATE_ERROR:
-            case STORE_VERB_STEP_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -235,7 +229,6 @@ int server_xa_open_24(struct thread_status_s *ts,
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
                      , INVALID_RMID
-                     , STORE_VERB_STEP_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -279,11 +272,6 @@ int server_xa_open_24(struct thread_status_s *ts,
             sr->sr.data.pld.rm.xa_open_rc = xa_open_execs->rc;
         } /* for (i=0; ... */
         
-        /* register protocol step */
-        if (LIXA_RC_OK != (ret_cod = payload_header_store_verb_step(
-                               ts, block_id, &lmi->header.pvs)))
-            THROW(STORE_VERB_STEP_ERROR);
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -295,8 +283,6 @@ int server_xa_open_24(struct thread_status_s *ts,
                 break;
             case INVALID_RMID:
                 ret_cod = LIXA_RC_INVALID_STATUS;
-                break;
-            case STORE_VERB_STEP_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -398,6 +384,9 @@ int server_xa_start_8(struct thread_status_s *ts,
                                  ts->updated_records);
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_START;
         } /* for (i=0; ... */
+
+        /* the status file must be synchronized */
+        ts->asked_sync = TRUE;
         
         THROW(NONE);
     } CATCH {
