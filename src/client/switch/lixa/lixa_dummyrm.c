@@ -121,7 +121,7 @@ int lixa_dummyrm_complete(int *handle, int *retval, int rmid, long flags) {
  */
 struct xa_switch_t lixa_dummyrm_sw = {
     "lixa_dummyrm",
-    TMNOFLAGS,
+    TMREGISTER,
     0,
     lixa_dummyrm_open,
     lixa_dummyrm_close,

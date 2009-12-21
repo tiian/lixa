@@ -1,4 +1,4 @@
 restart lixa_tx_begin development... :)
-from function server_xa_start
+from function server_xa_start (synchronize status file after start_8 ...)
 
 When server_manager_thread exits, the listener must be aware of this... 

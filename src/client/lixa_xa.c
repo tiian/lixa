@@ -424,7 +424,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid)
             if (act_rsrmgr->xa_switch->flags & TMREGISTER) {
                 LIXA_TRACE(("lixa_xa_start: resource manager # %d registers "
                             "dynamically, skipped...\n", i));
-                break;
+                continue;
             }
             record.rmid = i;
             g_array_append_val(msg.body.start_8.rsrmgrs, record);
