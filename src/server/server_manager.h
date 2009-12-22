@@ -131,15 +131,45 @@ extern "C" {
     
     
     /**
-     * Process XML message coming from client
+     * Process the input message arrived from the client and prepare the output
+     * message if necessary
      * @param ts IN/OUT thread status structure
      * @param slot_id IN id of the slot must be freed
      * @param buf IN/OUT buffer read from socket
      * @param read_bytes IN number of bytes read from socket
      * @return a standardized return code
      */
-    int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
+    int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
                                 char *buf, ssize_t read_bytes);
+
+
+
+    /**
+     * Process the input message arrived from the client
+     * @param ts IN/OUT thread status structure
+     * @param slot_id IN id of the slot must be freed
+     * @param buf IN/OUT buffer read from socket
+     * @param read_bytes IN number of bytes read from socket
+     * @param lmo OUT message should be returned to the client
+     * @return a standardized return code
+     */
+    int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
+                                  char *buf, ssize_t read_bytes,
+                                  struct lixa_msg_s *lmo);
+
+
+
+    /**
+     * Prepare the output message must be sent to the client
+     * @param ts IN/OUT thread status structure
+     * @param slot_id IN id of the slot must be freed
+     * @param lmo IN message will be returned to the client
+     * @param rc IN return code of the previous operations must be returned
+     *              to the client
+     * @return a standardized return code
+     */
+    int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
+                                   struct lixa_msg_s *lmo, int rc);
 
     
     

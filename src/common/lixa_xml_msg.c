@@ -743,15 +743,31 @@ int lixa_msg_serialize_start_16(const struct lixa_msg_s *msg,
                                 char *buffer,
                                 size_t *offset, size_t *free_chars)
 {
-    enum Exception { NONE } excp;
+    enum Exception { BUFFER_TOO_SHORT
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_msg_serialize_start_16\n"));
     TRY {
+        int used_chars;
+        
+        /* <answer> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%d\"/>",
+                              LIXA_XML_MSG_TAG_ANSWER,
+                              LIXA_XML_MSG_PROP_RC,
+                              msg->body.open_16.answer.rc);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT);
+        *free_chars -= used_chars;
+        *offset += used_chars;
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case BUFFER_TOO_SHORT:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

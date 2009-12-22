@@ -48,6 +48,7 @@
 #include <lixa_xml_msg.h>
 #include <server_manager.h>
 #include <server_messages.h>
+#include <server_reply.h>
 #include <server_xa.h>
 
 
@@ -335,7 +336,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                 THROW(FREE_SLOTS);
         } else if (LIXA_RC_OK == ret_cod) {
             /* XML message to process from client */
-            if (LIXA_RC_OK != (ret_cod = server_manager_XML_proc(
+            if (LIXA_RC_OK != (ret_cod = server_manager_msg_proc(
                                    ts, slot_id, buf, read_bytes)))
                 THROW(XML_PROC);
         } else
@@ -486,8 +487,58 @@ int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id)
 
 
 
-int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
+int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
                             char *buf, ssize_t read_bytes)
+{
+    enum Exception { OUTMSG_PREP_ERROR
+                     , INMSG_PROC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int rc;
+    
+    struct lixa_msg_s lmo;
+
+    LIXA_TRACE(("server_manager_msg_proc\n"));
+    TRY {
+        /* process the input message */
+        rc = server_manager_inmsg_proc(ts, slot_id, buf, read_bytes, &lmo);
+        
+        if (LIXA_RC_OK != (ret_cod = server_manager_outmsg_prep(
+                               ts, slot_id, &lmo, rc))) {
+            LIXA_TRACE(("server_manager_msg_proc: server_manager_outmsg_prep "
+                        "return code is %d\n", ret_cod));
+            THROW(OUTMSG_PREP_ERROR);
+        }
+
+        if (LIXA_RC_OK != rc) {
+            LIXA_TRACE(("server_manager_msg_proc: server_manager_inmsg_prep "
+                        "return code is %d\n", rc));
+            THROW(INMSG_PROC_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OUTMSG_PREP_ERROR:
+            case INMSG_PROC_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_manager_msg_proc/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
+                              char *buf, ssize_t read_bytes,
+                              struct lixa_msg_s *lmo)
 {
     enum Exception { LIXA_MSG_DESERIALIZE_ERROR
                      , LIXA_MSG_TRACE_ERROR
@@ -500,13 +551,13 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    struct lixa_msg_s lmi, lmo;
+    struct lixa_msg_s lmi;
 
-    LIXA_TRACE(("server_manager_XML_proc\n"));
+    LIXA_TRACE(("server_manager_inmsg_proc\n"));
     TRY {
         uint32_t block_id;
         
-        LIXA_TRACE(("server_manager_XML_proc: message is |%*.*s|\n",
+        LIXA_TRACE(("server_manager_inmsg_proc: message is |%*.*s|\n",
                     read_bytes, read_bytes, buf));
 
         /* deserialize the message from XML to native C ... */
@@ -522,15 +573,15 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
         block_id = ts->client_array[slot_id].pers_status_slot_id;
 
         /* set output message */
-        lmo.header.level = LIXA_MSG_LEVEL;
-        lmo.header.pvs.verb = LIXA_MSG_VERB_NULL;
-        lmo.header.pvs.step = lmi.header.pvs.step + LIXA_MSG_STEP_INCR;
+        lmo->header.level = LIXA_MSG_LEVEL;
+        lmo->header.pvs.verb = LIXA_MSG_VERB_NULL;
+        lmo->header.pvs.step = lmi.header.pvs.step + LIXA_MSG_STEP_INCR;
         
         /* process the message */
         switch (lmi.header.pvs.verb) {
             case LIXA_MSG_VERB_OPEN:
                 if (LIXA_RC_OK != (ret_cod = server_xa_open(
-                                       ts, &lmi, &lmo, block_id)))
+                                       ts, &lmi, lmo, block_id)))
                     THROW(SERVER_XA_OPEN_ERROR)
                 break;
             case LIXA_MSG_VERB_CLOSE:
@@ -540,7 +591,7 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                 break;
             case LIXA_MSG_VERB_START:
                 if (LIXA_RC_OK != (ret_cod = server_xa_start(
-                                       ts, &lmi, &lmo, block_id)))
+                                       ts, &lmi, lmo, block_id)))
                     THROW(SERVER_XA_START_ERROR)
                 break;
             default:
@@ -578,37 +629,80 @@ int server_manager_XML_proc(struct thread_status_s *ts, size_t slot_id,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         
-        /* prepare output message */
-        if (lmo.header.pvs.verb != LIXA_MSG_VERB_NULL) {
-            /* allocate the output buffer */
-            if (NULL == (ts->client_array[slot_id].output_buffer = malloc(
-                             LIXA_MSG_XML_BUFFER_SIZE))) {
-                LIXA_TRACE(("server_manager_XML_proc: error while allocating "
-                            "the buffer to reply to client\n"));
-                ret_cod = LIXA_RC_MALLOC_ERROR;
-            }
-            lmo.body.open_16.answer.rc = ret_cod;
-            if (LIXA_RC_OK != (
-                    ret_cod = lixa_msg_serialize(
-                        &lmo,
-                        ts->client_array[slot_id].output_buffer,
-                        LIXA_MSG_XML_BUFFER_SIZE,
-                        &ts->client_array[slot_id].output_buffer_size))) {
-                LIXA_TRACE(("server_manager_XML_proc: error while serializing "
-                            "reply message to client\n"));
-            }
-            if (LIXA_RC_OK == ret_cod) {
-                LIXA_TRACE(("server_manager_XML_proc: reply message is "
-                            "|%*.*s|\n",
-                            ts->client_array[slot_id].output_buffer_size,
-                            ts->client_array[slot_id].output_buffer_size,
-                            ts->client_array[slot_id].output_buffer));
-            }
-
-        }
-            
     } /* TRY-CATCH */
-    LIXA_TRACE(("server_manager_XML_proc/excp=%d/"
+    LIXA_TRACE(("server_manager_inmsg_proc/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
+                               struct lixa_msg_s *lmo, int rc)
+{
+    enum Exception { NOTHING_TO_DO
+                     , MALLOC_ERROR
+                     , VERB_NOT_FOUND
+                     , REPLY_OPEN_ERROR
+                     , REPLY_START_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_manager_outmsg_prep\n"));
+    TRY {
+        if (lmo->header.pvs.verb == LIXA_MSG_VERB_NULL)
+            THROW(NOTHING_TO_DO);
+        
+        /* allocate the output buffer */
+        if (NULL == (ts->client_array[slot_id].output_buffer = malloc(
+                         LIXA_MSG_XML_BUFFER_SIZE))) {
+            LIXA_TRACE(("server_manager_outmsg_proc: error while "
+                        "allocating the buffer to reply to client\n"));
+            THROW(MALLOC_ERROR);
+        }
+
+        /* prepare output message */
+        switch (lmo->header.pvs.verb) {
+            case LIXA_MSG_VERB_NULL:
+                break;
+            case LIXA_MSG_VERB_OPEN:
+                if (LIXA_RC_OK != (ret_cod = server_reply_open(
+                                       ts, slot_id, lmo, rc)))
+                    THROW(REPLY_OPEN_ERROR);
+                break;
+            case LIXA_MSG_VERB_START:
+                if (LIXA_RC_OK != (ret_cod = server_reply_start(
+                                       ts, slot_id, lmo, rc)))
+                    THROW(REPLY_START_ERROR);
+                break;
+            default:
+                THROW(VERB_NOT_FOUND);
+        } /* switch (lmo.header.pvs.verb) */
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NOTHING_TO_DO:
+                ret_cod = LIXA_RC_OK;
+                break;
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case VERB_NOT_FOUND:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case REPLY_OPEN_ERROR:
+                break;
+            case REPLY_START_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_manager_outmsg_prep/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
