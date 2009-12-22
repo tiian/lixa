@@ -385,6 +385,12 @@ int server_xa_start_8(struct thread_status_s *ts,
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_START;
         } /* for (i=0; ... */
 
+        /* prepare output message */
+        lmo->header.pvs.verb = lmi->header.pvs.verb;
+        /* prepare next protocol step */
+        ts->client_array[block_id].last_verb_step.verb = lmo->header.pvs.verb;
+        ts->client_array[block_id].last_verb_step.step = lmo->header.pvs.step;
+
         /* the status file must be synchronized */
         ts->asked_sync = TRUE;
         

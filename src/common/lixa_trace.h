@@ -97,6 +97,11 @@
 #define LIXA_TRACE_MOD_SERVER_XA          0x00000040
 
 /**
+ * trace module for server reply functions
+ */
+#define LIXA_TRACE_MOD_SERVER_REPLY       0x00000080
+
+/**
  * trace module for client TX standard functions
  */
 #define LIXA_TRACE_MOD_CLIENT_TX          0x00001000

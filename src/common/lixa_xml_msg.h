@@ -399,6 +399,15 @@ struct lixa_msg_body_start_8_s {
 
 
 /**
+ * Message body for verb "start", step "16"
+ */
+struct lixa_msg_body_start_16_s {
+    struct lixa_msg_body_answer_s   answer;
+};
+
+
+
+/**
  * This structure maps the messages flowing between LIXA client (lixac) and
  * LIXA server (lixad). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
@@ -418,6 +427,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_open_24_s         open_24;
         struct lixa_msg_body_close_8_s         close_8;
         struct lixa_msg_body_start_8_s         start_8;
+        struct lixa_msg_body_start_16_s        start_16;
     } body;
 };
 
