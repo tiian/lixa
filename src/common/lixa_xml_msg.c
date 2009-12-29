@@ -966,6 +966,53 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
 
 
 
+int lixa_msg_deserialize_default_answer(xmlNodePtr cur,
+                                        struct lixa_msg_body_answer_s *answer)
+{
+    enum Exception { RC_NOT_FOUND
+                     , XML_UNRECOGNIZED_TAG
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_deserialize_default_answer\n"));
+    TRY {
+        xmlChar *tmp = NULL;
+
+        while (NULL != cur) {
+            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_ANSWER)) {
+                /* retrieve answer result */
+                if (NULL == (tmp = (xmlGetProp(cur, LIXA_XML_MSG_PROP_RC))))
+                    THROW(RC_NOT_FOUND);
+                answer->rc = (int)strtol((char *)tmp, NULL, 0);
+                xmlFree(tmp);
+            } else
+                THROW(XML_UNRECOGNIZED_TAG);
+            cur = cur->next;
+        } /* while (NULL != cur) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case RC_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
+            case XML_UNRECOGNIZED_TAG:
+                ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_deserialize_default_answer/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
     enum Exception { PROFILE_NOT_FOUND
@@ -1050,46 +1097,13 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 
 int lixa_msg_deserialize_open_16(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
-    enum Exception { RC_NOT_FOUND
-                     , XML_UNRECOGNIZED_TAG
-                     , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int ret_cod;
     
     LIXA_TRACE(("lixa_msg_deserialize_open_16\n"));
-    TRY {
-        xmlChar *tmp = NULL;
-
-        while (NULL != cur) {
-            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_ANSWER)) {
-                /* retrieve answer result */
-                if (NULL == (tmp = (xmlGetProp(cur, LIXA_XML_MSG_PROP_RC))))
-                    THROW(RC_NOT_FOUND);
-                msg->body.open_16.answer.rc =
-                    (int)strtol((char *)tmp, NULL, 0);
-                xmlFree(tmp);
-            } else
-                THROW(XML_UNRECOGNIZED_TAG);
-            cur = cur->next;
-        } /* while (NULL != cur) */
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case RC_NOT_FOUND:
-                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
-                break;
-            case XML_UNRECOGNIZED_TAG:
-                ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_msg_deserialize_open_16/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    ret_cod = lixa_msg_deserialize_default_answer(
+        cur, &msg->body.open_16.answer);
+    LIXA_TRACE(("lixa_msg_deserialize_open_16/"
+                "ret_cod=%d/errno=%d\n", ret_cod, errno));
     return ret_cod;
 }
 
@@ -1340,26 +1354,13 @@ int lixa_msg_deserialize_start_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 
 int lixa_msg_deserialize_start_16(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
-    enum Exception { NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int ret_cod;
     
     LIXA_TRACE(("lixa_msg_deserialize_start_16\n"));
-    TRY {
-        /* @@@ implement me... */
-        exit(1);
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_msg_deserialize_start_16/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    ret_cod = lixa_msg_deserialize_default_answer(
+        cur, &msg->body.start_16.answer);
+    LIXA_TRACE(("lixa_msg_deserialize_start_16/"
+                "ret_cod=%d/errno=%d\n", ret_cod, errno));
     return ret_cod;
 }
 
@@ -1713,11 +1714,11 @@ int lixa_msg_trace_start(const struct lixa_msg_s *msg)
                     }
                 }
                 break;
-                /*
             case 16:
                 LIXA_TRACE(("lixa_msg_trace_start: body[answer[rc[%d]]]\n",
                             msg->body.start_16.answer.rc));
                 break;
+                /*
             case 24:
                 if (NULL != msg->body.start_24.xa_open_execs) {
                     LIXA_TRACE(("lixa_msg_trace_start: body["

@@ -89,9 +89,12 @@ extern "C" {
      * @param cs IN reference to the status of the calling client
      * @param txrc OUT return code prepared for tx_open call
      * @param xid IN transaction id of the new transaction
+     * @param next_txstate IN the txstate will be reached by the control thread
+     *                        after executing this function
      * @return a reason code
      */
-    int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid);
+    int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid,
+                      int next_txstate);
 
 
 

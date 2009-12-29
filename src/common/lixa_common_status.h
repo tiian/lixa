@@ -102,6 +102,42 @@
  * Resource manager state initialized
  */
 #define XA_STATE_R1    1
+/**
+ * Transaction branch association state "not associated"
+ */
+#define XA_STATE_T0   10
+/**
+ * Transaction branch association state "associated"
+ */
+#define XA_STATE_T1   11
+/**
+ * Transaction branch association state "association suspended"
+ */
+#define XA_STATE_T2   12
+/**
+ * Transaction branch state "non-existent transaction"
+ */
+#define XA_STATE_S0   30
+/**
+ * Transaction branch state "active"
+ */
+#define XA_STATE_S1   31
+/**
+ * Transaction branch state "idle"
+ */
+#define XA_STATE_S2   32
+/**
+ * Transaction branch state "prepared"
+ */
+#define XA_STATE_S3   33
+/**
+ * Transaction branch state "rollback only"
+ */
+#define XA_STATE_S4   34
+/**
+ * Transaction branch state "heuristically completed"
+ */
+#define XA_STATE_S5   35
 
 
 
@@ -148,14 +184,27 @@ struct common_status_conthr_s {
  */
 struct common_status_rsrmgr_s {
     /**
-     * State of the resource manager as in "X/Open CAE Specification -
+     * Resource manager state as in "X/Open CAE Specification -
      * Distribute Transaction Processing: The XA Specification - chapter 6
+     * table 6-1
      */
-    int   xastate;
+    int   xa_r_state;
+    /**
+     * Transaction branch association state as in "X/Open CAE Specification -
+     * Distribute Transaction Processing: The XA Specification - chapter 6
+     * table 6-2
+     */
+    int   xa_t_state;
+    /**
+     * Transaction branch state as in "X/Open CAE Specification -
+     * Distribute Transaction Processing: The XA Specification - chapter 6
+     * table 6-4
+     */
+    int   xa_s_state;
     /**
      * This is the next verb will be issued against the resource manager;
-     * @ref xastate shows the reached state, this property is used to trace
-     * a tentative to a new state
+     * xa_r_state, xa_t_state, xa_s_state show the reached state, this property
+     * is used to trace a tentative to a new state
      */
     int   next_verb;
 };
@@ -187,7 +236,9 @@ extern "C" {
     
     static inline void common_status_rsrmgr_init(
         struct common_status_rsrmgr_s *csr) {
-        csr->xastate = XA_STATE_R0;
+        csr->xa_r_state = XA_STATE_R0;
+        csr->xa_t_state = XA_STATE_T0;
+        csr->xa_s_state = XA_STATE_S0;
         csr->next_verb = LIXA_MSG_VERB_NULL;
         return;
     }
