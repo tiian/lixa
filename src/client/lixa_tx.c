@@ -69,7 +69,6 @@ int lixa_tx_begin(int *txrc)
                      , PROTOCOL_ERROR
                      , INVALID_STATUS1
                      , LIXA_XA_START_ERROR
-                     , INVALID_STATUS2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int tmp_txrc = TX_OK;
@@ -79,7 +78,7 @@ int lixa_tx_begin(int *txrc)
     LIXA_TRACE_INIT;
     LIXA_TRACE(("lixa_tx_begin\n"));
     TRY {
-        int txstate, new_txstate;
+        int txstate, next_txstate;
         client_status_t *cs;
         XID xid;
         
@@ -99,7 +98,10 @@ int lixa_tx_begin(int *txrc)
 
         switch (txstate) {
             case TX_STATE_S1:
+                next_txstate = TX_STATE_S3;
+                break;
             case TX_STATE_S2:
+                next_txstate = TX_STATE_S4;
                 break;
             case TX_STATE_S0:
             case TX_STATE_S3:
@@ -108,31 +110,22 @@ int lixa_tx_begin(int *txrc)
             default:
                 THROW(INVALID_STATUS1);
         }
+        LIXA_TRACE(("lixa_tx_begin: txstate = S%d, "
+                    "next_txstate = S%d\n", txstate, next_txstate));
 
         /* generate the transction id */
         xid_create_new(&xid);
         client_status_set_xid(cs, &xid);
         
         /* the real logic must be put here */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_start(cs, txrc, &xid)))
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
+                               cs, txrc, &xid, next_txstate)))
             THROW(LIXA_XA_START_ERROR);
         
         /* @@@ go on from here... */
         
         /* update the TX state, now TX_STATE_S0 */
-        switch (txstate) {
-            case TX_STATE_S1:
-                new_txstate = TX_STATE_S3;
-                break;
-            case TX_STATE_S2:
-                new_txstate = TX_STATE_S4;
-                break;
-            default:
-                THROW(INVALID_STATUS2);
-        }        
-        LIXA_TRACE(("lixa_tx_begin: old status = S%d, "
-                    "new status = S%d\n", txstate, new_txstate));
-        client_status_set_txstate(cs, new_txstate);
+        client_status_set_txstate(cs, next_txstate);
         
         THROW(NONE);
     } CATCH {
@@ -151,9 +144,6 @@ int lixa_tx_begin(int *txrc)
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case LIXA_XA_START_ERROR:
-                break;
-            case INVALID_STATUS2:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
             case NONE:
                 *txrc = tmp_txrc;

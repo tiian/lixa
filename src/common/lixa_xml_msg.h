@@ -408,6 +408,60 @@ struct lixa_msg_body_start_16_s {
 
 
 /**
+ * Control thread status
+ */
+struct lixa_msg_body_start_24_conthr_s {
+    /**
+     * State of the control thread
+     */
+    int                       state;
+};
+
+
+
+/**
+ * Convenience struct for @ref lixa_msg_body_start_24_s
+ * xid is not stored in this structure because it was already stored by the
+ * server after receiving step 8 message, see @ref lixa_msg_body_start_8_s
+ */
+struct lixa_msg_body_start_24_xa_start_execs_s {
+    /**
+     * rmid parameter as passed to xa_start routine
+     */
+    int             rmid;
+    /**
+     * flags parameter as passed to xa_start routine
+     */
+    long            flags;
+    /**
+     * return code of xa_start routine
+     */
+    int             rc;
+    /**
+     * the new state associated to the resource manager after xa_start execution
+     */
+    int             state;
+};
+
+
+
+/**
+ * Message body for verb "start", step "24"
+ */
+struct lixa_msg_body_start_24_s {
+    /**
+     * Control thread information
+     */
+    struct lixa_msg_body_start_24_conthr_s   conthr;
+    /**
+     * Parameters and return value of xa_start executions
+     */
+    GArray                                  *xa_start_execs;
+};
+
+
+
+/**
  * This structure maps the messages flowing between LIXA client (lixac) and
  * LIXA server (lixad). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
@@ -428,6 +482,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_close_8_s         close_8;
         struct lixa_msg_body_start_8_s         start_8;
         struct lixa_msg_body_start_16_s        start_16;
+        struct lixa_msg_body_start_24_s        start_24;
     } body;
 };
 
@@ -608,6 +663,18 @@ extern "C" {
                              struct lixa_msg_s *msg);
     
 
+
+    /**
+     * Deserialize an XML subtree containing a default answer message
+     * @param cur IN reference to the XML subtree
+     * @param answer OUT reference to the answer contained in the message
+     * @return a reason code
+     */     
+    int lixa_msg_deserialize_default_answer(
+        xmlNodePtr cur,
+        struct lixa_msg_body_answer_s *answer);
+
+
     
     /**
      * Deserialize an XML subtree containing details pertaining to
@@ -707,7 +774,7 @@ extern "C" {
 
 
     /**
-     * Convenience function for @ref lixa_msg_trace: it display the content
+     * Convenience function for @ref lixa_msg_trace : it display the content
      * of a "close" message
      * @param msg IN the message must be massaged
      * @return a reason code
@@ -717,7 +784,7 @@ extern "C" {
 
     
     /**
-     * Convenience function for @ref lixa_msg_trace: it display the content
+     * Convenience function for @ref lixa_msg_trace : it display the content
      * of a "open" message
      * @param msg IN the message must be massaged
      * @return a reason code
@@ -727,7 +794,7 @@ extern "C" {
 
     
     /**
-     * Convenience function for @ref lixa_msg_trace: it display the content
+     * Convenience function for @ref lixa_msg_trace : it display the content
      * of a "start" message
      * @param msg IN the message must be massaged
      * @return a reason code

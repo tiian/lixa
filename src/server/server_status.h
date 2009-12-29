@@ -186,7 +186,7 @@ struct server_client_status_s {
      */ 
     char                         *output_buffer;
     /**
-     * Size of the buffer must be sent to the client; if @output_buffer is
+     * Size of the buffer must be sent to the client; if @ref output_buffer is
      * NULL, this field is meaningless
      */
     size_t                        output_buffer_size;
