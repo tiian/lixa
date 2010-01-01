@@ -310,6 +310,14 @@ struct payload_rsrmgr_s {
      * rc value as returned from xa_open
      */
     int                             xa_open_rc;
+    /**
+     * flags value as passed to xa_start
+     */
+    long                            xa_start_flags;
+    /**
+     * rc value as returned from xa_start
+     */
+    int                             xa_start_rc;
 };
 
 

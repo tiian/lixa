@@ -191,6 +191,14 @@ extern const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXEC;
  * Label used to specify "xa_open_execs" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXECS;
+/**
+ * Label used to specify "xa_start_exec" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_XA_START_EXEC;
+/**
+ * Label used to specify "xa_start_execs" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_XA_START_EXECS;
 
 
 

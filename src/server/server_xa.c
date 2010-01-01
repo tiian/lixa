@@ -304,6 +304,7 @@ int server_xa_start(struct thread_status_s *ts,
                     uint32_t block_id)
 {
     enum Exception { SERVER_XA_OPEN_8_ERROR
+                     , SERVER_XA_OPEN_24_ERROR
                      , INVALID_STEP
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -316,13 +317,11 @@ int server_xa_start(struct thread_status_s *ts,
                                        ts, lmi, lmo, block_id)))
                     THROW(SERVER_XA_OPEN_8_ERROR);
                 break;
-                /*
             case 24:
                 if (LIXA_RC_OK != (ret_cod = server_xa_start_24(
                                        ts, lmi, block_id)))
                     THROW(SERVER_XA_OPEN_24_ERROR);
                 break;
-                */
             default:
                 THROW(INVALID_STEP);
         }
@@ -331,6 +330,7 @@ int server_xa_start(struct thread_status_s *ts,
     } CATCH {
         switch (excp) {
             case SERVER_XA_OPEN_8_ERROR:
+            case SERVER_XA_OPEN_24_ERROR:
                 break;
             case INVALID_STEP:
                 ret_cod = LIXA_RC_INVALID_STATUS;
@@ -405,6 +405,73 @@ int server_xa_start_8(struct thread_status_s *ts,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_start_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_xa_start_24(struct thread_status_s *ts,
+                       const struct lixa_msg_s *lmi,
+                       uint32_t block_id)
+{
+    enum Exception { INVALID_BLOCK_ID
+                     , NUMBER_OF_RSRMGRS_MISMATCH
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_start_24\n"));
+    TRY {
+        uint32_t i;
+        
+        /* check block_id is a valid block */
+        if (ts->curr_status[block_id].sr.data.pld.type !=
+            DATA_PAYLOAD_TYPE_HEADER)
+            THROW(INVALID_BLOCK_ID);
+        /* check children blocks match with the arrived update */
+        if (lmi->body.start_24.xa_start_execs->len >
+            ts->curr_status[block_id].sr.data.pld.ph.n)
+            THROW(NUMBER_OF_RSRMGRS_MISMATCH);
+        /* retrieve and save control thread status */
+        ts->curr_status[block_id].sr.data.pld.ph.state.txstate =
+            lmi->body.start_24.conthr.state;
+        /* store data in the children blocks... */
+        for (i=0; i<lmi->body.start_24.xa_start_execs->len; ++i) {
+            status_record_t *sr;
+            struct lixa_msg_body_start_24_xa_start_execs_s *xa_start_execs;
+            uint32_t slot;
+            xa_start_execs = &g_array_index(
+                lmi->body.start_24.xa_start_execs,
+                struct lixa_msg_body_start_24_xa_start_execs_s, i);
+            slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
+                xa_start_execs->rmid];
+            sr = ts->curr_status + slot;
+            /* update the block */
+            status_record_update(ts->curr_status + slot, slot,
+                                 ts->updated_records);
+            sr->sr.data.pld.rm.state.xa_t_state = xa_start_execs->state;
+            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
+            sr->sr.data.pld.rm.xa_start_flags = xa_start_execs->flags;
+            sr->sr.data.pld.rm.xa_start_rc = xa_start_execs->rc;
+        } /* for (i=0; ... */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_BLOCK_ID:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NUMBER_OF_RSRMGRS_MISMATCH:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_start_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

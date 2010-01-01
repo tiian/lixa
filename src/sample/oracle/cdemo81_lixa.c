@@ -314,6 +314,11 @@ char *argv[];
 
   for (;;)
   {
+      if (TX_OK != (txrc = tx_begin())) {
+          fprintf(stderr, "tx_begin error: %d\n", txrc);
+          exit(txrc);
+      }
+  
     /* Prompt for employee name.  Break on no name. */
     printf("\nEnter employee name (or CR to EXIT): ");
     fgets((char *) ename, (int) enamelen+1, stdin);
