@@ -375,7 +375,8 @@ int server_xa_start_8(struct thread_status_s *ts,
             rsrmgrs = &g_array_index(
                 lmi->body.start_8.rsrmgrs,
                 struct lixa_msg_body_start_8_rsrmgr_s, i);
-            slot = rsrmgrs->rmid;
+            slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
+                rsrmgrs->rmid];
             LIXA_TRACE(("server_xa_start_8: updating next_verb for resource "
                         "manager # " UINT32_T_FORMAT "\n", slot));
             sr = ts->curr_status + slot;

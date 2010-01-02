@@ -1,5 +1,2 @@
-restart lixa_tx_begin development... :)
-there's a bug in tx_begin exploited when Oracle resource manager is used; but
-it's a LIXA fail, not Oracle!
 
 When server_manager_thread exits, the listener must be aware of this... 
