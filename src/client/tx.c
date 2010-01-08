@@ -49,7 +49,6 @@
 
 int tx_begin(void)
 {
-    /** @@@ must be fixed see bug 2907537 */
     int txrc = TX_FAIL;
     lixa_tx_begin(&txrc);
     return txrc;
@@ -68,7 +67,8 @@ int tx_close(void)
 
 int tx_commit(void)
 {
-    /** @@@ must be fixed see bug 2907542 */
+    int txrc = TX_FAIL;
+    lixa_tx_commit(&txrc);
     return TX_OK;
 }
 

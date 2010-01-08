@@ -125,4 +125,24 @@ verb=3,step=24 -->  			send list of executions of xa_start
 
 ***************************************************************************
 
+verb=4 (xa_end)
 
+  level: message level, version
+  verb:  xa_end -> 4
+  step:  8, 16, 24, ... as necessary
+
+  client->server message (send if the transaction is committing - commit="1" -
+  		 	 or rollbacking - commit="0")
+  <msg level="1" verb="3" step="8">
+    <conthr commit="1"/>
+  </msg>
+
+
+client 			 server		description
+verb=4,step=8 -->			send commit/rollback
+		<-- verb=4,step=16	synchronize status file
+		    			confirm operation
+verb=4,step=24 -->  			send list of executions of xa_end
+	       				routine (store xa_end results and
+					new states on transaction manager 
+					server)

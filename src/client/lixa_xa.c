@@ -173,6 +173,81 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
 
 
 
+int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
+{
+    enum Exception { MSG_SERIALIZE_ERROR1
+                     , SEND_ERROR
+                     , MSG_RETRIEVE_ERROR
+                     , MSG_DESERIALIZE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_xa_end\n"));
+    TRY {
+        struct lixa_msg_s msg; 
+        size_t buffer_size = 0;
+        int fd;
+        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        ssize_t read_bytes;
+        
+        /* retrieve the socket */
+        fd = client_status_get_sockfd(cs);
+
+        /* build the message */
+        msg.header.level = LIXA_MSG_LEVEL;
+        msg.header.pvs.verb = LIXA_MSG_VERB_END;
+        msg.header.pvs.step = LIXA_MSG_STEP_INCR;
+
+        msg.body.end_8.conthr.commit = commit;
+        
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
+                               &msg, buffer, sizeof(buffer)-1, &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR1);
+        memset(&msg, 0, sizeof(msg));
+        
+        LIXA_TRACE(("lixa_xa_end: sending " SIZE_T_FORMAT
+                    " bytes to the server for step 8\n", buffer_size));
+        if (buffer_size != send(fd, buffer, buffer_size, 0))
+            THROW(SEND_ERROR);
+        
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(fd, buffer, buffer_size,
+                                                       &read_bytes)))
+            THROW(MSG_RETRIEVE_ERROR);
+        LIXA_TRACE(("lixa_xa_open: receiving %d"
+                    " bytes from the server |%*.*s|\n",
+                    read_bytes, read_bytes, read_bytes, buffer));
+        
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
+                               buffer, read_bytes, &msg)))
+            THROW(MSG_DESERIALIZE_ERROR);
+#ifdef _TRACE
+        lixa_msg_trace(&msg);
+#endif
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case MSG_SERIALIZE_ERROR1:
+                break;
+            case SEND_ERROR:
+                ret_cod = LIXA_RC_SEND_ERROR;
+                break;
+            case MSG_RETRIEVE_ERROR:
+            case MSG_DESERIALIZE_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_xa_end/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
 {
     enum Exception { OBJ_CORRUPTED
@@ -553,7 +628,6 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
                 ret_cod = LIXA_RC_SEND_ERROR;
                 break;
             case MSG_RETRIEVE_ERROR:
-                break;
             case MSG_DESERIALIZE_ERROR:
                 break;
             case ERROR_FROM_SERVER:

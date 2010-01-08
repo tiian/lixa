@@ -1,0 +1,65 @@
+******************************************************************************
+
+tx_commit() sequence diagram
+
+
+A.P.		T.M.		R.M.		lixad
+|
+[] tx_commit()	|		|		|
+[]------------->[] save commit/rollback intent	|		A
+|		[]--------------|-------------->[] save		|
+|		|		|		[] &		|
+|		[]<-------------|---------------[] synch	|
+|	     {1}[]		|		|		|
+|		[] xa_end()	|		|		|lixa_xa_
+|		[]------------->[]		|		|end
+|		|		[]		|		|
+|		[]<-------------[]		|		|
+|		[]		|		|		|
+|		[] save xa_end result		|		|
+|		[]--------------|-------------->[] save		V
+|	     {2}[]		|		|  		A
+|		[] xa_prepare()	| 		|		|
+|		[]------------->[]		|		|
+|		|  		[]		|		|
+|		[]<-------------[]		|		|
+|	     {3}[]		|		|		|lixa_xa_
+|		[] save xa_prepare result and	|		|prepare
+|		[] commit/rollback intent	|		|
+|		[]--------------|-------------->[] save		|
+|		|		|		[] &		|
+|		[]<-------------|---------------[] synch	|
+|		[]		|		|  		V
+|		[] xa_commit()/	|		|		A
+|		[] xa_rollback()|		|		|
+|		[]------------->[]		|		|lixa_xa_
+|		|		[]		|		|commit
+|		[]<-------------[]		|		|
+|		[]		|		|		|lixa_xa_
+|		[] save xa_commit result	|		|rollback
+|		[]--------------|-------------->[] discard	|
+[]<-------------[]		|		[] data		V
+[]
+|
+
+A.P. = Application Program
+T.M. = Transaction Manager (lixac library)
+R.M. = Resource Manager
+lixad = LIXA daemon
+
+{1}
+xa_end() invoked using TMSUCCES flag; if an "xa_end()" call fails, the 
+successive might be called using TMFAIL. This point is not so clear from 
+standard.
+
+{2}
+if there is only one resource manager, xa_prepare() can be avoided and the
+T.M. jumps to "xa_commit(TMONEPHASE)" step
+
+{3}
+if any resource manager fails "xa_prepare()" there is no reason to try
+"xa_prepare()" on the remaining resource manager set and T.M. jumps to 
+"xa_rollback" step
+
+******************************************************************************
+

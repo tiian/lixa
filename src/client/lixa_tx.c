@@ -122,8 +122,6 @@ int lixa_tx_begin(int *txrc)
                                cs, txrc, &xid, next_txstate)))
             THROW(LIXA_XA_START_ERROR);
         
-        /* @@@ go on from here... */
-        
         /* update the TX state, now TX_STATE_S0 */
         client_status_set_txstate(cs, next_txstate);
         
@@ -208,7 +206,6 @@ int lixa_tx_close(int *txrc)
                 THROW(INVALID_STATUS);
         }
         
-        /* the real logic must be put here */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_close(cs, &tmp_txrc)))
             THROW(LIXA_XA_CLOSE_ERROR);
             
@@ -255,6 +252,82 @@ int lixa_tx_close(int *txrc)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_close/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_tx_commit(int *txrc)
+{
+    enum Exception { STATUS_NOT_FOUND
+                     , COLL_GET_CS_ERROR
+                     , PROTOCOL_ERROR
+                     , INVALID_STATUS
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    *txrc = TX_FAIL;
+
+    LIXA_TRACE_INIT;    
+    LIXA_TRACE(("lixa_tx_commit\n"));
+    TRY {
+        int txstate, next_txstate;
+        client_status_t *cs;
+        
+        /* retrieve a reference to the thread status */
+        ret_cod = client_status_coll_get_cs(&global_csc, &cs);
+        switch (ret_cod) {
+            case LIXA_RC_OK: /* nothing to do */
+                break;
+            case LIXA_RC_OBJ_NOT_FOUND:
+                THROW(STATUS_NOT_FOUND);
+            default:
+                THROW(COLL_GET_CS_ERROR);
+        }
+
+        /* check TX state (see Table 7-1) */
+        txstate = client_status_get_txstate(cs);
+
+        switch (txstate) {
+            case TX_STATE_S0:
+            case TX_STATE_S1:
+            case TX_STATE_S2:
+                THROW(PROTOCOL_ERROR);
+            case TX_STATE_S3:
+            case TX_STATE_S4:
+                break;
+            default:
+                THROW(INVALID_STATUS);
+        }
+        LIXA_TRACE(("lixa_tx_commit: txstate = S%d\n", txstate));
+
+        ret_cod = lixa_xa_end(cs, txrc, TRUE);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case STATUS_NOT_FOUND:
+                *txrc = TX_PROTOCOL_ERROR;
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case COLL_GET_CS_ERROR:
+                break;
+            case PROTOCOL_ERROR:
+                *txrc = TX_PROTOCOL_ERROR;
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_tx_commit/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
