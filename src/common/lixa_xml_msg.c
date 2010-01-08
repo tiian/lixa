@@ -65,6 +65,7 @@
 
 
 const xmlChar *LIXA_XML_MSG_HEADER =             (xmlChar *)"<?xml";
+const xmlChar *LIXA_XML_MSG_PROP_COMMIT =        (xmlChar *)"commit";
 const xmlChar *LIXA_XML_MSG_PROP_FLAGS =         (xmlChar *)"flags";
 const xmlChar *LIXA_XML_MSG_PROP_LEVEL =         (xmlChar *)"level";
 const xmlChar *LIXA_XML_MSG_PROP_NAME =          (xmlChar *)"name";
@@ -197,7 +198,9 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                      , SERIALIZE_START_8_ERROR
                      , SERIALIZE_START_16_ERROR
                      , SERIALIZE_START_24_ERROR
+                     , SERIALIZE_END_8_ERROR
                      , INVALID_START_STEP
+                     , INVALID_END_STEP
                      , INVALID_VERB
                      , BUFFER_TOO_SHORT3
                      , NONE } excp;
@@ -303,6 +306,35 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                         THROW(INVALID_START_STEP);
                 }
                 break;
+            case LIXA_MSG_VERB_END:
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        if (LIXA_RC_OK != (
+                                ret_cod =
+                                lixa_msg_serialize_end_8(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_END_8_ERROR);
+                        break;
+                        /*
+                    case 16:
+                        if (LIXA_RC_OK != (
+                                ret_cod =
+                                lixa_msg_serialize_end_16(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_END_16_ERROR);
+                        break;
+                    case 24:
+                        if (LIXA_RC_OK != (
+                                ret_cod =
+                                lixa_msg_serialize_end_24(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_END_24_ERROR);
+                        break;
+                        */
+                    default:
+                        THROW(INVALID_END_STEP);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -336,10 +368,12 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
             case SERIALIZE_START_8_ERROR:
             case SERIALIZE_START_16_ERROR:
             case SERIALIZE_START_24_ERROR:
+            case SERIALIZE_END_8_ERROR:
                 break;
             case INVALID_OPEN_STEP:
             case INVALID_CLOSE_STEP:
             case INVALID_START_STEP:
+            case INVALID_END_STEP:
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
@@ -873,6 +907,49 @@ int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
 
 
 
+int lixa_msg_serialize_end_8(const struct lixa_msg_s *msg,
+                               char *buffer,
+                               size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_serialize_end_8\n"));
+    TRY {
+        int used_chars;
+        
+        /* <conthr> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%d\"/>",
+                              LIXA_XML_MSG_TAG_CONTHR,
+                              LIXA_XML_MSG_PROP_COMMIT,
+                              msg->body.end_8.conthr.commit ? 1 : 0);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_serialize_end_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                          struct lixa_msg_s *msg)
 {
@@ -886,6 +963,7 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                      , INVALID_STEP1
                      , INVALID_STEP2
                      , INVALID_STEP3
+                     , INVALID_STEP4
                      , INVALID_VERB
                      , CHILD_LEVEL_ERROR
                      , NONE } excp;
@@ -978,6 +1056,26 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         THROW(INVALID_STEP3);
                 }
                 break;
+            case LIXA_MSG_VERB_END: /* end */
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        ret_cod = lixa_msg_deserialize_end_8(
+                            cur->xmlChildrenNode, msg);
+                        break;
+                        /*
+                    case 16:
+                        ret_cod = lixa_msg_deserialize_start_16(
+                            cur->xmlChildrenNode, msg);
+                        break;
+                    case 24:
+                        ret_cod = lixa_msg_deserialize_start_24(
+                            cur->xmlChildrenNode, msg);
+                        break;
+                        */
+                    default:
+                        THROW(INVALID_STEP4);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -1003,6 +1101,7 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
             case INVALID_STEP1:
             case INVALID_STEP2:
             case INVALID_STEP3:
+            case INVALID_STEP4:
             case INVALID_VERB:
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
                 break;
@@ -1531,6 +1630,52 @@ int lixa_msg_deserialize_start_24(xmlNodePtr cur, struct lixa_msg_s *msg)
 
 
 
+int lixa_msg_deserialize_end_8(xmlNodePtr cur, struct lixa_msg_s *msg)
+{
+    enum Exception { COMMIT_NOT_FOUND
+                     , XML_UNRECOGNIZED_TAG
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_deserialize_end_8\n"));
+    TRY {
+        while (NULL != cur) {
+            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CONTHR)) {
+                xmlChar *tmp;
+                /* retrieve commit property */
+                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_COMMIT)))
+                    THROW(COMMIT_NOT_FOUND);
+                msg->body.end_8.conthr.commit =
+                    (int)strtol((char *)tmp, NULL, 0);
+                xmlFree(tmp);
+            } else
+                THROW(XML_UNRECOGNIZED_TAG);
+            cur = cur->next;
+        } /* while (NULL != cur) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case COMMIT_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
+            case XML_UNRECOGNIZED_TAG:
+                ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_deserialize_end_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_msg_free(struct lixa_msg_s *msg)
 {
     enum Exception { INVALID_STEP1
@@ -1634,6 +1779,7 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
     enum Exception { TRACE_OPEN_ERROR
                      , TRACE_CLOSE_ERROR
                      , TRACE_START_ERROR
+                     , TRACE_END_ERROR
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1657,6 +1803,10 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
                 if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_start(msg)))
                     THROW(TRACE_START_ERROR);
                 break;
+            case LIXA_MSG_VERB_END: /* end */
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_end(msg)))
+                    THROW(TRACE_END_ERROR);
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -1667,6 +1817,7 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
             case TRACE_OPEN_ERROR:
             case TRACE_CLOSE_ERROR:
             case TRACE_START_ERROR:
+            case TRACE_END_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
@@ -1907,3 +2058,73 @@ int lixa_msg_trace_start(const struct lixa_msg_s *msg)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int lixa_msg_trace_end(const struct lixa_msg_s *msg)
+{
+    enum Exception { INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_trace_end\n"));
+    TRY {
+        switch (msg->header.pvs.step) {
+            case 8:
+                LIXA_TRACE(("lixa_msg_trace_end: body[conthr[commit["
+                            "%d]]]\n", msg->body.end_8.conthr.commit));
+                break;
+                /*
+            case 16:
+                LIXA_TRACE(("lixa_msg_trace_end: body[answer[rc[%d]]]\n",
+                            msg->body.end_16.answer.rc));
+                break;
+            case 24:
+                if (NULL != msg->body.end_24.xa_end_execs) {
+                    LIXA_TRACE(("lixa_msg_trace: body["
+                                "conthr[state=%d]]\n",
+                                msg->body.end_24.conthr.state));
+                    for (i=0; i<msg->body.t_24.xa_end_execs->len;
+                         ++i) {
+                        struct lixa_msg_body_end_24_xa_end_execs_s
+                            *xa_end_exec =
+                            &g_array_index(
+                                msg->body.end_24.xa_end_execs,
+                                struct
+                                lixa_msg_body_end_24_xa_end_execs_s,
+                                i);
+                        LIXA_TRACE(("lixa_msg_trace: body["
+                                    "xa_end_execs["
+                                    "xa_end_exec["
+                                    "rmid=%d,flags=%ld,"
+                                    "rc=%d,state=%d]]]\n",
+                                    xa_end_exec->rmid,
+                                    xa_end_exec->flags,
+                                    xa_end_exec->rc,
+                                    xa_end_exec->state));
+                    }
+                }
+                break;
+                */
+            default:
+                THROW(INVALID_STEP);
+        } /* switch (msg->header.pvs.step) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_trace_end/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
