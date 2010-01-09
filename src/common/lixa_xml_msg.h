@@ -115,6 +115,11 @@
 #define LIXA_MSG_STEP_INCR    8
 
 
+
+/**
+ * Label used to specify initial XML header
+ */
+extern const xmlChar *LIXA_XML_MSG_HEADER;
 /**
  * Label used to specify "commit" property
  */
@@ -495,7 +500,53 @@ struct lixa_msg_body_end_8_conthr_s {
  */
 struct lixa_msg_body_end_8_s {
     struct lixa_msg_body_end_8_conthr_s   conthr;
-    GArray                               *rsrmgrs;
+};
+
+
+
+/**
+ * Message body for verb "end", step "16"
+ */
+struct lixa_msg_body_end_16_s {
+    struct lixa_msg_body_answer_s   answer;
+};
+
+
+
+/**
+ * Convenience struct for @ref lixa_msg_body_end_24_s
+ * xid is not stored in this structure because it was already stored by the
+ * server after receiving step 8 message, see @ref lixa_msg_body_end_8_s
+ */
+struct lixa_msg_body_end_24_xa_end_execs_s {
+    /**
+     * rmid parameter as passed to xa_end routine
+     */
+    int             rmid;
+    /**
+     * flags parameter as passed to xa_end routine
+     */
+    long            flags;
+    /**
+     * return code of xa_end routine
+     */
+    int             rc;
+    /**
+     * the new state associated to the resource manager after xa_end execution
+     */
+    int             state;
+};
+
+
+
+/**
+ * Message body for verb "end", step "24"
+ */
+struct lixa_msg_body_end_24_s {
+    /**
+     * Parameters and return value of xa_end executions
+     */
+    GArray                                  *xa_end_execs;
 };
 
 
@@ -523,6 +574,8 @@ struct lixa_msg_s {
         struct lixa_msg_body_start_16_s        start_16;
         struct lixa_msg_body_start_24_s        start_24;
         struct lixa_msg_body_end_8_s           end_8;
+        struct lixa_msg_body_end_16_s          end_16;
+        struct lixa_msg_body_end_24_s          end_24;
     } body;
 };
 
@@ -549,336 +602,12 @@ extern "C" {
 
     
     /**
-     * Serialize a message struct to an XML buffer for external transmission
-     * @param msg IN the object must be serialized
-     * @param buffer OUT the buffer will contain the XML serialized object
-     *                   (the size has fixed size of
-     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
-     *                   null terminated
-     * @param buffer_len IN the space allocated for buffer
-     * @param msg_len OUT number of chars used in buffer for serializing msg
-     * @return a reason code
-     */
-    int lixa_msg_serialize(const struct lixa_msg_s *msg,
-                           char *buffer, size_t buffer_len,
-                           size_t *msg_len);
-
-    
-
-    /**
-     * Serialize the "open_8" specific body part of a message
-     * @param msg IN the object must be serialized
-     * @param buffer OUT the buffer will contain the XML serialized object
-     *                   (the size has fixed size of
-     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
-     *                   null terminated
-     * @param offset IN/OUT offset must be used to start serialization inside
-     *                      the buffer
-     * @param free_chars IN/OUT remaing free chars inside the buffer
-     * @return a reason code
-     */
-    int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg,
-                                  char *buffer,
-                                  size_t *offset, size_t *free_chars);
-
-
-    
-    /**
-     * Serialize the "open_16" specific body part of a message
-     * @param msg IN the object must be serialized
-     * @param buffer OUT the buffer will contain the XML serialized object
-     *                   (the size has fixed size of
-     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
-     *                   null terminated
-     * @param offset IN/OUT offset must be used to start serialization inside
-     *                      the buffer
-     * @param free_chars IN/OUT remaing free chars inside the buffer
-     * @return a reason code
-     */
-    int lixa_msg_serialize_open_16(const struct lixa_msg_s *msg,
-                                   char *buffer,
-                                   size_t *offset, size_t *free_chars);
-
-    
-    
-    /**
-     * Serialize the "open_24" specific body part of a message
-     * @param msg IN the object must be serialized
-     * @param buffer OUT the buffer will contain the XML serialized object
-     *                   (the size has fixed size of
-     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
-     *                   null terminated
-     * @param offset IN/OUT offset must be used to start serialization inside
-     *                      the buffer
-     * @param free_chars IN/OUT remaing free chars inside the buffer
-     * @return a reason code
-     */
-    int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg,
-                                   char *buffer,
-                                   size_t *offset, size_t *free_chars);
-
-    
-    
-    /**
-     * Serialize the "close_8" specific body part of a message
-     * @param msg IN the object must be serialized
-     * @param buffer OUT the buffer will contain the XML serialized object
-     *                   (the size has fixed size of
-     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
-     *                   null terminated
-     * @param offset IN/OUT offset must be used to start serialization inside
-     *                      the buffer
-     * @param free_chars IN/OUT remaing free chars inside the buffer
-     * @return a reason code
-     */
-    int lixa_msg_serialize_close_8(const struct lixa_msg_s *msg,
-                                   char *buffer,
-                                   size_t *offset, size_t *free_chars);
-
-
-    
-    /**
-     * Serialize the "start_8" specific body part of a message
-     * @param msg IN the object must be serialized
-     * @param buffer OUT the buffer will contain the XML serialized object
-     *                   (the size has fixed size of
-     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
-     *                   null terminated
-     * @param offset IN/OUT offset must be used to start serialization inside
-     *                      the buffer
-     * @param free_chars IN/OUT remaing free chars inside the buffer
-     * @return a reason code
-     */
-    int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
-                                   char *buffer,
-                                   size_t *offset, size_t *free_chars);
-
-
-    
-    /**
-     * Serialize the "start_16" specific body part of a message
-     * @param msg IN the object must be serialized
-     * @param buffer OUT the buffer will contain the XML serialized object
-     *                   (the size has fixed size of
-     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
-     *                   null terminated
-     * @param offset IN/OUT offset must be used to start serialization inside
-     *                      the buffer
-     * @param free_chars IN/OUT remaing free chars inside the buffer
-     * @return a reason code
-     */
-    int lixa_msg_serialize_start_16(const struct lixa_msg_s *msg,
-                                    char *buffer,
-                                    size_t *offset, size_t *free_chars);
-
-
-    
-    /**
-     * Serialize the "start_24" specific body part of a message
-     * @param msg IN the object must be serialized
-     * @param buffer OUT the buffer will contain the XML serialized object
-     *                   (the size has fixed size of
-     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
-     *                   null terminated
-     * @param offset IN/OUT offset must be used to start serialization inside
-     *                      the buffer
-     * @param free_chars IN/OUT remaing free chars inside the buffer
-     * @return a reason code
-     */
-    int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
-                                    char *buffer,
-                                    size_t *offset, size_t *free_chars);
-
-
-    
-    /**
-     * Serialize the "end_8" specific body part of a message
-     * @param msg IN the object must be serialized
-     * @param buffer OUT the buffer will contain the XML serialized object
-     *                   (the size has fixed size of
-     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
-     *                   null terminated
-     * @param offset IN/OUT offset must be used to start serialization inside
-     *                      the buffer
-     * @param free_chars IN/OUT remaing free chars inside the buffer
-     * @return a reason code
-     */
-    int lixa_msg_serialize_end_8(const struct lixa_msg_s *msg,
-                                 char *buffer,
-                                 size_t *offset, size_t *free_chars);
-
-
-    
-    /**
-     * Deserialize a buffer containing the XML to a message struct
-     * @param buffer IN/OUT the buffer that's containing the serialized object
-     *                  (it must be null terminated)
-     * @param buffer_len OUT number of significative bytes of buffer
-     * @param msg OUT the object after deserialization
-     * @return a reason code
-     */
-    int lixa_msg_deserialize(char *buffer, size_t buffer_len,
-                             struct lixa_msg_s *msg);
-    
-
-
-    /**
-     * Deserialize an XML subtree containing a default answer message
-     * @param cur IN reference to the XML subtree
-     * @param answer OUT reference to the answer contained in the message
-     * @return a reason code
-     */     
-    int lixa_msg_deserialize_default_answer(
-        xmlNodePtr cur,
-        struct lixa_msg_body_answer_s *answer);
-
-
-    
-    /**
-     * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=open, step=8
-     * @param cur IN pointer to XML subtree
-     * @param msg OUT the object after deserialization
-     * @return a reason code
-     */
-    int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg);
-
-
-
-    /**
-     * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=open, step=16
-     * @param cur IN pointer to XML subtree
-     * @param msg OUT the object after deserialization
-     * @return a reason code
-     */
-    int lixa_msg_deserialize_open_16(xmlNodePtr cur, struct lixa_msg_s *msg);
-
-
-
-    /**
-     * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=open, step=24
-     * @param cur IN pointer to XML subtree
-     * @param msg OUT the object after deserialization
-     * @return a reason code
-     */
-    int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg);
-
-
-
-    /**
-     * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=close, step=8
-     * @param cur IN pointer to XML subtree
-     * @param msg OUT the object after deserialization
-     * @return a reason code
-     */
-    int lixa_msg_deserialize_close_8(xmlNodePtr cur, struct lixa_msg_s *msg);
-
-
-
-    /**
-     * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=start, step=8
-     * @param cur IN pointer to XML subtree
-     * @param msg OUT the object after deserialization
-     * @return a reason code
-     */
-    int lixa_msg_deserialize_start_8(xmlNodePtr cur, struct lixa_msg_s *msg);
-
-
-
-    /**
-     * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=start, step=16
-     * @param cur IN pointer to XML subtree
-     * @param msg OUT the object after deserialization
-     * @return a reason code
-     */
-    int lixa_msg_deserialize_start_16(xmlNodePtr cur, struct lixa_msg_s *msg);
-
-
-
-    /**
-     * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=start, step=24
-     * @param cur IN pointer to XML subtree
-     * @param msg OUT the object after deserialization
-     * @return a reason code
-     */
-    int lixa_msg_deserialize_start_24(xmlNodePtr cur, struct lixa_msg_s *msg);
-
-
-
-    /**
-     * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=end, step=8
-     * @param cur IN pointer to XML subtree
-     * @param msg OUT the object after deserialization
-     * @return a reason code
-     */
-    int lixa_msg_deserialize_end_8(xmlNodePtr cur, struct lixa_msg_s *msg);
-
-
-
-    /**
      * Free all the dynamically allocated strings previously allocated by
      * @ref lixa_msg_deserialize using xmlGetProp method
      * @param msg IN/OUT the message must be massaged
      * @return a reason code
      */
     int lixa_msg_free(struct lixa_msg_s *msg);
-
-
-    
-    /**
-     * Display the content of a previously deserialized message with
-     * @ref lixa_msg_deserialize method
-     * @param msg IN the message must be massaged
-     * @return a reason code
-     */
-    int lixa_msg_trace(const struct lixa_msg_s *msg);
-
-
-
-    /**
-     * Convenience function for @ref lixa_msg_trace : it display the content
-     * of a "close" message
-     * @param msg IN the message must be massaged
-     * @return a reason code
-     */
-    int lixa_msg_trace_close(const struct lixa_msg_s *msg);
-
-
-    
-    /**
-     * Convenience function for @ref lixa_msg_trace : it display the content
-     * of a "open" message
-     * @param msg IN the message must be massaged
-     * @return a reason code
-     */
-    int lixa_msg_trace_open(const struct lixa_msg_s *msg);
-
-
-    
-    /**
-     * Convenience function for @ref lixa_msg_trace : it display the content
-     * of a "start" message
-     * @param msg IN the message must be massaged
-     * @return a reason code
-     */
-    int lixa_msg_trace_start(const struct lixa_msg_s *msg);
-
-
-    
-    /**
-     * Convenience function for @ref lixa_msg_trace : it display the content
-     * of an "end" message
-     * @param msg IN the message must be massaged
-     * @return a reason code
-     */
-    int lixa_msg_trace_end(const struct lixa_msg_s *msg);
 
 
     

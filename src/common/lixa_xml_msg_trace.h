@@ -30,8 +30,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEMPLATE_H
-# define TEMPLATE_H
+#ifndef LIXA_XML_MSG_TRACE_H
+# define LIXA_XML_MSG_TRACE_H
 
 
 
@@ -39,7 +39,7 @@
 
 
 
-#include <lixa_trace.h>
+#include <lixa_xml_msg.h>
 
 
 
@@ -50,7 +50,7 @@
 #else
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_SERVER_REPLY
+#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_COMMON_XML_MSG
 
 
 
@@ -61,56 +61,52 @@ extern "C" {
 
 
     /**
-     * Send the default output message to the client
-     * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
-     * @param lmo IN message will be returned to the client
-     * @return a standardized return code
+     * Display the content of a previously deserialized message with
+     * @ref lixa_msg_deserialize method
+     * @param msg IN the message must be massaged
+     * @return a reason code
      */
-    int server_reply_default(struct thread_status_s *ts, size_t slot_id,
-                             struct lixa_msg_s *lmo);
+    int lixa_msg_trace(const struct lixa_msg_s *msg);
+
+
+
+    /**
+     * Convenience function for @ref lixa_msg_trace : it display the content
+     * of a "close" message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int lixa_msg_trace_close(const struct lixa_msg_s *msg);
 
 
     
     /**
-     * Send the output message related to "open" verb to the client
-     * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
-     * @param lmo IN message will be returned to the client
-     * @param rc IN return code of the previous operations must be returned
-     *              to the client
-     * @return a standardized return code
+     * Convenience function for @ref lixa_msg_trace : it display the content
+     * of a "open" message
+     * @param msg IN the message must be massaged
+     * @return a reason code
      */
-    int server_reply_open(struct thread_status_s *ts, size_t slot_id,
-                          struct lixa_msg_s *lmo, int rc);
+    int lixa_msg_trace_open(const struct lixa_msg_s *msg);
 
 
     
     /**
-     * Send the output message related to "start" verb to the client
-     * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
-     * @param lmo IN message will be returned to the client
-     * @param rc IN return code of the previous operations must be returned
-     *              to the client
-     * @return a standardized return code
+     * Convenience function for @ref lixa_msg_trace : it display the content
+     * of a "start" message
+     * @param msg IN the message must be massaged
+     * @return a reason code
      */
-    int server_reply_start(struct thread_status_s *ts, size_t slot_id,
-                           struct lixa_msg_s *lmo, int rc);
+    int lixa_msg_trace_start(const struct lixa_msg_s *msg);
 
 
     
     /**
-     * Send the output message related to "end" verb to the client
-     * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
-     * @param lmo IN message will be returned to the client
-     * @param rc IN return code of the previous operations must be returned
-     *              to the client
-     * @return a standardized return code
+     * Convenience function for @ref lixa_msg_trace : it display the content
+     * of an "end" message
+     * @param msg IN the message must be massaged
+     * @return a reason code
      */
-    int server_reply_end(struct thread_status_s *ts, size_t slot_id,
-                         struct lixa_msg_s *lmo, int rc);
+    int lixa_msg_trace_end(const struct lixa_msg_s *msg);
 
 
     
@@ -129,4 +125,4 @@ extern "C" {
 
 
 
-#endif /* TEMPLATE_H */
+#endif /* LIXA_XML_MSG_TRACE_H */
