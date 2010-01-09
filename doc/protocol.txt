@@ -133,8 +133,21 @@ verb=4 (xa_end)
 
   client->server message (send if the transaction is committing - commit="1" -
   		 	 or rollbacking - commit="0")
-  <msg level="1" verb="3" step="8">
+  <msg level="1" verb="4" step="8">
     <conthr commit="1"/>
+  </msg>
+
+  server -> client message (answer)
+  <msg level="1" verb="4" step="16">
+    <answer rc="0"/>
+  </msg>
+
+  client -> server message (async assertion)
+  <msg level="1" verb="4" step="24">
+    <xa_end_execs>
+      <xa_end_exec rmid="0" flags="0" rc="0" state="?"/>
+      <xa_end_exec rmid="1" flags="0" rc="0" state="?"/>
+    </xa_end_execs>
   </msg>
 
 
@@ -143,6 +156,5 @@ verb=4,step=8 -->			send commit/rollback
 		<-- verb=4,step=16	synchronize status file
 		    			confirm operation
 verb=4,step=24 -->  			send list of executions of xa_end
-	       				routine (store xa_end results and
-					new states on transaction manager 
-					server)
+	       				routine (store xa_end results)
+

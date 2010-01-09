@@ -1,4 +1,3 @@
-tx_commit development; restart from server_manager_inmsg_proc error
-(the message verb=4,step=8 is not yet handled by the server...)
+tx_commit development; restart from lixa_xa_end compilation error
 
 When server_manager_thread exits, the listener must be aware of this... 

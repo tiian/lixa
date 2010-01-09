@@ -303,8 +303,8 @@ int server_xa_start(struct thread_status_s *ts,
                     struct lixa_msg_s *lmo,
                     uint32_t block_id)
 {
-    enum Exception { SERVER_XA_OPEN_8_ERROR
-                     , SERVER_XA_OPEN_24_ERROR
+    enum Exception { SERVER_XA_START_8_ERROR
+                     , SERVER_XA_START_24_ERROR
                      , INVALID_STEP
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -315,12 +315,12 @@ int server_xa_start(struct thread_status_s *ts,
             case 8:
                 if (LIXA_RC_OK != (ret_cod = server_xa_start_8(
                                        ts, lmi, lmo, block_id)))
-                    THROW(SERVER_XA_OPEN_8_ERROR);
+                    THROW(SERVER_XA_START_8_ERROR);
                 break;
             case 24:
                 if (LIXA_RC_OK != (ret_cod = server_xa_start_24(
                                        ts, lmi, block_id)))
-                    THROW(SERVER_XA_OPEN_24_ERROR);
+                    THROW(SERVER_XA_START_24_ERROR);
                 break;
             default:
                 THROW(INVALID_STEP);
@@ -329,8 +329,8 @@ int server_xa_start(struct thread_status_s *ts,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case SERVER_XA_OPEN_8_ERROR:
-            case SERVER_XA_OPEN_24_ERROR:
+            case SERVER_XA_START_8_ERROR:
+            case SERVER_XA_START_24_ERROR:
                 break;
             case INVALID_STEP:
                 ret_cod = LIXA_RC_INVALID_STATUS;
@@ -476,4 +476,119 @@ int server_xa_start_24(struct thread_status_s *ts,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int server_xa_end(struct thread_status_s *ts,
+                    const struct lixa_msg_s *lmi,
+                    struct lixa_msg_s *lmo,
+                    uint32_t block_id)
+{
+    enum Exception { SERVER_XA_END_8_ERROR
+                     , SERVER_XA_END_24_ERROR
+                     , INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_end\n"));
+    TRY {
+        switch (lmi->header.pvs.step) {
+            case 8:
+                if (LIXA_RC_OK != (ret_cod = server_xa_end_8(
+                                       ts, lmi, lmo, block_id)))
+                    THROW(SERVER_XA_END_8_ERROR);
+                break;
+                /*
+            case 24:
+                if (LIXA_RC_OK != (ret_cod = server_xa_end_24(
+                                       ts, lmi, block_id)))
+                    THROW(SERVER_XA_END_24_ERROR);
+                break;
+                */
+            default:
+                THROW(INVALID_STEP);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case SERVER_XA_END_8_ERROR:
+            case SERVER_XA_END_24_ERROR:
+                break;
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_end/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_xa_end_8(struct thread_status_s *ts,
+                    const struct lixa_msg_s *lmi,
+                    struct lixa_msg_s *lmo,
+                    uint32_t block_id)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_end_8\n"));
+    TRY {
+        uint32_t i;
+        
+        /* store commit/rollback intent */
+        status_record_update(ts->curr_status + block_id, block_id,
+                             ts->updated_records);
+        if (lmi->body.end_8.conthr.commit)
+            ts->curr_status[block_id].sr.data.pld.ph.state.will_commit = TRUE;
+        else
+            ts->curr_status[block_id].sr.data.pld.ph.state.will_rollback = TRUE;
+        
+        /* store next_verb for all the resource managers */
+        for (i=0; i<ts->curr_status[block_id].sr.data.pld.ph.n; ++i) {
+            status_record_t *sr;
+            uint32_t slot;
+            slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
+            LIXA_TRACE(("server_xa_end_8: updating next_verb for resource "
+                        "manager # " UINT32_T_FORMAT "\n", slot));
+            sr = ts->curr_status + slot;
+            /* update the block */
+            status_record_update(ts->curr_status + slot, slot,
+                                 ts->updated_records);
+            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_END;
+        } /* for (i=0; ... */
+
+        /* prepare output message */
+        lmo->header.pvs.verb = lmi->header.pvs.verb;
+        /* prepare next protocol step */
+        ts->client_array[block_id].last_verb_step.verb = lmo->header.pvs.verb;
+        ts->client_array[block_id].last_verb_step.step = lmo->header.pvs.step;
+
+        /* the status file must be synchronized */
+        ts->asked_sync = TRUE;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_end_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
 

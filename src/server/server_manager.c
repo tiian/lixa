@@ -45,7 +45,8 @@
 
 #include <lixa_errors.h>
 #include <lixa_trace.h>
-#include <lixa_xml_msg.h>
+#include <lixa_xml_msg_deserialize.h>
+#include <lixa_xml_msg_trace.h>
 #include <server_manager.h>
 #include <server_messages.h>
 #include <server_reply.h>
@@ -545,6 +546,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
                      , SERVER_XA_OPEN_ERROR
                      , SERVER_XA_CLOSE_ERROR
                      , SERVER_XA_START_ERROR
+                     , SERVER_XA_END_ERROR
                      , INVALID_VERB
                      , STORE_VERB_STEP_ERROR
                      , LIXA_MSG_FREE_ERROR
@@ -594,6 +596,11 @@ int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
                                        ts, &lmi, lmo, block_id)))
                     THROW(SERVER_XA_START_ERROR)
                 break;
+            case LIXA_MSG_VERB_END:
+                if (LIXA_RC_OK != (ret_cod = server_xa_end(
+                                       ts, &lmi, lmo, block_id)))
+                    THROW(SERVER_XA_END_ERROR)
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -616,6 +623,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
             case SERVER_XA_OPEN_ERROR:
             case SERVER_XA_CLOSE_ERROR:
             case SERVER_XA_START_ERROR:
+            case SERVER_XA_END_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INVALID_STATUS;
@@ -645,6 +653,7 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
                      , VERB_NOT_FOUND
                      , REPLY_OPEN_ERROR
                      , REPLY_START_ERROR
+                     , REPLY_END_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -675,6 +684,11 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
                                        ts, slot_id, lmo, rc)))
                     THROW(REPLY_START_ERROR);
                 break;
+            case LIXA_MSG_VERB_END:
+                if (LIXA_RC_OK != (ret_cod = server_reply_end(
+                                       ts, slot_id, lmo, rc)))
+                    THROW(REPLY_END_ERROR);
+                break;
             default:
                 THROW(VERB_NOT_FOUND);
         } /* switch (lmo.header.pvs.verb) */
@@ -692,8 +706,8 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case REPLY_OPEN_ERROR:
-                break;
             case REPLY_START_ERROR:
+            case REPLY_END_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

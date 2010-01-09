@@ -35,7 +35,7 @@
 
 
 #include <lixa_errors.h>
-#include <lixa_xml_msg.h>
+#include <lixa_xml_msg_serialize.h>
 #include <server_status.h>
 
 
@@ -155,6 +155,38 @@ int server_reply_start(struct thread_status_s *ts, size_t slot_id,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_reply_start/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_reply_end(struct thread_status_s *ts, size_t slot_id,
+                     struct lixa_msg_s *lmo, int rc)
+{
+    enum Exception { REPLY_DEFAULT_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_reply_end\n"));
+    TRY {
+        lmo->body.end_16.answer.rc = rc;
+        if (LIXA_RC_OK != (ret_cod = server_reply_default(ts, slot_id, lmo)))
+            THROW(REPLY_DEFAULT_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case REPLY_DEFAULT_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_reply_end/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

@@ -173,6 +173,18 @@ struct common_status_conthr_s {
      * Transaction ID
      */
     XID   xid;
+    /**
+     * Boolean value: 
+     * the Application Program called @ref tx_commit and the current status
+     * is moving to resource commit
+     */
+    int   will_commit;
+    /**
+     * Boolean value:
+     * the Application Program called @ref tx_rollback and the current status
+     * is moving to resource commit
+     */
+    int   will_rollback;
 };
 
 
@@ -229,6 +241,8 @@ extern "C" {
         struct common_status_conthr_s *csc) {
         csc->txstate = TX_STATE_S0;
         memset(&csc->xid, 0, sizeof(XID));
+        csc->will_commit = FALSE;
+        csc->will_rollback = FALSE;
         return;
     }
 
