@@ -261,6 +261,8 @@ int lixa_tx_commit(int *txrc)
                      , COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
                      , INVALID_STATUS
+                     , XA_END_ERROR
+                     , XA_PREPARE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -271,6 +273,7 @@ int lixa_tx_commit(int *txrc)
     TRY {
         int txstate, next_txstate;
         client_status_t *cs;
+        int rwrm = 0;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -299,10 +302,16 @@ int lixa_tx_commit(int *txrc)
         }
         LIXA_TRACE(("lixa_tx_commit: txstate = S%d\n", txstate));
 
-        ret_cod = lixa_xa_end(cs, txrc, TRUE);
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, TRUE, &rwrm)))
+            THROW(XA_END_ERROR);
 
-        /* @@@ restart from here */
+        /* bypass prepare if there is only one resource manager */
+        if (rwrm > 1) {
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_prepare(cs, txrc)))
+                THROW(XA_PREPARE_ERROR);
+        }
         
+        /* @@@ restart from here */
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -319,7 +328,11 @@ int lixa_tx_commit(int *txrc)
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
+            case XA_END_ERROR:
+            case XA_PREPARE_ERROR:
+                break;
             case NONE:
+                *txrc = TX_OK;
                 ret_cod = LIXA_RC_OK;
                 break;
             default:

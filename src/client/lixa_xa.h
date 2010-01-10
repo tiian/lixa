@@ -74,13 +74,14 @@ extern "C" {
     /**
      * End work performed ohn behalf of the transaction manager
      * @param cs IN reference to the status of the calling client
-     * @param txrc OUT return code prepared for tx_close call
+     * @param txrc OUT return code prepared for tx_commit/tx_rollback call
      * @param commit IN boolean value:
      *                  TRUE = xa_end will be followed by xa_commit
      *                  FALSE = xa_end will be followed by xa_rollback
+     * @param rwrm OUT number of resource manager with read/write transaction
      * @return a reason code
      */
-    int lixa_xa_end(client_status_t *cs, int *txrc, int commit);
+    int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int *rwrm);
     
     
     
@@ -96,6 +97,16 @@ extern "C" {
     
     
 
+    /**
+     * End work performed ohn behalf of the transaction manager
+     * @param cs IN reference to the status of the calling client
+     * @param txrc OUT return code prepared for tx_commit/tx_rollback call
+     * @return a reason code
+     */
+    int lixa_xa_prepare(client_status_t *cs, int *txrc);
+    
+    
+    
     /**
      * Send xa_start to all the resource manager does not support dynamic
      * registration
