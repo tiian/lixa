@@ -184,6 +184,17 @@ extern "C" {
 
 
 
+    /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=end, step=24
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_end_24(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
