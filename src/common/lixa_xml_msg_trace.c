@@ -230,12 +230,12 @@ int lixa_msg_trace_open(const struct lixa_msg_s *msg)
                                     "xa_open_execs["
                                     "xa_open_exec["
                                     "xa_info='%s',rmid=%d,flags=0x%lx,"
-                                    "rc=%d,state=%d]]]\n",
+                                    "rc=%d,r_state=%d]]]\n",
                                     (char *)xa_open_exec->xa_info,
                                     xa_open_exec->rmid,
                                     xa_open_exec->flags,
                                     xa_open_exec->rc,
-                                    xa_open_exec->state));
+                                    xa_open_exec->r_state));
                     }
                 }
                 break;
@@ -318,11 +318,11 @@ int lixa_msg_trace_start(const struct lixa_msg_s *msg)
                                     "xa_start_execs["
                                     "xa_start_exec["
                                     "rmid=%d,flags=0x%lx,"
-                                    "rc=%d,state=%d]]]\n",
+                                    "rc=%d,t_state=%d]]]\n",
                                     xa_start_exec->rmid,
                                     xa_start_exec->flags,
                                     xa_start_exec->rc,
-                                    xa_start_exec->state));
+                                    xa_start_exec->t_state));
                     }
                 }
                 break;
@@ -384,11 +384,12 @@ int lixa_msg_trace_end(const struct lixa_msg_s *msg)
                                     "xa_end_execs["
                                     "xa_end_exec["
                                     "rmid=%d,flags=0x%lx,"
-                                    "rc=%d,state=%d]]]\n",
+                                    "rc=%d,s_state=%d,t_state=%d]]]\n",
                                     xa_end_exec->rmid,
                                     xa_end_exec->flags,
                                     xa_end_exec->rc,
-                                    xa_end_exec->state));
+                                    xa_end_exec->s_state,
+                                    xa_end_exec->t_state));
                     }
                 }
                 break;

@@ -149,6 +149,18 @@ extern const xmlChar *LIXA_XML_MSG_PROP_RC;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_RMID;
 /**
+ * Label used to specify "r_state" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_R_STATE;
+/**
+ * Label used to specify "s_state" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_S_STATE;
+/**
+ * Label used to specify "t_state" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_T_STATE;
+/**
  * Label used to specify "state" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_STATE;
@@ -349,9 +361,9 @@ struct lixa_msg_body_open_24_xa_open_execs_s {
      */
     int             rc;
     /**
-     * the new state associated to the resource manager after xa_open execution
+     * the new resource manager state after xa_open execution
      */
-    int             state;
+    int             r_state;
 };
 
 
@@ -467,9 +479,10 @@ struct lixa_msg_body_start_24_xa_start_execs_s {
      */
     int             rc;
     /**
-     * the new state associated to the resource manager after xa_start execution
+     * the new transaction branch association state associated to the resource
+     * manager after xa_end execution
      */
-    int             state;
+    int             t_state;
 };
 
 
@@ -540,9 +553,15 @@ struct lixa_msg_body_end_24_xa_end_execs_s {
      */
     int             rc;
     /**
-     * the new state associated to the resource manager after xa_end execution
+     * the new transaction branch association state associated to the resource
+     * manager after xa_end execution
      */
-    int             state;
+    int             t_state;
+    /**
+     * the new transaction branch state associated to the resource
+     * manager after xa_end execution
+     */
+    int             s_state;
 };
 
 

@@ -1,4 +1,3 @@
-tx_commit development; restart from server_manager_inmsg_proc 
-it does not yet handle verb=4,step=24
+tx_commit development; restart from lixa_tx_commit
 
 When server_manager_thread exits, the listener must be aware of this... 
