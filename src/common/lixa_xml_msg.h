@@ -88,31 +88,35 @@
  * Current protocol level; it's used to recognize incompatible client/server
  * configuration at run-time
  */
-#define LIXA_MSG_LEVEL        0
+#define LIXA_MSG_LEVEL          0
 /**
  * Id reserved for a null message
  */
-#define LIXA_MSG_VERB_NULL    0
+#define LIXA_MSG_VERB_NULL      0
 /**
  * Id assigned to verb "open"
  */
-#define LIXA_MSG_VERB_OPEN    1
+#define LIXA_MSG_VERB_OPEN      1
 /**
  * Id assigned to verb "open"
  */
-#define LIXA_MSG_VERB_CLOSE   2
+#define LIXA_MSG_VERB_CLOSE     2
 /**
  * Id assigned to verb "start"
  */
-#define LIXA_MSG_VERB_START   3
+#define LIXA_MSG_VERB_START     3
 /**
  * Id assigned to verb "end"
  */
-#define LIXA_MSG_VERB_END     4
+#define LIXA_MSG_VERB_END       4
+/**
+ * Id assigned to verb "prepare"
+ */
+#define LIXA_MSG_VERB_PREPARE   5
 /**
  * Default increment for message step
  */
-#define LIXA_MSG_STEP_INCR    8
+#define LIXA_MSG_STEP_INCR      8
 
 
 
@@ -579,6 +583,67 @@ struct lixa_msg_body_end_24_s {
 
 
 /**
+ * Control thread status
+ */
+struct lixa_msg_body_prepare_8_conthr_s {
+    /**
+     * TRUE = commit
+     * FALSE = rollback
+     */
+    int   commit;
+};
+
+
+
+/**
+ * Convenience struct for @ref lixa_msg_body_prepare_8_s
+ * xid is not stored in this structure because it was already stored by the
+ * server after receiving step 8 message, see @ref lixa_msg_body_prepare_8_s
+ */
+struct lixa_msg_body_prepare_8_xa_prepare_execs_s {
+    /**
+     * rmid parameter as passed to xa_prepare routine
+     */
+    int             rmid;
+    /**
+     * flags parameter as passed to xa_prepare routine
+     */
+    long            flags;
+    /**
+     * return code of xa_prepare routine
+     */
+    int             rc;
+    /**
+     * the new transaction branch state associated to the resource
+     * manager after xa_prepare execution
+     */
+    int             s_state;
+    /**
+     * the new resource manager state associated to the resource
+     * manager after xa_prepare execution
+     */
+    int             r_state;
+};
+
+
+
+/**
+ * Message body for verb "prepare", step "8"
+ */
+struct lixa_msg_body_prepare_8_s {
+    /**
+     * Control thread information
+     */
+    struct lixa_msg_body_prepare_8_conthr_s   conthr;
+    /**
+     * Parameters and return value of xa_prepare executions
+     */
+    GArray                                   *xa_prepare_execs;
+};
+
+
+
+/**
  * This structure maps the messages flowing between LIXA client (lixac) and
  * LIXA server (lixad). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
@@ -603,6 +668,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_end_8_s           end_8;
         struct lixa_msg_body_end_16_s          end_16;
         struct lixa_msg_body_end_24_s          end_24;
+        struct lixa_msg_body_prepare_8_s       prepare_8;
     } body;
 };
 

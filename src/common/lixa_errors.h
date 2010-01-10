@@ -182,6 +182,15 @@
 #define LIXA_RC_UNSUPPORTED_OPTION             -22
 
 /**
+ * Generic error for an TX error (an TX return code not equal TX_OK)
+ */
+#define LIXA_RC_TX_ERROR                       -98
+/**
+ * Generic error for an XA error (an XA return code not equal XA_OK)
+ */
+#define LIXA_RC_XA_ERROR                       -99
+
+/**
  * "malloc" function error
  */
 #define LIXA_RC_MALLOC_ERROR                  -100
