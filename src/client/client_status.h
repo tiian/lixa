@@ -253,7 +253,7 @@ extern "C" {
      * @param cs IN object reference
      * @return a reference to the transaction ID
      */
-    static inline const XID *client_status_get_xid(const client_status_t *cs) {
+    static inline XID *client_status_get_xid(client_status_t *cs) {
         return &cs->state.xid; }
 
 

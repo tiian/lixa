@@ -73,9 +73,10 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                      , SERIALIZE_START_8_ERROR
                      , SERIALIZE_START_16_ERROR
                      , SERIALIZE_START_24_ERROR
+                     , INVALID_START_STEP
                      , SERIALIZE_END_8_ERROR
                      , SERIALIZE_END_16_ERROR
-                     , INVALID_START_STEP
+                     , SERIALIZE_END_24_ERROR
                      , INVALID_END_STEP
                      , INVALID_VERB
                      , BUFFER_TOO_SHORT3
@@ -198,7 +199,6 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_END_16_ERROR);
                         break;
-                        /*
                     case 24:
                         if (LIXA_RC_OK != (
                                 ret_cod =
@@ -206,7 +206,6 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_END_24_ERROR);
                         break;
-                        */
                     default:
                         THROW(INVALID_END_STEP);
                 }
@@ -246,6 +245,7 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
             case SERIALIZE_START_24_ERROR:
             case SERIALIZE_END_8_ERROR:
             case SERIALIZE_END_16_ERROR:
+            case SERIALIZE_END_24_ERROR:
                 break;
             case INVALID_OPEN_STEP:
             case INVALID_CLOSE_STEP:
@@ -440,7 +440,7 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
                 msg->body.open_24.xa_open_execs,
                 struct lixa_msg_body_open_24_xa_open_execs_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
-                                  "<%s %s=\"%s\" %s=\"%d\" %s=\"%ld\" "
+                                  "<%s %s=\"%s\" %s=\"%d\" %s=\"0x%lx\" "
                                   "%s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_XA_OPEN_EXEC,
                                   LIXA_XML_MSG_PROP_XA_INFO,
@@ -736,7 +736,7 @@ int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
                 msg->body.start_24.xa_start_execs,
                 struct lixa_msg_body_start_24_xa_start_execs_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
-                                  "<%s %s=\"%d\" %s=\"%ld\" "
+                                  "<%s %s=\"%d\" %s=\"0x%lx\" "
                                   "%s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_XA_START_EXEC,
                                   LIXA_XML_MSG_PROP_RMID,
@@ -864,6 +864,85 @@ int lixa_msg_serialize_end_16(const struct lixa_msg_s *msg,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_end_16/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_serialize_end_24(const struct lixa_msg_s *msg,
+                              char *buffer,
+                              size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT1
+                     , BUFFER_TOO_SHORT2
+                     , BUFFER_TOO_SHORT3
+                     , BUFFER_TOO_SHORT4
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_serialize_end_24\n"));
+    TRY {
+        int used_chars;
+        guint i;
+        
+        /* <xa_end_execs> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s>",
+                              LIXA_XML_MSG_TAG_XA_END_EXECS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT2);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        /* <xa_end_exec> */
+        for (i=0; i<msg->body.end_24.xa_end_execs->len; ++i) {
+            struct lixa_msg_body_end_24_xa_end_execs_s *xa_end_exec;
+            xa_end_exec = &g_array_index(
+                msg->body.end_24.xa_end_execs,
+                struct lixa_msg_body_end_24_xa_end_execs_s, i);
+            used_chars = snprintf(buffer + *offset, *free_chars,
+                                  "<%s %s=\"%d\" %s=\"0x%lx\" "
+                                  "%s=\"%d\" %s=\"%d\"/>",
+                                  LIXA_XML_MSG_TAG_XA_END_EXEC,
+                                  LIXA_XML_MSG_PROP_RMID,
+                                  xa_end_exec->rmid,
+                                  LIXA_XML_MSG_PROP_FLAGS,
+                                  xa_end_exec->flags,
+                                  LIXA_XML_MSG_PROP_RC,
+                                  xa_end_exec->rc,
+                                  LIXA_XML_MSG_PROP_STATE,
+                                  xa_end_exec->state);
+            if (used_chars >= *free_chars)
+                THROW(BUFFER_TOO_SHORT3);
+            *free_chars -= used_chars;
+            *offset += used_chars;
+        }
+        /* </xa_end_execs> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "</%s>",
+                              LIXA_XML_MSG_TAG_XA_END_EXECS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT4);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT1:
+            case BUFFER_TOO_SHORT2:
+            case BUFFER_TOO_SHORT3:
+            case BUFFER_TOO_SHORT4:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_serialize_end_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

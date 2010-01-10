@@ -76,7 +76,7 @@
  * max fixed size, only an initial size to avoid reallocation for 1, 2 & 3
  * configured resource managers
  */
-#define LIXA_MSG_XML_START_RSRMGRS  3
+#define LIXA_MSG_XML_DEFAULT_RSRMGRS  3
 /**
  * Number of digits prefix an XML message
  */
@@ -196,6 +196,14 @@ extern const xmlChar *LIXA_XML_MSG_TAG_RSRMGR;
  * Label used to specify "rsrmgrs" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_RSRMGRS;
+/**
+ * Label used to specify "xa_end_exec" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_XA_END_EXEC;
+/**
+ * Label used to specify "xa_end_execs" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_XA_END_EXECS;
 /**
  * Label used to specify "xa_open_exec" tag
  */

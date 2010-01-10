@@ -259,7 +259,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
             record.rmid = i;
             record.flags = xa_end_flags;
             record.rc = rc = act_rsrmgr->xa_switch->xa_end_entry(
-                xid, record.rmid, record.flags);
+                client_status_get_xid(cs), record.rmid, record.flags);
             LIXA_TRACE(("lixa_xa_end: xa_end_entry(xid, %d, %ld) = %d\n",
                         record.rmid, record.flags, record.rc));
 
