@@ -71,7 +71,6 @@ int lixa_tx_begin(int *txrc)
                      , LIXA_XA_START_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int tmp_txrc = TX_OK;
     
     *txrc = TX_FAIL;
     
@@ -144,7 +143,6 @@ int lixa_tx_begin(int *txrc)
             case LIXA_XA_START_ERROR:
                 break;
             case NONE:
-                *txrc = tmp_txrc;
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
@@ -302,6 +300,8 @@ int lixa_tx_commit(int *txrc)
         LIXA_TRACE(("lixa_tx_commit: txstate = S%d\n", txstate));
 
         ret_cod = lixa_xa_end(cs, txrc, TRUE);
+
+        /* @@@ restart from here */
         
         THROW(NONE);
     } CATCH {

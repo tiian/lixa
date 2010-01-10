@@ -413,12 +413,17 @@ char *argv[];
       }  /* end for (;;) */
 
       /* Commit the change. */
+      /* Original Oracle code
       if (status = OCITransCommit(svchp, errhp, 0))
+      */
+      /* LIXA adaptation */
+      if (TX_OK != tx_commit())
       {
         checkerr(errhp, status);
         cleanup();
         return OCI_ERROR;
       }
+
       printf("\n\n%s added to the %s department as employee number %d\n",
                  ename, dept, empno);
   }

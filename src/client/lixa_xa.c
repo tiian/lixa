@@ -317,7 +317,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
-            record.state = csr->xa_t_state;
+            record.s_state = csr->xa_s_state;
+            record.t_state = csr->xa_t_state;
             g_array_append_val(msg.body.end_24.xa_end_execs, record);
         } /* for (i=0; ...) */
         
@@ -530,7 +531,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
-            record.state = csr->xa_r_state;
+            record.r_state = csr->xa_r_state;
             g_array_append_val(msg.body.open_24.xa_open_execs, record);
         } /* for (i=0; ...) */
         
@@ -727,7 +728,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
-            record.state = csr->xa_t_state;
+            record.t_state = csr->xa_t_state;
             g_array_append_val(msg.body.start_24.xa_start_execs, record);
         } /* for (i=0; ...) */
         

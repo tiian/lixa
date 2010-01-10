@@ -72,6 +72,9 @@ const xmlChar *LIXA_XML_MSG_PROP_NAME =          (xmlChar *)"name";
 const xmlChar *LIXA_XML_MSG_PROP_PROFILE =       (xmlChar *)"profile";
 const xmlChar *LIXA_XML_MSG_PROP_RC =            (xmlChar *)"rc";
 const xmlChar *LIXA_XML_MSG_PROP_RMID =          (xmlChar *)"rmid";
+const xmlChar *LIXA_XML_MSG_PROP_R_STATE =       (xmlChar *)"r_state";
+const xmlChar *LIXA_XML_MSG_PROP_S_STATE =       (xmlChar *)"s_state";
+const xmlChar *LIXA_XML_MSG_PROP_T_STATE =       (xmlChar *)"t_state";
 const xmlChar *LIXA_XML_MSG_PROP_STATE =         (xmlChar *)"state";
 const xmlChar *LIXA_XML_MSG_PROP_STEP =          (xmlChar *)"step";
 const xmlChar *LIXA_XML_MSG_PROP_VERB =          (xmlChar *)"verb";
@@ -257,12 +260,10 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                 switch (msg->header.pvs.step) {
                     case 8: /* nothing to do */
                         break;
-                        /*
                     case 24:
                         g_array_free(msg->body.end_24.xa_end_execs, TRUE);
                         msg->body.end_24.xa_end_execs = NULL;
                         break;
-                        */
                     default:
                         THROW(INVALID_STEP4);
                 }
