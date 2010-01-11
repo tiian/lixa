@@ -229,6 +229,14 @@ extern const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXEC;
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXECS;
 /**
+ * Label used to specify "xa_prepare_exec" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_XA_PREPARE_EXEC;
+/**
+ * Label used to specify "xa_prepare_execs" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_XA_PREPARE_EXECS;
+/**
  * Label used to specify "xa_start_exec" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_XA_START_EXEC;
@@ -619,10 +627,10 @@ struct lixa_msg_body_prepare_8_xa_prepare_execs_s {
      */
     int             s_state;
     /**
-     * the new resource manager state associated to the resource
-     * manager after xa_prepare execution
+     * the new transaction branch association state associated to the resource
+     * manager after xa_end execution
      */
-    int             r_state;
+    int             t_state;
 };
 
 
@@ -639,6 +647,15 @@ struct lixa_msg_body_prepare_8_s {
      * Parameters and return value of xa_prepare executions
      */
     GArray                                   *xa_prepare_execs;
+};
+
+
+
+/**
+ * Message body for verb "prepare", step "16"
+ */
+struct lixa_msg_body_prepare_16_s {
+    struct lixa_msg_body_answer_s   answer;
 };
 
 
@@ -669,6 +686,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_end_16_s          end_16;
         struct lixa_msg_body_end_24_s          end_24;
         struct lixa_msg_body_prepare_8_s       prepare_8;
+        struct lixa_msg_body_prepare_16_s      prepare_16;
     } body;
 };
 

@@ -64,35 +64,37 @@
 
 
 
-const xmlChar *LIXA_XML_MSG_HEADER =             (xmlChar *)"<?xml";
-const xmlChar *LIXA_XML_MSG_PROP_COMMIT =        (xmlChar *)"commit";
-const xmlChar *LIXA_XML_MSG_PROP_FLAGS =         (xmlChar *)"flags";
-const xmlChar *LIXA_XML_MSG_PROP_LEVEL =         (xmlChar *)"level";
-const xmlChar *LIXA_XML_MSG_PROP_NAME =          (xmlChar *)"name";
-const xmlChar *LIXA_XML_MSG_PROP_PROFILE =       (xmlChar *)"profile";
-const xmlChar *LIXA_XML_MSG_PROP_RC =            (xmlChar *)"rc";
-const xmlChar *LIXA_XML_MSG_PROP_RMID =          (xmlChar *)"rmid";
-const xmlChar *LIXA_XML_MSG_PROP_R_STATE =       (xmlChar *)"r_state";
-const xmlChar *LIXA_XML_MSG_PROP_S_STATE =       (xmlChar *)"s_state";
-const xmlChar *LIXA_XML_MSG_PROP_T_STATE =       (xmlChar *)"t_state";
-const xmlChar *LIXA_XML_MSG_PROP_STATE =         (xmlChar *)"state";
-const xmlChar *LIXA_XML_MSG_PROP_STEP =          (xmlChar *)"step";
-const xmlChar *LIXA_XML_MSG_PROP_VERB =          (xmlChar *)"verb";
-const xmlChar *LIXA_XML_MSG_PROP_XA_INFO =       (xmlChar *)"xa_info";
-const xmlChar *LIXA_XML_MSG_PROP_XA_NAME =       (xmlChar *)"xa_name";
-const xmlChar *LIXA_XML_MSG_PROP_XID =           (xmlChar *)"xid";
-const xmlChar *LIXA_XML_MSG_TAG_ANSWER =         (xmlChar *)"answer";
-const xmlChar *LIXA_XML_MSG_TAG_CLIENT =         (xmlChar *)"client";
-const xmlChar *LIXA_XML_MSG_TAG_CONTHR =         (xmlChar *)"conthr";
-const xmlChar *LIXA_XML_MSG_TAG_MSG =            (xmlChar *)"msg";
-const xmlChar *LIXA_XML_MSG_TAG_RSRMGR =         (xmlChar *)"rsrmgr";
-const xmlChar *LIXA_XML_MSG_TAG_RSRMGRS =        (xmlChar *)"rsrmgrs";
-const xmlChar *LIXA_XML_MSG_TAG_XA_END_EXEC =   (xmlChar *)"xa_end_exec";
-const xmlChar *LIXA_XML_MSG_TAG_XA_END_EXECS =  (xmlChar *)"xa_end_execs";
-const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXEC =   (xmlChar *)"xa_open_exec";
-const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXECS =  (xmlChar *)"xa_open_execs";
-const xmlChar *LIXA_XML_MSG_TAG_XA_START_EXEC =  (xmlChar *)"xa_start_exec";
-const xmlChar *LIXA_XML_MSG_TAG_XA_START_EXECS = (xmlChar *)"xa_start_execs";
+const xmlChar *LIXA_XML_MSG_HEADER =               (xmlChar *)"<?xml";
+const xmlChar *LIXA_XML_MSG_PROP_COMMIT =          (xmlChar *)"commit";
+const xmlChar *LIXA_XML_MSG_PROP_FLAGS =           (xmlChar *)"flags";
+const xmlChar *LIXA_XML_MSG_PROP_LEVEL =           (xmlChar *)"level";
+const xmlChar *LIXA_XML_MSG_PROP_NAME =            (xmlChar *)"name";
+const xmlChar *LIXA_XML_MSG_PROP_PROFILE =         (xmlChar *)"profile";
+const xmlChar *LIXA_XML_MSG_PROP_RC =              (xmlChar *)"rc";
+const xmlChar *LIXA_XML_MSG_PROP_RMID =            (xmlChar *)"rmid";
+const xmlChar *LIXA_XML_MSG_PROP_R_STATE =         (xmlChar *)"r_state";
+const xmlChar *LIXA_XML_MSG_PROP_S_STATE =         (xmlChar *)"s_state";
+const xmlChar *LIXA_XML_MSG_PROP_T_STATE =         (xmlChar *)"t_state";
+const xmlChar *LIXA_XML_MSG_PROP_STATE =           (xmlChar *)"state";
+const xmlChar *LIXA_XML_MSG_PROP_STEP =            (xmlChar *)"step";
+const xmlChar *LIXA_XML_MSG_PROP_VERB =            (xmlChar *)"verb";
+const xmlChar *LIXA_XML_MSG_PROP_XA_INFO =         (xmlChar *)"xa_info";
+const xmlChar *LIXA_XML_MSG_PROP_XA_NAME =         (xmlChar *)"xa_name";
+const xmlChar *LIXA_XML_MSG_PROP_XID =             (xmlChar *)"xid";
+const xmlChar *LIXA_XML_MSG_TAG_ANSWER =           (xmlChar *)"answer";
+const xmlChar *LIXA_XML_MSG_TAG_CLIENT =           (xmlChar *)"client";
+const xmlChar *LIXA_XML_MSG_TAG_CONTHR =           (xmlChar *)"conthr";
+const xmlChar *LIXA_XML_MSG_TAG_MSG =              (xmlChar *)"msg";
+const xmlChar *LIXA_XML_MSG_TAG_RSRMGR =           (xmlChar *)"rsrmgr";
+const xmlChar *LIXA_XML_MSG_TAG_RSRMGRS =          (xmlChar *)"rsrmgrs";
+const xmlChar *LIXA_XML_MSG_TAG_XA_END_EXEC =      (xmlChar *)"xa_end_exec";
+const xmlChar *LIXA_XML_MSG_TAG_XA_END_EXECS =     (xmlChar *)"xa_end_execs";
+const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXEC =     (xmlChar *)"xa_open_exec";
+const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXECS =    (xmlChar *)"xa_open_execs";
+const xmlChar *LIXA_XML_MSG_TAG_XA_PREPARE_EXEC =  (xmlChar *)"xa_prepare_exec";
+const xmlChar *LIXA_XML_MSG_TAG_XA_PREPARE_EXECS = (xmlChar *)"xa_prepare_execs";
+const xmlChar *LIXA_XML_MSG_TAG_XA_START_EXEC =    (xmlChar *)"xa_start_exec";
+const xmlChar *LIXA_XML_MSG_TAG_XA_START_EXECS =   (xmlChar *)"xa_start_execs";
 
 
 
@@ -190,6 +192,7 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                      , INVALID_STEP2
                      , INVALID_STEP3
                      , INVALID_STEP4
+                     , INVALID_STEP5
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -268,6 +271,17 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                         THROW(INVALID_STEP4);
                 }
                 break;
+            case LIXA_MSG_VERB_PREPARE: /* prepare */
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        g_array_free(msg->body.prepare_8.xa_prepare_execs,
+                                     TRUE);
+                        msg->body.prepare_8.xa_prepare_execs = NULL;
+                        break;
+                    default:
+                        THROW(INVALID_STEP5);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -279,6 +293,7 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case INVALID_STEP2:
             case INVALID_STEP3:
             case INVALID_STEP4:
+            case INVALID_STEP5:
             case INVALID_VERB:
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
                 break;

@@ -271,7 +271,7 @@ int lixa_tx_commit(int *txrc)
     LIXA_TRACE_INIT;    
     LIXA_TRACE(("lixa_tx_commit\n"));
     TRY {
-        int txstate, next_txstate;
+        int txstate, commit = TRUE;
         client_status_t *cs;
         int rwrm = 0;
         
@@ -307,7 +307,7 @@ int lixa_tx_commit(int *txrc)
 
         /* bypass prepare if there is only one resource manager */
         if (rwrm > 1) {
-            if (LIXA_RC_OK != (ret_cod = lixa_xa_prepare(cs, txrc)))
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_prepare(cs, txrc, &commit)))
                 THROW(XA_PREPARE_ERROR);
         }
         

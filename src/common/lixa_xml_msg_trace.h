@@ -82,6 +82,16 @@ extern "C" {
     
     /**
      * Convenience function for @ref lixa_msg_trace : it display the content
+     * of an "end" message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int lixa_msg_trace_end(const struct lixa_msg_s *msg);
+
+
+    
+    /**
+     * Convenience function for @ref lixa_msg_trace : it display the content
      * of a "open" message
      * @param msg IN the message must be massaged
      * @return a reason code
@@ -92,21 +102,21 @@ extern "C" {
     
     /**
      * Convenience function for @ref lixa_msg_trace : it display the content
-     * of a "start" message
+     * of a "prepare" message
      * @param msg IN the message must be massaged
      * @return a reason code
      */
-    int lixa_msg_trace_start(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_prepare(const struct lixa_msg_s *msg);
 
 
     
     /**
      * Convenience function for @ref lixa_msg_trace : it display the content
-     * of an "end" message
+     * of a "start" message
      * @param msg IN the message must be massaged
      * @return a reason code
      */
-    int lixa_msg_trace_end(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_start(const struct lixa_msg_s *msg);
 
 
     

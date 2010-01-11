@@ -326,6 +326,14 @@ struct payload_rsrmgr_s {
      * rc value as returned from xa_end
      */
     int                             xa_end_rc;
+    /**
+     * flags value as passed to xa_prepare
+     */
+    long                            xa_prepare_flags;
+    /**
+     * rc value as returned from xa_prepare
+     */
+    int                             xa_prepare_rc;
 };
 
 

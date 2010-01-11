@@ -77,6 +77,54 @@ extern "C" {
     
 
     /**
+     * Executes the logic related to "xa_end" on the server side
+     * @param ts IN/OUT a reference to the current thread status
+     * @param lmi IN a reference to the message received from the client
+     * @param lmo OUT a reference to the message must be sent to the client
+     * @param block_id IN position of the block is storing the status of the
+     *                    client is calling the server
+     * @return a reason code
+     */
+    int server_xa_end(struct thread_status_s *ts,
+                      const struct lixa_msg_s *lmi,
+                      struct lixa_msg_s *lmo,
+                      uint32_t block_id);
+
+    
+
+    /**
+     * Executes the logic related to the first step of "xa_end" on the
+     * server side
+     * @param ts IN/OUT a reference to the current thread status
+     * @param lmi IN a reference to the message received from the client
+     * @param lmo OUT a reference to the message must be sent to the client
+     * @param block_id IN position of the block is storing the status of the
+     *                    client is calling the server
+     * @return a reason code
+     */
+    int server_xa_end_8(struct thread_status_s *ts,
+                        const struct lixa_msg_s *lmi,
+                        struct lixa_msg_s *lmo,
+                        uint32_t block_id);
+
+    
+
+    /**
+     * Executes the logic related to the third step of "xa_end" on the server
+     * side
+     * @param ts IN/OUT a reference to the current thread status
+     * @param lmi IN a reference to the message received from the client
+     * @param block_id IN position of the block is storing the status of the
+     *                    client is calling the server
+     * @return a reason code
+     */
+    int server_xa_end_24(struct thread_status_s *ts,
+                         const struct lixa_msg_s *lmi,
+                         uint32_t block_id);
+
+    
+    
+    /**
      * Executes the logic related to "xa_open" on the server side
      * @param ts IN/OUT a reference to the current thread status
      * @param lmi IN a reference to the message received from the client
@@ -121,6 +169,39 @@ extern "C" {
     int server_xa_open_24(struct thread_status_s *ts,
                           const struct lixa_msg_s *lmi,
                           uint32_t block_id);
+
+    
+
+    /**
+     * Executes the logic related to "xa_prepare" on the server side
+     * @param ts IN/OUT a reference to the current thread status
+     * @param lmi IN a reference to the message received from the client
+     * @param lmo OUT a reference to the message must be sent to the client
+     * @param block_id IN position of the block is storing the status of the
+     *                    client is calling the server
+     * @return a reason code
+     */
+    int server_xa_prepare(struct thread_status_s *ts,
+                          const struct lixa_msg_s *lmi,
+                          struct lixa_msg_s *lmo,
+                          uint32_t block_id);
+
+    
+
+    /**
+     * Executes the logic related to the first step of "xa_prepare" on the
+     * server side
+     * @param ts IN/OUT a reference to the current thread status
+     * @param lmi IN a reference to the message received from the client
+     * @param lmo OUT a reference to the message must be sent to the client
+     * @param block_id IN position of the block is storing the status of the
+     *                    client is calling the server
+     * @return a reason code
+     */
+    int server_xa_prepare_8(struct thread_status_s *ts,
+                            const struct lixa_msg_s *lmi,
+                            struct lixa_msg_s *lmo,
+                            uint32_t block_id);
 
     
 
@@ -172,54 +253,6 @@ extern "C" {
 
     
 
-    /**
-     * Executes the logic related to "xa_end" on the server side
-     * @param ts IN/OUT a reference to the current thread status
-     * @param lmi IN a reference to the message received from the client
-     * @param lmo OUT a reference to the message must be sent to the client
-     * @param block_id IN position of the block is storing the status of the
-     *                    client is calling the server
-     * @return a reason code
-     */
-    int server_xa_end(struct thread_status_s *ts,
-                      const struct lixa_msg_s *lmi,
-                      struct lixa_msg_s *lmo,
-                      uint32_t block_id);
-
-    
-
-    /**
-     * Executes the logic related to the first step of "xa_end" on the
-     * server side
-     * @param ts IN/OUT a reference to the current thread status
-     * @param lmi IN a reference to the message received from the client
-     * @param lmo OUT a reference to the message must be sent to the client
-     * @param block_id IN position of the block is storing the status of the
-     *                    client is calling the server
-     * @return a reason code
-     */
-    int server_xa_end_8(struct thread_status_s *ts,
-                        const struct lixa_msg_s *lmi,
-                        struct lixa_msg_s *lmo,
-                        uint32_t block_id);
-
-    
-
-    /**
-     * Executes the logic related to the third step of "xa_end" on the server
-     * side
-     * @param ts IN/OUT a reference to the current thread status
-     * @param lmi IN a reference to the message received from the client
-     * @param block_id IN position of the block is storing the status of the
-     *                    client is calling the server
-     * @return a reason code
-     */
-    int server_xa_end_24(struct thread_status_s *ts,
-                         const struct lixa_msg_s *lmi,
-                         uint32_t block_id);
-
-    
-    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

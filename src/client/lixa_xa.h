@@ -101,9 +101,15 @@ extern "C" {
      * End work performed ohn behalf of the transaction manager
      * @param cs IN reference to the status of the calling client
      * @param txrc OUT return code prepared for tx_commit/tx_rollback call
+     * @param commit OUT boolean value:
+     *                  TRUE = xa_prepare will be followed by xa_commit
+     *                  FALSE = xa_prepare will be followed by xa_rollback
+     *                          (one resource manager is not able to prepare
+     *                          for commit and the transaction must be backed
+     *                          out)
      * @return a reason code
      */
-    int lixa_xa_prepare(client_status_t *cs, int *txrc);
+    int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit);
     
     
     

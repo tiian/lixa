@@ -182,7 +182,9 @@ struct common_status_conthr_s {
     /**
      * Boolean value:
      * the Application Program called @ref tx_rollback and the current status
-     * is moving to resource commit
+     * is moving to resource commit or the Application Program called
+     * @ref tx_commit and one resource manager was not able to prepare for
+     * commit
      */
     int   will_rollback;
 };
