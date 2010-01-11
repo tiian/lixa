@@ -74,6 +74,17 @@ extern "C" {
 
 
     /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=close, step=8
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_close_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
+    /**
      * Deserialize an XML subtree containing a default answer message
      * @param cur IN reference to the XML subtree
      * @param answer OUT reference to the answer contained in the message
@@ -85,6 +96,39 @@ extern "C" {
 
 
     
+    /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=end, step=8
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_end_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
+    /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=end, step=16
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_end_16(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
+    /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=end, step=24
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_end_24(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
     /**
      * Deserialize an XML subtree containing details pertaining to
      * a message with verb=open, step=8
@@ -120,12 +164,23 @@ extern "C" {
 
     /**
      * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=close, step=8
+     * a message with verb=prepare, step=8
      * @param cur IN pointer to XML subtree
      * @param msg OUT the object after deserialization
      * @return a reason code
      */
-    int lixa_msg_deserialize_close_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_prepare_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
+    /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=prepare, step=16
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_prepare_16(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 
@@ -159,39 +214,6 @@ extern "C" {
      * @return a reason code
      */
     int lixa_msg_deserialize_start_24(xmlNodePtr cur, struct lixa_msg_s *msg);
-
-
-
-    /**
-     * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=end, step=8
-     * @param cur IN pointer to XML subtree
-     * @param msg OUT the object after deserialization
-     * @return a reason code
-     */
-    int lixa_msg_deserialize_end_8(xmlNodePtr cur, struct lixa_msg_s *msg);
-
-
-
-    /**
-     * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=end, step=16
-     * @param cur IN pointer to XML subtree
-     * @param msg OUT the object after deserialization
-     * @return a reason code
-     */
-    int lixa_msg_deserialize_end_16(xmlNodePtr cur, struct lixa_msg_s *msg);
-
-
-
-    /**
-     * Deserialize an XML subtree containing details pertaining to
-     * a message with verb=end, step=24
-     * @param cur IN pointer to XML subtree
-     * @param msg OUT the object after deserialization
-     * @return a reason code
-     */
-    int lixa_msg_deserialize_end_24(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 

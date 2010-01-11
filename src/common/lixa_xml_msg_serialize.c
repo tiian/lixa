@@ -78,6 +78,9 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                      , SERIALIZE_END_16_ERROR
                      , SERIALIZE_END_24_ERROR
                      , INVALID_END_STEP
+                     , SERIALIZE_PREPARE_8_ERROR
+                     , SERIALIZE_PREPARE_16_ERROR
+                     , INVALID_PREPARE_STEP
                      , INVALID_VERB
                      , BUFFER_TOO_SHORT3
                      , NONE } excp;
@@ -210,6 +213,26 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                         THROW(INVALID_END_STEP);
                 }
                 break;
+            case LIXA_MSG_VERB_PREPARE:
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        if (LIXA_RC_OK != (
+                                ret_cod =
+                                lixa_msg_serialize_prepare_8(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_PREPARE_8_ERROR);
+                        break;
+                    case 16:
+                        if (LIXA_RC_OK != (
+                                ret_cod =
+                                lixa_msg_serialize_prepare_16(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_PREPARE_16_ERROR);
+                        break;
+                    default:
+                        THROW(INVALID_PREPARE_STEP);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -246,11 +269,14 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
             case SERIALIZE_END_8_ERROR:
             case SERIALIZE_END_16_ERROR:
             case SERIALIZE_END_24_ERROR:
+            case SERIALIZE_PREPARE_8_ERROR:
+            case SERIALIZE_PREPARE_16_ERROR:
                 break;
             case INVALID_OPEN_STEP:
             case INVALID_CLOSE_STEP:
             case INVALID_START_STEP:
             case INVALID_END_STEP:
+            case INVALID_PREPARE_STEP:
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
@@ -265,6 +291,240 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_serialize_close_8(const struct lixa_msg_s *msg, char *buffer,
+                               size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT1
+                     , BUFFER_TOO_SHORT2
+                     , BUFFER_TOO_SHORT3
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_serialize_close_8\n"));
+    TRY {
+        int used_chars;
+        guint i;
+        
+        /* <rsrmgrs> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s>",
+                              LIXA_XML_MSG_TAG_RSRMGRS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT1);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        /* <rsrmgr> */
+        for (i=0; i<msg->body.close_8.rsrmgrs->len; ++i) {
+            struct lixa_msg_body_close_8_rsrmgr_s *rsrmgr;
+            rsrmgr = &g_array_index(
+                msg->body.close_8.rsrmgrs,
+                struct lixa_msg_body_close_8_rsrmgr_s, i);
+            used_chars = snprintf(buffer + *offset, *free_chars,
+                                  "<%s %s=\"%d\"/>",
+                                  LIXA_XML_MSG_TAG_RSRMGR,
+                                  LIXA_XML_MSG_PROP_RMID,
+                                  rsrmgr->rmid);
+            if (used_chars >= *free_chars)
+                THROW(BUFFER_TOO_SHORT2);
+            *free_chars -= used_chars;
+            *offset += used_chars;
+        }
+        /* </rsrmgrs> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "</%s>",
+                              LIXA_XML_MSG_TAG_RSRMGRS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT3);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT1:
+            case BUFFER_TOO_SHORT2:
+            case BUFFER_TOO_SHORT3:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_serialize_close_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_serialize_end_8(const struct lixa_msg_s *msg,
+                               char *buffer,
+                               size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_serialize_end_8\n"));
+    TRY {
+        int used_chars;
+        
+        /* <conthr> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%d\"/>",
+                              LIXA_XML_MSG_TAG_CONTHR,
+                              LIXA_XML_MSG_PROP_COMMIT,
+                              msg->body.end_8.conthr.commit ? 1 : 0);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_serialize_end_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_serialize_end_16(const struct lixa_msg_s *msg,
+                              char *buffer,
+                              size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_serialize_end_16\n"));
+    TRY {
+        int used_chars;
+        
+        /* <answer> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%d\"/>",
+                              LIXA_XML_MSG_TAG_ANSWER,
+                              LIXA_XML_MSG_PROP_RC,
+                              msg->body.end_16.answer.rc);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_serialize_end_16/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_serialize_end_24(const struct lixa_msg_s *msg,
+                              char *buffer,
+                              size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT1
+                     , BUFFER_TOO_SHORT2
+                     , BUFFER_TOO_SHORT3
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_serialize_end_24\n"));
+    TRY {
+        int used_chars;
+        guint i;
+        
+        /* <xa_end_execs> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s>",
+                              LIXA_XML_MSG_TAG_XA_END_EXECS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT1);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        /* <xa_end_exec> */
+        for (i=0; i<msg->body.end_24.xa_end_execs->len; ++i) {
+            struct lixa_msg_body_end_24_xa_end_execs_s *xa_end_exec;
+            xa_end_exec = &g_array_index(
+                msg->body.end_24.xa_end_execs,
+                struct lixa_msg_body_end_24_xa_end_execs_s, i);
+            used_chars = snprintf(buffer + *offset, *free_chars,
+                                  "<%s %s=\"%d\" %s=\"0x%lx\" "
+                                  "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
+                                  LIXA_XML_MSG_TAG_XA_END_EXEC,
+                                  LIXA_XML_MSG_PROP_RMID,
+                                  xa_end_exec->rmid,
+                                  LIXA_XML_MSG_PROP_FLAGS,
+                                  xa_end_exec->flags,
+                                  LIXA_XML_MSG_PROP_RC,
+                                  xa_end_exec->rc,
+                                  LIXA_XML_MSG_PROP_S_STATE,
+                                  xa_end_exec->s_state,
+                                  LIXA_XML_MSG_PROP_T_STATE,
+                                  xa_end_exec->t_state);
+            if (used_chars >= *free_chars)
+                THROW(BUFFER_TOO_SHORT2);
+            *free_chars -= used_chars;
+            *offset += used_chars;
+        }
+        /* </xa_end_execs> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "</%s>",
+                              LIXA_XML_MSG_TAG_XA_END_EXECS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT3);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT1:
+            case BUFFER_TOO_SHORT2:
+            case BUFFER_TOO_SHORT3:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_serialize_end_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -490,50 +750,70 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
 
 
 
-int lixa_msg_serialize_close_8(const struct lixa_msg_s *msg, char *buffer,
-                               size_t *offset, size_t *free_chars)
+int lixa_msg_serialize_prepare_8(const struct lixa_msg_s *msg,
+                                  char *buffer,
+                                  size_t *offset, size_t *free_chars)
 {
     enum Exception { BUFFER_TOO_SHORT1
                      , BUFFER_TOO_SHORT2
                      , BUFFER_TOO_SHORT3
+                     , BUFFER_TOO_SHORT4
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_msg_serialize_close_8\n"));
+    LIXA_TRACE(("lixa_msg_serialize_prepare_8\n"));
     TRY {
         int used_chars;
         guint i;
         
-        /* <rsrmgrs> */
+        /* <conthr> */
         used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s>",
-                              LIXA_XML_MSG_TAG_RSRMGRS);
+                              "<%s %s=\"%d\"/>",
+                              LIXA_XML_MSG_TAG_CONTHR,
+                              LIXA_XML_MSG_PROP_COMMIT,
+                              msg->body.prepare_8.conthr.commit);
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT1);
         *free_chars -= used_chars;
         *offset += used_chars;
-        /* <rsrmgr> */
-        for (i=0; i<msg->body.close_8.rsrmgrs->len; ++i) {
-            struct lixa_msg_body_close_8_rsrmgr_s *rsrmgr;
-            rsrmgr = &g_array_index(
-                msg->body.close_8.rsrmgrs,
-                struct lixa_msg_body_close_8_rsrmgr_s, i);
+        /* <xa_prepare_execs> */
+        used_chars = snprintf(buffer + *offset, *free_chars, "<%s>",
+                              LIXA_XML_MSG_TAG_XA_PREPARE_EXECS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT2);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        /* <xa_prepare_exec> */
+        for (i=0; i<msg->body.prepare_8.xa_prepare_execs->len; ++i) {
+            struct lixa_msg_body_prepare_8_xa_prepare_execs_s *xa_prepare_exec;
+            xa_prepare_exec = &g_array_index(
+                msg->body.prepare_8.xa_prepare_execs,
+                struct lixa_msg_body_prepare_8_xa_prepare_execs_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
-                                  "<%s %s=\"%d\"/>",
-                                  LIXA_XML_MSG_TAG_RSRMGR,
+                                  "<%s %s=\"%d\" %s=\"0x%lx\" "
+                                  "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
+                                  LIXA_XML_MSG_TAG_XA_PREPARE_EXEC,
                                   LIXA_XML_MSG_PROP_RMID,
-                                  rsrmgr->rmid);
+                                  xa_prepare_exec->rmid,
+                                  LIXA_XML_MSG_PROP_FLAGS,
+                                  xa_prepare_exec->flags,
+                                  LIXA_XML_MSG_PROP_RC,
+                                  xa_prepare_exec->rc,
+                                  LIXA_XML_MSG_PROP_S_STATE,
+                                  xa_prepare_exec->s_state,
+                                  LIXA_XML_MSG_PROP_T_STATE,
+                                  xa_prepare_exec->t_state);
             if (used_chars >= *free_chars)
-                THROW(BUFFER_TOO_SHORT2);
+                THROW(BUFFER_TOO_SHORT3);
             *free_chars -= used_chars;
             *offset += used_chars;
         }
-        /* </rsrmgrs> */
+        /* </xa_prepare_execs> */
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "</%s>",
-                              LIXA_XML_MSG_TAG_RSRMGRS);
+                              LIXA_XML_MSG_TAG_XA_PREPARE_EXECS);
         if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT3);
+            THROW(BUFFER_TOO_SHORT4);
         *free_chars -= used_chars;
         *offset += used_chars;
         
@@ -543,6 +823,7 @@ int lixa_msg_serialize_close_8(const struct lixa_msg_s *msg, char *buffer,
             case BUFFER_TOO_SHORT1:
             case BUFFER_TOO_SHORT2:
             case BUFFER_TOO_SHORT3:
+            case BUFFER_TOO_SHORT4:
                 ret_cod = LIXA_RC_CONTAINER_FULL;
                 break;
             case NONE:
@@ -552,10 +833,54 @@ int lixa_msg_serialize_close_8(const struct lixa_msg_s *msg, char *buffer,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_msg_serialize_close_8/excp=%d/"
+    LIXA_TRACE(("lixa_msg_serialize_prepare_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int lixa_msg_serialize_prepare_16(const struct lixa_msg_s *msg,
+                                  char *buffer,
+                                  size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_serialize_prepare_16\n"));
+    TRY {
+        int used_chars;
+        
+        /* <answer> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%d\"/>",
+                              LIXA_XML_MSG_TAG_ANSWER,
+                              LIXA_XML_MSG_PROP_RC,
+                              msg->body.prepare_16.answer.rc);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_serialize_prepare_16/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
 
 
 int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
@@ -778,173 +1103,6 @@ int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_start_24/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-int lixa_msg_serialize_end_8(const struct lixa_msg_s *msg,
-                               char *buffer,
-                               size_t *offset, size_t *free_chars)
-{
-    enum Exception { BUFFER_TOO_SHORT
-                     , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("lixa_msg_serialize_end_8\n"));
-    TRY {
-        int used_chars;
-        
-        /* <conthr> */
-        used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%d\"/>",
-                              LIXA_XML_MSG_TAG_CONTHR,
-                              LIXA_XML_MSG_PROP_COMMIT,
-                              msg->body.end_8.conthr.commit ? 1 : 0);
-        if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT);
-        *free_chars -= used_chars;
-        *offset += used_chars;
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_msg_serialize_end_8/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-int lixa_msg_serialize_end_16(const struct lixa_msg_s *msg,
-                              char *buffer,
-                              size_t *offset, size_t *free_chars)
-{
-    enum Exception { BUFFER_TOO_SHORT
-                     , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("lixa_msg_serialize_end_16\n"));
-    TRY {
-        int used_chars;
-        
-        /* <answer> */
-        used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%d\"/>",
-                              LIXA_XML_MSG_TAG_ANSWER,
-                              LIXA_XML_MSG_PROP_RC,
-                              msg->body.end_16.answer.rc);
-        if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT);
-        *free_chars -= used_chars;
-        *offset += used_chars;
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_msg_serialize_end_16/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-int lixa_msg_serialize_end_24(const struct lixa_msg_s *msg,
-                              char *buffer,
-                              size_t *offset, size_t *free_chars)
-{
-    enum Exception { BUFFER_TOO_SHORT1
-                     , BUFFER_TOO_SHORT2
-                     , BUFFER_TOO_SHORT3
-                     , BUFFER_TOO_SHORT4
-                     , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("lixa_msg_serialize_end_24\n"));
-    TRY {
-        int used_chars;
-        guint i;
-        
-        /* <xa_end_execs> */
-        used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s>",
-                              LIXA_XML_MSG_TAG_XA_END_EXECS);
-        if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT2);
-        *free_chars -= used_chars;
-        *offset += used_chars;
-        /* <xa_end_exec> */
-        for (i=0; i<msg->body.end_24.xa_end_execs->len; ++i) {
-            struct lixa_msg_body_end_24_xa_end_execs_s *xa_end_exec;
-            xa_end_exec = &g_array_index(
-                msg->body.end_24.xa_end_execs,
-                struct lixa_msg_body_end_24_xa_end_execs_s, i);
-            used_chars = snprintf(buffer + *offset, *free_chars,
-                                  "<%s %s=\"%d\" %s=\"0x%lx\" "
-                                  "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
-                                  LIXA_XML_MSG_TAG_XA_END_EXEC,
-                                  LIXA_XML_MSG_PROP_RMID,
-                                  xa_end_exec->rmid,
-                                  LIXA_XML_MSG_PROP_FLAGS,
-                                  xa_end_exec->flags,
-                                  LIXA_XML_MSG_PROP_RC,
-                                  xa_end_exec->rc,
-                                  LIXA_XML_MSG_PROP_S_STATE,
-                                  xa_end_exec->s_state,
-                                  LIXA_XML_MSG_PROP_T_STATE,
-                                  xa_end_exec->t_state);
-            if (used_chars >= *free_chars)
-                THROW(BUFFER_TOO_SHORT3);
-            *free_chars -= used_chars;
-            *offset += used_chars;
-        }
-        /* </xa_end_execs> */
-        used_chars = snprintf(buffer + *offset, *free_chars,
-                              "</%s>",
-                              LIXA_XML_MSG_TAG_XA_END_EXECS);
-        if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT4);
-        *free_chars -= used_chars;
-        *offset += used_chars;
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_msg_serialize_end_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

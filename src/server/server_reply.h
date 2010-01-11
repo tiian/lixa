@@ -73,6 +73,20 @@ extern "C" {
 
     
     /**
+     * Send the output message related to "end" verb to the client
+     * @param ts IN/OUT thread status structure
+     * @param slot_id IN id of the slot must be freed
+     * @param lmo IN message will be returned to the client
+     * @param rc IN return code of the previous operations must be returned
+     *              to the client
+     * @return a standardized return code
+     */
+    int server_reply_end(struct thread_status_s *ts, size_t slot_id,
+                         struct lixa_msg_s *lmo, int rc);
+
+
+    
+    /**
      * Send the output message related to "open" verb to the client
      * @param ts IN/OUT thread status structure
      * @param slot_id IN id of the slot must be freed
@@ -87,6 +101,20 @@ extern "C" {
 
     
     /**
+     * Send the output message related to "prepare" verb to the client
+     * @param ts IN/OUT thread status structure
+     * @param slot_id IN id of the slot must be freed
+     * @param lmo IN message will be returned to the client
+     * @param rc IN return code of the previous operations must be returned
+     *              to the client
+     * @return a standardized return code
+     */
+    int server_reply_prepare(struct thread_status_s *ts, size_t slot_id,
+                             struct lixa_msg_s *lmo, int rc);
+
+
+    
+    /**
      * Send the output message related to "start" verb to the client
      * @param ts IN/OUT thread status structure
      * @param slot_id IN id of the slot must be freed
@@ -97,20 +125,6 @@ extern "C" {
      */
     int server_reply_start(struct thread_status_s *ts, size_t slot_id,
                            struct lixa_msg_s *lmo, int rc);
-
-
-    
-    /**
-     * Send the output message related to "end" verb to the client
-     * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
-     * @param lmo IN message will be returned to the client
-     * @param rc IN return code of the previous operations must be returned
-     *              to the client
-     * @return a standardized return code
-     */
-    int server_reply_end(struct thread_status_s *ts, size_t slot_id,
-                         struct lixa_msg_s *lmo, int rc);
 
 
     

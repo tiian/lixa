@@ -614,12 +614,15 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
 
 
 
-int lixa_xa_prepare(client_status_t *cs, int *txrc)
+int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
 {
     enum Exception { ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
+                     , MSG_RETRIEVE_ERROR
+                     , MSG_DESERIALIZE_ERROR
+                     , ERROR_FROM_SERVER
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -640,7 +643,7 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc)
         msg.header.pvs.verb = LIXA_MSG_VERB_PREPARE;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
-        msg.body.prepare_8.conthr.commit = TRUE;
+        *commit = TRUE;
         
         msg.body.prepare_8.xa_prepare_execs = g_array_sized_new(
             FALSE, FALSE,
@@ -701,10 +704,18 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc)
                     THROW(UNEXPECTED_XA_RC);
             }
             record.s_state = csr->xa_s_state;
-            record.r_state = csr->xa_r_state;
+            record.t_state = csr->xa_t_state;
             g_array_append_val(msg.body.prepare_8.xa_prepare_execs, record);
+
+            if (XA_OK != record.rc) {
+                /* interrupt first phase commit, we must rollback the global
+                   transaction */
+                *commit = FALSE;
+                break;
+            }
         } /* for (i=0; ...) */
         
+        msg.body.prepare_8.conthr.commit = *commit;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
@@ -719,7 +730,25 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc)
                     " bytes to the server for step 8\n", buffer_size));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
+
+        /* wait server answer */
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(fd, buffer, buffer_size,
+                                                       &read_bytes)))
+            THROW(MSG_RETRIEVE_ERROR);
+        LIXA_TRACE(("lixa_xa_prepare: receiving %d"
+                    " bytes from the server |%*.*s|\n",
+                    read_bytes, read_bytes, read_bytes, buffer));
         
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
+                               buffer, read_bytes, &msg)))
+            THROW(MSG_DESERIALIZE_ERROR);
+#ifdef _TRACE
+        lixa_msg_trace(&msg);
+#endif
+        /* check the answer from the server */
+        if (LIXA_RC_OK != (ret_cod = msg.body.prepare_16.answer.rc))
+            THROW(ERROR_FROM_SERVER);
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -733,6 +762,12 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc)
                 break;
             case SEND_ERROR:
                 ret_cod = LIXA_RC_SEND_ERROR;
+                break;
+            case MSG_RETRIEVE_ERROR:
+            case MSG_DESERIALIZE_ERROR:
+                break;
+            case ERROR_FROM_SERVER:
+                ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

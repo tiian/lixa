@@ -69,7 +69,7 @@ int tx_commit(void)
 {
     int txrc = TX_FAIL;
     lixa_tx_commit(&txrc);
-    return TX_OK;
+    return txrc;
 }
 
 
