@@ -72,7 +72,17 @@ extern "C" {
     
     
     /**
-     * End work performed ohn behalf of the transaction manager
+     * Commit work performed on behalf of the transaction manager
+     * @param cs IN reference to the status of the calling client
+     * @param txrc OUT return code prepared for tx_commit/tx_rollback call
+     * @return a reason code
+     */
+    int lixa_xa_commit(client_status_t *cs, int *txrc);
+    
+    
+    
+    /**
+     * End work performed on behalf of the transaction manager
      * @param cs IN reference to the status of the calling client
      * @param txrc OUT return code prepared for tx_commit/tx_rollback call
      * @param commit IN boolean value:
@@ -98,7 +108,7 @@ extern "C" {
     
 
     /**
-     * End work performed ohn behalf of the transaction manager
+     * End work performed on behalf of the transaction manager
      * @param cs IN reference to the status of the calling client
      * @param txrc OUT return code prepared for tx_commit/tx_rollback call
      * @param commit OUT boolean value:
@@ -110,6 +120,16 @@ extern "C" {
      * @return a reason code
      */
     int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit);
+    
+    
+    
+    /**
+     * Roll back work performed on behalf of the transaction manager
+     * @param cs IN reference to the status of the calling client
+     * @param txrc OUT return code prepared for tx_commit/tx_rollback call
+     * @return a reason code
+     */
+    int lixa_xa_rollback(client_status_t *cs, int *txrc);
     
     
     

@@ -114,6 +114,10 @@
  */
 #define LIXA_MSG_VERB_PREPARE   5
 /**
+ * Id assigned to verb "commit"
+ */
+#define LIXA_MSG_VERB_COMMIT    6
+/**
  * Default increment for message step
  */
 #define LIXA_MSG_STEP_INCR      8
@@ -212,6 +216,14 @@ extern const xmlChar *LIXA_XML_MSG_TAG_RSRMGR;
  * Label used to specify "rsrmgrs" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_RSRMGRS;
+/**
+ * Label used to specify "xa_commit_exec" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_XA_COMMIT_EXEC;
+/**
+ * Label used to specify "xa_commit_execs" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_XA_COMMIT_EXECS;
 /**
  * Label used to specify "xa_end_exec" tag
  */
@@ -661,6 +673,44 @@ struct lixa_msg_body_prepare_16_s {
 
 
 /**
+ * Convenience struct for @ref lixa_msg_body_commit_8_s
+ * xid is not stored in this structure because it was already stored by the
+ * server after receiving step 8 message, see @ref lixa_msg_body_commit_8_s
+ */
+struct lixa_msg_body_commit_8_xa_commit_execs_s {
+    /**
+     * rmid parameter as passed to xa_commit routine
+     */
+    int             rmid;
+    /**
+     * flags parameter as passed to xa_commit routine
+     */
+    long            flags;
+    /**
+     * return code of xa_commit routine
+     */
+    int             rc;
+};
+
+
+
+/**
+ * Message body for verb "commit", step "8"
+ */
+struct lixa_msg_body_commit_8_s {
+    /**
+     * Control thread information
+    struct lixa_msg_body_commit_8_conthr_s    conthr;
+     */
+    /**
+     * Parameters and return value of xa_commit executions
+     */
+    GArray                                   *xa_commit_execs;
+};
+
+
+
+/**
  * This structure maps the messages flowing between LIXA client (lixac) and
  * LIXA server (lixad). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
@@ -687,6 +737,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_end_24_s          end_24;
         struct lixa_msg_body_prepare_8_s       prepare_8;
         struct lixa_msg_body_prepare_16_s      prepare_16;
+        struct lixa_msg_body_commit_8_s        commit_8;
     } body;
 };
 

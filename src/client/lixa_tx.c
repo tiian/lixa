@@ -263,6 +263,8 @@ int lixa_tx_commit(int *txrc)
                      , INVALID_STATUS
                      , XA_END_ERROR
                      , XA_PREPARE_ERROR
+                     , XA_COMMIT_ERROR
+                     , XA_ROLLBACK_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -310,8 +312,18 @@ int lixa_tx_commit(int *txrc)
             if (LIXA_RC_OK != (ret_cod = lixa_xa_prepare(cs, txrc, &commit)))
                 THROW(XA_PREPARE_ERROR);
         }
+
+        if (commit) {
+            LIXA_TRACE(("lixa_tx_commit: prepare OK, go on with commit...\n"));
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_commit(cs, txrc)))
+                THROW(XA_COMMIT_ERROR);
+        } else {
+            LIXA_TRACE(("lixa_tx_commit: prepare KO, "
+                        "go on with rollback...\n"));
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc)))
+                THROW(XA_ROLLBACK_ERROR);
+        }
         
-        /* @@@ restart from here */
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -330,6 +342,8 @@ int lixa_tx_commit(int *txrc)
                 break;
             case XA_END_ERROR:
             case XA_PREPARE_ERROR:
+            case XA_COMMIT_ERROR:
+            case XA_ROLLBACK_ERROR:
                 break;
             case NONE:
                 *txrc = TX_OK;

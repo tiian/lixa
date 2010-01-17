@@ -158,3 +158,47 @@ verb=4,step=8 -->			send commit/rollback
 verb=4,step=24 -->  			send list of executions of xa_end
 	       				routine (store xa_end results)
 
+***************************************************************************
+
+verb=5 (xa_prepare)
+
+  level: message level, version
+  verb:  xa_prepare -> 5
+  step:  8, 16, ... as necessary
+
+  client->server message (send the xa_prepare result)
+  <msg level="1" verb="5" step="8">
+    <xa_prepare_execs>
+      <xa_prepare_exec rmid="0" flags="0" rc="0" state="?"/>
+      <xa_prepare_exec rmid="1" flags="0" rc="0" state="?"/>
+    </xa_prepare_execs>
+  </msg>
+
+  server -> client message (answer)
+  <msg level="1" verb="5" step="16">
+    <answer rc="0"/>
+  </msg>
+
+
+client 			 server		description
+verb=5,step=8 -->			send xa_prepare result
+		<-- verb=5,step=16	synchronize status file
+		    			confirm operation
+
+***************************************************************************
+
+verb=6 (xa_commit)
+
+  level: message level, version
+  verb:  xa_commit -> 6
+  step:  8, 16, ... as necessary
+
+  client->server message (send the xa_commit result)
+  <msg level="1" verb="6" step="8">
+    <xa_commit_execs>
+      <xa_commit_exec rmid="0" flags="0" rc="0" state="?"/>
+      <xa_commit_exec rmid="1" flags="0" rc="0" state="?"/>
+    </xa_commit_execs>
+  </msg>
+
+
