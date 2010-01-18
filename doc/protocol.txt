@@ -26,7 +26,7 @@ verb=1 (xa_open)
 
   level: message level, version
   verb:  xa_open -> 1
-  step:  8, 16, 24, ... as necessary
+  step:  8, 16, 24
 
   client->server message (question)
   <msg level="1" verb="1" step="8">
@@ -86,7 +86,7 @@ verb=3 (xa_start)
 
   level: message level, version
   verb:  xa_start -> 3
-  step:  8, 16, 24, ... as necessary
+  step:  8, 16, 24
 
   client->server message (send the XID - transaction id - and the resource
                           managers will receive xa_start)
@@ -129,7 +129,7 @@ verb=4 (xa_end)
 
   level: message level, version
   verb:  xa_end -> 4
-  step:  8, 16, 24, ... as necessary
+  step:  8, 16, 24
 
   client->server message (send if the transaction is committing - commit="1" -
   		 	 or rollbacking - commit="0")
@@ -145,8 +145,8 @@ verb=4 (xa_end)
   client -> server message (async assertion)
   <msg level="1" verb="4" step="24">
     <xa_end_execs>
-      <xa_end_exec rmid="0" flags="0" rc="0" state="?"/>
-      <xa_end_exec rmid="1" flags="0" rc="0" state="?"/>
+      <xa_end_exec rmid="0" flags="0" rc="0" s_state="?" t_state="?"/>
+      <xa_end_exec rmid="1" flags="0" rc="0" s_state="?" t_state="?"/>
     </xa_end_execs>
   </msg>
 
@@ -164,13 +164,14 @@ verb=5 (xa_prepare)
 
   level: message level, version
   verb:  xa_prepare -> 5
-  step:  8, 16, ... as necessary
+  step:  8, 16
 
   client->server message (send the xa_prepare result)
   <msg level="1" verb="5" step="8">
+    <conthr commit="1"/>
     <xa_prepare_execs>
-      <xa_prepare_exec rmid="0" flags="0" rc="0" state="?"/>
-      <xa_prepare_exec rmid="1" flags="0" rc="0" state="?"/>
+      <xa_prepare_exec rmid="0" flags="0" rc="0" s_state="?" t_state="?"/>
+      <xa_prepare_exec rmid="1" flags="0" rc="0" s_state="?" t_state="?"/>
     </xa_prepare_execs>
   </msg>
 
@@ -191,14 +192,20 @@ verb=6 (xa_commit)
 
   level: message level, version
   verb:  xa_commit -> 6
-  step:  8, 16, ... as necessary
+  step:  8
 
   client->server message (send the xa_commit result)
   <msg level="1" verb="6" step="8">
+    <conthr finished="1"/>
     <xa_commit_execs>
-      <xa_commit_exec rmid="0" flags="0" rc="0" state="?"/>
-      <xa_commit_exec rmid="1" flags="0" rc="0" state="?"/>
+      <xa_commit_exec rmid="0" flags="0" rc="0" r_state="?" s_state="?"/>
+      <xa_commit_exec rmid="1" flags="0" rc="0" r_state="?" s_state="?"/>
     </xa_commit_execs>
   </msg>
+
+client 			 server		description
+verb=6,step=8 -->			send xa_commit result
+					gives server information the
+					transaction finished
 
 

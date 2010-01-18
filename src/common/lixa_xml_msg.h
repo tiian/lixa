@@ -133,6 +133,10 @@ extern const xmlChar *LIXA_XML_MSG_HEADER;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_COMMIT;
 /**
+ * Label used to specify "finished" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_FINISHED;
+/**
  * Label used to specify "flags" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_FLAGS;
@@ -640,7 +644,7 @@ struct lixa_msg_body_prepare_8_xa_prepare_execs_s {
     int             s_state;
     /**
      * the new transaction branch association state associated to the resource
-     * manager after xa_end execution
+     * manager after xa_prepare execution
      */
     int             t_state;
 };
@@ -673,6 +677,19 @@ struct lixa_msg_body_prepare_16_s {
 
 
 /**
+ * Control thread status
+ */
+struct lixa_msg_body_commit_8_conthr_s {
+    /**
+     * TRUE = yes
+     * FALSE = no
+     */
+    int   finished;
+};
+
+
+
+/**
  * Convenience struct for @ref lixa_msg_body_commit_8_s
  * xid is not stored in this structure because it was already stored by the
  * server after receiving step 8 message, see @ref lixa_msg_body_commit_8_s
@@ -690,6 +707,14 @@ struct lixa_msg_body_commit_8_xa_commit_execs_s {
      * return code of xa_commit routine
      */
     int             rc;
+    /**
+     * the new resource manager state after xa_commit execution
+     */
+    int             r_state;
+    /**
+     * the new transaction branch state after xa_commit execution
+     */
+    int             s_state;
 };
 
 
@@ -700,8 +725,8 @@ struct lixa_msg_body_commit_8_xa_commit_execs_s {
 struct lixa_msg_body_commit_8_s {
     /**
      * Control thread information
-    struct lixa_msg_body_commit_8_conthr_s    conthr;
      */
+    struct lixa_msg_body_commit_8_conthr_s    conthr;
     /**
      * Parameters and return value of xa_commit executions
      */

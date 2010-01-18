@@ -344,6 +344,7 @@ int lixa_tx_commit(int *txrc)
             case XA_PREPARE_ERROR:
             case XA_COMMIT_ERROR:
             case XA_ROLLBACK_ERROR:
+                *txrc = TX_FAIL;
                 break;
             case NONE:
                 *txrc = TX_OK;
@@ -353,8 +354,8 @@ int lixa_tx_commit(int *txrc)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_tx_commit/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE(("lixa_tx_commit/TX_*=%d/excp=%d/"
+                "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
     return ret_cod;
 }
 
