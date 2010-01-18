@@ -184,7 +184,8 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
 
 int lixa_xa_commit(client_status_t *cs, int *txrc)
 {
-    enum Exception { ASYNC_NOT_IMPLEMENTED
+    enum Exception { INVALID_XA_RC
+                     , ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
@@ -198,6 +199,8 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
         int fd;
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        int finished = TRUE;
+        int prepared = 0;
         
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -207,6 +210,14 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
         msg.header.pvs.verb = LIXA_MSG_VERB_COMMIT;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
+        /* compute how many resource manager are in "prepared" (S3) state */
+        for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+            struct common_status_rsrmgr_s *csr = &g_array_index(
+                cs->rmstates, struct common_status_rsrmgr_s, i);
+            if (XA_STATE_S3 == csr->xa_s_state)
+                prepared++;
+        }        
+        
         msg.body.commit_8.xa_commit_execs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_commit_8_xa_commit_execs_s),
@@ -221,18 +232,39 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
                 cs->rmstates, struct common_status_rsrmgr_s, i);
             struct lixa_msg_body_commit_8_xa_commit_execs_s record;
 
+            /* bypass resource managers are not prepared */
+            if (XA_STATE_S3 == csr->xa_s_state)
+                continue;
+            
             record.rmid = i;
-            record.flags = TMNOFLAGS;
+            record.flags = (prepared > 0) ? TMNOFLAGS : TMONEPHASE;
             record.rc = act_rsrmgr->xa_switch->xa_commit_entry(
                 client_status_get_xid(cs), record.rmid, record.flags);
             LIXA_TRACE(("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) = "
                         "%d\n", record.rmid, record.flags, record.rc));
 
+            finished = finished && (record.rc == XA_OK);
+            
             switch (record.rc) {
-                case XA_OK:
-                    csr->xa_s_state = XA_STATE_S3;
+                case XA_HEURHAZ:
+                    csr->xa_s_state = XA_STATE_S5;
+                    *txrc = TX_HAZARD;
                     break;
-                case XA_RDONLY:
+                case XA_HEURCOM:
+                    csr->xa_s_state = XA_STATE_S5;
+                    *txrc = TX_OK;
+                    break;
+                case XA_HEURRB:
+                    csr->xa_s_state = XA_STATE_S5;
+                    *txrc = TX_ROLLBACK;
+                    break;
+                case XA_HEURMIX:
+                    csr->xa_s_state = XA_STATE_S5;
+                    *txrc = TX_MIXED;
+                    break;
+                case XA_OK:
+                    csr->xa_s_state = XA_STATE_S0;
+                    break;
                 case XA_RBROLLBACK:
                 case XA_RBCOMMFAIL:
                 case XA_RBDEADLOCK:
@@ -242,12 +274,16 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
                     csr->xa_s_state = XA_STATE_S0;
+                    *txrc = TX_ROLLBACK;
+                    if (TMONEPHASE != record.flags)
+                        THROW(INVALID_XA_RC);
                     break;                    
                 case XAER_ASYNC:
                     *txrc = TX_FAIL;
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 case XAER_RMERR:
-                    csr->xa_s_state = XA_STATE_S2;
+                    csr->xa_s_state = XA_STATE_S0;
+                    *txrc = TX_ROLLBACK;
                     break;
                 case XAER_RMFAIL:
                     *txrc = TX_FAIL;
@@ -255,6 +291,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
                     break;
                 case XAER_NOTA:
                     csr->xa_s_state = XA_STATE_S0;
+                    *txrc = TX_ROLLBACK;
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
@@ -265,9 +302,12 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
+            record.r_state = csr->xa_r_state;
+            record.s_state = csr->xa_s_state;
             g_array_append_val(msg.body.commit_8.xa_commit_execs, record);
         } /* for (i=0; ...) */
         
+        msg.body.commit_8.conthr.finished = finished;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
@@ -286,6 +326,9 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INVALID_XA_RC:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
             case ASYNC_NOT_IMPLEMENTED:
                 ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
                 break;

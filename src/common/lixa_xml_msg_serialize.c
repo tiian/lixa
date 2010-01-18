@@ -81,6 +81,8 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                      , SERIALIZE_PREPARE_8_ERROR
                      , SERIALIZE_PREPARE_16_ERROR
                      , INVALID_PREPARE_STEP
+                     , SERIALIZE_COMMIT_8_ERROR
+                     , INVALID_COMMIT_STEP
                      , INVALID_VERB
                      , BUFFER_TOO_SHORT3
                      , NONE } excp;
@@ -233,6 +235,19 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                         THROW(INVALID_PREPARE_STEP);
                 }
                 break;
+            case LIXA_MSG_VERB_COMMIT:
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        if (LIXA_RC_OK != (
+                                ret_cod =
+                                lixa_msg_serialize_commit_8(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_COMMIT_8_ERROR);
+                        break;
+                    default:
+                        THROW(INVALID_COMMIT_STEP);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -271,12 +286,14 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
             case SERIALIZE_END_24_ERROR:
             case SERIALIZE_PREPARE_8_ERROR:
             case SERIALIZE_PREPARE_16_ERROR:
+            case SERIALIZE_COMMIT_8_ERROR:
                 break;
             case INVALID_OPEN_STEP:
             case INVALID_CLOSE_STEP:
             case INVALID_START_STEP:
             case INVALID_END_STEP:
             case INVALID_PREPARE_STEP:
+            case INVALID_COMMIT_STEP:
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
@@ -360,6 +377,96 @@ int lixa_msg_serialize_close_8(const struct lixa_msg_s *msg, char *buffer,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_close_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_serialize_commit_8(const struct lixa_msg_s *msg,
+                                char *buffer,
+                                size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT1
+                     , BUFFER_TOO_SHORT2
+                     , BUFFER_TOO_SHORT3
+                     , BUFFER_TOO_SHORT4
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_serialize_commit_8\n"));
+    TRY {
+        int used_chars;
+        guint i;
+        
+        /* <conthr> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%d\"/>",
+                              LIXA_XML_MSG_TAG_CONTHR,
+                              LIXA_XML_MSG_PROP_FINISHED,
+                              msg->body.commit_8.conthr.finished);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT1);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        /* <xa_commit_execs> */
+        used_chars = snprintf(buffer + *offset, *free_chars, "<%s>",
+                              LIXA_XML_MSG_TAG_XA_COMMIT_EXECS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT2);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        /* <xa_commit_exec> */
+        for (i=0; i<msg->body.commit_8.xa_commit_execs->len; ++i) {
+            struct lixa_msg_body_commit_8_xa_commit_execs_s *xa_commit_exec;
+            xa_commit_exec = &g_array_index(
+                msg->body.commit_8.xa_commit_execs,
+                struct lixa_msg_body_commit_8_xa_commit_execs_s, i);
+            used_chars = snprintf(buffer + *offset, *free_chars,
+                                  "<%s %s=\"%d\" %s=\"0x%lx\" "
+                                  "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
+                                  LIXA_XML_MSG_TAG_XA_COMMIT_EXEC,
+                                  LIXA_XML_MSG_PROP_RMID,
+                                  xa_commit_exec->rmid,
+                                  LIXA_XML_MSG_PROP_FLAGS,
+                                  xa_commit_exec->flags,
+                                  LIXA_XML_MSG_PROP_RC,
+                                  xa_commit_exec->rc,
+                                  LIXA_XML_MSG_PROP_R_STATE,
+                                  xa_commit_exec->r_state,
+                                  LIXA_XML_MSG_PROP_S_STATE,
+                                  xa_commit_exec->s_state);
+            if (used_chars >= *free_chars)
+                THROW(BUFFER_TOO_SHORT3);
+            *free_chars -= used_chars;
+            *offset += used_chars;
+        }
+        /* </xa_commit_execs> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "</%s>",
+                              LIXA_XML_MSG_TAG_XA_COMMIT_EXECS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT4);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT1:
+            case BUFFER_TOO_SHORT2:
+            case BUFFER_TOO_SHORT3:
+            case BUFFER_TOO_SHORT4:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_serialize_commit_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

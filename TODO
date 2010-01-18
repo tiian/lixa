@@ -1,5 +1,5 @@
-tx_commit development; restart from lixa_tx_commit (lixa_xa_prepare)
-	lixa_msg_serialize
+tx_commit development; restart from lixa_tx_commit: why <xa_commit_execs> tag
+	is empty? It seems there are no prepared resource managers... mmmm
 
 When server_manager_thread exits, the listener must be aware of this... 
 
