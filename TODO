@@ -1,5 +1,11 @@
-tx_commit development; restart from lixa_tx_commit: why <xa_commit_execs> tag
-	is empty? It seems there are no prepared resource managers... mmmm
+tx_commit development; restart from lixa_tx_commit: 
+    analyze csr->xa_s_state of all the resource manager:
+      are all in state S3 (prepared?) go on with normal two phase commit
+      are there only one in state S2 (idle?) go on with one phase commit
+
+tx_prepare: if there is only one resource manager, skip prepare (we should 
+move to commit/rollback without prepare)
+
 
 When server_manager_thread exits, the listener must be aware of this... 
 
