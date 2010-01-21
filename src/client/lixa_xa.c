@@ -233,7 +233,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
             struct lixa_msg_body_commit_8_xa_commit_execs_s record;
 
             /* bypass resource managers are not prepared */
-            if (XA_STATE_S3 == csr->xa_s_state)
+            if (XA_STATE_S3 != csr->xa_s_state)
                 continue;
             
             record.rmid = i;
@@ -244,7 +244,9 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
                         "%d\n", record.rmid, record.flags, record.rc));
 
             finished = finished && (record.rc == XA_OK);
-            
+
+            /* the algorithm used to determine *txrc must be reviewed
+               (see bug 2936618) */
             switch (record.rc) {
                 case XA_HEURHAZ:
                     csr->xa_s_state = XA_STATE_S5;
@@ -687,12 +689,11 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                 cs->rmstates, struct common_status_rsrmgr_s, i);
             struct lixa_msg_body_open_24_xa_open_execs_s record;
             long xa_open_flags = TMNOFLAGS;
-            int rc;
 
             record.xa_info = (xmlChar *)act_rsrmgr->generic->xa_open_info;
             record.rmid = i;
             record.flags = xa_open_flags;
-            record.rc = rc = act_rsrmgr->xa_switch->xa_open_entry(
+            record.rc = act_rsrmgr->xa_switch->xa_open_entry(
                 (char *)record.xa_info, record.rmid, record.flags);
             LIXA_TRACE(("lixa_xa_open: xa_open_entry('%s', %d, 0x%lx) = %d\n",
                         (char *)record.xa_info, record.rmid, record.flags,
