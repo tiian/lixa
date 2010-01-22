@@ -88,6 +88,116 @@ int server_xa_close(struct thread_status_s *ts,
 
 
 
+int server_xa_commit(struct thread_status_s *ts,
+                     const struct lixa_msg_s *lmi,
+                     uint32_t block_id)
+{
+    enum Exception { SERVER_XA_COMMIT_8_ERROR
+                     , INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_commit\n"));
+    TRY {
+        if (8 != lmi->header.pvs.step) {
+            THROW(INVALID_STEP);
+        } else if (LIXA_RC_OK != (ret_cod = server_xa_commit_8(
+                                      ts, lmi, block_id)))
+            THROW(SERVER_XA_COMMIT_8_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case SERVER_XA_COMMIT_8_ERROR:
+                break;
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_commit/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_xa_commit_8(struct thread_status_s *ts,
+                        const struct lixa_msg_s *lmi,
+                        uint32_t block_id)
+{
+    enum Exception { INVALID_BLOCK_ID
+                     , NUMBER_OF_RSRMGRS_MISMATCH
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_commit_8\n"));
+    TRY {
+        uint32_t i;
+        
+        /* check block_id is a valid block */
+        if (ts->curr_status[block_id].sr.data.pld.type !=
+            DATA_PAYLOAD_TYPE_HEADER)
+            THROW(INVALID_BLOCK_ID);
+        /* check children blocks match with the arrived update */
+        if (lmi->body.commit_8.xa_commit_execs->len >
+            ts->curr_status[block_id].sr.data.pld.ph.n)
+            THROW(NUMBER_OF_RSRMGRS_MISMATCH);
+        /* store commit/rollback intent after commit phase */
+        status_record_update(ts->curr_status + block_id, block_id,
+                             ts->updated_records);
+        ts->curr_status[block_id].sr.data.pld.ph.state.finished =
+            lmi->body.commit_8.conthr.finished;
+        
+        /* store data in the children blocks... */
+        for (i=0; i<lmi->body.commit_8.xa_commit_execs->len; ++i) {
+            status_record_t *sr;
+            struct lixa_msg_body_commit_8_xa_commit_execs_s *xa_commit_execs;
+            uint32_t slot;
+            xa_commit_execs = &g_array_index(
+                lmi->body.commit_8.xa_commit_execs,
+                struct lixa_msg_body_commit_8_xa_commit_execs_s, i);
+            slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
+                xa_commit_execs->rmid];
+            sr = ts->curr_status + slot;
+            /* update the block */
+            status_record_update(ts->curr_status + slot, slot,
+                                 ts->updated_records);
+            sr->sr.data.pld.rm.state.xa_r_state = xa_commit_execs->r_state;
+            sr->sr.data.pld.rm.state.xa_s_state = xa_commit_execs->s_state;
+            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
+            sr->sr.data.pld.rm.xa_commit_flags = xa_commit_execs->flags;
+            sr->sr.data.pld.rm.xa_commit_rc = xa_commit_execs->rc;
+        } /* for (i=0; ... */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_BLOCK_ID:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NUMBER_OF_RSRMGRS_MISMATCH:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_commit_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int server_xa_end(struct thread_status_s *ts,
                     const struct lixa_msg_s *lmi,
                     struct lixa_msg_s *lmo,
@@ -476,9 +586,9 @@ int server_xa_open_24(struct thread_status_s *ts,
 
 
 int server_xa_prepare(struct thread_status_s *ts,
-                    const struct lixa_msg_s *lmi,
-                    struct lixa_msg_s *lmo,
-                    uint32_t block_id)
+                      const struct lixa_msg_s *lmi,
+                      struct lixa_msg_s *lmo,
+                      uint32_t block_id)
 {
     enum Exception { SERVER_XA_PREPARE_8_ERROR
                      , INVALID_STEP

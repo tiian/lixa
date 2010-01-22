@@ -255,7 +255,7 @@ int lixa_tx_close(int *txrc)
 
 
 
-int lixa_tx_commit(int *txrc)
+int lixa_tx_commit(int *txrc, int *begin_new)
 {
     enum Exception { STATUS_NOT_FOUND
                      , COLL_GET_CS_ERROR
@@ -264,6 +264,12 @@ int lixa_tx_commit(int *txrc)
                      , XA_END_ERROR
                      , XA_PREPARE_ERROR
                      , XA_COMMIT_ERROR
+                     , INVALID_STATE1
+                     , INVALID_STATE2
+                     , INVALID_TXRC1
+                     , INVALID_STATE3
+                     , INVALID_STATE4
+                     , INVALID_TXRC2
                      , XA_ROLLBACK_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -273,7 +279,7 @@ int lixa_tx_commit(int *txrc)
     LIXA_TRACE_INIT;    
     LIXA_TRACE(("lixa_tx_commit\n"));
     TRY {
-        int txstate, commit = TRUE;
+        int txstate, next_txstate, commit = TRUE;
         client_status_t *cs;
         int rwrm = 0;
         
@@ -317,12 +323,62 @@ int lixa_tx_commit(int *txrc)
             LIXA_TRACE(("lixa_tx_commit: prepare OK, go on with commit...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_xa_commit(cs, txrc)))
                 THROW(XA_COMMIT_ERROR);
+            switch (*txrc) {
+                case TX_OK:
+                case TX_ROLLBACK:
+                case TX_MIXED:
+                case TX_HAZARD:
+                    if (TX_STATE_S3 == txstate)
+                        next_txstate = TX_STATE_S1;
+                    else if (TX_STATE_S4 == txstate)
+                        next_txstate = TX_STATE_S2;
+                    else THROW(INVALID_STATE1);
+                    break;
+                case TX_NO_BEGIN:
+                case TX_ROLLBACK_NO_BEGIN:
+                case TX_MIXED_NO_BEGIN:
+                case TX_HAZARD_NO_BEGIN:
+                    if (TX_STATE_S4 == txstate)
+                        next_txstate = TX_STATE_S2;
+                    else THROW(INVALID_STATE2);
+                    break;
+                default:
+                    THROW(INVALID_TXRC1);
+            } /* switch */
         } else {
             LIXA_TRACE(("lixa_tx_commit: prepare KO, "
                         "go on with rollback...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc)))
                 THROW(XA_ROLLBACK_ERROR);
-        }
+            switch (*txrc) {
+                case TX_OK:
+                case TX_MIXED:
+                case TX_HAZARD:
+                case TX_COMMITTED:
+                    if (TX_STATE_S3 == txstate)
+                        next_txstate = TX_STATE_S1;
+                    else if (TX_STATE_S4 == txstate)
+                        next_txstate = TX_STATE_S2;
+                    else THROW(INVALID_STATE3);
+                    break;
+                case TX_NO_BEGIN:
+                case TX_MIXED_NO_BEGIN:
+                case TX_HAZARD_NO_BEGIN:
+                case TX_COMMITTED_NO_BEGIN:
+                    if (TX_STATE_S4 == txstate)
+                        next_txstate = TX_STATE_S2;
+                    else THROW(INVALID_STATE4);
+                    break;
+                default:
+                    THROW(INVALID_TXRC2);
+            } /* switch */
+        } /* else */
+
+        /* update the TX state, now TX_STATE_S0 */
+        client_status_set_txstate(cs, next_txstate);
+
+        if (TX_STATE_S2 == next_txstate) /* start a new transaction */
+            *begin_new = TRUE;
         
         THROW(NONE);
     } CATCH {
@@ -343,6 +399,17 @@ int lixa_tx_commit(int *txrc)
             case XA_END_ERROR:
             case XA_PREPARE_ERROR:
             case XA_COMMIT_ERROR:
+                *txrc = TX_FAIL;
+                break;
+            case INVALID_STATE1:
+            case INVALID_STATE2:
+            case INVALID_TXRC1:
+            case INVALID_STATE3:
+            case INVALID_STATE4:
+            case INVALID_TXRC2:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;                
             case XA_ROLLBACK_ERROR:
                 *txrc = TX_FAIL;
                 break;

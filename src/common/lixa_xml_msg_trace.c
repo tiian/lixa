@@ -69,6 +69,7 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
                      , TRACE_START_ERROR
                      , TRACE_END_ERROR
                      , TRACE_PREPARE_ERROR
+                     , TRACE_COMMIT_ERROR
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -100,6 +101,10 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
                 if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_prepare(msg)))
                     THROW(TRACE_PREPARE_ERROR);
                 break;
+            case LIXA_MSG_VERB_COMMIT: /* commit */
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_commit(msg)))
+                    THROW(TRACE_COMMIT_ERROR);
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -112,6 +117,7 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
             case TRACE_START_ERROR:
             case TRACE_END_ERROR:
             case TRACE_PREPARE_ERROR:
+            case TRACE_COMMIT_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
@@ -124,6 +130,68 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_trace/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_trace_commit(const struct lixa_msg_s *msg)
+{
+    enum Exception { INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_trace_commit\n"));
+    TRY {
+        guint i;
+        
+        switch (msg->header.pvs.step) {
+            case 8:
+                if (NULL != msg->body.commit_8.xa_commit_execs) {
+                    LIXA_TRACE(("lixa_msg_trace: body["
+                                "conthr[finished=%d]]\n",
+                                msg->body.commit_8.conthr.finished));
+                    for (i=0; i<msg->body.commit_8.xa_commit_execs->len;
+                         ++i) {
+                        struct lixa_msg_body_commit_8_xa_commit_execs_s
+                            *xa_commit_exec =
+                            &g_array_index(
+                                msg->body.commit_8.xa_commit_execs,
+                                struct
+                                lixa_msg_body_commit_8_xa_commit_execs_s,
+                                i);
+                        LIXA_TRACE(("lixa_msg_trace: body["
+                                    "xa_commit_execs["
+                                    "xa_commit_exec["
+                                    "rmid=%d,flags=0x%lx,"
+                                    "rc=%d,r_state=%d,s_state=%d]]]\n",
+                                    xa_commit_exec->rmid,
+                                    xa_commit_exec->flags,
+                                    xa_commit_exec->rc,
+                                    xa_commit_exec->r_state,
+                                    xa_commit_exec->s_state));
+                    }
+                }
+                break;
+            default:
+                THROW(INVALID_STEP);
+        } /* switch (msg->header.pvs.step) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_trace_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

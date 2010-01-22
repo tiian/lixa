@@ -82,6 +82,16 @@ extern "C" {
     
     /**
      * Convenience function for @ref lixa_msg_trace : it display the content
+     * of a "commit" message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int lixa_msg_trace_commit(const struct lixa_msg_s *msg);
+
+
+    
+    /**
+     * Convenience function for @ref lixa_msg_trace : it display the content
      * of an "end" message
      * @param msg IN the message must be massaged
      * @return a reason code

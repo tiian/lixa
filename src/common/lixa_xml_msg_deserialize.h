@@ -85,6 +85,17 @@ extern "C" {
 
 
     /**
+     * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=commit, step=8
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_commit_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
+    /**
      * Deserialize an XML subtree containing a default answer message
      * @param cur IN reference to the XML subtree
      * @param answer OUT reference to the answer contained in the message

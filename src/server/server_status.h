@@ -334,6 +334,14 @@ struct payload_rsrmgr_s {
      * rc value as returned from xa_prepare
      */
     int                             xa_prepare_rc;
+    /**
+     * flags value as passed to xa_commit
+     */
+    long                            xa_commit_flags;
+    /**
+     * rc value as returned from xa_commit
+     */
+    int                             xa_commit_rc;
 };
 
 

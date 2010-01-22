@@ -159,8 +159,8 @@
 
 /**
  * Store the status of the current control thread is partecipating in the
- * transaction; this is the volatile local copy, the persistent remote copy
- * is stored on the server side
+ * transaction; the client keeps a volatile copy, the server stores the
+ * persistent copy
  */
 struct common_status_conthr_s {
     /**
@@ -187,6 +187,12 @@ struct common_status_conthr_s {
      * commit
      */
     int   will_rollback;
+    /**
+     * Boolean value:
+     * the Application Program transaction is completed and there are no more
+     * tasks related to it
+     */
+    int   finished;
 };
 
 
@@ -245,6 +251,7 @@ extern "C" {
         memset(&csc->xid, 0, sizeof(XID));
         csc->will_commit = FALSE;
         csc->will_rollback = FALSE;
+        csc->finished = FALSE;
         return;
     }
 
