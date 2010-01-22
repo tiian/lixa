@@ -245,7 +245,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
 
             finished = finished && (record.rc == XA_OK);
 
-            /* the algorithm used to determine *txrc must be reviewed
+            /* @@@ the algorithm used to determine *txrc must be reviewed
                (see bug 2936618) */
             switch (record.rc) {
                 case XA_HEURHAZ:
@@ -803,7 +803,7 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
     TRY {
         struct lixa_msg_s msg; 
         size_t buffer_size = 0;
-        int fd;
+        int fd, break_prepare;
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
@@ -839,9 +839,11 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
             LIXA_TRACE(("lixa_xa_prepare: xa_prepare_entry(xid, %d, 0x%lx) = "
                         "%d\n", record.rmid, record.flags, record.rc));
 
+            break_prepare = TRUE;
             switch (record.rc) {
                 case XA_OK:
                     csr->xa_s_state = XA_STATE_S3;
+                    break_prepare = FALSE;
                     break;
                 case XA_RDONLY:
                 case XA_RBROLLBACK:
@@ -853,6 +855,7 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
                     csr->xa_s_state = XA_STATE_S0;
+                    break_prepare = FALSE;
                     break;                    
                 case XAER_ASYNC:
                     *txrc = TX_FAIL;
@@ -880,7 +883,7 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
             record.t_state = csr->xa_t_state;
             g_array_append_val(msg.body.prepare_8.xa_prepare_execs, record);
 
-            if (XA_OK != record.rc) {
+            if (break_prepare) {
                 /* interrupt first phase commit, we must rollback the global
                    transaction */
                 *commit = FALSE;

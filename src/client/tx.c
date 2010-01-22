@@ -68,7 +68,10 @@ int tx_close(void)
 int tx_commit(void)
 {
     int txrc = TX_FAIL;
-    lixa_tx_commit(&txrc);
+    int begin_new = FALSE;
+    lixa_tx_commit(&txrc, &begin_new);
+    if (begin_new)
+        lixa_tx_begin(&txrc);
     return txrc;
 }
 

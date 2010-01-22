@@ -196,6 +196,7 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                      , INVALID_STEP3
                      , INVALID_STEP4
                      , INVALID_STEP5
+                     , INVALID_STEP6
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -285,6 +286,17 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                         THROW(INVALID_STEP5);
                 }
                 break;
+            case LIXA_MSG_VERB_COMMIT: /* commit */
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        g_array_free(msg->body.commit_8.xa_commit_execs,
+                                     TRUE);
+                        msg->body.commit_8.xa_commit_execs = NULL;
+                        break;
+                    default:
+                        THROW(INVALID_STEP6);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -297,6 +309,7 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case INVALID_STEP3:
             case INVALID_STEP4:
             case INVALID_STEP5:
+            case INVALID_STEP6:
             case INVALID_VERB:
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
                 break;
