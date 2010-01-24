@@ -25,7 +25,7 @@
         <trnmgr>local_2</trnmgr>
       </trnmgrs>
       <rsrmgrs>
-        <rsrmgr>OracleXE</rsrmgr>
+        <rsrmgr>LIXAdummyRM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="GT71">

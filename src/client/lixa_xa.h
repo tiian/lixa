@@ -75,9 +75,12 @@ extern "C" {
      * Commit work performed on behalf of the transaction manager
      * @param cs IN reference to the status of the calling client
      * @param txrc OUT return code prepared for tx_commit/tx_rollback call
+     * @param one_phase_commit IN boolean value:
+     *            TRUE = the T.M. is performing a ONE phase commit
+     *            FALSE = the T.M. is performing a standard TWO phase commit
      * @return a reason code
      */
-    int lixa_xa_commit(client_status_t *cs, int *txrc);
+    int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit);
     
     
     

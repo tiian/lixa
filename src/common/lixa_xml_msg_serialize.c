@@ -267,6 +267,10 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
         strncpy(buffer, prefix, LIXA_MSG_XML_PREFIX_DIGITS);
         
         *msg_len = offset;
+        
+        LIXA_TRACE(("lixa_msg_serialize: serialized message is |%*.*s|\n",
+                    *msg_len, *msg_len, buffer));
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {

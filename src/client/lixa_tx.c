@@ -281,7 +281,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
     TRY {
         int txstate, next_txstate, commit = TRUE;
         client_status_t *cs;
-        int rwrm = 0;
+        int rwrm = 0, one_phase_commit;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -315,13 +315,16 @@ int lixa_tx_commit(int *txrc, int *begin_new)
 
         /* bypass prepare if there is only one resource manager */
         if (rwrm > 1) {
+            one_phase_commit = FALSE;
             if (LIXA_RC_OK != (ret_cod = lixa_xa_prepare(cs, txrc, &commit)))
                 THROW(XA_PREPARE_ERROR);
-        }
+        } else
+            one_phase_commit = TRUE;
 
         if (commit) {
             LIXA_TRACE(("lixa_tx_commit: prepare OK, go on with commit...\n"));
-            if (LIXA_RC_OK != (ret_cod = lixa_xa_commit(cs, txrc)))
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_commit(
+                                   cs, txrc, one_phase_commit)))
                 THROW(XA_COMMIT_ERROR);
             switch (*txrc) {
                 case TX_OK:
