@@ -86,7 +86,7 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
     TRY {
         xmlChar *tmp = NULL;
 
-        LIXA_TRACE(("lixa_msg_deserialize: deserializing |%*.*s|\n",
+        LIXA_TRACE(("lixa_msg_deserialize: deserializing message |%*.*s|\n",
                     buffer_len, buffer_len, buffer));
         if (NULL == (doc = xmlReadMemory(
                          buffer, buffer_len, "buffer.xml", NULL, 0)))

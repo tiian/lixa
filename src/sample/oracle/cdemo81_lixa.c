@@ -203,7 +203,7 @@ char *argv[];
     disconnect_server();
     return OCI_ERROR;
   }
-
+  
   /* set flag to be used to drop the table */
   tab_exists = TRUE;
 

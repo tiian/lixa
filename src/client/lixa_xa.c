@@ -182,7 +182,7 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
 
 
 
-int lixa_xa_commit(client_status_t *cs, int *txrc)
+int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
 {
     enum Exception { INVALID_XA_RC
                      , ASYNC_NOT_IMPLEMENTED
@@ -200,8 +200,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         int finished = TRUE;
-        int prepared = 0;
-        
+
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
 
@@ -210,18 +209,13 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
         msg.header.pvs.verb = LIXA_MSG_VERB_COMMIT;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
-        /* compute how many resource manager are in "prepared" (S3) state */
-        for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
-            struct common_status_rsrmgr_s *csr = &g_array_index(
-                cs->rmstates, struct common_status_rsrmgr_s, i);
-            if (XA_STATE_S3 == csr->xa_s_state)
-                prepared++;
-        }        
-        
         msg.body.commit_8.xa_commit_execs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_commit_8_xa_commit_execs_s),
             global_ccc.actconf.rsrmgrs->len);
+        
+        LIXA_TRACE(("lixa_xa_commit: one_phase_commit = %d\n",
+                    one_phase_commit));
         
         /* loop on all the resource managers and call xa_commit function */
         *txrc = TX_OK;
@@ -232,12 +226,20 @@ int lixa_xa_commit(client_status_t *cs, int *txrc)
                 cs->rmstates, struct common_status_rsrmgr_s, i);
             struct lixa_msg_body_commit_8_xa_commit_execs_s record;
 
-            /* bypass resource managers are not prepared */
-            if (XA_STATE_S3 != csr->xa_s_state)
-                continue;
-            
             record.rmid = i;
-            record.flags = (prepared > 0) ? TMNOFLAGS : TMONEPHASE;
+            
+            /* bypass resource managers are not prepared */
+            if ((one_phase_commit && XA_STATE_S2 != csr->xa_s_state) ||
+                (!one_phase_commit && XA_STATE_S3 != csr->xa_s_state)) {
+                    LIXA_TRACE(("lixa_xa_commit: rmid = %d, "
+                                "one_phase_commit = %d, "
+                                "xa_s_state = %d, bypassing...\n",
+                                record.rmid, one_phase_commit,
+                                csr->xa_s_state));
+                    continue;
+                }
+                    
+            record.flags = one_phase_commit ? TMONEPHASE : TMNOFLAGS;
             record.rc = act_rsrmgr->xa_switch->xa_commit_entry(
                 client_status_get_xid(cs), record.rmid, record.flags);
             LIXA_TRACE(("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) = "
@@ -1030,7 +1032,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
                must not be performed */
             if (act_rsrmgr->xa_switch->flags & TMREGISTER) {
                 LIXA_TRACE(("lixa_xa_start: resource manager # %d registers "
-                            "dynamically, skipped...\n", i));
+                            "dynamically, skipping...\n", i));
                 continue;
             }
             record.rmid = i;
@@ -1092,7 +1094,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
                must not be performed */
             if (act_rsrmgr->xa_switch->flags & TMREGISTER) {
                 LIXA_TRACE(("lixa_xa_start: resource manager # %d registers "
-                            "dynamically, skipped...\n", i));
+                            "dynamically, skipping...\n", i));
                 continue;
             }
             
