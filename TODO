@@ -8,6 +8,11 @@ These was already tryed :(
 - removing tables creation before INSERT transaction: it does not solve the    
   issue
 
+I did not get a sample, but from Oracle documentation it seems:
+xaoEnv must be used in place of OCIEnvInit
+xaoSvcCtx must be used in place of OCIHandleAlloc  with flag OCI_HTYPE_SVCCTX
+this should be the next trial
+
 The problem must be investigated deeply and deeply... 
 
 
