@@ -1,20 +1,5 @@
-for some strange (!) reason, xa_prepare returns XA_RDONLY with Oracle XE...
-and data are not committed inside the table
-... this must be investigated...
-These was already tryed :(
-- privileges:
-  grant select on dba_pending_transactions to hr
-  it's documented and necessary, but it does not solve the issue
-- removing tables creation before INSERT transaction: it does not solve the    
-  issue
-
-I did not get a sample, but from Oracle documentation it seems:
-xaoEnv must be used in place of OCIEnvInit
-xaoSvcCtx must be used in place of OCIHandleAlloc  with flag OCI_HTYPE_SVCCTX
-this should be the next trial
-
-The problem must be investigated deeply and deeply... 
-
+cdemo81_sample commits, but crashes after commit... it should be an issue 
+related to bad Oracle programming and not to tx_commit itself!
 
 
 When server_manager_thread exits, the listener must be aware of this... 

@@ -56,14 +56,14 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixac_la_DEPENDENCIES = ../common/liblixab.la
 am_liblixac_la_OBJECTS = client_config.lo client_conn.lo \
-	client_status.lo lixa_tx.lo lixa_xa.lo tx.lo
+	client_status.lo lixa_ax.lo lixa_tx.lo lixa_xa.lo tx.lo
 liblixac_la_OBJECTS = $(am_liblixac_la_OBJECTS)
 liblixac_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(liblixac_la_LDFLAGS) $(LDFLAGS) -o $@
 liblixacmt_la_DEPENDENCIES = ../common/liblixabmt.la
 am_liblixacmt_la_OBJECTS = client_config.lo client_conn.lo \
-	client_status.lo lixa_tx.lo lixa_xa.lo tx.lo
+	client_status.lo lixa_ax.lo lixa_tx.lo lixa_xa.lo tx.lo
 liblixacmt_la_OBJECTS = $(am_liblixacmt_la_OBJECTS)
 liblixacmt_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -229,10 +229,10 @@ noinst_HEADERS = client_config.h client_conn.h client_status.h lixa_tx.h \
 
 lib_LTLIBRARIES = liblixac.la liblixacmt.la
 liblixac_la_SOURCES = client_config.c client_conn.c \
-	client_status.c lixa_tx.c lixa_xa.c tx.c
+	client_status.c lixa_ax.c lixa_tx.c lixa_xa.c tx.c
 
 liblixacmt_la_SOURCES = client_config.c client_conn.c \
-	client_status.c lixa_tx.c lixa_xa.c tx.c
+	client_status.c lixa_ax.c lixa_tx.c lixa_xa.c tx.c
 
 AM_CPPFLAGS = -I$(srcdir)/../common 
 AM_CFLAGS = -Wall -fno-strict-aliasing
@@ -314,6 +314,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client_config.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client_conn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client_status.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_ax.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_tx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_xa.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tx.Plo@am__quote@

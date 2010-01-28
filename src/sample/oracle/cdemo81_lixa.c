@@ -153,22 +153,37 @@ char *argv[];
                        (dvoid * (*)(dvoid *, dvoid *, size_t))0,
                        (void (*)(dvoid *, dvoid *)) 0 );
 
+  /* Oracle's original code removed by LIXA project
   (void) OCIEnvInit( (OCIEnv **) &envhp, OCI_DEFAULT, (size_t) 0,
                      (dvoid **) 0 );
-
+  */
+  /* LIXA "equivalent" code */
+  envhp = xaoEnv(NULL);
+  fprintf(stderr, "xaoEnv returned %p\n", envhp);
+  
   (void) OCIHandleAlloc( (dvoid *) envhp, (dvoid **) &errhp, OCI_HTYPE_ERROR,
                    (size_t) 0, (dvoid **) 0);
 
   /* server contexts */
+  /* Oracle's original code removed by LIXA project
   (void) OCIHandleAlloc( (dvoid *) envhp, (dvoid **) &srvhp, OCI_HTYPE_SERVER,
                    (size_t) 0, (dvoid **) 0);
-
+  */
+  
+  /* Oracle's original code removed by LIXA project
   (void) OCIHandleAlloc( (dvoid *) envhp, (dvoid **) &svchp, OCI_HTYPE_SVCCTX,
                    (size_t) 0, (dvoid **) 0);
+  */
+  /* LIXA "equivalent" code */
+  svchp = xaoSvcCtx(NULL);
+  fprintf(stderr, "xaoSvcCtx returned %p\n",svchp);
 
+  /* Oracle's original code removed by LIXA project
   (void) OCIServerAttach( srvhp, errhp, (text *)"", strlen(""), 0);
-
+  */
+  
   /* set attribute server context in the service context */
+  /* Oracle's original code removed by LIXA project
   (void) OCIAttrSet( (dvoid *) svchp, OCI_HTYPE_SVCCTX, (dvoid *)srvhp,
                      (ub4) 0, OCI_ATTR_SERVER, (OCIError *) errhp);
 
@@ -189,13 +204,14 @@ char *argv[];
   (void) OCIAttrSet((dvoid *) svchp, (ub4) OCI_HTYPE_SVCCTX,
                    (dvoid *) authp, (ub4) 0,
                    (ub4) OCI_ATTR_SESSION, errhp);
+  */
 
   checkerr(errhp, OCIHandleAlloc( (dvoid *) envhp, (dvoid **) &stmthp,
            OCI_HTYPE_STMT, (size_t) 0, (dvoid **) 0));
 
   checkerr(errhp, OCIHandleAlloc( (dvoid *) envhp, (dvoid **) &stmthp1,
            OCI_HTYPE_STMT, (size_t) 0, (dvoid **) 0));
-
+  
   /* create the tables and insert the data */
   if (setup_tables(svchp, stmthp))
   {
@@ -314,11 +330,6 @@ char *argv[];
 
   for (;;)
   {
-      if (TX_OK != (txrc = tx_begin())) {
-          fprintf(stderr, "tx_begin error: %d\n", txrc);
-          exit(txrc);
-      }
-  
     /* Prompt for employee name.  Break on no name. */
     printf("\nEnter employee name (or CR to EXIT): ");
     fgets((char *) ename, (int) enamelen+1, stdin);
@@ -362,6 +373,12 @@ char *argv[];
     myfflush();
     sal_ind = (sal <= 0) ? -2 : 0;  /* set indicator variable */
 
+    /* LIXA project added code: start a new transaction */
+    if (TX_OK != (txrc = tx_begin())) {
+        fprintf(stderr, "tx_begin error: %d\n", txrc);
+        exit(txrc);
+    }
+  
     /*
      *  Prompt for the employee's department number, and verify
      *  that the entered department number is valid

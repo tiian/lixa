@@ -72,17 +72,23 @@ struct xid_t {
 };
 typedef struct xid_t XID;
 #endif /* XID_T_TYPE */
-
-
-
 /*
  * A value of -1 in formatID means that the XID is null.
  */
+
+
+
 /*
  * Declarations of routines by which RMs call TMs:
  */
-extern int ax_reg(int, XID *, long);
-extern int ax_unreg(int, long);
+/**
+ * Dynamically register a resource manager with a transaction manager
+ */
+extern int ax_reg(int rmid, XID *xid, long flags);
+/**
+ * Dynamically unregister a resource manager with a transaction manager
+ */
+extern int ax_unreg(int rmid, long flags);
 
 
 
