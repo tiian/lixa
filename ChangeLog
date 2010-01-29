@@ -1,4 +1,10 @@
 LOG:
+
+20100129 - 0.3.7 removed "Oracle's cdemo81 sample and its cdemo81_lixa derivated
+                 sample: no more intellectual property possible issues..."
+
+20100128 - 0.3.6 bug # 2907542 fix
+
 20100101 - 0.3.5 bug # 2907537 fix
 
 20091212 - 0.3.4 bug # 2912287 fix

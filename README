@@ -43,7 +43,7 @@ but to execute the sample too, the path is longer:
 	make install
 	sudo su - oracle
 	cd /tmp/lixa/bin
-	./cdemo81
+	./lixa_oracle_sample [delete]
 because the application must be executed by "oracle" user or you have to deal
 with Oracle's own permission (this is not a source for Oracle info
 unfortunately, so only very basic set-up is explained)

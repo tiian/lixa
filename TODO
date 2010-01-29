@@ -1,5 +1,3 @@
-cdemo81_sample commits, but crashes after commit... it should be an issue 
-related to bad Oracle programming and not to tx_commit itself!
 
 
 When server_manager_thread exits, the listener must be aware of this... 
