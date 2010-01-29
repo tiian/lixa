@@ -32,7 +32,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = cdemo81$(EXEEXT) cdemo81_lixa$(EXEEXT)
+bin_PROGRAMS = lixa_oracle_sample$(EXEEXT)
 subdir = src/sample/oracle
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -47,15 +47,10 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_cdemo81_OBJECTS = cdemo81.$(OBJEXT)
-cdemo81_OBJECTS = $(am_cdemo81_OBJECTS)
-cdemo81_LDADD = $(LDADD)
-cdemo81_DEPENDENCIES = ../../common/liblixabmt.la \
-	../../client/liblixacmt.la
-am_cdemo81_lixa_OBJECTS = cdemo81_lixa.$(OBJEXT)
-cdemo81_lixa_OBJECTS = $(am_cdemo81_lixa_OBJECTS)
-cdemo81_lixa_LDADD = $(LDADD)
-cdemo81_lixa_DEPENDENCIES = ../../common/liblixabmt.la \
+am_lixa_oracle_sample_OBJECTS = lixa_oracle_sample.$(OBJEXT)
+lixa_oracle_sample_OBJECTS = $(am_lixa_oracle_sample_OBJECTS)
+lixa_oracle_sample_LDADD = $(LDADD)
+lixa_oracle_sample_DEPENDENCIES = ../../common/liblixabmt.la \
 	../../client/liblixacmt.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -69,8 +64,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(cdemo81_SOURCES) $(cdemo81_lixa_SOURCES)
-DIST_SOURCES = $(cdemo81_SOURCES) $(cdemo81_lixa_SOURCES)
+SOURCES = $(lixa_oracle_sample_SOURCES)
+DIST_SOURCES = $(lixa_oracle_sample_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -205,8 +200,7 @@ AM_LDFLAGS = -lpthread @LIBLTDL@ @LDFLAGS_GMODULE@
 # as documented in Oracle books the transaction manager library with
 # ax_reg/ax_unreg functions must be linked before the Oracle client library
 LDADD = ../../common/liblixabmt.la ../../client/liblixacmt.la @ORACLE_OCI_LDFLAGS@
-cdemo81_SOURCES = cdemo81.c
-cdemo81_lixa_SOURCES = cdemo81_lixa.c
+lixa_oracle_sample_SOURCES = lixa_oracle_sample.c
 all: all-am
 
 .SUFFIXES:
@@ -268,12 +262,9 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-cdemo81$(EXEEXT): $(cdemo81_OBJECTS) $(cdemo81_DEPENDENCIES) 
-	@rm -f cdemo81$(EXEEXT)
-	$(LINK) $(cdemo81_OBJECTS) $(cdemo81_LDADD) $(LIBS)
-cdemo81_lixa$(EXEEXT): $(cdemo81_lixa_OBJECTS) $(cdemo81_lixa_DEPENDENCIES) 
-	@rm -f cdemo81_lixa$(EXEEXT)
-	$(LINK) $(cdemo81_lixa_OBJECTS) $(cdemo81_lixa_LDADD) $(LIBS)
+lixa_oracle_sample$(EXEEXT): $(lixa_oracle_sample_OBJECTS) $(lixa_oracle_sample_DEPENDENCIES) 
+	@rm -f lixa_oracle_sample$(EXEEXT)
+	$(LINK) $(lixa_oracle_sample_OBJECTS) $(lixa_oracle_sample_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -281,8 +272,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdemo81.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdemo81_lixa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_oracle_sample.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
