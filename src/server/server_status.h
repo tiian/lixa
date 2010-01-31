@@ -342,6 +342,14 @@ struct payload_rsrmgr_s {
      * rc value as returned from xa_commit
      */
     int                             xa_commit_rc;
+    /**
+     * flags value as passed to xa_rollback
+     */
+    long                            xa_rollback_flags;
+    /**
+     * rc value as returned from xa_rollback
+     */
+    int                             xa_rollback_rc;
 };
 
 

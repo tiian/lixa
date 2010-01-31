@@ -96,6 +96,8 @@ const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXEC =     (xmlChar *)"xa_open_exec";
 const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXECS =    (xmlChar *)"xa_open_execs";
 const xmlChar *LIXA_XML_MSG_TAG_XA_PREPARE_EXEC =  (xmlChar *)"xa_prepare_exec";
 const xmlChar *LIXA_XML_MSG_TAG_XA_PREPARE_EXECS = (xmlChar *)"xa_prepare_execs";
+const xmlChar *LIXA_XML_MSG_TAG_XA_ROLLBACK_EXEC = (xmlChar *)"xa_rollback_exec";
+const xmlChar *LIXA_XML_MSG_TAG_XA_ROLLBACK_EXECS =(xmlChar *)"xa_rollback_execs";
 const xmlChar *LIXA_XML_MSG_TAG_XA_START_EXEC =    (xmlChar *)"xa_start_exec";
 const xmlChar *LIXA_XML_MSG_TAG_XA_START_EXECS =   (xmlChar *)"xa_start_execs";
 

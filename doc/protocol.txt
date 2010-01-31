@@ -208,4 +208,26 @@ verb=6,step=8 -->			send xa_commit result
 					gives server information the
 					transaction finished
 
+***************************************************************************
+
+verb=7 (xa_rollback)
+
+  level: message level, version
+  verb:  xa_commit -> 7
+  step:  8
+
+  client->server message (send the xa_rollback result)
+  <msg level="1" verb="7" step="8">
+    <conthr finished="1"/>
+    <xa_rollback_execs>
+      <xa_rollback_exec rmid="0" flags="0" rc="0" r_state="?" s_state="?"/>
+      <xa_rollback_exec rmid="1" flags="0" rc="0" r_state="?" s_state="?"/>
+    </xa_rollback_execs>
+  </msg>
+
+client 			 server		description
+verb=7,step=8 -->			send xa_rollback result
+					gives server information the
+					transaction finished
+
 

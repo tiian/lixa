@@ -91,10 +91,9 @@ extern "C" {
      * @param commit IN boolean value:
      *                  TRUE = xa_end will be followed by xa_commit
      *                  FALSE = xa_end will be followed by xa_rollback
-     * @param rwrm OUT number of resource manager with read/write transaction
      * @return a reason code
      */
-    int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int *rwrm);
+    int lixa_xa_end(client_status_t *cs, int *txrc, int commit);
     
     
     

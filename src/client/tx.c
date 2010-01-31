@@ -96,8 +96,12 @@ int tx_open(void)
 
 int tx_rollback(void)
 {
-    /** @@@ must be fixed see bug 2907548 */
-    return TX_OK;
+    int txrc = TX_FAIL;
+    int begin_new = FALSE;
+    lixa_tx_rollback(&txrc, &begin_new);
+    if (begin_new)
+        lixa_tx_begin(&txrc);
+    return txrc;
 }
 
 

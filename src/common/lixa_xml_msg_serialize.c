@@ -83,6 +83,8 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                      , INVALID_PREPARE_STEP
                      , SERIALIZE_COMMIT_8_ERROR
                      , INVALID_COMMIT_STEP
+                     , SERIALIZE_ROLLBACK_8_ERROR
+                     , INVALID_ROLLBACK_STEP
                      , INVALID_VERB
                      , BUFFER_TOO_SHORT3
                      , NONE } excp;
@@ -248,6 +250,19 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                         THROW(INVALID_COMMIT_STEP);
                 }
                 break;
+            case LIXA_MSG_VERB_ROLLBACK:
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        if (LIXA_RC_OK != (
+                                ret_cod =
+                                lixa_msg_serialize_rollback_8(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_ROLLBACK_8_ERROR);
+                        break;
+                    default:
+                        THROW(INVALID_ROLLBACK_STEP);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -291,6 +306,7 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
             case SERIALIZE_PREPARE_8_ERROR:
             case SERIALIZE_PREPARE_16_ERROR:
             case SERIALIZE_COMMIT_8_ERROR:
+            case SERIALIZE_ROLLBACK_8_ERROR:
                 break;
             case INVALID_OPEN_STEP:
             case INVALID_CLOSE_STEP:
@@ -298,6 +314,7 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
             case INVALID_END_STEP:
             case INVALID_PREPARE_STEP:
             case INVALID_COMMIT_STEP:
+            case INVALID_ROLLBACK_STEP:
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
@@ -988,6 +1005,97 @@ int lixa_msg_serialize_prepare_16(const struct lixa_msg_s *msg,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_prepare_16/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_serialize_rollback_8(const struct lixa_msg_s *msg,
+                                  char *buffer,
+                                  size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT1
+                     , BUFFER_TOO_SHORT2
+                     , BUFFER_TOO_SHORT3
+                     , BUFFER_TOO_SHORT4
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_serialize_rollback_8\n"));
+    TRY {
+        int used_chars;
+        guint i;
+        
+        /* <conthr> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%d\"/>",
+                              LIXA_XML_MSG_TAG_CONTHR,
+                              LIXA_XML_MSG_PROP_FINISHED,
+                              msg->body.rollback_8.conthr.finished);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT1);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        /* <xa_rollback_execs> */
+        used_chars = snprintf(buffer + *offset, *free_chars, "<%s>",
+                              LIXA_XML_MSG_TAG_XA_ROLLBACK_EXECS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT2);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        /* <xa_rollback_exec> */
+        for (i=0; i<msg->body.rollback_8.xa_rollback_execs->len; ++i) {
+            struct lixa_msg_body_rollback_8_xa_rollback_execs_s
+                *xa_rollback_exec;
+            xa_rollback_exec = &g_array_index(
+                msg->body.rollback_8.xa_rollback_execs,
+                struct lixa_msg_body_rollback_8_xa_rollback_execs_s, i);
+            used_chars = snprintf(buffer + *offset, *free_chars,
+                                  "<%s %s=\"%d\" %s=\"0x%lx\" "
+                                  "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
+                                  LIXA_XML_MSG_TAG_XA_ROLLBACK_EXEC,
+                                  LIXA_XML_MSG_PROP_RMID,
+                                  xa_rollback_exec->rmid,
+                                  LIXA_XML_MSG_PROP_FLAGS,
+                                  xa_rollback_exec->flags,
+                                  LIXA_XML_MSG_PROP_RC,
+                                  xa_rollback_exec->rc,
+                                  LIXA_XML_MSG_PROP_R_STATE,
+                                  xa_rollback_exec->r_state,
+                                  LIXA_XML_MSG_PROP_S_STATE,
+                                  xa_rollback_exec->s_state);
+            if (used_chars >= *free_chars)
+                THROW(BUFFER_TOO_SHORT3);
+            *free_chars -= used_chars;
+            *offset += used_chars;
+        }
+        /* </xa_rollback_execs> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "</%s>",
+                              LIXA_XML_MSG_TAG_XA_ROLLBACK_EXECS);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT4);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT1:
+            case BUFFER_TOO_SHORT2:
+            case BUFFER_TOO_SHORT3:
+            case BUFFER_TOO_SHORT4:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_serialize_rollback_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
