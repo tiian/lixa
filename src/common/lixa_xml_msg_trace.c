@@ -70,6 +70,7 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
                      , TRACE_END_ERROR
                      , TRACE_PREPARE_ERROR
                      , TRACE_COMMIT_ERROR
+                     , TRACE_ROLLBACK_ERROR
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -105,6 +106,10 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
                 if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_commit(msg)))
                     THROW(TRACE_COMMIT_ERROR);
                 break;
+            case LIXA_MSG_VERB_ROLLBACK: /* rollback */
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_rollback(msg)))
+                    THROW(TRACE_ROLLBACK_ERROR);
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -118,6 +123,7 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
             case TRACE_END_ERROR:
             case TRACE_PREPARE_ERROR:
             case TRACE_COMMIT_ERROR:
+            case TRACE_ROLLBACK_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
@@ -464,6 +470,68 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_trace_prepare/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_trace_rollback(const struct lixa_msg_s *msg)
+{
+    enum Exception { INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_trace_rollback\n"));
+    TRY {
+        guint i;
+        
+        switch (msg->header.pvs.step) {
+            case 8:
+                if (NULL != msg->body.rollback_8.xa_rollback_execs) {
+                    LIXA_TRACE(("lixa_msg_trace: body["
+                                "conthr[finished=%d]]\n",
+                                msg->body.rollback_8.conthr.finished));
+                    for (i=0; i<msg->body.rollback_8.xa_rollback_execs->len;
+                         ++i) {
+                        struct lixa_msg_body_rollback_8_xa_rollback_execs_s
+                            *xa_rollback_exec =
+                            &g_array_index(
+                                msg->body.rollback_8.xa_rollback_execs,
+                                struct
+                                lixa_msg_body_rollback_8_xa_rollback_execs_s,
+                                i);
+                        LIXA_TRACE(("lixa_msg_trace: body["
+                                    "xa_rollback_execs["
+                                    "xa_rollback_exec["
+                                    "rmid=%d,flags=0x%lx,"
+                                    "rc=%d,r_state=%d,s_state=%d]]]\n",
+                                    xa_rollback_exec->rmid,
+                                    xa_rollback_exec->flags,
+                                    xa_rollback_exec->rc,
+                                    xa_rollback_exec->r_state,
+                                    xa_rollback_exec->s_state));
+                    }
+                }
+                break;
+            default:
+                THROW(INVALID_STEP);
+        } /* switch (msg->header.pvs.step) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_trace_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

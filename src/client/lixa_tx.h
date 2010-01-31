@@ -104,6 +104,18 @@ extern "C" {
 
     
     /**
+     * This function implements the real logic underlaying @ref tx_rollback
+     * X/Open function
+     * @param txrc OUT tx_* return code
+     * @param begin_new OUT is a TRUE (boolean) value if a new transaction
+     *        must be started with @ref lixa_tx_begin
+     * @return a return code 
+     */
+    int lixa_tx_rollback(int *txrc, int *begin_new);
+
+
+    
+    /**
      * This function implements the real logic underlaying
      * @ref tx_set_commit_return X/Open function
      * @param txrc OUT tx_* return code

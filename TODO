@@ -9,4 +9,5 @@ testing and debugging:
 2. activate the trace
 3. pick-up the return code of every resource manager
 4. reproduce the behavior with any "test resource manager"
-
+The same source should be compiled 3 times to produce 3 different resource
+managers and avoid pesky matters related to static variables.

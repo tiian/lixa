@@ -118,6 +118,10 @@
  */
 #define LIXA_MSG_VERB_COMMIT    6
 /**
+ * Id assigned to verb "rollback"
+ */
+#define LIXA_MSG_VERB_ROLLBACK  7
+/**
  * Default increment for message step
  */
 #define LIXA_MSG_STEP_INCR      8
@@ -252,6 +256,14 @@ extern const xmlChar *LIXA_XML_MSG_TAG_XA_PREPARE_EXEC;
  * Label used to specify "xa_prepare_execs" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_XA_PREPARE_EXECS;
+/**
+ * Label used to specify "xa_rollback_exec" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_XA_ROLLBACK_EXEC;
+/**
+ * Label used to specify "xa_rollback_execs" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_XA_ROLLBACK_EXECS;
 /**
  * Label used to specify "xa_start_exec" tag
  */
@@ -736,6 +748,65 @@ struct lixa_msg_body_commit_8_s {
 
 
 /**
+ * Control thread status
+ */
+struct lixa_msg_body_rollback_8_conthr_s {
+    /**
+     * TRUE = yes
+     * FALSE = no
+     */
+    int   finished;
+};
+
+
+
+/**
+ * Convenience struct for @ref lixa_msg_body_rollback_8_s
+ * xid is not stored in this structure because it was already stored by the
+ * server after receiving step 8 message, see @ref lixa_msg_body_rollback_8_s
+ */
+struct lixa_msg_body_rollback_8_xa_rollback_execs_s {
+    /**
+     * rmid parameter as passed to xa_rollback routine
+     */
+    int             rmid;
+    /**
+     * flags parameter as passed to xa_rollback routine
+     */
+    long            flags;
+    /**
+     * return code of xa_rollback routine
+     */
+    int             rc;
+    /**
+     * the new resource manager state after xa_rollback execution
+     */
+    int             r_state;
+    /**
+     * the new transaction branch state after xa_rollback execution
+     */
+    int             s_state;
+};
+
+
+
+/**
+ * Message body for verb "rollback", step "8"
+ */
+struct lixa_msg_body_rollback_8_s {
+    /**
+     * Control thread information
+     */
+    struct lixa_msg_body_rollback_8_conthr_s    conthr;
+    /**
+     * Parameters and return value of xa_rollback executions
+     */
+    GArray                                   *xa_rollback_execs;
+};
+
+
+
+/**
  * This structure maps the messages flowing between LIXA client (lixac) and
  * LIXA server (lixad). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
@@ -763,6 +834,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_prepare_8_s       prepare_8;
         struct lixa_msg_body_prepare_16_s      prepare_16;
         struct lixa_msg_body_commit_8_s        commit_8;
+        struct lixa_msg_body_rollback_8_s      rollback_8;
     } body;
 };
 

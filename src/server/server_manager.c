@@ -549,6 +549,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
                      , SERVER_XA_END_ERROR
                      , SERVER_XA_PREPARE_ERROR
                      , SERVER_XA_COMMIT_ERROR
+                     , SERVER_XA_ROLLBACK_ERROR
                      , INVALID_VERB
                      , STORE_VERB_STEP_ERROR
                      , LIXA_MSG_FREE_ERROR
@@ -613,6 +614,11 @@ int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
                                        ts, &lmi, block_id)))
                     THROW(SERVER_XA_COMMIT_ERROR)
                 break;
+            case LIXA_MSG_VERB_ROLLBACK:
+                if (LIXA_RC_OK != (ret_cod = server_xa_rollback(
+                                       ts, &lmi, block_id)))
+                    THROW(SERVER_XA_ROLLBACK_ERROR)
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -638,6 +644,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
             case SERVER_XA_END_ERROR:
             case SERVER_XA_PREPARE_ERROR:
             case SERVER_XA_COMMIT_ERROR:
+            case SERVER_XA_ROLLBACK_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INVALID_STATUS;

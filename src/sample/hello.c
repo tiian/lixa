@@ -52,7 +52,10 @@ int main(int argc, char *argv[])
     printf("lixa hello: tx_set_transaction_control(): %d\n",
            tx_set_transaction_control(TX_UNCHAINED));
     printf("lixa hello: tx_begin(): %d\n", tx_begin());
+    /*
     printf("lixa hello: tx_commit(): %d\n", tx_commit());
+    */
+    printf("lixa hello: tx_rollback(): %d\n", tx_rollback());
     printf("lixa hello: tx_close(): %d\n", tx_close());
     printf("lixa hello after second tx_close()\n");
     return 0;

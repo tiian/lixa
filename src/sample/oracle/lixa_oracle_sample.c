@@ -166,9 +166,15 @@ int main(int argc, char *argv[])
     } else
         fprintf(stderr, "First arg is not 'DELETE', bypassing DELETE "
                 "statement...\n");
-        
+
+    /*
     if (TX_OK != (txrc = tx_commit())) {
         fprintf(stderr, "tx_commit error: %d\n", txrc);
+        exit(txrc);
+    }
+    */
+    if (TX_OK != (txrc = tx_rollback())) {
+        fprintf(stderr, "tx_rollback error: %d\n", txrc);
         exit(txrc);
     }
 
