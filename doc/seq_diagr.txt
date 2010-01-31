@@ -37,7 +37,7 @@ A.P.		T.M.		R.M.		lixad
 |		[]<-------------[]		|		|
 |		[]		|		|		|lixa_xa_
 |		[] save xa_commit result	|		|rollback
-|		[]--------------|-------------->[] discard	|
+|   TX_*	[]--------------|-------------->[] discard	|
 []<-------------[]		|		[] data		V
 []
 |
@@ -62,4 +62,33 @@ if any resource manager fails "xa_prepare()" there is no reason to try
 "xa_rollback" step
 
 ******************************************************************************
+
+tx_rollback() sequence diagram
+
+
+A.P.		T.M.		R.M.		lixad
+|
+[] tx_rollback()|		|		|
+[]------------->[] save rollback intent	 	|		A
+|		[]--------------|-------------->[] save		|
+|		[] xa_end()	|		[] {1}		|lixa_xa_
+|		[]------------->[]		|		|end
+|		|		[]		|		|
+|		[]<------------	[]		|		|
+|		[] save xa_end result		|		|
+|		[]--------------|-------------->[] save		|
+|		[] xa_rollback()|		[]		V
+|		[]------------->[]		|		A
+|		[]		[]		|		|
+|		[]<-------------[]		|		|lixa_xa_
+|		[] save xa_rollback result	|		|rollback
+|   TX_*	[]--------------|-------------->[] discard	|
+[]<-------------[]		|		[] data		|
+[]		|		|		|		V
+|		|		|		|		|
+|		|		|		|		|
+
+{1}
+rollback intent does not need synchronization on the Lixa server side
+because the absence of a persistence commit info means rollback
 
