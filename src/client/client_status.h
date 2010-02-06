@@ -39,12 +39,19 @@
 
 
 
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#ifdef HAVE_TIME_H
+# include <time.h>
+#endif
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
 
 
 
+#include <tx.h>
 #include <lixa_trace.h>
 #include <lixa_common_status.h>
 #include <client_config.h>
@@ -84,6 +91,20 @@ struct client_status_s {
      * State of the partecipating resource managers
      */
     GArray                         *rmstates;
+    /**
+     * The state of the transaction (with relationship to @ref tx_info and
+     * @ref tx_set_transaction_timeout )
+     */
+    TRANSACTION_STATE               tx_state;
+    /**
+     * Number of seconds between @ref tx_begin and @ref tx_commit or
+     * @ref tx_rollback ; 0 means not timeout
+     */
+    TRANSACTION_TIMEOUT             tx_timeout;
+    /**
+     * Tiemout time of the current transaction
+     */
+    time_t                          tx_timeout_time;
 };
 
 typedef struct client_status_s client_status_t;
@@ -169,7 +190,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-
+    
     /**
      * Initialize a new "object" of type client status
      * @param cs OUT object reference
@@ -263,10 +284,89 @@ extern "C" {
      * @param cs IN/OUT object reference
      * @param xid IN a transaction ID 
      */
-    static inline void client_status_set_xid(client_status_t *cs,
-                                             const XID *xid) {
+    static inline void
+    client_status_set_xid(client_status_t *cs, const XID *xid) {
         cs->state.xid = *xid; }
 
+
+
+    /**
+     * Get the tx_state property; this seems a duplicate of txstate, but the
+     * flaw is in TX specification (take a look to tx.h for the values of
+     * this property
+     */
+    static inline TRANSACTION_STATE
+    client_status_get_tx_state(client_status_t *cs) {
+        return cs->tx_state; }
+
+
+    
+    /**
+     * Set the tx_state property; this seems a duplicate of txstate, but the
+     * flaw is in TX specification (take a look to tx.h for the values of
+     * this property
+     */
+    static inline void client_status_set_tx_state(client_status_t *cs,
+                                                  TRANSACTION_STATE tx_state) {
+        cs->tx_state = tx_state; }
+
+
+    
+    /**
+     * Get the tx_timeout property
+     */
+    static inline TRANSACTION_TIMEOUT
+    client_status_get_tx_timeout(client_status_t *cs) {
+        return cs->tx_timeout; }
+
+
+    
+    /**
+     * Set the tx_timeout property
+     */
+    static inline void client_status_set_tx_timeout(
+        client_status_t *cs, TRANSACTION_TIMEOUT tx_timeout) {
+        cs->tx_timeout = tx_timeout; }
+
+
+    
+    /**
+     * Get the tx_timeout_time property
+     */
+    static inline time_t
+    client_status_get_tx_timeout_time(client_status_t *cs) {
+        return cs->tx_timeout_time; }
+    
+
+    
+    /**
+     * Set the tx_timeout_time property
+     */
+    static inline void client_status_set_tx_timeout_time(
+        client_status_t *cs, time_t tx_timeout_time) {
+        cs->tx_timeout_time = tx_timeout_time; }
+    
+
+
+    /**
+     * Is timeout time expired?
+     * @param cs IN client status reference
+     * @return a boolean value, TRUE means timeout is expired
+     */
+    static inline int client_status_is_tx_timeout_time(client_status_t *cs) {
+        struct timeval tv;
+        if (TX_TIMEOUT_ROLLBACK_ONLY == cs->tx_state)
+            return TRUE;
+        else {
+            gettimeofday(&tv, NULL);
+            if (tv.tv_sec > cs->tx_timeout_time) {
+                cs->tx_state = TX_TIMEOUT_ROLLBACK_ONLY;
+                return TRUE;
+            } else
+                return FALSE;
+        }
+    }
+        
 
     
     /**

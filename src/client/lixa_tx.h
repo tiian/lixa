@@ -138,6 +138,18 @@ extern "C" {
 
 
     
+    /**
+     * This function implements the real logic underlaying
+     * @ref tx_set_transaction_timeout X/Open function
+     * @param txrc OUT tx_* return code
+     * @param timeout IN transaction timeout (seconds)
+     * @return a return code 
+     */
+    int lixa_tx_set_transaction_control(int *txrc,
+                                        TRANSACTION_TIMEOUT timeout);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
