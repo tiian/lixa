@@ -112,6 +112,7 @@ void client_status_init(client_status_t *cs)
     common_status_conthr_init(&cs->state);
     cs->rmstates = g_array_new(FALSE, FALSE,
                                sizeof(struct common_status_rsrmgr_s));
+    cs->tx_timeout = 0;
     LIXA_TRACE(("client_status_init: end\n"));
     return;
 }

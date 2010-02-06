@@ -69,6 +69,7 @@ int lixa_tx_begin(int *txrc)
                      , PROTOCOL_ERROR
                      , INVALID_STATUS1
                      , LIXA_XA_START_ERROR
+                     , GETTIMEOFDAY_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -80,6 +81,7 @@ int lixa_tx_begin(int *txrc)
         int txstate, next_txstate;
         client_status_t *cs;
         XID xid;
+        TRANSACTION_TIMEOUT timeout;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -121,8 +123,20 @@ int lixa_tx_begin(int *txrc)
                                cs, txrc, &xid, next_txstate)))
             THROW(LIXA_XA_START_ERROR);
         
+        /* is there a timeout set? */
+        if (0 < (timeout = client_status_get_tx_timeout(cs))) {
+            struct timeval tv;
+            LIXA_TRACE(("lixa_tx_begin: this transaction has a timeout "
+                        "of %ld seconds\n", timeout));
+            if (0 != gettimeofday(&tv, NULL))
+                THROW(GETTIMEOFDAY_ERROR);
+            /* set tx_timeout_time */
+            client_status_set_tx_timeout_time(cs, tv.tv_sec + (time_t)timeout);
+        }
         /* update the TX state, now TX_STATE_S0 */
         client_status_set_txstate(cs, next_txstate);
+        /* update tx_state */
+        client_status_set_tx_state(cs, TX_ACTIVE);
         
         THROW(NONE);
     } CATCH {
@@ -141,6 +155,9 @@ int lixa_tx_begin(int *txrc)
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case LIXA_XA_START_ERROR:
+                break;
+            case GETTIMEOFDAY_ERROR:
+                ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -282,7 +299,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         int txstate, next_txstate, commit = TRUE;
         client_status_t *cs;
         int one_phase_commit;
-        
+
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
@@ -310,19 +327,28 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         }
         LIXA_TRACE(("lixa_tx_commit: txstate = S%d\n", txstate));
 
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, TRUE)))
-            THROW(XA_END_ERROR);
+        /* check if the there is a timeout */
+        if (client_status_is_tx_timeout_time(cs)) {
+            LIXA_TRACE(("lixa_tx_commit: this transaction is in state "
+                        "TX_TIMEOUT_ROLLBACK_ONLY and cannot be committed; "
+                        "rollbacking...\n", txstate));
+            commit = FALSE;
+        } else {
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, TRUE)))
+                THROW(XA_END_ERROR);
 
-        /* bypass prepare if there is only one resource manager */
-        if (global_ccc.actconf.rsrmgrs->len > 1) {
-            one_phase_commit = FALSE;
-            if (LIXA_RC_OK != (ret_cod = lixa_xa_prepare(cs, txrc, &commit)))
-                THROW(XA_PREPARE_ERROR);
-        } else
-            one_phase_commit = TRUE;
+            /* bypass prepare if there is only one resource manager */
+            if (global_ccc.actconf.rsrmgrs->len > 1) {
+                one_phase_commit = FALSE;
+                if (LIXA_RC_OK != (
+                        ret_cod = lixa_xa_prepare(cs, txrc, &commit)))
+                    THROW(XA_PREPARE_ERROR);
+            } else
+                one_phase_commit = TRUE;
+        }
 
         if (commit) {
-            LIXA_TRACE(("lixa_tx_commit: prepare OK, go on with commit...\n"));
+            LIXA_TRACE(("lixa_tx_commit: go on with commit...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_xa_commit(
                                    cs, txrc, one_phase_commit)))
                 THROW(XA_COMMIT_ERROR);
@@ -349,8 +375,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                     THROW(INVALID_TXRC1);
             } /* switch */
         } else {
-            LIXA_TRACE(("lixa_tx_commit: prepare KO, "
-                        "go on with rollback...\n"));
+            LIXA_TRACE(("lixa_tx_commit: go on with rollback...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc)))
                 THROW(XA_ROLLBACK_ERROR);
             switch (*txrc) {
@@ -867,6 +892,79 @@ int lixa_tx_set_transaction_control(int *txrc,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_set_transaction_control/TX_*=%d/excp=%d/"
+                "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_tx_set_transaction_timeout(int *txrc,
+                                    TRANSACTION_TIMEOUT timeout)
+{
+    enum Exception { COLL_GET_CS_ERROR
+                     , PROTOCOL_ERROR
+                     , INVALID_STATUS
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    *txrc = TX_FAIL;
+
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("lixa_tx_set_transaction_timeout\n"));
+    TRY {
+        int txstate;
+        client_status_t *cs;
+        
+        /* retrieve a reference to the thread status */
+        ret_cod = client_status_coll_get_cs(&global_csc, &cs);
+        switch (ret_cod) {
+            case LIXA_RC_OK: /* nothing to do */
+                break;
+            case LIXA_RC_OBJ_NOT_FOUND:
+                /* status not found -> tx_open did not succed -> protocol
+                   error */
+                THROW(PROTOCOL_ERROR);
+            default:
+                THROW(COLL_GET_CS_ERROR);
+        }
+
+        /* check TX state (see Table 7-1) */
+        txstate = client_status_get_txstate(cs);
+        switch (txstate) {
+            case TX_STATE_S0:
+                THROW(PROTOCOL_ERROR);
+            case TX_STATE_S1:
+            case TX_STATE_S2:
+            case TX_STATE_S3:
+            case TX_STATE_S4:
+                break;
+            default:
+                THROW(INVALID_STATUS);
+        }
+
+        
+                
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case COLL_GET_CS_ERROR:
+                break;
+            case PROTOCOL_ERROR:
+                *txrc = TX_PROTOCOL_ERROR;
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                *txrc = TX_OK;
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_tx_set_transaction_timeout/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
     return ret_cod;
 }
