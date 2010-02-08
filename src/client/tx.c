@@ -79,8 +79,9 @@ int tx_commit(void)
 
 int tx_info(TXINFO *info)
 {
-    /** @@@ must be fixed see bug 2907545 */
-    return TX_OK;
+    int txrc = TX_FAIL;
+    lixa_tx_info(&txrc, info);
+    return txrc;
 }
 
 
@@ -126,8 +127,9 @@ int tx_set_transaction_control(TRANSACTION_CONTROL control)
 
 int tx_set_transaction_timeout(TRANSACTION_TIMEOUT timeout)
 {
-    /** @@@ must be fixed see bug 2907562 */
-    return TX_OK;
+    int txrc = TX_FAIL;
+    lixa_tx_set_transaction_timeout(&txrc, timeout);
+    return txrc;
 }
     
 

@@ -52,6 +52,7 @@ void *a_thread(void *useless)
         tx_close();
 /*        tx_close();   */
     }
+    return NULL;
 }
 
 
@@ -70,7 +71,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "***************** %d *******************", load);
         sleep(3);
     }
-/*
+
     pthread_create(&foo, NULL, a_thread, NULL);
     pthread_create(&foo, NULL, a_thread, NULL);
     pthread_create(&foo, NULL, a_thread, NULL);

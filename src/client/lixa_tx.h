@@ -94,6 +94,17 @@ extern "C" {
 
     
     /**
+     * This function implements the real logic underlaying @ref tx_info
+     * X/Open function
+     * @param txrc OUT tx_* return code
+     * @param info OUT TXINFO structure
+     * @return a return code 
+     */
+    int lixa_tx_info(int *txrc, TXINFO *info);
+
+
+    
+    /**
      * This function implements the real logic underlaying @ref tx_open
      * X/Open function
      * @param txrc OUT tx_* return code
@@ -145,7 +156,7 @@ extern "C" {
      * @param timeout IN transaction timeout (seconds)
      * @return a return code 
      */
-    int lixa_tx_set_transaction_control(int *txrc,
+    int lixa_tx_set_transaction_timeout(int *txrc,
                                         TRANSACTION_TIMEOUT timeout);
 
 

@@ -456,6 +456,102 @@ int lixa_tx_commit(int *txrc, int *begin_new)
 
 
 
+int lixa_tx_info(int *txrc, TXINFO *info)
+{
+    enum Exception { COLL_GET_CS_ERROR
+                     , PROTOCOL_ERROR
+                     , INVALID_STATUS
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    *txrc = TX_FAIL;
+
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("lixa_tx_info\n"));
+    TRY {
+        int txstate;
+        client_status_t *cs;
+        
+        /* retrieve a reference to the thread status */
+        ret_cod = client_status_coll_get_cs(&global_csc, &cs);
+        switch (ret_cod) {
+            case LIXA_RC_OK: /* nothing to do */
+                break;
+            case LIXA_RC_OBJ_NOT_FOUND:
+                /* status not found -> tx_open did not succed -> protocol
+                   error */
+                THROW(PROTOCOL_ERROR);
+            default:
+                THROW(COLL_GET_CS_ERROR);
+        }
+
+        /* check TX state (see Table 7-1) */
+        txstate = client_status_get_txstate(cs);
+        switch (txstate) {
+            case TX_STATE_S0:
+                THROW(PROTOCOL_ERROR);
+            case TX_STATE_S1:
+            case TX_STATE_S2:
+            case TX_STATE_S3:
+            case TX_STATE_S4:
+                break;
+            default:
+                THROW(INVALID_STATUS);
+        }
+
+        if (NULL != info) {
+#ifdef _TRACE
+            char *xid_str;
+#endif
+            memcpy(&info->xid, client_status_get_xid(cs), sizeof(XID));
+            /* Lixa supports only this option; it's constant */
+            info->when_return = TX_COMMIT_COMPLETED;
+            if (TX_STATE_S1 == txstate || TX_STATE_S3 == txstate)
+                info->transaction_control = TX_UNCHAINED;
+            else
+                info->transaction_control = TX_CHAINED;
+            /* update tx_timeout and tx_state */
+            client_status_is_tx_timeout_time(cs);
+            info->transaction_timeout = client_status_get_tx_timeout(cs);
+            info->transaction_state = client_status_get_tx_state(cs);
+#ifdef _TRACE
+            xid_str = xid_serialize(&info->xid);
+            LIXA_TRACE(("lixa_tx_info: xid='%s', when_return=%ld, "
+                        "transaction_control=%ld, transaction_timeout=%ld, "
+                        "transaction_state=%ld\n", xid_str, info->when_return,
+                        info->transaction_control, info->transaction_timeout,
+                        info->transaction_state));
+            free(xid_str);
+#endif
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case COLL_GET_CS_ERROR:
+                break;
+            case PROTOCOL_ERROR:
+                *txrc = TX_PROTOCOL_ERROR;
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                *txrc = TX_OK;
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_tx_info/TX_*=%d/excp=%d/"
+                "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_tx_open(int *txrc)
 {
     enum Exception { CLIENT_STATUS_COLL_GET_CS_ERROR
@@ -942,8 +1038,9 @@ int lixa_tx_set_transaction_timeout(int *txrc,
                 THROW(INVALID_STATUS);
         }
 
+        /* set the new value for transaction timeout */
+        client_status_set_tx_timeout(cs, timeout);
         
-                
         THROW(NONE);
     } CATCH {
         switch (excp) {

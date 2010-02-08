@@ -1,5 +1,3 @@
-tx_set_transaction_timeout must be tested with tx_commit
-
 When server_manager_thread exits, the listener must be aware of this... 
 
 Implement a "test resource manager" can be driven by "open string" with the

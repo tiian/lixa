@@ -75,10 +75,10 @@ transaction running with the same JOB attribute, inside different server
 thread.
 This is OK until a recovery pending status happens.
 To recover a transaction on the client side, is NECESSARY, the same Application
-Program from the same host, comes back and contact the Transaction Manager.
+Program from the same host, comes back and contacts the Transaction Manager.
 Apache may be a good example.
 This is the scenario:
-Apache is configured with max 20 servers.
+Apache is configured with max servers = 20.
 The Transaction Manager is configured with 4 threads.
 Apache is fully loaded, 20 servers are running, 20 Application Programs are
 running, 20 transactions are in-flight.
@@ -90,7 +90,7 @@ Another Application Program running inside Apache contacts the Transaction
 Manager.
 The listener chooses the thread with the minimum load: it may be different
 from the thread is keeping the "RECOVERY PENDING" transaction.
-To avoid races conditions and statistical locks (the right job is served by
+To avoid race conditions and statistical locks (the right job is served by
 the wrong thread forever...), the first thing a thread must check for an 
 incoming client is:
 1. check if I (thread) have got a "RECOVERY PENDING" transaction for this job
@@ -194,7 +194,7 @@ These facts are true:
 - memory mapped pages can be transferred to disk before synch is requested
 - power supply can vanish in the middle of a disk block writing
 
-These protocol is safe:
+This protocol is safe:
 - there are two physical files for every logical status file
 - every file is an array of records
 - every record is delimited by two special fields:

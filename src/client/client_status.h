@@ -355,7 +355,9 @@ extern "C" {
      */
     static inline int client_status_is_tx_timeout_time(client_status_t *cs) {
         struct timeval tv;
-        if (TX_TIMEOUT_ROLLBACK_ONLY == cs->tx_state)
+        if (0 == cs->tx_timeout_time)
+            return FALSE;
+        else if (TX_TIMEOUT_ROLLBACK_ONLY == cs->tx_state)
             return TRUE;
         else {
             gettimeofday(&tv, NULL);
