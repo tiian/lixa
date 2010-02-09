@@ -132,6 +132,22 @@ These rules must be applied to shared table:
   from the shared table; it's responsability of the thread to complete the 
   recovery or insert a new record...  
 
+Shared table implementation:
+- first level : GMutex: used to protect the access to the table itself
+- first level = GTree (balanced binary trees): used to look-up job string
+- second level = GArray (array): used to look-up thread id after the job has
+                 been resolved
+- third level = GQueue (double ended queue): used to iterate over all the
+                blocks (transactions) must be recovered
+The recovery pending table is a 3 levels structure (cube) must accessed 
+following this order: job thread block
+It must be realized in an object oriented fashion because it's used in 
+completely different scopes:
+- server restart: the table is created from scratch analyzing status file
+- client crash: the table is update with a new record
+- client arrival: the table is consulted and updated if necessary (recovery
+                  performed)
+
 ******************************************
 
 TRANSACTION MANAGERS, RESOURCE MANAGERS and PROFILES
