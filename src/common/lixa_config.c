@@ -63,10 +63,6 @@
 
 
 
-
-const char *LIXA_CLIENT_CONFIG_DEFAULT_FILE = "/etc/lixac_conf.xml";
-const char *LIXA_SERVER_CONFIG_DEFAULT_FILE = "/etc/lixad_conf.xml";
-
 const xmlChar *LIXA_XML_CONFIG_LISTENER = (xmlChar *)"listener";
 const xmlChar *LIXA_XML_CONFIG_CLIENT = (xmlChar *)"client";
 const xmlChar *LIXA_XML_CONFIG_SERVER = (xmlChar *)"server";

@@ -4,8 +4,10 @@ AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
+  etc/Makefile
   src/Makefile
   src/common/Makefile
+  src/common/lixa_inst_conf.c
   src/client/Makefile
   src/client/switch/Makefile
   src/client/switch/lixa/Makefile

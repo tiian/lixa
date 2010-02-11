@@ -35,7 +35,7 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = src/common
 DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+	$(srcdir)/Makefile.in $(srcdir)/lixa_inst_conf.c.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -44,7 +44,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = lixa_inst_conf.c
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -56,7 +56,7 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixab_la_LIBADD =
 am_liblixab_la_OBJECTS = lixa_common_status.lo lixa_config.lo \
-	lixa_errors.lo lixa_trace.lo lixa_xml_msg.lo \
+	lixa_errors.lo lixa_inst_conf.lo lixa_trace.lo lixa_xml_msg.lo \
 	lixa_xml_msg_deserialize.lo lixa_xml_msg_serialize.lo \
 	lixa_xml_msg_trace.lo
 liblixab_la_OBJECTS = $(am_liblixab_la_OBJECTS)
@@ -65,7 +65,7 @@ liblixab_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(liblixab_la_LDFLAGS) $(LDFLAGS) -o $@
 liblixabmt_la_LIBADD =
 am_liblixabmt_la_OBJECTS = lixa_common_status.lo lixa_config.lo \
-	lixa_errors.lo lixa_trace.lo lixa_xml_msg.lo \
+	lixa_errors.lo lixa_inst_conf.lo lixa_trace.lo lixa_xml_msg.lo \
 	lixa_xml_msg_deserialize.lo lixa_xml_msg_serialize.lo \
 	lixa_xml_msg_trace.lo
 liblixabmt_la_OBJECTS = $(am_liblixabmt_la_OBJECTS)
@@ -216,16 +216,18 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_HEADERS = lixa_common_status.h lixa_config.h lixa_defines.h \
-		lixa_errors.h lixa_trace.h lixa_xml_msg.h \
+		lixa_errors.h lixa_inst_conf.h lixa_trace.h lixa_xml_msg.h \
 		lixa_xml_msg_deserialize.h lixa_xml_msg_serialize.h \
 		lixa_xml_msg_trace.h xa.h
 
 lib_LTLIBRARIES = liblixab.la liblixabmt.la
 liblixab_la_SOURCES = lixa_common_status.c lixa_config.c lixa_errors.c \
+		lixa_inst_conf.c \
 		lixa_trace.c lixa_xml_msg.c lixa_xml_msg_deserialize.c \
 		lixa_xml_msg_serialize.c lixa_xml_msg_trace.c
 
 liblixabmt_la_SOURCES = lixa_common_status.c lixa_config.c lixa_errors.c \
+		lixa_inst_conf.c \
 		lixa_trace.c lixa_xml_msg.c lixa_xml_msg_deserialize.c \
 		lixa_xml_msg_serialize.c lixa_xml_msg_trace.c
 
@@ -265,6 +267,8 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+lixa_inst_conf.c: $(top_builddir)/config.status $(srcdir)/lixa_inst_conf.c.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
@@ -306,6 +310,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_common_status.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_config.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_errors.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_inst_conf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_trace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_xml_msg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_xml_msg_deserialize.Plo@am__quote@

@@ -177,16 +177,21 @@ int client_config(client_config_coll_t *ccc)
         if (NULL != tmp_str && -1 != (fd = open(tmp_str, O_RDONLY))) {
             file_name = tmp_str;
         } else {
-            tmp_str = LIXA_CLIENT_CONFIG_DEFAULT_FILE;
+            file_name = LIXA_CLIENT_CONFIG_INSTDEF_FILE;
             LIXA_TRACE(("client_config: '%s' environment variable not found, "
-                        "using default config file '%s' for this client\n",
-                        LIXA_CONFIG_FILE_ENV_VAR, tmp_str));
-            if (-1 == (fd = open(tmp_str, O_RDONLY))) {
-                LIXA_TRACE(("client_config: file %s is not readable, throwing "
-                            "error\n", LIXA_CLIENT_CONFIG_DEFAULT_FILE));
-                THROW(OPEN_CONFIG_ERROR);
-            } else {
-                file_name = tmp_str;
+                        "using default installation config file '%s' for this "
+                        "client\n", LIXA_CONFIG_FILE_ENV_VAR, file_name));
+            if (-1 == (fd = open(file_name, O_RDONLY))) {
+                file_name = LIXA_CLIENT_CONFIG_SYSDEF_FILE;
+                LIXA_TRACE(("client_config: default installation config file "
+                            "'%s' is not available, using default system "
+                            "config file '%s' for this client\n",
+                            LIXA_CLIENT_CONFIG_INSTDEF_FILE, file_name));
+                if (-1 == (fd = open(file_name, O_RDONLY))) {
+                    LIXA_TRACE(("client_config: file %s is not readable, "
+                                "throwing error\n", file_name));
+                    THROW(OPEN_CONFIG_ERROR);
+                }
             }
         }
         if (-1 == (ret_cod = close(fd)))

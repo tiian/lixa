@@ -3537,7 +3537,7 @@ fi
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/common/Makefile src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/oracle/Makefile src/extra/Makefile src/server/Makefile src/sample/Makefile src/sample/oracle/Makefile doxygen.conf"
+ac_config_files="$ac_config_files Makefile etc/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/oracle/Makefile src/extra/Makefile src/server/Makefile src/sample/Makefile src/sample/oracle/Makefile doxygen.conf"
 
 
 # Include libltdl stuff
@@ -23104,8 +23104,10 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "etc/Makefile") CONFIG_FILES="$CONFIG_FILES etc/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "src/common/Makefile") CONFIG_FILES="$CONFIG_FILES src/common/Makefile" ;;
+    "src/common/lixa_inst_conf.c") CONFIG_FILES="$CONFIG_FILES src/common/lixa_inst_conf.c" ;;
     "src/client/Makefile") CONFIG_FILES="$CONFIG_FILES src/client/Makefile" ;;
     "src/client/switch/Makefile") CONFIG_FILES="$CONFIG_FILES src/client/switch/Makefile" ;;
     "src/client/switch/lixa/Makefile") CONFIG_FILES="$CONFIG_FILES src/client/switch/lixa/Makefile" ;;
