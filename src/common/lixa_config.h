@@ -51,6 +51,10 @@
 
 
 
+#include <lixa_inst_conf.h>
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -61,18 +65,6 @@
 #define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_COMMON_CONFIG
 
 
-
-/**
- * This is the path of the default server config file to search for (system
- * configuration)
- */
-extern const char *LIXA_SERVER_CONFIG_DEFAULT_FILE;
-
-/**
- * This is the path of the default client config file to search for (system
- * configuration)
- */
-extern const char *LIXA_CLIENT_CONFIG_DEFAULT_FILE;
 
 /**
  * Label used to specify "listener" tag
