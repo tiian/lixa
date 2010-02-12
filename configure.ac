@@ -4,6 +4,8 @@ AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
+  etc/lixac_conf.xml
+  etc/lixad_conf.xml
   etc/Makefile
   src/Makefile
   src/common/Makefile
@@ -16,6 +18,7 @@ AC_CONFIG_FILES([
   src/server/Makefile
   src/sample/Makefile
   src/sample/oracle/Makefile
+  var/Makefile
   doxygen.conf
 ])
 
@@ -24,6 +27,10 @@ AC_LIBLTDL_INSTALLABLE([src/extra/libltdl])
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL([src/extra/libltdl])
 AC_CONFIG_SUBDIRS([src/extra/libltdl])
+
+# Installation PATH
+test "x$prefix" = "xNONE" && prefix="/opt/lixa"
+test "x$exec_prefix" = "xNONE" -a "x$prefix" != "xNONE" && exec_prefix=$prefix
 
 # Include Oracle test
 m4_include(m4include/ax_lib_oracle_oci.m4)
@@ -43,6 +50,11 @@ LT_LIXAC_REVISION=0
 LT_LIXAB_CURRENT=0
 LT_LIXAB_AGE=0
 LT_LIXAB_REVISION=0
+
+# Expanded variables can be used in C code and XML files
+EXPANDED_SYSCONFDIR=$(eval echo $sysconfdir)
+EXPANDED_LOCALSTATEDIR=$(eval echo $localstatedir)
+EXPANDED_LIBDIR=$(eval echo $libdir)
 
 AC_PRESERVE_HELP_ORDER
 AC_ARG_ENABLE([debug],
@@ -122,6 +134,9 @@ AC_SUBST(LDFLAGS_GTHREAD)
 AC_SUBST(LDFLAGS_XML2)
 AC_SUBST(LTDLINCL)
 AC_SUBST(LIBLTDL)
+AC_SUBST(EXPANDED_SYSCONFDIR)
+AC_SUBST(EXPANDED_LOCALSTATEDIR)
+AC_SUBST(EXPANDED_LIBDIR)
 
 AC_OUTPUT
 

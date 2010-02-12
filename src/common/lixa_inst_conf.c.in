@@ -51,7 +51,5 @@
 
 
 const char *LIXA_INSTALL_BASE_PATH="@prefix@";
-const char *LIXA_CLIENT_CONFIG_INSTDEF_FILE = "@prefix@/lixac_conf.xml";
-const char *LIXA_SERVER_CONFIG_INSTDEF_FILE = "@prefix@/lixad_conf.xml";
-const char *LIXA_CLIENT_CONFIG_SYSDEF_FILE = "/etc/lixac_conf.xml";
-const char *LIXA_SERVER_CONFIG_SYSDEF_FILE = "/etc/lixad_conf.xml";
+const char *LIXA_CLIENT_CONFIG_SYSTEM_FILE = "@EXPANDED_SYSCONFDIR@/lixac_conf.xml";
+const char *LIXA_SERVER_CONFIG_SYSTEM_FILE = "@EXPANDED_SYSCONFDIR@/lixad_conf.xml";

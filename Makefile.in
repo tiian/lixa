@@ -99,6 +99,9 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+EXPANDED_LIBDIR = @EXPANDED_LIBDIR@
+EXPANDED_LOCALSTATEDIR = @EXPANDED_LOCALSTATEDIR@
+EXPANDED_SYSCONFDIR = @EXPANDED_SYSCONFDIR@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 GREP = @GREP@
@@ -198,7 +201,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = etc src
+SUBDIRS = etc src var
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

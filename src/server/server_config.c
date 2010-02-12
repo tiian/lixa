@@ -104,17 +104,11 @@ int server_config(struct server_config_s *sc,
             -1 != (fd = open(config_filename, O_RDONLY))) {
             file_name = config_filename;
         } else {
-            file_name = LIXA_SERVER_CONFIG_INSTDEF_FILE;
+            file_name = LIXA_SERVER_CONFIG_SYSTEM_FILE;
             if (-1 == (fd = open(file_name, O_RDONLY))) {
-                LIXA_TRACE(("server_config/file '%s' is not readable, trying "
-                            "with file '%s'...\n", file_name,
-                            LIXA_SERVER_CONFIG_SYSDEF_FILE));
-                file_name = LIXA_SERVER_CONFIG_SYSDEF_FILE;
-                if (-1 == (fd = open(file_name, O_RDONLY))) {
-                    LIXA_TRACE(("server_config/file %s is not readable, "
-                                "throwing error\n", file_name));
-                    THROW(OPEN_CONFIG_ERROR);
-                }
+                LIXA_TRACE(("server_config/file %s is not readable, "
+                            "throwing error\n", file_name));
+                THROW(OPEN_CONFIG_ERROR);
             }
         }
         if (-1 == (ret_cod = close(fd)))

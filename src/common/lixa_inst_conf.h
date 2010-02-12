@@ -57,28 +57,16 @@
 extern const char *LIXA_INSTALL_BASE_PATH;
 
 /**
- * This is the path of the default server config file to search for (install
+ * This is the path of the system server config file to search for (install
  * configuration)
  */
-extern const char *LIXA_SERVER_CONFIG_INSTDEF_FILE;
+extern const char *LIXA_SERVER_CONFIG_SYSTEM_FILE;
 
 /**
- * This is the path of the default client config file to search for (install
+ * This is the path of the system client config file to search for (install
  * configuration)
  */
-extern const char *LIXA_CLIENT_CONFIG_INSTDEF_FILE;
-
-/**
- * This is the path of the default server config file to search for (system
- * configuration)
- */
-extern const char *LIXA_SERVER_CONFIG_SYSDEF_FILE;
-
-/**
- * This is the path of the default client config file to search for (system
- * configuration)
- */
-extern const char *LIXA_CLIENT_CONFIG_SYSDEF_FILE;
+extern const char *LIXA_CLIENT_CONFIG_SYSTEM_FILE;
 
 
 

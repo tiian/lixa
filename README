@@ -21,7 +21,7 @@ Example: my libxml2 header files are rooted at /usr/include/libxml2
 
 You must set LIXA_TRACE_MASK environment variable according to values 
 described in file src/common/lixa_trace.h to see debug output messages
-	export LIXA_TRACE_MASK="0xffff"
+	export LIXA_TRACE_MASK="0xffffffff"
 to enable all trace messages (very verbose)
 
 If you really want to disable trace messages at source code level, use
@@ -32,7 +32,44 @@ operating environment too :-)
 If you want to insert extra debug code at source code level, use
 	./configure --enable-debug
 
-On my Ubuntu systems, to build Oracle XE cdemo81 sample, I use something like 
+LIXA tries to install itself in /opt/lixa path; this is not GNU compliant but
+it's suggested by POSIX.
+The standard layout is:
+	/opt/lixa/etc      config files
+	/opt/lixa/bin      programs
+	/opt/lixa/lib      libraries
+	/opt/lixa/var      state files
+you need root privileges to install in /opt; LIXA does NOT need root privileges
+to run, so you can perform something different:
+	1. as root, create a new user (i.e. "lixa")
+	2. as root, create a new directory: /opt/lixa
+	3. as root, change the ownership of /opt/lixa and assign it to user
+	   lixa (chown /opt/lixa lixa)
+	4. as root, switch to lixa user
+	5. compile and install LIXA inside /opt/lixa path
+	6. you just created a LIXA administrator (user in charge of 
+	   configuration and maintenance) and an installation every user
+	   can use on client side
+
+configure script understands "--prefix" and "--exec-prefix" options.
+If you want to install LIXA and discard it, use something like:
+	./configure --prefix=/tmp/lixa
+If you want to use LIXA a few more, use something like:
+	./configure --prefix=$HOME/lixa
+and you will get a layout like this:
+	$HOME/lixa/etc
+	$HOME/lixa/bin
+	$HOME/lixa/lib
+	$HOME/lixa/var
+If you want a "GNU like" installation, you may use something like this:
+	./configure --prefix=/ --exec-prefix=/usr/local
+and you will get a layout like this:
+	/etc
+	/usr/local/bin
+	/usr/local/lib
+	/var
+
+On my Ubuntu systems, to build Oracle XE related stuff, I use something like 
 this:
 	./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
 	make
