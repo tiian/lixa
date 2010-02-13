@@ -407,6 +407,10 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * "g_checksum_new" function error
  */
 #define LIXA_RC_G_CHECKSUM_NEW_ERROR           -303
+/**
+ * "g_checksum_get_string" function error
+ */
+#define LIXA_RC_G_CHECKSUM_GET_STRING_ERROR    -304
 
 
 

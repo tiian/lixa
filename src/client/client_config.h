@@ -61,6 +61,7 @@
 
 
 #include <lixa_trace.h>
+#include <lixa_config.h>
 #include <xa.h>
 
 
@@ -233,6 +234,10 @@ struct client_config_coll_s {
      */
     xmlDocPtr                    lixac_conf;
     /**
+     * Hex format of the MD5 digest of lixac_conf file
+     */
+    md5_digest_hex_t             lixac_conf_digest;
+    /**
      * It contains the subset of actual configuration for this client
      */
     struct actual_config_s       actconf;
@@ -287,15 +292,6 @@ extern "C" {
 
 
     
-    /* @@@ obsolete, remove
-     * Initialize a new "object" of type client config
-     * @param ccc OUT object reference
-     * @return a standardized return code
-    int client_config_coll_init(client_config_coll_t *ccc);
-     */
-
-    
-
     /**
      * Load configuration from environment vars and XML files
      * @param ccc OUT the object will contain the client configuration

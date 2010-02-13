@@ -48,6 +48,9 @@
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 
 
 
@@ -168,6 +171,24 @@ extern const xmlChar *LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY;
 
 
 
+/**
+ * Number of bytes necessary to store an MD5 digest
+ */
+#define MD5_DIGEST_LENGTH   16
+
+
+
+/**
+ * This type is used to store a binary raw MD5 digest 
+ */
+typedef guint8 md5_digest_t[MD5_DIGEST_LENGTH];
+/**
+ * This type is used to store an hex printable MD5 digest
+ */
+typedef char md5_digest_hex_t[MD5_DIGEST_LENGTH * 2 + 1];
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -194,6 +215,16 @@ extern "C" {
 
 
 
+    /**
+     * Compute the digest of the file associated to a passed file descriptor
+     * @param fd IN file descriptor
+     * @param digest OUT computed digest
+     * @return a standardized return code
+     */
+    int lixa_config_digest(int fd, md5_digest_hex_t digest);
+
+    
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

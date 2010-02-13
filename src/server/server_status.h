@@ -51,13 +51,11 @@
 #ifdef HAVE_STDINT_H
 # include <stdint.h>
 #endif
-#ifdef HAVE_GLIB_H
-# include <glib.h>
-#endif
 
 
 
 #include <lixa_common_status.h>
+#include <lixa_config.h>
 #include <lixa_xml_msg.h>
 #include <xa.h>
 
@@ -124,18 +122,6 @@
  * Number of (verb,step) values are stored by the server
  */
 #define PAYLOAD_HEADER_VERB_STEP  5
-
-/**
- * Number of bytes necessary to store an MD5 digest
- */
-#define MD5_DIGEST_LENGTH   16
-
-
-
-/**
- * This type is used to store an MD5 digest inside a status file record
- */
-typedef guint8 md5_digest_t[MD5_DIGEST_LENGTH];
 
 
 

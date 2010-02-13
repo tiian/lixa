@@ -30,8 +30,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEMPLATE_H
-# define TEMPLATE_H
+#ifndef LIXA_INST_CONF_H
+# define LIXA_INST_CONF_H
 
 
 
@@ -91,5 +91,5 @@ extern "C" {
 
 
 
-#endif /* TEMPLATE_H */
+#endif /* LIXA_INST_CONF_H */
 

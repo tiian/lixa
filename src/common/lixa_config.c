@@ -40,11 +40,26 @@
 #ifdef HAVE_LIBXML_PARSER_H
 # include <libxml/parser.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+#ifdef HAVE_SYS_MMAN_H
+# include <sys/mman.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
-# include <netinet/in.h>
+#ifdef HAVE_SYS_STAT_H
+# include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
 #endif
 
 
@@ -176,3 +191,71 @@ int lixa_config_retrieve_port(xmlNode *cur_node, in_port_t *port)
     return ret_cod;
 }
 
+
+
+int lixa_config_digest(int fd, md5_digest_hex_t digest)
+{
+    enum Exception { FSTAT_ERROR
+                     , MMAP_ERROR
+                     , G_CHECKSUM_NEW_ERROR
+                     , G_CHECKSUM_GET_STRING_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    struct stat buf;
+    guchar *content = NULL;
+    GChecksum *checksum = NULL;
+    
+    LIXA_TRACE(("lixa_config_digest\n"));
+    TRY {
+        const gchar *tmp = NULL;
+        
+        /* retrieve file statistics */
+        if (0 != fstat(fd, &buf))
+            THROW(FSTAT_ERROR);
+        /* map memory to file for checksum computation */
+        if (NULL == (content =
+                     mmap(NULL, buf.st_size, PROT_READ, MAP_SHARED, fd, 0)))
+            THROW(MMAP_ERROR);
+        /* create a new checksum */
+        if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))
+            THROW(G_CHECKSUM_NEW_ERROR);
+        g_checksum_update(checksum, content, buf.st_size);
+        if (NULL == (tmp = g_checksum_get_string(checksum)))
+            THROW(G_CHECKSUM_GET_STRING_ERROR);
+        strncpy(digest, (const char *)tmp, MD5_DIGEST_LENGTH * 2);
+        digest[MD5_DIGEST_LENGTH * 2] = '\0';
+        LIXA_TRACE(("lixa_config_digest: config file digest is '%s'\n",
+                    digest));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case FSTAT_ERROR:
+                ret_cod = LIXA_RC_FSTAT_ERROR;
+                break;
+            case MMAP_ERROR:
+                ret_cod = LIXA_RC_MMAP_ERROR;
+                break;
+            case G_CHECKSUM_NEW_ERROR:
+                ret_cod = LIXA_RC_G_CHECKSUM_NEW_ERROR;
+                break;
+            case G_CHECKSUM_GET_STRING_ERROR:
+                ret_cod = LIXA_RC_G_CHECKSUM_GET_STRING_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* recovery allocated resources */
+        if (NULL != content)
+            munmap(content, buf.st_size);
+        if (NULL != checksum)
+            g_checksum_free(checksum);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_config_digest/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}

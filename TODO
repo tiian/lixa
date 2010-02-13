@@ -1,4 +1,4 @@
-perform digest of lixac_conf.xml and store on server; when recovery happens
+store MD5 lixac_conf.xml digest on server; when recovery happens
 check the digests; on server side only warning; on client side, stop 
 processing if digests do no match (Request for Enhancement: reload config
 from server, recovery, discard config read from server, use config on file,
@@ -15,3 +15,6 @@ testing and debugging:
 4. reproduce the behavior with any "test resource manager"
 The same source should be compiled 3 times to produce 3 different resource
 managers and avoid pesky matters related to static variables.
+
+Remove all @@@ from source code: every one was/is an "open point"
+
