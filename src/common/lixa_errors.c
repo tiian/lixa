@@ -246,6 +246,9 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_G_CHECKSUM_NEW_ERROR:
             return "ERROR: 'g_checksum_new' function returned an "
                 "error condition";
+        case LIXA_RC_G_CHECKSUM_GET_STRING_ERROR:
+            return "ERROR: 'g_checksum_get_string' function returned an "
+                "error condition";
         default:
             return "ERROR: unknown error";
     } /* switch (ret_cod) */

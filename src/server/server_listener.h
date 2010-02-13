@@ -30,8 +30,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEMPLATE_H
-#define TEMPLATE_H
+#ifndef SERVER_LISTENER_H
+#define SERVER_LISTENER_H
 
 
 
@@ -42,6 +42,10 @@
 #ifdef HAVE_ARPA_INET_H
 # include <arpa/inet.h>
 #endif
+
+
+
+#include <server_status.h>
 
 
 
@@ -151,4 +155,4 @@ extern "C" {
 
 
 
-#endif /* TEMPLATE_H */
+#endif /* SERVER_LISTENER_H */

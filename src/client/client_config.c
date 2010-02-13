@@ -72,47 +72,11 @@
 
 
 
-/* @@@ obsolete, remove
-int client_config_coll_init(client_config_coll_t *ccc)
-{
-    enum Exception { NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("client_config_coll_init\n"));
-    TRY {
-        ccc->configured = FALSE;
-        ccc->profile = NULL;
-        memset(&ccc->serv_addr, 0, sizeof(struct sockaddr_in));
-        ccc->actconf.trnmgr = NULL;
-        ccc->actconf.rsrmgrs = g_array_new(
-            FALSE, FALSE, sizeof(struct act_rsrmgr_config_s));
-        ccc->trnmgrs = g_array_new(FALSE, FALSE, sizeof(
-                                       struct trnmgr_config_s));
-        ccc->rsrmgrs = g_array_new(FALSE, FALSE, sizeof(
-                                       struct rsrmgr_config_s));
-        ccc->profiles = g_array_new(FALSE, FALSE, sizeof(
-                                        struct profile_config_s));     
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        }
-    }
-    LIXA_TRACE(("client_config_coll_init/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-*/
-
-
 int client_config(client_config_coll_t *ccc)
 {
     enum Exception { STRDUP_ERROR
                      , OPEN_CONFIG_ERROR
+                     , LIXA_CONFIG_DIGEST_ERROR
                      , CLOSE_ERROR
                      , XML_READ_FILE_ERROR
                      , XML_DOC_GET_ROOT_ELEMENT_ERROR
@@ -187,6 +151,10 @@ int client_config(client_config_coll_t *ccc)
                 THROW(OPEN_CONFIG_ERROR);
             }
         }
+        if (LIXA_RC_OK != (ret_cod = lixa_config_digest(
+                               fd, ccc->lixac_conf_digest)))
+            THROW(LIXA_CONFIG_DIGEST_ERROR);
+        
         if (-1 == (ret_cod = close(fd)))
             THROW(CLOSE_ERROR);
         
@@ -245,6 +213,8 @@ int client_config(client_config_coll_t *ccc)
                 break;
             case OPEN_CONFIG_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case LIXA_CONFIG_DIGEST_ERROR:
                 break;
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
