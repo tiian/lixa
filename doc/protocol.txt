@@ -30,7 +30,7 @@ verb=1 (xa_open)
 
   client->server message (question)
   <msg level="1" verb="1" step="8">
-    <client profile="VZ67"/>
+    <client profile="VZ67" conf_digest="59530bdf33659b29e73d4adb9f9f6552"/>
     <rsrmgrs>
       <rsrmgr rmid="0" name="dummyrm" xa_name="lixa_dummyrm"/>
       <rsrmgr rmid="1" name="randomrm" xa_name="lixa_randomrm"/>

@@ -66,6 +66,7 @@
 
 const xmlChar *LIXA_XML_MSG_HEADER =               (xmlChar *)"<?xml";
 const xmlChar *LIXA_XML_MSG_PROP_COMMIT =          (xmlChar *)"commit";
+const xmlChar *LIXA_XML_MSG_PROP_CONF_DIGEST =     (xmlChar *)"conf_digest";
 const xmlChar *LIXA_XML_MSG_PROP_FINISHED =        (xmlChar *)"finished";
 const xmlChar *LIXA_XML_MSG_PROP_FLAGS =           (xmlChar *)"flags";
 const xmlChar *LIXA_XML_MSG_PROP_LEVEL =           (xmlChar *)"level";
