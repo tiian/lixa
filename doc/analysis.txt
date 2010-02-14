@@ -13,7 +13,8 @@ The JOB concept is related to the logical container of a set of transactions.
 Examples.
 The default JOB associated to a transaction is composed as:
 
-source_IP_address|md5digest(lixac_real_path)|profile
+source_IP_address|md5digest(lixac_real_path||profile)|substr(profile,0,32)|\0
+      15                          32                       16               1
 
 lixac_real_path: pathconf("/", _PC_PATH_MAX) to allocate buffer
 realpath("/etc/lixac_conf.xml", buffer) to retrieve the real filename

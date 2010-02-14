@@ -34,6 +34,8 @@
 
 
 
+#include <lixa_errors.h>
+#include <lixa_trace.h>
 #include <server_recovery.h>
 
 
@@ -43,3 +45,29 @@
 # undef LIXA_TRACE_MODULE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_SERVER_RECOVERY
+
+
+
+int server_recovery_table_init(server_recovery_table_t *srt)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_recovery_table_init\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_recovery_table_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

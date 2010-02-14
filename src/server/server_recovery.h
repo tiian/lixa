@@ -64,6 +64,11 @@ struct server_recovery_table_s {
      * Mutex used to serialize accesses
      */
     GMutex          *mutex;
+    /**
+     * First level of the multimensional structure: it's a tree and the key
+     * is the "job" string
+     */
+    GTree           *lvl1;
 };
 
 
@@ -71,7 +76,7 @@ struct server_recovery_table_s {
 /**
  * It's defined as a type because it's used in an object oriented fashion
  */
-typedef struct server_recovery_table_s server_recover_table_t;
+typedef struct server_recovery_table_s server_recovery_table_t;
 
 
 
@@ -80,6 +85,13 @@ extern "C" {
 #endif /* __cplusplus */
 
 
+
+    /**
+     * Initialize a new object
+     */
+    int server_recovery_table_init(server_recovery_table_t *srt);
+
+    
 
 #ifdef __cplusplus
 }

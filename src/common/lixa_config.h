@@ -51,6 +51,9 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
 
 
 
@@ -189,6 +192,44 @@ typedef char md5_digest_hex_t[MD5_DIGEST_LENGTH * 2 + 1];
 
 
 
+/**
+ * IP address len: 3 + 1 + 3 + 1 + 3 + 1 + 3
+ */
+#define LIXA_JOB_SOURCE_IP_ADDRESS_LEN  15
+/**
+ * Substring of client profile: only the first 16 chars are kept for human
+ * readable usage (it's not necessary from a unique id point of view)
+ */
+#define LIXA_JOB_SOURCE_PROFILE_LEN     16
+/**
+ * All the job string length
+ */
+#define LIXA_JOB_RAW_LEN  (LIXA_JOB_SOURCE_IP_ADDRESS_LEN + \
+                           MD5_DIGEST_LENGTH * 2 + \
+                           LIXA_JOB_SOURCE_PROFILE_LEN + 1)
+
+/**
+ * The union is used to access every single field or all the string; it
+ * contains the encoded string of a job
+ */
+union lixa_job_u {
+    struct {
+        char source_ip[LIXA_JOB_SOURCE_IP_ADDRESS_LEN];
+        char path_profile_digest[MD5_DIGEST_LENGTH * 2];
+        char profile[LIXA_JOB_SOURCE_PROFILE_LEN];
+        char terminator;
+    }    fields;
+    char job[LIXA_JOB_RAW_LEN];
+};
+
+/**
+ * This type is defined because @ref lixa_job_u must be used as an opaque
+ * object
+ */
+typedef union lixa_job_u lixa_job_t;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -222,6 +263,26 @@ extern "C" {
      * @return a standardized return code
      */
     int lixa_config_digest(int fd, md5_digest_hex_t digest);
+
+    
+
+    /**
+     * Reset the content of the object
+     * @param job IN/OUT reference to object
+     */
+    static inline void lixa_job_reset(lixa_job_t *job) {
+        memset(job, 0, LIXA_JOB_RAW_LEN); }
+
+
+
+    /**
+     * @param job IN/OUT reference to object
+     * @param path IN real path of the configuration file
+     * @param profile IN profile used by the application program
+     * @return a standardized return code
+     */
+    int lixa_job_set_path_profile(lixa_job_t *job, const char *path,
+                                  const char *profile);
 
     
     

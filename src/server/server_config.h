@@ -197,19 +197,6 @@ extern "C" {
     
     
     /**
-     * Parse a "profile" node tree
-     * @param sc IN/OUT configuration structure
-     * @param tpa IN thread pipe array
-     * @param a_node IN listener node
-     * @return a standardized return code
-     */
-    int server_parse_profile(struct server_config_s *sc,
-                             struct thread_pipe_array_s *tpa,
-                             xmlNode *a_node);
-    
-    
-    
-    /**
      * Initialize the configuration of the server
      * @param sc OUT the object must be initialized
      * @param tpa OUT the array of pipes used for thread communication
