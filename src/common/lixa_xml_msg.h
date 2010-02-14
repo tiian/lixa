@@ -51,6 +51,7 @@
 
 
 
+#include <lixa_config.h>
 #include <xa.h>
 
 
@@ -136,6 +137,10 @@ extern const xmlChar *LIXA_XML_MSG_HEADER;
  * Label used to specify "commit" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_COMMIT;
+/**
+ * Label used to specify "conf_digest" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_CONF_DIGEST;
 /**
  * Label used to specify "finished" property
  */
@@ -324,7 +329,8 @@ struct lixa_msg_body_answer_s {
  * Convenience struct for @ref lixa_msg_body_open_8_s
  */
 struct lixa_msg_body_open_8_client_s {
-    xmlChar   *profile;
+    xmlChar           *profile;
+    md5_digest_hex_t   lixac_conf_digest;
 };
 
     

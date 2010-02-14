@@ -677,10 +677,12 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg,
         
         /* <client> */
         used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%s\"/>",
+                              "<%s %s=\"%s\" %s=\"%s\"/>",
                               LIXA_XML_MSG_TAG_CLIENT,
                               LIXA_XML_MSG_PROP_PROFILE,
-                              msg->body.open_8.client.profile);
+                              msg->body.open_8.client.profile,
+                              LIXA_XML_MSG_PROP_CONF_DIGEST,
+                              msg->body.open_8.client.lixac_conf_digest);
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT1);
         *free_chars -= used_chars;

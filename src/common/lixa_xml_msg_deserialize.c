@@ -658,6 +658,7 @@ int lixa_msg_deserialize_end_24(xmlNodePtr cur, struct lixa_msg_s *msg)
 int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
     enum Exception { PROFILE_NOT_FOUND
+                     , CONF_DIGEST_NOT_FOUND
                      , RMID_NOT_FOUND
                      , NAME_NOT_FOUND
                      , XA_NAME_NOT_FOUND
@@ -669,10 +670,19 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     TRY {
         while (NULL != cur) {
             if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CLIENT)) {
+                xmlChar *tmp;
                 /* retrieve client properties */
                 if (NULL == (msg->body.open_8.client.profile =
                              xmlGetProp(cur, LIXA_XML_MSG_PROP_PROFILE)))
                     THROW(PROFILE_NOT_FOUND);
+                if (NULL == (tmp = xmlGetProp(
+                                 cur, LIXA_XML_MSG_PROP_CONF_DIGEST)))
+                    THROW(CONF_DIGEST_NOT_FOUND);
+                strncpy(msg->body.open_8.client.lixac_conf_digest,
+                        (char *)tmp, sizeof(md5_digest_hex_t));
+                msg->body.open_8.client.lixac_conf_digest[
+                    MD5_DIGEST_LENGTH * 2] = '\0';
+                xmlFree(tmp);
             } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_RSRMGRS)) {
                 xmlNodePtr cur2 = cur->xmlChildrenNode;
                 /* initialize array (3 slots may be a good choice for
@@ -715,6 +725,7 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } CATCH {
         switch (excp) {
             case PROFILE_NOT_FOUND:
+            case CONF_DIGEST_NOT_FOUND:
             case RMID_NOT_FOUND:
             case NAME_NOT_FOUND:
             case XA_NAME_NOT_FOUND:
