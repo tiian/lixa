@@ -129,7 +129,7 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
     LIXA_TRACE(("payload_header_init\n"));
     TRY {
         socklen_t serv_addr_len;
-
+        
         srd->pld.type = DATA_PAYLOAD_TYPE_HEADER;
         srd->pld.ph.n = 0;
         memset(&srd->pld.ph.block_array, 0, sizeof(uint32_t) * CHAIN_MAX_SIZE);

@@ -34,6 +34,12 @@
 
 
 
+#ifdef HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
+
+
+
 #include <lixa_errors.h>
 #include <lixa_common_status.h>
 
@@ -168,3 +174,97 @@ int xid_deserialize(char *ser_xid, XID *xid)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int lixa_job_set_path_profile(lixa_job_t *job, const char *path,
+                              const char *profile)
+{
+    enum Exception { G_CHECKSUM_NEW_ERROR
+                     , G_CHECKSUM_GET_STRING_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    GChecksum *checksum = NULL;
+
+    LIXA_TRACE(("\n"));
+    TRY {
+        const gchar *tmp = NULL;
+        
+        /* create a new checksum */
+        if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))
+            THROW(G_CHECKSUM_NEW_ERROR);
+        g_checksum_update(checksum, (guchar *)path, strlen(path));
+        g_checksum_update(checksum, (guchar *)profile, strlen(profile));
+
+        if (NULL == (tmp = g_checksum_get_string(checksum)))
+            THROW(G_CHECKSUM_GET_STRING_ERROR);
+        strncpy(job->fields.path_profile_digest, (const char *)tmp,
+                MD5_DIGEST_LENGTH * 2);
+        strncpy(job->fields.profile, profile, strlen(profile));
+        job->fields.terminator = '\0';
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_CHECKSUM_NEW_ERROR:
+                ret_cod = LIXA_RC_G_CHECKSUM_NEW_ERROR;
+                break;
+            case G_CHECKSUM_GET_STRING_ERROR:
+                ret_cod = LIXA_RC_G_CHECKSUM_GET_STRING_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_job_set_source_ip(lixa_job_t *job, int fd)
+{
+    enum Exception { GETSOCKNAME_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_job_set_source_ip\n"));
+    TRY {
+        struct sockaddr_in local_sock_addr;
+        socklen_t serv_addr_len;
+        
+        serv_addr_len = sizeof(struct sockaddr_in);
+        if (0 != getsockname(fd, (struct sockaddr *)&local_sock_addr,
+                             &serv_addr_len))
+            THROW(GETSOCKNAME_ERROR);        
+
+        /* @@@ use inet_ntoa but it must be protected with a mutex because
+           it's a non reentrant function...
+           the job id should be computed only once by any process, but this
+           method must be protected because there could be two different
+           thread running at the same time
+        */ 
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GETSOCKNAME_ERROR:
+                ret_cod = LIXA_RC_GETSOCKNAME_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_job_set_source_ip/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
