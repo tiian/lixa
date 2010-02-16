@@ -34,6 +34,9 @@
 
 
 
+#ifdef HAVE_ARPA_INET_H
+# include <arpa/inet.h>
+#endif
 #ifdef HAVE_LIBXML_TREE_H
 # include <libxml/tree.h>
 #endif
@@ -259,3 +262,166 @@ int lixa_config_digest(int fd, md5_digest_hex_t digest)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int lixa_job_set_raw(lixa_job_t *job, const char *raw_job)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    int truncated = FALSE;
+    
+    LIXA_TRACE(("lixa_job_set_raw\n"));
+    TRY {
+        size_t raw_size = strlen(raw_job);
+        
+        if (raw_size >= LIXA_JOB_RAW_LEN) {
+            raw_size = LIXA_JOB_RAW_LEN - 1;
+            truncated = TRUE;
+        }
+        lixa_job_reset(job);
+        strncpy(job->raw, raw_job, raw_size);
+        job->raw[LIXA_JOB_RAW_LEN] = '\0';
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = truncated ? LIXA_RC_TRUNCATION_OCCURRED : LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_job_set_raw/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_job_set_path_profile(lixa_job_t *job, const char *path,
+                              const char *profile)
+{
+    enum Exception { G_CHECKSUM_NEW_ERROR
+                     , PATHCONF_ERROR
+                     , MALLOC_ERROR
+                     , REALPATH_ERROR
+                     , G_CHECKSUM_GET_STRING_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    GChecksum *checksum = NULL;
+    char *tmp_filename;
+
+    LIXA_TRACE(("lixa_job_set_path_profile\n"));
+    TRY {
+        const gchar *tmp = NULL;
+        long pc_path_max = 0;
+
+        /* create a new checksum */
+        if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))
+            THROW(G_CHECKSUM_NEW_ERROR);
+
+        if (0 > (pc_path_max = pathconf("/", _PC_PATH_MAX)))
+            THROW(PATHCONF_ERROR);
+        if (NULL == (tmp_filename = malloc(pc_path_max + 1)))
+            THROW(MALLOC_ERROR);
+        if (NULL == realpath(path, tmp_filename))
+            THROW(REALPATH_ERROR);
+        
+        g_checksum_update(checksum, (guchar *)path, strlen(tmp_filename));
+        g_checksum_update(checksum, (guchar *)profile, strlen(profile));
+
+        if (NULL == (tmp = g_checksum_get_string(checksum)))
+            THROW(G_CHECKSUM_GET_STRING_ERROR);
+        strncpy(job->fields.path_profile_digest, (const char *)tmp,
+                MD5_DIGEST_LENGTH * 2);
+        strncpy(job->fields.profile, profile, strlen(profile));
+        job->fields.terminator = '\0';
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_CHECKSUM_NEW_ERROR:
+                ret_cod = LIXA_RC_G_CHECKSUM_NEW_ERROR;
+                break;
+            case PATHCONF_ERROR:
+                ret_cod = LIXA_RC_PATHCONF_ERROR;
+                break;
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case REALPATH_ERROR:
+                ret_cod = LIXA_RC_REALPATH_ERROR;
+                break;
+            case G_CHECKSUM_GET_STRING_ERROR:
+                ret_cod = LIXA_RC_G_CHECKSUM_GET_STRING_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* recovery object */
+        if (NULL != checksum)
+            g_checksum_free(checksum);
+        if (NULL != tmp_filename)
+            free(tmp_filename);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_job_set_path_profile/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_job_set_source_ip(lixa_job_t *job, int fd)
+{
+    enum Exception { GETSOCKNAME_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_job_set_source_ip\n"));
+    TRY {
+        struct sockaddr_in local_sock_addr;
+        socklen_t serv_addr_len;
+        static GStaticMutex mutex = G_STATIC_MUTEX_INIT;
+        char *tmp_source_ip;
+        size_t source_ip_len = 0;
+        
+        serv_addr_len = sizeof(struct sockaddr_in);
+        if (0 != getsockname(fd, (struct sockaddr *)&local_sock_addr,
+                             &serv_addr_len))
+            THROW(GETSOCKNAME_ERROR);        
+
+        memset(job->fields.source_ip, ' ', LIXA_JOB_SOURCE_IP_LEN);
+        g_static_mutex_lock(&mutex);
+        tmp_source_ip = inet_ntoa(local_sock_addr.sin_addr);
+        source_ip_len = strlen(tmp_source_ip);
+        if (source_ip_len > LIXA_JOB_SOURCE_IP_LEN)
+            source_ip_len = LIXA_JOB_SOURCE_IP_LEN;
+        strncpy(job->fields.source_ip, tmp_source_ip, source_ip_len);
+        g_static_mutex_unlock(&mutex);
+        job->fields.terminator = '\0';
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GETSOCKNAME_ERROR:
+                ret_cod = LIXA_RC_GETSOCKNAME_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_job_set_source_ip/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

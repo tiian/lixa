@@ -73,6 +73,32 @@
 
 
 /**
+ * Number of bytes necessary to store an MD5 digest
+ */
+#define MD5_DIGEST_LENGTH   16
+
+
+
+/**
+ * IP address len: 3 + 1 + 3 + 1 + 3 + 1 + 3
+ */
+#define LIXA_JOB_SOURCE_IP_LEN  15
+/**
+ * Substring of client profile: only the first 16 chars are kept for human
+ * readable usage (it's not necessary from a unique id point of view)
+ */
+#define LIXA_JOB_SOURCE_PROFILE_LEN     16
+/**
+ * All the job string length
+ */
+#define LIXA_JOB_RAW_LEN  (MD5_DIGEST_LENGTH * 2 + \
+                           LIXA_JOB_SOURCE_PROFILE_LEN + \
+                           LIXA_JOB_SOURCE_IP_LEN + 1)
+
+
+
+
+/**
  * Label used to specify "listener" tag
  */
 extern const xmlChar *LIXA_XML_CONFIG_LISTENER;
@@ -175,13 +201,6 @@ extern const xmlChar *LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY;
 
 
 /**
- * Number of bytes necessary to store an MD5 digest
- */
-#define MD5_DIGEST_LENGTH   16
-
-
-
-/**
  * This type is used to store a binary raw MD5 digest 
  */
 typedef guint8 md5_digest_t[MD5_DIGEST_LENGTH];
@@ -189,6 +208,28 @@ typedef guint8 md5_digest_t[MD5_DIGEST_LENGTH];
  * This type is used to store an hex printable MD5 digest
  */
 typedef char md5_digest_hex_t[MD5_DIGEST_LENGTH * 2 + 1];
+
+
+
+/**
+ * The union is used to access every single field or all the string; it
+ * contains the encoded string of a job
+ */
+union lixa_job_u {
+    struct {
+        char path_profile_digest[MD5_DIGEST_LENGTH * 2];
+        char profile[LIXA_JOB_SOURCE_PROFILE_LEN];
+        char source_ip[LIXA_JOB_SOURCE_IP_LEN];
+        char terminator;
+    }    fields;
+    char raw[LIXA_JOB_RAW_LEN];
+};
+
+/**
+ * This type is defined because @ref lixa_job_u must be used as an opaque
+ * object
+ */
+typedef union lixa_job_u lixa_job_t;
 
 
 
@@ -227,6 +268,60 @@ extern "C" {
     int lixa_config_digest(int fd, md5_digest_hex_t digest);
 
     
+
+    /**
+     * Reset the content of the object
+     * @param job IN/OUT reference to object
+     */
+    static inline void lixa_job_reset(lixa_job_t *job) {
+        memset(job->raw, ' ', LIXA_JOB_RAW_LEN - 1);
+        job->raw[LIXA_JOB_RAW_LEN] = '\0'; }
+
+
+
+    /**
+     * Retrieve the raw string of the job; the object must initialized with
+     * @ref lixa_job_reset before this method can be called!
+     * @param job IN reference to object
+     * @return the raw job string
+     */
+    static inline const char *lixa_job_get_raw(const lixa_job_t *job) {
+        return job->raw; }
+
+    
+
+    /**
+     * Set the job specifying the raw string (this can be used when the job
+     * is not computed, but retrieved from an environment var)
+     * @param job IN/OUT reference to object
+     * @param raw_job IN the raw string for job
+     * @return a standardized return code
+     */
+    int lixa_job_set_raw(lixa_job_t *job, const char *raw_job);
+
+
+    
+    /**
+     * Set path and profile
+     * @param job IN/OUT reference to object
+     * @param path IN real path of the configuration file
+     * @param profile IN profile used by the application program
+     * @return a standardized return code
+     */
+    int lixa_job_set_path_profile(lixa_job_t *job, const char *path,
+                                  const char *profile);
+
+    
+
+    /**
+     * Set source ip
+     * @param job IN/OUT reference to object
+     * @param fd IN file descriptor of the socket connected to the server
+     * @return a standardized return code
+     */
+    int lixa_job_set_source_ip(lixa_job_t *job, int fd);
+
+
 
 #ifdef __cplusplus
 }

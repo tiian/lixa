@@ -85,10 +85,17 @@
 
 
 /**
- * Name of the environment variable must be uset to specify che client config
+ * Name of the environment variable must be uset to specify the client config
  * file name
  */
 #define LIXA_CONFIG_FILE_ENV_VAR "LIXA_CONFIG_FILE"
+
+
+
+/**
+ * Name of the environment variable must be uset to specify the job
+ */
+#define LIXA_JOB_ENV_VAR "LIXA_JOB"
 
 
 
@@ -230,6 +237,15 @@ struct client_config_coll_s {
      */
     char                        *profile;
     /**
+     * Transactional job associated to the threads of this process (retrieved
+     * from environement variable @ref LIXA_JOB_ENV_VAR or computed at runtime)
+     */
+    lixa_job_t                  *job;
+    /**
+     * Path used to load lixac_conf file
+     */
+    const char                  *lixac_conf_filename;
+    /**
      * XML document representing lixac_conf.xml file
      */
     xmlDocPtr                    lixac_conf;
@@ -302,6 +318,18 @@ extern "C" {
     
 
     /**
+     * Perform an extra configuration step can not be performed when
+     * @ref client_config is called
+     * @param ccc IN/OUT the object that contains the client configuration
+     * @param fd IN the file descriptor associated to the server connected
+     *        socket
+     * @return a standardized return code
+     */
+    int client_config_job(client_config_coll_t *ccc, int fd);
+
+    
+    
+    /**
      * Validate configuration: fix the transaction and resource managers
      * @param ccc IN/OUT the object will contain the client configuration
      * @return a standardized return code
@@ -318,7 +346,7 @@ extern "C" {
     int client_config_load_switch(const client_config_coll_t *ccc);
 
 
-    
+
     /**
      * Unload the configured switch file
      * @param ccc IN configuration object reference

@@ -132,10 +132,9 @@ int client_config(client_config_coll_t *ccc)
         }
         LIXA_TRACE(("client_config: using transactional profile '%s' for "
                     "subsequent operations\n", tmp_str));        
-        
         if (NULL == (ccc->profile = strdup(tmp_str)))
             THROW(STRDUP_ERROR);
-        
+
         /* checking if available the custom config file */
         tmp_str = getenv(LIXA_CONFIG_FILE_ENV_VAR);
         if (NULL != tmp_str && -1 != (fd = open(tmp_str, O_RDONLY))) {
@@ -151,6 +150,7 @@ int client_config(client_config_coll_t *ccc)
                 THROW(OPEN_CONFIG_ERROR);
             }
         }
+        ccc->lixac_conf_filename = file_name;
         if (LIXA_RC_OK != (ret_cod = lixa_config_digest(
                                fd, ccc->lixac_conf_digest)))
             THROW(LIXA_CONFIG_DIGEST_ERROR);
@@ -256,9 +256,94 @@ int client_config(client_config_coll_t *ccc)
         /* unlock mutex (locked for configuration activity) */
         LIXA_TRACE(("client_config: releasing exclusive mutex\n"));
         g_static_mutex_unlock(&ccc->mutex);
-
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int client_config_job(client_config_coll_t *ccc, int fd)
+{
+    enum Exception { MALLOC_ERROR
+                     , JOB_SET_PATH_PROFILE
+                     , JOB_SET_SOURCE_IP
+                     , JOB_SET_RAW
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    lixa_job_t *tmp_job = NULL;
+    
+    LIXA_TRACE(("client_config_job\n"));
+    TRY {
+        const char *tmp_str;
+        
+        /* lock mutex to start configuration activity */
+        LIXA_TRACE(("client_config_job: acquiring exclusive mutex\n"));
+        g_static_mutex_lock(&ccc->mutex);
+
+        if (NULL != ccc->job) {
+            LIXA_TRACE(("client_config_job: already configured, "
+                        "skipping...\n"));
+            THROW(NONE);
+        }
+
+        /* checking if available the job environment variable */
+        if (NULL == (tmp_str = getenv(LIXA_JOB_ENV_VAR))) {
+            LIXA_TRACE(("client_config_job: '%s' environment variable not "
+                        "found, computing job string...\n", LIXA_JOB_ENV_VAR));
+            if (NULL == (tmp_job = (lixa_job_t *)malloc(sizeof(lixa_job_t))))
+                THROW(MALLOC_ERROR);
+            lixa_job_reset(tmp_job);
+            if (LIXA_RC_OK != (ret_cod = lixa_job_set_path_profile(
+                                   tmp_job, ccc->lixac_conf_filename,
+                                   ccc->profile)))
+                THROW(JOB_SET_PATH_PROFILE);
+            if (LIXA_RC_OK != (ret_cod = lixa_job_set_source_ip(tmp_job, fd)))
+                THROW(JOB_SET_SOURCE_IP);
+        } else {
+            int rc;
+            LIXA_TRACE(("client_config_job: '%s' environment variable value "
+                        "is '%s'\n", LIXA_JOB_ENV_VAR, tmp_str));
+            rc = lixa_job_set_raw(tmp_job, tmp_str);
+            if (LIXA_RC_TRUNCATION_OCCURRED) {
+                LIXA_TRACE(("client_config_job: environment variable value is "
+                            "too long; job was truncated\n"));
+                rc = LIXA_RC_OK;
+            }
+            if (LIXA_RC_OK != rc)
+                THROW(JOB_SET_RAW);
+        }
+        ccc->job = tmp_job;
+        LIXA_TRACE(("client_config_job: job value for this process is '%s'\n",
+                    lixa_job_get_raw(ccc->job)));
+        tmp_job = NULL;
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case JOB_SET_PATH_PROFILE:
+            case JOB_SET_SOURCE_IP:
+            case JOB_SET_RAW:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* release resources */
+        if (NULL != tmp_job)
+            free(tmp_job);
+        /* unlock mutex (locked for configuration activity) */
+        LIXA_TRACE(("client_config_job: releasing exclusive mutex\n"));
+        g_static_mutex_unlock(&ccc->mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_config_job/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

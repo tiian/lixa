@@ -1,5 +1,7 @@
-implement LIXA_JOB environment variable
-use the new lixa_job_t object to determine job in lixa_tx_open
+test the job computation algorithm:
+  - if LIXA_PROFILE is empty, it's not set to the default (first) value...
+  - check what happens if LIXA_JOB is set
+
 send the job info to the server; transform "profile" to "job" in open_8 because profile is useless on server side and is not stored in the server status
 
 store MD5 lixac_conf.xml digest on server; when recovery happens

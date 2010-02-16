@@ -137,6 +137,10 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: 'write' function returned an error condition";
         case LIXA_RC_READ_ERROR:
             return "ERROR: 'read' function returned an error condition";
+        case LIXA_RC_PATHCONF_ERROR:
+            return "ERROR: 'pathconf' function returned an error condition";
+        case LIXA_RC_REALPATH_ERROR:
+            return "ERROR: 'realpath' function returned an error condition";
             /*
               case LIXA_RC_FFLUSH_ERROR:
               return "ERROR: 'fflush' function returned an error condition";
