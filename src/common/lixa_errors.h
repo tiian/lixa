@@ -81,6 +81,11 @@
  * Peer has closed TCP/IP connection
  */
 #define LIXA_RC_CONNECTION_CLOSED               +4
+/**
+ * A truncation occurred because the destination is smaller then the source
+ */
+#define LIXA_RC_TRUNCATION_OCCURRED             +5
+
 
 
 /**

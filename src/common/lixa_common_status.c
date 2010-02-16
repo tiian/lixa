@@ -34,6 +34,9 @@
 
 
 
+#ifdef HAVE_ARPA_INET_H
+# include <arpa/inet.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
 #endif
@@ -177,6 +180,43 @@ int xid_deserialize(char *ser_xid, XID *xid)
 
 
 
+int lixa_job_set_raw(lixa_job_t *job, const char *raw_job)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    int truncated = FALSE;
+    
+    LIXA_TRACE(("lixa_job_set_raw\n"));
+    TRY {
+        size_t raw_size = strlen(raw_job);
+        
+        if (raw_size >= LIXA_JOB_RAW_LEN) {
+            raw_size = LIXA_JOB_RAW_LEN - 1;
+            truncated = TRUE;
+        }
+        
+        memset(job->fields.source_ip, ' ', LIXA_JOB_RAW_LEN - 1);
+        strncpy(job->raw, raw_job, raw_size);
+        job->raw[LIXA_JOB_RAW_LEN] = '\0';
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = truncated ? LIXA_RC_TRUNCATION_OCCURRED : LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_job_set_raw/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_job_set_path_profile(lixa_job_t *job, const char *path,
                               const char *profile)
 {
@@ -237,18 +277,24 @@ int lixa_job_set_source_ip(lixa_job_t *job, int fd)
     TRY {
         struct sockaddr_in local_sock_addr;
         socklen_t serv_addr_len;
+        static GStaticMutex mutex = G_STATIC_MUTEX_INIT;
+        char *tmp_source_ip;
+        size_t source_ip_len = 0;
         
         serv_addr_len = sizeof(struct sockaddr_in);
         if (0 != getsockname(fd, (struct sockaddr *)&local_sock_addr,
                              &serv_addr_len))
             THROW(GETSOCKNAME_ERROR);        
 
-        /* @@@ use inet_ntoa but it must be protected with a mutex because
-           it's a non reentrant function...
-           the job id should be computed only once by any process, but this
-           method must be protected because there could be two different
-           thread running at the same time
-        */ 
+        memset(job->fields.source_ip, ' ', LIXA_JOB_SOURCE_IP_LEN);
+        g_static_mutex_lock(&mutex);
+        tmp_source_ip = inet_ntoa(local_sock_addr.sin_addr);
+        source_ip_len = strlen(tmp_source_ip);
+        if (source_ip_len > LIXA_JOB_SOURCE_IP_LEN)
+            source_ip_len = LIXA_JOB_SOURCE_IP_LEN;
+        strncpy(job->fields.source_ip, tmp_source_ip, source_ip_len);
+        g_static_mutex_unlock(&mutex);
+        job->fields.terminator = '\0';
         
         THROW(NONE);
     } CATCH {

@@ -46,6 +46,9 @@ const char *lixa_strerror(int ret_cod)
         ret_cod -= LIXA_RC_ERROR_FROM_SERVER_OFFSET;
     
     switch (ret_cod) {
+        case LIXA_RC_TRUNCATION_OCCURRED:
+            return "WARNING: a truncation occurred because the destination "
+                "is smaller then the source";
         case LIXA_RC_CONNECTION_CLOSED:
             return "WARNING: peer has closed TCP/IP connection";
         case LIXA_RC_BYPASSED_OPERATION:
