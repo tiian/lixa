@@ -558,6 +558,7 @@ int lixa_tx_open(int *txrc)
                      , CLIENT_STATUS_COLL_REGISTER_ERROR
                      , CLIENT_CONFIG_ERROR
                      , CLIENT_CONNECT_ERROR
+                     , CLIENT_CONFIG_JOB_ERROR
                      , COLL_GET_CS_ERROR
                      , LIXA_XA_OPEN_ERROR
                      , ALREADY_OPENED
@@ -598,7 +599,10 @@ int lixa_tx_open(int *txrc)
             if (LIXA_RC_OK != (ret_cod =
                                client_connect(&global_csc, &global_ccc)))
                 THROW(CLIENT_CONNECT_ERROR);
-
+            if (LIXA_RC_OK != (ret_cod = client_config_job(
+                                   &global_ccc, client_status_get_sockfd(cs))))
+                THROW(CLIENT_CONFIG_JOB_ERROR);
+            
             next_txstate = TX_STATE_S1;
             
             /* the real logic must be put here */
@@ -621,8 +625,8 @@ int lixa_tx_open(int *txrc)
             case CLIENT_STATUS_COLL_REGISTER_ERROR:
                 break;
             case CLIENT_CONFIG_ERROR:
-                break;
             case CLIENT_CONNECT_ERROR:
+            case CLIENT_CONFIG_JOB_ERROR:
                 break;
             case COLL_GET_CS_ERROR:
             case LIXA_XA_OPEN_ERROR:

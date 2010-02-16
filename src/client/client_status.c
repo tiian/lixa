@@ -83,25 +83,13 @@ client_config_coll_t global_ccc = { FALSE,
                                     G_STATIC_MUTEX_INIT,
                                     NULL,
                                     NULL,
+                                    NULL,
+                                    NULL,
                                     "",
                                     {NULL, NULL},
                                     NULL,
                                     NULL,
                                     NULL };
-
-
-
-/* @@@ obsolete, remove!
- * Initialize the library when the library is loaded.
- * This piece of code is GNU/Linux + GCC specific: it will need some
- * rework for different platforms (probably it will not compile at all)
-void __attribute__ ((constructor)) lixac_init(void)
-{
-    LIXA_TRACE_INIT;
-    client_status_coll_init(&global_csc);
-    client_config_coll_init(&global_ccc);
-}
-*/
 
 
 

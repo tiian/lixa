@@ -236,6 +236,14 @@
  */
 #define LIXA_RC_READ_ERROR                   -114
 /**
+ * "pathconf" function error
+ */
+#define LIXA_RC_PATHCONF_ERROR               -115
+/**
+ * "realpath" function error
+ */
+#define LIXA_RC_REALPATH_ERROR               -116
+/**
  * "fflush" function error
 define LIXA_RC_FFLUSH_ERROR                  -116
  */
