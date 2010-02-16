@@ -370,6 +370,28 @@ extern "C" {
 
 
     /**
+     * Retrieve the raw string of the job; the object must initialized with
+     * @ref lixa_job_reset before this method can be called!
+     * @param job IN reference to object
+     * @return the raw job string
+     */
+    static inline const char *lixa_job_get_raw(const lixa_job_t *job) {
+        return job->raw; }
+
+    
+
+    /**
+     * Set the job specifying the raw string (this can be used when the job
+     * is not computed, but retrieved from an environment var)
+     * @param job IN/OUT reference to object
+     * @param raw_job IN the raw string for job
+     * @return a standardized return code
+     */
+    int lixa_job_set_raw(lixa_job_t *job, const char *raw_job);
+
+
+    
+    /**
      * Set path and profile
      * @param job IN/OUT reference to object
      * @param path IN real path of the configuration file
