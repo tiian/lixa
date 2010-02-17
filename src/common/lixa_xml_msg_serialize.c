@@ -681,8 +681,8 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg,
                               LIXA_XML_MSG_TAG_CLIENT,
                               LIXA_XML_MSG_PROP_PROFILE,
                               msg->body.open_8.client.profile,
-                              LIXA_XML_MSG_PROP_CONF_DIGEST,
-                              msg->body.open_8.client.lixac_conf_digest);
+                              LIXA_XML_MSG_PROP_CONFIG_DIGEST,
+                              msg->body.open_8.client.config_digest);
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT1);
         *free_chars -= used_chars;

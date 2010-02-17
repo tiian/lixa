@@ -251,9 +251,9 @@ struct payload_header_s {
      */
     struct sockaddr_in            peer_sock_addr;
     /**
-     * Hex format of the MD5 digest of lixac_conf file
+     * Hex format of the MD5 digest of lixac_conf file & profile
      */
-    md5_digest_hex_t              lixac_conf_digest;
+    md5_digest_hex_t              config_digest;
     /**
      * Sequence of last (verb,step) stored for the client.
      * This array is used as a circular buffer and position 0 contains ever

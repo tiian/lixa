@@ -1,10 +1,6 @@
-test the job computation algorithm:
-  - if LIXA_PROFILE is empty, it's not set to the default (first) value...
-  - check what happens if LIXA_JOB is set
-
 send the job info to the server; transform "profile" to "job" in open_8 because profile is useless on server side and is not stored in the server status
 
-store MD5 lixac_conf.xml digest on server; when recovery happens
+store MD5 lixac_conf.xml & profile digest on server; when recovery happens
 check the digests; on server side only warning; on client side, stop 
 processing if digests do no match (Request for Enhancement: reload config
 from server, recovery, discard config read from server, use config on file,

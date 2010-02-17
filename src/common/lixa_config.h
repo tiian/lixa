@@ -83,18 +83,14 @@
  * IP address len: 3 + 1 + 3 + 1 + 3 + 1 + 3
  */
 #define LIXA_JOB_SOURCE_IP_LEN  15
-/**
- * Substring of client profile: only the first 16 chars are kept for human
- * readable usage (it's not necessary from a unique id point of view)
- */
-#define LIXA_JOB_SOURCE_PROFILE_LEN     16
+
+
+
 /**
  * All the job string length
  */
-#define LIXA_JOB_RAW_LEN  (MD5_DIGEST_LENGTH * 2 + \
-                           LIXA_JOB_SOURCE_PROFILE_LEN + \
+#define LIXA_JOB_RAW_LEN  (MD5_DIGEST_LENGTH * 2 + 1 + \
                            LIXA_JOB_SOURCE_IP_LEN + 1)
-
 
 
 
@@ -217,8 +213,8 @@ typedef char md5_digest_hex_t[MD5_DIGEST_LENGTH * 2 + 1];
  */
 union lixa_job_u {
     struct {
-        char path_profile_digest[MD5_DIGEST_LENGTH * 2];
-        char profile[LIXA_JOB_SOURCE_PROFILE_LEN];
+        char config_digest[MD5_DIGEST_LENGTH * 2];
+        char separator;
         char source_ip[LIXA_JOB_SOURCE_IP_LEN];
         char terminator;
     }    fields;
@@ -262,10 +258,13 @@ extern "C" {
     /**
      * Compute the digest of the file associated to a passed file descriptor
      * @param fd IN file descriptor
+     * @param profile IN the string containing the profile assigned to the
+     *        process
      * @param digest OUT computed digest
      * @return a standardized return code
      */
-    int lixa_config_digest(int fd, md5_digest_hex_t digest);
+    int lixa_config_digest(int fd, const char *profile,
+                           md5_digest_hex_t digest);
 
     
 
@@ -304,15 +303,18 @@ extern "C" {
     /**
      * Set path and profile
      * @param job IN/OUT reference to object
-     * @param path IN real path of the configuration file
-     * @param profile IN profile used by the application program
+     * @param config_digest IN config file (lixac_conf.xml) & profile digest
      * @return a standardized return code
      */
-    int lixa_job_set_path_profile(lixa_job_t *job, const char *path,
-                                  const char *profile);
+    static inline void lixa_job_set_config_digest(
+        lixa_job_t *job, const char *config_digest) {
+        strncpy(job->fields.config_digest, config_digest,
+                MD5_DIGEST_LENGTH * 2);
+        job->fields.terminator = '\0';
+    }
+
 
     
-
     /**
      * Set source ip
      * @param job IN/OUT reference to object
