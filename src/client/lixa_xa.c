@@ -624,9 +624,9 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
         msg.body.open_8.client.profile = (xmlChar *)global_ccc.profile;
-        strncpy(msg.body.open_8.client.lixac_conf_digest,
-                global_ccc.lixac_conf_digest, sizeof(md5_digest_hex_t));
-        msg.body.open_8.client.lixac_conf_digest[MD5_DIGEST_LENGTH * 2] = '\0';
+        strncpy(msg.body.open_8.client.config_digest,
+                global_ccc.config_digest, sizeof(md5_digest_hex_t));
+        msg.body.open_8.client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
         msg.body.open_8.rsrmgrs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_open_8_rsrmgr_s),

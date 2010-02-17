@@ -138,9 +138,9 @@ extern const xmlChar *LIXA_XML_MSG_HEADER;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_COMMIT;
 /**
- * Label used to specify "conf_digest" property
+ * Label used to specify "config_digest" property
  */
-extern const xmlChar *LIXA_XML_MSG_PROP_CONF_DIGEST;
+extern const xmlChar *LIXA_XML_MSG_PROP_CONFIG_DIGEST;
 /**
  * Label used to specify "finished" property
  */
@@ -330,7 +330,7 @@ struct lixa_msg_body_answer_s {
  */
 struct lixa_msg_body_open_8_client_s {
     xmlChar           *profile;
-    md5_digest_hex_t   lixac_conf_digest;
+    md5_digest_hex_t   config_digest;
 };
 
     

@@ -76,19 +76,19 @@ int client_config(client_config_coll_t *ccc)
 {
     enum Exception { STRDUP_ERROR
                      , OPEN_CONFIG_ERROR
-                     , LIXA_CONFIG_DIGEST_ERROR
-                     , CLOSE_ERROR
                      , XML_READ_FILE_ERROR
                      , XML_DOC_GET_ROOT_ELEMENT_ERROR
                      , PARSE_CONFIG_ERROR
                      , CLIENT_CONFIG_DISPLAY_ERROR
                      , CLIENT_CONFIG_VALIDATE_ERROR
+                     , LIXA_CONFIG_DIGEST_ERROR
+                     , CLOSE_ERROR
                      , GETADDRINFO_ERROR
                      , CLIENT_CONFIG_LOAD_SWITCH_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    int fd = 0;
+    int fd = LIXA_NULL_FD;
     const char *file_name = NULL;
     xmlNode *root_element = NULL;
     struct addrinfo hints, *res = NULL;
@@ -97,7 +97,7 @@ int client_config(client_config_coll_t *ccc)
     
     LIXA_TRACE(("client_config\n"));
     TRY {
-        const char *tmp_str;
+        char *tmp_str;
         
         /* lock mutex to start configuration activity */
         LIXA_TRACE(("client_config: acquiring exclusive mutex\n"));
@@ -125,15 +125,16 @@ int client_config(client_config_coll_t *ccc)
      
         if (NULL == (tmp_str = getenv(LIXA_PROFILE_ENV_VAR))) {
             /* use empty string instead of NULL to avoid allocation issues */
-            tmp_str = "";
+            ccc->profile = tmp_str;
             LIXA_TRACE(("client_config: '%s' environment variable not found, "
                         "using default profile for this client\n",
                         LIXA_PROFILE_ENV_VAR));
+        } else {
+            LIXA_TRACE(("client_config: using transactional profile '%s' for "
+                        "subsequent operations\n", tmp_str));        
+            if (NULL == (ccc->profile = strdup(tmp_str)))
+                THROW(STRDUP_ERROR);
         }
-        LIXA_TRACE(("client_config: using transactional profile '%s' for "
-                    "subsequent operations\n", tmp_str));        
-        if (NULL == (ccc->profile = strdup(tmp_str)))
-            THROW(STRDUP_ERROR);
 
         /* checking if available the custom config file */
         tmp_str = getenv(LIXA_CONFIG_FILE_ENV_VAR);
@@ -151,12 +152,6 @@ int client_config(client_config_coll_t *ccc)
             }
         }
         ccc->lixac_conf_filename = file_name;
-        if (LIXA_RC_OK != (ret_cod = lixa_config_digest(
-                               fd, ccc->lixac_conf_digest)))
-            THROW(LIXA_CONFIG_DIGEST_ERROR);
-        
-        if (-1 == (ret_cod = close(fd)))
-            THROW(CLOSE_ERROR);
         
         /* loading config file */
         if (NULL == (ccc->lixac_conf = xmlReadFile(file_name, NULL, 0)))
@@ -174,6 +169,13 @@ int client_config(client_config_coll_t *ccc)
         
         if (LIXA_RC_OK != (ret_cod = client_config_validate(ccc)))
             THROW(CLIENT_CONFIG_VALIDATE_ERROR);
+        
+        if (LIXA_RC_OK != (ret_cod = lixa_config_digest(
+                               fd, ccc->profile, ccc->config_digest)))
+            THROW(LIXA_CONFIG_DIGEST_ERROR);        
+        if (-1 == (ret_cod = close(fd)))
+            THROW(CLOSE_ERROR);
+        fd = LIXA_NULL_FD;
         
         /* free parsed document */
         xmlFreeDoc(ccc->lixac_conf);
@@ -214,11 +216,6 @@ int client_config(client_config_coll_t *ccc)
             case OPEN_CONFIG_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
                 break;
-            case LIXA_CONFIG_DIGEST_ERROR:
-                break;
-            case CLOSE_ERROR:
-                ret_cod = LIXA_RC_CLOSE_ERROR;
-                break;
             case XML_READ_FILE_ERROR:
                 ret_cod = LIXA_RC_XML_READ_FILE_ERROR;
                 break;
@@ -228,6 +225,11 @@ int client_config(client_config_coll_t *ccc)
             case PARSE_CONFIG_ERROR:
             case CLIENT_CONFIG_DISPLAY_ERROR:
             case CLIENT_CONFIG_VALIDATE_ERROR:
+                break;
+            case LIXA_CONFIG_DIGEST_ERROR:
+                break;
+            case CLOSE_ERROR:
+                ret_cod = LIXA_RC_CLOSE_ERROR;
                 break;
             case GETADDRINFO_ERROR:
                 ret_cod = LIXA_RC_GETADDRINFO_ERROR;
@@ -244,6 +246,8 @@ int client_config(client_config_coll_t *ccc)
             LIXA_TRACE(("client_config: values before recovery "
                         "actions excp=%d/ret_cod=%d/errno=%d\n",
                         excp, ret_cod, errno));
+        if (LIXA_NULL_FD != fd)
+            close(fd);
         if (excp < NONE && ccc->lixac_conf != NULL) {
             /* free parsed document */
             xmlFreeDoc(ccc->lixac_conf);
@@ -267,7 +271,6 @@ int client_config(client_config_coll_t *ccc)
 int client_config_job(client_config_coll_t *ccc, int fd)
 {
     enum Exception { MALLOC_ERROR
-                     , JOB_SET_PATH_PROFILE
                      , JOB_SET_SOURCE_IP
                      , JOB_SET_RAW
                      , NONE } excp;
@@ -289,17 +292,15 @@ int client_config_job(client_config_coll_t *ccc, int fd)
             THROW(NONE);
         }
 
+        /* create the memory necessary to store the object */
+        if (NULL == (tmp_job = (lixa_job_t *)malloc(sizeof(lixa_job_t))))
+            THROW(MALLOC_ERROR);
         /* checking if available the job environment variable */
         if (NULL == (tmp_str = getenv(LIXA_JOB_ENV_VAR))) {
             LIXA_TRACE(("client_config_job: '%s' environment variable not "
                         "found, computing job string...\n", LIXA_JOB_ENV_VAR));
-            if (NULL == (tmp_job = (lixa_job_t *)malloc(sizeof(lixa_job_t))))
-                THROW(MALLOC_ERROR);
             lixa_job_reset(tmp_job);
-            if (LIXA_RC_OK != (ret_cod = lixa_job_set_path_profile(
-                                   tmp_job, ccc->lixac_conf_filename,
-                                   ccc->profile)))
-                THROW(JOB_SET_PATH_PROFILE);
+            lixa_job_set_config_digest(tmp_job, ccc->config_digest);
             if (LIXA_RC_OK != (ret_cod = lixa_job_set_source_ip(tmp_job, fd)))
                 THROW(JOB_SET_SOURCE_IP);
         } else {
@@ -307,7 +308,7 @@ int client_config_job(client_config_coll_t *ccc, int fd)
             LIXA_TRACE(("client_config_job: '%s' environment variable value "
                         "is '%s'\n", LIXA_JOB_ENV_VAR, tmp_str));
             rc = lixa_job_set_raw(tmp_job, tmp_str);
-            if (LIXA_RC_TRUNCATION_OCCURRED) {
+            if (LIXA_RC_TRUNCATION_OCCURRED == rc) {
                 LIXA_TRACE(("client_config_job: environment variable value is "
                             "too long; job was truncated\n"));
                 rc = LIXA_RC_OK;
@@ -326,7 +327,6 @@ int client_config_job(client_config_coll_t *ccc, int fd)
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
                 break;
-            case JOB_SET_PATH_PROFILE:
             case JOB_SET_SOURCE_IP:
             case JOB_SET_RAW:
                 break;
@@ -352,7 +352,8 @@ int client_config_job(client_config_coll_t *ccc, int fd)
 
 int client_config_validate(client_config_coll_t *ccc)
 {
-    enum Exception { TRNMGR_NOT_DEFINED
+    enum Exception { STRDUP_ERROR
+                     , TRNMGR_NOT_DEFINED
                      , TRNMGR_NOT_FOUND
                      , RSRMGR_NOT_FOUND
                      , PROFILE_NOT_FOUND
@@ -368,9 +369,15 @@ int client_config_validate(client_config_coll_t *ccc)
             struct profile_config_s *profile = &g_array_index(
                 ccc->profiles, struct profile_config_s, i);
             xmlChar *prof_trnmgr;
-            if (0 == strlen(ccc->profile) ||
-                0 == xmlStrcmp(profile->name,
-                               (const xmlChar *)ccc->profile)) {
+            if (NULL == ccc->profile ||
+                0 == xmlStrcmp(profile->name, (const xmlChar *)ccc->profile)) {
+                if (NULL == ccc->profile) {
+                    if (NULL == (ccc->profile = strdup((char *)profile->name)))
+                        THROW(STRDUP_ERROR);
+                    LIXA_TRACE(("client_config_validate: profile set to "
+                                "default value ('%s')\n", ccc->profile));
+                }
+
                 LIXA_TRACE(("client_config_validate: profile '%s' "
                             "matches with profile # %u ('%s')\n",
                             ccc->profile, i, profile->name));
@@ -455,6 +462,9 @@ int client_config_validate(client_config_coll_t *ccc)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case STRDUP_ERROR:
+                ret_cod = LIXA_RC_STRDUP_ERROR;
+                break;
             case TRNMGR_NOT_DEFINED:
             case TRNMGR_NOT_FOUND:
             case RSRMGR_NOT_FOUND:

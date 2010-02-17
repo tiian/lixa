@@ -250,9 +250,9 @@ struct client_config_coll_s {
      */
     xmlDocPtr                    lixac_conf;
     /**
-     * Hex format of the MD5 digest of lixac_conf file
+     * Hex format of the MD5 digest of lixac_conf file concatenated to profile
      */
-    md5_digest_hex_t             lixac_conf_digest;
+    md5_digest_hex_t             config_digest;
     /**
      * It contains the subset of actual configuration for this client
      */
