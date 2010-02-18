@@ -135,6 +135,8 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
         memset(&srd->pld.ph.block_array, 0, sizeof(uint32_t) * CHAIN_MAX_SIZE);
         memset(&srd->pld.ph.local_sock_addr, 0, sizeof(struct sockaddr_in));
         memset(&srd->pld.ph.peer_sock_addr, 0, sizeof(struct sockaddr_in));
+        memset(&srd->pld.ph.config_digest, 0, sizeof(md5_digest_hex_t));
+        lixa_job_reset(&srd->pld.ph.job);
         memset(&srd->pld.ph.last_verb_step, 0,
                sizeof(struct lixa_msg_verb_step_s) * PAYLOAD_HEADER_VERB_STEP);
         common_status_conthr_init(&srd->pld.ph.state);

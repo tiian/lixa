@@ -679,8 +679,8 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg,
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "<%s %s=\"%s\" %s=\"%s\"/>",
                               LIXA_XML_MSG_TAG_CLIENT,
-                              LIXA_XML_MSG_PROP_PROFILE,
-                              msg->body.open_8.client.profile,
+                              LIXA_XML_MSG_PROP_JOB,
+                              msg->body.open_8.client.job,
                               LIXA_XML_MSG_PROP_CONFIG_DIGEST,
                               msg->body.open_8.client.config_digest);
         if (used_chars >= *free_chars)

@@ -69,9 +69,9 @@ const xmlChar *LIXA_XML_MSG_PROP_COMMIT =          (xmlChar *)"commit";
 const xmlChar *LIXA_XML_MSG_PROP_CONFIG_DIGEST =   (xmlChar *)"config_digest";
 const xmlChar *LIXA_XML_MSG_PROP_FINISHED =        (xmlChar *)"finished";
 const xmlChar *LIXA_XML_MSG_PROP_FLAGS =           (xmlChar *)"flags";
+const xmlChar *LIXA_XML_MSG_PROP_JOB =             (xmlChar *)"job";
 const xmlChar *LIXA_XML_MSG_PROP_LEVEL =           (xmlChar *)"level";
 const xmlChar *LIXA_XML_MSG_PROP_NAME =            (xmlChar *)"name";
-const xmlChar *LIXA_XML_MSG_PROP_PROFILE =         (xmlChar *)"profile";
 const xmlChar *LIXA_XML_MSG_PROP_RC =              (xmlChar *)"rc";
 const xmlChar *LIXA_XML_MSG_PROP_RMID =            (xmlChar *)"rmid";
 const xmlChar *LIXA_XML_MSG_PROP_R_STATE =         (xmlChar *)"r_state";
@@ -211,8 +211,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case LIXA_MSG_VERB_OPEN: /* open */
                 switch (msg->header.pvs.step) {
                     case 8:
-                        xmlFree(msg->body.open_8.client.profile);
-                        msg->body.open_8.client.profile = NULL;
+                        xmlFree(msg->body.open_8.client.job);
+                        msg->body.open_8.client.job = NULL;
                         for (i=0; i<msg->body.open_8.rsrmgrs->len; ++i) {
                             struct lixa_msg_body_open_8_rsrmgr_s *rsrmgr =
                                 &g_array_index(
