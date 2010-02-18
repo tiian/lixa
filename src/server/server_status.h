@@ -255,6 +255,10 @@ struct payload_header_s {
      */
     md5_digest_hex_t              config_digest;
     /**
+     * Logical JOB associated to the transaction
+     */
+    lixa_job_t                    job;
+    /**
      * Sequence of last (verb,step) stored for the client.
      * This array is used as a circular buffer and position 0 contains ever
      * the last (verb,step)

@@ -657,7 +657,7 @@ int lixa_msg_deserialize_end_24(xmlNodePtr cur, struct lixa_msg_s *msg)
 
 int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
-    enum Exception { PROFILE_NOT_FOUND
+    enum Exception { JOB_NOT_FOUND
                      , CONFIG_DIGEST_NOT_FOUND
                      , RMID_NOT_FOUND
                      , NAME_NOT_FOUND
@@ -672,9 +672,9 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
             if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CLIENT)) {
                 xmlChar *tmp;
                 /* retrieve client properties */
-                if (NULL == (msg->body.open_8.client.profile =
-                             xmlGetProp(cur, LIXA_XML_MSG_PROP_PROFILE)))
-                    THROW(PROFILE_NOT_FOUND);
+                if (NULL == (msg->body.open_8.client.job =
+                             xmlGetProp(cur, LIXA_XML_MSG_PROP_JOB)))
+                    THROW(JOB_NOT_FOUND);
                 if (NULL == (tmp = xmlGetProp(
                                  cur, LIXA_XML_MSG_PROP_CONFIG_DIGEST)))
                     THROW(CONFIG_DIGEST_NOT_FOUND);
@@ -724,7 +724,7 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case PROFILE_NOT_FOUND:
+            case JOB_NOT_FOUND:
             case CONFIG_DIGEST_NOT_FOUND:
             case RMID_NOT_FOUND:
             case NAME_NOT_FOUND:

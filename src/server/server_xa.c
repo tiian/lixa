@@ -448,7 +448,7 @@ int server_xa_open_8(struct thread_status_s *ts,
 #endif /* LIXA_DEBUG */
         if (lmi->body.open_8.rsrmgrs->len > CHAIN_MAX_SIZE) {
             LIXA_TRACE(("server_xa_open_8: message arrived from client "
-                        "would use %u (max is %u)\n",
+                        "would use %u (max is %u) child blocks\n",
                         lmi->body.open_8.rsrmgrs->len,
                         CHAIN_MAX_SIZE));
             THROW(TOO_MANY_RSRMGRS);
@@ -458,6 +458,13 @@ int server_xa_open_8(struct thread_status_s *ts,
                                ts, block_id, lmi->body.open_8.rsrmgrs->len)))
             THROW(PAYLOAD_CHAIN_ALLOCATE_ERROR);
 
+        /* retrieve header information */
+        strncpy(ts->curr_status[block_id].sr.data.pld.ph.config_digest,
+                lmi->body.open_8.client.config_digest,
+                sizeof(md5_digest_hex_t));
+        lixa_job_set_raw(&(ts->curr_status[block_id].sr.data.pld.ph.job),
+                         (char *)lmi->body.open_8.client.job);
+        
         for (i=0; i<lmi->body.open_8.rsrmgrs->len; ++i) {
             status_record_t *sr;
             struct lixa_msg_body_open_8_rsrmgr_s *rsrmgr;

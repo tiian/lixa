@@ -150,6 +150,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_FINISHED;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_FLAGS;
 /**
+ * Label used to specify "job" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_JOB;
+/**
  * Label used to specify "level" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_LEVEL;
@@ -157,10 +161,6 @@ extern const xmlChar *LIXA_XML_MSG_PROP_LEVEL;
  * Label used to specify "name" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_NAME;
-/**
- * Label used to specify "profile" property
- */
-extern const xmlChar *LIXA_XML_MSG_PROP_PROFILE;
 /**
  * Label used to specify "rc" property
  */
@@ -329,7 +329,7 @@ struct lixa_msg_body_answer_s {
  * Convenience struct for @ref lixa_msg_body_open_8_s
  */
 struct lixa_msg_body_open_8_client_s {
-    xmlChar           *profile;
+    xmlChar           *job;
     md5_digest_hex_t   config_digest;
 };
 

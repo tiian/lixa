@@ -332,11 +332,9 @@ int lixa_msg_trace_open(const struct lixa_msg_s *msg)
 
         switch (msg->header.pvs.step) {
             case 8:
-                LIXA_TRACE(("lixa_msg_trace: body[client[profile="
+                LIXA_TRACE(("lixa_msg_trace: body[client[job="
                             "'%s',config_digest='%s']]]\n",
-                            msg->body.open_8.client.profile ?
-                            msg->body.open_8.client.profile :
-                            nil_str,
+                            msg->body.open_8.client.job,
                             msg->body.open_8.client.config_digest));
                 if (NULL != msg->body.open_8.rsrmgrs) {
                     for (i=0; i<msg->body.open_8.rsrmgrs->len; ++i) {
