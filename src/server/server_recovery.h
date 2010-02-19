@@ -39,6 +39,10 @@
 
 
 
+#include <lixa_config.h>
+
+
+
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
@@ -57,6 +61,37 @@
 
 
 /**
+ * It should be used to initialize a static @ref srvr_rcvr_tbl_t object
+ */
+#define SRVR_RCVR_TBL_INIT    { NULL, NULL, 0 }
+
+
+
+/**
+ * This struct is used as the base record of the more complex
+ * @ref srvr_rcvr_tbl_s data structure; the first three fields are the key
+ * fields and are used "by reference" because this structure should not be
+ * stored and/or persisted: it should only be a message structure
+ */
+struct srvr_rcvr_tbl_rec_s {
+    /**
+     * first level key: transactional JOB
+     */
+    lixa_job_t    *job;
+    /**
+     * second level key: the LIXA server thread status identificator
+     * (see @ref thread_status_array_s )
+     */
+    int            tsid;
+    /**
+     * third level key: the block inside thread status' file
+     */
+    uint32_t       block_id;
+};
+
+
+
+/**
  * Server recovery table struct: this object keeps track of the recovery
  * pending information
  */
@@ -69,7 +104,11 @@ struct srvr_rcvr_tbl_s {
      * First level of the multimensional structure: it's a tree and the key
      * is the "job" string
      */
-    GTree           *lvl1;
+    GTree           *lvl1_job;
+    /**
+     * Size of the array of thread status identifiers
+     */
+    guint            lvl2_tsid_array_size;
 };
 
 
@@ -89,14 +128,37 @@ extern "C" {
 
 
     /**
-     * Initialize a new object: initialization must be performed only ONCE
-     * @param srt OUT reference to the object
+     * Comparison function between two struct @see srvr_rcvr_tbl_rec_s
+     * @param a IN reference to first recovery table record
+     * @param b IN reference to second recovery table record
+     * @return negative value if a<b; 0 if a==b; positive value if a>b
+     */
+    int srvr_rcrv_tbl_key1_job_comp(gconstpointer a, gconstpointer b);
+
+
+    
+    /**
+     * Create a new object: initialization must be performed only ONCE
+     * @param srt OUT reference to the recovery table object
+     * @param tsid_array_size IN size of the array will store thread id
+     *        status
      * @return a standardized return code
      */
-    int srvr_rcvr_tbl_init(srvr_rcvr_tbl_t *srt);
+    int srvr_rcvr_tbl_new(srvr_rcvr_tbl_t *srt, guint tsid_array_size);
 
     
 
+    /**
+     * Insert a record in the recovery table
+     * @param srt IN/OUT reference to the recovery table object
+     * @param srtr IN reference to the record must be inserted
+     * @return a standardized return code
+     */
+    int srvr_rcvr_tbl_insert(srvr_rcvr_tbl_t *srt,
+                             const struct srvr_rcvr_tbl_rec_s *srtr);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
