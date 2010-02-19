@@ -64,9 +64,11 @@
 
 int server_manager(struct server_config_s *sc,
                    struct thread_pipe_array_s *tpa,
-                   struct thread_status_array_s *tsa)
+                   struct thread_status_array_s *tsa,
+                   srvr_rcvr_tbl_t *srt)
 {
-    enum Exception { MALLOC_ERROR
+    enum Exception { SRVR_RCVR_TBL_INIT_ERROR
+                     , MALLOC_ERROR
                      , THREAD_STATUS_LOAD_FILES_ERROR
                      , PTHREAD_CREATE_ERROR
                      , NONE } excp;
@@ -78,6 +80,9 @@ int server_manager(struct server_config_s *sc,
 
         LIXA_TRACE(("server_manager: number of managers to activate = %d\n",
                     sc->managers.n));
+
+        if (LIXA_RC_OK != (ret_cod = srvr_rcvr_tbl_init(srt)))
+            THROW(SRVR_RCVR_TBL_INIT_ERROR);
         
         /* prepare thread status array structure */
         if (NULL == (tsa->array = malloc(
@@ -107,6 +112,8 @@ int server_manager(struct server_config_s *sc,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case SRVR_RCVR_TBL_INIT_ERROR:
+                break;
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
                 break;

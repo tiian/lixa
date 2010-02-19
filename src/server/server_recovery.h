@@ -57,9 +57,10 @@
 
 
 /**
- * This object keeps track of the recovery pending information
+ * Server recovery table struct: this object keeps track of the recovery
+ * pending information
  */
-struct server_recovery_table_s {
+struct srvr_rcvr_tbl_s {
     /**
      * Mutex used to serialize accesses
      */
@@ -74,9 +75,10 @@ struct server_recovery_table_s {
 
 
 /**
- * It's defined as a type because it's used in an object oriented fashion
+ * Server recovery table: it's defined as a type because it's used in an
+ * object oriented fashion see @ref srvr_rcvr_tbl_s
  */
-typedef struct server_recovery_table_s server_recovery_table_t;
+typedef struct srvr_rcvr_tbl_s srvr_rcvr_tbl_t;
 
 
 
@@ -87,9 +89,11 @@ extern "C" {
 
 
     /**
-     * Initialize a new object
+     * Initialize a new object: initialization must be performed only ONCE
+     * @param srt OUT reference to the object
+     * @return a standardized return code
      */
-    int server_recovery_table_init(server_recovery_table_t *srt);
+    int srvr_rcvr_tbl_init(srvr_rcvr_tbl_t *srt);
 
     
 
