@@ -33,8 +33,8 @@ two different transactional logical container.
 
 The concept of JOB is really important for recovery actions: the Transaction
 Manager is generally an active component, but not in LIXA where the
-TM is only the actor coordinates the activities, not the actor performs the
-activities.
+TM is only the actor that coordinates the activities, not the actor that 
+performs the activities.
 If a JOB does not present itself to the TM for a long time, previous
 recovery pending transactions will remain parked inside TM status.
 If for any reason, the wrong client, try to recover a transaction, it may

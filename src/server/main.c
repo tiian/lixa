@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     struct listener_status_array_s lsa;
     struct thread_pipe_array_s tpa;
     struct thread_status_array_s tsa;
-    srvr_rcvr_tbl_t srt;
+    srvr_rcvr_tbl_t srt = SRVR_RCVR_TBL_INIT;
 
     LIXA_TRACE_INIT;
     LIXA_TRACE(("main: starting\n"));

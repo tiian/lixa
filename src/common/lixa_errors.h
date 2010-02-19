@@ -405,25 +405,30 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR -203
 /**
+ * A glib function returned a NULL pointer; the function is not documented as
+ * returnig NULL. This is basically an internal error
+ */
+#define LIXA_RC_G_RETURNED_NULL                -300
+/**
  * "g_module_open" function error
  */
-#define LIXA_RC_G_MODULE_OPEN_ERROR            -300
+#define LIXA_RC_G_MODULE_OPEN_ERROR            -301
 /**
  * "g_module_close" function error
  */
-#define LIXA_RC_G_MODULE_CLOSE_ERROR           -301
+#define LIXA_RC_G_MODULE_CLOSE_ERROR           -302
 /**
  * "g_module_symbol" function error
  */
-#define LIXA_RC_G_MODULE_SYMBOL_ERROR          -302
+#define LIXA_RC_G_MODULE_SYMBOL_ERROR          -303
 /**
  * "g_checksum_new" function error
  */
-#define LIXA_RC_G_CHECKSUM_NEW_ERROR           -303
+#define LIXA_RC_G_CHECKSUM_NEW_ERROR           -304
 /**
  * "g_checksum_get_string" function error
  */
-#define LIXA_RC_G_CHECKSUM_GET_STRING_ERROR    -304
+#define LIXA_RC_G_CHECKSUM_GET_STRING_ERROR    -305
 
 
 
