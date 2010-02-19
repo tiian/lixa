@@ -72,6 +72,7 @@
 #include <server_config.h>
 #include <server_listener.h>
 #include <server_manager.h>
+#include <server_recovery.h>
 #include <server_status.h>
 
 
@@ -101,6 +102,7 @@ int main(int argc, char *argv[])
     struct listener_status_array_s lsa;
     struct thread_pipe_array_s tpa;
     struct thread_status_array_s tsa;
+    srvr_rcvr_tbl_t srt;
 
     LIXA_TRACE_INIT;
     LIXA_TRACE(("main: starting\n"));
@@ -122,7 +124,7 @@ int main(int argc, char *argv[])
     }
 
     /* start configured manager(s) */
-    if (LIXA_RC_OK != (rc = server_manager(&sc, &tpa, &tsa))) {
+    if (LIXA_RC_OK != (rc = server_manager(&sc, &tpa, &tsa, &srt))) {
         LIXA_TRACE(("main/server_manager: rc = %d\n", rc));
         syslog(LOG_ERR, "error (%s) while starting manager(s), "
                "premature exit", lixa_strerror(rc));

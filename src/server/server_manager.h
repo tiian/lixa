@@ -40,6 +40,7 @@
 
 
 #include <server_config.h>
+#include <server_recovery.h>
 
 
 
@@ -69,11 +70,13 @@ extern "C" {
      * @param sc IN server configuration structure
      * @param tpa IN threads' communication pipes
      * @param tsa OUT status of all threads
+     * @param srt IN/OUT server recovery table
      * @return a standardized return code
      */
     int server_manager(struct server_config_s *sc,
                        struct thread_pipe_array_s *tpa,
-                       struct thread_status_array_s *tsa);
+                       struct thread_status_array_s *tsa,
+                       srvr_rcvr_tbl_t *srt);
 
 
 

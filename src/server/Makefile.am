@@ -3,7 +3,7 @@ noinst_HEADERS = ../common/lixa_trace.h server_config.h server_listener.h \
 	server_reply.h server_status.h server_xa.h
 AM_CPPFLAGS = -I$(srcdir)/../common
 AM_CFLAGS = -Wall
-AM_LDFLAGS = @LDFLAGS_XML2@ @LDFLAGS_GLIB@ -lpthread
+AM_LDFLAGS = @LDFLAGS_XML2@ @LDFLAGS_GLIB@ @LDFLAGS_GTHREAD@ -lpthread
 bin_PROGRAMS = lixad
 lixad_LDADD = ../common/liblixabmt.la
 lixad_SOURCES = main.c server_config.c server_listener.c server_manager.c \

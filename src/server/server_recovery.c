@@ -34,6 +34,12 @@
 
 
 
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
+
+
+
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <server_recovery.h>
@@ -48,13 +54,14 @@
 
 
 
-int server_recovery_table_init(server_recovery_table_t *srt)
+int srvr_rcvr_tbl_init(srvr_rcvr_tbl_t *srt)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("server_recovery_table_init\n"));
+    LIXA_TRACE(("srvr_rcvr_tbl_init\n"));
     TRY {
+        srt->mutex = g_mutex_new();
         
         THROW(NONE);
     } CATCH {
@@ -66,7 +73,7 @@ int server_recovery_table_init(server_recovery_table_t *srt)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("server_recovery_table_init/excp=%d/"
+    LIXA_TRACE(("srvr_rcvr_tbl_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
