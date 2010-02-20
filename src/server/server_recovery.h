@@ -82,7 +82,7 @@ struct srvr_rcvr_tbl_rec_s {
      * second level key: the LIXA server thread status identificator
      * (see @ref thread_status_array_s )
      */
-    int            tsid;
+    guint          tsid;
     /**
      * third level key: the block inside thread status' file
      */
@@ -156,6 +156,45 @@ extern "C" {
      */
     int srvr_rcvr_tbl_insert(srvr_rcvr_tbl_t *srt,
                              const struct srvr_rcvr_tbl_rec_s *srtr);
+
+
+
+    /**
+     * Look for server recovery table and extract the first record must be
+     * processed from a recovery pending point of view; this function uses a
+     * query by example logic
+     * @param srt IN/OUT reference to the recovery table object
+     * @param srtr IN reference to the search record:
+     *             srtr->job = the job is performing recovery;
+     *             srtr->tsid = the thread status id is performing recovery;
+     *             srtr->block_is unused
+     * @param out OUT reference to the output record:
+     *             out->job = srtr->job if there is at least one recovery
+     *                       pending transaction for this job;
+     *             out->job = "" if there are no recovery pending transactions
+     *                          for this job;
+     *             out->tsid = srtr->tsid if there is at least one recovery
+     *                        pending transaction for this job and this thread
+     *             out->tsid != 0 if there is at least one recovery pending
+     *                           transaction for this job, but for a different
+     *                           thread (specified by out->tsid)
+     *             out->tsid = 0 if there are no recovery pending transactions
+     *                          for this job & thread
+     *             out->block_id != 0 it's the block_id of the transaction must
+     *                               be recovered for this job & thread
+     *             out->block_id == 0 no transaction for this job & thread
+     * @return @ref LIXA_RC_OK if a transaction for this job and thread was
+     *                         found, block_id was dequeued;
+     *         @ref LIXA_RC_BYPASSED_OPERATION if a transaction for this job,
+     *                         but for a different thread was found, no block_id
+     *                         was dequeued;
+     *         @ref LIXA_RC_OBJ_NOT_FOUND if a transaction for this job was
+     *                         NOT found, no block_id was dequeued;
+     *         others return code for errors
+     */
+    int srvr_rcrv_tbl_get_block(srvr_rcvr_tbl_t *srt,
+                                const struct srvr_rcvr_tbl_rec_s *srtr,
+                                struct srvr_rcvr_tbl_rec_s *out);
 
 
     
