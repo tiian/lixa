@@ -197,7 +197,7 @@ extern "C" {
                                 struct srvr_rcvr_tbl_rec_s *out);
 
 
-    
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

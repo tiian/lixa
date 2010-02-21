@@ -70,6 +70,7 @@ int server_manager(struct server_config_s *sc,
     enum Exception { SRVR_RCVR_TBL_NEW_ERROR
                      , MALLOC_ERROR
                      , THREAD_STATUS_LOAD_FILES_ERROR
+                     , THREAD_STATUS_RECOVERY_ERROR
                      , PTHREAD_CREATE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -101,6 +102,10 @@ int server_manager(struct server_config_s *sc,
                             &(tsa->array[i]),
                             sc->managers.array[i-1].status_file)))
                     THROW(THREAD_STATUS_LOAD_FILES_ERROR);
+                /* enqueue recovery pending transactions */
+                if (LIXA_RC_OK != (ret_cod = thread_status_recovery(
+                                       &(tsa->array[i]), srt)))
+                    THROW(THREAD_STATUS_RECOVERY_ERROR);
                 /* it will be fixed by the thread itself */
                 if (0 != (ret_cod = pthread_create(
                               &(tsa->array[i].tid), NULL,
@@ -118,6 +123,7 @@ int server_manager(struct server_config_s *sc,
                 ret_cod = LIXA_RC_MALLOC_ERROR;
                 break;
             case THREAD_STATUS_LOAD_FILES_ERROR:
+            case THREAD_STATUS_RECOVERY_ERROR:
                 break;
             case PTHREAD_CREATE_ERROR:
                 ret_cod = LIXA_RC_PTHREAD_CREATE_ERROR;
@@ -882,7 +888,7 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
             THROW(PAYLOAD_HEADER_INIT);
 
         /* save a reference to the slot */
-        ts->client_array[place].pers_status_slot_id = place;
+        ts->client_array[place].pers_status_slot_id = slot;
         /* reset the output buffer pointer (it may be garbage if unused
            before */
         ts->client_array[place].output_buffer = NULL;

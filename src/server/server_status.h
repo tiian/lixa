@@ -58,6 +58,7 @@
 #include <lixa_config.h>
 #include <lixa_xml_msg.h>
 #include <xa.h>
+#include <server_recovery.h>
 
 
 
@@ -424,7 +425,7 @@ struct status_record_s {
      */
     uint32_t               counter;
     /**
-     * This field contains usefull control or data information
+     * This field contains useful control or data information
      */
     union status_record_u  sr;
     /**
@@ -537,6 +538,11 @@ struct thread_status_s {
      * records must be copied from one status file to the other one
      */
     GTree                         *updated_records;
+    /**
+     * Reference to the GLOBAL recovery table: this data structure is internally
+     * protected by a mutex to allow concurrency
+     */
+    srvr_rcvr_tbl_t               *recovery_table;
     /**
      * Exception reported by the thread (after exit)
      */
@@ -811,6 +817,29 @@ extern "C" {
 
     
 
+    /**
+     * Scan the status file and enqueue recovery pending transactions in
+     * the server recovery table
+     * @param ts IN/OUT thread status reference
+     * @param srt IN/OUT server recovery table reference
+     * @return a standardized return code
+     */
+    int thread_status_recovery(struct thread_status_s *ts,
+                               srvr_rcvr_tbl_t *srt);
+
+
+
+    /**
+     * Check a transaction header block and determines if it's in recovery
+     * pending state
+     * @param data IN transaction header block must be analyzed
+     * @return a boolean value
+     */
+    int thread_status_is_recovery_pending(
+        const struct status_record_data_s *data);
+
+
+    
     /**
      * Synchronize status files: this is the atomic operation necessary to
      * guarantee transactionality property of the system
