@@ -353,6 +353,8 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
             /* reset block payload content */
             memset(&(ts->curr_status[new_slot].sr.data.pld), 0,
                    sizeof(struct status_record_data_payload_s));
+            ts->curr_status[new_slot].sr.data.pld.type =
+                DATA_PAYLOAD_TYPE_RSRMGR;
             /* point the new block from chain */
             status_record_update(ts->curr_status + slot, slot,
                                  ts->updated_records);
@@ -1265,10 +1267,11 @@ void thread_status_init(struct thread_status_s *ts,
     ts->active_clients = 0;
     ts->client_array = NULL;
     ts->asked_sync = 0;
+    ts->status1_filename = ts->status2_filename = NULL;
     ts->status1 = ts->status2 = NULL;
     ts->curr_status = NULL;
-    ts->status1_filename = ts->status2_filename = NULL;
     ts->updated_records = g_tree_new(size_t_compare_func);
+    ts->recovery_table = NULL;
     ts->excp = ts->ret_cod = ts->last_errno = 0;
     if (id == 0)
         ts->tid = pthread_self();
@@ -1419,6 +1422,91 @@ int thread_status_load_files(struct thread_status_s *ts,
     LIXA_TRACE(("thread_status_load_files/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+    
+int thread_status_recovery(struct thread_status_s *ts,
+                           srvr_rcvr_tbl_t *srt)
+{
+    enum Exception { NULL_SERVER_RECOVERY_TABLE
+                     , RECOVERY_TABLE_INSERT_ERROR
+                     , INVALID_STATUS
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("thread_status_recovery\n"));
+    TRY {
+        uint32_t i;
+        struct status_record_s *first_block = ts->curr_status;
+        
+        if (NULL == srt)
+            THROW(NULL_SERVER_RECOVERY_TABLE);
+        ts->recovery_table = srt;
+        
+        /* traverse used block list */
+        i = first_block->sr.ctrl.first_used_block;
+        while (0 != i) {
+            struct status_record_data_s *data = &ts->curr_status[i].sr.data;
+            if (DATA_PAYLOAD_TYPE_RSRMGR == data->pld.type) {
+                LIXA_TRACE(("thread_status_recovery: block # " UINT32_T_FORMAT
+                            " is a transaction resource manager block, "
+                            "skipping...\n", i));
+            } else if (DATA_PAYLOAD_TYPE_HEADER == data->pld.type) {
+                LIXA_TRACE(("thread_status_recovery: block # " UINT32_T_FORMAT
+                            " is a transaction header block\n", i));
+                if (thread_status_is_recovery_pending(data)) {
+                    struct srvr_rcvr_tbl_rec_s srtr;
+                    LIXA_TRACE(("thread_status_recovery: block # "
+                                UINT32_T_FORMAT " is related to a recovery "
+                                "pending transaction\n", i));
+                    srtr.job = &data->pld.ph.job;
+                    srtr.tsid = ts->id;
+                    srtr.block_id = i;
+                    if (LIXA_RC_OK != (ret_cod = srvr_rcvr_tbl_insert(
+                                           ts->recovery_table, &srtr)))
+                        THROW(RECOVERY_TABLE_INSERT_ERROR);
+                }
+            } else {
+                LIXA_TRACE(("thread_status_recovery: block # " UINT32_T_FORMAT
+                            " is an unknown block (%d)\n", i, data->pld.type));
+                THROW(INVALID_STATUS);
+            }
+            i = data->next_block;
+        } /* for (i...) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_SERVER_RECOVERY_TABLE:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case RECOVERY_TABLE_INSERT_ERROR:
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("thread_status_recovery/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int thread_status_is_recovery_pending(
+    const struct status_record_data_s *data)
+{
+    if (DATA_PAYLOAD_TYPE_HEADER != data->pld.type)
+        return TRUE;
+    /* @@@ put some logic here */
+    return TRUE;
 }
 
 

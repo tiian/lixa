@@ -137,7 +137,8 @@ extern "C" {
      * Process the input message arrived from the client and prepare the output
      * message if necessary
      * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
+     * @param slot_id IN the slot associated to the file descriptor raised the
+     *                   POLLIN event 
      * @param buf IN/OUT buffer read from socket
      * @param read_bytes IN number of bytes read from socket
      * @return a standardized return code
@@ -150,7 +151,8 @@ extern "C" {
     /**
      * Process the input message arrived from the client
      * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
+     * @param slot_id IN the slot associated to the file descriptor raised the
+     *                   POLLIN event 
      * @param buf IN/OUT buffer read from socket
      * @param read_bytes IN number of bytes read from socket
      * @param lmo OUT message should be returned to the client
@@ -165,7 +167,8 @@ extern "C" {
     /**
      * Prepare the output message must be sent to the client
      * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
+     * @param slot_id IN the slot associated to the file descriptor raised the
+     *                   POLLIN event 
      * @param lmo IN message will be returned to the client
      * @param rc IN return code of the previous operations must be returned
      *              to the client

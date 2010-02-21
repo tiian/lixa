@@ -63,7 +63,8 @@ extern "C" {
     /**
      * Send the default output message to the client
      * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
+     * @param slot_id IN the slot associated to the file descriptor raised the
+     *                   POLLIN event 
      * @param lmo IN message will be returned to the client
      * @return a standardized return code
      */
@@ -75,7 +76,8 @@ extern "C" {
     /**
      * Send the output message related to "end" verb to the client
      * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
+     * @param slot_id IN the slot associated to the file descriptor raised the
+     *                   POLLIN event
      * @param lmo IN message will be returned to the client
      * @param rc IN return code of the previous operations must be returned
      *              to the client
@@ -89,7 +91,8 @@ extern "C" {
     /**
      * Send the output message related to "open" verb to the client
      * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
+     * @param slot_id IN the slot associated to the file descriptor raised the
+     *                   POLLIN event 
      * @param lmo IN message will be returned to the client
      * @param rc IN return code of the previous operations must be returned
      *              to the client
@@ -103,7 +106,8 @@ extern "C" {
     /**
      * Send the output message related to "prepare" verb to the client
      * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
+     * @param slot_id IN the slot associated to the file descriptor raised the
+     *                   POLLIN event 
      * @param lmo IN message will be returned to the client
      * @param rc IN return code of the previous operations must be returned
      *              to the client
@@ -117,7 +121,8 @@ extern "C" {
     /**
      * Send the output message related to "start" verb to the client
      * @param ts IN/OUT thread status structure
-     * @param slot_id IN id of the slot must be freed
+     * @param slot_id IN the slot associated to the file descriptor raised the
+     *                   POLLIN event 
      * @param lmo IN message will be returned to the client
      * @param rc IN return code of the previous operations must be returned
      *              to the client
