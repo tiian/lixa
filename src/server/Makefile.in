@@ -52,7 +52,8 @@ PROGRAMS = $(sbin_PROGRAMS)
 am_lixad_OBJECTS = main.$(OBJEXT) server_config.$(OBJEXT) \
 	server_listener.$(OBJEXT) server_manager.$(OBJEXT) \
 	server_recovery.$(OBJEXT) server_reply.$(OBJEXT) \
-	server_status.$(OBJEXT) server_xa.$(OBJEXT)
+	server_thread_status.$(OBJEXT) server_status.$(OBJEXT) \
+	server_xa.$(OBJEXT)
 lixad_OBJECTS = $(am_lixad_OBJECTS)
 lixad_DEPENDENCIES = ../common/liblixabmt.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -203,14 +204,15 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_HEADERS = ../common/lixa_trace.h server_config.h server_listener.h \
 	server_manager.h server_messages.h server_recovery.h \
-	server_reply.h server_status.h server_xa.h
+	server_reply.h server_thread_status.h server_status.h server_xa.h
 
 AM_CPPFLAGS = -I$(srcdir)/../common
 AM_CFLAGS = -Wall
 AM_LDFLAGS = @LDFLAGS_XML2@ @LDFLAGS_GLIB@ @LDFLAGS_GTHREAD@ -lpthread
 lixad_LDADD = ../common/liblixabmt.la
 lixad_SOURCES = main.c server_config.c server_listener.c server_manager.c \
-	server_recovery.c server_reply.c server_status.c server_xa.c
+	server_recovery.c server_reply.c server_thread_status.c \
+	server_status.c server_xa.c
 
 all: all-am
 
@@ -290,6 +292,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_recovery.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_reply.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_status.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_thread_status.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_xa.Po@am__quote@
 
 .c.o:
