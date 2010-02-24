@@ -231,6 +231,7 @@ int thread_status_recovery(struct thread_status_s *ts,
                            srvr_rcvr_tbl_t *srt)
 {
     enum Exception { NULL_SERVER_RECOVERY_TABLE
+                     , CHECK_RECOVERY_PENDING_ERROR
                      , RECOVERY_TABLE_INSERT_ERROR
                      , INVALID_STATUS
                      , NONE } excp;
@@ -254,9 +255,14 @@ int thread_status_recovery(struct thread_status_s *ts,
                             " is a transaction resource manager block, "
                             "skipping...\n", i));
             } else if (DATA_PAYLOAD_TYPE_HEADER == data->pld.type) {
+                int recovery_pending = FALSE;
                 LIXA_TRACE(("thread_status_recovery: block # " UINT32_T_FORMAT
                             " is a transaction header block\n", i));
-                if (thread_status_is_recovery_pending(data)) {
+                if (LIXA_RC_OK != (
+                        ret_cod = thread_status_check_recovery_pending(
+                            data, &recovery_pending)))
+                    THROW(CHECK_RECOVERY_PENDING_ERROR);
+                if (recovery_pending) {
                     struct srvr_rcvr_tbl_rec_s srtr;
                     LIXA_TRACE(("thread_status_recovery: block # "
                                 UINT32_T_FORMAT " is related to a recovery "
@@ -282,6 +288,7 @@ int thread_status_recovery(struct thread_status_s *ts,
             case NULL_SERVER_RECOVERY_TABLE:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
+            case CHECK_RECOVERY_PENDING_ERROR:
             case RECOVERY_TABLE_INSERT_ERROR:
                 break;
             case INVALID_STATUS:
@@ -301,16 +308,80 @@ int thread_status_recovery(struct thread_status_s *ts,
 
 
 
-int thread_status_is_recovery_pending(
-    const struct status_record_data_s *data)
+int thread_status_check_recovery_pending(
+    const struct status_record_data_s *data, int *result)
 {
-    if (DATA_PAYLOAD_TYPE_HEADER != data->pld.type) {
-        LIXA_TRACE(("thread_status_is_recovery_pending: WARNING data->pld.type"
-                    "=%d\n", data->pld.type));
-        return TRUE;
-    }
-    /* @@@ put some logic here */
-    return TRUE;
+    enum Exception { INVALID_HEADER_TYPE
+                     , FINISHED_TRANSACTION
+                     , NOT_STARTED_TRANSACTION
+                     , INVALID_VERB
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    /* conservative behavior */
+    *result = TRUE;
+    
+    LIXA_TRACE(("thread_status_check_recovery_pending\n"));
+    TRY {
+        const struct lixa_msg_verb_step_s *last = data->pld.ph.last_verb_step;
+        
+        if (DATA_PAYLOAD_TYPE_HEADER != data->pld.type) {
+            LIXA_TRACE(("thread_status_check_recovery_pending: "
+                        "data->pld.type=%d\n", data->pld.type));
+            THROW(INVALID_HEADER_TYPE);
+        }
+
+        /* the logic of this function could be improved in the future, but
+           at this time the algorithm is very conservative: probably some
+           unnecessary recovery operations will be performed */
+        
+        /* is the transaction already marked as finished? */
+        if (data->pld.ph.state.finished) {
+            LIXA_TRACE(("thread_status_check_recovery_pending: "
+                        "data->pld.ph.state.finished=%d returning FALSE\n",
+                        data->pld.ph.state.finished));
+            THROW(FINISHED_TRANSACTION);
+        }
+        /* check last verb & step */
+        switch (last->verb) {
+            case LIXA_MSG_VERB_OPEN:
+            case LIXA_MSG_VERB_CLOSE:
+                LIXA_TRACE(("thread_status_check_recovery_pending: "
+                            "last->verb=%d returning FALSE\n", last->verb));
+                THROW(NOT_STARTED_TRANSACTION);
+            case LIXA_MSG_VERB_START:
+            case LIXA_MSG_VERB_END:
+            case LIXA_MSG_VERB_PREPARE:
+            case LIXA_MSG_VERB_COMMIT:
+            case LIXA_MSG_VERB_ROLLBACK:
+                break;
+            default:
+                THROW(INVALID_VERB);
+        }
+        /* arrived here = possibly recovery pending... */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_HEADER_TYPE:
+            case INVALID_VERB:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case FINISHED_TRANSACTION:
+            case NOT_STARTED_TRANSACTION:
+                *result = FALSE;
+                ret_cod = LIXA_RC_OK;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("thread_status_check_recovery_pending/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 

@@ -17,7 +17,7 @@
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef LIXA_ERRORS_H
-#define LIXA_ERRORS_H
+# define LIXA_ERRORS_H
 
 #include <config.h>
 
