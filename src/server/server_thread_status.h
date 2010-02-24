@@ -84,10 +84,12 @@ extern "C" {
      * Check a transaction header block and determines if it's in recovery
      * pending state
      * @param data IN transaction header block must be analyzed
-     * @return a boolean value
+     * @param result OUT boolean value: TRUE if the transaction is in recovery
+     *        pending result
+     * @return a standardized return code
      */
-    int thread_status_is_recovery_pending(
-        const struct status_record_data_s *data);
+    int thread_status_check_recovery_pending(
+        const struct status_record_data_s *data, int *result);
 
 
     

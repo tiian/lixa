@@ -309,7 +309,9 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
 
 int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 {
-    enum Exception { CLOSE_ERROR
+    enum Exception { BLOCK_STATUS_ERROR
+                     , RECOVERY_TABLE_INSERT_ERROR
+                     , CLOSE_ERROR
                      , FREE_SLOTS
                      , XML_PROC
                      , MSG_RETRIEVE_ERROR
@@ -325,7 +327,24 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                                     buf, sizeof(buf), &read_bytes);
         if (LIXA_RC_CONNECTION_CLOSED == ret_cod) {
             /* client has closed the connection */
-            /* @@@ check what happens to current transaction */
+            int rec_pend = FALSE;
+            uint32_t block = ts->client_array[slot_id].pers_status_slot_id;
+            struct status_record_data_s *data =
+                &(ts->curr_status[block].sr.data);
+            
+            if (LIXA_RC_OK != (ret_cod = thread_status_check_recovery_pending(
+                                   data, &rec_pend)))
+                THROW(BLOCK_STATUS_ERROR);
+            if (rec_pend) {
+                struct srvr_rcvr_tbl_rec_s srtr;
+                /* insert a new record in the recovery pending table */
+                srtr.job = &data->pld.ph.job;
+                srtr.tsid = ts->id;
+                srtr.block_id = block;
+                if (LIXA_RC_OK != (ret_cod = srvr_rcvr_tbl_insert(
+                                       ts->recovery_table, &srtr)))
+                    THROW(RECOVERY_TABLE_INSERT_ERROR);
+            }
 
             /* close socket, release file descriptor and thread status slot */
             LIXA_TRACE(("server_manager_pollin_data: close socket, "
@@ -346,6 +365,9 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case BLOCK_STATUS_ERROR:
+            case RECOVERY_TABLE_INSERT_ERROR:
+                break;
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
                 break;
