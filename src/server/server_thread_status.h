@@ -56,15 +56,26 @@ extern "C" {
                             struct thread_pipe_array_s *tpa);
 
 
+
+    /**
+     * Dump the content of the thread status files
+     * @param ts IN thread status reference
+     * @return a reason code
+     */
+    int thread_status_dump(struct thread_status_s *ts);
+
+
     
     /**
      * Load the files associated to memory mapped status
      * @param ts IN/OUT pointer to the thread status structure
      * @param status_file_prefix IN the prefix used for status files
+     * @param dump IN the status files are loaded only to be dumped
      * @return a reason code
      */
     int thread_status_load_files(struct thread_status_s *ts,
-                                 const char *status_file_prefix);
+                                 const char *status_file_prefix,
+                                 int dump);
 
     
 
