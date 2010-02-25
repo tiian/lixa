@@ -171,7 +171,10 @@
  * The specified option might be valid, but it's not (yet) supported by LIXA
  */
 #define LIXA_RC_UNSUPPORTED_OPTION             -22
-
+/**
+ * A specified file can not be opened because it does not exist
+ */
+#define LIXA_RC_FILE_NOT_EXISTS                -23
 /**
  * Generic error for an TX error (an TX return code not equal TX_OK)
  */

@@ -380,9 +380,11 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
 
 int status_record_load(status_record_t **sr,
                        const char *status_file,
-                       GTree *updated_records)
+                       GTree *updated_records,
+                       int readonly)
 {
-    enum Exception { OPEN_ERROR1
+    enum Exception { FILE_NOT_EXISTS
+                     , OPEN_ERROR1
                      , OPEN_ERROR2
                      , GETTIMEOFDAY_ERROR
                      , STATUS_RECORD_SYNC_ERROR
@@ -401,13 +403,17 @@ int status_record_load(status_record_t **sr,
         struct stat fd_stat;
         LIXA_TRACE(("status_record_load: trying to open '%s' status file...\n",
                     status_file));
-        if (-1 == (fd = open(status_file, O_RDWR))) {
+        if (-1 == (fd = open(status_file, readonly ? O_RDONLY : O_RDWR))) {
             int i;
-            
-            LIXA_TRACE(("status_record_load: status file '%s' does not "
-                        "exist\n", status_file));
-            if (ENOENT != errno)
+
+            if (ENOENT == errno) {
+                LIXA_TRACE(("status_record_load: status file '%s' does not "
+                            "exist\n", status_file));
+                if (readonly)
+                    THROW(FILE_NOT_EXISTS);
+            } else
                 THROW(OPEN_ERROR1);
+            
             /* the file does not exist and must be created */
             if (-1 == (fd = open(status_file, O_RDWR | O_CREAT | O_EXCL,
                                  S_IRUSR | S_IWUSR | S_IRGRP)))
@@ -451,7 +457,8 @@ int status_record_load(status_record_t **sr,
 
         if (NULL == (tmp_sra = mmap(NULL, fd_stat.st_size,
                                     PROT_READ | PROT_WRITE,
-                                    MAP_SHARED, fd, 0)))
+                                    readonly ? MAP_PRIVATE : MAP_SHARED,
+                                    fd, 0)))
             THROW(MMAP_ERROR);
         LIXA_TRACE(("status_record_load: status file '%s' mapped at "
                     "address %p\n", status_file, tmp_sra));
@@ -466,6 +473,9 @@ int status_record_load(status_record_t **sr,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case FILE_NOT_EXISTS:
+                ret_cod = LIXA_RC_FILE_NOT_EXISTS;
+                break;
             case OPEN_ERROR1:
             case OPEN_ERROR2:
                 ret_cod = LIXA_RC_OPEN_ERROR;

@@ -1,7 +1,9 @@
-recovery table set-up: use srvr_rcvr_tbl_insert/get_block for recovery scan
-and recovery phase; restart from thread_status_is_recovery_pending after a 
-deep analysis of recovery pending states.
+continue from thread_status_dump
 
+the same record is cleaned after a successive restart of the server and
+the recovery pending check fails: investigate
+
+execute recovery when a new client arrive of the same job
 when recovery happens check config_digest; on server side only warning; 
 on client side, stop 
 processing if digests do no match (Request for Enhancement: reload config

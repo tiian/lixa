@@ -671,11 +671,14 @@ extern "C" {
      * @param status_file IN the name of the status file to be loaded
      * @param updated_records IN set of record has been updated since last
      *                           synchronization
+     * @param readonly IN the status file must be opened in read-only mode to
+     *                    avoid updates to the file
      * @return a standardized return code
      */
     int status_record_load(status_record_t **sr,
                            const char *status_file,
-                           GTree *updated_records);
+                           GTree *updated_records,
+                           int readonly);
 
 
 

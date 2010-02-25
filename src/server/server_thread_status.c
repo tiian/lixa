@@ -83,8 +83,33 @@ void thread_status_init(struct thread_status_s *ts,
 
 
 
+int thread_status_dump(struct thread_status_s *ts)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("thread_status_dump\n"));
+    TRY {
+        /* @@@ implement me */
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("thread_status_dump/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int thread_status_load_files(struct thread_status_s *ts,
-                             const char *status_file_prefix)
+                             const char *status_file_prefix, int dump)
 {
     enum Exception { STATUS_RECORD_LOAD_1_ERROR
                      , STATUS_RECORD_LOAD_2_ERROR
@@ -108,7 +133,7 @@ int thread_status_load_files(struct thread_status_s *ts,
         if (LIXA_RC_OK != (ret_cod = status_record_load(
                                &(ts->status1),
                                (const char *)ts->status1_filename,
-                               ts->updated_records)))
+                               ts->updated_records, dump)))
             THROW(STATUS_RECORD_LOAD_1_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status1)))
@@ -126,7 +151,7 @@ int thread_status_load_files(struct thread_status_s *ts,
         if (LIXA_RC_OK != (ret_cod = status_record_load(
                                &(ts->status2),
                                (const char *)ts->status2_filename,
-                               ts->updated_records)))
+                               ts->updated_records, dump)))
             THROW(STATUS_RECORD_LOAD_2_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status2)))
@@ -163,8 +188,8 @@ int thread_status_load_files(struct thread_status_s *ts,
                             "the more recent\n"));
                 /* copying second file over first one, and point first as
                    the current file */
-                if (LIXA_RC_OK != (ret_cod = status_record_copy(
-                                       ts->status1, ts->status2, ts)))
+                if (!dump && LIXA_RC_OK != (ret_cod = status_record_copy(
+                                                ts->status1, ts->status2, ts)))
                     THROW(STATUS_RECORD_COPY_ERROR1);
                 ts->curr_status = ts->status1;
             } else {
@@ -173,19 +198,19 @@ int thread_status_load_files(struct thread_status_s *ts,
                             "the more recent\n"));
                 /* copying first file over second one, and point second as
                    the current file */
-                if (LIXA_RC_OK != (ret_cod = status_record_copy(
-                                       ts->status2, ts->status1, ts)))
+                if (!dump && LIXA_RC_OK != (ret_cod = status_record_copy(
+                                                ts->status2, ts->status1, ts)))
                     THROW(STATUS_RECORD_COPY_ERROR2);
                 ts->curr_status = ts->status2;
             }
         } else if (s1ii) {
             /* only first file is integral */
             LIXA_TRACE(("thread_status_load_files: first status file is OK, "
-                        "second status file is damanged: oveeriding it...\n"));
+                        "second status file is damanged: overriding it...\n"));
             /* copying first file over second one, and point second as
                the current file */
-            if (LIXA_RC_OK != (ret_cod = status_record_copy(
-                                   ts->status2, ts->status1, ts)))
+            if (!dump && LIXA_RC_OK != (ret_cod = status_record_copy(
+                                            ts->status2, ts->status1, ts)))
                 THROW(STATUS_RECORD_COPY_ERROR3);
             ts->curr_status = ts->status2;
         } else {
@@ -194,8 +219,8 @@ int thread_status_load_files(struct thread_status_s *ts,
                         "first status file is damanged: overriding it...\n"));
             /* copying second file over first one, and point first as
                the current file */
-            if (LIXA_RC_OK != (ret_cod = status_record_copy(
-                                   ts->status1, ts->status2, ts)))
+            if (!dump && LIXA_RC_OK != (ret_cod = status_record_copy(
+                                            ts->status1, ts->status2, ts)))
                 THROW(STATUS_RECORD_COPY_ERROR4);
             ts->curr_status = ts->status1;
         }
@@ -343,11 +368,13 @@ int thread_status_check_recovery_pending(
             THROW(FINISHED_TRANSACTION);
         }
         /* check last verb & step */
+        LIXA_TRACE(("thread_status_check_recovery_pending: "
+                    "verb=%d, step=%d\n", last->verb, last->step));
         switch (last->verb) {
             case LIXA_MSG_VERB_OPEN:
             case LIXA_MSG_VERB_CLOSE:
                 LIXA_TRACE(("thread_status_check_recovery_pending: "
-                            "last->verb=%d returning FALSE\n", last->verb));
+                            "returning FALSE\n"));
                 THROW(NOT_STARTED_TRANSACTION);
             case LIXA_MSG_VERB_START:
             case LIXA_MSG_VERB_END:

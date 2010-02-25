@@ -20,6 +20,9 @@
 
 
 
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 #ifdef HAVE_ERRNO_H
 # include <errno.h>
 #endif
@@ -81,6 +84,18 @@ void daemonize(void);
 
 
 
+/* default command line options */
+static gboolean run_as_daemon = FALSE;
+static gboolean dump_and_exit = FALSE;
+/* command line options */
+static GOptionEntry entries[] =
+{
+    { "daemon", 'd', 0, G_OPTION_ARG_NONE, &run_as_daemon, "Run the process as a daemon", NULL },
+    { "dump", 'u', 0, G_OPTION_ARG_NONE, &dump_and_exit, "Dump the content of status files and exit", NULL }
+};
+
+
+
 int main(int argc, char *argv[])
 {
     int rc = LIXA_RC_OK;
@@ -89,14 +104,34 @@ int main(int argc, char *argv[])
     struct thread_pipe_array_s tpa;
     struct thread_status_array_s tsa;
     srvr_rcvr_tbl_t srt = SRVR_RCVR_TBL_INIT;
+    GError *error = NULL;
+    GOptionContext *option_context;
 
     LIXA_TRACE_INIT;
     LIXA_TRACE(("main: starting\n"));
     openlog("lixad", LOG_PID, LOG_DAEMON);
     syslog(LOG_NOTICE, "starting");
+
+    option_context = g_option_context_new("- Lixa server");
+    g_option_context_add_main_entries(option_context, entries, NULL);
     /*
-    daemonize();
+    g_option_context_add_group (context, gtk_get_option_group (TRUE));
     */
+    if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
+        syslog(LOG_ERR, "option parsing failed: %s\n", error->message);
+        LIXA_TRACE(("main: option parsing failed: %s\n", error->message));
+        g_print("option parsing failed: %s\n", error->message);
+        exit(1);
+    }
+    if (run_as_daemon && dump_and_exit) {
+        syslog(LOG_WARNING, "dump option overrides daemon option\n");
+        LIXA_TRACE(("main: dump option overrides daemon option\n"));
+        g_print("Warning: dump option overrides daemon option\n");
+        run_as_daemon = FALSE;
+    }
+    if (run_as_daemon)
+        daemonize();
+
     /* initialize libxml2 library */
     LIBXML_TEST_VERSION;
         
@@ -110,7 +145,8 @@ int main(int argc, char *argv[])
     }
 
     /* start configured manager(s) */
-    if (LIXA_RC_OK != (rc = server_manager(&sc, &tpa, &tsa, &srt))) {
+    if (LIXA_RC_OK != (rc = server_manager(&sc, &tpa, &tsa, &srt,
+                                           dump_and_exit))) {
         LIXA_TRACE(("main/server_manager: rc = %d\n", rc));
         syslog(LOG_ERR, "error (%s) while starting manager(s), "
                "premature exit", lixa_strerror(rc));
@@ -118,15 +154,14 @@ int main(int argc, char *argv[])
     }
 
     /* start configured listener(s) */
-    if (LIXA_RC_OK != (rc = server_listener(&sc, &lsa, &tsa))) {
+    if (!dump_and_exit &&
+        LIXA_RC_OK != (rc = server_listener(&sc, &lsa, &tsa))) {
         LIXA_TRACE(("main/server_listener: rc = %d\n", rc));
         syslog(LOG_ERR, "error (%s) while starting listener(s), "
                "premature exit", lixa_strerror(rc));
         return rc;
     }
 
-    sleep(30);
-    
     /* it's time to exit */
     syslog(LOG_NOTICE, "exiting");
 
