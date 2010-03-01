@@ -35,6 +35,9 @@
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
 #ifdef HAVE_SYSLOG_H
 # include <syslog.h>
 #endif
@@ -130,17 +133,22 @@ int thread_status_load_files(struct thread_status_s *ts,
                                            STATUS_FILE_SUFFIX_1, NULL);
         LIXA_TRACE(("thread_status_load_files: first status file is '%s'\n",
                     ts->status1_filename));
+        if (dump)
+            printf("Loading first file '%s'\n", ts->status1_filename);
         if (LIXA_RC_OK != (ret_cod = status_record_load(
                                &(ts->status1),
                                (const char *)ts->status1_filename,
                                ts->updated_records, dump)))
             THROW(STATUS_RECORD_LOAD_1_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
-                               ts->status1)))
+                               ts->status1))) {
             syslog(LOG_WARNING, "thread_status_load_files: first status file "
                    "('%s') did not pass integrity check\n",
                    ts->status1_filename);
-        else
+            if (dump)
+                printf("First status file '%s' did not pass integrity check\n",
+                       ts->status1_filename);
+        } else
             s1ii = TRUE;
         
         /* second file */
@@ -148,17 +156,22 @@ int thread_status_load_files(struct thread_status_s *ts,
                                            STATUS_FILE_SUFFIX_2, NULL);
         LIXA_TRACE(("thread_status_load_files: second status file is '%s'\n",
                     ts->status2_filename));
+        if (dump)
+            printf("Loading second file '%s'\n", ts->status2_filename);
         if (LIXA_RC_OK != (ret_cod = status_record_load(
                                &(ts->status2),
                                (const char *)ts->status2_filename,
                                ts->updated_records, dump)))
             THROW(STATUS_RECORD_LOAD_2_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
-                               ts->status2)))
+                               ts->status2))) {
             syslog(LOG_WARNING, "thread_status_load_files: second status file "
                    "('%s') did not pass integrity check\n",
                    ts->status2_filename);
-        else
+            if (dump)
+                printf("Second status file '%s' did not pass integrity "
+                       "check\n", ts->status2_filename);
+        } else
             s2ii = TRUE;
 
         if (!s1ii && !s2ii) {
@@ -223,6 +236,15 @@ int thread_status_load_files(struct thread_status_s *ts,
                                             ts->status1, ts->status2, ts)))
                 THROW(STATUS_RECORD_COPY_ERROR4);
             ts->curr_status = ts->status1;
+        }
+
+        if (dump) {
+            if (ts->curr_status == ts->status1)
+                printf("First file ('%s') will be dumped\n",
+                      ts->status1_filename);
+            else 
+                printf("Second file ('%s') will be dumped\n",
+                      ts->status2_filename);
         }
         THROW(NONE);
     } CATCH {
