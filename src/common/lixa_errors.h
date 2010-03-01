@@ -267,23 +267,23 @@ define LIXA_RC_RENAME_ERROR                  -123
 /**
  * "stat" function error
  */
-#define LIXA_RC_STAT_ERROR                    -123
+#define LIXA_RC_STAT_ERROR                    -122
 /**
  * "fstat" function error
  */
-#define LIXA_RC_FSTAT_ERROR                   -124
+#define LIXA_RC_FSTAT_ERROR                   -123
 /**
  * "mmap" function error
  */
-#define LIXA_RC_MMAP_ERROR                    -125
+#define LIXA_RC_MMAP_ERROR                    -124
 /**
  * "munmap" function error
  */
-#define LIXA_RC_MUNMAP_ERROR                  -126
+#define LIXA_RC_MUNMAP_ERROR                  -125
 /**
  * "msync" function error
  */
-#define LIXA_RC_MSYNC_ERROR                   -127
+#define LIXA_RC_MSYNC_ERROR                   -126
 
 /**
  * "vsnprintf" function error
@@ -296,7 +296,11 @@ define LIXA_RC_TIMES_ERROR                   -126
 /**
  * "uuid_parse" function error
  */
-#define LIXA_RC_UUID_PARSE_ERROR              -128
+#define LIXA_RC_UUID_PARSE_ERROR              -127
+/**
+ * "localtime/localtime_r" function error
+ */
+#define LIXA_RC_LOCALTIME_ERROR               -128
 /**
  * "gettimeofday" function error
  */

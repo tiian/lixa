@@ -202,11 +202,6 @@ struct status_record_ctrl_s {
      * First record of the free blocks chain (0 means the chain is empty)
      */
     uint32_t        first_free_block;
-    /**
-     * Status file name; this is a reference to the string allocated in
-     * configuration struct. This reference must be updated every time the
-     * server boots up
-     */
 };
 
 

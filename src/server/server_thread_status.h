@@ -59,12 +59,31 @@ extern "C" {
 
     /**
      * Dump the content of the thread status files
+     * WARNING: THIS FUNCTION IS *** NOT *** THREAD SAFE
      * @param ts IN thread status reference
      * @return a reason code
      */
     int thread_status_dump(struct thread_status_s *ts);
 
 
+
+    /**
+     * Dump a transaction header record; see @ref thread_status_dump
+     * @param ph IN payload header reference
+     * @return a reason code
+     */
+    int thread_status_dump_header(struct payload_header_s *ph);
+
+
+
+    /**
+     * Dump a resource manager record; see @ref thread_status_dump
+     * @param rm IN resource manager reference
+     * @return a reason code
+     */
+    int thread_status_dump_rsrmgr(struct payload_rsrmgr_s *rm);
+
+    
     
     /**
      * Load the files associated to memory mapped status

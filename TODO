@@ -1,3 +1,5 @@
+continue from thread_status_dump_header & thread_status_dump_rsrmgr
+
 continue from thread_status_dump
 
 the same record is cleaned after a successive restart of the server and

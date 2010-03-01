@@ -1,0 +1,105 @@
+/*
+ * Copyright (c) 2009-2010, Christian Ferrari <tiian@users.sourceforge.net>
+ * All rights reserved.
+ *
+ * This file is part of LIXA.
+ *
+ * LIXA is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * LIXA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#include <config.h>
+
+
+
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#ifdef HAVE_TIME_H
+# include <time.h>
+#endif
+
+
+
+#include <lixa_errors.h>
+#include <lixa_trace.h>
+#include <lixa_utils.h>
+
+
+
+/* set module trace flag */
+#ifdef LIXA_TRACE_MODULE
+# undef LIXA_TRACE_MODULE
+#endif /* LIXA_TRACE_MODULE */
+#define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_COMMON_UTILS
+
+
+
+int lixa_utils_iso_timestamp(const struct timeval *tv, char *buf,
+                             size_t buf_size)
+{
+    enum Exception { BUFFER_OVERFLOW
+                     , LOCALTIME_ERROR
+                     , INTERNAL_ERROR1
+                     , INTERNAL_ERROR2
+                     , INTERNAL_ERROR3
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_utils_iso_timestamp\n"));
+    TRY {
+        struct tm broken_down_time;
+        size_t buf_len;
+        
+        if (buf_size < ISO_TIMESTAMP_BUFFER_SIZE)
+            THROW(BUFFER_OVERFLOW);
+        if (NULL == localtime_r(&(tv->tv_sec), &broken_down_time))
+            THROW(LOCALTIME_ERROR);
+        strftime(buf, buf_size, "%FT%T", &broken_down_time);
+        if ((buf_len = strlen(buf)) >= buf_size)
+            THROW(INTERNAL_ERROR1);
+        sprintf(buf + buf_len, ".%6.6d", (int)tv->tv_usec);
+        if ((buf_len = strlen(buf)) >= buf_size)
+            THROW(INTERNAL_ERROR2);
+        strftime(buf + buf_len, buf_size - buf_len, "%z", &broken_down_time);
+        if ((buf_len = strlen(buf)) >= buf_size)
+            THROW(INTERNAL_ERROR3);
+        buf[ISO_TIMESTAMP_BUFFER_SIZE - 1] = '\0';
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_OVERFLOW:
+                ret_cod = LIXA_RC_BUFFER_OVERFLOW;
+                break;
+            case LOCALTIME_ERROR:
+                ret_cod = LIXA_RC_LOCALTIME_ERROR;
+                break;
+            case INTERNAL_ERROR1:
+            case INTERNAL_ERROR2:
+            case INTERNAL_ERROR3:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_utils_iso_timestamp/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
