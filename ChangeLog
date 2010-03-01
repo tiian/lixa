@@ -29,10 +29,6 @@ liblixacommon is compiled with POSIX thread enabled; when a non POSIX
 thread enable version of "client" will be released, liblixacommon must be
 double compiled (single and multithread)
 
-2009040101
-lixad command line should be able to specify a custom config file instead of
-default system configuration file; server_config() is already enabled
-
 2009040701
 lixad_conf.xml should be validated against a DTD or a schema to detect
 malformed configuration files
@@ -41,6 +37,7 @@ malformed configuration files
 lixad should be able to run as a console process, not only as a daemon, for
 debug purpouses. It's sufficient to skip "daemonize()" function and it seems
 all works in console environment
+*** SOLVED *** 20100228: see -d command line option for lixad pro
 
 2009051201
 client status collection index could use a double array instead of allocating

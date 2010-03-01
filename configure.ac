@@ -109,7 +109,7 @@ AC_CHECK_HEADERS(netdb.h netinet/in.h)
 AC_CHECK_HEADERS(poll.h pthread.h)
 AC_CHECK_HEADERS(signal.h stdarg.h stdint.h stdio.h stdlib.h string.h syslog.h)
 AC_CHECK_HEADERS(sys/mman.h sys/socket.h sys/stat.h)
-AC_CHECK_HEADERS(sys/time.h sys/types.h)
+AC_CHECK_HEADERS(sys/time.h sys/types.h time.h)
 AC_CHECK_HEADERS(unistd.h uuid/uuid.h)
 
 

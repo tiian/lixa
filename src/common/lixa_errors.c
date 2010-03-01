@@ -170,6 +170,9 @@ const char *lixa_strerror(int ret_cod)
             */
         case LIXA_RC_UUID_PARSE_ERROR:
             return "ERROR: 'uuid_parse' function returned an error condition";
+        case LIXA_RC_LOCALTIME_ERROR:
+            return "ERROR: 'localtime/localtime_r' function returned an error "
+                "condition";
         case LIXA_RC_GETTIMEOFDAY_ERROR:
             return "ERROR: 'gettimeofday' function returned an error "
                 "condition";

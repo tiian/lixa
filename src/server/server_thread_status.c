@@ -46,6 +46,7 @@
 
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_utils.h>
 #include <server_thread_status.h>
 
 
@@ -88,12 +89,103 @@ void thread_status_init(struct thread_status_s *ts,
 
 int thread_status_dump(struct thread_status_s *ts)
 {
-    enum Exception { NONE } excp;
+    enum Exception { ISO_TIMESTAMP_ERROR
+                     , DUMP_HEADER
+                     , DUMP_RSRMGR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("thread_status_dump\n"));
     TRY {
-        /* @@@ implement me */
+        struct status_record_ctrl_s *first_record = &(ts->curr_status->sr.ctrl);
+        char string_date_time[ISO_TIMESTAMP_BUFFER_SIZE];
+        uint32_t i;
+        
+        /* dump first record content */
+        printf("Magic number is: " UINT32_T_FORMAT " (" UINT32_T_FORMAT
+               ")\n", first_record->magic_number, STATUS_FILE_MAGIC_NUMBER);
+        printf("Level is: " UINT32_T_FORMAT " (" UINT32_T_FORMAT ")\n",
+               first_record->level, STATUS_FILE_LEVEL);
+        /* if for some reason there are porting issues, related to localtime_r,
+           localtime can be used instead (dumps are produced by only one
+           thread */
+        if (LIXA_RC_OK != (ret_cod = lixa_utils_iso_timestamp(
+                               &(first_record->last_sync), string_date_time,
+                               sizeof(string_date_time))))
+            THROW(ISO_TIMESTAMP_ERROR);
+        printf("Last sync timestamp: %s\n", string_date_time);
+        printf("Size: " UINT32_T_FORMAT " blocks\n",
+               first_record->number_of_blocks);
+        printf("Used block chain starts at: " UINT32_T_FORMAT " %s\n",
+               first_record->first_used_block,
+               first_record->first_used_block != 0 ? "" : "(empty chain)");
+        printf("Free block chain starts at: " UINT32_T_FORMAT " %s\n",
+               first_record->first_free_block,
+               first_record->first_free_block != 0 ? "" : "(empty chain)");
+
+        /* following blocks */
+        for (i=1; i<first_record->number_of_blocks; ++i) {
+            struct status_record_data_s *record =
+                &(ts->curr_status[i].sr.data);
+            printf("Block: " UINT32_T_FORMAT ", next block in chain: "
+                   UINT32_T_FORMAT "\n", i, record->next_block);
+            printf("Block type: ");
+            switch (record->pld.type) {
+                case DATA_PAYLOAD_TYPE_HEADER:
+                    printf("transaction manager record (transaction header)\n");
+                    if (LIXA_RC_OK != (ret_cod = thread_status_dump_header(
+                                           &(record->pld.ph))))
+                        THROW(DUMP_HEADER);
+                    break;
+                case DATA_PAYLOAD_TYPE_RSRMGR:
+                    printf("resource manager record\n");
+                    if (LIXA_RC_OK != (ret_cod = thread_status_dump_rsrmgr(
+                                           &(record->pld.rm))))
+                        THROW(DUMP_RSRMGR);
+                    break;
+                default:
+                    printf("unknown (%d)\n", record->pld.type);
+            }
+        } /* for (i=1; ... */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case ISO_TIMESTAMP_ERROR:
+                break;
+            case DUMP_HEADER:
+            case DUMP_RSRMGR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("thread_status_dump/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int thread_status_dump_header(struct payload_header_s *ph)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("thread_status_dump_header\n"));
+    TRY {
+        int i;
+        printf("Trn hdr/number of resource managers: %d\n", ph->n);
+        if (ph->n > 0) {
+            printf("Trn hdr/resource manager blocks are: ");
+            for (i=0; i<ph->n; ++i)
+                printf(UINT32_T_FORMAT " ", ph->block_array[i]);
+            printf("\n");
+        }
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -104,7 +196,32 @@ int thread_status_dump(struct thread_status_s *ts)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("thread_status_dump/excp=%d/"
+    LIXA_TRACE(("thread_status_dump_header/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int thread_status_dump_rsrmgr(struct payload_rsrmgr_s *rm)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("thread_status_dump_rsrmgr\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("thread_status_dump_rsrmgr/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

@@ -137,6 +137,11 @@
  */
 #define LIXA_TRACE_MOD_COMMON_STATUS      0x04000000
 
+/**
+ * trace module for common utils functions
+ */
+#define LIXA_TRACE_MOD_COMMON_UTILS       0x08000000
+
 
 
 /**
