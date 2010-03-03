@@ -1,6 +1,5 @@
-continue from thread_status_dump_header & thread_status_dump_rsrmgr
-
-continue from thread_status_dump
+it seems the xa_commit verb is not tracked by last_verb_step array (xa_rollback
+is recorded instead of xa_commit). Investigate.
 
 the same record is cleaned after a successive restart of the server and
 the recovery pending check fails: investigate

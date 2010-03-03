@@ -1,5 +1,7 @@
 LOG:
 
+20100303 - 0.3.10 implemented feature # 2961552 (status file dump)
+
 20100208 - 0.3.9 fixed bugs # 2907562, # 2907545 
 
 20100131 - 0.3.8 bug # 2907548 fix

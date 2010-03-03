@@ -20,6 +20,9 @@
 
 
 
+#ifdef HAVE_ARPA_INET_H
+# include <arpa/inet.h>
+#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -87,7 +90,7 @@ void thread_status_init(struct thread_status_s *ts,
 
 
 
-int thread_status_dump(struct thread_status_s *ts)
+int thread_status_dump(const struct thread_status_s *ts)
 {
     enum Exception { ISO_TIMESTAMP_ERROR
                      , DUMP_HEADER
@@ -97,10 +100,19 @@ int thread_status_dump(struct thread_status_s *ts)
     
     LIXA_TRACE(("thread_status_dump\n"));
     TRY {
-        struct status_record_ctrl_s *first_record = &(ts->curr_status->sr.ctrl);
+        struct status_record_ctrl_s *first_record =
+            &(ts->curr_status->sr.ctrl);
         char string_date_time[ISO_TIMESTAMP_BUFFER_SIZE];
         uint32_t i;
-        
+
+        printf("===================================="
+               "====================================\n");
+        if (ts->curr_status == ts->status1)
+            printf("First file ('%s') will be dumped\n",
+                   ts->status1_filename);
+        else 
+            printf("Second file ('%s') will be dumped\n",
+                   ts->status2_filename);
         /* dump first record content */
         printf("Magic number is: " UINT32_T_FORMAT " (" UINT32_T_FORMAT
                ")\n", first_record->magic_number, STATUS_FILE_MAGIC_NUMBER);
@@ -127,6 +139,8 @@ int thread_status_dump(struct thread_status_s *ts)
         for (i=1; i<first_record->number_of_blocks; ++i) {
             struct status_record_data_s *record =
                 &(ts->curr_status[i].sr.data);
+            printf("------------------------------------"
+                   "------------------------------------\n");
             printf("Block: " UINT32_T_FORMAT ", next block in chain: "
                    UINT32_T_FORMAT "\n", i, record->next_block);
             printf("Block type: ");
@@ -170,25 +184,62 @@ int thread_status_dump(struct thread_status_s *ts)
 
 
 
-int thread_status_dump_header(struct payload_header_s *ph)
+int thread_status_dump_header(const struct payload_header_s *ph)
 {
-    enum Exception { NONE } excp;
+    enum Exception { ISO_TIMESTAMP
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("thread_status_dump_header\n"));
     TRY {
         int i;
-        printf("Trn hdr/number of resource managers: %d\n", ph->n);
+        char arrival_time[ISO_TIMESTAMP_BUFFER_SIZE];
+        char *xid_str = NULL;
+        
+        printf("\tTrnhdr/number of resource managers: %d\n", ph->n);
         if (ph->n > 0) {
-            printf("Trn hdr/resource manager blocks are: ");
+            printf("\tTrnhdr/resource manager blocks are: ");
             for (i=0; i<ph->n; ++i)
                 printf(UINT32_T_FORMAT " ", ph->block_array[i]);
             printf("\n");
         }
-        
+        if (LIXA_RC_OK != (ret_cod = lixa_utils_iso_timestamp(
+                               &ph->arrival_time, arrival_time,
+                               sizeof(arrival_time))))
+            THROW(ISO_TIMESTAMP);
+        printf("\tTrnhdr/arrival time: %s\n", arrival_time);
+        printf("\tTrnhdr/local socket address:port is %s:%hu\n",
+               inet_ntoa(ph->local_sock_addr.sin_addr),
+               ntohs(ph->local_sock_addr.sin_port));
+        printf("\tTrnhdr/peer socket address:port is %s:%hu\n",
+               inet_ntoa(ph->peer_sock_addr.sin_addr),
+               ntohs(ph->peer_sock_addr.sin_port));
+        printf("\tTrnhdr/config digest is '%s'\n", ph->config_digest);
+        printf("\tTrnhdr/job is '%s'\n", lixa_job_get_raw(&ph->job));
+        printf("\tTrnhdr/last (verb, step) are: [ ");
+        for (i=0; i<PAYLOAD_HEADER_VERB_STEP; ++i) {
+            printf("(%d,%d) ",
+                   ph->last_verb_step[
+                       PAYLOAD_HEADER_VERB_STEP-i-1].verb,
+                   ph->last_verb_step[
+                       PAYLOAD_HEADER_VERB_STEP-i-1].step);
+        } /* for (i=0; ... */
+        printf("]\n");
+        xid_str = xid_serialize(&ph->state.xid);
+        printf("\tTrnhdr/state/finished: %d\n"
+               "\tTrnhdr/state/txstate: %d\n"
+               "\tTrnhdr/state/will commit: %d\n"
+               "\tTrnhdr/state/will rollback: %d\n"
+               "\tTrnhdr/state/xid: '%s'\n", 
+               ph->state.finished, ph->state.txstate, ph->state.will_commit,
+               ph->state.will_rollback,
+               xid_str != NULL ? xid_str : "(nil)");
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case ISO_TIMESTAMP:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -203,13 +254,42 @@ int thread_status_dump_header(struct payload_header_s *ph)
 
 
 
-int thread_status_dump_rsrmgr(struct payload_rsrmgr_s *rm)
+int thread_status_dump_rsrmgr(const struct payload_rsrmgr_s *rm)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("thread_status_dump_rsrmgr\n"));
     TRY {
+        printf("\tRsrmgr/rmid: %d\n", rm->rmid);
+        printf("\tRsrmgr/state/next_verb: %d\n"
+               "\tRsrmgr/state/xa_r_state: %d\n"
+               "\tRsrmgr/state/xa_s_state: %d\n"
+               "\tRsrmgr/state/xa_t_state: %d\n",
+               rm->state.next_verb, rm->state.xa_r_state,
+               rm->state.xa_s_state, rm->state.xa_t_state);
+        printf("\tRsrmgr/lixac_conf.xml name: '%s'\n"
+               "\tRsrmgr/xa_name: '%s'\n"
+               "\tRsrmgr/xa_open_info: '%s'\n"
+               "\tRsrmgr/xa_open_flags: %ld\n"
+               "\tRsrmgr/xa_open_rc: %d\n",
+               rm->name, rm->xa_name, rm->xa_open_info, rm->xa_open_flags,
+               rm->xa_open_rc);
+        printf("\tRsrmgr/xa_start_flags: %ld\n"
+               "\tRsrmgr/xa_start_rc: %d\n",
+               rm->xa_start_flags, rm->xa_start_rc);
+        printf("\tRsrmgr/xa_end_flags: %ld\n"
+               "\tRsrmgr/xa_end_rc: %d\n",
+               rm->xa_end_flags, rm->xa_end_rc);
+        printf("\tRsrmgr/xa_prepare_flags: %ld\n"
+               "\tRsrmgr/xa_prepare_rc: %d\n",
+               rm->xa_prepare_flags, rm->xa_prepare_rc);
+        printf("\tRsrmgr/xa_commit_flags: %ld\n"
+               "\tRsrmgr/xa_commit_rc: %d\n",
+               rm->xa_commit_flags, rm->xa_commit_rc);
+        printf("\tRsrmgr/xa_rollback_flags: %ld\n"
+               "\tRsrmgr/xa_rollback_rc: %d\n",
+               rm->xa_rollback_flags, rm->xa_rollback_rc);
         
         THROW(NONE);
     } CATCH {
@@ -250,8 +330,6 @@ int thread_status_load_files(struct thread_status_s *ts,
                                            STATUS_FILE_SUFFIX_1, NULL);
         LIXA_TRACE(("thread_status_load_files: first status file is '%s'\n",
                     ts->status1_filename));
-        if (dump)
-            printf("Loading first file '%s'\n", ts->status1_filename);
         if (LIXA_RC_OK != (ret_cod = status_record_load(
                                &(ts->status1),
                                (const char *)ts->status1_filename,
@@ -262,9 +340,6 @@ int thread_status_load_files(struct thread_status_s *ts,
             syslog(LOG_WARNING, "thread_status_load_files: first status file "
                    "('%s') did not pass integrity check\n",
                    ts->status1_filename);
-            if (dump)
-                printf("First status file '%s' did not pass integrity check\n",
-                       ts->status1_filename);
         } else
             s1ii = TRUE;
         
@@ -273,8 +348,6 @@ int thread_status_load_files(struct thread_status_s *ts,
                                            STATUS_FILE_SUFFIX_2, NULL);
         LIXA_TRACE(("thread_status_load_files: second status file is '%s'\n",
                     ts->status2_filename));
-        if (dump)
-            printf("Loading second file '%s'\n", ts->status2_filename);
         if (LIXA_RC_OK != (ret_cod = status_record_load(
                                &(ts->status2),
                                (const char *)ts->status2_filename,
@@ -285,9 +358,6 @@ int thread_status_load_files(struct thread_status_s *ts,
             syslog(LOG_WARNING, "thread_status_load_files: second status file "
                    "('%s') did not pass integrity check\n",
                    ts->status2_filename);
-            if (dump)
-                printf("Second status file '%s' did not pass integrity "
-                       "check\n", ts->status2_filename);
         } else
             s2ii = TRUE;
 
@@ -355,14 +425,6 @@ int thread_status_load_files(struct thread_status_s *ts,
             ts->curr_status = ts->status1;
         }
 
-        if (dump) {
-            if (ts->curr_status == ts->status1)
-                printf("First file ('%s') will be dumped\n",
-                      ts->status1_filename);
-            else 
-                printf("Second file ('%s') will be dumped\n",
-                      ts->status2_filename);
-        }
         THROW(NONE);
     } CATCH {
         switch (excp) {
