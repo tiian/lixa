@@ -63,16 +63,17 @@ extern "C" {
      * @param ts IN thread status reference
      * @return a reason code
      */
-    int thread_status_dump(struct thread_status_s *ts);
+    int thread_status_dump(const struct thread_status_s *ts);
 
 
 
     /**
      * Dump a transaction header record; see @ref thread_status_dump
+     * WARNING: THIS FUNCTION IS *** NOT *** THREAD SAFE
      * @param ph IN payload header reference
      * @return a reason code
      */
-    int thread_status_dump_header(struct payload_header_s *ph);
+    int thread_status_dump_header(const struct payload_header_s *ph);
 
 
 
@@ -81,7 +82,7 @@ extern "C" {
      * @param rm IN resource manager reference
      * @return a reason code
      */
-    int thread_status_dump_rsrmgr(struct payload_rsrmgr_s *rm);
+    int thread_status_dump_rsrmgr(const struct payload_rsrmgr_s *rm);
 
     
     
