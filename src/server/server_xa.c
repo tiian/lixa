@@ -50,9 +50,7 @@ int server_xa_close(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_close\n"));
     TRY {
         /* release all allocated blocks */
-        if (LIXA_RC_OK != (
-                ret_cod = payload_chain_release(
-                    ts, ts->client_array[block_id].pers_status_slot_id)))
+        if (LIXA_RC_OK != (ret_cod = payload_chain_release(ts, block_id)))
             THROW(PAYLOAD_CHAIN_RELEASE);
         
         THROW(NONE);
