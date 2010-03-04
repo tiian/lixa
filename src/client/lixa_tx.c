@@ -319,11 +319,13 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                         "TX_TIMEOUT_ROLLBACK_ONLY and cannot be committed; "
                         "rollbacking...\n", txstate));
             commit = FALSE;
-        } else {
-            if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, TRUE)))
-                THROW(XA_END_ERROR);
-
-            /* bypass prepare if there is only one resource manager */
+        }
+        /* detach the transaction */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, commit)))
+            THROW(XA_END_ERROR);
+        /* prepare (skip if we are rollbacking) */
+        if (commit) {
+            /* bypass xa_prepare if there is only one resource manager */
             if (global_ccc.actconf.rsrmgrs->len > 1) {
                 one_phase_commit = FALSE;
                 if (LIXA_RC_OK != (
@@ -332,7 +334,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
             } else
                 one_phase_commit = TRUE;
         }
-
+        /* commit/rollback */
         if (commit) {
             LIXA_TRACE(("lixa_tx_commit: go on with commit...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_xa_commit(

@@ -1,8 +1,16 @@
-it seems the xa_commit verb is not tracked by last_verb_step array (xa_rollback
-is recorded instead of xa_commit). Investigate.
+there is a bug in 
+server_manager_pollout
+when it calls
+payload_header_store_verb_step
+2010-03-04 22:47:54.608533 [27139/3082550160] payload_header_store_verb_step:(verb,step): (0,0) --> (0,0)
+2010-03-04 22:47:54.608543 [27139/3082550160] payload_header_store_verb_step:(verb,step): (0,0) --> (0,0)
+2010-03-04 22:47:54.608553 [27139/3082550160] payload_header_store_verb_step:(verb,step): (0,0) --> (0,0)
+2010-03-04 22:47:54.608562 [27139/3082550160] payload_header_store_verb_step:(verb,step): (1,8) --> (0,0)
+2010-03-04 22:47:54.608572 [27139/3082550160] payload_header_store_verb_step:(verb,step): (1936538686,1701584999) --> (1,8)
+values of verb and step are out of range and it's not clear where they come
+from; after some client cycle, there may be a sigfault: something is writing
+the wrong memory piece and corrupt this array...
 
-the same record is cleaned after a successive restart of the server and
-the recovery pending check fails: investigate
 
 execute recovery when a new client arrive of the same job
 when recovery happens check config_digest; on server side only warning; 

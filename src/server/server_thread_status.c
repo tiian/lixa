@@ -271,23 +271,23 @@ int thread_status_dump_rsrmgr(const struct payload_rsrmgr_s *rm)
         printf("\tRsrmgr/lixac_conf.xml name: '%s'\n"
                "\tRsrmgr/xa_name: '%s'\n"
                "\tRsrmgr/xa_open_info: '%s'\n"
-               "\tRsrmgr/xa_open_flags: %ld\n"
+               "\tRsrmgr/xa_open_flags: 0x%lx\n"
                "\tRsrmgr/xa_open_rc: %d\n",
                rm->name, rm->xa_name, rm->xa_open_info, rm->xa_open_flags,
                rm->xa_open_rc);
-        printf("\tRsrmgr/xa_start_flags: %ld\n"
+        printf("\tRsrmgr/xa_start_flags: 0x%lx\n"
                "\tRsrmgr/xa_start_rc: %d\n",
                rm->xa_start_flags, rm->xa_start_rc);
-        printf("\tRsrmgr/xa_end_flags: %ld\n"
+        printf("\tRsrmgr/xa_end_flags: 0x%lx\n"
                "\tRsrmgr/xa_end_rc: %d\n",
                rm->xa_end_flags, rm->xa_end_rc);
-        printf("\tRsrmgr/xa_prepare_flags: %ld\n"
+        printf("\tRsrmgr/xa_prepare_flags: 0x%lx\n"
                "\tRsrmgr/xa_prepare_rc: %d\n",
                rm->xa_prepare_flags, rm->xa_prepare_rc);
-        printf("\tRsrmgr/xa_commit_flags: %ld\n"
+        printf("\tRsrmgr/xa_commit_flags: 0x%lx\n"
                "\tRsrmgr/xa_commit_rc: %d\n",
                rm->xa_commit_flags, rm->xa_commit_rc);
-        printf("\tRsrmgr/xa_rollback_flags: %ld\n"
+        printf("\tRsrmgr/xa_rollback_flags: 0x%lx\n"
                "\tRsrmgr/xa_rollback_rc: %d\n",
                rm->xa_rollback_flags, rm->xa_rollback_rc);
         
@@ -386,22 +386,30 @@ int thread_status_load_files(struct thread_status_s *ts,
                 /* second file is newer */
                 LIXA_TRACE(("thread_status_load_files: second status file is "
                             "the more recent\n"));
-                /* copying second file over first one, and point first as
-                   the current file */
-                if (!dump && LIXA_RC_OK != (ret_cod = status_record_copy(
-                                                ts->status1, ts->status2, ts)))
-                    THROW(STATUS_RECORD_COPY_ERROR1);
-                ts->curr_status = ts->status1;
+                if (dump)
+                    ts->curr_status = ts->status2;
+                else {
+                    /* copying second file over first one, and point first as
+                       the current file */
+                    if (LIXA_RC_OK != (ret_cod =  status_record_copy(
+                                           ts->status1, ts->status2, ts)))
+                        THROW(STATUS_RECORD_COPY_ERROR1);
+                    ts->curr_status = ts->status1;
+                }
             } else {
                 /* first file is newer */
                 LIXA_TRACE(("thread_status_load_files: first status file is "
                             "the more recent\n"));
-                /* copying first file over second one, and point second as
-                   the current file */
-                if (!dump && LIXA_RC_OK != (ret_cod = status_record_copy(
-                                                ts->status2, ts->status1, ts)))
-                    THROW(STATUS_RECORD_COPY_ERROR2);
-                ts->curr_status = ts->status2;
+                if (dump)
+                    ts->curr_status = ts->status1;
+                else {
+                    /* copying first file over second one, and point second as
+                       the current file */
+                    if (LIXA_RC_OK != (ret_cod = status_record_copy(
+                                           ts->status2, ts->status1, ts)))
+                        THROW(STATUS_RECORD_COPY_ERROR2);
+                    ts->curr_status = ts->status2;
+                }
             }
         } else if (s1ii) {
             /* only first file is integral */
@@ -409,20 +417,28 @@ int thread_status_load_files(struct thread_status_s *ts,
                         "second status file is damanged: overriding it...\n"));
             /* copying first file over second one, and point second as
                the current file */
-            if (!dump && LIXA_RC_OK != (ret_cod = status_record_copy(
-                                            ts->status2, ts->status1, ts)))
-                THROW(STATUS_RECORD_COPY_ERROR3);
-            ts->curr_status = ts->status2;
+            if (dump)
+                ts->curr_status = ts->status1;
+            else {
+                if (LIXA_RC_OK != (ret_cod = status_record_copy(
+                                       ts->status2, ts->status1, ts)))
+                    THROW(STATUS_RECORD_COPY_ERROR3);
+                ts->curr_status = ts->status2;
+            }
         } else {
             /* only second file is integral */
             LIXA_TRACE(("thread_status_load_files: second status file is OK, "
                         "first status file is damanged: overriding it...\n"));
-            /* copying second file over first one, and point first as
-               the current file */
-            if (!dump && LIXA_RC_OK != (ret_cod = status_record_copy(
-                                            ts->status1, ts->status2, ts)))
-                THROW(STATUS_RECORD_COPY_ERROR4);
-            ts->curr_status = ts->status1;
+            if (dump)
+                ts->curr_status = ts->status2;
+            else {
+                /* copying second file over first one, and point first as
+                   the current file */
+                if (LIXA_RC_OK != (ret_cod = status_record_copy(
+                                       ts->status1, ts->status2, ts)))
+                    THROW(STATUS_RECORD_COPY_ERROR4);
+                ts->curr_status = ts->status1;
+            }
         }
 
         THROW(NONE);

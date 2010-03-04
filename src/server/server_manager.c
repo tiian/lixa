@@ -407,6 +407,7 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
     
     LIXA_TRACE(("server_manager_pollout\n"));
     TRY {
+        uint32_t block_id;
         ssize_t wrote_bytes;
         
         if (ts->client_array[slot_id].output_buffer_size >
@@ -420,13 +421,20 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
         free(ts->client_array[slot_id].output_buffer);
         ts->client_array[slot_id].output_buffer = NULL;
         ts->client_array[slot_id].output_buffer_size = 0;
-        if (LIXA_RC_OK != (ret_cod = payload_header_store_verb_step(
-                               ts, slot_id,
-                               &ts->client_array[slot_id].last_verb_step)))
-            THROW(STORE_VERB_STEP_ERROR);
         ts->client_array[slot_id].last_verb_step.verb = 0;
         ts->client_array[slot_id].last_verb_step.step = 0;
         
+        /* retrieve the block is storing the status of the client inside
+           memory mapped status file */
+        block_id = ts->client_array[slot_id].pers_status_slot_id;
+        LIXA_TRACE(("server_manager_pollout: I/O slot_id = "
+                    UINT32_T_FORMAT ", status block_id = " UINT32_T_FORMAT
+                    "\n", slot_id, block_id));
+        if (LIXA_RC_OK != (ret_cod = payload_header_store_verb_step(
+                               ts, block_id,
+                               &ts->client_array[block_id].last_verb_step)))
+            THROW(STORE_VERB_STEP_ERROR);
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -607,7 +615,10 @@ int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
         /* retrieve the block is storing the status of the client inside
            memory mapped status file */
         block_id = ts->client_array[slot_id].pers_status_slot_id;
-
+        LIXA_TRACE(("server_manager_inmsg_proc: I/O slot_id = "
+                    UINT32_T_FORMAT ", status block_id = " UINT32_T_FORMAT
+                    "\n", slot_id, block_id));
+        
         /* set output message */
         lmo->header.level = LIXA_MSG_LEVEL;
         lmo->header.pvs.verb = LIXA_MSG_VERB_NULL;
