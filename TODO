@@ -12,6 +12,7 @@ with valgrind the simplest case test is:
   (xa_open step 8)
 next diagnosys: inspect code to understand what's different in restart on
 used files...
+valgrind --num-callers=15 --error-limit=no /tmp/lixa/sbin/lixad
 
 execute recovery when a new client arrive of the same job
 when recovery happens check config_digest; on server side only warning; 
