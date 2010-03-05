@@ -300,6 +300,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case INVALID_STEP5:
             case INVALID_STEP6:
             case INVALID_VERB:
+                LIXA_TRACE(("lixa_msg_free: verb=%d, step=%d\n",
+                            msg->header.pvs.verb, msg->header.pvs.step));
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
                 break;
             case NONE:

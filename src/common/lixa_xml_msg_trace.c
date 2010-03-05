@@ -141,7 +141,7 @@ int lixa_msg_trace_commit(const struct lixa_msg_s *msg)
         switch (msg->header.pvs.step) {
             case 8:
                 if (NULL != msg->body.commit_8.xa_commit_execs) {
-                    LIXA_TRACE(("lixa_msg_trace: body["
+                    LIXA_TRACE(("lixa_msg_trace_commit: body["
                                 "conthr[finished=%d]]\n",
                                 msg->body.commit_8.conthr.finished));
                     for (i=0; i<msg->body.commit_8.xa_commit_execs->len;
@@ -153,7 +153,7 @@ int lixa_msg_trace_commit(const struct lixa_msg_s *msg)
                                 struct
                                 lixa_msg_body_commit_8_xa_commit_execs_s,
                                 i);
-                        LIXA_TRACE(("lixa_msg_trace: body["
+                        LIXA_TRACE(("lixa_msg_trace_commit: body["
                                     "xa_commit_execs["
                                     "xa_commit_exec["
                                     "rmid=%d,flags=0x%lx,"
@@ -318,7 +318,7 @@ int lixa_msg_trace_open(const struct lixa_msg_s *msg)
 
         switch (msg->header.pvs.step) {
             case 8:
-                LIXA_TRACE(("lixa_msg_trace: body[client[job="
+                LIXA_TRACE(("lixa_msg_trace_open: body[client[job="
                             "'%s',config_digest='%s']]]\n",
                             msg->body.open_8.client.job,
                             msg->body.open_8.client.config_digest));
@@ -329,7 +329,7 @@ int lixa_msg_trace_open(const struct lixa_msg_s *msg)
                                 msg->body.open_8.rsrmgrs,
                                 struct lixa_msg_body_open_8_rsrmgr_s,
                                 i);
-                        LIXA_TRACE(("lixa_msg_trace: body[rsrmgrs["
+                        LIXA_TRACE(("lixa_msg_trace_open: body[rsrmgrs["
                                     "rsrmgr[rmid=%d,name='%s',"
                                     "xa_name='%s']]]\n",
                                     rsrmgr->rmid,
@@ -341,12 +341,12 @@ int lixa_msg_trace_open(const struct lixa_msg_s *msg)
                 }
                 break;
             case 16:
-                LIXA_TRACE(("lixa_msg_trace: body[answer[rc[%d]]]\n",
+                LIXA_TRACE(("lixa_msg_trace_open: body[answer[rc[%d]]]\n",
                             msg->body.open_16.answer.rc));
                 break;
             case 24:
                 if (NULL != msg->body.open_24.xa_open_execs) {
-                    LIXA_TRACE(("lixa_msg_trace: body["
+                    LIXA_TRACE(("lixa_msg_trace_open: body["
                                 "conthr[state=%d]]\n",
                                 msg->body.open_24.conthr.state));
                     for (i=0; i<msg->body.open_24.xa_open_execs->len;
@@ -358,7 +358,7 @@ int lixa_msg_trace_open(const struct lixa_msg_s *msg)
                                 struct
                                 lixa_msg_body_open_24_xa_open_execs_s,
                                 i);
-                        LIXA_TRACE(("lixa_msg_trace: body["
+                        LIXA_TRACE(("lixa_msg_trace_open: body["
                                     "xa_open_execs["
                                     "xa_open_exec["
                                     "xa_info='%s',rmid=%d,flags=0x%lx,"
@@ -408,7 +408,7 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
         switch (msg->header.pvs.step) {
             case 8:
                 if (NULL != msg->body.prepare_8.xa_prepare_execs) {
-                    LIXA_TRACE(("lixa_msg_trace: body["
+                    LIXA_TRACE(("lixa_msg_trace_prepare: body["
                                 "conthr[commit=%d]]\n",
                                 msg->body.prepare_8.conthr.commit));
                     for (i=0; i<msg->body.prepare_8.xa_prepare_execs->len;
@@ -420,7 +420,7 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
                                 struct
                                 lixa_msg_body_prepare_8_xa_prepare_execs_s,
                                 i);
-                        LIXA_TRACE(("lixa_msg_trace: body["
+                        LIXA_TRACE(("lixa_msg_trace_prepare: body["
                                     "xa_prepare_execs["
                                     "xa_prepare_exec["
                                     "rmid=%d,flags=0x%lx,"
@@ -474,7 +474,7 @@ int lixa_msg_trace_rollback(const struct lixa_msg_s *msg)
         switch (msg->header.pvs.step) {
             case 8:
                 if (NULL != msg->body.rollback_8.xa_rollback_execs) {
-                    LIXA_TRACE(("lixa_msg_trace: body["
+                    LIXA_TRACE(("lixa_msg_trace_rollback: body["
                                 "conthr[finished=%d]]\n",
                                 msg->body.rollback_8.conthr.finished));
                     for (i=0; i<msg->body.rollback_8.xa_rollback_execs->len;
@@ -486,7 +486,7 @@ int lixa_msg_trace_rollback(const struct lixa_msg_s *msg)
                                 struct
                                 lixa_msg_body_rollback_8_xa_rollback_execs_s,
                                 i);
-                        LIXA_TRACE(("lixa_msg_trace: body["
+                        LIXA_TRACE(("lixa_msg_trace_rollback: body["
                                     "xa_rollback_execs["
                                     "xa_rollback_exec["
                                     "rmid=%d,flags=0x%lx,"
@@ -562,7 +562,7 @@ int lixa_msg_trace_start(const struct lixa_msg_s *msg)
                 break;
             case 24:
                 if (NULL != msg->body.start_24.xa_start_execs) {
-                    LIXA_TRACE(("lixa_msg_trace: body["
+                    LIXA_TRACE(("lixa_msg_trace_start: body["
                                 "conthr[state=%d]]\n",
                                 msg->body.start_24.conthr.state));
                     for (i=0; i<msg->body.start_24.xa_start_execs->len;
@@ -574,7 +574,7 @@ int lixa_msg_trace_start(const struct lixa_msg_s *msg)
                                 struct
                                 lixa_msg_body_start_24_xa_start_execs_s,
                                 i);
-                        LIXA_TRACE(("lixa_msg_trace: body["
+                        LIXA_TRACE(("lixa_msg_trace_start: body["
                                     "xa_start_execs["
                                     "xa_start_exec["
                                     "rmid=%d,flags=0x%lx,"
