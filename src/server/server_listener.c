@@ -218,7 +218,7 @@ int server_listener_loop(const struct server_config_s *sc,
         ts->poll_size = n;
         
         for (i = 0; i < n; ++i) {
-            if (i == 0)
+            if (!i)
                 /* control pipe */
                 ts->poll_array[i].fd = ts->tpa->array[ts->id].pipefd[0];
             else

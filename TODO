@@ -1,22 +1,3 @@
-there is a memory corruption issue spotted by valgrind probably in a wrong
-place :(
-without valgrind it generates a random access memory error: it can happen
-in malloc, in g_lib_*_free, and so on (segmentation fault)
-with valgrind the simplest case test is:
-- start lixad on fresh status files
-- run a single transaction
-- stop (kill) lixad
-- re-start lixad on used status files
-- run a single transaction
-- valgrind shout an error in lixa_msg_free/g_array_free on the first call
-  (xa_open step 8)
-next diagnosys: inspect code to understand what's different in restart on
-used files...
-valgrind --num-callers=15 --error-limit=no /tmp/lixa/sbin/lixad
-
-dest_is variable seems to be useless in status_record_copy function: remove
-and test it!
-
 execute recovery when a new client arrive of the same job
 when recovery happens check config_digest; on server side only warning; 
 on client side, stop 

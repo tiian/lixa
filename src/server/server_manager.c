@@ -83,7 +83,7 @@ int server_manager(struct server_config_s *sc,
          * process, it's IMPLICITLY created */
         for (i = 0; i < tsa->n; ++i) {
             thread_status_init(&(tsa->array[i]), i, tpa);
-            if (i != 0) {
+            if (i) {
                 /* load status file for thread != listener */
                 if (LIXA_RC_OK != (
                         ret_cod = thread_status_load_files(
@@ -202,15 +202,14 @@ void *server_manager_thread(void *void_ts)
                 }
                 if (ts->poll_array[i].revents & POLLIN) {
                     found_fd++;
-                    if (i == 0) {
+                    if (!i) {
                         if (LIXA_RC_OK != (
                                 ret_cod = server_manager_pollin_ctrl(
                                     ts, ts->poll_array[i].fd)))
                             THROW(POLLIN_CTRL_ERROR);
                     } else {
                         if (LIXA_RC_OK != (
-                                ret_cod = server_manager_pollin_data(
-                                    ts, i)))
+                                ret_cod = server_manager_pollin_data(ts, i)))
                             THROW(POLLIN_DATA_ERROR);
                     }
                 } else if (ts->poll_array[i].revents & POLLOUT) {
@@ -430,7 +429,7 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
                     "\n", slot_id, block_id));
         if (LIXA_RC_OK != (ret_cod = payload_header_store_verb_step(
                                ts, block_id,
-                               &ts->client_array[block_id].last_verb_step)))
+                               &ts->client_array[slot_id].last_verb_step)))
             THROW(STORE_VERB_STEP_ERROR);
 
         /* now useless, reset for first cycle */
@@ -629,8 +628,10 @@ int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
         /* process the message */
         switch (lmi.header.pvs.verb) {
             case LIXA_MSG_VERB_OPEN:
-                if (LIXA_RC_OK != (ret_cod = server_xa_open(
-                                       ts, &lmi, lmo, block_id)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_xa_open(
+                            ts, &lmi, lmo, block_id,
+                            &(ts->client_array[slot_id].last_verb_step))))
                     THROW(SERVER_XA_OPEN_ERROR)
                 break;
             case LIXA_MSG_VERB_CLOSE:
@@ -639,18 +640,24 @@ int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
                     THROW(SERVER_XA_CLOSE_ERROR)
                 break;
             case LIXA_MSG_VERB_START:
-                if (LIXA_RC_OK != (ret_cod = server_xa_start(
-                                       ts, &lmi, lmo, block_id)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_xa_start(
+                            ts, &lmi, lmo, block_id,
+                            &(ts->client_array[slot_id].last_verb_step))))
                     THROW(SERVER_XA_START_ERROR)
                 break;
             case LIXA_MSG_VERB_END:
-                if (LIXA_RC_OK != (ret_cod = server_xa_end(
-                                       ts, &lmi, lmo, block_id)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_xa_end(
+                            ts, &lmi, lmo, block_id,
+                            &(ts->client_array[slot_id].last_verb_step))))
                     THROW(SERVER_XA_END_ERROR)
                 break;
             case LIXA_MSG_VERB_PREPARE:
-                if (LIXA_RC_OK != (ret_cod = server_xa_prepare(
-                                       ts, &lmi, lmo, block_id)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_xa_prepare(
+                            ts, &lmi, lmo, block_id,
+                            &(ts->client_array[slot_id].last_verb_step))))
                     THROW(SERVER_XA_PREPARE_ERROR)
                 break;
             case LIXA_MSG_VERB_COMMIT:
