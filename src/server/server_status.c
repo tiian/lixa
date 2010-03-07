@@ -175,7 +175,7 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
 
 
 
-int payload_header_store_verb_step(struct thread_status_s *ts, uint32_t slot,
+int payload_header_store_verb_step(struct thread_status_s *ts, uint32_t block_id,
                                    const struct lixa_msg_verb_step_s *vs)
 {
     enum Exception { INVALID_RECORD
@@ -186,7 +186,7 @@ int payload_header_store_verb_step(struct thread_status_s *ts, uint32_t slot,
     TRY {
         int i;
         struct status_record_data_payload_s *pld =
-            &(ts->curr_status[slot].sr.data.pld);
+            &(ts->curr_status[block_id].sr.data.pld);
 
         /* check the record is a payload header */
         if (pld->type != DATA_PAYLOAD_TYPE_HEADER)
@@ -212,7 +212,7 @@ int payload_header_store_verb_step(struct thread_status_s *ts, uint32_t slot,
                     pld->ph.last_verb_step[0].step));
         pld->ph.last_verb_step[0] = *vs;
         /* update the record */
-        status_record_update(ts->curr_status + slot, slot,
+        status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
 
         THROW(NONE);
@@ -235,9 +235,9 @@ int payload_header_store_verb_step(struct thread_status_s *ts, uint32_t slot,
 
 
 
-int payload_chain_release(struct thread_status_s *ts, uint32_t slot)
+int payload_chain_release(struct thread_status_s *ts, uint32_t block_id)
 {
-    enum Exception { SLOT_IS_ZERO
+    enum Exception { BLOCK_ID_IS_ZERO
                      , INVALID_BLOCK_TYPE
                      , STATUS_RECORD_DELETE1
                      , STATUS_RECORD_DELETE2
@@ -249,24 +249,24 @@ int payload_chain_release(struct thread_status_s *ts, uint32_t slot)
         int i;
         status_record_t *csr = ts->curr_status;
         
-        if (slot == 0)
-            THROW(SLOT_IS_ZERO);
-        if (csr[slot].sr.data.pld.type != DATA_PAYLOAD_TYPE_HEADER)
+        if (block_id == 0)
+            THROW(BLOCK_ID_IS_ZERO);
+        if (csr[block_id].sr.data.pld.type != DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_TYPE);
         /* release chained blocks */
-        for (i = 0; i < csr[slot].sr.data.pld.ph.n; ++i) {
+        for (i = 0; i < csr[block_id].sr.data.pld.ph.n; ++i) {
             LIXA_TRACE(("payload_chain_release: child # %d, releasing chained "
                         "block " UINT32_T_FORMAT "\n",
-                        i, csr[slot].sr.data.pld.ph.block_array[i]));
+                        i, csr[block_id].sr.data.pld.ph.block_array[i]));
             if (LIXA_RC_OK != (ret_cod = status_record_delete(
                                    ts,
-                                   csr[slot].sr.data.pld.ph.block_array[i])))
+                                   csr[block_id].sr.data.pld.ph.block_array[i])))
                 THROW(STATUS_RECORD_DELETE1);
         }
         /* release current block */
         LIXA_TRACE(("payload_chain_release: releasing header block "
-                    UINT32_T_FORMAT "\n", slot));
-        if (LIXA_RC_OK != (ret_cod = status_record_delete(ts, slot)))
+                    UINT32_T_FORMAT "\n", block_id));
+        if (LIXA_RC_OK != (ret_cod = status_record_delete(ts, block_id)))
             THROW(STATUS_RECORD_DELETE2);
         /* PAY ATTENTION NO DATA IS CLEANED: ONLY BLOCK REMOVAL HAPPENS
            THIS IS INTENTIONALLY DID BECAUSE WE DON'T WANT TO ERASE THE
@@ -278,7 +278,7 @@ int payload_chain_release(struct thread_status_s *ts, uint32_t slot)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case SLOT_IS_ZERO:
+            case BLOCK_ID_IS_ZERO:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
                 break;
             case INVALID_BLOCK_TYPE:
@@ -301,7 +301,7 @@ int payload_chain_release(struct thread_status_s *ts, uint32_t slot)
 
 
 
-int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
+int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
                            int size)
 {
     enum Exception { OUT_OF_RANGE
@@ -322,7 +322,8 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
         }
 
         /* check this is a payload header */
-        if (ts->curr_status[slot].sr.data.pld.type != DATA_PAYLOAD_TYPE_HEADER)
+        if (ts->curr_status[block_id].sr.data.pld.type !=
+            DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_TYPE);
         
         /* allocate the blocks */
@@ -340,14 +341,14 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
             ts->curr_status[new_slot].sr.data.pld.type =
                 DATA_PAYLOAD_TYPE_RSRMGR;
             /* point the new block from chain */
-            status_record_update(ts->curr_status + slot, slot,
+            status_record_update(ts->curr_status + block_id, block_id,
                                  ts->updated_records);
-            ts->curr_status[slot].sr.data.pld.ph.block_array[i] = new_slot;
-            ts->curr_status[slot].sr.data.pld.ph.n++;
+            ts->curr_status[block_id].sr.data.pld.ph.block_array[i] = new_slot;
+            ts->curr_status[block_id].sr.data.pld.ph.n++;
             LIXA_TRACE(("payload_chain_allocate: number of children is now "
                         "%d, last children is " UINT32_T_FORMAT "\n",
-                        ts->curr_status[slot].sr.data.pld.ph.n,
-                        ts->curr_status[slot].sr.data.pld.ph.block_array[i]));
+                        ts->curr_status[block_id].sr.data.pld.ph.n,
+                        ts->curr_status[block_id].sr.data.pld.ph.block_array[i]));
         }
         THROW(NONE);
     } CATCH {
@@ -361,7 +362,7 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
             case STATUS_RECORD_INSERT_ERROR:
                 LIXA_TRACE(("payload_chain_allocate: unable to allocate "
                             "%d children blocks, releasing all...\n", size));
-                if (LIXA_RC_OK == (ret_cod = payload_chain_release(ts, slot)))
+                if (LIXA_RC_OK == (ret_cod = payload_chain_release(ts, block_id)))
                     ret_cod = LIXA_RC_CONTAINER_FULL;
                 break;
             case NONE:
@@ -426,7 +427,7 @@ int status_record_load(status_record_t **sr,
 
                 memset(&tmp_sr, 0, sizeof(tmp_sr));
                 tmp_sr.counter = 1;
-                if (i == 0) {
+                if (!i) {
                     /* write control record */
                     tmp_sr.sr.ctrl.magic_number = STATUS_FILE_MAGIC_NUMBER;
                     tmp_sr.sr.ctrl.level = STATUS_FILE_LEVEL;

@@ -621,12 +621,12 @@ extern "C" {
      * Store last (verb,step) value inside the payload header; oldest value
      * is erased if necessary
      * @param ts IN/OUT a reference to thread status
-     * @param slot IN index of the header chain block
+     * @param block_id IN id of the block contains the header chain block
      * @param vs IN reference to a (verb,step) value
      * @return a standardized return code
      */
     int payload_header_store_verb_step(struct thread_status_s *ts,
-                                       uint32_t slot,
+                                       uint32_t block_id,
                                        const struct lixa_msg_verb_step_s *vs);
 
     
@@ -638,10 +638,10 @@ extern "C" {
      * @param ts IN/OUT a reference to thread status: it's used to retrieve the
      *                  status files and change them when a dynamic resize is
      *                  necessary
-     * @param slot IN index of the header chain block
+     * @param block_id IN id of the block contains the header chain block
      * @return a standardized return code
      */
-    int payload_chain_release(struct thread_status_s *ts, uint32_t slot);
+    int payload_chain_release(struct thread_status_s *ts, uint32_t block_id);
     
 
 
@@ -651,11 +651,11 @@ extern "C" {
      * array. The allocation is atomically: all or none of the records are
      * allocated at exit
      * @param ts IN/OUT reference to thread status
-     * @param slot IN index of the block will have a chain
+     * @param block_id IN id of the block contains the header chain block
      * @param size IN number of blocks must be allocated
      * @return a reason code
      */
-    int payload_chain_allocate(struct thread_status_s *ts, uint32_t slot,
+    int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
                                int size);
     
     

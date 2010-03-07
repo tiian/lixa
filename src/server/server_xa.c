@@ -183,9 +183,10 @@ int server_xa_commit_8(struct thread_status_s *ts,
 
 
 int server_xa_end(struct thread_status_s *ts,
-                    const struct lixa_msg_s *lmi,
-                    struct lixa_msg_s *lmo,
-                    uint32_t block_id)
+                  const struct lixa_msg_s *lmi,
+                  struct lixa_msg_s *lmo,
+                  uint32_t block_id,
+                  struct lixa_msg_verb_step_s *last_verb_step)
 {
     enum Exception { SERVER_XA_END_8_ERROR
                      , SERVER_XA_END_24_ERROR
@@ -198,7 +199,7 @@ int server_xa_end(struct thread_status_s *ts,
         switch (lmi->header.pvs.step) {
             case 8:
                 if (LIXA_RC_OK != (ret_cod = server_xa_end_8(
-                                       ts, lmi, lmo, block_id)))
+                                       ts, lmi, lmo, block_id, last_verb_step)))
                     THROW(SERVER_XA_END_8_ERROR);
                 break;
             case 24:
@@ -236,7 +237,8 @@ int server_xa_end(struct thread_status_s *ts,
 int server_xa_end_8(struct thread_status_s *ts,
                     const struct lixa_msg_s *lmi,
                     struct lixa_msg_s *lmo,
-                    uint32_t block_id)
+                    uint32_t block_id,
+                    struct lixa_msg_verb_step_s *last_verb_step)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -274,8 +276,8 @@ int server_xa_end_8(struct thread_status_s *ts,
         /* prepare output message */
         lmo->header.pvs.verb = lmi->header.pvs.verb;
         /* prepare next protocol step */
-        ts->client_array[block_id].last_verb_step.verb = lmo->header.pvs.verb;
-        ts->client_array[block_id].last_verb_step.step = lmo->header.pvs.step;
+        last_verb_step->verb = lmo->header.pvs.verb;
+        last_verb_step->step = lmo->header.pvs.step;
         
         THROW(NONE);
     } CATCH {
@@ -362,7 +364,8 @@ int server_xa_end_24(struct thread_status_s *ts,
 int server_xa_open(struct thread_status_s *ts,
                    const struct lixa_msg_s *lmi,
                    struct lixa_msg_s *lmo,
-                   uint32_t block_id)
+                   uint32_t block_id,
+                   struct lixa_msg_verb_step_s *last_verb_step)
 {
     enum Exception { SERVER_XA_OPEN_8_ERROR
                      , SERVER_XA_OPEN_24_ERROR
@@ -375,7 +378,7 @@ int server_xa_open(struct thread_status_s *ts,
         switch (lmi->header.pvs.step) {
             case 8:
                 if (LIXA_RC_OK != (ret_cod = server_xa_open_8(
-                                       ts, lmi, lmo, block_id)))
+                                       ts, lmi, lmo, block_id, last_verb_step)))
                     THROW(SERVER_XA_OPEN_8_ERROR);
                 break;
             case 24:
@@ -413,7 +416,8 @@ int server_xa_open(struct thread_status_s *ts,
 int server_xa_open_8(struct thread_status_s *ts,
                      const struct lixa_msg_s *lmi,
                      struct lixa_msg_s *lmo,
-                     uint32_t block_id)
+                     uint32_t block_id,
+                     struct lixa_msg_verb_step_s *last_verb_step)
 {
     enum Exception { RSRMGRS_ARRAY_NULL
                      , TOO_MANY_RSRMGRS
@@ -471,8 +475,8 @@ int server_xa_open_8(struct thread_status_s *ts,
         /* prepare output message */
         lmo->header.pvs.verb = lmi->header.pvs.verb;
         /* prepare next protocol step */
-        ts->client_array[block_id].last_verb_step.verb = lmo->header.pvs.verb;
-        ts->client_array[block_id].last_verb_step.step = lmo->header.pvs.step;
+        last_verb_step->verb = lmo->header.pvs.verb;
+        last_verb_step->step = lmo->header.pvs.step;
 
         THROW(NONE);
     } CATCH {
@@ -579,7 +583,8 @@ int server_xa_open_24(struct thread_status_s *ts,
 int server_xa_prepare(struct thread_status_s *ts,
                       const struct lixa_msg_s *lmi,
                       struct lixa_msg_s *lmo,
-                      uint32_t block_id)
+                      uint32_t block_id,
+                      struct lixa_msg_verb_step_s *last_verb_step)
 {
     enum Exception { SERVER_XA_PREPARE_8_ERROR
                      , INVALID_STEP
@@ -591,7 +596,7 @@ int server_xa_prepare(struct thread_status_s *ts,
         if (8 != lmi->header.pvs.step) {
             THROW(INVALID_STEP);
         } else if (LIXA_RC_OK != (ret_cod = server_xa_prepare_8(
-                                   ts, lmi, lmo, block_id)))
+                                      ts, lmi, lmo, block_id, last_verb_step)))
             THROW(SERVER_XA_PREPARE_8_ERROR);
         
         THROW(NONE);
@@ -619,7 +624,8 @@ int server_xa_prepare(struct thread_status_s *ts,
 int server_xa_prepare_8(struct thread_status_s *ts,
                         const struct lixa_msg_s *lmi,
                         struct lixa_msg_s *lmo,
-                        uint32_t block_id)
+                        uint32_t block_id,
+                        struct lixa_msg_verb_step_s *last_verb_step)
 {
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
@@ -675,8 +681,8 @@ int server_xa_prepare_8(struct thread_status_s *ts,
         /* prepare output message */
         lmo->header.pvs.verb = lmi->header.pvs.verb;
         /* prepare next protocol step */
-        ts->client_array[block_id].last_verb_step.verb = lmo->header.pvs.verb;
-        ts->client_array[block_id].last_verb_step.step = lmo->header.pvs.step;
+        last_verb_step->verb = lmo->header.pvs.verb;
+        last_verb_step->step = lmo->header.pvs.step;
 
         /* the status file must be synchronized */
         ts->asked_sync = TRUE;
@@ -818,7 +824,8 @@ int server_xa_rollback_8(struct thread_status_s *ts,
 int server_xa_start(struct thread_status_s *ts,
                     const struct lixa_msg_s *lmi,
                     struct lixa_msg_s *lmo,
-                    uint32_t block_id)
+                    uint32_t block_id,
+                    struct lixa_msg_verb_step_s *last_verb_step)
 {
     enum Exception { SERVER_XA_START_8_ERROR
                      , SERVER_XA_START_24_ERROR
@@ -831,7 +838,7 @@ int server_xa_start(struct thread_status_s *ts,
         switch (lmi->header.pvs.step) {
             case 8:
                 if (LIXA_RC_OK != (ret_cod = server_xa_start_8(
-                                       ts, lmi, lmo, block_id)))
+                                       ts, lmi, lmo, block_id, last_verb_step)))
                     THROW(SERVER_XA_START_8_ERROR);
                 break;
             case 24:
@@ -869,7 +876,8 @@ int server_xa_start(struct thread_status_s *ts,
 int server_xa_start_8(struct thread_status_s *ts,
                       const struct lixa_msg_s *lmi,
                       struct lixa_msg_s *lmo,
-                      uint32_t block_id)
+                      uint32_t block_id,
+                      struct lixa_msg_verb_step_s *last_verb_step)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -895,7 +903,7 @@ int server_xa_start_8(struct thread_status_s *ts,
             slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
                 rsrmgrs->rmid];
             LIXA_TRACE(("server_xa_start_8: updating next_verb for resource "
-                        "manager # " UINT32_T_FORMAT "\n", slot));
+                        "manager # " UINT32_T_FORMAT "\n", rsrmgrs->rmid));
             sr = ts->curr_status + slot;
             /* update the block */
             status_record_update(ts->curr_status + slot, slot,
@@ -906,8 +914,8 @@ int server_xa_start_8(struct thread_status_s *ts,
         /* prepare output message */
         lmo->header.pvs.verb = lmi->header.pvs.verb;
         /* prepare next protocol step */
-        ts->client_array[block_id].last_verb_step.verb = lmo->header.pvs.verb;
-        ts->client_array[block_id].last_verb_step.step = lmo->header.pvs.step;
+        last_verb_step->verb = lmo->header.pvs.verb;
+        last_verb_step->step = lmo->header.pvs.step;
 
         /* the status file must be synchronized */
         ts->asked_sync = TRUE;
