@@ -421,8 +421,6 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
         free(ts->client_array[slot_id].output_buffer);
         ts->client_array[slot_id].output_buffer = NULL;
         ts->client_array[slot_id].output_buffer_size = 0;
-        ts->client_array[slot_id].last_verb_step.verb = 0;
-        ts->client_array[slot_id].last_verb_step.step = 0;
         
         /* retrieve the block is storing the status of the client inside
            memory mapped status file */
@@ -435,6 +433,10 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
                                &ts->client_array[block_id].last_verb_step)))
             THROW(STORE_VERB_STEP_ERROR);
 
+        /* now useless, reset for first cycle */
+        ts->client_array[slot_id].last_verb_step.verb = 0;
+        ts->client_array[slot_id].last_verb_step.step = 0;
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
