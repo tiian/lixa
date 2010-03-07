@@ -259,8 +259,8 @@ extern "C" {
      * @param job IN/OUT reference to object
      */
     static inline void lixa_job_reset(lixa_job_t *job) {
-        memset(job->raw, ' ', LIXA_JOB_RAW_LEN - 1);
-        job->raw[LIXA_JOB_RAW_LEN] = '\0'; }
+        memset(job->raw, ' ', LIXA_JOB_RAW_LEN - 2);
+        job->raw[LIXA_JOB_RAW_LEN - 1] = '\0'; }
 
 
 

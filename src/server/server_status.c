@@ -1142,14 +1142,11 @@ int status_record_copy(status_record_t *dest, const status_record_t *src,
         gchar *dest_filename = NULL;
         struct stat fstat;
         off_t src_size = 0;
-        status_record_t **dest_is = NULL;
         if (dest == src)
             THROW(DEST_EQUAL_SRC);
         if (dest == ts->status1) {
-            dest_is = &(ts->status1);
             dest_filename = ts->status1_filename;
         } else if (dest == ts->status2) {
-            dest_is = &(ts->status2);
             dest_filename = ts->status2_filename;
         } else
             THROW(DEST_DOES_NOT_POINT_STATUS);
@@ -1166,7 +1163,6 @@ int status_record_copy(status_record_t *dest, const status_record_t *src,
                         src_size, src[0].sr.ctrl.number_of_blocks,
                         fstat.st_size));
             /* reset the pointer in thread status structure... */
-            *dest_is = NULL;
             if (0 != munmap(dest, fstat.st_size))
                 THROW(MUNMAP_ERROR);
             if (-1 == truncate((const char *)dest_filename, src_size))
@@ -1177,7 +1173,6 @@ int status_record_copy(status_record_t *dest, const status_record_t *src,
                                      MAP_SHARED, dest_fd, 0)))
                 THROW(MMAP_ERROR);
             /* recover the pointer in thread status structure... */
-            *dest_is = dest;
             if (0 != close(dest_fd)) {
                 dest_fd = LIXA_NULL_FD;
                 THROW(CLOSE_ERROR);

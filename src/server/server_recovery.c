@@ -131,8 +131,9 @@ int srvr_rcvr_tbl_insert(srvr_rcvr_tbl_t *srt,
             /* prepare the array: all the elements are initialized with an
                empty queue object */
             for (i = 0; i < srt->lvl2_tsid_array_size; ++i) {
-                GQueue *q = &g_array_index(lvl2_tsid, GQueue, i);
-                g_queue_init(q);
+                GQueue q;
+                g_queue_init(&q);
+                g_array_append_val(lvl2_tsid, q);
             }
             /* insert the new element in the tree */
             g_tree_insert(srt->lvl1_job, srtr->job, lvl2_tsid);
