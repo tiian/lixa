@@ -258,9 +258,9 @@ int payload_chain_release(struct thread_status_s *ts, uint32_t block_id)
             LIXA_TRACE(("payload_chain_release: child # %d, releasing chained "
                         "block " UINT32_T_FORMAT "\n",
                         i, csr[block_id].sr.data.pld.ph.block_array[i]));
-            if (LIXA_RC_OK != (ret_cod = status_record_delete(
-                                   ts,
-                                   csr[block_id].sr.data.pld.ph.block_array[i])))
+            if (LIXA_RC_OK != (
+                    ret_cod = status_record_delete(
+                        ts, csr[block_id].sr.data.pld.ph.block_array[i])))
                 THROW(STATUS_RECORD_DELETE1);
         }
         /* release current block */

@@ -130,8 +130,8 @@ extern "C" {
      * @param read_bytes IN number of bytes read from socket
      * @return a standardized return code
      */
-    int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
-                                char *buf, ssize_t read_bytes);
+    int server_manager_msg_proc(struct thread_status_s *ts,
+                                size_t slot_id, char *buf, ssize_t read_bytes);
 
 
 
@@ -139,7 +139,7 @@ extern "C" {
      * Process the input message arrived from the client
      * @param ts IN/OUT thread status structure
      * @param slot_id IN the slot associated to the file descriptor raised the
-     *                   POLLIN event 
+     *                   POLLIN event
      * @param buf IN/OUT buffer read from socket
      * @param read_bytes IN number of bytes read from socket
      * @param lmo OUT message should be returned to the client
