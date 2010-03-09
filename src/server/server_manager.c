@@ -336,9 +336,9 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
         if (LIXA_RC_CONNECTION_CLOSED == ret_cod) {
             /* client has closed the connection */
             int rec_pend = FALSE;
-            uint32_t block = ts->client_array[slot_id].pers_status_slot_id;
+            uint32_t block_id = ts->client_array[slot_id].pers_status_slot_id;
             struct status_record_data_s *data =
-                &(ts->curr_status[block].sr.data);
+                &(ts->curr_status[block_id].sr.data);
             
             if (LIXA_RC_OK != (ret_cod = thread_status_check_recovery_pending(
                                    data, &rec_pend)))
@@ -348,7 +348,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                 /* insert a new record in the recovery pending table */
                 srtr.job = &data->pld.ph.job;
                 srtr.tsid = ts->id;
-                srtr.block_id = block;
+                srtr.block_id = block_id;
                 if (LIXA_RC_OK != (ret_cod = srvr_rcvr_tbl_insert(
                                        ts->recovery_table, &srtr)))
                     THROW(RECOVERY_TABLE_INSERT_ERROR);
@@ -364,8 +364,9 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                 THROW(FREE_SLOTS);
         } else if (LIXA_RC_OK == ret_cod) {
             /* XML message to process from client */
-            if (LIXA_RC_OK != (ret_cod = server_manager_msg_proc(
-                                   ts, slot_id, buf, read_bytes)))
+            if (LIXA_RC_OK != (
+                    ret_cod = server_manager_msg_proc(
+                        ts, slot_id, buf, read_bytes)))
                 THROW(XML_PROC);
         } else
             THROW(MSG_RETRIEVE_ERROR);
@@ -528,8 +529,8 @@ int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id)
 
 
 
-int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
-                            char *buf, ssize_t read_bytes)
+int server_manager_msg_proc(struct thread_status_s *ts,
+                            size_t slot_id, char *buf, ssize_t read_bytes)
 {
     enum Exception { OUTMSG_PREP_ERROR
                      , INMSG_PROC_ERROR
@@ -577,8 +578,8 @@ int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
 
 
 
-int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
-                              char *buf, ssize_t read_bytes,
+int server_manager_inmsg_proc(struct thread_status_s *ts,
+                              size_t slot_id, char *buf, ssize_t read_bytes,
                               struct lixa_msg_s *lmo)
 {
     enum Exception { LIXA_MSG_DESERIALIZE_ERROR
@@ -613,6 +614,19 @@ int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
         if (LIXA_RC_OK != (ret_cod = lixa_msg_trace(&lmi)))
             THROW(LIXA_MSG_TRACE_ERROR);
 #endif
+        /* is this the first message from the client? check recovery pending
+           transactions... */
+        if (ts->client_array[slot_id].first_message) {
+            LIXA_TRACE(("server_manager_inmsg_proc: processing the first "
+                        "message from this client...\n"));
+            /* @@@
+               verify if there are recovery pending transaction for the
+               job/thread */
+            /* reset the flag: this check should happen no more for this
+               client */
+            ts->client_array[slot_id].first_message = FALSE;
+        }
+        
         /* retrieve the block is storing the status of the client inside
            memory mapped status file */
         block_id = ts->client_array[slot_id].pers_status_slot_id;
@@ -929,10 +943,7 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
         ts->client_array[place].pers_status_slot_id = slot;
         /* reset the output buffer pointer (it may be garbage if unused
            before */
-        ts->client_array[place].output_buffer = NULL;
-        ts->client_array[place].output_buffer_size = 0;
-        ts->client_array[place].last_verb_step.verb = 0;
-        ts->client_array[place].last_verb_step.step = 0;
+        server_client_status_init(&(ts->client_array[place]));
                 
         THROW(NONE);
     } CATCH {

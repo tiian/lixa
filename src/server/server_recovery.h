@@ -150,32 +150,33 @@ extern "C" {
      * processed from a recovery pending point of view; this function uses a
      * query by example logic
      * @param srt IN/OUT reference to the recovery table object
-     * @param srtr IN reference to the search record:
-     *             srtr->job = the job is performing recovery;
-     *             srtr->tsid = the thread status id is performing recovery;
-     *             srtr->block_is unused
-     * @param out OUT reference to the output record:
+     * @param srtr IN reference to the search record:<br>
+     *             srtr->job = the job is performing recovery;<br>
+     *             srtr->tsid = the thread status id is performing recovery;<br>
+     *             srtr->block_id unused<br>
+     * @param out OUT reference to the output record:<br>
      *             out->job = srtr->job if there is at least one recovery
-     *                       pending transaction for this job;
+     *                       pending transaction for this job;<br>
      *             out->job = "" if there are no recovery pending transactions
-     *                          for this job;
+     *                          for this job;<br>
      *             out->tsid = srtr->tsid if there is at least one recovery
-     *                        pending transaction for this job and this thread
+     *                        pending transaction for this job and this
+     *                        thread;<br>
      *             out->tsid != 0 if there is at least one recovery pending
      *                           transaction for this job, but for a different
-     *                           thread (specified by out->tsid)
+     *                           thread (specified by out->tsid);<br>
      *             out->tsid = 0 if there are no recovery pending transactions
-     *                          for this job & thread
+     *                          for this job & thread;<br>
      *             out->block_id != 0 it's the block_id of the transaction must
-     *                               be recovered for this job & thread
-     *             out->block_id == 0 no transaction for this job & thread
+     *                               be recovered for this job & thread;<br>
+     *             out->block_id == 0 no transaction for this job & thread;<br>
      * @return @ref LIXA_RC_OK if a transaction for this job and thread was
-     *                         found, block_id was dequeued;
+     *                         found, block_id was dequeued;<br>
      *         @ref LIXA_RC_BYPASSED_OPERATION if a transaction for this job,
      *                         but for a different thread was found, no block_id
-     *                         was dequeued;
+     *                         was dequeued;<br>
      *         @ref LIXA_RC_OBJ_NOT_FOUND if a transaction for this job was
-     *                         NOT found, no block_id was dequeued;
+     *                         NOT found, no block_id was dequeued;<br>
      *         others return code for errors
      */
     int srvr_rcrv_tbl_get_block(srvr_rcvr_tbl_t *srt,

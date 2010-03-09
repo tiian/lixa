@@ -167,6 +167,10 @@ struct server_client_status_s {
      * (verb,step) related to the output_buffer
      */
     struct lixa_msg_verb_step_s   last_verb_step;
+    /**
+     * Boolean value: is the client sending the first message?
+     */
+    int                           first_message;
 };
 
 
@@ -561,6 +565,21 @@ extern "C" {
 #endif /* __cplusplus */
 
 
+
+    /**
+     * Initialize a struct of type @ref server_client_status_s
+     * @param scs IN/OUT reference to the struct must be initialized
+     */
+    inline static void server_client_status_init(
+        struct server_client_status_s *scs) {
+        scs->output_buffer = NULL;
+        scs->output_buffer_size = 0;
+        scs->last_verb_step.verb = 0;
+        scs->last_verb_step.step = 0;
+        scs->first_message = TRUE;
+    }
+
+    
 
     /**
      * This is a convenience function used as delete call back function for
