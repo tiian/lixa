@@ -165,6 +165,19 @@ extern "C" {
                                    struct lixa_msg_s *lmo, int rc);
 
     
+
+    /**
+     * Help the connected client to manage the recovery phase
+     * @param ts IN thread status structure
+     * @param lmi IN deserialized message sent by client
+     * @param lmo OUT deserialized message must be sent to the client
+     * @return a reason code
+     */
+    int server_manager_recovery(struct thread_status_s *ts,
+                                const struct lixa_msg_s *lmi,
+                                struct lixa_msg_s *lmo);
+
+
     
     /**
      * Prepare the data structure used for calling poll system function

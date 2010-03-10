@@ -584,6 +584,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
 {
     enum Exception { LIXA_MSG_DESERIALIZE_ERROR
                      , LIXA_MSG_TRACE_ERROR
+                     , SERVER_MANAGER_RECOVERY_ERROR
                      , SERVER_XA_OPEN_ERROR
                      , SERVER_XA_CLOSE_ERROR
                      , SERVER_XA_START_ERROR
@@ -619,9 +620,11 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
         if (ts->client_array[slot_id].first_message) {
             LIXA_TRACE(("server_manager_inmsg_proc: processing the first "
                         "message from this client...\n"));
-            /* @@@
-               verify if there are recovery pending transaction for the
+            /* verify if there are recovery pending transaction for the
                job/thread */
+            if (LIXA_RC_OK != (ret_cod = server_manager_recovery(
+                                   ts, &lmi, lmo)))
+                THROW(SERVER_MANAGER_RECOVERY_ERROR);
             /* reset the flag: this check should happen no more for this
                client */
             ts->client_array[slot_id].first_message = FALSE;
@@ -702,6 +705,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
         switch (excp) {
             case LIXA_MSG_DESERIALIZE_ERROR:
             case LIXA_MSG_TRACE_ERROR:
+            case SERVER_MANAGER_RECOVERY_ERROR:
             case LIXA_MSG_FREE_ERROR:
             case SERVER_XA_OPEN_ERROR:
             case SERVER_XA_CLOSE_ERROR:
@@ -810,6 +814,73 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_outmsg_prep/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_manager_recovery(struct thread_status_s *ts,
+                            const struct lixa_msg_s *lmi,
+                            struct lixa_msg_s *lmo)
+{
+    enum Exception { PROTOCOL_ERROR
+                     , JOB_SET_RAW_ERROR
+                     , GET_BLOCK_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_manager_recovery\n"));
+    TRY {
+        struct srvr_rcvr_tbl_rec_s query, result;
+        lixa_job_t query_job, result_job;
+
+        if (LIXA_MSG_VERB_OPEN != lmi->header.pvs.verb)
+            THROW(PROTOCOL_ERROR);
+
+        /* prepare the query object */
+        if (LIXA_RC_OK != (ret_cod = lixa_job_set_raw(
+                               &query_job,
+                               (const char *)lmi->body.open_8.client.job)))
+            THROW(JOB_SET_RAW_ERROR);
+        query.job = &query_job;
+        query.tsid = ts->id;
+        result.job = &result_job; /* reserve room for job object */
+
+        /* query the recovery table */
+        ret_cod = srvr_rcvr_tbl_get_block(ts->recovery_table, &query, &result);
+        switch (ret_cod) {
+            case LIXA_RC_OK:
+                /* @@@ to be implemented .... */
+                break;
+            case LIXA_RC_BYPASSED_OPERATION:
+                /* @@@ to be implemented .... */
+                break;
+            case LIXA_RC_OBJ_NOT_FOUND:
+                /* @@@ to be implemented .... */
+                break;
+            default:
+                THROW(GET_BLOCK_ERROR);
+        } /* switch (rc) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case PROTOCOL_ERROR:
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case JOB_SET_RAW_ERROR:
+                break;
+            case GET_BLOCK_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_manager_recovery/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
