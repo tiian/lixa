@@ -173,7 +173,7 @@ int srvr_rcvr_tbl_insert(srvr_rcvr_tbl_t *srt,
 
 
 
-int srvr_rcrv_tbl_get_block(srvr_rcvr_tbl_t *srt,
+int srvr_rcvr_tbl_get_block(srvr_rcvr_tbl_t *srt,
                             const struct srvr_rcvr_tbl_rec_s *srtr,
                             struct srvr_rcvr_tbl_rec_s *out)
 {
@@ -185,7 +185,7 @@ int srvr_rcrv_tbl_get_block(srvr_rcvr_tbl_t *srt,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("srvr_rcrv_tbl_get_block\n"));
+    LIXA_TRACE(("srvr_rcvr_tbl_get_block\n"));
     TRY {
         gpointer *node;
         GQueue *queue;
@@ -204,7 +204,7 @@ int srvr_rcrv_tbl_get_block(srvr_rcvr_tbl_t *srt,
             THROW(OUT_OF_RANGE);
 
         /* reset output record */
-        lixa_job_set_raw(out->job, "");
+        memset(out->job, 0, sizeof(lixa_job_t));
         out->tsid = 0;
         out->block_id = 0;
             
@@ -260,7 +260,7 @@ int srvr_rcrv_tbl_get_block(srvr_rcvr_tbl_t *srt,
         /* unlock mutex */
         g_mutex_unlock(srt->mutex);
     } /* TRY-CATCH */
-    LIXA_TRACE(("srvr_rcrv_tbl_get_block/excp=%d/"
+    LIXA_TRACE(("srvr_rcvr_tbl_get_block/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

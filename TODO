@@ -1,4 +1,4 @@
-restart from function server_manager_inmsg_proc
+restart from function server_manager_recovery
 
 execute recovery when a new client arrive of the same job
 when recovery happens check config_digest; on server side only warning; 

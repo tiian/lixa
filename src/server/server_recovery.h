@@ -154,7 +154,8 @@ extern "C" {
      *             srtr->job = the job is performing recovery;<br>
      *             srtr->tsid = the thread status id is performing recovery;<br>
      *             srtr->block_id unused<br>
-     * @param out OUT reference to the output record:<br>
+     *             <b>NOTE:</b> srtr->job must point to a valid job structure
+     * @param out IN/OUT reference to the output record:<br>
      *             out->job = srtr->job if there is at least one recovery
      *                       pending transaction for this job;<br>
      *             out->job = "" if there are no recovery pending transactions
@@ -170,6 +171,7 @@ extern "C" {
      *             out->block_id != 0 it's the block_id of the transaction must
      *                               be recovered for this job & thread;<br>
      *             out->block_id == 0 no transaction for this job & thread;<br>
+     *             <b>NOTE:</b> out->job must point to a valid job structure
      * @return @ref LIXA_RC_OK if a transaction for this job and thread was
      *                         found, block_id was dequeued;<br>
      *         @ref LIXA_RC_BYPASSED_OPERATION if a transaction for this job,
@@ -179,7 +181,7 @@ extern "C" {
      *                         NOT found, no block_id was dequeued;<br>
      *         others return code for errors
      */
-    int srvr_rcrv_tbl_get_block(srvr_rcvr_tbl_t *srt,
+    int srvr_rcvr_tbl_get_block(srvr_rcvr_tbl_t *srt,
                                 const struct srvr_rcvr_tbl_rec_s *srtr,
                                 struct srvr_rcvr_tbl_rec_s *out);
 
