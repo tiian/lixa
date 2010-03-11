@@ -212,7 +212,8 @@ void *server_manager_thread(void *void_ts)
                                 ret_cod = server_manager_pollin_data(ts, i)))
                             THROW(POLLIN_DATA_ERROR);
                     }
-                } else if (ts->poll_array[i].revents & POLLOUT) {
+                }
+                if (ts->poll_array[i].revents & POLLOUT) {
                     found_fd++;
                     if (LIXA_RC_OK != (ret_cod = server_manager_pollout(
                                            ts, i)))
@@ -617,7 +618,8 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
 #endif
         /* is this the first message from the client? check recovery pending
            transactions... */
-        if (ts->client_array[slot_id].first_message) {
+        if (ts->client_array[slot_id].first_message &&
+            LIXA_MSG_VERB_OPEN == lmi.header.pvs.verb) {
             LIXA_TRACE(("server_manager_inmsg_proc: processing the first "
                         "message from this client...\n"));
             /* verify if there are recovery pending transaction for the
@@ -857,7 +859,7 @@ int server_manager_recovery(struct thread_status_s *ts,
                 /* @@@ to be implemented .... */
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
-                /* @@@ to be implemented .... */
+                /* nothing to do */
                 break;
             default:
                 THROW(GET_BLOCK_ERROR);

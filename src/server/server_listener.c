@@ -26,6 +26,9 @@
 #ifdef HAVE_NETDB_H
 # include <netdb.h>
 #endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -354,7 +357,9 @@ int server_listener_find_manager(const struct thread_status_array_s *tsa,
             LIXA_TRACE(("server_listener_find_manager: id = %i, "
                         "active_clients = " SIZE_T_FORMAT "\n",
                         i, tsa->array[i].active_clients));
-            if (tsa->array[i].active_clients < current_min) {
+            if (tsa->array[i].active_clients < current_min ||
+                (tsa->array[i].active_clients == current_min &&
+                 !(rand()%(tsa->n - 1)))) {
                 current_pos = i;
                 current_min = tsa->array[current_pos].active_clients;
             }

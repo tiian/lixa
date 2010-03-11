@@ -994,7 +994,8 @@ int lixa_msg_deserialize_rollback_8(xmlNodePtr cur, struct lixa_msg_s *msg)
             xmlChar *tmp;
             if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CONTHR)) {
                 /* retrieve control thread properties */
-                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_FINISHED)))
+                if (NULL == (tmp = xmlGetProp(
+                                 cur, LIXA_XML_MSG_PROP_FINISHED)))
                     THROW(FINISHED_NOT_FOUND);
                 msg->body.rollback_8.conthr.finished =
                     (int)strtol((char *)tmp, NULL, 0);
@@ -1006,7 +1007,8 @@ int lixa_msg_deserialize_rollback_8(xmlNodePtr cur, struct lixa_msg_s *msg)
                    initial size) */
                 msg->body.rollback_8.xa_rollback_execs = g_array_sized_new(
                     FALSE, FALSE,
-                    sizeof(struct lixa_msg_body_rollback_8_xa_rollback_execs_s),
+                    sizeof(struct
+                           lixa_msg_body_rollback_8_xa_rollback_execs_s),
                     LIXA_MSG_XML_DEFAULT_RSRMGRS);
                 /* retrieve resource managers */
                 while (NULL != cur2) {
@@ -1031,7 +1033,8 @@ int lixa_msg_deserialize_rollback_8(xmlNodePtr cur, struct lixa_msg_s *msg)
                         if (NULL == (tmp = xmlGetProp(
                                          cur2, LIXA_XML_MSG_PROP_RC)))
                             THROW(RC_NOT_FOUND);
-                        xa_rollback_exec.rc = (int)strtol((char *)tmp, NULL, 0);
+                        xa_rollback_exec.rc = (int)strtol((char *)tmp,
+                                                          NULL, 0);
                         xmlFree(tmp);
                         /* retrieve r_state */
                         if (NULL == (tmp = xmlGetProp(
