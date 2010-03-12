@@ -198,6 +198,7 @@ int lixa_config_digest(int fd, const char *profile, md5_digest_hex_t digest)
     LIXA_TRACE(("lixa_config_digest\n"));
     TRY {
         const gchar *tmp = NULL;
+        long hostid = gethostid();
         
         /* retrieve file statistics */
         if (0 != fstat(fd, &buf))
@@ -209,8 +210,12 @@ int lixa_config_digest(int fd, const char *profile, md5_digest_hex_t digest)
         /* create a new checksum */
         if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))
             THROW(G_CHECKSUM_NEW_ERROR);
+        /* config file content digest */
         g_checksum_update(checksum, content, buf.st_size);
+        /* profile used inside the config file, digest */
         g_checksum_update(checksum, (guchar *)profile, strlen(profile));
+        /* "unique" id (maybe default IP4 address), digest */
+        g_checksum_update(checksum, (guchar *)&hostid, sizeof(hostid));
         if (NULL == (tmp = g_checksum_get_string(checksum)))
             THROW(G_CHECKSUM_GET_STRING_ERROR);
         strncpy(digest, (const char *)tmp, MD5_DIGEST_LENGTH * 2);

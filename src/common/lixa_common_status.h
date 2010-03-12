@@ -37,6 +37,7 @@
 #include <xa.h>
 #include <lixa_xml_msg.h>
 #include <lixa_trace.h>
+#include <lixa_config.h>
 
 
 
@@ -251,6 +252,17 @@ extern "C" {
         csr->next_verb = LIXA_MSG_VERB_NULL;
         return;
     }
+
+
+
+    /**
+     * Use an MD5 digest to set the global bqual
+     * <b>Note:</b> this function is not thread safe and MUST be called
+     * with a serialization technique
+     * @param md5_digest_hex IN pointer to a string of
+     * @ref MD5_DIGEST_LENGTH * 2 characters
+     */
+    void xid_set_global_bqual(const char *md5_digest_hex);
 
 
     

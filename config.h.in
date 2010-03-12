@@ -6,6 +6,9 @@
 /* Define to 1 if you have the <assert.h> header file. */
 #undef HAVE_ASSERT_H
 
+/* Define to 1 if the system has the type `clock_t'. */
+#undef HAVE_CLOCK_T
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
@@ -50,6 +53,9 @@
 
 /* Define to 1 if the system has the type `nfds_t'. */
 #undef HAVE_NFDS_T
+
+/* Define to 1 if the system has the type `off_t'. */
+#undef HAVE_OFF_T
 
 /* Define to 1 if you have the <poll.h> header file. */
 #undef HAVE_POLL_H
@@ -108,8 +114,14 @@
 /* Define to 1 if the system has the type `uint8_t'. */
 #undef HAVE_UINT8_T
 
+/* Define to 1 if the system has the type `uintptr_t'. */
+#undef HAVE_UINTPTR_T
+
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Define to 1 if the system has the type `uuid_t'. */
+#undef HAVE_UUID_T
 
 /* Define to 1 if you have the <uuid/uuid.h> header file. */
 #undef HAVE_UUID_UUID_H
@@ -137,6 +149,45 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* The size of `clock_t', as computed by sizeof. */
+#undef SIZEOF_CLOCK_T
+
+/* The size of `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
+/* The size of `in_port_t', as computed by sizeof. */
+#undef SIZEOF_IN_PORT_T
+
+/* The size of `long int', as computed by sizeof. */
+#undef SIZEOF_LONG_INT
+
+/* The size of `long long int', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG_INT
+
+/* The size of `nfds_t', as computed by sizeof. */
+#undef SIZEOF_NFDS_T
+
+/* The size of `off_t', as computed by sizeof. */
+#undef SIZEOF_OFF_T
+
+/* The size of `pthread_t', as computed by sizeof. */
+#undef SIZEOF_PTHREAD_T
+
+/* The size of `short int', as computed by sizeof. */
+#undef SIZEOF_SHORT_INT
+
+/* The size of `size_t', as computed by sizeof. */
+#undef SIZEOF_SIZE_T
+
+/* The size of `uint32_t', as computed by sizeof. */
+#undef SIZEOF_UINT32_T
+
+/* The size of `uintptr_t', as computed by sizeof. */
+#undef SIZEOF_UINTPTR_T
+
+/* The size of `uuid_t', as computed by sizeof. */
+#undef SIZEOF_UUID_T
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS

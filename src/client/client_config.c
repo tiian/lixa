@@ -95,7 +95,6 @@ int client_config(client_config_coll_t *ccc)
         } 
 
         memset(&ccc->serv_addr, 0, sizeof(struct sockaddr_in));
-        uuid_generate(lixa_xid_global_bqual);
         if (NULL == ccc->actconf.rsrmgrs)
             ccc->actconf.rsrmgrs = g_array_new(
                 FALSE, FALSE, sizeof(struct act_rsrmgr_config_s));
@@ -158,7 +157,8 @@ int client_config(client_config_coll_t *ccc)
         
         if (LIXA_RC_OK != (ret_cod = lixa_config_digest(
                                fd, ccc->profile, ccc->config_digest)))
-            THROW(LIXA_CONFIG_DIGEST_ERROR);        
+            THROW(LIXA_CONFIG_DIGEST_ERROR);
+        xid_set_global_bqual(ccc->config_digest);
         if (-1 == (ret_cod = close(fd)))
             THROW(CLOSE_ERROR);
         fd = LIXA_NULL_FD;
