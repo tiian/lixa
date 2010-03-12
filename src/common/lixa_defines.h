@@ -17,7 +17,7 @@
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef LIXA_DEFINES_H
-#define LIXA_DEFINES_H
+# define LIXA_DEFINES_H
 
 #include <config.h>
 
@@ -145,7 +145,7 @@
 /**
  * format for printing uintptr_t
  */
-#if (SIZEOF_UINTPTR_T == SIZEOF_INT)
+#if SIZEOF_UINTPTR_T == SIZEOF_INT
 # define UINTPTR_T_FORMAT "%u"
 #elif SIZEOF_UINTPTR_T == SIZEOF_LONG_INT
 # define UINTPTR_T_FORMAT "%lu"
@@ -202,8 +202,7 @@ extern "C" {
       
 
     /**
-     * Control word used by journaled file (for example, journal records
-     * are expressed as words
+     * Control word
      */
     typedef uint32_t lixa_word_t;
 

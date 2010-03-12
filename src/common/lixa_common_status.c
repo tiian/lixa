@@ -43,6 +43,30 @@ uuid_t lixa_xid_global_bqual;
 
 
 
+#if MD5_DIGEST_LENGTH != SIZEOF_UUID_T
+# error MD5 digest and uuid_t differs in length
+#endif
+
+
+
+void xid_set_global_bqual(const char *md5_digest_hex)
+{
+    int i;
+    unsigned char *p = (unsigned char *)&lixa_xid_global_bqual;
+    char tmp[3];
+    tmp[2] = '\0';
+    for (i=0; i<MD5_DIGEST_LENGTH; ++i) {
+        /* working with words would be more efficient, but there might be some
+           alignment issues on any platform if uuid_t is declared as an array
+           of bytes (on Linux it's defined as unsigned char uuid_t[16] */
+        tmp[0] = md5_digest_hex[i * 2];
+        tmp[1] = md5_digest_hex[i * 2 + 1];
+        p[i] = (unsigned char)strtoul(tmp, NULL, 16);
+    }
+}
+
+
+
 void xid_create_new(XID *xid)
 {
     uuid_t uuid_obj;

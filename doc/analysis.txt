@@ -122,7 +122,7 @@ The search keys are:
               perform?
 
 These rules must be applied to shared table:
-- Transaction Manager crash: at restart, every thread insert a record for
+- Transaction Manager crash: at restart, every thread inserts a record for
   every in-flight transaction inside the table
 - Application Program crash: the serving thread insert a record if there was
   an in-flight transaction for the broken connection
