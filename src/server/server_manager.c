@@ -553,7 +553,7 @@ int server_manager_msg_proc(struct thread_status_s *ts,
             THROW(OUTMSG_PREP_ERROR);
         }
 
-        if (LIXA_RC_OK != rc) {
+        if (LIXA_RC_OK != rc && LIXA_RC_RECOVERY_PENDING_TX != rc) {
             LIXA_TRACE(("server_manager_msg_proc: server_manager_inmsg_prep "
                         "return code is %d\n", rc));
             THROW(INMSG_PROC_ERROR);
@@ -600,6 +600,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     struct lixa_msg_s lmi;
+    int recovery_pending = FALSE;
 
     LIXA_TRACE(("server_manager_inmsg_proc\n"));
     TRY {
@@ -624,8 +625,8 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                         "message from this client...\n"));
             /* verify if there are recovery pending transaction for the
                job/thread */
-            if (LIXA_RC_OK != (ret_cod = server_manager_recovery(
-                                   ts, &lmi, lmo)))
+            if (LIXA_RC_OK != (ret_cod = server_manager_check_recovery(
+                                   ts, &lmi, &recovery_pending)))
                 THROW(SERVER_MANAGER_RECOVERY_ERROR);
             /* reset the flag: this check should happen no more for this
                client */
@@ -723,7 +724,8 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
             case STORE_VERB_STEP_ERROR:
                 break;
             case NONE:
-                ret_cod = LIXA_RC_OK;
+                ret_cod = recovery_pending ?
+                    LIXA_RC_RECOVERY_PENDING_TX : LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -822,9 +824,9 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
 
 
 
-int server_manager_recovery(struct thread_status_s *ts,
-                            const struct lixa_msg_s *lmi,
-                            struct lixa_msg_s *lmo)
+int server_manager_check_recovery(struct thread_status_s *ts,
+                                  const struct lixa_msg_s *lmi,
+                                  int *recovery_pending)
 {
     enum Exception { PROTOCOL_ERROR
                      , JOB_SET_RAW_ERROR
@@ -832,11 +834,14 @@ int server_manager_recovery(struct thread_status_s *ts,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("server_manager_recovery\n"));
+    LIXA_TRACE(("server_manager_check_recovery\n"));
     TRY {
         struct srvr_rcvr_tbl_rec_s query, result;
         lixa_job_t query_job, result_job;
 
+        /* optimistic guess */
+        *recovery_pending = FALSE;
+        
         if (LIXA_MSG_VERB_OPEN != lmi->header.pvs.verb)
             THROW(PROTOCOL_ERROR);
 
@@ -850,13 +855,12 @@ int server_manager_recovery(struct thread_status_s *ts,
         result.job = &result_job; /* reserve room for job object */
 
         /* query the recovery table */
-        ret_cod = srvr_rcvr_tbl_get_block(ts->recovery_table, &query, &result);
+        ret_cod = srvr_rcvr_tbl_get_block(ts->recovery_table, &query, &result,
+                                          TRUE);
         switch (ret_cod) {
             case LIXA_RC_OK:
-                /* @@@ to be implemented .... */
-                break;
             case LIXA_RC_BYPASSED_OPERATION:
-                /* @@@ to be implemented .... */
+                *recovery_pending = TRUE;
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 /* nothing to do */
@@ -882,7 +886,7 @@ int server_manager_recovery(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("server_manager_recovery/excp=%d/"
+    LIXA_TRACE(("server_manager_check_recovery/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

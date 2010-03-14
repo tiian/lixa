@@ -175,7 +175,8 @@ int srvr_rcvr_tbl_insert(srvr_rcvr_tbl_t *srt,
 
 int srvr_rcvr_tbl_get_block(srvr_rcvr_tbl_t *srt,
                             const struct srvr_rcvr_tbl_rec_s *srtr,
-                            struct srvr_rcvr_tbl_rec_s *out)
+                            struct srvr_rcvr_tbl_rec_s *out,
+                            int browse)
 {
     enum Exception { OBJ_CORRUPTED
                      , OUT_OF_RANGE
@@ -190,7 +191,7 @@ int srvr_rcvr_tbl_get_block(srvr_rcvr_tbl_t *srt,
         gpointer *node;
         GQueue *queue;
         
-        LIXA_TRACE(("srvr_rcvr_tbl_get_block: job='%s', tsid=%u\n",
+        LIXA_TRACE(("srvr_rcvr_tbl_get_block: query is job='%s', tsid=%u\n",
                     lixa_job_get_raw(srtr->job), srtr->tsid));
         
         if (NULL == srt->mutex || NULL == srt->lvl1_job)
@@ -224,6 +225,9 @@ int srvr_rcvr_tbl_get_block(srvr_rcvr_tbl_t *srt,
                 if (!g_queue_is_empty(q)) {
                     memcpy(out->job, srtr->job, sizeof(lixa_job_t));
                     out->tsid = i;
+                    LIXA_TRACE(("srvr_rcvr_tbl_get_block: answer is job='%s', "
+                                "tsid=%u\n",
+                                lixa_job_get_raw(out->job), out->tsid));
                     THROW(BYPASSED_OPERATION);
                 } /* if (!g_queue_is_empty(q)) */
             } /* for i */
@@ -233,7 +237,12 @@ int srvr_rcvr_tbl_get_block(srvr_rcvr_tbl_t *srt,
         /* there's a transaction */
         memcpy(out->job, srtr->job, sizeof(lixa_job_t));
         out->tsid = srtr->tsid;
-        out->block_id = GPOINTER_TO_UINT(g_queue_pop_head(queue));
+        out->block_id = browse ?
+            GPOINTER_TO_UINT(g_queue_peek_head(queue)) :
+            GPOINTER_TO_UINT(g_queue_pop_head(queue));
+        LIXA_TRACE(("srvr_rcvr_tbl_get_block: answer is job='%s', "
+                    "tsid=%u, block_id=" UINT32_T_FORMAT "\n",
+                    lixa_job_get_raw(out->job), out->tsid, out->block_id));
         
         THROW(NONE);
     } CATCH {
