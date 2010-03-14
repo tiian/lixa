@@ -172,18 +172,22 @@ extern "C" {
      *                               be recovered for this job & thread;<br>
      *             out->block_id == 0 no transaction for this job & thread;<br>
      *             <b>NOTE:</b> out->job must point to a valid job structure
+     * @param browse IN boolean value: if TRUE, don't remove the found info
+     *               from the recovery table, browse it only
      * @return @ref LIXA_RC_OK if a transaction for this job and thread was
-     *                         found, block_id was dequeued;<br>
+     *                         found, block_id was dequeued
+     *                         if browse == FALSE;<br>
      *         @ref LIXA_RC_BYPASSED_OPERATION if a transaction for this job,
      *                         but for a different thread was found, no block_id
      *                         was dequeued;<br>
      *         @ref LIXA_RC_OBJ_NOT_FOUND if a transaction for this job was
      *                         NOT found, no block_id was dequeued;<br>
-     *         others return code for errors
+     *         a different codes mean error
      */
     int srvr_rcvr_tbl_get_block(srvr_rcvr_tbl_t *srt,
                                 const struct srvr_rcvr_tbl_rec_s *srtr,
-                                struct srvr_rcvr_tbl_rec_s *out);
+                                struct srvr_rcvr_tbl_rec_s *out,
+                                int browse);
 
 
 

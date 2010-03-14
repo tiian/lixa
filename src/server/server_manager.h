@@ -167,15 +167,17 @@ extern "C" {
     
 
     /**
-     * Help the connected client to manage the recovery phase
+     * Check if the connected thread should deal with recovery pending
+     * transactions
      * @param ts IN thread status structure
      * @param lmi IN deserialized message sent by client
-     * @param lmo OUT deserialized message must be sent to the client
+     * @param recovery_pending OUT boolean: TRUE if there are recovery
+     *                         pending transactions
      * @return a reason code
      */
-    int server_manager_recovery(struct thread_status_s *ts,
-                                const struct lixa_msg_s *lmi,
-                                struct lixa_msg_s *lmo);
+    int server_manager_check_recovery(struct thread_status_s *ts,
+                                      const struct lixa_msg_s *lmi,
+                                      int *recovery_pending);
 
 
     

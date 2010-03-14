@@ -92,3 +92,65 @@ A.P.		T.M.		R.M.		lixad
 rollback intent does not need synchronization on the Lixa server side
 because the absence of a persistence commit info means rollback
 
+******************************************************************************
+
+recovery phase sequence diagram
+
+
+A.P.		T.M.		R.M.		lixad
+|
+[] tx_open()	|		|		|
+[]------------->[] open 	|		|
+|		[]--------------|-------------->[] create room
+|		|  recovery pending?		[] save open
+|		[]<-------------|---------------[] check recovery
+|		[]		|		|
+|		[] xa_open()	|		|
+|		[]------------->[]		|
+|		|  xa_open_execs[] open r.m.	|
+|		[]<-------------[]		|
+|		[]		|		|
+|		[]--------------|-------------->[] save results
+|		[]		|		[]
+|	/------>[] recovery query		|
+|	|	[]--------------|-------------->[] switch
+|	|	|  XID & info	|		[] thread {1}
+|	|	[]<-------------|---------------[]
+|	|	[]		|		|
+|	|	[] xa_rollback()/xa_commit()	|
+|	|	[]------------->[]		|
+|	|	|  result	[]		|
+|	|	[]<-------------[]		|
+|	|	[]		|		|
+|	|	[]--------------|-------------->[] free TX blocks
+|	|	[]		|		[]
+|	\-------[] another query|		|
+|		[]		|		|
+|		[] lixad has no more TXs	|
+|		[]		|		|
+|		[] xa_recovery	|		|
+|		[]------------->[]		|
+|		|		[] {2}		|
+|		[]<-------------[]		|
+|		[]		|		|
+|		[] xa_rollback()/xa_commit()	|
+|		[]------------->[]		|
+|		|		[]		|
+|		[]<-------------[]		|
+|		[]		|		|
+[]<-------------[]		|		|
+[]		|		|		|
+|		|		|		|
+|		|		|		|
+
+{1} The recovery query could return a transaction is managed by a different
+    thread: the server switches the client to another thread and answers
+    with the XID and infos related to the recovery pending transaction
+
+{2} All the resource managers are polled to discover potential transactions
+    "disappeared" from lixad server: this should never produce any more
+    transactions (it might report a just in time recovery pending transaction)
+    Transactions are recognized as revoverable if:
+    - XID format matches
+    - XID branch qualifier matches
+

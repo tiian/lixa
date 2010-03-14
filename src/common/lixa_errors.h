@@ -71,6 +71,10 @@
  * A truncation occurred because the destination is smaller then the source
  */
 #define LIXA_RC_TRUNCATION_OCCURRED             +5
+/**
+ * This thread of control should recover some recovery pending transactions
+ */
+#define LIXA_RC_RECOVERY_PENDING_TX             +6
 
 
 

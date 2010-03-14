@@ -578,6 +578,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
+        int recovery_pending = FALSE;
 
         /* check the resouce managers status is OK */
         if (cs->rmstates->len == 0) {
@@ -657,8 +658,13 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
 #ifdef _TRACE
         lixa_msg_trace(&msg);
 #endif
-        /* check the answer from the server */
-        if (LIXA_RC_OK != (ret_cod = msg.body.open_16.answer.rc))
+        /* check the answer from the server */        
+        if (LIXA_RC_RECOVERY_PENDING_TX  == (
+                ret_cod = msg.body.open_16.answer.rc)) {
+            recovery_pending = TRUE;
+            LIXA_TRACE(("lixa_xa_open: the server replied RECOVERY "
+                        "PENDING condition\n"));
+        } else if (LIXA_RC_OK != ret_cod)
             THROW(ERROR_FROM_SERVER);
 
         /* prepare the next message */
@@ -734,6 +740,8 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
 
         if (TX_OK != *txrc)
             THROW(XA_ERROR);
+
+        /* @@@ manage recovery pending phase (see doc/seq_diagr.txt) */
         
         THROW(NONE);
     } CATCH {

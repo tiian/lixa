@@ -1,0 +1,55 @@
+Lixa project roadmap
+Last update: 2010-03-14
+
+0.1.x : preliminary stage
+
+0.3.x : main development cycle
+
+Milestone: 
+	- all the mandatory features specified by X/Open specifications are
+	  implemented
+	- the "happy path" works
+Exit: pre-alpha stage
+
+0.5.x : main test cycle
+
+Milestone:
+	- all the designed test cases work
+	- a deep review of X/Open specifications does not suggest more test
+	  cases
+Exit: alpha test stage
+
+0.7.x : minor development cycle
+
+Milestone:
+	- all the relevant suggestions (RFNF) was implemented
+	- no known bugs
+	- a selection of VIRM (Very Important Resource Managers) was tested
+	  and worked fine when coordinated by Lixa
+	- system log "speaks" fine
+Exit: beta test stage
+
+0.9.x : first non beta version
+
+------------------------------------------------------------------------------
+
+Long term targets:
+
+0.11.x : minor development cycle
+
+Milestone:
+	- support for PHP language
+	- support for Python language
+	- support for Ruby language
+	- support for Perl language
+
+------------------------------------------------------------------------------
+
+Very long term targets:
+
+0.13.x : minor development cycle
+
+Milestone:
+	- support for COBOL language
+	- support for Java language (JTA API)
+
