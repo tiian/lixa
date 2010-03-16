@@ -93,7 +93,7 @@ extern "C" {
      */
     int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate);
     
-    
+
 
     /**
      * End work performed on behalf of the transaction manager
