@@ -109,6 +109,11 @@
  */
 #define LIXA_MSG_VERB_ROLLBACK  7
 /**
+ * Id assigned to verb "query recovery"
+ */
+#define LIXA_MSG_VERB_QRCVR     8
+
+/**
  * Default increment for message step
  */
 #define LIXA_MSG_STEP_INCR      8
@@ -799,6 +804,25 @@ struct lixa_msg_body_rollback_8_s {
 
 
 /**
+ * Convenience struct for @ref lixa_msg_body_open_8_s
+ */
+struct lixa_msg_body_qrcvr_8_client_s {
+    xmlChar           *job;
+    md5_digest_hex_t   config_digest;
+};
+
+    
+
+/**
+ * Message body for verb "qrcvr", step "8"
+ */
+struct lixa_msg_body_qrcvr_8_s {
+    struct lixa_msg_body_qrcvr_8_client_s client;
+};
+
+
+
+/**
  * This structure maps the messages flowing between LIXA client (lixac) and
  * LIXA server (lixad). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
@@ -827,6 +851,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_prepare_16_s      prepare_16;
         struct lixa_msg_body_commit_8_s        commit_8;
         struct lixa_msg_body_rollback_8_s      rollback_8;
+        struct lixa_msg_body_qrcvr_8_s         qrcvr_8;
     } body;
 };
 

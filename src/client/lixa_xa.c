@@ -32,6 +32,7 @@
 #include <lixa_xml_msg_deserialize.h>
 #include <lixa_xml_msg_serialize.h>
 #include <lixa_xml_msg_trace.h>
+#include <client_recovery.h>
 #include <client_status.h>
 #include <tx.h>
 #include <xa.h>
@@ -567,6 +568,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                      , UNEXPECTED_XA_RC
                      , SEND_ERROR2
                      , XA_ERROR
+                     , CLIENT_RECOVERY_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -741,7 +743,11 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
         if (TX_OK != *txrc)
             THROW(XA_ERROR);
 
-        /* @@@ manage recovery pending phase (see doc/seq_diagr.txt) */
+        /* manage recovery pending phase (see doc/seq_diagr.txt) */
+        if (recovery_pending &&
+            LIXA_RC_OK != (
+                ret_cod = client_recovery(cs, &msg.body.open_8.client)))
+            THROW(CLIENT_RECOVERY_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -771,6 +777,11 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                 break;
             case XA_ERROR:
                 ret_cod = LIXA_RC_XA_ERROR;
+                break;
+            case CLIENT_RECOVERY_ERROR:
+                /* @@@ no way - based on the standard - to report this type
+                   of error to the application program: open point for future
+                   investigation */
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

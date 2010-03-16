@@ -123,6 +123,11 @@
 #define LIXA_TRACE_MOD_CLIENT_STATUS      0x00020000
 
 /**
+ * trace module for client recovery functions
+ */
+#define LIXA_TRACE_MOD_CLIENT_RECOVERY    0x00040000
+
+/**
  * trace module for common config functions
  */
 #define LIXA_TRACE_MOD_COMMON_CONFIG      0x01000000
