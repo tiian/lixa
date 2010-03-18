@@ -61,6 +61,7 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                      , INVALID_STEP5
                      , INVALID_STEP6
                      , INVALID_STEP7
+                     , INVALID_STEP8
                      , INVALID_VERB
                      , CHILD_LEVEL_ERROR
                      , NONE } excp;
@@ -205,6 +206,16 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         THROW(INVALID_STEP7);
                 }
                 break;
+            case LIXA_MSG_VERB_QRCVR: /* qrcvr */
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        ret_cod = lixa_msg_deserialize_qrcvr_8(
+                            cur->xmlChildrenNode, msg);
+                        break;
+                    default:
+                        THROW(INVALID_STEP8);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -234,6 +245,7 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
             case INVALID_STEP5:
             case INVALID_STEP6:
             case INVALID_STEP7:
+            case INVALID_STEP8:
             case INVALID_VERB:
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
                 break;
@@ -971,6 +983,60 @@ int lixa_msg_deserialize_prepare_16(xmlNodePtr cur, struct lixa_msg_s *msg)
         cur, &msg->body.prepare_16.answer);
     LIXA_TRACE(("lixa_msg_deserialize_prepare_16/"
                 "ret_cod=%d/errno=%d\n", ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_deserialize_qrcvr_8(xmlNodePtr cur, struct lixa_msg_s *msg)
+{
+    enum Exception { JOB_NOT_FOUND
+                     , CONFIG_DIGEST_NOT_FOUND
+                     , XML_UNRECOGNIZED_TAG
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_deserialize_qrcvr_8\n"));
+    TRY {
+        while (NULL != cur) {
+            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CLIENT)) {
+                xmlChar *tmp;
+                /* retrieve client properties */
+                if (NULL == (msg->body.qrcvr_8.client.job =
+                             xmlGetProp(cur, LIXA_XML_MSG_PROP_JOB)))
+                    THROW(JOB_NOT_FOUND);
+                if (NULL == (tmp = xmlGetProp(
+                                 cur, LIXA_XML_MSG_PROP_CONFIG_DIGEST)))
+                    THROW(CONFIG_DIGEST_NOT_FOUND);
+                strncpy(msg->body.qrcvr_8.client.config_digest,
+                        (char *)tmp, sizeof(md5_digest_hex_t));
+                msg->body.qrcvr_8.client.config_digest[
+                    MD5_DIGEST_LENGTH * 2] = '\0';
+                xmlFree(tmp);
+            } else
+                THROW(XML_UNRECOGNIZED_TAG);
+            cur = cur->next;
+        } /* while (NULL != cur) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case JOB_NOT_FOUND:
+            case CONFIG_DIGEST_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
+            case XML_UNRECOGNIZED_TAG:
+                ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_deserialize_qrcvr_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 

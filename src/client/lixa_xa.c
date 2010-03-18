@@ -574,6 +574,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
     
     LIXA_TRACE(("lixa_xa_open\n"));
     TRY {
+        struct lixa_msg_body_open_8_client_s client;
         struct lixa_msg_s msg;
         int fd;
         size_t buffer_size = 0;
@@ -612,11 +613,12 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
         msg.header.pvs.verb = LIXA_MSG_VERB_OPEN;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
-        msg.body.open_8.client.job = (xmlChar *)lixa_job_get_raw(
-            global_ccc.job);
-        strncpy(msg.body.open_8.client.config_digest,
+        client.job = (xmlChar *)lixa_job_get_raw(global_ccc.job);
+        strncpy(client.config_digest,
                 global_ccc.config_digest, sizeof(md5_digest_hex_t));
-        msg.body.open_8.client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
+        client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
+        msg.body.open_8.client = client;
+
         msg.body.open_8.rsrmgrs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_open_8_rsrmgr_s),
@@ -745,8 +747,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
 
         /* manage recovery pending phase (see doc/seq_diagr.txt) */
         if (recovery_pending &&
-            LIXA_RC_OK != (
-                ret_cod = client_recovery(cs, &msg.body.open_8.client)))
+            LIXA_RC_OK != (ret_cod = client_recovery(cs, &client)))
             THROW(CLIENT_RECOVERY_ERROR);
         
         THROW(NONE);
@@ -757,8 +758,10 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                 break;
             case MSG_SERIALIZE_ERROR1:
                 break;
-            case MSG_RETRIEVE_ERROR:
+            case SEND_ERROR1:
+                ret_cod = LIXA_RC_SEND_ERROR;
                 break;
+            case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:
                 break;
             case ERROR_FROM_SERVER:

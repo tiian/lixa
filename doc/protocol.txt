@@ -230,4 +230,31 @@ verb=7,step=8 -->			send xa_rollback result
 					gives server information the
 					transaction finished
 
+***************************************************************************
+
+verb=8 (query recovery)
+
+  level: message level, version
+  verb:  xa_open -> 1
+  step:  8, 16
+
+  client->server message (question)
+  <msg level="1" verb="8" step="8">
+    <client profile="VZ67" conf_digest="59530bdf33659b29e73d4adb9f9f6552"/>
+  </msg>
+
+  server -> client message (answer)
+  <msg level="1" verb="8" step="16">
+    <answer rc="0"/>
+  </msg>
+
+  
+
+client 			 server		description
+verb=8,step=8 -->			query for recovery pending 
+					transactions
+		<-- verb=8,step=16	return the first transaction must
+					be recovered
+
+***************************************************************************
 

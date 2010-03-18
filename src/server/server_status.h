@@ -44,7 +44,7 @@
 #include <lixa_config.h>
 #include <lixa_xml_msg.h>
 #include <xa.h>
-#include <server_recovery.h>
+#include <srvr_rcvr_tbl.h>
 
 
 

@@ -26,7 +26,7 @@
 
 
 #include <server_config.h>
-#include <server_recovery.h>
+#include <srvr_rcvr_tbl.h>
 
 
 
