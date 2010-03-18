@@ -108,6 +108,16 @@ extern "C" {
     
     /**
      * Convenience function for @ref lixa_msg_trace : it display the content
+     * of a "qrcvr" message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg);
+
+
+    
+    /**
+     * Convenience function for @ref lixa_msg_trace : it display the content
      * of a "rollback" message
      * @param msg IN the message must be massaged
      * @return a reason code

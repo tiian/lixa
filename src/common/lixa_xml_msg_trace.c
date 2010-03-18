@@ -57,6 +57,7 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
                      , TRACE_PREPARE_ERROR
                      , TRACE_COMMIT_ERROR
                      , TRACE_ROLLBACK_ERROR
+                     , TRACE_QRCVR_ERROR
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -96,6 +97,10 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
                 if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_rollback(msg)))
                     THROW(TRACE_ROLLBACK_ERROR);
                 break;
+            case LIXA_MSG_VERB_QRCVR: /* qrcvr */
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_qrcvr(msg)))
+                    THROW(TRACE_QRCVR_ERROR);
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -110,6 +115,7 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
             case TRACE_PREPARE_ERROR:
             case TRACE_COMMIT_ERROR:
             case TRACE_ROLLBACK_ERROR:
+            case TRACE_QRCVR_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
@@ -461,6 +467,51 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
 
 
 
+int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
+{
+    enum Exception { INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_trace_qrcvr\n"));
+    TRY {
+        switch (msg->header.pvs.step) {
+            case 8:
+                LIXA_TRACE(("lixa_msg_trace_qrcvr: body[client[job="
+                            "'%s',config_digest='%s']]]\n",
+                            msg->body.qrcvr_8.client.job,
+                            msg->body.qrcvr_8.client.config_digest));
+                break;
+                /*
+            case 16:
+                LIXA_TRACE(("lixa_msg_trace_qrcvr: body[answer[rc[%d]]]\n",
+                            msg->body.qrcvr_16.answer.rc));
+                break;
+                */
+            default:
+                THROW(INVALID_STEP);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_trace_qrcvr/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+    
 int lixa_msg_trace_rollback(const struct lixa_msg_s *msg)
 {
     enum Exception { INVALID_STEP

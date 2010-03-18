@@ -36,6 +36,7 @@
 #include <server_manager.h>
 #include <server_messages.h>
 #include <server_thread_status.h>
+#include <server_recovery.h>
 #include <server_reply.h>
 #include <server_xa.h>
 
@@ -593,6 +594,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                      , SERVER_XA_PREPARE_ERROR
                      , SERVER_XA_COMMIT_ERROR
                      , SERVER_XA_ROLLBACK_ERROR
+                     , SERVER_XA_QRCVR_ERROR
                      , INVALID_VERB
                      , STORE_VERB_STEP_ERROR
                      , LIXA_MSG_FREE_ERROR
@@ -690,6 +692,11 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                                        ts, &lmi, block_id)))
                     THROW(SERVER_XA_ROLLBACK_ERROR)
                 break;
+            case LIXA_MSG_VERB_QRCVR:
+                if (LIXA_RC_OK != (ret_cod = server_recovery(
+                                       ts, &lmi, lmo, block_id)))
+                    THROW(SERVER_XA_QRCVR_ERROR)
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -717,6 +724,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
             case SERVER_XA_PREPARE_ERROR:
             case SERVER_XA_COMMIT_ERROR:
             case SERVER_XA_ROLLBACK_ERROR:
+            case SERVER_XA_QRCVR_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INVALID_STATUS;

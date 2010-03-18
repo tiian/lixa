@@ -187,6 +187,7 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                      , INVALID_STEP5
                      , INVALID_STEP6
                      , INVALID_STEP7
+                     , INVALID_STEP8
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -298,6 +299,16 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                         THROW(INVALID_STEP7);
                 }
                 break;
+            case LIXA_MSG_VERB_QRCVR: /* qrcvr */
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        xmlFree(msg->body.open_8.client.job);
+                        msg->body.open_8.client.job = NULL;
+                        break;
+                    default:
+                        THROW(INVALID_STEP8);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -312,6 +323,7 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case INVALID_STEP5:
             case INVALID_STEP6:
             case INVALID_STEP7:
+            case INVALID_STEP8:
             case INVALID_VERB:
                 LIXA_TRACE(("lixa_msg_free: verb=%d, step=%d\n",
                             msg->header.pvs.verb, msg->header.pvs.step));
