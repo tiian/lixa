@@ -30,7 +30,7 @@ verb=1 (xa_open)
 
   client->server message (question)
   <msg level="1" verb="1" step="8">
-    <client profile="VZ67" conf_digest="59530bdf33659b29e73d4adb9f9f6552"/>
+    <client job="59530bdf33659b29e73d4adb9f9f6552/127.0.0.1      " conf_digest="59530bdf33659b29e73d4adb9f9f6552"/>
     <rsrmgrs>
       <rsrmgr rmid="0" name="dummyrm" xa_name="lixa_dummyrm"/>
       <rsrmgr rmid="1" name="randomrm" xa_name="lixa_randomrm"/>
@@ -44,10 +44,10 @@ verb=1 (xa_open)
 
   client -> server message (async assertion)
   <msg level="1" verb="1" step="24">
-    <conthr state="1"/>
+    <conthr txstate="1"/>
     <xa_open_execs>
-      <xa_open_exec xa_info="xa_open string" rmid="0" flags="0" rc="0" state="1"/>
-      <xa_open_exec xa_info="xa_open string" rmid="1" flags="0" rc="0" state="1"/>
+      <xa_open_exec xa_info="xa_open string" rmid="0" flags="0x0" rc="0" r_state="1"/>
+      <xa_open_exec xa_info="xa_open string" rmid="1" flags="0x0" rc="0" r_state="1"/>
     </xa_open_execs>
   </msg>
   
@@ -91,7 +91,7 @@ verb=3 (xa_start)
   client->server message (send the XID - transaction id - and the resource
                           managers will receive xa_start)
   <msg level="1" verb="3" step="8">
-    <conthr xid="xid string in ASCII form"/>
+    <conthr xid="cd7f2d86-a6d8-4237-8e1e-83347e478c49.87cd2b4e-7ec7-4c7c-b839-f570171554cb"/>
     <rsrmgrs>
       <rsrmgr rmid="0"/>
       <rsrmgr rmid="1"/>
@@ -105,10 +105,10 @@ verb=3 (xa_start)
 
   client -> server message (async assertion)
   <msg level="1" verb="3" step="24">
-    <conthr state="?"/>
+    <conthr txstate="3"/>
     <xa_start_execs>
-      <xa_start_exec rmid="0" flags="0" rc="0" state="?"/>
-      <xa_start_exec rmid="1" flags="0" rc="0" state="?"/>
+      <xa_start_exec rmid="0" flags="0x0" rc="0" t_state="11"/>
+      <xa_start_exec rmid="1" flags="0x0" rc="0" t_state="11"/>
     </xa_start_execs>
   </msg>
 
@@ -134,7 +134,7 @@ verb=4 (xa_end)
   client->server message (send if the transaction is committing - commit="1" -
   		 	 or rollbacking - commit="0")
   <msg level="1" verb="4" step="8">
-    <conthr commit="1"/>
+    <conthr commit="0"/>
   </msg>
 
   server -> client message (answer)
@@ -145,8 +145,8 @@ verb=4 (xa_end)
   client -> server message (async assertion)
   <msg level="1" verb="4" step="24">
     <xa_end_execs>
-      <xa_end_exec rmid="0" flags="0" rc="0" s_state="?" t_state="?"/>
-      <xa_end_exec rmid="1" flags="0" rc="0" s_state="?" t_state="?"/>
+      <xa_end_exec rmid="0" flags="0x4000000" rc="0" s_state="32" t_state="10"/>
+      <xa_end_exec rmid="1" flags="0x4000000" rc="0" s_state="32" t_state="10"/>
     </xa_end_execs>
   </msg>
 
@@ -170,8 +170,8 @@ verb=5 (xa_prepare)
   <msg level="1" verb="5" step="8">
     <conthr commit="1"/>
     <xa_prepare_execs>
-      <xa_prepare_exec rmid="0" flags="0" rc="0" s_state="?" t_state="?"/>
-      <xa_prepare_exec rmid="1" flags="0" rc="0" s_state="?" t_state="?"/>
+      <xa_prepare_exec rmid="0" flags="0x0" rc="0" s_state="33" t_state="10"/>
+      <xa_prepare_exec rmid="1" flags="0x0" rc="0" s_state="33" t_state="10"/>
     </xa_prepare_execs>
   </msg>
 
@@ -198,8 +198,8 @@ verb=6 (xa_commit)
   <msg level="1" verb="6" step="8">
     <conthr finished="1"/>
     <xa_commit_execs>
-      <xa_commit_exec rmid="0" flags="0" rc="0" r_state="?" s_state="?"/>
-      <xa_commit_exec rmid="1" flags="0" rc="0" r_state="?" s_state="?"/>
+      <xa_commit_exec rmid="0" flags="0x0" rc="0" r_state="1" s_state="30"/>
+      <xa_commit_exec rmid="1" flags="0x0" rc="0" r_state="1" s_state="30"/>
     </xa_commit_execs>
   </msg>
 
@@ -220,8 +220,8 @@ verb=7 (xa_rollback)
   <msg level="1" verb="7" step="8">
     <conthr finished="1"/>
     <xa_rollback_execs>
-      <xa_rollback_exec rmid="0" flags="0" rc="0" r_state="?" s_state="?"/>
-      <xa_rollback_exec rmid="1" flags="0" rc="0" r_state="?" s_state="?"/>
+      <xa_rollback_exec rmid="0" flags="0x0" rc="0" r_state="1" s_state="30"/>
+      <xa_rollback_exec rmid="1" flags="0x0" rc="0" r_state="1" s_state="30"/>
     </xa_rollback_execs>
   </msg>
 
@@ -240,12 +240,19 @@ verb=8 (query recovery)
 
   client->server message (question)
   <msg level="1" verb="8" step="8">
-    <client profile="VZ67" conf_digest="59530bdf33659b29e73d4adb9f9f6552"/>
+    <client job="59530bdf33659b29e73d4adb9f9f6552/127.0.0.1      " conf_digest="59530bdf33659b29e73d4adb9f9f6552"/>
   </msg>
 
   server -> client message (answer)
   <msg level="1" verb="8" step="16">
-    <answer rc="0"/>
+    <client job="59530bdf33659b29e73d4adb9f9f6552/127.0.0.1      " conf_digest="59530bdf33659b29e73d4adb9f9f6552"/>
+      <last_verb_step verb="3" step="16"/>
+      <state finished="0" txstate="1" will_commit="1" will_rollback="0" xid="cd7f2d86-a6d8-4237-8e1e-83347e478c49.87cd2b4e-7ec7-4c7c-b839-f570171554cb"/>
+    </client>
+    <rsrmgrs>
+      <rsrmgr rmid="0" next_verb="4" r_state="?" s_state="?" t_state="?"/>
+      <rsrmgr rmid="1" next_verb="4" r_state="?" s_state="?" t_state="?"/>
+    </rsrmgrs>
   </msg>
 
   

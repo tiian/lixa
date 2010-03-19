@@ -353,8 +353,8 @@ int lixa_msg_trace_open(const struct lixa_msg_s *msg)
             case 24:
                 if (NULL != msg->body.open_24.xa_open_execs) {
                     LIXA_TRACE(("lixa_msg_trace_open: body["
-                                "conthr[state=%d]]\n",
-                                msg->body.open_24.conthr.state));
+                                "conthr[txstate=%d]]\n",
+                                msg->body.open_24.conthr.txstate));
                     for (i=0; i<msg->body.open_24.xa_open_execs->len;
                          ++i) {
                         struct lixa_msg_body_open_24_xa_open_execs_s
@@ -614,8 +614,8 @@ int lixa_msg_trace_start(const struct lixa_msg_s *msg)
             case 24:
                 if (NULL != msg->body.start_24.xa_start_execs) {
                     LIXA_TRACE(("lixa_msg_trace_start: body["
-                                "conthr[state=%d]]\n",
-                                msg->body.start_24.conthr.state));
+                                "conthr[txstate=%d]]\n",
+                                msg->body.start_24.conthr.txstate));
                     for (i=0; i<msg->body.start_24.xa_start_execs->len;
                          ++i) {
                         struct lixa_msg_body_start_24_xa_start_execs_s

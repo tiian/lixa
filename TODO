@@ -1,4 +1,5 @@
-restart from function "server_recovery"
+restart from function "server_recovery_result": build a message of type
+lixa_msg_body_qrcvr_16_s, return it, serialize it, send it to client...
 
 execute recovery when a new client arrive of the same job
 when recovery happens check config_digest; on server side only warning; 

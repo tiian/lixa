@@ -173,9 +173,9 @@ extern const xmlChar *LIXA_XML_MSG_PROP_S_STATE;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_T_STATE;
 /**
- * Label used to specify "state" property
+ * Label used to specify "txstate" property
  */
-extern const xmlChar *LIXA_XML_MSG_PROP_STATE;
+extern const xmlChar *LIXA_XML_MSG_PROP_TXSTATE;
 /**
  * Label used to specify "step" property
  */
@@ -372,7 +372,7 @@ struct lixa_msg_body_open_24_conthr_s {
     /**
      * State of the control thread
      */
-    int                       state;
+    int                       txstate;
 };
 
 
@@ -492,7 +492,7 @@ struct lixa_msg_body_start_24_conthr_s {
     /**
      * State of the control thread
      */
-    int                       state;
+    int                       txstate;
 };
 
 
@@ -804,7 +804,7 @@ struct lixa_msg_body_rollback_8_s {
 
 
 /**
- * Convenience struct for @ref lixa_msg_body_open_8_s
+ * Convenience struct for @ref lixa_msg_body_qrcvr_8_s
  */
 struct lixa_msg_body_qrcvr_8_client_s {
     xmlChar           *job;
@@ -818,6 +818,88 @@ struct lixa_msg_body_qrcvr_8_client_s {
  */
 struct lixa_msg_body_qrcvr_8_s {
     struct lixa_msg_body_qrcvr_8_client_s client;
+};
+
+
+
+/**
+ * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
+ */
+struct lixa_msg_body_qrcvr_16_client_s {
+    xmlChar           *job;
+    md5_digest_hex_t   config_digest;
+};
+
+    
+
+/**
+ * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
+ */
+struct lixa_msg_body_qrcvr_16_state_s {
+    /**
+     * Boolean: did the transaction finish?
+     */
+    int      finished;
+    /**
+     * Client TX state
+     */
+    int      txstate;
+    /**
+     * Boolean: did the transaction asked commit?
+     */
+    int      will_commit;
+    /**
+     * Boolean: did the transaction asked rollback?
+     */
+    int      will_rollback;
+    /**
+     * Transaction id
+     */
+    XID      xid;
+};
+
+    
+
+
+
+
+/**
+ * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
+ */
+struct lixa_msg_body_qrcvr_16_rsrmgr_s {
+    /**
+     * rmid parameter as passed to xa_close routine
+     */
+    int        rmid;
+    /**
+     * next expected verb at crash time
+     */
+    int        next_verb;
+    /**
+     * the resource manager state at crash time
+     */
+    int        r_state;
+    /**
+     * the transaction branch state at crash time
+     */
+    int        s_state;
+    /**
+     * the transaction branch association state associated to the resource
+     * manager at crash time
+     */
+    int        t_state;
+};
+
+    
+
+/**
+ * Message body for verb "qrcvr", step "16"
+ */
+struct lixa_msg_body_qrcvr_16_s {
+    struct lixa_msg_body_qrcvr_16_client_s   client;
+    struct lixa_msg_verb_step_s              last_verb_step;
+    struct lixa_msg_body_qrcvr_16_state_s    state;
+    GArray                                  *rsrmgrs;
 };
 
 
@@ -852,6 +934,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_commit_8_s        commit_8;
         struct lixa_msg_body_rollback_8_s      rollback_8;
         struct lixa_msg_body_qrcvr_8_s         qrcvr_8;
+        struct lixa_msg_body_qrcvr_16_s        qrcvr_16;
     } body;
 };
 

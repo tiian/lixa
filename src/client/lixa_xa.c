@@ -675,7 +675,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.pvs.verb = LIXA_MSG_VERB_OPEN;
         msg.header.pvs.step = 24;
-        msg.body.open_24.conthr.state = next_txstate;
+        msg.body.open_24.conthr.txstate = next_txstate;
         msg.body.open_24.xa_open_execs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_open_24_xa_open_execs_s),
@@ -1213,7 +1213,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.pvs.verb = LIXA_MSG_VERB_START;
         msg.header.pvs.step = 24;
-        msg.body.start_24.conthr.state = next_txstate;
+        msg.body.start_24.conthr.txstate = next_txstate;
         msg.body.start_24.xa_start_execs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_start_24_xa_start_execs_s),
