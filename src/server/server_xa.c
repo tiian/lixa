@@ -528,7 +528,7 @@ int server_xa_open_24(struct thread_status_s *ts,
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* retrieve and save control thread status */
         ts->curr_status[block_id].sr.data.pld.ph.state.txstate =
-            lmi->body.open_24.conthr.state;
+            lmi->body.open_24.conthr.txstate;
         /* store data in the children blocks... */
         for (i=0; i<lmi->body.open_24.xa_open_execs->len; ++i) {
             status_record_t *sr;
@@ -962,7 +962,7 @@ int server_xa_start_24(struct thread_status_s *ts,
         status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
         ts->curr_status[block_id].sr.data.pld.ph.state.txstate =
-            lmi->body.start_24.conthr.state;
+            lmi->body.start_24.conthr.txstate;
         /* store data in the children blocks... */
         for (i=0; i<lmi->body.start_24.xa_start_execs->len; ++i) {
             status_record_t *sr;

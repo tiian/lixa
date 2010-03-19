@@ -778,9 +778,9 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
             xmlChar *tmp;
             if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CONTHR)) {
                 /* retrieve control thread properties */
-                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_STATE)))
+                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_TXSTATE)))
                     THROW(CONTHR_NOT_FOUND);
-                msg->body.open_24.conthr.state =
+                msg->body.open_24.conthr.txstate =
                     (int)strtol((char *)tmp, NULL, 0);
                 xmlFree(tmp);
             } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_XA_OPEN_EXECS)) {
@@ -1265,9 +1265,9 @@ int lixa_msg_deserialize_start_24(xmlNodePtr cur, struct lixa_msg_s *msg)
             xmlChar *tmp;
             if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CONTHR)) {
                 /* retrieve control thread properties */
-                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_STATE)))
+                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_TXSTATE)))
                     THROW(CONTHR_NOT_FOUND);
-                msg->body.start_24.conthr.state =
+                msg->body.start_24.conthr.txstate =
                     (int)strtol((char *)tmp, NULL, 0);
                 xmlFree(tmp);
             } else if (!xmlStrcmp(cur->name,

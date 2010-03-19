@@ -812,8 +812,8 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "<%s %s=\"%d\"/>",
                               LIXA_XML_MSG_TAG_CONTHR,
-                              LIXA_XML_MSG_PROP_STATE,
-                              msg->body.open_24.conthr.state);
+                              LIXA_XML_MSG_PROP_TXSTATE,
+                              msg->body.open_24.conthr.txstate);
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT1);
         *free_chars -= used_chars;
@@ -1309,8 +1309,8 @@ int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "<%s %s=\"%d\"/>",
                               LIXA_XML_MSG_TAG_CONTHR,
-                              LIXA_XML_MSG_PROP_STATE,
-                              msg->body.start_24.conthr.state);
+                              LIXA_XML_MSG_PROP_TXSTATE,
+                              msg->body.start_24.conthr.txstate);
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT1);
         *free_chars -= used_chars;
