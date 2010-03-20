@@ -153,6 +153,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_LEVEL;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_NAME;
 /**
+ * Label used to specify "next_verb" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_NEXT_VERB;
+/**
  * Label used to specify "rc" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_RC;
@@ -185,6 +189,14 @@ extern const xmlChar *LIXA_XML_MSG_PROP_STEP;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_VERB;
 /**
+ * Label used to specify "will_commit" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_WILL_COMMIT;
+/**
+ * Label used to specify "will_rollback" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_WILL_ROLLBACK;
+/**
  * Label used to specify "xa_info" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_XA_INFO;
@@ -209,6 +221,10 @@ extern const xmlChar *LIXA_XML_MSG_TAG_CLIENT;
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_CONTHR;
 /**
+ * Label used to specify "last_verb_step" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_LAST_VERB_STEP;
+/**
  * Label used to specify "msg" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_MSG;
@@ -220,6 +236,10 @@ extern const xmlChar *LIXA_XML_MSG_TAG_RSRMGR;
  * Label used to specify "rsrmgrs" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_RSRMGRS;
+/**
+ * Label used to specify "state" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_STATE;
 /**
  * Label used to specify "xa_commit_exec" tag
  */
@@ -826,7 +846,7 @@ struct lixa_msg_body_qrcvr_8_s {
  * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
  */
 struct lixa_msg_body_qrcvr_16_client_s {
-    xmlChar           *job;
+    const xmlChar     *job;
     md5_digest_hex_t   config_digest;
 };
 
