@@ -80,7 +80,7 @@ extern "C" {
                                const struct lixa_msg_s *lmi,
                                struct lixa_msg_s *lmo);
 
-    
+
 
 #ifdef __cplusplus
 }

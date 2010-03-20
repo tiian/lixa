@@ -116,6 +116,45 @@ int server_recovery_result(struct thread_status_s *ts,
     
     LIXA_TRACE(("server_recovery_result\n"));
     TRY {
+        guint i;
+        uint32_t block_id = record->block_id;
+        struct status_record_data_payload_s *pld =
+            &(ts->curr_status[block_id].sr.data.pld);
+
+        lmo->header.pvs.verb = LIXA_MSG_VERB_QRCVR;
+        
+        lmo->body.qrcvr_16.client.job =
+            (const xmlChar *)lixa_job_get_raw(&pld->ph.job);
+        memcpy(&lmo->body.qrcvr_16.client.config_digest,
+               &pld->ph.config_digest, sizeof(md5_digest_hex_t));
+
+        lmo->body.qrcvr_16.last_verb_step.verb =
+            pld->ph.last_verb_step[0].verb;
+        lmo->body.qrcvr_16.last_verb_step.step =
+            pld->ph.last_verb_step[0].step;
+
+        lmo->body.qrcvr_16.state.finished = pld->ph.state.finished;
+        lmo->body.qrcvr_16.state.txstate = pld->ph.state.txstate;
+        lmo->body.qrcvr_16.state.will_commit = pld->ph.state.will_commit;
+        lmo->body.qrcvr_16.state.will_rollback = pld->ph.state.will_rollback;
+        memcpy(&lmo->body.qrcvr_16.state.xid, &pld->ph.state.xid,
+               sizeof(XID));
+
+        lmo->body.qrcvr_16.rsrmgrs = g_array_sized_new(
+            FALSE, FALSE,
+            sizeof(struct lixa_msg_body_qrcvr_16_rsrmgr_s),
+            pld->ph.n);
+        for (i=0; i<pld->ph.n; ++i) {
+            struct lixa_msg_body_qrcvr_16_rsrmgr_s rsrmgr;
+            status_record_t *sr = ts->curr_status +
+                ts->curr_status[block_id].sr.data.pld.ph.block_array[i]; 
+            rsrmgr.rmid = sr->sr.data.pld.rm.rmid;
+            rsrmgr.next_verb = sr->sr.data.pld.rm.state.next_verb;
+            rsrmgr.r_state = sr->sr.data.pld.rm.state.xa_r_state;
+            rsrmgr.s_state = sr->sr.data.pld.rm.state.xa_s_state;
+            rsrmgr.t_state = sr->sr.data.pld.rm.state.xa_t_state;
+            g_array_append_val(lmo->body.qrcvr_16.rsrmgrs, rsrmgr);
+        }
         
         THROW(NONE);
     } CATCH {

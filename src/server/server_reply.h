@@ -105,6 +105,19 @@ extern "C" {
 
     
     /**
+     * Send the output message related to "qrcvr" verb to the client
+     * @param ts IN/OUT thread status structure
+     * @param slot_id IN the slot associated to the file descriptor raised the
+     *                   POLLIN event 
+     * @param lmo IN message will be returned to the client
+     * @return a standardized return code
+     */
+    int server_reply_qrcvr(struct thread_status_s *ts, size_t slot_id,
+                           struct lixa_msg_s *lmo);
+
+
+    
+    /**
      * Send the output message related to "start" verb to the client
      * @param ts IN/OUT thread status structure
      * @param slot_id IN the slot associated to the file descriptor raised the

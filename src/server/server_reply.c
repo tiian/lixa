@@ -49,7 +49,7 @@ int server_reply_default(struct thread_status_s *ts, size_t slot_id,
                     ts->client_array[slot_id].output_buffer,
                     LIXA_MSG_XML_BUFFER_SIZE,
                     &ts->client_array[slot_id].output_buffer_size))) {
-            LIXA_TRACE(("server_reply_open: error while "
+            LIXA_TRACE(("server_reply_default: error while "
                         "serializing reply message to client\n"));
             /* release the buffer to avoid transmission */
             free(ts->client_array[slot_id].output_buffer);
@@ -57,7 +57,7 @@ int server_reply_default(struct thread_status_s *ts, size_t slot_id,
             THROW(SERIALIZE_ERROR);
         }
         if (LIXA_RC_OK == ret_cod) {
-            LIXA_TRACE(("server_reply_open: reply message is "
+            LIXA_TRACE(("server_reply_default: reply message is "
                         "|%*.*s|\n",
                         ts->client_array[slot_id].output_buffer_size,
                         ts->client_array[slot_id].output_buffer_size,
@@ -173,6 +173,55 @@ int server_reply_prepare(struct thread_status_s *ts, size_t slot_id,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_reply_prepare/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_reply_qrcvr(struct thread_status_s *ts, size_t slot_id,
+                       struct lixa_msg_s *lmo)
+{
+    enum Exception { SERIALIZE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_reply_qrcvr\n"));
+    TRY {
+        if (LIXA_RC_OK != (
+                ret_cod = lixa_msg_serialize(
+                    lmo,
+                    ts->client_array[slot_id].output_buffer,
+                    LIXA_MSG_XML_BUFFER_SIZE,
+                    &ts->client_array[slot_id].output_buffer_size))) {
+            LIXA_TRACE(("server_reply_qrcvr: error while "
+                        "serializing reply message to client\n"));
+            /* release the buffer to avoid transmission */
+            free(ts->client_array[slot_id].output_buffer);
+            ts->client_array[slot_id].output_buffer = NULL;
+            THROW(SERIALIZE_ERROR);
+        }
+        if (LIXA_RC_OK == ret_cod) {
+            LIXA_TRACE(("server_reply_qrcvr: reply message is "
+                        "|%*.*s|\n",
+                        ts->client_array[slot_id].output_buffer_size,
+                        ts->client_array[slot_id].output_buffer_size,
+                        ts->client_array[slot_id].output_buffer));
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case SERIALIZE_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_reply_qrcvr/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

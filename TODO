@@ -1,5 +1,4 @@
-restart from function "server_recovery_result": build a message of type
-lixa_msg_body_qrcvr_16_s, return it, serialize it, send it to client...
+now "lixa_msg_free" is called for reply message too (see "server_manager_msg_proc") and some fixed is needed on lixa_msg_free. 
 
 execute recovery when a new client arrive of the same job
 when recovery happens check config_digest; on server side only warning; 
