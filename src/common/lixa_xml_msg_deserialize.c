@@ -1048,7 +1048,8 @@ int lixa_msg_deserialize_qrcvr_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 
 int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
-    enum Exception { JOB_NOT_FOUND
+    enum Exception { RC_NOT_FOUND
+                     , JOB_NOT_FOUND
                      , CONFIG_DIGEST_NOT_FOUND
                      , PROP_VERB_NOT_FOUND
                      , PROP_STEP_NOT_FOUND
@@ -1058,20 +1059,29 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
                      , PROP_WILL_ROLLBACK_NOT_FOUND
                      , XID_NOT_FOUND
                      , XID_DESERIALIZE_ERROR
+                     , XML_UNRECOGNIZED_TAG1
                      , RMID_NOT_FOUND
                      , NEXT_VERB_NOT_FOUND
                      , R_STATE_NOT_FOUND
                      , S_STATE_NOT_FOUND
                      , T_STATE_NOT_FOUND
-                     , XML_UNRECOGNIZED_TAG
+                     , XML_UNRECOGNIZED_TAG2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_msg_deserialize_qrcvr_16\n"));
     TRY {
         while (NULL != cur) {
-            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CLIENT)) {
-                xmlChar *tmp;
+            xmlChar *tmp;
+            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_ANSWER)) {
+                /* retrieve answer result */
+                if (NULL == (tmp = (xmlGetProp(cur, LIXA_XML_MSG_PROP_RC))))
+                    THROW(RC_NOT_FOUND);
+                msg->body.qrcvr_16.answer.rc =
+                    (int)strtol((char *)tmp, NULL, 0);
+                xmlFree(tmp);
+            } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CLIENT)) {
+                xmlNodePtr cur2 = cur->xmlChildrenNode;
                 /* retrieve client properties */
                 if (NULL == (msg->body.qrcvr_16.client.job =
                              xmlGetProp(cur, LIXA_XML_MSG_PROP_JOB)))
@@ -1084,52 +1094,64 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
                 msg->body.qrcvr_16.client.config_digest[
                     MD5_DIGEST_LENGTH * 2] = '\0';
                 xmlFree(tmp);
-            } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_LAST_VERB_STEP)) {
-                xmlChar *tmp;
-                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_VERB)))
-                    THROW(PROP_VERB_NOT_FOUND);
-                msg->body.qrcvr_16.last_verb_step.verb =
-                    (int)strtol((char *)tmp, NULL, 0);
-                xmlFree(tmp);
-                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_STEP)))
-                    THROW(PROP_STEP_NOT_FOUND);
-                msg->body.qrcvr_16.last_verb_step.step =
-                    (int)strtol((char *)tmp, NULL, 0);
-                xmlFree(tmp);
-            } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_STATE)) {
-                xmlChar *tmp;
-                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_FINISHED)))
-                    THROW(PROP_FINISHED_NOT_FOUND);
-                msg->body.qrcvr_16.state.finished =
-                    (int)strtol((char *)tmp, NULL, 0);
-                xmlFree(tmp);
-                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_TXSTATE)))
-                    THROW(PROP_TXSTATE_NOT_FOUND);
-                msg->body.qrcvr_16.state.txstate =
-                    (int)strtol((char *)tmp, NULL, 0);
-                xmlFree(tmp);
-                if (NULL == (tmp = xmlGetProp(
-                                 cur, LIXA_XML_MSG_PROP_WILL_COMMIT)))
-                    THROW(PROP_WILL_COMMIT_NOT_FOUND);
-                msg->body.qrcvr_16.state.will_commit =
-                    (int)strtol((char *)tmp, NULL, 0);
-                xmlFree(tmp);
-                if (NULL == (tmp = xmlGetProp(
-                                 cur, LIXA_XML_MSG_PROP_WILL_ROLLBACK)))
-                    THROW(PROP_WILL_ROLLBACK_NOT_FOUND);
-                msg->body.qrcvr_16.state.will_rollback =
-                    (int)strtol((char *)tmp, NULL, 0);
-                xmlFree(tmp);
-                /* retrieve xid properties */
-                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_XID)))
-                    THROW(XID_NOT_FOUND);
-                if (LIXA_RC_OK != (ret_cod = xid_deserialize(
-                                       (char *)tmp, 
-                                       &msg->body.start_8.conthr.xid))) {
-                    xmlFree(tmp);
-                    THROW(XID_DESERIALIZE_ERROR);
-                } else
-                    xmlFree(tmp);
+
+                while (NULL != cur2) {
+                    if (!xmlStrcmp(
+                            cur2->name, LIXA_XML_MSG_TAG_LAST_VERB_STEP)) {
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_VERB)))
+                            THROW(PROP_VERB_NOT_FOUND);
+                        msg->body.qrcvr_16.client.last_verb_step.verb =
+                            (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_STEP)))
+                            THROW(PROP_STEP_NOT_FOUND);
+                        msg->body.qrcvr_16.client.last_verb_step.step =
+                            (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                    } else if (!xmlStrcmp(cur2->name, LIXA_XML_MSG_TAG_STATE)) {
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_FINISHED)))
+                            THROW(PROP_FINISHED_NOT_FOUND);
+                        msg->body.qrcvr_16.client.state.finished =
+                            (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_TXSTATE)))
+                            THROW(PROP_TXSTATE_NOT_FOUND);
+                        msg->body.qrcvr_16.client.state.txstate =
+                            (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_WILL_COMMIT)))
+                            THROW(PROP_WILL_COMMIT_NOT_FOUND);
+                        msg->body.qrcvr_16.client.state.will_commit =
+                            (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                        if (NULL == (
+                                tmp = xmlGetProp(
+                                    cur2, LIXA_XML_MSG_PROP_WILL_ROLLBACK)))
+                            THROW(PROP_WILL_ROLLBACK_NOT_FOUND);
+                        msg->body.qrcvr_16.client.state.will_rollback =
+                            (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                        /* retrieve xid properties */
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_XID)))
+                            THROW(XID_NOT_FOUND);
+                        if (LIXA_RC_OK != (
+                                ret_cod = xid_deserialize(
+                                    (char *)tmp, 
+                                    &msg->body.qrcvr_16.client.state.xid))) {
+                            xmlFree(tmp);
+                            THROW(XID_DESERIALIZE_ERROR);
+                        } else
+                            xmlFree(tmp);  
+                    } else
+                        THROW(XML_UNRECOGNIZED_TAG1);
+                    cur2 = cur2->next;
+                } /* while (NULL != child) */
             } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_RSRMGRS)) {
                 xmlNodePtr cur2 = cur->xmlChildrenNode;
                 /* initialize array (3 slots may be a good choice for
@@ -1141,7 +1163,6 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
                 /* retrieve resource managers */
                 while (NULL != cur2) {
                     if (!xmlStrcmp(cur2->name, LIXA_XML_MSG_TAG_RSRMGR)) {
-                        xmlChar *tmp;
                         struct lixa_msg_body_qrcvr_16_rsrmgr_s rsrmgr;
                         /* retrieve rmid */
                         if (NULL == (tmp = xmlGetProp(
@@ -1159,32 +1180,33 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
                         if (NULL == (tmp = xmlGetProp(
                                          cur2, LIXA_XML_MSG_PROP_R_STATE)))
                             THROW(R_STATE_NOT_FOUND);
-                        rsrmgr.next_verb = (int)strtol((char *)tmp, NULL, 0);
+                        rsrmgr.r_state = (int)strtol((char *)tmp, NULL, 0);
                         xmlFree(tmp);
                         /* s_state */
                         if (NULL == (tmp = xmlGetProp(
                                          cur2, LIXA_XML_MSG_PROP_S_STATE)))
                             THROW(S_STATE_NOT_FOUND);
-                        rsrmgr.next_verb = (int)strtol((char *)tmp, NULL, 0);
+                        rsrmgr.s_state = (int)strtol((char *)tmp, NULL, 0);
                         xmlFree(tmp);
                         /* t_state */
                         if (NULL == (tmp = xmlGetProp(
                                          cur2, LIXA_XML_MSG_PROP_T_STATE)))
                             THROW(T_STATE_NOT_FOUND);
-                        rsrmgr.next_verb = (int)strtol((char *)tmp, NULL, 0);
+                        rsrmgr.t_state = (int)strtol((char *)tmp, NULL, 0);
                         xmlFree(tmp);
                         g_array_append_val(msg->body.qrcvr_16.rsrmgrs, rsrmgr);
                     }
                     cur2 = cur2->next;
                 } /* while (NULL != child) */
             } else
-                THROW(XML_UNRECOGNIZED_TAG);
+                THROW(XML_UNRECOGNIZED_TAG2);
             cur = cur->next;
         } /* while (NULL != cur) */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case RC_NOT_FOUND:
             case JOB_NOT_FOUND:
             case CONFIG_DIGEST_NOT_FOUND:
             case PROP_VERB_NOT_FOUND:
@@ -1198,6 +1220,9 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
                 break;
             case XID_DESERIALIZE_ERROR:
                 break;
+            case XML_UNRECOGNIZED_TAG1:
+                ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
+                break;
             case RMID_NOT_FOUND:
             case NEXT_VERB_NOT_FOUND:
             case R_STATE_NOT_FOUND:
@@ -1205,7 +1230,7 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
             case T_STATE_NOT_FOUND:
                 ret_cod = LIXA_RC_MALFORMED_XML_MSG;
                 break;
-            case XML_UNRECOGNIZED_TAG:
+            case XML_UNRECOGNIZED_TAG2:
                 ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
                 break;
             case NONE:

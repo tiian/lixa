@@ -32,6 +32,9 @@ const char *lixa_strerror(int ret_cod)
         ret_cod -= LIXA_RC_ERROR_FROM_SERVER_OFFSET;
     
     switch (ret_cod) {
+        case LIXA_RC_LIXAC_CONF_CHANGED:
+            return "WARNING: the digest of the lixac config file changed -> "
+                "the client config file changed";
         case LIXA_RC_RECOVERY_PENDING_TX:
             return "WARNING: this thread of control should recover some "
                 "recovery pending transactions";

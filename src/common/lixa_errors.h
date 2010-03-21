@@ -75,6 +75,10 @@
  * This thread of control should recover some recovery pending transactions
  */
 #define LIXA_RC_RECOVERY_PENDING_TX             +6
+/**
+ * The digest of the lixac config file changed -> the client config file changed
+ */
+#define LIXA_RC_LIXAC_CONF_CHANGED              +7
 
 
 

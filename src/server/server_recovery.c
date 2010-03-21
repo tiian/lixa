@@ -20,6 +20,12 @@
 
 
 
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
+#endif
+
+
+
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <server_recovery.h>
@@ -57,7 +63,7 @@ int server_recovery(struct thread_status_s *ts,
         /* prepare the query object */
         if (LIXA_RC_OK != (ret_cod = lixa_job_set_raw(
                                &query_job,
-                               (const char *)lmi->body.open_8.client.job)))
+                               (const char *)lmi->body.qrcvr_8.client.job)))
             THROW(JOB_SET_RAW_ERROR);
         query.job = &query_job;
         query.tsid = ts->id;
@@ -73,9 +79,10 @@ int server_recovery(struct thread_status_s *ts,
                     THROW(SERVER_RECOVERY_RESULT_ERROR);
                 break;
             case LIXA_RC_BYPASSED_OPERATION:
+                /* @@@ implement thread transfer */
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
-                /* nothing to do */
+                /* @@@ answer "no available transactions" */
                 break;
             default:
                 THROW(GET_BLOCK_ERROR);
@@ -124,6 +131,8 @@ int server_recovery_result(struct thread_status_s *ts,
 
         lmo->header.pvs.verb = LIXA_MSG_VERB_QRCVR;
 
+        lmo->body.qrcvr_16.answer.rc = LIXA_RC_OK;
+        
         /* this duplication is not necessary, but it helps in keeping a clean
            code: no special behaviour in @ref lixa_msg_free */
         if (NULL == (lmo->body.qrcvr_16.client.job =
@@ -132,16 +141,32 @@ int server_recovery_result(struct thread_status_s *ts,
         memcpy(&lmo->body.qrcvr_16.client.config_digest,
                &pld->ph.config_digest, sizeof(md5_digest_hex_t));
 
-        lmo->body.qrcvr_16.last_verb_step.verb =
+        /* check config digest: current and past */
+        if (memcmp(lmi->body.qrcvr_8.client.config_digest,
+                   lmo->body.qrcvr_16.client.config_digest,
+                   sizeof(md5_digest_hex_t))) {
+            lmo->body.qrcvr_16.answer.rc = LIXA_RC_LIXAC_CONF_CHANGED;
+            syslog(LOG_NOTICE, "A client is asking recovery information "
+                   "for job '%s' and the config file changed in the meantime",
+                   lmo->body.qrcvr_16.client.job);
+            LIXA_TRACE(("server_recovery_result: job is '%s', past config "
+                        "digest is '%s', current config digest is '%s'\n",
+                        lmo->body.qrcvr_16.client.job,
+                        lmo->body.qrcvr_16.client.config_digest,
+                        lmi->body.qrcvr_8.client.config_digest));
+        }
+        
+        lmo->body.qrcvr_16.client.last_verb_step.verb =
             pld->ph.last_verb_step[0].verb;
-        lmo->body.qrcvr_16.last_verb_step.step =
+        lmo->body.qrcvr_16.client.last_verb_step.step =
             pld->ph.last_verb_step[0].step;
 
-        lmo->body.qrcvr_16.state.finished = pld->ph.state.finished;
-        lmo->body.qrcvr_16.state.txstate = pld->ph.state.txstate;
-        lmo->body.qrcvr_16.state.will_commit = pld->ph.state.will_commit;
-        lmo->body.qrcvr_16.state.will_rollback = pld->ph.state.will_rollback;
-        memcpy(&lmo->body.qrcvr_16.state.xid, &pld->ph.state.xid,
+        lmo->body.qrcvr_16.client.state.finished = pld->ph.state.finished;
+        lmo->body.qrcvr_16.client.state.txstate = pld->ph.state.txstate;
+        lmo->body.qrcvr_16.client.state.will_commit = pld->ph.state.will_commit;
+        lmo->body.qrcvr_16.client.state.will_rollback =
+            pld->ph.state.will_rollback;
+        memcpy(&lmo->body.qrcvr_16.client.state.xid, &pld->ph.state.xid,
                sizeof(XID));
 
         lmo->body.qrcvr_16.rsrmgrs = g_array_sized_new(

@@ -245,7 +245,8 @@ verb=8 (query recovery)
 
   server -> client message (answer)
   <msg level="1" verb="8" step="16">
-    <client job="59530bdf33659b29e73d4adb9f9f6552/127.0.0.1      " conf_digest="59530bdf33659b29e73d4adb9f9f6552"/>
+    <answer rc="0"/>
+    <client job="59530bdf33659b29e73d4adb9f9f6552/127.0.0.1      " conf_digest="59530bdf33659b29e73d4adb9f9f6552">
       <last_verb_step verb="3" step="16"/>
       <state finished="0" txstate="1" will_commit="1" will_rollback="0" xid="cd7f2d86-a6d8-4237-8e1e-83347e478c49.87cd2b4e-7ec7-4c7c-b839-f570171554cb"/>
     </client>
