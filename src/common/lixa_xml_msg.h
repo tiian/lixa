@@ -846,7 +846,7 @@ struct lixa_msg_body_qrcvr_8_s {
  * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
  */
 struct lixa_msg_body_qrcvr_16_client_s {
-    const xmlChar     *job;
+    xmlChar           *job;
     md5_digest_hex_t   config_digest;
 };
 

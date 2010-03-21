@@ -111,7 +111,8 @@ int server_recovery_result(struct thread_status_s *ts,
                            const struct lixa_msg_s *lmi,
                            struct lixa_msg_s *lmo)
 {
-    enum Exception { NONE } excp;
+    enum Exception { XML_CHAR_STRDUP_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("server_recovery_result\n"));
@@ -122,9 +123,12 @@ int server_recovery_result(struct thread_status_s *ts,
             &(ts->curr_status[block_id].sr.data.pld);
 
         lmo->header.pvs.verb = LIXA_MSG_VERB_QRCVR;
-        
-        lmo->body.qrcvr_16.client.job =
-            (const xmlChar *)lixa_job_get_raw(&pld->ph.job);
+
+        /* this duplication is not necessary, but it helps in keeping a clean
+           code: no special behaviour in @ref lixa_msg_free */
+        if (NULL == (lmo->body.qrcvr_16.client.job =
+                     xmlCharStrdup(lixa_job_get_raw(&pld->ph.job))))
+            THROW(XML_CHAR_STRDUP_ERROR);
         memcpy(&lmo->body.qrcvr_16.client.config_digest,
                &pld->ph.config_digest, sizeof(md5_digest_hex_t));
 
@@ -159,6 +163,9 @@ int server_recovery_result(struct thread_status_s *ts,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case XML_CHAR_STRDUP_ERROR:
+                ret_cod = LIXA_RC_XML_CHAR_STRDUP_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

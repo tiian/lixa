@@ -212,6 +212,10 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_qrcvr_8(
                             cur->xmlChildrenNode, msg);
                         break;
+                    case 16:
+                        ret_cod = lixa_msg_deserialize_qrcvr_16(
+                            cur->xmlChildrenNode, msg);
+                        break;
                     default:
                         THROW(INVALID_STEP8);
                 }
@@ -1036,6 +1040,182 @@ int lixa_msg_deserialize_qrcvr_8(xmlNodePtr cur, struct lixa_msg_s *msg)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_qrcvr_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
+{
+    enum Exception { JOB_NOT_FOUND
+                     , CONFIG_DIGEST_NOT_FOUND
+                     , PROP_VERB_NOT_FOUND
+                     , PROP_STEP_NOT_FOUND
+                     , PROP_FINISHED_NOT_FOUND
+                     , PROP_TXSTATE_NOT_FOUND
+                     , PROP_WILL_COMMIT_NOT_FOUND
+                     , PROP_WILL_ROLLBACK_NOT_FOUND
+                     , XID_NOT_FOUND
+                     , XID_DESERIALIZE_ERROR
+                     , RMID_NOT_FOUND
+                     , NEXT_VERB_NOT_FOUND
+                     , R_STATE_NOT_FOUND
+                     , S_STATE_NOT_FOUND
+                     , T_STATE_NOT_FOUND
+                     , XML_UNRECOGNIZED_TAG
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_deserialize_qrcvr_16\n"));
+    TRY {
+        while (NULL != cur) {
+            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CLIENT)) {
+                xmlChar *tmp;
+                /* retrieve client properties */
+                if (NULL == (msg->body.qrcvr_16.client.job =
+                             xmlGetProp(cur, LIXA_XML_MSG_PROP_JOB)))
+                    THROW(JOB_NOT_FOUND);
+                if (NULL == (tmp = xmlGetProp(
+                                 cur, LIXA_XML_MSG_PROP_CONFIG_DIGEST)))
+                    THROW(CONFIG_DIGEST_NOT_FOUND);
+                strncpy(msg->body.qrcvr_16.client.config_digest,
+                        (char *)tmp, sizeof(md5_digest_hex_t));
+                msg->body.qrcvr_16.client.config_digest[
+                    MD5_DIGEST_LENGTH * 2] = '\0';
+                xmlFree(tmp);
+            } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_LAST_VERB_STEP)) {
+                xmlChar *tmp;
+                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_VERB)))
+                    THROW(PROP_VERB_NOT_FOUND);
+                msg->body.qrcvr_16.last_verb_step.verb =
+                    (int)strtol((char *)tmp, NULL, 0);
+                xmlFree(tmp);
+                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_STEP)))
+                    THROW(PROP_STEP_NOT_FOUND);
+                msg->body.qrcvr_16.last_verb_step.step =
+                    (int)strtol((char *)tmp, NULL, 0);
+                xmlFree(tmp);
+            } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_STATE)) {
+                xmlChar *tmp;
+                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_FINISHED)))
+                    THROW(PROP_FINISHED_NOT_FOUND);
+                msg->body.qrcvr_16.state.finished =
+                    (int)strtol((char *)tmp, NULL, 0);
+                xmlFree(tmp);
+                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_TXSTATE)))
+                    THROW(PROP_TXSTATE_NOT_FOUND);
+                msg->body.qrcvr_16.state.txstate =
+                    (int)strtol((char *)tmp, NULL, 0);
+                xmlFree(tmp);
+                if (NULL == (tmp = xmlGetProp(
+                                 cur, LIXA_XML_MSG_PROP_WILL_COMMIT)))
+                    THROW(PROP_WILL_COMMIT_NOT_FOUND);
+                msg->body.qrcvr_16.state.will_commit =
+                    (int)strtol((char *)tmp, NULL, 0);
+                xmlFree(tmp);
+                if (NULL == (tmp = xmlGetProp(
+                                 cur, LIXA_XML_MSG_PROP_WILL_ROLLBACK)))
+                    THROW(PROP_WILL_ROLLBACK_NOT_FOUND);
+                msg->body.qrcvr_16.state.will_rollback =
+                    (int)strtol((char *)tmp, NULL, 0);
+                xmlFree(tmp);
+                /* retrieve xid properties */
+                if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_XID)))
+                    THROW(XID_NOT_FOUND);
+                if (LIXA_RC_OK != (ret_cod = xid_deserialize(
+                                       (char *)tmp, 
+                                       &msg->body.start_8.conthr.xid))) {
+                    xmlFree(tmp);
+                    THROW(XID_DESERIALIZE_ERROR);
+                } else
+                    xmlFree(tmp);
+            } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_RSRMGRS)) {
+                xmlNodePtr cur2 = cur->xmlChildrenNode;
+                /* initialize array (3 slots may be a good choice for
+                   initial size) */
+                msg->body.qrcvr_16.rsrmgrs = g_array_sized_new(
+                    FALSE, FALSE,
+                    sizeof(struct lixa_msg_body_qrcvr_16_rsrmgr_s),
+                    LIXA_MSG_XML_DEFAULT_RSRMGRS);
+                /* retrieve resource managers */
+                while (NULL != cur2) {
+                    if (!xmlStrcmp(cur2->name, LIXA_XML_MSG_TAG_RSRMGR)) {
+                        xmlChar *tmp;
+                        struct lixa_msg_body_qrcvr_16_rsrmgr_s rsrmgr;
+                        /* retrieve rmid */
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_RMID)))
+                            THROW(RMID_NOT_FOUND);
+                        rsrmgr.rmid = (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                        /* next_verb */
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_NEXT_VERB)))
+                            THROW(NEXT_VERB_NOT_FOUND);
+                        rsrmgr.next_verb = (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                        /* r_state */
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_R_STATE)))
+                            THROW(R_STATE_NOT_FOUND);
+                        rsrmgr.next_verb = (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                        /* s_state */
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_S_STATE)))
+                            THROW(S_STATE_NOT_FOUND);
+                        rsrmgr.next_verb = (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                        /* t_state */
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_T_STATE)))
+                            THROW(T_STATE_NOT_FOUND);
+                        rsrmgr.next_verb = (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
+                        g_array_append_val(msg->body.qrcvr_16.rsrmgrs, rsrmgr);
+                    }
+                    cur2 = cur2->next;
+                } /* while (NULL != child) */
+            } else
+                THROW(XML_UNRECOGNIZED_TAG);
+            cur = cur->next;
+        } /* while (NULL != cur) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case JOB_NOT_FOUND:
+            case CONFIG_DIGEST_NOT_FOUND:
+            case PROP_VERB_NOT_FOUND:
+            case PROP_STEP_NOT_FOUND:
+            case PROP_FINISHED_NOT_FOUND:
+            case PROP_TXSTATE_NOT_FOUND:
+            case PROP_WILL_COMMIT_NOT_FOUND:
+            case PROP_WILL_ROLLBACK_NOT_FOUND:
+            case XID_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
+            case XID_DESERIALIZE_ERROR:
+                break;
+            case RMID_NOT_FOUND:
+            case NEXT_VERB_NOT_FOUND:
+            case R_STATE_NOT_FOUND:
+            case S_STATE_NOT_FOUND:
+            case T_STATE_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
+            case XML_UNRECOGNIZED_TAG:
+                ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_deserialize_qrcvr_16/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
