@@ -39,7 +39,8 @@
 int client_recovery(client_status_t *cs,
                     const struct lixa_msg_body_open_8_client_s *client)
 {
-    enum Exception { MSG_SERIALIZE_ERROR
+    enum Exception { XML_STRDUP_ERROR
+                     , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
                      , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
@@ -62,7 +63,8 @@ int client_recovery(client_status_t *cs,
         msg.header.pvs.verb = LIXA_MSG_VERB_QRCVR;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
-        msg.body.qrcvr_8.client.job = client->job;
+        if (NULL == (msg.body.qrcvr_8.client.job = xmlStrdup(client->job)))
+            THROW(XML_STRDUP_ERROR);
         strncpy(msg.body.qrcvr_8.client.config_digest, client->config_digest,
                 sizeof(md5_digest_hex_t));
         msg.body.qrcvr_8.client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
@@ -77,8 +79,8 @@ int client_recovery(client_status_t *cs,
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
 
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(fd, buffer, buffer_size,
-                                                       &read_bytes)))
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
+                               fd, buffer, sizeof(buffer)-1, &read_bytes)))
             THROW(MSG_RETRIEVE_ERROR);
         LIXA_TRACE(("client_recovery: receiving %d"
                     " bytes from the server |%*.*s|\n",
@@ -94,6 +96,9 @@ int client_recovery(client_status_t *cs,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case XML_STRDUP_ERROR:
+                ret_cod = LIXA_RC_XML_STRDUP_ERROR;
+                break;
             case MSG_SERIALIZE_ERROR:
                 break;
             case SEND_ERROR:

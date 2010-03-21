@@ -402,6 +402,14 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR -203
 /**
+ * "xmlCharStrdup" function error
+ */
+#define LIXA_RC_XML_CHAR_STRDUP_ERROR          -204
+/**
+ * "xmlStrdup" function error
+ */
+#define LIXA_RC_XML_STRDUP_ERROR               -205
+/**
  * A glib function returned a NULL pointer; the function is not documented as
  * returnig NULL. This is basically an internal error
  */

@@ -236,6 +236,10 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR:
             return "ERROR: 'xmlDocGetRootElement' function returned an "
                 "error condition";
+        case LIXA_RC_XML_CHAR_STRDUP_ERROR:
+            return "ERROR: 'xmlCharStrdup' function returned a NULL pointer";
+        case LIXA_RC_XML_STRDUP_ERROR:
+            return "ERROR: 'xmlStrdup' function returned a NULL pointer";
         case LIXA_RC_G_RETURNED_NULL:
             return "ERROR:  a glib function returned a NULL pointer; the "
                 "function is not documented as returnig NULL. This is "

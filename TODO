@@ -1,4 +1,4 @@
-now "lixa_msg_free" is called for reply message too (see "server_manager_msg_proc") and some fixed is needed on lixa_msg_free. 
+fix lixa_msg_trace for verb=8 step=16 (lixa_msg_trace_qrcvr)
 
 execute recovery when a new client arrive of the same job
 when recovery happens check config_digest; on server side only warning; 

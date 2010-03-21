@@ -391,8 +391,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
         
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(fd, buffer, buffer_size,
-                                                       &read_bytes)))
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
+                               fd, buffer, sizeof(buffer)-1, &read_bytes)))
             THROW(MSG_RETRIEVE_ERROR);
         LIXA_TRACE(("lixa_xa_end: receiving %d"
                     " bytes from the server |%*.*s|\n",
@@ -649,8 +649,8 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR1);
 
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(fd, buffer, buffer_size,
-                                                       &read_bytes)))
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
+                               fd, buffer, sizeof(buffer)-1, &read_bytes)))
             THROW(MSG_RETRIEVE_ERROR);
         LIXA_TRACE(("lixa_xa_open: receiving %d"
                     " bytes from the server |%*.*s|\n",
@@ -921,8 +921,8 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
             THROW(SEND_ERROR);
 
         /* wait server answer */
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(fd, buffer, buffer_size,
-                                                       &read_bytes)))
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
+                               fd, buffer, sizeof(buffer)-1, &read_bytes)))
             THROW(MSG_RETRIEVE_ERROR);
         LIXA_TRACE(("lixa_xa_prepare: receiving %d"
                     " bytes from the server |%*.*s|\n",
@@ -1192,8 +1192,8 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
         
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(fd, buffer, buffer_size,
-                                                       &read_bytes)))
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
+                               fd, buffer, sizeof(buffer)-1, &read_bytes)))
             THROW(MSG_RETRIEVE_ERROR);
         LIXA_TRACE(("lixa_xa_start: receiving %d"
                     " bytes from the server |%*.*s|\n",

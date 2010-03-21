@@ -1109,7 +1109,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
         *offset += used_chars;
         /* <last_verb_step/> */
         used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%d\" %s=\"%d\">",
+                              "<%s %s=\"%d\" %s=\"%d\"/>",
                               LIXA_XML_MSG_TAG_LAST_VERB_STEP,
                               LIXA_XML_MSG_PROP_VERB,
                               msg->body.qrcvr_16.last_verb_step.verb,

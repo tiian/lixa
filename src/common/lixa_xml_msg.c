@@ -201,6 +201,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
     TRY {
         guint i;
         switch (msg->header.pvs.verb) {
+            case LIXA_MSG_VERB_NULL: /* nothing to release */
+                break;
             case LIXA_MSG_VERB_OPEN: /* open */
                 switch (msg->header.pvs.step) {
                     case 8:
@@ -216,6 +218,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                         }
                         g_array_free(msg->body.open_8.rsrmgrs, TRUE);
                         msg->body.open_8.rsrmgrs = NULL;
+                        break;
+                    case 16: /* nothing to release */
                         break;
                     case 24:
                         for (i=0; i<msg->body.open_24.xa_open_execs->len;
@@ -251,6 +255,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                         g_array_free(msg->body.start_8.rsrmgrs, TRUE);
                         msg->body.start_8.rsrmgrs = NULL;
                         break;
+                    case 16: /* nothing to release */
+                        break;
                     case 24:
                         g_array_free(msg->body.start_24.xa_start_execs, TRUE);
                         msg->body.start_24.xa_start_execs = NULL;
@@ -262,6 +268,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case LIXA_MSG_VERB_END: /* end */
                 switch (msg->header.pvs.step) {
                     case 8: /* nothing to do */
+                        break;
+                    case 16: /* nothing to release */
                         break;
                     case 24:
                         g_array_free(msg->body.end_24.xa_end_execs, TRUE);
@@ -277,6 +285,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                         g_array_free(msg->body.prepare_8.xa_prepare_execs,
                                      TRUE);
                         msg->body.prepare_8.xa_prepare_execs = NULL;
+                        break;
+                    case 16: /* nothing to release */
                         break;
                     default:
                         THROW(INVALID_STEP5);
@@ -307,8 +317,14 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case LIXA_MSG_VERB_QRCVR: /* qrcvr */
                 switch (msg->header.pvs.step) {
                     case 8:
-                        xmlFree(msg->body.open_8.client.job);
-                        msg->body.open_8.client.job = NULL;
+                        xmlFree(msg->body.qrcvr_8.client.job);
+                        msg->body.qrcvr_8.client.job = NULL;
+                        break;
+                    case 16:
+                        xmlFree(msg->body.qrcvr_16.client.job);
+                        msg->body.qrcvr_16.client.job = NULL;
+                        g_array_free(msg->body.qrcvr_16.rsrmgrs, TRUE);
+                        msg->body.qrcvr_16.rsrmgrs = NULL;
                         break;
                     default:
                         THROW(INVALID_STEP8);
