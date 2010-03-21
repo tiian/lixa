@@ -1082,6 +1082,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                      , BUFFER_TOO_SHORT5
                      , BUFFER_TOO_SHORT6
                      , BUFFER_TOO_SHORT7
+                     , BUFFER_TOO_SHORT8
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -1092,9 +1093,20 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
         int used_chars;
         guint i;
         
-        if (NULL == (ser_xid = xid_serialize(&msg->body.qrcvr_16.state.xid)))
+        if (NULL == (ser_xid = xid_serialize(
+                         &msg->body.qrcvr_16.client.state.xid)))
             THROW(XID_SERIALIZE_ERROR);
         
+        /* <answer> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%d\"/>",
+                              LIXA_XML_MSG_TAG_ANSWER,
+                              LIXA_XML_MSG_PROP_RC,
+                              msg->body.qrcvr_16.answer.rc);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT1);
+        *free_chars -= used_chars;
+        *offset += used_chars;
         /* <client> */
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "<%s %s=\"%s\" %s=\"%s\">",
@@ -1104,7 +1116,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                               LIXA_XML_MSG_PROP_CONFIG_DIGEST,
                               msg->body.qrcvr_16.client.config_digest);
         if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT1);
+            THROW(BUFFER_TOO_SHORT2);
         *free_chars -= used_chars;
         *offset += used_chars;
         /* <last_verb_step/> */
@@ -1112,11 +1124,11 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                               "<%s %s=\"%d\" %s=\"%d\"/>",
                               LIXA_XML_MSG_TAG_LAST_VERB_STEP,
                               LIXA_XML_MSG_PROP_VERB,
-                              msg->body.qrcvr_16.last_verb_step.verb,
+                              msg->body.qrcvr_16.client.last_verb_step.verb,
                               LIXA_XML_MSG_PROP_STEP,
-                              msg->body.qrcvr_16.last_verb_step.step);
+                              msg->body.qrcvr_16.client.last_verb_step.step);
         if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT2);
+            THROW(BUFFER_TOO_SHORT3);
         *free_chars -= used_chars;
         *offset += used_chars;
         /* <state/> */
@@ -1125,17 +1137,17 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                               "%s=\"%s\"/>",
                               LIXA_XML_MSG_TAG_STATE,
                               LIXA_XML_MSG_PROP_FINISHED,
-                              msg->body.qrcvr_16.state.finished,
+                              msg->body.qrcvr_16.client.state.finished,
                               LIXA_XML_MSG_PROP_TXSTATE,
-                              msg->body.qrcvr_16.state.txstate,
+                              msg->body.qrcvr_16.client.state.txstate,
                               LIXA_XML_MSG_PROP_WILL_COMMIT,
-                              msg->body.qrcvr_16.state.will_commit,
+                              msg->body.qrcvr_16.client.state.will_commit,
                               LIXA_XML_MSG_PROP_WILL_ROLLBACK,
-                              msg->body.qrcvr_16.state.will_rollback,
+                              msg->body.qrcvr_16.client.state.will_rollback,
                               LIXA_XML_MSG_PROP_XID,
                               ser_xid);
         if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT3);
+            THROW(BUFFER_TOO_SHORT4);
         *free_chars -= used_chars;
         *offset += used_chars;
         /* </client> */
@@ -1143,7 +1155,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                               "</%s>",
                               LIXA_XML_MSG_TAG_CLIENT);
         if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT4);
+            THROW(BUFFER_TOO_SHORT5);
         *free_chars -= used_chars;
         *offset += used_chars;
         /* <rsrmgrs> */
@@ -1151,7 +1163,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                               "<%s>",
                               LIXA_XML_MSG_TAG_RSRMGRS);
         if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT5);
+            THROW(BUFFER_TOO_SHORT6);
         *free_chars -= used_chars;
         *offset += used_chars;
         /* <rsrmgr/> */
@@ -1175,7 +1187,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                                   LIXA_XML_MSG_PROP_T_STATE,
                                   rsrmgr->t_state);
             if (used_chars >= *free_chars)
-                THROW(BUFFER_TOO_SHORT6);
+                THROW(BUFFER_TOO_SHORT7);
             *free_chars -= used_chars;
             *offset += used_chars;
         }
@@ -1184,7 +1196,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                               "</%s>",
                               LIXA_XML_MSG_TAG_RSRMGRS);
         if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT7);
+            THROW(BUFFER_TOO_SHORT8);
         *free_chars -= used_chars;
         *offset += used_chars;
         
@@ -1201,6 +1213,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
             case BUFFER_TOO_SHORT5:
             case BUFFER_TOO_SHORT6:
             case BUFFER_TOO_SHORT7:
+            case BUFFER_TOO_SHORT8:
                 ret_cod = LIXA_RC_CONTAINER_FULL;
                 break;
             case NONE:

@@ -843,17 +843,7 @@ struct lixa_msg_body_qrcvr_8_s {
 
 
 /**
- * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
- */
-struct lixa_msg_body_qrcvr_16_client_s {
-    xmlChar           *job;
-    md5_digest_hex_t   config_digest;
-};
-
-    
-
-/**
- * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
+ * Convenience struct for @ref lixa_msg_body_qrcvr_16_client_s
  */
 struct lixa_msg_body_qrcvr_16_state_s {
     /**
@@ -913,12 +903,23 @@ struct lixa_msg_body_qrcvr_16_rsrmgr_s {
     
 
 /**
+ * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
+ */
+struct lixa_msg_body_qrcvr_16_client_s {
+    xmlChar                                 *job;
+    md5_digest_hex_t                         config_digest;
+    struct lixa_msg_verb_step_s              last_verb_step;
+    struct lixa_msg_body_qrcvr_16_state_s    state;
+};
+
+    
+
+/**
  * Message body for verb "qrcvr", step "16"
  */
 struct lixa_msg_body_qrcvr_16_s {
+    struct lixa_msg_body_answer_s            answer;
     struct lixa_msg_body_qrcvr_16_client_s   client;
-    struct lixa_msg_verb_step_s              last_verb_step;
-    struct lixa_msg_body_qrcvr_16_state_s    state;
     GArray                                  *rsrmgrs;
 };
 

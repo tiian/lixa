@@ -92,6 +92,8 @@ int client_recovery(client_status_t *cs,
 #ifdef _TRACE
         lixa_msg_trace(&msg);
 #endif
+
+        /* @@@ check the answer is arrived from the server */
         
         THROW(NONE);
     } CATCH {

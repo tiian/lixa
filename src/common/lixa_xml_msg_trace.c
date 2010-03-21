@@ -469,12 +469,17 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
 
 int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
 {
-    enum Exception { INVALID_STEP
+    enum Exception { XID_SERIALIZE_ERROR
+                     , INVALID_STEP
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
+    char *ser_xid = NULL;
+
     LIXA_TRACE(("lixa_msg_trace_qrcvr\n"));
     TRY {
+        guint i;
+        
         switch (msg->header.pvs.step) {
             case 8:
                 LIXA_TRACE(("lixa_msg_trace_qrcvr: body[client[job="
@@ -482,12 +487,47 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
                             msg->body.qrcvr_8.client.job,
                             msg->body.qrcvr_8.client.config_digest));
                 break;
-                /*
             case 16:
+                if (NULL == (ser_xid = xid_serialize(
+                                 &msg->body.qrcvr_16.client.state.xid)))
+                    THROW(XID_SERIALIZE_ERROR);
+        
                 LIXA_TRACE(("lixa_msg_trace_qrcvr: body[answer[rc[%d]]]\n",
                             msg->body.qrcvr_16.answer.rc));
+                LIXA_TRACE(("lixa_msg_trace_qrcvr: body[client[job="
+                            "'%s',config_digest='%s']]]\n",
+                            msg->body.qrcvr_16.client.job,
+                            msg->body.qrcvr_16.client.config_digest));
+                LIXA_TRACE(("lixa_msg_trace_qrcvr: body[client[last_verb_step["
+                            "verb=%d,step=%d]]]]\n",
+                            msg->body.qrcvr_16.client.last_verb_step.verb,
+                            msg->body.qrcvr_16.client.last_verb_step.step));
+                LIXA_TRACE(("lixa_msg_trace_qrcvr: body[client[state["
+                            "finished=%d,txstate=%d,will_commit=%d,"
+                            "will_rollback=%d,xid='%s']]]]\n",
+                            msg->body.qrcvr_16.client.state.finished,
+                            msg->body.qrcvr_16.client.state.txstate,
+                            msg->body.qrcvr_16.client.state.will_commit,
+                            msg->body.qrcvr_16.client.state.will_rollback,
+                            ser_xid));
+                if (NULL != msg->body.qrcvr_16.rsrmgrs) {
+                    for (i=0; i<msg->body.qrcvr_16.rsrmgrs->len; ++i) {
+                        struct lixa_msg_body_qrcvr_16_rsrmgr_s *rsrmgr =
+                            &g_array_index(
+                                msg->body.qrcvr_16.rsrmgrs,
+                                struct lixa_msg_body_qrcvr_16_rsrmgr_s,
+                                i);
+                        LIXA_TRACE(("lixa_msg_trace_qrcvr: body[rsrmgrs["
+                                    "rsrmgr[rmid=%d,next_verb=%d,r_state=%d,"
+                                    "s_state=%d,t_state=%d]]]\n",
+                                    rsrmgr->rmid,
+                                    rsrmgr->next_verb,
+                                    rsrmgr->r_state,
+                                    rsrmgr->s_state,
+                                    rsrmgr->t_state));
+                    }
+                }
                 break;
-                */
             default:
                 THROW(INVALID_STEP);
         }
@@ -495,6 +535,9 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case XID_SERIALIZE_ERROR:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case INVALID_STEP:
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
                 break;
@@ -504,6 +547,9 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* memory recovery */
+        if (NULL != ser_xid)
+            free(ser_xid);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_trace_qrcvr/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

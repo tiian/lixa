@@ -1,8 +1,7 @@
-fix lixa_msg_trace for verb=8 step=16 (lixa_msg_trace_qrcvr)
+client_recovery: check answer and perform recovery
+server_recovery: implement LIXA_RC_BYPASSED_OPERATION and LIXA_RC_OBJ_NOT_FOUND
 
-execute recovery when a new client arrive of the same job
-when recovery happens check config_digest; on server side only warning; 
-on client side, stop 
+when recovery happens check config_digest; on client side, stop 
 processing if digests do no match (Request for Enhancement: reload config
 from server, recovery, discard config read from server, use config on file,
 go on with new transactions...)
