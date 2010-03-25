@@ -28,6 +28,7 @@
 
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_syslog.h>
 #include <server_recovery.h>
 
 
@@ -145,15 +146,17 @@ int server_recovery_result(struct thread_status_s *ts,
         if (memcmp(lmi->body.qrcvr_8.client.config_digest,
                    lmo->body.qrcvr_16.client.config_digest,
                    sizeof(md5_digest_hex_t))) {
+            char *ser_xid = xid_serialize(&pld->ph.state.xid);
+            
             lmo->body.qrcvr_16.answer.rc = LIXA_RC_LIXAC_CONF_CHANGED;
-            syslog(LOG_NOTICE, "A client is asking recovery information "
-                   "for job '%s' and the config file changed in the meantime",
-                   lmo->body.qrcvr_16.client.job);
+            syslog(LOG_WARNING, LIXA_SYSLOG_LXD011W,
+                   lmo->body.qrcvr_16.client.job, ser_xid ? ser_xid : "");
             LIXA_TRACE(("server_recovery_result: job is '%s', past config "
                         "digest is '%s', current config digest is '%s'\n",
                         lmo->body.qrcvr_16.client.job,
                         lmo->body.qrcvr_16.client.config_digest,
                         lmi->body.qrcvr_8.client.config_digest));
+            if (ser_xid) free(ser_xid);
         }
         
         lmo->body.qrcvr_16.client.last_verb_step.verb =

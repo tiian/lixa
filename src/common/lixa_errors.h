@@ -184,6 +184,10 @@
  */
 #define LIXA_RC_FILE_NOT_EXISTS                -23
 /**
+ * A transaction can not be recovered
+ */
+#define LIXA_RC_ABORTED_RECOVERY               -24
+/**
  * Generic error for an TX error (an TX return code not equal TX_OK)
  */
 #define LIXA_RC_TX_ERROR                       -98

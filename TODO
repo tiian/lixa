@@ -1,11 +1,6 @@
 client_recovery: check answer and perform recovery
 server_recovery: implement LIXA_RC_BYPASSED_OPERATION and LIXA_RC_OBJ_NOT_FOUND
 
-when recovery happens check config_digest; on client side, stop 
-processing if digests do no match (Request for Enhancement: reload config
-from server, recovery, discard config read from server, use config on file,
-go on with new transactions...)
-
 When server_manager_thread exits, the listener must be aware of this... 
 
 Implement a "test resource manager" can be driven by "open string" with the

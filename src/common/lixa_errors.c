@@ -106,6 +106,8 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_FILE_NOT_EXISTS:
             return "ERROR: a specified file can not be opened because it does "
                 "not exist";
+        case LIXA_RC_ABORTED_RECOVERY:
+            return "ERROR: a transaction can not be recovered";
         case LIXA_RC_TX_ERROR:
             return "ERROR: generic error for a TX error (a TX return code "
                 "not equal TX_OK)";
