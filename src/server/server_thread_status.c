@@ -50,6 +50,7 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_utils.h>
+#include <lixa_syslog.h>
 #include <server_thread_status.h>
 
 
@@ -337,9 +338,7 @@ int thread_status_load_files(struct thread_status_s *ts,
             THROW(STATUS_RECORD_LOAD_1_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status1))) {
-            syslog(LOG_WARNING, "thread_status_load_files: first status file "
-                   "('%s') did not pass integrity check\n",
-                   ts->status1_filename);
+            syslog(LOG_WARNING, LIXA_SYSLOG_LXD007W, ts->status1_filename);
         } else
             s1ii = TRUE;
         
@@ -355,17 +354,13 @@ int thread_status_load_files(struct thread_status_s *ts,
             THROW(STATUS_RECORD_LOAD_2_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status2))) {
-            syslog(LOG_WARNING, "thread_status_load_files: second status file "
-                   "('%s') did not pass integrity check\n",
-                   ts->status2_filename);
+            syslog(LOG_WARNING, LIXA_SYSLOG_LXD008W, ts->status2_filename);
         } else
             s2ii = TRUE;
 
         if (!s1ii && !s2ii) {
             /* two damaged files! */
-            syslog(LOG_ERR, "thread_status_load_files: both status files "
-                   "did not pass integrity check; the server can not "
-                   "start-up");
+            syslog(LOG_ERR, LIXA_SYSLOG_LXD009E);
             THROW(DAMAGED_STATUS_FILES);
         } else if (s1ii && s2ii) {
             /* two integral files, check timestamp */
@@ -727,8 +722,7 @@ int thread_status_sync_files(struct thread_status_s *ts)
         if (0 != memcmp(ts->curr_status, alt_status, curr_status_size)) {
             LIXA_TRACE(("thread_status_sync_files: memory mapped status "
                         "files are different after copy. INTERNAL ERROR\n"));
-            syslog(LOG_ERR, "thread_status_sync_files: memory mapped status "
-                   "files are different after copy. INTERNAL ERROR");
+            syslog(LOG_CRIT, LIXA_SYSLOG_LXD010C);
             THROW(MEMCMP_ERROR);
         }
 #endif /* LIXA_DEBUG */

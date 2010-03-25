@@ -1,6 +1,6 @@
 noinst_HEADERS = lixa_common_status.h lixa_config.h lixa_defines.h \
-		lixa_errors.h lixa_inst_conf.h lixa_trace.h lixa_utils.h \
-		lixa_xml_msg.h \
+		lixa_errors.h lixa_inst_conf.h lixa_syslog.h \
+		lixa_trace.h lixa_utils.h lixa_xml_msg.h \
 		lixa_xml_msg_deserialize.h lixa_xml_msg_serialize.h \
 		lixa_xml_msg_trace.h xa.h
 lib_LTLIBRARIES = liblixab.la liblixabmt.la

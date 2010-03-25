@@ -29,6 +29,9 @@
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -44,6 +47,7 @@
 #include <lixa_config.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_syslog.h>
 #include <client_config.h>
 #include <client_status.h>
 #include <xa.h>
@@ -94,6 +98,10 @@ int client_config(client_config_coll_t *ccc)
             THROW(NONE);
         } 
 
+        /* open system log */
+        openlog("lixac", LOG_PID, LOG_DAEMON);
+        syslog(LOG_INFO, LIXA_SYSLOG_LXC000I);
+        
         memset(&ccc->serv_addr, 0, sizeof(struct sockaddr_in));
         if (NULL == ccc->actconf.rsrmgrs)
             ccc->actconf.rsrmgrs = g_array_new(

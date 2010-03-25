@@ -58,6 +58,7 @@
 
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_syslog.h>
 #include <server_config.h>
 #include <server_listener.h>
 #include <server_manager.h>
@@ -110,7 +111,7 @@ int main(int argc, char *argv[])
     LIXA_TRACE_INIT;
     LIXA_TRACE(("main: starting\n"));
     openlog("lixad", LOG_PID, LOG_DAEMON);
-    syslog(LOG_NOTICE, "starting");
+    syslog(LOG_NOTICE, LIXA_SYSLOG_LXD000N);
 
     option_context = g_option_context_new("- Lixa server");
     g_option_context_add_main_entries(option_context, entries, NULL);
@@ -118,13 +119,13 @@ int main(int argc, char *argv[])
     g_option_context_add_group (context, gtk_get_option_group (TRUE));
     */
     if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
-        syslog(LOG_ERR, "option parsing failed: %s\n", error->message);
+        syslog(LOG_ERR, LIXA_SYSLOG_LXD001E, error->message);
         LIXA_TRACE(("main: option parsing failed: %s\n", error->message));
         g_print("option parsing failed: %s\n", error->message);
         exit(1);
     }
     if (run_as_daemon && dump_and_exit) {
-        syslog(LOG_WARNING, "dump option overrides daemon option\n");
+        syslog(LOG_WARNING, LIXA_SYSLOG_LXD002W);
         LIXA_TRACE(("main: dump option overrides daemon option\n"));
         g_print("Warning: dump option overrides daemon option\n");
         run_as_daemon = FALSE;
@@ -139,8 +140,7 @@ int main(int argc, char *argv[])
     server_config_init(&sc, &tpa);
     if (LIXA_RC_OK != (rc = server_config(&sc, &tpa, ""))) {
         LIXA_TRACE(("main/server_config: rc = %d\n", rc));
-        syslog(LOG_ERR, "configuration error (%s), premature exit",
-               lixa_strerror(rc));
+        syslog(LOG_ERR, LIXA_SYSLOG_LXD003E, lixa_strerror(rc));
         return rc;
     }
 
@@ -148,8 +148,7 @@ int main(int argc, char *argv[])
     if (LIXA_RC_OK != (rc = server_manager(&sc, &tpa, &tsa, &srt,
                                            dump_and_exit))) {
         LIXA_TRACE(("main/server_manager: rc = %d\n", rc));
-        syslog(LOG_ERR, "error (%s) while starting manager(s), "
-               "premature exit", lixa_strerror(rc));
+        syslog(LOG_ERR, LIXA_SYSLOG_LXD004E, lixa_strerror(rc));
         return rc;
     }
 
@@ -157,13 +156,12 @@ int main(int argc, char *argv[])
     if (!dump_and_exit &&
         LIXA_RC_OK != (rc = server_listener(&sc, &lsa, &tsa))) {
         LIXA_TRACE(("main/server_listener: rc = %d\n", rc));
-        syslog(LOG_ERR, "error (%s) while starting listener(s), "
-               "premature exit", lixa_strerror(rc));
+        syslog(LOG_ERR, LIXA_SYSLOG_LXD005E, lixa_strerror(rc));
         return rc;
     }
 
     /* it's time to exit */
-    syslog(LOG_NOTICE, "exiting");
+    syslog(LOG_NOTICE, LIXA_SYSLOG_LXD006N);
 
     LIXA_TRACE(("lixad/main: exiting\n"));    
     return 0;

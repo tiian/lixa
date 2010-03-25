@@ -20,10 +20,17 @@
 
 
 
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
+#endif
+
+
+
 #include <lixa_errors.h>
 #include <lixa_xml_msg_deserialize.h>
 #include <lixa_xml_msg_serialize.h>
 #include <lixa_xml_msg_trace.h>
+#include <lixa_syslog.h>
 #include <client_recovery.h>
 
 
@@ -44,13 +51,14 @@ int client_recovery(client_status_t *cs,
                      , SEND_ERROR
                      , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
+                     , ABORTED_RECOVERY
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("client_recovery\n"));
     TRY {
         int fd;
-        struct lixa_msg_s msg;
+        struct lixa_msg_s rqst, rpl;
         size_t buffer_size = 0;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
@@ -59,18 +67,18 @@ int client_recovery(client_status_t *cs,
         fd = client_status_get_sockfd(cs);
 
         /* build the message */
-        msg.header.level = LIXA_MSG_LEVEL;
-        msg.header.pvs.verb = LIXA_MSG_VERB_QRCVR;
-        msg.header.pvs.step = LIXA_MSG_STEP_INCR;
+        rqst.header.level = LIXA_MSG_LEVEL;
+        rqst.header.pvs.verb = LIXA_MSG_VERB_QRCVR;
+        rqst.header.pvs.step = LIXA_MSG_STEP_INCR;
 
-        if (NULL == (msg.body.qrcvr_8.client.job = xmlStrdup(client->job)))
+        if (NULL == (rqst.body.qrcvr_8.client.job = xmlStrdup(client->job)))
             THROW(XML_STRDUP_ERROR);
-        strncpy(msg.body.qrcvr_8.client.config_digest, client->config_digest,
+        strncpy(rqst.body.qrcvr_8.client.config_digest, client->config_digest,
                 sizeof(md5_digest_hex_t));
-        msg.body.qrcvr_8.client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
+        rqst.body.qrcvr_8.client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer)-1, &buffer_size)))
+                               &rqst, buffer, sizeof(buffer)-1, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
 
         LIXA_TRACE(("client_recovery: sending " SIZE_T_FORMAT
@@ -87,12 +95,32 @@ int client_recovery(client_status_t *cs,
                     read_bytes, read_bytes, read_bytes, buffer));
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                               buffer, read_bytes, &msg)))
+                               buffer, read_bytes, &rpl)))
             THROW(MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
-        lixa_msg_trace(&msg);
+        lixa_msg_trace(&rpl);
 #endif
 
+        /* check config digest */
+        if (strncmp(rqst.body.qrcvr_8.client.config_digest,
+                    rpl.body.qrcvr_16.client.config_digest,
+                    sizeof(md5_digest_hex_t))) {
+            char *ser_xid = xid_serialize(
+                &rpl.body.qrcvr_16.client.state.xid);
+            
+            LIXA_TRACE(("client_recovery: current config digest ('%s') does "
+                        "not match server stored config digest ('%s'); "
+                        "this transaction can NOT be recovered by this "
+                        "client\n",
+                        rpl.body.qrcvr_16.client.config_digest,
+                        rqst.body.qrcvr_8.client.config_digest));
+            syslog(LOG_ERR, LIXA_SYSLOG_LXC001E, ser_xid ? ser_xid : "",
+                   rpl.body.qrcvr_16.client.config_digest,
+                   rqst.body.qrcvr_8.client.config_digest);
+            if (ser_xid) free(ser_xid);
+            THROW(ABORTED_RECOVERY);
+        }
+        
         /* @@@ check the answer is arrived from the server */
         
         THROW(NONE);
@@ -108,6 +136,9 @@ int client_recovery(client_status_t *cs,
                 break;
             case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:
+                break;
+            case ABORTED_RECOVERY:
+                ret_cod = LIXA_RC_ABORTED_RECOVERY;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
