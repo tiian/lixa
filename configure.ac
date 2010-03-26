@@ -62,6 +62,11 @@ AC_ARG_ENABLE([debug],
                 [enable debug code (assert statements)]),
         [LIXA_DEBUG="yes" CPPFLAGS="$CPPFLAGS -DLIXA_DEBUG"; CFLAGS="-g" ], \
 	[LIXA_DEBUG="no"; CFLAGS="-g -O2" ] )
+AC_ARG_ENABLE([crash],
+	AS_HELP_STRING([--enable-crash],
+		[enable crash simulation code]),
+	[_CRASH="yes"; CPPFLAGS="$CPPFLAGS -D_CRASH"], 
+	[_CRASH="no"] )
 AC_ARG_ENABLE([trace],
         AS_HELP_STRING([--disable-trace],
                 [disable trace feature (not suggested)]),

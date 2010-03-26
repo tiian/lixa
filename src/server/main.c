@@ -56,6 +56,7 @@
 
 
 
+#include <lixa_crash.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_syslog.h>
@@ -109,6 +110,7 @@ int main(int argc, char *argv[])
     GOptionContext *option_context;
 
     LIXA_TRACE_INIT;
+    LIXA_CRASH_INIT;
     LIXA_TRACE(("main: starting\n"));
     openlog("lixad", LOG_PID, LOG_DAEMON);
     syslog(LOG_NOTICE, LIXA_SYSLOG_LXD000N);

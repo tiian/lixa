@@ -32,6 +32,9 @@ operating environment too :-)
 If you want to insert extra debug code at source code level, use
 	./configure --enable-debug
 
+If you want to insert crash simulation code (test case only), use
+	./configure --enable-crash
+
 LIXA tries to install itself in /opt/lixa path; this is not GNU compliant but
 it's suggested by POSIX.
 The standard layout is:
