@@ -41,7 +41,11 @@
  * the null terminator
  */
 #define ISO_TIMESTAMP_BUFFER_SIZE 32
-
+/**
+ * If @ref lixa_get_program_name is not able to retrieve the current program
+ * name, it will retrieve this value
+ */
+#define DEFAULT_PROGRAM_NAME "lixac"
 
 
 #ifdef __cplusplus
@@ -62,6 +66,19 @@ extern "C" {
      */
     int lixa_utils_iso_timestamp(const struct timeval *tv, char *buf,
                                  size_t buf_size);
+
+
+
+    /**
+     * Retrieve the name of the current running program
+     * NOTE: this function is strictly PLATFORM DEPENDENT and returns a
+     * default constant value on a system there is no implementation for
+     * @param buf OUT buffer will contain the output string; the returned
+     *            string is NULL TERMINATED, ever
+     * @param buf_size IN buffer size (leading '\0' uses 1 char in the buffer)
+     * @return a standardized reason code
+     */
+    int lixa_get_program_name(char *buf, size_t buf_size);
 
 
     

@@ -20,6 +20,12 @@
 
 
 
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
+#endif
+#ifdef HAVE_LIBGEN_H
+# include <libgen.h>
+#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
@@ -28,6 +34,9 @@
 #endif
 #ifdef HAVE_TIME_H
 # include <time.h>
+#endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
 #endif
 
 
@@ -99,6 +108,62 @@ int lixa_utils_iso_timestamp(const struct timeval *tv, char *buf,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_utils_iso_timestamp/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_get_program_name(char *buf, size_t buf_size)
+{
+    enum Exception { OPEN_ERROR
+                     , READ_ERROR
+                     , UNSUPPORTED_PLATFORM
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    int fd = LIXA_NULL_FD;
+    
+    LIXA_TRACE(("lixa_get_program_name\n"));
+    TRY {
+#ifdef __linux
+        char filename[1000];
+        char tmp[1000];
+
+        snprintf(filename, sizeof(filename), "/proc/%d/cmdline", getpid());
+        filename[sizeof(filename)-1] = '\0';
+        if (-1 == (fd = open(filename, O_RDONLY)))
+            THROW(OPEN_ERROR);
+        memset(buf, 0, buf_size);
+        if (0 >= read(fd, tmp, sizeof(tmp)-1))
+            THROW(READ_ERROR);
+        strncpy(buf, basename(tmp), buf_size-1);
+#else
+# warning lixa_get_program_name not implemented for this platform!
+        THROW(UNSUPPORTED_PLATFORM);
+#endif
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OPEN_ERROR:
+            case READ_ERROR:
+            case UNSUPPORTED_PLATFORM:                
+                strncpy(buf, DEFAULT_PROGRAM_NAME, buf_size-1);
+                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* write a safety terminator */
+        buf[buf_size-1] = '\0';
+        if (LIXA_NULL_FD != fd)
+            close(fd);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_get_program_name/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

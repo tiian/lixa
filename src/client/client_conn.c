@@ -32,6 +32,9 @@
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
 #endif
@@ -48,6 +51,7 @@
 #include <lixa_errors.h>
 #include <lixa_config.h>
 #include <lixa_trace.h>
+#include <lixa_syslog.h>
 #include <client_conn.h>
 #include <client_status.h>
 
@@ -89,8 +93,10 @@ int client_connect(client_status_coll_t *csc,
         LIXA_TRACE(("client_connect: connecting socket %d to server '%s' port "
                     IN_PORT_T_FORMAT "\n", out_socket, tc->address, tc->port));
         if (0 != connect(out_socket, (struct sockaddr *)&ccc->serv_addr,
-                         sizeof(struct sockaddr_in)))
+                         sizeof(struct sockaddr_in))) {
+            syslog(LOG_ERR, LIXA_SYSLOG_LXC002E, tc->address, tc->port);
             THROW(CONNECT_ERROR);
+        }
 
         if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(csc, &cs)))
             THROW(CLIENT_STATUS_COLL_GET_CS_ERROR);
