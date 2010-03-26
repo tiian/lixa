@@ -47,6 +47,7 @@
 #include <lixa_config.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_utils.h>
 #include <lixa_syslog.h>
 #include <client_config.h>
 #include <client_status.h>
@@ -88,6 +89,7 @@ int client_config(client_config_coll_t *ccc)
     LIXA_TRACE(("client_config\n"));
     TRY {
         char *tmp_str;
+        static char program_name[31];
         
         /* lock mutex to start configuration activity */
         LIXA_TRACE(("client_config: acquiring exclusive mutex\n"));
@@ -99,7 +101,8 @@ int client_config(client_config_coll_t *ccc)
         } 
 
         /* open system log */
-        openlog("lixac", LOG_PID, LOG_DAEMON);
+        lixa_get_program_name(program_name, sizeof(program_name));
+        openlog(program_name, LOG_PID, LOG_DAEMON);
         syslog(LOG_INFO, LIXA_SYSLOG_LXC000I);
         
         memset(&ccc->serv_addr, 0, sizeof(struct sockaddr_in));

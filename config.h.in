@@ -33,6 +33,9 @@
 /* Define to 1 if the system has the type `in_port_t'. */
 #undef HAVE_IN_PORT_T
 
+/* Define to 1 if you have the <libgen.h> header file. */
+#undef HAVE_LIBGEN_H
+
 /* Define to 1 if you have the <libxml/parser.h> header file. */
 #undef HAVE_LIBXML_PARSER_H
 
