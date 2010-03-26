@@ -1,7 +1,14 @@
 client_recovery: check answer and perform recovery
+
+restore multithread config for lixad (lixad_conf.xml ;) 
+
 server_recovery: implement LIXA_RC_BYPASSED_OPERATION and LIXA_RC_OBJ_NOT_FOUND
 
 When server_manager_thread exits, the listener must be aware of this... 
+
+Print the features (debug, trace, crash) has been compiled in the software and
+the version (main version, library version) on syslog and/or command line for
+lixad
 
 Implement a "test resource manager" can be driven by "open string" with the
 return code of every XA function. This would become the reference tool for

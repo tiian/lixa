@@ -29,6 +29,7 @@
 
 
 
+#include <lixa_crash.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_tx.h>
@@ -62,6 +63,7 @@ int lixa_tx_begin(int *txrc)
     *txrc = TX_FAIL;
     
     LIXA_TRACE_INIT;
+    LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_begin\n"));
     TRY {
         int txstate, next_txstate;
@@ -175,6 +177,7 @@ int lixa_tx_close(int *txrc)
     *txrc = TX_FAIL;
     
     LIXA_TRACE_INIT;
+    LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_close\n"));
     TRY {
         int txstate;
@@ -280,6 +283,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
     *txrc = TX_FAIL;
 
     LIXA_TRACE_INIT;    
+    LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_commit\n"));
     TRY {
         int txstate, next_txstate, commit = TRUE;
@@ -455,6 +459,7 @@ int lixa_tx_info(int *txrc, TXINFO *info)
     *txrc = TX_FAIL;
 
     LIXA_TRACE_INIT;
+    LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_info\n"));
     TRY {
         int txstate;
@@ -557,6 +562,7 @@ int lixa_tx_open(int *txrc)
     *txrc = TX_FAIL;
 
     LIXA_TRACE_INIT;
+    LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_open\n"));    
     TRY {
         int txstate, next_txstate, pos = 0;
@@ -655,6 +661,7 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
     *txrc = TX_FAIL;
 
     LIXA_TRACE_INIT;    
+    LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_rollback\n"));
     TRY {
         int txstate, next_txstate;
@@ -776,6 +783,7 @@ int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return)
     *txrc = TX_FAIL;
 
     LIXA_TRACE_INIT;
+    LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_set_commit_return\n"));
     TRY {
         int txstate;
@@ -875,6 +883,7 @@ int lixa_tx_set_transaction_control(int *txrc,
     *txrc = TX_FAIL;
 
     LIXA_TRACE_INIT;
+    LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_set_transaction_control\n"));
     TRY {
         int txstate, new_txstate;
@@ -998,6 +1007,7 @@ int lixa_tx_set_transaction_timeout(int *txrc,
     *txrc = TX_FAIL;
 
     LIXA_TRACE_INIT;
+    LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_set_transaction_timeout\n"));
     TRY {
         int txstate;

@@ -75,7 +75,7 @@ extern "C" {
      * default constant value on a system there is no implementation for
      * @param buf OUT buffer will contain the output string; the returned
      *            string is NULL TERMINATED, ever
-     * @param buf_size IN buffer size (leading '\0' uses 1 char in the buffer)
+     * @param buf_size IN buffer size (trailing zero uses 1 char in the buffer)
      * @return a standardized reason code
      */
     int lixa_get_program_name(char *buf, size_t buf_size);

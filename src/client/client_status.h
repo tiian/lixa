@@ -38,6 +38,7 @@
 
 
 #include <tx.h>
+#include <lixa_crash.h>
 #include <lixa_trace.h>
 #include <lixa_common_status.h>
 #include <client_config.h>
@@ -91,6 +92,12 @@ struct client_status_s {
      * Tiemout time of the current transaction
      */
     time_t                          tx_timeout_time;
+#ifdef _CRASH
+    /**
+     * Counter used for crash simulation feature
+     */
+    int                             crash_count;
+#endif
 };
 
 typedef struct client_status_s client_status_t;

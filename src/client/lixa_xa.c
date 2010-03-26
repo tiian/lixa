@@ -26,6 +26,7 @@
 
 
 
+#include <lixa_crash.h>
 #include <lixa_trace.h>
 #include <lixa_errors.h>
 #include <lixa_xa.h>
@@ -938,6 +939,8 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
         if (LIXA_RC_OK != (ret_cod = msg.body.prepare_16.answer.rc))
             THROW(ERROR_FROM_SERVER);
 
+        LIXA_CRASH(LIXA_CRASH_POINT_PREPARE_1, &cs->crash_count);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {

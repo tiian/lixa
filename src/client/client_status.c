@@ -89,6 +89,9 @@ void client_status_init(client_status_t *cs)
                                sizeof(struct common_status_rsrmgr_s));
     cs->tx_timeout = 0;
     cs->tx_timeout_time = 0;
+#ifdef _CRASH
+    cs->crash_count = 0;
+#endif
     LIXA_TRACE(("client_status_init: end\n"));
     return;
 }

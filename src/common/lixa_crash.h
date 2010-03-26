@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIXA_CRASH_SIMUL_H
-# define LIXA_CRASH_SIMUL_H
+#ifndef LIXA_CRASH_H
+# define LIXA_CRASH_H
 
 
 
@@ -40,13 +40,25 @@
 
 
 
-#ifdef _CRASH_SIMUL
-# define LIXA_CRASH_SIMUL(a)         lixa_crash_simul(a)
-# define LIXA_CRASH_SIMUL_INIT(a)    lixa_crash_simul_init(a)
+#ifdef _CRASH
+# define LIXA_CRASH(a,b)         lixa_crash(a,b)
+# define LIXA_CRASH_INIT         lixa_crash_init()
 #else
-# define LIXA_CRASH_SIMUL(a)
-# define LIXA_CRASH_SIMUL_INIT(a)
+# define LIXA_CRASH(a,b)
+# define LIXA_CRASH_INIT
 #endif
+
+
+
+/**
+ * No crash point set
+ */
+#define LIXA_CRASH_POINT_NULL          0
+/**
+ * The Transaction Manager will crash after successfully prepared all the
+ * resource manager
+ */
+#define LIXA_CRASH_POINT_PREPARE_1     1
 
 
 
@@ -61,7 +73,7 @@ extern "C" {
      * process routine: only the first thread will initialize the environtment,
      * successive calls will be ignored
      */
-    void lixa_crash_simul_init(void);
+    void lixa_crash_init(void);
     
 
 
@@ -73,7 +85,7 @@ extern "C" {
      * @param count IN/OUT keeps track of the number of times the crash point
      *              has been already traversed
      */
-    void lixa_crash_simul(lixa_word_t crash_point, int *count);
+    void lixa_crash(lixa_word_t crash_point, int *count);
 
     
 
@@ -92,4 +104,4 @@ extern "C" {
 
 
 
-#endif /* LIXA_CRASH_SIMUL_H */
+#endif /* LIXA_CRASH_H */
