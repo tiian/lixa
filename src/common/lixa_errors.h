@@ -188,6 +188,13 @@
  */
 #define LIXA_RC_ABORTED_RECOVERY               -24
 /**
+ * Client/server recovery configuration do not match 
+ */
+#define LIXA_RC_RECOVERY_INFO_MISMATCH         -25
+
+
+
+/**
  * Generic error for an TX error (an TX return code not equal TX_OK)
  */
 #define LIXA_RC_TX_ERROR                       -98

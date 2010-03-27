@@ -45,6 +45,12 @@
     "digest '%s'"
 #define LIXA_SYSLOG_LXC002E "LXC002E unable to connect to LiXa server at " \
     "address %s, port " IN_PORT_T_FORMAT
+#define LIXA_SYSLOG_LXC003C "LXC003C resource manager '%s' returned an " \
+    "error (%d) while committing (xa_commit) during recovery phase for " \
+    "transaction '%s'"
+#define LIXA_SYSLOG_LXC004C "LXC004C resource manager '%s' returned an " \
+    "error (%d) while rolling back (xa_rollback) during recovery phase for " \
+    "transaction '%s'"
 
 
 

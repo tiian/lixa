@@ -53,10 +53,12 @@ int client_recovery(client_status_t *cs,
                      , MSG_DESERIALIZE_ERROR
                      , ABORTED_RECOVERY
                      , ANALYZE_ERROR
+                     , COMMIT_ERROR
+                     , ROLLBACK_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    char *ser_xid;
+    char *ser_xid = NULL;
     
     LIXA_TRACE(("client_recovery\n"));
     TRY {
@@ -129,8 +131,16 @@ int client_recovery(client_status_t *cs,
             THROW(ANALYZE_ERROR);
         LIXA_TRACE(("client_recovery: transaction '%s' must be %s\n",
                     ser_xid, commit ? "committed" : "rolled back"));
-        
-        /* @@@ perform ... */
+
+        if (commit) {
+            if (LIXA_RC_OK != (ret_cod = client_recovery_commit(cs, &rpl)))
+                THROW(COMMIT_ERROR);
+        } else {
+            if (LIXA_RC_OK != (ret_cod = client_recovery_rollback(cs, &rpl)))
+                THROW(ROLLBACK_ERROR);
+        }
+            
+        /* @@@ query the resource managers with xa_recover ... */
         exit(1);
         
         THROW(NONE);
@@ -151,6 +161,8 @@ int client_recovery(client_status_t *cs,
                 ret_cod = LIXA_RC_ABORTED_RECOVERY;
                 break;
             case ANALYZE_ERROR:
+            case COMMIT_ERROR:
+            case ROLLBACK_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -171,7 +183,8 @@ int client_recovery_analyze(const client_status_t *cs,
                             const struct lixa_msg_s *rpl,
                             int *commit)
 {
-    enum Exception { NONE } excp;
+    enum Exception { DIFFERENT_NUMBER
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("client_recovery_analyze\n"));
@@ -201,10 +214,22 @@ int client_recovery_analyze(const client_status_t *cs,
                 only_one = FALSE;
             *commit = all_prepared || only_one;
         }
+        /* check resource managers match */
+        if (rpl->body.qrcvr_16.rsrmgrs->len !=
+            global_ccc.actconf.rsrmgrs->len) {
+            LIXA_TRACE(("client_recovery_analyze: the number of resource "
+                        "managers do not match (%ud,%ud)\n",
+                        rpl->body.qrcvr_16.rsrmgrs->len,
+                        global_ccc.actconf.rsrmgrs->len));
+            THROW(DIFFERENT_NUMBER);
+        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case DIFFERENT_NUMBER:
+                ret_cod = LIXA_RC_RECOVERY_INFO_MISMATCH;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -216,4 +241,119 @@ int client_recovery_analyze(const client_status_t *cs,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int client_recovery_commit(const client_status_t *cs,
+                           const struct lixa_msg_s *rpl)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    char *ser_xid = NULL;
+    
+    LIXA_TRACE(("client_recovery_commit\n"));
+    TRY {
+        guint i;
+        
+        ser_xid = xid_serialize(&rpl->body.qrcvr_16.client.state.xid);
+        LIXA_TRACE(("client_recovery_commit: committing transaction '%s'\n",
+                    ser_xid));
+        
+        /* check the status of the resource managers */
+        for (i=0; i<rpl->body.qrcvr_16.rsrmgrs->len; ++i) {
+            int rc;
+            struct lixa_msg_body_qrcvr_16_rsrmgr_s *rsrmgr =
+                &g_array_index(rpl->body.qrcvr_16.rsrmgrs,
+                               struct lixa_msg_body_qrcvr_16_rsrmgr_s, i);
+            struct act_rsrmgr_config_s *act_rsrmgr =
+                &g_array_index(global_ccc.actconf.rsrmgrs,
+                               struct act_rsrmgr_config_s, i);
+            LIXA_TRACE(("client_recovery_commit: xa_commit for rmid=%d, "
+                        "name='%s', xa_name='%s'...\n",
+                        rsrmgr->rmid, (char *)act_rsrmgr->generic->name,
+                        act_rsrmgr->xa_switch->name));
+            rc = act_rsrmgr->xa_switch->xa_commit_entry(
+                &rpl->body.qrcvr_16.client.state.xid, i,
+                rpl->body.qrcvr_16.rsrmgrs->len == 1 ? TMONEPHASE : TMNOFLAGS);
+            LIXA_TRACE(("client_recovery_commit: rc=%d\n", rc));
+            if (rc)
+                syslog(LOG_CRIT, LIXA_SYSLOG_LXC003C,
+                       act_rsrmgr->xa_switch->name, rc, ser_xid); 
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        if (ser_xid) free(ser_xid);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_recovery_commit/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+    
+int client_recovery_rollback(const client_status_t *cs,
+                             const struct lixa_msg_s *rpl)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    char *ser_xid = NULL;
+    
+    LIXA_TRACE(("client_recovery_rollback\n"));
+    TRY {
+        guint i;
+        
+        ser_xid = xid_serialize(&rpl->body.qrcvr_16.client.state.xid);
+        LIXA_TRACE(("client_recovery_rollback: rolling back "
+                    "transaction '%s'\n", ser_xid));
+        
+        /* check the status of the resource managers */
+        for (i=0; i<rpl->body.qrcvr_16.rsrmgrs->len; ++i) {
+            int rc;
+            struct lixa_msg_body_qrcvr_16_rsrmgr_s *rsrmgr =
+                &g_array_index(rpl->body.qrcvr_16.rsrmgrs,
+                               struct lixa_msg_body_qrcvr_16_rsrmgr_s, i);
+            struct act_rsrmgr_config_s *act_rsrmgr =
+                &g_array_index(global_ccc.actconf.rsrmgrs,
+                               struct act_rsrmgr_config_s, i);
+            LIXA_TRACE(("client_recovery_rollback: xa_rollback for rmid=%d, "
+                        "name='%s', xa_name='%s'...\n",
+                        rsrmgr->rmid, (char *)act_rsrmgr->generic->name,
+                        act_rsrmgr->xa_switch->name));
+            rc = act_rsrmgr->xa_switch->xa_rollback_entry(
+                &rpl->body.qrcvr_16.client.state.xid, i,
+                rpl->body.qrcvr_16.rsrmgrs->len == 1 ? TMONEPHASE : TMNOFLAGS);
+            LIXA_TRACE(("client_recovery_rollback: rc=%d\n", rc));
+            if (rc)
+                syslog(LOG_CRIT, LIXA_SYSLOG_LXC004C,
+                       act_rsrmgr->xa_switch->name, rc, ser_xid); 
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        if (ser_xid) free(ser_xid);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_recovery_rollback/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
 

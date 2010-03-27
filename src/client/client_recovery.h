@@ -73,6 +73,28 @@ extern "C" {
 
 
     
+    /**
+     * Commit the transaction received from the server
+     * @param cs IN reference to the status of the calling client
+     * @param rpl IN information received from the server
+     * @return a reason code
+     */
+    int client_recovery_commit(const client_status_t *cs,
+                               const struct lixa_msg_s *rpl);
+
+
+    
+    /**
+     * Rollback the transaction received from the server
+     * @param cs IN reference to the status of the calling client
+     * @param rpl IN information received from the server
+     * @return a reason code
+     */
+    int client_recovery_rollback(const client_status_t *cs,
+                                 const struct lixa_msg_s *rpl);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
