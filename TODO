@@ -1,4 +1,4 @@
-client_recovery: check answer and perform recovery
+client_recovery: perform recovery
 
 restore multithread config for lixad (lixad_conf.xml ;) 
 

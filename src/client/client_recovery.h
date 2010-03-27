@@ -56,8 +56,22 @@ extern "C" {
      */
     int client_recovery(client_status_t *cs,
                         const struct lixa_msg_body_open_8_client_s *client);
-
     
+
+
+    /**
+     * Analyze the data received from the server
+     * @param cs IN reference to the status of the calling client
+     * @param rpl IN information received from the server
+     * @param commit OUT boolean value: TRUE = perform commit, FALSE = perform
+     *               rollback
+     * @return a reason code
+     */
+    int client_recovery_analyze(const client_status_t *cs,
+                                const struct lixa_msg_s *rpl,
+                                int *commit);
+
+
     
 #ifdef __cplusplus
 }
