@@ -361,9 +361,21 @@ extern "C" {
                 return FALSE;
         }
     }
-        
 
+
+
+    /**
+     * Get a writable reference to crash_count property
+     * @param cs IN object reference
+     * @return a writable reference to the number of times the crash point
+     * was traversed
+     */
+    static inline int *client_status_get_crash_count(client_status_t *cs) {
+        return &cs->crash_count;
+    }
     
+
+
     /**
      * Return the status of a specific thread; this method MUST be protected
      * by a rdlock because the array can change while the method is in progress
