@@ -108,6 +108,8 @@ const char *lixa_strerror(int ret_cod)
                 "not exist";
         case LIXA_RC_ABORTED_RECOVERY:
             return "ERROR: a transaction can not be recovered";
+        case LIXA_RC_RECOVERY_INFO_MISMATCH:
+            return "ERROR: client/server recovery configuration do not match";
         case LIXA_RC_TX_ERROR:
             return "ERROR: generic error for a TX error (a TX return code "
                 "not equal TX_OK)";
