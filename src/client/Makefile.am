@@ -13,3 +13,6 @@ liblixac_la_LIBADD = ../common/liblixab.la
 liblixacmt_la_LIBADD = ../common/liblixabmt.la
 liblixac_la_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_GMODULE@ @LDFLAGS_XML2@ -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
 liblixacmt_la_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_GMODULE@ @LDFLAGS_GTHREAD@ @LDFLAGS_XML2@ -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
+bin_PROGRAMS = lixar
+lixar_LDADD = ../common/liblixabmt.la liblixacmt.la
+lixar_SOURCES = lixar.c

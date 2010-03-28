@@ -139,7 +139,7 @@ int client_recovery(client_status_t *cs,
             if (LIXA_RC_OK != (ret_cod = client_recovery_rollback(cs, &rpl)))
                 THROW(ROLLBACK_ERROR);
         }
-            
+        
         /* @@@ query the resource managers with xa_recover ... */
         exit(1);
         
@@ -180,7 +180,7 @@ int client_recovery(client_status_t *cs,
 
 
 int client_recovery_analyze(const client_status_t *cs,
-                            const struct lixa_msg_s *rpl,
+                            struct lixa_msg_s *rpl,
                             int *commit)
 {
     enum Exception { DIFFERENT_NUMBER
@@ -245,7 +245,7 @@ int client_recovery_analyze(const client_status_t *cs,
 
 
 int client_recovery_commit(const client_status_t *cs,
-                           const struct lixa_msg_s *rpl)
+                           struct lixa_msg_s *rpl)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -302,7 +302,7 @@ int client_recovery_commit(const client_status_t *cs,
 
     
 int client_recovery_rollback(const client_status_t *cs,
-                             const struct lixa_msg_s *rpl)
+                             struct lixa_msg_s *rpl)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
