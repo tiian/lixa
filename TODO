@@ -1,3 +1,5 @@
+lixar: implement the recovery utility (scans resource manager info)
+
 client_recovery: perform recovery
 
 restore multithread config for lixad (lixad_conf.xml ;) 

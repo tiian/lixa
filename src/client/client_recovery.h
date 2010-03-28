@@ -68,7 +68,7 @@ extern "C" {
      * @return a reason code
      */
     int client_recovery_analyze(const client_status_t *cs,
-                                const struct lixa_msg_s *rpl,
+                                struct lixa_msg_s *rpl,
                                 int *commit);
 
 
@@ -80,7 +80,7 @@ extern "C" {
      * @return a reason code
      */
     int client_recovery_commit(const client_status_t *cs,
-                               const struct lixa_msg_s *rpl);
+                               struct lixa_msg_s *rpl);
 
 
     
@@ -91,7 +91,7 @@ extern "C" {
      * @return a reason code
      */
     int client_recovery_rollback(const client_status_t *cs,
-                                 const struct lixa_msg_s *rpl);
+                                 struct lixa_msg_s *rpl);
 
 
     

@@ -38,12 +38,12 @@
    E: LOG_ERR
    C: LOG_CRIT
 */
-#define LIXA_SYSLOG_LXC000I "LXC000I this process is starting a new LiXa " \
+#define LIXA_SYSLOG_LXC000I "LXC000I this process is starting a new LIXA " \
     "transaction manager"
 #define LIXA_SYSLOG_LXC001E "LXC001E transaction '%s' can NOT be recovered " \
     "because current config digest '%s' does NOT match server stored config " \
     "digest '%s'"
-#define LIXA_SYSLOG_LXC002E "LXC002E unable to connect to LiXa server at " \
+#define LIXA_SYSLOG_LXC002E "LXC002E unable to connect to LIXA server at " \
     "address %s, port " IN_PORT_T_FORMAT
 #define LIXA_SYSLOG_LXC003C "LXC003C resource manager '%s' returned an " \
     "error (%d) while committing (xa_commit) during recovery phase for " \
@@ -54,7 +54,7 @@
 
 
 
-#define LIXA_SYSLOG_LXD000N "LXD000N this process is starting a new LiXa " \
+#define LIXA_SYSLOG_LXD000N "LXD000N this process is starting a new LIXA " \
     "server"
 #define LIXA_SYSLOG_LXD001E "LXD001E failed to parse options: %s"
 #define LIXA_SYSLOG_LXD002W "LXD002W dump option overrides daemon option"
@@ -64,7 +64,7 @@
     "premature exit"
 #define LIXA_SYSLOG_LXD005E "LXD005E error (%s) while starting listener(s), " \
     "premature exit"
-#define LIXA_SYSLOG_LXD006N "LXD006N this LiXa server is terminating"
+#define LIXA_SYSLOG_LXD006N "LXD006N this LIXA server is terminating"
 #define LIXA_SYSLOG_LXD007W "LXD007W first status file ('%s') did not pass " \
     "integrity check"
 #define LIXA_SYSLOG_LXD008W "LXD008W second status file ('%s') did not pass " \
@@ -76,6 +76,12 @@
 #define LIXA_SYSLOG_LXD011W "LXD011W a client is performing recovery " \
     "but config file changed in the meantime for job '%s' and transaction " \
     "'%s'"
+
+
+#define LIXA_SYSLOG_LXR000I "LXR000I LIXA recovery process is starting"
+#define LIXA_SYSLOG_LXR001E "LXR001E failed to parse options: %s"
+#define LIXA_SYSLOG_LXR002I "LXR002I this LIXA recovery process is terminating"
+
 
 
 #endif /* LIXA_SYSLOG_H */
