@@ -27,6 +27,7 @@
 
 
 #include <lixa_errors.h>
+#include <lixa_common_status.h>
 #include <lixa_xml_msg_deserialize.h>
 #include <lixa_xml_msg_serialize.h>
 #include <lixa_xml_msg_trace.h>
@@ -357,3 +358,118 @@ int client_recovery_rollback(const client_status_t *cs,
 
 
 
+int client_recovery_cold_phase(const client_status_t *cs)
+{
+    enum Exception { G_TREE_NEW
+                     , RECOVER_ERROR1
+                     , G_ARRAY_NEW
+                     , MALLOC_ERROR
+                     , RECOVER_ERROR2
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    GTree *crt = NULL; /* cold recovery table */
+    
+    LIXA_TRACE(("client_recovery_cold_phase\n"));
+    TRY {
+        guint i;
+        
+        /* create a new tree; node key is a dynamically allocated XID;
+           node data is a dynamic array */
+        if (NULL == (crt = g_tree_new_full(
+                         clnt_rcvr_xid_compare, NULL, free,
+                         clnt_rcvr_array_free)))
+            THROW(G_TREE_NEW);
+
+        /* scan all the resource managers associated to the current profile */
+        for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+            XID xid_array[50];
+            int xa_rc, found, first = TRUE;
+            int count = sizeof(xid_array)/sizeof(XID);
+            struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
+                global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
+            LIXA_TRACE(("client_recovery_cold_phase: rmid=%u, "
+                        "lixa_name='%s', xa_name='%s'\n", i,
+                        act_rsrmgr->generic->name,
+                        act_rsrmgr->xa_switch->name));
+            do {
+                int j;
+                found = act_rsrmgr->xa_switch->xa_recover_entry(
+                    xid_array, count, (int)i,
+                    first ? TMSTARTRSCAN : TMNOFLAGS);
+                LIXA_TRACE(("client_recovery_cold_phase: rmid=%u, found=%d\n",
+                            i, found));
+                if (found < 0)
+                    THROW(RECOVER_ERROR1);
+                for (j=0; j<found; ++j) {
+                    XID *xid;
+                    GArray *node;
+                    /* look for the xid */
+                    if (NULL == (node = (GArray *)g_tree_lookup(
+                                     crt, xid_array+j))) {
+                        /* initialize the array */
+                        if (NULL == (node = g_array_new(
+                                         FALSE, FALSE, sizeof(int))))
+                            THROW(G_ARRAY_NEW);
+                        /* create a new xid object */
+                        if (NULL == (xid = malloc(sizeof(XID))))
+                            THROW(MALLOC_ERROR);
+                        memcpy(xid, xid_array+j, sizeof(XID));
+                        /* insert the node in the tree */
+                        g_tree_insert(crt, xid, node);
+                    }
+                    /* add the id to the array */
+                    g_array_append_val(node, i);
+                }
+            } while (found == count);
+            /* stop the scan */
+            if (XA_OK != (xa_rc = act_rsrmgr->xa_switch->xa_recover_entry(
+                              xid_array, 0, (int)i, TMENDRSCAN))) {
+                LIXA_TRACE(("client_recovery_cold_phase: rmid=%u, xa_rc=%d\n",
+                            i, found));
+                THROW(RECOVER_ERROR2);
+            }
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_TREE_NEW:
+                ret_cod = LIXA_RC_G_RETURNED_NULL;
+                break;
+            case RECOVER_ERROR1:
+                ret_cod = LIXA_RC_XA_ERROR;
+                break;
+            case G_ARRAY_NEW:
+                ret_cod = LIXA_RC_G_RETURNED_NULL;
+                break;                
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case RECOVER_ERROR2:
+                ret_cod = LIXA_RC_XA_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        if (NULL != crt) g_tree_destroy(crt);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_recovery_cold_phase/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int clnt_rcvr_xid_compare(gconstpointer a, gconstpointer b, gpointer foo) {
+    return xid_compare((const XID *)a, (const XID *)b);
+}
+
+
+
+void clnt_rcvr_array_free(gpointer data) {
+    g_array_free((GArray *)data, FALSE);
+}

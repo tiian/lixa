@@ -25,7 +25,14 @@
 
 
 
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
+
+
+
 #include <client_status.h>
+#include <tx.h>
 
 
 
@@ -94,7 +101,31 @@ extern "C" {
                                  struct lixa_msg_s *rpl);
 
 
+
+    /**
+     * Cold phase is the recovery phase without LIXA server info: this should
+     * be performed only AFTER the normal recovery phase
+     * @param cs IN reference to the status
+     * @return a standardized reason code
+     */
+    int client_recovery_cold_phase(const client_status_t *cs);
+
+
+
+    /**
+     * This is a wrapper for @ref xid_compare
+     */
+    int clnt_rcvr_xid_compare(gconstpointer a, gconstpointer b, gpointer foo);
+
+
+
+    /**
+     * This is a wrapper for g_array_free(*, TRUE)
+     */
+    void clnt_rcvr_array_free(gpointer data);
+
     
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -37,6 +37,7 @@
 #include <lixa_xml_msg.h>
 #include <client_conn.h>
 #include <client_config.h>
+#include <client_recovery.h>
 #include <client_status.h>
 
 
@@ -1074,6 +1075,7 @@ int lixa_tx_recover(void)
 {
     enum Exception { COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
+                     , COLD_PHASE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -1095,6 +1097,9 @@ int lixa_tx_recover(void)
             default:
                 THROW(COLL_GET_CS_ERROR);
         }
+
+        if (LIXA_RC_OK != (ret_cod = client_recovery_cold_phase(cs)))
+            THROW(COLD_PHASE_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -1103,6 +1108,8 @@ int lixa_tx_recover(void)
                 break;
             case PROTOCOL_ERROR:
                 ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case COLD_PHASE_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

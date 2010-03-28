@@ -1,3 +1,5 @@
+errors in xa_recover with Oracle (something related to strange views...)
+
 lixar: implement the recovery utility (scans resource manager info)
 
 client_recovery: perform recovery
