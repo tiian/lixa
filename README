@@ -88,6 +88,17 @@ because the application must be executed by "oracle" user or you have to deal
 with Oracle's own permission (this is not a source for Oracle info
 unfortunately, so only very basic set-up is explained)
 
+Don't forget these steps for Oracle XA:
+1. connect as SYSDBA with:
+2. sqlplus "sys/oracle as sysdba"       (if your sys user has password oracle)
+3. grant select on dba_pending_transactions to hr
+                   (if hr is the user you want to use to run your application)
+4. create some extra views located in
+   $ORACLE_HOME/rdbms/admin/xaview.sql
+   cat xaview.sql | sqlplus "sys/oracle as sysdba"
+5. grant select on v$pending_xatrans$ to hr;
+6. grant select on v$xatrans$ to hr;
+
 Doxygen documentation.
 There is a minimal configuration for Doxygen inside LIXA.
 Please update doxygen.conf.in and change /var/www/lixa to a suitable 
