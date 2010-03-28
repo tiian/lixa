@@ -1070,3 +1070,51 @@ int lixa_tx_set_transaction_timeout(int *txrc,
 
 
 
+int lixa_tx_recover(void)
+{
+    enum Exception { COLL_GET_CS_ERROR
+                     , PROTOCOL_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE_INIT;
+    LIXA_CRASH_INIT;
+    LIXA_TRACE(("lixa_tx_recover\n"));
+    TRY {
+        client_status_t *cs;
+        
+        /* retrieve a reference to the thread status */
+        ret_cod = client_status_coll_get_cs(&global_csc, &cs);
+        switch (ret_cod) {
+            case LIXA_RC_OK: /* nothing to do */
+                break;
+            case LIXA_RC_OBJ_NOT_FOUND:
+                /* status not found -> tx_open did not succed -> protocol
+                   error */
+                THROW(PROTOCOL_ERROR);
+            default:
+                THROW(COLL_GET_CS_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case COLL_GET_CS_ERROR:
+                break;
+            case PROTOCOL_ERROR:
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_tx_recover/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+

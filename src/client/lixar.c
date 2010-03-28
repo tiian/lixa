@@ -108,13 +108,21 @@ int main(int argc, char *argv[])
             printf("tx_open() returned TX_ERROR: unable to proceed\n");
             break;
         case TX_FAIL:
-            printf("tx_open() returned TX_FAIL: unable to procee\n");
+            printf("tx_open() returned TX_FAIL: unable to proceed\n");
             break;
         default:
-            printf("tx_open() returned %d: unable to procee\n", tx_rc);
+            printf("tx_open() returned %d: unable to proceed\n", tx_rc);
     }
-    if (TX_OK != tx_rc)
+    if (TX_OK != tx_rc) {
+        syslog(LOG_ERR, LIXA_SYSLOG_LXR003E, tx_rc);
         exit(1);
+    }
+
+    if (LIXA_RC_OK != (rc = lixa_tx_recover())) {
+        printf("There was an error while recoverying transactions: "
+               "%d ('%s')\n", rc, lixa_strerror(rc));
+        exit(1);
+    }
     
     /* it's time to exit */
     syslog(LOG_NOTICE, LIXA_SYSLOG_LXR002I);
