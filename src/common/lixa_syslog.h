@@ -81,6 +81,7 @@
 #define LIXA_SYSLOG_LXR000I "LXR000I LIXA recovery process is starting"
 #define LIXA_SYSLOG_LXR001E "LXR001E failed to parse options: %s"
 #define LIXA_SYSLOG_LXR002I "LXR002I this LIXA recovery process is terminating"
+#define LIXA_SYSLOG_LXR003E "LXR003E unable to perform tx_open() (rc=%d)"
 
 
 

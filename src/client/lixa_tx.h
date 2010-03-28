@@ -147,6 +147,17 @@ extern "C" {
 
 
 
+    /**
+     * <b>Note:</b> tx_recover is <b>not</b> a standard function, and this
+     * function is directly called from the client program.
+     * Perform manual recovery: query resource managers, analyze answers,
+     * commit/rollback
+     * @return a standardized return code
+     */
+    int lixa_tx_recover(void);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
