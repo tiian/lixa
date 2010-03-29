@@ -383,7 +383,7 @@ int client_recovery_cold_phase(const client_status_t *cs)
 
         /* scan all the resource managers associated to the current profile */
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
-            XID xid_array[50];
+            XID xid_array[100];
             int xa_rc, found, first = TRUE;
             int count = sizeof(xid_array)/sizeof(XID);
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
@@ -397,6 +397,7 @@ int client_recovery_cold_phase(const client_status_t *cs)
                 found = act_rsrmgr->xa_switch->xa_recover_entry(
                     xid_array, count, (int)i,
                     first ? TMSTARTRSCAN : TMNOFLAGS);
+                first = FALSE;
                 LIXA_TRACE(("client_recovery_cold_phase: rmid=%u, found=%d\n",
                             i, found));
                 if (found < 0)
@@ -423,12 +424,15 @@ int client_recovery_cold_phase(const client_status_t *cs)
                 }
             } while (found == count);
             /* stop the scan */
-            if (XA_OK != (xa_rc = act_rsrmgr->xa_switch->xa_recover_entry(
+            /* @@@ not able to make it run properly :( see later...
+            if (found > 0 &&
+                XA_OK != (xa_rc = act_rsrmgr->xa_switch->xa_recover_entry(
                               xid_array, 0, (int)i, TMENDRSCAN))) {
                 LIXA_TRACE(("client_recovery_cold_phase: rmid=%u, xa_rc=%d\n",
-                            i, found));
+                            i, xa_rc));
                 THROW(RECOVER_ERROR2);
             }
+            */
         }
         
         THROW(NONE);

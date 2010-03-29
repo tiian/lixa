@@ -6,5 +6,7 @@
   </listeners>
   <managers>
     <manager status_file="/tmp/lixa/var/lixad_status1"/>
+    <manager status_file="/tmp/lixa/var/lixad_status2"/>
+    <manager status_file="/tmp/lixa/var/lixad_status3"/>
   </managers>
 </server>
