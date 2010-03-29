@@ -27,9 +27,10 @@
 const char *lixa_strerror(int ret_cod)
 {
     /* remove "error from server" offset */
-    if (ret_cod > LIXA_RC_ERROR_FROM_SERVER_OFFSET ||
-        (ret_cod < 0 && LIXA_RC_ERROR_FROM_SERVER_OFFSET + ret_cod > 0))
+    if (ret_cod > LIXA_RC_ERROR_FROM_SERVER_OFFSET)
         ret_cod -= LIXA_RC_ERROR_FROM_SERVER_OFFSET;
+    else if (ret_cod < -LIXA_RC_ERROR_FROM_SERVER_OFFSET)
+        ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
     
     switch (ret_cod) {
         case LIXA_RC_LIXAC_CONF_CHANGED:

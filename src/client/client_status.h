@@ -370,9 +370,11 @@ extern "C" {
      * @return a writable reference to the number of times the crash point
      * was traversed
      */
+#ifdef _CRASH
     static inline int *client_status_get_crash_count(client_status_t *cs) {
         return &cs->crash_count;
     }
+#endif
     
 
 
