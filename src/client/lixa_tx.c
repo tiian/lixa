@@ -1071,13 +1071,17 @@ int lixa_tx_set_transaction_timeout(int *txrc,
 
 
 
-int lixa_tx_recover(void)
+int lixa_tx_recover(int report)
 {
     enum Exception { COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
-                     , COLD_PHASE_ERROR
+                     , G_TREE_NEW
+                     , RECOVERY_SCAN_ERROR
+                     , RECOVERY_REPORT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    GTree *crt = NULL; /* cold recovery table */
     
     LIXA_TRACE_INIT;
     LIXA_CRASH_INIT;
@@ -1098,8 +1102,18 @@ int lixa_tx_recover(void)
                 THROW(COLL_GET_CS_ERROR);
         }
 
-        if (LIXA_RC_OK != (ret_cod = client_recovery_cold_phase(cs)))
-            THROW(COLD_PHASE_ERROR);
+        /* create a new tree; node key is a dynamically allocated XID;
+           node data is a dynamic array */
+        if (NULL == (crt = g_tree_new_full(
+                         clnt_rcvr_xid_compare, NULL, free,
+                         clnt_rcvr_array_free)))
+            THROW(G_TREE_NEW);
+
+        if (LIXA_RC_OK != (ret_cod = client_recovery_scan(cs, crt)))
+            THROW(RECOVERY_SCAN_ERROR);
+        
+        if (report && LIXA_RC_OK != (ret_cod = client_recovery_report(cs, crt)))
+            THROW(RECOVERY_REPORT_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -1109,7 +1123,11 @@ int lixa_tx_recover(void)
             case PROTOCOL_ERROR:
                 ret_cod = LIXA_RC_PROTOCOL_ERROR;
                 break;
-            case COLD_PHASE_ERROR:
+            case G_TREE_NEW:
+                ret_cod = LIXA_RC_G_RETURNED_NULL;
+                break;
+            case RECOVERY_SCAN_ERROR:
+            case RECOVERY_REPORT_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1117,6 +1135,7 @@ int lixa_tx_recover(void)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (NULL != crt) g_tree_destroy(crt);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_recover/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

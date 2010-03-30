@@ -67,6 +67,16 @@ void xid_set_global_bqual(const char *md5_digest_hex)
 
 
 
+int xid_bqual_is_global(const XID *xid)
+{
+    if (xid->bqual_length != MD5_DIGEST_LENGTH)
+        return FALSE;
+    return !memcmp(xid->data + xid->gtrid_length, &lixa_xid_global_bqual,
+                   MD5_DIGEST_LENGTH);
+}
+
+
+
 void xid_create_new(XID *xid)
 {
     uuid_t uuid_obj;

@@ -152,9 +152,10 @@ extern "C" {
      * function is directly called from the client program.
      * Perform manual recovery: query resource managers, analyze answers,
      * commit/rollback
+     * @param report IN print a report of the prepared and in-doubt transactions
      * @return a standardized return code
      */
-    int lixa_tx_recover(void);
+    int lixa_tx_recover(int report);
 
 
     

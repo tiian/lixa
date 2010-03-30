@@ -103,15 +103,39 @@ extern "C" {
 
 
     /**
-     * Cold phase is the recovery phase without LIXA server info: this should
-     * be performed only AFTER the normal recovery phase
+     * Scan all the resource manager to find out the prepared and in-doubt
+     * transactions: this should be performed only AFTER the normal recovery
+     * phase
      * @param cs IN reference to the status
+     * @param crt OUT reference to the cold recovery table
      * @return a standardized reason code
      */
-    int client_recovery_cold_phase(const client_status_t *cs);
+    int client_recovery_scan(const client_status_t *cs, GTree *crt);
 
 
 
+    /**
+     * Report the content of a cold recovery table
+     * @param cs IN reference to the status
+     * @param crt IN reference to the cold recovery table
+     * @return a standardized reason code
+     */
+    int client_recovery_report(const client_status_t *cs, GTree *crt);
+
+
+    
+    /**
+     * Used to traverse the tree (cold recovery table) and report every
+     * node of the tree
+     * @param key IN xid object
+     * @param value IN array of resource manager ids
+     * @param data IN output stream
+     */
+    gboolean client_recovery_report_foreach(gpointer key, gpointer value,
+                                            gpointer data);
+
+
+    
     /**
      * This is a wrapper for @ref xid_compare
      */

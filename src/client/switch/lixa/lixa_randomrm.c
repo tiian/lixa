@@ -154,10 +154,8 @@ int lixa_randomrm_commit(XID *xid, int rmid, long flags) {
  * Random implementation of xa_recover function
  */ 
 int lixa_randomrm_recover(XID *xid, long count, int rmid, long flags) {
-    char *xid_str = xid_serialize(xid);
-    LIXA_TRACE(("lixa_randomrm_recover: xid='%s', count=%ld, rmid=%d, "
-                "flags=0x%lx\n", xid_str, count, rmid, flags));
-    free(xid_str);
+    LIXA_TRACE(("lixa_randomrm_recover: *xid=%p, count=%ld, rmid=%d, "
+                "flags=0x%lx\n", xid, count, rmid, flags));
     if (random() % 100 < ERROR_PERC)
         return XAER_RMERR;
     return XA_OK;
