@@ -38,6 +38,7 @@
 #include <lixa_crash.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_tx.h>
 #include <lixa_syslog.h>
 #include <client_config.h>
 #include <tx.h>
@@ -53,12 +54,12 @@
 
 
 /* default command line options */
-static gboolean run_as_daemon = FALSE;
+static gboolean report = FALSE;
 static gboolean dump_and_exit = FALSE;
 /* command line options */
 static GOptionEntry entries[] =
 {
-    { "daemon", 'd', 0, G_OPTION_ARG_NONE, &run_as_daemon, "Run the process as a daemon", NULL },
+    { "report", 'r', 0, G_OPTION_ARG_NONE, &report, "Print a report of all the prepared and in-doubt transactions compatible with current configuration and profile", NULL },
     { "dump", 'u', 0, G_OPTION_ARG_NONE, &dump_and_exit, "Dump the content of status files and exit", NULL }
 };
 
@@ -96,7 +97,8 @@ int main(int argc, char *argv[])
     LIBXML_TEST_VERSION;
 
     /* echo environment variables */
-    output_environment();
+    if (report)
+        output_environment();
 
     /* open the resource managers for the current profile */
     tx_rc = tx_open();
@@ -118,7 +120,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    if (LIXA_RC_OK != (rc = lixa_tx_recover())) {
+    if (LIXA_RC_OK != (rc = lixa_tx_recover(report))) {
         printf("There was an error while recoverying transactions: "
                "%d ('%s')\n", rc, lixa_strerror(rc));
         exit(1);

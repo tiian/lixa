@@ -265,7 +265,17 @@ extern "C" {
     void xid_set_global_bqual(const char *md5_digest_hex);
 
 
+
+    /**
+     * Check if the branch qualifier of the transaction matched the global
+     * branch qualifier of current running transaction manager instance
+     * @param xid IN transaction id to inspect
+     * @return a boolean value
+     */
+    int xid_bqual_is_global(const XID *xid);
+
     
+                            
     /**
      * Create a new XID
      * @param xid OUT the generated unique transaction id

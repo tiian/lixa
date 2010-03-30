@@ -141,9 +141,6 @@ int client_recovery(client_status_t *cs,
                 THROW(ROLLBACK_ERROR);
         }
         
-        /* @@@ query the resource managers with xa_recover ... */
-        exit(1);
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -358,37 +355,29 @@ int client_recovery_rollback(const client_status_t *cs,
 
 
 
-int client_recovery_cold_phase(const client_status_t *cs)
+int client_recovery_scan(const client_status_t *cs, GTree *crt)
 {
-    enum Exception { G_TREE_NEW
-                     , RECOVER_ERROR1
+    enum Exception { RECOVER_ERROR1
                      , G_ARRAY_NEW
                      , MALLOC_ERROR
                      , RECOVER_ERROR2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    GTree *crt = NULL; /* cold recovery table */
+    char *ser_xid = NULL;
     
-    LIXA_TRACE(("client_recovery_cold_phase\n"));
+    LIXA_TRACE(("client_recovery_scan\n"));
     TRY {
         guint i;
         
-        /* create a new tree; node key is a dynamically allocated XID;
-           node data is a dynamic array */
-        if (NULL == (crt = g_tree_new_full(
-                         clnt_rcvr_xid_compare, NULL, free,
-                         clnt_rcvr_array_free)))
-            THROW(G_TREE_NEW);
-
         /* scan all the resource managers associated to the current profile */
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             XID xid_array[100];
-            int xa_rc, found, first = TRUE;
+            int found, first = TRUE;
             int count = sizeof(xid_array)/sizeof(XID);
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            LIXA_TRACE(("client_recovery_cold_phase: rmid=%u, "
+            LIXA_TRACE(("client_recovery_scan: rmid=%u, "
                         "lixa_name='%s', xa_name='%s'\n", i,
                         act_rsrmgr->generic->name,
                         act_rsrmgr->xa_switch->name));
@@ -398,16 +387,42 @@ int client_recovery_cold_phase(const client_status_t *cs)
                     xid_array, count, (int)i,
                     first ? TMSTARTRSCAN : TMNOFLAGS);
                 first = FALSE;
-                LIXA_TRACE(("client_recovery_cold_phase: rmid=%u, found=%d\n",
+                LIXA_TRACE(("client_recovery_scan: rmid=%u, found=%d\n",
                             i, found));
                 if (found < 0)
                     THROW(RECOVER_ERROR1);
                 for (j=0; j<found; ++j) {
                     XID *xid;
                     GArray *node;
+#ifdef _TRACE
+                    ser_xid = xid_serialize(xid_array+j);
+                    LIXA_TRACE(("client_recovery_scan: rmid=%u returned xid "
+                                "'%s'\n", i, ser_xid));
+                    
+                    free(ser_xid);
+                    ser_xid = NULL;
+#endif
+                    /* check XID format id */
+                    if (LIXA_XID_FORMAT_ID != xid_array[j].formatID) {
+                        LIXA_TRACE(("client_recovery_scan: this transaction "
+                                    "has format id 0x%lx instead of 0x%lx "
+                                    "and will be discarded\n",
+                                    xid_array[j].formatID, LIXA_XID_FORMAT_ID));
+                        continue;
+                    }
+                    /* check XID branch qualifier */
+                    if (!xid_bqual_is_global(xid_array + j)) {
+                        LIXA_TRACE(("client_recovery_scan: the branch "
+                                    "qualifier of this transaction does not "
+                                    "match current global branch qualifier "
+                                    "and will be discarded\n"));
+                        continue;
+                    }
                     /* look for the xid */
                     if (NULL == (node = (GArray *)g_tree_lookup(
                                      crt, xid_array+j))) {
+                        LIXA_TRACE(("client_recovery_scan: creating "
+                                    "a new node for this xid\n", ser_xid));
                         /* initialize the array */
                         if (NULL == (node = g_array_new(
                                          FALSE, FALSE, sizeof(int))))
@@ -428,7 +443,7 @@ int client_recovery_cold_phase(const client_status_t *cs)
             if (found > 0 &&
                 XA_OK != (xa_rc = act_rsrmgr->xa_switch->xa_recover_entry(
                               xid_array, 0, (int)i, TMENDRSCAN))) {
-                LIXA_TRACE(("client_recovery_cold_phase: rmid=%u, xa_rc=%d\n",
+                LIXA_TRACE(("client_recovery_scan: rmid=%u, xa_rc=%d\n",
                             i, xa_rc));
                 THROW(RECOVER_ERROR2);
             }
@@ -438,9 +453,6 @@ int client_recovery_cold_phase(const client_status_t *cs)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case G_TREE_NEW:
-                ret_cod = LIXA_RC_G_RETURNED_NULL;
-                break;
             case RECOVER_ERROR1:
                 ret_cod = LIXA_RC_XA_ERROR;
                 break;
@@ -459,11 +471,78 @@ int client_recovery_cold_phase(const client_status_t *cs)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        if (NULL != crt) g_tree_destroy(crt);
+        if (ser_xid) free(ser_xid);
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_recovery_cold_phase/excp=%d/"
+    LIXA_TRACE(("client_recovery_scan/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+int client_recovery_report(const client_status_t *cs, GTree *crt)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("client_recovery_report\n"));
+    TRY {
+        guint i;
+
+        printf("\nResource manager list:\n");
+        for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+            struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
+                global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
+            printf("rmid=%u, lixa_name='%s', xa_name='%s'\n", i,
+                   act_rsrmgr->generic->name, act_rsrmgr->xa_switch->name);
+        }
+
+        printf("\nPrepared and in-doubt transaction list:\n");
+        g_tree_foreach(crt, client_recovery_report_foreach, (gpointer *)stdout);
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_recovery_report/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+    
+
+
+gboolean client_recovery_report_foreach(gpointer key, gpointer value,
+                                         gpointer data)
+{
+    /* key points to a xid object, value points to an array of resource manager
+       ids, data points to the output stream */
+    XID *xid = (XID *)key;
+    GArray *rsrmgrs = (GArray *)value;
+    FILE *stream = (FILE *)data;
+
+    char *ser_xid;
+    guint i;
+
+    if (NULL == (ser_xid = xid_serialize(xid))) {
+        LIXA_TRACE(("client_recovery_report_foreach: unable to allocate "
+                    "memory for xid serialization\n"));
+        return TRUE;
+    }
+    fprintf(stream, "xid='%s': ", ser_xid);
+    for (i=0; i<rsrmgrs->len; ++i) {
+        int *p = &g_array_index(rsrmgrs, int, i);
+        fprintf(stream, "rmid=%d ", *p);
+    }
+    fprintf(stream, "\n");
+    
+    free(ser_xid);
+    return FALSE;
 }
 
 

@@ -383,7 +383,7 @@ extern "C" {
      * by a rdlock because the array can change while the method is in progress
      * @param csc IN object reference
      * @param pos IN position of the desired thread
-     *               (@ref client_status_coll_search)
+     *               ( @ref client_status_coll_search )
      * @return a reference to the desired object
      */
     static inline client_status_t *client_status_coll_get_status(

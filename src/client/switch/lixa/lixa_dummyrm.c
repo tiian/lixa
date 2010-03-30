@@ -132,10 +132,8 @@ int lixa_dummyrm_commit(XID *xid, int rmid, long flags) {
  * Dummy implementation of xa_recover function
  */ 
 int lixa_dummyrm_recover(XID *xid, long count, int rmid, long flags) {
-    char *xid_str = xid_serialize(xid);
-    LIXA_TRACE(("lixa_dummyrm_recover: xid='%s', count=%ld, rmid=%d, "
-                "flags=0x%lx\n", xid_str, count, rmid, flags));
-    free(xid_str);
+    LIXA_TRACE(("lixa_dummyrm_recover: *xid=%p, count=%ld, rmid=%d, "
+                "flags=0x%lx\n", xid, count, rmid, flags));
     return XA_OK;
 }
 
