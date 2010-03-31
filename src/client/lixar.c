@@ -55,18 +55,26 @@
 
 /* default command line options */
 static gboolean report = FALSE;
-static gboolean dump_and_exit = FALSE;
-/* command line options */
+static char *xid = NULL;
+static char *xid_file = NULL;
+static gboolean commit = FALSE;
+static gboolean rollback = FALSE;
+/* command line options: DO NOT CHANGE ORDER, only append!!! */
 static GOptionEntry entries[] =
 {
-    { "report", 'r', 0, G_OPTION_ARG_NONE, &report, "Print a report of all the prepared and in-doubt transactions compatible with current configuration and profile", NULL },
-    { "dump", 'u', 0, G_OPTION_ARG_NONE, &dump_and_exit, "Dump the content of status files and exit", NULL }
+    { "print", 'p', 0, G_OPTION_ARG_NONE, &report, "Print a report of all the prepared and in-doubt transactions compatible with current configuration and profile", NULL },
+    { "xid", 'x', 0, G_OPTION_ARG_STRING, &xid, "Select specified transaction for rollback/commit", NULL },
+    { "xidfile", 'X', 0, G_OPTION_ARG_STRING, &xid_file, "Select specified file as a list of transaction to rollback/commit", NULL },
+    { "commit", 'c', 0, G_OPTION_ARG_NONE, &commit, "Commit prepared & in-doubt transactions", NULL },
+    { "rollback", 'r', 0, G_OPTION_ARG_NONE, &rollback, "Rollback prepared & in-doubt transactions", NULL }
 };
 
 
 
 void output_environment(void);
 
+
+void output_options(void);
 
 
 int main(int argc, char *argv[])
@@ -85,17 +93,44 @@ int main(int argc, char *argv[])
 
     option_context = g_option_context_new("- LIXA recovery utility");
     g_option_context_add_main_entries(option_context, entries, NULL);
-
+    
     if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
         syslog(LOG_ERR, LIXA_SYSLOG_LXR001E, error->message);
         LIXA_TRACE(("main: option parsing failed: %s\n", error->message));
-        g_print("option parsing failed: %s\n", error->message);
+        fprintf(stderr, "option parsing failed: %s\n", error->message);
         exit(1);
     }
 
+    if (xid && xid_file) {
+        fprintf(stderr, "'-%c' ('--%s') and '-%c' ('--%s') options are "
+                "mutually exclusive\n",
+                entries[1].short_name, entries[1].long_name,
+                entries[2].short_name, entries[2].long_name);
+        exit(1);
+    }
+
+    if (commit && rollback) {
+        fprintf(stderr, "'-%c' ('--%s') and '-%c' ('--%s') options are "
+                "mutually exclusive\n",
+                entries[3].short_name, entries[3].long_name,
+                entries[4].short_name, entries[4].long_name);
+        exit(1);
+    }
+
+    if ((commit || rollback) && (!xid && !xid_file)) {
+        fprintf(stderr, "No transaction to be committed/rolled back was "
+                "specified; see '-%c' ('--%s') and '-%c' ('--%s') options \n",
+                entries[1].short_name, entries[1].long_name,
+                entries[2].short_name, entries[2].long_name);
+        exit(1);
+    }
+    
     /* initialize libxml2 library */
     LIBXML_TEST_VERSION;
 
+    /* echo execution options */
+    output_options();
+    
     /* echo environment variables */
     if (report)
         output_environment();
@@ -125,6 +160,11 @@ int main(int argc, char *argv[])
                "%d ('%s')\n", rc, lixa_strerror(rc));
         exit(1);
     }
+
+    if (xid)
+        g_free(xid);
+    if (xid_file)
+        g_free(xid_file);
     
     /* it's time to exit */
     syslog(LOG_NOTICE, LIXA_SYSLOG_LXR002I);
@@ -154,5 +194,25 @@ void output_environment(void)
     printf("LIXA_JOB_ENV_VAR = '%s'\n",
            tmp_str ? tmp_str : null_str);
 
+    return;
+}
+
+
+
+void output_options(void)
+{
+    static const char *true_string = "yes";
+    static const char *false_string = "no";
+    printf("Execution options:\n");
+    printf("\t- print report --> %s\n", report ? true_string : false_string);
+    if (xid)
+        printf("\t- transaction to commit/rollback --> %s\n", xid);
+    if (xid_file)
+        printf("\t- (file) list of transactions to commit/rollback --> %s\n",
+               xid_file);
+    printf("\t- transaction(s) will be committed --> %s\n",
+           commit ? true_string : false_string);
+    printf("\t- transaction(s) will be rolled back --> %s\n",
+           rollback ? true_string : false_string);
     return;
 }
