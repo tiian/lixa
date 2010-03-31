@@ -141,11 +141,13 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: 'pathconf' function returned an error condition";
         case LIXA_RC_REALPATH_ERROR:
             return "ERROR: 'realpath' function returned an error condition";
+        case LIXA_RC_FOPEN_ERROR:
+            return "ERROR: 'fopen' function returned an error condition";
+        case LIXA_RC_FCLOSE_ERROR:
+            return "ERROR: 'fclose' function returned an error condition";
+        case LIXA_RC_FGETS_ERROR:
+            return "ERROR: 'fgets' function returned an error condition";
             /*
-              case LIXA_RC_FFLUSH_ERROR:
-              return "ERROR: 'fflush' function returned an error condition";
-              case LIXA_RC_FSYNC_ERROR:
-              return "ERROR: 'fsync' function returned an error condition";
               case LIXA_RC_FDATASYNC_ERROR:
               return "ERROR: 'fdatasync' function returned an error "
               "condition";

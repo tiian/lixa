@@ -23,6 +23,9 @@
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
@@ -32,6 +35,7 @@
 #include <lixa_crash.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_common_status.h>
 #include <lixa_tx.h>
 #include <lixa_xa.h>
 #include <lixa_xml_msg.h>
@@ -1071,23 +1075,29 @@ int lixa_tx_set_transaction_timeout(int *txrc,
 
 
 
-int lixa_tx_recover(int report)
+int lixa_tx_recover(int report, int commit, int rollback,
+                    const char *xid, const char *xid_file)
 {
     enum Exception { COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
                      , G_TREE_NEW
                      , RECOVERY_SCAN_ERROR
                      , RECOVERY_REPORT_ERROR
+                     , FOPEN_ERROR
+                     , FGETS_ERROR
+                     , XID_DESERIALIZE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     GTree *crt = NULL; /* cold recovery table */
+    FILE *xid_stream = NULL;
     
     LIXA_TRACE_INIT;
     LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_recover\n"));
     TRY {
         client_status_t *cs;
+        int i;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -1114,6 +1124,31 @@ int lixa_tx_recover(int report)
         
         if (report && LIXA_RC_OK != (ret_cod = client_recovery_report(cs, crt)))
             THROW(RECOVERY_REPORT_ERROR);
+
+        /* open file if necessary */
+        if (NULL == (xid_stream = fopen(xid_file, "r")))
+            THROW(FOPEN_ERROR);
+
+        i = 0;
+        while (xid || !feof(xid_stream)) {
+            char buffer[2*LIXA_XID_SERIALIZED_BUFFER_SIZE];
+            XID tmp_xid;
+            i++;
+            if (xid && i>1) break; /* leave after first cycle */
+            if (xid) {
+                strncpy(buffer, xid, sizeof(buffer)-1);
+                buffer[sizeof(buffer)-1] = '\0';
+            } else {
+                if (NULL == fgets(buffer, sizeof(buffer), xid_stream))
+                    THROW(FGETS_ERROR);                
+            }
+            if (strlen(buffer) != LIXA_XID_SERIALIZED_BUFFER_SIZE-1) {
+                LIXA_TRACE(("lixa_tx_recover: record # %d is of wrong "
+                            "size, discarded ('%s')\n", i, buffer));
+            }
+            if (LIXA_RC_OK != (ret_cod = xid_deserialize(buffer, &tmp_xid)))
+                THROW(XID_DESERIALIZE_ERROR);
+        }
         
         THROW(NONE);
     } CATCH {
@@ -1129,13 +1164,22 @@ int lixa_tx_recover(int report)
             case RECOVERY_SCAN_ERROR:
             case RECOVERY_REPORT_ERROR:
                 break;
+            case FOPEN_ERROR:
+                ret_cod = LIXA_RC_FOPEN_ERROR;
+                break;
+            case FGETS_ERROR:
+                ret_cod = LIXA_RC_FGETS_ERROR;
+                break;
+            case XID_DESERIALIZE_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        if (NULL != crt) g_tree_destroy(crt);
+        if (NULL != crt)        g_tree_destroy(crt);
+        if (NULL != xid_stream) fclose(xid_stream);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_recover/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

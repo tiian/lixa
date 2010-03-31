@@ -126,7 +126,7 @@ char *xid_get_bqual_ascii(const XID *xid)
 char *xid_serialize(const XID *xid)
 {
     char *ser;
-    if (NULL == (ser = (char *)malloc(2*(2*sizeof(uuid_t)+4)+2)))
+    if (NULL == (ser = (char *)malloc(LIXA_XID_SERIALIZED_BUFFER_SIZE)))
         return NULL;
     uuid_unparse((unsigned char *)xid->data, ser);
     uuid_unparse((unsigned char *)xid->data + sizeof(uuid_t),

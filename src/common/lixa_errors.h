@@ -252,13 +252,17 @@
  */
 #define LIXA_RC_REALPATH_ERROR               -116
 /**
- * "fflush" function error
-define LIXA_RC_FFLUSH_ERROR                  -116
+ * "fopen" function error
  */
+#define LIXA_RC_FOPEN_ERROR                  -117
 /**
- * "fsync" function error
-define LIXA_RC_FSYNC_ERROR                   -117
+ * "fclose" function error
  */
+#define LIXA_RC_FCLOSE_ERROR                 -118
+/**
+ * "fgets" function/macro error
+ */
+#define LIXA_RC_FGETS_ERROR                  -119
 /**
  * "fdatasync" function error
 define LIXA_RC_FDATASYNC_ERROR               -118
@@ -266,10 +270,6 @@ define LIXA_RC_FDATASYNC_ERROR               -118
 /**
  * "fputc"/"putc" function/macro error
 define LIXA_RC_FPUTC_ERROR                   -119
- */
-/**
- * "fgetc"/"getc" function/macro error
-define LIXA_RC_FGETC_ERROR                   -120
  */
 /**
  * "ftruncate" function error

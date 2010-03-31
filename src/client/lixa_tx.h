@@ -153,9 +153,14 @@ extern "C" {
      * Perform manual recovery: query resource managers, analyze answers,
      * commit/rollback
      * @param report IN print a report of the prepared and in-doubt transactions
+     * @param commit IN commit prepared and in-doubt transactions
+     * @param rollback IN rollback prepared and in-doubt transactions
+     * @param xid IN transaction to commit/rollback
+     * @param xid_file IN (file) list of transaction(s) to commit/rollback
      * @return a standardized return code
      */
-    int lixa_tx_recover(int report);
+    int lixa_tx_recover(int report, int commit, int rollback,
+                        const char *xid, const char *xid_file);
 
 
     
