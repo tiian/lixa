@@ -64,7 +64,7 @@ static GOptionEntry entries[] =
 {
     { "print", 'p', 0, G_OPTION_ARG_NONE, &report, "Print a report of all the prepared and in-doubt transactions compatible with current configuration and profile", NULL },
     { "xid", 'x', 0, G_OPTION_ARG_STRING, &xid, "Select specified transaction for rollback/commit", NULL },
-    { "xidfile", 'X', 0, G_OPTION_ARG_STRING, &xid_file, "Select specified file as a list of transaction to rollback/commit", NULL },
+    { "xid-file", 'X', 0, G_OPTION_ARG_STRING, &xid_file, "Select specified file as a list of transaction to rollback/commit", NULL },
     { "commit", 'c', 0, G_OPTION_ARG_NONE, &commit, "Commit prepared & in-doubt transactions", NULL },
     { "rollback", 'r', 0, G_OPTION_ARG_NONE, &rollback, "Rollback prepared & in-doubt transactions", NULL }
 };
@@ -155,7 +155,8 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    if (LIXA_RC_OK != (rc = lixa_tx_recover(report))) {
+    if (LIXA_RC_OK != (rc = lixa_tx_recover(report, commit, rollback,
+                                            xid, xid_file))) {
         printf("There was an error while recoverying transactions: "
                "%d ('%s')\n", rc, lixa_strerror(rc));
         exit(1);
@@ -204,15 +205,15 @@ void output_options(void)
     static const char *true_string = "yes";
     static const char *false_string = "no";
     printf("Execution options:\n");
-    printf("\t- print report --> %s\n", report ? true_string : false_string);
+    printf("\t- print report = %s\n", report ? true_string : false_string);
     if (xid)
-        printf("\t- transaction to commit/rollback --> %s\n", xid);
+        printf("\t- transaction to commit/rollback = %s\n", xid);
     if (xid_file)
-        printf("\t- (file) list of transactions to commit/rollback --> %s\n",
+        printf("\t- (file) list of transactions to commit/rollback = %s\n",
                xid_file);
-    printf("\t- transaction(s) will be committed --> %s\n",
+    printf("\t- transaction(s) will be committed = %s\n",
            commit ? true_string : false_string);
-    printf("\t- transaction(s) will be rolled back --> %s\n",
+    printf("\t- transaction(s) will be rolled back = %s\n\n",
            rollback ? true_string : false_string);
     return;
 }

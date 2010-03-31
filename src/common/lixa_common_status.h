@@ -145,6 +145,14 @@
 
 
 /**
+ * Minimum size of a buffer used to store a serialized xid (the null terminator
+ * is computed in this constant
+ */
+#define LIXA_XID_SERIALIZED_BUFFER_SIZE  (2*(2*sizeof(uuid_t)+4)+2)
+
+
+
+/**
  * Store the status of the current control thread is partecipating in the
  * transaction; the client keeps a volatile copy, the server stores the
  * persistent copy
