@@ -497,9 +497,15 @@ int client_recovery_report(const client_status_t *cs, GTree *crt)
                    act_rsrmgr->generic->name, act_rsrmgr->xa_switch->name);
         }
 
-        printf("\nPrepared and in-doubt transaction list:\n");
-        g_tree_foreach(crt, client_recovery_report_foreach, (gpointer *)stdout);
-
+        if (g_tree_nnodes(crt)) {
+            printf("\nPrepared and in-doubt transaction list:\n");
+            g_tree_foreach(crt, client_recovery_report_foreach,
+                           (gpointer *)stdout);
+        } else
+            printf("\nThere are no prepared and in-doubt transactions to "
+                   "list.\n");
+        printf("\n");
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -548,6 +554,12 @@ gboolean client_recovery_report_foreach(gpointer key, gpointer value,
 
 
 int clnt_rcvr_xid_compare(gconstpointer a, gconstpointer b, gpointer foo) {
+    /*
+    LIXA_TRACE(("clnt_rcvr_xid_compare: "));
+    LIXA_TRACE_HEX_DATA(a, sizeof(XID));
+    LIXA_TRACE(("clnt_rcvr_xid_compare: "));
+    LIXA_TRACE_HEX_DATA(b, sizeof(XID));
+    */
     return xid_compare((const XID *)a, (const XID *)b);
 }
 
@@ -556,3 +568,102 @@ int clnt_rcvr_xid_compare(gconstpointer a, gconstpointer b, gpointer foo) {
 void clnt_rcvr_array_free(gpointer data) {
     g_array_free((GArray *)data, FALSE);
 }
+
+
+
+int client_recovery_cold_commit(const client_status_t *cs,
+                                const XID *xid,
+                                const GArray *rsrmgrs)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("client_recovery_cold_commit\n"));
+    TRY {
+        guint i;
+        
+        for (i=0; i<rsrmgrs->len; ++i) {
+            int xa_rc;
+            const long flags = TMNOFLAGS;
+            int *rmid = &g_array_index(rsrmgrs, int, i);
+            struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
+                global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s,
+                *rmid);
+            LIXA_TRACE(("client_recovery_cold_commit: rmid=%d, "
+                        "lixa_name='%s', xa_name='%s'\n", *rmid,
+                        act_rsrmgr->generic->name,
+                        act_rsrmgr->xa_switch->name));
+            xa_rc = act_rsrmgr->xa_switch->xa_commit_entry(
+                xid, *rmid, flags);
+            LIXA_TRACE(("client_recovery_cold_commit: "
+                        "xa_commit_entry(xid, %d, 0x%lx) = %d\n",
+                        *rmid, flags, xa_rc));
+            printf("rmid=%d, lixa_name='%s', xa_name='%s', rc=%d\n",
+                   *rmid, act_rsrmgr->generic->name,
+                   act_rsrmgr->xa_switch->name, xa_rc);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_recovery_cold_commit/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int client_recovery_cold_rollback(const client_status_t *cs,
+                                  const XID *xid,
+                                  const GArray *rsrmgrs)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("client_recovery_cold_rollback\n"));
+    TRY {
+        guint i;
+        
+        for (i=0; i<rsrmgrs->len; ++i) {
+            int xa_rc;
+            const long flags = TMNOFLAGS;
+            int *rmid = &g_array_index(rsrmgrs, int, i);
+            struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
+                global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s,
+                *rmid);
+            LIXA_TRACE(("client_recovery_cold_rollback: rmid=%d, "
+                        "lixa_name='%s', xa_name='%s'\n", *rmid,
+                        act_rsrmgr->generic->name,
+                        act_rsrmgr->xa_switch->name));
+            xa_rc = act_rsrmgr->xa_switch->xa_rollback_entry(
+                xid, *rmid, flags);
+            LIXA_TRACE(("client_recovery_cold_rollback: "
+                        "xa_rollback_entry(xid, %d, 0x%lx) = %d\n",
+                        *rmid, flags, xa_rc));
+            printf("rmid=%d, lixa_name='%s', xa_name='%s', rc=%d\n",
+                   *rmid, act_rsrmgr->generic->name,
+                   act_rsrmgr->xa_switch->name, xa_rc);
+        }
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_recovery_cold_rollback/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

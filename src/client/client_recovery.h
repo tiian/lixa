@@ -150,6 +150,32 @@ extern "C" {
 
     
 
+    /**
+     * Cold commit a transaction
+     * @param cs IN reference to the status of the calling client
+     * @param xid IN transaction to commit
+     * @param rsrmgrs IN the array of resource managers should be committed
+     * @return a reason code
+     */
+    int client_recovery_cold_commit(const client_status_t *cs,
+                                    const XID *xid,
+                                    const GArray *rsrmgrs);
+
+
+    
+    /**
+     * Cold rollback a transaction
+     * @param cs IN reference to the status of the calling client
+     * @param xid IN transaction to commit
+     * @param rsrmgrs IN the array of resource managers should be rolled back
+     * @return a reason code
+     */
+    int client_recovery_cold_rollback(const client_status_t *cs,
+                                      const XID *xid,
+                                      const GArray *rsrmgrs);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

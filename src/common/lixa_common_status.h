@@ -345,9 +345,7 @@ extern "C" {
      *         if (a<b) --> -1 <br>
      *         if (a>b) --> +1
      */
-    static inline int xid_compare(const XID *a, const XID *b) {
-        return memcmp(a, b, sizeof(XID));
-    }
+    int xid_compare(const XID *a, const XID *b);
 
 
     
