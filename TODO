@@ -1,10 +1,3 @@
-lixar: implement the recovery utility: cold recovery after scan and report
-(debug xid loop in lixa_tx_recover and go on)
-
-client_recovery: perform recovery
-
-restore multithread config for lixad (lixad_conf.xml ;) 
-
 server_recovery: implement LIXA_RC_BYPASSED_OPERATION and LIXA_RC_OBJ_NOT_FOUND
 
 When server_manager_thread exits, the listener must be aware of this... 

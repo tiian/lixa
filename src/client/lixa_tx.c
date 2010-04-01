@@ -1086,6 +1086,8 @@ int lixa_tx_recover(int report, int commit, int rollback,
                      , FOPEN_ERROR
                      , FGETS_ERROR
                      , XID_DESERIALIZE_ERROR
+                     , COLD_COMMIT_ERROR
+                     , COLD_ROLLBACK_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -1122,32 +1124,64 @@ int lixa_tx_recover(int report, int commit, int rollback,
         if (LIXA_RC_OK != (ret_cod = client_recovery_scan(cs, crt)))
             THROW(RECOVERY_SCAN_ERROR);
         
-        if (report && LIXA_RC_OK != (ret_cod = client_recovery_report(cs, crt)))
+        if (report && LIXA_RC_OK != (
+                ret_cod = client_recovery_report(cs, crt)))
             THROW(RECOVERY_REPORT_ERROR);
 
         /* open file if necessary */
-        if (NULL == (xid_stream = fopen(xid_file, "r")))
+        if (NULL != xid_file && NULL == (xid_stream = fopen(xid_file, "r")))
             THROW(FOPEN_ERROR);
 
         i = 0;
-        while (xid || !feof(xid_stream)) {
+        while (xid || xid_file) {
             char buffer[2*LIXA_XID_SERIALIZED_BUFFER_SIZE];
             XID tmp_xid;
+            gpointer tree_record;
+            
             i++;
             if (xid && i>1) break; /* leave after first cycle */
             if (xid) {
                 strncpy(buffer, xid, sizeof(buffer)-1);
                 buffer[sizeof(buffer)-1] = '\0';
             } else {
-                if (NULL == fgets(buffer, sizeof(buffer), xid_stream))
-                    THROW(FGETS_ERROR);                
+                char *p;
+                if (NULL == fgets(buffer, sizeof(buffer), xid_stream)) {
+                    if (feof(xid_stream))
+                        break;
+                    else
+                        THROW(FGETS_ERROR);
+                }
+                /* remove trailing \n */
+                if (NULL != (p = strchr(buffer, '\n')))
+                    *p = '\0';
             }
             if (strlen(buffer) != LIXA_XID_SERIALIZED_BUFFER_SIZE-1) {
                 LIXA_TRACE(("lixa_tx_recover: record # %d is of wrong "
                             "size, discarded ('%s')\n", i, buffer));
+                continue;
             }
+            printf("Analizing transaction '%s':\n", buffer);
             if (LIXA_RC_OK != (ret_cod = xid_deserialize(buffer, &tmp_xid)))
                 THROW(XID_DESERIALIZE_ERROR);
+            
+            /* look for xid */
+            if (NULL == (tree_record = g_tree_lookup(crt, &tmp_xid))) {
+                printf("this transaction was not found, skipping...\n");
+                continue;
+            } else {
+                if (commit) {
+                    if (LIXA_RC_OK != (
+                            ret_cod = client_recovery_cold_commit(
+                                cs, &tmp_xid, tree_record)))
+                    THROW(COLD_COMMIT_ERROR);
+                } else if (rollback) {
+                    if (LIXA_RC_OK != (
+                            ret_cod = client_recovery_cold_rollback(
+                                cs, &tmp_xid, tree_record)))
+                        THROW(COLD_ROLLBACK_ERROR);
+                } else printf("this transaction exists and could be "
+                              "committed/rolled back.\n");
+            }
         }
         
         THROW(NONE);
@@ -1171,6 +1205,9 @@ int lixa_tx_recover(int report, int commit, int rollback,
                 ret_cod = LIXA_RC_FGETS_ERROR;
                 break;
             case XID_DESERIALIZE_ERROR:
+                break;
+            case COLD_COMMIT_ERROR:
+            case COLD_ROLLBACK_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

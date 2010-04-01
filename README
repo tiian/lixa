@@ -90,12 +90,12 @@ unfortunately, so only very basic set-up is explained)
 
 Don't forget these steps for Oracle XA:
 1. connect as SYSDBA with:
-2. sqlplus "sys/oracle as sysdba"       (if your sys user has password oracle)
-3. grant select on dba_pending_transactions to hr
-                   (if hr is the user you want to use to run your application)
-4. create some extra views located in
+2. create some extra views located in
    $ORACLE_HOME/rdbms/admin/xaview.sql
    cat xaview.sql | sqlplus "sys/oracle as sysdba"
+3. sqlplus "sys/oracle as sysdba"       (if your sys user has password oracle)
+4. grant select on dba_pending_transactions to hr
+                   (if hr is the user you want to use to run your application)
 5. grant select on v$pending_xatrans$ to hr;
 6. grant select on v$xatrans$ to hr;
 
