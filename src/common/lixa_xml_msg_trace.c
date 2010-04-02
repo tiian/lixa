@@ -487,13 +487,14 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
                             msg->body.qrcvr_8.client.job,
                             msg->body.qrcvr_8.client.config_digest));
                 break;
-            case 16:
+            case 16:        
+                LIXA_TRACE(("lixa_msg_trace_qrcvr: body[answer[rc[%d]]]\n",
+                            msg->body.qrcvr_16.answer.rc));
+                if (LIXA_RC_OBJ_NOT_FOUND == msg->body.qrcvr_16.answer.rc)
+                    break;
                 if (NULL == (ser_xid = xid_serialize(
                                  &msg->body.qrcvr_16.client.state.xid)))
                     THROW(XID_SERIALIZE_ERROR);
-        
-                LIXA_TRACE(("lixa_msg_trace_qrcvr: body[answer[rc[%d]]]\n",
-                            msg->body.qrcvr_16.answer.rc));
                 LIXA_TRACE(("lixa_msg_trace_qrcvr: body[client[job="
                             "'%s',config_digest='%s']]]\n",
                             msg->body.qrcvr_16.client.job,

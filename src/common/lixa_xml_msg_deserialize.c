@@ -1110,7 +1110,8 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
                         msg->body.qrcvr_16.client.last_verb_step.step =
                             (int)strtol((char *)tmp, NULL, 0);
                         xmlFree(tmp);
-                    } else if (!xmlStrcmp(cur2->name, LIXA_XML_MSG_TAG_STATE)) {
+                    } else if (!xmlStrcmp(cur2->name,
+                                          LIXA_XML_MSG_TAG_STATE)) {
                         if (NULL == (tmp = xmlGetProp(
                                          cur2, LIXA_XML_MSG_PROP_FINISHED)))
                             THROW(PROP_FINISHED_NOT_FOUND);

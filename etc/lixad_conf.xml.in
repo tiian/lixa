@@ -6,7 +6,5 @@
   </listeners>
   <managers>
     <manager status_file="@EXPANDED_LOCALSTATEDIR@/lixad_status1"/>
-    <manager status_file="@EXPANDED_LOCALSTATEDIR@/lixad_status2"/>
-    <manager status_file="@EXPANDED_LOCALSTATEDIR@/lixad_status3"/>
   </managers>
 </server>

@@ -1075,6 +1075,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                                 size_t *offset, size_t *free_chars)
 {
     enum Exception { XID_SERIALIZE_ERROR
+                     , BYPASS_CLIENT_RSRMGRS
                      , BUFFER_TOO_SHORT1
                      , BUFFER_TOO_SHORT2
                      , BUFFER_TOO_SHORT3
@@ -1107,6 +1108,8 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
             THROW(BUFFER_TOO_SHORT1);
         *free_chars -= used_chars;
         *offset += used_chars;
+        if (LIXA_RC_OBJ_NOT_FOUND == msg->body.qrcvr_16.answer.rc)
+            THROW(BYPASS_CLIENT_RSRMGRS);
         /* <client> */
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "<%s %s=\"%s\" %s=\"%s\">",
@@ -1205,6 +1208,9 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
         switch (excp) {
             case XID_SERIALIZE_ERROR:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case BYPASS_CLIENT_RSRMGRS:
+                ret_cod = LIXA_RC_OK;
                 break;
             case BUFFER_TOO_SHORT1:
             case BUFFER_TOO_SHORT2:
