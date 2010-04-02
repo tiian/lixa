@@ -321,10 +321,13 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                         msg->body.qrcvr_8.client.job = NULL;
                         break;
                     case 16:
-                        xmlFree(msg->body.qrcvr_16.client.job);
-                        msg->body.qrcvr_16.client.job = NULL;
-                        g_array_free(msg->body.qrcvr_16.rsrmgrs, TRUE);
-                        msg->body.qrcvr_16.rsrmgrs = NULL;
+                        if (LIXA_RC_OBJ_NOT_FOUND !=
+                            msg->body.qrcvr_16.answer.rc) {
+	                        xmlFree(msg->body.qrcvr_16.client.job);
+                            msg->body.qrcvr_16.client.job = NULL;
+                            g_array_free(msg->body.qrcvr_16.rsrmgrs, TRUE);
+                            msg->body.qrcvr_16.rsrmgrs = NULL;
+                        }
                         break;
                     default:
                         THROW(INVALID_STEP8);

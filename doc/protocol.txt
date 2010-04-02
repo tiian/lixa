@@ -243,7 +243,8 @@ verb=8 (query recovery)
     <client job="59530bdf33659b29e73d4adb9f9f6552/127.0.0.1      " conf_digest="59530bdf33659b29e73d4adb9f9f6552"/>
   </msg>
 
-  server -> client message (answer)
+  server -> client message (answer there is at least one
+                            transaction to recover)
   <msg level="1" verb="8" step="16">
     <answer rc="0"/>
     <client job="59530bdf33659b29e73d4adb9f9f6552/127.0.0.1      " conf_digest="59530bdf33659b29e73d4adb9f9f6552">
@@ -256,6 +257,12 @@ verb=8 (query recovery)
     </rsrmgrs>
   </msg>
 
+
+  server -> client message (answer there are no
+                            transactions to recover)
+  <msg level="1" verb="8" step="16">
+    <answer rc="1"/>
+  </msg>
   
 
 client 			 server		description

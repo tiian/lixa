@@ -49,6 +49,7 @@ int server_recovery(struct thread_status_s *ts,
     enum Exception { PROTOCOL_ERROR
                      , JOB_SET_RAW_ERROR
                      , SERVER_RECOVERY_RESULT_ERROR
+                     , RECOVERY_RESULT_EMPTY_ERROR
                      , GET_BLOCK_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -83,7 +84,9 @@ int server_recovery(struct thread_status_s *ts,
                 /* @@@ implement thread transfer */
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
-                /* @@@ answer "no available transactions" */
+                if (LIXA_RC_OK != (ret_cod = server_recovery_empty_result(
+                                       ts, &result, lmi, lmo)))
+                    THROW(RECOVERY_RESULT_EMPTY_ERROR);
                 break;
             default:
                 THROW(GET_BLOCK_ERROR);
@@ -98,6 +101,7 @@ int server_recovery(struct thread_status_s *ts,
             case JOB_SET_RAW_ERROR:
                 break;
             case SERVER_RECOVERY_RESULT_ERROR:
+            case RECOVERY_RESULT_EMPTY_ERROR:
             case GET_BLOCK_ERROR:
                 break;
             case NONE:
@@ -166,7 +170,8 @@ int server_recovery_result(struct thread_status_s *ts,
 
         lmo->body.qrcvr_16.client.state.finished = pld->ph.state.finished;
         lmo->body.qrcvr_16.client.state.txstate = pld->ph.state.txstate;
-        lmo->body.qrcvr_16.client.state.will_commit = pld->ph.state.will_commit;
+        lmo->body.qrcvr_16.client.state.will_commit =
+            pld->ph.state.will_commit;
         lmo->body.qrcvr_16.client.state.will_rollback =
             pld->ph.state.will_rollback;
         memcpy(&lmo->body.qrcvr_16.client.state.xid, &pld->ph.state.xid,
@@ -202,6 +207,37 @@ int server_recovery_result(struct thread_status_s *ts,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_recovery_result/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_recovery_empty_result(struct thread_status_s *ts,
+                                 const struct srvr_rcvr_tbl_rec_s *record,
+                                 const struct lixa_msg_s *lmi,
+                                 struct lixa_msg_s *lmo)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_recovery_empty_result\n"));
+    TRY {
+        lmo->header.pvs.verb = LIXA_MSG_VERB_QRCVR;
+
+        lmo->body.qrcvr_16.answer.rc = LIXA_RC_OBJ_NOT_FOUND;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_recovery_empty_result/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

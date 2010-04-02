@@ -82,6 +82,22 @@ extern "C" {
 
 
 
+    /**
+     * Prepare the message with no recovery information (no transactions)
+     * @param ts IN/OUT a reference to the current thread status
+     * @param record IN a reference to the record extracted from the
+     *               recovery table
+     * @param lmi IN a reference to the message received from the client
+     * @param lmo OUT a reference to the message must be sent to the client
+     * @return a standardized reason code
+     */
+    int server_recovery_empty_result(struct thread_status_s *ts,
+                                     const struct srvr_rcvr_tbl_rec_s *record,
+                                     const struct lixa_msg_s *lmi,
+                                     struct lixa_msg_s *lmo);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
