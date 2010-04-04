@@ -521,11 +521,27 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
                         LIXA_TRACE(("lixa_msg_trace_qrcvr: body[rsrmgrs["
                                     "rsrmgr[rmid=%d,next_verb=%d,r_state=%d,"
                                     "s_state=%d,t_state=%d]]]\n",
-                                    rsrmgr->rmid,
-                                    rsrmgr->next_verb,
-                                    rsrmgr->r_state,
-                                    rsrmgr->s_state,
+                                    rsrmgr->rmid, rsrmgr->next_verb,
+                                    rsrmgr->r_state, rsrmgr->s_state,
                                     rsrmgr->t_state));
+                    }
+                }
+                break;
+            case 24:        
+                LIXA_TRACE(("lixa_msg_trace_qrcvr: body[recovery[failed=%d,"
+                            "commit=%d]]\n",
+                            msg->body.qrcvr_24.recovery.failed,
+                            msg->body.qrcvr_24.recovery.commit));
+                if (NULL != msg->body.qrcvr_24.rsrmgrs) {
+                    for (i=0; i<msg->body.qrcvr_24.rsrmgrs->len; ++i) {
+                        struct lixa_msg_body_qrcvr_24_rsrmgr_s *rsrmgr =
+                            &g_array_index(
+                                msg->body.qrcvr_24.rsrmgrs,
+                                struct lixa_msg_body_qrcvr_24_rsrmgr_s,
+                                i);
+                        LIXA_TRACE(("lixa_msg_trace_qrcvr: body[rsrmgrs["
+                                    "rsrmgr[rmid=%d,rc=%d]]]\n",
+                                    rsrmgr->rmid, rsrmgr->rc));
                     }
                 }
                 break;

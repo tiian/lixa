@@ -97,7 +97,8 @@ extern "C" {
      * @param lmo OUT a reference to the message must be sent to the client
      * @param block_id IN position of the block is storing the status of the
      *                    client is calling the server
-     * @param last_verb_step OUT last verb and step values
+     * @param last_verb_step OUT last verb and step values (prepared for
+     *                       reply function)
      * @return a reason code
      */
     int server_xa_end(struct thread_status_s *ts,
@@ -116,7 +117,8 @@ extern "C" {
      * @param lmo OUT a reference to the message must be sent to the client
      * @param block_id IN position of the block is storing the status of the
      *                    client is calling the server
-     * @param last_verb_step OUT last verb and step values
+     * @param last_verb_step OUT last verb and step values (prepared for
+     *                       reply function)
      * @return a reason code
      */
     int server_xa_end_8(struct thread_status_s *ts,
@@ -149,7 +151,8 @@ extern "C" {
      * @param lmo OUT a reference to the message must be sent to the client
      * @param block_id IN position of the block is storing the status of the
      *                    client is calling the server
-     * @param last_verb_step OUT last verb and step values
+     * @param last_verb_step OUT last verb and step values (prepared for
+     *                       reply function)
      * @return a reason code
      */
     int server_xa_open(struct thread_status_s *ts,
@@ -168,7 +171,8 @@ extern "C" {
      * @param lmo OUT a reference to the message must be sent to the client
      * @param block_id IN position of the block is storing the status of the
      *                    client is calling the server
-     * @param last_verb_step OUT last verb and step values
+     * @param last_verb_step OUT last verb and step values (prepared for
+     *                       reply function)
      * @return a reason code
      */
     int server_xa_open_8(struct thread_status_s *ts,
@@ -201,7 +205,8 @@ extern "C" {
      * @param lmo OUT a reference to the message must be sent to the client
      * @param block_id IN position of the block is storing the status of the
      *                    client is calling the server
-     * @param last_verb_step OUT last verb and step values
+     * @param last_verb_step OUT last verb and step values (prepared for
+     *                       reply function)
      * @return a reason code
      */
     int server_xa_prepare(struct thread_status_s *ts,
@@ -220,7 +225,8 @@ extern "C" {
      * @param lmo OUT a reference to the message must be sent to the client
      * @param block_id IN position of the block is storing the status of the
      *                    client is calling the server
-     * @param last_verb_step OUT last verb and step values
+     * @param last_verb_step OUT last verb and step values (prepared for
+     *                       reply function)
      * @return a reason code
      */
     int server_xa_prepare_8(struct thread_status_s *ts,
@@ -266,7 +272,8 @@ extern "C" {
      * @param lmo OUT a reference to the message must be sent to the client
      * @param block_id IN position of the block is storing the status of the
      *                    client is calling the server
-     * @param last_verb_step OUT last verb and step values
+     * @param last_verb_step OUT last verb and step values (prepared for
+     *                       reply function)
      * @return a reason code
      */
     int server_xa_start(struct thread_status_s *ts,
@@ -285,7 +292,8 @@ extern "C" {
      * @param lmo OUT a reference to the message must be sent to the client
      * @param block_id IN position of the block is storing the status of the
      *                    client is calling the server
-     * @param last_verb_step OUT last verb and step values
+     * @param last_verb_step OUT last verb and step values (prepared for
+     *                       reply function)
      * @return a reason code
      */
     int server_xa_start_8(struct thread_status_s *ts,

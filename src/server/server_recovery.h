@@ -56,12 +56,48 @@ extern "C" {
      * @param lmo OUT a reference to the message must be sent to the client
      * @param block_id IN position of the block is storing the status of the
      *                    client is calling the server
+     * @param last_verb_step OUT last verb and step values (prepared for
+     *                       reply function)
      * @return a reason code
      */
     int server_recovery(struct thread_status_s *ts,
                         const struct lixa_msg_s *lmi,
                         struct lixa_msg_s *lmo,
-                        uint32_t block_id);
+                        uint32_t block_id,
+                        struct lixa_msg_verb_step_s *last_verb_step);
+
+    
+
+    /**
+     * Executes the logic related to "qrcvr" (step 8) on the server side
+     * @param ts IN/OUT a reference to the current thread status
+     * @param lmi IN a reference to the message received from the client
+     * @param lmo OUT a reference to the message must be sent to the client
+     * @param block_id IN position of the block is storing the status of the
+     *                    client is calling the server
+     * @param last_verb_step OUT last verb and step values (prepared for
+     *                       reply function)
+     * @return a reason code
+     */
+    int server_recovery_8(struct thread_status_s *ts,
+                          const struct lixa_msg_s *lmi,
+                          struct lixa_msg_s *lmo,
+                          uint32_t block_id,
+                          struct lixa_msg_verb_step_s *last_verb_step);
+
+    
+
+    /**
+     * Executes the logic related to "qrcvr" (step 24) on the server side
+     * @param ts IN/OUT a reference to the current thread status
+     * @param lmi IN a reference to the message received from the client
+     * @param block_id IN position of the block is storing the status of the
+     *                    client is calling the server
+     * @return a reason code
+     */
+    int server_recovery_24(struct thread_status_s *ts,
+                           const struct lixa_msg_s *lmi,
+                           uint32_t block_id);
 
     
 
@@ -73,12 +109,15 @@ extern "C" {
      *               recovery table
      * @param lmi IN a reference to the message received from the client
      * @param lmo OUT a reference to the message must be sent to the client
+     * @param client_block_id IN position of the block is storing the status
+     *                        of the client is calling the server
      * @return a standardized reason code
      */
     int server_recovery_result(struct thread_status_s *ts,
                                const struct srvr_rcvr_tbl_rec_s *record,
                                const struct lixa_msg_s *lmi,
-                               struct lixa_msg_s *lmo);
+                               struct lixa_msg_s *lmo,
+                               uint32_t client_block_id);
 
 
 

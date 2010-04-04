@@ -124,6 +124,10 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
         memset(&srd->pld.ph.last_verb_step, 0,
                sizeof(struct lixa_msg_verb_step_s) * PAYLOAD_HEADER_VERB_STEP);
         common_status_conthr_init(&srd->pld.ph.state);
+        srd->pld.ph.recoverying_block_id = 0;
+        srd->pld.ph.recovery_failed = FALSE;
+        srd->pld.ph.recovery_commit = FALSE;
+        memset(&srd->pld.ph.recovery_failed_time, 0, sizeof(struct timeval));
         
         /* set the timestamp of the client arrival */
         if (0 != gettimeofday(&srd->pld.ph.arrival_time, NULL))
@@ -175,7 +179,8 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
 
 
 
-int payload_header_store_verb_step(struct thread_status_s *ts, uint32_t block_id,
+int payload_header_store_verb_step(struct thread_status_s *ts,
+                                   uint32_t block_id,
                                    const struct lixa_msg_verb_step_s *vs)
 {
     enum Exception { INVALID_RECORD
@@ -348,7 +353,8 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
             LIXA_TRACE(("payload_chain_allocate: number of children is now "
                         "%d, last children is " UINT32_T_FORMAT "\n",
                         ts->curr_status[block_id].sr.data.pld.ph.n,
-                        ts->curr_status[block_id].sr.data.pld.ph.block_array[i]));
+                        ts->curr_status[block_id
+                                        ].sr.data.pld.ph.block_array[i]));
         }
         THROW(NONE);
     } CATCH {
@@ -362,7 +368,8 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
             case STATUS_RECORD_INSERT_ERROR:
                 LIXA_TRACE(("payload_chain_allocate: unable to allocate "
                             "%d children blocks, releasing all...\n", size));
-                if (LIXA_RC_OK == (ret_cod = payload_chain_release(ts, block_id)))
+                if (LIXA_RC_OK == (ret_cod =
+                                   payload_chain_release(ts, block_id)))
                     ret_cod = LIXA_RC_CONTAINER_FULL;
                 break;
             case NONE:

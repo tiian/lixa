@@ -51,6 +51,9 @@
 #define LIXA_SYSLOG_LXC004C "LXC004C resource manager '%s' returned an " \
     "error (%d) while rolling back (xa_rollback) during recovery phase for " \
     "transaction '%s'"
+#define LIXA_SYSLOG_LXC005W "LXC005W unable to recover transaction id '%s'; " \
+    "this transaction must be manually recovered and the correlated " \
+    "record(s) must be manually fixed in lixad server status file"
 
 
 
@@ -76,6 +79,10 @@
 #define LIXA_SYSLOG_LXD011W "LXD011W a client is performing recovery " \
     "but config file changed in the meantime for job '%s' and transaction " \
     "'%s'"
+#define LIXA_SYSLOG_LXD012W "LXD012W a client notified recovery failed " \
+    "condition for the transaction registered in status file %d and block " \
+    UINT32_T_FORMAT
+
 
 
 #define LIXA_SYSLOG_LXR000I "LXR000I LIXA recovery process is starting"

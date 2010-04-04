@@ -1,12 +1,9 @@
-try this scenario:
-  - client crash (1 TX to recover)
-  - recover
-  - no more TX to recover
-  - go on with normal xa_start
-
 restore server multithread configuration
 
 server_recovery: implement LIXA_RC_BYPASSED_OPERATION
+
+open a RFNF: an utility (it must designed how) to clean up recovery failed
+records from server status file
 
 When server_manager_thread exits, the listener must be aware of this... 
 

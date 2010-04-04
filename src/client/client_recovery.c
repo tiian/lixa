@@ -48,23 +48,25 @@ int client_recovery(client_status_t *cs,
                     const struct lixa_msg_body_open_8_client_s *client)
 {
     enum Exception { XML_STRDUP_ERROR
-                     , MSG_SERIALIZE_ERROR
-                     , SEND_ERROR
+                     , MSG_SERIALIZE_ERROR1
+                     , SEND_ERROR1
                      , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , ABORTED_RECOVERY
                      , ANALYZE_ERROR
                      , COMMIT_ERROR
                      , ROLLBACK_ERROR
+                     , MSG_SERIALIZE_ERROR2
+                     , SEND_ERROR2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     char *ser_xid = NULL;
+    struct lixa_msg_s rqst, rpl, updt;
     
     LIXA_TRACE(("client_recovery\n"));
     TRY {
         int fd;
-        struct lixa_msg_s rqst, rpl;
         size_t buffer_size = 0;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
@@ -73,73 +75,116 @@ int client_recovery(client_status_t *cs,
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
 
-        /* build the message */
-        rqst.header.level = LIXA_MSG_LEVEL;
-        rqst.header.pvs.verb = LIXA_MSG_VERB_QRCVR;
-        rqst.header.pvs.step = LIXA_MSG_STEP_INCR;
+        while (TRUE) { /* exit only if the server tells: no available tx */
+            /* initialize messages */
+            lixa_msg_init(&rqst);
+            lixa_msg_init(&rpl);
+            lixa_msg_init(&updt);
+            /* build the message */
+            rqst.header.level = LIXA_MSG_LEVEL;
+            rqst.header.pvs.verb = LIXA_MSG_VERB_QRCVR;
+            rqst.header.pvs.step = LIXA_MSG_STEP_INCR;
 
-        if (NULL == (rqst.body.qrcvr_8.client.job = xmlStrdup(client->job)))
-            THROW(XML_STRDUP_ERROR);
-        strncpy(rqst.body.qrcvr_8.client.config_digest, client->config_digest,
-                sizeof(md5_digest_hex_t));
-        rqst.body.qrcvr_8.client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
+            if (NULL == (rqst.body.qrcvr_8.client.job =
+                         xmlStrdup(client->job)))
+                THROW(XML_STRDUP_ERROR);
+            strncpy(rqst.body.qrcvr_8.client.config_digest,
+                    client->config_digest,
+                    sizeof(md5_digest_hex_t));
+            rqst.body.qrcvr_8.client.config_digest[MD5_DIGEST_LENGTH * 2] =
+                '\0';
         
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &rqst, buffer, sizeof(buffer)-1, &buffer_size)))
-            THROW(MSG_SERIALIZE_ERROR);
+            if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
+                                   &rqst, buffer, sizeof(buffer)-1,
+                                   &buffer_size)))
+                THROW(MSG_SERIALIZE_ERROR1);
 
-        LIXA_TRACE(("client_recovery: sending " SIZE_T_FORMAT
-                    " bytes ('%s') to the server for step 8\n",
-                    buffer_size, buffer));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR);
+            LIXA_TRACE(("client_recovery: sending " SIZE_T_FORMAT
+                        " bytes ('%s') to the server for step %d\n",
+                        buffer_size, buffer, rqst.header.pvs.step));
+            if (buffer_size != send(fd, buffer, buffer_size, 0))
+                THROW(SEND_ERROR1);
 
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer)-1, &read_bytes)))
-            THROW(MSG_RETRIEVE_ERROR);
-        LIXA_TRACE(("client_recovery: receiving %d"
-                    " bytes from the server |%*.*s|\n",
-                    read_bytes, read_bytes, read_bytes, buffer));
-        
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                               buffer, read_bytes, &rpl)))
-            THROW(MSG_DESERIALIZE_ERROR);
+            if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
+                                   fd, buffer, sizeof(buffer)-1, &read_bytes)))
+                THROW(MSG_RETRIEVE_ERROR);
+            LIXA_TRACE(("client_recovery: receiving %d"
+                        " bytes from the server |%*.*s|\n",
+                        read_bytes, read_bytes, read_bytes, buffer));
+            
+            if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
+                                   buffer, read_bytes, &rpl)))
+                THROW(MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
-        lixa_msg_trace(&rpl);
+            lixa_msg_trace(&rpl);
 #endif
-
-        ser_xid = xid_serialize(&rpl.body.qrcvr_16.client.state.xid);
+            
+            /* check exit condition */
+            if (LIXA_RC_OBJ_NOT_FOUND == rpl.body.qrcvr_16.answer.rc) {
+                LIXA_TRACE(("client_recovery: the server answered "
+                            "LIXA_RC_OBJ_NOT_FOUND; there are no more "
+                            "transactions to recover\n"));
+                break;
+            }
+            
+            ser_xid = xid_serialize(&rpl.body.qrcvr_16.client.state.xid);
         
-        /* check config digest */
-        if (strncmp(rqst.body.qrcvr_8.client.config_digest,
-                    rpl.body.qrcvr_16.client.config_digest,
-                    sizeof(md5_digest_hex_t))) {    
-            LIXA_TRACE(("client_recovery: current config digest ('%s') does "
-                        "not match server stored config digest ('%s'); "
-                        "this transaction can NOT be recovered by this "
-                        "client\n",
+            /* check config digest */
+            if (strncmp(rqst.body.qrcvr_8.client.config_digest,
                         rpl.body.qrcvr_16.client.config_digest,
-                        rqst.body.qrcvr_8.client.config_digest));
-            syslog(LOG_ERR, LIXA_SYSLOG_LXC001E, ser_xid ? ser_xid : "",
-                   rpl.body.qrcvr_16.client.config_digest,
-                   rqst.body.qrcvr_8.client.config_digest);
-            THROW(ABORTED_RECOVERY);
-        }
-        
-        /* check the answer is arrived from the server */
-        if (LIXA_RC_OK != (ret_cod = client_recovery_analyze(
-                               cs, &rpl, &commit)))
-            THROW(ANALYZE_ERROR);
-        LIXA_TRACE(("client_recovery: transaction '%s' must be %s\n",
-                    ser_xid, commit ? "committed" : "rolled back"));
+                        sizeof(md5_digest_hex_t))) {    
+                LIXA_TRACE(("client_recovery: current config digest ('%s') "
+                            "does not match server stored config digest "
+                            "('%s'); this transaction can NOT be recovered "
+                            "by this client\n",
+                            rpl.body.qrcvr_16.client.config_digest,
+                            rqst.body.qrcvr_8.client.config_digest));
+                syslog(LOG_ERR, LIXA_SYSLOG_LXC001E, ser_xid ? ser_xid : "",
+                       rpl.body.qrcvr_16.client.config_digest,
+                       rqst.body.qrcvr_8.client.config_digest);
+                THROW(ABORTED_RECOVERY);
+            }
 
-        if (commit) {
-            if (LIXA_RC_OK != (ret_cod = client_recovery_commit(cs, &rpl)))
-                THROW(COMMIT_ERROR);
-        } else {
-            if (LIXA_RC_OK != (ret_cod = client_recovery_rollback(cs, &rpl)))
-                THROW(ROLLBACK_ERROR);
-        }
+            /* check the answer is arrived from the server */
+            if (LIXA_RC_OK != (ret_cod = client_recovery_analyze(
+                                   cs, &rpl, &commit)))
+                THROW(ANALYZE_ERROR);
+            LIXA_TRACE(("client_recovery: transaction '%s' must be %s\n",
+                        ser_xid, commit ? "committed" : "rolled back"));
+
+            /* build the message */
+            updt.header.level = LIXA_MSG_LEVEL;
+            updt.header.pvs.verb = LIXA_MSG_VERB_QRCVR;
+            updt.header.pvs.step = 3*LIXA_MSG_STEP_INCR;
+            updt.body.qrcvr_24.recovery.commit = commit;
+            
+            if (commit) {
+                if (LIXA_RC_OK != (ret_cod = client_recovery_commit(
+                                       cs, &rpl, &updt)))
+                    THROW(COMMIT_ERROR);
+            } else {
+                if (LIXA_RC_OK != (ret_cod = client_recovery_rollback(
+                                       cs, &rpl, &updt)))
+                    THROW(ROLLBACK_ERROR);
+            }
+            if (updt.body.qrcvr_24.recovery.failed)
+                syslog(LOG_WARNING, LIXA_SYSLOG_LXC005W, ser_xid);
+            
+            if (LIXA_RC_OK != (
+                    ret_cod = lixa_msg_serialize(
+                        &updt, buffer, sizeof(buffer)-1, &buffer_size)))
+                THROW(MSG_SERIALIZE_ERROR2);
+            
+            LIXA_TRACE(("client_recovery: sending " SIZE_T_FORMAT
+                        " bytes ('%s') to the server for step %d\n",
+                        buffer_size, buffer, updt.header.pvs.step));
+            if (buffer_size != send(fd, buffer, buffer_size, 0))
+                THROW(SEND_ERROR2);
+            /* release messages */
+            lixa_msg_free(&rqst);
+            lixa_msg_free(&rpl);
+            lixa_msg_free(&updt);
+        } /* while (TRUE) */
         
         THROW(NONE);
     } CATCH {
@@ -147,9 +192,9 @@ int client_recovery(client_status_t *cs,
             case XML_STRDUP_ERROR:
                 ret_cod = LIXA_RC_XML_STRDUP_ERROR;
                 break;
-            case MSG_SERIALIZE_ERROR:
+            case MSG_SERIALIZE_ERROR1:
                 break;
-            case SEND_ERROR:
+            case SEND_ERROR1:
                 ret_cod = LIXA_RC_SEND_ERROR;
                 break;
             case MSG_RETRIEVE_ERROR:
@@ -162,6 +207,11 @@ int client_recovery(client_status_t *cs,
             case COMMIT_ERROR:
             case ROLLBACK_ERROR:
                 break;
+            case MSG_SERIALIZE_ERROR2:
+                break;
+            case SEND_ERROR2:
+                ret_cod = LIXA_RC_SEND_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -169,6 +219,10 @@ int client_recovery(client_status_t *cs,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         if (ser_xid) free(ser_xid);
+        /* release messages */
+        lixa_msg_free(&rqst);
+        lixa_msg_free(&rpl);
+        lixa_msg_free(&updt);
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -205,7 +259,7 @@ int client_recovery_analyze(const client_status_t *cs,
                             "s_state=%d, t_state=%d\n",
                             rsrmgr->rmid, rsrmgr->r_state, rsrmgr->s_state,
                             rsrmgr->t_state));
-                if (rsrmgr->t_state != XA_STATE_S3)
+                if (rsrmgr->s_state != XA_STATE_S3)
                     all_prepared = FALSE;
             }
             if (rpl->body.qrcvr_16.rsrmgrs->len > 1)
@@ -243,7 +297,8 @@ int client_recovery_analyze(const client_status_t *cs,
 
 
 int client_recovery_commit(const client_status_t *cs,
-                           struct lixa_msg_s *rpl)
+                           struct lixa_msg_s *rpl,
+                           struct lixa_msg_s *updt)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -253,11 +308,16 @@ int client_recovery_commit(const client_status_t *cs,
     LIXA_TRACE(("client_recovery_commit\n"));
     TRY {
         guint i;
+        int failed = FALSE;
         
         ser_xid = xid_serialize(&rpl->body.qrcvr_16.client.state.xid);
         LIXA_TRACE(("client_recovery_commit: committing transaction '%s'\n",
                     ser_xid));
         
+        updt->body.qrcvr_24.rsrmgrs = g_array_sized_new(
+            FALSE, FALSE,
+            sizeof(struct lixa_msg_body_qrcvr_24_rsrmgr_s),
+            rpl->body.qrcvr_16.rsrmgrs->len);
         /* check the status of the resource managers */
         for (i=0; i<rpl->body.qrcvr_16.rsrmgrs->len; ++i) {
             int rc;
@@ -267,6 +327,8 @@ int client_recovery_commit(const client_status_t *cs,
             struct act_rsrmgr_config_s *act_rsrmgr =
                 &g_array_index(global_ccc.actconf.rsrmgrs,
                                struct act_rsrmgr_config_s, i);
+            struct lixa_msg_body_qrcvr_24_rsrmgr_s record;
+            
             LIXA_TRACE(("client_recovery_commit: xa_commit for rmid=%d, "
                         "name='%s', xa_name='%s'...\n",
                         rsrmgr->rmid, (char *)act_rsrmgr->generic->name,
@@ -275,10 +337,17 @@ int client_recovery_commit(const client_status_t *cs,
                 &rpl->body.qrcvr_16.client.state.xid, i,
                 rpl->body.qrcvr_16.rsrmgrs->len == 1 ? TMONEPHASE : TMNOFLAGS);
             LIXA_TRACE(("client_recovery_commit: rc=%d\n", rc));
-            if (rc)
+            if (XA_OK != rc) {
                 syslog(LOG_CRIT, LIXA_SYSLOG_LXC003C,
-                       act_rsrmgr->xa_switch->name, rc, ser_xid); 
+                       act_rsrmgr->xa_switch->name, rc, ser_xid);
+                failed = TRUE;
+            }
+            /* prepare record for server update */
+            record.rmid = rsrmgr->rmid;
+            record.rc = rc;
+            g_array_append_val(updt->body.qrcvr_24.rsrmgrs, record);
         }
+        updt->body.qrcvr_24.recovery.failed = failed;
         
         THROW(NONE);
     } CATCH {
@@ -300,7 +369,8 @@ int client_recovery_commit(const client_status_t *cs,
 
     
 int client_recovery_rollback(const client_status_t *cs,
-                             struct lixa_msg_s *rpl)
+                             struct lixa_msg_s *rpl,
+                             struct lixa_msg_s *updt)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -310,11 +380,16 @@ int client_recovery_rollback(const client_status_t *cs,
     LIXA_TRACE(("client_recovery_rollback\n"));
     TRY {
         guint i;
+        int failed = FALSE;
         
         ser_xid = xid_serialize(&rpl->body.qrcvr_16.client.state.xid);
         LIXA_TRACE(("client_recovery_rollback: rolling back "
                     "transaction '%s'\n", ser_xid));
         
+        updt->body.qrcvr_24.rsrmgrs = g_array_sized_new(
+            FALSE, FALSE,
+            sizeof(struct lixa_msg_body_qrcvr_24_rsrmgr_s),
+            rpl->body.qrcvr_16.rsrmgrs->len);
         /* check the status of the resource managers */
         for (i=0; i<rpl->body.qrcvr_16.rsrmgrs->len; ++i) {
             int rc;
@@ -324,6 +399,8 @@ int client_recovery_rollback(const client_status_t *cs,
             struct act_rsrmgr_config_s *act_rsrmgr =
                 &g_array_index(global_ccc.actconf.rsrmgrs,
                                struct act_rsrmgr_config_s, i);
+            struct lixa_msg_body_qrcvr_24_rsrmgr_s record;
+            
             LIXA_TRACE(("client_recovery_rollback: xa_rollback for rmid=%d, "
                         "name='%s', xa_name='%s'...\n",
                         rsrmgr->rmid, (char *)act_rsrmgr->generic->name,
@@ -332,10 +409,17 @@ int client_recovery_rollback(const client_status_t *cs,
                 &rpl->body.qrcvr_16.client.state.xid, i,
                 rpl->body.qrcvr_16.rsrmgrs->len == 1 ? TMONEPHASE : TMNOFLAGS);
             LIXA_TRACE(("client_recovery_rollback: rc=%d\n", rc));
-            if (rc)
+            if (XA_OK != rc) {
                 syslog(LOG_CRIT, LIXA_SYSLOG_LXC004C,
-                       act_rsrmgr->xa_switch->name, rc, ser_xid); 
+                       act_rsrmgr->xa_switch->name, rc, ser_xid);
+                failed = TRUE;
+            }
+            /* prepare record for server update */
+            record.rmid = rsrmgr->rmid;
+            record.rc = rc;
+            g_array_append_val(updt->body.qrcvr_24.rsrmgrs, record);
         }
+        updt->body.qrcvr_24.recovery.failed = failed;
         
         THROW(NONE);
     } CATCH {
@@ -407,7 +491,8 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt)
                         LIXA_TRACE(("client_recovery_scan: this transaction "
                                     "has format id 0x%lx instead of 0x%lx "
                                     "and will be discarded\n",
-                                    xid_array[j].formatID, LIXA_XID_FORMAT_ID));
+                                    xid_array[j].formatID,
+                                    LIXA_XID_FORMAT_ID));
                         continue;
                     }
                     /* check XID branch qualifier */
@@ -572,7 +657,7 @@ void clnt_rcvr_array_free(gpointer data) {
 
 
 int client_recovery_cold_commit(const client_status_t *cs,
-                                const XID *xid,
+                                XID *xid,
                                 const GArray *rsrmgrs)
 {
     enum Exception { NONE } excp;
@@ -621,7 +706,7 @@ int client_recovery_cold_commit(const client_status_t *cs,
 
 
 int client_recovery_cold_rollback(const client_status_t *cs,
-                                  const XID *xid,
+                                  XID *xid,
                                   const GArray *rsrmgrs)
 {
     enum Exception { NONE } excp;

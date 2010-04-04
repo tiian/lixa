@@ -263,13 +263,25 @@ verb=8 (query recovery)
   <msg level="1" verb="8" step="16">
     <answer rc="1"/>
   </msg>
-  
+ 
+ 
+  client->server message (recovery result)
+  <msg level="1" verb="8" step="24">
+    <recovery failed="0" commit="0"/>
+    <rsrmgrs>
+      <rsrmgr rmid="0" rc="?"/>
+      <rsrmgr rmid="1" rc="?"/>
+    </rsrmgrs>
+  </msg>
+
 
 client 			 server		description
 verb=8,step=8 -->			query for recovery pending 
 					transactions
 		<-- verb=8,step=16	return the first transaction must
 					be recovered
-
+verb=8,step=24 -->			send recovery result
+					store failed info or discard
+					transaction info
 ***************************************************************************
 

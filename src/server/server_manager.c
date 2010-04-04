@@ -698,8 +698,10 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                     THROW(SERVER_XA_ROLLBACK_ERROR)
                 break;
             case LIXA_MSG_VERB_QRCVR:
-                if (LIXA_RC_OK != (ret_cod = server_recovery(
-                                       ts, &lmi, lmo, block_id)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_recovery(
+                            ts, &lmi, lmo, block_id,
+                            &(ts->client_array[slot_id].last_verb_step))))
                     THROW(SERVER_XA_QRCVR_ERROR)
                 break;
             default:

@@ -377,8 +377,9 @@ int server_xa_open(struct thread_status_s *ts,
     TRY {
         switch (lmi->header.pvs.step) {
             case 8:
-                if (LIXA_RC_OK != (ret_cod = server_xa_open_8(
-                                       ts, lmi, lmo, block_id, last_verb_step)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_xa_open_8(
+                            ts, lmi, lmo, block_id, last_verb_step)))
                     THROW(SERVER_XA_OPEN_8_ERROR);
                 break;
             case 24:
