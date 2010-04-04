@@ -77,7 +77,8 @@
  */
 #define LIXA_MSG_LEVEL          0
 /**
- * Id reserved for a null message
+ * Id reserved for a null message: do NOT change this value because it
+ * would break the @ref lixa_msg_init behavior
  */
 #define LIXA_MSG_VERB_NULL      0
 /**
@@ -132,6 +133,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_COMMIT;
  * Label used to specify "config_digest" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_CONFIG_DIGEST;
+/**
+ * Label used to specify "failed" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_FAILED;
 /**
  * Label used to specify "finished" property
  */
@@ -228,6 +233,10 @@ extern const xmlChar *LIXA_XML_MSG_TAG_LAST_VERB_STEP;
  * Label used to specify "msg" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_MSG;
+/**
+ * Label used to specify "recovery" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_RECOVERY;
 /**
  * Label used to specify "rsrmgr" tag
  */
@@ -926,6 +935,48 @@ struct lixa_msg_body_qrcvr_16_s {
 
 
 /**
+ * Convenience struct for @ref lixa_msg_body_qrcvr_24_s
+ */
+struct lixa_msg_body_qrcvr_24_recovery_s {
+    /**
+     * Boolean: TRUE -> attempted recovery failed;
+     */
+    int                                      failed;
+    /**
+     * Boolean: TRUE -> attempted xa_commit; FALSE -> attempted xa_rollback
+     */
+    int                                      commit;
+};
+
+    
+
+/**
+ * Convenience struct for @ref lixa_msg_body_qrcvr_24_s
+ */
+struct lixa_msg_body_qrcvr_24_rsrmgr_s {
+    /**
+     * rmid parameter as passed to xa_close routine
+     */
+    int                                      rmid;
+    /**
+     * xa_rollback / xa_commit return code
+     */
+    int                                      rc;
+};
+
+    
+
+/**
+ * Message body for verb "qrcvr", step "24"
+ */
+struct lixa_msg_body_qrcvr_24_s {
+    struct lixa_msg_body_qrcvr_24_recovery_s recovery;
+    GArray                                  *rsrmgrs;
+};
+
+
+
+/**
  * This structure maps the messages flowing between LIXA client (lixac) and
  * LIXA server (lixad). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
@@ -956,6 +1007,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_rollback_8_s      rollback_8;
         struct lixa_msg_body_qrcvr_8_s         qrcvr_8;
         struct lixa_msg_body_qrcvr_16_s        qrcvr_16;
+        struct lixa_msg_body_qrcvr_24_s        qrcvr_24;
     } body;
 };
 
@@ -965,6 +1017,16 @@ struct lixa_msg_s {
 extern "C" {
 #endif /* __cplusplus */
 
+
+
+    /**
+     * Initialize an empty message
+     * @param msg IN/OUT message must be initialized
+     */
+    static inline void lixa_msg_init(struct lixa_msg_s *msg) {
+        memset(msg, 0, sizeof(struct lixa_msg_s));
+    }
+    
 
 
     /**

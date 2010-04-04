@@ -20,6 +20,12 @@
 
 
 
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#ifdef HAVE_TIME_H
+# include <time.h>
+#endif
 #ifdef HAVE_SYSLOG_H
 # include <syslog.h>
 #endif
@@ -44,7 +50,61 @@
 int server_recovery(struct thread_status_s *ts,
                     const struct lixa_msg_s *lmi,
                     struct lixa_msg_s *lmo,
-                    uint32_t block_id)
+                    uint32_t block_id,
+                    struct lixa_msg_verb_step_s *last_verb_step)
+{
+    enum Exception { SERVER_RECOVERY_8_ERROR
+                     , SERVER_RECOVERY_24_ERROR
+                     , INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_recovery\n"));
+    TRY {
+        switch (lmi->header.pvs.step) {
+            case 8:
+                if (LIXA_RC_OK != (
+                        ret_cod = server_recovery_8(
+                            ts, lmi, lmo, block_id, last_verb_step)))
+                    THROW(SERVER_RECOVERY_8_ERROR);
+                break;
+            case 24:
+                if (LIXA_RC_OK != (ret_cod = server_recovery_24(
+                                       ts, lmi, block_id)))
+                    THROW(SERVER_RECOVERY_24_ERROR);
+                break;
+            default:
+                THROW(INVALID_STEP);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case SERVER_RECOVERY_8_ERROR:
+            case SERVER_RECOVERY_24_ERROR:
+                break;
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_recovery/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_recovery_8(struct thread_status_s *ts,
+                      const struct lixa_msg_s *lmi,
+                      struct lixa_msg_s *lmo,
+                      uint32_t block_id,
+                      struct lixa_msg_verb_step_s *last_verb_step)
 {
     enum Exception { PROTOCOL_ERROR
                      , JOB_SET_RAW_ERROR
@@ -54,7 +114,7 @@ int server_recovery(struct thread_status_s *ts,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("server_recovery\n"));
+    LIXA_TRACE(("server_recovery_8\n"));
     TRY {
         struct srvr_rcvr_tbl_rec_s query, result;
         lixa_job_t query_job, result_job;
@@ -77,7 +137,7 @@ int server_recovery(struct thread_status_s *ts,
         switch (ret_cod) {
             case LIXA_RC_OK:
                 if (LIXA_RC_OK != (ret_cod = server_recovery_result(
-                                       ts, &result, lmi, lmo)))
+                                       ts, &result, lmi, lmo, block_id)))
                     THROW(SERVER_RECOVERY_RESULT_ERROR);
                 break;
             case LIXA_RC_BYPASSED_OPERATION:
@@ -91,6 +151,10 @@ int server_recovery(struct thread_status_s *ts,
             default:
                 THROW(GET_BLOCK_ERROR);
         } /* switch (rc) */
+        
+        /* prepare next protocol step */
+        last_verb_step->verb = lmo->header.pvs.verb;
+        last_verb_step->step = lmo->header.pvs.step;
         
         THROW(NONE);
     } CATCH {
@@ -111,7 +175,81 @@ int server_recovery(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("server_recovery/excp=%d/"
+    LIXA_TRACE(("server_recovery_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_recovery_24(struct thread_status_s *ts,
+                       const struct lixa_msg_s *lmi,
+                       uint32_t block_id)
+{
+    enum Exception { PAYLOAD_CHAIN_RELEASE
+                     , GETTIMEOFDAY_ERROR
+                     , INVALID_STATUS
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_recovery_24\n"));
+    TRY {
+        uint32_t recoverying_block_id = ts->curr_status[block_id].
+            sr.data.pld.ph.recoverying_block_id;
+
+        if (!lmi->body.qrcvr_24.recovery.failed) {
+            LIXA_TRACE(("server_recovery_24: client completed the recovery "
+                        "phase successfully; release block # " UINT32_T_FORMAT
+                        " and its chain\n", recoverying_block_id));
+            if (LIXA_RC_OK != (ret_cod = payload_chain_release(
+                                   ts, recoverying_block_id)))
+                THROW(PAYLOAD_CHAIN_RELEASE);
+        } else {
+            struct payload_header_s *ph = &(
+                ts->curr_status[recoverying_block_id].sr.data.pld.ph);
+            int i;
+            ph->recovery_failed = TRUE;
+            ph->recovery_commit = lmi->body.qrcvr_24.recovery.commit;
+            status_record_update(ts->curr_status + recoverying_block_id,
+                                 recoverying_block_id, ts->updated_records);
+            if (0 != gettimeofday(&ph->recovery_failed_time, NULL))
+                THROW(GETTIMEOFDAY_ERROR);
+            if (lmi->body.qrcvr_24.rsrmgrs->len != ph->n)
+                THROW(INVALID_STATUS);
+            for (i=0; i<ph->n; ++i) {
+                struct lixa_msg_body_qrcvr_24_rsrmgr_s *rsrmgr;
+                status_record_t *sr;
+                rsrmgr = &g_array_index(lmi->body.qrcvr_24.rsrmgrs,
+                                        struct lixa_msg_body_qrcvr_24_rsrmgr_s,
+                                        i);
+                sr = ts->curr_status + ph->block_array[i];
+                sr->sr.data.pld.rm.recovery_rc = rsrmgr->rc;
+                status_record_update(ts->curr_status + ph->block_array[i],
+                                     ph->block_array[i], ts->updated_records);
+                syslog(LOG_WARNING, LIXA_SYSLOG_LXD012W, ts->id,
+                       recoverying_block_id);
+            }
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case PAYLOAD_CHAIN_RELEASE:
+                break;
+            case GETTIMEOFDAY_ERROR:
+                ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_recovery_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -121,7 +259,8 @@ int server_recovery(struct thread_status_s *ts,
 int server_recovery_result(struct thread_status_s *ts,
                            const struct srvr_rcvr_tbl_rec_s *record,
                            const struct lixa_msg_s *lmi,
-                           struct lixa_msg_s *lmo)
+                           struct lixa_msg_s *lmo,
+                           uint32_t client_block_id)
 {
     enum Exception { XML_CHAR_STRDUP_ERROR
                      , NONE } excp;
@@ -134,8 +273,14 @@ int server_recovery_result(struct thread_status_s *ts,
         struct status_record_data_payload_s *pld =
             &(ts->curr_status[block_id].sr.data.pld);
 
+        /* register the block is in recovery phase */
+        ts->curr_status[client_block_id].sr.data.pld.ph.recoverying_block_id =
+            block_id;
+        status_record_update(ts->curr_status + client_block_id,
+                             client_block_id, ts->updated_records);
+        
+        /* set basic answer information */
         lmo->header.pvs.verb = LIXA_MSG_VERB_QRCVR;
-
         lmo->body.qrcvr_16.answer.rc = LIXA_RC_OK;
         
         /* this duplication is not necessary, but it helps in keeping a clean

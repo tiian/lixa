@@ -84,10 +84,13 @@ extern "C" {
      * Commit the transaction received from the server
      * @param cs IN reference to the status of the calling client
      * @param rpl IN information received from the server
+     * @param updt IN information must be sent to the server (recovery
+     *                update info)
      * @return a reason code
      */
     int client_recovery_commit(const client_status_t *cs,
-                               struct lixa_msg_s *rpl);
+                               struct lixa_msg_s *rpl,
+                               struct lixa_msg_s *updt);
 
 
     
@@ -95,10 +98,13 @@ extern "C" {
      * Rollback the transaction received from the server
      * @param cs IN reference to the status of the calling client
      * @param rpl IN information received from the server
+     * @param updt IN information must be sent to the server (recovery
+     *                update info)
      * @return a reason code
      */
     int client_recovery_rollback(const client_status_t *cs,
-                                 struct lixa_msg_s *rpl);
+                                 struct lixa_msg_s *rpl,
+                                 struct lixa_msg_s *updt);
 
 
 
@@ -158,7 +164,7 @@ extern "C" {
      * @return a reason code
      */
     int client_recovery_cold_commit(const client_status_t *cs,
-                                    const XID *xid,
+                                    XID *xid,
                                     const GArray *rsrmgrs);
 
 
@@ -171,7 +177,7 @@ extern "C" {
      * @return a reason code
      */
     int client_recovery_cold_rollback(const client_status_t *cs,
-                                      const XID *xid,
+                                      XID *xid,
                                       const GArray *rsrmgrs);
 
 

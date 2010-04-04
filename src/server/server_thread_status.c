@@ -187,14 +187,15 @@ int thread_status_dump(const struct thread_status_s *ts)
 
 int thread_status_dump_header(const struct payload_header_s *ph)
 {
-    enum Exception { ISO_TIMESTAMP
+    enum Exception { ISO_TIMESTAMP1
+                     , ISO_TIMESTAMP2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("thread_status_dump_header\n"));
     TRY {
         int i;
-        char arrival_time[ISO_TIMESTAMP_BUFFER_SIZE];
+        char tmp_str_time[ISO_TIMESTAMP_BUFFER_SIZE];
         char *xid_str = NULL;
         
         printf("\tTrnhdr/number of resource managers: %d\n", ph->n);
@@ -205,10 +206,10 @@ int thread_status_dump_header(const struct payload_header_s *ph)
             printf("\n");
         }
         if (LIXA_RC_OK != (ret_cod = lixa_utils_iso_timestamp(
-                               &ph->arrival_time, arrival_time,
-                               sizeof(arrival_time))))
-            THROW(ISO_TIMESTAMP);
-        printf("\tTrnhdr/arrival time: %s\n", arrival_time);
+                               &ph->arrival_time, tmp_str_time,
+                               sizeof(tmp_str_time))))
+            THROW(ISO_TIMESTAMP1);
+        printf("\tTrnhdr/arrival time: %s\n", tmp_str_time);
         printf("\tTrnhdr/local socket address:port is %s:%hu\n",
                inet_ntoa(ph->local_sock_addr.sin_addr),
                ntohs(ph->local_sock_addr.sin_port));
@@ -235,11 +236,22 @@ int thread_status_dump_header(const struct payload_header_s *ph)
                ph->state.finished, ph->state.txstate, ph->state.will_commit,
                ph->state.will_rollback,
                xid_str != NULL ? xid_str : "(nil)");
+        if (LIXA_RC_OK != (ret_cod = lixa_utils_iso_timestamp(
+                               &ph->recovery_failed_time, tmp_str_time,
+                               sizeof(tmp_str_time))))
+            THROW(ISO_TIMESTAMP1);
+        printf("\tTrnhdr/recoverying block id: " UINT32_T_FORMAT "\n"
+               "\tTrnhdr/recovery failed: %d\n"
+               "\tTrnhdr/recovery failed time: %s\n"               
+               "\tTrnhdr/recovery commit: %d\n",
+               ph->recoverying_block_id, ph->recovery_failed,
+               tmp_str_time, ph->recovery_commit);
 
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case ISO_TIMESTAMP:
+            case ISO_TIMESTAMP1:
+            case ISO_TIMESTAMP2:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -291,6 +303,8 @@ int thread_status_dump_rsrmgr(const struct payload_rsrmgr_s *rm)
         printf("\tRsrmgr/xa_rollback_flags: 0x%lx\n"
                "\tRsrmgr/xa_rollback_rc: %d\n",
                rm->xa_rollback_flags, rm->xa_rollback_rc);
+        printf("\tRsrmgr/recovery_rc: %d\n",
+               rm->recovery_rc);
         
         THROW(NONE);
     } CATCH {
@@ -550,6 +564,7 @@ int thread_status_check_recovery_pending(
 {
     enum Exception { INVALID_HEADER_TYPE
                      , FINISHED_TRANSACTION
+                     , RECOVERY_FAILED_TRANSACTION
                      , NOT_STARTED_TRANSACTION
                      , INVALID_VERB
                      , NONE } excp;
@@ -575,9 +590,16 @@ int thread_status_check_recovery_pending(
         /* is the transaction already marked as finished? */
         if (data->pld.ph.state.finished) {
             LIXA_TRACE(("thread_status_check_recovery_pending: "
-                        "data->pld.ph.state.finished=%d returning FALSE\n",
+                        "data->pld.ph.state.finished=%d, returning FALSE\n",
                         data->pld.ph.state.finished));
             THROW(FINISHED_TRANSACTION);
+        }
+        /* was the transaction already recovered (with errors?) */
+        if (data->pld.ph.recovery_failed) {
+            LIXA_TRACE(("thread_status_check_recovery_pending: "
+                        "data->pld.ph.recovery_failed=%d, returning FALSE\n",
+                        data->pld.ph.recovery_failed));
+            THROW(RECOVERY_FAILED_TRANSACTION);
         }
         /* check last verb & step */
         LIXA_TRACE(("thread_status_check_recovery_pending: "
@@ -607,6 +629,7 @@ int thread_status_check_recovery_pending(
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case FINISHED_TRANSACTION:
+            case RECOVERY_FAILED_TRANSACTION:
             case NOT_STARTED_TRANSACTION:
                 *result = FALSE;
                 ret_cod = LIXA_RC_OK;

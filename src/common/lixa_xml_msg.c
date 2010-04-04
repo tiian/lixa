@@ -53,6 +53,7 @@
 const xmlChar *LIXA_XML_MSG_HEADER =               (xmlChar *)"<?xml";
 const xmlChar *LIXA_XML_MSG_PROP_COMMIT =          (xmlChar *)"commit";
 const xmlChar *LIXA_XML_MSG_PROP_CONFIG_DIGEST =   (xmlChar *)"config_digest";
+const xmlChar *LIXA_XML_MSG_PROP_FAILED =          (xmlChar *)"failed";
 const xmlChar *LIXA_XML_MSG_PROP_FINISHED =        (xmlChar *)"finished";
 const xmlChar *LIXA_XML_MSG_PROP_FLAGS =           (xmlChar *)"flags";
 const xmlChar *LIXA_XML_MSG_PROP_JOB =             (xmlChar *)"job";
@@ -77,6 +78,7 @@ const xmlChar *LIXA_XML_MSG_TAG_CLIENT =           (xmlChar *)"client";
 const xmlChar *LIXA_XML_MSG_TAG_CONTHR =           (xmlChar *)"conthr";
 const xmlChar *LIXA_XML_MSG_TAG_LAST_VERB_STEP =   (xmlChar *)"last_verb_step";
 const xmlChar *LIXA_XML_MSG_TAG_MSG =              (xmlChar *)"msg";
+const xmlChar *LIXA_XML_MSG_TAG_RECOVERY =         (xmlChar *)"recovery";
 const xmlChar *LIXA_XML_MSG_TAG_RSRMGR =           (xmlChar *)"rsrmgr";
 const xmlChar *LIXA_XML_MSG_TAG_RSRMGRS =          (xmlChar *)"rsrmgrs";
 const xmlChar *LIXA_XML_MSG_TAG_STATE =            (xmlChar *)"state";
@@ -206,34 +208,43 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case LIXA_MSG_VERB_OPEN: /* open */
                 switch (msg->header.pvs.step) {
                     case 8:
-                        xmlFree(msg->body.open_8.client.job);
-                        msg->body.open_8.client.job = NULL;
-                        for (i=0; i<msg->body.open_8.rsrmgrs->len; ++i) {
-                            struct lixa_msg_body_open_8_rsrmgr_s *rsrmgr =
-                                &g_array_index(
-                                    msg->body.open_8.rsrmgrs,
-                                    struct lixa_msg_body_open_8_rsrmgr_s, i);
-                            xmlFree(rsrmgr->name);
-                            xmlFree(rsrmgr->xa_name);
+                        if (NULL != msg->body.open_8.client.job) {
+                            xmlFree(msg->body.open_8.client.job);
+                            msg->body.open_8.client.job = NULL;
                         }
-                        g_array_free(msg->body.open_8.rsrmgrs, TRUE);
-                        msg->body.open_8.rsrmgrs = NULL;
+                        if (NULL != msg->body.open_8.rsrmgrs) {
+                            for (i=0; i<msg->body.open_8.rsrmgrs->len; ++i) {
+                                struct lixa_msg_body_open_8_rsrmgr_s *rsrmgr =
+                                    &g_array_index(
+                                        msg->body.open_8.rsrmgrs,
+                                        struct lixa_msg_body_open_8_rsrmgr_s,
+                                        i);
+                                xmlFree(rsrmgr->name);
+                                xmlFree(rsrmgr->xa_name);
+                            }
+                            g_array_free(msg->body.open_8.rsrmgrs, TRUE);
+                            msg->body.open_8.rsrmgrs = NULL;
+                        }
                         break;
                     case 16: /* nothing to release */
                         break;
                     case 24:
-                        for (i=0; i<msg->body.open_24.xa_open_execs->len;
-                             ++i) {
-                            struct lixa_msg_body_open_24_xa_open_execs_s
-                                *xa_open_exec =
-                                &g_array_index(
-                                    msg->body.open_24.xa_open_execs,
-                                    struct
-                                    lixa_msg_body_open_24_xa_open_execs_s, i);
-                            xmlFree(xa_open_exec->xa_info);
+                        if (NULL != msg->body.open_24.xa_open_execs) {
+                            for (i=0; i<msg->body.open_24.xa_open_execs->len;
+                                 ++i) {
+                                struct lixa_msg_body_open_24_xa_open_execs_s
+                                    *xa_open_exec =
+                                    &g_array_index(
+                                        msg->body.open_24.xa_open_execs,
+                                        struct
+                                        lixa_msg_body_open_24_xa_open_execs_s,
+                                        i);
+                                xmlFree(xa_open_exec->xa_info);
+                            }
+                            g_array_free(msg->body.open_24.xa_open_execs,
+                                         TRUE);
+                            msg->body.open_24.xa_open_execs = NULL;
                         }
-                        g_array_free(msg->body.open_24.xa_open_execs, TRUE);
-                        msg->body.open_24.xa_open_execs = NULL;
                         break;
                     default:
                         THROW(INVALID_STEP1);
@@ -242,8 +253,10 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case LIXA_MSG_VERB_CLOSE: /* close */
                 switch (msg->header.pvs.step) {
                     case 8:
-                        g_array_free(msg->body.close_8.rsrmgrs, TRUE);
-                        msg->body.open_8.rsrmgrs = NULL;
+                        if (NULL != msg->body.close_8.rsrmgrs) {
+                            g_array_free(msg->body.close_8.rsrmgrs, TRUE);
+                            msg->body.open_8.rsrmgrs = NULL;
+                        }
                         break;
                     default:
                         THROW(INVALID_STEP2);
@@ -252,14 +265,19 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case LIXA_MSG_VERB_START: /* start */
                 switch (msg->header.pvs.step) {
                     case 8:
-                        g_array_free(msg->body.start_8.rsrmgrs, TRUE);
-                        msg->body.start_8.rsrmgrs = NULL;
+                        if (NULL != msg->body.start_8.rsrmgrs) {
+                            g_array_free(msg->body.start_8.rsrmgrs, TRUE);
+                            msg->body.start_8.rsrmgrs = NULL;
+                        }
                         break;
                     case 16: /* nothing to release */
                         break;
                     case 24:
-                        g_array_free(msg->body.start_24.xa_start_execs, TRUE);
-                        msg->body.start_24.xa_start_execs = NULL;
+                        if (NULL != msg->body.start_24.xa_start_execs) {
+                            g_array_free(msg->body.start_24.xa_start_execs,
+                                         TRUE);
+                            msg->body.start_24.xa_start_execs = NULL;
+                        }
                         break;
                     default:
                         THROW(INVALID_STEP3);
@@ -272,8 +290,10 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                     case 16: /* nothing to release */
                         break;
                     case 24:
-                        g_array_free(msg->body.end_24.xa_end_execs, TRUE);
-                        msg->body.end_24.xa_end_execs = NULL;
+                        if (NULL != msg->body.end_24.xa_end_execs) {
+                            g_array_free(msg->body.end_24.xa_end_execs, TRUE);
+                            msg->body.end_24.xa_end_execs = NULL;
+                        }
                         break;
                     default:
                         THROW(INVALID_STEP4);
@@ -282,9 +302,11 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case LIXA_MSG_VERB_PREPARE: /* prepare */
                 switch (msg->header.pvs.step) {
                     case 8:
-                        g_array_free(msg->body.prepare_8.xa_prepare_execs,
-                                     TRUE);
-                        msg->body.prepare_8.xa_prepare_execs = NULL;
+                        if (NULL != msg->body.prepare_8.xa_prepare_execs) {
+                            g_array_free(msg->body.prepare_8.xa_prepare_execs,
+                                         TRUE);
+                            msg->body.prepare_8.xa_prepare_execs = NULL;
+                        }
                         break;
                     case 16: /* nothing to release */
                         break;
@@ -295,9 +317,11 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case LIXA_MSG_VERB_COMMIT: /* commit */
                 switch (msg->header.pvs.step) {
                     case 8:
-                        g_array_free(msg->body.commit_8.xa_commit_execs,
-                                     TRUE);
-                        msg->body.commit_8.xa_commit_execs = NULL;
+                        if (NULL != msg->body.commit_8.xa_commit_execs) {
+                            g_array_free(msg->body.commit_8.xa_commit_execs,
+                                         TRUE);
+                            msg->body.commit_8.xa_commit_execs = NULL;
+                        }
                         break;
                     default:
                         THROW(INVALID_STEP6);
@@ -306,9 +330,12 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case LIXA_MSG_VERB_ROLLBACK: /* rollback */
                 switch (msg->header.pvs.step) {
                     case 8:
-                        g_array_free(msg->body.rollback_8.xa_rollback_execs,
-                                     TRUE);
-                        msg->body.rollback_8.xa_rollback_execs = NULL;
+                        if (NULL != msg->body.rollback_8.xa_rollback_execs) {
+                            g_array_free(
+                                msg->body.rollback_8.xa_rollback_execs,
+                                TRUE);
+                            msg->body.rollback_8.xa_rollback_execs = NULL;
+                        }
                         break;
                     default:
                         THROW(INVALID_STEP7);
@@ -317,16 +344,28 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case LIXA_MSG_VERB_QRCVR: /* qrcvr */
                 switch (msg->header.pvs.step) {
                     case 8:
-                        xmlFree(msg->body.qrcvr_8.client.job);
-                        msg->body.qrcvr_8.client.job = NULL;
+                        if (NULL != msg->body.qrcvr_8.client.job) {
+                            xmlFree(msg->body.qrcvr_8.client.job);
+                            msg->body.qrcvr_8.client.job = NULL;
+                        }
                         break;
                     case 16:
                         if (LIXA_RC_OBJ_NOT_FOUND !=
                             msg->body.qrcvr_16.answer.rc) {
-	                        xmlFree(msg->body.qrcvr_16.client.job);
-                            msg->body.qrcvr_16.client.job = NULL;
-                            g_array_free(msg->body.qrcvr_16.rsrmgrs, TRUE);
-                            msg->body.qrcvr_16.rsrmgrs = NULL;
+                            if (NULL != msg->body.qrcvr_16.client.job) {
+                                xmlFree(msg->body.qrcvr_16.client.job);
+                                msg->body.qrcvr_16.client.job = NULL;
+                            }
+                            if (NULL != msg->body.qrcvr_16.rsrmgrs) {
+                                g_array_free(msg->body.qrcvr_16.rsrmgrs, TRUE);
+                                msg->body.qrcvr_16.rsrmgrs = NULL;
+                            }
+                        }
+                        break;
+                    case 24:
+                        if (NULL != msg->body.qrcvr_24.rsrmgrs) {
+                            g_array_free(msg->body.qrcvr_24.rsrmgrs, TRUE);
+                            msg->body.qrcvr_24.rsrmgrs = NULL;
                         }
                         break;
                     default:

@@ -280,6 +280,24 @@ extern "C" {
 
     
     /**
+     * Serialize the "qrcvr_24" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int lixa_msg_serialize_qrcvr_24(const struct lixa_msg_s *msg,
+                                    char *buffer,
+                                    size_t *offset, size_t *free_chars);
+
+
+    
+    /**
      * Serialize the "rollback_8" specific body part of a message
      * @param msg IN the object must be serialized
      * @param buffer OUT the buffer will contain the XML serialized object

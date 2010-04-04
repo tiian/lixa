@@ -254,6 +254,23 @@ struct payload_header_s {
      * Status of the control thread is managing the transaction
      */
     struct common_status_conthr_s state;
+    /**
+     * Id of the block is in recovery phase (if any)
+     */
+    uint32_t                      recoverying_block_id;
+    /**
+     * An attempted recovery failed
+     */
+    int                           recovery_failed;
+    /**
+     * Date and time of the recovery failed event
+     */
+    struct timeval                recovery_failed_time;
+    /**
+     * recovery phase attempted xa_commit (TRUE) or xa_rollback (FALSE);
+     * meaningless if recovery phase did not happen
+     */
+    int                           recovery_commit;
 };
 
     
@@ -330,6 +347,11 @@ struct payload_rsrmgr_s {
      * rc value as returned from xa_rollback
      */
     int                             xa_rollback_rc;
+    /**
+     * return code of the recovery phase
+     * meaningless if recovery phase did not happen
+     */
+    int                             recovery_rc;
 };
 
 
