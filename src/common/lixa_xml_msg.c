@@ -219,8 +219,10 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                                         msg->body.open_8.rsrmgrs,
                                         struct lixa_msg_body_open_8_rsrmgr_s,
                                         i);
-                                xmlFree(rsrmgr->name);
-                                xmlFree(rsrmgr->xa_name);
+                                if (NULL != rsrmgr->name)
+                                    xmlFree(rsrmgr->name);
+                                if (NULL != rsrmgr->xa_name)
+                                    xmlFree(rsrmgr->xa_name);
                             }
                             g_array_free(msg->body.open_8.rsrmgrs, TRUE);
                             msg->body.open_8.rsrmgrs = NULL;
@@ -239,7 +241,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                                         struct
                                         lixa_msg_body_open_24_xa_open_execs_s,
                                         i);
-                                xmlFree(xa_open_exec->xa_info);
+                                if (NULL != xa_open_exec->xa_info)
+                                    xmlFree(xa_open_exec->xa_info);
                             }
                             g_array_free(msg->body.open_24.xa_open_execs,
                                          TRUE);

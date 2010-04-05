@@ -337,10 +337,17 @@ int client_recovery_commit(const client_status_t *cs,
                 &rpl->body.qrcvr_16.client.state.xid, i,
                 rpl->body.qrcvr_16.rsrmgrs->len == 1 ? TMONEPHASE : TMNOFLAGS);
             LIXA_TRACE(("client_recovery_commit: rc=%d\n", rc));
-            if (XA_OK != rc) {
-                syslog(LOG_CRIT, LIXA_SYSLOG_LXC003C,
-                       act_rsrmgr->xa_switch->name, rc, ser_xid);
-                failed = TRUE;
+            switch (rc) {
+                case XA_OK:
+                    break;
+                case XA_RDONLY:
+                    syslog(LOG_NOTICE, LIXA_SYSLOG_LXC006N,
+                           act_rsrmgr->xa_switch->name, rc, ser_xid);
+                    break;
+                default:
+                    syslog(LOG_CRIT, LIXA_SYSLOG_LXC003C,
+                           act_rsrmgr->xa_switch->name, rc, ser_xid);
+                    failed = TRUE;
             }
             /* prepare record for server update */
             record.rmid = rsrmgr->rmid;
@@ -409,10 +416,17 @@ int client_recovery_rollback(const client_status_t *cs,
                 &rpl->body.qrcvr_16.client.state.xid, i,
                 rpl->body.qrcvr_16.rsrmgrs->len == 1 ? TMONEPHASE : TMNOFLAGS);
             LIXA_TRACE(("client_recovery_rollback: rc=%d\n", rc));
-            if (XA_OK != rc) {
-                syslog(LOG_CRIT, LIXA_SYSLOG_LXC004C,
-                       act_rsrmgr->xa_switch->name, rc, ser_xid);
-                failed = TRUE;
+            switch (rc) {
+                case XA_OK:
+                    break;
+                case XA_RDONLY:
+                    syslog(LOG_NOTICE, LIXA_SYSLOG_LXC007N,
+                           act_rsrmgr->xa_switch->name, rc, ser_xid);
+                    break;
+                default:
+                    syslog(LOG_CRIT, LIXA_SYSLOG_LXC004C,
+                           act_rsrmgr->xa_switch->name, rc, ser_xid);
+                    failed = TRUE;
             }
             /* prepare record for server update */
             record.rmid = rsrmgr->rmid;
