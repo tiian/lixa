@@ -48,6 +48,7 @@
 
 
 int server_recovery(struct thread_status_s *ts,
+                    size_t slot_id,
                     const struct lixa_msg_s *lmi,
                     struct lixa_msg_s *lmo,
                     uint32_t block_id,
@@ -65,7 +66,7 @@ int server_recovery(struct thread_status_s *ts,
             case 8:
                 if (LIXA_RC_OK != (
                         ret_cod = server_recovery_8(
-                            ts, lmi, lmo, block_id, last_verb_step)))
+                            ts, slot_id, lmi, lmo, block_id, last_verb_step)))
                     THROW(SERVER_RECOVERY_8_ERROR);
                 break;
             case 24:
@@ -101,6 +102,7 @@ int server_recovery(struct thread_status_s *ts,
 
 
 int server_recovery_8(struct thread_status_s *ts,
+                      size_t slot_id,
                       const struct lixa_msg_s *lmi,
                       struct lixa_msg_s *lmo,
                       uint32_t block_id,
@@ -109,6 +111,7 @@ int server_recovery_8(struct thread_status_s *ts,
     enum Exception { PROTOCOL_ERROR
                      , JOB_SET_RAW_ERROR
                      , SERVER_RECOVERY_RESULT_ERROR
+                     , THREAD_SWITCH
                      , RECOVERY_RESULT_EMPTY_ERROR
                      , GET_BLOCK_ERROR
                      , NONE } excp;
@@ -118,6 +121,8 @@ int server_recovery_8(struct thread_status_s *ts,
     TRY {
         struct srvr_rcvr_tbl_rec_s query, result;
         lixa_job_t query_job, result_job;
+        struct thread_status_switch_s *tss =
+            &(ts->client_array[slot_id].switch_thread);
 
         if (LIXA_MSG_VERB_QRCVR != lmi->header.pvs.verb)
             THROW(PROTOCOL_ERROR);
@@ -141,7 +146,11 @@ int server_recovery_8(struct thread_status_s *ts,
                     THROW(SERVER_RECOVERY_RESULT_ERROR);
                 break;
             case LIXA_RC_BYPASSED_OPERATION:
-                /* @@@ implement thread transfer */
+                tss->id = result.tsid;
+                LIXA_TRACE(("server_recovery_8: this client must be switched "
+                            "to thread %d to perform recovery\n",
+                            tss->id));
+                THROW(THREAD_SWITCH);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 if (LIXA_RC_OK != (ret_cod = server_recovery_empty_result(
@@ -165,6 +174,10 @@ int server_recovery_8(struct thread_status_s *ts,
             case JOB_SET_RAW_ERROR:
                 break;
             case SERVER_RECOVERY_RESULT_ERROR:
+                break;
+            case THREAD_SWITCH:
+                ret_cod = LIXA_RC_THREAD_SWITCH;
+                break;
             case RECOVERY_RESULT_EMPTY_ERROR:
             case GET_BLOCK_ERROR:
                 break;

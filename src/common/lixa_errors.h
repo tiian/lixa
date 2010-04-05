@@ -80,6 +80,10 @@
  * changed
  */
 #define LIXA_RC_LIXAC_CONF_CHANGED              +7
+/**
+ * The thread is serving the client must be switched to a different one
+ */
+#define LIXA_RC_THREAD_SWITCH                   +8
 
 
 

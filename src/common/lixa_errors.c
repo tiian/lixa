@@ -33,6 +33,9 @@ const char *lixa_strerror(int ret_cod)
         ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
     
     switch (ret_cod) {
+        case LIXA_RC_THREAD_SWITCH:
+            return "WARNING: the thread is serving the client must be "
+                "switched to a different one";
         case LIXA_RC_LIXAC_CONF_CHANGED:
             return "WARNING: the digest of the lixac config file changed -> "
                 "the client config file changed";

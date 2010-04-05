@@ -39,7 +39,15 @@
 /**
  * Associated to @ref srv_msg_body_new_client_s
  */
-#define SRV_MSG_TYPE_NEW_CLIENT    1
+#define SRV_MSG_TYPE_NEW_CLIENT      1
+/**
+ * Associated to @ref srv_msg_body_switch_req_s
+ */
+#define SRV_MSG_TYPE_SWITCH_REQ      2
+/**
+ * Associated to @ref srv_msg_body_switch_rep_s
+ */
+#define SRV_MSG_TYPE_SWITCH_REP      3
 
 
 
@@ -56,6 +64,69 @@ struct srv_msg_body_new_client_s {
 
 
 /**
+ * Switch thread request: a client must be moved from a source thread to a
+ * destination thread
+ */
+struct srv_msg_body_switch_req_s {
+    /**
+     * source thread identifier
+     */
+    int                       source;
+    /**
+     * file descriptor of the socket connected to the client
+     */    
+    int                       fd;
+    /**
+     * block id of the header block in the source status file
+     */
+    uint32_t                  block_id;
+    /**
+     * slot id of the switching client in the polling array
+     */
+    size_t                    slot_id;
+    /**
+     * buffer received from the client
+     */
+    char                     *buffer;
+    /**
+     * number of significative bytes in buffer
+     */
+    size_t                    buffer_size;
+    /**
+     * pointer to the source header block
+     */
+    struct payload_header_s  *header;
+    /**
+     * pointers to the source rsrmgr blocks
+     */
+    struct payload_rsrmgr_s  *rsrmgr[CHAIN_MAX_SIZE];
+};
+
+
+
+/**
+ * Switch thread reply: a cliend must be moved from a source thread to a
+ * destination thread
+ */
+struct srv_msg_body_switch_rep_s {
+    /**
+     * a standardized reason code of the switch operation: it must be
+     * LIXA_RC_OK to go on correctly
+     */
+    int                       result;
+    /**
+     * block id of the header block in the source status file
+     */
+    uint32_t                  block_id;
+    /**
+     * slot id of the switching client in the polling array
+     */
+    size_t                    slot_id;
+};
+
+
+
+/**
  * Used to code a generic message exchanged in the server
  */
 struct srv_msg_s {
@@ -67,7 +138,9 @@ struct srv_msg_s {
      * Message body / payload: it carries information
      */
     union {
-        struct srv_msg_body_new_client_s nc;
+        struct srv_msg_body_new_client_s    nc;
+        struct srv_msg_body_switch_req_s    sr;
+        struct srv_msg_body_switch_rep_s    sp;
     } body;
 };
 

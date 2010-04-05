@@ -1,9 +1,13 @@
-restore server multithread configuration
-
-server_recovery: implement LIXA_RC_BYPASSED_OPERATION
+analyze with valgrind: in multithread recovery scenario, the server picks up
+a segmentation fault error after few client (abort) iterations; this does not
+happen with single thread server...
 
 open a RFNF: an utility (it must designed how) to clean up recovery failed
 records from server status file
+
+open a BUG: implement a server side control on the sequence of received 
+messages from client (it's an automata control); this is low priority bug and
+should not happen if the client is right (!)
 
 When server_manager_thread exits, the listener must be aware of this... 
 

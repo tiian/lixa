@@ -146,6 +146,30 @@ struct thread_pipe_array_s {
 
 
 /**
+ * This is a convenience struct for @ref server_client_status_s
+ */
+struct thread_status_switch_s {
+    /**
+     * This value is a flag (TRUE if != 0) that specifies the condition:
+     * the current slot_id (and correlated block_id) must be transferred to
+     * a different thread; the value is the destination thread id itself
+     */
+    int                            id;
+    /**
+     * Number of significative bytes in buffer
+     */
+    size_t                         buffer_size;
+    /**
+     * Points to a dynamically allocated buffer with the input read from the
+     * source thread and must be passed to the destination thread; the buffer
+     * must be released by the destination thread
+     */
+    char                          *buffer;
+};
+
+
+
+/**
  * It's the struct used to keep the status of a client
  */
 struct server_client_status_s {
@@ -171,6 +195,15 @@ struct server_client_status_s {
      * Boolean value: is the client sending the first message?
      */
     int                           first_message;
+    /**
+     * Boolean value: the thread is in "control only" mode: no buffer from
+     * the client will be read, but only from control pipe
+     */
+    int                           control_only;
+    /**
+     * Info necessary to switch the current client to a different thread
+     */
+    struct thread_status_switch_s switch_thread;
 };
 
 
@@ -473,7 +506,7 @@ struct two_status_record_s {
      */
     status_record_t *second;
 };
-    
+
 
 
 /**
@@ -546,8 +579,8 @@ struct thread_status_s {
      */
     GTree                         *updated_records;
     /**
-     * Reference to the GLOBAL recovery table: this data structure is internally
-     * protected by a mutex to allow concurrency
+     * Reference to the GLOBAL recovery table: this data structure is
+     * internally protected by a mutex to allow concurrency
      */
     srvr_rcvr_tbl_t               *recovery_table;
     /**
@@ -589,6 +622,19 @@ extern "C" {
 
 
     /**
+     * Initialize a struct of type @ref thread_status_switch_s
+     * @param tss IN/OUT reference to the struct must be initialized
+     */
+    inline static void thread_status_switch_init(
+        struct thread_status_switch_s *tss) {
+        tss->id = 0;
+        tss->buffer_size = 0;
+        tss->buffer = NULL;
+    }
+
+
+    
+    /**
      * Initialize a struct of type @ref server_client_status_s
      * @param scs IN/OUT reference to the struct must be initialized
      */
@@ -599,6 +645,8 @@ extern "C" {
         scs->last_verb_step.verb = 0;
         scs->last_verb_step.step = 0;
         scs->first_message = TRUE;
+        scs->control_only = FALSE;
+        thread_status_switch_init(&scs->switch_thread);
     }
 
     

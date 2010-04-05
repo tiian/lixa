@@ -26,6 +26,7 @@
 
 
 #include <server_config.h>
+#include <server_messages.h>
 #include <srvr_rcvr_tbl.h>
 
 
@@ -95,6 +96,45 @@ extern "C" {
      * @return a standardized return code
      */
     int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id);
+
+
+
+    /**
+     * Switch the connected client to a different thread, phase 1:
+     * the source thread send a message with the switch information to the
+     * destination thread and freeze the connected client in "control only"
+     * mode
+     * @param ts IN/OUT thread status
+     * @param slot_id IN the slot associated to the file descriptor connected
+     *                to the client
+     * @return a standardized return code
+     */
+    int server_manager_switch_1(struct thread_status_s *ts,
+                                size_t slot_id);
+
+
+
+    /**
+     * Switch the connected client to a different thread, phase 2:
+     * the destination thread receives a message with the switch information
+     * @param ts IN/OUT thread status
+     * @param msg IN the request message sent by source thread
+     * @return a standardized return code
+     */
+    int server_manager_switch_2(struct thread_status_s *ts,
+                                const struct srv_msg_s *msg);
+
+
+
+    /**
+     * Switch the connected client to a different thread, phase 3:
+     * the source thread receives the answer from the destination thread
+     * @param ts IN/OUT thread status
+     * @param msg IN the request message sent by source thread
+     * @return a standardized return code
+     */
+    int server_manager_switch_3(struct thread_status_s *ts,
+                                const struct srv_msg_s *msg);
 
 
 
