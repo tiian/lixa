@@ -1,13 +1,16 @@
-analyze with valgrind: in multithread recovery scenario, the server picks up
-a segmentation fault error after few client (abort) iterations; this does not
-happen with single thread server...
-
-open a RFNF: an utility (it must designed how) to clean up recovery failed
-records from server status file
-
-open a BUG: implement a server side control on the sequence of received 
-messages from client (it's an automata control); this is low priority bug and
-should not happen if the client is right (!)
+in single threaded scenario too, something is writing in a wrong memory 
+location and damage a pointer inside server recovery table:
+- jb = '                                         '
+- all blank/zeros it must be discovered
+- who damage the string (lixa_job_t)???
+- valgrind sees nothing but an invalid read when it's too late...
+- the damager damage the pointer to the string
+- or the search string is not valid...
+- are all the strings put in the recovery table duplicated??
+- in single thread scenario, no task switch happens: it can not be related to
+  multithread programming error; but it seems with 3 threads the problem
+  happens with fewer cycles; with a client at a time it does not seem to happen
+  (or it may happen after too many cycles)
 
 When server_manager_thread exits, the listener must be aware of this... 
 

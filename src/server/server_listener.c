@@ -281,6 +281,7 @@ int server_listener_loop(const struct server_config_s *sc,
                         THROW(FIND_MANAGER_ERROR);
 
                     /* prepare the message to signal the manager */
+                    memset(&msg, 0, sizeof(msg));
                     msg.type = SRV_MSG_TYPE_NEW_CLIENT;
                     msg.body.nc.fd = conn_fd;
 
