@@ -187,6 +187,7 @@ void *server_manager_thread(void *void_ts)
             found_fd = 0;
             n = ts->poll_size;
             for (i = 0; i < n; ++i) {
+                int connection_closed = FALSE;
                 LIXA_TRACE(("server_manager_thread: slot=" NFDS_T_FORMAT
                             ", fd=%d, POLLIN=%d, POLLOUT=%d, POLLERR=%d, "
                             "POLLHUP=%d, POLLNVAL=%d\n",
@@ -217,6 +218,9 @@ void *server_manager_thread(void *void_ts)
                         switch (ret_cod) {
                             case LIXA_RC_OK:
                                 break;
+                            case LIXA_RC_CONNECTION_CLOSED:
+                                connection_closed = TRUE;
+                                break;
                             case LIXA_RC_THREAD_SWITCH:
                                 ret_cod = server_manager_switch_1(ts, i);
                                 break;
@@ -225,7 +229,8 @@ void *server_manager_thread(void *void_ts)
                         }
                     }
                 }
-                if (ts->poll_array[i].revents & POLLOUT) {
+                if (!connection_closed &&
+                    ts->poll_array[i].revents & POLLOUT) {
                     found_fd++;
                     if (LIXA_RC_OK != (
                             ret_cod = server_manager_pollout(ts, i)))
@@ -347,6 +352,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                      , RECOVERY_TABLE_INSERT_ERROR
                      , CLOSE_ERROR
                      , FREE_SLOTS
+                     , CONNECTION_CLOSED
                      , INTERNAL_ERROR
                      , MALLOC_ERROR
                      , THREAD_SWITCH
@@ -391,6 +397,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
             if (LIXA_RC_OK != (ret_cod =
                                server_manager_free_slots(ts, slot_id)))
                 THROW(FREE_SLOTS);
+            THROW(CONNECTION_CLOSED);
         } else if (LIXA_RC_OK == ret_cod) {
             struct thread_status_switch_s *tss =
                 &(ts->client_array[slot_id].switch_thread);
@@ -426,6 +433,9 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                 ret_cod = LIXA_RC_CLOSE_ERROR;
                 break;
             case FREE_SLOTS:
+                break;
+            case CONNECTION_CLOSED:
+                ret_cod = LIXA_RC_CONNECTION_CLOSED;
                 break;
 #ifdef LIXA_DEBUG
             case INTERNAL_ERROR:
@@ -473,6 +483,7 @@ int server_manager_switch_1(struct thread_status_s *ts,
                     "id is %d, input buffer is '%s'\n",
                     ts->id, slot_id, block_id, tss->id, tss->buffer));
         /* prepare the message for the destination thread */
+        memset(&msg, 0, sizeof(msg));
         msg.type = SRV_MSG_TYPE_SWITCH_REQ;
         msg.body.sr.source = ts->id;
         msg.body.sr.fd = ts->poll_array[slot_id].fd;
@@ -486,8 +497,9 @@ int server_manager_switch_1(struct thread_status_s *ts,
                                           msg.body.sr.header->block_array[i]
                                                       ].sr.data.pld.rm);
         }
+        
         /* move the thread to control only state */
-        ts->client_array[tss->id].control_only = TRUE;
+        ts->client_array[slot_id].control_only = TRUE;
         /* send the message to the destination thread */
         if (sizeof(msg) != write(ts->tpa->array[tss->id].pipefd[1],
                                  &msg, sizeof(msg)))
@@ -586,6 +598,7 @@ int server_manager_switch_2(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* prepare answer message */
+        memset(&answer, 0, sizeof(answer));
         answer.type = SRV_MSG_TYPE_SWITCH_REP;
         answer.body.sp.result = ret_cod;
         answer.body.sp.block_id = msg->body.sr.block_id;
@@ -618,7 +631,7 @@ int server_manager_switch_3(struct thread_status_s *ts,
         struct thread_status_switch_s *tss =
             &(ts->client_array[msg->body.sp.slot_id].switch_thread);
         /* clear switch info */
-        ts->client_array[tss->id].control_only = FALSE;
+        ts->client_array[msg->body.sp.slot_id].control_only = FALSE;
         tss->id = 0;
         tss->buffer_size = 0;
         if (NULL != tss->buffer) {

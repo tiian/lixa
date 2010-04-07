@@ -44,6 +44,9 @@ int srvr_rcrv_tbl_key1_job_comp(gconstpointer a, gconstpointer b)
 {
     const char *ja = lixa_job_get_raw((const lixa_job_t *)a);
     const char *jb = lixa_job_get_raw((const lixa_job_t *)b);
+    LIXA_TRACE(("srvr_rcrv_tbl_key1_job_comp: ja='%*.*s', jb='%*.*s'\n",
+                sizeof(lixa_job_t)-1, sizeof(lixa_job_t)-1, ja,
+                sizeof(lixa_job_t)-1, sizeof(lixa_job_t)-1, jb));
     return strncmp(ja, jb, sizeof(lixa_job_t) - 1);
 }
 
@@ -193,7 +196,7 @@ int srvr_rcvr_tbl_get_block(srvr_rcvr_tbl_t *srt,
         
         LIXA_TRACE(("srvr_rcvr_tbl_get_block: query is job='%s', tsid=%u\n",
                     lixa_job_get_raw(srtr->job), srtr->tsid));
-        
+
         if (NULL == srt->mutex || NULL == srt->lvl1_job)
             THROW(OBJ_CORRUPTED);
 
