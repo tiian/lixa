@@ -350,6 +350,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 {
     enum Exception { BLOCK_STATUS_ERROR
                      , RECOVERY_TABLE_INSERT_ERROR
+                     , PAYLOAD_CHAIN_RELEASE
                      , CLOSE_ERROR
                      , FREE_SLOTS
                      , CONNECTION_CLOSED
@@ -387,8 +388,12 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                 if (LIXA_RC_OK != (ret_cod = srvr_rcvr_tbl_insert(
                                        ts->recovery_table, &srtr)))
                     THROW(RECOVERY_TABLE_INSERT_ERROR);
+            } else {
+                /* release blocks in status file: now they are useless */
+                if (LIXA_RC_OK != (
+                        ret_cod = payload_chain_release(ts, block_id)))
+                    THROW(PAYLOAD_CHAIN_RELEASE);
             }
-
             /* close socket, release file descriptor and thread status slot */
             LIXA_TRACE(("server_manager_pollin_data: close socket, "
                         "fd = %d\n", ts->poll_array[slot_id].fd));
@@ -428,6 +433,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
         switch (excp) {
             case BLOCK_STATUS_ERROR:
             case RECOVERY_TABLE_INSERT_ERROR:
+            case PAYLOAD_CHAIN_RELEASE:
                 break;
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
