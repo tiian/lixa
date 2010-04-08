@@ -118,9 +118,11 @@ extern "C" {
      * Comparison function between two struct @see srvr_rcvr_tbl_rec_s
      * @param a IN reference to first recovery table record
      * @param b IN reference to second recovery table record
+     * @param user_data IN unused
      * @return negative value if a<b; 0 if a==b; positive value if a>b
      */
-    int srvr_rcrv_tbl_key1_job_comp(gconstpointer a, gconstpointer b);
+    int srvr_rcrv_tbl_key1_job_comp(gconstpointer a, gconstpointer b,
+                                    gpointer user_data);
 
 
     
@@ -133,8 +135,40 @@ extern "C" {
      */
     int srvr_rcvr_tbl_new(srvr_rcvr_tbl_t *srt, guint tsid_array_size);
 
+
+
+    /**
+     * Delete an existing object </br>
+     * NOTE: this function is usefull only to avoid memory leak detection at
+     * server shutdown (the recovery table would not need to be deallocated)
+     * @param srt IN/OUT reference to the recovery table object
+     * @return a standardized return code
+     */
+    int srvr_rcvr_tbl_delete(srvr_rcvr_tbl_t *srt);
+
+
+    
+    /**
+     * Tree traverse function used by @ref srvr_rcvr_tbl_trace
+     * @param key IN the key of the traversed node (job)
+     * @param value IN the value of the traversed node (array of slot_ids)
+     * @param data IN useless
+     * @return FALSE because TRUE would break tree traversal
+     */
+    gboolean srvr_rcvr_tbl_trace_trav(gpointer key, gpointer value,
+                                      gpointer data);
     
 
+    
+    /**
+     * Trace the content of a server recovery table (debug purpose)
+     * @param srt IN reference to the recovery table object
+     * @return a standardized return code
+     */
+    void srvr_rcvr_tbl_trace(srvr_rcvr_tbl_t *srt);
+
+
+    
     /**
      * Insert a record in the recovery table
      * @param srt IN/OUT reference to the recovery table object

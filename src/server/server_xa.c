@@ -43,21 +43,15 @@ int server_xa_close(struct thread_status_s *ts,
                     const struct lixa_msg_s *lmi,
                     uint32_t block_id)
 {
-    enum Exception { PAYLOAD_CHAIN_RELEASE
-                     , NONE } excp;
+    enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("server_xa_close\n"));
     TRY {
-        /* release all allocated blocks */
-        if (LIXA_RC_OK != (ret_cod = payload_chain_release(ts, block_id)))
-            THROW(PAYLOAD_CHAIN_RELEASE);
-        
+        /* nothing to do, but a simple trace... ?! */
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case PAYLOAD_CHAIN_RELEASE:
-                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

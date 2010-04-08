@@ -40,7 +40,8 @@
 
 
 
-int srvr_rcrv_tbl_key1_job_comp(gconstpointer a, gconstpointer b)
+int srvr_rcrv_tbl_key1_job_comp(gconstpointer a, gconstpointer b,
+                                gpointer user_data)
 {
     const char *ja = lixa_job_get_raw((const lixa_job_t *)a);
     const char *jb = lixa_job_get_raw((const lixa_job_t *)b);
@@ -66,7 +67,9 @@ int srvr_rcvr_tbl_new(srvr_rcvr_tbl_t *srt, guint tsid_array_size)
             THROW(OBJ_NOT_INITIALIZED);
         if (NULL == (srt->mutex = g_mutex_new()))
             THROW(G_MUTEX_NEW_ERROR);
-        if (NULL == (srt->lvl1_job = g_tree_new(srvr_rcrv_tbl_key1_job_comp)))
+        if (NULL == (srt->lvl1_job = g_tree_new_full(
+                         srvr_rcrv_tbl_key1_job_comp, NULL,
+                         free, NULL)))
             THROW(G_TREE_NEW_ERROR);
         srt->lvl2_tsid_array_size = tsid_array_size;
         
@@ -94,12 +97,60 @@ int srvr_rcvr_tbl_new(srvr_rcvr_tbl_t *srt, guint tsid_array_size)
 
 
 
+int srvr_rcvr_tbl_delete(srvr_rcvr_tbl_t *srt)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("srvr_rcvr_tbl_delete\n"));
+    TRY {
+        /* @@@ must be implemented and called from shutdown procedure to
+           avoid not significative memory leak detection */
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("srvr_rcvr_tbl_delete/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+gboolean srvr_rcvr_tbl_trace_trav(gpointer key, gpointer value,
+                                  gpointer data)
+{
+    LIXA_TRACE(("srvr_rcvr_tbl_trace_trav: key=%p, value=%p\n", key, value));
+    LIXA_TRACE(("srvr_rcvr_tbl_trace_trav: job='%s'\n",
+                lixa_job_get_raw((lixa_job_t *)key)));
+    return FALSE;
+}
+
+
+
+void srvr_rcvr_tbl_trace(srvr_rcvr_tbl_t *srt)
+{
+    LIXA_TRACE(("srvr_rcvr_tbl_trace: srt=%p, srt->mutex=%p, "
+                "srt->lvl1_job=%p, srt->lvl2_tsid_array_size=%u\n",
+                srt, srt->mutex, srt->lvl1_job, srt->lvl2_tsid_array_size));
+    g_tree_foreach(srt->lvl1_job, srvr_rcvr_tbl_trace_trav, NULL);
+}
+
+
+
 int srvr_rcvr_tbl_insert(srvr_rcvr_tbl_t *srt,
                          const struct srvr_rcvr_tbl_rec_s *srtr)
 {
     enum Exception { OBJ_CORRUPTED
                      , OUT_OF_RANGE
                      , G_ARRAY_SIZED_NEW_ERROR
+                     , MALLOC_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -127,6 +178,8 @@ int srvr_rcvr_tbl_insert(srvr_rcvr_tbl_t *srt,
             /* create a new array for level 2 */
             GArray *lvl2_tsid = NULL;
             guint i;
+            lixa_job_t *key = NULL;
+            
             if (NULL == (lvl2_tsid = g_array_sized_new(
                              FALSE, FALSE, sizeof(GQueue),
                              srt->lvl2_tsid_array_size)))
@@ -138,8 +191,11 @@ int srvr_rcvr_tbl_insert(srvr_rcvr_tbl_t *srt,
                 g_queue_init(&q);
                 g_array_append_val(lvl2_tsid, q);
             }
+            if (NULL == (key = malloc(sizeof(lixa_job_t))))
+                THROW(MALLOC_ERROR);
+            memcpy(key, srtr->job, sizeof(lixa_job_t));
             /* insert the new element in the tree */
-            g_tree_insert(srt->lvl1_job, srtr->job, lvl2_tsid);
+            g_tree_insert(srt->lvl1_job, key, lvl2_tsid);
             node = (gpointer *)lvl2_tsid;
         }
 
@@ -159,7 +215,10 @@ int srvr_rcvr_tbl_insert(srvr_rcvr_tbl_t *srt,
                 break;
             case G_ARRAY_SIZED_NEW_ERROR:
                 ret_cod = LIXA_RC_G_RETURNED_NULL;
-                break;                
+                break;
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
