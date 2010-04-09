@@ -138,7 +138,7 @@ extern "C" {
 
 
     /**
-     * Delete an existing object </br>
+     * Delete an existing object <br>
      * NOTE: this function is usefull only to avoid memory leak detection at
      * server shutdown (the recovery table would not need to be deallocated)
      * @param srt IN/OUT reference to the recovery table object

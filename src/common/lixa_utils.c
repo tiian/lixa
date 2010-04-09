@@ -42,6 +42,7 @@
 
 
 #include <lixa_errors.h>
+#include <lixa_inst_conf.h>
 #include <lixa_trace.h>
 #include <lixa_utils.h>
 
@@ -52,6 +53,20 @@
 # undef LIXA_TRACE_MODULE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_COMMON_UTILS
+
+
+
+void lixa_print_version(FILE *stream)
+{
+    fprintf(stream, "LIXA: a Libre XA implementation\n"
+            "Copyright (c) 2009-2010, Christian Ferrari; "
+            "all rights reserved.\n"
+            "License: GPL (GNU Public License) version 2\n"
+            "Package name: %s; package version: %s\n"
+            "Access http://sourceforge.net/projects/lixa/ to report bugs "
+            "and partecipate to the project\n",
+            LIXA_PACKAGE_NAME, LIXA_PACKAGE_VERSION);
+}
 
 
 

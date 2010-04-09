@@ -103,7 +103,8 @@ int client_config(client_config_coll_t *ccc)
         /* open system log */
         lixa_get_program_name(program_name, sizeof(program_name));
         openlog(program_name, LOG_PID, LOG_DAEMON);
-        syslog(LOG_INFO, LIXA_SYSLOG_LXC000I);
+        syslog(LOG_INFO, LIXA_SYSLOG_LXC000I,
+               LIXA_PACKAGE_NAME, LIXA_PACKAGE_VERSION);
         
         memset(&ccc->serv_addr, 0, sizeof(struct sockaddr_in));
         if (NULL == ccc->actconf.rsrmgrs)

@@ -119,31 +119,81 @@ void lixa_trace(const char *fmt, ...)
 
 
 
-void lixa_trace_hex_data(const byte_t *data, lixa_word_t size,
-                         FILE *out_stream)
+void lixa_trace_hex_data(const char *prefix, const byte_t *data,
+                         lixa_word_t size, FILE *out_stream)
 {
     lixa_word_t i;
+    struct tm broken_time;
+    struct timeval tv;
+    
+#ifdef HAVE_VFPRINTF
+    gettimeofday(&tv, NULL);
+    localtime_r(&tv.tv_sec, &broken_time);
 
+    g_static_mutex_lock(&lixa_trace_mutex);
+    /* default header */
+    fprintf(out_stream,
+            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [%d/"
+            PTHREAD_T_FORMAT "] %s",
+            broken_time.tm_year + 1900, broken_time.tm_mon + 1,
+            broken_time.tm_mday, broken_time.tm_hour,
+            broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
+            getpid(), pthread_self(), prefix);
+    /* dump data */
     for (i = 0; i < size; ++i) {
         fprintf(out_stream, "%02x ", (data[i] & 0xff));
     } /* for (i = 0; i < size; ++i) */
+    /* close trace record */
     fprintf(out_stream, "\n");
+#ifdef LIXA_DEBUG
+    fflush(out_stream);
+#endif
+    /* remove the lock from mutex */
+    g_static_mutex_unlock(&lixa_trace_mutex);
+#else
+# error "vfprintf is necessary for lixa_trace_hex_data function!"
+#endif
 }
 
 
 
-void lixa_trace_text_data(const byte_t *data, lixa_word_t size,
-                          FILE *out_stream)
+void lixa_trace_text_data(const char *prefix, const byte_t *data,
+                          lixa_word_t size, FILE *out_stream)
 {
     lixa_word_t i;
+    struct tm broken_time;
+    struct timeval tv;
     
+#ifdef HAVE_VFPRINTF
+    gettimeofday(&tv, NULL);
+    localtime_r(&tv.tv_sec, &broken_time);
+
+    g_static_mutex_lock(&lixa_trace_mutex);
+    /* default header */
+    fprintf(out_stream,
+            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [%d/"
+            PTHREAD_T_FORMAT "] %s",
+            broken_time.tm_year + 1900, broken_time.tm_mon + 1,
+            broken_time.tm_mday, broken_time.tm_hour,
+            broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
+            getpid(), pthread_self(), prefix);
+    /* dump data */
     for (i = 0; i < size; ++i) {
         if (data[i] >= (byte_t)' ' && data[i] < (byte_t)0x80)
             putc((int)(data[i] & 0xff), out_stream);
         else
             putc((int)' ', out_stream);
     } /* for (i = 0; i < size; ++i) */
+    /* close trace record */
     fprintf(out_stream, "\n");
+#ifdef LIXA_DEBUG
+    fflush(out_stream);
+#endif
+    /* remove the lock from mutex */
+    g_static_mutex_unlock(&lixa_trace_mutex);
+#else
+# error "vfprintf is necessary for lixa_trace_hex_data function!"
+#endif
 }
 
 

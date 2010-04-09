@@ -39,6 +39,7 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_tx.h>
+#include <lixa_utils.h>
 #include <lixa_syslog.h>
 #include <client_config.h>
 #include <tx.h>
@@ -59,6 +60,7 @@ static char *xid = NULL;
 static char *xid_file = NULL;
 static gboolean commit = FALSE;
 static gboolean rollback = FALSE;
+static gboolean print_version = FALSE;
 /* command line options: DO NOT CHANGE ORDER, only append!!! */
 static GOptionEntry entries[] =
 {
@@ -66,7 +68,9 @@ static GOptionEntry entries[] =
     { "xid", 'x', 0, G_OPTION_ARG_STRING, &xid, "Select specified transaction for rollback/commit", NULL },
     { "xid-file", 'X', 0, G_OPTION_ARG_STRING, &xid_file, "Select specified file as a list of transaction to rollback/commit", NULL },
     { "commit", 'c', 0, G_OPTION_ARG_NONE, &commit, "Commit prepared & in-doubt transactions", NULL },
-    { "rollback", 'r', 0, G_OPTION_ARG_NONE, &rollback, "Rollback prepared & in-doubt transactions", NULL }
+    { "rollback", 'r', 0, G_OPTION_ARG_NONE, &rollback, "Rollback prepared & in-doubt transactions", NULL },
+    { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
+    { NULL }
 };
 
 
@@ -89,8 +93,9 @@ int main(int argc, char *argv[])
     LIXA_CRASH_INIT;
     LIXA_TRACE(("main: starting\n"));
     openlog("lixar", LOG_PID, LOG_DAEMON);
-    syslog(LOG_NOTICE, LIXA_SYSLOG_LXR000I);
-
+    syslog(LOG_NOTICE, LIXA_SYSLOG_LXR000I,
+           LIXA_PACKAGE_NAME, LIXA_PACKAGE_VERSION);
+    
     option_context = g_option_context_new("- LIXA recovery utility");
     g_option_context_add_main_entries(option_context, entries, NULL);
     
@@ -101,6 +106,11 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    if (print_version) {
+        lixa_print_version(stdout);
+        exit(0);
+    }
+    
     if (xid && xid_file) {
         fprintf(stderr, "'-%c' ('--%s') and '-%c' ('--%s') options are "
                 "mutually exclusive\n",
