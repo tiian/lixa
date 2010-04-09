@@ -25,6 +25,12 @@
 
 
 
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -52,6 +58,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
+
+
+    /**
+     * Print software version info
+     * @param stream IN stdio stream to use for fprintf function
+     */
+    void lixa_print_version(FILE *stream);
+    
 
 
     /**

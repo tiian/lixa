@@ -39,7 +39,7 @@
    C: LOG_CRIT
 */
 #define LIXA_SYSLOG_LXC000I "LXC000I this process is starting a new LIXA " \
-    "transaction manager"
+    "transaction manager (%s package version is %s)"
 #define LIXA_SYSLOG_LXC001E "LXC001E transaction '%s' can NOT be recovered " \
     "because current config digest '%s' does NOT match server stored config " \
     "digest '%s'"
@@ -64,7 +64,7 @@
 
 
 #define LIXA_SYSLOG_LXD000N "LXD000N this process is starting a new LIXA " \
-    "server"
+    "server (%s package version is %s)"
 #define LIXA_SYSLOG_LXD001E "LXD001E failed to parse options: %s"
 #define LIXA_SYSLOG_LXD002W "LXD002W dump option overrides daemon option"
 #define LIXA_SYSLOG_LXD003E "LXD003E configuration error ('%s'), premature " \
@@ -93,7 +93,8 @@
 
 
 
-#define LIXA_SYSLOG_LXR000I "LXR000I LIXA recovery process is starting"
+#define LIXA_SYSLOG_LXR000I "LXR000I LIXA recovery process is starting " \
+    "(%s package version is %s)"
 #define LIXA_SYSLOG_LXR001E "LXR001E failed to parse options: %s"
 #define LIXA_SYSLOG_LXR002I "LXR002I this LIXA recovery process is terminating"
 #define LIXA_SYSLOG_LXR003E "LXR003E unable to perform tx_open() (rc=%d)"

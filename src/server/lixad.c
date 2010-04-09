@@ -89,11 +89,14 @@ void daemonize(void);
 /* default command line options */
 static gboolean run_as_daemon = FALSE;
 static gboolean dump_and_exit = FALSE;
+static gboolean print_version = FALSE;
 /* command line options */
 static GOptionEntry entries[] =
 {
     { "daemon", 'd', 0, G_OPTION_ARG_NONE, &run_as_daemon, "Run the process as a daemon", NULL },
-    { "dump", 'u', 0, G_OPTION_ARG_NONE, &dump_and_exit, "Dump the content of status files and exit", NULL }
+    { "dump", 'u', 0, G_OPTION_ARG_NONE, &dump_and_exit, "Dump the content of status files and exit", NULL },
+    { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
+    { NULL }
 };
 
 
@@ -113,9 +116,10 @@ int main(int argc, char *argv[])
     LIXA_CRASH_INIT;
     LIXA_TRACE(("main: starting\n"));
     openlog("lixad", LOG_PID, LOG_DAEMON);
-    syslog(LOG_NOTICE, LIXA_SYSLOG_LXD000N);
+    syslog(LOG_NOTICE, LIXA_SYSLOG_LXD000N,
+           LIXA_PACKAGE_NAME, LIXA_PACKAGE_VERSION);
 
-    option_context = g_option_context_new("- Lixa server");
+    option_context = g_option_context_new("- LIXA server");
     g_option_context_add_main_entries(option_context, entries, NULL);
     /*
     g_option_context_add_group (context, gtk_get_option_group (TRUE));
@@ -125,6 +129,10 @@ int main(int argc, char *argv[])
         LIXA_TRACE(("main: option parsing failed: %s\n", error->message));
         g_print("option parsing failed: %s\n", error->message);
         exit(1);
+    }
+    if (print_version) {
+        lixa_print_version(stdout);
+        exit(0);
     }
     if (run_as_daemon && dump_and_exit) {
         syslog(LOG_WARNING, LIXA_SYSLOG_LXD002W);

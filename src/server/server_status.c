@@ -581,10 +581,11 @@ int status_record_check_integrity(status_record_t *sr)
         /* @@@ substitute with g_checksum_reset when available */
         g_checksum_free(checksum);
         checksum = NULL;
-        LIXA_TRACE(("status_record_check_integrity: first block digest is: "));
-        LIXA_TRACE_HEX_DATA(first_block->digest, digest_len);        
-        LIXA_TRACE(("status_record_check_integrity: checksum digest is:    "));
-        LIXA_TRACE_HEX_DATA(digest, digest_len);        
+        LIXA_TRACE_HEX_DATA("status_record_check_integrity: "
+                            "first block digest is: ",
+                            first_block->digest, digest_len);
+        LIXA_TRACE_HEX_DATA("status_record_check_integrity: "
+                            "checksum digest is:    ", digest, digest_len);
         /* check digest */
         if (memcmp(digest, first_block->digest, digest_len)) {
             LIXA_TRACE(("status_record_check_integrity: the signature of the "
@@ -596,8 +597,8 @@ int status_record_check_integrity(status_record_t *sr)
                     UINT32_T_FORMAT "\n", first_block->sr.ctrl.magic_number));
         LIXA_TRACE(("status_record_check_integrity:   [level] = "
                     UINT32_T_FORMAT "\n", first_block->sr.ctrl.level));
-        LIXA_TRACE(("status_record_check_integrity:   [last_sync] = "));
-        LIXA_TRACE_HEX_DATA((byte_t *)&(first_block->sr.ctrl.last_sync),
+        LIXA_TRACE_HEX_DATA("status_record_check_integrity:   [last_sync] = ",
+                            (byte_t *)&(first_block->sr.ctrl.last_sync),
                             sizeof(first_block->sr.ctrl.last_sync));
         LIXA_TRACE(("status_record_check_integrity:   [number_of_blocks] = "
                     UINT32_T_FORMAT "\n",
@@ -632,12 +633,12 @@ int status_record_check_integrity(status_record_t *sr)
             g_checksum_free(checksum);
             checksum = NULL;
             
-            LIXA_TRACE(("status_record_check_integrity: block # "
-                        UINT32_T_FORMAT " digest is:          ", i));
-            LIXA_TRACE_HEX_DATA(curr_block->digest, digest_len);        
-            LIXA_TRACE(("status_record_check_integrity: block # "
-                        UINT32_T_FORMAT " checksum digest is: ", i));
-            LIXA_TRACE_HEX_DATA(digest, digest_len);        
+            LIXA_TRACE(("status_record_check_integrity: checking block # "
+                        UINT32_T_FORMAT "\n", i));
+            LIXA_TRACE_HEX_DATA("status_record_check_integrity: digest is: ",
+                                curr_block->digest, digest_len);        
+            LIXA_TRACE_HEX_DATA("status_record_check_integrity: checksum "
+                                "digest is: ", digest, digest_len);        
             /* check digest */
             if (memcmp(digest, curr_block->digest, digest_len)) {
                 LIXA_TRACE(("status_record_check_integrity: block # "
@@ -745,8 +746,8 @@ void status_record_display_chains(const status_record_t *sr)
                 UINT32_T_FORMAT "\n", sr->sr.ctrl.magic_number));
     LIXA_TRACE(("status_record_display_chains:   [level] = "
                 UINT32_T_FORMAT "\n", sr->sr.ctrl.level));
-    LIXA_TRACE(("status_record_display_chains:   [last_sync] = "));
-    LIXA_TRACE_HEX_DATA((byte_t *)&(sr->sr.ctrl.last_sync),
+    LIXA_TRACE_HEX_DATA("status_record_display_chains:   [last_sync] = ",
+                        (byte_t *)&(sr->sr.ctrl.last_sync),
                         sizeof(sr->sr.ctrl.last_sync));
     LIXA_TRACE(("status_record_display_chains:   [number_of_blocks] = "
                 UINT32_T_FORMAT "\n",

@@ -22,7 +22,7 @@
 
 
 #include <config.h>
-
+\
 
 
 /* save old LIXA_TRACE_MODULE and set a new value */
@@ -53,6 +53,21 @@ extern const char *LIXA_SERVER_CONFIG_SYSTEM_FILE;
  * configuration)
  */
 extern const char *LIXA_CLIENT_CONFIG_SYSTEM_FILE;
+
+/**
+ * Name of the package as set inside configure.ac
+ */
+extern const char *LIXA_PACKAGE_NAME;
+
+/**
+ * Version of the package as set inside configure.ac
+ */
+extern const char *LIXA_PACKAGE_VERSION;
+
+/**
+ * E-mail address as set inside configure.ac
+ */
+extern const char *LIXA_PACKAGE_BUGREPORT;
 
 
 

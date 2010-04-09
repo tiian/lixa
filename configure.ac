@@ -1,4 +1,4 @@
-AC_INIT([lixa], [0.3.11], [tiian@users.sourceforge.net])
+AC_INIT([lixa], [0.3.11], [tiian at users dot sourceforge dot net])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
@@ -147,6 +147,9 @@ AC_CHECK_SIZEOF([uuid_t], [], [[#include <uuid/uuid.h>]])
 
 AC_CHECK_FUNCS(vfprintf)
 
+AC_SUBST(PACKAGE_BUGREPORT)
+AC_SUBST(PACKAGE_NAME)
+AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(LT_LIXAC_CURRENT)
 AC_SUBST(LT_LIXAC_REVISION)
 AC_SUBST(LT_LIXAC_AGE)

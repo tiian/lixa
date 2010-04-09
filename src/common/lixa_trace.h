@@ -198,10 +198,10 @@ extern unsigned long lixa_trace_mask;
  * trace mask (LIXA_TRACE_MASK) specified as environment variable
  */
 #ifdef _TRACE
-# define LIXA_TRACE_HEX_DATA(a,b)   (LIXA_TRACE_MODULE & lixa_trace_mask ? \
-                                     lixa_trace_hex_data(a,b,stderr) : 0)
+# define LIXA_TRACE_HEX_DATA(a,b,c) (LIXA_TRACE_MODULE & lixa_trace_mask ? \
+                                     lixa_trace_hex_data(a,b,c,stderr) : 0)
 #else
-# define LIXA_TRACE_HEX_DATA(a,b)
+# define LIXA_TRACE_HEX_DATA(a,b,c)
 #endif /* _TRACE */
 
 
@@ -229,23 +229,27 @@ extern "C" {
 
     /**
      * Dump the content of a piece of memory to a stream (hex format)
+     * @param prefix IN trace prefix to print before dump (it is a fixed
+     *               prefix, not a format with values)
      * @param data IN pointer to base memory
      * @param size IN number of bytes to dump
      * @param out_stream IN destination standard I/O stream
      */
-    void lixa_trace_hex_data(const byte_t *data , lixa_word_t size,
-                             FILE *out_stream);
+    void lixa_trace_hex_data(const char *prefix, const byte_t *data,
+                             lixa_word_t size, FILE *out_stream);
 
 
       
     /**
      * Dump the content of a piece of memory to a stream (text format)
+     * @param prefix IN trace prefix to print before dump (it is a fixed
+     *               prefix, not a format with values)
      * @param data IN pointer to base memory
      * @param size IN number of bytes to dump
      * @param out_stream IN destination standard I/O stream
      */
-    void lixa_trace_text_data(const byte_t *data, lixa_word_t size,
-                              FILE *out_stream);
+    void lixa_trace_text_data(const char *prefix, const byte_t *data,
+                              lixa_word_t size, FILE *out_stream);
 
 
 
