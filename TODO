@@ -1,9 +1,9 @@
+Go on with lixa_tx_rc_add
+
+Review the multi resource manager XA->TX return code mapping and use
+lixa_tx_rc_hierarchy for cases not explicitly described in Appendix B. TX
 
 When server_manager_thread exits, the listener must be aware of this... 
-
-Print the features (debug, trace, crash) has been compiled in the software and
-the version (main version, library version) on syslog and/or command line for
-lixad
 
 Implement a "test resource manager" can be driven by "open string" with the
 return code of every XA function. This would become the reference tool for
