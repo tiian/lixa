@@ -232,7 +232,15 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 client_status_get_xid(cs), record.rmid, record.flags);
             LIXA_TRACE(("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) = "
                         "%d\n", record.rmid, record.flags, record.rc));
-
+            if (XA_RETRY == record.rc) {
+                /* try a second time */
+                LIXA_TRACE(("lixa_xa_commit: XA_RETRY, try again..."));
+                record.rc = act_rsrmgr->xa_switch->xa_commit_entry(
+                    client_status_get_xid(cs), record.rmid, record.flags);
+                LIXA_TRACE(("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) "
+                            "= %d\n", record.rmid, record.flags, record.rc));
+            }
+            
             finished = finished && (record.rc == XA_OK);
 
             /* @@@ the algorithm used to determine *txrc must be reviewed
@@ -1020,9 +1028,17 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc)
             record.flags = TMNOFLAGS;
             record.rc = act_rsrmgr->xa_switch->xa_rollback_entry(
                 client_status_get_xid(cs), record.rmid, record.flags);
-            LIXA_TRACE(("lixa_xa_rollback: xa_rollback_entry(xid, %d, 0x%lx) = "
-                        "%d\n", record.rmid, record.flags, record.rc));
-
+            LIXA_TRACE(("lixa_xa_rollback: xa_rollback_entry(xid, %d, 0x%lx) "
+                        "= %d\n", record.rmid, record.flags, record.rc));
+            if (XA_RETRY == record.rc) {
+                LIXA_TRACE(("lixa_xa_rollback: XA_RETRY, trying again..."));
+                record.rc = act_rsrmgr->xa_switch->xa_rollback_entry(
+                    client_status_get_xid(cs), record.rmid, record.flags);
+                LIXA_TRACE(("lixa_xa_rollback: xa_rollback_entry("
+                            "xid, %d, 0x%lx) = %d\n", record.rmid,
+                            record.flags, record.rc));
+            }
+            
             finished = finished && (record.rc == XA_OK);
 
             /* @@@ the algorithm used to determine *txrc must be reviewed
