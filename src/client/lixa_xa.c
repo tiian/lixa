@@ -29,6 +29,7 @@
 #include <lixa_crash.h>
 #include <lixa_trace.h>
 #include <lixa_errors.h>
+#include <lixa_tx_rc.h>
 #include <lixa_xa.h>
 #include <lixa_xml_msg_deserialize.h>
 #include <lixa_xml_msg_serialize.h>
@@ -172,13 +173,17 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
 
 int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
 {
-    enum Exception { INVALID_XA_RC
+    enum Exception { TX_RC_ADD_ERROR
+                     , INVALID_XA_RC
                      , ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    lixa_tx_rc_t ltr = LIXA_TX_RC_T_INIT;
+    *txrc = TX_FAIL;
     
     LIXA_TRACE(("lixa_xa_commit\n"));
     TRY {
@@ -187,7 +192,6 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
         int fd;
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
-        int finished = TRUE;
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -204,9 +208,11 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
         
         LIXA_TRACE(("lixa_xa_commit: one_phase_commit = %d\n",
                     one_phase_commit));
+
+        /* prepare the object to compute *txrc */
+        lixa_tx_rc_create(&ltr, TRUE, TRUE, global_ccc.actconf.rsrmgrs->len);
         
         /* loop on all the resource managers and call xa_commit function */
-        *txrc = TX_OK;
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
@@ -241,26 +247,15 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                             "= %d\n", record.rmid, record.flags, record.rc));
             }
             
-            finished = finished && (record.rc == XA_OK);
-
-            /* @@@ the algorithm used to determine *txrc must be reviewed
-               (see bug 2936618) */
+            if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(&ltr, record.rc)))
+                THROW(TX_RC_ADD_ERROR);
+            
             switch (record.rc) {
                 case XA_HEURHAZ:
-                    csr->xa_s_state = XA_STATE_S5;
-                    *txrc = TX_HAZARD;
-                    break;
                 case XA_HEURCOM:
-                    csr->xa_s_state = XA_STATE_S5;
-                    *txrc = TX_OK;
-                    break;
                 case XA_HEURRB:
-                    csr->xa_s_state = XA_STATE_S5;
-                    *txrc = TX_ROLLBACK;
-                    break;
                 case XA_HEURMIX:
                     csr->xa_s_state = XA_STATE_S5;
-                    *txrc = TX_MIXED;
                     break;
                 case XA_OK:
                     csr->xa_s_state = XA_STATE_S0;
@@ -274,40 +269,43 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
                     csr->xa_s_state = XA_STATE_S0;
-                    *txrc = TX_ROLLBACK;
                     if (TMONEPHASE != record.flags)
                         THROW(INVALID_XA_RC);
                     break;                    
                 case XAER_ASYNC:
-                    *txrc = TX_FAIL;
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 case XAER_RMERR:
                     csr->xa_s_state = XA_STATE_S0;
-                    *txrc = TX_ROLLBACK;
                     break;
                 case XAER_RMFAIL:
-                    *txrc = TX_FAIL;
                     csr->xa_r_state = XA_STATE_R0;
                     break;
                 case XAER_NOTA:
                     csr->xa_s_state = XA_STATE_S0;
-                    *txrc = TX_ROLLBACK;
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
-                    *txrc = TX_FAIL;
                     csr->xa_t_state = XA_STATE_T0;
                     break;
                 default:
-                    *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
             record.r_state = csr->xa_r_state;
             record.s_state = csr->xa_s_state;
             g_array_append_val(msg.body.commit_8.xa_commit_execs, record);
         } /* for (i=0; ...) */
-        
-        msg.body.commit_8.conthr.finished = finished;
+
+        *txrc = lixa_tx_rc_get(&ltr);
+        switch (*txrc) {
+            case TX_OK:
+            case TX_OUTSIDE:
+            case TX_ROLLBACK:
+            case TX_COMMITTED:
+                msg.body.commit_8.conthr.finished = TRUE;
+                break;
+            default:
+                msg.body.commit_8.conthr.finished = FALSE;
+        }
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
@@ -326,6 +324,8 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case TX_RC_ADD_ERROR:
+                break;
             case INVALID_XA_RC:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
@@ -346,6 +346,8 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* release memory */
+        lixa_tx_rc_delete(&ltr);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -984,14 +986,18 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
 
 
 
-int lixa_xa_rollback(client_status_t *cs, int *txrc)
+int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
 {
-    enum Exception {ASYNC_NOT_IMPLEMENTED
+    enum Exception { TX_RC_ADD_ERROR
+                    , ASYNC_NOT_IMPLEMENTED
                     , UNEXPECTED_XA_RC
                     , MSG_SERIALIZE_ERROR
                     , SEND_ERROR
                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    lixa_tx_rc_t ltr = LIXA_TX_RC_T_INIT;
+    *txrc = TX_FAIL;
     
     LIXA_TRACE(("lixa_xa_rollback\n"));
     TRY {
@@ -1000,7 +1006,6 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc)
         int fd;
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
-        int finished = TRUE;
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -1015,8 +1020,11 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc)
             sizeof(struct lixa_msg_body_rollback_8_xa_rollback_execs_s),
             global_ccc.actconf.rsrmgrs->len);
         
+        /* prepare the object to compute *txrc */
+        lixa_tx_rc_create(&ltr, tx_commit, FALSE,
+                          global_ccc.actconf.rsrmgrs->len);
+
         /* loop on all the resource managers and call xa_rollback function */
-        *txrc = TX_OK;
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
@@ -1039,26 +1047,21 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc)
                             record.flags, record.rc));
             }
             
-            finished = finished && (record.rc == XA_OK);
-
-            /* @@@ the algorithm used to determine *txrc must be reviewed
-               (see bug 2936618) */
+            if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(&ltr, record.rc)))
+                THROW(TX_RC_ADD_ERROR);
+            
             switch (record.rc) {
                 case XA_HEURHAZ:
                     csr->xa_s_state = XA_STATE_S5;
-                    *txrc = TX_HAZARD;
                     break;
                 case XA_HEURCOM:
                     csr->xa_s_state = XA_STATE_S5;
-                    *txrc = TX_COMMITTED;
                     break;
                 case XA_HEURRB:
                     csr->xa_s_state = XA_STATE_S5;
-                    *txrc = TX_OK;
                     break;
                 case XA_HEURMIX:
                     csr->xa_s_state = XA_STATE_S5;
-                    *txrc = TX_MIXED;
                     break;
                 case XA_OK:
                     csr->xa_s_state = XA_STATE_S0;
@@ -1072,30 +1075,23 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc)
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
                     csr->xa_s_state = XA_STATE_S0;
-                    *txrc = TX_OK;
                     break;                    
                 case XAER_ASYNC:
-                    *txrc = TX_FAIL;
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 case XAER_RMERR:
                     csr->xa_s_state = XA_STATE_S0;
-                    *txrc = TX_OK;
                     break;
                 case XAER_RMFAIL:
-                    *txrc = TX_FAIL;
                     csr->xa_r_state = XA_STATE_R0;
                     break;
                 case XAER_NOTA:
                     csr->xa_s_state = XA_STATE_S0;
-                    *txrc = TX_ROLLBACK;
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
-                    *txrc = TX_FAIL;
                     csr->xa_t_state = XA_STATE_T0;
                     break;
                 default:
-                    *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
             record.r_state = csr->xa_r_state;
@@ -1103,7 +1099,18 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc)
             g_array_append_val(msg.body.rollback_8.xa_rollback_execs, record);
         } /* for (i=0; ...) */
         
-        msg.body.rollback_8.conthr.finished = finished;
+        *txrc = lixa_tx_rc_get(&ltr);
+        switch (*txrc) {
+            case TX_OK:
+            case TX_OUTSIDE:
+            case TX_ROLLBACK:
+            case TX_COMMITTED:
+                msg.body.commit_8.conthr.finished = TRUE;
+                break;
+            default:
+                msg.body.commit_8.conthr.finished = FALSE;
+        }
+        
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
@@ -1139,6 +1146,8 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* release memory */
+        lixa_tx_rc_delete(&ltr);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

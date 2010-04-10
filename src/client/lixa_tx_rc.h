@@ -28,6 +28,9 @@
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 
 
 
@@ -51,6 +54,15 @@
  * from XA_* return codes
  */
 struct lixa_tx_rc_s {
+    /**
+     * The original operation issued from Application Program was tx_commit
+     * (TRUE) or tx_rollback (FALSE). <br>
+     * <b>Note:</b> the original operation may be different from the operation
+     * was really performed because the prepare phase of a tx_commit can
+     * fail and the transaction manager switch from tx_commit/commit to
+     * tx_commit/rollback operation
+     */
+    int         tx_commit;
     /**
      * The object will be used in a commit operation (TRUE), or in a rollback
      * (FALSE) operation
@@ -79,7 +91,7 @@ typedef struct lixa_tx_rc_s lixa_tx_rc_t;
 /**
  * Static initializer for an object of type @ref lixa_tx_rc_t
  */
-#define LIXA_TX_RC_T_INIT { TRUE, 0, NULL }
+#define LIXA_TX_RC_T_INIT { TRUE, TRUE, TX_FAIL, NULL }
 
 
 
@@ -92,16 +104,20 @@ extern "C" {
     /**
      * Create an object of type @ref lixa_tx_rc_t
      * @param ltr IN/OUT reference to the object must be initialized
+     * @param tx_commit IN the original operation issued from Application
+     *                  Program was tx_commit (TRUE) or tx_rollback (FALSE)
      * @param commit IN boolean: TRUE if the object will be used in a commit
      *               operation; <br>
      *               FALSE if the object will be used in a rollback operation
      * @param size IN initial/estimated size of the array (if 0, it will be
      *             dynamically increased when necessary)
      */
-    static inline void lixa_tx_rc_create(lixa_tx_rc_t *ltr, int commit,
+    static inline void lixa_tx_rc_create(lixa_tx_rc_t *ltr,
+                                         int tx_commit, int commit,
                                          guint size) {
+        ltr->tx_commit = tx_commit;
         ltr->commit = commit;
-        ltr->tx_rc = TX_OK;
+        ltr->tx_rc = TX_FAIL;
         ltr->xa_rc = g_array_sized_new(FALSE, FALSE, sizeof(int), size);
         assert(ltr->xa_rc != NULL);
     }
@@ -113,8 +129,10 @@ extern "C" {
      * @param ltr IN/OUT reference to the object
      */
     static inline void lixa_tx_rc_delete(lixa_tx_rc_t *ltr) {
-        g_array_free(ltr->xa_rc, TRUE);
-        ltr->xa_rc = NULL;
+        if (NULL != ltr->xa_rc) {
+            g_array_free(ltr->xa_rc, TRUE);
+            ltr->xa_rc = NULL;
+        }
     }
 
 
@@ -171,7 +189,9 @@ extern "C" {
      * @param ltr IN reference to the object
      * @return a TX_* return code
      */
-    int lixa_tx_rc_get(const lixa_tx_rc_t *ltr);
+    static inline int lixa_tx_rc_get(const lixa_tx_rc_t *ltr) {
+        return ltr->tx_rc;
+    }
 
 
     

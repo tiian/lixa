@@ -1,4 +1,6 @@
-Go on with lixa_tx_rc_add
+optimize lixa_tx_commit : if the first resource manager fails after prepare,
+can we switch to rollback instead of going on with commit and exiting with 
+TX_MIXED?!
 
 Review the multi resource manager XA->TX return code mapping and use
 lixa_tx_rc_hierarchy for cases not explicitly described in Appendix B. TX
