@@ -115,9 +115,11 @@ extern "C" {
      * Roll back work performed on behalf of the transaction manager
      * @param cs IN reference to the status of the calling client
      * @param txrc OUT return code prepared for tx_commit/tx_rollback call
+     * @param tx_commit IN the function is called from tx_commit (TRUE) or
+     *                  from tx_rollback (FALSE)
      * @return a reason code
      */
-    int lixa_xa_rollback(client_status_t *cs, int *txrc);
+    int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit);
     
     
     

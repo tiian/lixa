@@ -286,7 +286,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     *txrc = TX_FAIL;
-
+    
     LIXA_TRACE_INIT;    
     LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_commit\n"));
@@ -373,13 +373,13 @@ int lixa_tx_commit(int *txrc, int *begin_new)
             } /* switch */
         } else {
             LIXA_TRACE(("lixa_tx_commit: go on with rollback...\n"));
-            if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc)))
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc, TRUE)))
                 THROW(XA_ROLLBACK_ERROR);
             switch (*txrc) {
                 case TX_OK:
+                case TX_ROLLBACK:
                 case TX_MIXED:
                 case TX_HAZARD:
-                case TX_COMMITTED:
                     if (TX_STATE_S3 == txstate)
                         next_txstate = TX_STATE_S1;
                     else if (TX_STATE_S4 == txstate)
@@ -387,6 +387,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                     else THROW(INVALID_STATE3);
                     break;
                 case TX_NO_BEGIN:
+                case TX_ROLLBACK_NO_BEGIN:
                 case TX_MIXED_NO_BEGIN:
                 case TX_HAZARD_NO_BEGIN:
                 case TX_COMMITTED_NO_BEGIN:
@@ -439,7 +440,6 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                 *txrc = TX_FAIL;
                 break;
             case NONE:
-                *txrc = TX_OK;
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
@@ -702,7 +702,7 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
         if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, FALSE)))
             THROW(XA_END_ERROR);
 
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc)))
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc, FALSE)))
             THROW(XA_ROLLBACK_ERROR);
         switch (*txrc) {
             case TX_OK:
