@@ -73,6 +73,7 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
            reserved for the current thread of control */
         *txrc = TX_OK;
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+            int tmp_txrc = TX_OK;
             int rc;
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
@@ -85,12 +86,11 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
                 case XA_OK:
                     break;
                 case XAER_RMERR:
-                    if (*txrc == TX_OK)
-                        *txrc = TX_ERROR;
+                    tmp_txrc = TX_ERROR;
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
-                    *txrc = TX_FAIL;
+                    tmp_txrc = TX_FAIL;
                     break;
                 case XAER_ASYNC:
                     *txrc = TX_FAIL;
@@ -99,6 +99,9 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);                    
             } /* switch (rc) */
+            if (lixa_tx_rc_hierarchy(tmp_txrc) <
+                lixa_tx_rc_hierarchy(*txrc))
+                *txrc = tmp_txrc;
         }
                 
         /* retrieve the socket */
@@ -432,6 +435,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
         *txrc = TX_OK;
         xa_end_flags = TMSUCCESS;
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+            int tmp_txrc = TX_OK;
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
             struct common_status_rsrmgr_s *csr = &g_array_index(
@@ -463,6 +467,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                     csr->xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     read_write_rsrmgr--; /* read only transaction */
+                    if (commit)
+                        tmp_txrc = TX_ROLLBACK;
                     break;                    
                 case XAER_ASYNC:
                     *txrc = TX_FAIL;
@@ -477,10 +483,13 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                     csr->xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     break;
+                    if (commit)
+                        tmp_txrc = TX_ROLLBACK;
                 case XAER_RMFAIL:
                     *txrc = TX_FAIL;
                     csr->xa_r_state = XA_STATE_R0;
                     xa_end_flags = TMFAIL;
+                    tmp_txrc = TX_FAIL;
                     break;
                 case XAER_NOTA:
                     /* @@@ this behavior comes from page 65 of
@@ -491,11 +500,14 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                     csr->xa_t_state = XA_STATE_T0;
                     csr->xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
+                    if (commit)
+                        tmp_txrc = TX_ROLLBACK;
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
                     *txrc = TX_FAIL;
                     csr->xa_t_state = XA_STATE_T0;
+                    tmp_txrc = TX_FAIL;
                     break;
                 default:
                     *txrc = TX_FAIL;
@@ -504,6 +516,10 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
             record.s_state = csr->xa_s_state;
             record.t_state = csr->xa_t_state;
             g_array_append_val(msg.body.end_24.xa_end_execs, record);
+            
+            if (lixa_tx_rc_hierarchy(tmp_txrc) <
+                lixa_tx_rc_hierarchy(*txrc))
+                *txrc = tmp_txrc;
         } /* for (i=0; ...) */
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
@@ -701,6 +717,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                 cs->rmstates, struct common_status_rsrmgr_s, i);
             struct lixa_msg_body_open_24_xa_open_execs_s record;
             long xa_open_flags = TMNOFLAGS;
+            int tmp_txrc = TX_OK;
 
             record.xa_info = (xmlChar *)act_rsrmgr->generic->xa_open_info;
             record.rmid = i;
@@ -718,13 +735,12 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                     csr->xa_r_state = XA_STATE_R1;
                     break;
                 case XAER_RMERR:
-                    if (*txrc == TX_OK)
-                        *txrc = TX_ERROR;
+                    tmp_txrc = TX_ERROR;
                     csr->xa_r_state = XA_STATE_R1;
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
-                    *txrc = TX_FAIL;
+                    tmp_txrc = TX_FAIL;
                     csr->xa_r_state = XA_STATE_R1;
                     break;
                 case XAER_ASYNC:
@@ -736,6 +752,10 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
             }
             record.r_state = csr->xa_r_state;
             g_array_append_val(msg.body.open_24.xa_open_execs, record);
+            
+            if (lixa_tx_rc_hierarchy(tmp_txrc) <
+                lixa_tx_rc_hierarchy(*txrc))
+                *txrc = tmp_txrc;
         } /* for (i=0; ...) */
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
@@ -855,6 +875,7 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
             struct common_status_rsrmgr_s *csr = &g_array_index(
                 cs->rmstates, struct common_status_rsrmgr_s, i);
             struct lixa_msg_body_prepare_8_xa_prepare_execs_s record;
+            int tmp_txrc = TX_OK;
 
             record.rmid = i;
             record.flags = TMNOFLAGS;
@@ -870,6 +891,9 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
                     break_prepare = FALSE;
                     break;
                 case XA_RDONLY:
+                    csr->xa_s_state = XA_STATE_S0;
+                    break_prepare = FALSE;
+                    break;
                 case XA_RBROLLBACK:
                 case XA_RBCOMMFAIL:
                 case XA_RBDEADLOCK:
@@ -880,25 +904,31 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
                 case XA_RBTRANSIENT:
                     csr->xa_s_state = XA_STATE_S0;
                     break_prepare = FALSE;
+                    tmp_txrc = TX_ROLLBACK;
                     break;                    
+                case XAER_NOTA:
+                    csr->xa_s_state = XA_STATE_S0;
+                    tmp_txrc = TX_ROLLBACK;
+                    break;
+                case XAER_RMERR:
+                    csr->xa_s_state = XA_STATE_S2;
+                    tmp_txrc = TX_ROLLBACK;
+                    break;
+                case XAER_RMFAIL:
+                    csr->xa_r_state = XA_STATE_R0;
+                    tmp_txrc = TX_FAIL;
+                    break;
+                case XAER_INVAL:
+                    csr->xa_t_state = XA_STATE_T0;
+                    tmp_txrc = TX_FAIL;
+                    break;
+                case XAER_PROTO:
+                    csr->xa_t_state = XA_STATE_T0;
+                    tmp_txrc = TX_ROLLBACK;
+                    break;
                 case XAER_ASYNC:
                     *txrc = TX_FAIL;
                     THROW(ASYNC_NOT_IMPLEMENTED);
-                case XAER_RMERR:
-                    csr->xa_s_state = XA_STATE_S2;
-                    break;
-                case XAER_RMFAIL:
-                    *txrc = TX_FAIL;
-                    csr->xa_r_state = XA_STATE_R0;
-                    break;
-                case XAER_NOTA:
-                    csr->xa_s_state = XA_STATE_S0;
-                    break;
-                case XAER_INVAL:
-                case XAER_PROTO:
-                    *txrc = TX_FAIL;
-                    csr->xa_t_state = XA_STATE_T0;
-                    break;
                 default:
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
@@ -907,6 +937,10 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
             record.t_state = csr->xa_t_state;
             g_array_append_val(msg.body.prepare_8.xa_prepare_execs, record);
 
+            if (lixa_tx_rc_hierarchy(tmp_txrc) <
+                lixa_tx_rc_hierarchy(*txrc))
+                *txrc = tmp_txrc;
+            
             if (break_prepare) {
                 /* interrupt first phase commit, we must rollback the global
                    transaction */
@@ -1258,6 +1292,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
             struct lixa_msg_body_start_24_xa_start_execs_s record;
             long xa_start_flags = TMNOFLAGS;
             int rc;
+            int tmp_txrc = TX_OK;
 
             /* if resource manager supports dynamic registration, xa_start
                must not be performed */
@@ -1279,13 +1314,12 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
                     csr->xa_t_state = XA_STATE_T1;
                     break;
                 case XAER_RMERR:
-                    if (*txrc == TX_OK)
-                        *txrc = TX_ERROR;
+                    tmp_txrc = TX_ERROR;
                     csr->xa_t_state = XA_STATE_T0;
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
-                    *txrc = TX_FAIL;
+                    tmp_txrc = TX_FAIL;
                     csr->xa_t_state = XA_STATE_T0;
                     break;
                 case XAER_ASYNC:
@@ -1297,6 +1331,10 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
             }
             record.t_state = csr->xa_t_state;
             g_array_append_val(msg.body.start_24.xa_start_execs, record);
+
+            if (lixa_tx_rc_hierarchy(tmp_txrc) <
+                lixa_tx_rc_hierarchy(*txrc))
+                *txrc = tmp_txrc;
         } /* for (i=0; ...) */
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
