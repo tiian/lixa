@@ -111,6 +111,9 @@ Have fun!
 
 Pre-requisites: 
 libxml2-0
+libglib2
+libuuid 
+
 glib2-0
 libuuid
 libltdl

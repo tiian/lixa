@@ -22702,7 +22702,8 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <uuid/uuid.h>
+\
+	#include <uuid/uuid.h>
 
 typedef uuid_t ac__type_new_;
 int
@@ -22752,6 +22753,11 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+else
+  \
+	{ { echo "$as_me:$LINENO: error: cannot go on without uuid_t type" >&5
+echo "$as_me: error: cannot go on without uuid_t type" >&2;}
+   { (exit 1); exit 1; }; }
 fi
 
 { echo "$as_me:$LINENO: checking for in_addr_t" >&5
