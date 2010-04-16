@@ -127,7 +127,9 @@ AC_CHECK_TYPES(pthread_t)
 AC_CHECK_TYPES(uint8_t)
 AC_CHECK_TYPES(uint32_t)
 AC_CHECK_TYPES(uintptr_t)
-AC_CHECK_TYPES([uuid_t], [], [], [[#include <uuid/uuid.h>]])
+AC_CHECK_TYPES([uuid_t], [], \
+	[AC_MSG_ERROR([cannot go on without uuid_t type])], \
+	[[#include <uuid/uuid.h>]])
 AC_CHECK_TYPES([in_addr_t], [], [], [[#include <netinet/in.h>]])
 AC_CHECK_TYPES([in_port_t], [], [], [[#include <netinet/in.h>]])
 
