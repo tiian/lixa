@@ -72,8 +72,8 @@ and you will get a layout like this:
 	/usr/local/lib
 	/var
 
-On my Ubuntu systems, to build Oracle XE related stuff, I use something like 
-this:
+On my Ubuntu systems, to build Oracle XE 10.2.0 related stuff, I use something
+like this:
 	./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
 	make
 
@@ -98,6 +98,11 @@ Don't forget these steps for Oracle XA:
                    (if hr is the user you want to use to run your application)
 5. grant select on v$pending_xatrans$ to hr;
 6. grant select on v$xatrans$ to hr;
+
+On my Ubuntu systems, to build IBM DB2 Express-C 9.7 related stuff, I use
+something like this:
+	./configure --with-ibmdb2=/opt/ibm/db2/V9.7
+	make
 
 Doxygen documentation.
 There is a minimal configuration for Doxygen inside LIXA.
