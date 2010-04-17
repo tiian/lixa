@@ -13,6 +13,7 @@ AC_CONFIG_FILES([
   src/client/Makefile
   src/client/switch/Makefile
   src/client/switch/lixa/Makefile
+  src/client/switch/ibmdb2/Makefile
   src/client/switch/oracle/Makefile
   src/extra/Makefile
   src/server/Makefile
