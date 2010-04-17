@@ -65,7 +65,15 @@ AC_DEFUN([AX_LIB_IBMDB2_CLI],
         [ibmdb2_home_lib_dir=""]
     )
 
-    IBMDB2_CLI_CFLAGS=""
+    AC_ARG_WITH([ibmdb2-static-registration],
+        AC_HELP_STRING([--with-ibmdb2-static-registration],
+            [use XA static registration (xa_start) instead of dynamic (ax_reg)]
+        ),
+        [ibmdb2_static_registration="yes"],
+        [ibmdb2_static_registration="no"]
+    )
+
+    IBMDB2_CLI_CPPFLAGS=""
     IBMDB2_CLI_LDFLAGS=""
 
     dnl
@@ -141,7 +149,7 @@ Please, locate IBMDB2 directories using --with-ibmdb2 or \
                 [[ ]]
             )],
             [
-            IBMDB2_CLI_CFLAGS="-I$ibmdb2_include_dir"
+            IBMDB2_CLI_CPPFLAGS="-I$ibmdb2_include_dir"
             cli_header_found="yes"
             AC_MSG_RESULT([yes])
             ],
@@ -186,6 +194,10 @@ if (SQL_SUCCESS != cli_rc) return 1; else return 0;
         LDFLAGS="$saved_LDFLAGS"
     fi
 
-    AC_SUBST([IBMDB2_CLI_CFLAGS])
+    if test ibmdb2_static_registration = "yes" ; then
+        CPPFLAGS="$CPPFLAGS -DIBMDB2_STATIC_REGISTRATION"
+    fi
+
+    AC_SUBST([IBMDB2_CLI_CPPFLAGS])
     AC_SUBST([IBMDB2_CLI_LDFLAGS])
 ])

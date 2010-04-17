@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I$(srcdir)/../../client @IBMDB2_CLI_CFLAGS@
+AM_CPPFLAGS = -I$(srcdir)/../../client @IBMDB2_CLI_CPPFLAGS@
 AM_CFLAGS =
 AM_LDFLAGS = -lpthread @LIBLTDL@ @LDFLAGS_GMODULE@
 LDADD = ../../common/liblixabmt.la ../../client/liblixacmt.la @IBMDB2_CLI_LDFLAGS@

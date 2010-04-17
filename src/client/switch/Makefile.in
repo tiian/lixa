@@ -56,7 +56,7 @@ RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = lixa oracle
+DIST_SUBDIRS = lixa oracle ibmdb2
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -90,7 +90,7 @@ EXPANDED_SYSCONFDIR = @EXPANDED_SYSCONFDIR@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 GREP = @GREP@
-IBMDB2_CLI_CFLAGS = @IBMDB2_CLI_CFLAGS@
+IBMDB2_CLI_CPPFLAGS = @IBMDB2_CLI_CPPFLAGS@
 IBMDB2_CLI_LDFLAGS = @IBMDB2_CLI_LDFLAGS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -189,7 +189,8 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @COMPILE_ORACLE_STUFF_TRUE@MAYBE_ORACLE = oracle
-SUBDIRS = lixa $(MAYBE_ORACLE)
+@COMPILE_IBMDB2_STUFF_TRUE@MAYBE_IBMDB2 = ibmdb2
+SUBDIRS = lixa $(MAYBE_ORACLE) $(MAYBE_IBMDB2)
 all: all-recursive
 
 .SUFFIXES:

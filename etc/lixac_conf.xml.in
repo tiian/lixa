@@ -6,6 +6,7 @@
   </trnmgrs>
   <rsrmgrs>
     <rsrmgr name="OracleXE" switch_file="@EXPANDED_LIBDIR@/switch_oracle.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
+    <rsrmgr name="IBMDB2" switch_file="@EXPANDED_LIBDIR@/switch_ibmdb2.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" />
     <rsrmgr name="LIXAdummyRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_dummyrm.so" xa_open_info="dummy open string" xa_close_info="dummy close string" />
     <rsrmgr name="LIXArandomRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_randomrm.so" xa_open_info="random open string" xa_close_info="random close string" />
   </rsrmgrs>
@@ -34,7 +35,7 @@
         <trnmgr>local_2</trnmgr>
       </trnmgrs>
       <rsrmgrs>
-        <rsrmgr>LIXAdummyRM</rsrmgr>
+        <rsrmgr>IBMDB2</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="CF70">
