@@ -103,6 +103,11 @@ On my Ubuntu systems, to build IBM DB2 Express-C 9.7 related stuff, I use
 something like this:
 	./configure --with-ibmdb2=/opt/ibm/db2/V9.7
 	make
+IBM DB2 suggests dynamic XA registration, but if you want to force XA static 
+registration (xa_start instead of ax_reg), configure LIXA with something like 
+this:
+	./configure --with-ibmdb2=/opt/ibm/db2/V9.7 --with-ibmdb2-static-registration
+	make
 
 Doxygen documentation.
 There is a minimal configuration for Doxygen inside LIXA.

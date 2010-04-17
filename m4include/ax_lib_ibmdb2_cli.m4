@@ -194,7 +194,7 @@ if (SQL_SUCCESS != cli_rc) return 1; else return 0;
         LDFLAGS="$saved_LDFLAGS"
     fi
 
-    if test ibmdb2_static_registration = "yes" ; then
+    if test "$ibmdb2_static_registration" = "yes" ; then
         CPPFLAGS="$CPPFLAGS -DIBMDB2_STATIC_REGISTRATION"
     fi
 
