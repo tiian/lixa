@@ -111,7 +111,7 @@ Please, locate Oracle directories using --with-oracle or \
         dnl
         AC_MSG_CHECKING([for Oracle OCI headers in $oracle_include_dir])
 
-        AC_LANG_PUSH(C++)
+        AC_LANG_PUSH([C])
         AC_COMPILE_IFELSE([
             AC_LANG_PROGRAM([[@%:@include <oci.h>]],
                 [[
@@ -132,7 +132,7 @@ Please, locate Oracle directories using --with-oracle or \
             AC_MSG_RESULT([not found])
             ]
         )
-        AC_LANG_POP([C++])
+        AC_LANG_POP([C])
 
         dnl
         dnl Check OCI libraries
@@ -141,7 +141,7 @@ Please, locate Oracle directories using --with-oracle or \
 
             AC_MSG_CHECKING([for Oracle OCI libraries in $oracle_lib_dir])
 
-            AC_LANG_PUSH(C++)
+            AC_LANG_PUSH([C])
             AC_LINK_IFELSE([
                 AC_LANG_PROGRAM([[@%:@include <oci.h>]],
                     [[
@@ -160,7 +160,7 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
                 AC_MSG_RESULT([not found])
                 ]
             )
-            AC_LANG_POP([C++])
+            AC_LANG_POP([C])
         fi
 
         CPPFLAGS="$saved_CPPFLAGS"

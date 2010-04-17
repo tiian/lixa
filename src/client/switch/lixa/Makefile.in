@@ -37,6 +37,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
+	$(top_srcdir)/m4include/ax_lib_ibmdb2_cli.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -110,6 +111,8 @@ EXPANDED_SYSCONFDIR = @EXPANDED_SYSCONFDIR@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 GREP = @GREP@
+IBMDB2_CLI_CFLAGS = @IBMDB2_CLI_CFLAGS@
+IBMDB2_CLI_LDFLAGS = @IBMDB2_CLI_LDFLAGS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@

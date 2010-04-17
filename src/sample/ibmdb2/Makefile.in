@@ -32,8 +32,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = lixa_oracle_sample$(EXEEXT)
-subdir = src/sample/oracle
+bin_PROGRAMS = lixa_db2_cli_sample$(EXEEXT)
+subdir = src/sample/ibmdb2
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
@@ -48,10 +48,10 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_lixa_oracle_sample_OBJECTS = lixa_oracle_sample.$(OBJEXT)
-lixa_oracle_sample_OBJECTS = $(am_lixa_oracle_sample_OBJECTS)
-lixa_oracle_sample_LDADD = $(LDADD)
-lixa_oracle_sample_DEPENDENCIES = ../../common/liblixabmt.la \
+am_lixa_db2_cli_sample_OBJECTS = lixa_db2_cli_sample.$(OBJEXT)
+lixa_db2_cli_sample_OBJECTS = $(am_lixa_db2_cli_sample_OBJECTS)
+lixa_db2_cli_sample_LDADD = $(LDADD)
+lixa_db2_cli_sample_DEPENDENCIES = ../../common/liblixabmt.la \
 	../../client/liblixacmt.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -65,8 +65,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(lixa_oracle_sample_SOURCES)
-DIST_SOURCES = $(lixa_oracle_sample_SOURCES)
+SOURCES = $(lixa_db2_cli_sample_SOURCES)
+DIST_SOURCES = $(lixa_db2_cli_sample_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -200,13 +200,11 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I$(srcdir)/../../client @ORACLE_OCI_CFLAGS@
+AM_CPPFLAGS = -I$(srcdir)/../../client @IBMDB2_CLI_CFLAGS@
 AM_CFLAGS = 
 AM_LDFLAGS = -lpthread @LIBLTDL@ @LDFLAGS_GMODULE@
-# as documented in Oracle books the transaction manager library with
-# ax_reg/ax_unreg functions must be linked before the Oracle client library
-LDADD = ../../common/liblixabmt.la ../../client/liblixacmt.la @ORACLE_OCI_LDFLAGS@
-lixa_oracle_sample_SOURCES = lixa_oracle_sample.c
+LDADD = ../../common/liblixabmt.la ../../client/liblixacmt.la @IBMDB2_CLI_LDFLAGS@
+lixa_db2_cli_sample_SOURCES = lixa_db2_cli_sample.c
 all: all-am
 
 .SUFFIXES:
@@ -220,9 +218,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  src/sample/oracle/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  src/sample/ibmdb2/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  src/sample/oracle/Makefile
+	  $(AUTOMAKE) --gnu  src/sample/ibmdb2/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -268,9 +266,9 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-lixa_oracle_sample$(EXEEXT): $(lixa_oracle_sample_OBJECTS) $(lixa_oracle_sample_DEPENDENCIES) 
-	@rm -f lixa_oracle_sample$(EXEEXT)
-	$(LINK) $(lixa_oracle_sample_OBJECTS) $(lixa_oracle_sample_LDADD) $(LIBS)
+lixa_db2_cli_sample$(EXEEXT): $(lixa_db2_cli_sample_OBJECTS) $(lixa_db2_cli_sample_DEPENDENCIES) 
+	@rm -f lixa_db2_cli_sample$(EXEEXT)
+	$(LINK) $(lixa_db2_cli_sample_OBJECTS) $(lixa_db2_cli_sample_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -278,7 +276,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_oracle_sample.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_db2_cli_sample.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

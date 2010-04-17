@@ -17,6 +17,7 @@ AC_CONFIG_FILES([
   src/extra/Makefile
   src/server/Makefile
   src/sample/Makefile
+  src/sample/ibmdb2/Makefile
   src/sample/oracle/Makefile
   var/Makefile
   doxygen.conf
@@ -36,6 +37,9 @@ test "x$exec_prefix" = "xNONE" -a "x$prefix" != "xNONE" && exec_prefix=$prefix
 m4_include(m4include/ax_lib_oracle_oci.m4)
 AX_LIB_ORACLE_OCI
 AM_CONDITIONAL([COMPILE_ORACLE_STUFF], [test -n "$oracle_home_dir"])
+m4_include(m4include/ax_lib_ibmdb2_cli.m4)
+AX_LIB_IBMDB2_CLI
+AM_CONDITIONAL([COMPILE_IBMDB2_STUFF], [test -n "$ibmdb2_home_dir"])
 
 # LT Version numbers, remember to change them just *before* a release.
 #   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)

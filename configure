@@ -878,6 +878,10 @@ ORACLE_OCI_CFLAGS
 ORACLE_OCI_LDFLAGS
 COMPILE_ORACLE_STUFF_TRUE
 COMPILE_ORACLE_STUFF_FALSE
+IBMDB2_CLI_CFLAGS
+IBMDB2_CLI_LDFLAGS
+COMPILE_IBMDB2_STUFF_TRUE
+COMPILE_IBMDB2_STUFF_FALSE
 PKG_CONFIG
 LT_LIXAC_CURRENT
 LT_LIXAC_REVISION
@@ -1517,6 +1521,11 @@ Optional Packages:
   --with-oracle-include=[DIR]
                           use Oracle OCI API headers from given path
   --with-oracle-lib=[DIR] use Oracle OCI API libraries from given path
+  --with-ibmdb2=[DIR]     use IBM DB2 CLI API from given path to DB2 home
+                          directory
+  --with-ibmdb2-include=[DIR]
+                          use IBM DB2 CLI API headers from given path
+  --with-ibmdb2-lib=[DIR] use IBM DB2 CLI API libraries from given path
   --enable-debug          enable debug code (assert statements)
   --enable-crash          enable crash simulation code
   --disable-trace         disable trace feature (not suggested)
@@ -3541,7 +3550,7 @@ fi
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files Makefile etc/lixac_conf.xml etc/lixad_conf.xml etc/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/oracle/Makefile src/extra/Makefile src/server/Makefile src/sample/Makefile src/sample/oracle/Makefile var/Makefile doxygen.conf"
+ac_config_files="$ac_config_files Makefile etc/lixac_conf.xml etc/lixad_conf.xml etc/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/oracle/Makefile src/extra/Makefile src/server/Makefile src/sample/Makefile src/sample/ibmdb2/Makefile src/sample/oracle/Makefile var/Makefile doxygen.conf"
 
 
 # Include libltdl stuff
@@ -4440,7 +4449,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4443 "configure"' > conftest.$ac_ext
+  echo '#line 4452 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7497,11 +7506,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7500: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7509: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7504: \$? = $ac_status" >&5
+   echo "$as_me:7513: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7787,11 +7796,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7790: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7799: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7794: \$? = $ac_status" >&5
+   echo "$as_me:7803: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7891,11 +7900,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7894: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7903: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7898: \$? = $ac_status" >&5
+   echo "$as_me:7907: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10268,7 +10277,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10271 "configure"
+#line 10280 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10368,7 +10377,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10371 "configure"
+#line 10380 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12769,11 +12778,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12772: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12781: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12776: \$? = $ac_status" >&5
+   echo "$as_me:12785: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -12873,11 +12882,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12876: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12885: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12880: \$? = $ac_status" >&5
+   echo "$as_me:12889: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14471,11 +14480,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14474: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14483: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14478: \$? = $ac_status" >&5
+   echo "$as_me:14487: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14575,11 +14584,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14578: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14587: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14582: \$? = $ac_status" >&5
+   echo "$as_me:14591: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16795,11 +16804,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16798: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16807: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16802: \$? = $ac_status" >&5
+   echo "$as_me:16811: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17085,11 +17094,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17088: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17097: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17092: \$? = $ac_status" >&5
+   echo "$as_me:17101: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17189,11 +17198,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17192: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17201: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17196: \$? = $ac_status" >&5
+   echo "$as_me:17205: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19971,11 +19980,11 @@ Please, locate Oracle directories using --with-oracle or \
                                 { echo "$as_me:$LINENO: checking for Oracle OCI headers in $oracle_include_dir" >&5
 echo $ECHO_N "checking for Oracle OCI headers in $oracle_include_dir... $ECHO_C" >&6; }
 
-        ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+        ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
         cat >conftest.$ac_ext <<_ACEOF
 
@@ -20014,7 +20023,7 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } && {
-	 test -z "$ac_cxx_werror_flag" ||
+	 test -z "$ac_c_werror_flag" ||
 	 test ! -s conftest.err
        } && test -s conftest.$ac_objext; then
 
@@ -20048,11 +20057,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
             { echo "$as_me:$LINENO: checking for Oracle OCI libraries in $oracle_lib_dir" >&5
 echo $ECHO_N "checking for Oracle OCI libraries in $oracle_lib_dir... $ECHO_C" >&6; }
 
-            ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+            ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
             cat >conftest.$ac_ext <<_ACEOF
 
@@ -20089,7 +20098,7 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } && {
-	 test -z "$ac_cxx_werror_flag" ||
+	 test -z "$ac_c_werror_flag" ||
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
@@ -20176,6 +20185,262 @@ echo "${ECHO_T}no" >&6; }
 else
   COMPILE_ORACLE_STUFF_TRUE='#'
   COMPILE_ORACLE_STUFF_FALSE=
+fi
+
+
+
+
+
+
+# Check whether --with-ibmdb2 was given.
+if test "${with_ibmdb2+set}" = set; then
+  withval=$with_ibmdb2; ibmdb2_home_dir="$withval"
+else
+  ibmdb2_home_dir=""
+
+fi
+
+
+
+# Check whether --with-ibmdb2-include was given.
+if test "${with_ibmdb2_include+set}" = set; then
+  withval=$with_ibmdb2_include; ibmdb2_home_include_dir="$withval"
+else
+  ibmdb2_home_include_dir=""
+
+fi
+
+
+# Check whether --with-ibmdb2-lib was given.
+if test "${with_ibmdb2_lib+set}" = set; then
+  withval=$with_ibmdb2_lib; ibmdb2_home_lib_dir="$withval"
+else
+  ibmdb2_home_lib_dir=""
+
+fi
+
+
+    IBMDB2_CLI_CFLAGS=""
+    IBMDB2_CLI_LDFLAGS=""
+
+                case $host in
+      i?86-*-*-*)
+        IBMDB2_LIB_NAME="lib32"
+	;;
+      x86_64-*-*-*)
+        IBMDB2_LIB_NAME="lib64"
+	;;
+      *) { { echo "$as_me:$LINENO: error: LIXA is not yet ported on this architecture for IBM DB2" >&5
+echo "$as_me: error: LIXA is not yet ported on this architecture for IBM DB2" >&2;}
+   { (exit 1); exit 1; }; }
+        ;;
+    esac
+
+                want_ibmdb2_but_no_path="no"
+
+    if test -n "$ibmdb2_home_dir"; then
+
+        if test "$ibmdb2_home_dir" != "no" -a "$ibmdb2_home_dir" != "yes"; then
+                        ibmdb2_include_dir="$ibmdb2_home_dir/include"
+            ibmdb2_lib_dir="$ibmdb2_home_dir/$IBMDB2_LIB_NAME"
+        elif test "$ibmdb2_home_dir" = "yes"; then
+            want_ibmdb2_but_no_path="yes"
+        fi
+
+    elif test -n "$ibmdb2_home_include_dir" -o -n "$ibmdb2_home_lib_dir"; then
+
+        if test "$ibmdb2_home_include_dir" != "no" -a "$ibmdb2_home_include_dir" != "yes"; then
+            ibmdb2_include_dir="$ibmdb2_home_include_dir"
+        elif test "$ibmdb2_home_include_dir" = "yes"; then
+            want_ibmdb2_but_no_path="yes"
+        fi
+
+        if test "$ibmdb2_home_lib_dir" != "no" -a "$ibmdb2_home_lib_dir" != "yes"; then
+            ibmdb2_lib_dir="$ibmdb2_home_lib_dir"
+        elif test "$ibmdb2_home_lib_dir" = "yes"; then
+            want_ibmdb2_but_no_path="yes"
+        fi
+    fi
+
+    if test "$want_ibmdb2_but_no_path" = "yes"; then
+        { echo "$as_me:$LINENO: WARNING: IBMDB2 support is requested but no IBMDB2 paths have been provided. \
+Please, locate IBMDB2 directories using --with-ibmdb2 or \
+--with-ibmdb2-include and --with-ibmdb2-lib options." >&5
+echo "$as_me: WARNING: IBMDB2 support is requested but no IBMDB2 paths have been provided. \
+Please, locate IBMDB2 directories using --with-ibmdb2 or \
+--with-ibmdb2-include and --with-ibmdb2-lib options." >&2;}
+    fi
+
+                if test -n "$ibmdb2_include_dir" -a -n "$ibmdb2_lib_dir"; then
+
+        saved_CPPFLAGS="$CPPFLAGS"
+        CPPFLAGS="$CPPFLAGS -I$ibmdb2_include_dir"
+
+        saved_LDFLAGS="$LDFLAGS"
+        cli_ldflags="-Wl,-rpath,$ibmdb2_lib_dir -L$ibmdb2_lib_dir -ldb2"
+        LDFLAGS="$LDFLAGS $cli_ldflags"
+
+                                { echo "$as_me:$LINENO: checking for Ibmdb2 CLI headers in $ibmdb2_include_dir" >&5
+echo $ECHO_N "checking for Ibmdb2 CLI headers in $ibmdb2_include_dir... $ECHO_C" >&6; }
+
+        ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+        cat >conftest.$ac_ext <<_ACEOF
+
+            /* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <sqlcli1.h>
+int
+main ()
+{
+
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+            IBMDB2_CLI_CFLAGS="-I$ibmdb2_include_dir"
+            cli_header_found="yes"
+            { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+            cli_header_found="no"
+            { echo "$as_me:$LINENO: result: not found" >&5
+echo "${ECHO_T}not found" >&6; }
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+        ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+                                if test "$cli_header_found" = "yes"; then
+
+            { echo "$as_me:$LINENO: checking for Ibmdb2 CLI libraries in $ibmdb2_lib_dir" >&5
+echo $ECHO_N "checking for Ibmdb2 CLI libraries in $ibmdb2_lib_dir... $ECHO_C" >&6; }
+
+            ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+            cat >conftest.$ac_ext <<_ACEOF
+
+                /* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <sqlcli.h>
+int
+main ()
+{
+
+SQLHANDLE *env;
+SQLRETURN cli_rc = SQL_SUCCESS;
+cli_rc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, env);
+if (SQL_SUCCESS != cli_rc) return 1; else return 0;
+
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+
+                IBMDB2_CLI_LDFLAGS="$cli_ldflags"
+                cli_lib_found="yes"
+                { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+                cli_lib_found="no"
+                { echo "$as_me:$LINENO: result: not found" >&5
+echo "${ECHO_T}not found" >&6; }
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+            ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+        fi
+
+        CPPFLAGS="$saved_CPPFLAGS"
+        LDFLAGS="$saved_LDFLAGS"
+    fi
+
+
+
+
+ if test -n "$ibmdb2_home_dir"; then
+  COMPILE_IBMDB2_STUFF_TRUE=
+  COMPILE_IBMDB2_STUFF_FALSE='#'
+else
+  COMPILE_IBMDB2_STUFF_TRUE='#'
+  COMPILE_IBMDB2_STUFF_FALSE=
 fi
 
 
@@ -28426,6 +28691,13 @@ echo "$as_me: error: conditional \"COMPILE_ORACLE_STUFF\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${COMPILE_IBMDB2_STUFF_TRUE}" && test -z "${COMPILE_IBMDB2_STUFF_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"COMPILE_IBMDB2_STUFF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"COMPILE_IBMDB2_STUFF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
@@ -28909,6 +29181,7 @@ do
     "src/extra/Makefile") CONFIG_FILES="$CONFIG_FILES src/extra/Makefile" ;;
     "src/server/Makefile") CONFIG_FILES="$CONFIG_FILES src/server/Makefile" ;;
     "src/sample/Makefile") CONFIG_FILES="$CONFIG_FILES src/sample/Makefile" ;;
+    "src/sample/ibmdb2/Makefile") CONFIG_FILES="$CONFIG_FILES src/sample/ibmdb2/Makefile" ;;
     "src/sample/oracle/Makefile") CONFIG_FILES="$CONFIG_FILES src/sample/oracle/Makefile" ;;
     "var/Makefile") CONFIG_FILES="$CONFIG_FILES var/Makefile" ;;
     "doxygen.conf") CONFIG_FILES="$CONFIG_FILES doxygen.conf" ;;
@@ -29125,6 +29398,10 @@ ORACLE_OCI_CFLAGS!$ORACLE_OCI_CFLAGS$ac_delim
 ORACLE_OCI_LDFLAGS!$ORACLE_OCI_LDFLAGS$ac_delim
 COMPILE_ORACLE_STUFF_TRUE!$COMPILE_ORACLE_STUFF_TRUE$ac_delim
 COMPILE_ORACLE_STUFF_FALSE!$COMPILE_ORACLE_STUFF_FALSE$ac_delim
+IBMDB2_CLI_CFLAGS!$IBMDB2_CLI_CFLAGS$ac_delim
+IBMDB2_CLI_LDFLAGS!$IBMDB2_CLI_LDFLAGS$ac_delim
+COMPILE_IBMDB2_STUFF_TRUE!$COMPILE_IBMDB2_STUFF_TRUE$ac_delim
+COMPILE_IBMDB2_STUFF_FALSE!$COMPILE_IBMDB2_STUFF_FALSE$ac_delim
 PKG_CONFIG!$PKG_CONFIG$ac_delim
 LT_LIXAC_CURRENT!$LT_LIXAC_CURRENT$ac_delim
 LT_LIXAC_REVISION!$LT_LIXAC_REVISION$ac_delim
@@ -29145,7 +29422,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 31; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 35; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
