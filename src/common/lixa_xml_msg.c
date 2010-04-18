@@ -75,6 +75,8 @@ const xmlChar *LIXA_XML_MSG_PROP_XA_INFO =         (xmlChar *)"xa_info";
 const xmlChar *LIXA_XML_MSG_PROP_XA_NAME =         (xmlChar *)"xa_name";
 const xmlChar *LIXA_XML_MSG_PROP_XID =             (xmlChar *)"xid";
 const xmlChar *LIXA_XML_MSG_TAG_ANSWER =           (xmlChar *)"answer";
+const xmlChar *LIXA_XML_MSG_TAG_AX_REG_EXEC =      (xmlChar *)"ax_reg_exec";
+const xmlChar *LIXA_XML_MSG_TAG_AX_UNREG_EXEC =    (xmlChar *)"ax_unreg_exec";
 const xmlChar *LIXA_XML_MSG_TAG_CLIENT =           (xmlChar *)"client";
 const xmlChar *LIXA_XML_MSG_TAG_CONTHR =           (xmlChar *)"conthr";
 const xmlChar *LIXA_XML_MSG_TAG_LAST_VERB_STEP =   (xmlChar *)"last_verb_step";
@@ -196,6 +198,7 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                      , INVALID_STEP6
                      , INVALID_STEP7
                      , INVALID_STEP8
+                     , INVALID_STEP9
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -376,6 +379,14 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                         THROW(INVALID_STEP8);
                 }
                 break;
+            case LIXA_MSG_VERB_REG: /* reg */
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        break;
+                    default:
+                        THROW(INVALID_STEP9);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -391,6 +402,7 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case INVALID_STEP6:
             case INVALID_STEP7:
             case INVALID_STEP8:
+            case INVALID_STEP9:
             case INVALID_VERB:
                 LIXA_TRACE(("lixa_msg_free: verb=%d, step=%d\n",
                             msg->header.pvs.verb, msg->header.pvs.step));

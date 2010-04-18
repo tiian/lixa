@@ -576,6 +576,45 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
 
 
     
+int lixa_msg_trace_reg(const struct lixa_msg_s *msg)
+{
+    enum Exception { INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_trace_reg\n"));
+    TRY {
+        switch (msg->header.pvs.step) {
+            case 8:
+                LIXA_TRACE(("lixa_msg_trace_reg: body[ax_reg_exec["
+                            "rmid=%d,flags=0x%lx,rc=%d,td_state=%d]]\n",
+                            msg->body.reg_8.rmid, msg->body.reg_8.flags,
+                            msg->body.reg_8.rc, msg->body.reg_8.td_state));
+                break;
+            default:
+                THROW(INVALID_STEP);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_trace_reg/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+    
 int lixa_msg_trace_rollback(const struct lixa_msg_s *msg)
 {
     enum Exception { INVALID_STEP

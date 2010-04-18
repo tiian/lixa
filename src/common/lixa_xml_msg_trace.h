@@ -118,6 +118,16 @@ extern "C" {
     
     /**
      * Convenience function for @ref lixa_msg_trace : it display the content
+     * of a "reg" message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int lixa_msg_trace_reg(const struct lixa_msg_s *msg);
+
+
+    
+    /**
+     * Convenience function for @ref lixa_msg_trace : it display the content
      * of a "rollback" message
      * @param msg IN the message must be massaged
      * @return a reason code

@@ -113,6 +113,14 @@
  * Id assigned to verb "query recovery"
  */
 #define LIXA_MSG_VERB_QRCVR     8
+/**
+ * Id assigned to verb "reg"
+ */
+#define LIXA_MSG_VERB_REG       9
+/**
+ * Id assigned to verb "unreg"
+ */
+#define LIXA_MSG_VERB_UNREG    10
 
 /**
  * Default increment for message step
@@ -221,6 +229,14 @@ extern const xmlChar *LIXA_XML_MSG_PROP_XID;
  * Label used to specify "answer" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_ANSWER;
+/**
+ * Label used to specify "ax_reg_exec" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_AX_REG_EXEC;
+/**
+ * Label used to specify "ax_unreg_exec" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_AX_UNREG_EXEC;
 /**
  * Label used to specify "client" tag
  */
@@ -888,9 +904,6 @@ struct lixa_msg_body_qrcvr_16_state_s {
 
     
 
-
-
-
 /**
  * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
  */
@@ -986,6 +999,30 @@ struct lixa_msg_body_qrcvr_24_s {
 
 
 /**
+ * Message body for verb "reg", step "8"
+ */
+struct lixa_msg_body_reg_8_s {
+    /**
+     * rmid parameter as passed to xa_rollback routine
+     */
+    int             rmid;
+    /**
+     * flags parameter as passed to xa_rollback routine
+     */
+    long            flags;
+    /**
+     * return code of ax_reg routine
+     */
+    int             rc;
+    /**
+     * the new transaction branch association state after ax_reg execution
+     */
+    int             td_state;
+};
+
+
+
+/**
  * This structure maps the messages flowing between LIXA client (lixac) and
  * LIXA server (lixad). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
@@ -1017,6 +1054,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_qrcvr_8_s         qrcvr_8;
         struct lixa_msg_body_qrcvr_16_s        qrcvr_16;
         struct lixa_msg_body_qrcvr_24_s        qrcvr_24;
+        struct lixa_msg_body_reg_8_s           reg_8;
     } body;
 };
 
