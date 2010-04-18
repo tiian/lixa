@@ -285,3 +285,11 @@ verb=8,step=24 -->			send recovery result
 					transaction info
 ***************************************************************************
 
+  client -> server message (async assertion)
+  <msg level="1" verb="9" step="8">
+    <ax_reg_exec rmid="0" flags="0x0" rc="0" td_state="21"/>
+  </msg>
+
+client			server		description
+verb=9,step=8 -->			register the new status
+					(ax_reg result)

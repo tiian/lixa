@@ -1350,6 +1350,67 @@ int lixa_msg_deserialize_qrcvr_24(xmlNodePtr cur, struct lixa_msg_s *msg)
 
 
 
+int lixa_msg_deserialize_reg_8(xmlNodePtr cur, struct lixa_msg_s *msg)
+{
+    enum Exception { RMID_NOT_FOUND
+                     , FLAGS_NOT_FOUND
+                     , RC_NOT_FOUND
+                     , TD_STATE_NOT_FOUND
+                     , XML_UNRECOGNIZED_TAG
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_deserialize_reg_8\n"));
+    TRY {
+        xmlChar *tmp = NULL;
+        
+        if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_AX_REG_EXEC)) {
+            /* retrieve control thread properties */
+            if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_RMID)))
+                THROW(RMID_NOT_FOUND);
+            msg->body.reg_8.rmid = (int)strtol((char *)tmp, NULL, 0);
+            xmlFree(tmp);
+            if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_FLAGS)))
+                THROW(FLAGS_NOT_FOUND);
+            msg->body.reg_8.flags = (int)strtol((char *)tmp, NULL, 0);
+            xmlFree(tmp);
+            if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_RC)))
+                THROW(RC_NOT_FOUND);
+            msg->body.reg_8.rc = (int)strtol((char *)tmp, NULL, 0);
+            xmlFree(tmp);
+            if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_TD_STATE)))
+                THROW(TD_STATE_NOT_FOUND);
+            msg->body.reg_8.td_state = (int)strtol((char *)tmp, NULL, 0);
+            xmlFree(tmp);
+        } else
+            THROW(XML_UNRECOGNIZED_TAG);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case RMID_NOT_FOUND:
+            case FLAGS_NOT_FOUND:
+            case RC_NOT_FOUND:
+            case TD_STATE_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;                
+            case XML_UNRECOGNIZED_TAG:
+                ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_deserialize_reg_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+    
 int lixa_msg_deserialize_rollback_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
     enum Exception { FINISHED_NOT_FOUND
