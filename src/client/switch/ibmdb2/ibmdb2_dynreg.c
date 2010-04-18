@@ -16,36 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
 
 
 
-#include <lixa_trace.h>
-#include <xa.h>
+#include "xa.h"
 
 
 
-/* set module trace flag */
-#ifdef LIXA_TRACE_MODULE
-# undef LIXA_TRACE_MODULE
-#endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_XA
+/*
+ * This is IBM DB2 specific: the xa_switch_t struct is returned from
+ * function db2xacic_std (dynamic registration)
+ */
+extern struct xa_switch_t *db2xacic_std(void);
 
 
 
-int ax_reg(int rmid, XID *xid, long flags)
+/*
+ * The function is exported and dynamically retrieved afted the module was
+ * fetched
+ */
+struct xa_switch_t *lixa_get_xa_switch()
 {
-    /* @@@ dummy implementation to be fixed: bug 2913849 */
-    LIXA_TRACE(("ax_reg: rmid=%d, xid=%p, flags=0x%lx\n", rmid, xid, flags));
-    xid->formatID = -1;
-    return TM_OK;
-}
-
-
-
-int ax_unreg(int rmid, long flags)
-{
-    /* @@@ dummy implementation to be fixed: bug 2913849 */
-    LIXA_TRACE(("ax_unreg: rmid=%d, flags=0x%lx\n", rmid, flags));
-    return TM_OK;
+    return db2xacic_std();
 }

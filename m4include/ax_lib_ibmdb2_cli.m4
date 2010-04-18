@@ -65,14 +65,6 @@ AC_DEFUN([AX_LIB_IBMDB2_CLI],
         [ibmdb2_home_lib_dir=""]
     )
 
-    AC_ARG_WITH([ibmdb2-static-registration],
-        AC_HELP_STRING([--with-ibmdb2-static-registration],
-            [use XA static registration (xa_start) instead of dynamic (ax_reg)]
-        ),
-        [ibmdb2_static_registration="yes"],
-        [ibmdb2_static_registration="no"]
-    )
-
     IBMDB2_CLI_CPPFLAGS=""
     IBMDB2_CLI_LDFLAGS=""
 
@@ -192,10 +184,6 @@ if (SQL_SUCCESS != cli_rc) return 1; else return 0;
 
         CPPFLAGS="$saved_CPPFLAGS"
         LDFLAGS="$saved_LDFLAGS"
-    fi
-
-    if test "$ibmdb2_static_registration" = "yes" ; then
-        CPPFLAGS="$CPPFLAGS -DIBMDB2_STATIC_REGISTRATION"
     fi
 
     AC_SUBST([IBMDB2_CLI_CPPFLAGS])

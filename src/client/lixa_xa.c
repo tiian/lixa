@@ -288,7 +288,8 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
-                    csr->xa_t_state = XA_STATE_T0;
+                    csr->xa_td_state =
+                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     break;
                 default:
                     THROW(UNEXPECTED_XA_RC);
@@ -452,7 +453,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
             read_write_rsrmgr++;
             switch (record.rc) {
                 case XA_OK:
-                    csr->xa_t_state = XA_STATE_T0;
+                    csr->xa_td_state =
+                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     csr->xa_s_state = XA_STATE_S2;
                     break;
                 case XA_RBROLLBACK:
@@ -463,7 +465,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                 case XA_RBPROTO:
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
-                    csr->xa_t_state = XA_STATE_T0;
+                    csr->xa_td_state =
+                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     csr->xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     read_write_rsrmgr--; /* read only transaction */
@@ -479,7 +482,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                        it seems not clear what should be done when there's a
                        problem in dissociation
                        there might be a bug in this place... */
-                    csr->xa_t_state = XA_STATE_T0;
+                    csr->xa_td_state =
+                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     csr->xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     break;
@@ -497,7 +501,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                        it seems not clear what should be done when there's a
                        problem in dissociation
                        there might be a bug in this place... */
-                    csr->xa_t_state = XA_STATE_T0;
+                    csr->xa_td_state =
+                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     csr->xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     if (commit)
@@ -506,7 +511,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                 case XAER_INVAL:
                 case XAER_PROTO:
                     *txrc = TX_FAIL;
-                    csr->xa_t_state = XA_STATE_T0;
+                    csr->xa_td_state =
+                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     tmp_txrc = TX_FAIL;
                     break;
                 default:
@@ -514,7 +520,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                     THROW(UNEXPECTED_XA_RC);
             }
             record.s_state = csr->xa_s_state;
-            record.t_state = csr->xa_t_state;
+            record.td_state = csr->xa_td_state;
             g_array_append_val(msg.body.end_24.xa_end_execs, record);
             
             if (lixa_tx_rc_hierarchy(tmp_txrc) <
@@ -614,16 +620,22 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
         if (cs->rmstates->len == 0) {
             /* popolate the array... */
             for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+                struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
+                    global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
+                int dynamic = act_rsrmgr->xa_switch->flags & TMREGISTER;
                 struct common_status_rsrmgr_s csr;
-                common_status_rsrmgr_init(&csr);
+                common_status_rsrmgr_init(&csr, dynamic);
                 g_array_append_val(cs->rmstates, csr);
             }
         } else if (cs->rmstates->len == global_ccc.actconf.rsrmgrs->len) {
             /* reset the array values */
             for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+                struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
+                    global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
+                int dynamic = act_rsrmgr->xa_switch->flags & TMREGISTER;
                 struct common_status_rsrmgr_s *csr = &g_array_index(
                     cs->rmstates, struct common_status_rsrmgr_s, i);
-                common_status_rsrmgr_init(csr);
+                common_status_rsrmgr_init(csr, dynamic);
             }            
         } else {
             LIXA_TRACE(("lixa_xa_open: cs->rmstates->len = %u, "
@@ -655,6 +667,8 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
             struct lixa_msg_body_open_8_rsrmgr_s record;
             record.rmid = i;
+            record.dynamic = act_rsrmgr->xa_switch->flags & TMREGISTER ?
+                1 : 0;
             record.name = act_rsrmgr->generic->name;
             record.xa_name = (xmlChar *)act_rsrmgr->xa_switch->name;
             g_array_append_val(msg.body.open_8.rsrmgrs, record);
@@ -919,11 +933,13 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
                     tmp_txrc = TX_FAIL;
                     break;
                 case XAER_INVAL:
-                    csr->xa_t_state = XA_STATE_T0;
+                    csr->xa_td_state =
+                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     tmp_txrc = TX_FAIL;
                     break;
                 case XAER_PROTO:
-                    csr->xa_t_state = XA_STATE_T0;
+                    csr->xa_td_state =
+                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     tmp_txrc = TX_ROLLBACK;
                     break;
                 case XAER_ASYNC:
@@ -934,7 +950,7 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
                     THROW(UNEXPECTED_XA_RC);
             }
             record.s_state = csr->xa_s_state;
-            record.t_state = csr->xa_t_state;
+            record.td_state = csr->xa_td_state;
             g_array_append_val(msg.body.prepare_8.xa_prepare_execs, record);
 
             if (lixa_tx_rc_hierarchy(tmp_txrc) <
@@ -1123,7 +1139,8 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
-                    csr->xa_t_state = XA_STATE_T0;
+                    csr->xa_td_state =
+                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     break;
                 default:
                     THROW(UNEXPECTED_XA_RC);
@@ -1311,16 +1328,16 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
 
             switch (record.rc) {
                 case XA_OK:
-                    csr->xa_t_state = XA_STATE_T1;
+                    csr->xa_td_state = XA_STATE_T1;
                     break;
                 case XAER_RMERR:
                     tmp_txrc = TX_ERROR;
-                    csr->xa_t_state = XA_STATE_T0;
+                    csr->xa_td_state = XA_STATE_T0;
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
                     tmp_txrc = TX_FAIL;
-                    csr->xa_t_state = XA_STATE_T0;
+                    csr->xa_td_state = XA_STATE_T0;
                     break;
                 case XAER_ASYNC:
                     *txrc = TX_FAIL;
@@ -1329,7 +1346,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
-            record.t_state = csr->xa_t_state;
+            record.td_state = csr->xa_td_state;
             g_array_append_val(msg.body.start_24.xa_start_execs, record);
 
             if (lixa_tx_rc_hierarchy(tmp_txrc) <

@@ -279,12 +279,12 @@ int lixa_msg_trace_end(const struct lixa_msg_s *msg)
                                     "xa_end_execs["
                                     "xa_end_exec["
                                     "rmid=%d,flags=0x%lx,"
-                                    "rc=%d,s_state=%d,t_state=%d]]]\n",
+                                    "rc=%d,s_state=%d,td_state=%d]]]\n",
                                     xa_end_exec->rmid,
                                     xa_end_exec->flags,
                                     xa_end_exec->rc,
                                     xa_end_exec->s_state,
-                                    xa_end_exec->t_state));
+                                    xa_end_exec->td_state));
                     }
                 }
                 break;
@@ -336,9 +336,10 @@ int lixa_msg_trace_open(const struct lixa_msg_s *msg)
                                 struct lixa_msg_body_open_8_rsrmgr_s,
                                 i);
                         LIXA_TRACE(("lixa_msg_trace_open: body[rsrmgrs["
-                                    "rsrmgr[rmid=%d,name='%s',"
+                                    "rsrmgr[rmid=%d,dynamic=%d,name='%s',"
                                     "xa_name='%s']]]\n",
                                     rsrmgr->rmid,
+                                    rsrmgr->dynamic,
                                     rsrmgr->name ?
                                     rsrmgr->name : nil_str,
                                     rsrmgr->xa_name ?
@@ -430,12 +431,12 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
                                     "xa_prepare_execs["
                                     "xa_prepare_exec["
                                     "rmid=%d,flags=0x%lx,"
-                                    "rc=%d,s_state=%d,t_state=%d]]]\n",
+                                    "rc=%d,s_state=%d,td_state=%d]]]\n",
                                     xa_prepare_exec->rmid,
                                     xa_prepare_exec->flags,
                                     xa_prepare_exec->rc,
                                     xa_prepare_exec->s_state,
-                                    xa_prepare_exec->t_state));
+                                    xa_prepare_exec->td_state));
                     }
                 }
                 break;
@@ -520,10 +521,10 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
                                 i);
                         LIXA_TRACE(("lixa_msg_trace_qrcvr: body[rsrmgrs["
                                     "rsrmgr[rmid=%d,next_verb=%d,r_state=%d,"
-                                    "s_state=%d,t_state=%d]]]\n",
+                                    "s_state=%d,td_state=%d]]]\n",
                                     rsrmgr->rmid, rsrmgr->next_verb,
                                     rsrmgr->r_state, rsrmgr->s_state,
-                                    rsrmgr->t_state));
+                                    rsrmgr->td_state));
                     }
                 }
                 break;
@@ -692,11 +693,11 @@ int lixa_msg_trace_start(const struct lixa_msg_s *msg)
                                     "xa_start_execs["
                                     "xa_start_exec["
                                     "rmid=%d,flags=0x%lx,"
-                                    "rc=%d,t_state=%d]]]\n",
+                                    "rc=%d,td_state=%d]]]\n",
                                     xa_start_exec->rmid,
                                     xa_start_exec->flags,
                                     xa_start_exec->rc,
-                                    xa_start_exec->t_state));
+                                    xa_start_exec->td_state));
                     }
                 }
                 break;

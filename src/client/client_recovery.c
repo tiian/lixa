@@ -256,9 +256,9 @@ int client_recovery_analyze(const client_status_t *cs,
                     &g_array_index(rpl->body.qrcvr_16.rsrmgrs,
                                    struct lixa_msg_body_qrcvr_16_rsrmgr_s, i);
                 LIXA_TRACE(("client_recovery_analyze: rmid=%d, r_state=%d, "
-                            "s_state=%d, t_state=%d\n",
+                            "s_state=%d, td_state=%d\n",
                             rsrmgr->rmid, rsrmgr->r_state, rsrmgr->s_state,
-                            rsrmgr->t_state));
+                            rsrmgr->td_state));
                 if (rsrmgr->s_state != XA_STATE_S3)
                     all_prepared = FALSE;
             }

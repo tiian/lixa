@@ -24,12 +24,9 @@
 
 
 /*
- * These are IBM DB2 specific: the xa_switch_t struct is returned from a
- * function:
- * - db2xacic_std (dynamic registration)
- * - db2xacic_static_std (static registration)
+ * This is IBM DB2 specific: the xa_switch_t struct is returned from
+ * function db2xacic_static_std (static registration)
  */
-extern struct xa_switch_t *db2xacic_std(void);
 extern struct xa_switch_t *db2xacicst_std(void);
 
 
@@ -40,9 +37,5 @@ extern struct xa_switch_t *db2xacicst_std(void);
  */
 struct xa_switch_t *lixa_get_xa_switch()
 {
-#ifdef IBMDB2_STATIC_REGISTRATION
     return db2xacicst_std();
-#else
-    return db2xacic_std();
-#endif
 }
