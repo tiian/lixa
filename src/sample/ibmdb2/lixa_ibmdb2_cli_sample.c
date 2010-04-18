@@ -115,6 +115,15 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    /* this function is useful only to test ax_unreg when ax_reg returns
+     * NULLXID */
+    if (SQL_SUCCESS != (rc_cli = SQLEndTran(
+                            SQL_HANDLE_DBC, conn, SQL_COMMIT))) {
+        fprintf(stderr, "Unable to terminate (ROLLBACK) the transaction: %d\n",
+                rc_cli);
+        exit(1);
+    }
+    
     /* this is to test tx_commit */
     /*
     if (TX_OK != (txrc = tx_commit())) {

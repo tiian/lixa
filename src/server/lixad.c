@@ -59,6 +59,7 @@
 #include <lixa_crash.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_utils.h>
 #include <lixa_syslog.h>
 #include <server_config.h>
 #include <server_listener.h>

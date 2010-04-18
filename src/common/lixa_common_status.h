@@ -102,6 +102,26 @@
  */
 #define XA_STATE_T2   12
 /**
+ * Transaction branch association state (dynamic registration)
+ * "not registered"
+ */
+#define XA_STATE_D0   20
+/**
+ * Transaction branch association state (dynamic registration)
+ * "registered with valid XID"
+ */
+#define XA_STATE_D1   21
+/**
+ * Transaction branch association state (dynamic registration)
+ * "registration suspended"
+ */
+#define XA_STATE_D2   22
+/**
+ * Transaction branch association state (dynamic registration)
+ * "registered with NULLXID"
+ */
+#define XA_STATE_D3   23
+/**
  * Transaction branch state "non-existent transaction"
  */
 #define XA_STATE_S0   30
@@ -205,11 +225,16 @@ struct common_status_rsrmgr_s {
      */
     int   xa_r_state;
     /**
+     * The resource manager is using dynamic registration (TRUE) or static
+     * registration (FALSE)
+     */
+    int   dynamic;
+    /**
      * Transaction branch association state as in "X/Open CAE Specification -
      * Distribute Transaction Processing: The XA Specification - chapter 6
-     * table 6-2
+     * table 6-2 (static registration) and table 6-3 (dynamic registration)
      */
-    int   xa_t_state;
+    int   xa_td_state;
     /**
      * Transaction branch state as in "X/Open CAE Specification -
      * Distribute Transaction Processing: The XA Specification - chapter 6
@@ -251,11 +276,21 @@ extern "C" {
     }
 
 
-    
+
+    /**
+     * Initialize a common status resource manager structure
+     * @param csr IN/OUT reference to the struct must be initialized
+     * @param dynamic IN boolean: the resource manager uses dynamic
+     *                registration (TRUE) or static registration (FALSE)
+     */
     static inline void common_status_rsrmgr_init(
-        struct common_status_rsrmgr_s *csr) {
+        struct common_status_rsrmgr_s *csr, int dynamic) {
         csr->xa_r_state = XA_STATE_R0;
-        csr->xa_t_state = XA_STATE_T0;
+        csr->dynamic = dynamic;
+        if (dynamic)
+            csr->xa_td_state = XA_STATE_D0;
+        else
+            csr->xa_td_state = XA_STATE_T0;
         csr->xa_s_state = XA_STATE_S0;
         csr->next_verb = LIXA_MSG_VERB_NULL;
         return;

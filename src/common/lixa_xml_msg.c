@@ -53,6 +53,7 @@
 const xmlChar *LIXA_XML_MSG_HEADER =               (xmlChar *)"<?xml";
 const xmlChar *LIXA_XML_MSG_PROP_COMMIT =          (xmlChar *)"commit";
 const xmlChar *LIXA_XML_MSG_PROP_CONFIG_DIGEST =   (xmlChar *)"config_digest";
+const xmlChar *LIXA_XML_MSG_PROP_DYNAMIC =         (xmlChar *)"dynamic";
 const xmlChar *LIXA_XML_MSG_PROP_FAILED =          (xmlChar *)"failed";
 const xmlChar *LIXA_XML_MSG_PROP_FINISHED =        (xmlChar *)"finished";
 const xmlChar *LIXA_XML_MSG_PROP_FLAGS =           (xmlChar *)"flags";
@@ -64,7 +65,7 @@ const xmlChar *LIXA_XML_MSG_PROP_RC =              (xmlChar *)"rc";
 const xmlChar *LIXA_XML_MSG_PROP_RMID =            (xmlChar *)"rmid";
 const xmlChar *LIXA_XML_MSG_PROP_R_STATE =         (xmlChar *)"r_state";
 const xmlChar *LIXA_XML_MSG_PROP_S_STATE =         (xmlChar *)"s_state";
-const xmlChar *LIXA_XML_MSG_PROP_T_STATE =         (xmlChar *)"t_state";
+const xmlChar *LIXA_XML_MSG_PROP_TD_STATE =        (xmlChar *)"td_state";
 const xmlChar *LIXA_XML_MSG_PROP_TXSTATE =         (xmlChar *)"txstate";
 const xmlChar *LIXA_XML_MSG_PROP_STEP =            (xmlChar *)"step";
 const xmlChar *LIXA_XML_MSG_PROP_VERB =            (xmlChar *)"verb";

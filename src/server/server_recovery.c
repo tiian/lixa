@@ -347,7 +347,7 @@ int server_recovery_result(struct thread_status_s *ts,
             rsrmgr.next_verb = sr->sr.data.pld.rm.state.next_verb;
             rsrmgr.r_state = sr->sr.data.pld.rm.state.xa_r_state;
             rsrmgr.s_state = sr->sr.data.pld.rm.state.xa_s_state;
-            rsrmgr.t_state = sr->sr.data.pld.rm.state.xa_t_state;
+            rsrmgr.td_state = sr->sr.data.pld.rm.state.xa_td_state;
             g_array_append_val(lmo->body.qrcvr_16.rsrmgrs, rsrmgr);
         }
         

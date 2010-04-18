@@ -1526,9 +1526,6 @@ Optional Packages:
   --with-ibmdb2-include=[DIR]
                           use IBM DB2 CLI API headers from given path
   --with-ibmdb2-lib=[DIR] use IBM DB2 CLI API libraries from given path
-  --with-ibmdb2-static-registration
-                          use XA static registration (xa_start) instead of
-                          dynamic (ax_reg)
   --enable-debug          enable debug code (assert statements)
   --enable-crash          enable crash simulation code
   --disable-trace         disable trace feature (not suggested)
@@ -4452,7 +4449,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4455 "configure"' > conftest.$ac_ext
+  echo '#line 4452 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7509,11 +7506,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7512: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7509: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7516: \$? = $ac_status" >&5
+   echo "$as_me:7513: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7799,11 +7796,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7802: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7799: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7806: \$? = $ac_status" >&5
+   echo "$as_me:7803: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7903,11 +7900,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7906: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7903: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7910: \$? = $ac_status" >&5
+   echo "$as_me:7907: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10280,7 +10277,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10283 "configure"
+#line 10280 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10380,7 +10377,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10383 "configure"
+#line 10380 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12781,11 +12778,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12784: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12781: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12788: \$? = $ac_status" >&5
+   echo "$as_me:12785: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -12885,11 +12882,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12888: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12885: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12892: \$? = $ac_status" >&5
+   echo "$as_me:12889: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14483,11 +14480,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14486: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14483: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14490: \$? = $ac_status" >&5
+   echo "$as_me:14487: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14587,11 +14584,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14590: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14587: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14594: \$? = $ac_status" >&5
+   echo "$as_me:14591: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16807,11 +16804,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16810: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16807: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16814: \$? = $ac_status" >&5
+   echo "$as_me:16811: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17097,11 +17094,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17100: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17097: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17104: \$? = $ac_status" >&5
+   echo "$as_me:17101: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17201,11 +17198,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17204: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17201: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17208: \$? = $ac_status" >&5
+   echo "$as_me:17205: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20223,16 +20220,6 @@ else
 fi
 
 
-
-# Check whether --with-ibmdb2-static-registration was given.
-if test "${with_ibmdb2_static_registration+set}" = set; then
-  withval=$with_ibmdb2_static_registration; ibmdb2_static_registration="yes"
-else
-  ibmdb2_static_registration="no"
-
-fi
-
-
     IBMDB2_CLI_CPPFLAGS=""
     IBMDB2_CLI_LDFLAGS=""
 
@@ -20443,10 +20430,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
         CPPFLAGS="$saved_CPPFLAGS"
         LDFLAGS="$saved_LDFLAGS"
-    fi
-
-    if test "$ibmdb2_static_registration" = "yes" ; then
-        CPPFLAGS="$CPPFLAGS -DIBMDB2_STATIC_REGISTRATION"
     fi
 
 

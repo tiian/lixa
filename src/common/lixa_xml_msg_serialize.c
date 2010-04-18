@@ -642,8 +642,8 @@ int lixa_msg_serialize_end_24(const struct lixa_msg_s *msg,
                                   xa_end_exec->rc,
                                   LIXA_XML_MSG_PROP_S_STATE,
                                   xa_end_exec->s_state,
-                                  LIXA_XML_MSG_PROP_T_STATE,
-                                  xa_end_exec->t_state);
+                                  LIXA_XML_MSG_PROP_TD_STATE,
+                                  xa_end_exec->td_state);
             if (used_chars >= *free_chars)
                 THROW(BUFFER_TOO_SHORT2);
             *free_chars -= used_chars;
@@ -723,10 +723,13 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg,
                 msg->body.open_8.rsrmgrs,
                 struct lixa_msg_body_open_8_rsrmgr_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
-                                  "<%s %s=\"%d\" %s=\"%s\" %s=\"%s\"/>",
+                                  "<%s %s=\"%d\" %s=\"%d\" %s=\"%s\" "
+                                  "%s=\"%s\"/>",
                                   LIXA_XML_MSG_TAG_RSRMGR,
                                   LIXA_XML_MSG_PROP_RMID,
                                   rsrmgr->rmid,
+                                  LIXA_XML_MSG_PROP_DYNAMIC,
+                                  rsrmgr->dynamic,
                                   LIXA_XML_MSG_PROP_NAME,
                                   rsrmgr->name,
                                   LIXA_XML_MSG_PROP_XA_NAME,
@@ -952,8 +955,8 @@ int lixa_msg_serialize_prepare_8(const struct lixa_msg_s *msg,
                                   xa_prepare_exec->rc,
                                   LIXA_XML_MSG_PROP_S_STATE,
                                   xa_prepare_exec->s_state,
-                                  LIXA_XML_MSG_PROP_T_STATE,
-                                  xa_prepare_exec->t_state);
+                                  LIXA_XML_MSG_PROP_TD_STATE,
+                                  xa_prepare_exec->td_state);
             if (used_chars >= *free_chars)
                 THROW(BUFFER_TOO_SHORT3);
             *free_chars -= used_chars;
@@ -1196,8 +1199,8 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                                   rsrmgr->r_state,
                                   LIXA_XML_MSG_PROP_S_STATE,
                                   rsrmgr->s_state,
-                                  LIXA_XML_MSG_PROP_T_STATE,
-                                  rsrmgr->t_state);
+                                  LIXA_XML_MSG_PROP_TD_STATE,
+                                  rsrmgr->td_state);
             if (used_chars >= *free_chars)
                 THROW(BUFFER_TOO_SHORT7);
             *free_chars -= used_chars;
@@ -1612,8 +1615,8 @@ int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
                                   xa_start_exec->flags,
                                   LIXA_XML_MSG_PROP_RC,
                                   xa_start_exec->rc,
-                                  LIXA_XML_MSG_PROP_T_STATE,
-                                  xa_start_exec->t_state);
+                                  LIXA_XML_MSG_PROP_TD_STATE,
+                                  xa_start_exec->td_state);
             if (used_chars >= *free_chars)
                 THROW(BUFFER_TOO_SHORT3);
             *free_chars -= used_chars;

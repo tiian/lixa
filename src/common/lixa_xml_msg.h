@@ -138,6 +138,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_CONFIG_DIGEST;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_FAILED;
 /**
+ * Label used to specify "dynamic" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_DYNAMIC;
+/**
  * Label used to specify "finished" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_FINISHED;
@@ -178,9 +182,9 @@ extern const xmlChar *LIXA_XML_MSG_PROP_R_STATE;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_S_STATE;
 /**
- * Label used to specify "t_state" property
+ * Label used to specify "td_state" property
  */
-extern const xmlChar *LIXA_XML_MSG_PROP_T_STATE;
+extern const xmlChar *LIXA_XML_MSG_PROP_TD_STATE;
 /**
  * Label used to specify "txstate" property
  */
@@ -363,6 +367,11 @@ struct lixa_msg_body_open_8_rsrmgr_s {
      * rmid parameter as passed to xa_open routine
      */
     int        rmid;
+    /**
+     * the resource manager is using dynamic registration (TRUE) or
+     * static registration (FALSE)
+     */
+    int        dynamic;
     /**
      * name of the resource manager as configured for Lixa
      */
@@ -548,7 +557,7 @@ struct lixa_msg_body_start_24_xa_start_execs_s {
      * the new transaction branch association state associated to the resource
      * manager after xa_end execution
      */
-    int             t_state;
+    int             td_state;
 };
 
 
@@ -622,7 +631,7 @@ struct lixa_msg_body_end_24_xa_end_execs_s {
      * the new transaction branch association state associated to the resource
      * manager after xa_end execution
      */
-    int             t_state;
+    int             td_state;
     /**
      * the new transaction branch state associated to the resource
      * manager after xa_end execution
@@ -684,7 +693,7 @@ struct lixa_msg_body_prepare_8_xa_prepare_execs_s {
      * the new transaction branch association state associated to the resource
      * manager after xa_prepare execution
      */
-    int             t_state;
+    int             td_state;
 };
 
 
@@ -906,7 +915,7 @@ struct lixa_msg_body_qrcvr_16_rsrmgr_s {
      * the transaction branch association state associated to the resource
      * manager at crash time
      */
-    int        t_state;
+    int        td_state;
 };
 
     

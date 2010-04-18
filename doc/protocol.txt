@@ -32,8 +32,8 @@ verb=1 (xa_open)
   <msg level="1" verb="1" step="8">
     <client job="59530bdf33659b29e73d4adb9f9f6552/127.0.0.1      " conf_digest="59530bdf33659b29e73d4adb9f9f6552"/>
     <rsrmgrs>
-      <rsrmgr rmid="0" name="dummyrm" xa_name="lixa_dummyrm"/>
-      <rsrmgr rmid="1" name="randomrm" xa_name="lixa_randomrm"/>
+      <rsrmgr rmid="0" dynamic="1" name="dummyrm" xa_name="lixa_dummyrm"/>
+      <rsrmgr rmid="1" dynamic="0" name="randomrm" xa_name="lixa_randomrm"/>
     </rsrmgrs>
   </msg>
 
@@ -107,8 +107,8 @@ verb=3 (xa_start)
   <msg level="1" verb="3" step="24">
     <conthr txstate="3"/>
     <xa_start_execs>
-      <xa_start_exec rmid="0" flags="0x0" rc="0" t_state="11"/>
-      <xa_start_exec rmid="1" flags="0x0" rc="0" t_state="11"/>
+      <xa_start_exec rmid="0" flags="0x0" rc="0" td_state="11"/>
+      <xa_start_exec rmid="1" flags="0x0" rc="0" td_state="11"/>
     </xa_start_execs>
   </msg>
 
@@ -145,8 +145,8 @@ verb=4 (xa_end)
   client -> server message (async assertion)
   <msg level="1" verb="4" step="24">
     <xa_end_execs>
-      <xa_end_exec rmid="0" flags="0x4000000" rc="0" s_state="32" t_state="10"/>
-      <xa_end_exec rmid="1" flags="0x4000000" rc="0" s_state="32" t_state="10"/>
+      <xa_end_exec rmid="0" flags="0x4000000" rc="0" s_state="32" td_state="10"/>
+      <xa_end_exec rmid="1" flags="0x4000000" rc="0" s_state="32" td_state="10"/>
     </xa_end_execs>
   </msg>
 
@@ -170,8 +170,8 @@ verb=5 (xa_prepare)
   <msg level="1" verb="5" step="8">
     <conthr commit="1"/>
     <xa_prepare_execs>
-      <xa_prepare_exec rmid="0" flags="0x0" rc="0" s_state="33" t_state="10"/>
-      <xa_prepare_exec rmid="1" flags="0x0" rc="0" s_state="33" t_state="10"/>
+      <xa_prepare_exec rmid="0" flags="0x0" rc="0" s_state="33" td_state="10"/>
+      <xa_prepare_exec rmid="1" flags="0x0" rc="0" s_state="33" td_state="10"/>
     </xa_prepare_execs>
   </msg>
 
@@ -252,8 +252,8 @@ verb=8 (query recovery)
       <state finished="0" txstate="1" will_commit="1" will_rollback="0" xid="cd7f2d86-a6d8-4237-8e1e-83347e478c49.87cd2b4e-7ec7-4c7c-b839-f570171554cb"/>
     </client>
     <rsrmgrs>
-      <rsrmgr rmid="0" next_verb="4" r_state="?" s_state="?" t_state="?"/>
-      <rsrmgr rmid="1" next_verb="4" r_state="?" s_state="?" t_state="?"/>
+      <rsrmgr rmid="0" next_verb="4" r_state="?" s_state="?" td_state="?"/>
+      <rsrmgr rmid="1" next_verb="4" r_state="?" s_state="?" td_state="?"/>
     </rsrmgrs>
   </msg>
 

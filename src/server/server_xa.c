@@ -326,7 +326,7 @@ int server_xa_end_24(struct thread_status_s *ts,
             status_record_update(ts->curr_status + slot, slot,
                                  ts->updated_records);
             sr->sr.data.pld.rm.state.xa_s_state = xa_end_execs->s_state;
-            sr->sr.data.pld.rm.state.xa_t_state = xa_end_execs->t_state;
+            sr->sr.data.pld.rm.state.xa_td_state = xa_end_execs->td_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
             sr->sr.data.pld.rm.xa_end_flags = xa_end_execs->flags;
             sr->sr.data.pld.rm.xa_end_rc = xa_end_execs->rc;
@@ -459,7 +459,8 @@ int server_xa_open_8(struct thread_status_s *ts,
             sr->sr.data.pld.rm.rmid = rsrmgr->rmid;
             strncpy(sr->sr.data.pld.rm.name, (char *)rsrmgr->name,
                     PAYLOAD_RSRMGR_NAME_MAX);
-            common_status_rsrmgr_init(&sr->sr.data.pld.rm.state);
+            common_status_rsrmgr_init(&sr->sr.data.pld.rm.state,
+                                      rsrmgr->dynamic);
             sr->sr.data.pld.rm.name[PAYLOAD_RSRMGR_NAME_MAX - 1] = '\0';
             strncpy(sr->sr.data.pld.rm.xa_name, (char *)rsrmgr->xa_name,
                     RMNAMESZ);
@@ -667,7 +668,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
             status_record_update(ts->curr_status + slot, slot,
                                  ts->updated_records);
             sr->sr.data.pld.rm.state.xa_s_state = xa_prepare_execs->s_state;
-            sr->sr.data.pld.rm.state.xa_t_state = xa_prepare_execs->t_state;
+            sr->sr.data.pld.rm.state.xa_td_state = xa_prepare_execs->td_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
             sr->sr.data.pld.rm.xa_prepare_flags = xa_prepare_execs->flags;
             sr->sr.data.pld.rm.xa_prepare_rc = xa_prepare_execs->rc;
@@ -972,7 +973,7 @@ int server_xa_start_24(struct thread_status_s *ts,
             /* update the block */
             status_record_update(ts->curr_status + slot, slot,
                                  ts->updated_records);
-            sr->sr.data.pld.rm.state.xa_t_state = xa_start_execs->t_state;
+            sr->sr.data.pld.rm.state.xa_td_state = xa_start_execs->td_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
             sr->sr.data.pld.rm.xa_start_flags = xa_start_execs->flags;
             sr->sr.data.pld.rm.xa_start_rc = xa_start_execs->rc;

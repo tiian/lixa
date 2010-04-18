@@ -277,10 +277,11 @@ int thread_status_dump_rsrmgr(const struct payload_rsrmgr_s *rm)
         printf("\tRsrmgr/rmid: %d\n", rm->rmid);
         printf("\tRsrmgr/state/next_verb: %d\n"
                "\tRsrmgr/state/xa_r_state: %d\n"
-               "\tRsrmgr/state/xa_s_state: %d\n"
-               "\tRsrmgr/state/xa_t_state: %d\n",
-               rm->state.next_verb, rm->state.xa_r_state,
-               rm->state.xa_s_state, rm->state.xa_t_state);
+               "\tRsrmgr/state/dynamic: %d\n"
+               "\tRsrmgr/state/xa_td_state: %d\n"
+               "\tRsrmgr/state/xa_s_state: %d\n",
+               rm->state.next_verb, rm->state.xa_r_state, rm->state.dynamic,
+               rm->state.xa_td_state, rm->state.xa_s_state);
         printf("\tRsrmgr/lixac_conf.xml name: '%s'\n"
                "\tRsrmgr/xa_name: '%s'\n"
                "\tRsrmgr/xa_open_info: '%s'\n"
