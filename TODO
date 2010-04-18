@@ -1,5 +1,4 @@
-lixa_common_status.h: change xa_t_state to xa_td_state to reflect static and
-dynamic association
+Restart from ax_reg function...
 
 When server_manager_thread exits, the listener must be aware of this... 
 
