@@ -118,7 +118,8 @@ int main(int argc, char *argv[])
             exit(1);
         }
 
-        ocirc = OCIStmtExecute(oci_svc_ctx, stmt_hndl, err_hndl, (ub4)1, (ub4)0,
+        ocirc = OCIStmtExecute(oci_svc_ctx, stmt_hndl, err_hndl,
+                               (ub4)1, (ub4)0,
                                (CONST OCISnapshot *)NULL,
                                (OCISnapshot *)NULL, OCI_DEFAULT);
         if (OCI_SUCCESS != ocirc && OCI_SUCCESS_WITH_INFO != ocirc) {
@@ -139,7 +140,8 @@ int main(int argc, char *argv[])
             exit(1);
         }
 
-        ocirc = OCIStmtExecute(oci_svc_ctx, stmt_hndl, err_hndl, (ub4)1, (ub4)0,
+        ocirc = OCIStmtExecute(oci_svc_ctx, stmt_hndl, err_hndl,
+                               (ub4)1, (ub4)0,
                                (CONST OCISnapshot *)NULL,
                                (OCISnapshot *)NULL, OCI_DEFAULT);
         if (OCI_SUCCESS != ocirc && OCI_SUCCESS_WITH_INFO != ocirc) {
