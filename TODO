@@ -1,4 +1,4 @@
-Restart from ax_reg function... (@@@ and a segmentation fault...)
+Test dynamic registration on server side (server_ax_reg, server_ax_unreg)
 
 When server_manager_thread exits, the listener must be aware of this... 
 

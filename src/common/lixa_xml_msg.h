@@ -852,7 +852,7 @@ struct lixa_msg_body_rollback_8_s {
     /**
      * Parameters and return value of xa_rollback executions
      */
-    GArray                                   *xa_rollback_execs;
+    GArray                                     *xa_rollback_execs;
 };
 
 
@@ -999,9 +999,9 @@ struct lixa_msg_body_qrcvr_24_s {
 
 
 /**
- * Message body for verb "reg", step "8"
+ * Convenience struct for @ref lixa_msg_body_reg_8_s
  */
-struct lixa_msg_body_reg_8_s {
+struct lixa_msg_body_reg_8_ax_reg_exec_s {
     /**
      * rmid parameter as passed to xa_rollback routine
      */
@@ -1018,6 +1018,54 @@ struct lixa_msg_body_reg_8_s {
      * the new transaction branch association state after ax_reg execution
      */
     int             td_state;
+};
+
+
+
+/**
+ * Message body for verb "reg", step "8"
+ */
+struct lixa_msg_body_reg_8_s {
+    /**
+     * Parameters and return value of ax_reg executions
+     */
+    struct lixa_msg_body_reg_8_ax_reg_exec_s   ax_reg_exec;
+};
+
+
+
+/**
+ * Convenience struct for @ref lixa_msg_body_unreg_8_s
+ */
+struct lixa_msg_body_unreg_8_ax_unreg_exec_s {
+    /**
+     * rmid parameter as passed to xa_rollback routine
+     */
+    int             rmid;
+    /**
+     * flags parameter as passed to xa_rollback routine
+     */
+    long            flags;
+    /**
+     * return code of ax_reg routine
+     */
+    int             rc;
+    /**
+     * the new transaction branch association state after ax_reg execution
+     */
+    int             td_state;
+};
+
+
+
+/**
+ * Message body for verb "unreg", step "8"
+ */
+struct lixa_msg_body_unreg_8_s {
+    /**
+     * Parameters and return value of ax_unreg executions
+     */
+    struct lixa_msg_body_unreg_8_ax_unreg_exec_s   ax_unreg_exec;
 };
 
 
@@ -1055,6 +1103,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_qrcvr_16_s        qrcvr_16;
         struct lixa_msg_body_qrcvr_24_s        qrcvr_24;
         struct lixa_msg_body_reg_8_s           reg_8;
+        struct lixa_msg_body_unreg_8_s         unreg_8;
     } body;
 };
 

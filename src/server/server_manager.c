@@ -883,6 +883,8 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                      , SERVER_XA_COMMIT_ERROR
                      , SERVER_XA_ROLLBACK_ERROR
                      , SERVER_QRCVR_ERROR
+                     , SERVER_AX_REG_ERROR
+                     , SERVER_AX_UNREG_ERROR
                      , INVALID_VERB
                      , STORE_VERB_STEP_ERROR
                      , NONE } excp;
@@ -988,6 +990,16 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                             &(ts->client_array[slot_id].last_verb_step))))
                     THROW(SERVER_QRCVR_ERROR)
                 break;
+            case LIXA_MSG_VERB_REG:
+                if (LIXA_RC_OK != (ret_cod = server_ax_reg(
+                                       ts, &lmi, block_id)))
+                    THROW(SERVER_AX_REG_ERROR)
+                break;
+            case LIXA_MSG_VERB_UNREG:
+                if (LIXA_RC_OK != (ret_cod = server_ax_unreg(
+                                       ts, &lmi, block_id)))
+                    THROW(SERVER_AX_UNREG_ERROR)
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -1011,6 +1023,8 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
             case SERVER_XA_COMMIT_ERROR:
             case SERVER_XA_ROLLBACK_ERROR:
             case SERVER_QRCVR_ERROR:
+            case SERVER_AX_REG_ERROR:
+            case SERVER_AX_UNREG_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INVALID_STATUS;

@@ -77,6 +77,8 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                      , INVALID_QRCVR_STEP
                      , SERIALIZE_REG_8_ERROR
                      , INVALID_REG_STEP
+                     , SERIALIZE_UNREG_8_ERROR
+                     , INVALID_UNREG_STEP
                      , INVALID_VERB
                      , BUFFER_TOO_SHORT3
                      , NONE } excp;
@@ -295,6 +297,19 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                         THROW(INVALID_REG_STEP);
                 }
                 break;                
+            case LIXA_MSG_VERB_UNREG:
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        if (LIXA_RC_OK != (
+                                ret_cod =
+                                lixa_msg_serialize_unreg_8(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_UNREG_8_ERROR);
+                        break;
+                    default:
+                        THROW(INVALID_UNREG_STEP);
+                }
+                break;                
             default:
                 THROW(INVALID_VERB);
         }
@@ -343,6 +358,7 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
             case SERIALIZE_QRCVR_16_ERROR:
             case SERIALIZE_QRCVR_24_ERROR:
             case SERIALIZE_REG_8_ERROR:
+            case SERIALIZE_UNREG_8_ERROR:
                 break;
             case INVALID_OPEN_STEP:
             case INVALID_CLOSE_STEP:
@@ -353,6 +369,7 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
             case INVALID_ROLLBACK_STEP:
             case INVALID_QRCVR_STEP:
             case INVALID_REG_STEP:
+            case INVALID_UNREG_STEP:
             case INVALID_VERB:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
@@ -1373,13 +1390,13 @@ int lixa_msg_serialize_reg_8(const struct lixa_msg_s *msg,
                               "%s=\"%d\" %s=\"%d\"/>",
                               LIXA_XML_MSG_TAG_AX_REG_EXEC,
                               LIXA_XML_MSG_PROP_RMID,
-                              msg->body.reg_8.rmid,
+                              msg->body.reg_8.ax_reg_exec.rmid,
                               LIXA_XML_MSG_PROP_FLAGS,
-                              msg->body.reg_8.flags,
+                              msg->body.reg_8.ax_reg_exec.flags,
                               LIXA_XML_MSG_PROP_RC,
-                              msg->body.reg_8.rc,
+                              msg->body.reg_8.ax_reg_exec.rc,
                               LIXA_XML_MSG_PROP_TD_STATE,
-                              msg->body.reg_8.td_state);
+                              msg->body.reg_8.ax_reg_exec.td_state);
             if (used_chars >= *free_chars)
                 THROW(BUFFER_TOO_SHORT);
             *free_chars -= used_chars;
@@ -1715,6 +1732,56 @@ int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_start_24/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_serialize_unreg_8(const struct lixa_msg_s *msg,
+                             char *buffer,
+                             size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_serialize_unreg_8\n"));
+    TRY {
+        int used_chars;
+
+        /* <ax_unreg_exec> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%d\" %s=\"0x%lx\" "
+                              "%s=\"%d\" %s=\"%d\"/>",
+                              LIXA_XML_MSG_TAG_AX_UNREG_EXEC,
+                              LIXA_XML_MSG_PROP_RMID,
+                              msg->body.unreg_8.ax_unreg_exec.rmid,
+                              LIXA_XML_MSG_PROP_FLAGS,
+                              msg->body.unreg_8.ax_unreg_exec.flags,
+                              LIXA_XML_MSG_PROP_RC,
+                              msg->body.unreg_8.ax_unreg_exec.rc,
+                              LIXA_XML_MSG_PROP_TD_STATE,
+                              msg->body.unreg_8.ax_unreg_exec.td_state);
+            if (used_chars >= *free_chars)
+                THROW(BUFFER_TOO_SHORT);
+            *free_chars -= used_chars;
+            *offset += used_chars;
+            
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_serialize_unreg_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

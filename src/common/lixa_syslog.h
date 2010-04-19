@@ -60,6 +60,9 @@
 #define LIXA_SYSLOG_LXC007N "LXC007N resource manager '%s' returned " \
     "XA_RDONLY (%d) while rolling back (xa_rollback) during recovery phase " \
     "for transaction '%s'"
+#define LIXA_SYSLOG_LXC008I "LXC008I resource manager '%s' returned " \
+    "XAER_NOTA during recovery commit: the resource manager already " \
+    "committed the transaction with xid '%s'"
 
 
 

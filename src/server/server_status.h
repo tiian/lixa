@@ -381,6 +381,22 @@ struct payload_rsrmgr_s {
      */
     int                             xa_rollback_rc;
     /**
+     * flags value as passed to ax_reg
+     */
+    long                            ax_reg_flags;
+    /**
+     * rc value as returned from ax_reg
+     */
+    int                             ax_reg_rc;
+    /**
+     * flags value as passed to ax_unreg
+     */
+    long                            ax_unreg_flags;
+    /**
+     * rc value as returned from ax_unreg
+     */
+    int                             ax_unreg_rc;
+    /**
      * return code of the recovery phase
      * meaningless if recovery phase did not happen
      */
