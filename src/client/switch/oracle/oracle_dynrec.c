@@ -25,8 +25,9 @@
 
 /*
  * This is Oracle specific: the xa_switch_t struct supplied is named xaosw
+ * for XA dynamic registration
  */
-extern struct xa_switch_t xaosw;
+extern struct xa_switch_t xaoswd;
 
 
 
@@ -36,5 +37,5 @@ extern struct xa_switch_t xaosw;
  */
 struct xa_switch_t *lixa_get_xa_switch()
 {
-    return &xaosw;
+    return &xaoswd;
 }
