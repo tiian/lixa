@@ -293,3 +293,13 @@ verb=8,step=24 -->			send recovery result
 client			server		description
 verb=9,step=8 -->			register the new status
 					(ax_reg result)
+***************************************************************************
+
+  client -> server message (async assertion)
+  <msg level="1" verb="10" step="8">
+    <ax_unreg_exec rmid="0" flags="0x0" rc="0" td_state="20"/>
+  </msg>
+
+client			server		description
+verb=10,step=8 -->			register the new status
+					(ax_unreg result)

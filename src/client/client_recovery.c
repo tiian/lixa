@@ -342,11 +342,15 @@ int client_recovery_commit(const client_status_t *cs,
                     break;
                 case XA_RDONLY:
                     syslog(LOG_NOTICE, LIXA_SYSLOG_LXC006N,
-                           act_rsrmgr->xa_switch->name, rc, ser_xid);
+                           act_rsrmgr->generic->name, rc, ser_xid);
+                    break;
+                case XAER_NOTA:
+                    syslog(LOG_INFO, LIXA_SYSLOG_LXC008I,
+                           act_rsrmgr->generic->name, ser_xid);
                     break;
                 default:
                     syslog(LOG_CRIT, LIXA_SYSLOG_LXC003C,
-                           act_rsrmgr->xa_switch->name, rc, ser_xid);
+                           act_rsrmgr->generic->name, rc, ser_xid);
                     failed = TRUE;
             }
             /* prepare record for server update */

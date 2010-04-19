@@ -103,12 +103,12 @@ int main(int argc, char *argv[])
                 rc_cli);
         exit(1);
     }
-
+    /*
     if (TX_OK != (txrc = tx_begin())) {
         fprintf(stderr, "tx_begin error: %d\n", txrc);
         exit(txrc);
     }
-
+    */
     if (SQL_SUCCESS != (rc_cli = SQLExecDirect(stat, sql_stat, SQL_NTS))) {
         fprintf(stderr, "Unable to execute the SQL statement ('%s'): %d\n",
                 sql_stat, rc_cli);
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
      * NULLXID */
     if (SQL_SUCCESS != (rc_cli = SQLEndTran(
                             SQL_HANDLE_DBC, conn, SQL_COMMIT))) {
-        fprintf(stderr, "Unable to terminate (ROLLBACK) the transaction: %d\n",
+        fprintf(stderr, "Unable to terminate (COMMIT) the transaction: %d\n",
                 rc_cli);
         exit(1);
     }
@@ -132,11 +132,13 @@ int main(int argc, char *argv[])
     }
     */
     /* this is to test tx_rollback */
+    /*
     if (TX_OK != (txrc = tx_rollback())) {
         fprintf(stderr, "tx_rollback error: %d\n", txrc);
         exit(txrc);
     }
-
+    */
+    
     if (SQL_SUCCESS != (rc_cli = SQLFreeHandle(SQL_HANDLE_STMT, stat))) {
         fprintf(stderr, "Unable to free the statement handle: %d\n",
                 rc_cli);

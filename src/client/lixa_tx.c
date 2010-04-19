@@ -58,8 +58,9 @@ int lixa_tx_begin(int *txrc)
 {
     enum Exception { STATUS_NOT_FOUND
                      , COLL_GET_CS_ERROR
-                     , PROTOCOL_ERROR
-                     , INVALID_STATUS1
+                     , PROTOCOL_ERROR1
+                     , INVALID_STATUS
+                     , PROTOCOL_ERROR2
                      , LIXA_XA_START_ERROR
                      , GETTIMEOFDAY_ERROR
                      , NONE } excp;
@@ -75,6 +76,7 @@ int lixa_tx_begin(int *txrc)
         client_status_t *cs;
         XID xid;
         TRANSACTION_TIMEOUT timeout;
+        guint i;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -100,13 +102,26 @@ int lixa_tx_begin(int *txrc)
             case TX_STATE_S0:
             case TX_STATE_S3:
             case TX_STATE_S4:
-                THROW(PROTOCOL_ERROR);                
+                THROW(PROTOCOL_ERROR1);
             default:
-                THROW(INVALID_STATUS1);
+                THROW(INVALID_STATUS);
         }
         LIXA_TRACE(("lixa_tx_begin: txstate = S%d, "
                     "next_txstate = S%d\n", txstate, next_txstate));
 
+        /* check there are no local transactions started from any resource
+           manager */
+        for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+            struct common_status_rsrmgr_s *csr = &g_array_index(
+                cs->rmstates, struct common_status_rsrmgr_s, i);
+            if (csr->dynamic && XA_STATE_D0 != csr->xa_td_state) {
+                LIXA_TRACE(("lixa_tx_begin: resource manager # %u uses "
+                            "dynamic registration and is in state %d\n",
+                            i, csr->xa_td_state));
+                THROW(PROTOCOL_ERROR2);
+            }
+        }
+        
         /* generate the transction id */
         xid_create_new(&xid);
         client_status_set_xid(cs, &xid);
@@ -140,11 +155,12 @@ int lixa_tx_begin(int *txrc)
                 break;
             case COLL_GET_CS_ERROR:
                 break;
-            case PROTOCOL_ERROR:
+            case PROTOCOL_ERROR1:
+            case PROTOCOL_ERROR2:
                 *txrc = TX_PROTOCOL_ERROR;
                 ret_cod = LIXA_RC_PROTOCOL_ERROR;
                 break;
-            case INVALID_STATUS1:
+            case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case LIXA_XA_START_ERROR:

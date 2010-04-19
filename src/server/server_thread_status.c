@@ -147,7 +147,8 @@ int thread_status_dump(const struct thread_status_s *ts)
             printf("Block type: ");
             switch (record->pld.type) {
                 case DATA_PAYLOAD_TYPE_HEADER:
-                    printf("transaction manager record (transaction header)\n");
+                    printf("transaction manager record "
+                           "(transaction header)\n");
                     if (LIXA_RC_OK != (ret_cod = thread_status_dump_header(
                                            &(record->pld.ph))))
                         THROW(DUMP_HEADER);
@@ -304,6 +305,12 @@ int thread_status_dump_rsrmgr(const struct payload_rsrmgr_s *rm)
         printf("\tRsrmgr/xa_rollback_flags: 0x%lx\n"
                "\tRsrmgr/xa_rollback_rc: %d\n",
                rm->xa_rollback_flags, rm->xa_rollback_rc);
+        printf("\tRsrmgr/ax_reg_flags: 0x%lx\n"
+               "\tRsrmgr/ax_reg_rc: %d\n",
+               rm->ax_reg_flags, rm->ax_reg_rc);
+        printf("\tRsrmgr/ax_unreg_flags: 0x%lx\n"
+               "\tRsrmgr/ax_unreg_rc: %d\n",
+               rm->ax_unreg_flags, rm->ax_unreg_rc);
         printf("\tRsrmgr/recovery_rc: %d\n",
                rm->recovery_rc);
         
