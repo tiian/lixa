@@ -1,4 +1,4 @@
-AC_INIT([lixa], [0.3.12], [tiian at users dot sourceforge dot net])
+AC_INIT([lixa], [0.3.13], [tiian at users dot sourceforge dot net])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 AC_PROG_CC
 AC_CONFIG_HEADER([config.h])

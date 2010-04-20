@@ -1,5 +1,10 @@
 LOG:
 
+20100420 - 0.3.13 fixed bug # 2913849
+                  implemented and partially tested dynamic registration for
+                  IBM DB2; implemented but not tested dynamic registration for
+                  Oracle
+
 20100411 - 0.3.12 fixed bug # 2984162, # 2984162
 
 20100409 - 0.3.11 fixed bug # 2907563

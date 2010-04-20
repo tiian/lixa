@@ -103,12 +103,12 @@ int main(int argc, char *argv[])
                 rc_cli);
         exit(1);
     }
-    /*
+    
     if (TX_OK != (txrc = tx_begin())) {
         fprintf(stderr, "tx_begin error: %d\n", txrc);
         exit(txrc);
     }
-    */
+
     if (SQL_SUCCESS != (rc_cli = SQLExecDirect(stat, sql_stat, SQL_NTS))) {
         fprintf(stderr, "Unable to execute the SQL statement ('%s'): %d\n",
                 sql_stat, rc_cli);
@@ -117,20 +117,21 @@ int main(int argc, char *argv[])
 
     /* this function is useful only to test ax_unreg when ax_reg returns
      * NULLXID */
+    /*
     if (SQL_SUCCESS != (rc_cli = SQLEndTran(
                             SQL_HANDLE_DBC, conn, SQL_COMMIT))) {
         fprintf(stderr, "Unable to terminate (COMMIT) the transaction: %d\n",
                 rc_cli);
         exit(1);
     }
+    */
     
     /* this is to test tx_commit */
-    /*
     if (TX_OK != (txrc = tx_commit())) {
         fprintf(stderr, "tx_commit error: %d\n", txrc);
         exit(txrc);
     }
-    */
+
     /* this is to test tx_rollback */
     /*
     if (TX_OK != (txrc = tx_rollback())) {

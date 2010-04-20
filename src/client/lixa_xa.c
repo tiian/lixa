@@ -222,20 +222,29 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
             struct common_status_rsrmgr_s *csr = &g_array_index(
                 cs->rmstates, struct common_status_rsrmgr_s, i);
             struct lixa_msg_body_commit_8_xa_commit_execs_s record;
-
             record.rmid = i;
             
             /* bypass resource managers are not prepared */
             if ((one_phase_commit && XA_STATE_S2 != csr->xa_s_state) ||
                 (!one_phase_commit && XA_STATE_S3 != csr->xa_s_state)) {
-                    LIXA_TRACE(("lixa_xa_commit: rmid = %d, "
-                                "one_phase_commit = %d, "
-                                "xa_s_state = %d, bypassing...\n",
+                    LIXA_TRACE(("lixa_xa_commit: rmid=%d, "
+                                "one_phase_commit=%d, "
+                                "xa_s_state=%d, bypassing...\n",
                                 record.rmid, one_phase_commit,
                                 csr->xa_s_state));
                     continue;
                 }
-                    
+
+            /* bypass resource managers have not dynamically registered and
+               statically ended the transaction */
+            if (csr->dynamic && csr->xa_s_state != XA_STATE_S2) {
+                LIXA_TRACE(("lixa_xa_commit: resource manager # %i "
+                            "has not yet dynamically registered and "
+                            "statically ended, skipping...\n",
+                            record.rmid));
+                continue;
+            }
+            
             record.flags = one_phase_commit ? TMONEPHASE : TMNOFLAGS;
             record.rc = act_rsrmgr->xa_switch->xa_commit_entry(
                 client_status_get_xid(cs), record.rmid, record.flags);
@@ -443,6 +452,15 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                 cs->rmstates, struct common_status_rsrmgr_s, i);
             struct lixa_msg_body_end_24_xa_end_execs_s record;
 
+            /* dynamic registered resource managers with unregistered state
+               must be bypassed */
+            if (csr->dynamic && csr->xa_td_state != XA_STATE_D1) {
+                LIXA_TRACE(("lixa_xa_end: resource manager # %u has not "
+                            "dynamically registered itself, skipping...\n",
+                            i));
+                continue;
+            }
+            
             record.rmid = i;
             record.flags = xa_end_flags;
             record.rc = act_rsrmgr->xa_switch->xa_end_entry(
@@ -1081,8 +1099,18 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             struct common_status_rsrmgr_s *csr = &g_array_index(
                 cs->rmstates, struct common_status_rsrmgr_s, i);
             struct lixa_msg_body_rollback_8_xa_rollback_execs_s record;
-
-            record.rmid = i;            
+            record.rmid = i;
+            
+            /* bypass resource managers have not dynamically registered and
+               statically ended the transaction */
+            if (csr->dynamic && csr->xa_s_state != XA_STATE_S2) {
+                LIXA_TRACE(("lixa_xa_commit: resource manager # %i "
+                            "has not yet dynamically registered and "
+                            "statically ended, skipping...\n",
+                            record.rmid));
+                continue;
+            }
+            
             record.flags = TMNOFLAGS;
             record.rc = act_rsrmgr->xa_switch->xa_rollback_entry(
                 client_status_get_xid(cs), record.rmid, record.flags);
