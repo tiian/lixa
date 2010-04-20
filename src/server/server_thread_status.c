@@ -573,7 +573,8 @@ int thread_status_check_recovery_pending(
     enum Exception { INVALID_HEADER_TYPE
                      , FINISHED_TRANSACTION
                      , RECOVERY_FAILED_TRANSACTION
-                     , NOT_STARTED_TRANSACTION
+                     , NOT_STARTED_TRANSACTION1
+                     , NOT_STARTED_TRANSACTION2
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -615,14 +616,21 @@ int thread_status_check_recovery_pending(
         switch (last->verb) {
             case LIXA_MSG_VERB_OPEN:
             case LIXA_MSG_VERB_CLOSE:
+            case LIXA_MSG_VERB_UNREG:
                 LIXA_TRACE(("thread_status_check_recovery_pending: "
                             "returning FALSE\n"));
-                THROW(NOT_STARTED_TRANSACTION);
+                THROW(NOT_STARTED_TRANSACTION1);
             case LIXA_MSG_VERB_START:
             case LIXA_MSG_VERB_END:
             case LIXA_MSG_VERB_PREPARE:
             case LIXA_MSG_VERB_COMMIT:
             case LIXA_MSG_VERB_ROLLBACK:
+                break;
+            case LIXA_MSG_VERB_REG:
+                /* check TX state */
+                if (data->pld.ph.state.txstate != TX_STATE_S3 &&
+                    data->pld.ph.state.txstate != TX_STATE_S4)
+                    THROW(NOT_STARTED_TRANSACTION1);
                 break;
             default:
                 THROW(INVALID_VERB);
@@ -638,7 +646,8 @@ int thread_status_check_recovery_pending(
                 break;
             case FINISHED_TRANSACTION:
             case RECOVERY_FAILED_TRANSACTION:
-            case NOT_STARTED_TRANSACTION:
+            case NOT_STARTED_TRANSACTION1:
+            case NOT_STARTED_TRANSACTION2:
                 *result = FALSE;
                 ret_cod = LIXA_RC_OK;
                 break;

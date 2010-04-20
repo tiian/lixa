@@ -117,7 +117,7 @@ extern "C" {
                                          guint size) {
         ltr->tx_commit = tx_commit;
         ltr->commit = commit;
-        ltr->tx_rc = TX_FAIL;
+        ltr->tx_rc = TX_OK;
         ltr->xa_rc = g_array_sized_new(FALSE, FALSE, sizeof(int), size);
         assert(ltr->xa_rc != NULL);
     }
