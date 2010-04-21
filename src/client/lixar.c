@@ -61,6 +61,8 @@ static char *xid_file = NULL;
 static gboolean commit = FALSE;
 static gboolean rollback = FALSE;
 static gboolean print_version = FALSE;
+static gboolean bypass_bqual_check = FALSE;
+static gboolean bypass_formatid_check = FALSE;
 /* command line options: DO NOT CHANGE ORDER, only append!!! */
 static GOptionEntry entries[] =
 {
@@ -70,6 +72,8 @@ static GOptionEntry entries[] =
     { "commit", 'c', 0, G_OPTION_ARG_NONE, &commit, "Commit prepared & in-doubt transactions", NULL },
     { "rollback", 'r', 0, G_OPTION_ARG_NONE, &rollback, "Rollback prepared & in-doubt transactions", NULL },
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
+    { "bypass-bqual-check", 'b', 0, G_OPTION_ARG_NONE, &bypass_bqual_check, "Bypass xid branch qualifier check", NULL },
+    { "bypass-formatid-check", 'B', 0, G_OPTION_ARG_NONE, &bypass_formatid_check, "Bypass xid format id check", NULL },
     { NULL }
 };
 
@@ -165,8 +169,9 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    if (LIXA_RC_OK != (rc = lixa_tx_recover(report, commit, rollback,
-                                            xid, xid_file))) {
+    if (LIXA_RC_OK != (rc = lixa_tx_recover(
+                           report, commit, rollback, bypass_bqual_check,
+                           bypass_formatid_check, xid, xid_file))) {
         printf("There was an error while recoverying transactions: "
                "%d ('%s')\n", rc, lixa_strerror(rc));
         exit(1);
@@ -223,7 +228,11 @@ void output_options(void)
                xid_file);
     printf("\t- transaction(s) will be committed = %s\n",
            commit ? true_string : false_string);
-    printf("\t- transaction(s) will be rolled back = %s\n\n",
+    printf("\t- transaction(s) will be rolled back = %s\n",
            rollback ? true_string : false_string);
+    printf("\t- bypass xid branch qualifier check = %s\n",
+           bypass_bqual_check ? true_string : false_string);
+    printf("\t- bypass xid format id check = %s\n\n",
+           bypass_formatid_check ? true_string : false_string);    
     return;
 }

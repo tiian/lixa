@@ -1,5 +1,9 @@
 LOG:
 
+20100421 - 0.3.14 implemented rfnf # 2980750
+                  fixed a bug related to dynamic registration: it created
+                  in-doubt transaction in normal situations (!)
+
 20100420 - 0.3.13 fixed bug # 2913849
                   implemented and partially tested dynamic registration for
                   IBM DB2; implemented but not tested dynamic registration for

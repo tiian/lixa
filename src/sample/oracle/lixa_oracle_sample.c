@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Unable to allocate error handle\n");
         exit(1);
     }
-    
+
     if (TX_OK != (txrc = tx_begin())) {
         fprintf(stderr, "tx_begin error: %d\n", txrc);
         exit(txrc);
@@ -159,13 +159,13 @@ int main(int argc, char *argv[])
         fprintf(stderr, "tx_commit error: %d\n", txrc);
         exit(txrc);
     }
+
     /*
     if (TX_OK != (txrc = tx_rollback())) {
         fprintf(stderr, "tx_rollback error: %d\n", txrc);
         exit(txrc);
     }
     */
-
     /* free the allocated handles */
     OCIHandleFree((dvoid *)stmt_hndl, (ub4)OCI_HTYPE_STMT);
     OCIHandleFree((dvoid *)err_hndl, (ub4)OCI_HTYPE_ERROR);

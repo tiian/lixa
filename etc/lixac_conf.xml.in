@@ -5,7 +5,8 @@
     <trnmgr name="local_2" domain="AF_INET" address="127.0.0.1" port="3456" />
   </trnmgrs>
   <rsrmgrs>
-    <rsrmgr name="OracleXE" switch_file="@EXPANDED_LIBDIR@/switch_oracle.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
+    <rsrmgr name="OracleXE_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
+    <rsrmgr name="OracleXE_stareg" switch_file="@EXPANDED_LIBDIR@/switch_oracle_stareg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
     <rsrmgr name="IBMDB2_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_ibmdb2_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" />
     <rsrmgr name="IBMDB2_stareg" switch_file="@EXPANDED_LIBDIR@/switch_ibmdb2_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" />
     <rsrmgr name="LIXAdummyRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_dummyrm.so" xa_open_info="dummy open string" xa_close_info="dummy close string" />
@@ -27,7 +28,7 @@
         <trnmgr>local_2</trnmgr>
       </trnmgrs>
       <rsrmgrs>
-        <rsrmgr>OracleXE</rsrmgr>
+        <rsrmgr>OracleXE_dynreg</rsrmgr>
         <rsrmgr>LIXAdummyRM</rsrmgr>
       </rsrmgrs>
     </profile>
