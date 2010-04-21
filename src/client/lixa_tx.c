@@ -1091,7 +1091,7 @@ int lixa_tx_set_transaction_timeout(int *txrc,
 
 
 
-int lixa_tx_recover(int report, int commit, int rollback,
+int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
                     const char *xid, const char *xid_file)
 {
     enum Exception { COLL_GET_CS_ERROR
@@ -1137,7 +1137,8 @@ int lixa_tx_recover(int report, int commit, int rollback,
                          clnt_rcvr_array_free)))
             THROW(G_TREE_NEW);
 
-        if (LIXA_RC_OK != (ret_cod = client_recovery_scan(cs, crt)))
+        if (LIXA_RC_OK != (ret_cod = client_recovery_scan(
+                               cs, crt, bbqc, bfic)))
             THROW(RECOVERY_SCAN_ERROR);
         
         if (report && LIXA_RC_OK != (

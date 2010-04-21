@@ -457,7 +457,8 @@ int client_recovery_rollback(const client_status_t *cs,
 
 
 
-int client_recovery_scan(const client_status_t *cs, GTree *crt)
+int client_recovery_scan(const client_status_t *cs, GTree *crt,
+                         int bbqc, int bfic)
 {
     enum Exception { RECOVER_ERROR1
                      , G_ARRAY_NEW
@@ -505,7 +506,7 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt)
                     ser_xid = NULL;
 #endif
                     /* check XID format id */
-                    if (LIXA_XID_FORMAT_ID != xid_array[j].formatID) {
+                    if (!bfic && LIXA_XID_FORMAT_ID != xid_array[j].formatID) {
                         LIXA_TRACE(("client_recovery_scan: this transaction "
                                     "has format id 0x%lx instead of 0x%lx "
                                     "and will be discarded\n",
@@ -514,7 +515,7 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt)
                         continue;
                     }
                     /* check XID branch qualifier */
-                    if (!xid_bqual_is_global(xid_array + j)) {
+                    if (!bbqc && !xid_bqual_is_global(xid_array + j)) {
                         LIXA_TRACE(("client_recovery_scan: the branch "
                                     "qualifier of this transaction does not "
                                     "match current global branch qualifier "

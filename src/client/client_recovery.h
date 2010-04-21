@@ -114,9 +114,12 @@ extern "C" {
      * phase
      * @param cs IN reference to the status
      * @param crt OUT reference to the cold recovery table
+     * @param bbqc IN bypass the brach qualifier check (TRUE/FALSE)
+     * @param bfic IN bypass the format id check (TRUE/FALSE)
      * @return a standardized reason code
      */
-    int client_recovery_scan(const client_status_t *cs, GTree *crt);
+    int client_recovery_scan(const client_status_t *cs, GTree *crt,
+                             int bbqc, int bfic);
 
 
 
