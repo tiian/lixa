@@ -53,9 +53,39 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
+liblixamonkey_la_LIBADD =
+am_liblixamonkey_la_OBJECTS = liblixamonkey.lo
+liblixamonkey_la_OBJECTS = $(am_liblixamonkey_la_OBJECTS)
+liblixamonkey_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(liblixamonkey_la_LDFLAGS) $(LDFLAGS) -o $@
 switch_lixa_dummyrm_la_LIBADD =
 am_switch_lixa_dummyrm_la_OBJECTS = lixa_dummyrm.lo
 switch_lixa_dummyrm_la_OBJECTS = $(am_switch_lixa_dummyrm_la_OBJECTS)
+switch_lixa_monkeyrm1_dynreg_la_DEPENDENCIES = liblixamonkey.la
+am_switch_lixa_monkeyrm1_dynreg_la_OBJECTS = lixa_monkeyrm_dynreg.lo
+switch_lixa_monkeyrm1_dynreg_la_OBJECTS =  \
+	$(am_switch_lixa_monkeyrm1_dynreg_la_OBJECTS)
+switch_lixa_monkeyrm1_stareg_la_DEPENDENCIES = liblixamonkey.la
+am_switch_lixa_monkeyrm1_stareg_la_OBJECTS = lixa_monkeyrm_stareg.lo
+switch_lixa_monkeyrm1_stareg_la_OBJECTS =  \
+	$(am_switch_lixa_monkeyrm1_stareg_la_OBJECTS)
+switch_lixa_monkeyrm2_dynreg_la_DEPENDENCIES = liblixamonkey.la
+am_switch_lixa_monkeyrm2_dynreg_la_OBJECTS = lixa_monkeyrm_dynreg.lo
+switch_lixa_monkeyrm2_dynreg_la_OBJECTS =  \
+	$(am_switch_lixa_monkeyrm2_dynreg_la_OBJECTS)
+switch_lixa_monkeyrm2_stareg_la_DEPENDENCIES = liblixamonkey.la
+am_switch_lixa_monkeyrm2_stareg_la_OBJECTS = lixa_monkeyrm_stareg.lo
+switch_lixa_monkeyrm2_stareg_la_OBJECTS =  \
+	$(am_switch_lixa_monkeyrm2_stareg_la_OBJECTS)
+switch_lixa_monkeyrm3_dynreg_la_DEPENDENCIES = liblixamonkey.la
+am_switch_lixa_monkeyrm3_dynreg_la_OBJECTS = lixa_monkeyrm_dynreg.lo
+switch_lixa_monkeyrm3_dynreg_la_OBJECTS =  \
+	$(am_switch_lixa_monkeyrm3_dynreg_la_OBJECTS)
+switch_lixa_monkeyrm3_stareg_la_DEPENDENCIES = liblixamonkey.la
+am_switch_lixa_monkeyrm3_stareg_la_OBJECTS = lixa_monkeyrm_stareg.lo
+switch_lixa_monkeyrm3_stareg_la_OBJECTS =  \
+	$(am_switch_lixa_monkeyrm3_stareg_la_OBJECTS)
 switch_lixa_randomrm_la_LIBADD =
 am_switch_lixa_randomrm_la_OBJECTS = lixa_randomrm.lo
 switch_lixa_randomrm_la_OBJECTS =  \
@@ -72,9 +102,23 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(switch_lixa_dummyrm_la_SOURCES) \
+SOURCES = $(liblixamonkey_la_SOURCES) \
+	$(switch_lixa_dummyrm_la_SOURCES) \
+	$(switch_lixa_monkeyrm1_dynreg_la_SOURCES) \
+	$(switch_lixa_monkeyrm1_stareg_la_SOURCES) \
+	$(switch_lixa_monkeyrm2_dynreg_la_SOURCES) \
+	$(switch_lixa_monkeyrm2_stareg_la_SOURCES) \
+	$(switch_lixa_monkeyrm3_dynreg_la_SOURCES) \
+	$(switch_lixa_monkeyrm3_stareg_la_SOURCES) \
 	$(switch_lixa_randomrm_la_SOURCES)
-DIST_SOURCES = $(switch_lixa_dummyrm_la_SOURCES) \
+DIST_SOURCES = $(liblixamonkey_la_SOURCES) \
+	$(switch_lixa_dummyrm_la_SOURCES) \
+	$(switch_lixa_monkeyrm1_dynreg_la_SOURCES) \
+	$(switch_lixa_monkeyrm1_stareg_la_SOURCES) \
+	$(switch_lixa_monkeyrm2_dynreg_la_SOURCES) \
+	$(switch_lixa_monkeyrm2_stareg_la_SOURCES) \
+	$(switch_lixa_monkeyrm3_dynreg_la_SOURCES) \
+	$(switch_lixa_monkeyrm3_stareg_la_SOURCES) \
 	$(switch_lixa_randomrm_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -209,12 +253,35 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-lib_LTLIBRARIES = switch_lixa_dummyrm.la switch_lixa_randomrm.la
+lib_LTLIBRARIES = liblixamonkey.la \
+	switch_lixa_monkeyrm1_dynreg.la \
+	switch_lixa_monkeyrm1_stareg.la \
+	switch_lixa_monkeyrm2_dynreg.la \
+	switch_lixa_monkeyrm2_stareg.la \
+	switch_lixa_monkeyrm3_dynreg.la \
+	switch_lixa_monkeyrm3_stareg.la \
+	switch_lixa_dummyrm.la \
+	switch_lixa_randomrm.la 
+
+liblixamonkey_la_SOURCES = liblixamonkey.c
+switch_lixa_monkeyrm1_dynreg_la_SOURCES = lixa_monkeyrm_dynreg.c
+switch_lixa_monkeyrm1_stareg_la_SOURCES = lixa_monkeyrm_stareg.c
+switch_lixa_monkeyrm2_dynreg_la_SOURCES = lixa_monkeyrm_dynreg.c
+switch_lixa_monkeyrm2_stareg_la_SOURCES = lixa_monkeyrm_stareg.c
+switch_lixa_monkeyrm3_dynreg_la_SOURCES = lixa_monkeyrm_dynreg.c
+switch_lixa_monkeyrm3_stareg_la_SOURCES = lixa_monkeyrm_stareg.c
 switch_lixa_dummyrm_la_SOURCES = lixa_dummyrm.c
 switch_lixa_randomrm_la_SOURCES = lixa_randomrm.c
 AM_CPPFLAGS = -I$(srcdir)/../../../common
 AM_CFLAGS = -Wall
 AM_LDFLAGS = -module
+liblixamonkey_la_LDFLAGS = 
+switch_lixa_monkeyrm1_dynreg_la_LIBADD = liblixamonkey.la
+switch_lixa_monkeyrm1_stareg_la_LIBADD = liblixamonkey.la
+switch_lixa_monkeyrm2_dynreg_la_LIBADD = liblixamonkey.la
+switch_lixa_monkeyrm2_stareg_la_LIBADD = liblixamonkey.la
+switch_lixa_monkeyrm3_dynreg_la_LIBADD = liblixamonkey.la
+switch_lixa_monkeyrm3_stareg_la_LIBADD = liblixamonkey.la
 all: all-am
 
 .SUFFIXES:
@@ -275,8 +342,22 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+liblixamonkey.la: $(liblixamonkey_la_OBJECTS) $(liblixamonkey_la_DEPENDENCIES) 
+	$(liblixamonkey_la_LINK) -rpath $(libdir) $(liblixamonkey_la_OBJECTS) $(liblixamonkey_la_LIBADD) $(LIBS)
 switch_lixa_dummyrm.la: $(switch_lixa_dummyrm_la_OBJECTS) $(switch_lixa_dummyrm_la_DEPENDENCIES) 
 	$(LINK) -rpath $(libdir) $(switch_lixa_dummyrm_la_OBJECTS) $(switch_lixa_dummyrm_la_LIBADD) $(LIBS)
+switch_lixa_monkeyrm1_dynreg.la: $(switch_lixa_monkeyrm1_dynreg_la_OBJECTS) $(switch_lixa_monkeyrm1_dynreg_la_DEPENDENCIES) 
+	$(LINK) -rpath $(libdir) $(switch_lixa_monkeyrm1_dynreg_la_OBJECTS) $(switch_lixa_monkeyrm1_dynreg_la_LIBADD) $(LIBS)
+switch_lixa_monkeyrm1_stareg.la: $(switch_lixa_monkeyrm1_stareg_la_OBJECTS) $(switch_lixa_monkeyrm1_stareg_la_DEPENDENCIES) 
+	$(LINK) -rpath $(libdir) $(switch_lixa_monkeyrm1_stareg_la_OBJECTS) $(switch_lixa_monkeyrm1_stareg_la_LIBADD) $(LIBS)
+switch_lixa_monkeyrm2_dynreg.la: $(switch_lixa_monkeyrm2_dynreg_la_OBJECTS) $(switch_lixa_monkeyrm2_dynreg_la_DEPENDENCIES) 
+	$(LINK) -rpath $(libdir) $(switch_lixa_monkeyrm2_dynreg_la_OBJECTS) $(switch_lixa_monkeyrm2_dynreg_la_LIBADD) $(LIBS)
+switch_lixa_monkeyrm2_stareg.la: $(switch_lixa_monkeyrm2_stareg_la_OBJECTS) $(switch_lixa_monkeyrm2_stareg_la_DEPENDENCIES) 
+	$(LINK) -rpath $(libdir) $(switch_lixa_monkeyrm2_stareg_la_OBJECTS) $(switch_lixa_monkeyrm2_stareg_la_LIBADD) $(LIBS)
+switch_lixa_monkeyrm3_dynreg.la: $(switch_lixa_monkeyrm3_dynreg_la_OBJECTS) $(switch_lixa_monkeyrm3_dynreg_la_DEPENDENCIES) 
+	$(LINK) -rpath $(libdir) $(switch_lixa_monkeyrm3_dynreg_la_OBJECTS) $(switch_lixa_monkeyrm3_dynreg_la_LIBADD) $(LIBS)
+switch_lixa_monkeyrm3_stareg.la: $(switch_lixa_monkeyrm3_stareg_la_OBJECTS) $(switch_lixa_monkeyrm3_stareg_la_DEPENDENCIES) 
+	$(LINK) -rpath $(libdir) $(switch_lixa_monkeyrm3_stareg_la_OBJECTS) $(switch_lixa_monkeyrm3_stareg_la_LIBADD) $(LIBS)
 switch_lixa_randomrm.la: $(switch_lixa_randomrm_la_OBJECTS) $(switch_lixa_randomrm_la_DEPENDENCIES) 
 	$(LINK) -rpath $(libdir) $(switch_lixa_randomrm_la_OBJECTS) $(switch_lixa_randomrm_la_LIBADD) $(LIBS)
 
@@ -286,7 +367,10 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixamonkey.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_dummyrm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_monkeyrm_dynreg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_monkeyrm_stareg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_randomrm.Plo@am__quote@
 
 .c.o:
