@@ -1,3 +1,5 @@
+restart from lixa_monkeyrm_open; establish a dir to store monkey config files...
+
 LIXA Monkey RM implementation in progress:
 - load a file (xa_open) with all the step/return codes
 - implement the monkey (!)
