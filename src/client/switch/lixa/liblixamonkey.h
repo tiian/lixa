@@ -56,6 +56,48 @@ extern struct xa_switch_t lixa_monkeyrm_dyn_sw;
 
 
 
+/**
+ * Enumeration used to assing a numerical id to any XA verb
+ */
+enum monkey_status_verb_e { XA_OPEN = 1, XA_CLOSE, XA_START, XA_END,
+                            XA_PREPARE, XA_COMMIT, XA_ROLLBACK,
+                            XA_RECOVER, XA_FORGET, XA_COMPLETE };
+
+
+
+/**
+ * This struct is the base record of @ref monkey_status_s struct
+ */
+struct monkey_status_record_s {
+    /**
+     * Monkey resource manager is waiting for this verb
+     */
+    enum monkey_status_verb_e   verb;
+    /**
+     * Monkey resource manager will reply this return code
+     */
+    int                         rc;
+};
+
+
+
+/**
+ * This struct contains all the pertinent status data related to a resource
+ * manager instance (thread_id/rmid)
+ */
+struct monkey_status_s {
+    /**
+     * next record is waited by the resource manager
+     */
+    guint   next_record;
+    /**
+     * array of records of type @ref monkey_status_record_s
+     */
+    GArray *records;
+};
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -63,9 +105,45 @@ extern "C" {
 
 
     /**
+     * Comparison function for @ref monkey_status first & second level hast
+     * table
+     */
+    gboolean monkey_status_gequal(gconstpointer a, gconstpointer b);
+
+
+
+    /**
+     * Value destroy function for @ref monkey_status first level hash table
+     */
+    void monkey_status_destroy1(gpointer data);
+
+
+
+    /**
+     * Value destroy function for @ref monkey_status second level hash table
+     */
+    void monkey_status_destroy2(gpointer data);
+
+
+
+    /**
      * LIXA Monkey RM implementation of xa_open function
      */ 
     int lixa_monkeyrm_open(char *xa_info, int rmid, long flags);
+
+
+    
+    /**
+     * LIXA Monkey RM implementation of xa_open function
+     * @param xa_info IN same as in xa_open
+     * @param rmid IN same as in xa_open
+     * @param flags IN same as in xa_open
+     * @param mss IN/OUT points to the block stores the status of the
+     *                   resource manager
+     * @return a standardized return code
+     */ 
+    int lixa_monkeyrm_open_init(char *xa_info, int rmid, long flags,
+                                struct monkey_status_s *mss);
 
 
     

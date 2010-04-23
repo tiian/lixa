@@ -11,12 +11,12 @@
     <rsrmgr name="IBMDB2_stareg" switch_file="@EXPANDED_LIBDIR@/switch_ibmdb2_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" />
     <rsrmgr name="LIXAdummyRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_dummyrm.so" xa_open_info="dummy open string" xa_close_info="dummy close string" />
     <rsrmgr name="LIXArandomRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_randomrm.so" xa_open_info="random open string" xa_close_info="random close string" />
-    <rsrmgr name="LIXAmonkey1dynRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm1_dynreg.so" xa_open_info="random open string" xa_close_info="" />
-    <rsrmgr name="LIXAmonkey2dynRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm2_dynreg.so" xa_open_info="random open string" xa_close_info="" />
-    <rsrmgr name="LIXAmonkey3dynRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm3_dynreg.so" xa_open_info="random open string" xa_close_info="" />
-    <rsrmgr name="LIXAmonkey1staRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm1_stareg.so" xa_open_info="random open string" xa_close_info="" />
-    <rsrmgr name="LIXAmonkey2staRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm2_stareg.so" xa_open_info="random open string" xa_close_info="" />
-    <rsrmgr name="LIXAmonkey3staRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm3_stareg.so" xa_open_info="random open string" xa_close_info="" />
+    <rsrmgr name="LIXAmonkey1dynRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_dynreg.so" xa_open_info="/tmp/monkey.conf" xa_close_info="" />
+    <rsrmgr name="LIXAmonkey2dynRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_dynreg.so" xa_open_info="random open string" xa_close_info="" />
+    <rsrmgr name="LIXAmonkey3dynRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_dynreg.so" xa_open_info="random open string" xa_close_info="" />
+    <rsrmgr name="LIXAmonkey1staRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_stareg.so" xa_open_info="random open string" xa_close_info="" />
+    <rsrmgr name="LIXAmonkey2staRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_stareg.so" xa_open_info="random open string" xa_close_info="" />
+    <rsrmgr name="LIXAmonkey3staRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_stareg.so" xa_open_info="random open string" xa_close_info="" />
   </rsrmgrs>
   <profiles>
     <profile name="GT71">
