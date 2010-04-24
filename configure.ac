@@ -1,4 +1,4 @@
-AC_INIT([lixa], [0.3.14], [tiian at users dot sourceforge dot net])
+AC_INIT([lixa], [0.3.14], [http://sourceforge.net/tracker/?group_id=257602&atid=1233231], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
@@ -20,9 +20,11 @@ AC_CONFIG_FILES([
   src/sample/Makefile
   src/sample/ibmdb2/Makefile
   src/sample/oracle/Makefile
+  tests/Makefile
   var/Makefile
   doxygen.conf
 ])
+AC_CONFIG_TESTDIR([tests])
 
 # Include libltdl stuff
 AC_LIBLTDL_INSTALLABLE([src/extra/libltdl])
