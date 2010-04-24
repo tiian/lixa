@@ -1,1 +1,1 @@
-SUBDIRS = etc src var
+SUBDIRS = etc src var tests

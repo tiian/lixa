@@ -204,7 +204,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = etc src var
+SUBDIRS = etc src var tests
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

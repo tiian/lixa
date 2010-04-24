@@ -1,0 +1,8 @@
+AT_BANNER([LIXA client basic tests])
+AT_SETUP([foo])
+AT_DATA([testfile],
+[[line one
+line two
+]])
+AT_CHECK([grep -q one testfile])
+AT_CLEANUP
