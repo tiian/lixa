@@ -60,6 +60,9 @@
 /* Define to 1 if the system has the type `off_t'. */
 #undef HAVE_OFF_T
 
+/* Define to 1 if the system has the type `pid_t'. */
+#undef HAVE_PID_T
+
 /* Define to 1 if you have the <poll.h> header file. */
 #undef HAVE_POLL_H
 
@@ -173,6 +176,9 @@
 
 /* The size of `off_t', as computed by sizeof. */
 #undef SIZEOF_OFF_T
+
+/* The size of `pid_t', as computed by sizeof. */
+#undef SIZEOF_PID_T
 
 /* The size of `pthread_t', as computed by sizeof. */
 #undef SIZEOF_PTHREAD_T

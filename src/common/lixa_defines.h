@@ -91,6 +91,20 @@
 
 
 
+#ifdef HAVE_PID_T
+# if SIZEOF_PID_T == SIZEOF_INT
+#  define PID_T_FORMAT "%d"
+# elif SIZEOF_PID_T == SIZEOF_LONG_INT
+#  define PID_T_FORMAT "%l"
+# else
+#  error Unable to determine sizeof(pid_t)
+# endif
+#else
+# error pid_t type is not available
+#endif
+
+
+
 #ifdef HAVE_PTHREAD_T
 # if SIZEOF_PTHREAD_T == SIZEOF_LONG_INT
 #  define PTHREAD_T_FORMAT "%lu"

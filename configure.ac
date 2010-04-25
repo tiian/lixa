@@ -1,4 +1,4 @@
-AC_INIT([lixa], [0.3.14], [http://sourceforge.net/tracker/?group_id=257602&atid=1233231], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [0.3.14], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
@@ -21,6 +21,8 @@ AC_CONFIG_FILES([
   src/sample/ibmdb2/Makefile
   src/sample/oracle/Makefile
   tests/Makefile
+  tests/atlocal
+  tests/etc/lixad_conf.xml
   var/Makefile
   doxygen.conf
 ])
@@ -130,6 +132,7 @@ AC_CHECK_TYPES([clock_t], [], [], [[#include <time.h>]])
 AC_CHECK_TYPES([in_port_t], [], [], [[#include <netinet/in.h>]])
 AC_CHECK_TYPES([nfds_t], [], [], [[#include <poll.h>]])
 AC_CHECK_TYPES(off_t)
+AC_CHECK_TYPES(pid_t)
 AC_CHECK_TYPES(pthread_t)
 AC_CHECK_TYPES(uint8_t)
 AC_CHECK_TYPES(uint32_t)
@@ -148,6 +151,7 @@ AC_CHECK_SIZEOF([clock_t], [], [[#include <time.h>]])
 AC_CHECK_SIZEOF([in_port_t], [], [[#include <netinet/in.h>]])
 AC_CHECK_SIZEOF([off_t])
 AC_CHECK_SIZEOF([nfds_t], [], [[#include <poll.h>]])
+AC_CHECK_SIZEOF([pid_t], [], [[#include <sys/types.h>]])
 AC_CHECK_SIZEOF([pthread_t], [], [[#include <pthread.h>]])
 AC_CHECK_SIZEOF([size_t])
 AC_CHECK_SIZEOF([uintptr_t])

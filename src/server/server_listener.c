@@ -67,7 +67,8 @@ int server_listener(const struct server_config_s *sc,
                     struct listener_status_array_s *lsa,
                     struct thread_status_array_s *tsa)
 {
-    enum Exception { MALLOC_ERROR
+    enum Exception { PIPE_ERROR
+                     , MALLOC_ERROR
                      , INVALID_ADDRESS_ERROR
                      , SOCKET_ERROR
                      , SETSOCKOPT_ERROR
@@ -84,6 +85,13 @@ int server_listener(const struct server_config_s *sc,
     
     LIXA_TRACE(("server_listener\n"));
     TRY {
+        struct thread_status_s *ts = &(tsa->array[0]);
+        
+        if (0 != pipe(ts->tpa->array[0].pipefd))
+            THROW(PIPE_ERROR);
+        LIXA_TRACE(("server_listener: pipe for listener is [%d,%d]\n",
+                    ts->tpa->array[0].pipefd[0], ts->tpa->array[0].pipefd[1]));
+
         /* allocate status structure */
         if (NULL == (lsa->array = (struct listener_status_s *)malloc(
                          sizeof(struct listener_status_s) * n)))
@@ -160,6 +168,9 @@ int server_listener(const struct server_config_s *sc,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PIPE_ERROR:
+                ret_cod = LIXA_RC_PIPE_ERROR;
+                break;
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
                 break;

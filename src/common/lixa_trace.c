@@ -98,7 +98,7 @@ void lixa_trace(const char *fmt, ...)
     g_static_mutex_lock(&lixa_trace_mutex);
     /* default header */
     fprintf(stderr,
-            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [%d/"
+            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [" PID_T_FORMAT "/"
             PTHREAD_T_FORMAT "] ",
             broken_time.tm_year + 1900, broken_time.tm_mon + 1,
             broken_time.tm_mday, broken_time.tm_hour,
@@ -133,7 +133,7 @@ void lixa_trace_hex_data(const char *prefix, const byte_t *data,
     g_static_mutex_lock(&lixa_trace_mutex);
     /* default header */
     fprintf(out_stream,
-            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [%d/"
+            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [" PID_T_FORMAT "/"
             PTHREAD_T_FORMAT "] %s",
             broken_time.tm_year + 1900, broken_time.tm_mon + 1,
             broken_time.tm_mday, broken_time.tm_hour,

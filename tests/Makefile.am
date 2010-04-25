@@ -13,12 +13,12 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	} > $@-t
 	mv $@-t $@
 
-EXTRA_DIST = testsuite.at lixac_basic.at package.m4 $(TESTSUITE)
+EXTRA_DIST = testsuite.at lixac_basic.at package.m4 $(TESTSUITE) atlocal.in
 TESTSUITE = $(srcdir)/testsuite
 
-check-local: atconfig $(TESTSUITE)
+check-local: atconfig atlocal $(TESTSUITE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
-installcheck-local: atconfig $(TESTSUITE)
+installcheck-local: atconfig atlocal $(TESTSUITE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
 clean-local:
 	test ! -f '$(TESTSUITE)' || \

@@ -113,6 +113,10 @@ struct manager_config_array_s {
  */
 struct server_config_s {
     /**
+     * Path of the file will contain the server pid
+     */
+    char                               *pid_file;
+    /**
      * Listeners' configuration
      */
     struct listener_config_array_s      listeners;

@@ -96,6 +96,11 @@ extern const xmlChar *LIXA_XML_CONFIG_CLIENT;
 extern const xmlChar *LIXA_XML_CONFIG_SERVER;
 
 /**
+ * Label used to specify "pid_file" property in "server" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_SERVER_PID;
+
+/**
  * Label used to specify "domain" property
  */
 extern const xmlChar *LIXA_XML_CONFIG_DOMAIN_PROPERTY;
