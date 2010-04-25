@@ -1,3 +1,4 @@
+noinst_HEADERS = liblixamonkey.h
 lib_LTLIBRARIES = liblixamonkey.la \
 	switch_lixa_monkeyrm_dynreg.la \
 	switch_lixa_monkeyrm_stareg.la \

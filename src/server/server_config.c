@@ -73,9 +73,6 @@ int server_config(struct server_config_s *sc,
     enum Exception { OPEN_CONFIG_ERROR
                      , CLOSE_ERROR
                      , REALLOC_ERROR
-                     /* @@@
-                     , PIPE_ERROR
-                     */
                      , XML_READ_FILE_ERROR
                      , XML_DOC_GET_ROOT_ELEMENT_ERROR
                      , PARSE_CONFIG_ERROR
@@ -113,12 +110,6 @@ int server_config(struct server_config_s *sc,
                          tpa->array, sizeof(struct thread_pipe_s))))
             THROW(REALLOC_ERROR);
         tpa->n++;
-        /* @@@
-        if (0 != pipe(tpa->array[0].pipefd))
-            THROW(PIPE_ERROR);
-        LIXA_TRACE(("server_config: pipe for listener is [%d,%d]\n",
-                    tpa->array[0].pipefd[0], tpa->array[0].pipefd[1]));
-        */
         
         /* loading config file */
         if (NULL == (doc = xmlReadFile(file_name, NULL, 0)))
@@ -154,11 +145,6 @@ int server_config(struct server_config_s *sc,
             case REALLOC_ERROR:
                 ret_cod = LIXA_RC_REALLOC_ERROR;
                 break;
-                /* @@@
-            case PIPE_ERROR:
-                ret_cod = LIXA_RC_PIPE_ERROR;
-                break;
-                */
             case XML_READ_FILE_ERROR:
                 ret_cod = LIXA_RC_XML_READ_FILE_ERROR;
                 break;
@@ -355,13 +341,12 @@ int server_parse_manager(struct server_config_s *sc,
     enum Exception { REALLOC_ERROR1
                      , STATUS_NOT_AVAILABLE_ERROR
                      , REALLOC_ERROR2
-                     , PIPE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("server_parse_manager\n"));
     TRY {
-        int i = 0, j = 0;
+        int i = 0;
 
         /* realloc array */
         if (NULL == (sc->managers.array = realloc(
@@ -388,13 +373,7 @@ int server_parse_manager(struct server_config_s *sc,
         if (NULL == (tpa->array = realloc
 		     (tpa->array, ++tpa->n * sizeof(struct thread_pipe_s))))
             THROW(REALLOC_ERROR2);
-        j = tpa->n - 1;
-        if (0 != pipe(tpa->array[j].pipefd))
-            THROW(PIPE_ERROR);
-        LIXA_TRACE(("server_parse_manager: pipe %d for manager %d is "
-                    "[%d,%d]\n",
-                    j, i, tpa->array[j].pipefd[0], tpa->array[j].pipefd[1]));
-        
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -404,9 +383,6 @@ int server_parse_manager(struct server_config_s *sc,
                 break;
             case STATUS_NOT_AVAILABLE_ERROR:
                 ret_cod = LIXA_RC_CONFIG_ERROR;
-                break;
-            case PIPE_ERROR:
-                ret_cod = LIXA_RC_PIPE_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -5,6 +5,6 @@ AT_CHECK([test -d $TESTS_VAR_DIR || mkdir $TESTS_VAR_DIR], [0], [ignore], [], [m
 AT_CLEANUP
 
 AT_SETUP([Client test])
-AT_CHECK([lixa_test_exec.sh])
+AT_CHECK([lixa_test_exec.sh], [0], [ignore], [ignore])
 AT_CLEANUP
 

@@ -25,14 +25,11 @@ export LIXA_TRACE_MASK=0xffffffff
 
 # This file contains utility functions for test purpouses
 start_server() {
-    echo PATH=$PATH
     lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml
-    LIXAD_PID=$$
-    echo $LIXAD_PID
 }
 
 stop_server() {
-    kill $LIXAD_PID
+    kill $(cat $TESTS_VAR_DIR/run.pid)
 }
 
 

@@ -1,6 +1,3 @@
-remove @@@ form server_config; after daemonize() moved after config, the
-listener is not able to work properly
-
 restart from lixa_monkeyrm_open; establish a dir to store monkey config files...
 
 LIXA Monkey RM implementation in progress:
