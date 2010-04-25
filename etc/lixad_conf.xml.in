@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<server>
+<server pid_file="@EXPANDED_LOCALSTATEDIR@/run.pid">
   <listeners>
     <listener domain="AF_INET" address="127.0.0.1" port="3456"/>
     <listener domain="AF_INET" address="0.0.0.0" port="2345"/>

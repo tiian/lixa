@@ -70,6 +70,7 @@
 const xmlChar *LIXA_XML_CONFIG_LISTENER = (xmlChar *)"listener";
 const xmlChar *LIXA_XML_CONFIG_CLIENT = (xmlChar *)"client";
 const xmlChar *LIXA_XML_CONFIG_SERVER = (xmlChar *)"server";
+const xmlChar *LIXA_XML_CONFIG_SERVER_PID = (xmlChar *)"pid_file";
 const xmlChar *LIXA_XML_CONFIG_DOMAIN_PROPERTY = (xmlChar *)"domain";
 const xmlChar *LIXA_XML_CONFIG_ADDRESS_PROPERTY = (xmlChar *)"address";
 const xmlChar *LIXA_XML_CONFIG_PORT_PROPERTY = (xmlChar *)"port";

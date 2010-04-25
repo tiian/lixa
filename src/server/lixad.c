@@ -82,20 +82,24 @@
  * changing parent group
  * This function is copied from an example showed by Richard Stevens in
  * UNIX network programming book
+ * @param IN pid_file_name specify the file where the process pid must be
+ *           stored
  */
-void daemonize(void);
+void daemonize(const char *pid_file_name);
 
 
 
 /* default command line options */
 static gboolean run_as_daemon = FALSE;
 static gboolean dump_and_exit = FALSE;
+static char *config_file = NULL;
 static gboolean print_version = FALSE;
 /* command line options */
 static GOptionEntry entries[] =
 {
     { "daemon", 'd', 0, G_OPTION_ARG_NONE, &run_as_daemon, "Run the process as a daemon", NULL },
     { "dump", 'u', 0, G_OPTION_ARG_NONE, &dump_and_exit, "Dump the content of status files and exit", NULL },
+    { "config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Use the desired configuration file", NULL },
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
     { NULL }
 };
@@ -141,20 +145,22 @@ int main(int argc, char *argv[])
         g_print("Warning: dump option overrides daemon option\n");
         run_as_daemon = FALSE;
     }
-    if (run_as_daemon)
-        daemonize();
 
     /* initialize libxml2 library */
     LIBXML_TEST_VERSION;
         
     /* initialize configuration structure */
     server_config_init(&sc, &tpa);
-    if (LIXA_RC_OK != (rc = server_config(&sc, &tpa, ""))) {
+    if (LIXA_RC_OK != (rc = server_config(&sc, &tpa, config_file))) {
         LIXA_TRACE(("main/server_config: rc = %d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD003E, lixa_strerror(rc));
         return rc;
     }
 
+    /* daemonize the server process */
+    if (run_as_daemon)
+        daemonize(sc.pid_file);
+    
     /* start configured manager(s) */
     if (LIXA_RC_OK != (rc = server_manager(&sc, &tpa, &tsa, &srt,
                                            dump_and_exit))) {
@@ -183,39 +189,48 @@ int main(int argc, char *argv[])
 /**
  * Courtesy of Mr. Richard Stevens, UNIX Network Programming
  */
-void daemonize(void)
+void daemonize(const char *pid_file_name)
 {
-        pid_t pid;
-        int i;
+    pid_t pid;
+    int i;
+    FILE *pid_file = NULL;
+    
+    LIXA_TRACE(("lixad/daemonize: fork()\n"));
+    if (0 != (pid = fork()))
+        exit(0);
+    
+    LIXA_TRACE(("lixad/daemonize: setsid()\n"));
+    setsid();
+    
+    LIXA_TRACE(("lixad/daemonize: signal()\n"));
+    signal(SIGHUP, SIG_IGN);
+    
+    LIXA_TRACE(("lixad/daemonize: fork()\n"));
+    if (0 != (pid = fork()))
+        exit(0);
+    
+    LIXA_TRACE(("lixad/daemonize: chdir()\n"));
+    chdir("/");
+    
+    LIXA_TRACE(("lixad/daemonize: umask()\n"));
+    umask(0);
 
-        LIXA_TRACE(("lixad/daemonize: fork()\n"));
-        if (0 != (pid = fork()))
-            exit(0);
+    for (i = 0; i < 64; ++i)
+        close(i);
+    
+    /* write pid file */
+    if (NULL == (pid_file = fopen(pid_file_name, "w")))
+        syslog(LOG_WARNING, LIXA_SYSLOG_LXD015W, pid_file_name);
+    else {
+        fprintf(pid_file, PID_T_FORMAT "\n", getpid());
+        fclose(pid_file);
+    }
 
-        LIXA_TRACE(("lixad/daemonize: setsid()\n"));
-        setsid();
-
-        LIXA_TRACE(("lixad/daemonize: signal()\n"));
-        signal(SIGHUP, SIG_IGN);
-        
-        LIXA_TRACE(("lixad/daemonize: fork()\n"));
-        if (0 != (pid = fork()))
-            exit(0);
-
-        LIXA_TRACE(("lixad/daemonize: chdir()\n"));
-        chdir("/");
-
-        LIXA_TRACE(("lixad/daemonize: umask()\n"));
-        umask(0);
-
-        for (i = 0; i < 64; ++i)
-            close(i);
-
-        syslog(LOG_NOTICE, "entered daemon status");
-
-        freopen("/tmp/lixad.stderr", "w", stderr);
-
-        LIXA_TRACE(("lixad/daemonize: now daemonized!\n"));
-
-        return;
+    syslog(LOG_NOTICE, LIXA_SYSLOG_LXD014N);
+    
+    freopen("/tmp/lixad.stderr", "w", stderr);
+    
+    LIXA_TRACE(("lixad/daemonize: now daemonized!\n"));
+    
+    return;
 }

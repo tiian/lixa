@@ -1,8 +1,10 @@
 AT_BANNER([LIXA client basic tests])
-AT_SETUP([foo])
-AT_DATA([testfile],
-[[line one
-line two
-]])
-AT_CHECK([grep -q one testfile])
+
+AT_SETUP([Environment setup])
+AT_CHECK([test -d $TESTS_VAR_DIR || mkdir $TESTS_VAR_DIR], [0], [ignore], [], [mkdir $TESTS_VAR_DIR], [rm -rf $TESTS_VAR_DIR && mkdir $TESTS_VAR_DIR])
 AT_CLEANUP
+
+AT_SETUP([Client test])
+AT_CHECK([lixa_test_exec.sh])
+AT_CLEANUP
+

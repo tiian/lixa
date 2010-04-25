@@ -35,6 +35,9 @@
 #ifdef HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
 #endif
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
+#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -50,6 +53,7 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_config.h>
+#include <lixa_syslog.h>
 #include <server_config.h>
 
 
@@ -69,7 +73,9 @@ int server_config(struct server_config_s *sc,
     enum Exception { OPEN_CONFIG_ERROR
                      , CLOSE_ERROR
                      , REALLOC_ERROR
+                     /* @@@
                      , PIPE_ERROR
+                     */
                      , XML_READ_FILE_ERROR
                      , XML_DOC_GET_ROOT_ELEMENT_ERROR
                      , PARSE_CONFIG_ERROR
@@ -107,10 +113,12 @@ int server_config(struct server_config_s *sc,
                          tpa->array, sizeof(struct thread_pipe_s))))
             THROW(REALLOC_ERROR);
         tpa->n++;
+        /* @@@
         if (0 != pipe(tpa->array[0].pipefd))
             THROW(PIPE_ERROR);
         LIXA_TRACE(("server_config: pipe for listener is [%d,%d]\n",
                     tpa->array[0].pipefd[0], tpa->array[0].pipefd[1]));
+        */
         
         /* loading config file */
         if (NULL == (doc = xmlReadFile(file_name, NULL, 0)))
@@ -146,9 +154,11 @@ int server_config(struct server_config_s *sc,
             case REALLOC_ERROR:
                 ret_cod = LIXA_RC_REALLOC_ERROR;
                 break;
+                /* @@@
             case PIPE_ERROR:
                 ret_cod = LIXA_RC_PIPE_ERROR;
                 break;
+                */
             case XML_READ_FILE_ERROR:
                 ret_cod = LIXA_RC_XML_READ_FILE_ERROR;
                 break;
@@ -185,7 +195,8 @@ int server_parse(struct server_config_s *sc,
                  struct thread_pipe_array_s *tpa,
                  xmlNode *a_node)
 {
-    enum Exception { PARSE_LISTENER_ERROR
+    enum Exception { PID_FILE_ERROR
+                     , PARSE_LISTENER_ERROR
                      , PARSE_MANAGER_ERROR
                      , SERVER_PARSE_ERROR
                      , NONE } excp;
@@ -198,7 +209,18 @@ int server_parse(struct server_config_s *sc,
         for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
             if (cur_node->type == XML_ELEMENT_NODE) {
                 LIXA_TRACE(("server_parse: tag %s\n", cur_node->name));
-                if (!xmlStrcmp(cur_node->name, LIXA_XML_CONFIG_LISTENER)) {
+                if (!xmlStrcmp(cur_node->name, LIXA_XML_CONFIG_SERVER)) {
+                    if (NULL == (sc->pid_file = (char *)xmlGetProp(
+                                     cur_node, LIXA_XML_CONFIG_SERVER_PID))) {
+                        syslog(LOG_ERR, LIXA_SYSLOG_LXD016E,
+                               LIXA_XML_CONFIG_SERVER_PID,
+                               LIXA_XML_CONFIG_SERVER);
+                        THROW(PID_FILE_ERROR);
+                    } else
+                        LIXA_TRACE(("server_parse: pid file is '%s'\n",
+                                    sc->pid_file));
+                } else if (!xmlStrcmp(cur_node->name,
+                                      LIXA_XML_CONFIG_LISTENER)) {
                     if (LIXA_RC_OK != (ret_cod = server_parse_listener(
                                            sc, cur_node)))
                         THROW(PARSE_LISTENER_ERROR);
@@ -217,6 +239,7 @@ int server_parse(struct server_config_s *sc,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PID_FILE_ERROR:
             case PARSE_LISTENER_ERROR:
             case PARSE_MANAGER_ERROR:
             case SERVER_PARSE_ERROR:
@@ -403,6 +426,7 @@ void server_config_init(struct server_config_s *sc,
                         struct thread_pipe_array_s *tpa)
 {
     LIXA_TRACE(("server_config_init/start\n"));
+    sc->pid_file = NULL;
     sc->listeners.n = 0;
     sc->listeners.array = NULL;
     sc->managers.n = 0;
