@@ -69,6 +69,15 @@ extern "C" {
 
 
     /**
+     * Initialize the pipes necessary to thread intercommunication
+     * @param tpa IN/OUT object reference
+     * @return a standardized return code
+     */
+    int server_pipes_init(struct thread_pipe_array_s *tpa);
+
+    
+    
+    /**
      * This is the initial function of every new manager thread
      * @param void_ts IN status of this thread
      */

@@ -82,8 +82,8 @@
  * changing parent group
  * This function is copied from an example showed by Richard Stevens in
  * UNIX network programming book
- * @param IN pid_file_name specify the file where the process pid must be
- *           stored
+ * @param pid_file_name IN specify the file where the process pid must be
+ *        stored
  */
 void daemonize(const char *pid_file_name);
 
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 
     /* initialize libxml2 library */
     LIBXML_TEST_VERSION;
-        
+
     /* initialize configuration structure */
     server_config_init(&sc, &tpa);
     if (LIXA_RC_OK != (rc = server_config(&sc, &tpa, config_file))) {
@@ -160,6 +160,12 @@ int main(int argc, char *argv[])
     /* daemonize the server process */
     if (run_as_daemon)
         daemonize(sc.pid_file);
+
+    if (LIXA_RC_OK != (rc = server_pipes_init(&tpa))) {
+        LIXA_TRACE(("main/server_pipes_init: rc = %d\n", rc));
+        syslog(LOG_ERR, LIXA_SYSLOG_LXD017E);
+        return rc;
+    }
     
     /* start configured manager(s) */
     if (LIXA_RC_OK != (rc = server_manager(&sc, &tpa, &tsa, &srt,

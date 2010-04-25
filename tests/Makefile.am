@@ -13,7 +13,8 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	} > $@-t
 	mv $@-t $@
 
-EXTRA_DIST = testsuite.at lixac_basic.at package.m4 $(TESTSUITE) atlocal.in
+EXTRA_DIST = testsuite.at lixac_basic.at package.m4 $(TESTSUITE) atlocal.in \
+	lixa_test_exec.sh lixa_test_functions.sh
 TESTSUITE = $(srcdir)/testsuite
 
 check-local: atconfig atlocal $(TESTSUITE)

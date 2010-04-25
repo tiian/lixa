@@ -96,6 +96,7 @@
 #define LIXA_SYSLOG_LXD014N "LXD014N LIXA server entered daemon status"
 #define LIXA_SYSLOG_LXD015W "LXD015W unable to open pid file '%s'"
 #define LIXA_SYSLOG_LXD016E "LXD016E config file error: unable to find property '%s' in tag '%s'"
+#define LIXA_SYSLOG_LXD017E "LXD017E intercommunication pipes initialization error"
 
 
 

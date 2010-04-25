@@ -143,6 +143,43 @@ int server_manager(struct server_config_s *sc,
 
 
 
+int server_pipes_init(struct thread_pipe_array_s *tpa)
+{
+    enum Exception { PIPE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_pipes_init\n"));
+    TRY {
+        int i;
+
+        for (i=0; i<tpa->n; ++i) {
+            if (0 != pipe(tpa->array[i].pipefd))
+                THROW(PIPE_ERROR);
+            LIXA_TRACE(("server_pipes_init: pipe for %s (%d) is [%d,%d]\n",
+                        i ? "manager" : "listener", i,
+                        tpa->array[i].pipefd[0], tpa->array[i].pipefd[1]));
+        }        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case PIPE_ERROR:
+                ret_cod = LIXA_RC_PIPE_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_pipes_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 void *server_manager_thread(void *void_ts)
 {
     enum Exception { ADD_POLL_ERROR
