@@ -18,7 +18,12 @@
 # along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+if test -z "$1"
+then
+	echo "No program to test, exiting with error"
+	exit 1
+fi
 
 . lixa_test_functions.sh
 
-exec_test
+exec_test $1
