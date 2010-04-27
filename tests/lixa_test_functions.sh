@@ -22,7 +22,6 @@
 export LIXA_TRACE_MASK=0xffffffff
 
 
-
 # This file contains utility functions for test purpouses
 start_server() {
     lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml
@@ -34,6 +33,12 @@ stop_server() {
 
 
 exec_test() {
+    echo "Starting LIXA server"
     start_server
+    echo "Starting case test $1"
+    $1
+    rc=$?
+    echo "Stopping LIXA server"
     stop_server
+    return $rc
 }

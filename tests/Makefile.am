@@ -1,3 +1,5 @@
+SUBDIRS = etc src
+
 # Always generate package.m4 into the source directory, not into the
 # build directory, since it must be distributed, along with testsuite,
 # configure, etc.

@@ -4,7 +4,16 @@ AT_SETUP([Environment setup])
 AT_CHECK([test -d $TESTS_VAR_DIR || mkdir $TESTS_VAR_DIR], [0], [ignore], [], [mkdir $TESTS_VAR_DIR], [rm -rf $TESTS_VAR_DIR && mkdir $TESTS_VAR_DIR])
 AT_CLEANUP
 
-AT_SETUP([Client test])
-AT_CHECK([lixa_test_exec.sh], [0], [ignore], [ignore])
+AT_SETUP([case0001])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+]])
+AT_DATA([monkey2s.conf],
+[[# first monkey R.M. config
+]])
+AT_DATA([monkey3s.conf],
+[[# first monkey R.M. config
+]])
+AT_CHECK([LIXA_PROFILE=CASE0001 ; lixa_test_exec.sh case0001], [0], [ignore], [ignore])
 AT_CLEANUP
 

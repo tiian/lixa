@@ -22,7 +22,10 @@ AC_CONFIG_FILES([
   src/sample/oracle/Makefile
   tests/Makefile
   tests/atlocal
+  tests/etc/lixac_conf.xml
   tests/etc/lixad_conf.xml
+  tests/etc/Makefile
+  tests/src/Makefile
   var/Makefile
   doxygen.conf
 ])
