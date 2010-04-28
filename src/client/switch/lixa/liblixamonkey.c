@@ -86,13 +86,71 @@ void monkey_status_destroy2(gpointer data) {
 
 
 
+int lixa_monkeyrm_getrc(struct monkey_status_s *mss, 
+                        enum monkey_status_verb_e verb, int *rc)
+{
+    enum Exception { OUT_OF_RANGE
+                     , INVALID_OPTION
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_monkeyrm_getrc\n"));
+    TRY {
+        struct monkey_status_record_s *msrs = NULL;
+        
+        /* check a potential out of range */
+        if (mss->next_record >= mss->records->len) {
+            LIXA_TRACE(("lixa_monkeyrm_getrc: already picked all the "
+                        "available return codes (%u)\n", mss->next_record));
+            THROW(OUT_OF_RANGE);
+        }
+        msrs = &g_array_index(mss->records, struct monkey_status_record_s,
+                              mss->next_record);
+        if (msrs->verb != verb) {
+            LIXA_TRACE(("lixa_monkeyrm_getrc: expected verb is %d, passed "
+                        "verb is %d\n", msrs->verb, verb));
+            THROW(INVALID_OPTION);
+        }
+        LIXA_TRACE(("lixa_monkeyrm_getrc: verb is %d, XA return code is %d\n",
+                    msrs->verb, msrs->rc));
+        *rc = msrs->rc;
+
+        /* increment next_record */
+        mss->next_record++;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OUT_OF_RANGE:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case INVALID_OPTION:
+                ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_monkeyrm_getrc/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+    
 int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
 {
     enum Exception { HASH_TABLE_NEW1
                      , HASH_TABLE_NEW2
                      , OPEN_INIT
+                     , GETRC_ERROR
                      , NONE } excp;
+    
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int xa_rc = XA_OK;
     
     LIXA_TRACE(("lixa_monkeyrm_open: xa_info='%s', rmid=%d, flags=0x%lx\n",
                 xa_info, rmid, flags));
@@ -141,28 +199,40 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
                 THROW(OPEN_INIT);
             g_hash_table_insert(slht, (gpointer)rmid, (gpointer)mss);
         }
+
+        /* retrieve the return code must be returned */
+        if (LIXA_RC_OK != lixa_monkeyrm_getrc(mss, XA_OPEN, &ret_cod))
+            THROW(GETRC_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case HASH_TABLE_NEW1:
             case HASH_TABLE_NEW2:
+                ret_cod = LIXA_RC_G_RETURNED_NULL;
+                xa_rc = XAER_RMERR;
+                break;
             case OPEN_INIT:
-                ret_cod = XAER_RMERR;
+                xa_rc = XAER_RMERR;
+                break;
+            case GETRC_ERROR:
+                xa_rc = XAER_RMERR;
                 break;
             case NONE:
-                ret_cod = XA_OK;
+                ret_cod = LIXA_RC_OK;
                 break;
             default:
-                ret_cod = XAER_RMERR;
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                xa_rc = XAER_RMERR;
         } /* switch (excp) */
         /* unlock mutex */
         g_static_mutex_unlock(&monkey_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_open/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/xa_rc=%d/errno=%d\n",
+                excp, ret_cod, xa_rc, errno));
     assert(XA_OK == ret_cod);
-    return ret_cod;
+    return xa_rc;
 }
 
 

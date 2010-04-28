@@ -127,6 +127,19 @@ extern "C" {
 
 
     /**
+     * Check verb, return the rc has been configured for this step
+     * @param mss IN reference to the monkey status struct
+     * @param verb IN the verb must be checked
+     * @param rc OUT the return code must be returned to the transaction
+     *           manager
+     * @return a standardized reason code
+     */
+    int lixa_monkeyrm_getrc(struct monkey_status_s *mss, 
+                            enum monkey_status_verb_e verb, int *rc);
+
+
+    
+    /**
      * LIXA Monkey RM implementation of xa_open function
      */ 
     int lixa_monkeyrm_open(char *xa_info, int rmid, long flags);

@@ -1,4 +1,5 @@
-restart from lixa_monkeyrm_open; establish a dir to store monkey config files...
+implement all methods of liblixamonkeyrm (is is necessary a refactorying...
+may not - only open must create the structure )
 
 LIXA Monkey RM implementation in progress:
 - load a file (xa_open) with all the step/return codes
