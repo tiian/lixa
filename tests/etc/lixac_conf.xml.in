@@ -16,6 +16,16 @@
     <rsrmgr name="IBMDB2_stareg" switch_file="@abs_top_builddir@/src/client/switch/ibmdb2/.libs/switch_ibmdb2_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" />
   </rsrmgrs>
   <profiles>
+    <profile name="CASE0000">
+      <trnmgrs>
+        <trnmgr>TestTM</trnmgr>
+      </trnmgrs>
+      <rsrmgrs>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+        <rsrmgr>LIXAmonkey2staRM</rsrmgr>
+        <rsrmgr>LIXAmonkey3staRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
     <profile name="CASE0001">
       <trnmgrs>
         <trnmgr>TestTM</trnmgr>
