@@ -8,14 +8,26 @@ AT_SETUP([case0000])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
+xa_info/0
+xa_begin/0
+xa_commit/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# second monkey R.M. config
-xa_open/-3
+xa_open/0
+xa_info/0
+xa_begin/0
+xa_commit/0
+xa_close/0
 ]])
 AT_DATA([monkey3s.conf],
 [[# third monkey R.M. config
 xa_open/0
+xa_info/0
+xa_begin/0
+xa_commit/0
+xa_close/0
 ]])
 AT_CHECK([LIXA_PROFILE=CASE0000 ; lixa_test_exec.sh case0000], [0], [ignore], [ignore])
 AT_CLEANUP

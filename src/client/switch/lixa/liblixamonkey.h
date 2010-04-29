@@ -59,9 +59,9 @@ extern struct xa_switch_t lixa_monkeyrm_dyn_sw;
 /**
  * Enumeration used to assing a numerical id to any XA verb
  */
-enum monkey_status_verb_e { XA_OPEN = 1, XA_CLOSE, XA_START, XA_END,
+enum monkey_status_verb_e { XA_OPEN = 1, XA_CLOSE, XA_START, XA_BEGIN, XA_END,
                             XA_PREPARE, XA_COMMIT, XA_ROLLBACK,
-                            XA_RECOVER, XA_FORGET, XA_COMPLETE };
+                            XA_RECOVER, XA_FORGET, XA_COMPLETE, XA_INFO };
 
 
 
@@ -134,8 +134,8 @@ extern "C" {
      *           manager
      * @return a standardized reason code
      */
-    int lixa_monkeyrm_getrc(struct monkey_status_s *mss, 
-                            enum monkey_status_verb_e verb, int *rc);
+    int lixa_monkeyrm_get_rc(struct monkey_status_s *mss, 
+                             enum monkey_status_verb_e verb, int *rc);
 
 
     

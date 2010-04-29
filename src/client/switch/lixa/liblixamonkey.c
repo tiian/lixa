@@ -86,7 +86,7 @@ void monkey_status_destroy2(gpointer data) {
 
 
 
-int lixa_monkeyrm_getrc(struct monkey_status_s *mss, 
+int lixa_monkeyrm_get_rc(struct monkey_status_s *mss, 
                         enum monkey_status_verb_e verb, int *rc)
 {
     enum Exception { OUT_OF_RANGE
@@ -94,24 +94,24 @@ int lixa_monkeyrm_getrc(struct monkey_status_s *mss,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_monkeyrm_getrc\n"));
+    LIXA_TRACE(("lixa_monkeyrm_get_rc\n"));
     TRY {
         struct monkey_status_record_s *msrs = NULL;
         
         /* check a potential out of range */
         if (mss->next_record >= mss->records->len) {
-            LIXA_TRACE(("lixa_monkeyrm_getrc: already picked all the "
+            LIXA_TRACE(("lixa_monkeyrm_get_rc: already picked all the "
                         "available return codes (%u)\n", mss->next_record));
             THROW(OUT_OF_RANGE);
         }
         msrs = &g_array_index(mss->records, struct monkey_status_record_s,
                               mss->next_record);
         if (msrs->verb != verb) {
-            LIXA_TRACE(("lixa_monkeyrm_getrc: expected verb is %d, passed "
+            LIXA_TRACE(("lixa_monkeyrm_get_rc: expected verb is %d, passed "
                         "verb is %d\n", msrs->verb, verb));
             THROW(INVALID_OPTION);
         }
-        LIXA_TRACE(("lixa_monkeyrm_getrc: verb is %d, XA return code is %d\n",
+        LIXA_TRACE(("lixa_monkeyrm_get_rc: verb is %d, XA return code is %d\n",
                     msrs->verb, msrs->rc));
         *rc = msrs->rc;
 
@@ -134,7 +134,7 @@ int lixa_monkeyrm_getrc(struct monkey_status_s *mss,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_monkeyrm_getrc/excp=%d/"
+    LIXA_TRACE(("lixa_monkeyrm_get_rc/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -146,7 +146,7 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
     enum Exception { HASH_TABLE_NEW1
                      , HASH_TABLE_NEW2
                      , OPEN_INIT
-                     , GETRC_ERROR
+                     , GET_RC_ERROR
                      , NONE } excp;
     
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -201,8 +201,8 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
         }
 
         /* retrieve the return code must be returned */
-        if (LIXA_RC_OK != lixa_monkeyrm_getrc(mss, XA_OPEN, &ret_cod))
-            THROW(GETRC_ERROR);
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_OPEN, &ret_cod))
+            THROW(GET_RC_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -215,7 +215,7 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
             case OPEN_INIT:
                 xa_rc = XAER_RMERR;
                 break;
-            case GETRC_ERROR:
+            case GET_RC_ERROR:
                 xa_rc = XAER_RMERR;
                 break;
             case NONE:
@@ -231,7 +231,7 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
     LIXA_TRACE(("lixa_monkeyrm_open/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
                 excp, ret_cod, xa_rc, errno));
-    assert(XA_OK == ret_cod);
+    assert(LIXA_RC_OK == ret_cod);
     return xa_rc;
 }
 
@@ -276,12 +276,15 @@ int lixa_monkeyrm_open_init(char *xa_info, int rmid, long flags,
             /* split string, pos rc */
             *delim = '\0';
             rc = delim + 1;
+            LIXA_TRACE(("lixa_monkeyrm_open_init: verb='%s'\n", buffer));
             if (NULL != strstr(buffer, "xa_open"))
                 record.verb = XA_OPEN;
             else if (NULL != strstr(buffer, "xa_close"))
                 record.verb = XA_CLOSE;
             else if (NULL != strstr(buffer, "xa_start"))
                 record.verb = XA_START;
+            else if (NULL != strstr(buffer, "xa_begin"))
+                record.verb = XA_BEGIN;
             else if (NULL != strstr(buffer, "xa_end"))
                 record.verb = XA_END;
             else if (NULL != strstr(buffer, "xa_rollback"))
@@ -296,6 +299,8 @@ int lixa_monkeyrm_open_init(char *xa_info, int rmid, long flags,
                 record.verb = XA_FORGET;
             else if (NULL != strstr(buffer, "xa_complete"))
                 record.verb = XA_COMPLETE;
+            else if (NULL != strstr(buffer, "xa_info"))
+                record.verb = XA_INFO;
             else
                 THROW(INVALID_VERB);
             record.rc = (int)strtol(rc, NULL, 10);
@@ -334,86 +339,671 @@ int lixa_monkeyrm_open_init(char *xa_info, int rmid, long flags,
 
 
     
-int lixa_monkeyrm_close(char *xa_info, int rmid, long flags) {
+int lixa_monkeyrm_close(char *xa_info, int rmid, long flags)
+{
+    enum Exception { NULL_MONKEY_STATUS
+                     , INVALID_STATUS1
+                     , INVALID_STATUS2
+                     , GET_RC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int xa_rc = XA_OK;
+    
     LIXA_TRACE(("lixa_monkeyrm_close: xa_info='%s', rmid=%d, flags=0x%lx\n",
                 xa_info, rmid, flags));
-    return XA_OK;
+    TRY {
+        pthread_t tid;
+        GHashTable *slht;
+        struct monkey_status_s *mss;
+
+        /* lock mutex */
+        g_static_mutex_lock(&monkey_mutex);
+        
+        /* first call ? */
+        if (NULL == monkey_status)
+            THROW(NULL_MONKEY_STATUS);
+            
+        /* search current thread id in the hash table */
+        tid = pthread_self();
+        if (NULL == (slht = (GHashTable *)g_hash_table_lookup(
+                         monkey_status, (gconstpointer)tid)))
+            THROW(INVALID_STATUS1);
+        
+        /* search passed rmid in the second level hash table */
+        if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
+                         slht, (gconstpointer)rmid)))
+            THROW(INVALID_STATUS2);
+
+        /* retrieve the return code must be returned */
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_CLOSE, &ret_cod))
+            THROW(GET_RC_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_MONKEY_STATUS:
+                xa_rc = XAER_PROTO;
+                ret_cod = LIXA_RC_OK;
+                break;
+            case INVALID_STATUS1:
+            case INVALID_STATUS2:
+                xa_rc = XAER_RMERR;
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case GET_RC_ERROR:
+                xa_rc = XAER_RMERR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* unlock mutex */
+        g_static_mutex_unlock(&monkey_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_monkeyrm_close/excp=%d/"
+                "ret_cod=%d/xa_rc=%d/errno=%d\n",
+                excp, ret_cod, xa_rc, errno));
+    assert(LIXA_RC_OK == ret_cod);
+    return xa_rc;
 }
 
 
 
-int lixa_monkeyrm_start(XID *xid, int rmid, long flags) {
+int lixa_monkeyrm_start(XID *xid, int rmid, long flags)
+{
+    enum Exception { NULL_MONKEY_STATUS
+                     , INVALID_STATUS1
+                     , INVALID_STATUS2
+                     , GET_RC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int xa_rc = XA_OK;
+    
     char *xid_str = xid_serialize(xid);
     LIXA_TRACE(("lixa_monkeyrm_start: xid='%s', rmid=%d, flags=0x%lx\n",
                 xid_str, rmid, flags));
     free(xid_str);
-    return XA_OK;
+    
+    TRY {
+        pthread_t tid;
+        GHashTable *slht;
+        struct monkey_status_s *mss;
+
+        /* lock mutex */
+        g_static_mutex_lock(&monkey_mutex);
+        
+        /* first call ? */
+        if (NULL == monkey_status)
+            THROW(NULL_MONKEY_STATUS);
+            
+        /* search current thread id in the hash table */
+        tid = pthread_self();
+        if (NULL == (slht = (GHashTable *)g_hash_table_lookup(
+                         monkey_status, (gconstpointer)tid)))
+            THROW(INVALID_STATUS1);
+        
+        /* search passed rmid in the second level hash table */
+        if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
+                         slht, (gconstpointer)rmid)))
+            THROW(INVALID_STATUS2);
+
+        /* retrieve the return code must be returned */
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_START, &ret_cod))
+            THROW(GET_RC_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_MONKEY_STATUS:
+                xa_rc = XAER_PROTO;
+                ret_cod = LIXA_RC_OK;
+                break;
+            case INVALID_STATUS1:
+            case INVALID_STATUS2:
+                xa_rc = XAER_RMERR;
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case GET_RC_ERROR:
+                xa_rc = XAER_RMERR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* unlock mutex */
+        g_static_mutex_unlock(&monkey_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_monkeyrm_start/excp=%d/"
+                "ret_cod=%d/xa_rc=%d/errno=%d\n",
+                excp, ret_cod, xa_rc, errno));
+    assert(LIXA_RC_OK == ret_cod);
+    return xa_rc;
 }
 
 
 
-int lixa_monkeyrm_end(XID *xid, int rmid, long flags) {
+int lixa_monkeyrm_end(XID *xid, int rmid, long flags)
+{
+    enum Exception { NULL_MONKEY_STATUS
+                     , INVALID_STATUS1
+                     , INVALID_STATUS2
+                     , GET_RC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int xa_rc = XA_OK;
+    
     char *xid_str = xid_serialize(xid);
     LIXA_TRACE(("lixa_monkeyrm_end: xid='%s', rmid=%d, flags=0x%lx\n",
                 xid_str, rmid, flags));
     free(xid_str);
-    return XA_OK;
+    
+    TRY {
+        pthread_t tid;
+        GHashTable *slht;
+        struct monkey_status_s *mss;
+
+        /* lock mutex */
+        g_static_mutex_lock(&monkey_mutex);
+        
+        /* first call ? */
+        if (NULL == monkey_status)
+            THROW(NULL_MONKEY_STATUS);
+            
+        /* search current thread id in the hash table */
+        tid = pthread_self();
+        if (NULL == (slht = (GHashTable *)g_hash_table_lookup(
+                         monkey_status, (gconstpointer)tid)))
+            THROW(INVALID_STATUS1);
+        
+        /* search passed rmid in the second level hash table */
+        if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
+                         slht, (gconstpointer)rmid)))
+            THROW(INVALID_STATUS2);
+
+        /* retrieve the return code must be returned */
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_END, &ret_cod))
+            THROW(GET_RC_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_MONKEY_STATUS:
+                xa_rc = XAER_PROTO;
+                ret_cod = LIXA_RC_OK;
+                break;
+            case INVALID_STATUS1:
+            case INVALID_STATUS2:
+                xa_rc = XAER_RMERR;
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case GET_RC_ERROR:
+                xa_rc = XAER_RMERR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* unlock mutex */
+        g_static_mutex_unlock(&monkey_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_monkeyrm_end/excp=%d/"
+                "ret_cod=%d/xa_rc=%d/errno=%d\n",
+                excp, ret_cod, xa_rc, errno));
+    assert(LIXA_RC_OK == ret_cod);
+    return xa_rc;
 }
 
 
 
-int lixa_monkeyrm_rollback(XID *xid, int rmid, long flags) {
+int lixa_monkeyrm_rollback(XID *xid, int rmid, long flags)
+{
+    enum Exception { NULL_MONKEY_STATUS
+                     , INVALID_STATUS1
+                     , INVALID_STATUS2
+                     , GET_RC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int xa_rc = XA_OK;
+    
     char *xid_str = xid_serialize(xid);
     LIXA_TRACE(("lixa_monkeyrm_rollback: xid='%s', rmid=%d, flags=0x%lx\n",
                 xid_str, rmid, flags));
     free(xid_str);
-    return XA_OK;
+    
+    TRY {
+        pthread_t tid;
+        GHashTable *slht;
+        struct monkey_status_s *mss;
+
+        /* lock mutex */
+        g_static_mutex_lock(&monkey_mutex);
+        
+        /* first call ? */
+        if (NULL == monkey_status)
+            THROW(NULL_MONKEY_STATUS);
+            
+        /* search current thread id in the hash table */
+        tid = pthread_self();
+        if (NULL == (slht = (GHashTable *)g_hash_table_lookup(
+                         monkey_status, (gconstpointer)tid)))
+            THROW(INVALID_STATUS1);
+        
+        /* search passed rmid in the second level hash table */
+        if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
+                         slht, (gconstpointer)rmid)))
+            THROW(INVALID_STATUS2);
+
+        /* retrieve the return code must be returned */
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_ROLLBACK, &ret_cod))
+            THROW(GET_RC_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_MONKEY_STATUS:
+                xa_rc = XAER_PROTO;
+                ret_cod = LIXA_RC_OK;
+                break;
+            case INVALID_STATUS1:
+            case INVALID_STATUS2:
+                xa_rc = XAER_RMERR;
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case GET_RC_ERROR:
+                xa_rc = XAER_RMERR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* unlock mutex */
+        g_static_mutex_unlock(&monkey_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_monkeyrm_rollback/excp=%d/"
+                "ret_cod=%d/xa_rc=%d/errno=%d\n",
+                excp, ret_cod, xa_rc, errno));
+    assert(LIXA_RC_OK == ret_cod);
+    return xa_rc;
 }
 
 
 
-int lixa_monkeyrm_prepare(XID *xid, int rmid, long flags) {
+int lixa_monkeyrm_prepare(XID *xid, int rmid, long flags)
+{
+    enum Exception { NULL_MONKEY_STATUS
+                     , INVALID_STATUS1
+                     , INVALID_STATUS2
+                     , GET_RC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int xa_rc = XA_OK;
+    
     char *xid_str = xid_serialize(xid);
     LIXA_TRACE(("lixa_monkeyrm_prepare: xid='%s', rmid=%d, flags=0x%lx\n",
                 xid_str, rmid, flags));
     free(xid_str);
-    return XA_OK;
+    
+    TRY {
+        pthread_t tid;
+        GHashTable *slht;
+        struct monkey_status_s *mss;
+
+        /* lock mutex */
+        g_static_mutex_lock(&monkey_mutex);
+        
+        /* first call ? */
+        if (NULL == monkey_status)
+            THROW(NULL_MONKEY_STATUS);
+            
+        /* search current thread id in the hash table */
+        tid = pthread_self();
+        if (NULL == (slht = (GHashTable *)g_hash_table_lookup(
+                         monkey_status, (gconstpointer)tid)))
+            THROW(INVALID_STATUS1);
+        
+        /* search passed rmid in the second level hash table */
+        if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
+                         slht, (gconstpointer)rmid)))
+            THROW(INVALID_STATUS2);
+
+        /* retrieve the return code must be returned */
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_PREPARE, &ret_cod))
+            THROW(GET_RC_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_MONKEY_STATUS:
+                xa_rc = XAER_PROTO;
+                ret_cod = LIXA_RC_OK;
+                break;
+            case INVALID_STATUS1:
+            case INVALID_STATUS2:
+                xa_rc = XAER_RMERR;
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case GET_RC_ERROR:
+                xa_rc = XAER_RMERR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* unlock mutex */
+        g_static_mutex_unlock(&monkey_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_monkeyrm_prepare/excp=%d/"
+                "ret_cod=%d/xa_rc=%d/errno=%d\n",
+                excp, ret_cod, xa_rc, errno));
+    assert(LIXA_RC_OK == ret_cod);
+    return xa_rc;
 }
 
 
 
-int lixa_monkeyrm_commit(XID *xid, int rmid, long flags) {
+int lixa_monkeyrm_commit(XID *xid, int rmid, long flags)
+{
+    enum Exception { NULL_MONKEY_STATUS
+                     , INVALID_STATUS1
+                     , INVALID_STATUS2
+                     , GET_RC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int xa_rc = XA_OK;
+    
     char *xid_str = xid_serialize(xid);
     LIXA_TRACE(("lixa_monkeyrm_commit: xid='%s', rmid=%d, flags=0x%lx\n",
                 xid_str, rmid, flags));
     free(xid_str);
-    return XA_OK;
+    
+    TRY {
+        pthread_t tid;
+        GHashTable *slht;
+        struct monkey_status_s *mss;
+
+        /* lock mutex */
+        g_static_mutex_lock(&monkey_mutex);
+        
+        /* first call ? */
+        if (NULL == monkey_status)
+            THROW(NULL_MONKEY_STATUS);
+            
+        /* search current thread id in the hash table */
+        tid = pthread_self();
+        if (NULL == (slht = (GHashTable *)g_hash_table_lookup(
+                         monkey_status, (gconstpointer)tid)))
+            THROW(INVALID_STATUS1);
+        
+        /* search passed rmid in the second level hash table */
+        if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
+                         slht, (gconstpointer)rmid)))
+            THROW(INVALID_STATUS2);
+
+        /* retrieve the return code must be returned */
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_COMMIT, &ret_cod))
+            THROW(GET_RC_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_MONKEY_STATUS:
+                xa_rc = XAER_PROTO;
+                ret_cod = LIXA_RC_OK;
+                break;
+            case INVALID_STATUS1:
+            case INVALID_STATUS2:
+                xa_rc = XAER_RMERR;
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case GET_RC_ERROR:
+                xa_rc = XAER_RMERR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* unlock mutex */
+        g_static_mutex_unlock(&monkey_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_monkeyrm_commit/excp=%d/"
+                "ret_cod=%d/xa_rc=%d/errno=%d\n",
+                excp, ret_cod, xa_rc, errno));
+    assert(LIXA_RC_OK == ret_cod);
+    return xa_rc;
 }
 
 
 
-int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags) {
-    LIXA_TRACE(("lixa_monkeyrm_recover: *xid=%p, count=%ld, rmid=%d, "
-                "flags=0x%lx\n", xid, count, rmid, flags));
-    return XA_OK;
-}
-
-
-
-int lixa_monkeyrm_forget(XID *xid, int rmid, long flags) {
+int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
+{
+    enum Exception { NULL_MONKEY_STATUS
+                     , INVALID_STATUS1
+                     , INVALID_STATUS2
+                     , GET_RC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int xa_rc = XA_OK;
+    
     char *xid_str = xid_serialize(xid);
+    LIXA_TRACE(("lixa_monkeyrm_recover: *xid=%s, count=%ld, rmid=%d, "
+                "flags=0x%lx\n", xid_str, count, rmid, flags));
+    free(xid_str);
+    
+    TRY {
+        pthread_t tid;
+        GHashTable *slht;
+        struct monkey_status_s *mss;
+
+        /* lock mutex */
+        g_static_mutex_lock(&monkey_mutex);
+        
+        /* first call ? */
+        if (NULL == monkey_status)
+            THROW(NULL_MONKEY_STATUS);
+            
+        /* search current thread id in the hash table */
+        tid = pthread_self();
+        if (NULL == (slht = (GHashTable *)g_hash_table_lookup(
+                         monkey_status, (gconstpointer)tid)))
+            THROW(INVALID_STATUS1);
+        
+        /* search passed rmid in the second level hash table */
+        if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
+                         slht, (gconstpointer)rmid)))
+            THROW(INVALID_STATUS2);
+
+        /* retrieve the return code must be returned */
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_RECOVER, &ret_cod))
+            THROW(GET_RC_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_MONKEY_STATUS:
+                xa_rc = XAER_PROTO;
+                ret_cod = LIXA_RC_OK;
+                break;
+            case INVALID_STATUS1:
+            case INVALID_STATUS2:
+                xa_rc = XAER_RMERR;
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case GET_RC_ERROR:
+                xa_rc = XAER_RMERR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* unlock mutex */
+        g_static_mutex_unlock(&monkey_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_monkeyrm_recover/excp=%d/"
+                "ret_cod=%d/xa_rc=%d/errno=%d\n",
+                excp, ret_cod, xa_rc, errno));
+    assert(LIXA_RC_OK == ret_cod);
+    return xa_rc;
+}
+
+
+
+int lixa_monkeyrm_forget(XID *xid, int rmid, long flags)
+{
+    enum Exception { NULL_MONKEY_STATUS
+                     , INVALID_STATUS1
+                     , INVALID_STATUS2
+                     , GET_RC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int xa_rc = XA_OK;
+    
+    char *xid_str = xid_serialize(xid); 
     LIXA_TRACE(("lixa_monkeyrm_forget: xid='%s', rmid=%d, flags=0x%lx\n",
                 xid_str, rmid, flags));
     free(xid_str);
-    return XA_OK;
+    
+    TRY {
+        pthread_t tid;
+        GHashTable *slht;
+        struct monkey_status_s *mss;
+
+        /* lock mutex */
+        g_static_mutex_lock(&monkey_mutex);
+        
+        /* first call ? */
+        if (NULL == monkey_status)
+            THROW(NULL_MONKEY_STATUS);
+            
+        /* search current thread id in the hash table */
+        tid = pthread_self();
+        if (NULL == (slht = (GHashTable *)g_hash_table_lookup(
+                         monkey_status, (gconstpointer)tid)))
+            THROW(INVALID_STATUS1);
+        
+        /* search passed rmid in the second level hash table */
+        if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
+                         slht, (gconstpointer)rmid)))
+            THROW(INVALID_STATUS2);
+
+        /* retrieve the return code must be returned */
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_FORGET, &ret_cod))
+            THROW(GET_RC_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_MONKEY_STATUS:
+                xa_rc = XAER_PROTO;
+                ret_cod = LIXA_RC_OK;
+                break;
+            case INVALID_STATUS1:
+            case INVALID_STATUS2:
+                xa_rc = XAER_RMERR;
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case GET_RC_ERROR:
+                xa_rc = XAER_RMERR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* unlock mutex */
+        g_static_mutex_unlock(&monkey_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_monkeyrm_commit/excp=%d/"
+                "ret_cod=%d/xa_rc=%d/errno=%d\n",
+                excp, ret_cod, xa_rc, errno));
+    assert(LIXA_RC_OK == ret_cod);
+    return xa_rc;
 }
 
 
 
-int lixa_monkeyrm_complete(int *handle, int *retval, int rmid, long flags) {
+int lixa_monkeyrm_complete(int *handle, int *retval, int rmid, long flags)
+{
+    enum Exception { NULL_MONKEY_STATUS
+                     , INVALID_STATUS1
+                     , INVALID_STATUS2
+                     , GET_RC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int xa_rc = XA_OK;
+    
     LIXA_TRACE(("lixa_monkeyrm_complete: rmid=%d, flags=0x%lx\n",
-                rmid, flags));
-    return XA_OK;
+                rmid, flags));    
+    TRY {
+        pthread_t tid;
+        GHashTable *slht;
+        struct monkey_status_s *mss;
+
+        /* lock mutex */
+        g_static_mutex_lock(&monkey_mutex);
+        
+        /* first call ? */
+        if (NULL == monkey_status)
+            THROW(NULL_MONKEY_STATUS);
+            
+        /* search current thread id in the hash table */
+        tid = pthread_self();
+        if (NULL == (slht = (GHashTable *)g_hash_table_lookup(
+                         monkey_status, (gconstpointer)tid)))
+            THROW(INVALID_STATUS1);
+        
+        /* search passed rmid in the second level hash table */
+        if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
+                         slht, (gconstpointer)rmid)))
+            THROW(INVALID_STATUS2);
+
+        /* retrieve the return code must be returned */
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_COMPLETE, &ret_cod))
+            THROW(GET_RC_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_MONKEY_STATUS:
+                xa_rc = XAER_PROTO;
+                ret_cod = LIXA_RC_OK;
+                break;
+            case INVALID_STATUS1:
+            case INVALID_STATUS2:
+                xa_rc = XAER_RMERR;
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case GET_RC_ERROR:
+                xa_rc = XAER_RMERR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* unlock mutex */
+        g_static_mutex_unlock(&monkey_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_monkeyrm_complete/excp=%d/"
+                "ret_cod=%d/xa_rc=%d/errno=%d\n",
+                excp, ret_cod, xa_rc, errno));
+    assert(LIXA_RC_OK == ret_cod);
+    return xa_rc;
 }
 
 
