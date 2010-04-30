@@ -18,27 +18,32 @@
 #
 
 
-
 export LIXA_TRACE_MASK=0xffffffff
 
 
 # This file contains utility functions for test purpouses
+reset_server() {
+	echo "Resetting LIXA server status"
+	rm -rf $TESTS_VAR_DIR
+	mkdir $TESTS_VAR_DIR
+}
+
 start_server() {
-    lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml
+	echo "Starting LIXA server"
+	lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml
 }
 
 stop_server() {
-    kill $(cat $TESTS_VAR_DIR/run.pid)
+	echo "Stopping LIXA server"
+	kill $(cat $TESTS_VAR_DIR/run.pid)
 }
 
 
 exec_test() {
-    echo "Starting LIXA server"
-    start_server
-    echo "Starting case test $1"
-    $1
-    rc=$?
-    echo "Stopping LIXA server"
-    stop_server
-    return $rc
+	start_server
+	echo "Starting case test $1"
+	$1
+	rc=$?
+	stop_server
+	return $rc
 }

@@ -18,12 +18,21 @@
 # along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# Options:
+# $1 name of the case test must be run
+# $2 [reset|noreset] to reset the LIXA server status
+
+. lixa_test_functions.sh
+
 if test -z "$1"
 then
 	echo "No program to test, exiting with error"
 	exit 1
 fi
 
-. lixa_test_functions.sh
+if test x"$2" = xreset
+then
+	reset_server
+fi	
 
 exec_test $1
