@@ -1,10 +1,6 @@
 AT_BANNER([LIXA client basic tests])
 
-AT_SETUP([Environment setup])
-AT_CHECK([test -d $TESTS_VAR_DIR || mkdir $TESTS_VAR_DIR], [0], [ignore], [], [mkdir $TESTS_VAR_DIR], [rm -rf $TESTS_VAR_DIR && mkdir $TESTS_VAR_DIR])
-AT_CLEANUP
-
-AT_SETUP([case0000])
+AT_SETUP([Basic static registration (3 RMs)])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
@@ -32,14 +28,13 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([LIXA_PROFILE=CASE0000 ; lixa_test_exec.sh case0000 reset], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0000 ; lixa_test_exec.sh case0000 reset], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([case0001])
+AT_SETUP([Basic dynamic registration (3 RMs)])
 AT_DATA([monkey1d.conf],
 [[# first monkey R.M. config
 xa_open/0
-xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/0
@@ -48,7 +43,6 @@ xa_close/0
 AT_DATA([monkey2d.conf],
 [[# second monkey R.M. config
 xa_open/0
-xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/0
@@ -57,12 +51,83 @@ xa_close/0
 AT_DATA([monkey3d.conf],
 [[# third monkey R.M. config
 xa_open/0
-xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE0001 && lixa_test_exec.sh case0001 reset], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0001 && lixa_test_exec.sh case0001 reset], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Heuristic completion (commit)])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/6
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/7
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh case0002 reset], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Heuristic completion (rollback)])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/5
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/6
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_rollback/7
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_rollback/8
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh case0003 reset], [0], [ignore], [ignore])
 AT_CLEANUP
 

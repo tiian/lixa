@@ -16,8 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdio.h>
-#include <unistd.h>
+#include <config.h>
+
+
+
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
+
 
 
 #include <tx.h>
@@ -32,14 +44,20 @@
 int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
+    int rc;
     TXINFO info;
     
     printf("%s| starting...\n", pgm);
-    printf("%s| tx_open(): %d\n", pgm, tx_open());
-    printf("%s| tx_begin(): %d\n", pgm, tx_begin());
-    printf("%s| tx_info(): %d\n", pgm, tx_info(&info));
-    printf("%s| tx_commit(): %d\n", pgm, tx_commit());
-    printf("%s| tx_close(): %d\n", pgm, tx_close());
+    printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
+    assert(TX_OK == rc);
+    printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
+    assert(TX_OK == rc);
+    printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info));
+    assert(TX_OK == rc);
+    printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
+    assert(TX_OK == rc);
+    printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+    assert(TX_OK == rc);
     printf("%s| ...finished\n", pgm);
     return 0;
 }

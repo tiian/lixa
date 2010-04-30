@@ -59,12 +59,11 @@ int main(int argc, char *argv[])
     /* emulate callback registration from resource manager when accessing
      * resource manager owned resources; you may imagine these are the
      * equivalent of a SQLExecDirect function call */
-    lixa_monkeyrm_call_ax_reg(0);
-    lixa_monkeyrm_call_ax_reg(1);
     lixa_monkeyrm_call_ax_reg(2);
+    lixa_monkeyrm_call_ax_reg(3);
     
-    printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
-    assert(TX_OK == rc);
+    printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
+    assert(TX_HAZARD == rc);
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     assert(TX_OK == rc);
     printf("%s| ...finished\n", pgm);

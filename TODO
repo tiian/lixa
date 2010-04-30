@@ -1,12 +1,7 @@
-LIXA Monkey RM implementation in progress:
-- load a file (xa_open) with all the step/return codes
-- implement the monkey (!)
-- implement "call_ax_reg" and "call_ax_unreg" too to emulate a dynamic 
-registration
 
 When server_manager_thread exits, the listener must be aware of this... 
 
-Remove "ltdl" if it is unused (I suppose it...)
+Remove "ltdl" if it is unused (I suppose it is...)
 
 Remove all @@@ from source code: every one was/is an "open point"
 
