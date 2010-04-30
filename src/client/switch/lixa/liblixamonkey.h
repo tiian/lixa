@@ -59,9 +59,9 @@ extern struct xa_switch_t lixa_monkeyrm_dyn_sw;
 /**
  * Enumeration used to assing a numerical id to any XA verb
  */
-enum monkey_status_verb_e { XA_OPEN = 1, XA_CLOSE, XA_START, XA_BEGIN, XA_END,
+enum monkey_status_verb_e { XA_OPEN = 1, XA_CLOSE, XA_START, XA_END,
                             XA_PREPARE, XA_COMMIT, XA_ROLLBACK,
-                            XA_RECOVER, XA_FORGET, XA_COMPLETE, XA_INFO };
+                            XA_RECOVER, XA_FORGET, XA_COMPLETE };
 
 
 
@@ -222,7 +222,30 @@ extern "C" {
     int lixa_monkeyrm_complete(int *handle, int *retval, int rmid, long flags);
 
     
-    
+
+    /**
+     * This function is used to simulate a call-back from the resource manager
+     * library when dynamic registration is used
+     * @param rmid IN resource manager id will be passed to ax_reg
+     * @param xid IN transaction id object will be passed to ax_reg
+     * @param flags IN flags will be passed to ax_reg
+     * @return a standardized return code
+     */
+    int lixa_monkeyrm_call_ax_reg(int rmid, XID *xid, long flags);
+
+
+
+    /**
+     * This function is used to simulate a call-back from the resource manager
+     * library when dynamic registration is used
+     * @param rmid IN resource manager id will be passed to ax_unreg
+     * @param flags IN flags will be passed to ax_unreg
+     * @return a standardized return code
+     */
+    int lixa_monkeyrm_call_ax_unreg(int rmid, long flags);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

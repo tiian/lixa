@@ -283,8 +283,6 @@ int lixa_monkeyrm_open_init(char *xa_info, int rmid, long flags,
                 record.verb = XA_CLOSE;
             else if (NULL != strstr(buffer, "xa_start"))
                 record.verb = XA_START;
-            else if (NULL != strstr(buffer, "xa_begin"))
-                record.verb = XA_BEGIN;
             else if (NULL != strstr(buffer, "xa_end"))
                 record.verb = XA_END;
             else if (NULL != strstr(buffer, "xa_rollback"))
@@ -299,8 +297,6 @@ int lixa_monkeyrm_open_init(char *xa_info, int rmid, long flags,
                 record.verb = XA_FORGET;
             else if (NULL != strstr(buffer, "xa_complete"))
                 record.verb = XA_COMPLETE;
-            else if (NULL != strstr(buffer, "xa_info"))
-                record.verb = XA_INFO;
             else
                 THROW(INVALID_VERB);
             record.rc = (int)strtol(rc, NULL, 10);
@@ -1004,6 +1000,56 @@ int lixa_monkeyrm_complete(int *handle, int *retval, int rmid, long flags)
                 excp, ret_cod, xa_rc, errno));
     assert(LIXA_RC_OK == ret_cod);
     return xa_rc;
+}
+
+
+
+int lixa_monkeyrm_call_ax_reg(int rmid, XID *xid, long flags)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_monkeyrm_call_ax_reg\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_monkeyrm_call_ax_reg/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_monkeyrm_call_ax_unreg(int rmid, long flags)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_monkeyrm_call_ax_unreg\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_monkeyrm_call_ax_unreg/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 
