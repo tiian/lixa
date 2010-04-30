@@ -36,5 +36,16 @@
         <rsrmgr>LIXAmonkey3dynRM</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="CASE0002">
+      <trnmgrs>
+        <trnmgr>TestTM</trnmgr>
+      </trnmgrs>
+      <rsrmgrs>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+        <rsrmgr>LIXAmonkey2staRM</rsrmgr>
+        <rsrmgr>LIXAmonkey1dynRM</rsrmgr>
+        <rsrmgr>LIXAmonkey2dynRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
   </profiles>
 </client>

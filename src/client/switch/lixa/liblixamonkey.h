@@ -227,11 +227,9 @@ extern "C" {
      * This function is used to simulate a call-back from the resource manager
      * library when dynamic registration is used
      * @param rmid IN resource manager id will be passed to ax_reg
-     * @param xid IN transaction id object will be passed to ax_reg
-     * @param flags IN flags will be passed to ax_reg
      * @return a standardized return code
      */
-    int lixa_monkeyrm_call_ax_reg(int rmid, XID *xid, long flags);
+    int lixa_monkeyrm_call_ax_reg(int rmid);
 
 
 
@@ -239,10 +237,9 @@ extern "C" {
      * This function is used to simulate a call-back from the resource manager
      * library when dynamic registration is used
      * @param rmid IN resource manager id will be passed to ax_unreg
-     * @param flags IN flags will be passed to ax_unreg
      * @return a standardized return code
      */
-    int lixa_monkeyrm_call_ax_unreg(int rmid, long flags);
+    int lixa_monkeyrm_call_ax_unreg(int rmid);
 
 
 

@@ -201,7 +201,7 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
         }
 
         /* retrieve the return code must be returned */
-        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_OPEN, &ret_cod))
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_OPEN, &xa_rc))
             THROW(GET_RC_ERROR);
         
         THROW(NONE);
@@ -371,7 +371,7 @@ int lixa_monkeyrm_close(char *xa_info, int rmid, long flags)
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
-        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_CLOSE, &ret_cod))
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_CLOSE, &xa_rc))
             THROW(GET_RC_ERROR);
         
         THROW(NONE);
@@ -446,7 +446,7 @@ int lixa_monkeyrm_start(XID *xid, int rmid, long flags)
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
-        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_START, &ret_cod))
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_START, &xa_rc))
             THROW(GET_RC_ERROR);
         
         THROW(NONE);
@@ -521,7 +521,7 @@ int lixa_monkeyrm_end(XID *xid, int rmid, long flags)
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
-        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_END, &ret_cod))
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_END, &xa_rc))
             THROW(GET_RC_ERROR);
         
         THROW(NONE);
@@ -596,7 +596,7 @@ int lixa_monkeyrm_rollback(XID *xid, int rmid, long flags)
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
-        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_ROLLBACK, &ret_cod))
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_ROLLBACK, &xa_rc))
             THROW(GET_RC_ERROR);
         
         THROW(NONE);
@@ -671,7 +671,7 @@ int lixa_monkeyrm_prepare(XID *xid, int rmid, long flags)
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
-        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_PREPARE, &ret_cod))
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_PREPARE, &xa_rc))
             THROW(GET_RC_ERROR);
         
         THROW(NONE);
@@ -746,7 +746,7 @@ int lixa_monkeyrm_commit(XID *xid, int rmid, long flags)
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
-        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_COMMIT, &ret_cod))
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_COMMIT, &xa_rc))
             THROW(GET_RC_ERROR);
         
         THROW(NONE);
@@ -821,7 +821,7 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
-        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_RECOVER, &ret_cod))
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_RECOVER, &xa_rc))
             THROW(GET_RC_ERROR);
         
         THROW(NONE);
@@ -896,7 +896,7 @@ int lixa_monkeyrm_forget(XID *xid, int rmid, long flags)
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
-        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_FORGET, &ret_cod))
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_FORGET, &xa_rc))
             THROW(GET_RC_ERROR);
         
         THROW(NONE);
@@ -968,7 +968,7 @@ int lixa_monkeyrm_complete(int *handle, int *retval, int rmid, long flags)
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
-        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_COMPLETE, &ret_cod))
+        if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_COMPLETE, &xa_rc))
             THROW(GET_RC_ERROR);
         
         THROW(NONE);
@@ -1004,13 +1004,18 @@ int lixa_monkeyrm_complete(int *handle, int *retval, int rmid, long flags)
 
 
 
-int lixa_monkeyrm_call_ax_reg(int rmid, XID *xid, long flags)
+int lixa_monkeyrm_call_ax_reg(int rmid)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_monkeyrm_call_ax_reg\n"));
     TRY {
+        XID xid;
+        long flags = TMNOFLAGS;
+        int rc = ax_reg(rmid, &xid, flags);
+
+        LIXA_TRACE(("lixa_monkeyrm_call_ax_reg: ax_reg returned %d\n", rc));
         
         THROW(NONE);
     } CATCH {
@@ -1029,13 +1034,18 @@ int lixa_monkeyrm_call_ax_reg(int rmid, XID *xid, long flags)
 
 
 
-int lixa_monkeyrm_call_ax_unreg(int rmid, long flags)
+int lixa_monkeyrm_call_ax_unreg(int rmid)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_monkeyrm_call_ax_unreg\n"));
     TRY {
+        long flags = TMNOFLAGS;
+        int rc = ax_unreg(rmid, flags);
+
+        LIXA_TRACE(("lixa_monkeyrm_call_ax_unreg: ax_unreg returned %d\n",
+                    rc));
         
         THROW(NONE);
     } CATCH {

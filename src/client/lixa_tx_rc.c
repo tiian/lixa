@@ -166,6 +166,7 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                                 case XA_RBTRANSIENT:
                                 case XA_HEURRB:
                                 case XAER_RMERR:
+                                case XA_HEURMIX:
                                     prev_tx_rc = TX_MIXED;
                                     break;
                                 default:
@@ -193,6 +194,7 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                             switch (prev_xa_rc) {
                                 case XA_HEURCOM: /* any commit */
                                 case XA_OK:
+                                case XA_HEURMIX:
                                     prev_tx_rc = TX_MIXED;
                                     break;
                                 case XA_RBROLLBACK: /* any rollback */
@@ -258,6 +260,7 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                                 case XA_HEURRB:
                                 case XAER_RMERR:
                                 case XA_OK:
+                                case XA_HEURMIX:
                                     prev_tx_rc = TX_MIXED;
                                     break;
                                 case XAER_NOTA:
@@ -291,6 +294,7 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                             prev_xa_rc = g_array_index(ltr->xa_rc, int, i);
                             switch (prev_xa_rc) {
                                 case XA_HEURCOM:
+                                case XA_HEURMIX:
                                     prev_tx_rc = TX_MIXED;
                                     break;
                                 case XA_RBROLLBACK: /* any rollback */

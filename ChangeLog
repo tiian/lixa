@@ -1,5 +1,8 @@
 LOG:
 
+         - 0.3.15 implemented test case infrastructure
+                  implemented monkey test resource manager
+
 20100421 - 0.3.14 implemented rfnf # 2980750
                   fixed a bug related to dynamic registration: it created
                   in-doubt transaction in normal situations (!)
