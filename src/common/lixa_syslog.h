@@ -105,6 +105,8 @@
 #define LIXA_SYSLOG_LXR001E "LXR001E failed to parse options: %s"
 #define LIXA_SYSLOG_LXR002I "LXR002I this LIXA recovery process is terminating"
 #define LIXA_SYSLOG_LXR003E "LXR003E unable to perform tx_open() (rc=%d)"
+#define LIXA_SYSLOG_LXR004W "LXR004W resource manager returned %d while performing cold commit recovery, xa_forget will be issued to clean-up transaction '%s'"
+#define LIXA_SYSLOG_LXR005W "LXR005W resource manager returned %d while performing cold rollback recovery, xa_forget will be issued to clean-up transaction '%s'"
 
 
 

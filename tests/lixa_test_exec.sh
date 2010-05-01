@@ -24,15 +24,17 @@
 
 . lixa_test_functions.sh
 
-if test -z "$1"
+if test x"$1" = xreset
+then
+	reset_server
+fi	
+
+if test -z "$2"
 then
 	echo "No program to test, exiting with error"
 	exit 1
 fi
 
-if test x"$2" = xreset
-then
-	reset_server
-fi	
+shift 
 
-exec_test $1
+exec_test $*

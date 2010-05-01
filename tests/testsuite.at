@@ -1,3 +1,4 @@
 AT_INIT
 AT_COPYRIGHT([Copyright (c) 2009-2010, Christian Ferrari <tiian@users.sourceforge.net>])
 m4_include([lixac_basic.at])
+m4_include([lixar_heur.at])

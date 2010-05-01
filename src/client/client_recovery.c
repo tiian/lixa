@@ -685,7 +685,7 @@ int client_recovery_cold_commit(const client_status_t *cs,
     LIXA_TRACE(("client_recovery_cold_commit\n"));
     TRY {
         guint i;
-        
+
         for (i=0; i<rsrmgrs->len; ++i) {
             int xa_rc;
             const long flags = TMNOFLAGS;
@@ -702,9 +702,26 @@ int client_recovery_cold_commit(const client_status_t *cs,
             LIXA_TRACE(("client_recovery_cold_commit: "
                         "xa_commit_entry(xid, %d, 0x%lx) = %d\n",
                         *rmid, flags, xa_rc));
-            printf("rmid=%d, lixa_name='%s', xa_name='%s', rc=%d\n",
-                   *rmid, act_rsrmgr->generic->name,
+            printf("xa_commit --> rmid=%d, lixa_name='%s', xa_name='%s', "
+                   "rc=%d\n", *rmid, act_rsrmgr->generic->name,
                    act_rsrmgr->xa_switch->name, xa_rc);
+            if (XA_HEURCOM == xa_rc || XA_HEURRB == xa_rc ||
+                XA_HEURMIX == xa_rc || XA_HEURHAZ == xa_rc) {
+                char *ser_xid = xid_serialize(xid);
+                LIXA_TRACE(("client_recovery_cold_commit: the resource "
+                            "manager returned heuristic completion, calling "
+                            "xa_forget...\n"));
+                syslog(LOG_CRIT, LIXA_SYSLOG_LXR004W, xa_rc, ser_xid);
+                xa_rc = act_rsrmgr->xa_switch->xa_forget_entry(
+                    xid, *rmid, flags);
+                LIXA_TRACE(("client_recovery_cold_commit: "
+                            "xa_forget_entry('%s', %d, 0x%lx) = %d\n",
+                            ser_xid, *rmid, flags, xa_rc));
+                printf("xa_forget --> rmid=%d, lixa_name='%s', xa_name='%s', "
+                       "rc=%d\n", *rmid, act_rsrmgr->generic->name,
+                       act_rsrmgr->xa_switch->name, xa_rc);
+                free(ser_xid);
+            }
         }
         
         THROW(NONE);
@@ -751,9 +768,26 @@ int client_recovery_cold_rollback(const client_status_t *cs,
             LIXA_TRACE(("client_recovery_cold_rollback: "
                         "xa_rollback_entry(xid, %d, 0x%lx) = %d\n",
                         *rmid, flags, xa_rc));
-            printf("rmid=%d, lixa_name='%s', xa_name='%s', rc=%d\n",
-                   *rmid, act_rsrmgr->generic->name,
+            printf("xa_rollback --> rmid=%d, lixa_name='%s', xa_name='%s', "
+                   "rc=%d\n", *rmid, act_rsrmgr->generic->name,
                    act_rsrmgr->xa_switch->name, xa_rc);
+            if (XA_HEURCOM == xa_rc || XA_HEURRB == xa_rc ||
+                XA_HEURMIX == xa_rc || XA_HEURHAZ == xa_rc) {
+                char *ser_xid = xid_serialize(xid);
+                LIXA_TRACE(("client_recovery_cold_rollback: the resource "
+                            "manager returned heuristic completion, calling "
+                            "xa_forget...\n"));
+                syslog(LOG_CRIT, LIXA_SYSLOG_LXR005W, xa_rc, ser_xid);
+                xa_rc = act_rsrmgr->xa_switch->xa_forget_entry(
+                    xid, *rmid, flags);
+                LIXA_TRACE(("client_recovery_cold_rollback: "
+                            "xa_forget_entry('%s', %d, 0x%lx) = %d\n",
+                            ser_xid, *rmid, flags, xa_rc));
+                printf("xa_forget --> rmid=%d, lixa_name='%s', xa_name='%s', "
+                       "rc=%d\n", *rmid, act_rsrmgr->generic->name,
+                       act_rsrmgr->xa_switch->name, xa_rc);
+                free(ser_xid);
+            }
         }
 
         THROW(NONE);
