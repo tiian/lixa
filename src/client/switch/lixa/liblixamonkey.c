@@ -792,10 +792,8 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int xa_rc = XA_OK;
     
-    char *xid_str = xid_serialize(xid);
-    LIXA_TRACE(("lixa_monkeyrm_recover: *xid=%s, count=%ld, rmid=%d, "
-                "flags=0x%lx\n", xid_str, count, rmid, flags));
-    free(xid_str);
+    LIXA_TRACE(("lixa_monkeyrm_recover: *xid=%p, count=%ld, rmid=%d, "
+                "flags=0x%lx\n", xid, count, rmid, flags));
     
     TRY {
         pthread_t tid;
@@ -823,6 +821,14 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
         /* retrieve the return code must be returned */
         if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_RECOVER, &xa_rc))
             THROW(GET_RC_ERROR);
+
+        if (1 == xa_rc) {
+            char ser_xid[LIXA_XID_SERIALIZED_BUFFER_SIZE];
+            strcpy(ser_xid, "11111111-2222-3333-4444-555555555555.66666666-"
+                   "7777-8888-9999-000000000000");
+            /* this is a constant value used to perform basic testing */
+            xid_deserialize(ser_xid, xid);
+        }
         
         THROW(NONE);
     } CATCH {

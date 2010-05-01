@@ -540,8 +540,10 @@ clean-local:
 # Always generate testsuite into the source directory, not into the
 # build directory, since it must be distributed, along with
 # package.m4, configure, etc.
-$(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/lixac_basic.at \
-              $(srcdir)/package.m4
+$(TESTSUITE): $(srcdir)/testsuite.at \
+		$(srcdir)/lixac_basic.at \
+		$(srcdir)/lixar_heur.at \
+		$(srcdir)/package.m4
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
