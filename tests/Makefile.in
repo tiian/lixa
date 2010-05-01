@@ -190,8 +190,8 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = etc src
-EXTRA_DIST = testsuite.at lixac_basic.at package.m4 $(TESTSUITE) atlocal.in \
-	lixa_test_exec.sh lixa_test_functions.sh
+EXTRA_DIST = testsuite.at lixac_basic.at lixar_heur.at package.m4 \
+	$(TESTSUITE) atlocal.in lixa_test_exec.sh lixa_test_functions.sh
 
 TESTSUITE = $(srcdir)/testsuite
 AUTOM4TE = autom4te

@@ -47,6 +47,22 @@ int main(int argc, char *argv[])
     char *pgm = argv[0];
     int rc;
     TXINFO info;
+    int commit;
+
+    if (argc < 2) {
+        fprintf(stderr, "%s: at least an option must be specified\n",
+                argv[0]);
+        exit (1);
+    }
+    if (!strcmp(argv[1], "commit"))
+        commit = TRUE;
+    else if (!strcmp(argv[1], "rollback"))
+        commit = FALSE;
+    else {
+        fprintf(stderr, "%s: first option must be [commit|rollback]\n",
+                argv[0]);
+        exit (1);
+    }
     
     printf("%s| starting...\n", pgm);
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
@@ -61,8 +77,11 @@ int main(int argc, char *argv[])
      * equivalent of a SQLExecDirect function call */
     lixa_monkeyrm_call_ax_reg(2);
     lixa_monkeyrm_call_ax_reg(3);
-    
-    printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
+
+    if (commit)
+        printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
+    else
+        printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(TX_HAZARD == rc);
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     assert(TX_OK == rc);
