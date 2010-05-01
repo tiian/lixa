@@ -15,7 +15,8 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	} > $@-t
 	mv $@-t $@
 
-EXTRA_DIST = testsuite.at lixac_basic.at lixar_heur.at package.m4 \
+EXTRA_DIST = testsuite.at lixac_basic.at lixac_chained.at lixar_heur.at \
+	package.m4 \
 	$(TESTSUITE) atlocal.in lixa_test_exec.sh lixa_test_functions.sh
 TESTSUITE = $(srcdir)/testsuite
 
@@ -35,6 +36,7 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 # package.m4, configure, etc.
 $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/lixac_basic.at \
+		$(srcdir)/lixac_chained.at \
 		$(srcdir)/lixar_heur.at \
 		$(srcdir)/package.m4
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
