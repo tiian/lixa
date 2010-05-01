@@ -1,7 +1,9 @@
 LOG:
 
-         - 0.3.15 implemented test case infrastructure
+20100501 - 0.3.15 implemented test case infrastructure
                   implemented monkey test resource manager
+                  fixed bug # 2943356 (heuristically completed transactions
+                  support)
 
 20100421 - 0.3.14 implemented rfnf # 2980750
                   fixed a bug related to dynamic registration: it created

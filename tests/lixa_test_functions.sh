@@ -40,12 +40,10 @@ stop_server() {
 
 
 exec_test() {
-	start_server
 	echo "Starting case test $1"
 	PGM=$1
 	shift
 	$PGM $*
 	rc=$?
-	stop_server
 	return $rc
 }

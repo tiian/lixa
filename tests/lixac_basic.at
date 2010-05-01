@@ -28,7 +28,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0000 ; lixa_test_exec.sh reset case0000], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0000 ; lixa_test_exec.sh reset recycle case0000], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Basic dynamic registration (3 RMs)])
@@ -56,7 +56,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0001 && lixa_test_exec.sh reset case0001], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0001 && lixa_test_exec.sh reset recycle case0001], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Heuristic completion 4 RMs (commit)])
@@ -94,7 +94,7 @@ xa_prepare/0
 xa_commit/8
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset case0002], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle case0002 commit], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Heuristic completion 4 RMs (rollback)])
@@ -128,6 +128,6 @@ xa_end/0
 xa_rollback/8
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset case0003], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle case0002 rollback], [0], [ignore], [ignore])
 AT_CLEANUP
 
