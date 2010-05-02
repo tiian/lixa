@@ -125,6 +125,14 @@ extern "C" {
                                      int *manager_id);
 
 
+
+    /**
+     * Install the LIXA signal handler
+     * @return a standardized reason code
+     */
+    int server_listener_signal(void);
+
+
     
 #ifdef __cplusplus
 }

@@ -26,6 +26,9 @@
 #ifdef HAVE_NETDB_H
 # include <netdb.h>
 #endif
+#ifdef HAVE_SIGNAL_H
+# include <signal.h>
+#endif
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
@@ -73,6 +76,7 @@ int server_listener(const struct server_config_s *sc,
                      , SETSOCKOPT_ERROR
                      , BIND_ERROR
                      , LISTEN_ERROR
+                     , LISTENER_SIGNAL_ERROR
                      , LISTENER_LOOP_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -154,6 +158,9 @@ int server_listener(const struct server_config_s *sc,
                 THROW(LISTEN_ERROR);
         } /* for (i=0; i<n; ++i) */
 
+        if (LIXA_RC_OK != (ret_cod = server_listener_signal()))
+            THROW(LISTENER_SIGNAL_ERROR);
+        
         if (LIXA_RC_OK != (ret_cod = server_listener_loop(sc, lsa, tsa)))
             THROW(LISTENER_LOOP_ERROR);
         
@@ -178,6 +185,7 @@ int server_listener(const struct server_config_s *sc,
             case LISTEN_ERROR:
                 ret_cod = LIXA_RC_LISTEN_ERROR;
                 break;
+            case LISTENER_SIGNAL_ERROR:
             case LISTENER_LOOP_ERROR:
                 break;
             case NONE:
@@ -390,3 +398,46 @@ int server_listener_find_manager(const struct thread_status_array_s *tsa,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+void server_listener_signal_sigterm(int signo)
+{
+    LIXA_TRACE(("server_listener_signal_sigterm\n"));
+}
+
+
+
+int server_listener_signal(void)
+{
+    enum Exception { SIGACTION_SIGTERM_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_listener_signal\n"));
+    TRY {
+        struct sigaction act;
+
+        act.sa_handler = server_listener_signal_sigterm;
+        sigemptyset(&act.sa_mask);
+        act.sa_flags = 0;
+        if (0 > sigaction(SIGTERM, &act, NULL))
+            THROW(SIGACTION_SIGTERM_ERROR);
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case SIGACTION_SIGTERM_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_listener_signal/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

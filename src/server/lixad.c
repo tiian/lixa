@@ -111,7 +111,6 @@ int main(int argc, char *argv[])
     int rc = LIXA_RC_OK;
     struct server_config_s sc;
     struct listener_status_array_s lsa;
-    struct thread_pipe_array_s tpa;
     struct thread_status_array_s tsa;
     srvr_rcvr_tbl_t srt = SRVR_RCVR_TBL_INIT;
     GError *error = NULL;

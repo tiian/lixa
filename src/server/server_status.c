@@ -65,6 +65,10 @@
 
 
 
+struct thread_pipe_array_s tpa;
+
+
+
 gboolean traverse_and_delete(gpointer key, gpointer value, gpointer data)
 {
     /* ignore value, data is the GTree... */
