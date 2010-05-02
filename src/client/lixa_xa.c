@@ -945,7 +945,6 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
                     csr->xa_s_state = XA_STATE_S0;
-                    break_prepare = FALSE;
                     tmp_txrc = TX_ROLLBACK;
                     break;                    
                 case XAER_NOTA:
@@ -1116,7 +1115,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             if (csr->dynamic && csr->xa_s_state != XA_STATE_S2 &&
                 csr->xa_s_state != XA_STATE_S3) {
                 LIXA_TRACE(("lixa_xa_rollback: resource manager # %i "
-                            "has not yet dynamically registered and "
+                            "has not yet dynamically registered and/or "
                             "statically ended/prepared, skipping...\n",
                             record.rmid));
                 continue;

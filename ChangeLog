@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.3.16 
+         - 0.3.16 fixed bug 2944441
 
 20100501 - 0.3.15 implemented test case infrastructure
                   implemented monkey test resource manager
