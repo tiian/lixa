@@ -59,9 +59,16 @@ extern struct xa_switch_t lixa_monkeyrm_dyn_sw;
 /**
  * Enumeration used to assing a numerical id to any XA verb
  */
-enum monkey_status_verb_e { XA_OPEN = 1, XA_CLOSE, XA_START, XA_END,
-                            XA_PREPARE, XA_COMMIT, XA_ROLLBACK,
-                            XA_RECOVER, XA_FORGET, XA_COMPLETE };
+enum monkey_status_verb_e { XA_OPEN = 1,
+                            XA_CLOSE,
+                            XA_START,
+                            XA_END,
+                            XA_PREPARE,
+                            XA_COMMIT,
+                            XA_ROLLBACK,
+                            XA_RECOVER,
+                            XA_FORGET,
+                            XA_COMPLETE };
 
 
 

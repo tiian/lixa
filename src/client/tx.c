@@ -53,12 +53,33 @@ int tx_close(void)
 
 int tx_commit(void)
 {
-    int txrc = TX_FAIL;
+    int txrc1 = TX_FAIL;
+    int txrc2 = TX_FAIL;
     int begin_new = FALSE;
-    lixa_tx_commit(&txrc, &begin_new);
-    if (begin_new)
-        lixa_tx_begin(&txrc);
-    return txrc;
+    lixa_tx_commit(&txrc1, &begin_new);
+    if (begin_new) {
+        lixa_tx_begin(&txrc2);
+        if (TX_OK != txrc2) {
+            switch (txrc1) {
+                case TX_OK:
+                    txrc2 = TX_NO_BEGIN;
+                    break;
+                case TX_ROLLBACK:
+                    txrc2 = TX_ROLLBACK_NO_BEGIN;
+                    break;
+                case TX_MIXED:
+                    txrc2 = TX_MIXED_NO_BEGIN;
+                    break;
+                case TX_HAZARD:
+                    txrc2 = TX_HAZARD_NO_BEGIN;
+                    break;
+                default:
+                    txrc2 = TX_FAIL;
+            }
+        }
+    } else
+        txrc2 = txrc1;
+    return txrc2;
 }
 
 
@@ -83,14 +104,34 @@ int tx_open(void)
 
 int tx_rollback(void)
 {
-    int txrc = TX_FAIL;
+    int txrc1 = TX_FAIL;
+    int txrc2 = TX_FAIL;
     int begin_new = FALSE;
-    lixa_tx_rollback(&txrc, &begin_new);
-    if (begin_new)
-        lixa_tx_begin(&txrc);
-    return txrc;
+    lixa_tx_rollback(&txrc1, &begin_new);
+    if (begin_new) {
+        lixa_tx_begin(&txrc2);
+        if (TX_OK != txrc2) {
+            switch (txrc1) {
+                case TX_OK:
+                    txrc2 = TX_NO_BEGIN;
+                    break;
+                case TX_MIXED:
+                    txrc2 = TX_MIXED_NO_BEGIN;
+                    break;
+                case TX_HAZARD:
+                    txrc2 = TX_HAZARD_NO_BEGIN;
+                    break;
+                case TX_COMMITTED:
+                    txrc2 = TX_COMMITTED_NO_BEGIN;
+                    break;
+                default:
+                    txrc2 = TX_FAIL;
+            }
+        }
+    } else
+        txrc2 = txrc1;
+    return txrc2;
 }
-
 
 
 int tx_set_commit_return(COMMIT_RETURN when_return)

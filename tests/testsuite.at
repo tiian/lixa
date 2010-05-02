@@ -3,3 +3,4 @@ AT_COPYRIGHT([Copyright (c) 2009-2010, Christian Ferrari <tiian@users.sourceforg
 
 m4_include([lixac_basic.at])
 m4_include([lixar_heur.at])
+m4_include([lixac_chained.at])
