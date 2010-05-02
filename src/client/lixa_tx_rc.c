@@ -85,6 +85,8 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                 case XA_HEURCOM:
                     if (ltr->commit)
                         tmp_tx_rc = TX_OK;
+                    else if(ltr->tx_commit)
+                        tmp_tx_rc = TX_MIXED;
                     else
                         tmp_tx_rc = TX_COMMITTED;
                     break;
