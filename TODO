@@ -1,4 +1,4 @@
-Prepare test case for TX_CHAINED errors
+restart from server_listener_signal_sigterm
 
 When server_manager_thread exits, the listener must be aware of this... 
 

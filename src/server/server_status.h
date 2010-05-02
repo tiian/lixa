@@ -146,6 +146,14 @@ struct thread_pipe_array_s {
 
 
 /**
+ * This "object" is statically allocated outside main stack because it must
+ * be accessible from signal handler
+ */
+extern struct thread_pipe_array_s tpa;
+
+
+
+/**
  * This is a convenience struct for @ref server_client_status_s
  */
 struct thread_status_switch_s {
