@@ -1,4 +1,4 @@
-restart from server_listener_signal_sigterm
+restart from server_listener_signal_action
 
 When server_manager_thread exits, the listener must be aware of this... 
 
