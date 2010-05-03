@@ -240,8 +240,15 @@ int server_listener_loop(const struct server_config_s *sc,
 
         while (TRUE) {
             LIXA_TRACE(("server_listener_loop: entering poll...\n"));
-            if (0 >= (ready_fd = poll(ts->poll_array, ts->poll_size, -1)))
-                THROW(POLL_ERROR);
+            while (TRUE) {
+                ready_fd = poll(ts->poll_array, ts->poll_size, -1);
+                if (0 >= ready_fd) {
+                    if (EINTR == errno)
+                        continue;
+                    else
+                        THROW(POLL_ERROR);
+                }
+            }
             LIXA_TRACE(("server_listener_loop: ready file descriptors = %d\n",
                         ready_fd));
             /* look for ready file descriptors */
@@ -401,16 +408,18 @@ int server_listener_find_manager(const struct thread_status_array_s *tsa,
 
 
 
-void server_listener_signal_sigterm(int signo)
+void server_listener_signal_action(int signo)
 {
-    LIXA_TRACE(("server_listener_signal_sigterm\n"));
+    LIXA_TRACE(("server_listener_signal_action: signo=%d\n", signo));
 }
 
 
 
 int server_listener_signal(void)
 {
-    enum Exception { SIGACTION_SIGTERM_ERROR
+    enum Exception { SIGACTION_SIGINT_ERROR
+                     , SIGACTION_SIGTERM_ERROR
+                     , SIGACTION_SIGQUIT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -418,16 +427,22 @@ int server_listener_signal(void)
     TRY {
         struct sigaction act;
 
-        act.sa_handler = server_listener_signal_sigterm;
+        act.sa_handler = server_listener_signal_action;
         sigemptyset(&act.sa_mask);
-        act.sa_flags = 0;
+        act.sa_flags = SA_RESTART;
+        if (0 > sigaction(SIGINT, &act, NULL))
+            THROW(SIGACTION_SIGINT_ERROR);
         if (0 > sigaction(SIGTERM, &act, NULL))
             THROW(SIGACTION_SIGTERM_ERROR);
+        if (0 > sigaction(SIGQUIT, &act, NULL))
+            THROW(SIGACTION_SIGQUIT_ERROR);
 
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case SIGACTION_SIGINT_ERROR:
             case SIGACTION_SIGTERM_ERROR:
+            case SIGACTION_SIGQUIT_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
