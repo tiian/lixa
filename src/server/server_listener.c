@@ -410,7 +410,11 @@ int server_listener_find_manager(const struct thread_status_array_s *tsa,
 
 void server_listener_signal_action(int signo)
 {
+    struct srv_msg_s msg;
+    
     LIXA_TRACE(("server_listener_signal_action: signo=%d\n", signo));
+    msg.type = SRV_MSG_TYPE_SHUTDOWN;
+    msg.body.sd.type = SHUTDOWN_FORCE;
 }
 
 
