@@ -48,6 +48,10 @@
  * Associated to @ref srv_msg_body_switch_rep_s
  */
 #define SRV_MSG_TYPE_SWITCH_REP      3
+/**
+ * Associated to @ref srv_msg_body_shutdown_s
+ */
+#define SRV_MSG_TYPE_SHUTDOWN        4
 
 
 
@@ -127,6 +131,32 @@ struct srv_msg_body_switch_rep_s {
 
 
 /**
+ * Three different types of shutdown  can be requested to LIXA server:
+ * QUIESCE: the server will wait every transaction completed; no new
+ *          transaction can be started
+ * IMMEDIATE: the server will flush the connected clients, synchronize status
+ *            files and exit
+ * FORCE: the server will synchronize status files and abruptly exit
+ */
+enum shutdown_type_e { SHUTDOWN_QUIESCE
+                       , SHUTDOWN_IMMEDIATE
+                       , SHUTDOWN_FORCE };
+
+
+
+/**
+ * Shutdown has been requested by the operator
+ */
+struct srv_msg_body_shutdown_s {
+    /**
+     * Type of shutdown must be performed
+     */
+    enum shutdown_type_e      type;
+};
+
+
+
+/**
  * Used to code a generic message exchanged in the server
  */
 struct srv_msg_s {
@@ -141,6 +171,7 @@ struct srv_msg_s {
         struct srv_msg_body_new_client_s    nc;
         struct srv_msg_body_switch_req_s    sr;
         struct srv_msg_body_switch_rep_s    sp;
+        struct srv_msg_body_shutdown_s      sd;
     } body;
 };
 
