@@ -213,9 +213,14 @@ void *server_manager_thread(void *void_ts)
                     THROW(THREAD_STATUS_SYNC_FILES_ERROR);
                 ts->asked_sync = 0;
             }
+            if (SHUTDOWN_NULL != ts->shutdown_type) {
+                LIXA_TRACE(("server_manager_thread: id=%d, leaving main "
+                            "loop and shutdown...\n", ts->id));
+                break;
+            }
             if (LIXA_RC_OK != (ret_cod = server_manager_fix_poll(ts)))
                 THROW(FIX_POLL_ERROR);
-            LIXA_TRACE(("server_manager_thread: id = %d, entering poll...\n",
+            LIXA_TRACE(("server_manager_thread: id=%d, entering poll...\n",
                         ts->id));
             if (0 >= (ready_fd = poll(ts->poll_array, ts->poll_size, -1)))
                 THROW(POLL_ERROR);
@@ -246,10 +251,18 @@ void *server_manager_thread(void *void_ts)
                 if (ts->poll_array[i].revents & POLLIN) {
                     found_fd++;
                     if (!i) {
-                        if (LIXA_RC_OK != (
-                                ret_cod = server_manager_pollin_ctrl(
-                                    ts, ts->poll_array[i].fd)))
-                            THROW(POLLIN_CTRL_ERROR);
+                        ret_cod = server_manager_pollin_ctrl(
+                            ts, ts->poll_array[i].fd);
+                        if (LIXA_RC_ASKED_SHUTDOWN == ret_cod) {
+                            ts->asked_sync = TRUE;
+                            if (SHUTDOWN_FORCE == ts->shutdown_type) {
+                                LIXA_TRACE(("server_manager_thread: break "
+                                            "current loop to perform force "
+                                            "shutdown\n"));
+                                break;
+                            }
+                        } else if (LIXA_RC_OK != ret_cod)
+                                THROW(POLLIN_CTRL_ERROR);
                     } else {
                         ret_cod = server_manager_pollin_data(ts, i);
                         switch (ret_cod) {
@@ -321,6 +334,8 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
                      , NEW_CLIENT_ERROR
                      , SWITCH_2
                      , SWITCH_3
+                     , SHUTDOWN_ERROR
+                     , ASKED_SHUTDOWN
                      , INVALID_MESSAGE
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -342,14 +357,20 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
                     THROW(NEW_CLIENT_ERROR);
                 break;
             case SRV_MSG_TYPE_SWITCH_REQ:
-                if (LIXA_RC_OK != (ret_cod = server_manager_switch_2(
-                                       ts, &msg)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_manager_switch_2(ts, &msg)))
                     THROW(SWITCH_2);
                 break;
             case SRV_MSG_TYPE_SWITCH_REP:
-                if (LIXA_RC_OK != (ret_cod = server_manager_switch_3(
-                                       ts, &msg)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_manager_switch_3(ts, &msg)))
                     THROW(SWITCH_3);
+                break;
+            case SRV_MSG_TYPE_SHUTDOWN:
+                if (LIXA_RC_OK != (
+                        ret_cod = server_manager_shutdown(ts, &msg)))
+                    THROW(SHUTDOWN_ERROR);
+                THROW(ASKED_SHUTDOWN);
                 break;
             default:
                 THROW(INVALID_MESSAGE);
@@ -365,6 +386,10 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
             case NEW_CLIENT_ERROR:
             case SWITCH_2:
             case SWITCH_3:
+            case SHUTDOWN_ERROR:
+                break;
+            case ASKED_SHUTDOWN:
+                ret_cod = LIXA_RC_ASKED_SHUTDOWN;
                 break;
             case INVALID_MESSAGE:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -709,6 +734,45 @@ int server_manager_switch_3(struct thread_status_s *ts,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_switch_3/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_manager_shutdown(struct thread_status_s *ts,
+                            const struct srv_msg_s *msg)
+{
+    enum Exception { INVALID_TYPE
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_manager_shutdown\n"));
+    TRY {
+        switch (msg->body.sd.type) {
+            case SHUTDOWN_QUIESCE:
+            case SHUTDOWN_IMMEDIATE:
+            case SHUTDOWN_FORCE:
+                ts->shutdown_type = msg->body.sd.type;
+                break;
+            default:
+                THROW(INVALID_TYPE);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_TYPE:
+                ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_manager_shutdown/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

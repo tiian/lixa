@@ -84,6 +84,10 @@
  * The thread is serving the client must be switched to a different one
  */
 #define LIXA_RC_THREAD_SWITCH                   +8
+/**
+ * Shutdown must be performed
+ */
+#define LIXA_RC_ASKED_SHUTDOWN                  +9
 
 
 

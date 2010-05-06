@@ -76,7 +76,7 @@
     "premature exit"
 #define LIXA_SYSLOG_LXD005E "LXD005E error (%s) while starting listener(s), " \
     "premature exit"
-#define LIXA_SYSLOG_LXD006N "LXD006N this LIXA server is terminating"
+#define LIXA_SYSLOG_LXD006N "LXD006N this LIXA server ended"
 #define LIXA_SYSLOG_LXD007W "LXD007W first status file ('%s') did not pass " \
     "integrity check"
 #define LIXA_SYSLOG_LXD008W "LXD008W second status file ('%s') did not pass " \

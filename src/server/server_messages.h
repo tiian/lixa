@@ -131,20 +131,6 @@ struct srv_msg_body_switch_rep_s {
 
 
 /**
- * Three different types of shutdown  can be requested to LIXA server:
- * QUIESCE: the server will wait every transaction completed; no new
- *          transaction can be started
- * IMMEDIATE: the server will flush the connected clients, synchronize status
- *            files and exit
- * FORCE: the server will synchronize status files and abruptly exit
- */
-enum shutdown_type_e { SHUTDOWN_QUIESCE
-                       , SHUTDOWN_IMMEDIATE
-                       , SHUTDOWN_FORCE };
-
-
-
-/**
  * Shutdown has been requested by the operator
  */
 struct srv_msg_body_shutdown_s {

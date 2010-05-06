@@ -113,6 +113,21 @@
 
 
 /**
+ * Three different types of shutdown  can be requested to LIXA server:
+ * QUIESCE: the server will wait every transaction completed; no new
+ *          transaction can be started
+ * IMMEDIATE: the server will flush the connected clients, synchronize status
+ *            files and exit
+ * FORCE: the server will synchronize status files and abruptly exit
+ */
+enum shutdown_type_e { SHUTDOWN_NULL
+                       , SHUTDOWN_QUIESCE
+                       , SHUTDOWN_IMMEDIATE
+                       , SHUTDOWN_FORCE };
+
+
+
+/**
  * It contains the configuration common to any thread
  */
 struct thread_pipe_s {
@@ -619,6 +634,10 @@ struct thread_status_s {
      * Errno reported by the thread (after exit)
      */
     int                            last_errno;
+    /**
+     * Type of shutdown must be performed
+     */
+    enum shutdown_type_e           shutdown_type;
 };
 
 
