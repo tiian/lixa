@@ -148,6 +148,17 @@ extern "C" {
 
 
     /**
+     * Shutdown the current server
+     * @param ts IN/OUT thread status
+     * @param msg IN the shutdown message (sent by the signal handler routine)
+     * @return a standardized return code
+     */
+    int server_manager_shutdown(struct thread_status_s *ts,
+                                const struct srv_msg_s *msg);
+
+
+
+    /**
      * This method manages POLLOUT event on file descriptors when a session
      * previously asked to send back data to its client
      * @param ts IN/OUT thread status

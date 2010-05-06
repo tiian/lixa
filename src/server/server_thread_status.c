@@ -86,6 +86,7 @@ void thread_status_init(struct thread_status_s *ts,
         ts->tid = pthread_self();
     else
         ts->tid = 0;
+    ts->shutdown_type = SHUTDOWN_NULL;
     LIXA_TRACE(("thread_status_init: end initialization (id = %d)\n", id));
 }
 

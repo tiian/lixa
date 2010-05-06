@@ -208,6 +208,8 @@ int server_listener_loop(const struct server_config_s *sc,
 {
     enum Exception { MALLOC_ERROR
                      , POLL_ERROR
+                     , READ_ERROR
+                     , UNEXPECTED_MESSAGE
                      , NETWORK_EVENT_ERROR
                      , ACCEPT_ERROR
                      , FIND_MANAGER_ERROR
@@ -217,6 +219,7 @@ int server_listener_loop(const struct server_config_s *sc,
     
     LIXA_TRACE(("server_listener_loop\n"));
     TRY {
+        int shutdown = FALSE;    
         /* prepare pool array */
         nfds_t n = (nfds_t)lsa->n + 1;
         nfds_t i;
@@ -238,7 +241,7 @@ int server_listener_loop(const struct server_config_s *sc,
             ts->poll_array[i].events = POLLIN;
         } /* for (i = 0; i < n; ++i) */
 
-        while (TRUE) {
+        while (!shutdown) {
             LIXA_TRACE(("server_listener_loop: entering poll...\n"));
             while (TRUE) {
                 ready_fd = poll(ts->poll_array, ts->poll_size, -1);
@@ -247,7 +250,8 @@ int server_listener_loop(const struct server_config_s *sc,
                         continue;
                     else
                         THROW(POLL_ERROR);
-                }
+                } else
+                    break;
             }
             LIXA_TRACE(("server_listener_loop: ready file descriptors = %d\n",
                         ready_fd));
@@ -258,9 +262,9 @@ int server_listener_loop(const struct server_config_s *sc,
                 socklen_t clilen;
                 int conn_fd;
                 
-                LIXA_TRACE(("server_listener_loop: slot = " NFDS_T_FORMAT
-                            ", fd = %d, POLLIN = %d, POLLERR = %d, "
-                            "POLLHUP = %d, POLLNVAL = %d\n",
+                LIXA_TRACE(("server_listener_loop: slot=" NFDS_T_FORMAT
+                            ", fd=%d, POLLIN=%d, POLLERR=%d, "
+                            "POLLHUP=%d, POLLNVAL=%d\n",
                             i, ts->poll_array[i].fd,
                             ts->poll_array[i].revents & POLLIN,
                             ts->poll_array[i].revents & POLLERR,
@@ -277,43 +281,64 @@ int server_listener_loop(const struct server_config_s *sc,
                 }
                 
                 if (ts->poll_array[i].revents & POLLIN) {
-                    int manager_id = 0;
-                    struct srv_msg_s msg;
-                    
-                    clilen = sizeof(cliaddr);
-                    if (0 > (conn_fd = accept(ts->poll_array[i].fd,
-                                              (struct sockaddr *)&cliaddr,
-                                              &clilen)))
-                        THROW(ACCEPT_ERROR);
-                    LIXA_TRACE(("server_listener_loop: accepted new incoming "
-                                "connection from address '%s', port "
-                                IN_PORT_T_FORMAT ", fd = %d\n",
-                                inet_ntoa(cliaddr.sin_addr),
-                                ntohs(cliaddr.sin_port), conn_fd));
-                    /* choose a manager for this client */
-                    if (LIXA_RC_OK != (ret_cod = server_listener_find_manager(
-                                           tsa, &manager_id)))
-                        THROW(FIND_MANAGER_ERROR);
+                    if (!i) {
+                        /* control pipe */
+                        struct srv_msg_s msg;
+                        if (sizeof(msg) != read(ts->poll_array[i].fd, &msg,
+                                                sizeof(msg)))
+                            THROW(READ_ERROR);
+                        if (SRV_MSG_TYPE_SHUTDOWN != msg.type)
+                            THROW(UNEXPECTED_MESSAGE);
+                        shutdown = TRUE;
+                        break;
+                    } else {
+                        /* listening port */
+                        int manager_id = 0;
+                        struct srv_msg_s msg;
+                        
+                        clilen = sizeof(cliaddr);
+                        if (0 > (conn_fd = accept(ts->poll_array[i].fd,
+                                                  (struct sockaddr *)&cliaddr,
+                                                  &clilen)))
+                            THROW(ACCEPT_ERROR);
+                        LIXA_TRACE(("server_listener_loop: accepted new "
+                                    "incoming "
+                                    "connection from address '%s', port "
+                                    IN_PORT_T_FORMAT ", fd = %d\n",
+                                    inet_ntoa(cliaddr.sin_addr),
+                                    ntohs(cliaddr.sin_port), conn_fd));
+                        /* choose a manager for this client */
+                        if (LIXA_RC_OK != (ret_cod =
+                                           server_listener_find_manager(
+                                               tsa, &manager_id)))
+                            THROW(FIND_MANAGER_ERROR);
 
-                    /* prepare the message to signal the manager */
-                    memset(&msg, 0, sizeof(msg));
-                    msg.type = SRV_MSG_TYPE_NEW_CLIENT;
-                    msg.body.nc.fd = conn_fd;
-
-                    if (sizeof(msg) != write(
-                            ts->tpa->array[manager_id].pipefd[1], &msg,
-                            sizeof(msg)))
-                        THROW(WRITE_ERROR);
-                    
-                    found_fd++;
+                        /* prepare the message to signal the manager */
+                        memset(&msg, 0, sizeof(msg));
+                        msg.type = SRV_MSG_TYPE_NEW_CLIENT;
+                        msg.body.nc.fd = conn_fd;
+                        
+                        if (sizeof(msg) != write(
+                                ts->tpa->array[manager_id].pipefd[1], &msg,
+                                sizeof(msg)))
+                            THROW(WRITE_ERROR);
+                        
+                        found_fd++;
+                    }
                 }
-
                 /* @@@ */
                 
                 if (ready_fd == found_fd)
                     break; /* the loop is now useless */
             } /* for (i = 0; i < n; ++i) */
         } /* while (TRUE) */
+
+        for (i=1; i<tsa->n; ++i) {
+            LIXA_TRACE(("server_listener_loop: waiting thread id "
+                        PTHREAD_T_FORMAT " termination...\n",
+                        tsa->array[i].tid));
+            pthread_join(tsa->array[i].tid, NULL);
+        }
         
         THROW(NONE);
     } CATCH {
@@ -323,6 +348,12 @@ int server_listener_loop(const struct server_config_s *sc,
                 break;
             case POLL_ERROR:
                 ret_cod = LIXA_RC_POLL_ERROR;
+                break;
+            case READ_ERROR:
+                ret_cod = LIXA_RC_READ_ERROR;
+                break;
+            case UNEXPECTED_MESSAGE:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
             case NETWORK_EVENT_ERROR:
                 ret_cod = LIXA_RC_NETWORK_EVENT_ERROR;
@@ -410,11 +441,25 @@ int server_listener_find_manager(const struct thread_status_array_s *tsa,
 
 void server_listener_signal_action(int signo)
 {
+    int i;
     struct srv_msg_s msg;
     
     LIXA_TRACE(("server_listener_signal_action: signo=%d\n", signo));
     msg.type = SRV_MSG_TYPE_SHUTDOWN;
-    msg.body.sd.type = SHUTDOWN_FORCE;
+    if (SIGQUIT == signo)
+        msg.body.sd.type = SHUTDOWN_QUIESCE;
+    else if (SIGTERM == signo)
+        msg.body.sd.type = SHUTDOWN_IMMEDIATE;
+    else
+        msg.body.sd.type = SHUTDOWN_FORCE;
+
+    for (i=0; i<tpa.n; ++i) {
+        LIXA_TRACE(("server_listener_signal_action: sending message to "
+                    "thread id %d\n", i));
+        if (sizeof(msg) != write(tpa.array[i].pipefd[1], &msg, sizeof(msg)))
+            LIXA_TRACE(("server_listener_signal_action: error while writing "
+                        "to thread id %d (errno=%d)\n", i, errno));
+    }
 }
 
 
