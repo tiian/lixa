@@ -1,8 +1,8 @@
-AM_CPPFLAGS = -I../../src/client -I../../src/common \
+AM_CPPFLAGS = -DLIXA_MULTITHREAD=0 -I../../src/client -I../../src/common \
 	-I../../src/client/switch/lixa
 AM_CFLAGS = -Wall
-AM_LDFLAGS = -lpthread @LIBLTDL@ @LDFLAGS_GMODULE@
-LDADD = ../../src/common/liblixabmt.la ../../src/client/liblixacmt.la \
+#AM_LDFLAGS = -lpthread @LIBLTDL@ @LDFLAGS_GMODULE@
+LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 noinst_PROGRAMS = case0000 case0001 case0002 case0003
 case0000_SOURCES = case0000.c

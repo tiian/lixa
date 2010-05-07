@@ -70,8 +70,10 @@ GStaticMutex lixa_trace_mutex = G_STATIC_MUTEX_INIT;
 void lixa_trace_init(void)
 {
     if (!lixa_trace_initialized) {
+#if LIXA_MULTITHREAD == 1
         /* initialize thread system if necessary */
         if (!g_thread_supported ()) g_thread_init(NULL);
+#endif
         /* retrieve environemnt variable */
         if (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL)
             lixa_trace_mask = strtoul(

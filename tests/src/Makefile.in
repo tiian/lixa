@@ -50,26 +50,26 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_case0000_OBJECTS = case0000.$(OBJEXT)
 case0000_OBJECTS = $(am_case0000_OBJECTS)
 case0000_LDADD = $(LDADD)
-case0000_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0000_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0001_OBJECTS = case0001.$(OBJEXT)
 case0001_OBJECTS = $(am_case0001_OBJECTS)
 case0001_LDADD = $(LDADD)
-case0001_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0001_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0002_OBJECTS = case0002.$(OBJEXT)
 case0002_OBJECTS = $(am_case0002_OBJECTS)
 case0002_LDADD = $(LDADD)
-case0002_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0002_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0003_OBJECTS = case0003.$(OBJEXT)
 case0003_OBJECTS = $(am_case0003_OBJECTS)
 case0003_LDADD = $(LDADD)
-case0003_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0003_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -220,12 +220,12 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I../../src/client -I../../src/common \
+AM_CPPFLAGS = -DLIXA_MULTITHREAD=0 -I../../src/client -I../../src/common \
 	-I../../src/client/switch/lixa
 
 AM_CFLAGS = -Wall
-AM_LDFLAGS = -lpthread @LIBLTDL@ @LDFLAGS_GMODULE@
-LDADD = ../../src/common/liblixabmt.la ../../src/client/liblixacmt.la \
+#AM_LDFLAGS = -lpthread @LIBLTDL@ @LDFLAGS_GMODULE@
+LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 
 case0000_SOURCES = case0000.c

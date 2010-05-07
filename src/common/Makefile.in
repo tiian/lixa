@@ -56,19 +56,27 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixab_la_LIBADD =
-am_liblixab_la_OBJECTS = lixa_common_status.lo lixa_config.lo \
-	lixa_crash.lo lixa_errors.lo lixa_inst_conf.lo lixa_utils.lo \
-	lixa_trace.lo lixa_xml_msg.lo lixa_xml_msg_deserialize.lo \
-	lixa_xml_msg_serialize.lo lixa_xml_msg_trace.lo
+am_liblixab_la_OBJECTS = liblixab_la-lixa_common_status.lo \
+	liblixab_la-lixa_config.lo liblixab_la-lixa_crash.lo \
+	liblixab_la-lixa_errors.lo liblixab_la-lixa_inst_conf.lo \
+	liblixab_la-lixa_utils.lo liblixab_la-lixa_trace.lo \
+	liblixab_la-lixa_xml_msg.lo \
+	liblixab_la-lixa_xml_msg_deserialize.lo \
+	liblixab_la-lixa_xml_msg_serialize.lo \
+	liblixab_la-lixa_xml_msg_trace.lo
 liblixab_la_OBJECTS = $(am_liblixab_la_OBJECTS)
 liblixab_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(liblixab_la_LDFLAGS) $(LDFLAGS) -o $@
 liblixabmt_la_LIBADD =
-am_liblixabmt_la_OBJECTS = lixa_common_status.lo lixa_config.lo \
-	lixa_crash.lo lixa_errors.lo lixa_inst_conf.lo lixa_utils.lo \
-	lixa_trace.lo lixa_xml_msg.lo lixa_xml_msg_deserialize.lo \
-	lixa_xml_msg_serialize.lo lixa_xml_msg_trace.lo
+am_liblixabmt_la_OBJECTS = liblixabmt_la-lixa_common_status.lo \
+	liblixabmt_la-lixa_config.lo liblixabmt_la-lixa_crash.lo \
+	liblixabmt_la-lixa_errors.lo liblixabmt_la-lixa_inst_conf.lo \
+	liblixabmt_la-lixa_utils.lo liblixabmt_la-lixa_trace.lo \
+	liblixabmt_la-lixa_xml_msg.lo \
+	liblixabmt_la-lixa_xml_msg_deserialize.lo \
+	liblixabmt_la-lixa_xml_msg_serialize.lo \
+	liblixabmt_la-lixa_xml_msg_trace.lo
 liblixabmt_la_OBJECTS = $(am_liblixabmt_la_OBJECTS)
 liblixabmt_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -242,7 +250,9 @@ liblixabmt_la_SOURCES = lixa_common_status.c lixa_config.c lixa_crash.c \
 		lixa_xml_msg_serialize.c lixa_xml_msg_trace.c
 
 AM_CFLAGS = -Wall
+liblixab_la_CPPFLAGS = -DLIXA_MULTITHREAD=0
 liblixab_la_LDFLAGS = -luuid -version-info @LT_LIXAB_CURRENT@:@LT_LIXAB_REVISION@:@LT_LIXAB_AGE@
+liblixabmt_la_CPPFLAGS = -DLIXA_MULTITHREAD=1
 liblixabmt_la_LDFLAGS = -lpthread -luuid -version-info @LT_LIXAB_CURRENT@:@LT_LIXAB_REVISION@:@LT_LIXAB_AGE@
 all: all-am
 
@@ -317,17 +327,28 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_common_status.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_config.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_crash.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_errors.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_inst_conf.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_trace.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_utils.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_xml_msg.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_xml_msg_deserialize.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_xml_msg_serialize.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa_xml_msg_trace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixab_la-lixa_common_status.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixab_la-lixa_config.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixab_la-lixa_crash.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixab_la-lixa_errors.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixab_la-lixa_inst_conf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixab_la-lixa_trace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixab_la-lixa_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixab_la-lixa_xml_msg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixab_la-lixa_xml_msg_deserialize.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixab_la-lixa_xml_msg_serialize.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixab_la-lixa_xml_msg_trace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixabmt_la-lixa_common_status.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixabmt_la-lixa_config.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixabmt_la-lixa_crash.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixabmt_la-lixa_errors.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixabmt_la-lixa_inst_conf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixabmt_la-lixa_trace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixabmt_la-lixa_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixabmt_la-lixa_xml_msg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixabmt_la-lixa_xml_msg_deserialize.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixabmt_la-lixa_xml_msg_serialize.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixabmt_la-lixa_xml_msg_trace.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -349,6 +370,160 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+liblixab_la-lixa_common_status.lo: lixa_common_status.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixab_la-lixa_common_status.lo -MD -MP -MF $(DEPDIR)/liblixab_la-lixa_common_status.Tpo -c -o liblixab_la-lixa_common_status.lo `test -f 'lixa_common_status.c' || echo '$(srcdir)/'`lixa_common_status.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixab_la-lixa_common_status.Tpo $(DEPDIR)/liblixab_la-lixa_common_status.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_common_status.c' object='liblixab_la-lixa_common_status.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixab_la-lixa_common_status.lo `test -f 'lixa_common_status.c' || echo '$(srcdir)/'`lixa_common_status.c
+
+liblixab_la-lixa_config.lo: lixa_config.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixab_la-lixa_config.lo -MD -MP -MF $(DEPDIR)/liblixab_la-lixa_config.Tpo -c -o liblixab_la-lixa_config.lo `test -f 'lixa_config.c' || echo '$(srcdir)/'`lixa_config.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixab_la-lixa_config.Tpo $(DEPDIR)/liblixab_la-lixa_config.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_config.c' object='liblixab_la-lixa_config.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixab_la-lixa_config.lo `test -f 'lixa_config.c' || echo '$(srcdir)/'`lixa_config.c
+
+liblixab_la-lixa_crash.lo: lixa_crash.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixab_la-lixa_crash.lo -MD -MP -MF $(DEPDIR)/liblixab_la-lixa_crash.Tpo -c -o liblixab_la-lixa_crash.lo `test -f 'lixa_crash.c' || echo '$(srcdir)/'`lixa_crash.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixab_la-lixa_crash.Tpo $(DEPDIR)/liblixab_la-lixa_crash.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_crash.c' object='liblixab_la-lixa_crash.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixab_la-lixa_crash.lo `test -f 'lixa_crash.c' || echo '$(srcdir)/'`lixa_crash.c
+
+liblixab_la-lixa_errors.lo: lixa_errors.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixab_la-lixa_errors.lo -MD -MP -MF $(DEPDIR)/liblixab_la-lixa_errors.Tpo -c -o liblixab_la-lixa_errors.lo `test -f 'lixa_errors.c' || echo '$(srcdir)/'`lixa_errors.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixab_la-lixa_errors.Tpo $(DEPDIR)/liblixab_la-lixa_errors.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_errors.c' object='liblixab_la-lixa_errors.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixab_la-lixa_errors.lo `test -f 'lixa_errors.c' || echo '$(srcdir)/'`lixa_errors.c
+
+liblixab_la-lixa_inst_conf.lo: lixa_inst_conf.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixab_la-lixa_inst_conf.lo -MD -MP -MF $(DEPDIR)/liblixab_la-lixa_inst_conf.Tpo -c -o liblixab_la-lixa_inst_conf.lo `test -f 'lixa_inst_conf.c' || echo '$(srcdir)/'`lixa_inst_conf.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixab_la-lixa_inst_conf.Tpo $(DEPDIR)/liblixab_la-lixa_inst_conf.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_inst_conf.c' object='liblixab_la-lixa_inst_conf.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixab_la-lixa_inst_conf.lo `test -f 'lixa_inst_conf.c' || echo '$(srcdir)/'`lixa_inst_conf.c
+
+liblixab_la-lixa_utils.lo: lixa_utils.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixab_la-lixa_utils.lo -MD -MP -MF $(DEPDIR)/liblixab_la-lixa_utils.Tpo -c -o liblixab_la-lixa_utils.lo `test -f 'lixa_utils.c' || echo '$(srcdir)/'`lixa_utils.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixab_la-lixa_utils.Tpo $(DEPDIR)/liblixab_la-lixa_utils.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_utils.c' object='liblixab_la-lixa_utils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixab_la-lixa_utils.lo `test -f 'lixa_utils.c' || echo '$(srcdir)/'`lixa_utils.c
+
+liblixab_la-lixa_trace.lo: lixa_trace.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixab_la-lixa_trace.lo -MD -MP -MF $(DEPDIR)/liblixab_la-lixa_trace.Tpo -c -o liblixab_la-lixa_trace.lo `test -f 'lixa_trace.c' || echo '$(srcdir)/'`lixa_trace.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixab_la-lixa_trace.Tpo $(DEPDIR)/liblixab_la-lixa_trace.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_trace.c' object='liblixab_la-lixa_trace.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixab_la-lixa_trace.lo `test -f 'lixa_trace.c' || echo '$(srcdir)/'`lixa_trace.c
+
+liblixab_la-lixa_xml_msg.lo: lixa_xml_msg.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixab_la-lixa_xml_msg.lo -MD -MP -MF $(DEPDIR)/liblixab_la-lixa_xml_msg.Tpo -c -o liblixab_la-lixa_xml_msg.lo `test -f 'lixa_xml_msg.c' || echo '$(srcdir)/'`lixa_xml_msg.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixab_la-lixa_xml_msg.Tpo $(DEPDIR)/liblixab_la-lixa_xml_msg.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_xml_msg.c' object='liblixab_la-lixa_xml_msg.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixab_la-lixa_xml_msg.lo `test -f 'lixa_xml_msg.c' || echo '$(srcdir)/'`lixa_xml_msg.c
+
+liblixab_la-lixa_xml_msg_deserialize.lo: lixa_xml_msg_deserialize.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixab_la-lixa_xml_msg_deserialize.lo -MD -MP -MF $(DEPDIR)/liblixab_la-lixa_xml_msg_deserialize.Tpo -c -o liblixab_la-lixa_xml_msg_deserialize.lo `test -f 'lixa_xml_msg_deserialize.c' || echo '$(srcdir)/'`lixa_xml_msg_deserialize.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixab_la-lixa_xml_msg_deserialize.Tpo $(DEPDIR)/liblixab_la-lixa_xml_msg_deserialize.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_xml_msg_deserialize.c' object='liblixab_la-lixa_xml_msg_deserialize.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixab_la-lixa_xml_msg_deserialize.lo `test -f 'lixa_xml_msg_deserialize.c' || echo '$(srcdir)/'`lixa_xml_msg_deserialize.c
+
+liblixab_la-lixa_xml_msg_serialize.lo: lixa_xml_msg_serialize.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixab_la-lixa_xml_msg_serialize.lo -MD -MP -MF $(DEPDIR)/liblixab_la-lixa_xml_msg_serialize.Tpo -c -o liblixab_la-lixa_xml_msg_serialize.lo `test -f 'lixa_xml_msg_serialize.c' || echo '$(srcdir)/'`lixa_xml_msg_serialize.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixab_la-lixa_xml_msg_serialize.Tpo $(DEPDIR)/liblixab_la-lixa_xml_msg_serialize.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_xml_msg_serialize.c' object='liblixab_la-lixa_xml_msg_serialize.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixab_la-lixa_xml_msg_serialize.lo `test -f 'lixa_xml_msg_serialize.c' || echo '$(srcdir)/'`lixa_xml_msg_serialize.c
+
+liblixab_la-lixa_xml_msg_trace.lo: lixa_xml_msg_trace.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixab_la-lixa_xml_msg_trace.lo -MD -MP -MF $(DEPDIR)/liblixab_la-lixa_xml_msg_trace.Tpo -c -o liblixab_la-lixa_xml_msg_trace.lo `test -f 'lixa_xml_msg_trace.c' || echo '$(srcdir)/'`lixa_xml_msg_trace.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixab_la-lixa_xml_msg_trace.Tpo $(DEPDIR)/liblixab_la-lixa_xml_msg_trace.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_xml_msg_trace.c' object='liblixab_la-lixa_xml_msg_trace.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixab_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixab_la-lixa_xml_msg_trace.lo `test -f 'lixa_xml_msg_trace.c' || echo '$(srcdir)/'`lixa_xml_msg_trace.c
+
+liblixabmt_la-lixa_common_status.lo: lixa_common_status.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixabmt_la-lixa_common_status.lo -MD -MP -MF $(DEPDIR)/liblixabmt_la-lixa_common_status.Tpo -c -o liblixabmt_la-lixa_common_status.lo `test -f 'lixa_common_status.c' || echo '$(srcdir)/'`lixa_common_status.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixabmt_la-lixa_common_status.Tpo $(DEPDIR)/liblixabmt_la-lixa_common_status.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_common_status.c' object='liblixabmt_la-lixa_common_status.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixabmt_la-lixa_common_status.lo `test -f 'lixa_common_status.c' || echo '$(srcdir)/'`lixa_common_status.c
+
+liblixabmt_la-lixa_config.lo: lixa_config.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixabmt_la-lixa_config.lo -MD -MP -MF $(DEPDIR)/liblixabmt_la-lixa_config.Tpo -c -o liblixabmt_la-lixa_config.lo `test -f 'lixa_config.c' || echo '$(srcdir)/'`lixa_config.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixabmt_la-lixa_config.Tpo $(DEPDIR)/liblixabmt_la-lixa_config.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_config.c' object='liblixabmt_la-lixa_config.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixabmt_la-lixa_config.lo `test -f 'lixa_config.c' || echo '$(srcdir)/'`lixa_config.c
+
+liblixabmt_la-lixa_crash.lo: lixa_crash.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixabmt_la-lixa_crash.lo -MD -MP -MF $(DEPDIR)/liblixabmt_la-lixa_crash.Tpo -c -o liblixabmt_la-lixa_crash.lo `test -f 'lixa_crash.c' || echo '$(srcdir)/'`lixa_crash.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixabmt_la-lixa_crash.Tpo $(DEPDIR)/liblixabmt_la-lixa_crash.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_crash.c' object='liblixabmt_la-lixa_crash.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixabmt_la-lixa_crash.lo `test -f 'lixa_crash.c' || echo '$(srcdir)/'`lixa_crash.c
+
+liblixabmt_la-lixa_errors.lo: lixa_errors.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixabmt_la-lixa_errors.lo -MD -MP -MF $(DEPDIR)/liblixabmt_la-lixa_errors.Tpo -c -o liblixabmt_la-lixa_errors.lo `test -f 'lixa_errors.c' || echo '$(srcdir)/'`lixa_errors.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixabmt_la-lixa_errors.Tpo $(DEPDIR)/liblixabmt_la-lixa_errors.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_errors.c' object='liblixabmt_la-lixa_errors.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixabmt_la-lixa_errors.lo `test -f 'lixa_errors.c' || echo '$(srcdir)/'`lixa_errors.c
+
+liblixabmt_la-lixa_inst_conf.lo: lixa_inst_conf.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixabmt_la-lixa_inst_conf.lo -MD -MP -MF $(DEPDIR)/liblixabmt_la-lixa_inst_conf.Tpo -c -o liblixabmt_la-lixa_inst_conf.lo `test -f 'lixa_inst_conf.c' || echo '$(srcdir)/'`lixa_inst_conf.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixabmt_la-lixa_inst_conf.Tpo $(DEPDIR)/liblixabmt_la-lixa_inst_conf.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_inst_conf.c' object='liblixabmt_la-lixa_inst_conf.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixabmt_la-lixa_inst_conf.lo `test -f 'lixa_inst_conf.c' || echo '$(srcdir)/'`lixa_inst_conf.c
+
+liblixabmt_la-lixa_utils.lo: lixa_utils.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixabmt_la-lixa_utils.lo -MD -MP -MF $(DEPDIR)/liblixabmt_la-lixa_utils.Tpo -c -o liblixabmt_la-lixa_utils.lo `test -f 'lixa_utils.c' || echo '$(srcdir)/'`lixa_utils.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixabmt_la-lixa_utils.Tpo $(DEPDIR)/liblixabmt_la-lixa_utils.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_utils.c' object='liblixabmt_la-lixa_utils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixabmt_la-lixa_utils.lo `test -f 'lixa_utils.c' || echo '$(srcdir)/'`lixa_utils.c
+
+liblixabmt_la-lixa_trace.lo: lixa_trace.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixabmt_la-lixa_trace.lo -MD -MP -MF $(DEPDIR)/liblixabmt_la-lixa_trace.Tpo -c -o liblixabmt_la-lixa_trace.lo `test -f 'lixa_trace.c' || echo '$(srcdir)/'`lixa_trace.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixabmt_la-lixa_trace.Tpo $(DEPDIR)/liblixabmt_la-lixa_trace.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_trace.c' object='liblixabmt_la-lixa_trace.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixabmt_la-lixa_trace.lo `test -f 'lixa_trace.c' || echo '$(srcdir)/'`lixa_trace.c
+
+liblixabmt_la-lixa_xml_msg.lo: lixa_xml_msg.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixabmt_la-lixa_xml_msg.lo -MD -MP -MF $(DEPDIR)/liblixabmt_la-lixa_xml_msg.Tpo -c -o liblixabmt_la-lixa_xml_msg.lo `test -f 'lixa_xml_msg.c' || echo '$(srcdir)/'`lixa_xml_msg.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixabmt_la-lixa_xml_msg.Tpo $(DEPDIR)/liblixabmt_la-lixa_xml_msg.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_xml_msg.c' object='liblixabmt_la-lixa_xml_msg.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixabmt_la-lixa_xml_msg.lo `test -f 'lixa_xml_msg.c' || echo '$(srcdir)/'`lixa_xml_msg.c
+
+liblixabmt_la-lixa_xml_msg_deserialize.lo: lixa_xml_msg_deserialize.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixabmt_la-lixa_xml_msg_deserialize.lo -MD -MP -MF $(DEPDIR)/liblixabmt_la-lixa_xml_msg_deserialize.Tpo -c -o liblixabmt_la-lixa_xml_msg_deserialize.lo `test -f 'lixa_xml_msg_deserialize.c' || echo '$(srcdir)/'`lixa_xml_msg_deserialize.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixabmt_la-lixa_xml_msg_deserialize.Tpo $(DEPDIR)/liblixabmt_la-lixa_xml_msg_deserialize.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_xml_msg_deserialize.c' object='liblixabmt_la-lixa_xml_msg_deserialize.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixabmt_la-lixa_xml_msg_deserialize.lo `test -f 'lixa_xml_msg_deserialize.c' || echo '$(srcdir)/'`lixa_xml_msg_deserialize.c
+
+liblixabmt_la-lixa_xml_msg_serialize.lo: lixa_xml_msg_serialize.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixabmt_la-lixa_xml_msg_serialize.lo -MD -MP -MF $(DEPDIR)/liblixabmt_la-lixa_xml_msg_serialize.Tpo -c -o liblixabmt_la-lixa_xml_msg_serialize.lo `test -f 'lixa_xml_msg_serialize.c' || echo '$(srcdir)/'`lixa_xml_msg_serialize.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixabmt_la-lixa_xml_msg_serialize.Tpo $(DEPDIR)/liblixabmt_la-lixa_xml_msg_serialize.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_xml_msg_serialize.c' object='liblixabmt_la-lixa_xml_msg_serialize.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixabmt_la-lixa_xml_msg_serialize.lo `test -f 'lixa_xml_msg_serialize.c' || echo '$(srcdir)/'`lixa_xml_msg_serialize.c
+
+liblixabmt_la-lixa_xml_msg_trace.lo: lixa_xml_msg_trace.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixabmt_la-lixa_xml_msg_trace.lo -MD -MP -MF $(DEPDIR)/liblixabmt_la-lixa_xml_msg_trace.Tpo -c -o liblixabmt_la-lixa_xml_msg_trace.lo `test -f 'lixa_xml_msg_trace.c' || echo '$(srcdir)/'`lixa_xml_msg_trace.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/liblixabmt_la-lixa_xml_msg_trace.Tpo $(DEPDIR)/liblixabmt_la-lixa_xml_msg_trace.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixa_xml_msg_trace.c' object='liblixabmt_la-lixa_xml_msg_trace.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixabmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixabmt_la-lixa_xml_msg_trace.lo `test -f 'lixa_xml_msg_trace.c' || echo '$(srcdir)/'`lixa_xml_msg_trace.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
