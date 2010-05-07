@@ -9,6 +9,7 @@ libxml2 and glib2 configuration.
 If your libxml2 and/or glib2 are not configured with pkg-config, you could try
 to export standard Automake shell variables to supply include and library
 paths.
+libuuid is another requirement
 
 This is an example if the libxml2 headers are not in standard include 
 directory and it's not pkg-config configured: use this command
@@ -18,6 +19,10 @@ Example: my libxml2 header files are rooted at /usr/include/libxml2
 	export CPPFLAGS=-I/usr/include/libxml2
 	./configure
 	make
+
+Test cases are executed with autotest tool. If you are interested in testing
+the build before installing it, use:
+	make check
 
 You must set LIXA_TRACE_MASK environment variable according to values 
 described in file src/common/lixa_trace.h to see debug output messages
@@ -120,6 +125,5 @@ libglib2
 libuuid 
 
 glib2-0
-libuuid
 libltdl
 

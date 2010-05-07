@@ -16,5 +16,8 @@ liblixabmt_la_SOURCES = lixa_common_status.c lixa_config.c lixa_crash.c \
 		lixa_trace.c lixa_xml_msg.c lixa_xml_msg_deserialize.c \
 		lixa_xml_msg_serialize.c lixa_xml_msg_trace.c
 AM_CFLAGS = -Wall
+liblixab_la_CPPFLAGS = -DLIXA_MULTITHREAD=0
 liblixab_la_LDFLAGS = -luuid -version-info @LT_LIXAB_CURRENT@:@LT_LIXAB_REVISION@:@LT_LIXAB_AGE@
+liblixabmt_la_CPPFLAGS = -DLIXA_MULTITHREAD=1
 liblixabmt_la_LDFLAGS = -lpthread -luuid -version-info @LT_LIXAB_CURRENT@:@LT_LIXAB_REVISION@:@LT_LIXAB_AGE@
+

@@ -4,6 +4,7 @@ AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
+  doc/Makefile
   etc/lixac_conf.xml
   etc/lixad_conf.xml
   etc/Makefile
@@ -15,7 +16,6 @@ AC_CONFIG_FILES([
   src/client/switch/lixa/Makefile
   src/client/switch/ibmdb2/Makefile
   src/client/switch/oracle/Makefile
-  src/extra/Makefile
   src/server/Makefile
   src/sample/Makefile
   src/sample/ibmdb2/Makefile

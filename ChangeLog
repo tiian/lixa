@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.3.16 fixed bug 2944441
+20100507 - 0.3.16 fixed bugs # 2944441, # 2978075
                   partially implemented rfnf 2963164
 
 20100501 - 0.3.15 implemented test case infrastructure
@@ -17,7 +17,7 @@ LOG:
                   IBM DB2; implemented but not tested dynamic registration for
                   Oracle
 
-20100411 - 0.3.12 fixed bug # 2984162, # 2984162
+20100411 - 0.3.12 fixed bugs # 2984162, # 2984162
 
 20100409 - 0.3.11 fixed bug # 2907563
 
@@ -45,50 +45,3 @@ LOG:
 
 20090330 - 0.1.0 first very early release, the daemon compiles and run, but is
            useless
-
-TODO:
-2009032901
-liblixacommon is compiled with POSIX thread enabled; when a non POSIX
-thread enable version of "client" will be released, liblixacommon must be
-double compiled (single and multithread)
-
-2009040701
-lixad_conf.xml should be validated against a DTD or a schema to detect
-malformed configuration files
-
-2009040702
-lixad should be able to run as a console process, not only as a daemon, for
-debug purpouses. It's sufficient to skip "daemonize()" function and it seems
-all works in console environment
-*** SOLVED *** 20100228: see -d command line option for lixad pro
-
-2009051201
-client status collection index could use a double array instead of allocating
-and freeing the array every time insert/delete operation is asked
-
-2009051401
-a client that performs a lot of tx_open/tx_close can saturate all the available
-TCP/IP connection and "connect" functions fail.
-SO_LINGER could be a "solution", but this may generate different issues as
-W. Richard Stevens explained in "UNIX network programming".
-
-2009081601
-conditional compilation should allow to compile/not compile Oracle related
-stuff; unfortunately I was not able to set AM_CONDITIONAL properly to address
-the result. It must be reworked later.
-*** SOLVED *** 20090925: now conditional compilation works fine for Oracle
-related stuff.
-
-2009101001
-libxml2 include and library path should be specified using configure standards
-and not with an exported shell variable (include files and library can be at
-different rooted path, so 3 configure options must be implemented):
---with-libxml2=[DIR]
---with-libxml2-include=[DIR]
---with-libxml2-lib=[DIR]
-*** SOLVED *** 20091030: now pkg-config is used instead of command line options
-
-2009111301
-if a server thread receives an error, some recovery action must happen
-(nowaday the listener is not informed and all the server hang when all the
-threads exited)  
