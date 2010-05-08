@@ -57,7 +57,6 @@ int tx_commit(void)
     int txrc2 = TX_FAIL;
     int begin_new = FALSE;
     lixa_tx_commit(&txrc1, &begin_new);
-    printf("txrc1 = %d\n", txrc1);
     if (begin_new) {
         lixa_tx_begin(&txrc2);
         if (TX_OK != txrc2) {
@@ -80,7 +79,6 @@ int tx_commit(void)
         }
     } else
         txrc2 = txrc1;
-    printf("txrc2 = %d\n", txrc2);
     return txrc2;
 }
 

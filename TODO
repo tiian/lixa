@@ -1,5 +1,4 @@
-
-When server_manager_thread exits, the listener must be aware of this... 
+Implement last step of server_manager_thread_cleanup (send notification...)
 
 Remove all @@@ from source code: every one was/is an "open point"
 

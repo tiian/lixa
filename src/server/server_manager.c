@@ -316,14 +316,53 @@ void *server_manager_thread(void *void_ts)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* update thread status */
+        ts->excp = excp;
+        ts->ret_cod = ret_cod;
+        ts->last_errno = errno;
+        /* call clean-up routine */
+        server_manager_thread_cleanup(ts);
     } /* TRY-CATCH */
-    ts->excp = excp;
-    ts->ret_cod = ret_cod;
-    ts->last_errno = errno;
     LIXA_TRACE(("server_manager_thread/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     pthread_exit(void_ts);
 }
+
+
+
+void server_manager_thread_cleanup(struct thread_status_s *ts)
+{
+    /* closing control pipe input fd */
+    int fd, i;
+
+    fd = ts->tpa->array[ts->id].pipefd[1];
+    LIXA_TRACE(("server_manager_thread_cleanup: closing writer control pipe "
+                "...\n"));
+    ts->tpa->array[ts->id].pipefd[1] = LIXA_NULL_FD;
+    LIXA_TRACE(("server_manager_thread_cleanup: close(%d)=%d, errno=%d\n",
+                fd, close(fd), errno));
+
+    fd = ts->tpa->array[ts->id].pipefd[0];
+    LIXA_TRACE(("server_manager_thread_cleanup: closing reader control pipe "
+                "...\n"));
+    ts->tpa->array[ts->id].pipefd[0] = LIXA_NULL_FD;
+    LIXA_TRACE(("server_manager_thread_cleanup: close(%d)=%d, errno=%d\n",
+                fd, close(fd), errno));
+
+    /* scan all file descriptors and close it */
+    for (i=1; i<ts->poll_size; ++i) {
+        if (ts->poll_array[i].fd == LIXA_NULL_FD)
+            continue;
+        fd = ts->poll_array[i].fd;
+        LIXA_TRACE(("server_manager_thread_cleanup: closing socket...\n"));
+        ts->poll_array[i].fd = LIXA_NULL_FD;
+        LIXA_TRACE(("server_manager_thread_cleanup: close(%d)=%d, errno=%d\n",
+                    fd, close(fd), errno));
+    }
+    
+    return;
+}
+
 
 
 
