@@ -1,4 +1,5 @@
-Implement last step of server_manager_thread_cleanup (send notification...)
+Modify listener to avoid dispatching a client to a server exited (server_listener_find_manager). What about transaction "marooned" inside a dead thread? Is it better to close the whole server...??? (I may be...)
+Recognize THREAD_END message from other threads...
 
 Remove all @@@ from source code: every one was/is an "open point"
 
