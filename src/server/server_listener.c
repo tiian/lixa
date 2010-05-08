@@ -454,8 +454,13 @@ void server_listener_signal_action(int signo)
         msg.body.sd.type = SHUTDOWN_FORCE;
 
     for (i=0; i<tpa.n; ++i) {
-        LIXA_TRACE(("server_listener_signal_action: sending message to "
-                    "thread id %d\n", i));
+        if (LIXA_NULL_FD == tpa.array[i].pipefd[1]) {
+            LIXA_TRACE(("server_listener_signal_action: thread id %d closed "
+                        "control pipe, skipping...\n", i));
+            continue;
+        } else 
+            LIXA_TRACE(("server_listener_signal_action: sending message to "
+                        "thread id %d\n", i));
         if (sizeof(msg) != write(tpa.array[i].pipefd[1], &msg, sizeof(msg)))
             LIXA_TRACE(("server_listener_signal_action: error while writing "
                         "to thread id %d (errno=%d)\n", i, errno));

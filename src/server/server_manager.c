@@ -334,6 +334,7 @@ void server_manager_thread_cleanup(struct thread_status_s *ts)
 {
     /* closing control pipe input fd */
     int fd, i;
+    struct srv_msg_s msg;
 
     fd = ts->tpa->array[ts->id].pipefd[1];
     LIXA_TRACE(("server_manager_thread_cleanup: closing writer control pipe "
@@ -359,10 +360,29 @@ void server_manager_thread_cleanup(struct thread_status_s *ts)
         LIXA_TRACE(("server_manager_thread_cleanup: close(%d)=%d, errno=%d\n",
                     fd, close(fd), errno));
     }
+
+    /* notify thread end to other threads */
+    msg.type = SRV_MSG_TYPE_THREAD_END;
+    msg.body.te.excp = ts->excp;
+    msg.body.te.ret_cod = ts->ret_cod;
+    msg.body.te.last_errno = ts->last_errno;
+    for (i=0; i<tpa.n; ++i) {
+        if (i == ts->id)
+            continue; /* skipping myself */
+        if (LIXA_NULL_FD == tpa.array[i].pipefd[1]) {
+            LIXA_TRACE(("server_manager_thread_cleanup: thread id %d closed "
+                        "control pipe, skipping...\n", i));
+            continue;
+        } else 
+            LIXA_TRACE(("server_manager_thread_cleanup: sending message to "
+                        "thread id %d\n", i));
+        if (sizeof(msg) != write(tpa.array[i].pipefd[1], &msg, sizeof(msg)))
+            LIXA_TRACE(("server_manager_thread_cleanup: error while writing "
+                        "to thread id %d (errno=%d)\n", i, errno));
+    }
     
     return;
 }
-
 
 
 

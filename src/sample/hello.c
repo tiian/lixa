@@ -42,9 +42,9 @@ int main(int argc, char *argv[])
     printf("lixa hello: tx_set_transaction_control(): %d\n",
            tx_set_transaction_control(TX_UNCHAINED));
     printf("lixa hello: tx_set_transaction_timeout(): %d\n",
-           tx_set_transaction_timeout(2));
+           tx_set_transaction_timeout(3));
     printf("lixa hello: tx_begin(): %d\n", tx_begin());
-    sleep(1);
+    sleep(2);
     printf("lixa hello: tx_info(): %d\n", tx_info(&info));
     printf("lixa hello: tx_commit(): %d\n", tx_commit());
     /*
