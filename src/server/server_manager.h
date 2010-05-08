@@ -86,6 +86,18 @@ extern "C" {
 
 
     /**
+     * Clean-up the server environment: <br>
+     * - reset element in thread pipe array (to avoid another thread
+     *   communication) <br>
+     * - close file descriptors (all: sockets and control pipe) <br>
+     * - send notification message to all the other threads <br>
+     * @param ts IN thread status reference
+     */
+    void server_manager_thread_cleanup(struct thread_status_s *ts);
+
+
+    
+    /**
      * This method manages POLLIN event on file descriptors when it happens
      * due to internal control actions
      * @param ts IN/OUT thread status
