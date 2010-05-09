@@ -92,7 +92,7 @@ extern "C" {
      * @return a reason code
      */
     int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate);
-    
+
 
 
     /**

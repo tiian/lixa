@@ -662,21 +662,21 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                         cs->rmstates->len, global_ccc.actconf.rsrmgrs->len));
             THROW(OBJ_CORRUPTED);
         }
-        
+
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
-
+        
         /* build the message */
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.pvs.verb = LIXA_MSG_VERB_OPEN;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
-
+        
         client.job = (xmlChar *)lixa_job_get_raw(global_ccc.job);
         strncpy(client.config_digest,
                 global_ccc.config_digest, sizeof(md5_digest_hex_t));
         client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
         msg.body.open_8.client = client;
-
+        
         msg.body.open_8.rsrmgrs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_open_8_rsrmgr_s),
@@ -689,14 +689,15 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
             record.dynamic = act_rsrmgr->xa_switch->flags & TMREGISTER ?
                 1 : 0;
             record.name = act_rsrmgr->generic->name;
-            record.xa_name = (xmlChar *)act_rsrmgr->xa_switch->name;
-            g_array_append_val(msg.body.open_8.rsrmgrs, record);
+                record.xa_name = (xmlChar *)act_rsrmgr->xa_switch->name;
+                g_array_append_val(msg.body.open_8.rsrmgrs, record);
         }
-
+        
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer)-1, &buffer_size)))
+                               &msg, buffer, sizeof(buffer)-1,
+                               &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR1);
-
+        
         /* this object contains a lot of references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
@@ -708,7 +709,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                     buffer_size, buffer));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR1);
-
+        
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
                                fd, buffer, sizeof(buffer)-1, &read_bytes)))
             THROW(MSG_RETRIEVE_ERROR);
@@ -730,7 +731,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                         "PENDING condition\n"));
         } else if (LIXA_RC_OK != ret_cod)
             THROW(ERROR_FROM_SERVER);
-
+        
         /* prepare the next message */
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.pvs.verb = LIXA_MSG_VERB_OPEN;
@@ -790,11 +791,11 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                 lixa_tx_rc_hierarchy(*txrc))
                 *txrc = tmp_txrc;
         } /* for (i=0; ...) */
-        
+
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR2);
-
+        
         /* this object contains references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
@@ -805,10 +806,10 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
                     " bytes to the server for step 24\n", buffer_size));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR2);
-
+        
         if (TX_OK != *txrc)
             THROW(XA_ERROR);
-
+        
         /* manage recovery pending phase (see doc/seq_diagr.txt) */
         if (recovery_pending &&
             LIXA_RC_OK != (ret_cod = client_recovery(cs, &client)))
