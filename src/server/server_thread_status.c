@@ -63,9 +63,8 @@
 
 
 
-void thread_status_init(struct thread_status_s *ts,
-                        int id,
-                        struct thread_pipe_array_s *tpa)
+void thread_status_init(struct thread_status_s *ts, int id,
+                        struct thread_pipe_array_s *tpa, int mmode)
 {
     LIXA_TRACE(("thread_status_init: initializing thread status (id = %d)\n",
                 id));
@@ -81,6 +80,7 @@ void thread_status_init(struct thread_status_s *ts,
     ts->curr_status = NULL;
     ts->updated_records = g_tree_new(size_t_compare_func);
     ts->recovery_table = NULL;
+    ts->mmode = mmode;
     ts->excp = ts->ret_cod = ts->last_errno = 0;
     if (id == 0)
         ts->tid = pthread_self();

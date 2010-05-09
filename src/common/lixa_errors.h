@@ -88,6 +88,10 @@
  * Shutdown must be performed
  */
 #define LIXA_RC_ASKED_SHUTDOWN                  +9
+/**
+ * Only maintenance mode is allowed
+ */
+#define LIXA_RC_MAINTENANCE_MODE               +10
 
 
 

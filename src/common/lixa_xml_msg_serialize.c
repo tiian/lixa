@@ -714,8 +714,7 @@ int lixa_msg_serialize_end_24(const struct lixa_msg_s *msg,
 
 
 
-int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg,
-                              char *buffer,
+int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg, char *buffer,
                               size_t *offset, size_t *free_chars)
 {
     enum Exception { BUFFER_TOO_SHORT1
@@ -732,12 +731,14 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg,
         
         /* <client> */
         used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%s\" %s=\"%s\"/>",
+                              "<%s %s=\"%s\" %s=\"%s\" %s=\"%d\"/>",
                               LIXA_XML_MSG_TAG_CLIENT,
                               LIXA_XML_MSG_PROP_JOB,
                               msg->body.open_8.client.job,
                               LIXA_XML_MSG_PROP_CONFIG_DIGEST,
-                              msg->body.open_8.client.config_digest);
+                              msg->body.open_8.client.config_digest,
+                              LIXA_XML_MSG_PROP_MAINT,
+                              msg->body.open_8.client.maint);
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT1);
         *free_chars -= used_chars;

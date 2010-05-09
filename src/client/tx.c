@@ -96,7 +96,7 @@ int tx_info(TXINFO *info)
 int tx_open(void)
 {
     int txrc = TX_FAIL;
-    lixa_tx_open(&txrc);
+    lixa_tx_open(&txrc, FALSE);
     return txrc;
 }
 

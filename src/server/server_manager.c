@@ -57,7 +57,7 @@
 int server_manager(struct server_config_s *sc,
                    struct thread_pipe_array_s *tpa,
                    struct thread_status_array_s *tsa,
-                   srvr_rcvr_tbl_t *srt, int dump)
+                   srvr_rcvr_tbl_t *srt, int dump, int mmode)
 {
     enum Exception { SRVR_RCVR_TBL_NEW_ERROR
                      , MALLOC_ERROR
@@ -87,7 +87,7 @@ int server_manager(struct server_config_s *sc,
         /* first thread slot is for listener: it's the main thread of the
          * process, it's IMPLICITLY created */
         for (i = 0; i < tsa->n; ++i) {
-            thread_status_init(&(tsa->array[i]), i, tpa);
+            thread_status_init(&(tsa->array[i]), i, tpa, mmode);
             if (i) {
                 /* load status file for thread != listener */
                 if (LIXA_RC_OK != (
@@ -321,8 +321,8 @@ void *server_manager_thread(void *void_ts)
         ts->ret_cod = ret_cod;
         ts->last_errno = errno;
         if (NONE != excp)
-            syslog(LOG_CRIT, LIXA_SYSLOG_LXD018C, ts->id, ts->excp, ts->ret_cod,
-                   ts->last_errno);
+            syslog(LOG_CRIT, LIXA_SYSLOG_LXD018C, ts->id, ts->excp,
+                   ts->ret_cod, ts->last_errno);
         /* call clean-up routine */
         server_manager_thread_cleanup(ts);
     } /* TRY-CATCH */
@@ -528,6 +528,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
         } else if (LIXA_RC_OK == ret_cod) {
             struct thread_status_switch_s *tss =
                 &(ts->client_array[slot_id].switch_thread);
+            uint32_t block_id = ts->client_array[slot_id].pers_status_slot_id;
             /* XML message to process from client */
             ret_cod = server_manager_msg_proc(ts, slot_id, buf, read_bytes);
             switch (ret_cod) {
@@ -544,6 +545,10 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                     tss->buffer[read_bytes] = '\0';
                     tss->buffer_size = read_bytes;
                     THROW(THREAD_SWITCH);
+                case LIXA_RC_MAINTENANCE_MODE:
+                    /* @@@ this point needs a procedure to force shutdown a
+                       client ... */
+                    break;
                 default:
                     THROW(XML_PROC);
             }
@@ -974,6 +979,7 @@ int server_manager_msg_proc(struct thread_status_s *ts,
                             size_t slot_id, char *buf, ssize_t read_bytes)
 {
     enum Exception { THREAD_SWITCH
+                     , MAINTENANCE_MODE
                      , OUTMSG_PREP_ERROR
                      , INMSG_PROC_ERROR
                      , NONE } excp;
@@ -998,6 +1004,9 @@ int server_manager_msg_proc(struct thread_status_s *ts,
             THROW(OUTMSG_PREP_ERROR);
         }
 
+        if (LIXA_RC_MAINTENANCE_MODE == rc)
+            THROW(MAINTENANCE_MODE);
+        
         if (LIXA_RC_OK != rc && LIXA_RC_RECOVERY_PENDING_TX != rc) {
             LIXA_TRACE(("server_manager_msg_proc: server_manager_inmsg_prep "
                         "return code is %d\n", rc));
@@ -1009,6 +1018,9 @@ int server_manager_msg_proc(struct thread_status_s *ts,
         switch (excp) {
             case THREAD_SWITCH:
                 ret_cod = LIXA_RC_THREAD_SWITCH;
+                break;
+            case MAINTENANCE_MODE:
+                ret_cod = rc;
                 break;
             case OUTMSG_PREP_ERROR:
             case INMSG_PROC_ERROR:

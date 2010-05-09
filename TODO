@@ -1,3 +1,7 @@
+server_manager_polling_data, row 549: restart from here while implementing
+maintenance mode for lixad
+
+go on with bug 2983464 fixing...
 
 Remove all @@@ from source code: every one was/is an "open point"
 

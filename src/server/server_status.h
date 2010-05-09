@@ -623,6 +623,12 @@ struct thread_status_s {
      */
     srvr_rcvr_tbl_t               *recovery_table;
     /**
+     * Maintenance mode (boolean value): only privileged clients can connect
+     * to the server; this status is used to perform special maintenance
+     * activities
+     */
+    int                            mmode;
+    /**
      * Exception reported by the thread (after exit)
      */
     int                            excp;

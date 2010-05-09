@@ -566,7 +566,7 @@ int lixa_tx_info(int *txrc, TXINFO *info)
 
 
 
-int lixa_tx_open(int *txrc)
+int lixa_tx_open(int *txrc, int mmode)
 {
     enum Exception { CLIENT_STATUS_COLL_GET_CS_ERROR
                      , CLIENT_STATUS_COLL_REGISTER_ERROR
@@ -622,7 +622,7 @@ int lixa_tx_open(int *txrc)
             
             /* the real logic must be put here */
             if (LIXA_RC_OK != (ret_cod = lixa_xa_open(
-                                   cs, &tmp_txrc, next_txstate)))
+                                   cs, &tmp_txrc, next_txstate, mmode)))
                 THROW(LIXA_XA_OPEN_ERROR);
             
             /* set new state after RMs are open... */

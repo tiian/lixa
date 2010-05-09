@@ -548,6 +548,7 @@ int server_xa_open_8(struct thread_status_s *ts,
                      struct lixa_msg_verb_step_s *last_verb_step)
 {
     enum Exception { RSRMGRS_ARRAY_NULL
+                     , MAINTENANCE_MODE
                      , TOO_MANY_RSRMGRS
                      , PAYLOAD_CHAIN_ALLOCATE_ERROR
                      , NONE } excp;
@@ -562,6 +563,20 @@ int server_xa_open_8(struct thread_status_s *ts,
         if (NULL == lmi->body.open_8.rsrmgrs)
             THROW(RSRMGRS_ARRAY_NULL);
 #endif /* LIXA_DEBUG */
+
+        if (ts->mmode && !lmi->body.open_8.client.maint) {
+            /* server in maintenance mode, client not in maintenance mode */
+            LIXA_TRACE(("server_xa_open_8: connected client is not operating "
+                        "in maintenance mode while server was started in "
+                        "maintenance mode; closing client connection...\n"));
+            /* prepare output message */
+            lmo->header.pvs.verb = lmi->header.pvs.verb;
+            /* prepare next protocol step */
+            last_verb_step->verb = lmo->header.pvs.verb;
+            last_verb_step->step = lmo->header.pvs.step;
+            THROW(MAINTENANCE_MODE);
+        }
+        
         if (lmi->body.open_8.rsrmgrs->len > CHAIN_MAX_SIZE) {
             LIXA_TRACE(("server_xa_open_8: message arrived from client "
                         "would use %u (max is %u) child blocks\n",
@@ -569,9 +584,10 @@ int server_xa_open_8(struct thread_status_s *ts,
                         CHAIN_MAX_SIZE));
             THROW(TOO_MANY_RSRMGRS);
         }
-
+        
         if (LIXA_RC_OK != (ret_cod = payload_chain_allocate(
-                               ts, block_id, lmi->body.open_8.rsrmgrs->len)))
+                               ts, block_id,
+                               lmi->body.open_8.rsrmgrs->len)))
             THROW(PAYLOAD_CHAIN_ALLOCATE_ERROR);
 
         /* retrieve header information */
@@ -579,28 +595,28 @@ int server_xa_open_8(struct thread_status_s *ts,
                 lmi->body.open_8.client.config_digest,
                 sizeof(md5_digest_hex_t));
         lixa_job_set_raw(&(ts->curr_status[block_id].sr.data.pld.ph.job),
-                         (char *)lmi->body.open_8.client.job);
+                             (char *)lmi->body.open_8.client.job);
         
         for (i=0; i<lmi->body.open_8.rsrmgrs->len; ++i) {
             status_record_t *sr;
-            struct lixa_msg_body_open_8_rsrmgr_s *rsrmgr;
-            sr = ts->curr_status +
-                ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
-            rsrmgr = &g_array_index(lmi->body.open_8.rsrmgrs,
-                                    struct lixa_msg_body_open_8_rsrmgr_s,
-                                    i);
-            sr->sr.data.pld.rm.rmid = rsrmgr->rmid;
-            strncpy(sr->sr.data.pld.rm.name, (char *)rsrmgr->name,
-                    PAYLOAD_RSRMGR_NAME_MAX);
-            common_status_rsrmgr_init(&sr->sr.data.pld.rm.state,
-                                      rsrmgr->dynamic);
-            sr->sr.data.pld.rm.name[PAYLOAD_RSRMGR_NAME_MAX - 1] = '\0';
-            strncpy(sr->sr.data.pld.rm.xa_name, (char *)rsrmgr->xa_name,
-                    RMNAMESZ);
-            sr->sr.data.pld.rm.xa_name[RMNAMESZ - 1] = '\0';
-            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_OPEN;
+                struct lixa_msg_body_open_8_rsrmgr_s *rsrmgr;
+                sr = ts->curr_status +
+                    ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
+                rsrmgr = &g_array_index(lmi->body.open_8.rsrmgrs,
+                                        struct lixa_msg_body_open_8_rsrmgr_s,
+                                        i);
+                sr->sr.data.pld.rm.rmid = rsrmgr->rmid;
+                strncpy(sr->sr.data.pld.rm.name, (char *)rsrmgr->name,
+                        PAYLOAD_RSRMGR_NAME_MAX);
+                common_status_rsrmgr_init(&sr->sr.data.pld.rm.state,
+                                          rsrmgr->dynamic);
+                sr->sr.data.pld.rm.name[PAYLOAD_RSRMGR_NAME_MAX - 1] = '\0';
+                strncpy(sr->sr.data.pld.rm.xa_name, (char *)rsrmgr->xa_name,
+                        RMNAMESZ);
+                sr->sr.data.pld.rm.xa_name[RMNAMESZ - 1] = '\0';
+                sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_OPEN;
         }
-
+        
         /* prepare output message */
         lmo->header.pvs.verb = lmi->header.pvs.verb;
         /* prepare next protocol step */
@@ -615,8 +631,12 @@ int server_xa_open_8(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
 #endif /* LIXA_DEBUG */
+            case MAINTENANCE_MODE:
+                ret_cod = LIXA_RC_MAINTENANCE_MODE;
+                break;
             case TOO_MANY_RSRMGRS:
                 ret_cod = LIXA_RC_TOO_MANY_RSRMGRS;
+                break;
             case PAYLOAD_CHAIN_ALLOCATE_ERROR:
                 break;
             case NONE:

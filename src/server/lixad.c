@@ -91,6 +91,7 @@ void daemonize(const char *pid_file_name);
 
 /* default command line options */
 static gboolean run_as_daemon = FALSE;
+static gboolean maintenance = FALSE;
 static gboolean dump_and_exit = FALSE;
 static char *config_file = NULL;
 static gboolean print_version = FALSE;
@@ -98,6 +99,7 @@ static gboolean print_version = FALSE;
 static GOptionEntry entries[] =
 {
     { "daemon", 'd', 0, G_OPTION_ARG_NONE, &run_as_daemon, "Run the process as a daemon", NULL },
+    { "maintenance", 'm', 0, G_OPTION_ARG_NONE, &maintenance, "Start the server in maintenance mode only", NULL },
     { "dump", 'u', 0, G_OPTION_ARG_NONE, &dump_and_exit, "Dump the content of status files and exit", NULL },
     { "config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Use the desired configuration file", NULL },
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
@@ -145,6 +147,9 @@ int main(int argc, char *argv[])
         run_as_daemon = FALSE;
     }
 
+    if (maintenance)
+        syslog(LOG_WARNING, LIXA_SYSLOG_LXD020N);
+    
     /* initialize libxml2 library */
     LIBXML_TEST_VERSION;
 
@@ -167,8 +172,9 @@ int main(int argc, char *argv[])
     }
     
     /* start configured manager(s) */
-    if (LIXA_RC_OK != (rc = server_manager(&sc, &tpa, &tsa, &srt,
-                                           dump_and_exit))) {
+    if (LIXA_RC_OK != (rc = server_manager(
+                           &sc, &tpa, &tsa, &srt, dump_and_exit,
+                           maintenance))) {
         LIXA_TRACE(("main/server_manager: rc = %d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD004E, lixa_strerror(rc));
         return rc;
