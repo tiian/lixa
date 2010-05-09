@@ -89,9 +89,11 @@ extern "C" {
      * @param txrc OUT return code prepared for tx_open call
      * @param next_txstate IN the txstate will be reached by the control thread
      *                        after executing this function
+     * @param mmode IN the operation is performed inside a maintenance session
      * @return a reason code
      */
-    int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate);
+    int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate,
+                     int mmode);
 
 
 

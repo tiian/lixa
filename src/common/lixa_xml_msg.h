@@ -170,6 +170,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_LEVEL;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_NAME;
 /**
+ * Label used to specify "maint" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_MAINT;
+/**
  * Label used to specify "next_verb" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_NEXT_VERB;
@@ -371,6 +375,7 @@ struct lixa_msg_body_answer_s {
 struct lixa_msg_body_open_8_client_s {
     xmlChar           *job;
     md5_digest_hex_t   config_digest;
+    int                maint;
 };
 
     

@@ -607,7 +607,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
 
 
 
-int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
+int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
 {
     enum Exception { OBJ_CORRUPTED
                      , MSG_SERIALIZE_ERROR1
@@ -675,6 +675,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate)
         strncpy(client.config_digest,
                 global_ccc.config_digest, sizeof(md5_digest_hex_t));
         client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
+        client.maint = mmode;
         msg.body.open_8.client = client;
         
         msg.body.open_8.rsrmgrs = g_array_sized_new(

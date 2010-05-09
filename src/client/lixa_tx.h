@@ -94,9 +94,12 @@ extern "C" {
      * This function implements the real logic underlaying @ref tx_open
      * X/Open function
      * @param txrc OUT tx_* return code
+     * @param mmode IN boolean value: TRUE if the function is called from a
+     *                 maintentance client instead of a normal Application
+     *                 Program
      * @return a return code 
      */
-    int lixa_tx_open(int *txrc);
+    int lixa_tx_open(int *txrc, int mmode);
 
 
     

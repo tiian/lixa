@@ -51,9 +51,10 @@ extern "C" {
      * @param ts OUT reference to the structure must be initialized
      * @param id IN thread id must assigned
      * @param tpa IN reference to the thread pipe array
+     * @param mmode IN the thread must operate in maintenance mode
      */
     void thread_status_init(struct thread_status_s *ts, int id,
-                            struct thread_pipe_array_s *tpa);
+                            struct thread_pipe_array_s *tpa, int mmode);
 
 
 

@@ -99,6 +99,7 @@
 #define LIXA_SYSLOG_LXD017E "LXD017E intercommunication pipes initialization error"
 #define LIXA_SYSLOG_LXD018C "LXD018C internal thread id=%d raised unexpected expection (server_manager_thread: excp=%d,ret_cod=%d,errno=%d); immediate shutdown will terminate the server"
 #define LIXA_SYSLOG_LXD019N "LXD019N received signal %d, server %s shutdown in progress..."
+#define LIXA_SYSLOG_LXD020N "LXD020N the server is operating in MAINTENANCE MODE ONLY"
 
 
 
