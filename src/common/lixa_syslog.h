@@ -76,7 +76,7 @@
     "premature exit"
 #define LIXA_SYSLOG_LXD005E "LXD005E error (%s) while starting listener(s), " \
     "premature exit"
-#define LIXA_SYSLOG_LXD006N "LXD006N this LIXA server ended"
+#define LIXA_SYSLOG_LXD006N "LXD006N server terminated activities"
 #define LIXA_SYSLOG_LXD007W "LXD007W first status file ('%s') did not pass " \
     "integrity check"
 #define LIXA_SYSLOG_LXD008W "LXD008W second status file ('%s') did not pass " \
@@ -97,6 +97,8 @@
 #define LIXA_SYSLOG_LXD015W "LXD015W unable to open pid file '%s'"
 #define LIXA_SYSLOG_LXD016E "LXD016E config file error: unable to find property '%s' in tag '%s'"
 #define LIXA_SYSLOG_LXD017E "LXD017E intercommunication pipes initialization error"
+#define LIXA_SYSLOG_LXD018C "LXD018C internal thread id=%d raised unexpected expection (server_manager_thread: excp=%d,ret_cod=%d,errno=%d); immediate shutdown will terminate the server"
+#define LIXA_SYSLOG_LXD019N "LXD019N received signal %d, server %s shutdown in progress..."
 
 
 

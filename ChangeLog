@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.3.17 fixed bug # 2998604
+
 20100507 - 0.3.16 fixed bugs # 2944441, # 2978075
                   partially implemented rfnf 2963164
 

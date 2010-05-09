@@ -262,7 +262,7 @@ void *server_manager_thread(void *void_ts)
                                 break;
                             }
                         } else if (LIXA_RC_OK != ret_cod)
-                                THROW(POLLIN_CTRL_ERROR);
+                            THROW(POLLIN_CTRL_ERROR);
                     } else {
                         ret_cod = server_manager_pollin_data(ts, i);
                         switch (ret_cod) {
@@ -320,6 +320,9 @@ void *server_manager_thread(void *void_ts)
         ts->excp = excp;
         ts->ret_cod = ret_cod;
         ts->last_errno = errno;
+        if (NONE != excp)
+            syslog(LOG_CRIT, LIXA_SYSLOG_LXD018C, ts->id, ts->excp, ts->ret_cod,
+                   ts->last_errno);
         /* call clean-up routine */
         server_manager_thread_cleanup(ts);
     } /* TRY-CATCH */
@@ -361,11 +364,9 @@ void server_manager_thread_cleanup(struct thread_status_s *ts)
                     fd, close(fd), errno));
     }
 
-    /* notify thread end to other threads */
-    msg.type = SRV_MSG_TYPE_THREAD_END;
-    msg.body.te.excp = ts->excp;
-    msg.body.te.ret_cod = ts->ret_cod;
-    msg.body.te.last_errno = ts->last_errno;
+    /* notify a shutdown message to all the threads */
+    msg.type = SRV_MSG_TYPE_SHUTDOWN;
+    msg.body.sd.type = SHUTDOWN_IMMEDIATE;
     for (i=0; i<tpa.n; ++i) {
         if (i == ts->id)
             continue; /* skipping myself */
@@ -374,8 +375,8 @@ void server_manager_thread_cleanup(struct thread_status_s *ts)
                         "control pipe, skipping...\n", i));
             continue;
         } else 
-            LIXA_TRACE(("server_manager_thread_cleanup: sending message to "
-                        "thread id %d\n", i));
+            LIXA_TRACE(("server_manager_thread_cleanup: sending shutdown "
+                        "message to thread id %d\n", i));
         if (sizeof(msg) != write(tpa.array[i].pipefd[1], &msg, sizeof(msg)))
             LIXA_TRACE(("server_manager_thread_cleanup: error while writing "
                         "to thread id %d (errno=%d)\n", i, errno));
