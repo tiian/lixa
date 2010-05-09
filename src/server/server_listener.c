@@ -32,6 +32,9 @@
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -52,6 +55,7 @@
 
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_syslog.h>
 #include <server_config.h>
 #include <server_listener.h>
 #include <server_messages.h>
@@ -443,16 +447,22 @@ void server_listener_signal_action(int signo)
 {
     int i;
     struct srv_msg_s msg;
+    const char *shutdown_type = "";
     
     LIXA_TRACE(("server_listener_signal_action: signo=%d\n", signo));
     msg.type = SRV_MSG_TYPE_SHUTDOWN;
-    if (SIGQUIT == signo)
+    if (SIGQUIT == signo) {
         msg.body.sd.type = SHUTDOWN_QUIESCE;
-    else if (SIGTERM == signo)
+        shutdown_type = "quiesce";
+    } else if (SIGTERM == signo) {
         msg.body.sd.type = SHUTDOWN_IMMEDIATE;
-    else
+        shutdown_type = "immediate";
+    } else {
         msg.body.sd.type = SHUTDOWN_FORCE;
-
+        shutdown_type = "force";
+    }
+    syslog(LOG_NOTICE, LIXA_SYSLOG_LXD019N, signo, shutdown_type);
+    
     for (i=0; i<tpa.n; ++i) {
         if (LIXA_NULL_FD == tpa.array[i].pipefd[1]) {
             LIXA_TRACE(("server_listener_signal_action: thread id %d closed "
