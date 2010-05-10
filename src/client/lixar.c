@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
         output_environment();
 
     /* open the resource managers for the current profile */
-    tx_rc = tx_open();
+    lixa_tx_open(&tx_rc, TRUE);
     LIXA_TRACE(("lixar/tx_open: tx_rc = %d\n", tx_rc));
     switch (tx_rc) {
         case TX_OK:

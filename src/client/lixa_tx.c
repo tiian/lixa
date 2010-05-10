@@ -568,17 +568,21 @@ int lixa_tx_info(int *txrc, TXINFO *info)
 
 int lixa_tx_open(int *txrc, int mmode)
 {
-    enum Exception { CLIENT_STATUS_COLL_GET_CS_ERROR
-                     , CLIENT_STATUS_COLL_REGISTER_ERROR
+    enum Exception { CLIENT_STATUS_COLL_REGISTER_ERROR
+                     , CLIENT_STATUS_COLL_GET_CS_ERROR
                      , CLIENT_CONFIG_ERROR
                      , CLIENT_CONNECT_ERROR
                      , CLIENT_CONFIG_JOB_ERROR
                      , COLL_GET_CS_ERROR
+                     , SHUTDOWN_ERROR
                      , LIXA_XA_OPEN_ERROR
                      , ALREADY_OPENED
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int tmp_txrc;
+
+    int fd = LIXA_NULL_FD;
+    client_status_t *cs = NULL;
     
     *txrc = TX_FAIL;
 
@@ -587,7 +591,6 @@ int lixa_tx_open(int *txrc, int mmode)
     LIXA_TRACE(("lixa_tx_open\n"));    
     TRY {
         int txstate, next_txstate, pos = 0;
-        client_status_t *cs;
 
         /* check if the thread is already registered and
          * retrieve a reference to the status of the current thread */
@@ -614,13 +617,14 @@ int lixa_tx_open(int *txrc, int mmode)
             if (LIXA_RC_OK != (ret_cod =
                                client_connect(&global_csc, &global_ccc)))
                 THROW(CLIENT_CONNECT_ERROR);
+            fd = client_status_get_sockfd(cs);
             if (LIXA_RC_OK != (ret_cod = client_config_job(
                                    &global_ccc, client_status_get_sockfd(cs))))
                 THROW(CLIENT_CONFIG_JOB_ERROR);
             
             next_txstate = TX_STATE_S1;
             
-            /* the real logic must be put here */
+            /* the real logic is inside this function */
             if (LIXA_RC_OK != (ret_cod = lixa_xa_open(
                                    cs, &tmp_txrc, next_txstate, mmode)))
                 THROW(LIXA_XA_OPEN_ERROR);
@@ -635,16 +639,26 @@ int lixa_tx_open(int *txrc, int mmode)
         
         THROW(NONE);
     } CATCH {
+        char dummy_buffer[256];
         switch (excp) {
-            case CLIENT_STATUS_COLL_GET_CS_ERROR:
             case CLIENT_STATUS_COLL_REGISTER_ERROR:
-                break;
+            case CLIENT_STATUS_COLL_GET_CS_ERROR:
             case CLIENT_CONFIG_ERROR:
             case CLIENT_CONNECT_ERROR:
             case CLIENT_CONFIG_JOB_ERROR:
                 break;
-            case COLL_GET_CS_ERROR:
+            case SHUTDOWN_ERROR:
+                ret_cod = LIXA_RC_SHUTDOWN_ERROR;
+                break;
             case LIXA_XA_OPEN_ERROR:
+                /* clean-up socket */
+                LIXA_TRACE(("lixa_tx_open: clean-up socket %d...\n", fd));
+                shutdown(fd, SHUT_WR);
+                recv(fd, dummy_buffer, sizeof(dummy_buffer), 0);
+                shutdown(fd, SHUT_RD);
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+                LIXA_TRACE(("lixa_tx_open: ...cleaned socket %d!\n", fd));
+                *txrc = TX_ERROR;
                 break;
             case ALREADY_OPENED:
                 ret_cod = LIXA_RC_BYPASSED_OPERATION;
