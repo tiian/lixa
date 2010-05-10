@@ -94,6 +94,46 @@ because the absence of a persistence commit info means rollback
 
 ******************************************************************************
 
+open and maintenance mode:
+	server is in maintenance mode
+	client is NOT in maintenance mode
+
+
+A.P.		T.M.		R.M.		lixad
+|
+[] tx_open()	|		|		|
+[]------------->[] open 	|		|
+|		[]--------------|-------------->[] create room
+|		|  		|		[] check serer is
+|		|		|		[] in maint mode
+|		[]<-------------|---------------[] reply rc="10"
+|		[]		|		|
+|		[] shutdown(write)		|
+|		[] dummy read			|
+|		[] shutdown(read)		|
+|		[] leave...	|		|
+
+******************************************************************************
+
+open and maintenance mode:
+	server is in maintenance mode
+	client is in maintenance mode
+
+
+A.P.		T.M.		R.M.		lixad
+|
+[] tx_open()	|		|		|
+[]------------->[] open 	|		|
+|		[]--------------|-------------->[] create room
+|		|  		|		[] check server is
+|		|		|		[] in maint mode
+|		[]<-------------|---------------[] reply rc="10"
+|		[]		|		|
+|		[] understand maint mode	|
+|		[] and go on...			|
+
+******************************************************************************
+
 open and recovery phase sequence diagram
 
 

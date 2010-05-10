@@ -528,7 +528,6 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
         } else if (LIXA_RC_OK == ret_cod) {
             struct thread_status_switch_s *tss =
                 &(ts->client_array[slot_id].switch_thread);
-            uint32_t block_id = ts->client_array[slot_id].pers_status_slot_id;
             /* XML message to process from client */
             ret_cod = server_manager_msg_proc(ts, slot_id, buf, read_bytes);
             switch (ret_cod) {
@@ -546,8 +545,6 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                     tss->buffer_size = read_bytes;
                     THROW(THREAD_SWITCH);
                 case LIXA_RC_MAINTENANCE_MODE:
-                    /* @@@ this point needs a procedure to force shutdown a
-                       client ... */
                     break;
                 default:
                     THROW(XML_PROC);

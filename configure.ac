@@ -1,5 +1,10 @@
 AC_INIT([lixa], [0.3.17], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
+
+LT_INIT
+AC_PROG_LIBTOOL
+AM_PROG_LIBTOOL
+
 AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
@@ -30,12 +35,6 @@ AC_CONFIG_FILES([
   doxygen.conf
 ])
 AC_CONFIG_TESTDIR([tests])
-
-# Include libltdl stuff
-AC_LIBLTDL_INSTALLABLE([src/extra/libltdl])
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL([src/extra/libltdl])
-AC_CONFIG_SUBDIRS([src/extra/libltdl])
 
 # Installation PATH
 test "x$prefix" = "xNONE" && prefix="/opt/lixa"

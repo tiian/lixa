@@ -1,5 +1,5 @@
-server_manager_polling_data, row 549: restart from here while implementing
-maintenance mode for lixad
+now client and server can goes maintenance mode, but there is not a way to retrieve the list of recovery failed transactions: only the next transaction to be recovered is passed from server to client.
+The issue is complicated by multithread behavior of the server: the list should be produced merging the content of all the threads..... A good idea is necessary to go on... ;)
 
 go on with bug 2983464 fixing...
 
