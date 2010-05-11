@@ -652,12 +652,7 @@ int lixa_tx_open(int *txrc, int mmode)
                 break;
             case LIXA_XA_OPEN_ERROR:
                 /* clean-up socket */
-                LIXA_TRACE(("lixa_tx_open: clean-up socket %d...\n", fd));
-                shutdown(fd, SHUT_WR);
-                recv(fd, dummy_buffer, sizeof(dummy_buffer), 0);
-                shutdown(fd, SHUT_RD);
-                client_status_set_sockfd(cs, LIXA_NULL_FD);
-                LIXA_TRACE(("lixa_tx_open: ...cleaned socket %d!\n", fd));
+                client_disconnect(&global_csc);
                 *txrc = TX_ERROR;
                 break;
             case ALREADY_OPENED:

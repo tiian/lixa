@@ -1,5 +1,11 @@
-now client and server can goes maintenance mode, but there is not a way to retrieve the list of recovery failed transactions: only the next transaction to be recovered is passed from server to client.
-The issue is complicated by multithread behavior of the server: the list should be produced merging the content of all the threads..... A good idea is necessary to go on... ;)
+implement a command line for lixad to reset "recovery failed" bits at start-up
+
+this will be the sequence to clean recovery failed records:
+- start lixad in maintenance mode
+- execute lixar and clean all the transactions
+- use lixad to dump the status file
+- check the recovery failed records has been committed/rolled back by lixar
+- restart lixad using clean up flags
 
 go on with bug 2983464 fixing...
 

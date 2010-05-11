@@ -92,7 +92,7 @@ void daemonize(const char *pid_file_name);
 /* default command line options */
 static gboolean run_as_daemon = FALSE;
 static gboolean maintenance = FALSE;
-static gboolean dump_and_exit = FALSE;
+static char *dump_specs = NULL;
 static char *config_file = NULL;
 static gboolean print_version = FALSE;
 /* command line options */
@@ -100,7 +100,7 @@ static GOptionEntry entries[] =
 {
     { "daemon", 'd', 0, G_OPTION_ARG_NONE, &run_as_daemon, "Run the process as a daemon", NULL },
     { "maintenance", 'm', 0, G_OPTION_ARG_NONE, &maintenance, "Start the server in maintenance mode only", NULL },
-    { "dump", 'u', 0, G_OPTION_ARG_NONE, &dump_and_exit, "Dump the content of status files and exit", NULL },
+    { "dump", 'u', 0, G_OPTION_ARG_STRING, &dump_specs, "Dump the content of status files using order [ufs] (u=used, f=free, s=sequential)", NULL },
     { "config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Use the desired configuration file", NULL },
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
     { NULL }
@@ -117,6 +117,7 @@ int main(int argc, char *argv[])
     srvr_rcvr_tbl_t srt = SRVR_RCVR_TBL_INIT;
     GError *error = NULL;
     GOptionContext *option_context;
+    struct ts_dump_spec_s tsds;
 
     LIXA_TRACE_INIT;
     LIXA_CRASH_INIT;
@@ -140,7 +141,7 @@ int main(int argc, char *argv[])
         lixa_print_version(stdout);
         exit(0);
     }
-    if (run_as_daemon && dump_and_exit) {
+    if (run_as_daemon && NULL != dump_specs) {
         syslog(LOG_WARNING, LIXA_SYSLOG_LXD002W);
         LIXA_TRACE(("main: dump option overrides daemon option\n"));
         g_print("Warning: dump option overrides daemon option\n");
@@ -172,16 +173,21 @@ int main(int argc, char *argv[])
     }
     
     /* start configured manager(s) */
+    tsds.dump = NULL != dump_specs;
+    if (tsds.dump) {
+        tsds.free = NULL != strchr(dump_specs, 'f');
+        tsds.used = NULL != strchr(dump_specs, 'u');
+        tsds.seq = NULL != strchr(dump_specs, 's');
+    }
     if (LIXA_RC_OK != (rc = server_manager(
-                           &sc, &tpa, &tsa, &srt, dump_and_exit,
-                           maintenance))) {
+                           &sc, &tpa, &tsa, &srt, &tsds, maintenance))) {
         LIXA_TRACE(("main/server_manager: rc = %d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD004E, lixa_strerror(rc));
         return rc;
     }
 
     /* start configured listener(s) */
-    if (!dump_and_exit &&
+    if (NULL == dump_specs &&
         LIXA_RC_OK != (rc = server_listener(&sc, &lsa, &tsa))) {
         LIXA_TRACE(("main/server_listener: rc = %d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD005E, lixa_strerror(rc));

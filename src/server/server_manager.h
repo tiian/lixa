@@ -27,6 +27,7 @@
 
 #include <server_config.h>
 #include <server_messages.h>
+#include <server_thread_status.h>
 #include <srvr_rcvr_tbl.h>
 
 
@@ -58,14 +59,15 @@ extern "C" {
      * @param tpa IN threads' communication pipes
      * @param tsa OUT status of all threads
      * @param srt IN/OUT server recovery table
-     * @param dump IN dump status file (and exit)
+     * @param tsds IN dump specification
      * @param mmode IN maintenance mode: only privileged clients can connect
      * @return a standardized return code
      */
     int server_manager(struct server_config_s *sc,
                        struct thread_pipe_array_s *tpa,
                        struct thread_status_array_s *tsa,
-                       srvr_rcvr_tbl_t *srt, int dump, int mmode);
+                       srvr_rcvr_tbl_t *srt,
+                       const struct ts_dump_spec_s *tsds, int mmode);
 
 
 
