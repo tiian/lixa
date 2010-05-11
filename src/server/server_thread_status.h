@@ -40,6 +40,30 @@
 
 
 
+/**
+ * Used to codify how to dump the status file
+ */
+struct ts_dump_spec_s {
+    /**
+     * Boolean: TRUE, perform dump; FALSE, do not perform dump
+     */
+    int        dump;
+    /**
+     * Boolean: TRUE, dump all the record in physical order
+     */
+    int        seq;
+    /**
+     * Boolean: TRUE, dump free blocks following free chains
+     */
+    int        free;
+    /**
+     * Boolean: TRUE, dump used blocks following used chains
+     */
+    int        used;
+};
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -62,9 +86,11 @@ extern "C" {
      * Dump the content of the thread status files
      * WARNING: THIS FUNCTION IS *** NOT *** THREAD SAFE
      * @param ts IN thread status reference
+     * @param tsds IN dump specification
      * @return a reason code
      */
-    int thread_status_dump(const struct thread_status_s *ts);
+    int thread_status_dump(const struct thread_status_s *ts,
+                           const struct ts_dump_spec_s *tsds);
 
 
 
@@ -91,12 +117,12 @@ extern "C" {
      * Load the files associated to memory mapped status
      * @param ts IN/OUT pointer to the thread status structure
      * @param status_file_prefix IN the prefix used for status files
-     * @param dump IN the status files are loaded only to be dumped
+     * @param tsds IN dump specification (load and dump if activated)
      * @return a reason code
      */
     int thread_status_load_files(struct thread_status_s *ts,
                                  const char *status_file_prefix,
-                                 int dump);
+                                 const struct ts_dump_spec_s *tsds);
 
     
 

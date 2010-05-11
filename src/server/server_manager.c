@@ -57,7 +57,8 @@
 int server_manager(struct server_config_s *sc,
                    struct thread_pipe_array_s *tpa,
                    struct thread_status_array_s *tsa,
-                   srvr_rcvr_tbl_t *srt, int dump, int mmode)
+                   srvr_rcvr_tbl_t *srt,
+                   const struct ts_dump_spec_s *tsds, int mmode)
 {
     enum Exception { SRVR_RCVR_TBL_NEW_ERROR
                      , MALLOC_ERROR
@@ -93,12 +94,12 @@ int server_manager(struct server_config_s *sc,
                 if (LIXA_RC_OK != (
                         ret_cod = thread_status_load_files(
                             &(tsa->array[i]),
-                            sc->managers.array[i-1].status_file, dump)))
+                            sc->managers.array[i-1].status_file, tsds)))
                     THROW(THREAD_STATUS_LOAD_FILES_ERROR);
                 /* dump the status file if asked */
-                if (dump) {
+                if (tsds->dump) {
                     if (LIXA_RC_OK != (ret_cod = thread_status_dump(
-                                           &(tsa->array[i]))))
+                                           &(tsa->array[i]), tsds)))
                         THROW(THREAD_STATUS_DUMP_ERROR);
                     continue;
                 }

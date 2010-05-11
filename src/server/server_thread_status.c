@@ -92,11 +92,16 @@ void thread_status_init(struct thread_status_s *ts, int id,
 
 
 
-int thread_status_dump(const struct thread_status_s *ts)
+int thread_status_dump(const struct thread_status_s *ts,
+                       const struct ts_dump_spec_s *tsds)
 {
     enum Exception { ISO_TIMESTAMP_ERROR
-                     , DUMP_HEADER
-                     , DUMP_RSRMGR
+                     , DUMP_HEADER1
+                     , DUMP_RSRMGR1
+                     , DUMP_HEADER2
+                     , DUMP_RSRMGR2
+                     , DUMP_HEADER3
+                     , DUMP_RSRMGR3
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -137,41 +142,112 @@ int thread_status_dump(const struct thread_status_s *ts)
                first_record->first_free_block,
                first_record->first_free_block != 0 ? "" : "(empty chain)");
 
-        /* following blocks */
-        for (i=1; i<first_record->number_of_blocks; ++i) {
-            struct status_record_data_s *record =
-                &(ts->curr_status[i].sr.data);
-            printf("------------------------------------"
-                   "------------------------------------\n");
-            printf("Block: " UINT32_T_FORMAT ", next block in chain: "
-                   UINT32_T_FORMAT "\n", i, record->next_block);
-            printf("Block type: ");
-            switch (record->pld.type) {
-                case DATA_PAYLOAD_TYPE_HEADER:
-                    printf("transaction manager record "
-                           "(transaction header)\n");
-                    if (LIXA_RC_OK != (ret_cod = thread_status_dump_header(
-                                           &(record->pld.ph))))
-                        THROW(DUMP_HEADER);
-                    break;
-                case DATA_PAYLOAD_TYPE_RSRMGR:
-                    printf("resource manager record\n");
-                    if (LIXA_RC_OK != (ret_cod = thread_status_dump_rsrmgr(
-                                           &(record->pld.rm))))
-                        THROW(DUMP_RSRMGR);
-                    break;
-                default:
-                    printf("unknown (%d)\n", record->pld.type);
+        printf("Dumping records following physical order: %d\n", tsds->seq);
+        printf("Dumping records following free block chain: %d\n", tsds->free);
+        printf("Dumping records following used block chain: %d\n", tsds->used);
+
+        if (tsds->seq) {
+            for (i=1; i<first_record->number_of_blocks; ++i) {
+                struct status_record_data_s *record =
+                    &(ts->curr_status[i].sr.data);
+                printf("------------------------------------"
+                       "------------------------------------\n");
+                printf("Block: " UINT32_T_FORMAT ", next block in chain: "
+                       UINT32_T_FORMAT "\n", i, record->next_block);
+                printf("Block type: ");
+                switch (record->pld.type) {
+                    case DATA_PAYLOAD_TYPE_HEADER:
+                        printf("transaction manager record "
+                               "(transaction header)\n");
+                        if (LIXA_RC_OK != (ret_cod = thread_status_dump_header(
+                                               &(record->pld.ph))))
+                            THROW(DUMP_HEADER1);
+                        break;
+                    case DATA_PAYLOAD_TYPE_RSRMGR:
+                        printf("resource manager record\n");
+                        if (LIXA_RC_OK != (ret_cod = thread_status_dump_rsrmgr(
+                                               &(record->pld.rm))))
+                            THROW(DUMP_RSRMGR1);
+                        break;
+                    default:
+                        printf("unknown (%d)\n", record->pld.type);
+                }
+            } /* for (i=1; ... */
+        } /* if (tsds->seq) */
+
+        if (tsds->free) {
+            i = ts->curr_status[0].sr.ctrl.first_free_block;
+            while (0 != i) {
+                struct status_record_data_s *record =
+                    &(ts->curr_status[i].sr.data);
+                printf("------------------------------------"
+                       "------------------------------------\n");
+                printf("Block: " UINT32_T_FORMAT ", next block in chain: "
+                       UINT32_T_FORMAT "\n", i, record->next_block);
+                printf("Block type: ");
+                switch (record->pld.type) {
+                    case DATA_PAYLOAD_TYPE_HEADER:
+                        printf("transaction manager record "
+                               "(transaction header)\n");
+                        if (LIXA_RC_OK != (ret_cod = thread_status_dump_header(
+                                               &(record->pld.ph))))
+                            THROW(DUMP_HEADER2);
+                        break;
+                    case DATA_PAYLOAD_TYPE_RSRMGR:
+                        printf("resource manager record\n");
+                        if (LIXA_RC_OK != (ret_cod = thread_status_dump_rsrmgr(
+                                               &(record->pld.rm))))
+                            THROW(DUMP_RSRMGR2);
+                        break;
+                    default:
+                        printf("unknown (%d)\n", record->pld.type);
+                }
+                i = ts->curr_status[i].sr.data.next_block;
             }
-        } /* for (i=1; ... */
+        }
+        
+        if (tsds->used) {
+            i = ts->curr_status[0].sr.ctrl.first_used_block;
+            while (0 != i) {
+                struct status_record_data_s *record =
+                    &(ts->curr_status[i].sr.data);
+                printf("------------------------------------"
+                       "------------------------------------\n");
+                printf("Block: " UINT32_T_FORMAT ", next block in chain: "
+                       UINT32_T_FORMAT "\n", i, record->next_block);
+                printf("Block type: ");
+                switch (record->pld.type) {
+                    case DATA_PAYLOAD_TYPE_HEADER:
+                        printf("transaction manager record "
+                               "(transaction header)\n");
+                        if (LIXA_RC_OK != (ret_cod = thread_status_dump_header(
+                                               &(record->pld.ph))))
+                            THROW(DUMP_HEADER3);
+                        break;
+                    case DATA_PAYLOAD_TYPE_RSRMGR:
+                        printf("resource manager record\n");
+                        if (LIXA_RC_OK != (ret_cod = thread_status_dump_rsrmgr(
+                                               &(record->pld.rm))))
+                            THROW(DUMP_RSRMGR3);
+                        break;
+                    default:
+                        printf("unknown (%d)\n", record->pld.type);
+                }
+                i = ts->curr_status[i].sr.data.next_block;
+            } 
+        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case ISO_TIMESTAMP_ERROR:
                 break;
-            case DUMP_HEADER:
-            case DUMP_RSRMGR:
+            case DUMP_HEADER1:
+            case DUMP_RSRMGR1:
+            case DUMP_HEADER2:
+            case DUMP_RSRMGR2:
+            case DUMP_HEADER3:
+            case DUMP_RSRMGR3:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -333,7 +409,8 @@ int thread_status_dump_rsrmgr(const struct payload_rsrmgr_s *rm)
 
 
 int thread_status_load_files(struct thread_status_s *ts,
-                             const char *status_file_prefix, int dump)
+                             const char *status_file_prefix,
+                             const struct ts_dump_spec_s *tsds)
 {
     enum Exception { STATUS_RECORD_LOAD_1_ERROR
                      , STATUS_RECORD_LOAD_2_ERROR
@@ -357,7 +434,7 @@ int thread_status_load_files(struct thread_status_s *ts,
         if (LIXA_RC_OK != (ret_cod = status_record_load(
                                &(ts->status1),
                                (const char *)ts->status1_filename,
-                               ts->updated_records, dump)))
+                               ts->updated_records, tsds->dump)))
             THROW(STATUS_RECORD_LOAD_1_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status1))) {
@@ -373,7 +450,7 @@ int thread_status_load_files(struct thread_status_s *ts,
         if (LIXA_RC_OK != (ret_cod = status_record_load(
                                &(ts->status2),
                                (const char *)ts->status2_filename,
-                               ts->updated_records, dump)))
+                               ts->updated_records, tsds->dump)))
             THROW(STATUS_RECORD_LOAD_2_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status2))) {
@@ -404,7 +481,7 @@ int thread_status_load_files(struct thread_status_s *ts,
                 /* second file is newer */
                 LIXA_TRACE(("thread_status_load_files: second status file is "
                             "the more recent\n"));
-                if (dump)
+                if (tsds->dump)
                     ts->curr_status = ts->status2;
                 else {
                     /* copying second file over first one, and point first as
@@ -418,7 +495,7 @@ int thread_status_load_files(struct thread_status_s *ts,
                 /* first file is newer */
                 LIXA_TRACE(("thread_status_load_files: first status file is "
                             "the more recent\n"));
-                if (dump)
+                if (tsds->dump)
                     ts->curr_status = ts->status1;
                 else {
                     /* copying first file over second one, and point second as
@@ -435,7 +512,7 @@ int thread_status_load_files(struct thread_status_s *ts,
                         "second status file is damanged: overriding it...\n"));
             /* copying first file over second one, and point second as
                the current file */
-            if (dump)
+            if (tsds->dump)
                 ts->curr_status = ts->status1;
             else {
                 if (LIXA_RC_OK != (ret_cod = status_record_copy(
@@ -447,7 +524,7 @@ int thread_status_load_files(struct thread_status_s *ts,
             /* only second file is integral */
             LIXA_TRACE(("thread_status_load_files: second status file is OK, "
                         "first status file is damanged: overriding it...\n"));
-            if (dump)
+            if (tsds->dump)
                 ts->curr_status = ts->status2;
             else {
                 /* copying second file over first one, and point first as
