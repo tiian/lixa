@@ -1,3 +1,6 @@
+continue case test development for recovery failed transactions (see   
+lixad_clean_failded.at)
+
 implement a command line for lixad to reset "recovery failed" bits at start-up
 
 this will be the sequence to clean recovery failed records:
