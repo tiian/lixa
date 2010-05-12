@@ -645,6 +645,66 @@ int thread_status_recovery(struct thread_status_s *ts,
 
 
 
+int thread_status_clean_failed(struct thread_status_s *ts)
+{
+    enum Exception { STATUS_RECORD_DELETE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("thread_status_clean_failed\n"));
+    TRY {
+        uint32_t i;
+        struct status_record_ctrl_s *first_record =
+            &(ts->curr_status->sr.ctrl);
+
+        for (i=1; i<first_record->number_of_blocks; ++i) {
+            struct status_record_data_s *record =
+                &(ts->curr_status[i].sr.data);
+            if (DATA_PAYLOAD_TYPE_HEADER == record->pld.type &&
+                record->pld.ph.recovery_failed) {
+                char *ser_xid = xid_serialize(&record->pld.ph.state.xid);
+                LIXA_TRACE(("thread_status_clean_failed: block # "
+                            UINT32_T_FORMAT " contains a recovery failed "
+                            "transaction ('%s'), cleaning it\n", i,
+                            NULL != ser_xid ? ser_xid : ""));
+                ret_cod = status_record_delete(ts, i);
+                switch (ret_cod) {
+                    case LIXA_RC_OK:
+                        syslog(LOG_INFO, LIXA_SYSLOG_LXD021I,
+                               NULL != ser_xid ? ser_xid : "");
+                        break;
+                    case LIXA_RC_OBJ_NOT_FOUND:
+                        LIXA_TRACE(("thread_status_clean_failed: block # "
+                                    UINT32_T_FORMAT " is not in used "
+                                    "chain\n", i));
+                        break;
+                    default:
+                        THROW(STATUS_RECORD_DELETE_ERROR);
+                        break;
+                }
+                free(ser_xid);
+            }
+        } /* for (i=1; ... */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case STATUS_RECORD_DELETE_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("thread_status_clean_failed/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int thread_status_check_recovery_pending(
     const struct status_record_data_s *data, int *result)
 {

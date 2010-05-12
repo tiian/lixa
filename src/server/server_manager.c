@@ -58,12 +58,14 @@ int server_manager(struct server_config_s *sc,
                    struct thread_pipe_array_s *tpa,
                    struct thread_status_array_s *tsa,
                    srvr_rcvr_tbl_t *srt,
-                   const struct ts_dump_spec_s *tsds, int mmode)
+                   const struct ts_dump_spec_s *tsds,
+                   const struct ts_recovery_spec_s *tsrs, int mmode)
 {
     enum Exception { SRVR_RCVR_TBL_NEW_ERROR
                      , MALLOC_ERROR
                      , THREAD_STATUS_LOAD_FILES_ERROR
                      , THREAD_STATUS_DUMP_ERROR
+                     , THREAD_STATUS_CLEAN_FAILED_ERROR
                      , THREAD_STATUS_RECOVERY_ERROR
                      , PTHREAD_CREATE_ERROR
                      , NONE } excp;
@@ -103,6 +105,10 @@ int server_manager(struct server_config_s *sc,
                         THROW(THREAD_STATUS_DUMP_ERROR);
                     continue;
                 }
+                if (tsrs->clean_failed &&
+                    LIXA_RC_OK != (ret_cod = thread_status_clean_failed(
+                                       &(tsa->array[i]))))
+                    THROW(THREAD_STATUS_CLEAN_FAILED_ERROR);
                 /* enqueue recovery pending transactions */
                 if (LIXA_RC_OK != (ret_cod = thread_status_recovery(
                                        &(tsa->array[i]), srt)))
@@ -125,6 +131,7 @@ int server_manager(struct server_config_s *sc,
                 break;
             case THREAD_STATUS_LOAD_FILES_ERROR:
             case THREAD_STATUS_DUMP_ERROR:
+            case THREAD_STATUS_CLEAN_FAILED_ERROR:
             case THREAD_STATUS_RECOVERY_ERROR:
                 break;
             case PTHREAD_CREATE_ERROR:

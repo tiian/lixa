@@ -64,6 +64,18 @@ struct ts_dump_spec_s {
 
 
 
+/**
+ * Used to codify how to recover the status file at startup
+ */
+struct ts_recovery_spec_s {
+    /**
+     * Remove recovery failed transactions from status file
+     */
+    int        clean_failed;
+};
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -138,6 +150,15 @@ extern "C" {
 
 
 
+    /**
+     * Free a chain of blocks and returns the new next block
+     * @param ts IN/OUT thread status reference
+     * @return a standardized reason code
+     */
+    int thread_status_clean_failed(struct thread_status_s *ts);
+
+
+    
     /**
      * Check a transaction header block and determines if it's in recovery
      * pending state

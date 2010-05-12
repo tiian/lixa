@@ -94,6 +94,7 @@ static gboolean run_as_daemon = FALSE;
 static gboolean maintenance = FALSE;
 static char *dump_specs = NULL;
 static char *config_file = NULL;
+static gboolean clean_failed = FALSE;
 static gboolean print_version = FALSE;
 /* command line options */
 static GOptionEntry entries[] =
@@ -102,6 +103,7 @@ static GOptionEntry entries[] =
     { "maintenance", 'm', 0, G_OPTION_ARG_NONE, &maintenance, "Start the server in maintenance mode only", NULL },
     { "dump", 'u', 0, G_OPTION_ARG_STRING, &dump_specs, "Dump the content of status files using order [ufs] (u=used, f=free, s=sequential)", NULL },
     { "config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Use the desired configuration file", NULL },
+    { "clean-failed", 'l', 0, G_OPTION_ARG_NONE, &clean_failed, "Clean recovery failed transactions at start-up", NULL },
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
     { NULL }
 };
@@ -118,6 +120,7 @@ int main(int argc, char *argv[])
     GError *error = NULL;
     GOptionContext *option_context;
     struct ts_dump_spec_s tsds;
+    struct ts_recovery_spec_s tsrs;
 
     LIXA_TRACE_INIT;
     LIXA_CRASH_INIT;
@@ -179,8 +182,10 @@ int main(int argc, char *argv[])
         tsds.used = NULL != strchr(dump_specs, 'u');
         tsds.seq = NULL != strchr(dump_specs, 's');
     }
+    tsrs.clean_failed = clean_failed;
     if (LIXA_RC_OK != (rc = server_manager(
-                           &sc, &tpa, &tsa, &srt, &tsds, maintenance))) {
+                           &sc, &tpa, &tsa, &srt, &tsds, &tsrs,
+                           maintenance))) {
         LIXA_TRACE(("main/server_manager: rc = %d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD004E, lixa_strerror(rc));
         return rc;

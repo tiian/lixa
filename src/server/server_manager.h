@@ -59,7 +59,8 @@ extern "C" {
      * @param tpa IN threads' communication pipes
      * @param tsa OUT status of all threads
      * @param srt IN/OUT server recovery table
-     * @param tsds IN dump specification
+     * @param tsds IN dump specifications
+     * @param tsrs IN recovery specifications
      * @param mmode IN maintenance mode: only privileged clients can connect
      * @return a standardized return code
      */
@@ -67,7 +68,8 @@ extern "C" {
                        struct thread_pipe_array_s *tpa,
                        struct thread_status_array_s *tsa,
                        srvr_rcvr_tbl_t *srt,
-                       const struct ts_dump_spec_s *tsds, int mmode);
+                       const struct ts_dump_spec_s *tsds,
+                       const struct ts_recovery_spec_s *tsrs, int mmode);
 
 
 
