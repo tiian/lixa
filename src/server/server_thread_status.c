@@ -647,7 +647,7 @@ int thread_status_recovery(struct thread_status_s *ts,
 
 int thread_status_clean_failed(struct thread_status_s *ts)
 {
-    enum Exception { STATUS_RECORD_DELETE_ERROR
+    enum Exception { PAYLOAD_CHAIN_RELEASE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -667,7 +667,7 @@ int thread_status_clean_failed(struct thread_status_s *ts)
                             UINT32_T_FORMAT " contains a recovery failed "
                             "transaction ('%s'), cleaning it\n", i,
                             NULL != ser_xid ? ser_xid : ""));
-                ret_cod = status_record_delete(ts, i);
+                ret_cod = payload_chain_release(ts, i);
                 switch (ret_cod) {
                     case LIXA_RC_OK:
                         syslog(LOG_INFO, LIXA_SYSLOG_LXD021I,
@@ -679,7 +679,7 @@ int thread_status_clean_failed(struct thread_status_s *ts)
                                     "chain\n", i));
                         break;
                     default:
-                        THROW(STATUS_RECORD_DELETE_ERROR);
+                        THROW(PAYLOAD_CHAIN_RELEASE_ERROR);
                         break;
                 }
                 free(ser_xid);
@@ -689,7 +689,7 @@ int thread_status_clean_failed(struct thread_status_s *ts)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case STATUS_RECORD_DELETE_ERROR:
+            case PAYLOAD_CHAIN_RELEASE_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

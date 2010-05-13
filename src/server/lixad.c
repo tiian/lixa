@@ -183,6 +183,8 @@ int main(int argc, char *argv[])
         tsds.seq = NULL != strchr(dump_specs, 's');
     }
     tsrs.clean_failed = clean_failed;
+    if (tsrs.clean_failed)
+        syslog(LOG_NOTICE, LIXA_SYSLOG_LXD022N);
     if (LIXA_RC_OK != (rc = server_manager(
                            &sc, &tpa, &tsa, &srt, &tsds, &tsrs,
                            maintenance))) {

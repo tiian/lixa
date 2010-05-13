@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.3.17 fixed bug # 2998604
+         - 0.3.17 fixed bug # 2998604, # 2983464
                   maintenance mode ("-m") for lixad is now available
                   dump specific records ("--dump=[ufs]") instead of all the
                   content
