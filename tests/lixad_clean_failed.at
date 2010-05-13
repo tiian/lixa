@@ -1,6 +1,7 @@
 AT_BANNER([LIXA recovery failed clean-up (bug 2983464)])
 
-AT_SETUP([Preparing failed transaction])
+AT_SETUP([Crashing while after transaction prepared])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
@@ -31,7 +32,8 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0000 ; export LIXA_CRASH_POINT=1 ; lixa_test_exec.sh reset start case0000], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Recovering failed transaction])
+AT_SETUP([Creating recovery failed transaction])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
@@ -45,7 +47,7 @@ xa_close/0
 AT_DATA([monkey2s.conf],
 [[# second monkey R.M. config
 xa_open/0
-xa_commit/0
+xa_commit/7
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -55,7 +57,39 @@ xa_close/0
 AT_DATA([monkey3s.conf],
 [[# third monkey R.M. config
 xa_open/0
+xa_commit/6
+xa_start/0
+xa_end/0
+xa_prepare/0
 xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0000 ; lixa_test_exec.sh noreset none case0000], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Executing a normal transaction])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey3s.conf],
+[[# third monkey R.M. config
+xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -65,3 +99,10 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0000 ; lixa_test_exec.sh noreset stop case0000], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([Checking recovery failed transaction])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|grep 'recovery failed: 1'], [0], [ignore], [ignore])
+AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --daemon --clean-failed], [0], [ignore], [ignore])
+AT_CHECK([kill $(cat $TESTS_VAR_DIR/run.pid)], [0], [ignore], [ignore])
+AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|grep -v 'recovery failed: 1'], [0], [ignore], [ignore])
+AT_CLEANUP

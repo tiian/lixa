@@ -76,8 +76,8 @@ AC_ARG_ENABLE([debug],
 AC_ARG_ENABLE([crash],
 	AS_HELP_STRING([--enable-crash],
 		[enable crash simulation code]),
-	[_CRASH="yes"; CPPFLAGS="$CPPFLAGS -D_CRASH"], 
-	[_CRASH="no"] )
+	[LIXA_CRASH="yes"; CPPFLAGS="$CPPFLAGS -D_CRASH"], 
+	[LIXA_CRASH="no"] )
 AC_ARG_ENABLE([trace],
         AS_HELP_STRING([--disable-trace],
                 [disable trace feature (not suggested)]),
@@ -180,6 +180,7 @@ AC_SUBST(LIBLTDL)
 AC_SUBST(EXPANDED_SYSCONFDIR)
 AC_SUBST(EXPANDED_LOCALSTATEDIR)
 AC_SUBST(EXPANDED_LIBDIR)
+AC_SUBST(LIXA_CRASH)
 
 AC_OUTPUT
 

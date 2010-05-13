@@ -28,3 +28,6 @@ export TESTS_VAR_DIR
 
 LIXA_CONFIG_FILE=@abs_top_builddir@/tests/etc/lixac_conf.xml
 export LIXA_CONFIG_FILE
+
+LIXA_CRASH=@LIXA_CRASH@
+export LIXA_CRASH
