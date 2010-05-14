@@ -639,7 +639,6 @@ int lixa_tx_open(int *txrc, int mmode)
         
         THROW(NONE);
     } CATCH {
-        char dummy_buffer[256];
         switch (excp) {
             case CLIENT_STATUS_COLL_REGISTER_ERROR:
             case CLIENT_STATUS_COLL_GET_CS_ERROR:
