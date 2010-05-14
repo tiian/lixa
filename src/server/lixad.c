@@ -94,6 +94,7 @@ static gboolean run_as_daemon = FALSE;
 static gboolean maintenance = FALSE;
 static char *dump_specs = NULL;
 static char *config_file = NULL;
+static char *trace_file = NULL;
 static gboolean clean_failed = FALSE;
 static gboolean print_version = FALSE;
 /* command line options */
@@ -103,6 +104,7 @@ static GOptionEntry entries[] =
     { "maintenance", 'm', 0, G_OPTION_ARG_NONE, &maintenance, "Start the server in maintenance mode only", NULL },
     { "dump", 'u', 0, G_OPTION_ARG_STRING, &dump_specs, "Dump the content of status files using order [ufs] (u=used, f=free, s=sequential)", NULL },
     { "config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Use the desired configuration file", NULL },
+    { "trace-file", 't', 0, G_OPTION_ARG_STRING, &trace_file, "Specify trace file name", NULL },
     { "clean-failed", 'l', 0, G_OPTION_ARG_NONE, &clean_failed, "Clean recovery failed transactions at start-up", NULL },
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
     { NULL }
@@ -124,7 +126,7 @@ int main(int argc, char *argv[])
 
     LIXA_TRACE_INIT;
     LIXA_CRASH_INIT;
-    LIXA_TRACE(("main: starting\n"));
+
     openlog("lixad", LOG_PID, LOG_DAEMON);
     syslog(LOG_NOTICE, LIXA_SYSLOG_LXD000N,
            LIXA_PACKAGE_NAME, LIXA_PACKAGE_VERSION);
@@ -136,10 +138,13 @@ int main(int argc, char *argv[])
     */
     if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
         syslog(LOG_ERR, LIXA_SYSLOG_LXD001E, error->message);
-        LIXA_TRACE(("main: option parsing failed: %s\n", error->message));
         g_print("option parsing failed: %s\n", error->message);
         exit(1);
     }
+    
+    if (NULL != trace_file)
+        freopen(trace_file, "w", stderr);
+    
     if (print_version) {
         lixa_print_version(stdout);
         exit(0);
@@ -252,7 +257,10 @@ void daemonize(const char *pid_file_name)
 
     syslog(LOG_NOTICE, LIXA_SYSLOG_LXD014N);
     
-    freopen("/tmp/lixad.stderr", "w", stderr);
+    if (NULL != trace_file)
+        freopen(trace_file, "a", stderr);
+    else
+        freopen("/dev/null", "a", stderr);
     
     LIXA_TRACE(("lixad/daemonize: now daemonized!\n"));
     
