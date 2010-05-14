@@ -1,0 +1,47 @@
+<preface>
+  <title>What's LIXA</title>
+  <para>
+    LIXA is acronym of LIbre XA: it's a free, libre, open source
+    implementation of two X/Open standards: "Distributed Transaction
+    Processing: The TX (Transaction Demarcation) Specification" and
+    "Distributed Transaction Processing: The XA Specification"
+  </para>
+  <para>
+    LIXA implements an XA compliant transaction manager. LIXA supplies
+    the TX API.
+  </para>
+  <para>
+    These are useful links to reach the official X/Open documentation:
+    <itemizedlist mark='bullet'>
+      <listitem>
+	<para>
+	  <link url="http://www.opengroup.org/pubs/catalog/g504.htm">
+	    <citetitle>
+	      Distributed Transaction Processing: Reference Model, Version 3
+	    </citetitle>
+	  </link>
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  <link url="http://www.opengroup.org/pubs/catalog/c504.htm">
+	    <citetitle>
+	      Distributed TP: The TX (Transaction Demarcation) Specification
+	    </citetitle>
+	  </link>
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  <link url="http://www.opengroup.org/pubs/catalog/c193.htm">
+	    <citetitle>
+	      Distributed TP: The XA Specification
+	    </citetitle>
+	  </link>
+	</para>
+      </listitem>
+    </itemizedlist>
+    LIXA documentation tries to avoid duplication with the content of the
+    above books.
+  </para>
+</preface>
