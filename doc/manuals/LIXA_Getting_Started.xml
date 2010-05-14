@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V5.0/EN" 
+	  "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY pref SYSTEM "LIXA_Getting_Started_Preface.xml">
+]>
+<book xmlns="http://docbook.org/ns/docbook">
+  <title>LIXA: Getting Started</title>
+  <info>
+    <author>
+      <personname>
+	<firstname>Christian</firstname>
+	<surname>Ferrari</surname>
+      </personname>
+    </author>
+  </info>
+  &pref;
+</book>
