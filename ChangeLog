@@ -1,5 +1,14 @@
 LOG:
 
+20100515 - 0.5.1  implemented test case TX/3.2/0.0 and fixed bug # 3002125
+                  implemented test case TX/3.2/1.0
+                  implemented test case TX/3.3/0.0
+                  implemented test case TX/3.3/1.0
+                  implemented test case TX/3.3/1.1
+                  implemented test case TX/3.3/2.0 and fixed bug # 3002128
+                  implemented test case TX/3.3/2.1 and fixed bug # 3002128
+                  implemented test case TX/3.3/2.2
+
 20100515 - 0.5.0  fixed bugs # 2998604, # 2983464
                   maintenance mode ("-m") for lixad is now available
                   dump specific records ("--dump=[ufs]") instead of all the
