@@ -808,8 +808,15 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR2);
         
-        if (TX_OK != *txrc)
+        if (TX_OK != *txrc) {
+            int txrc2, rc2;
+            LIXA_TRACE(("lixa_xa_open: performing xa_close on all the "
+                        "resource managers because tx_open is not TX_OK\n"));
+            rc2 = lixa_xa_close(cs, &txrc2);
+            LIXA_TRACE(("lixa_xa_open/lixa_xa_close: rc=%d, txrx=%d\n",
+                        rc2, txrc2));
             THROW(XA_ERROR);
+        }
         
         /* manage recovery pending phase (see doc/seq_diagr.txt) */
         if (recovery_pending &&

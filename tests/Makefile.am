@@ -15,7 +15,10 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	} > $@-t
 	mv $@-t $@
 
-EXTRA_DIST = testsuite.at lixac_basic.at lixac_chained.at lixar_heur.at \
+EXTRA_DIST = but.at bug_2944441.at bug_2983464.at \
+	generic.at generic_client.at generic_heur.at \
+	testsuite.at \
+	tx.at tx_3_2.at \
 	package.m4 \
 	$(TESTSUITE) atlocal.in lixa_test_exec.sh lixa_test_functions.sh
 TESTSUITE = $(srcdir)/testsuite
@@ -35,9 +38,14 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 # build directory, since it must be distributed, along with
 # package.m4, configure, etc.
 $(TESTSUITE): $(srcdir)/testsuite.at \
-		$(srcdir)/lixac_basic.at \
-		$(srcdir)/lixac_chained.at \
-		$(srcdir)/lixar_heur.at \
+		$(srcdir)/bug.at \
+		$(srcdir)/bug_2944441.at \
+		$(srcdir)/bug_2983464.at \
+		$(srcdir)/generic.at \
+		$(srcdir)/generic_client.at \
+		$(srcdir)/generic_heur.at \
+		$(srcdir)/tx.at \
+		$(srcdir)/tx_3_2.at \
 		$(srcdir)/package.m4
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@

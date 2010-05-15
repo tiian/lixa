@@ -1,0 +1,3 @@
+# Generic case tests
+m4_include([generic_client.at])
+m4_include([generic_heur.at])
