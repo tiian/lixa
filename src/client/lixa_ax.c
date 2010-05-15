@@ -54,7 +54,7 @@ int ax_reg(int rmid, XID *xid, long flags)
         struct common_status_rsrmgr_s *csr;
         struct lixa_msg_s msg;
         size_t buffer_size = 0;
-        int fd, txstate;
+        int fd, txstate, next_xa_td_state = XA_STATE_D1;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         
         /* retrieve a reference to the thread status */
@@ -93,6 +93,7 @@ int ax_reg(int rmid, XID *xid, long flags)
                                 "started a transaction (TX states S%d); "
                                 "null XID will be returned\n", txstate));
                     xid->formatID = -1;
+                    next_xa_td_state = XA_STATE_D3;
                     break;
                 case TX_STATE_S3:
                 case TX_STATE_S4:
@@ -154,7 +155,7 @@ int ax_reg(int rmid, XID *xid, long flags)
             THROW(SEND_ERROR);
 
         /* new resource manager state */
-        csr->xa_td_state = XA_STATE_D1;
+        csr->xa_td_state = next_xa_td_state;
         
         THROW(NONE);
     } CATCH {
@@ -189,7 +190,8 @@ int ax_unreg(int rmid, long flags)
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
                      , NONE } excp;
-    int ret_cod = TM_OK;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int xa_ret_cod = TM_OK;
     
     LIXA_TRACE(("ax_unreg: rmid=%d, flags=0x%lx\n", rmid, flags));
     TRY {
@@ -207,38 +209,38 @@ int ax_unreg(int rmid, long flags)
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 LIXA_TRACE(("ax_unreg: status not found\n"));
-                ret_cod = TMER_PROTO;
+                xa_ret_cod = TMER_PROTO;
                 break;
             default:
                 THROW(COLL_GET_CS_ERROR);
         }
 
         /* check the rmid value is not out of range */
-        if ((TM_OK == ret_cod) &&
+        if ((TM_OK == xa_ret_cod) &&
             (rmid < 0 || rmid >= global_ccc.actconf.rsrmgrs->len)) {
             LIXA_TRACE(("ax_unreg: rmid out of range\n"));
-            ret_cod = TMER_INVAL;
+            xa_ret_cod = TMER_INVAL;
         }
 
         /* check the status of the resource manager */
         csr = &g_array_index(cs->rmstates, struct common_status_rsrmgr_s,
                              rmid);
-        if ((TM_OK == ret_cod) && !csr->dynamic) {
+        if ((TM_OK == xa_ret_cod) && !csr->dynamic) {
             LIXA_TRACE(("ax_unreg: resource manager # %d is not using "
                         "dynamic registration\n", rmid));
-            ret_cod = TMER_INVAL;
+            xa_ret_cod = TMER_INVAL;
         }
 
-        if ((TM_OK == ret_cod) && (XA_STATE_R1 != csr->xa_r_state)) {
+        if ((TM_OK == xa_ret_cod) && (XA_STATE_R1 != csr->xa_r_state)) {
             LIXA_TRACE(("ax_unreg: invalid XA r_state (%d)\n",
                         csr->xa_r_state));
-            ret_cod = TMER_PROTO;
+            xa_ret_cod = TMER_PROTO;
         }
 
-        if ((TM_OK == ret_cod) && (XA_STATE_D1 != csr->xa_td_state)) {
+        if ((TM_OK == ret_cod) && (XA_STATE_D3 != csr->xa_td_state)) {
             LIXA_TRACE(("ax_unreg: invalid XA td_state (%d)\n",
                         csr->xa_td_state));
-            ret_cod = TMER_PROTO;
+            xa_ret_cod = TMER_PROTO;
         }
 
         /* build the message */
@@ -274,7 +276,7 @@ int ax_unreg(int rmid, long flags)
                 ret_cod = TMER_TMERR;
                 break;
             case NONE:
-                ret_cod = LIXA_RC_OK;
+                ret_cod = xa_ret_cod;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;

@@ -1048,16 +1048,14 @@ int lixa_monkeyrm_call_ax_unreg(int rmid)
     LIXA_TRACE(("lixa_monkeyrm_call_ax_unreg\n"));
     TRY {
         long flags = TMNOFLAGS;
-        int rc = ax_unreg(rmid, flags);
 
         LIXA_TRACE(("lixa_monkeyrm_call_ax_unreg: ax_unreg returned %d\n",
-                    rc));
+                    ret_cod = ax_unreg(rmid, flags)));
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NONE:
-                ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;

@@ -60,6 +60,7 @@ int lixa_tx_begin(int *txrc)
                      , COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR1
                      , INVALID_STATUS
+                     , OUTSIDE_ERROR
                      , PROTOCOL_ERROR2
                      , LIXA_XA_START_ERROR
                      , GETTIMEOFDAY_ERROR
@@ -114,7 +115,13 @@ int lixa_tx_begin(int *txrc)
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct common_status_rsrmgr_s *csr = &g_array_index(
                 cs->rmstates, struct common_status_rsrmgr_s, i);
-            if (csr->dynamic && XA_STATE_D0 != csr->xa_td_state) {
+            if (csr->dynamic && XA_STATE_D3 == csr->xa_td_state) {
+                LIXA_TRACE(("lixa_tx_begin: resource manager # %u uses "
+                            "dynamic registration and is in state %d "
+                            "(Registered with NULLXID)\n",
+                            i, csr->xa_td_state));
+                THROW(OUTSIDE_ERROR);
+            } else if (csr->dynamic && XA_STATE_D0 != csr->xa_td_state) {
                 LIXA_TRACE(("lixa_tx_begin: resource manager # %u uses "
                             "dynamic registration and is in state %d\n",
                             i, csr->xa_td_state));
@@ -155,6 +162,10 @@ int lixa_tx_begin(int *txrc)
                 break;
             case COLL_GET_CS_ERROR:
                 break;
+            case OUTSIDE_ERROR:
+                *txrc = TX_OUTSIDE;
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;                
             case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
                 *txrc = TX_PROTOCOL_ERROR;
