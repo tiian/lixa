@@ -1,6 +1,6 @@
 AT_BANNER([LIXA recovery failed clean-up (bug 2983464)])
 
-AT_SETUP([Crashing while after transaction prepared])
+AT_SETUP([Crashing a prepared transaction])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
