@@ -1,0 +1,23 @@
+AT_BANNER([TX: 3.2 Opening and Closing Resource Managers])
+
+AT_SETUP([TX/3.2/0.0])
+# "An AP must call tx_open( ) to open all RMs linked with the AP. If tx_open( ) 
+# returns with an error, all RMs are closed."
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/-3
+xa_close/0
+]])
+AT_DATA([monkey3s.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0000 ; lixa_test_exec.sh reset recycle case0000 2>&1 | grep 'lixa_monkeyrm_close'], [1], [ignore], [ignore])
+AT_CLEANUP
+

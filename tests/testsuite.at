@@ -1,7 +1,7 @@
 AT_INIT
 AT_COPYRIGHT([Copyright (c) 2009-2010, Christian Ferrari <tiian@users.sourceforge.net>])
 
-m4_include([lixac_basic.at])
-m4_include([lixar_heur.at])
-m4_include([lixac_chained.at])
-m4_include([lixad_clean_failed.at])
+m4_include([generic.at])
+m4_include([tx.at])
+m4_include([bug.at])
+
