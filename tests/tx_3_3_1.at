@@ -1,0 +1,76 @@
+AT_BANNER([TX: 3.3.1 Heuristic Completion])
+
+AT_SETUP([TX/3.3.1/0.0])
+# "Under certain unusual failure conditions, an RM may unilaterally commit or 
+# roll back changes to recoverable resources that it made within a global 
+# transaction. If this decision does not match the commit decision the TM 
+# makes, a return code on tx_commit( ) or tx_rollback ( ) notifies the AP
+#of a mixed heuristic outcome."
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/7
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_rollback/7
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle case0002 rollback -3], [0], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/6
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/6
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start case0002 commit -3], [0], [ignore], [ignore])
+AT_CLEANUP
+
