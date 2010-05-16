@@ -48,9 +48,10 @@ int main(int argc, char *argv[])
     int rc;
     TXINFO info;
     int commit;
+    int expected_rc;
 
-    if (argc < 2) {
-        fprintf(stderr, "%s: at least an option must be specified\n",
+    if (argc < 3) {
+        fprintf(stderr, "%s: at least two option must be specified\n",
                 argv[0]);
         exit (1);
     }
@@ -63,8 +64,9 @@ int main(int argc, char *argv[])
                 argv[0]);
         exit (1);
     }
+    expected_rc = (int)strtol(argv[2], NULL, 0);
     
-    printf("%s| starting...\n", pgm);
+    printf("%s| starting (%s/%d)...\n", pgm, argv[1], expected_rc);
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     assert(TX_OK == rc);
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
@@ -82,7 +84,7 @@ int main(int argc, char *argv[])
         printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
     else
         printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
-    assert(TX_HAZARD == rc);
+    assert(expected_rc == rc);
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     assert(TX_OK == rc);
     printf("%s| ...finished\n", pgm);

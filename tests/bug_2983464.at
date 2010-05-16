@@ -101,7 +101,7 @@ AT_CLEANUP
 
 AT_SETUP([Checking recovery failed transaction])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|grep 'recovery failed: 1'], [0], [ignore], [ignore])
+AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u | tee $TESTS_TMP_FILE1 ; grep 'recovery failed: 1' $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --daemon --clean-failed], [0], [ignore], [ignore])
 AT_CHECK([kill $(cat $TESTS_VAR_DIR/run.pid)], [0], [ignore], [ignore])
 AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|grep -v 'recovery failed: 1'], [0], [ignore], [ignore])
