@@ -190,6 +190,9 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = etc src
+
+# Interrupt the test at first failure
+TESTSUITEFLAGS = "-e"
 EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	generic.at generic_client.at generic_heur.at \
 	testsuite.at \

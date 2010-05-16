@@ -27,11 +27,11 @@ TESTS_VAR_DIR=@abs_top_builddir@/tests/var
 export TESTS_VAR_DIR
 
 TESTS_TMP_DIR=@abs_top_builddir@/tests/tmp
-if test -d $TESTS_TMP_DIR
+export TESTS_TMP_DIR
+if test ! -d $TESTS_TMP_DIR
 then
-	rm -rf $TESTS_TMP_DIR
+	mkdir $TESTS_TMP_DIR
 fi
-mkdir $TESTS_TMP_DIR
 TESTS_TMP_FILE1=$TESTS_TMP_DIR/file1
 export TESTS_TMP_FILE1
 
