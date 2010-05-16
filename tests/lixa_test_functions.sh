@@ -30,14 +30,14 @@ reset_server() {
 
 start_server() {
 	echo "Starting LIXA server"
-	lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml
+	lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$TESTS_TMP_DIR/lixad.trace
+	echo "LIXA server is running with PID " $(cat $TESTS_VAR_DIR/run.pid)
 }
 
 stop_server() {
-	echo "Stopping LIXA server"
+	echo "Stopping LIXA server running with PID " $(cat $TESTS_VAR_DIR/run.pid)
 	kill $(cat $TESTS_VAR_DIR/run.pid)
 }
-
 
 exec_test() {
 	echo "Starting case test $1"

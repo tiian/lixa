@@ -1,5 +1,8 @@
 SUBDIRS = etc src
 
+# Interrupt the test at first failure
+TESTSUITEFLAGS = "-e"
+
 # Always generate package.m4 into the source directory, not into the
 # build directory, since it must be distributed, along with testsuite,
 # configure, etc.
