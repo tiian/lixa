@@ -34,7 +34,8 @@ build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = case0000$(EXEEXT) case0001$(EXEEXT) \
 	case0002$(EXEEXT) case0003$(EXEEXT) case0004$(EXEEXT) \
-	case0005$(EXEEXT) case0006$(EXEEXT) case0007$(EXEEXT)
+	case0005$(EXEEXT) case0006$(EXEEXT) case0007$(EXEEXT) \
+	case0008$(EXEEXT)
 subdir = tests/src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -96,6 +97,12 @@ case0007_LDADD = $(LDADD)
 case0007_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
+am_case0008_OBJECTS = case0008.$(OBJEXT)
+case0008_OBJECTS = $(am_case0008_OBJECTS)
+case0008_LDADD = $(LDADD)
+case0008_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
+	../../src/client/switch/lixa/liblixamonkey.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -110,10 +117,11 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) $(case0002_SOURCES) \
 	$(case0003_SOURCES) $(case0004_SOURCES) $(case0005_SOURCES) \
-	$(case0006_SOURCES) $(case0007_SOURCES)
+	$(case0006_SOURCES) $(case0007_SOURCES) $(case0008_SOURCES)
 DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0002_SOURCES) $(case0003_SOURCES) $(case0004_SOURCES) \
-	$(case0005_SOURCES) $(case0006_SOURCES) $(case0007_SOURCES)
+	$(case0005_SOURCES) $(case0006_SOURCES) $(case0007_SOURCES) \
+	$(case0008_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -263,6 +271,7 @@ case0004_SOURCES = case0004.c
 case0005_SOURCES = case0005.c
 case0006_SOURCES = case0006.c
 case0007_SOURCES = case0007.c
+case0008_SOURCES = case0008.c
 all: all-am
 
 .SUFFIXES:
@@ -327,6 +336,9 @@ case0006$(EXEEXT): $(case0006_OBJECTS) $(case0006_DEPENDENCIES)
 case0007$(EXEEXT): $(case0007_OBJECTS) $(case0007_DEPENDENCIES) 
 	@rm -f case0007$(EXEEXT)
 	$(LINK) $(case0007_OBJECTS) $(case0007_LDADD) $(LIBS)
+case0008$(EXEEXT): $(case0008_OBJECTS) $(case0008_DEPENDENCIES) 
+	@rm -f case0008$(EXEEXT)
+	$(LINK) $(case0008_OBJECTS) $(case0008_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -342,6 +354,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0005.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0006.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0007.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0008.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

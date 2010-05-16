@@ -171,6 +171,10 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                                 case XA_HEURMIX:
                                     prev_tx_rc = TX_MIXED;
                                     break;
+                                case XA_HEURHAZ:
+                                    /* case test TX/3.3.1/1.1 */
+                                    prev_tx_rc = TX_HAZARD;
+                                    break;
                                 default:
                                     THROW(UNEXPECTED_XA_RC2);
                             } /* switch (prev_xa_rc) */
@@ -323,6 +327,10 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                                         prev_tx_rc = TX_MIXED;
                                     break;
                                     */
+                                case XA_HEURHAZ:
+                                    /* case test TX/3.3.1/1.0 */
+                                    prev_tx_rc = TX_HAZARD;
+                                    break;
                                 default:
                                     THROW(UNEXPECTED_XA_RC6);
                             } /* switch (prev_xa_rc) */

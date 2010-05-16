@@ -21,7 +21,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	generic.at generic_client.at generic_heur.at \
 	testsuite.at \
-	tx.at tx_3_2.at tx_3_3.at tx_3_3_1.at \
+	tx.at tx_3_2.at tx_3_3.at tx_3_3_1.at tx_3_4.at \
 	package.m4 \
 	$(TESTSUITE) atlocal.in lixa_test_exec.sh lixa_test_functions.sh
 TESTSUITE = $(srcdir)/testsuite
@@ -50,6 +50,7 @@ $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/tx.at \
 		$(srcdir)/tx_3_2.at \
 		$(srcdir)/tx_3_3.at tx_3_3_1.at \
+		$(srcdir)/tx_3_4.at \
 		$(srcdir)/package.m4
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@

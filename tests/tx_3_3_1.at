@@ -5,7 +5,7 @@ AT_SETUP([TX/3.3.1/0.0])
 # roll back changes to recoverable resources that it made within a global 
 # transaction. If this decision does not match the commit decision the TM 
 # makes, a return code on tx_commit( ) or tx_rollback ( ) notifies the AP
-#of a mixed heuristic outcome."
+# of a mixed heuristic outcome."
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
@@ -37,6 +37,14 @@ xa_rollback/7
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle case0002 rollback -3], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/3.3.1/0.1])
+# "Under certain unusual failure conditions, an RM may unilaterally commit or 
+# roll back changes to recoverable resources that it made within a global 
+# transaction. If this decision does not match the commit decision the TM 
+# makes, a return code on tx_commit( ) or tx_rollback ( ) notifies the AP
+# of a mixed heuristic outcome."
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
@@ -72,5 +80,163 @@ xa_commit/0
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle case0002 commit -3], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/3.3.1/1.0])
+# In some cases, a TM may not be able to determine whether an RM.s decision 
+# matched the commit decision made by the TM. In such a situation, a
+# separate return code on tx_commit( ) or tx_rollback ( ) notifies the AP 
+# that some RMs may have made a heuristic decision (this is known as a 
+# heuristic hazard condition).
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/8
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_rollback/8
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle case0002 rollback -4], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/3.3.1/1.1])
+# In some cases, a TM may not be able to determine whether an RM.s decision 
+# matched the commit decision made by the TM. In such a situation, a
+# separate return code on tx_commit( ) or tx_rollback ( ) notifies the AP 
+# that some RMs may have made a heuristic decision (this is known as a 
+# heuristic hazard condition).
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle case0002 commit -4], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/3.3.1/2.0])
+# Only heuristic decisions that are mixed or hazard are reported to the AP as 
+# heuristic decisions.
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/6
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_rollback/6
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle case0002 rollback 0], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/3.3.1/2.1])
+# Only heuristic decisions that are mixed or hazard are reported to the AP as 
+# heuristic decisions.
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/7
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/7
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle case0002 commit 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
