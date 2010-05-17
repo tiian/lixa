@@ -1,0 +1,84 @@
+AT_BANNER([TX: 3.5 Chained and Unchained Transactions])
+
+AT_SETUP([TX/3.5/0.0])
+# By default, an AP executes in the unchained mode; when an active global
+# transaction is completed, a new transaction does not begin until the AP
+# calls tx_begin( ).
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_end/0
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset start case0009 ], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/3.5/1.0])
+# In the chained mode, a new transaction starts in the AP thread of control
+# implicitly when the current transaction completes. That is, when the AP
+# calls tx_commit( ) or tx_rollback ( ), the TM coordinates completion of 
+# the current transaction and initiates a new transaction in the calling
+# thread of control before returning control to the AP.
+# The AP enables or disables the chained mode by calling
+#  tx_set_transaction_control ( ). Transitions between the chained and 
+# unchained mode affect the behaviour of the next tx_commit( ) or
+# tx_rollback ( ) call. The call to tx_set_transaction_control ( ) does not 
+# put the AP into or take it out of a global transaction.
+# Since tx_close( ) cannot be called when an AP is in a global transaction,
+# the AP executing in chained mode must switch to unchained mode and complete
+# the current transaction before calling tx_close( ).
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_end/0
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop case0010 ], [0], [ignore], [ignore])
+AT_CLEANUP
+
