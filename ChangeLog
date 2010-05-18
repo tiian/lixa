@@ -2,6 +2,8 @@ LOG:
 
          - 0.5.3  implemented test case TX/3.5/0.0
                   implemented test case TX/3.5/1.0
+                  implemented test case TX/3.6/0.0
+                  implementing test case TX/4.2/0.0 and fixing bug # 3003629
 
 20100516 - 0.5.2  implemented test case TX/3.3.1/0.0
                   implemented test case TX/3.3.1/0.1

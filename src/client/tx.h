@@ -78,6 +78,9 @@ typedef struct xid_t XID;
 /*
  * A value of -1 in formatID means that the XID is null.
  */
+#ifndef NULLXID
+# define NULLXID -1
+#endif
 /*
  * Definitions for tx_*() routines
  */
