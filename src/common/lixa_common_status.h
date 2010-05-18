@@ -269,6 +269,7 @@ extern "C" {
         struct common_status_conthr_s *csc) {
         csc->txstate = TX_STATE_S0;
         memset(&csc->xid, 0, sizeof(XID));
+        csc->xid.formatID = NULLXID;
         csc->will_commit = FALSE;
         csc->will_rollback = FALSE;
         csc->finished = FALSE;

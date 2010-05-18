@@ -1,0 +1,62 @@
+AT_BANNER([TX: 3.6 Transaction Timeout])
+
+AT_SETUP([TX/3.6/0.0])
+# To control the amount of resource spent executing a transaction, an AP may 
+# use tx_set_transaction_timeout ( ) to set the transaction_timeout value.
+# This value specifies the time period (in seconds) in which the transaction
+# must complete before it becomes susceptible to transaction timeout. A value
+# of 0 means that the timeout feature is disabled. The initial setting for
+# each AP is 0.
+# An AP may call tx_set_transaction_timeout ( ) at any time, but the call
+# affects only transactions the AP begins subsequently. If an AP calls
+# tx_set_transaction_timeout ( ) in transaction mode, the new timeout value
+# does not affect the current transaction.
+# The timeout interval begins and is reset whenever the AP calls tx_begin( ).
+# It is also reset by tx_commit( ) or tx_rollback ( ) in the chained mode when
+# these functions start a new transaction. If the AP does not call either
+# tx_commit( ) or tx_rollback ( ) before the interval expires, the TM
+# declares a timeout whenever it is possible to do so (under certain
+# circumstances the TM may not be able to interrupt an operation in progress).
+# A transaction for which the TM has declared a timeout is rolled back.
+# Transaction state information returned by tx_info ( ) indicates that a
+# transaction has timed out and has been marked rollback-only. To complete
+# such a transaction, the AP should call tx_rollback ( ). If an AP issues a
+# tx_commit( ) for a transaction that has been marked rollback only, the TM
+# rolls back the transaction.
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_end/0
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0011 ], [0], [ignore], [ignore])
+AT_CLEANUP
+
