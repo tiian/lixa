@@ -21,7 +21,10 @@
 
 
 #ifdef HAVE_STRING_H
-#include <string.h>
+# include <string.h>
+#endif
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
 #endif
 
 
@@ -31,6 +34,7 @@
 #include <lixa_errors.h>
 #include <lixa_tx_rc.h>
 #include <lixa_xa.h>
+#include <lixa_syslog.h>
 #include <lixa_xml_msg_deserialize.h>
 #include <lixa_xml_msg_serialize.h>
 #include <lixa_xml_msg_trace.h>
@@ -1357,6 +1361,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
             long xa_start_flags = TMNOFLAGS;
             int rc;
             int tmp_txrc = TX_OK;
+            char *ser_xid = NULL;
 
             /* if resource manager supports dynamic registration, xa_start
                must not be performed */
@@ -1380,6 +1385,22 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
                 case XAER_RMERR:
                     tmp_txrc = TX_ERROR;
                     csr->xa_td_state = XA_STATE_T0;
+                    break;
+                case XAER_DUPID:
+                    tmp_txrc = TX_ERROR;
+                    csr->xa_td_state = XA_STATE_T0;
+                    ser_xid = xid_serialize(xid);
+                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC009W,
+                           (char *)act_rsrmgr->generic->name, record.rmid,
+                           NULL != ser_xid ? ser_xid : "");
+                    LIXA_TRACE(("lixa_xa_start: xa_start returned XAER_DUPID "
+                                "for rmid=%d,xid='%s' and this should NOT "
+                                "happen!\n", record.rmid,
+                                NULL != ser_xid ? ser_xid : ""));
+                    if (NULL != ser_xid) {
+                        free(ser_xid);
+                        ser_xid = NULL;
+                    }
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:

@@ -63,6 +63,8 @@
 #define LIXA_SYSLOG_LXC008I "LXC008I resource manager '%s' returned " \
     "XAER_NOTA during recovery commit: the resource manager already " \
     "committed the transaction with xid '%s'"
+#define LIXA_SYSLOG_LXC009W "LXC009W resource manager '%s' (rmid=%d) " \
+    "returned XAER_DUPID for xid='%s' and this should NOT happen"
 
 
 

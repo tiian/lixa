@@ -135,8 +135,16 @@ int lixa_tx_begin(int *txrc)
         
         /* the real logic must be put here */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
-                               cs, txrc, &xid, next_txstate)))
+                               cs, txrc, &xid, next_txstate))) {
+            if (TX_ERROR == *txrc) {
+                int txrc2, rc2;
+                rc2 = lixa_tx_close(&txrc2);
+                LIXA_TRACE(("lixa_tx_begin: TX_ERROR will be returned; "
+                            "called lixa_tx_close() to clean-up resource "
+                            "managers: rc=%d, txrc=%d\n", rc2, txrc2));
+            }
             THROW(LIXA_XA_START_ERROR);
+        }
         
         /* is there a timeout set? */
         if (0 < (timeout = client_status_get_tx_timeout(cs))) {

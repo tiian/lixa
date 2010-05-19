@@ -1,4 +1,4 @@
-Restart from case test TX/4.2/0.0
+Restart from case test TX/5.20/0.0; TX_FAIL behavior must be checked
 
 Remove all @@@ from source code: every one was/is an "open point"
 
