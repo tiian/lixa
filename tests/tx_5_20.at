@@ -1,0 +1,39 @@
+AT_BANNER([TX: 5.20 tx_begin()])
+
+AT_SETUP([TX/5.20/0.0])
+# The function tx_begin( ) fails (returning [TX_PROTOCOL_ERROR]) if the
+# caller is already in transaction mode or tx_open( ) has not been called.
+#
+# [TX_OUTSIDE]
+# The transaction manager is unable to start a global transaction because the
+# calling thread of control is currently participating in work outside any
+# global transaction with one or more resource managers. All such work must be
+# completed before a global transaction can be started. The caller.s state
+# with respect to the local transaction is unchanged.
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-3
+xa_close/0
+xa_open/0
+xa_start/-8
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_close/0
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0014 ], [0], [ignore], [ignore])
+AT_CLEANUP
+
