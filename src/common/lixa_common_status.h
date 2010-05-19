@@ -384,6 +384,17 @@ extern "C" {
     int xid_compare(const XID *a, const XID *b);
 
 
+
+    /**
+     * Reset a xid structure
+     * @param xid IN/OUT transaction id to be resetted
+     */
+    static inline void xid_reset(XID *xid) {
+        memset(xid, 0, sizeof(XID));
+        xid->formatID = NULLXID;
+    }
+
+
     
 #ifdef __cplusplus
 }

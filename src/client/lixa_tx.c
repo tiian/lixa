@@ -429,7 +429,9 @@ int lixa_tx_commit(int *txrc, int *begin_new)
 
         /* update the TX state, now TX_STATE_S0 */
         client_status_set_txstate(cs, next_txstate);
-
+        /* reset the transaction id */
+        xid_reset(client_status_get_xid(cs));
+        
         if (TX_STATE_S2 == next_txstate) /* start a new transaction */
             *begin_new = TRUE;
         
@@ -764,6 +766,8 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
         
         /* update the TX state, now TX_STATE_S0 */
         client_status_set_txstate(cs, next_txstate);
+        /* reset the transaction id */
+        xid_reset(client_status_get_xid(cs));
 
         if (TX_STATE_S2 == next_txstate) /* start a new transaction */
             *begin_new = TRUE;
