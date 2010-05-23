@@ -62,7 +62,8 @@ int lixa_tx_begin(int *txrc)
                      , INVALID_STATUS
                      , OUTSIDE_ERROR
                      , PROTOCOL_ERROR2
-                     , LIXA_XA_START_ERROR
+                     , LIXA_XA_START_ERROR1
+                     , LIXA_XA_START_ERROR2
                      , GETTIMEOFDAY_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -73,7 +74,7 @@ int lixa_tx_begin(int *txrc)
     LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_begin\n"));
     TRY {
-        int txstate, next_txstate;
+        int txstate, next_txstate, dupid_or_proto = FALSE;
         client_status_t *cs;
         XID xid;
         TRANSACTION_TIMEOUT timeout;
@@ -135,15 +136,39 @@ int lixa_tx_begin(int *txrc)
         
         /* the real logic must be put here */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
-                               cs, txrc, &xid, next_txstate))) {
-            if (TX_ERROR == *txrc) {
-                int txrc2, rc2;
-                rc2 = lixa_tx_close(&txrc2);
-                LIXA_TRACE(("lixa_tx_begin: TX_ERROR will be returned; "
-                            "called lixa_tx_close() to clean-up resource "
-                            "managers: rc=%d, txrc=%d\n", rc2, txrc2));
+                               cs, txrc, &xid, next_txstate,
+                               &dupid_or_proto))) {
+            int retry_ok = FALSE;
+            if (dupid_or_proto) {
+                int txrc2 = TX_FAIL;
+                LIXA_TRACE(("lixa_tx_begin: XAER_DUPID or XAER_PROTO "
+                            "returned from any resource manager xa_start; "
+                            "trying a new synchronization with "
+                            "tx_rollback...\n"));
+                if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
+                                       cs, &txrc2, FALSE))) {
+                    LIXA_TRACE(("lixa_tx_begin: error while calling "
+                                "lixa_xa_end (ret_cod=%d, txrc2=%d), going "
+                                "on...\n", ret_cod, txrc2));
+                }
+                if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(
+                                       cs, &txrc2, FALSE))) {
+                    LIXA_TRACE(("lixa_tx_begin: error while calling "
+                                "lixa_xa_rollback (ret_cod=%d, txrc2=%d), "
+                                "going on...\n", ret_cod, txrc2));
+                }
+                if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
+                                       cs, txrc, &xid, next_txstate,
+                                       &dupid_or_proto))) {
+                    LIXA_TRACE(("lixa_tx_begin: lixa_xa_start failed again, "
+                                "returning TX_FAIL\n"));
+                    *txrc = TX_FAIL;
+                    THROW(LIXA_XA_START_ERROR1);
+                }
+                retry_ok = TRUE;
             }
-            THROW(LIXA_XA_START_ERROR);
+            if (!retry_ok)
+                THROW(LIXA_XA_START_ERROR2);
         }
         
         /* is there a timeout set? */
@@ -182,7 +207,8 @@ int lixa_tx_begin(int *txrc)
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
-            case LIXA_XA_START_ERROR:
+            case LIXA_XA_START_ERROR1:
+            case LIXA_XA_START_ERROR2:
                 break;
             case GETTIMEOFDAY_ERROR:
                 ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;

@@ -65,6 +65,8 @@
     "committed the transaction with xid '%s'"
 #define LIXA_SYSLOG_LXC009W "LXC009W resource manager '%s' (rmid=%d) " \
     "returned XAER_DUPID for xid='%s' and this should NOT happen"
+#define LIXA_SYSLOG_LXC010W "LXC010W resource manager '%s' (rmid=%d) " \
+    "returned XAER_PROTO for xid='%s' and this should NOT happen"
 
 
 

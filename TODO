@@ -1,4 +1,8 @@
-Restart from case test TX/5.20/0.0; TX_FAIL behavior must be checked
+Stability test with valgrind must be performed
+
+Stress test must be performed
+
+Crash test must be performed
 
 Remove all @@@ from source code: every one was/is an "open point"
 

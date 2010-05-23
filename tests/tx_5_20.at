@@ -1,6 +1,5 @@
 AT_BANNER([TX: 5.20 tx_begin()])
 
-AT_SETUP([TX/5.20/0.0])
 # The function tx_begin( ) fails (returning [TX_PROTOCOL_ERROR]) if the
 # caller is already in transaction mode or tx_open( ) has not been called.
 #
@@ -10,8 +9,35 @@ AT_SETUP([TX/5.20/0.0])
 # global transaction with one or more resource managers. All such work must be
 # completed before a global transaction can be started. The caller.s state
 # with respect to the local transaction is unchanged.
+#
+# [TX_PROTOCOL_ERROR]
+# The function was called in an improper context (for example, the caller is
+# already in transaction mode). The caller.s state with respect to transaction
+# mode is unchanged.
+#
+# [TX_ERROR]
+# Either the transaction manager or one or more of the resource managers
+# encountered a transient error trying to start a new transaction. When this
+# error is returned, the caller is not in transaction mode. The exact nature
+# of the error is determined in a product-specific manner.
+#
+# [TX_FAIL]
+# Either the transaction manager or one or more of the resource managers
+# encountered a fatal error. The nature of the error is such that the
+# transaction manager and/or one or more of the resource managers can no
+# longer perform work on behalf of the application. When this error is
+# returned, the caller is not in transaction mode. The exact nature of the
+# error is determined in a product-specific manner.
+#
+# Note 3 at TX pag. 65:
+# Receipt of [XAER_DUPID] or [XAER_PROTO] is a strong indication of a failure
+# between the TM and the RM. The TM may try to resynchronise with the RM by
+# issuing xa_end( ) and xa_rollback ( ). If this is unsuccessful, [TX_FAIL]
+# may be returned to the AP. See Origin of Error on page 62.
+AT_SETUP([TX/5.20/0.0])
+# test TX_ERROR (recoverable error) condition for tx_begin
 AT_DATA([monkey1s.conf],
-[[# first monkey R.M. config
+[[# monkey R.M. config
 xa_open/0
 xa_start/0
 xa_end/0
@@ -22,18 +48,469 @@ xa_end/0
 xa_prepare/0
 xa_commit/0
 xa_start/-3
-xa_close/0
-xa_open/0
 xa_start/-8
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-3
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
-[[# second monkey R.M. config
+[[# monkey R.M. config
 xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
 xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
 xa_open/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0014 ], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start case0014 -6], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.20/0.1])
+# test TX_ERROR (recoverable error) condition for tx_begin
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-3
+xa_start/-8
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-3
+xa_start/-6
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0014 -6], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.20/0.2])
+# test TX_ERROR (recoverable error) condition for tx_begin
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-3
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-3
+xa_start/-6
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0014 -6], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.20/0.3])
+# test TX_ERROR (recoverable error) condition for tx_begin
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-3
+xa_start/-8
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_start/-6
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0014 -6], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.20/0.4])
+# test TX_FAIL (unrecoverable error) condition for tx_begin
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-8
+xa_end/0
+xa_rollback/0
+xa_start/-8
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0014 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.20/0.5])
+# test TX_FAIL (unrecoverable error) condition for tx_begin
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-6
+xa_end/0
+xa_rollback/0
+xa_start/-6
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0014 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.20/0.6])
+# test TX_FAIL (unrecoverable error) condition for tx_begin
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-6
+xa_end/0
+xa_rollback/0
+xa_start/-6
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-8
+xa_end/0
+xa_rollback/0
+xa_start/-8
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0014 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.20/0.7])
+# test TX_FAIL (unrecoverable error) condition for tx_begin
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-6
+xa_end/0
+xa_rollback/0
+xa_start/-3
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-8
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0014 -7], [0], [ignore], [ignore])
 AT_CLEANUP
 

@@ -1258,7 +1258,8 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
 
 
 
-int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
+int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate,
+                  int *dupid_or_proto)
 {
     enum Exception { MSG_SERIALIZE_ERROR1
                      , SEND_ERROR
@@ -1281,7 +1282,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
         int fd;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
-        
+
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
 
@@ -1387,6 +1388,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
                     csr->xa_td_state = XA_STATE_T0;
                     break;
                 case XAER_DUPID:
+                    *dupid_or_proto = TRUE;
                     tmp_txrc = TX_ERROR;
                     csr->xa_td_state = XA_STATE_T0;
                     ser_xid = xid_serialize(xid);
@@ -1403,9 +1405,25 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate)
                     }
                     break;
                 case XAER_INVAL:
-                case XAER_PROTO:
                     tmp_txrc = TX_FAIL;
                     csr->xa_td_state = XA_STATE_T0;
+                    break;
+                case XAER_PROTO:
+                    *dupid_or_proto = TRUE;
+                    tmp_txrc = TX_ERROR;
+                    csr->xa_td_state = XA_STATE_T0;
+                    ser_xid = xid_serialize(xid);
+                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC010W,
+                           (char *)act_rsrmgr->generic->name, record.rmid,
+                           NULL != ser_xid ? ser_xid : "");
+                    LIXA_TRACE(("lixa_xa_start: xa_start returned XAER_PROTO "
+                                "for rmid=%d,xid='%s' and this should NOT "
+                                "happen!\n", record.rmid,
+                                NULL != ser_xid ? ser_xid : ""));
+                    if (NULL != ser_xid) {
+                        free(ser_xid);
+                        ser_xid = NULL;
+                    }
                     break;
                 case XAER_ASYNC:
                     *txrc = TX_FAIL;

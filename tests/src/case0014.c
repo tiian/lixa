@@ -42,9 +42,16 @@
 int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
-    int rc;
-    int rmid = 1;
+    int rc, test_rc;
+    int rmid = 2;
     
+    if (argc < 2) {
+        fprintf(stderr, "%s: at least one option must be specified\n",
+                argv[0]);
+        exit (1);
+    }
+    test_rc = strtol(argv[1], NULL, 0);
+
     printf("%s| starting...\n", pgm);
 
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
@@ -80,16 +87,17 @@ int main(int argc, char *argv[])
     assert(TX_OK == rc);
     
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
-    assert(TX_ERROR == rc);
+    assert(test_rc == rc);
 
-    printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
+    printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OK == rc);
-    
-    printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
-    assert(TX_ERROR == rc);
 
-    printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
-    assert(TX_PROTOCOL_ERROR == rc);
+    printf("%s| lixa_monekyrm_call_ax_reg(%d): %d\n",
+           pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
+    assert(TM_OK == rc);
+
+    printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
+    assert(TX_OK == rc);
     
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     assert(TX_OK == rc);
