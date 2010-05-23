@@ -1,6 +1,13 @@
 LOG:
 
-         - 0.5.4  implementing test case TX/5.20/0.0 and fixing bug # 3004280
+20100523 - 0.5.4  implemented test case TX/5.20/0.0 and fixed bug # 3004280
+                  implemented test case TX/5.20/0.1 and fixed bug # 3004280
+                  implemented test case TX/5.20/0.2 and fixed bug # 3004280
+                  implemented test case TX/5.20/0.3 and fixed bug # 3004280
+                  implemented test case TX/5.20/0.4 and fixed bug # 3004280
+                  implemented test case TX/5.20/0.5 and fixed bug # 3004280
+                  implemented test case TX/5.20/0.6 and fixed bug # 3004280
+                  implemented test case TX/5.20/0.7 and fixed bug # 3004280
 
 20100519 - 0.5.3  implemented test case TX/3.5/0.0
                   implemented test case TX/3.5/1.0

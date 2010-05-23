@@ -133,10 +133,12 @@ extern "C" {
      * @param xid IN transaction id of the new transaction
      * @param next_txstate IN the txstate will be reached by the control thread
      *                        after executing this function
+     * @param dupid_or_proto OUT boolean flag: TRUE if one or more resource
+     *                       managers returned XAER_DUPID or XAER_PROTO
      * @return a reason code
      */
     int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid,
-                      int next_txstate);
+                      int next_txstate, int *dupid_or_proto);
 
 
 
