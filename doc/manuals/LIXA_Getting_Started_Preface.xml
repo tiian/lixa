@@ -15,7 +15,7 @@
     <itemizedlist mark='bullet'>
       <listitem>
 	<para>
-	  <link url="http://www.opengroup.org/pubs/catalog/g504.htm">
+	  <link xlink:href="http://www.opengroup.org/pubs/catalog/g504.htm">
 	    <citetitle>
 	      Distributed Transaction Processing: Reference Model, Version 3
 	    </citetitle>
@@ -24,7 +24,7 @@
       </listitem>
       <listitem>
 	<para>
-	  <link url="http://www.opengroup.org/pubs/catalog/c504.htm">
+	  <link xlink:href="http://www.opengroup.org/pubs/catalog/c504.htm">
 	    <citetitle>
 	      Distributed TP: The TX (Transaction Demarcation) Specification
 	    </citetitle>
@@ -33,7 +33,7 @@
       </listitem>
       <listitem>
 	<para>
-	  <link url="http://www.opengroup.org/pubs/catalog/c193.htm">
+	  <link xlink:href="http://www.opengroup.org/pubs/catalog/c193.htm">
 	    <citetitle>
 	      Distributed TP: The XA Specification
 	    </citetitle>
