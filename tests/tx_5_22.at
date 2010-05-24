@@ -1,0 +1,93 @@
+AT_BANNER([TX: 5.22 tx_close()])
+
+AT_SETUP([TX/5.22/0.0])
+# The function tx_close( ) should be called when an application thread of
+# control no longer wishes to participate in global transactions. The function
+# tx_close( ) fails (returning [TX_PROTOCOL_ERROR]) if the caller is in
+# transaction mode. That is, no resource managers are closed even though some
+# may not be participating in the current transaction.
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+xa_open/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset start case0015 0], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.22/0.1])
+# [TX_ERROR]
+# Either the transaction manager or one or more of the resource managers
+# encountered a transient error. The exact nature of the error is determined
+# in a product-specific manner. All resource managers that could be closed are
+# closed.
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/-3
+xa_open/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0015 -6], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.22/0.2])
+# [TX_FAIL]
+# Either the transaction manager or one or more of the resource managers
+# encountered a fatal error. The nature of the error is such that the
+# transaction manager and/or one or more of the resource managers can no
+# longer perform work on behalf of the application. The exact nature of the
+# error is determined in a product-specific manner.
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/-5
+xa_open/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop case0015 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+

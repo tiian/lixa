@@ -1,5 +1,9 @@
 LOG:
 
+20100524 - 0.5.5  implemented test case TX/5.22/0.0
+                  implemented test case TX/5.22/0.1 and fixed bug # 3006369
+                  implemented test case TX/5.22/0.2
+
 20100523 - 0.5.4  implemented test case TX/5.20/0.0 and fixed bug # 3004280
                   implemented test case TX/5.20/0.1 and fixed bug # 3004280
                   implemented test case TX/5.20/0.2 and fixed bug # 3004280

@@ -9,4 +9,5 @@ m4_include([tx_3_6.at])
 m4_include([tx_3_8.at])
 m4_include([tx_4_2.at])
 m4_include([tx_5_20.at])
+m4_include([tx_5_22.at])
 

@@ -276,6 +276,10 @@ int lixa_tx_close(int *txrc)
                 THROW(INVALID_STATUS);
         }
         
+        /* update the TX state, now TX_STATE_S0; the result of XA calls
+           must not be waited; see bug 3006369 */
+        client_status_set_txstate(cs, TX_STATE_S0);
+        
         if (LIXA_RC_OK != (ret_cod = lixa_xa_close(cs, &tmp_txrc)))
             THROW(LIXA_XA_CLOSE_ERROR);
             
@@ -289,9 +293,6 @@ int lixa_tx_close(int *txrc)
             THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
         */
             
-        /* update the TX state, now TX_STATE_S0 */
-        client_status_set_txstate(cs, TX_STATE_S0);
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
