@@ -6,7 +6,7 @@ LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 noinst_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0006 case0007 case0008 case0009 case0010 case0011 case0012 \
-	case0013 case0014
+	case0013 case0014 case0015
 case0000_SOURCES = case0000.c
 case0001_SOURCES = case0001.c
 case0002_SOURCES = case0002.c
@@ -22,3 +22,4 @@ case0011_SOURCES = case0011.c
 case0012_SOURCES = case0012.c
 case0013_SOURCES = case0013.c
 case0014_SOURCES = case0014.c
+case0015_SOURCES = case0015.c
