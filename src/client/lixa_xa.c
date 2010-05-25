@@ -1126,7 +1126,8 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             /* bypass resource managers have not dynamically registered and
                statically ended the transaction */
             if (csr->dynamic && csr->xa_s_state != XA_STATE_S2 &&
-                csr->xa_s_state != XA_STATE_S3) {
+                csr->xa_s_state != XA_STATE_S3 &&
+                csr->xa_s_state != XA_STATE_S4) {
                 LIXA_TRACE(("lixa_xa_rollback: resource manager # %i "
                             "has not yet dynamically registered and/or "
                             "statically ended/prepared, skipping...\n",

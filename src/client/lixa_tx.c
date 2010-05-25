@@ -392,8 +392,12 @@ int lixa_tx_commit(int *txrc, int *begin_new)
             commit = FALSE;
         }
         /* detach the transaction */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, commit)))
-            THROW(XA_END_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, commit))) {
+            if (TX_ROLLBACK == *txrc)
+                commit = FALSE;
+            else
+                THROW(XA_END_ERROR);
+        }
         /* prepare (skip if we are rollbacking) */
         if (commit) {
             /* bypass xa_prepare if there is only one resource manager */
