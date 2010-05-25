@@ -1,5 +1,11 @@
 AT_BANNER([TX: 5.23 tx_commit()])
 
+# All the test cases test thid condition too:
+# [TX_PROTOCOL_ERROR]
+# The function was called in an improper context (for example, the caller is
+# not in transaction mode). The caller.s state with respect to the transaction
+# is not changed.
+
 AT_SETUP([TX/5.23/0.0])
 # [TX_NO_BEGIN]
 # The transaction committed successfully; however, a new transaction could not
@@ -23,7 +29,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0016 1 -100], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset start case0016 1 -100], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TX/5.23/0.1])
@@ -46,6 +52,161 @@ xa_end/102
 xa_rollback/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0016 0 -2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0016 0 -2], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.23/0.2])
+# [TX_ROLLBACK_NO_BEGIN]
+# The transaction could not commit and has been rolled back. In addition, a
+# new transaction could not be started and the caller is no longer in
+# transaction mode. This return value can occur only when the
+# transaction_control characteristic is TX_CHAINED.
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_start/-3
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/102
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0016 1 -102], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.23/0.3])
+# [TX_MIXED]
+# The transaction was partially committed and partially rolled back. In
+# addition, if the transaction_control characteristic is TX_CHAINED, a new
+# transaction is started.
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/7
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/6
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0016 0 -3], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.23/0.4])
+# [TX_MIXED_NO_BEGIN]
+# The transaction was partially committed and partially rolled back. In
+# addition, a new transaction could not be started and the caller is no longer
+# in transaction mode. This return value can occur only when the
+# transaction_control characteristic is TX_CHAINED.
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/7
+xa_start/-3
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/6
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0016 1 -103], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.23/0.5])
+# [TX_HAZARD]
+# Due to a failure, the transaction may have been partially committed and
+# partially rolled back. In addition, if the transaction_control
+# characteristic is TX_CHAINED, a new transaction is started. 
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0016 0 -4], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.23/0.6])
+# TX_HAZARD_NO_BEGIN]
+# Due to a failure, the transaction may have been partially committed and
+# partially rolled back. In addition, a new transaction could not be started
+# and the caller is no longer in transaction mode. This return value can occur
+# only when the transaction_control characteristic is TX_CHAINED.
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-3
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0016 1 -104], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.23/0.7])
+# [TX_FAIL]
+# Either the transaction manager or one or more of the resource managers
+# encountered a fatal error. The nature of the error is such that the
+# transaction manager and/or one or more of the resource managers can no
+# longer perform work on behalf of the application. The exact nature of the
+# error is determined in a product-specific manner. The caller's state with
+# respect to the transaction is unknown.
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/-7
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop case0016 0 -7], [0], [ignore], [ignore])
 AT_CLEANUP
 

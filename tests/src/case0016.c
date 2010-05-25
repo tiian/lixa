@@ -55,12 +55,18 @@ int main(int argc, char *argv[])
 
     printf("%s| starting...\n", pgm);
 
+    printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
+    assert(TX_PROTOCOL_ERROR == rc);
+
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     assert(TX_OK == rc);
 
+    printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
+    assert(TX_PROTOCOL_ERROR == rc);
+
     if (chained) {
         printf("%s| tx_set_transaction_control(): %d\n", pgm,
-               tx_set_transaction_control(TX_CHAINED));
+               rc = tx_set_transaction_control(TX_CHAINED));
         assert(TX_OK == rc);
     }
     
@@ -73,9 +79,11 @@ int main(int argc, char *argv[])
 
     printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
     assert(test_rc == rc);
-    
-    printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-    assert(TX_OK == rc);
+
+    if (TX_FAIL != test_rc) {
+        printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+        assert(TX_OK == rc);
+    }
 
     printf("%s| ...finished\n", pgm);
     return 0;
