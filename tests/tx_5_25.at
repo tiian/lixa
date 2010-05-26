@@ -1,5 +1,6 @@
 AT_BANNER([TX: 5.25 tx_info()])
 
+AT_SETUP([TX/5.25/0.0])
 # Al case tests check these statements:
 #
 # If info is null, no TXINFO structure is returned.
@@ -14,12 +15,6 @@ AT_BANNER([TX: 5.25 tx_info()])
 
 # These statements are already checked by TX/3.4/0.0, TX/3.5/0.0, TX/3.5/1.0,
 # TX/3.6/0.0, TX/3.8/0.0
-
-AT_SETUP([TX/5.25/0.0])
-# [TX_NO_BEGIN]
-# The transaction committed successfully; however, a new transaction could not
-# be started and the caller is no longer in transaction mode. This return
-# value occurs only when the transaction_control characteristic is TX_CHAINED.
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0

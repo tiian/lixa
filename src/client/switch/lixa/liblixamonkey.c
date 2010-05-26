@@ -1012,29 +1012,13 @@ int lixa_monkeyrm_complete(int *handle, int *retval, int rmid, long flags)
 
 int lixa_monkeyrm_call_ax_reg(int rmid)
 {
-    enum Exception { NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    XID xid;
+    long flags = TMNOFLAGS;
+    int ret_cod;
     
     LIXA_TRACE(("lixa_monkeyrm_call_ax_reg\n"));
-    TRY {
-        XID xid;
-        long flags = TMNOFLAGS;
-        int rc = ax_reg(rmid, &xid, flags);
-
-        LIXA_TRACE(("lixa_monkeyrm_call_ax_reg: ax_reg returned %d\n", rc));
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_monkeyrm_call_ax_reg/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    ret_cod = ax_reg(rmid, &xid, flags);
+    LIXA_TRACE(("lixa_monkeyrm_call_ax_reg: ax_reg returned %d\n", ret_cod));
     return ret_cod;
 }
 
@@ -1042,27 +1026,13 @@ int lixa_monkeyrm_call_ax_reg(int rmid)
 
 int lixa_monkeyrm_call_ax_unreg(int rmid)
 {
-    enum Exception { NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    long flags = TMNOFLAGS;
+    int ret_cod;
     
     LIXA_TRACE(("lixa_monkeyrm_call_ax_unreg\n"));
-    TRY {
-        long flags = TMNOFLAGS;
-
-        LIXA_TRACE(("lixa_monkeyrm_call_ax_unreg: ax_unreg returned %d\n",
-                    ret_cod = ax_unreg(rmid, flags)));
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_monkeyrm_call_ax_unreg/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    ret_cod = ax_unreg(rmid, flags);
+    LIXA_TRACE(("lixa_monkeyrm_call_ax_unreg: ax_unreg returned %d\n",
+                ret_cod));
     return ret_cod;
 }
 
