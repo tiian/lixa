@@ -38,7 +38,8 @@
 
 int ax_reg(int rmid, XID *xid, long flags)
 {
-    enum Exception { COLL_GET_CS_ERROR
+    enum Exception { CLIENT_NOT_INITIALIZED
+                     , COLL_GET_CS_ERROR
                      , XID_SERIALIZE_ERROR
                      , INVALID_TX_STATE
                      , MSG_SERIALIZE_ERROR
@@ -64,7 +65,7 @@ int ax_reg(int rmid, XID *xid, long flags)
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 LIXA_TRACE(("ax_reg: status not found\n"));
-                ret_cod = TMER_PROTO;
+                THROW(CLIENT_NOT_INITIALIZED);
                 break;
             default:
                 THROW(COLL_GET_CS_ERROR);
@@ -160,6 +161,7 @@ int ax_reg(int rmid, XID *xid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_NOT_INITIALIZED:
             case COLL_GET_CS_ERROR:
             case XID_SERIALIZE_ERROR:
             case INVALID_TX_STATE:

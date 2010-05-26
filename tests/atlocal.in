@@ -34,6 +34,8 @@ then
 fi
 TESTS_TMP_FILE1=$TESTS_TMP_DIR/file1
 export TESTS_TMP_FILE1
+TESTS_TMP_FILE2=$TESTS_TMP_DIR/file2
+export TESTS_TMP_FILE2
 
 LIXA_CONFIG_FILE=@abs_top_builddir@/tests/etc/lixac_conf.xml
 export LIXA_CONFIG_FILE
