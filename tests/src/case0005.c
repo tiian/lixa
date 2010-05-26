@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OK == rc);
     printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info1));
-    assert(TX_OK == rc);
+    assert(1 == rc);
 
     /* emulate callback registration from resource manager when accessing
      * resource manager owned resources; you may imagine these are the
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_PROTOCOL_ERROR == rc);
     printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info2));
-    assert(TX_OK == rc);
+    assert(1 == rc);
 
     /* check the transaction context was not changed */
     assert(memcmp(&info1, &info2, sizeof(TXINFO)) == 0);

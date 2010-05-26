@@ -590,6 +590,11 @@ int lixa_tx_info(int *txrc, TXINFO *info)
             free(xid_str);
 #endif
         }
+
+        if (TX_STATE_S3 == txstate || TX_STATE_S4 == txstate)
+            *txrc = 1;
+        else
+            *txrc = 0;
         
         THROW(NONE);
     } CATCH {
@@ -604,7 +609,6 @@ int lixa_tx_info(int *txrc, TXINFO *info)
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case NONE:
-                *txrc = TX_OK;
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
