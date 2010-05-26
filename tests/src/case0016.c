@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     int rmid = 1;
     
     if (argc < 3) {
-        fprintf(stderr, "%s: at least one option must be specified\n",
+        fprintf(stderr, "%s: at least two options must be specified\n",
                 argv[0]);
         exit (1);
     }

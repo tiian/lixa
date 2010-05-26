@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
     assert(TM_OK == rc);
         
-    printf("%s| tx_set_commit_return(): %d\n", pgm,
+    printf("%s| tx_set_transaction_control(): %d\n", pgm,
            rc = tx_set_transaction_control(TX_CHAINED));
     assert(TX_OK == rc);
     
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
     assert(TM_OK == rc);
         
-    printf("%s| tx_set_commit_return(): %d\n", pgm,
+    printf("%s| tx_set_transaction_control(): %d\n", pgm,
            rc = tx_set_transaction_control(TX_UNCHAINED));
     assert(TX_OK == rc);
     

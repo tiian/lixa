@@ -36,62 +36,67 @@
 #include <liblixamonkey.h>
 
 
-
-/* this case test is used to test TX_CHAINED transactions */
-
+/* This case test is for tx_begin() */
 
 
 int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
-    int rc;
-    TXINFO info1, info2;
-    int commit;
-
+    int rc, test_rc;
+    int rmid = 1;
+    TXINFO info;
+    
     if (argc < 2) {
         fprintf(stderr, "%s: at least one option must be specified\n",
                 argv[0]);
         exit (1);
     }
-    if (!strcmp(argv[1], "commit"))
-        commit = TRUE;
-    else if (!strcmp(argv[1], "rollback"))
-        commit = FALSE;
-    else {
-        fprintf(stderr, "%s: first option must be [commit|rollback]\n",
-                argv[0]);
-        exit (1);
-    }
+    test_rc = strtol(argv[1], NULL, 0);
 
     printf("%s| starting...\n", pgm);
+
+    printf("%s| tx_info(): %d\n", pgm, rc = tx_info(NULL));
+    assert(TX_PROTOCOL_ERROR == rc);
+
+    printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info));
+    assert(TX_PROTOCOL_ERROR == rc);
+
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     assert(TX_OK == rc);
-    printf("%s| tx_set_transaction_control(): %d\n", pgm,
-           tx_set_transaction_control(TX_CHAINED));
-    assert(TX_OK == rc);
+
+    printf("%s| tx_info(): %d\n", pgm, rc = tx_info(NULL));
+    assert(0 == rc);
+
+    printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info));
+    assert(0 == rc);
+
+    assert(NULLXID == info.xid.formatID);
+    
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OK == rc);
-    printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info1));
+
+    printf("%s| tx_info(): %d\n", pgm, rc = tx_info(NULL));
     assert(1 == rc);
 
-    /* emulate callback registration from resource manager when accessing
-     * resource manager owned resources; you may imagine these are the
-     * equivalent of a SQLExecDirect function call */
-    lixa_monkeyrm_call_ax_reg(1);
-
-    if (commit)
-        printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
-    else
-        printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
-    assert(TX_OK == rc);
-    printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info2));
+    printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info));
     assert(1 == rc);
 
-    /* compare transactions: they must be different! */
-    assert(memcmp(&info1.xid, &info2.xid, sizeof(XID)) != 0);
+    assert(NULLXID != info.xid.formatID);
+    assert(0 != info.xid.gtrid_length);
+    assert(0 != info.xid.bqual_length);
     
-    printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-    assert(TX_PROTOCOL_ERROR == rc);
+    printf("%s| lixa_monekyrm_call_ax_reg(%d): %d\n",
+           pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
+    assert(TM_OK == rc);
+
+    printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
+    assert(test_rc == rc);
+
+    if (TX_FAIL != test_rc) {
+        printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+        assert(TX_OK == rc);
+    }
+
     printf("%s| ...finished\n", pgm);
     return 0;
 }

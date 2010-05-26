@@ -1,0 +1,42 @@
+AT_BANNER([TX: 5.25 tx_info()])
+
+# Al case tests check these statements:
+#
+# If info is null, no TXINFO structure is returned.
+#
+# If the caller is in transaction mode, 1 is returned. If the caller is not in
+# transaction mode, 0 is returned.
+#
+# If tx_info ( ) is called in transaction mode, xid is populated with a
+# current transaction branch identifier and transaction_state contains the
+# state of the current transaction. If the caller is not in transaction mode,
+# xid is populated with the null XID
+
+# These statements are already checked by TX/3.4/0.0, TX/3.5/0.0, TX/3.5/1.0,
+# TX/3.6/0.0, TX/3.8/0.0
+
+AT_SETUP([TX/5.25/0.0])
+# [TX_NO_BEGIN]
+# The transaction committed successfully; however, a new transaction could not
+# be started and the caller is no longer in transaction mode. This return
+# value occurs only when the transaction_control characteristic is TX_CHAINED.
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0017 0], [0], [ignore], [ignore])
+AT_CLEANUP
+

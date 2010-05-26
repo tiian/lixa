@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OK == rc);
     printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info));
-    assert(TX_OK == rc);
+    assert(1 == rc);
     printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
     assert(TX_OK == rc);
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
