@@ -17,8 +17,7 @@ xa_open/0
 xa_close/0
 xa_open/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0018 -6], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0018 -6 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset start case0018 -6 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
 #
 # If tx_open( ) returns [TX_ERROR], no resource managers are open.
 AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'performing xa_close on all the resource managers because tx_open is not TX_OK' $TESTS_TMP_FILE2], [0], [ignore], [ignore])
@@ -33,7 +32,7 @@ AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0018 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0018 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
 #
 # If tx_open( ) returns [TX_OK], some or all of the resource managers have
 # been opened.
@@ -50,7 +49,7 @@ AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0018 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0018 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
 #
 # Once tx_open( ) returns success, subsequent calls to tx_open( ) (before an
 # intervening call to tx_close( )) are allowed. However, such subsequent calls
@@ -78,6 +77,6 @@ xa_open/0
 # transaction manager and/or one or more of the resource managers can no
 # longer perform work on behalf of the application. The exact nature of the
 # error is determined in a product-specific manner. 
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0018 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop case0018 -7], [0], [ignore], [ignore])
 AT_CLEANUP
 
