@@ -8,10 +8,12 @@ pdf: 	LIXA.pdf
 
 LIXA.html:	LIXA.xml \
 		LIXA_Preface.xml \
+		LIXA_Introduction.xml \
 		LIXA_Bibliography.xml
 
 LIXA.fo:	LIXA.xml \
 		LIXA_Preface.xml \
+		LIXA_Introduction.xml \
 		LIXA_Bibliography.xml
 
 %.html:	%.xml

@@ -1,0 +1,124 @@
+<chapter>
+  <title>Introduction</title>
+  <section>
+    <title>Why should I use LIXA project?</title>
+    <para>
+      LIXA project allows you to develop an Application Program that performs
+      two phase commit transactions against two ore more Resource Manager.
+      Two phase commit is a conceptual protocol designed to 
+      <quote>guarantee</quote> <acronym>ACID</acronym> (Atomicity, Consistency,
+      Isolation, Durability) transactionality.
+      XA specification is not the only two phase commit protocol implementation
+      but it is probably the best known and widespread. For detailed
+      explanation please refer to <citation>RefModel</citation>.
+    </para>
+  </section>
+  <warning>
+    <para>
+      The reference model (<citation>RefModel</citation>) technical guide
+      available on the <trademark>Open Group</trademark> web site is more
+      recent than the XA specification (<citation>XAspec</citation>); an XA+
+      specification exists too and the reference model was updated to
+      host the concepts necessary for XA+. LIXA project does not implement
+      the XA+ specification, but only XA and the following concepts explained 
+      in <citation>RefModel</citation> does not apply to LIXA project:
+      <itemizedlist mark='bullet'>
+	<listitem><para>3.1: Superior Node</para></listitem>
+	<listitem><para>3.1: Subordinate Node</para></listitem>
+	<listitem><para>3.1: Communication Resrouce Manager (<acronym>CRM</acronym>)</para></listitem>
+	<listitem><para>3.5: Distributed Communication Facilities</para></listitem>
+	<listitem><para>3.6: Activity between Functional Components Involving Two or More APs</para></listitem>
+	<listitem><para>3.7: CRM Communication Paradigms with APs</para></listitem>
+	<listitem><para>3.8: High-level TP Language</para></listitem>
+      </itemizedlist>
+      XA specification was designed to implement the two phase commit protocol
+      in the case there is only one Application Program running inside a
+      Transaction Monitor and using a Transaction Manager to coordinate any
+      number of Resource Managers. XA+ specification was designed to
+      implement the two phase commit protocol in the case there are two or
+      more Application Programs running inside distinct Transaction Monitors
+      and using distinct Transaction Managers to coordinate any number of
+      Resource Managers.
+    </para>
+  </warning>
+  <section>
+    <title>Transaction Manager and Transaction Monitor</title>
+    <para>
+      As explained in Appendix A of <citation>RefModel</citation> a 
+      Transaction Manager can be though as a subset of a Transaction Monitor.
+      Many commercial and non commercial products tend to merge the features
+      in a single bundle; this is good if you need a Transaction Monitor,
+      this may be bed if you only need a Transaction Manager.
+    </para>
+    <para>
+      IBM TXSeries<footnote><para>TXSeries is a registered trademark of 
+	  IBM corporation</para></footnote> is a Transaction Monitor with an
+      integrated Transaction Manager.
+      Oracle (BEA) Tuxedo<footnote><para>Tuxedo is a registered trademark of
+	  Oracle corporation</para></footnote> is a Transaction Monitor with an
+      integrated Transaction Manager.
+      JBOSS<footnote><para>JBOSS is a registered trademark of Red Hat
+	  corporation</para></footnote> is a <acronym>JEE</acronym>
+      (Java Enterprise Edition) application server; it is a Transaction
+      Monitor with an integrated Transaction Manager for bytecode based
+      applications.
+    </para>
+    <para>
+      BTM (Bitronix JTA Transaction Manager) is a Transaction Manager, but it
+      is not a Transaction Monitor and can be used in conjunction with a
+      <acronym>JVM</acronym> (Java Virtual Machine) and possibly any
+      Transaction Monitor. Unfortunately it is a Java based technology and not
+      a native one; in the Java arena there are a few stand-alone Transaction
+      Manager, while in the C language arena it is not easy to find out one.
+    </para>
+    <para>
+      LIXA project implement a stand-alone Transaction Manager your 
+      Application Program can use in many different ways:
+      <itemizedlist mark='bullet'>
+	<listitem><para>from a C application launched from shell</para></listitem>
+	<listitem><para>from a C application launched via CGI from a web server</para></listitem>
+	<listitem><para>from a scripting language application<footnote><para>You must wrap the TX C API to be able to use it from Perl, PHP, Python, Ruby...</para></footnote></para></listitem>
+      </itemizedlist>
+      With the aid of LIXA Transaction Manager potentially any web server can
+      be converted in an Application Server with two phase commit support.
+    </para>
+  </section>
+  <section>
+    <title>LIXA Architecture</title>
+    <para>
+      From an architectural point of view, LIXA project adopts an original
+      approach: an Application Program links the LIXA client library and
+      embeds the Transaction Manager logic. Every Application Program instance
+      runs its own Transaction Manager instance, but every Transaction
+      Manager instance uses the LIXA server daemon to save and retrieve the
+      state of the managed transactions.
+      LIXA project was designed to allow massive parallelism and embedding at
+      the same time: the parallelism is necessary to accomplish nowadays
+      workloads while the embeddable property is necessary to avoid conflicts
+      with process and thread management of the potential Transaction
+      Monitors.
+    </para>
+  </section>
+  <section>
+    <title>Project, Projuct, Product</title>
+    <para>
+      LIXA is a <emphasis>project</emphasis>: a software artifact you can pick
+      up to try, use, modify, distribute following GPL license. The project is
+      hosted by SourceForge collaborative portal and you can use the portal
+      to interact with the author and other users.
+      LIXA is not supported because it is not a product: you can use it AS IS
+      without any guarantee.
+    </para>
+    <para>
+      A projuct is a software artifact that was a project financed from a
+      customer. When a second customer can be interested in the software
+      artifact, it is selled again. When the third customer knocks the door
+      the team developed the project starts a new business with the new
+      product. But it is a projuct because it was designed and modeled
+      following the first customer needs.
+    </para>
+    <para>
+      A product is a software artifact with 
+    </para>
+  </section>
+</chapter>

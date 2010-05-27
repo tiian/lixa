@@ -2,6 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V5.0/EN" 
 	  "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY pref SYSTEM "LIXA_Preface.xml">
+<!ENTITY intro SYSTEM "LIXA_Introduction.xml">
 <!ENTITY biblio SYSTEM "LIXA_Bibliography.xml">
 ]>
 <book xmlns="http://docbook.org/ns/docbook">
@@ -20,5 +21,6 @@
     </copyright>
   </info>
   &pref;
+  &intro;
   &biblio;
 </book>

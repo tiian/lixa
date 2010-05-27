@@ -1,5 +1,5 @@
 <preface>
-  <title>What's LIXA?</title>
+  <title>Preface</title>
   <para>
     LIXA is acronym of LIbre XA: it's a free, libre, open source
     implementation of two X/Open specifications: "Distributed Transaction
@@ -63,4 +63,32 @@
     LIXA documentation tries to avoid duplication with the content of the
     above books.
   </para>
+  <note><title>Intended audience</title>
+    <para>
+      This manual is maintained in the hope it can help:
+      <itemizedlist mark='bullet'>
+	<listitem>
+	  <para>developers who want to use LIXA project to develop applications
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>system administrators have to install, configure and manage
+	  LIXA project instances
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>curious people want to discover the features offered by the
+	    LIXA project
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+  </note>
+  <note><title>Language</title>
+    <para>
+      Unfortunately English is not my mother tongue. This manual may contain
+      a lot of language mistakes. If you sent me revisioned versions of the
+      Docbook sources (XML), I would promptly accept them.
+    </para>
+  </note>
 </preface>
