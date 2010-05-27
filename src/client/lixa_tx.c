@@ -708,7 +708,7 @@ int lixa_tx_open(int *txrc, int mmode)
             case LIXA_XA_OPEN_ERROR:
                 /* clean-up socket */
                 client_disconnect(&global_csc);
-                *txrc = TX_ERROR;
+                *txrc = tmp_txrc;
                 break;
             case ALREADY_OPENED:
                 ret_cod = LIXA_RC_BYPASSED_OPERATION;
