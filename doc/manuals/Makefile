@@ -2,17 +2,17 @@ STYLESHEETS_DIR = /usr/share/xml/docbook/stylesheet/nwalsh
 
 all: html pdf
 
-html:	LIXA_Getting_Started.html
+html:	LIXA.html
 
-pdf: 	LIXA_Getting_Started.pdf
+pdf: 	LIXA.pdf
 
-LIXA_Getting_Started.html:	LIXA_Getting_Started.xml \
-				LIXA_Getting_Started_Preface.xml \
-				LIXA_Bibliography.xml
+LIXA.html:	LIXA.xml \
+		LIXA_Preface.xml \
+		LIXA_Bibliography.xml
 
-LIXA_Getting_Started.fo:	LIXA_Getting_Started.xml \
-				LIXA_Getting_Started_Preface.xml \
-				LIXA_Bibliography.xml
+LIXA.fo:	LIXA.xml \
+		LIXA_Preface.xml \
+		LIXA_Bibliography.xml
 
 %.html:	%.xml
 	xsltproc -o $@ $(STYLESHEETS_DIR)/xhtml/docbook.xsl $<
