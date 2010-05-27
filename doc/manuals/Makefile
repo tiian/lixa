@@ -7,10 +7,12 @@ html:	LIXA_Getting_Started.html
 pdf: 	LIXA_Getting_Started.pdf
 
 LIXA_Getting_Started.html:	LIXA_Getting_Started.xml \
-				LIXA_Getting_Started_Preface.xml
+				LIXA_Getting_Started_Preface.xml \
+				LIXA_Bibliography.xml
 
 LIXA_Getting_Started.fo:	LIXA_Getting_Started.xml \
-				LIXA_Getting_Started_Preface.xml
+				LIXA_Getting_Started_Preface.xml \
+				LIXA_Bibliography.xml
 
 %.html:	%.xml
 	xsltproc -o $@ $(STYLESHEETS_DIR)/xhtml/docbook.xsl $<

@@ -2,9 +2,11 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V5.0/EN" 
 	  "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY pref SYSTEM "LIXA_Getting_Started_Preface.xml">
+<!ENTITY biblio SYSTEM "LIXA_Bibliography.xml">
 ]>
 <book xmlns="http://docbook.org/ns/docbook">
-  <title>LIXA: Getting Started</title>
+  <title>LIXA</title>
+  <subtitle>A libre, free, open source implementation of XA and TX specifications</subtitle>
   <info>
     <author>
       <personname>
@@ -12,6 +14,11 @@
 	<surname>Ferrari</surname>
       </personname>
     </author>
+    <copyright>
+      <year>2010</year>
+      <holder>Christian Ferrari</holder>
+    </copyright>
   </info>
   &pref;
+  &biblio;
 </book>
