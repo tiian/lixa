@@ -46,9 +46,9 @@
     <para>
       As explained in Appendix A of <citation>RefModel</citation> a 
       Transaction Manager can be though as a subset of a Transaction Monitor.
-      Many commercial and non commercial products tend to merge the features
+      Most commercial products tend to merge the features
       in a single bundle; this is good if you need a Transaction Monitor,
-      this may be bed if you only need a Transaction Manager.
+      this may be bad if you only need a Transaction Manager.
     </para>
     <para>
       IBM TXSeries<footnote><para>TXSeries is a registered trademark of 
@@ -103,8 +103,12 @@
     <title>Project, Projuct, Product</title>
     <para>
       LIXA is a <emphasis>project</emphasis>: a software artifact you can pick
-      up to try, use, modify, distribute following GPL license. The project is
-      hosted by SourceForge collaborative portal and you can use the portal
+      up to try, use, modify and distribute according to GPL license terms. 
+      The project is hosted by 
+      <link xlink:href="http://sourceforge.net/projects/lixa/">
+	<citetitle>SourceForge</citetitle>
+      </link>
+      collaborative portal and you can use the portal
       to interact with the author and other users.
       LIXA is not supported because it is not a product: you can use it AS IS
       without any guarantee.
@@ -112,13 +116,46 @@
     <para>
       A projuct is a software artifact that was a project financed from a
       customer. When a second customer can be interested in the software
-      artifact, it is selled again. When the third customer knocks the door
-      the team developed the project starts a new business with the new
-      product. But it is a projuct because it was designed and modeled
-      following the first customer needs.
+      artifact, it is selled again. When the third customer knocks the door,
+      the team developed the project starts a new business with a new
+      <emphasis>product</emphasis>. But it is a projuct because it was 
+      designed and modeled following the first customer needs.
     </para>
     <para>
-      A product is a software artifact with 
+      In my honest opinion a <emphasis>product</emphasis> is a software 
+      artifact with some characteristics:
+      <itemizedlist mark='bullet'>
+	<listitem><para>it is produced by a software factory</para></listitem>
+	<listitem><para>it is selled by a commercial network</para></listitem>
+	<listitem><para>it has a team of specialists you can contact to have 
+	    support</para></listitem>
+	<listitem><para>it has a team of specialists can visit and help you 
+	    with installation, configuration, problem determination, 
+	    etc...</para></listitem>
+	<listitem><para>it is fully documented</para></listitem>
+	<listitem><para>it is certified to run properly on some documented 
+	    hardware and software platforms</para></listitem>
+	<listitem><para>it has a certified compatibility matrix the customer
+	    can use to find oud a valid mix of distinct software components
+	    (i.e. different Resource Managers, for a Transaction Manager
+	    like LIXA)</para></listitem>
+	<listitem><para>it can be installed, updated and removed from a system
+	    using the standard tool of the platform (i.e. dpkg, rpm, pkg,
+	    etc....)</para></listitem>
+	<listitem><para>it can be upgraded to a successive version without
+	    side effects for the product and/or the hosting system
+	</para></listitem>
+      </itemizedlist>
+      <important><para>LIXA project is not a product.</para></important>
+    </para>
+    <para>
+      If you were running a business interested in the development of a
+      product based on the technology developed by LIXA project you should
+      contact the author through       
+      <link xlink:href="http://sourceforge.net/projects/lixa/">
+	<citetitle>SourceForge</citetitle>
+      </link>
+      collaborative portal.
     </para>
   </section>
 </chapter>
