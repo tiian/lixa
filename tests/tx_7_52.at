@@ -1,0 +1,219 @@
+AT_BANNER([TX: 7.52 State Table])
+
+AT_SETUP([TX/7.52/0.0])
+# Testing unchained states S0, S1, S3
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+# S1 state
+# tx_open
+xa_open/0
+# tx_begin
+xa_start/0
+xa_end/0
+xa_rollback/0
+# tx_close
+xa_close/0
+xa_open/0
+# tx_info
+xa_close/0
+xa_open/0
+# tx_open
+xa_close/0
+xa_open/0
+# tx_set_commit_return
+xa_close/0
+xa_open/0
+# tx_set_transaction_timeout
+xa_close/0
+xa_open/0
+# S3 state
+xa_start/0
+# tx_commit
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+# tx_info
+xa_end/0
+xa_rollback/0
+xa_start/0
+# tx_open
+xa_end/0
+xa_rollback/0
+xa_start/0
+# tx_rollback
+xa_end/0
+xa_rollback/0
+xa_start/0
+# tx_set_commit_return
+xa_end/0
+xa_rollback/0
+xa_start/0
+# tx_set_transaction_timeout
+xa_end/0
+xa_rollback/0
+xa_start/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+# S1 state
+# tx_open
+xa_open/0
+# tx_begin
+xa_end/0
+xa_rollback/0
+# tx_close
+xa_close/0
+xa_open/0
+# tx_info
+xa_close/0
+xa_open/0
+# tx_open
+xa_close/0
+xa_open/0
+# tx_set_commit_return
+xa_close/0
+xa_open/0
+# tx_set_transaction_timeout
+xa_close/0
+xa_open/0
+# S3 state
+# tx_commit
+xa_end/0
+xa_prepare/0
+xa_commit/0
+# tx_info
+xa_end/0
+xa_rollback/0
+# tx_open
+xa_end/0
+xa_rollback/0
+# tx_rollback
+xa_end/0
+xa_rollback/0
+# tx_set_commit_return
+xa_end/0
+xa_rollback/0
+# tx_set_transaction_timeout
+xa_end/0
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0020 0 -100], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/7.52/0.1])
+# Testing chained states S0, S1, S3
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+# S2 state
+# tx_open
+xa_open/0
+# tx_begin
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_start/-3
+# tx_close
+xa_close/0
+xa_open/0
+# tx_info
+xa_close/0
+xa_open/0
+# tx_open
+xa_close/0
+xa_open/0
+# tx_set_commit_return
+xa_close/0
+xa_open/0
+# tx_set_transaction_timeout
+xa_close/0
+xa_open/0
+# S4 state
+xa_start/0
+# tx_commit
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/-3
+xa_start/0
+# tx_info
+xa_end/0
+xa_rollback/0
+xa_start/0
+# tx_open
+xa_end/0
+xa_rollback/0
+xa_start/0
+# tx_rollback
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_start/-3
+xa_start/0
+# tx_set_commit_return
+xa_end/0
+xa_rollback/0
+xa_start/0
+# tx_set_transaction_timeout
+xa_end/0
+xa_rollback/0
+xa_start/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+# S2 state
+# tx_open
+xa_open/0
+# tx_begin
+xa_end/0
+xa_rollback/0
+# tx_close
+xa_close/0
+xa_open/0
+# tx_info
+xa_close/0
+xa_open/0
+# tx_open
+xa_close/0
+xa_open/0
+# tx_set_commit_return
+xa_close/0
+xa_open/0
+# tx_set_transaction_timeout
+xa_close/0
+xa_open/0
+# S4 state
+# tx_commit
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+# tx_info
+xa_end/0
+xa_rollback/0
+# tx_open
+xa_end/0
+xa_rollback/0
+# tx_rollback
+xa_end/0
+xa_rollback/0
+xa_end/0
+xa_rollback/0
+# tx_set_commit_return
+xa_end/0
+xa_rollback/0
+# tx_set_transaction_timeout
+xa_end/0
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0020 1 -100], [0], [ignore], [ignore])
+AT_CLEANUP
+
