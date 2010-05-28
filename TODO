@@ -1,6 +1,4 @@
-Restart from TX/7.52 case0020.c:
-- test chaining switch
-- test all 4 different combinations of dynamic/static resource managers
+Restart from TX/7.52; test notes; do not recycle for every test case
 
 Stability test with valgrind must be performed
 
