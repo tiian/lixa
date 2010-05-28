@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.5.8  implemented test case TX/5.27/0.0
+20100528 - 0.5.8  implemented test case TX/5.27/0.0
                   implemented test case TX/5.27/0.1
                   implemented test case TX/5.27/0.2
                   implemented test case TX/5.27/0.3
@@ -8,6 +8,7 @@ LOG:
                   implemented test case TX/5.27/0.5
                   implemented test case TX/5.27/0.6
                   implemented test case TX/5.27/0.7
+                  fixed bug # 3008437
 
 20100527 - 0.5.7  implemented test case TX/5.25/0.0
                   implemented test case TX/5.26/0.0 and fixed bug # 3007267

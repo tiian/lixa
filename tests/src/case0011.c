@@ -48,8 +48,19 @@ int main(int argc, char *argv[])
     int rmid = 1;
     
     printf("%s| starting...\n", pgm);
+    printf("%s| tx_set_transaction_timeout(): %d\n", pgm,
+           rc = tx_set_transaction_timeout(1));
+    assert(TX_PROTOCOL_ERROR == rc);
+    
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     assert(TX_OK == rc);
+    
+    printf("%s| tx_info(): %d\n", pgm, tx_info(&info));
+    assert(0 == info.transaction_timeout);
+    
+    printf("%s| tx_set_transaction_timeout(): %d\n", pgm,
+           rc = tx_set_transaction_timeout(-10));
+    assert(TX_EINVAL == rc);
     
     printf("%s| tx_info(): %d\n", pgm, tx_info(&info));
     assert(0 == info.transaction_timeout);

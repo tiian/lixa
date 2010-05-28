@@ -45,6 +45,10 @@ int main(int argc, char *argv[])
     int rmid = 1;
     
     printf("%s| starting...\n", pgm);
+    printf("%s| tx_set_transaction_control(): %d\n", pgm,
+           rc = tx_set_transaction_control(TX_CHAINED));
+    assert(TX_PROTOCOL_ERROR == rc);
+    
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     assert(TX_OK == rc);
     
@@ -58,6 +62,13 @@ int main(int argc, char *argv[])
     printf("%s| tx_set_transaction_control(): %d\n", pgm,
            rc = tx_set_transaction_control(TX_CHAINED));
     assert(TX_OK == rc);
+    
+    printf("%s| tx_info(): %d\n", pgm, tx_info(&info));
+    assert(TX_CHAINED == info.transaction_control);
+    
+    printf("%s| tx_set_transaction_control(): %d\n", pgm,
+           rc = tx_set_transaction_control(333));
+    assert(TX_EINVAL == rc);
     
     printf("%s| tx_info(): %d\n", pgm, tx_info(&info));
     assert(TX_CHAINED == info.transaction_control);

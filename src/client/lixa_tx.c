@@ -1088,6 +1088,7 @@ int lixa_tx_set_transaction_timeout(int *txrc,
     enum Exception { COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
                      , INVALID_STATUS
+                     , INVALID_OPTION
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -1127,6 +1128,13 @@ int lixa_tx_set_transaction_timeout(int *txrc,
                 THROW(INVALID_STATUS);
         }
 
+        /* see bug # 3008437 */
+        if (timeout < 0) {
+            LIXA_TRACE(("lixa_tx_set_transaction_timeout: %ld is not "
+                        "considered a valid value for timeout\n", timeout));
+            THROW(INVALID_OPTION);
+        }
+        
         /* set the new value for transaction timeout */
         client_status_set_tx_timeout(cs, timeout);
         
@@ -1141,6 +1149,10 @@ int lixa_tx_set_transaction_timeout(int *txrc,
                 break;
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case INVALID_OPTION:
+                *txrc = TX_EINVAL;
+                ret_cod = LIXA_RC_INVALID_OPTION;
                 break;
             case NONE:
                 *txrc = TX_OK;
