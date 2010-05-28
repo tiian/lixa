@@ -1,9 +1,19 @@
 LOG:
 
-20100527 - 0.5.7  implemented test case TX/5.25/0.0 and fixed bug # 3007267
-                  implemented test case TX/5.25/0.1 and fixed bug # 3007402
-                  implemented test case TX/5.25/0.2
-                  implemented test case TX/5.25/0.3 and fixed bug # 3007816
+         - 0.5.8  implemented test case TX/5.27/0.0
+                  implemented test case TX/5.27/0.1
+                  implemented test case TX/5.27/0.2
+                  implemented test case TX/5.27/0.3
+                  implemented test case TX/5.27/0.4
+                  implemented test case TX/5.27/0.5
+                  implemented test case TX/5.27/0.6
+                  implemented test case TX/5.27/0.7
+
+20100527 - 0.5.7  implemented test case TX/5.25/0.0
+                  implemented test case TX/5.26/0.0 and fixed bug # 3007267
+                  implemented test case TX/5.26/0.1 and fixed bug # 3007402
+                  implemented test case TX/5.26/0.2
+                  implemented test case TX/5.26/0.3 and fixed bug # 3007816
 
 20100525 - 0.5.6  implemented test case TX/5.23/0.0
                   implemented test case TX/5.23/0.1 and fixed bug # 3006838
