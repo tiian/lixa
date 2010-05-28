@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.5.9
+
 20100528 - 0.5.8  implemented test case TX/5.27/0.0
                   implemented test case TX/5.27/0.1
                   implemented test case TX/5.27/0.2

@@ -23,7 +23,7 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	testsuite.at \
 	tx.at tx_3_2.at tx_3_3.at tx_3_3_1.at tx_3_4.at tx_3_5.at \
 	tx_3_6.at tx_3_8.at tx_4_2.at tx_5_20.at tx_5_22.at tx_5_23.at \
-	tx_5_25.at tx_5_26.at tx_5_27.at \
+	tx_5_25.at tx_5_26.at tx_5_27.at tx_7_52.at \
 	package.m4 \
 	$(TESTSUITE) atlocal.in lixa_test_exec.sh lixa_test_functions.sh
 TESTSUITE = $(srcdir)/testsuite
@@ -57,7 +57,7 @@ $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/tx_4_2.at $(srcdir)/tx_5_20.at \
 		$(srcdir)/tx_5_22.at $(srcdir)/tx_5_23.at \
 		$(srcdir)/tx_5_25.at $(srcdir)/tx_5_26.at \
-		$(srcdir)/tx_5_27.at \
+		$(srcdir)/tx_5_27.at $(srcdir)/tx_7_52.at \
 		$(srcdir)/package.m4
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@
