@@ -43,8 +43,20 @@ int main(int argc, char *argv[])
     int rc;
     
     printf("%s| starting...\n", pgm);
+
+    printf("%s| tx_set_commit_return(): %d\n", pgm,
+           rc = tx_set_commit_return(TX_COMMIT_COMPLETED));
+    assert(TX_PROTOCOL_ERROR == rc);
+    
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     assert(TX_OK == rc);
+    
+    printf("%s| tx_set_commit_return(): %d\n", pgm,
+           rc = tx_set_commit_return(333));
+    assert(TX_EINVAL == rc);
+    
+    printf("%s| tx_info(): %d\n", pgm, tx_info(&info));
+    assert(TX_COMMIT_COMPLETED == info.when_return);
     
     printf("%s| tx_set_commit_return(): %d\n", pgm,
            rc = tx_set_commit_return(TX_COMMIT_COMPLETED));
