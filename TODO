@@ -1,3 +1,7 @@
+Restart from TX/7.52 case0020.c:
+- test chaining switch
+- test all 4 different combinations of dynamic/static resource managers
+
 Stability test with valgrind must be performed
 
 Stress test must be performed
