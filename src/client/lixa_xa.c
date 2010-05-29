@@ -199,6 +199,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
         int fd;
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        char *ser_xid;
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -314,11 +315,23 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
         } /* for (i=0; ...) */
 
         *txrc = lixa_tx_rc_get(&ltr);
+
+        if (TX_MIXED == *txrc || TX_HAZARD == *txrc) {
+            ser_xid = xid_serialize(client_status_get_xid(cs));
+            syslog(LOG_WARNING, LIXA_SYSLOG_LXC011W,
+                   NULL != ser_xid ? ser_xid : "",
+                   TX_MIXED == *txrc ? "TX_MIXED" : "TX_HAZARD");
+            if (NULL != ser_xid)
+                free(ser_xid);
+        }
+        
         switch (*txrc) {
             case TX_OK:
             case TX_OUTSIDE:
             case TX_ROLLBACK:
             case TX_COMMITTED:
+            case TX_MIXED:
+            case TX_HAZARD:
                 msg.body.commit_8.conthr.finished = TRUE;
                 break;
             default:
@@ -1096,6 +1109,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
         int fd;
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        char *ser_xid;
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -1203,11 +1217,23 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
         } /* for (i=0; ...) */
         
         *txrc = lixa_tx_rc_get(&ltr);
+
+        if (TX_MIXED == *txrc || TX_HAZARD == *txrc) {
+            ser_xid = xid_serialize(client_status_get_xid(cs));
+            syslog(LOG_WARNING, LIXA_SYSLOG_LXC012W,
+                   NULL != ser_xid ? ser_xid : "",
+                   TX_MIXED == *txrc ? "TX_MIXED" : "TX_HAZARD");
+            if (NULL != ser_xid)
+                free(ser_xid);
+        }
+        
         switch (*txrc) {
             case TX_OK:
             case TX_OUTSIDE:
             case TX_ROLLBACK:
             case TX_COMMITTED:
+            case TX_MIXED:
+            case TX_HAZARD:
                 msg.body.commit_8.conthr.finished = TRUE;
                 break;
             default:
