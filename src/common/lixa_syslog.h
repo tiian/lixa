@@ -67,6 +67,10 @@
     "returned XAER_DUPID for xid='%s' and this should NOT happen"
 #define LIXA_SYSLOG_LXC010W "LXC010W resource manager '%s' (rmid=%d) " \
     "returned XAER_PROTO for xid='%s' and this should NOT happen"
+#define LIXA_SYSLOG_LXC011W "LXC011W the transaction with xid '%s' has not " \
+    "completely committed (%s)"
+#define LIXA_SYSLOG_LXC012W "LXC012W the transaction with xid '%s' has not " \
+    "completely backed out (%s)"
 
 
 
