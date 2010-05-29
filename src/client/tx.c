@@ -76,7 +76,8 @@ int tx_commit(void)
                 default:
                     txrc2 = TX_FAIL;
             }
-        }
+        } else
+            txrc2 = txrc1;
     } else
         txrc2 = txrc1;
     return txrc2;
@@ -127,7 +128,8 @@ int tx_rollback(void)
                 default:
                     txrc2 = TX_FAIL;
             }
-        }
+        } else
+            txrc2 = txrc1;
     } else
         txrc2 = txrc1;
     return txrc2;

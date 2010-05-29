@@ -1,4 +1,4 @@
-Restart from TX/7.52; test notes; do not recycle for every test case
+Restart from TX/7.52/3.5 (TX_CHAINED version); test notes; do not recycle for every test case
 
 Stability test with valgrind must be performed
 
