@@ -42,16 +42,17 @@
 int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
-    int rc, test_rc, chained;;
+    int rc, commit, test_rc, chained;;
     int rmid = 1;
     
-    if (argc < 3) {
-        fprintf(stderr, "%s: at least two options must be specified\n",
+    if (argc < 4) {
+        fprintf(stderr, "%s: at least three options must be specified\n",
                 argv[0]);
         exit (1);
     }
-    chained = strtol(argv[1], NULL, 0);
-    test_rc = strtol(argv[2], NULL, 0);
+    commit = strtol(argv[1], NULL, 0);
+    chained = strtol(argv[2], NULL, 0);
+    test_rc = strtol(argv[3], NULL, 0);
 
     printf("%s| starting...\n", pgm);
 
@@ -71,11 +72,14 @@ int main(int argc, char *argv[])
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
     assert(TM_OK == rc);
 
-    printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
+    if (commit)
+        printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
+    else
+        printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());        
     assert(test_rc == rc);
 
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-    if (chained)
+    if (chained && test_rc > TX_NO_BEGIN)
         assert(TX_PROTOCOL_ERROR == rc);
     else
         assert(TX_OK == rc);
