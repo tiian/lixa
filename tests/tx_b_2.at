@@ -1,0 +1,217 @@
+AT_BANNER([TX: B.2 Function Call Mappings])
+
+# TX Transaction Demarcation Specification, pag. 60:
+#
+# The XA specification gives two optimisations in this procedure:
+# 1. During Phase 1, any RM may report that the AP did not ask it to update
+#    shared resources, which eliminates the Phase 2 call to that RM.
+# 2. If the TM has dealt with only one subordinate RM in the global
+#    transaction, it can omit Phase 1.
+#
+# TX/B.2/0.* tests note 1
+# TX/B.2/1.* tests note 2
+
+AT_SETUP([TX/B.2/0.0])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start case0002 commit 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2 | wc -l | grep '^4'], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.2/0.1])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/3
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0002 commit 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2 | wc -l | grep '^3'], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.2/0.2])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/3
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/3
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0002 commit 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2 | wc -l | grep '^2'], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.2/0.3])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/3
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/3
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/3
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0002 commit 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2 | wc -l | grep '^1'], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.2/0.4])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/3
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/3
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/3
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/3
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0002 commit 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.2/1.0])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0000 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'one_phase_commit' $TESTS_TMP_FILE2], [1], [ignore], [ignore])
+AT_CLEANUP
+
