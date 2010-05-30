@@ -1408,3 +1408,14 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop case0021 0 1 -104], [0], [ignore], [ignore])
 AT_CLEANUP
 
+# This statement is partially tested by TX/3.6/0.0:
+#
+# When tx_info ( ) returns one of:
+# [TX_ROLLBACK_ONLY]
+# [TX_TIMEOUT_ROLLBACK_ONLY]
+# in the transaction state information, the transaction is marked
+# rollback-only and is rolled back whether the application program calls
+# tx_commit( ) or tx_rollback ( ).
+#
+# TX_ROLLBACK_ONLY does not apply to LIXA and is never returned to the
+# Application Program

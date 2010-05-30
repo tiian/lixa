@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.5.9  implemented test case TX/7.52/0.0
+20100530 - 0.5.9  implemented test case TX/7.52/0.0
                   implemented test case TX/7.52/0.1
                   implemented test case TX/7.52/1.0
                   implemented test case TX/7.52/1.1
@@ -29,6 +29,9 @@ LOG:
                   implemented test case TX/7.52/6.1
                   implemented test case TX/7.52/6.2
                   implemented test case TX/7.52/6.3
+                  removed a false recovery pending condition when a 
+                  transaction ends with TX_MIXED/TX_HAZARD and TX_CHAINED is in
+                  effect
 
 20100528 - 0.5.8  implemented test case TX/5.27/0.0
                   implemented test case TX/5.27/0.1

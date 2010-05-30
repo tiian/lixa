@@ -96,6 +96,9 @@ int main(int argc, char *argv[])
 
     sleep(2);
     
+    printf("%s| tx_info(): %d\n", pgm, tx_info(&info));
+    assert(TX_TIMEOUT_ROLLBACK_ONLY == info.transaction_state);
+    
     printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
     assert(TX_ROLLBACK == rc);
     
