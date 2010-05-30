@@ -104,7 +104,7 @@
     <para>
       LIXA is a <emphasis>project</emphasis>: a software artifact you can pick
       up to try, use, modify and distribute according to GPL license terms. 
-      The project is hosted by 
+      The project is hosted on 
       <link xlink:href="http://sourceforge.net/projects/lixa/">
 	<citetitle>SourceForge</citetitle>
       </link>
@@ -157,5 +157,47 @@
       </link>
       collaborative portal.
     </para>
+  </section>
+  <section>
+    <title>LIXA and X/OPEN CAE specifications</title> 
+    <para>
+      LIXA project tries to be as compliant as possible with the X/Open CAE
+      specifications cited in bibliography. These are the non implemented
+      and/or non implementable features.
+    </para>
+    <simplesect>
+      <title>The commit_return Characteristic</title>
+      <para>
+	As explained in <citation>TXspec</citation> (3.4, 3.8.1) two values
+	are available:
+	<itemizedlist mark='bullet'>
+	  <listitem><para><constant>TX_COMMIT_COMPLETED
+	    </constant></para></listitem>
+	  <listitem><para><constant>TX_COMMIT_DECISION_LOGGED
+	    </constant></para></listitem>
+	</itemizedlist>
+	LIXA TX API implementation supports only
+	<constant>TX_COMMIT_COMPLETED</constant>
+	this behavior is allowed by the specification.
+      </para>
+    </simplesect>
+    <simplesect>
+      <title>The transaction state element</title>
+      <para>
+	As explained in <citation>TXspec</citation> (4.2, page 16)
+	<function>tx_info()</function> can return three values:
+	<itemizedlist mark='bullet'>
+	  <listitem><para><constant>TX_ACTIVE
+	    </constant></para></listitem>
+	  <listitem><para><constant>TX_TIMEOUT_ROLLBACK_ONLY
+	    </constant></para></listitem>
+	  <listitem><para><constant>TX_ROLLBACK_ONLY
+	    </constant></para></listitem>
+	</itemizedlist>
+      </para>
+      LIXA <function>tx_info()</function> does not return
+      <constant>TX_ROLLBACK_ONLY</constant>. This does not hurt the
+      X/Open CAE specification.
+    </simplesect>
   </section>
 </chapter>

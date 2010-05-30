@@ -355,7 +355,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
     TRY {
         int txstate, next_txstate, commit = TRUE;
         client_status_t *cs;
-        int one_phase_commit;
+        int one_phase_commit = FALSE;
 
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -390,7 +390,9 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                         "TX_TIMEOUT_ROLLBACK_ONLY and cannot be committed; "
                         "rollbacking...\n", txstate));
             commit = FALSE;
-        }
+        } else
+            one_phase_commit = client_status_could_one_phase(cs);
+
         /* detach the transaction */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, commit))) {
             if (TX_ROLLBACK == *txrc)
@@ -400,14 +402,10 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         }
         /* prepare (skip if we are rollbacking) */
         if (commit) {
-            /* bypass xa_prepare if there is only one resource manager */
-            if (global_ccc.actconf.rsrmgrs->len > 1) {
-                one_phase_commit = FALSE;
-                if (LIXA_RC_OK != (
-                        ret_cod = lixa_xa_prepare(cs, txrc, &commit)))
+            /* bypass xa_prepare if one_phase_commit is TRUE */
+            if (!one_phase_commit &&
+                LIXA_RC_OK != (ret_cod = lixa_xa_prepare(cs, txrc, &commit)))
                     THROW(XA_PREPARE_ERROR);
-            } else
-                one_phase_commit = TRUE;
         }
         /* commit/rollback */
         if (commit) {

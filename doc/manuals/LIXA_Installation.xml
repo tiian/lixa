@@ -1,0 +1,68 @@
+<chapter>
+  <title>Installation</title>
+  <para>
+    This chapter explains how to download, install, verify the software
+    released by LIXA project.
+  </para>
+  <section>
+    <title>System requirements</title>
+    <para>
+      LIXA project is developed on an x86 based Ubuntu 8.04 system; it
+      compiles and runs on both <emphasis>server</emphasis> and
+      <emphasis>desktop</emphasis> flavors. Installation on a different Linux
+      distribution should be quite straightforward; installation on different
+      <emphasis>UNIX like</emphasis> would probably need some work.
+    </para>
+    <para>
+      If you successfully installed LIXA on a different system, you might
+      publish your experience on the public forum hosted on SourceForge.net 
+      and share your results with other users. 
+    </para>
+    <simplesect>
+      <title>Pre-requisites</title>
+    </simplesect>
+    <para>
+      To compile LIXA software the GNU tools are needed: gcc, gmake, libtool.
+      Autoconf and automake are used, but should not be necessary if you want
+      to install the original tarball.
+    </para>
+    <para>
+      Some <emphasis>libraries (run time and development stuff)</emphasis> are
+      necessary too:
+      <itemizedlist mark='bullet'>
+	<listitem><para>libdl</para></listitem>
+	<listitem><para>libglib</para></listitem>
+	<listitem><para>libgmodule</para></listitem>
+	<listitem><para>libgthread</para></listitem>
+	<listitem><para>libm</para></listitem>
+	<listitem><para>libpthread</para></listitem>
+	<listitem><para>libuuid</para></listitem>
+	<listitem><para>libxml2</para></listitem>
+      </itemizedlist>
+    </para>
+  </section>
+  <section>
+    <title>Software download</title>
+    <para>
+      The LIXA project is hosted on SourceForge.net portal at this URL:
+      <link xlink:href="http://sourceforge.net/projects/lixa/">
+	<citetitle>http://sourceforge.net/projects/lixa/</citetitle>
+      </link>
+    </para>
+    <para>
+      The software is available only as a <emphasis>source code</emphasis>
+      tarball; no
+      pre-compiled packages are available: you need C development tools
+      installed to have success in LIXA installation. It is suggested to 
+      download the gzipped tarball from the main page: the last available
+      release is generally what you need; you could download a previous release
+      if you had a reason to do it.
+    </para>
+    <para>
+      Alternatively you can fetch the source code using a subversion client,
+      but you should pay attention many commits on the subversion repositoty
+      are intermediate works and can give you partial or broken under
+      construction features.
+    </para>
+  </section>
+</chapter>

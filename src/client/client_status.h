@@ -75,7 +75,8 @@ struct client_status_s {
      */
     struct common_status_conthr_s   state;
     /**
-     * State of the partecipating resource managers
+     * State of the partecipating resource managers (ses @ref
+     * common_status_rsrmgr_s )
      */
     GArray                         *rmstates;
     /**
@@ -385,7 +386,8 @@ extern "C" {
      * - the number of static Resource Managers <br>
      * - the number of registered dynamic Resource Managers <br>
      * @param cs IN client status reference
-     * @return a boolean value
+     * @return a boolean value; if any error happens, it return FALSE
+     *         (conservative behavior)
      */
     int client_status_could_one_phase(const client_status_t *cs);
 
