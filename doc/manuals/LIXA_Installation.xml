@@ -7,9 +7,13 @@
   <section>
     <title>System requirements</title>
     <para>
-      LIXA project is developed on an x86 based Ubuntu 8.04 system; it
+      LIXA project is developed on an x86 based 
+      <link xlink:href="http://www.ubuntu.com/">
+	<citetitle>Ubuntu 8.04 system</citetitle>
+      </link>; it
       compiles and runs on both <emphasis>server</emphasis> and
-      <emphasis>desktop</emphasis> flavors. Installation on a different Linux
+      <emphasis>desktop</emphasis> flavors. Installation on a different 
+      GNU/Linux
       distribution should be quite straightforward; installation on different
       <emphasis>UNIX like</emphasis> would probably need some work.
     </para>
@@ -18,28 +22,104 @@
       publish your experience on the public forum hosted on SourceForge.net 
       and share your results with other users. 
     </para>
-    <simplesect>
+    <section>
       <title>Pre-requisites</title>
-    </simplesect>
-    <para>
-      To compile LIXA software the GNU tools are needed: gcc, gmake, libtool.
-      Autoconf and automake are used, but should not be necessary if you want
-      to install the original tarball.
-    </para>
-    <para>
-      Some <emphasis>libraries (run time and development stuff)</emphasis> are
-      necessary too:
-      <itemizedlist mark='bullet'>
-	<listitem><para>libdl</para></listitem>
-	<listitem><para>libglib</para></listitem>
-	<listitem><para>libgmodule</para></listitem>
-	<listitem><para>libgthread</para></listitem>
-	<listitem><para>libm</para></listitem>
-	<listitem><para>libpthread</para></listitem>
-	<listitem><para>libuuid</para></listitem>
-	<listitem><para>libxml2</para></listitem>
-      </itemizedlist>
-    </para>
+      <para>
+	To compile LIXA software the GNU tools are needed: gcc, gmake, libtool.
+	Autoconf and automake are used, but should not be necessary if you want
+	to install the original tarball.
+      </para>
+      <para>
+	Some <emphasis>libraries (run time and development stuff)</emphasis> 
+	are necessary too:
+	<itemizedlist mark='bullet'>
+	  <listitem><para><application>libdl</application></para></listitem>
+	  <listitem><para><application>libglib</application></para></listitem>
+	  <listitem><para><application>libgmodule</application></para></listitem>
+	  <listitem><para><application>libgthread</application></para></listitem>
+	  <listitem><para><application>libm</application></para></listitem>
+	  <listitem><para><application>libpthread</application></para></listitem>
+	  <listitem><para><application>libuuid</application></para></listitem>
+	  <listitem><para><application>libxml2</application></para></listitem>
+	</itemizedlist>
+	<application>libglib</application> (and others libg*) and 
+	<application>libxml2</application> are discovered with 
+	<command>pkg-config</command> command, while the others must be in
+	standard include <envar>PATH</envar>.
+      </para>
+      <simplesect>
+	<title>Low level pre-requisites</title>
+	<para>
+	  If you are trying to install LIXA software on a different operating
+	  system, these are some fundamental requirements:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para><function>poll</function>: 
+		LIXA daemon uses this function for high parallelism network
+		operations
+	    </para></listitem>
+	    <listitem><para><function>mmap</function>:
+		LIXA daemon uses this function for high performance disk
+		access
+	    </para></listitem>
+	    <listitem><para><function>dlopen</function>:
+		LIXA transaction manager uses this function to dynamically load
+		resource managers XA switch structures 
+	    </para></listitem>
+	    <listitem><para><function>uuid_generate</function>:
+		LIXA transaction manager uses this function to generate unique
+		transaction identifiers (xid)
+	    </para></listitem>
+	  </itemizedlist>
+	  Without the above functions, a specific porting process is necessary
+	  to adapt LIXA to your system.
+	</para>
+      </simplesect>
+    </section>
+    <section>
+      <title>Co-requisites</title>
+      <para>
+	An XA transaction manager is used to coordinate one or more XA
+	resource managers. From a LIXA perspective there are basically 3 type
+	of resource managers:
+	<orderedlist numeration="arabic">
+	  <listitem><para>
+	      <emphasis>LIXA testing:</emphasis> resource managers
+	      provided by the project for testing and as sample implementation
+	  </para></listitem>
+	  <listitem><para>
+	      <emphasis>F/OSS real:</emphasis> resource managers provided by
+	      Free/Open Source Software projects; at the time of this
+	      writing this set is empty, but it could improve in the near
+	      future
+	      <footnote><para>
+		  I think the lack of the XA interface in the implementation 
+		  of 
+		  the F/OSS resource managers is a consequence of the lack of
+		  a F/OSS transaction manager; looking at the Java ecosystem,
+		  both MySQL and PostgreSQL supports JTA that's basically
+		  <quote>a Java XA wrapper</quote> because there are JTA
+		  compliant application server like Jboss and Jeronimo.
+	      </para></footnote>
+	  </para></listitem>
+	  <listitem><para>
+	      <emphasis>Proprietary real:</emphasis> resource managers
+	      provided by business corporations using non free licensing
+	  </para></listitem>
+	</orderedlist>
+	There is not a list of <emphasis>supported</emphasis> third party
+	resource managers, because LIXA is a project and not a product; this
+	is the list of third party resource managers have been tested in
+	conjuction with LIXA transaction manager:
+	<itemizedlist mark='bullet'>
+	  <listitem><para><productname>
+		IBM DB2 Express-C 9.7
+	  </productname></para></listitem>
+	  <listitem><para><productname>
+		Oracle XE 10.2
+	  </productname></para></listitem>
+	</itemizedlist>
+      </para>
+    </section>
   </section>
   <section>
     <title>Software download</title>
