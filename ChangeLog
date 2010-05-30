@@ -5,6 +5,10 @@ LOG:
                   implemented test case TX/B.2/0.2
                   implemented test case TX/B.2/0.3
                   implemented test case TX/B.2/0.4
+                  implemented test case TX/B.2/1.0
+                  implemented test case TX/B.2/1.1
+                  optimized one phase commit behavior with dynamically 
+                  registered resource managers
 
 20100530 - 0.5.9  implemented test case TX/7.52/0.0
                   implemented test case TX/7.52/0.1

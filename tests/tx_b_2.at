@@ -192,7 +192,7 @@ xa_end/0
 xa_prepare/3
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0002 commit 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0002 commit 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2], [1], [ignore], [ignore])
 AT_CLEANUP
 
@@ -202,7 +202,6 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_start/0
 xa_end/0
-xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
@@ -211,7 +210,20 @@ AT_DATA([monkey1d.conf],
 xa_open/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0000 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
-AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'one_phase_commit' $TESTS_TMP_FILE2], [1], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0000], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.2/1.1])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0005 ; lixa_test_exec.sh noreset stop case0000], [0], [ignore], [ignore])
 AT_CLEANUP
 

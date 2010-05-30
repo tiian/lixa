@@ -10,7 +10,6 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_start/0
 xa_end/0
-xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])

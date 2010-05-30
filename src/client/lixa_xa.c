@@ -214,7 +214,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
             sizeof(struct lixa_msg_body_commit_8_xa_commit_execs_s),
             global_ccc.actconf.rsrmgrs->len);
         
-        LIXA_TRACE(("lixa_xa_commit: one_phase_commit = %d\n",
+        LIXA_TRACE(("lixa_xa_commit: one_phase_commit=%d\n",
                     one_phase_commit));
 
         /* prepare the object to compute *txrc */

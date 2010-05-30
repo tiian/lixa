@@ -1,5 +1,4 @@
-Implement client_status_could_one_phase; use it in lixa_tx_commit; fix all the
-test cases will change behavior after this improvement
+Restart from bug # 3009182
 
 Stability test with valgrind must be performed
 

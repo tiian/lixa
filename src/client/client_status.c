@@ -474,6 +474,33 @@ int client_status_coll_search(client_status_coll_t *csc, int *pos, int lock)
 
 
 
+int client_status_could_one_phase(const client_status_t *cs)
+{
+    guint i, n=0;
+    
+    if (global_ccc.actconf.rsrmgrs->len == 1)
+        return TRUE;
+    
+    /* scan all the resource manager status */
+    for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
+        struct common_status_rsrmgr_s *csr = &g_array_index(
+            cs->rmstates, struct common_status_rsrmgr_s, i);
+        LIXA_TRACE(("client_status_could_one_phase: i=%u, csr->dynamic=%d, "
+                    "csr->xa_td_state=%d\n", i, csr->dynamic,
+                    csr->xa_td_state)); 
+        if (csr->dynamic) {
+            if (csr->xa_td_state == XA_STATE_D1)
+                n++;
+        } else
+            n++;
+    }
+    LIXA_TRACE(("client_status_could_one_phase: found %u registered "
+                "resource managers\n", n));
+    return n == 1;
+}
+
+
+
 int client_status_coll_get_cs(client_status_coll_t *csc,
                               client_status_t **cs)
 {
