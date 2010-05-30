@@ -1,4 +1,5 @@
-Restart from TX/7.52/3.5 (TX_CHAINED version); test notes; do not recycle for every test case
+Implement client_status_could_one_phase; use it in lixa_tx_commit; fix all the
+test cases will change behavior after this improvement
 
 Stability test with valgrind must be performed
 

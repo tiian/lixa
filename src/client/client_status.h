@@ -375,8 +375,21 @@ extern "C" {
         return &cs->crash_count;
     }
 #endif
-    
 
+
+
+    /**
+     * Used to interrogate client status and understand if "one phase commit"
+     * instead of two phase commit can be performed. The result is dynamically
+     * computed and can depends on: <br>
+     * - the number of static Resource Managers <br>
+     * - the number of registered dynamic Resource Managers <br>
+     * @param cs IN client status reference
+     * @return a boolean value
+     */
+    int client_status_could_one_phase(const client_status_t *cs);
+
+    
 
     /**
      * Return the status of a specific thread; this method MUST be protected
