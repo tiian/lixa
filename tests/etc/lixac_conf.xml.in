@@ -74,5 +74,21 @@
         <rsrmgr>LIXAmonkey2dynRM</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="CASE_PROF_0006">
+      <trnmgrs>
+        <trnmgr>TestTM</trnmgr>
+      </trnmgrs>
+      <rsrmgrs>
+        <rsrmgr>LIXAmonkey1dynRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0007">
+      <trnmgrs>
+        <trnmgr>TestTM</trnmgr>
+      </trnmgrs>
+      <rsrmgrs>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
   </profiles>
 </client>
