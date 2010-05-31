@@ -1542,6 +1542,9 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate,
                         ser_xid = NULL;
                     }
                     break;
+                case XAER_OUTSIDE:
+                    tmp_txrc = TX_OUTSIDE;
+                    break;
                 case XAER_INVAL:
                     tmp_txrc = TX_FAIL;
                     csr->xa_td_state = XA_STATE_T0;
