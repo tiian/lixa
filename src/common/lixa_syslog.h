@@ -71,6 +71,12 @@
     "completely committed (%s)"
 #define LIXA_SYSLOG_LXC012W "LXC012W the transaction with xid '%s' has not " \
     "completely backed out (%s)"
+#define LIXA_SYSLOG_LXC013W "LXC013W Resource Manager '%s' (rmid=%d) " \
+    "returned XA_RETRY but the Transaction Manager does not use TMNOWAIT " \
+    "flag when calling xa_start(): this is a bug inside the RM"
+#define LIXA_SYSLOG_LXC014W "LXC014W Resource Manager '%s' (rmid=%d) " \
+    "returned %d, the Transaction Manager called xa_start() without " \
+    "TMRESUME/TMJOIN flag: there probably is a bug inside the RM code"
 
 
 

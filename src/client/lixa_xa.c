@@ -1511,6 +1511,16 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate,
                 case XA_OK:
                     csr->xa_td_state = XA_STATE_T1;
                     break;
+                case XA_RETRY:
+                    LIXA_TRACE(("lixa_xa_start: the resource manager returned "
+                                "XA_RETRY, but the transaction manager does "
+                                "not use TMNOWAIT flag; this is a resource "
+                                "manager wrong behavior!\n"));
+                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC013W,
+                           (char *)act_rsrmgr->generic->name, record.rmid);
+                    tmp_txrc = TX_ERROR;
+                    csr->xa_td_state = XA_STATE_T0;
+                    break;
                 case XAER_RMERR:
                     tmp_txrc = TX_ERROR;
                     csr->xa_td_state = XA_STATE_T0;
@@ -1557,6 +1567,9 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate,
                     *txrc = TX_FAIL;
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 default:
+                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC014W,
+                           (char *)act_rsrmgr->generic->name, record.rmid,
+                           record.rc);
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
