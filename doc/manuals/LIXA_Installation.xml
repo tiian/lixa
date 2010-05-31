@@ -14,8 +14,8 @@
       compiles and runs on both <emphasis>server</emphasis> and
       <emphasis>desktop</emphasis> flavors. Installation on a different 
       GNU/Linux
-      distribution should be quite straightforward; installation on different
-      <emphasis>UNIX like</emphasis> would probably need some work.
+      distribution should be quite straightforward; installation on a different
+      <trademark>UNIX</trademark> like system would probably need some work.
     </para>
     <para>
       If you successfully installed LIXA on a different system, you might
@@ -84,7 +84,7 @@
 	<orderedlist numeration="arabic">
 	  <listitem><para>
 	      <emphasis>LIXA testing:</emphasis> resource managers
-	      provided by the project for testing and as sample implementation
+	      provided by the project for testing and as sample implementations
 	  </para></listitem>
 	  <listitem><para>
 	      <emphasis>F/OSS real:</emphasis> resource managers provided by
@@ -103,7 +103,7 @@
 	  </para></listitem>
 	  <listitem><para>
 	      <emphasis>Proprietary real:</emphasis> resource managers
-	      provided by business corporations using non free licensing
+	      provided by business corporations using commercial licensing.
 	  </para></listitem>
 	</orderedlist>
 	There is not a list of <emphasis>supported</emphasis> third party
@@ -140,9 +140,61 @@
     </para>
     <para>
       Alternatively you can fetch the source code using a subversion client,
-      but you should pay attention many commits on the subversion repositoty
+      but you should pay attention many commits on the subversion repository
       are intermediate works and can give you partial or broken under
       construction features.
+    </para>
+  </section>
+  <section>
+    <title>Configure, build and install</title>
+    <para>
+      LIXA project tries to adhere the GNU <emphasis>de facto</emphasis>
+      standard. Supposing you downloaded package 
+      <filename>lixa-X.Y.Z.tar.gz</filename>, the basic sequence is:
+      <screen>
+	tar xvzf lixa-X.Y.Z.tar.gz
+	cd lixa-X.Y.Z
+	./configure
+	make
+	make install
+      </screen>
+      The above commands, if nothing goes wrong, install the LIXA software
+      artifacts in <filename>/opt/lixa</filename> default directory.
+    </para>
+    <para>
+      There are many options you can pass to <command>configure</command>
+      command to meet your needs (see below).
+    </para>
+    <simplesect>
+      <title>Choosing a different installation <envar>PATH</envar></title>
+    </simplesect>
+    <para>
+      At very first install <filename>/tmp</filename> could be a good
+      destination:
+      <screen>
+	./configure --prefix=/tmp/lixa
+      </screen>
+    </para>
+    <para>
+      After some testing, you might prefer your home directory:
+      <screen>
+	./configure --prefix=$HOME/lixa
+      </screen>
+      and you will get a layout like this:
+      <screen>
+        $HOME/lixa/bin
+        $HOME/lixa/etc
+        $HOME/lixa/include
+        $HOME/lixa/lib
+        $HOME/lixa/sbin
+        $HOME/lixa/var
+      </screen>
+    </para>
+    <para>
+      You can split code and data with something like this:
+      <screen>
+	./configure --prefix=/ --exec-prefix=/usr/local
+      </screen>
     </para>
   </section>
 </chapter>
