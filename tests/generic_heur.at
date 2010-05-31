@@ -6,21 +6,21 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_recover/1
 xa_commit/5
-xa_forget/0
+xa_forget/-3
 ]])
 AT_DATA([monkey2s.conf],
 [[# second monkey R.M. config
 xa_open/0
 xa_recover/1
 xa_commit/6
-xa_forget/0
+xa_forget/-4
 ]])
 AT_DATA([monkey1d.conf],
 [[# third monkey R.M. config
 xa_open/0
 xa_recover/1
 xa_commit/7
-xa_forget/0
+xa_forget/-7
 ]])
 AT_DATA([monkey2d.conf],
 [[# fourth monkey R.M. config
@@ -72,6 +72,7 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/5
+xa_forget/-3
 xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
@@ -81,6 +82,7 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/6
+xa_forget/-4
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -89,6 +91,7 @@ xa_open/0
 xa_end/0
 xa_prepare/0
 xa_commit/7
+xa_forget/-7
 xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
@@ -97,6 +100,7 @@ xa_open/0
 xa_end/0
 xa_prepare/0
 xa_commit/8
+xa_forget/0
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start case0002 commit -4], [0], [ignore], [ignore])
@@ -138,6 +142,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_rollback/5
+xa_forget/0
 xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
@@ -146,6 +151,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_rollback/6
+xa_forget/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -153,6 +159,7 @@ AT_DATA([monkey1d.conf],
 xa_open/0
 xa_end/0
 xa_rollback/7
+xa_forget/-3
 xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
@@ -160,6 +167,7 @@ AT_DATA([monkey2d.conf],
 xa_open/0
 xa_end/0
 xa_rollback/8
+xa_forget/-3
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start case0002 rollback -4], [0], [ignore], [ignore])

@@ -28,7 +28,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0000 ; lixa_test_exec.sh reset recycle case0000], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0000 ; lixa_test_exec.sh reset start case0000], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Basic dynamic registration (3 RMs)])
@@ -56,7 +56,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0001 && lixa_test_exec.sh reset recycle case0001], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0001 && lixa_test_exec.sh noreset none case0001], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Heuristic completion 4 RMs (commit)])
@@ -67,6 +67,7 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/5
+xa_forget/0
 xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
@@ -76,6 +77,7 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/6
+xa_forget/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -84,6 +86,7 @@ xa_open/0
 xa_end/0
 xa_prepare/0
 xa_commit/7
+xa_forget/0
 xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
@@ -92,9 +95,10 @@ xa_open/0
 xa_end/0
 xa_prepare/0
 xa_commit/8
+xa_forget/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle case0002 commit -4], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0002 commit -4], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Heuristic completion 4 RMs (rollback)])
@@ -104,6 +108,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_rollback/5
+xa_forget/0
 xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
@@ -112,6 +117,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_rollback/6
+xa_forget/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -119,6 +125,7 @@ AT_DATA([monkey1d.conf],
 xa_open/0
 xa_end/0
 xa_rollback/7
+xa_forget/0
 xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
@@ -126,8 +133,9 @@ AT_DATA([monkey2d.conf],
 xa_open/0
 xa_end/0
 xa_rollback/8
+xa_forget/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle case0002 rollback -4], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0002 rollback -4], [0], [ignore], [ignore])
 AT_CLEANUP
 

@@ -19,7 +19,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0003 commit -100], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset start case0003 commit -100], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Chained transactions rollback (2 RMs)])
@@ -39,7 +39,7 @@ xa_end/0
 xa_rollback/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0003 rollback -100], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0003 rollback -100], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Chained transactions commit (2 RMs)])
@@ -59,9 +59,10 @@ xa_open/0
 xa_end/0
 xa_prepare/0
 xa_commit/5
+xa_forget/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0003 commit -103], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0003 commit -103], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Chained transactions rollback (2 RMs)])
@@ -72,6 +73,7 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 xa_rollback/7
+xa_forget/0
 xa_start/-3
 xa_close/0
 ]])
@@ -82,6 +84,6 @@ xa_end/0
 xa_prepare/102
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0003 commit -103], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop case0003 commit -103], [0], [ignore], [ignore])
 AT_CLEANUP
 

@@ -81,6 +81,19 @@ extern "C" {
      */
     int lixa_xa_end(client_status_t *cs, int *txrc, int commit);
     
+
+
+    /**
+     * This function is not directly called by the TX layer, but it's an
+     * helper function for @ref lixa_xa_commit and @ref lixa_xa_rollback
+     * @param cs IN reference to the status of the calling client
+     * @param finished OUT boolean value: TRUE if the transaction can be
+     *                     marked as complete, FALSE if any resource manager
+     *                     remains in Heuristically Completed status
+     * @return a reason code
+     */
+    int lixa_xa_forget(client_status_t *cs, int *finished);
+
     
     
     /**
