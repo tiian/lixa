@@ -1,3 +1,4 @@
+tx_b_4.at implement TX_ROLLBACK_NO_BEGIN and TX_COMMITTED_NO_BEGIN too
 
 Stability test with valgrind must be performed
 

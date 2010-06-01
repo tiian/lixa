@@ -72,11 +72,15 @@ int main(int argc, char *argv[])
             printf("%s| tx_set_transaction_control(): %d\n", pgm,
                    rc = tx_set_transaction_control(TX_CHAINED));
             assert(TX_OK == rc);
+            printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
+            assert(TX_OK == rc);
             printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
             break;
         case 2:
             printf("%s| tx_set_transaction_control(): %d\n", pgm,
                    rc = tx_set_transaction_control(TX_CHAINED));
+            assert(TX_OK == rc);
+            printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
             assert(TX_OK == rc);
             printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
             break;

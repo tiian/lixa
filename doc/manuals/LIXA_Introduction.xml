@@ -199,5 +199,29 @@
       <constant>TX_ROLLBACK_ONLY</constant>. This does not hurt the
       X/Open CAE specification.
     </simplesect>
+    <simplesect>
+      <title>XA -> TX return code mappings</title>
+      <para>
+	In <citation>TXspec</citation> (Appendix B.4, page 64) it is suggested
+	to return the value <constant>TX_ERROR</constant> when the Resource
+	Manager returns <constant>XA_RETRY</constant>; this is explained in
+	<quote>note 1</quote>. 
+      </para>
+      <para>
+	The LIXA implementation of 
+	For <function>tx_commit()</function> and
+	<function>tx_rollback()</function> returns 
+	<constant>TX_NO_BEGIN</constant> instead of 
+	<constant>TX_ERROR</constant> because it seems a more useful 
+	information for the Application Program: the transaction has been
+	successfully committed/rolled back, but a new transaction can not be
+	started
+	<footnote><para>The X/Open CAE specification document
+	    <quote>suggests</quote> the mapping and it seems there is some
+	    flesibility in the suggestions. From a LIXA perspective all this
+	    stuff is academic because <constant>TMNOWAIT</constant> is not
+	    used by LIXA implementation.</para></footnote>.
+      </para>
+    </simplesect>
   </section>
 </chapter>
