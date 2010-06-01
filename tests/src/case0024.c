@@ -53,9 +53,9 @@ int main(int argc, char *argv[])
     mode = strtol(argv[1], NULL, 0);
     test_rc = strtol(argv[2], NULL, 0);
 
-    if (mode < 0 || mode > 2) {
-        fprintf(stderr, "%s: mode must be 0 (simple), 1 (commit), "
-                "2 (rollback)\n", argv[0]);
+    if (mode < 1 || mode > 2) {
+        fprintf(stderr, "%s: mode must be 1 (commit), 2 (rollback)\n",
+                argv[0]);
         exit (1);
     }
 
@@ -64,24 +64,14 @@ int main(int argc, char *argv[])
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     assert(TX_OK == rc);
 
+    printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
+    assert(TX_OK == rc);
+
     switch (mode) {
-        case 0:
-            printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
-            break;
         case 1:
-            printf("%s| tx_set_transaction_control(): %d\n", pgm,
-                   rc = tx_set_transaction_control(TX_CHAINED));
-            assert(TX_OK == rc);
-            printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
-            assert(TX_OK == rc);
             printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
             break;
         case 2:
-            printf("%s| tx_set_transaction_control(): %d\n", pgm,
-                   rc = tx_set_transaction_control(TX_CHAINED));
-            assert(TX_OK == rc);
-            printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
-            assert(TX_OK == rc);
             printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
             break;
         default:
