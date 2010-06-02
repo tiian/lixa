@@ -530,9 +530,9 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                         csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     csr->xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
-                    break;
                     if (commit)
                         tmp_txrc = TX_ROLLBACK;
+                    break;
                 case XAER_RMFAIL:
                     *txrc = TX_FAIL;
                     csr->xa_r_state = XA_STATE_R0;
