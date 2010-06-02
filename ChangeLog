@@ -1,6 +1,11 @@
 LOG:
 
-         - 0.5.11
+         - 0.5.11 implemented test case TX/B.4/0.*
+                  implemented test case TX/B.4/1.*
+                  implemented test case TX/B.4/2.*
+                  implemented test case TX/B.4/3.*
+                  implemented test case TX/B.4/4.*
+                  implemented test case TX/B.4/5.* and fixed bug # 3010322
 
 20100531 - 0.5.10 implemented test case TX/B.2/0.0
                   implemented test case TX/B.2/0.1
