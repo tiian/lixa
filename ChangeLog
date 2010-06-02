@@ -6,6 +6,8 @@ LOG:
                   implemented test case TX/B.4/3.*
                   implemented test case TX/B.4/4.*
                   implemented test case TX/B.4/5.* and fixed bug # 3010322
+                  implemented test case TX/B.4/6.*
+                  implemented test case TX/B.4/7.* and fixed bug # 3010638
 
 20100531 - 0.5.10 implemented test case TX/B.2/0.0
                   implemented test case TX/B.2/0.1
