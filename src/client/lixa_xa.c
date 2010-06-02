@@ -259,7 +259,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                         "%d\n", record.rmid, record.flags, record.rc));
             if (XA_RETRY == record.rc) {
                 /* try a second time */
-                LIXA_TRACE(("lixa_xa_commit: XA_RETRY, try again..."));
+                LIXA_TRACE(("lixa_xa_commit: XA_RETRY, trying again...\n"));
                 record.rc = act_rsrmgr->xa_switch->xa_commit_entry(
                     client_status_get_xid(cs), record.rmid, record.flags);
                 LIXA_TRACE(("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) "
@@ -294,6 +294,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 case XAER_ASYNC:
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 case XAER_RMERR:
+                case XA_RETRY:
                     csr->xa_s_state = XA_STATE_S0;
                     break;
                 case XAER_RMFAIL:
@@ -521,11 +522,6 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                     *txrc = TX_FAIL;
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 case XAER_RMERR:
-                    /* @@@ this behavior comes from page 65 of
-                       "The TX Specification"; from state table of XA protocol
-                       it seems not clear what should be done when there's a
-                       problem in dissociation
-                       there might be a bug in this place... */
                     csr->xa_td_state =
                         csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     csr->xa_s_state = XA_STATE_S4;
@@ -540,11 +536,6 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                     tmp_txrc = TX_FAIL;
                     break;
                 case XAER_NOTA:
-                    /* @@@ this behavior comes from page 65 of
-                       "The TX Specification"; from state table of XA protocol
-                       it seems not clear what should be done when there's a
-                       problem in dissociation
-                       there might be a bug in this place... */
                     csr->xa_td_state =
                         csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     csr->xa_s_state = XA_STATE_S4;
@@ -1290,6 +1281,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                 case XAER_ASYNC:
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 case XAER_RMERR:
+                case XA_RETRY:
                     csr->xa_s_state = XA_STATE_S0;
                     break;
                 case XAER_RMFAIL:

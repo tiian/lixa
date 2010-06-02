@@ -416,6 +416,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
             switch (*txrc) {
                 case TX_OK:
                 case TX_ROLLBACK:
+                case TX_ERROR:
                 case TX_MIXED:
                 case TX_HAZARD:
                     if (TX_STATE_S3 == txstate)
@@ -787,6 +788,7 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
             case TX_MIXED:
             case TX_HAZARD:
             case TX_COMMITTED:
+            case TX_ERROR:
                 if (TX_STATE_S3 == txstate)
                     next_txstate = TX_STATE_S1;
                 else if (TX_STATE_S4 == txstate)
