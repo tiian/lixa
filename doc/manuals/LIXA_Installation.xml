@@ -83,11 +83,11 @@
 	of resource managers:
 	<orderedlist numeration="arabic">
 	  <listitem><para>
-	      <emphasis>LIXA testing:</emphasis> resource managers
+	      <emphasis>LIXA:</emphasis> resource managers
 	      provided by the project for testing and as sample implementations
 	  </para></listitem>
 	  <listitem><para>
-	      <emphasis>F/OSS real:</emphasis> resource managers provided by
+	      <emphasis>F/OSS:</emphasis> resource managers provided by
 	      Free/Open Source Software projects; at the time of this
 	      writing this set is empty, but it could improve in the near
 	      future
@@ -96,13 +96,13 @@
 		  of 
 		  the F/OSS resource managers is a consequence of the lack of
 		  a F/OSS transaction manager; looking at the Java ecosystem,
-		  both MySQL and PostgreSQL supports JTA that's basically
-		  <quote>a Java XA wrapper</quote> because there are JTA
-		  compliant application server like Jboss and Jeronimo.
+		  both MySQL and PostgreSQL supports JTA, that's basically
+		  <quote>a Java XA wrapper</quote>, because there are JTA
+		  compliant application server like Jboss, JOnAS and Jeronimo.
 	      </para></footnote>
 	  </para></listitem>
 	  <listitem><para>
-	      <emphasis>Proprietary real:</emphasis> resource managers
+	      <emphasis>Proprietary:</emphasis> resource managers
 	      provided by business corporations using commercial licensing.
 	  </para></listitem>
 	</orderedlist>
@@ -134,7 +134,7 @@
       tarball; no
       pre-compiled packages are available: you need C development tools
       installed to have success in LIXA installation. It is suggested to 
-      download the gzipped tarball from the main page: the last available
+      download the gzipped tarball from the main page: the latest available
       release is generally what you need; you could download a previous release
       if you had a reason to do it.
     </para>
@@ -167,15 +167,14 @@
     </para>
     <simplesect>
       <title>Choosing a different installation <envar>PATH</envar></title>
-    </simplesect>
-    <para>
-      At very first install <filename>/tmp</filename> could be a good
-      destination:
-      <screen>
-	./configure --prefix=/tmp/lixa
-      </screen>
-    </para>
-    <para>
+      <para>
+	At very first install <filename>/tmp</filename> could be a good
+	destination:
+	<screen>
+	  ./configure --prefix=/tmp/lixa
+	</screen>
+      </para>
+      <para>
       After some testing, you might prefer your home directory:
       <screen>
 	./configure --prefix=$HOME/lixa
@@ -189,12 +188,113 @@
         $HOME/lixa/sbin
         $HOME/lixa/var
       </screen>
-    </para>
-    <para>
-      You can split code and data with something like this:
-      <screen>
-	./configure --prefix=/ --exec-prefix=/usr/local
-      </screen>
-    </para>
+      </para>
+      <para>
+	You can split code and data with something like this:
+	<screen>
+	  ./configure --prefix=/ --exec-prefix=/usr/local
+	</screen>
+      </para>
+    </simplesect>
+    <simplesect>
+      <title>Locating pre-requisites libraries</title>
+      <para>
+	If any of the pre-requisite library include files are not in the
+	standard search <envar>PATH</envar>, you can export 
+	<envar>CPPFLAGS</envar> before configure process to add your custom
+	path:
+	<screen>
+	  export CPPFLAGS=-I/path/to/libxml2
+	  ./configure
+	  make
+	</screen>
+	to see a list of environment variables can affect the build process
+	use the command <synopsis>./configure --help</synopsis>
+      </para>
+    </simplesect>
+    <section>
+      <title>Optional features</title>
+      <para>
+	The supplied defaults are generally good enought to start working with
+	LIXA, but if you have to perform some hacking you might be interested
+	in activating/deactivating some optional features.
+      </para>
+      <simplesect>
+	<title>Tracing</title>
+	<para>
+	  The tracing feature is enabled by default: the binary objects
+	  produced by the build procedure contains a lot of messages can
+	  be displayed turning on tracing at run time.
+	</para>
+	<para>
+	  Removing the tracing feature can save RAM (smaller binary objects)
+	  and CPU (every trace message is tested against run time 
+	  configuration).
+	</para>
+	<important>
+	  <para>
+	    Disabling tracing seems a good way to increase the performance of
+	    the software, but unfortunately without trace it is quite 
+	    impossible to debug some issues. Only rock stable software can
+	    be compiled without tracing, and this is not the case of LIXA.
+	  </para>
+	</important>
+	<para>
+	  To disable tracing, use <option>--disable-trace</option> on
+	  <command>./configure</command> command line:
+	  <screen>
+	    ./configure --disable-trace
+	  </screen>
+	</para>
+      </simplesect>
+      <simplesect>
+	<title>Extra debug code</title>
+	<para>
+	  To enable extra debug code, basically some checks can signal
+	  internal errors in the code use <option>--enable-debug</option> on
+	  <command>./configure</command> command line:
+	  <screen>
+	    ./configure --enable-debug
+	  </screen>
+	  This feature could be interesting when porting the LIXA project
+	  software to a different platform; for normal use, the extra
+	  debugging code is useless.
+	</para>
+      </simplesect>
+      <simplesect>
+	<title>Crash simulation</title>
+	<para>
+	  This feature is useful when testing the software: with crash
+	  simulation the software can be tested against simulated software
+	  crashes and, on some extents, power outages.
+	  To enable crash simulation use <option>--enable-crash</option> on
+	  <command>./configure</command> command line:
+	  <screen>
+	    ./configure --enable-crash
+	  </screen>
+	</para>
+      </simplesect>
+    </section>
+    <section>
+      <title>Linking third party resource managers</title>
+      <para>
+	To link an already tested third party resource manager you can use
+	a specific option on <command>./configure</command> command; to
+	link a new resource manager, you have to hack the Makefiles and
+	put all you need in place or you may perform a manual link.
+      </para>
+      <section>
+	<title>IBM DB2 Express-C 9.7<footnote><para>
+	      IBM and DB2 are trademark of <trademark>IBM</trademark>
+	      corporation
+	</para></footnote></title>
+      </section>
+      <section>
+	<title>Oracle XE 10.2<footnote><para>
+	      Oracle is a trademark of <trademark>Oracle</trademark>
+	      corporation
+	</para></footnote></title>
+      </section>
+    </section>
   </section>
 </chapter>
