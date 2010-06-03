@@ -77,6 +77,10 @@
 #define LIXA_SYSLOG_LXC014W "LXC014W Resource Manager '%s' (rmid=%d) " \
     "returned %d, the Transaction Manager called xa_start() without " \
     "TMRESUME/TMJOIN flag: there probably is a bug inside the RM code"
+#define LIXA_SYSLOG_LXC015W "LXC015W Resource Manager '%s' (rmid=%d) " \
+    "returned XA_NOMIGRATE for xid '%s', but the Transaction Manager called " \
+    "xa_end() without " \
+    "TMSUSPEND/TMMIGRATE flag: there probably is a bug inside the RM code"
 
 
 

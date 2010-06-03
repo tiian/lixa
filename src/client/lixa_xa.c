@@ -473,6 +473,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
         xa_end_flags = TMSUCCESS;
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             int tmp_txrc = TX_OK;
+            char *ser_xid;
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
             struct common_status_rsrmgr_s *csr = &g_array_index(
@@ -497,6 +498,22 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
 
             read_write_rsrmgr++;
             switch (record.rc) {
+                case XA_NOMIGRATE:
+                    tmp_txrc = TX_FAIL;
+                    csr->xa_td_state = XA_STATE_T0;
+                    ser_xid = xid_serialize(client_status_get_xid(cs));
+                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC015W,
+                           (char *)act_rsrmgr->generic->name, record.rmid,
+                           NULL != ser_xid ? ser_xid : "");
+                    LIXA_TRACE(("lixa_xa_end: xa_end returned "
+                                "XA_NOMIGRATE for rmid=%d,xid='%s' and this "
+                                "should NOT happen!\n", record.rmid,
+                                NULL != ser_xid ? ser_xid : ""));
+                    if (NULL != ser_xid) {
+                        free(ser_xid);
+                        ser_xid = NULL;
+                    }
+                    break;
                 case XA_OK:
                     csr->xa_td_state =
                         csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
@@ -1378,8 +1395,8 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
 
 
 
-int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate,
-                  int *dupid_or_proto)
+int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
+                  int next_txstate, int *dupid_or_proto)
 {
     enum Exception { MSG_SERIALIZE_ERROR1
                      , SEND_ERROR
@@ -1465,7 +1482,6 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate,
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.pvs.verb = LIXA_MSG_VERB_START;
         msg.header.pvs.step = 24;
-        msg.body.start_24.conthr.txstate = next_txstate;
         msg.body.start_24.xa_start_execs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_start_24_xa_start_execs_s),
@@ -1575,6 +1591,12 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int next_txstate,
                 lixa_tx_rc_hierarchy(*txrc))
                 *txrc = tmp_txrc;
         } /* for (i=0; ...) */
+
+        /* txstate will be moved to next state only if xa_start succeded */
+        if (TX_OK == *txrc)
+            msg.body.start_24.conthr.txstate = next_txstate;
+        else
+            msg.body.start_24.conthr.txstate = txstate;
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))

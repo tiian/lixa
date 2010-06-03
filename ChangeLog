@@ -8,6 +8,8 @@ LOG:
                   implemented test case TX/B.4/5.* and fixed bug # 3010322
                   implemented test case TX/B.4/6.*
                   implemented test case TX/B.4/7.* and fixed bug # 3010638
+                  optimized recovery pending detection when xa_start() 
+                  does not complete OK
 
 20100531 - 0.5.10 implemented test case TX/B.2/0.0
                   implemented test case TX/B.2/0.1
