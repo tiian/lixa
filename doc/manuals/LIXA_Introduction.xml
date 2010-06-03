@@ -25,7 +25,7 @@
       <itemizedlist mark='bullet'>
 	<listitem><para>3.1: Superior Node</para></listitem>
 	<listitem><para>3.1: Subordinate Node</para></listitem>
-	<listitem><para>3.1: Communication Resrouce Manager (<acronym>CRM</acronym>)</para></listitem>
+	<listitem><para>3.1: Communication Resource Manager (<acronym>CRM</acronym>)</para></listitem>
 	<listitem><para>3.5: Distributed Communication Facilities</para></listitem>
 	<listitem><para>3.6: Activity between Functional Components Involving Two or More APs</para></listitem>
 	<listitem><para>3.7: CRM Communication Paradigms with APs</para></listitem>
@@ -64,11 +64,23 @@
       applications.
     </para>
     <para>
-      BTM (Bitronix JTA Transaction Manager) is a Transaction Manager, but it
-      is not a Transaction Monitor and can be used in conjunction with a
-      <acronym>JVM</acronym> (Java Virtual Machine) and possibly any
-      Transaction Monitor. Unfortunately it is a Java based technology and not
-      a native one; in the Java arena there are a few stand-alone Transaction
+      <link xlink:href="http://www.springsource.com/">
+	<citetitle>Spring JTA Transaction Manager</citetitle>
+      </link>,
+      <link xlink:href="http://jotm.objectweb.org/index.html">
+	<citetitle>JOTM (Java Open Transaction Manager)</citetitle>
+      </link>
+      and
+      <link xlink:href="http://www.bitronix.be/">
+	<citetitle>BTM (Bitronix JTA Transaction Manager)</citetitle>
+      </link> 
+      are Transaction Managers, but they are not Transaction Monitors and can 
+      be used in conjunction with a
+      <acronym>JVM</acronym> (Java Virtual Machine) and 
+      <emphasis>possibly</emphasis> any
+      Transaction Monitor. Unfortunately they are Java based technologies and 
+      not native ones; in the Java arena there are a few stand-alone 
+      Transaction
       Manager, while in the C language arena it is not easy to find out one.
     </para>
     <para>
@@ -81,6 +93,10 @@
       </itemizedlist>
       With the aid of LIXA Transaction Manager potentially any web server can
       be converted in an Application Server with two phase commit support.
+    </para>
+    <para>
+      It can not be excluded there will be a JTA interface for LIXA in the
+      future.
     </para>
   </section>
   <section>
@@ -95,8 +111,7 @@
       LIXA project was designed to allow massive parallelism and embedding at
       the same time: the parallelism is necessary to accomplish nowadays
       workloads while the embeddable property is necessary to avoid conflicts
-      with process and thread management of the potential Transaction
-      Monitors.
+      with process and thread management of any Transaction Monitor.
     </para>
   </section>
   <section>
@@ -114,11 +129,12 @@
       without any guarantee.
     </para>
     <para>
-      A projuct is a software artifact that was a project financed from a
+      A projuct is a software artifact that was a project financed by a
       customer. When a second customer can be interested in the software
       artifact, it is selled again. When the third customer knocks the door,
       the team developed the project starts a new business with a new
-      <emphasis>product</emphasis>. But it is a projuct because it was 
+      <emphasis>product</emphasis>. But it is a <emphasis>projuct</emphasis> 
+      because it was 
       designed and modeled following the first customer needs.
     </para>
     <para>
@@ -162,7 +178,7 @@
     <title>LIXA and X/OPEN CAE specifications</title> 
     <para>
       LIXA project tries to be as compliant as possible with the X/Open CAE
-      specifications cited in bibliography. These are the non implemented
+      specifications cited in bibliography. Below there are the non implemented
       and/or non implementable features.
     </para>
     <simplesect>
