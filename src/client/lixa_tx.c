@@ -136,7 +136,7 @@ int lixa_tx_begin(int *txrc)
         
         /* the real logic must be put here */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
-                               cs, txrc, &xid, next_txstate,
+                               cs, txrc, &xid, txstate, next_txstate,
                                &dupid_or_proto))) {
             int retry_ok = FALSE;
             if (dupid_or_proto) {
@@ -158,7 +158,7 @@ int lixa_tx_begin(int *txrc)
                                 "going on...\n", ret_cod, txrc2));
                 }
                 if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
-                                       cs, txrc, &xid, next_txstate,
+                                       cs, txrc, &xid, txstate, next_txstate,
                                        &dupid_or_proto))) {
                     LIXA_TRACE(("lixa_tx_begin: lixa_xa_start failed again, "
                                 "returning TX_FAIL\n"));

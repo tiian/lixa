@@ -713,6 +713,7 @@ int thread_status_check_recovery_pending(
                      , RECOVERY_FAILED_TRANSACTION
                      , NOT_STARTED_TRANSACTION1
                      , NOT_STARTED_TRANSACTION2
+                     , NOT_STARTED_TRANSACTION3
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -756,9 +757,20 @@ int thread_status_check_recovery_pending(
             case LIXA_MSG_VERB_CLOSE:
             case LIXA_MSG_VERB_UNREG:
                 LIXA_TRACE(("thread_status_check_recovery_pending: "
-                            "returning FALSE\n"));
+                            "returning FALSE for last->verb=%d\n",
+                            last->verb));
                 THROW(NOT_STARTED_TRANSACTION1);
             case LIXA_MSG_VERB_START:
+                /* check transaction manager state */
+                if (TX_STATE_S3 != data->pld.ph.state.txstate &&
+                    TX_STATE_S4 != data->pld.ph.state.txstate) {
+                    LIXA_TRACE(("thread_status_check_recovery_pending: "
+                                "returning FALSE for last->verb=START and "
+                                "txstate=%d\n",
+                                data->pld.ph.state.txstate));
+                    THROW(NOT_STARTED_TRANSACTION2);
+                }
+                break;
             case LIXA_MSG_VERB_END:
             case LIXA_MSG_VERB_PREPARE:
             case LIXA_MSG_VERB_COMMIT:
@@ -768,7 +780,7 @@ int thread_status_check_recovery_pending(
                 /* check TX state */
                 if (data->pld.ph.state.txstate != TX_STATE_S3 &&
                     data->pld.ph.state.txstate != TX_STATE_S4)
-                    THROW(NOT_STARTED_TRANSACTION1);
+                    THROW(NOT_STARTED_TRANSACTION3);
                 break;
             default:
                 THROW(INVALID_VERB);
@@ -786,6 +798,7 @@ int thread_status_check_recovery_pending(
             case RECOVERY_FAILED_TRANSACTION:
             case NOT_STARTED_TRANSACTION1:
             case NOT_STARTED_TRANSACTION2:
+            case NOT_STARTED_TRANSACTION3:
                 *result = FALSE;
                 ret_cod = LIXA_RC_OK;
                 break;
