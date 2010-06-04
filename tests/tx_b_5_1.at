@@ -1,0 +1,62 @@
+AT_BANNER([TX: B.5 Suggested Mapping of Return Codes: Multiple RMs (xa_open)])
+
+AT_SETUP([TX/B.5/0.0])
+# The TM opens the RM when the AP calls tx_open( ).
+# xa_open( )      tx_open( )
+# [XAER_RMERR] -> [TX_ERROR]
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/-3
+xa_close/0
+xa_open/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/-3
+xa_close/0
+xa_open/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0006 ; lixa_test_exec.sh reset start case0018 -6], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0018 -6], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/0.1])
+# The TM opens the RM when the AP calls tx_open( ).
+# xa_open( )      tx_open( )
+# [XAER_INVAL] -> [TX_FAIL]
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/-5
+xa_close/0
+xa_open/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/-5
+xa_close/0
+xa_open/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0006 ; lixa_test_exec.sh noreset none case0018 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0018 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/0.2])
+# The TM opens the RM when the AP calls tx_open( ).
+# xa_open( )      tx_open( )
+# [XAER_PROTO] -> [TX_FAIL]
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/-6
+xa_close/0
+xa_open/0
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/-6
+xa_close/0
+xa_open/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0006 ; lixa_test_exec.sh noreset none case0018 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0018 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
