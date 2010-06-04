@@ -1,3 +1,6 @@
+Restart from tx_b_5_2.at
+after xa_start, it must be implemented xa_prepare (not available in one resouce manager case tests)
+
 Stability test with valgrind must be performed
 
 Stress test must be performed
