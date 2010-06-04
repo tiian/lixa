@@ -120,6 +120,23 @@
 	</itemizedlist>
       </para>
     </section>
+    <section>
+      <title>Authorization</title>
+      <important><para>
+	The software produced by the LIXA project does not require any
+	special authorization to run.
+      </para></important>
+      <para>
+	You can run the processes with the desired UNIX users you prefer; you
+	may assign a specific user and group, but it is not mandatory.
+      </para>
+      <note><para>
+	  LIXA client communicates to LIXA server (daemon) throught TCP/IP and
+	  client processes do not access the status files located in
+	  <filename>/opt/lixa/var</filename>, only the 
+	  <command>lixad</command> has to access the status files.
+      </para></note>
+    </section>
   </section>
   <section>
     <title>Software download</title>
@@ -288,13 +305,73 @@
 	      IBM and DB2 are trademark of <trademark>IBM</trademark>
 	      corporation
 	</para></footnote></title>
+	<para>
+	  This step is useful if you want to use IBM DB2 as a Resource
+	  Manager coordinated by LIXA; only version Express-C 9.7 has been
+	  tested, but there should not be relevant differences with a
+	  different version. Use something like this:
+	  <screen>
+	    ./configure --with-ibmdb2=/opt/ibm/db2/V9.7
+	  </screen>
+	  to create a loadable module containing the switch structure.
+	</para>
       </section>
       <section>
 	<title>Oracle XE 10.2<footnote><para>
 	      Oracle is a trademark of <trademark>Oracle</trademark>
 	      corporation
 	</para></footnote></title>
+	<para>
+	  This step is useful if you want to use Oracle Database as a Resource
+	  Manager coordinated by LIXA; only version XE 10.2 has been
+	  tested, but there should not be relevant differences with a
+	  different version. Use something like this:
+	  <screen>
+	    ./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+	  </screen>
+	  to create a loadable module containing the switch structure.
+	</para>
+	<para>
+	  Extra configuration is needed in order to use Oracle DBMS; the
+	  necessary steps are documented in the configuration chapter.
+	</para>
       </section>
     </section>
+    <section>
+      <title>Summary</title>
+      <para>
+	The option illustrated above can be combined to obtain a specific
+	configuration. This is an example of a IBM DB2 + Oracle enabled
+	installation using an alternate installation path:
+	<screen>
+	  tar xvzf lixa-X.Y.Z.tar.gz
+	  cd lixa-X.Y.Z
+	  ./configure --prefix=$HOME/lixa --with-ibmdb2=/opt/ibm/db2/V9.7 --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+	  make
+	  make install
+	</screen>
+      </para>
+    </section>
+  </section>
+  <section>
+    <title>Checking</title>
+    <para>
+      Before using LIXA to manage your transactions you might be interested
+      in checking the compiled software quality.
+    </para>
+    <para>
+      LIXA has its own test suite implemented with 
+      <application>Autotest</application>. A specific build configuration is
+      suggested to enable all the tests:
+      <screen>
+	tar xvzf lixa-X.Y.Z.tar.gz
+	cd lixa-X.Y.Z
+	./configure --prefix=/tmp/lixa --enable-crash
+	make check
+      </screen>
+      If the binary code produced by the compiler is fine, and your system
+      is fine too, all the test <emphasis>must</emphasis> complete without
+      errors.
+    </para>
   </section>
 </chapter>

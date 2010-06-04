@@ -1,15 +1,19 @@
 LOG:
 
-         - 0.5.12 implemented test case TX/B.5/0.*
+         - 0.5.12 implemented test cases TX/B.5/0.*
+                  implemented test cases TX/B.5/1.*
+                  implemented test cases TX/B.5/2.*
+                  implemented test cases TX/B.5/3.*
+                  implemented test cases TX/B.5/4.*
 
-20100603 - 0.5.11 implemented test case TX/B.4/0.*
-                  implemented test case TX/B.4/1.*
-                  implemented test case TX/B.4/2.*
-                  implemented test case TX/B.4/3.*
-                  implemented test case TX/B.4/4.*
-                  implemented test case TX/B.4/5.* and fixed bug # 3010322
-                  implemented test case TX/B.4/6.*
-                  implemented test case TX/B.4/7.* and fixed bug # 3010638
+20100603 - 0.5.11 implemented test cases TX/B.4/0.*
+                  implemented test cases TX/B.4/1.*
+                  implemented test cases TX/B.4/2.*
+                  implemented test cases TX/B.4/3.*
+                  implemented test cases TX/B.4/4.*
+                  implemented test cases TX/B.4/5.* and fixed bug # 3010322
+                  implemented test cases TX/B.4/6.*
+                  implemented test cases TX/B.4/7.* and fixed bug # 3010638
                   optimized recovery pending detection when xa_start() 
                   does not complete OK
 

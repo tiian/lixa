@@ -1,4 +1,4 @@
-AT_BANNER([TX: B.5 Suggested Mapping of Return Codes: Multiple RMs (xa_open)])
+AT_BANNER([TX: B.5 ... Multiple RMs (xa_open)])
 
 # Failure schema with 4 resource managers (2 static + 2 dynamic)
 #
