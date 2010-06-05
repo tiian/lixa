@@ -42,16 +42,18 @@
 int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
-    int rc, mode, test_rc;
+    int rc, mode, test_rc, dynam;
+    int rmid1 = 2, rmid2 = 3;
     
-    if (argc < 3) {
-        fprintf(stderr, "%s: at least one option must be specified\n",
+    if (argc < 4) {
+        fprintf(stderr, "%s: at least three options must be specified\n",
                 argv[0]);
         exit (1);
     }
 
     mode = strtol(argv[1], NULL, 0);
-    test_rc = strtol(argv[2], NULL, 0);
+    dynam = strtol(argv[2], NULL, 0);
+    test_rc = strtol(argv[3], NULL, 0);
 
     if (mode < 1 || mode > 2) {
         fprintf(stderr, "%s: mode must be 1 (commit), 2 (rollback)\n",
@@ -67,6 +69,17 @@ int main(int argc, char *argv[])
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OK == rc);
 
+    if (dynam & 1) {
+        printf("%s| lixa_monekyrm_call_ax_reg(%d): %d\n",
+               pgm, rmid1, rc = lixa_monkeyrm_call_ax_reg(rmid1));
+        assert(TX_OK == rc);
+    }
+    if (dynam & 2) {
+        printf("%s| lixa_monekyrm_call_ax_reg(%d): %d\n",
+               pgm, rmid2, rc = lixa_monkeyrm_call_ax_reg(rmid2));
+        assert(TX_OK == rc);
+    }
+    
     switch (mode) {
         case 1:
             printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
