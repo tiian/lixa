@@ -1,0 +1,98 @@
+<chapter>
+  <title>Configuration</title>
+  <para>
+    LIXA is constituted of two components: client and server. The figure
+    below shows a typical configuration with three distinct Application
+    Programs and four different Resource Managers.
+  </para>
+  <figure xml:id="config1">
+    <title>Typical LIXA topology</title>
+    <mediaobject>
+      <imageobject>
+	<imagedata fileref="LIXA_Configuration_1.png"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  <section>
+    <title>Architectural elements</title>
+    <para>
+      The <command>lixad</command> daemon process can be executed on any
+      system: there is no need it is hosted in the same system is hosting
+      the Application Programs. The communications between 
+      <command>lixac</command> is based on a TCP/IP socket.
+    </para>
+    <para>
+      The <command>lixac</command> library is embedded in the Application
+      Programs; the communication between Application Program and
+      <command>lixac</command> is based on TX (Transaction Demarcation)
+      API, see <citation>TXspec</citation>. The library contains the logic
+      of the LIXA Transaction Manager.
+    </para>
+    <para>
+      The communication between the Application Program and the Resource
+      Manager depends on Resource Manager configuration: it may be cross
+      memory based, TCP/IP based, etc...
+      The communication between the <command>lixac</command> library and the
+      Resource Manager depends on Resource Manager configuration and must be
+      the same used by the Application Program.
+    </para>
+    <para>
+      The communication between <command>lixac</command> and 
+      <command>lixad</command> is ever istantiated by the client: the
+      server never calls the client.
+    </para>
+  </section>
+  <section>
+    <title>Configuring the server</title>
+    <para>
+      The default configuration file is <filename>etc/lixad_conf.xml</filename>
+      and is located at the root installation path (i.e.
+      <filename>/opt/lixa/etc/lixad_conf.xml</filename>). 
+      Below there is a sample configuration file:
+      <screen>
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+  &lt;server pid_file="/tmp/lixa/var/run.pid"&gt;
+  &lt;listeners&gt;
+    &lt;listener domain="AF_INET" address="127.0.0.1" port="3456"/&gt;
+    &lt;listener domain="AF_INET" address="0.0.0.0" port="2345"/&gt;
+  &lt;/listeners&gt;
+  &lt;managers&gt;
+    &lt;manager status_file="/tmp/lixa/var/lixad_status1"/&gt;
+    &lt;manager status_file="/tmp/lixa/var/lixad_status2"/&gt;
+    &lt;manager status_file="/tmp/lixa/var/lixad_status3"/&gt;
+  &lt;/managers&gt;
+&lt;/server&gt;
+      </screen>
+      
+      The tags and the
+      properties of the XML file are described below:
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	    <varname>pid_file</varname>: the file used by the server to store
+	    the daemon <acronym>PID</acronym>
+	</para></listitem>
+	<listitem><para>
+	    <varname>listener</varname>: the server can activate one or more
+	    listeners; most of the times one listener is sufficient, but if
+	    you want to listen only on a subset of the address associated to
+	    the server you have to configure many
+	</para></listitem>
+	<listitem><para>
+	    <varname>domain</varname>: the type of socket must be used to
+	    listen for clients. The only allowed type is 
+	    <constant>AF_INET</constant>; this may be different in the future
+	</para></listitem>
+	<listitem><para>
+	    <varname>address</varname>: the address must be used to listen for
+	    clients; the special value <constant>0.0.0.0</constant> means
+	    any address
+	</para></listitem>
+	<listitem><para>
+	    <varname>port</varname>: the port must be used to listen for
+	    clients; it must be a free port (use command 
+	    <command>netstat</command> to find out one)
+	</para></listitem>
+      </itemizedlist>
+    </para>
+  </section>
+</chapter>
