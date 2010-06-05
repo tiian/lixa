@@ -1,5 +1,6 @@
 # include smaller files
 
+m4_include([tx_b_5_5.at])
 m4_include([tx_b_5_0.at])
 m4_include([tx_b_5_1.at])
 m4_include([tx_b_5_2.at])

@@ -3,10 +3,8 @@ AT_BANNER([TX: B.5 ... Multiple RMs (xa_rollback/xa_start)])
 # Failure schema with 4 resource managers (2 static + 2 dynamic)
 #
 # S1
-# D1
 # S1 S2
-# D1 D2
-# S2 D2
+# S2
 
 AT_SETUP([TX/B.5/4.0])
 # The [XA_RETRY] code tells the TM to reissue the call. The result the TM

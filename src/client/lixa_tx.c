@@ -634,7 +634,7 @@ int lixa_tx_open(int *txrc, int mmode)
                      , ALREADY_OPENED
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int tmp_txrc;
+    int tmp_txrc = TX_FAIL;
 
     int fd = LIXA_NULL_FD;
     client_status_t *cs = NULL;
