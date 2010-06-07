@@ -114,18 +114,20 @@ int lixa_tx_begin(int *txrc)
         /* check there are no local transactions started from any resource
            manager */
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
-            struct common_status_rsrmgr_s *csr = &g_array_index(
-                cs->rmstates, struct common_status_rsrmgr_s, i);
-            if (csr->dynamic && XA_STATE_D3 == csr->xa_td_state) {
+            struct client_status_rsrmgr_s *csr = &g_array_index(
+                cs->rmstatus, struct client_status_rsrmgr_s, i);
+            if (csr->common.dynamic &&
+                XA_STATE_D3 == csr->common.xa_td_state) {
                 LIXA_TRACE(("lixa_tx_begin: resource manager # %u uses "
                             "dynamic registration and is in state %d "
                             "(Registered with NULLXID)\n",
-                            i, csr->xa_td_state));
+                            i, csr->common.xa_td_state));
                 THROW(OUTSIDE_ERROR);
-            } else if (csr->dynamic && XA_STATE_D0 != csr->xa_td_state) {
+            } else if (csr->common.dynamic &&
+                       XA_STATE_D0 != csr->common.xa_td_state) {
                 LIXA_TRACE(("lixa_tx_begin: resource manager # %u uses "
                             "dynamic registration and is in state %d\n",
-                            i, csr->xa_td_state));
+                            i, csr->common.xa_td_state));
                 THROW(PROTOCOL_ERROR2);
             }
         }

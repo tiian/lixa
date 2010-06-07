@@ -52,7 +52,7 @@ int ax_reg(int rmid, XID *xid, long flags)
     LIXA_TRACE(("ax_reg: rmid=%d, xid=%p, flags=0x%lx\n", rmid, xid, flags));
     TRY {
         client_status_t *cs;
-        struct common_status_rsrmgr_s *csr;
+        struct client_status_rsrmgr_s *csr;
         struct lixa_msg_s msg;
         size_t buffer_size = 0;
         int fd, txstate, next_xa_td_state = XA_STATE_D1;
@@ -115,22 +115,23 @@ int ax_reg(int rmid, XID *xid, long flags)
             }
         
         /* check the status of the resource manager */
-        csr = &g_array_index(cs->rmstates, struct common_status_rsrmgr_s,
+        csr = &g_array_index(cs->rmstatus, struct client_status_rsrmgr_s,
                              rmid);
-        if ((TM_OK == ret_cod) && !csr->dynamic) {
+        if ((TM_OK == ret_cod) && !csr->common.dynamic) {
             LIXA_TRACE(("ax_reg: resource manager # %d is not using "
                         "dynamic registration\n", rmid));
             ret_cod = TMER_INVAL;
         }
 
-        if ((TM_OK == ret_cod) && (XA_STATE_R1 != csr->xa_r_state)) {
-            LIXA_TRACE(("ax_reg: invalid XA r_state (%d)\n", csr->xa_r_state));
+        if ((TM_OK == ret_cod) && (XA_STATE_R1 != csr->common.xa_r_state)) {
+            LIXA_TRACE(("ax_reg: invalid XA r_state (%d)\n",
+                        csr->common.xa_r_state));
             ret_cod = TMER_PROTO;
         }
 
-        if ((TM_OK == ret_cod) && (XA_STATE_D0 != csr->xa_td_state)) {
+        if ((TM_OK == ret_cod) && (XA_STATE_D0 != csr->common.xa_td_state)) {
             LIXA_TRACE(("ax_reg: invalid XA td_state (%d)\n",
-                        csr->xa_td_state));
+                        csr->common.xa_td_state));
             ret_cod = TMER_PROTO;
         }
 
@@ -156,7 +157,7 @@ int ax_reg(int rmid, XID *xid, long flags)
             THROW(SEND_ERROR);
 
         /* new resource manager state */
-        csr->xa_td_state = next_xa_td_state;
+        csr->common.xa_td_state = next_xa_td_state;
         
         THROW(NONE);
     } CATCH {
@@ -198,7 +199,7 @@ int ax_unreg(int rmid, long flags)
     LIXA_TRACE(("ax_unreg: rmid=%d, flags=0x%lx\n", rmid, flags));
     TRY {
         client_status_t *cs;
-        struct common_status_rsrmgr_s *csr;
+        struct client_status_rsrmgr_s *csr;
         struct lixa_msg_s msg;
         size_t buffer_size = 0;
         int fd;
@@ -225,23 +226,23 @@ int ax_unreg(int rmid, long flags)
         }
 
         /* check the status of the resource manager */
-        csr = &g_array_index(cs->rmstates, struct common_status_rsrmgr_s,
+        csr = &g_array_index(cs->rmstatus, struct client_status_rsrmgr_s,
                              rmid);
-        if ((TM_OK == xa_ret_cod) && !csr->dynamic) {
+        if ((TM_OK == xa_ret_cod) && !csr->common.dynamic) {
             LIXA_TRACE(("ax_unreg: resource manager # %d is not using "
                         "dynamic registration\n", rmid));
             xa_ret_cod = TMER_INVAL;
         }
 
-        if ((TM_OK == xa_ret_cod) && (XA_STATE_R1 != csr->xa_r_state)) {
+        if ((TM_OK == xa_ret_cod) && (XA_STATE_R1 != csr->common.xa_r_state)) {
             LIXA_TRACE(("ax_unreg: invalid XA r_state (%d)\n",
-                        csr->xa_r_state));
+                        csr->common.xa_r_state));
             xa_ret_cod = TMER_PROTO;
         }
 
-        if ((TM_OK == ret_cod) && (XA_STATE_D3 != csr->xa_td_state)) {
+        if ((TM_OK == ret_cod) && (XA_STATE_D3 != csr->common.xa_td_state)) {
             LIXA_TRACE(("ax_unreg: invalid XA td_state (%d)\n",
-                        csr->xa_td_state));
+                        csr->common.xa_td_state));
             xa_ret_cod = TMER_PROTO;
         }
 
@@ -267,7 +268,7 @@ int ax_unreg(int rmid, long flags)
             THROW(SEND_ERROR);
 
         /* new resource manager state */
-        csr->xa_td_state = XA_STATE_D0;
+        csr->common.xa_td_state = XA_STATE_D0;
                 
         THROW(NONE);
     } CATCH {

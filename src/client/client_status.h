@@ -57,6 +57,26 @@
 
 
 /**
+ * Status of the resource manager: this is a volatile status, the persistent
+ * one is stored server side
+ */
+struct client_status_rsrmgr_s {
+    /**
+     * It store the common (client & server) part of the rsrmgr status
+     */
+    struct common_status_rsrmgr_s common;
+    /**
+     * It stores the return code of xa_prepare() that must be used when
+     * evaluating the return code of xa_rollback() under some circumstances;
+     * this field is NOT propagated to the server because the server already
+     * stores it; 
+     */
+    int   prepare_rc;
+};
+
+
+
+/**
  * It contains the status of a thread connected to a lixa transaction
  * manager
  */
@@ -75,10 +95,10 @@ struct client_status_s {
      */
     struct common_status_conthr_s   state;
     /**
-     * State of the partecipating resource managers (ses @ref
-     * common_status_rsrmgr_s )
+     * State of the partecipating resource managers (see @ref
+     * client_status_rsrmgr_s )
      */
-    GArray                         *rmstates;
+    GArray                         *rmstatus;
     /**
      * The state of the transaction (with relationship to @ref tx_info and
      * @ref tx_set_transaction_timeout )
@@ -183,6 +203,20 @@ extern client_config_coll_t global_ccc;
 extern "C" {
 #endif /* __cplusplus */
 
+
+
+    /**
+     * Initialize a @ref client_status_rsrmgr_s struct
+     * @param csr OUT reference to the structure must be initialized
+     * @param dynamic IN boolean: is the resource manager using dynamic
+     *                   registration?
+     */
+    static inline void client_status_rsrmgr_init(
+        struct client_status_rsrmgr_s *csr, int dynamic) {
+        common_status_rsrmgr_init(&(csr->common), dynamic);
+        csr->prepare_rc = XA_OK;
+    }
+    
 
     
     /**
