@@ -1,5 +1,7 @@
-Restart from tx_b_5_2.at
-after xa_start, it must be implemented xa_prepare (not available in one resouce manager case tests)
+Restart from tx_b_5_7.at
+lixa_tx.c:444 
+
+
 
 Stability test with valgrind must be performed
 

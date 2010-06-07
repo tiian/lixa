@@ -312,7 +312,6 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                                 case XA_RBTIMEOUT:
                                 case XA_RBTRANSIENT:
                                 case XA_HEURRB:
-                                case XAER_RMERR:
                                 case XA_OK:
                                 case XAER_NOTA:
                                     if (ltr->tx_commit)
@@ -320,13 +319,12 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                                     else
                                         prev_tx_rc = TX_OK;
                                     break;
-                                    /*
+                                case XAER_RMERR:
                                     if (ltr->tx_commit)
-                                        prev_tx_rc = TX_FAIL;
+                                        prev_tx_rc = TX_HAZARD;
                                     else
-                                        prev_tx_rc = TX_MIXED;
+                                        prev_tx_rc = TX_OK;
                                     break;
-                                    */
                                 case XA_HEURHAZ:
                                     /* case test TX/3.3.1/1.0 */
                                     prev_tx_rc = TX_HAZARD;
@@ -383,7 +381,9 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
         } /* else if (TX_FAIL != ltr->tx_rc) */
 
         /* store the new values */
-        ltr->tx_rc = tmp_tx_rc;
+        if (lixa_tx_rc_hierarchy(tmp_tx_rc) <
+            lixa_tx_rc_hierarchy(ltr->tx_rc))
+            ltr->tx_rc = tmp_tx_rc;
         g_array_append_val(ltr->xa_rc, xa_rc); 
         LIXA_TRACE(("lixa_tx_rc_add: ltr->tx_rc=%d\n", ltr->tx_rc));
         
