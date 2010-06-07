@@ -103,7 +103,7 @@ xa_commit/8
 xa_forget/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start case0002 commit -4], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start case0002 commit -3], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
@@ -170,7 +170,7 @@ xa_rollback/8
 xa_forget/-3
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start case0002 rollback -4], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start case0002 rollback -3], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0

@@ -355,7 +355,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
     TRY {
         int txstate, next_txstate, commit = TRUE;
         client_status_t *cs;
-        int one_phase_commit = FALSE;
+        int one_phase_commit = FALSE, prepare_txrc;
 
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -407,6 +407,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                 LIXA_RC_OK != (ret_cod = lixa_xa_prepare(cs, txrc, &commit)))
                     THROW(XA_PREPARE_ERROR);
         }
+        prepare_txrc = *txrc;
         /* commit/rollback */
         if (commit) {
             LIXA_TRACE(("lixa_tx_commit: go on with commit...\n"));
@@ -440,6 +441,8 @@ int lixa_tx_commit(int *txrc, int *begin_new)
             LIXA_TRACE(("lixa_tx_commit: go on with rollback...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc, TRUE)))
                 THROW(XA_ROLLBACK_ERROR);
+            LIXA_TRACE(("lixa_tx_commit: txrc=%d, prepare_txrc=%d\n",
+                        *txrc, prepare_txrc));
             switch (*txrc) {
                 case TX_OK:
                 case TX_ROLLBACK:

@@ -320,6 +320,86 @@ xa_end/0
 xa_prepare/-4
 xa_rollback/0
 ]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -2], [0], [ignore], [ignore])
+# XA_RDONLY + XAER_RMERR (rollback OK)
+#
+# TX page 68
+#
+# A return code of [XAER_RMERR] or [XAER_PROTO] from xa_prepare( ) makes no
+# assertion about whether the RM successfully prepared its work. The TM should
+# call all RMs with xa_rollback ( ) to attempt to roll back the transaction.
+# If this is unsuccessful, the TM could return [TX_HAZARD] or [TX_FAIL].
+#
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/3
+xa_rollback/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -2], [0], [ignore], [ignore])
+# XA_RDONLY + XAER_RMERR (rollback KO)
+#
+# TX page 68
+#
+# A return code of [XAER_RMERR] or [XAER_PROTO] from xa_prepare( ) makes no
+# assertion about whether the RM successfully prepared its work. The TM should
+# call all RMs with xa_rollback ( ) to attempt to roll back the transaction.
+# If this is unsuccessful, the TM could return [TX_HAZARD] or [TX_FAIL].
+#
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/3
+xa_rollback/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/-3
+]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0024 1 3 -2], [0], [ignore], [ignore])
 AT_CLEANUP
 
