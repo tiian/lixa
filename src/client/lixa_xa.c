@@ -225,26 +225,28 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            struct common_status_rsrmgr_s *csr = &g_array_index(
-                cs->rmstates, struct common_status_rsrmgr_s, i);
+            struct client_status_rsrmgr_s *csr = &g_array_index(
+                cs->rmstatus, struct client_status_rsrmgr_s, i);
             struct lixa_msg_body_commit_8_xa_commit_execs_s record;
             record.rmid = i;
             
             /* bypass resource managers are not prepared */
-            if ((one_phase_commit && XA_STATE_S2 != csr->xa_s_state) ||
-                (!one_phase_commit && XA_STATE_S3 != csr->xa_s_state)) {
+            if ((one_phase_commit &&
+                 XA_STATE_S2 != csr->common.xa_s_state) ||
+                (!one_phase_commit &&
+                 XA_STATE_S3 != csr->common.xa_s_state)) {
                     LIXA_TRACE(("lixa_xa_commit: rmid=%d, "
                                 "one_phase_commit=%d, "
                                 "xa_s_state=%d, bypassing...\n",
                                 record.rmid, one_phase_commit,
-                                csr->xa_s_state));
+                                csr->common.xa_s_state));
                     continue;
                 }
 
             /* bypass resource managers have not dynamically registered and
                statically ended the transaction */
-            if (csr->dynamic && csr->xa_s_state != XA_STATE_S2 &&
-                csr->xa_s_state != XA_STATE_S3) {
+            if (csr->common.dynamic && csr->common.xa_s_state != XA_STATE_S2 &&
+                csr->common.xa_s_state != XA_STATE_S3) {
                 LIXA_TRACE(("lixa_xa_commit: resource manager # %i "
                             "has not yet dynamically registered and "
                             "statically ended/prepared, skipping...\n",
@@ -274,10 +276,10 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 case XA_HEURCOM:
                 case XA_HEURRB:
                 case XA_HEURMIX:
-                    csr->xa_s_state = XA_STATE_S5;
+                    csr->common.xa_s_state = XA_STATE_S5;
                     break;
                 case XA_OK:
-                    csr->xa_s_state = XA_STATE_S0;
+                    csr->common.xa_s_state = XA_STATE_S0;
                     break;
                 case XA_RBROLLBACK:
                 case XA_RBCOMMFAIL:
@@ -287,7 +289,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 case XA_RBPROTO:
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
-                    csr->xa_s_state = XA_STATE_S0;
+                    csr->common.xa_s_state = XA_STATE_S0;
                     if (TMONEPHASE != record.flags)
                         THROW(INVALID_XA_RC);
                     break;                    
@@ -295,24 +297,24 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 case XAER_RMERR:
                 case XA_RETRY:
-                    csr->xa_s_state = XA_STATE_S0;
+                    csr->common.xa_s_state = XA_STATE_S0;
                     break;
                 case XAER_RMFAIL:
-                    csr->xa_r_state = XA_STATE_R0;
+                    csr->common.xa_r_state = XA_STATE_R0;
                     break;
                 case XAER_NOTA:
-                    csr->xa_s_state = XA_STATE_S0;
+                    csr->common.xa_s_state = XA_STATE_S0;
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
-                    csr->xa_td_state =
-                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    csr->common.xa_td_state =
+                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     break;
                 default:
                     THROW(UNEXPECTED_XA_RC);
             }
-            record.r_state = csr->xa_r_state;
-            record.s_state = csr->xa_s_state;
+            record.r_state = csr->common.xa_r_state;
+            record.s_state = csr->common.xa_s_state;
             g_array_append_val(msg.body.commit_8.xa_commit_execs, record);
         } /* for (i=0; ...) */
 
@@ -476,13 +478,14 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
             char *ser_xid;
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            struct common_status_rsrmgr_s *csr = &g_array_index(
-                cs->rmstates, struct common_status_rsrmgr_s, i);
+            struct client_status_rsrmgr_s *csr = &g_array_index(
+                cs->rmstatus, struct client_status_rsrmgr_s, i);
             struct lixa_msg_body_end_24_xa_end_execs_s record;
 
             /* dynamic registered resource managers with unregistered state
                must be bypassed */
-            if (csr->dynamic && csr->xa_td_state != XA_STATE_D1) {
+            if (csr->common.dynamic &&
+                csr->common.xa_td_state != XA_STATE_D1) {
                 LIXA_TRACE(("lixa_xa_end: resource manager # %u has not "
                             "dynamically registered itself, skipping...\n",
                             i));
@@ -500,7 +503,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
             switch (record.rc) {
                 case XA_NOMIGRATE:
                     tmp_txrc = TX_FAIL;
-                    csr->xa_td_state = XA_STATE_T0;
+                    csr->common.xa_td_state = XA_STATE_T0;
                     ser_xid = xid_serialize(client_status_get_xid(cs));
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC015W,
                            (char *)act_rsrmgr->generic->name, record.rmid,
@@ -515,9 +518,9 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                     }
                     break;
                 case XA_OK:
-                    csr->xa_td_state =
-                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
-                    csr->xa_s_state = XA_STATE_S2;
+                    csr->common.xa_td_state =
+                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    csr->common.xa_s_state = XA_STATE_S2;
                     break;
                 case XA_RBROLLBACK:
                 case XA_RBCOMMFAIL:
@@ -527,9 +530,9 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                 case XA_RBPROTO:
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
-                    csr->xa_td_state =
-                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
-                    csr->xa_s_state = XA_STATE_S4;
+                    csr->common.xa_td_state =
+                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    csr->common.xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     read_write_rsrmgr--; /* read only transaction */
                     if (commit)
@@ -539,23 +542,23 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                     *txrc = TX_FAIL;
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 case XAER_RMERR:
-                    csr->xa_td_state =
-                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
-                    csr->xa_s_state = XA_STATE_S4;
+                    csr->common.xa_td_state =
+                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    csr->common.xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     if (commit)
                         tmp_txrc = TX_ROLLBACK;
                     break;
                 case XAER_RMFAIL:
                     *txrc = TX_FAIL;
-                    csr->xa_r_state = XA_STATE_R0;
+                    csr->common.xa_r_state = XA_STATE_R0;
                     xa_end_flags = TMFAIL;
                     tmp_txrc = TX_FAIL;
                     break;
                 case XAER_NOTA:
-                    csr->xa_td_state =
-                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
-                    csr->xa_s_state = XA_STATE_S4;
+                    csr->common.xa_td_state =
+                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    csr->common.xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     if (commit)
                         tmp_txrc = TX_ROLLBACK;
@@ -563,16 +566,16 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                 case XAER_INVAL:
                 case XAER_PROTO:
                     *txrc = TX_FAIL;
-                    csr->xa_td_state =
-                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    csr->common.xa_td_state =
+                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     tmp_txrc = TX_FAIL;
                     break;
                 default:
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
-            record.s_state = csr->xa_s_state;
-            record.td_state = csr->xa_td_state;
+            record.s_state = csr->common.xa_s_state;
+            record.td_state = csr->common.xa_td_state;
             g_array_append_val(msg.body.end_24.xa_end_execs, record);
             
             if (lixa_tx_rc_hierarchy(tmp_txrc) <
@@ -654,9 +657,9 @@ int lixa_xa_forget(client_status_t *cs, int *finished)
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            struct common_status_rsrmgr_s *csr = &g_array_index(
-                cs->rmstates, struct common_status_rsrmgr_s, i);
-            if (XA_STATE_S5 == csr->xa_s_state) {
+            struct client_status_rsrmgr_s *csr = &g_array_index(
+                cs->rmstatus, struct client_status_rsrmgr_s, i);
+            if (XA_STATE_S5 == csr->common.xa_s_state) {
                 int rc;
                 int rmid = i;
                 XID *xid = client_status_get_xid(cs);
@@ -678,7 +681,7 @@ int lixa_xa_forget(client_status_t *cs, int *finished)
                 }
                 switch (rc) {
                     case XA_OK:
-                        csr->xa_s_state = XA_STATE_S0;
+                        csr->common.xa_s_state = XA_STATE_S0;
                         break;
                     case XAER_ASYNC:
                         THROW(ASYNC_NOT_IMPLEMENTED);
@@ -690,7 +693,7 @@ int lixa_xa_forget(client_status_t *cs, int *finished)
                                     "is not able to forget this xid\n", rmid));
                         break;
                     case XAER_NOTA:
-                        csr->xa_s_state = XA_STATE_S0;
+                        csr->common.xa_s_state = XA_STATE_S0;
                         LIXA_TRACE(("lixa_xa_forget: resource manager # %d "
                                     "does not recognize as 'Heuristically "
                                     "Completed' the transaction...\n", rmid));
@@ -755,30 +758,31 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
         int recovery_pending = FALSE;
 
         /* check the resouce managers status is OK */
-        if (cs->rmstates->len == 0) {
+        if (cs->rmstatus->len == 0) {
             /* popolate the array... */
             for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
                 struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                     global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
                 int dynamic = act_rsrmgr->xa_switch->flags & TMREGISTER;
-                struct common_status_rsrmgr_s csr;
-                common_status_rsrmgr_init(&csr, dynamic);
-                g_array_append_val(cs->rmstates, csr);
+                struct client_status_rsrmgr_s csr;
+                client_status_rsrmgr_init(&csr, dynamic);
+                g_array_append_val(cs->rmstatus, csr);
             }
-        } else if (cs->rmstates->len == global_ccc.actconf.rsrmgrs->len) {
+        } else if (cs->rmstatus->len == global_ccc.actconf.rsrmgrs->len) {
             /* reset the array values */
             for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
                 struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                     global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
                 int dynamic = act_rsrmgr->xa_switch->flags & TMREGISTER;
-                struct common_status_rsrmgr_s *csr = &g_array_index(
-                    cs->rmstates, struct common_status_rsrmgr_s, i);
-                common_status_rsrmgr_init(csr, dynamic);
+                struct client_status_rsrmgr_s *csr = &g_array_index(
+                    cs->rmstatus, struct client_status_rsrmgr_s, i);
+                client_status_rsrmgr_init(csr, dynamic);
             }            
         } else {
-            LIXA_TRACE(("lixa_xa_open: cs->rmstates->len = %u, "
+            LIXA_TRACE(("lixa_xa_open: cs->rmstatus->len = %u, "
                         "global_ccc.actconf.rsrmgrs->len = %u\n",
-                        cs->rmstates->len, global_ccc.actconf.rsrmgrs->len));
+                        cs->rmstatus->len,
+                        global_ccc.actconf.rsrmgrs->len));
             THROW(OBJ_CORRUPTED);
         }
 
@@ -867,8 +871,8 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            struct common_status_rsrmgr_s *csr = &g_array_index(
-                cs->rmstates, struct common_status_rsrmgr_s, i);
+            struct client_status_rsrmgr_s *csr = &g_array_index(
+                cs->rmstatus, struct client_status_rsrmgr_s, i);
             struct lixa_msg_body_open_24_xa_open_execs_s record;
             long xa_open_flags = TMNOFLAGS;
             int tmp_txrc = TX_OK;
@@ -886,16 +890,16 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
                see RFNF 2907143 https://sourceforge.net/tracker/?func=detail&aid=2907143&group_id=257602&atid=1231748 */
             switch (record.rc) {
                 case XA_OK:
-                    csr->xa_r_state = XA_STATE_R1;
+                    csr->common.xa_r_state = XA_STATE_R1;
                     break;
                 case XAER_RMERR:
                     tmp_txrc = TX_ERROR;
-                    csr->xa_r_state = XA_STATE_R1;
+                    csr->common.xa_r_state = XA_STATE_R1;
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
                     tmp_txrc = TX_FAIL;
-                    csr->xa_r_state = XA_STATE_R1;
+                    csr->common.xa_r_state = XA_STATE_R1;
                     break;
                 case XAER_ASYNC:
                     *txrc = TX_FAIL;
@@ -904,7 +908,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
-            record.r_state = csr->xa_r_state;
+            record.r_state = csr->common.xa_r_state;
             g_array_append_val(msg.body.open_24.xa_open_execs, record);
             
             if (lixa_tx_rc_hierarchy(tmp_txrc) <
@@ -1033,14 +1037,14 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            struct common_status_rsrmgr_s *csr = &g_array_index(
-                cs->rmstates, struct common_status_rsrmgr_s, i);
+            struct client_status_rsrmgr_s *csr = &g_array_index(
+                cs->rmstatus, struct client_status_rsrmgr_s, i);
             struct lixa_msg_body_prepare_8_xa_prepare_execs_s record;
             int tmp_txrc = TX_OK;
 
             /* dynamic registered resource managers with unregistered state
                must be bypassed */
-            if (csr->dynamic && csr->xa_s_state != XA_STATE_S2) {
+            if (csr->common.dynamic && csr->common.xa_s_state != XA_STATE_S2) {
                 LIXA_TRACE(("lixa_xa_prepare: resource manager # %u has not "
                             "dynamically registered & ended its "
                             "partecipation, skipping...\n", i));
@@ -1057,11 +1061,11 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
             break_prepare = TRUE;
             switch (record.rc) {
                 case XA_OK:
-                    csr->xa_s_state = XA_STATE_S3;
+                    csr->common.xa_s_state = XA_STATE_S3;
                     break_prepare = FALSE;
                     break;
                 case XA_RDONLY:
-                    csr->xa_s_state = XA_STATE_S0;
+                    csr->common.xa_s_state = XA_STATE_S0;
                     break_prepare = FALSE;
                     break;
                 case XA_RBROLLBACK:
@@ -1072,29 +1076,29 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
                 case XA_RBPROTO:
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
-                    csr->xa_s_state = XA_STATE_S0;
+                    csr->common.xa_s_state = XA_STATE_S0;
                     tmp_txrc = TX_ROLLBACK;
                     break;                    
                 case XAER_NOTA:
-                    csr->xa_s_state = XA_STATE_S0;
+                    csr->common.xa_s_state = XA_STATE_S0;
                     tmp_txrc = TX_ROLLBACK;
                     break;
                 case XAER_RMERR:
-                    csr->xa_s_state = XA_STATE_S2;
+                    csr->common.xa_s_state = XA_STATE_S2;
                     tmp_txrc = TX_ROLLBACK;
                     break;
                 case XAER_RMFAIL:
-                    csr->xa_r_state = XA_STATE_R0;
+                    csr->common.xa_r_state = XA_STATE_R0;
                     tmp_txrc = TX_FAIL;
                     break;
                 case XAER_INVAL:
-                    csr->xa_td_state =
-                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    csr->common.xa_td_state =
+                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     tmp_txrc = TX_FAIL;
                     break;
                 case XAER_PROTO:
-                    csr->xa_td_state =
-                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    csr->common.xa_td_state =
+                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     tmp_txrc = TX_ROLLBACK;
                     break;
                 case XAER_ASYNC:
@@ -1104,8 +1108,8 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
-            record.s_state = csr->xa_s_state;
-            record.td_state = csr->xa_td_state;
+            record.s_state = csr->common.xa_s_state;
+            record.td_state = csr->common.xa_td_state;
             g_array_append_val(msg.body.prepare_8.xa_prepare_execs, record);
 
             if (lixa_tx_rc_hierarchy(tmp_txrc) <
@@ -1235,16 +1239,16 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            struct common_status_rsrmgr_s *csr = &g_array_index(
-                cs->rmstates, struct common_status_rsrmgr_s, i);
+            struct client_status_rsrmgr_s *csr = &g_array_index(
+                cs->rmstatus, struct client_status_rsrmgr_s, i);
             struct lixa_msg_body_rollback_8_xa_rollback_execs_s record;
             record.rmid = i;
             
             /* bypass resource managers have not dynamically registered and
                statically ended the transaction */
-            if (csr->dynamic && csr->xa_s_state != XA_STATE_S2 &&
-                csr->xa_s_state != XA_STATE_S3 &&
-                csr->xa_s_state != XA_STATE_S4) {
+            if (csr->common.dynamic && csr->common.xa_s_state != XA_STATE_S2 &&
+                csr->common.xa_s_state != XA_STATE_S3 &&
+                csr->common.xa_s_state != XA_STATE_S4) {
                 LIXA_TRACE(("lixa_xa_rollback: resource manager # %i "
                             "has not yet dynamically registered and/or "
                             "statically ended/prepared, skipping...\n",
@@ -1271,19 +1275,19 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             
             switch (record.rc) {
                 case XA_HEURHAZ:
-                    csr->xa_s_state = XA_STATE_S5;
+                    csr->common.xa_s_state = XA_STATE_S5;
                     break;
                 case XA_HEURCOM:
-                    csr->xa_s_state = XA_STATE_S5;
+                    csr->common.xa_s_state = XA_STATE_S5;
                     break;
                 case XA_HEURRB:
-                    csr->xa_s_state = XA_STATE_S5;
+                    csr->common.xa_s_state = XA_STATE_S5;
                     break;
                 case XA_HEURMIX:
-                    csr->xa_s_state = XA_STATE_S5;
+                    csr->common.xa_s_state = XA_STATE_S5;
                     break;
                 case XA_OK:
-                    csr->xa_s_state = XA_STATE_S0;
+                    csr->common.xa_s_state = XA_STATE_S0;
                     break;
                 case XA_RBROLLBACK:
                 case XA_RBCOMMFAIL:
@@ -1293,30 +1297,30 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                 case XA_RBPROTO:
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
-                    csr->xa_s_state = XA_STATE_S0;
+                    csr->common.xa_s_state = XA_STATE_S0;
                     break;                    
                 case XAER_ASYNC:
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 case XAER_RMERR:
                 case XA_RETRY:
-                    csr->xa_s_state = XA_STATE_S0;
+                    csr->common.xa_s_state = XA_STATE_S0;
                     break;
                 case XAER_RMFAIL:
-                    csr->xa_r_state = XA_STATE_R0;
+                    csr->common.xa_r_state = XA_STATE_R0;
                     break;
                 case XAER_NOTA:
-                    csr->xa_s_state = XA_STATE_S0;
+                    csr->common.xa_s_state = XA_STATE_S0;
                     break;
                 case XAER_INVAL:
                 case XAER_PROTO:
-                    csr->xa_td_state =
-                        csr->dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    csr->common.xa_td_state =
+                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     break;
                 default:
                     THROW(UNEXPECTED_XA_RC);
             }
-            record.r_state = csr->xa_r_state;
-            record.s_state = csr->xa_s_state;
+            record.r_state = csr->common.xa_r_state;
+            record.s_state = csr->common.xa_s_state;
             g_array_append_val(msg.body.rollback_8.xa_rollback_execs, record);
         } /* for (i=0; ...) */
         
@@ -1492,8 +1496,8 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            struct common_status_rsrmgr_s *csr = &g_array_index(
-                cs->rmstates, struct common_status_rsrmgr_s, i);
+            struct client_status_rsrmgr_s *csr = &g_array_index(
+                cs->rmstatus, struct client_status_rsrmgr_s, i);
             struct lixa_msg_body_start_24_xa_start_execs_s record;
             long xa_start_flags = TMNOFLAGS;
             int rc;
@@ -1517,7 +1521,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
 
             switch (record.rc) {
                 case XA_OK:
-                    csr->xa_td_state = XA_STATE_T1;
+                    csr->common.xa_td_state = XA_STATE_T1;
                     break;
                 case XA_RETRY:
                     LIXA_TRACE(("lixa_xa_start: the resource manager returned "
@@ -1527,16 +1531,16 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC013W,
                            (char *)act_rsrmgr->generic->name, record.rmid);
                     tmp_txrc = TX_ERROR;
-                    csr->xa_td_state = XA_STATE_T0;
+                    csr->common.xa_td_state = XA_STATE_T0;
                     break;
                 case XAER_RMERR:
                     tmp_txrc = TX_ERROR;
-                    csr->xa_td_state = XA_STATE_T0;
+                    csr->common.xa_td_state = XA_STATE_T0;
                     break;
                 case XAER_DUPID:
                     *dupid_or_proto = TRUE;
                     tmp_txrc = TX_ERROR;
-                    csr->xa_td_state = XA_STATE_T0;
+                    csr->common.xa_td_state = XA_STATE_T0;
                     ser_xid = xid_serialize(xid);
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC009W,
                            (char *)act_rsrmgr->generic->name, record.rmid,
@@ -1555,12 +1559,12 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                     break;
                 case XAER_INVAL:
                     tmp_txrc = TX_FAIL;
-                    csr->xa_td_state = XA_STATE_T0;
+                    csr->common.xa_td_state = XA_STATE_T0;
                     break;
                 case XAER_PROTO:
                     *dupid_or_proto = TRUE;
                     tmp_txrc = TX_ERROR;
-                    csr->xa_td_state = XA_STATE_T0;
+                    csr->common.xa_td_state = XA_STATE_T0;
                     ser_xid = xid_serialize(xid);
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC010W,
                            (char *)act_rsrmgr->generic->name, record.rmid,
@@ -1584,7 +1588,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }
-            record.td_state = csr->xa_td_state;
+            record.td_state = csr->common.xa_td_state;
             g_array_append_val(msg.body.start_24.xa_start_execs, record);
 
             if (lixa_tx_rc_hierarchy(tmp_txrc) <

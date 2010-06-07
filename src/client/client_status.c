@@ -85,8 +85,8 @@ void client_status_init(client_status_t *cs)
     cs->active = FALSE;
     cs->sockfd = LIXA_NULL_FD;
     common_status_conthr_init(&cs->state);
-    cs->rmstates = g_array_new(FALSE, FALSE,
-                               sizeof(struct common_status_rsrmgr_s));
+    cs->rmstatus = g_array_new(FALSE, FALSE,
+                               sizeof(struct client_status_rsrmgr_s));
     cs->tx_timeout = 0;
     cs->tx_timeout_time = 0;
 #ifdef _CRASH
@@ -101,7 +101,7 @@ void client_status_init(client_status_t *cs)
 void client_status_free(client_status_t *cs)
 {
     LIXA_TRACE(("client_status_free: begin\n"));
-    g_array_free(cs->rmstates, TRUE);
+    g_array_free(cs->rmstatus, TRUE);
     LIXA_TRACE(("client_status_free: end\n"));
 }
 
@@ -483,13 +483,13 @@ int client_status_could_one_phase(const client_status_t *cs)
     
     /* scan all the resource manager status */
     for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
-        struct common_status_rsrmgr_s *csr = &g_array_index(
-            cs->rmstates, struct common_status_rsrmgr_s, i);
+        struct client_status_rsrmgr_s *csr = &g_array_index(
+            cs->rmstatus, struct client_status_rsrmgr_s, i);
         LIXA_TRACE(("client_status_could_one_phase: i=%u, csr->dynamic=%d, "
-                    "csr->xa_td_state=%d\n", i, csr->dynamic,
-                    csr->xa_td_state)); 
-        if (csr->dynamic) {
-            if (csr->xa_td_state == XA_STATE_D1)
+                    "csr->xa_td_state=%d\n", i, csr->common.dynamic,
+                    csr->common.xa_td_state)); 
+        if (csr->common.dynamic) {
+            if (csr->common.xa_td_state == XA_STATE_D1)
                 n++;
         } else
             n++;
