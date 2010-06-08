@@ -95,10 +95,151 @@
 	<listitem><para>
 	    <varname>manager</varname>: any configured 
 	    <emphasis>manager</emphasis> is a server worker and has its own
-	    associated thread. The number of manager should be activated 
-	    depends on the workload.
+	    associated thread. The number of managers should be activated 
+	    depends on the workload; if D is the number of indipendent 
+	    hard disk devices and P is the number of processors/cores, the
+	    range of suggested managers spans the range
+	    <equation><title>Number of managers suggested range</title>
+	      <mathphrase>
+		[min(D,P) ; D*P]
+	      </mathphrase>
+	    </equation>
+	</para></listitem>
+	<listitem><para>
+	    <varname>status_file</varname>: the physical path must be used to
+	    create the status files (a couple) for a manager
 	</para></listitem>
       </itemizedlist>
+    </para>
+  </section>
+  <section>
+    <title>Configuring the client</title>
+    <para>
+      The default configuration file is <filename>etc/lixac_conf.xml</filename>
+      and is located at the root installation path (i.e.
+      <filename>/opt/lixa/etc/lixac_conf.xml</filename>). 
+      Below there is a sample configuration file:
+      <screen>
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;client&gt;
+  &lt;trnmgrs&gt;
+    &lt;trnmgr name="server1" domain="AF_INET" address="10.23.45.67" port="2345" /&gt;
+    &lt;trnmgr name="server2" domain="AF_INET" address="10.23.46.91" port="3456" /&gt;
+  &lt;/trnmgrs&gt;
+  &lt;rsrmgrs&gt;
+    &lt;rsrmgr name="OracleXE_dynreg" switch_file="/tmp/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
+    &lt;rsrmgr name="OracleXE_stareg" switch_file="/tmp/lixa/lib/switch_oracle_stareg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
+    &lt;rsrmgr name="IBMDB2_dynreg" switch_file="/tmp/lixa/lib/switch_ibmdb2_dynreg.so" xa_open_info="axlib=/tmp/lixa/lib/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+    &lt;rsrmgr name="IBMDB2_stareg" switch_file="/tmp/lixa/lib/switch_ibmdb2_stareg.so" xa_open_info="axlib=/tmp/lixa/lib/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+  &lt;/rsrmgrs&gt;
+  &lt;profiles&gt;
+    &lt;profile name="GT71"&gt;
+      &lt;trnmgrs&gt;
+        &lt;trnmgr&gt;local_1&lt;/trnmgr&gt;
+      &lt;/trnmgrs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;OracleXE_stareg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;IBMDB2_stareg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+    &lt;profile name="VZ67"&gt;
+      &lt;trnmgrs&gt;
+        &lt;trnmgr&gt;local_1&lt;/trnmgr&gt;
+      &lt;/trnmgrs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;OracleXE_dynreg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;IBMDB2_dynreg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+    &lt;profile name="AG71"&gt;
+      &lt;trnmgrs&gt;
+        &lt;trnmgr&gt;local_2&lt;/trnmgr&gt;
+      &lt;/trnmgrs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;IBMDB2_dynreg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/client&gt;
+      </screen>
+      The tags and the
+      properties of the XML file are described below:
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	    <varname>trnmgr</varname>: every manager (see 
+	    <filename>lixad_conf.xml</filename>) must be reached by the 
+	    clients configured with this file needs to be listed here
+	</para></listitem>
+	<listitem><para>
+	    <varname>trnmgr/name</varname>: a name associated to the 
+	    manager; it will be used below
+	</para></listitem>
+	<listitem><para>
+	    <varname>domain</varname>: the same domain specified in
+	    <filename>lixad_conf.xml</filename> (see above)
+	</para></listitem>
+	<listitem><para>
+	    <varname>address</varname>: the same address specified in
+	    <filename>lixad_conf.xml</filename> (see above)
+	</para></listitem>
+	<listitem><para>
+	    <varname>port</varname>: the same port specified in
+	    <filename>lixad_conf.xml</filename> (see above)
+	</para></listitem>
+	<listitem><para>
+	    <varname>rsrmgr</varname>: every resource manager will be used
+	    by the Application Programs configured to use this client
+	    configuration must be listed here
+	</para></listitem>
+	<listitem><para>
+	    <varname>rsrmgr/name</varname>: a name associated to the 
+	    Resource Manager; it will be used below
+	</para></listitem>
+	<listitem><para>
+	    <varname>switch_file</varname>: name of the file containing the
+	    XA switch structure; the file is produced with the installation
+	    procedure
+	</para></listitem>
+	<listitem><para>
+	    <varname>xa_open_info</varname>: parameters must be passed to
+	    the Resource Manager with xa_open() function call; the content
+	    of the string depends on the Resource Manager, see its
+	    documentation. The string max length is 255 characters
+	</para></listitem>
+	<listitem><para>
+	    <varname>xa_close_info</varname>: parameters must be passed to
+	    the Resource Manager with xa_close() function call; the content
+	    of the string depends on the Resource Manager, see its
+	    documentation. The string max length is 255 characters
+	</para></listitem>
+	<listitem><para>
+	    <varname>profile</varname>: every transactional profile must be
+	    used by the Application Programs needs to be listed here
+	</para></listitem>
+	<listitem><para>
+	    <varname>profile/name</varname>: the name associated to the
+	    transaction profile; this name is used in different places and
+	    it is suggested to avoid special characters, blanks and possibly
+	    mixed case (these hints may help you in troubleshooting)
+	</para></listitem>
+	<listitem><para>
+	    <varname>profile/trnmgr</varname>: manager will be used to store
+	    the transactional information associated to this profile; more
+	    than one manager can be specified but only the first one is
+	    used with current release software
+	</para></listitem>
+	<listitem><para>
+	    <varname>profile/rsrmgr</varname>: every Resource Manager must be
+	    used by the Application Programs associated to this transactional
+	    profile needs to be listed here. There is no a limit: you can
+	    specify 1, 2, 3, ... resource managers. Avoid useless resource
+	    manager because xa_open() and xa_close() will be performed 
+	    against all the listed resource managers. If you can choose 
+	    between a "dynamic" and a "static" version of the same resource
+	    manager, the "dynamic" one is more efficient	    
+	</para></listitem>
+      </itemizedlist>
+
     </para>
   </section>
 </chapter>

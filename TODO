@@ -1,7 +1,4 @@
-Restart from tx_b_5_7.at
-lixa_tx.c:444 
-
-
+Protect TX from TX_FAIL: if it happens, no function can be called after it
 
 Stability test with valgrind must be performed
 
