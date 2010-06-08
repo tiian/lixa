@@ -443,8 +443,12 @@ int lixa_tx_commit(int *txrc, int *begin_new)
             LIXA_TRACE(("lixa_tx_commit: go on with rollback...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc, TRUE)))
                 THROW(XA_ROLLBACK_ERROR);
-            LIXA_TRACE(("lixa_tx_commit: txrc=%d, prepare_txrc=%d\n",
-                        *txrc, prepare_txrc));
+            if (TX_FAIL == prepare_txrc) {
+                LIXA_TRACE(("lixa_tx_commit: txrc=%d, prepare_txrc=%d, "
+                            "returning TX_FAIL to Application Program\n",
+                            *txrc, prepare_txrc));
+                *txrc = TX_FAIL;
+            }
             switch (*txrc) {
                 case TX_OK:
                 case TX_ROLLBACK:
