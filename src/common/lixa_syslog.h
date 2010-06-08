@@ -81,6 +81,10 @@
     "returned XA_NOMIGRATE for xid '%s', but the Transaction Manager called " \
     "xa_end() without " \
     "TMSUSPEND/TMMIGRATE flag: there probably is a bug inside the RM code"
+#define LIXA_SYSLOG_LXC016W "LXC016W Resource Manager '%s' (rmid=%d) " \
+    "returned %d to xa_prepare() and %d to xa_rollback(): the Application " \
+    "Program called tx_commit() for this transaction ('%s') and this is " \
+    "an hazard condition"
 
 
 

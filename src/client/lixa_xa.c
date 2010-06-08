@@ -1042,6 +1042,9 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
             struct lixa_msg_body_prepare_8_xa_prepare_execs_s record;
             int tmp_txrc = TX_OK;
 
+            /* reset the value because some R.M. will not be xa_prepared */
+            csr->prepare_rc = XA_OK;
+            
             /* dynamic registered resource managers with unregistered state
                must be bypassed */
             if (csr->common.dynamic && csr->common.xa_s_state != XA_STATE_S2) {
@@ -1053,8 +1056,9 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
             
             record.rmid = i;
             record.flags = TMNOFLAGS;
-            record.rc = act_rsrmgr->xa_switch->xa_prepare_entry(
-                client_status_get_xid(cs), record.rmid, record.flags);
+            record.rc = csr->prepare_rc =
+                act_rsrmgr->xa_switch->xa_prepare_entry(
+                    client_status_get_xid(cs), record.rmid, record.flags);
             LIXA_TRACE(("lixa_xa_prepare: xa_prepare_entry(xid, %d, 0x%lx) = "
                         "%d\n", record.rmid, record.flags, record.rc));
 
@@ -1268,6 +1272,29 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                 LIXA_TRACE(("lixa_xa_rollback: xa_rollback_entry("
                             "xid, %d, 0x%lx) = %d\n", record.rmid,
                             record.flags, record.rc));
+            }
+
+            /* force a different return code if xa_prepare was a failure; see
+               TX (Transaction Demarcation) Specification page 68, note 3 */
+            if (tx_commit &&
+                XA_OK != record.rc && XA_HEURRB != record.rc &&
+                XAER_RMFAIL != record.rc &&
+                (XA_RBBASE > record.rc || XA_RBEND < record.rc) &&
+                (XAER_RMERR == csr->prepare_rc ||
+                 XAER_PROTO == csr->prepare_rc)) {
+                LIXA_TRACE(("lixa_xa_rollback: tx_commit=%d, record.rc=%d, "
+                            "csr->prepare_rc=%d, forcing XA_HEURHAZ for this "
+                            "rollback\n", tx_commit, record.rc,
+                            csr->prepare_rc));
+                ser_xid = xid_serialize(client_status_get_xid(cs));
+                syslog(LOG_WARNING, LIXA_SYSLOG_LXC016W,
+                       (char *)act_rsrmgr->generic->name, record.rmid,
+                       csr->prepare_rc, record.rc,
+                       NULL != ser_xid ? ser_xid : "");
+                if (NULL != ser_xid)
+                    free(ser_xid);
+                /* force the return code of xa_rollback() to a different one */
+                record.rc = XA_HEURHAZ;
             }
             
             if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(&ltr, record.rc)))
