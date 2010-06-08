@@ -19,7 +19,7 @@
       The <command>lixad</command> daemon process can be executed on any
       system: there is no need it is hosted in the same system is hosting
       the Application Programs. The communications between 
-      <command>lixac</command> is based on a TCP/IP socket.
+      <command>lixac</command> are based on a TCP/IP socket.
     </para>
     <para>
       The <command>lixac</command> library is embedded in the Application
@@ -30,7 +30,7 @@
     </para>
     <para>
       The communication between the Application Program and the Resource
-      Manager depends on Resource Manager configuration: it may be cross
+      Managers depends on Resource Managers configuration: it may be cross
       memory based, TCP/IP based, etc...
       The communication between the <command>lixac</command> library and the
       Resource Manager depends on Resource Manager configuration and must be
@@ -91,6 +91,12 @@
 	    <varname>port</varname>: the port must be used to listen for
 	    clients; it must be a free port (use command 
 	    <command>netstat</command> to find out one)
+	</para></listitem>
+	<listitem><para>
+	    <varname>manager</varname>: any configured 
+	    <emphasis>manager</emphasis> is a server worker and has its own
+	    associated thread. The number of manager should be activated 
+	    depends on the workload.
 	</para></listitem>
       </itemizedlist>
     </para>
