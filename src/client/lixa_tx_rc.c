@@ -215,6 +215,9 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                                 case XAER_RMERR:
                                     prev_tx_rc = TX_ROLLBACK;
                                     break;
+                                case XA_HEURHAZ:
+                                    prev_tx_rc = TX_HAZARD;
+                                    break;
                                 default:
                                     THROW(UNEXPECTED_XA_RC3);
                             } /* switch (prev_xa_rc) */
@@ -274,6 +277,9 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                                         prev_tx_rc = TX_FAIL;
                                     else
                                         prev_tx_rc = TX_MIXED;
+                                    break;
+                                case XA_HEURHAZ:
+                                    prev_tx_rc = TX_HAZARD;
                                     break;
                                 default:
                                     THROW(UNEXPECTED_XA_RC5);
@@ -365,6 +371,9 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                                         prev_tx_rc = TX_ROLLBACK;
                                     else
                                         prev_tx_rc = TX_OK;
+                                    break;
+                                case XA_HEURHAZ:
+                                    prev_tx_rc = TX_HAZARD;
                                     break;
                                 default:
                                     THROW(UNEXPECTED_XA_RC7);

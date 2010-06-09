@@ -1,4 +1,4 @@
-AC_INIT([lixa], [0.5.12], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [0.5.13], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 LT_INIT

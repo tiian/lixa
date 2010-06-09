@@ -290,8 +290,22 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
                     csr->common.xa_s_state = XA_STATE_S0;
-                    if (TMONEPHASE != record.flags)
+                    if (TMONEPHASE != record.flags) {
+                        ser_xid = xid_serialize(client_status_get_xid(cs));
+                        syslog(LOG_WARNING, LIXA_SYSLOG_LXC017W,
+                               (char *)act_rsrmgr->generic->name, record.rmid,
+                               record.rc, NULL != ser_xid ? ser_xid : "");
+                        LIXA_TRACE(("lixa_xa_commit: xa_commit returned "
+                                    "XA_RB* (%d) for rmid=%d,xid='%s' but "
+                                    "TMONEPHASE was not used\n",
+                                    record.rc, record.rmid,
+                                    NULL != ser_xid ? ser_xid : ""));
+                        if (NULL != ser_xid) {
+                            free(ser_xid);
+                            ser_xid = NULL;
+                        }
                         THROW(INVALID_XA_RC);
+                    }
                     break;                    
                 case XAER_ASYNC:
                     THROW(ASYNC_NOT_IMPLEMENTED);
