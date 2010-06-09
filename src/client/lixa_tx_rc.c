@@ -175,6 +175,9 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                                     /* case test TX/3.3.1/1.1 */
                                     prev_tx_rc = TX_HAZARD;
                                     break;
+                                case XAER_NOTA:
+                                    prev_tx_rc = TX_FAIL;
+                                    break;
                                 default:
                                     THROW(UNEXPECTED_XA_RC2);
                             } /* switch (prev_xa_rc) */

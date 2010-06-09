@@ -1,3 +1,9 @@
+Test case TX/B.5/8.6 shows an issue in lixa_tx_rc_add; a problem is related
+to XAER_NOTA with a different outcome from one resource manager and many
+resource managers. It might be a solution to rewrite the function and
+use a different approach calculating tx_rc from scratch at every insertion
+instead of using an incremental approach..... Thinking about it....
+
 Protect TX from TX_FAIL: if it happens, no function can be called after it
 
 Stability test with valgrind must be performed
