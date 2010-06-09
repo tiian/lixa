@@ -1,5 +1,8 @@
 LOG:
 
+         - 0.5.13 implemented test cases TX/B.5/8.*
+                  fixing bug # 3013661
+
 20100608 - 0.5.12 implemented test cases TX/B.5/0.*
                   implemented test cases TX/B.5/1.*
                   implemented test cases TX/B.5/2.*
