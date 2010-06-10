@@ -480,6 +480,7 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                 case XA_HEURCOM:
                 case XA_HEURRB:
                 case XA_HEURMIX:
+                case XA_RETRY:
                 case XA_OK:
                 case XA_RBROLLBACK:
                 case XA_RBCOMMFAIL:
@@ -541,17 +542,26 @@ int lixa_tx_rc_get(lixa_tx_rc_t *ltr)
     guint i, j;
     
     /* check the array is not empty */
-    ltr->tx_rc = TX_FAIL;
-    if (NULL == ltr || NULL == ltr->xa_rc || 0 == ltr->xa_rc->len) {
-        LIXA_TRACE(("lixa_tx_get_rc: the array is empty\n"));
-        return ltr->tx_rc;
+    if (NULL == ltr || NULL == ltr->xa_rc) {
+        LIXA_TRACE(("lixa_tx_get_rc: ltr is NULL, returning TX_FAIL\n"));
+        return TX_FAIL;
     }
 
+    /* no value, it's OK (all dynamic without activity) */
+    ltr->tx_rc = TX_OK;
+    if (0 == ltr->xa_rc->len) {
+        LIXA_TRACE(("lixa_tx_get_rc: the array is empty, ltr->tx_rc=%d\n",
+                    ltr->tx_rc));
+        return ltr->tx_rc;
+    }
+    
     /* check the first value */
     ltr->tx_rc = TX_OK;
     first = g_array_index(ltr->xa_rc, int, 0);
     switch (first) {
         case XA_OK:
+            if (!ltr->commit && ltr->tx_commit)
+                ltr->tx_rc = TX_ROLLBACK;
             break;
         case XA_HEURCOM:
             if (ltr->tx_commit)
