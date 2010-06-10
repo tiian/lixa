@@ -186,12 +186,10 @@ extern "C" {
 
     /**
      * Retrieve the currently computed value for tx_rc
-     * @param ltr IN reference to the object
+     * @param ltr IN/OUT reference to the object
      * @return a TX_* return code
      */
-    static inline int lixa_tx_rc_get(const lixa_tx_rc_t *ltr) {
-        return ltr->tx_rc;
-    }
+    int lixa_tx_rc_get(lixa_tx_rc_t *ltr);
 
 
     
