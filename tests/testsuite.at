@@ -6,8 +6,8 @@ AT_SETUP([check lixad process is NOT active...])
 AT_CHECK([ps -ef | grep lixad | grep -v grep], [1], [ignore], [ignore])
 AT_CLEANUP
 
-m4_include([tx.at])
 m4_include([bug.at])
+m4_include([tx.at])
 m4_include([generic.at])
 
 AT_BANNER([LIXA case test clean-up steps])
