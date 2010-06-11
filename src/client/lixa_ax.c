@@ -253,7 +253,7 @@ int ax_unreg(int rmid, long flags)
 
         msg.body.unreg_8.ax_unreg_exec.rmid = rmid;
         msg.body.unreg_8.ax_unreg_exec.flags = flags;
-        msg.body.unreg_8.ax_unreg_exec.rc = ret_cod;
+        msg.body.unreg_8.ax_unreg_exec.rc = xa_ret_cod;
         msg.body.unreg_8.ax_unreg_exec.td_state = XA_STATE_D0;
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(

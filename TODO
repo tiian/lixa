@@ -1,4 +1,9 @@
-TX/3.3/2.0 it seems the real return code of ax_unreg is not sent to the server
+client_recovery_analyze needs maintenance: it choose rollback in some 
+situations where commit has been yet performed. See test case  TX/B.5/8.1
+
+xa_forget must be moved inside xa_rollback/xa_commit or it must be re-arranged with a new message to the server.
+But a new message open a problem with the "finished" flag: if leaved at commit/rollback place, it will become unreliable; if moved to a new "forget" message, it will trasform the new message in mandatory.
+Test case TX/B.5/8.1 (any,XAER_RMFAIL) may be used to discover the behavior.
 
 Protect TX from TX_FAIL: if it happens, no function can be called after it
 

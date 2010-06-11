@@ -246,7 +246,7 @@ int client_recovery_analyze(const client_status_t *cs,
         *commit = FALSE;
         /* intention of the client (transaction manager) */
         if (rpl->body.qrcvr_16.client.state.will_commit) {
-            int all_prepared = TRUE;
+            int /* all_prepared = TRUE, */ any_prepared = FALSE;
             int only_one = TRUE;
             LIXA_TRACE(("client_recovery_analyze: the TX was committing\n"));
             *commit = TRUE;
@@ -259,12 +259,16 @@ int client_recovery_analyze(const client_status_t *cs,
                             "s_state=%d, td_state=%d\n",
                             rsrmgr->rmid, rsrmgr->r_state, rsrmgr->s_state,
                             rsrmgr->td_state));
+                /*
                 if (rsrmgr->s_state != XA_STATE_S3)
                     all_prepared = FALSE;
+                */
+                if (rsrmgr->s_state == XA_STATE_S3)
+                    any_prepared = TRUE;
             }
             if (rpl->body.qrcvr_16.rsrmgrs->len > 1)
                 only_one = FALSE;
-            *commit = all_prepared || only_one;
+            *commit = any_prepared || only_one;
         }
         /* check resource managers match */
         if (rpl->body.qrcvr_16.rsrmgrs->len !=
