@@ -1215,7 +1215,8 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
 
 int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
 {
-    enum Exception { TX_RC_ADD_ERROR
+    enum Exception { TX_RC_ADD_ERROR1
+                     , TX_RC_ADD_ERROR2
                      , ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
                      , XA_FORGET_ERROR
@@ -1268,9 +1269,13 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                 csr->common.xa_s_state != XA_STATE_S3 &&
                 csr->common.xa_s_state != XA_STATE_S4) {
                 LIXA_TRACE(("lixa_xa_rollback: resource manager # %i "
+                            "(xa_s_state=%d) "
                             "has not yet dynamically registered and/or "
                             "statically ended/prepared, skipping...\n",
-                            record.rmid));
+                            record.rmid, csr->common.xa_s_state));
+                if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(
+                                       &ltr, csr->prepare_rc)))
+                    THROW(TX_RC_ADD_ERROR1);
                 continue;
             }
             
@@ -1312,7 +1317,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             }
             
             if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(&ltr, record.rc)))
-                THROW(TX_RC_ADD_ERROR);
+                THROW(TX_RC_ADD_ERROR2);
             
             switch (record.rc) {
                 case XA_HEURHAZ:
@@ -1412,6 +1417,9 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case TX_RC_ADD_ERROR1:
+            case TX_RC_ADD_ERROR2:
+                break;
             case ASYNC_NOT_IMPLEMENTED:
                 ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
                 break;
