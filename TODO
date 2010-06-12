@@ -1,9 +1,18 @@
-client_recovery_analyze needs maintenance: it choose rollback in some 
-situations where commit has been yet performed. See test case  TX/B.5/8.1
-
 xa_forget must be moved inside xa_rollback/xa_commit or it must be re-arranged with a new message to the server.
 But a new message open a problem with the "finished" flag: if leaved at commit/rollback place, it will become unreliable; if moved to a new "forget" message, it will trasform the new message in mandatory.
 Test case TX/B.5/8.1 (any,XAER_RMFAIL) may be used to discover the behavior.
+
+A solution can be this one:
+- the commit set "finished"="1" only if there are no resource managers with
+  heuristically result
+- if any resource manager needs "xa_forget" a new message is forged with
+  the return code, the new states and the new value of "finished"; the new
+  message must be handled server side to store the information received from
+  the client
+- the additional message should not be overwhelming because heuristically
+  completion should be a rare event
+
+Go on with test cases TX B.5
 
 Protect TX from TX_FAIL: if it happens, no function can be called after it
 

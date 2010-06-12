@@ -1763,7 +1763,7 @@ xa_prepare/0
 xa_commit/6
 xa_forget/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
 # XA_HEURMIX XA_RETRY XA_OK 
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
