@@ -36,14 +36,20 @@ start_server() {
 
 stop_server() {
 	echo "Stopping LIXA server running with PID " $(cat $TESTS_VAR_DIR/run.pid)
-	kill $(cat $TESTS_VAR_DIR/run.pid)
+	PID="$(cat $TESTS_VAR_DIR/run.pid)"
+	kill $PID
+	while test $(ps -p $PID | grep lixad | wc -l) -gt 0
+	do
+		echo "Waiting server (PID=$PID) termination..."
+		sleep 1
+	done
 }
 
 exec_test() {
 	echo "Starting case test $1"
 	PGM=$1
 	shift
-	$PGM $*
+	nice $PGM $*
 	rc=$?
 	return $rc
 }
