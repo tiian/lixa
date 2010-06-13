@@ -420,6 +420,14 @@ struct payload_rsrmgr_s {
      */
     int                             ax_unreg_rc;
     /**
+     * flags value as passed to xa_forget
+     */
+    long                            xa_forget_flags;
+    /**
+     * rc value as returned from xa_forget
+     */
+    int                             xa_forget_rc;
+    /**
      * return code of the recovery phase
      * meaningless if recovery phase did not happen
      */

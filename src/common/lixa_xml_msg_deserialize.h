@@ -128,6 +128,17 @@ extern "C" {
 
     /**
      * Deserialize an XML subtree containing details pertaining to
+     * a message with verb=forget, step=8
+     * @param cur IN pointer to XML subtree
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int lixa_msg_deserialize_forget_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+
+
+
+    /**
+     * Deserialize an XML subtree containing details pertaining to
      * a message with verb=open, step=8
      * @param cur IN pointer to XML subtree
      * @param msg OUT the object after deserialization

@@ -60,6 +60,7 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
                      , TRACE_QRCVR_ERROR
                      , TRACE_REG_ERROR
                      , TRACE_UNREG_ERROR
+                     , TRACE_FORGET_ERROR
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -111,6 +112,10 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
                 if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_unreg(msg)))
                     THROW(TRACE_UNREG_ERROR);
                 break;
+            case LIXA_MSG_VERB_FORGET: /* forget */
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_forget(msg)))
+                    THROW(TRACE_FORGET_ERROR);
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -128,6 +133,7 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
             case TRACE_QRCVR_ERROR:
             case TRACE_REG_ERROR:
             case TRACE_UNREG_ERROR:
+            case TRACE_FORGET_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
@@ -318,6 +324,67 @@ int lixa_msg_trace_end(const struct lixa_msg_s *msg)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_trace_end/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_msg_trace_forget(const struct lixa_msg_s *msg)
+{
+    enum Exception { INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_trace_forget\n"));
+    TRY {
+        guint i;
+        
+        switch (msg->header.pvs.step) {
+            case 8:
+                if (NULL != msg->body.forget_8.xa_forget_execs) {
+                    LIXA_TRACE(("lixa_msg_trace_forget: body["
+                                "conthr[finished=%d]]\n",
+                                msg->body.forget_8.conthr.finished));
+                    for (i=0; i<msg->body.forget_8.xa_forget_execs->len;
+                         ++i) {
+                        struct lixa_msg_body_forget_8_xa_forget_execs_s
+                            *xa_forget_exec =
+                            &g_array_index(
+                                msg->body.forget_8.xa_forget_execs,
+                                struct
+                                lixa_msg_body_forget_8_xa_forget_execs_s,
+                                i);
+                        LIXA_TRACE(("lixa_msg_trace_forget: body["
+                                    "xa_forget_execs["
+                                    "xa_forget_exec["
+                                    "rmid=%d,flags=0x%lx,"
+                                    "rc=%d,s_state=%d]]]\n",
+                                    xa_forget_exec->rmid,
+                                    xa_forget_exec->flags,
+                                    xa_forget_exec->rc,
+                                    xa_forget_exec->s_state));
+                    }
+                }
+                break;
+            default:
+                THROW(INVALID_STEP);
+        } /* switch (msg->header.pvs.step) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_trace_forget/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

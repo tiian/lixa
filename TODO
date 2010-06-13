@@ -1,3 +1,5 @@
+Implemented xa_forget message, only client side must be updated now (all the scaffholding is in place)
+
 xa_forget must be moved inside xa_rollback/xa_commit or it must be re-arranged with a new message to the server.
 But a new message open a problem with the "finished" flag: if leaved at commit/rollback place, it will become unreliable; if moved to a new "forget" message, it will trasform the new message in mandatory.
 Test case TX/B.5/8.1 (any,XAER_RMFAIL) may be used to discover the behavior.

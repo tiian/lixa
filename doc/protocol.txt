@@ -208,6 +208,9 @@ verb=6,step=8 -->			send xa_commit result
 					gives server information the
 					transaction finished
 
+Note: if there are heuristically completed tasks, finished="0" and another
+      message (verb=11, xa_forget) follows
+
 ***************************************************************************
 
 verb=7 (xa_rollback)
@@ -229,6 +232,9 @@ client 			 server		description
 verb=7,step=8 -->			send xa_rollback result
 					gives server information the
 					transaction finished
+
+Note: if there are heuristically completed tasks, finished="0" and another
+      message (verb=11, xa_forget) follows
 
 ***************************************************************************
 
@@ -303,3 +309,28 @@ verb=9,step=8 -->			register the new status
 client			server		description
 verb=10,step=8 -->			register the new status
 					(ax_unreg result)
+
+***************************************************************************
+
+verb=11 (xa_forget)
+
+  level: message level, version
+  verb:  xa_forget -> 6
+  step:  8
+
+  client->server message (send the xa_forget result)
+  <msg level="1" verb="11" step="8">
+    <conthr finished="1"/>
+    <xa_forget_execs>
+      <xa_forget_exec rmid="0" flags="0x0" rc="0" s_state="30"/>
+      <xa_forget_exec rmid="1" flags="0x0" rc="0" s_state="30"/>
+    </xa_forget_execs>
+  </msg>
+
+client 			 server		description
+verb=11,step=8 -->			send xa_forget result
+					gives server information the
+					transaction finished
+
+***************************************************************************
+
