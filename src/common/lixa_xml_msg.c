@@ -86,10 +86,12 @@ const xmlChar *LIXA_XML_MSG_TAG_RECOVERY =         (xmlChar *)"recovery";
 const xmlChar *LIXA_XML_MSG_TAG_RSRMGR =           (xmlChar *)"rsrmgr";
 const xmlChar *LIXA_XML_MSG_TAG_RSRMGRS =          (xmlChar *)"rsrmgrs";
 const xmlChar *LIXA_XML_MSG_TAG_STATE =            (xmlChar *)"state";
-const xmlChar *LIXA_XML_MSG_TAG_XA_END_EXEC =      (xmlChar *)"xa_end_exec";
-const xmlChar *LIXA_XML_MSG_TAG_XA_END_EXECS =     (xmlChar *)"xa_end_execs";
 const xmlChar *LIXA_XML_MSG_TAG_XA_COMMIT_EXEC =   (xmlChar *)"xa_commit_exec";
 const xmlChar *LIXA_XML_MSG_TAG_XA_COMMIT_EXECS =  (xmlChar *)"xa_commit_execs";
+const xmlChar *LIXA_XML_MSG_TAG_XA_END_EXEC =      (xmlChar *)"xa_end_exec";
+const xmlChar *LIXA_XML_MSG_TAG_XA_END_EXECS =     (xmlChar *)"xa_end_execs";
+const xmlChar *LIXA_XML_MSG_TAG_XA_FORGET_EXEC =   (xmlChar *)"xa_forget_exec";
+const xmlChar *LIXA_XML_MSG_TAG_XA_FORGET_EXECS =  (xmlChar *)"xa_forget_execs";
 const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXEC =     (xmlChar *)"xa_open_exec";
 const xmlChar *LIXA_XML_MSG_TAG_XA_OPEN_EXECS =    (xmlChar *)"xa_open_execs";
 const xmlChar *LIXA_XML_MSG_TAG_XA_PREPARE_EXEC =  (xmlChar *)"xa_prepare_exec";
@@ -200,6 +202,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                      , INVALID_STEP7
                      , INVALID_STEP8
                      , INVALID_STEP9
+                     , INVALID_STEP10
+                     , INVALID_STEP11
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -388,6 +392,27 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                         THROW(INVALID_STEP9);
                 }
                 break;
+            case LIXA_MSG_VERB_UNREG: /* unreg */
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        break;
+                    default:
+                        THROW(INVALID_STEP10);
+                }
+                break;
+            case LIXA_MSG_VERB_FORGET: /* forget */
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        if (NULL != msg->body.forget_8.xa_forget_execs) {
+                            g_array_free(msg->body.forget_8.xa_forget_execs,
+                                         TRUE);
+                            msg->body.forget_8.xa_forget_execs = NULL;
+                        }
+                        break;
+                    default:
+                        THROW(INVALID_STEP11);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -404,6 +429,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case INVALID_STEP7:
             case INVALID_STEP8:
             case INVALID_STEP9:
+            case INVALID_STEP10:
+            case INVALID_STEP11:
             case INVALID_VERB:
                 LIXA_TRACE(("lixa_msg_free: verb=%d, step=%d\n",
                             msg->header.pvs.verb, msg->header.pvs.step));

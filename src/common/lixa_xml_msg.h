@@ -121,6 +121,10 @@
  * Id assigned to verb "unreg"
  */
 #define LIXA_MSG_VERB_UNREG    10
+/**
+ * Id assigned to verb "forget"
+ */
+#define LIXA_MSG_VERB_FORGET   11
 
 /**
  * Default increment for message step
@@ -289,6 +293,14 @@ extern const xmlChar *LIXA_XML_MSG_TAG_XA_END_EXEC;
  * Label used to specify "xa_end_execs" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_XA_END_EXECS;
+/**
+ * Label used to specify "xa_forget_exec" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_XA_FORGET_EXEC;
+/**
+ * Label used to specify "xa_forget_execs" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_XA_FORGET_EXECS;
 /**
  * Label used to specify "xa_open_exec" tag
  */
@@ -1076,6 +1088,61 @@ struct lixa_msg_body_unreg_8_s {
 
 
 /**
+ * Control thread status
+ */
+struct lixa_msg_body_forget_8_conthr_s {
+    /**
+     * TRUE = yes
+     * FALSE = no
+     */
+    int   finished;
+};
+
+
+
+/**
+ * Convenience struct for @ref lixa_msg_body_forget_8_s
+ * xid is not stored in this structure because it was already stored by the
+ * server after receiving step 8 message, see @ref lixa_msg_body_forget_8_s
+ */
+struct lixa_msg_body_forget_8_xa_forget_execs_s {
+    /**
+     * rmid parameter as passed to xa_forget routine
+     */
+    int             rmid;
+    /**
+     * flags parameter as passed to xa_forget routine
+     */
+    long            flags;
+    /**
+     * return code of xa_forget routine
+     */
+    int             rc;
+    /**
+     * the new transaction branch state after xa_forget execution
+     */
+    int             s_state;
+};
+
+
+
+/**
+ * Message body for verb "forget", step "8"
+ */
+struct lixa_msg_body_forget_8_s {
+    /**
+     * Control thread information
+     */
+    struct lixa_msg_body_forget_8_conthr_s    conthr;
+    /**
+     * Parameters and return value of xa_forget executions
+     */
+    GArray                                   *xa_forget_execs;
+};
+
+
+
+/**
  * This structure maps the messages flowing between LIXA client (lixac) and
  * LIXA server (lixad). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
@@ -1109,6 +1176,7 @@ struct lixa_msg_s {
         struct lixa_msg_body_qrcvr_24_s        qrcvr_24;
         struct lixa_msg_body_reg_8_s           reg_8;
         struct lixa_msg_body_unreg_8_s         unreg_8;
+        struct lixa_msg_body_forget_8_s        forget_8;
     } body;
 };
 

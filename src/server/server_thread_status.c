@@ -382,6 +382,9 @@ int thread_status_dump_rsrmgr(const struct payload_rsrmgr_s *rm)
         printf("\tRsrmgr/xa_rollback_flags: 0x%lx\n"
                "\tRsrmgr/xa_rollback_rc: %d\n",
                rm->xa_rollback_flags, rm->xa_rollback_rc);
+        printf("\tRsrmgr/xa_forget_flags: 0x%lx\n"
+               "\tRsrmgr/xa_forget_rc: %d\n",
+               rm->xa_forget_flags, rm->xa_forget_rc);
         printf("\tRsrmgr/ax_reg_flags: 0x%lx\n"
                "\tRsrmgr/ax_reg_rc: %d\n",
                rm->ax_reg_flags, rm->ax_reg_rc);
