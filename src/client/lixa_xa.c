@@ -184,7 +184,6 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                      , INVALID_XA_RC
                      , ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
-                     , XA_FORGET_ERROR
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
                      , NONE } excp;
@@ -210,6 +209,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
         msg.header.pvs.verb = LIXA_MSG_VERB_COMMIT;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
+        msg.body.commit_8.conthr.finished = TRUE;
         msg.body.commit_8.xa_commit_execs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_commit_8_xa_commit_execs_s),
@@ -277,6 +277,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 case XA_HEURRB:
                 case XA_HEURMIX:
                     csr->common.xa_s_state = XA_STATE_S5;
+                    msg.body.commit_8.conthr.finished = FALSE;
                     break;
                 case XA_OK:
                     csr->common.xa_s_state = XA_STATE_S0;
@@ -350,17 +351,11 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
             case TX_COMMITTED:
             case TX_MIXED:
             case TX_HAZARD:
-                msg.body.commit_8.conthr.finished = TRUE;
                 break;
             default:
                 msg.body.commit_8.conthr.finished = FALSE;
         }
 
-        /* clean Heurstically Completed states... */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(
-                               cs, &msg.body.commit_8.conthr.finished)))
-            THROW(XA_FORGET_ERROR);
-        
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
@@ -390,7 +385,6 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
             case UNEXPECTED_XA_RC:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
-            case XA_FORGET_ERROR:
             case MSG_SERIALIZE_ERROR:
                 break;
             case SEND_ERROR:
@@ -657,43 +651,62 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
 
 
 
-int lixa_xa_forget(client_status_t *cs, int *finished)
+int lixa_xa_forget(client_status_t *cs)
 {
     enum Exception { ASYNC_NOT_IMPLEMENTED
                      , INTERNAL_ERROR
+                     , MSG_SERIALIZE_ERROR
+                     , SEND_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_xa_forget\n"));
     TRY {
+        struct lixa_msg_s msg;
+        size_t buffer_size = 0;
+        int fd;
         guint i;
+        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        char *ser_xid;
 
+        /* retrieve the socket */
+        fd = client_status_get_sockfd(cs);
+
+        /* build the message */
+        msg.header.level = LIXA_MSG_LEVEL;
+        msg.header.pvs.verb = LIXA_MSG_VERB_FORGET;
+        msg.header.pvs.step = LIXA_MSG_STEP_INCR;
+
+        msg.body.forget_8.conthr.finished = TRUE;
+        msg.body.forget_8.xa_forget_execs = g_array_sized_new(
+            FALSE, FALSE,
+            sizeof(struct lixa_msg_body_forget_8_xa_forget_execs_s),
+            global_ccc.actconf.rsrmgrs->len);
+        
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
             struct client_status_rsrmgr_s *csr = &g_array_index(
                 cs->rmstatus, struct client_status_rsrmgr_s, i);
+            struct lixa_msg_body_forget_8_xa_forget_execs_s record;
+            record.rmid = i;
             if (XA_STATE_S5 == csr->common.xa_s_state) {
-                int rc;
-                int rmid = i;
-                XID *xid = client_status_get_xid(cs);
-                long flags = TMNOFLAGS;
-                char *ser_xid = xid_serialize(xid);
-                                
                 LIXA_TRACE(("lixa_xa_forget: resource manager # %d is in "
                             "'Heustically Completed' state, calling "
-                            "xa_forget()...\n", rmid));
-                rc = act_rsrmgr->xa_switch->xa_forget_entry(
-                    xid, rmid, flags);
+                            "xa_forget()...\n", record.rmid));
+                record.flags = TMNOFLAGS;
+                record.rc = act_rsrmgr->xa_switch->xa_forget_entry(
+                    client_status_get_xid(cs), record.rmid, record.flags);
+                ser_xid = xid_serialize(client_status_get_xid(cs));
                 LIXA_TRACE(("lixa_xa_forget: xa_forget_entry('%s', %d, 0x%lx) "
                             "= %d\n",
                             NULL != ser_xid ? ser_xid : "",
-                            rmid, flags, rc));
+                            record.rmid, record.flags, record.rc));
                 if (NULL != ser_xid) {
                     free(ser_xid);
                     ser_xid = NULL;
                 }
-                switch (rc) {
+                switch (record.rc) {
                     case XA_OK:
                         csr->common.xa_s_state = XA_STATE_S0;
                         break;
@@ -702,22 +715,45 @@ int lixa_xa_forget(client_status_t *cs, int *finished)
                         break;
                     case XAER_RMERR:
                     case XAER_RMFAIL:
-                        *finished = FALSE;
+                        msg.body.forget_8.conthr.finished = FALSE;
                         LIXA_TRACE(("lixa_xa_forget: resource manager # %d "
-                                    "is not able to forget this xid\n", rmid));
+                                    "is not able to forget this xid\n",
+                                    record.rmid));
                         break;
                     case XAER_NOTA:
                         csr->common.xa_s_state = XA_STATE_S0;
                         LIXA_TRACE(("lixa_xa_forget: resource manager # %d "
                                     "does not recognize as 'Heuristically "
-                                    "Completed' the transaction...\n", rmid));
+                                    "Completed' the transaction...\n",
+                                    record.rmid));
                         break;
                     case XAER_INVAL:
                     case XAER_PROTO:
                     default:
                         THROW(INTERNAL_ERROR);
                 }
-            }
+            record.s_state = csr->common.xa_s_state;
+            g_array_append_val(msg.body.forget_8.xa_forget_execs, record);
+            } /* if (XA_STATE_S5 == csr->common.xa_s_state) */
+        } /* for i */
+
+        /* send the message only if there are records to send */
+        if (0 < msg.body.forget_8.xa_forget_execs->len) {
+            if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
+                                   &msg, buffer, sizeof(buffer),
+                                   &buffer_size)))
+                THROW(MSG_SERIALIZE_ERROR);
+
+            /* this object contains references to external stuff and
+               cannot be freed using standard lixa_msg_free; we are freeing the
+               array to avoid memory leaks */
+            g_array_free(msg.body.forget_8.xa_forget_execs, TRUE);
+            memset(&msg, 0, sizeof(msg));
+        
+            LIXA_TRACE(("lixa_xa_forget: sending " SIZE_T_FORMAT
+                        " bytes to the server for step 8\n", buffer_size));
+            if (buffer_size != send(fd, buffer, buffer_size, 0))
+                THROW(SEND_ERROR);
         }
         
         THROW(NONE);
@@ -728,6 +764,11 @@ int lixa_xa_forget(client_status_t *cs, int *finished)
                 break;
             case INTERNAL_ERROR:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case MSG_SERIALIZE_ERROR:
+                break;
+            case SEND_ERROR:
+                ret_cod = LIXA_RC_SEND_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1219,7 +1260,6 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                      , TX_RC_ADD_ERROR2
                      , ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
-                     , XA_FORGET_ERROR
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
                      , NONE } excp;
@@ -1245,6 +1285,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
         msg.header.pvs.verb = LIXA_MSG_VERB_ROLLBACK;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
+        msg.body.rollback_8.conthr.finished = TRUE;
         msg.body.rollback_8.xa_rollback_execs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_rollback_8_xa_rollback_execs_s),
@@ -1321,16 +1362,11 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             
             switch (record.rc) {
                 case XA_HEURHAZ:
-                    csr->common.xa_s_state = XA_STATE_S5;
-                    break;
                 case XA_HEURCOM:
-                    csr->common.xa_s_state = XA_STATE_S5;
-                    break;
                 case XA_HEURRB:
-                    csr->common.xa_s_state = XA_STATE_S5;
-                    break;
                 case XA_HEURMIX:
                     csr->common.xa_s_state = XA_STATE_S5;
+                    msg.body.rollback_8.conthr.finished = FALSE;
                     break;
                 case XA_OK:
                     csr->common.xa_s_state = XA_STATE_S0;
@@ -1388,16 +1424,10 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             case TX_COMMITTED:
             case TX_MIXED:
             case TX_HAZARD:
-                msg.body.commit_8.conthr.finished = TRUE;
                 break;
             default:
-                msg.body.commit_8.conthr.finished = FALSE;
+                msg.body.rollback_8.conthr.finished = FALSE;
         }
-        
-        /* clean Heurstically Completed states... */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(
-                               cs, &msg.body.commit_8.conthr.finished)))
-            THROW(XA_FORGET_ERROR);
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
@@ -1426,7 +1456,6 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             case UNEXPECTED_XA_RC:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
-            case XA_FORGET_ERROR:
             case MSG_SERIALIZE_ERROR:
                 break;
             case SEND_ERROR:

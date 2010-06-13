@@ -342,10 +342,11 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                      , INVALID_STATE1
                      , INVALID_STATE2
                      , INVALID_TXRC1
+                     , XA_ROLLBACK_ERROR
                      , INVALID_STATE3
                      , INVALID_STATE4
                      , INVALID_TXRC2
-                     , XA_ROLLBACK_ERROR
+                     , XA_FORGET_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -436,6 +437,9 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                         next_txstate = TX_STATE_S2;
                     else THROW(INVALID_STATE2);
                     break;
+                case TX_FAIL:
+                    next_txstate = txstate;
+                    break;
                 default:
                     THROW(INVALID_TXRC1);
             } /* switch */
@@ -469,11 +473,18 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                         next_txstate = TX_STATE_S2;
                     else THROW(INVALID_STATE4);
                     break;
+                case TX_FAIL:
+                    next_txstate = txstate;
+                    break;
                 default:
                     THROW(INVALID_TXRC2);
             } /* switch */
         } /* else */
 
+        /* clean Heurstically Completed states... */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs)))
+            THROW(XA_FORGET_ERROR);
+        
         /* update the TX state, now TX_STATE_S0 */
         client_status_set_txstate(cs, next_txstate);
         /* reset the transaction id */
@@ -511,7 +522,8 @@ int lixa_tx_commit(int *txrc, int *begin_new)
             case INVALID_TXRC2:
                 *txrc = TX_FAIL;
                 ret_cod = LIXA_RC_INVALID_STATUS;
-                break;                
+                break;
+            case XA_FORGET_ERROR:
             case XA_ROLLBACK_ERROR:
                 *txrc = TX_FAIL;
                 break;
@@ -748,6 +760,7 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
                      , INVALID_STATE1
                      , INVALID_STATE2
                      , INVALID_TXRC
+                     , XA_FORGET_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -816,6 +829,10 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
                 THROW(INVALID_TXRC);
         } /* switch */
         
+        /* clean Heurstically Completed states... */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs)))
+            THROW(XA_FORGET_ERROR);
+        
         /* update the TX state, now TX_STATE_S0 */
         client_status_set_txstate(cs, next_txstate);
         /* reset the transaction id */
@@ -850,6 +867,7 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;                
             case XA_ROLLBACK_ERROR:
+            case XA_FORGET_ERROR:
                 *txrc = TX_FAIL;
                 break;
             case NONE:
