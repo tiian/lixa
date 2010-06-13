@@ -929,7 +929,7 @@ int lixa_monkeyrm_forget(XID *xid, int rmid, long flags)
         /* unlock mutex */
         g_static_mutex_unlock(&monkey_mutex);
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_monkeyrm_commit/excp=%d/"
+    LIXA_TRACE(("lixa_monkeyrm_forget/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
                 excp, ret_cod, xa_rc, errno));
     assert(LIXA_RC_OK == ret_cod);
