@@ -1,6 +1,6 @@
 AT_BANNER([TX: B.5 ... Multiple RMs (xa_commit)])
 
-AT_SETUP([TX/B.5/8.8 (XA_HEURMIX,any)])
+AT_SETUP([TX/B.5/8.12 (XA_RETRY,any)])
 # XA_HEURHAZ XA_HEURCOM XA_HEURRB
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -10,8 +10,8 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/5
-xa_forget/0
+xa_commit/4
+xa_commit/4
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
@@ -49,18 +49,15 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start cas
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/4
+xa_commit/4
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/-4
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -70,8 +67,6 @@ xa_forget/0
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/-4
 xa_end/0
 xa_prepare/0
 xa_commit/4
@@ -80,29 +75,24 @@ xa_commit/4
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/-4
 xa_end/0
 xa_prepare/0
 xa_commit/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
 # XA_RBROLLBACK XA_RBCOMMFAIL XA_RBDEADLOCK
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/4
+xa_commit/4
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/-4
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -111,8 +101,6 @@ xa_commit/100
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/0
 xa_end/0
 xa_prepare/0
 xa_commit/101
@@ -120,8 +108,6 @@ xa_commit/101
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/-4
 xa_end/0
 xa_prepare/0
 xa_commit/102
@@ -136,7 +122,8 @@ xa_commit/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/4
+xa_commit/4
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
@@ -176,7 +163,8 @@ xa_commit/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/4
+xa_commit/4
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
@@ -216,7 +204,8 @@ xa_commit/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/4
+xa_commit/4
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
@@ -247,7 +236,7 @@ xa_prepare/0
 xa_commit/-5
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
-# XAER_PROTO
+# XAER_PROTO 
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -256,7 +245,8 @@ xa_commit/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/4
+xa_commit/4
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
@@ -287,15 +277,54 @@ xa_prepare/0
 xa_commit/-6
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
-AT_CLEANUP
-
-AT_SETUP([TX/B.5/8.9 (any,XAER_RMFAIL)])
-# XA_HEURHAZ XA_HEURCOM XA_HEURRB
+# XA_OK
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
 # this commit is related to previous (recovery pending) transaction
 xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/4
+xa_commit/4
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -6], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/8.13 (any,XA_RETRY)])
+# XA_HEURHAZ XA_HEURCOM XA_HEURRB
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -305,8 +334,6 @@ xa_forget/0
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/-4
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -316,8 +343,6 @@ xa_forget/0
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/-4
 xa_end/0
 xa_prepare/0
 xa_commit/6
@@ -326,19 +351,16 @@ xa_forget/0
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/8
+xa_forget/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
 # XA_HEURMIX XA_RETRY XA_OK 
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/-4
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -348,8 +370,6 @@ xa_forget/0
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/-4
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -359,8 +379,6 @@ xa_commit/4
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/-4
 xa_end/0
 xa_prepare/0
 xa_commit/0
@@ -368,19 +386,16 @@ xa_commit/0
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/8
+xa_forget/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
 # XA_RBROLLBACK XA_RBCOMMFAIL XA_RBDEADLOCK
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/-4
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -389,8 +404,6 @@ xa_commit/100
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/0
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -399,8 +412,6 @@ xa_commit/101
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/-4
 xa_end/0
 xa_prepare/0
 xa_commit/102
@@ -408,11 +419,10 @@ xa_commit/102
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this commit is related to previous (recovery pending) transaction
-xa_commit/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/8
+xa_forget/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
 # XA_RBINTEGRITY XA_RBOTHER XA_RBPROTO
@@ -452,7 +462,8 @@ xa_open/0
 xa_commit/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/8
+xa_forget/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
 # XA_RBTIMEOUT XA_RBTRANSIENT XAER_ASYNC
@@ -492,7 +503,8 @@ xa_open/0
 xa_commit/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/8
+xa_forget/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
 # XAER_RMERR XAER_NOTA XAER_INVAL
@@ -532,7 +544,8 @@ xa_open/0
 xa_commit/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/8
+xa_forget/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
 # XAER_PROTO
@@ -572,9 +585,51 @@ xa_open/0
 xa_commit/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_commit/8
+xa_forget/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_OK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0024 1 3 -6], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TX/B.5/8.0 (XAER_RMFAIL,any)])
@@ -775,7 +830,7 @@ xa_prepare/0
 xa_commit/-2
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
-# XAER_RMERR XAER_NOTA XAER_INVAL
+# XAER_PROTO XAER_NOTA XAER_INVAL
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -794,7 +849,7 @@ xa_commit/-4
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-3
+xa_commit/-6
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
@@ -815,7 +870,7 @@ xa_prepare/0
 xa_commit/-5
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
-# XAER_PROTO
+# XAER_RMERR 
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -852,7 +907,7 @@ xa_open/0
 xa_commit/0
 xa_end/0
 xa_prepare/0
-xa_commit/-6
+xa_commit/-3
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -2871,5 +2926,1193 @@ xa_prepare/0
 xa_commit/-4
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/8.8 (XA_HEURMIX,any)])
+# XA_HEURHAZ XA_HEURCOM XA_HEURRB
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/7
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/6
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_HEURMIX XA_RETRY XA_OK 
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/4
+xa_commit/4
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_RBROLLBACK XA_RBCOMMFAIL XA_RBDEADLOCK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/100
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/101
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/102
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBINTEGRITY XA_RBOTHER XA_RBPROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/103
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/104
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/105
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBTIMEOUT XA_RBTRANSIENT XAER_ASYNC
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/106
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/107
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/-2
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_RMERR XAER_NOTA XAER_INVAL
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/-3
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/-4
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/-5
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/-6
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/8.9 (any,XA_HEURMIX)])
+# XA_HEURHAZ XA_HEURCOM XA_HEURRB
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/7
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/6
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_HEURMIX XA_RETRY XA_OK 
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/4
+xa_commit/4
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_RBROLLBACK XA_RBCOMMFAIL XA_RBDEADLOCK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/100
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/101
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/102
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBINTEGRITY XA_RBOTHER XA_RBPROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/103
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/104
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/105
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBTIMEOUT XA_RBTRANSIENT XAER_ASYNC
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/106
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/107
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/-2
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_RMERR XAER_NOTA XAER_INVAL
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/-3
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/-4
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/-5
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/-6
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/8.10 (XA_HEURHAZ,any)])
+# XA_HEURHAZ XA_HEURCOM XA_HEURRB
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/7
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/6
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_HEURMIX XA_RETRY XA_OK 
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/4
+xa_commit/4
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_RBROLLBACK XA_RBCOMMFAIL XA_RBDEADLOCK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/100
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/101
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/102
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBINTEGRITY XA_RBOTHER XA_RBPROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/103
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/104
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/105
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBTIMEOUT XA_RBTRANSIENT XAER_ASYNC
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/106
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/107
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/-2
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_RMERR XAER_NOTA XAER_INVAL
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/-3
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/-4
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/-5
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_PROTO 
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/-6
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_OK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -4], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/8.11 (any,XA_HEURHAZ)])
+# XA_HEURHAZ XA_HEURCOM XA_HEURRB
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/7
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/6
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_HEURMIX XA_RETRY XA_OK 
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/4
+xa_commit/4
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_RBROLLBACK XA_RBCOMMFAIL XA_RBDEADLOCK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/100
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/101
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/102
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBINTEGRITY XA_RBOTHER XA_RBPROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/103
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/104
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/105
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBTIMEOUT XA_RBTRANSIENT XAER_ASYNC
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/106
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/107
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_end/0
+xa_prepare/0
+xa_commit/-2
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_RMERR XAER_NOTA XAER_INVAL
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/-3
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/-4
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/-5
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/-6
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_OK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit is related to previous (recovery pending) transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0024 1 3 -4], [0], [ignore], [ignore])
 AT_CLEANUP
 
