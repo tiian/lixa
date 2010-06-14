@@ -651,7 +651,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
 
 
 
-int lixa_xa_forget(client_status_t *cs)
+int lixa_xa_forget(client_status_t *cs, int finished)
 {
     enum Exception { ASYNC_NOT_IMPLEMENTED
                      , INTERNAL_ERROR
@@ -677,7 +677,7 @@ int lixa_xa_forget(client_status_t *cs)
         msg.header.pvs.verb = LIXA_MSG_VERB_FORGET;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
-        msg.body.forget_8.conthr.finished = TRUE;
+        msg.body.forget_8.conthr.finished = finished;
         msg.body.forget_8.xa_forget_execs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_forget_8_xa_forget_execs_s),

@@ -221,6 +221,11 @@ int server_recovery_24(struct thread_status_s *ts,
             struct payload_header_s *ph = &(
                 ts->curr_status[recoverying_block_id].sr.data.pld.ph);
             int i;
+            
+            LIXA_TRACE(("server_recovery_24: client did not complete the "
+                        "recovery phase successfully; keeping block # "
+                        UINT32_T_FORMAT
+                        " and its chain\n", recoverying_block_id));
             ph->recovery_failed = TRUE;
             ph->recovery_commit = lmi->body.qrcvr_24.recovery.commit;
             status_record_update(ts->curr_status + recoverying_block_id,

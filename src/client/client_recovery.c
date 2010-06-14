@@ -431,6 +431,10 @@ int client_recovery_rollback(const client_status_t *cs,
                     syslog(LOG_NOTICE, LIXA_SYSLOG_LXC007N,
                            act_rsrmgr->xa_switch->name, rc, ser_xid);
                     break;
+                case XAER_NOTA:
+                    syslog(LOG_INFO, LIXA_SYSLOG_LXC018I,
+                           act_rsrmgr->generic->name, ser_xid);
+                    break;
                 default:
                     syslog(LOG_CRIT, LIXA_SYSLOG_LXC004C,
                            act_rsrmgr->xa_switch->name, rc, ser_xid);
