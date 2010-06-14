@@ -1,6 +1,3 @@
-Investigate xa_forget message...
-Test case TX/B.5/8.1 (any,XAER_RMFAIL) may be used to discover the behavior.
-
 Go on with test cases TX B.5
 
 Protect TX from TX_FAIL: if it happens, no function can be called after it

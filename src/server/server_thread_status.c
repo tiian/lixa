@@ -778,6 +778,7 @@ int thread_status_check_recovery_pending(
             case LIXA_MSG_VERB_PREPARE:
             case LIXA_MSG_VERB_COMMIT:
             case LIXA_MSG_VERB_ROLLBACK:
+            case LIXA_MSG_VERB_FORGET:
                 break;
             case LIXA_MSG_VERB_REG:
                 /* check TX state */

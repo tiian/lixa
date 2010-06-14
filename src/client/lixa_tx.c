@@ -356,7 +356,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
     LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_commit\n"));
     TRY {
-        int txstate, next_txstate, commit = TRUE;
+        int txstate, next_txstate, commit = TRUE, finished = TRUE;
         client_status_t *cs;
         int one_phase_commit = FALSE, prepare_txrc;
 
@@ -439,6 +439,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                     break;
                 case TX_FAIL:
                     next_txstate = txstate;
+                    finished = FALSE;
                     break;
                 default:
                     THROW(INVALID_TXRC1);
@@ -475,6 +476,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                     break;
                 case TX_FAIL:
                     next_txstate = txstate;
+                    finished = FALSE;
                     break;
                 default:
                     THROW(INVALID_TXRC2);
@@ -482,7 +484,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         } /* else */
 
         /* clean Heurstically Completed states... */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs)))
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs, finished)))
             THROW(XA_FORGET_ERROR);
         
         /* update the TX state, now TX_STATE_S0 */
@@ -770,7 +772,7 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
     LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_rollback\n"));
     TRY {
-        int txstate, next_txstate;
+        int txstate, next_txstate, finished = TRUE;
         client_status_t *cs;
         
         /* retrieve a reference to the thread status */
@@ -825,12 +827,16 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
                     next_txstate = TX_STATE_S2;
                 else THROW(INVALID_STATE2);
                 break;
+            case TX_FAIL:
+                next_txstate = txstate;
+                finished = FALSE;
+                break;
             default:
                 THROW(INVALID_TXRC);
         } /* switch */
         
         /* clean Heurstically Completed states... */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs)))
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs, finished)))
             THROW(XA_FORGET_ERROR);
         
         /* update the TX state, now TX_STATE_S0 */

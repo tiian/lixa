@@ -87,9 +87,12 @@ extern "C" {
      * This function is not directly called by the TX layer, but it's an
      * helper function for @ref lixa_xa_commit and @ref lixa_xa_rollback
      * @param cs IN reference to the status of the calling client
+     * @param finished IN boolean value: TRUE, the transaction can be
+     *                    finished; FALSE, a blocking error marked the
+     *                    transaction as not finished
      * @return a reason code
      */
-    int lixa_xa_forget(client_status_t *cs);
+    int lixa_xa_forget(client_status_t *cs, int finished);
 
     
     

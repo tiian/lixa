@@ -89,6 +89,9 @@
     "returned XA_RB* (%d) for xid '%s', but the Transaction Manager called " \
     "xa_commit() without TMONEPHASE flag: there probably is a bug inside " \
     "the RM code"
+#define LIXA_SYSLOG_LXC018I "LXC018I resource manager '%s' returned " \
+    "XAER_NOTA during recovery rollback: the resource manager already " \
+    "rolled back the transaction with xid '%s'"
 
 
 
