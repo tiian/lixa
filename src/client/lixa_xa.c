@@ -20,6 +20,9 @@
 
 
 
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
@@ -261,6 +264,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                         "%d\n", record.rmid, record.flags, record.rc));
             if (XA_RETRY == record.rc) {
                 /* try a second time */
+                sleep(1); /* this is a critical choice... */
                 LIXA_TRACE(("lixa_xa_commit: XA_RETRY, trying again...\n"));
                 record.rc = act_rsrmgr->xa_switch->xa_commit_entry(
                     client_status_get_xid(cs), record.rmid, record.flags);
@@ -311,8 +315,10 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 case XAER_ASYNC:
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 case XAER_RMERR:
-                case XA_RETRY:
                     csr->common.xa_s_state = XA_STATE_S0;
+                    break;
+                case XA_RETRY: /* state does not change, this will become a
+                                  recovery pending transaction */
                     break;
                 case XAER_RMFAIL:
                     csr->common.xa_r_state = XA_STATE_R0;
@@ -1326,6 +1332,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             LIXA_TRACE(("lixa_xa_rollback: xa_rollback_entry(xid, %d, 0x%lx) "
                         "= %d\n", record.rmid, record.flags, record.rc));
             if (XA_RETRY == record.rc) {
+                sleep(1); /* this is a critical choice */
                 LIXA_TRACE(("lixa_xa_rollback: XA_RETRY, trying again..."));
                 record.rc = act_rsrmgr->xa_switch->xa_rollback_entry(
                     client_status_get_xid(cs), record.rmid, record.flags);
@@ -1384,8 +1391,10 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                 case XAER_ASYNC:
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 case XAER_RMERR:
-                case XA_RETRY:
                     csr->common.xa_s_state = XA_STATE_S0;
+                    break;
+                case XA_RETRY: /* state does not change, this will become a
+                                  recovery pending transaction */
                     break;
                 case XAER_RMFAIL:
                     csr->common.xa_r_state = XA_STATE_R0;
