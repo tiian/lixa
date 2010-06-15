@@ -240,10 +240,12 @@ int server_recovery_24(struct thread_status_s *ts,
                 rsrmgr = &g_array_index(lmi->body.qrcvr_24.rsrmgrs,
                                         struct lixa_msg_body_qrcvr_24_rsrmgr_s,
                                         i);
-                sr = ts->curr_status + ph->block_array[i];
+                sr = ts->curr_status + ph->block_array[rsrmgr->rmid];
                 sr->sr.data.pld.rm.recovery_rc = rsrmgr->rc;
-                status_record_update(ts->curr_status + ph->block_array[i],
-                                     ph->block_array[i], ts->updated_records);
+                status_record_update(ts->curr_status +
+                                     ph->block_array[rsrmgr->rmid],
+                                     ph->block_array[rsrmgr->rmid],
+                                     ts->updated_records);
                 syslog(LOG_WARNING, LIXA_SYSLOG_LXD012W, ts->id,
                        recoverying_block_id);
             }
