@@ -259,10 +259,6 @@ int client_recovery_analyze(const client_status_t *cs,
                             "s_state=%d, td_state=%d\n",
                             rsrmgr->rmid, rsrmgr->r_state, rsrmgr->s_state,
                             rsrmgr->td_state));
-                /*
-                if (rsrmgr->s_state != XA_STATE_S3)
-                    all_prepared = FALSE;
-                */
                 if (rsrmgr->s_state == XA_STATE_S3)
                     any_prepared = TRUE;
             }
