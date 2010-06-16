@@ -952,9 +952,6 @@ AT_SETUP([TX/B.4/5.1])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-# TX/B.4/5.0
-xa_commit/6
 xa_start/0
 xa_end/100
 xa_rollback/0
@@ -1100,8 +1097,6 @@ AT_SETUP([TX/B.4/5.12])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
-# this recovery pending commit fails due to Resource Manager rollback
-xa_commit/104
 xa_start/0
 xa_end/-5
 xa_rollback/0
@@ -1115,8 +1110,6 @@ AT_SETUP([TX/B.4/5.13])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
-# this recovery pending commit fails due to Resource Manager rollback
-xa_commit/103
 xa_start/0
 xa_end/-6
 xa_rollback/0
@@ -1134,8 +1127,6 @@ AT_SETUP([TX/B.4/6.0])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
-# this recovery pending commit fails due to Resource Manager rollback
-xa_commit/100
 xa_start/0
 xa_end/9
 xa_rollback/0
@@ -1149,8 +1140,6 @@ AT_SETUP([TX/B.4/6.1])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
-# this is a recovery pending rollback from the previous transaction
-xa_rollback/0
 xa_start/0
 xa_end/100
 xa_rollback/0
@@ -1296,8 +1285,6 @@ AT_SETUP([TX/B.4/6.12])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
-# this rollback is related to recovery pending transaction
-xa_rollback/6
 xa_start/0
 xa_end/-5
 xa_rollback/0
@@ -1312,8 +1299,6 @@ AT_SETUP([TX/B.4/6.13])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
-# this rollback is related to recovery pending transaction
-xa_rollback/6
 xa_start/0
 xa_end/-6
 xa_rollback/0
@@ -1331,8 +1316,6 @@ AT_SETUP([TX/B.4/7.0])
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
-# this rollback is related to recovery pending transaction
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_commit/7
