@@ -38,8 +38,6 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start cas
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 ]])
@@ -85,8 +83,6 @@ xa_end/9
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_end/0
 ]])
 AT_DATA([monkey2d.conf],
@@ -100,16 +96,12 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none ca
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 ]])
@@ -147,15 +139,11 @@ xa_end/9
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_end/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_end/9
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 2 3 -7], [0], [ignore], [ignore])
@@ -176,8 +164,6 @@ xa_close/0
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_rollback/0
@@ -195,8 +181,6 @@ xa_close/0
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_end/0
 xa_rollback/0
 xa_close/0
@@ -1797,8 +1781,6 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none ca
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_rollback/0
@@ -1856,8 +1838,6 @@ xa_close/0
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_end/0
 xa_rollback/0
 xa_close/0
@@ -1875,8 +1855,6 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none ca
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_rollback/0
@@ -1885,8 +1863,6 @@ xa_close/0
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_rollback/0
@@ -1934,8 +1910,6 @@ xa_close/0
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_end/0
 xa_rollback/0
 xa_close/0
@@ -1943,8 +1917,6 @@ xa_close/0
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_end/-7
 xa_rollback/0
 xa_close/0
@@ -1967,8 +1939,6 @@ xa_close/0
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_rollback/0
@@ -1986,8 +1956,6 @@ xa_close/0
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_end/0
 xa_rollback/0
 xa_close/0
@@ -1996,8 +1964,6 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none ca
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_rollback/0
@@ -2055,8 +2021,6 @@ xa_close/0
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_end/0
 xa_rollback/0
 xa_close/0
@@ -2074,8 +2038,6 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none ca
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_rollback/0
@@ -2084,8 +2046,6 @@ xa_close/0
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_rollback/0
@@ -2133,8 +2093,6 @@ xa_close/0
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_end/0
 xa_rollback/0
 xa_close/0
@@ -2142,8 +2100,6 @@ xa_close/0
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_end/-5
 xa_rollback/0
 xa_close/0
@@ -2166,8 +2122,6 @@ xa_close/0
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_rollback/0
@@ -2185,8 +2139,6 @@ xa_close/0
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_end/0
 xa_rollback/0
 xa_close/0
@@ -2195,8 +2147,6 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none ca
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
-# this step rollbacks the recovery pending transaction of previous case test
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_rollback/0
