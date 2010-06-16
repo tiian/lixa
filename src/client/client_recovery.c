@@ -270,7 +270,7 @@ int client_recovery_analyze(const client_status_t *cs,
         if (rpl->body.qrcvr_16.rsrmgrs->len !=
             global_ccc.actconf.rsrmgrs->len) {
             LIXA_TRACE(("client_recovery_analyze: the number of resource "
-                        "managers do not match (%ud,%ud)\n",
+                        "managers does not match (%ud,%ud)\n",
                         rpl->body.qrcvr_16.rsrmgrs->len,
                         global_ccc.actconf.rsrmgrs->len));
             THROW(DIFFERENT_NUMBER);
