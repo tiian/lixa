@@ -1795,23 +1795,6 @@ xa_end/0
 xa_rollback/-6
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0024 2 0 -7], [0], [ignore], [ignore])
-AT_CLEANUP
-
-AT_SETUP([TX/B.4/8.17])
-# XA_RETRY
-AT_DATA([monkey1s.conf],
-[[# first monkey R.M. config
-xa_open/0
-# this rollback is related to previous (recovery pending) transaction
-xa_rollback/0
-xa_start/0
-xa_end/0
-xa_rollback/4
-xa_rollback/4
-xa_commit/4
-xa_close/0
-]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset stop case0024 2 0 -6], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset stop case0024 2 0 -7], [0], [ignore], [ignore])
 AT_CLEANUP
 

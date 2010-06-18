@@ -91,7 +91,6 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                 case XA_HEURCOM:
                 case XA_HEURRB:
                 case XA_HEURMIX:
-                case XA_RETRY:
                 case XA_OK:
                 case XA_RBROLLBACK:
                 case XA_RBCOMMFAIL:
@@ -113,6 +112,11 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                                 "asynchronous operations\n"));
                     THROW(INVALID_OPTION3);
                     break;
+                    /* 
+                       case XA_RETRY:
+                       this return code is not documented in "DTP: The XA
+                       Specification" page 49-51
+                    */
                 default:
                     LIXA_TRACE(("lixa_tx_rc_add: %d can not be "
                                 "accepted for xa_rollback()\n", xa_rc));
