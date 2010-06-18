@@ -1,6 +1,6 @@
-Go on with test cases TX B.5 (next to implement: any commit, any commit)
-
 Protect TX from TX_FAIL: if it happens, no function can be called after it
+
+Develop XA driven specification case tests
 
 Stability test with valgrind must be performed
 
