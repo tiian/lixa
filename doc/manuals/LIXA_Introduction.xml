@@ -239,5 +239,33 @@
 	    used by LIXA implementation.</para></footnote>.
       </para>
     </simplesect>
+    <simplesect>
+      <title><function>xa_rollback()</function> and 
+	<constant>XA_RETRY</constant> return code</title>
+      <para>
+	In <citation>TXspec</citation> (Appendix B.5, page 69) it is 
+	explained <constant>XA_RETRY</constant> is a valid return code for
+	function <function>xa_rollback()</function>. Unfortunately
+	<citation>XAspec</citation> does not agree with this point of view: the
+	<constant>XA_RETRY</constant> is not a valid return code for 
+	function <function>xa_rollback()</function>. It may be an error in
+	<citation>TXspec</citation>: the same row was copied from the previous
+	table (page 68).
+      </para>
+      <para>
+	<citation>XA+spec</citation> does not list 
+	<constant>XA_RETRY</constant> as a valid return code for 
+	function <function>xa_rollback()</function>; it lists
+	<constant>XA_RETRY_COMMFAIL</constant> but it does not apply to LIXA
+	implementation because it is related to the 
+	<emphasis>Communication Resource Manager</emphasis> concept that is
+	not supported by LIXA implementation.
+      </para>
+      <para>
+	The LIXA implementation sticks to <citation>XAspec</citation>: if a
+	resource manager returned <constant>XA_RETRY</constant> it would be
+	considered a bug inside the resource manager.
+      </para>
+    </simplesect>
   </section>
 </chapter>

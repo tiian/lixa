@@ -36,5 +36,17 @@
       <title>Distributed Transaction Processing: The XA Specification</title>
     </biblioentry>
 
+    <biblioentry>
+      <abbrev>XA+spec</abbrev>
+      <copyright><year>1994</year>
+        <holder>X/Open Company Limited</holder></copyright>
+      <biblioid class="isbn">1-85912-046-6</biblioid>
+      <publisher>
+	<publishername>X/Open Company Ltd., U.K.</publishername>
+      </publisher>
+      <title>Distributed Transaction Processing: The XA+ Specification
+      Version 2</title>
+    </biblioentry>
+
   </bibliodiv>
 </bibliography>
