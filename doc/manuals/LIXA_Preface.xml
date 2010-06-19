@@ -63,6 +63,17 @@
 	  </link>
 	</para>
       </listitem>
+      <listitem>
+	<para>
+	  <citation>XA+spec</citation>
+	  <link xlink:href="http://www.opengroup.org/pubs/catalog/s423.htm">
+	    <citetitle>
+	      Distributed Transaction Processing: The XA+ Specification
+	      Version 2
+	    </citetitle>
+	  </link>
+	</para>
+      </listitem>
     </itemizedlist>
     LIXA documentation tries to avoid duplication with the content of the
     above books.
