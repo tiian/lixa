@@ -326,12 +326,18 @@ int lixa_tx_rc_get(lixa_tx_rc_t *ltr)
                     if (lixa_tx_rc_hierarchy(TX_MIXED) <
                         lixa_tx_rc_hierarchy(ltr->tx_rc))
                         ltr->tx_rc = TX_MIXED;
-                /* [XA_HEURCOM]       [XAER_NOTA]  ->      [TX_FAIL] */
+                /* tx_commit()/xa_rollback()
+                   [XA_HEURCOM]       [XAER_NOTA]  ->      [TX_FAIL]
+                   tx_rollback()/xa_rollback()
+                   [XA_HEURCOM]       [XAER_NOTA]  ->      [TX_MIXED] */ 
                 if ((XA_HEURCOM == first && XAER_NOTA == second) ||
-                    (XA_HEURCOM == second && XAER_NOTA == first)) {
-                    ltr->tx_rc = TX_FAIL;
-                    break;
-                }
+                    (XA_HEURCOM == second && XAER_NOTA == first))
+                    if (ltr->tx_commit) {
+                        ltr->tx_rc = TX_FAIL;
+                        break;
+                    } else if (lixa_tx_rc_hierarchy(TX_MIXED) <
+                               lixa_tx_rc_hierarchy(ltr->tx_rc))
+                        ltr->tx_rc = TX_MIXED;
                 /* any rollback       any rollback ->      Note 4 */
                 if ((XA_HEURRB == first || XAER_RMERR == first ||
                       XA_OK == first || XAER_NOTA == first ||

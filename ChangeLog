@@ -1,6 +1,7 @@
 LOG:
 
          - 0.5.14 implemented test cases TX/B.5/9.*
+                  fixed bug # 3018480
 
 20100618 - 0.5.13 implemented test cases TX/B.5/8.*
                   fixed bug # 3013661
