@@ -1,4 +1,4 @@
-AT_BANNER([TX: B.5 ... Multiple RMs (xa_commit)])
+AT_BANNER([TX: B.5 ... Multiple RMs (tx_commit/xa_commit)])
 
 AT_SETUP([TX/B.5/8.0 (XAER_RMFAIL,any)])
 # XA_HEURHAZ XA_HEURCOM XA_HEURRB
