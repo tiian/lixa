@@ -49,7 +49,7 @@ exec_test() {
 	echo "Starting case test $1"
 	PGM=$1
 	shift
-	nice $PGM $*
+	$PGM $*
 	rc=$?
 	return $rc
 }
