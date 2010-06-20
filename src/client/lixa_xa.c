@@ -1341,11 +1341,11 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                             record.flags, record.rc));
             }
 
-            /* force a different return code if xa_prepare was a failure; see
+            /* force a different return code if xa_prepare failed; see
                TX (Transaction Demarcation) Specification page 68, note 3 */
             if (tx_commit &&
                 XA_OK != record.rc && XA_HEURRB != record.rc &&
-                XAER_RMFAIL != record.rc &&
+                XAER_RMFAIL != record.rc && XA_HEURCOM != record.rc &&
                 (XA_RBBASE > record.rc || XA_RBEND < record.rc) &&
                 (XAER_RMERR == csr->prepare_rc ||
                  XAER_PROTO == csr->prepare_rc)) {

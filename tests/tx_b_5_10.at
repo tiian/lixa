@@ -1,6 +1,6 @@
 AT_BANNER([TX: B.5 ... Multiple RMs (tx_commit/xa_rollback)])
 
-AT_SETUP([TX/B.5/9.0 (XAER_RMFAIL,any)])
+AT_SETUP([TX/B.5/10.0 (XAER_RMFAIL,any)])
 # XA_HEURHAZ XA_HEURCOM
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -319,7 +319,7 @@ xa_rollback/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([TX/B.5/9.1 (any,XAER_RMFAIL)])
+AT_SETUP([TX/B.5/10.1 (any,XAER_RMFAIL)])
 # XA_HEURHAZ XA_HEURCOM
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -644,7 +644,7 @@ xa_rollback/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([TX/B.5/9.2 (XAER_INVAL,any)])
+AT_SETUP([TX/B.5/10.2 (XAER_INVAL,any)])
 # XA_HEURHAZ XA_HEURCOM
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -969,7 +969,7 @@ xa_rollback/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([TX/B.5/9.3 (any,XAER_INVAL)])
+AT_SETUP([TX/B.5/10.3 (any,XAER_INVAL)])
 # XA_HEURHAZ XA_HEURCOM
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -1291,6 +1291,1973 @@ xa_end/0
 xa_prepare/-3
 xa_rollback/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/10.4 (XAER_PROTO,any)])
+# XA_HEURHAZ XA_HEURCOM
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/7
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_HEURRB XA_HEURMIX
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/6
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_OK XA_RBROLLBACK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/100
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBCOMMFAIL XA_RBDEADLOCK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/101
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/102
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBINTEGRITY XA_RBOTHER
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/103
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/104
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBPROTO XA_RBTIMEOUT
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/105
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/106
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBTRANSIENT XAER_ASYNC
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/107
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-2
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_RMFAIL XAER_NOTA
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-7
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-4
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_INVAL XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-5
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/10.5 (any,XAER_PROTO)])
+# XA_HEURHAZ XA_HEURCOM
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/7
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_HEURRB XA_HEURMIX
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/6
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_OK XA_RBROLLBACK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/100
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBCOMMFAIL XA_RBDEADLOCK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/101
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/102
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBINTEGRITY XA_RBOTHER
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/103
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/104
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBPROTO XA_RBTIMEOUT
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/105
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/106
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XA_RBTRANSIENT XAER_ASYNC
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/107
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-2
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_RMFAIL XAER_NOTA
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-7
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-4
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_INVAL XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-5
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/10.6 (XA_HEURMIX,any)])
+# XA_HEURHAZ XA_HEURCOM
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/7
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_HEURRB XA_HEURMIX
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/6
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_OK XA_RBROLLBACK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/100
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_RBCOMMFAIL XA_RBDEADLOCK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/101
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/102
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_RBINTEGRITY XA_RBOTHER
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/103
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/104
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_RBPROTO XA_RBTIMEOUT
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/105
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/106
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_RBTRANSIENT XAER_ASYNC
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/107
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-2
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_RMFAIL XAER_NOTA
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-7
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-4
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_INVAL XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-5
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/10.7 (any,XA_HEURMIX)])
+# XA_HEURHAZ XA_HEURCOM
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/7
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_HEURRB XA_HEURMIX
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/6
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_OK XA_RBROLLBACK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/100
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_RBCOMMFAIL XA_RBDEADLOCK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/101
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/102
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_RBINTEGRITY XA_RBOTHER
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/103
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/104
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_RBPROTO XA_RBTIMEOUT
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/105
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/106
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_RBTRANSIENT XAER_ASYNC
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/107
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-2
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_RMFAIL XAER_NOTA
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-7
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-4
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_INVAL XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-5
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/10.8 (XA_HEURHAZ,any)])
+# XA_HEURHAZ XA_HEURCOM
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/7
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_HEURRB XA_HEURMIX
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/6
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_OK XA_RBROLLBACK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/100
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -4], [0], [ignore], [ignore])
+# XA_RBCOMMFAIL XA_RBDEADLOCK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/101
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/102
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -4], [0], [ignore], [ignore])
+# XA_RBINTEGRITY XA_RBOTHER
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/103
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/104
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -4], [0], [ignore], [ignore])
+# XA_RBPROTO XA_RBTIMEOUT
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/105
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/106
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -4], [0], [ignore], [ignore])
+# XA_RBTRANSIENT XAER_ASYNC
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/107
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-2
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_RMFAIL XAER_NOTA
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-7
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-4
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_INVAL XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-5
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/10.9 (any,XA_HEURHAZ)])
+# XA_HEURHAZ XA_HEURCOM
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/7
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_HEURRB XA_HEURMIX
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/6
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/5
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -3], [0], [ignore], [ignore])
+# XA_OK XA_RBROLLBACK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/100
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -4], [0], [ignore], [ignore])
+# XA_RBCOMMFAIL XA_RBDEADLOCK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/101
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/102
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -4], [0], [ignore], [ignore])
+# XA_RBINTEGRITY XA_RBOTHER
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/103
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/104
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -4], [0], [ignore], [ignore])
+# XA_RBPROTO XA_RBTIMEOUT
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/105
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/106
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -4], [0], [ignore], [ignore])
+# XA_RBTRANSIENT XAER_ASYNC
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/107
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-2
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_RMFAIL XAER_NOTA
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-7
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-4
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+# XAER_INVAL XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-5
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/-6
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/8
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/B.5/10.10 (XA_HEURCOM,XA_HEURCOM)])
+# XA_HEURCOM XA_HEURCOM XA_HEURCOM XA_HEURCOM
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/7
+xa_forget/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback is related to previous (recovery pending) transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/7
+xa_forget/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_rollback/7
+xa_forget/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/7
+xa_forget/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0024 1 3 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
