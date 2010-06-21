@@ -1,4 +1,3 @@
-Protect TX from TX_FAIL: if it happens, no function can be called after it
 
 Develop XA driven specification case tests
 

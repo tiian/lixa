@@ -1,0 +1,31 @@
+AT_BANNER([TX: 5.19 TX_FAIL])
+
+# In some cases the [TX_FAIL] error description includes the following 
+# sentence:
+#   The nature of the error is such that the transaction manager and/or one or
+#   more of the resource managers can no longer perform work on behalf of the
+#   application.
+# This means that any of the following can no longer perform work on behalf of
+# the application:
+# - transaction manager
+# - any resource manager
+# - any combination of resource managers
+# - any combination of resource managers and the transaction manager.
+
+# Again: Appendix B.3 General Rules for Mapping of Return Codes (page 62):
+#
+# The return code [TX_FAIL] reports that the TM or an RM failed and the TM
+# should not be called further.
+
+AT_SETUP([TX/5.19/0.0])
+# test tx_set_....
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/-7
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M.config
+xa_open/-7
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0026 0], [0], [ignore], [ignore])
+AT_CLEANUP
