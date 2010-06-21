@@ -22,7 +22,8 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	generic.at generic_client.at generic_heur.at \
 	testsuite.at \
 	tx.at tx_3_2.at tx_3_3.at tx_3_3_1.at tx_3_4.at tx_3_5.at \
-	tx_3_6.at tx_3_8.at tx_4_2.at tx_5_20.at tx_5_22.at tx_5_23.at \
+	tx_3_6.at tx_3_8.at tx_4_2.at tx_5_19.at \
+	tx_5_20.at tx_5_22.at tx_5_23.at \
 	tx_5_25.at tx_5_26.at tx_5_27.at tx_7_52.at tx_b_2.at tx_b_4.at \
 	tx_b_5.at tx_b_5_0.at tx_b_5_1.at tx_b_5_2.at tx_b_5_3.at \
 	tx_b_5_4.at tx_b_5_5.at tx_b_5_6.at tx_b_5_7.at tx_b_5_8.at \
@@ -57,7 +58,8 @@ $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/tx_3_3_1.at \
 		$(srcdir)/tx_3_4.at $(srcdir)/tx_3_5.at \
 		$(srcdir)/tx_3_6.at $(srcdir)/tx_3_8.at \
-		$(srcdir)/tx_4_2.at $(srcdir)/tx_5_20.at \
+		$(srcdir)/tx_4_2.at \
+		$(srcdir)/tx_5_19.at $(srcdir)/tx_5_20.at \
 		$(srcdir)/tx_5_22.at $(srcdir)/tx_5_23.at \
 		$(srcdir)/tx_5_25.at $(srcdir)/tx_5_26.at \
 		$(srcdir)/tx_5_27.at $(srcdir)/tx_7_52.at \

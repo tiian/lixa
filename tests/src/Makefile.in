@@ -40,7 +40,8 @@ noinst_PROGRAMS = case0000$(EXEEXT) case0001$(EXEEXT) \
 	case0014$(EXEEXT) case0015$(EXEEXT) case0016$(EXEEXT) \
 	case0017$(EXEEXT) case0018$(EXEEXT) case0019$(EXEEXT) \
 	case0020$(EXEEXT) case0021$(EXEEXT) case0022$(EXEEXT) \
-	case0023$(EXEEXT) case0024$(EXEEXT) case0025$(EXEEXT)
+	case0023$(EXEEXT) case0024$(EXEEXT) case0025$(EXEEXT) \
+	case0026$(EXEEXT)
 subdir = tests/src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -210,6 +211,12 @@ case0025_LDADD = $(LDADD)
 case0025_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
+am_case0026_OBJECTS = case0026.$(OBJEXT)
+case0026_OBJECTS = $(am_case0026_OBJECTS)
+case0026_LDADD = $(LDADD)
+case0026_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
+	../../src/client/switch/lixa/liblixamonkey.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -230,7 +237,7 @@ SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) $(case0002_SOURCES) \
 	$(case0015_SOURCES) $(case0016_SOURCES) $(case0017_SOURCES) \
 	$(case0018_SOURCES) $(case0019_SOURCES) $(case0020_SOURCES) \
 	$(case0021_SOURCES) $(case0022_SOURCES) $(case0023_SOURCES) \
-	$(case0024_SOURCES) $(case0025_SOURCES)
+	$(case0024_SOURCES) $(case0025_SOURCES) $(case0026_SOURCES)
 DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0002_SOURCES) $(case0003_SOURCES) $(case0004_SOURCES) \
 	$(case0005_SOURCES) $(case0006_SOURCES) $(case0007_SOURCES) \
@@ -239,7 +246,8 @@ DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0014_SOURCES) $(case0015_SOURCES) $(case0016_SOURCES) \
 	$(case0017_SOURCES) $(case0018_SOURCES) $(case0019_SOURCES) \
 	$(case0020_SOURCES) $(case0021_SOURCES) $(case0022_SOURCES) \
-	$(case0023_SOURCES) $(case0024_SOURCES) $(case0025_SOURCES)
+	$(case0023_SOURCES) $(case0024_SOURCES) $(case0025_SOURCES) \
+	$(case0026_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -407,6 +415,7 @@ case0022_SOURCES = case0022.c
 case0023_SOURCES = case0023.c
 case0024_SOURCES = case0024.c
 case0025_SOURCES = case0025.c
+case0026_SOURCES = case0026.c
 all: all-am
 
 .SUFFIXES:
@@ -525,6 +534,9 @@ case0024$(EXEEXT): $(case0024_OBJECTS) $(case0024_DEPENDENCIES)
 case0025$(EXEEXT): $(case0025_OBJECTS) $(case0025_DEPENDENCIES) 
 	@rm -f case0025$(EXEEXT)
 	$(LINK) $(case0025_OBJECTS) $(case0025_LDADD) $(LIBS)
+case0026$(EXEEXT): $(case0026_OBJECTS) $(case0026_DEPENDENCIES) 
+	@rm -f case0026$(EXEEXT)
+	$(LINK) $(case0026_OBJECTS) $(case0026_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -558,6 +570,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0023.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0024.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0025.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0026.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
