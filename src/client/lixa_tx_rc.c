@@ -170,6 +170,8 @@ int lixa_tx_rc_get(lixa_tx_rc_t *ltr)
         return ltr->tx_rc;
     }
     
+    LIXA_TRACE(("lixa_tx_get_rc: ltr->commit=%d, ltr->tx_commit=%d\n",
+                ltr->commit, ltr->tx_commit));
     /* check the first value */
     ltr->tx_rc = TX_OK;
     first = g_array_index(ltr->xa_rc, int, 0);
@@ -331,13 +333,14 @@ int lixa_tx_rc_get(lixa_tx_rc_t *ltr)
                    tx_rollback()/xa_rollback()
                    [XA_HEURCOM]       [XAER_NOTA]  ->      [TX_MIXED] */ 
                 if ((XA_HEURCOM == first && XAER_NOTA == second) ||
-                    (XA_HEURCOM == second && XAER_NOTA == first))
+                    (XA_HEURCOM == second && XAER_NOTA == first)) {
                     if (ltr->tx_commit) {
                         ltr->tx_rc = TX_FAIL;
                         break;
                     } else if (lixa_tx_rc_hierarchy(TX_MIXED) <
                                lixa_tx_rc_hierarchy(ltr->tx_rc))
                         ltr->tx_rc = TX_MIXED;
+                }
                 /* any rollback       any rollback ->      Note 4 */
                 if ((XA_HEURRB == first || XAER_RMERR == first ||
                       XA_OK == first || XAER_NOTA == first ||
