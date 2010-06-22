@@ -350,7 +350,8 @@ int lixa_tx_close(int *txrc)
 
 int lixa_tx_commit(int *txrc, int *begin_new)
 {
-    enum Exception { STATUS_NOT_FOUND
+    enum Exception { CLIENT_STATUS_FAILED
+                     , STATUS_NOT_FOUND
                      , COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
                      , INVALID_STATUS
@@ -382,6 +383,8 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* nothing to do */
+                if (client_status_is_failed(cs))
+                    THROW(CLIENT_STATUS_FAILED);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 THROW(STATUS_NOT_FOUND);
@@ -516,6 +519,10 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_STATUS_FAILED:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_TX_FAIL;
+                break;
             case STATUS_NOT_FOUND:
                 *txrc = TX_PROTOCOL_ERROR;
                 ret_cod = LIXA_RC_PROTOCOL_ERROR;
@@ -565,7 +572,8 @@ int lixa_tx_commit(int *txrc, int *begin_new)
 
 int lixa_tx_info(int *txrc, TXINFO *info)
 {
-    enum Exception { COLL_GET_CS_ERROR
+    enum Exception { CLIENT_STATUS_FAILED
+                     , COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
                      , INVALID_STATUS
                      , NONE } excp;
@@ -584,6 +592,8 @@ int lixa_tx_info(int *txrc, TXINFO *info)
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* nothing to do */
+                if (client_status_is_failed(cs))
+                    THROW(CLIENT_STATUS_FAILED);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 /* status not found -> tx_open did not succed -> protocol
@@ -641,6 +651,10 @@ int lixa_tx_info(int *txrc, TXINFO *info)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_STATUS_FAILED:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_TX_FAIL;
+                break;
             case COLL_GET_CS_ERROR:
                 break;
             case PROTOCOL_ERROR:
@@ -668,7 +682,8 @@ int lixa_tx_info(int *txrc, TXINFO *info)
 
 int lixa_tx_open(int *txrc, int mmode)
 {
-    enum Exception { CLIENT_STATUS_COLL_REGISTER_ERROR
+    enum Exception { CLIENT_STATUS_FAILED
+                     , CLIENT_STATUS_COLL_REGISTER_ERROR
                      , CLIENT_STATUS_COLL_GET_CS_ERROR
                      , CLIENT_CONFIG_ERROR
                      , CLIENT_CONNECT_ERROR
@@ -697,6 +712,8 @@ int lixa_tx_open(int *txrc, int mmode)
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* already registered, nothing to do */
+                if (client_status_is_failed(cs))
+                    THROW(CLIENT_STATUS_FAILED);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND: /* first time, it must be registered */
                 /* register this thread in library status */
@@ -740,6 +757,10 @@ int lixa_tx_open(int *txrc, int mmode)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_STATUS_FAILED:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_TX_FAIL;
+                break;
             case CLIENT_STATUS_COLL_REGISTER_ERROR:
             case CLIENT_STATUS_COLL_GET_CS_ERROR:
             case CLIENT_CONFIG_ERROR:
@@ -777,7 +798,8 @@ int lixa_tx_open(int *txrc, int mmode)
 
 int lixa_tx_rollback(int *txrc, int *begin_new)
 {
-    enum Exception { STATUS_NOT_FOUND
+    enum Exception { CLIENT_STATUS_FAILED
+                     , STATUS_NOT_FOUND
                      , COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
                      , INVALID_STATUS
@@ -803,6 +825,8 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* nothing to do */
+                if (client_status_is_failed(cs))
+                    THROW(CLIENT_STATUS_FAILED);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 THROW(STATUS_NOT_FOUND);
@@ -874,6 +898,10 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_STATUS_FAILED:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_TX_FAIL;
+                break;
             case STATUS_NOT_FOUND:
                 *txrc = TX_PROTOCOL_ERROR;
                 ret_cod = LIXA_RC_PROTOCOL_ERROR;
@@ -918,7 +946,8 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
     
 int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return)
 {
-    enum Exception { COLL_GET_CS_ERROR
+    enum Exception { CLIENT_STATUS_FAILED
+                     , COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
                      , INVALID_STATUS
                      , UNSUPPORTED_OPTION
@@ -939,6 +968,8 @@ int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return)
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* nothing to do */
+                if (client_status_is_failed(cs))
+                    THROW(CLIENT_STATUS_FAILED);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 /* status not found -> tx_open did not succed -> protocol
@@ -982,6 +1013,10 @@ int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_STATUS_FAILED:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_TX_FAIL;
+                break;
             case COLL_GET_CS_ERROR:
                 break;
             case PROTOCOL_ERROR:
@@ -1019,7 +1054,8 @@ int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return)
 int lixa_tx_set_transaction_control(int *txrc,
                                     TRANSACTION_CONTROL control)
 {
-    enum Exception { COLL_GET_CS_ERROR
+    enum Exception { CLIENT_STATUS_FAILED
+                     , COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
                      , INVALID_STATUS
                      , INTERNAL_ERROR1
@@ -1041,6 +1077,8 @@ int lixa_tx_set_transaction_control(int *txrc,
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* nothing to do */
+                if (client_status_is_failed(cs))
+                    THROW(CLIENT_STATUS_FAILED);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 /* status not found -> tx_open did not succed -> protocol
@@ -1111,6 +1149,10 @@ int lixa_tx_set_transaction_control(int *txrc,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_STATUS_FAILED:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_TX_FAIL;
+                break;
             case COLL_GET_CS_ERROR:
                 break;
             case PROTOCOL_ERROR:
@@ -1148,7 +1190,8 @@ int lixa_tx_set_transaction_control(int *txrc,
 int lixa_tx_set_transaction_timeout(int *txrc,
                                     TRANSACTION_TIMEOUT timeout)
 {
-    enum Exception { COLL_GET_CS_ERROR
+    enum Exception { CLIENT_STATUS_FAILED
+                     , COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
                      , INVALID_STATUS
                      , INVALID_OPTION
@@ -1168,6 +1211,8 @@ int lixa_tx_set_transaction_timeout(int *txrc,
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* nothing to do */
+                if (client_status_is_failed(cs))
+                    THROW(CLIENT_STATUS_FAILED);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 /* status not found -> tx_open did not succed -> protocol
@@ -1204,6 +1249,10 @@ int lixa_tx_set_transaction_timeout(int *txrc,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_STATUS_FAILED:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_TX_FAIL;
+                break;
             case COLL_GET_CS_ERROR:
                 break;
             case PROTOCOL_ERROR:
