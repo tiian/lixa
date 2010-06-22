@@ -771,7 +771,7 @@ int lixa_tx_open(int *txrc, int mmode)
                 ret_cod = LIXA_RC_SHUTDOWN_ERROR;
                 break;
             case LIXA_XA_OPEN_ERROR:
-                /* clean-up socket */
+                /* clean-up socket and free thread status */
                 client_disconnect(&global_csc);
                 *txrc = tmp_txrc;
                 break;
