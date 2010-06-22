@@ -1,6 +1,6 @@
 # TX (Transaction Demarcation) Specification compliance case tests
 
-#m4_include([tx_5_19.at])
+m4_include([tx_5_19.at])
 
 m4_include([tx_3_2.at])
 m4_include([tx_3_3.at])
