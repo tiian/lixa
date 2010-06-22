@@ -208,6 +208,10 @@
 
 
 /**
+ * The client status is unknown due to a previous TX_FAIL
+ */
+#define LIXA_RC_TX_FAIL                        -97
+/**
  * Generic error for an TX error (an TX return code not equal TX_OK)
  */
 #define LIXA_RC_TX_ERROR                       -98

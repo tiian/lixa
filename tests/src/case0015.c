@@ -75,6 +75,10 @@ int main(int argc, char *argv[])
     
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     assert(test_rc == rc);
+    if (TX_FAIL == test_rc) {
+        printf("%s| ...finished (TX_FAIL)\n", pgm);
+        return 0;
+    }
 
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     assert(TX_OK == rc);

@@ -1,3 +1,4 @@
+Implementing TX_FAIL protection: restart from lixa_tx_close
 
 Develop XA driven specification case tests
 

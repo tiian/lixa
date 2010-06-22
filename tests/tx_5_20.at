@@ -291,11 +291,6 @@ xa_start/-8
 xa_end/0
 xa_rollback/0
 xa_start/-8
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
@@ -312,11 +307,6 @@ xa_start/0
 xa_end/0
 xa_rollback/0
 xa_start/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config

@@ -75,8 +75,6 @@ xa_end/0
 xa_prepare/0
 xa_commit/0
 xa_close/-5
-xa_open/0
-xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
@@ -84,8 +82,6 @@ xa_open/0
 xa_end/0
 xa_prepare/0
 xa_commit/0
-xa_close/0
-xa_open/0
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop case0015 -7], [0], [ignore], [ignore])

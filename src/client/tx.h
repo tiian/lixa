@@ -97,9 +97,13 @@ typedef long TRANSACTION_TIMEOUT;
 /* transaction state values */
 typedef long TRANSACTION_STATE;
 
+/** As described in TX (Transaction Demarcation) Specification */
 #define TX_ACTIVE 0
+/** As described in TX (Transaction Demarcation) Specification */
 #define TX_TIMEOUT_ROLLBACK_ONLY 1
+/** As described in TX (Transaction Demarcation) Specification */
 #define TX_ROLLBACK_ONLY 2
+
 /* structure populated by tx_info() */
 struct tx_info_t {
     XID xid;
