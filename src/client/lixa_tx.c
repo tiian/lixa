@@ -56,7 +56,8 @@
 
 int lixa_tx_begin(int *txrc)
 {
-    enum Exception { STATUS_NOT_FOUND
+    enum Exception { CLIENT_STATUS_FAILED
+                     , STATUS_NOT_FOUND
                      , COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR1
                      , INVALID_STATUS
@@ -67,6 +68,7 @@ int lixa_tx_begin(int *txrc)
                      , GETTIMEOFDAY_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    client_status_t *cs = NULL;
     
     *txrc = TX_FAIL;
     
@@ -75,7 +77,6 @@ int lixa_tx_begin(int *txrc)
     LIXA_TRACE(("lixa_tx_begin\n"));
     TRY {
         int txstate, next_txstate, dupid_or_proto = FALSE;
-        client_status_t *cs;
         XID xid;
         TRANSACTION_TIMEOUT timeout;
         guint i;
@@ -84,6 +85,8 @@ int lixa_tx_begin(int *txrc)
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* nothing to do */
+                if (client_status_is_failed(cs))
+                    THROW(CLIENT_STATUS_FAILED);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 THROW(STATUS_NOT_FOUND);
@@ -191,6 +194,10 @@ int lixa_tx_begin(int *txrc)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_STATUS_FAILED:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_TX_FAIL;
+                break;
             case STATUS_NOT_FOUND:
                 *txrc = TX_PROTOCOL_ERROR;
                 ret_cod = LIXA_RC_PROTOCOL_ERROR;
@@ -222,6 +229,8 @@ int lixa_tx_begin(int *txrc)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
         } /* switch (excp) */
+        if (TX_FAIL == *txrc && NULL != cs)
+            client_status_failed(cs);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_begin/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -232,7 +241,8 @@ int lixa_tx_begin(int *txrc)
 
 int lixa_tx_close(int *txrc)
 {
-    enum Exception { COLL_GET_CS_ERROR
+    enum Exception { CLIENT_STATUS_FAILED
+                     , COLL_GET_CS_ERROR
                      , PROTOCOL_ERROR
                      , INVALID_STATUS
                      , LIXA_XA_CLOSE_ERROR
@@ -241,7 +251,8 @@ int lixa_tx_close(int *txrc)
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int tmp_txrc = TX_OK;
-    
+    client_status_t *cs = NULL;
+
     *txrc = TX_FAIL;
     
     LIXA_TRACE_INIT;
@@ -249,12 +260,13 @@ int lixa_tx_close(int *txrc)
     LIXA_TRACE(("lixa_tx_close\n"));
     TRY {
         int txstate;
-        client_status_t *cs;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* nothing to do */
+                if (client_status_is_failed(cs))
+                    THROW(CLIENT_STATUS_FAILED);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 *txrc = TX_OK;
@@ -298,6 +310,10 @@ int lixa_tx_close(int *txrc)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_STATUS_FAILED:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_TX_FAIL;
+                break;
             case COLL_GET_CS_ERROR:
                 break;
             case PROTOCOL_ERROR:
@@ -322,6 +338,8 @@ int lixa_tx_close(int *txrc)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
         } /* switch (excp) */
+        if (TX_FAIL == *txrc && NULL != cs)
+            client_status_failed(cs);        
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_close/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -349,6 +367,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                      , XA_FORGET_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    client_status_t *cs = NULL;
     
     *txrc = TX_FAIL;
     
@@ -357,7 +376,6 @@ int lixa_tx_commit(int *txrc, int *begin_new)
     LIXA_TRACE(("lixa_tx_commit\n"));
     TRY {
         int txstate, next_txstate, commit = TRUE, finished = TRUE;
-        client_status_t *cs;
         int one_phase_commit = FALSE, prepare_txrc;
 
         /* retrieve a reference to the thread status */
@@ -535,6 +553,8 @@ int lixa_tx_commit(int *txrc, int *begin_new)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (TX_FAIL == *txrc && NULL != cs)
+            client_status_failed(cs);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_commit/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -550,6 +570,7 @@ int lixa_tx_info(int *txrc, TXINFO *info)
                      , INVALID_STATUS
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    client_status_t *cs = NULL;
     
     *txrc = TX_FAIL;
 
@@ -558,7 +579,6 @@ int lixa_tx_info(int *txrc, TXINFO *info)
     LIXA_TRACE(("lixa_tx_info\n"));
     TRY {
         int txstate;
-        client_status_t *cs;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -636,6 +656,8 @@ int lixa_tx_info(int *txrc, TXINFO *info)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (TX_FAIL == *txrc && NULL != cs)
+            client_status_failed(cs);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_info/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -743,6 +765,8 @@ int lixa_tx_open(int *txrc, int mmode)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (TX_FAIL == *txrc && NULL != cs)
+            client_status_failed(cs);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_open/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -765,7 +789,8 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
                      , XA_FORGET_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
+    client_status_t *cs = NULL;
+        
     *txrc = TX_FAIL;
 
     LIXA_TRACE_INIT;    
@@ -773,7 +798,6 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
     LIXA_TRACE(("lixa_tx_rollback\n"));
     TRY {
         int txstate, next_txstate, finished = TRUE;
-        client_status_t *cs;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -882,6 +906,8 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (TX_FAIL == *txrc && NULL != cs)
+            client_status_failed(cs);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_rollback/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -899,6 +925,7 @@ int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return)
                      , INVALID_OPTION
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    client_status_t *cs = NULL;
     
     *txrc = TX_FAIL;
 
@@ -907,7 +934,6 @@ int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return)
     LIXA_TRACE(("lixa_tx_set_commit_return\n"));
     TRY {
         int txstate;
-        client_status_t *cs;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -980,6 +1006,8 @@ int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (TX_FAIL == *txrc && NULL != cs)
+            client_status_failed(cs);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_set_commit_return/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -999,6 +1027,7 @@ int lixa_tx_set_transaction_control(int *txrc,
                      , INVALID_OPTION
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    client_status_t *cs = NULL;
     
     *txrc = TX_FAIL;
 
@@ -1007,7 +1036,6 @@ int lixa_tx_set_transaction_control(int *txrc,
     LIXA_TRACE(("lixa_tx_set_transaction_control\n"));
     TRY {
         int txstate, new_txstate;
-        client_status_t *cs;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -1107,6 +1135,8 @@ int lixa_tx_set_transaction_control(int *txrc,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (TX_FAIL == *txrc && NULL != cs)
+            client_status_failed(cs);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_set_transaction_control/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -1124,6 +1154,7 @@ int lixa_tx_set_transaction_timeout(int *txrc,
                      , INVALID_OPTION
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    client_status_t *cs = NULL;
     
     *txrc = TX_FAIL;
 
@@ -1132,7 +1163,6 @@ int lixa_tx_set_transaction_timeout(int *txrc,
     LIXA_TRACE(("lixa_tx_set_transaction_timeout\n"));
     TRY {
         int txstate;
-        client_status_t *cs;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -1194,6 +1224,8 @@ int lixa_tx_set_transaction_timeout(int *txrc,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (TX_FAIL == *txrc && NULL != cs)
+            client_status_failed(cs);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_set_transaction_timeout/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -1225,8 +1257,8 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
     LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_recover\n"));
     TRY {
-        client_status_t *cs;
         int i;
+        client_status_t *cs = NULL;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);

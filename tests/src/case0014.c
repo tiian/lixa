@@ -88,7 +88,12 @@ int main(int argc, char *argv[])
     
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(test_rc == rc);
-
+    if (TX_FAIL == test_rc) {
+        /* test can not go on after TX_FAIL */
+        printf("%s| ...finished\n", pgm);
+        return 0;
+    }
+    
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OK == rc);
 

@@ -89,6 +89,7 @@ void client_status_init(client_status_t *cs)
                                sizeof(struct client_status_rsrmgr_s));
     cs->tx_timeout = 0;
     cs->tx_timeout_time = 0;
+    cs->failed = FALSE;
 #ifdef _CRASH
     cs->crash_count = 0;
 #endif

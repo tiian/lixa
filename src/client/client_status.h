@@ -113,6 +113,12 @@ struct client_status_s {
      * Tiemout time of the current transaction
      */
     time_t                          tx_timeout_time;
+    /**
+     * An operation returned TX_FAIL; the transaction manager and/or one or
+     * more of the resource managers can no longer perform work on behalf of
+     * the application
+     */
+    int                             failed;
 #ifdef _CRASH
     /**
      * Counter used for crash simulation feature
@@ -396,6 +402,25 @@ extern "C" {
                 return FALSE;
         }
     }
+
+
+
+    /**
+     * Is the failed flag active?
+     * @param cs ON object reference
+     * @return a boolean condition
+     */
+    static inline int client_status_is_failed(const client_status_t *cs) {
+        return cs->failed; }
+
+
+    
+    /**
+     * Set failed flag for the client
+     * @param cs IN/OUT object reference
+     */
+    static inline void client_status_failed(client_status_t *cs) {
+        cs->failed = TRUE; }
 
 
 
