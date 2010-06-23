@@ -83,12 +83,19 @@ int main(int argc, char *argv[])
         assert(TX_OK == rc);
     
     printf("%s| tx_info(): %d\n", pgm, tx_info(&info));
+    if (0 == fail_point)
+        assert(TX_FAIL == rc);
+    else
+        assert(TX_OK == rc);
+    
     if (0 == fail_point) {
+        printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
+        assert(TX_FAIL == rc);
+        printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
         assert(TX_FAIL == rc);
         printf("%s| ...finished (TX_FAIL)\n", pgm);
         return 0;
-    } else
-        assert(TX_OK == rc);
+    }
     
     printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
     if (1 == fail_point)
@@ -112,6 +119,23 @@ int main(int argc, char *argv[])
 
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     if (2 == fail_point) {
+        assert(TX_FAIL == rc);
+        printf("%s| ...finished (TX_FAIL)\n", pgm);
+        exit(0);
+    } else
+        assert(TX_OK == rc);
+    
+    printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
+    assert(TX_OK == rc);
+    
+    printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+    if (3 == fail_point)
+        assert(TX_FAIL == rc);
+    else
+        assert(TX_OK == rc);
+    
+    printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
+    if (3 == fail_point) {
         assert(TX_FAIL == rc);
         printf("%s| ...finished (TX_FAIL)\n", pgm);
         exit(0);

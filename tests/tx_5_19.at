@@ -93,6 +93,33 @@ AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
 xa_open/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop case0026 2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0026 2], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TX/5.19/0.3])
+# test tx_open
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+# this rollback recovers the previous commit failure
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+xa_open/0
+xa_close/-7
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_close/0
+xa_open/0
+xa_close/-7
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop case0026 3], [0], [ignore], [ignore])
 AT_CLEANUP
 

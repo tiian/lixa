@@ -1,7 +1,11 @@
 LOG:
 
-         - 0.5.15 implementing test cases TX/5.19/0.*
-                  fixing bug # 3019248
+20100623 - 0.5.15 implementing test cases TX/5.19/0.*
+                  fixed bug # 3019248
+                  Alpha test first milestone reached: LIXA implementation is
+                  compliant with the "Distributed Transaction Processing: 
+                  The TX (Transaction Demarcation) Specification"
+                  (X/Open CAE Specification)
 
 20100621 - 0.5.14 implemented test cases TX/B.5/9.*
                   fixed bugs # 3018480, # 3018764
