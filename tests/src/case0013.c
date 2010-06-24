@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     assert(TX_CHAINED == info.transaction_control);
     assert(2 == info.transaction_timeout);
     
-    printf("%s| lixa_monekyrm_call_ax_reg(%d): %d\n",
+    printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
     assert(TM_OK == rc);
 

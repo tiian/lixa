@@ -1,6 +1,6 @@
-Implementing TX_FAIL protection: restart from lixa_tx_close
-
-Develop XA driven specification case tests
+Develop XA driven specification case tests (xa_5_26.at)
+- xa_open/xa_close: test xa_info (255 chars + NULL)
+- tests all possible return codes for every function and an invalid one too
 
 Stability test with valgrind must be performed
 

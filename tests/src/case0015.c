@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     assert(TX_PROTOCOL_ERROR == rc);
 
-    printf("%s| lixa_monekyrm_call_ax_reg(%d): %d\n",
+    printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
     assert(TM_OK == rc);
 

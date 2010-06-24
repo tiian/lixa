@@ -70,12 +70,12 @@ int main(int argc, char *argv[])
     assert(TX_OK == rc);
 
     if (dynam & 1) {
-        printf("%s| lixa_monekyrm_call_ax_reg(%d): %d\n",
+        printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
                pgm, rmid1, rc = lixa_monkeyrm_call_ax_reg(rmid1));
         assert(TX_OK == rc);
     }
     if (dynam & 2) {
-        printf("%s| lixa_monekyrm_call_ax_reg(%d): %d\n",
+        printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
                pgm, rmid2, rc = lixa_monkeyrm_call_ax_reg(rmid2));
         assert(TX_OK == rc);
     }
