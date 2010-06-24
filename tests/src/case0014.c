@@ -69,14 +69,14 @@ int main(int argc, char *argv[])
     printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
     assert(TX_OK == rc);
     
-    printf("%s| lixa_monekyrm_call_ax_reg(%d): %d\n",
+    printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
     assert(TM_OK == rc);
 
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OUTSIDE == rc);
 
-    printf("%s| lixa_monekyrm_call_ax_unreg(%d): %d\n",
+    printf("%s| lixa_monkeyrm_call_ax_unreg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_unreg(rmid));
     assert(TM_OK == rc);
 
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OK == rc);
 
-    printf("%s| lixa_monekyrm_call_ax_reg(%d): %d\n",
+    printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
     assert(TM_OK == rc);
 

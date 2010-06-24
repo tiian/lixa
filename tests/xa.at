@@ -1,0 +1,4 @@
+# XA Specification compliance case tests
+
+m4_include([xa_5_26.at])
+

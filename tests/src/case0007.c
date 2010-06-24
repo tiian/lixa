@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
      * resource manager owned resources; you may imagine these are the
      * equivalent of a SQLExecDirect function call */
     for (rmid=0; rmid<3; ++rmid) {
-        printf("%s| lixa_monekyrm_call_ax_reg(%d): %d\n",
+        printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
                pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
     }
     
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
      * resource manager owned resources; you may imagine these are the
      * equivalent of a SQLEndTran function call */
     for (rmid=0; rmid<3; ++rmid) {
-        printf("%s| lixa_monekyrm_call_ax_unreg(%d): %d\n",
+        printf("%s| lixa_monkeyrm_call_ax_unreg(%d): %d\n",
                pgm, rmid, rc = lixa_monkeyrm_call_ax_unreg(rmid));
         if (0 == begin_pos)
             assert(TMER_PROTO == rc);
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
      * resource manager owned resources; you may imagine these are the
      * equivalent of a SQLExecDirect function call */
     for (rmid=0; rmid<3; ++rmid) {
-        printf("%s| lixa_monekyrm_call_ax_reg(%d): %d\n",
+        printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
                pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
         assert(TM_OK == rc);
     }
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
      * resource manager owned resources; you may imagine these are the
      * equivalent of a SQLEndTran function call */
     for (rmid=0; rmid<3; ++rmid) {
-        printf("%s| lixa_monekyrm_call_ax_unreg(%d): %d\n",
+        printf("%s| lixa_monkeyrm_call_ax_unreg(%d): %d\n",
                pgm, rmid, rc = lixa_monkeyrm_call_ax_unreg(rmid));
         assert(TM_OK == rc);
     }

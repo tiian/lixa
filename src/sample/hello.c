@@ -27,7 +27,9 @@
 int main(int argc, char *argv[])
 {
     TXINFO info;
+    /*
     int rc, rmid = 0;
+    */
     
     printf("lixa hello before first tx_open()\n");
     printf("lixa hello: tx_open(): %d\n", tx_open());
