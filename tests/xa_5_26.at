@@ -1,15 +1,35 @@
 AT_BANNER([XA: 5.26 ax_reg])
 
 AT_SETUP([XA/5.26/0.0])
+# XA specification: page 26
+# A resource manager calls ax_reg() to inform a transaction manager that it is
+# about to perform work on behalf of an application thread of control. The
+# transaction manager, in turn, replies to the resource manager with an
+# indication of whether or not that work should be performed on behalf of a
+# transaction branch. If the transaction manager determines that the calling
+# thread of control is involved in a branch, upon successful return, xid
+# points to a valid XID. If the resource manager.s work is outside any global
+# transaction, xid points to NULLXID.
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
-xa_start/-7
+xa_start/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_start/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
 xa_open/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0026 0], [0], [ignore], [ignore])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M.config
+xa_open/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle case0027 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'lixa_monkeyrm_call_ax_reg.*NULL XID.*rmid=2' $TESTS_TMP_FILE2], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'lixa_monkeyrm_call_ax_reg.*valid XID.*rmid=3' $TESTS_TMP_FILE2], [0], [ignore], [ignore])
 AT_CLEANUP
 

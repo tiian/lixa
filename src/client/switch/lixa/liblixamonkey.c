@@ -1018,7 +1018,12 @@ int lixa_monkeyrm_call_ax_reg(int rmid)
     
     LIXA_TRACE(("lixa_monkeyrm_call_ax_reg\n"));
     ret_cod = ax_reg(rmid, &xid, flags);
-    LIXA_TRACE(("lixa_monkeyrm_call_ax_reg: ax_reg returned %d\n", ret_cod));
+    if (NULLXID == xid.formatID)
+        LIXA_TRACE(("lixa_monkeyrm_call_ax_reg: ax_reg returned a NULL XID "
+                    "(rmid=%d, rc=%d)\n", rmid, ret_cod));
+    else
+        LIXA_TRACE(("lixa_monkeyrm_call_ax_reg: ax_reg returned a valid "
+                    "XID (rmid=%d, rc=%d)\n", rmid, ret_cod));
     return ret_cod;
 }
 

@@ -1,6 +1,9 @@
 LOG:
 
-20100623 - 0.5.15 implementing test cases TX/5.19/0.*
+         - 0.7.0  implementing test cases XA/5.26/0.*
+                  fixing bug # 3021563
+
+20100623 - 0.5.15 implemented test cases TX/5.19/0.*
                   fixed bug # 3019248
                   Alpha test first milestone reached: LIXA implementation is
                   compliant with the "Distributed Transaction Processing: 
