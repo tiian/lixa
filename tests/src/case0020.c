@@ -42,7 +42,7 @@
 int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
-    int rc, chained, all_dyn;
+    int rc, chained, all_dyn, all_sta;
     int rmid = 1, rmid0 = 0;
     
     if (argc < 3) {
@@ -51,7 +51,8 @@ int main(int argc, char *argv[])
         exit (1);
     }
     chained = strtol(argv[1], NULL, 0);
-    all_dyn = strtol(argv[2], NULL, 0);
+    all_dyn = 1 == strtol(argv[2], NULL, 0);
+    all_sta = 2 == strtol(argv[2], NULL, 0);
 
     printf("%s| starting...\n", pgm);
     printf("%s| testing state S0...\n", pgm);
@@ -113,7 +114,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     if (chained && !all_dyn)
         assert(TX_NO_BEGIN == rc);
@@ -207,7 +211,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
     assert(TX_OK == rc);
     if (chained) {
@@ -218,7 +225,10 @@ int main(int argc, char *argv[])
         }
         printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
                pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-        assert(TM_OK == rc);
+        if (!all_sta)
+            assert(TM_OK == rc);
+        else
+            assert(TMER_TMERR == rc);
         printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
         if (!all_dyn)
             assert(TX_NO_BEGIN == rc);
@@ -250,7 +260,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(TX_OK == rc);
     if (!chained) {
@@ -269,7 +282,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(TX_OK == rc);
     if (!chained) {
@@ -286,7 +302,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(TX_OK == rc);
     if (chained) {
@@ -297,7 +316,10 @@ int main(int argc, char *argv[])
         }
         printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
                pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-        assert(TM_OK == rc);
+        if (!all_sta)
+            assert(TM_OK == rc);
+        else
+            assert(TMER_TMERR == rc);
         printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
         if (!all_dyn)
             assert(TX_NO_BEGIN == rc);
@@ -330,7 +352,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(TX_OK == rc);
     if (!chained) {
@@ -350,7 +375,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(TX_OK == rc);
     if (!chained) {
@@ -376,7 +404,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(TX_OK == rc);
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
@@ -402,7 +433,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(TX_OK == rc);
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
@@ -423,7 +457,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(TX_OK == rc);
 
@@ -450,7 +487,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(TX_OK == rc);
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
@@ -465,7 +505,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     if (chained) {
         printf("%s| tx_set_transaction_control(): %d\n", pgm,
                rc = tx_set_transaction_control(TX_UNCHAINED));
@@ -484,7 +527,10 @@ int main(int argc, char *argv[])
     }
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TM_OK == rc);
+    if (!all_sta)
+        assert(TM_OK == rc);
+    else
+        assert(TMER_TMERR == rc);
     printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(TX_OK == rc);
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());

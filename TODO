@@ -1,3 +1,8 @@
+Check again the fix for ax_reg (the message is sent only if TM_OK is the
+current return code...); compare with ax_unreg. Probably a finer idea must be
+found: when the message must be sent to the server? Think it and fix the
+software accordingly....
+
 Develop XA driven specification case tests (xa_5_26.at)
 - xa_open/xa_close: test xa_info (255 chars + NULL)
 - tests all possible return codes for every function and an invalid one too
