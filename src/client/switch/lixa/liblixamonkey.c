@@ -1048,7 +1048,7 @@ int lixa_monkeyrm_call_ax_unreg(int rmid)
  * version)
  */
 struct xa_switch_t lixa_monkeyrm_sta_sw = {
-    "LIXA Monkey RM",
+    "LIXA Monkey RM (static)",
     TMNOFLAGS,
     0,
     lixa_monkeyrm_open,
@@ -1070,7 +1070,7 @@ struct xa_switch_t lixa_monkeyrm_sta_sw = {
  * version)
  */
 struct xa_switch_t lixa_monkeyrm_dyn_sw = {
-    "LIXA Monkey RM",
+    "LIXA Monkey RM (dynamic)",
     TMREGISTER,
     0,
     lixa_monkeyrm_open,

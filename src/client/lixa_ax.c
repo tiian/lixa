@@ -38,9 +38,9 @@
 
 int ax_reg(int rmid, XID *xid, long flags)
 {
-    enum Exception { NOT_DYNAMIC
-                     , CLIENT_NOT_INITIALIZED
+    enum Exception { CLIENT_NOT_INITIALIZED
                      , COLL_GET_CS_ERROR
+                     , NOT_DYNAMIC
                      , XID_SERIALIZE_ERROR
                      , INVALID_TX_STATE
                      , MSG_SERIALIZE_ERROR
@@ -58,17 +58,8 @@ int ax_reg(int rmid, XID *xid, long flags)
         size_t buffer_size = 0;
         int fd, txstate, next_xa_td_state = XA_STATE_D1;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
-        struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
-            global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, rmid);
+        struct act_rsrmgr_config_s *act_rsrmgr;
 
-        /* check the resource manager declared dynamic registration */
-        if (!(TMREGISTER & act_rsrmgr->xa_switch->flags)) {
-            LIXA_TRACE(("ax_reg: resource manager %d did not set TMREGISTER "
-                        "flag (flags=0x%lx)\n", rmid,
-                        act_rsrmgr->xa_switch->flags));
-            THROW(NOT_DYNAMIC);
-        }
-        
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
@@ -82,6 +73,17 @@ int ax_reg(int rmid, XID *xid, long flags)
                 THROW(COLL_GET_CS_ERROR);
         }
 
+        /* check the resource manager declared dynamic registration */
+        act_rsrmgr = &g_array_index(
+            global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, rmid);
+        if (!(TMREGISTER & act_rsrmgr->xa_switch->flags)) {
+            LIXA_TRACE(("ax_reg: resource manager %d ('%s') did not set "
+                        "TMREGISTER flag (flags=0x%lx)\n", rmid,
+                        act_rsrmgr->xa_switch->name,
+                        act_rsrmgr->xa_switch->flags));
+            THROW(NOT_DYNAMIC);
+        }
+        
         /* check the rmid value is not out of range */
         if ((TM_OK == ret_cod) &&
             (rmid < 0 || rmid >= global_ccc.actconf.rsrmgrs->len)) {
@@ -173,11 +175,9 @@ int ax_reg(int rmid, XID *xid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case NOT_DYNAMIC:
-                ret_cod = TMER_TMERR;
-                break;
             case CLIENT_NOT_INITIALIZED:
             case COLL_GET_CS_ERROR:
+            case NOT_DYNAMIC:
             case XID_SERIALIZE_ERROR:
             case INVALID_TX_STATE:
             case MSG_SERIALIZE_ERROR:
@@ -203,8 +203,8 @@ int ax_reg(int rmid, XID *xid, long flags)
 
 int ax_unreg(int rmid, long flags)
 {
-    enum Exception { NOT_DYNAMIC
-                     , COLL_GET_CS_ERROR
+    enum Exception { COLL_GET_CS_ERROR
+                     , NOT_DYNAMIC
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
                      , NONE } excp;
@@ -219,18 +219,8 @@ int ax_unreg(int rmid, long flags)
         size_t buffer_size = 0;
         int fd;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
-        struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
-            global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, rmid);
+        struct act_rsrmgr_config_s *act_rsrmgr;
 
-        /* check the resource manager declared dynamic registration */
-        if (!(TMREGISTER & act_rsrmgr->xa_switch->flags)) {
-            LIXA_TRACE(("ax_unreg: resource manager %d did not set TMREGISTER "
-                        "flag (flags=0x%lx)\n", rmid,
-                        act_rsrmgr->xa_switch->flags));
-            THROW(NOT_DYNAMIC);
-        }
-        
-        
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
@@ -244,6 +234,16 @@ int ax_unreg(int rmid, long flags)
                 THROW(COLL_GET_CS_ERROR);
         }
 
+        /* check the resource manager declared dynamic registration */
+        act_rsrmgr = &g_array_index(
+            global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, rmid);
+        if (!(TMREGISTER & act_rsrmgr->xa_switch->flags)) {
+            LIXA_TRACE(("ax_unreg: resource manager %d did not set TMREGISTER "
+                        "flag (flags=0x%lx)\n", rmid,
+                        act_rsrmgr->xa_switch->flags));
+            THROW(NOT_DYNAMIC);
+        }        
+        
         /* check the rmid value is not out of range */
         if ((TM_OK == xa_ret_cod) &&
             (rmid < 0 || rmid >= global_ccc.actconf.rsrmgrs->len)) {
@@ -299,10 +299,8 @@ int ax_unreg(int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case NOT_DYNAMIC:
-                ret_cod = TMER_TMERR;
-                break;
             case COLL_GET_CS_ERROR:
+            case NOT_DYNAMIC:
             case MSG_SERIALIZE_ERROR:
             case SEND_ERROR:
                 ret_cod = TMER_TMERR;
