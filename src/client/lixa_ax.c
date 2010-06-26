@@ -40,6 +40,7 @@ int ax_reg(int rmid, XID *xid, long flags)
 {
     enum Exception { CLIENT_NOT_INITIALIZED
                      , COLL_GET_CS_ERROR
+                     , OUT_OF_RANGE
                      , NOT_DYNAMIC
                      , XID_SERIALIZE_ERROR
                      , INVALID_TX_STATE
@@ -72,7 +73,11 @@ int ax_reg(int rmid, XID *xid, long flags)
             default:
                 THROW(COLL_GET_CS_ERROR);
         }
-
+        
+        /* check rmid is valid */
+        if (0 > rmid || global_ccc.actconf.rsrmgrs->len <= rmid)
+            THROW(OUT_OF_RANGE);
+        
         /* check the resource manager declared dynamic registration */
         act_rsrmgr = &g_array_index(
             global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, rmid);
@@ -148,35 +153,43 @@ int ax_reg(int rmid, XID *xid, long flags)
             ret_cod = TMER_PROTO;
         }
 
-        /* build the message */
-        msg.header.level = LIXA_MSG_LEVEL;
-        msg.header.pvs.verb = LIXA_MSG_VERB_REG;
-        msg.header.pvs.step = LIXA_MSG_STEP_INCR;
-
-        msg.body.reg_8.ax_reg_exec.rmid = rmid;
-        msg.body.reg_8.ax_reg_exec.flags = flags;
-        msg.body.reg_8.ax_reg_exec.rc = ret_cod;
-        msg.body.reg_8.ax_reg_exec.td_state = XA_STATE_D1;
-        
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
-            THROW(MSG_SERIALIZE_ERROR);
-
-        /* retrieve the socket */
-        fd = client_status_get_sockfd(cs);
-        LIXA_TRACE(("ax_reg: sending " SIZE_T_FORMAT
-                    " bytes to the server for step 8\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR);
-
-        /* new resource manager state */
-        csr->common.xa_td_state = next_xa_td_state;
+        if (TM_OK == ret_cod) {
+            /* build the message */
+            msg.header.level = LIXA_MSG_LEVEL;
+            msg.header.pvs.verb = LIXA_MSG_VERB_REG;
+            msg.header.pvs.step = LIXA_MSG_STEP_INCR;
+            
+            msg.body.reg_8.ax_reg_exec.rmid = rmid;
+            msg.body.reg_8.ax_reg_exec.flags = flags;
+            msg.body.reg_8.ax_reg_exec.rc = ret_cod;
+            msg.body.reg_8.ax_reg_exec.td_state = next_xa_td_state;
+            
+            if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
+                                   &msg, buffer, sizeof(buffer),
+                                   &buffer_size)))
+                THROW(MSG_SERIALIZE_ERROR);
+            
+            /* retrieve the socket */
+            fd = client_status_get_sockfd(cs);
+            LIXA_TRACE(("ax_reg: sending " SIZE_T_FORMAT
+                        " bytes to the server for step 8\n", buffer_size));
+            if (buffer_size != send(fd, buffer, buffer_size, 0))
+                THROW(SEND_ERROR);
+            
+            /* new resource manager state */
+            csr->common.xa_td_state = next_xa_td_state;
+        } /* if (TM_OK == ret_cod) */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case CLIENT_NOT_INITIALIZED:
             case COLL_GET_CS_ERROR:
+                ret_cod = TMER_TMERR;
+                break;
+            case OUT_OF_RANGE:
+                ret_cod = TMER_INVAL;
+                break;
             case NOT_DYNAMIC:
             case XID_SERIALIZE_ERROR:
             case INVALID_TX_STATE:
@@ -185,7 +198,6 @@ int ax_reg(int rmid, XID *xid, long flags)
                 ret_cod = TMER_TMERR;
                 break;
             case NONE:
-                ret_cod = TM_OK;
                 break;
             default:
                 ret_cod = TMER_TMERR;
@@ -204,6 +216,7 @@ int ax_reg(int rmid, XID *xid, long flags)
 int ax_unreg(int rmid, long flags)
 {
     enum Exception { COLL_GET_CS_ERROR
+                     , OUT_OF_RANGE
                      , NOT_DYNAMIC
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
@@ -234,6 +247,10 @@ int ax_unreg(int rmid, long flags)
                 THROW(COLL_GET_CS_ERROR);
         }
 
+        /* check rmid is valid */
+        if (0 > rmid || global_ccc.actconf.rsrmgrs->len <= rmid)
+            THROW(OUT_OF_RANGE);
+        
         /* check the resource manager declared dynamic registration */
         act_rsrmgr = &g_array_index(
             global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, rmid);
@@ -276,30 +293,36 @@ int ax_unreg(int rmid, long flags)
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.pvs.verb = LIXA_MSG_VERB_UNREG;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
-
+        
         msg.body.unreg_8.ax_unreg_exec.rmid = rmid;
         msg.body.unreg_8.ax_unreg_exec.flags = flags;
         msg.body.unreg_8.ax_unreg_exec.rc = xa_ret_cod;
         msg.body.unreg_8.ax_unreg_exec.td_state = XA_STATE_D0;
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
+                               &msg, buffer, sizeof(buffer),
+                               &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
-
+        
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
         LIXA_TRACE(("ax_unreg: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
-
+        
         /* new resource manager state */
         csr->common.xa_td_state = XA_STATE_D0;
-                
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case COLL_GET_CS_ERROR:
+                ret_cod = TMER_TMERR;
+                break;
+            case OUT_OF_RANGE:
+                ret_cod = TMER_INVAL;
+                break;
             case NOT_DYNAMIC:
             case MSG_SERIALIZE_ERROR:
             case SEND_ERROR:

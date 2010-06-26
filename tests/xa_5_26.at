@@ -10,6 +10,19 @@ AT_SETUP([XA/5.26/0.0])
 # thread of control is involved in a branch, upon successful return, xid
 # points to a valid XID. If the resource manager.s work is outside any global
 # transaction, xid points to NULLXID.
+#
+# A resource manager must call this function from the same thread of control
+# that originally called ax_reg(). A resource manager taking advantage of this
+# facility must have TMREGISTER set in the flags element of its xa_switch_t
+# structure (see Chapter 4). Moreover, ax_unreg() returns failure [TMER_TMERR]
+# when issued by a resource manager that has not set TMREGISTER.
+#
+# The function.s first argument, rmid, is the integer that the resource
+# manager received when the transaction manager called xa_open(). It
+# identifies the resource manager in the thread of control.
+#
+# [TMER_PROTO]
+#    The routine was invoked in an improper context. See Chapter 6 for details.
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
