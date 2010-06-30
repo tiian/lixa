@@ -40,14 +40,13 @@ int ax_reg(int rmid, XID *xid, long flags)
 {
     enum Exception { CLIENT_NOT_INITIALIZED
                      , COLL_GET_CS_ERROR
-                     , OUT_OF_RANGE
                      , NOT_DYNAMIC
-                     , XID_SERIALIZE_ERROR
                      , INVALID_TX_STATE
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
                      , NONE } excp;
-    int ret_cod = TM_OK;
+    int ret_cod = TMER_TMERR;
+    int xa_ret_cod = TM_OK;
 
     char *ser_xid = NULL;
     
@@ -74,37 +73,34 @@ int ax_reg(int rmid, XID *xid, long flags)
                 THROW(COLL_GET_CS_ERROR);
         }
         
-        /* check rmid is valid */
-        if (0 > rmid || global_ccc.actconf.rsrmgrs->len <= rmid)
-            THROW(OUT_OF_RANGE);
+        /* check the rmid value is not out of range */
+        if (0 > rmid || global_ccc.actconf.rsrmgrs->len <= rmid) {
+            LIXA_TRACE(("ax_unreg: rmid out of range\n"));
+            xa_ret_cod = TMER_INVAL;
+        }
         
         /* check the resource manager declared dynamic registration */
-        act_rsrmgr = &g_array_index(
-            global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, rmid);
-        if (!(TMREGISTER & act_rsrmgr->xa_switch->flags)) {
-            LIXA_TRACE(("ax_reg: resource manager %d ('%s') did not set "
-                        "TMREGISTER flag (flags=0x%lx)\n", rmid,
-                        act_rsrmgr->xa_switch->name,
-                        act_rsrmgr->xa_switch->flags));
-            THROW(NOT_DYNAMIC);
+        if (TM_OK == xa_ret_cod) {
+            act_rsrmgr = &g_array_index(
+                global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, rmid);
+            if (!(TMREGISTER & act_rsrmgr->xa_switch->flags)) {
+                LIXA_TRACE(("ax_reg: resource manager %d ('%s') did not set "
+                            "TMREGISTER flag (flags=0x%lx)\n", rmid,
+                            act_rsrmgr->xa_switch->name,
+                            act_rsrmgr->xa_switch->flags));
+                xa_ret_cod = TMER_TMERR;
+            }
         }
         
-        /* check the rmid value is not out of range */
-        if ((TM_OK == ret_cod) &&
-            (rmid < 0 || rmid >= global_ccc.actconf.rsrmgrs->len)) {
-            LIXA_TRACE(("ax_reg: rmid out of range\n"));
-            ret_cod = TMER_INVAL;
-        }
-
         /* check the status of the transaction manager */
         txstate = client_status_get_txstate(cs);
-        if (TM_OK  == ret_cod)
+        if (TM_OK == xa_ret_cod)
             switch (txstate) {
                 case TX_STATE_S0:
                     LIXA_TRACE(("ax_reg: the transaction has not yet opened "
                                 "the resource managers (TX state S%d)\n",
                                 txstate));
-                    ret_cod = TMER_PROTO;
+                    xa_ret_cod = TMER_PROTO;
                     break;
                 case TX_STATE_S1:
                 case TX_STATE_S2:
@@ -117,13 +113,11 @@ int ax_reg(int rmid, XID *xid, long flags)
                 case TX_STATE_S3:
                 case TX_STATE_S4:
 #ifdef _TRACE
-                    if (NULL == (ser_xid = xid_serialize(
-                                     client_status_get_xid(cs))))
-                        THROW(XID_SERIALIZE_ERROR);
                     LIXA_TRACE(("ax_reg: the application program has "
                                 "started a transaction (TX states S%d); "
                                 "this XID '%s' will be returned\n",
-                                txstate, ser_xid));
+                                txstate,
+                                NULL == ser_xid ? "" : ser_xid));
 #endif
                     memcpy(xid, client_status_get_xid(cs), sizeof(XID));
                     break;
@@ -135,50 +129,48 @@ int ax_reg(int rmid, XID *xid, long flags)
         /* check the status of the resource manager */
         csr = &g_array_index(cs->rmstatus, struct client_status_rsrmgr_s,
                              rmid);
-        if ((TM_OK == ret_cod) && !csr->common.dynamic) {
+        if ((TM_OK == xa_ret_cod) && !csr->common.dynamic) {
             LIXA_TRACE(("ax_reg: resource manager # %d is not using "
                         "dynamic registration\n", rmid));
-            ret_cod = TMER_INVAL;
+            xa_ret_cod = TMER_INVAL;
         }
 
-        if ((TM_OK == ret_cod) && (XA_STATE_R1 != csr->common.xa_r_state)) {
+        if ((TM_OK == xa_ret_cod) && (XA_STATE_R1 != csr->common.xa_r_state)) {
             LIXA_TRACE(("ax_reg: invalid XA r_state (%d)\n",
                         csr->common.xa_r_state));
-            ret_cod = TMER_PROTO;
+            xa_ret_cod = TMER_PROTO;
         }
 
-        if ((TM_OK == ret_cod) && (XA_STATE_D0 != csr->common.xa_td_state)) {
+        if ((TM_OK == xa_ret_cod) &&
+            (XA_STATE_D0 != csr->common.xa_td_state)) {
             LIXA_TRACE(("ax_reg: invalid XA td_state (%d)\n",
                         csr->common.xa_td_state));
-            ret_cod = TMER_PROTO;
+            xa_ret_cod = TMER_PROTO;
         }
 
-        if (TM_OK == ret_cod) {
-            /* build the message */
-            msg.header.level = LIXA_MSG_LEVEL;
-            msg.header.pvs.verb = LIXA_MSG_VERB_REG;
-            msg.header.pvs.step = LIXA_MSG_STEP_INCR;
-            
-            msg.body.reg_8.ax_reg_exec.rmid = rmid;
-            msg.body.reg_8.ax_reg_exec.flags = flags;
-            msg.body.reg_8.ax_reg_exec.rc = ret_cod;
-            msg.body.reg_8.ax_reg_exec.td_state = next_xa_td_state;
-            
-            if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                                   &msg, buffer, sizeof(buffer),
-                                   &buffer_size)))
-                THROW(MSG_SERIALIZE_ERROR);
-            
-            /* retrieve the socket */
-            fd = client_status_get_sockfd(cs);
-            LIXA_TRACE(("ax_reg: sending " SIZE_T_FORMAT
-                        " bytes to the server for step 8\n", buffer_size));
-            if (buffer_size != send(fd, buffer, buffer_size, 0))
-                THROW(SEND_ERROR);
-            
-            /* new resource manager state */
-            csr->common.xa_td_state = next_xa_td_state;
-        } /* if (TM_OK == ret_cod) */
+        /* build the message */
+        msg.header.level = LIXA_MSG_LEVEL;
+        msg.header.pvs.verb = LIXA_MSG_VERB_REG;
+        msg.header.pvs.step = LIXA_MSG_STEP_INCR;
+        
+        msg.body.reg_8.ax_reg_exec.rmid = rmid;
+        msg.body.reg_8.ax_reg_exec.flags = flags;
+        msg.body.reg_8.ax_reg_exec.rc = ret_cod;
+        msg.body.reg_8.ax_reg_exec.td_state = next_xa_td_state;
+        
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
+                               &msg, buffer, sizeof(buffer), &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR);
+        
+        /* retrieve the socket */
+        fd = client_status_get_sockfd(cs);
+        LIXA_TRACE(("ax_reg: sending " SIZE_T_FORMAT
+                    " bytes to the server for step 8\n", buffer_size));
+        if (buffer_size != send(fd, buffer, buffer_size, 0))
+            THROW(SEND_ERROR);
+        
+        /* new resource manager state */
+        csr->common.xa_td_state = next_xa_td_state;
         
         THROW(NONE);
     } CATCH {
@@ -187,17 +179,14 @@ int ax_reg(int rmid, XID *xid, long flags)
             case COLL_GET_CS_ERROR:
                 ret_cod = TMER_TMERR;
                 break;
-            case OUT_OF_RANGE:
-                ret_cod = TMER_INVAL;
-                break;
             case NOT_DYNAMIC:
-            case XID_SERIALIZE_ERROR:
             case INVALID_TX_STATE:
             case MSG_SERIALIZE_ERROR:
             case SEND_ERROR:
                 ret_cod = TMER_TMERR;
                 break;
             case NONE:
+                ret_cod = xa_ret_cod;
                 break;
             default:
                 ret_cod = TMER_TMERR;
@@ -216,12 +205,10 @@ int ax_reg(int rmid, XID *xid, long flags)
 int ax_unreg(int rmid, long flags)
 {
     enum Exception { COLL_GET_CS_ERROR
-                     , OUT_OF_RANGE
-                     , NOT_DYNAMIC
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
                      , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int ret_cod = TMER_TMERR;
     int xa_ret_cod = TM_OK;
     
     LIXA_TRACE(("ax_unreg: rmid=%d, flags=0x%lx\n", rmid, flags));
@@ -247,27 +234,24 @@ int ax_unreg(int rmid, long flags)
                 THROW(COLL_GET_CS_ERROR);
         }
 
-        /* check rmid is valid */
-        if (0 > rmid || global_ccc.actconf.rsrmgrs->len <= rmid)
-            THROW(OUT_OF_RANGE);
-        
-        /* check the resource manager declared dynamic registration */
-        act_rsrmgr = &g_array_index(
-            global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, rmid);
-        if (!(TMREGISTER & act_rsrmgr->xa_switch->flags)) {
-            LIXA_TRACE(("ax_unreg: resource manager %d did not set TMREGISTER "
-                        "flag (flags=0x%lx)\n", rmid,
-                        act_rsrmgr->xa_switch->flags));
-            THROW(NOT_DYNAMIC);
-        }        
-        
         /* check the rmid value is not out of range */
-        if ((TM_OK == xa_ret_cod) &&
-            (rmid < 0 || rmid >= global_ccc.actconf.rsrmgrs->len)) {
+        if (0 > rmid || global_ccc.actconf.rsrmgrs->len <= rmid) {
             LIXA_TRACE(("ax_unreg: rmid out of range\n"));
             xa_ret_cod = TMER_INVAL;
         }
-
+        
+        /* check the resource manager declared dynamic registration */
+        if (TM_OK == xa_ret_cod) {
+            act_rsrmgr = &g_array_index(
+                global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, rmid);
+            if (!(TMREGISTER & act_rsrmgr->xa_switch->flags)) {
+                LIXA_TRACE(("ax_unreg: resource manager %d did not set "
+                            "TMREGISTER flag (flags=0x%lx)\n", rmid,
+                            act_rsrmgr->xa_switch->flags));
+                xa_ret_cod = TMER_TMERR;
+            }        
+        }
+        
         /* check the status of the resource manager */
         csr = &g_array_index(cs->rmstatus, struct client_status_rsrmgr_s,
                              rmid);
@@ -283,7 +267,8 @@ int ax_unreg(int rmid, long flags)
             xa_ret_cod = TMER_PROTO;
         }
 
-        if ((TM_OK == ret_cod) && (XA_STATE_D3 != csr->common.xa_td_state)) {
+        if ((TM_OK == xa_ret_cod) &&
+            (XA_STATE_D3 != csr->common.xa_td_state)) {
             LIXA_TRACE(("ax_unreg: invalid XA td_state (%d)\n",
                         csr->common.xa_td_state));
             xa_ret_cod = TMER_PROTO;
@@ -300,8 +285,7 @@ int ax_unreg(int rmid, long flags)
         msg.body.unreg_8.ax_unreg_exec.td_state = XA_STATE_D0;
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer),
-                               &buffer_size)))
+                               &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
         
         /* retrieve the socket */
@@ -320,10 +304,6 @@ int ax_unreg(int rmid, long flags)
             case COLL_GET_CS_ERROR:
                 ret_cod = TMER_TMERR;
                 break;
-            case OUT_OF_RANGE:
-                ret_cod = TMER_INVAL;
-                break;
-            case NOT_DYNAMIC:
             case MSG_SERIALIZE_ERROR:
             case SEND_ERROR:
                 ret_cod = TMER_TMERR;
@@ -332,7 +312,7 @@ int ax_unreg(int rmid, long flags)
                 ret_cod = xa_ret_cod;
                 break;
             default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                ret_cod = TMER_TMERR;
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("ax_unreg/excp=%d/"
