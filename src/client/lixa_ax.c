@@ -40,6 +40,7 @@ int ax_reg(int rmid, XID *xid, long flags)
 {
     enum Exception { CLIENT_NOT_INITIALIZED
                      , COLL_GET_CS_ERROR
+                     , OUT_OF_RANGE
                      , NOT_DYNAMIC
                      , INVALID_TX_STATE
                      , MSG_SERIALIZE_ERROR
@@ -76,7 +77,7 @@ int ax_reg(int rmid, XID *xid, long flags)
         /* check the rmid value is not out of range */
         if (0 > rmid || global_ccc.actconf.rsrmgrs->len <= rmid) {
             LIXA_TRACE(("ax_unreg: rmid out of range\n"));
-            xa_ret_cod = TMER_INVAL;
+            THROW(OUT_OF_RANGE);
         }
         
         /* check the resource manager declared dynamic registration */
@@ -179,6 +180,9 @@ int ax_reg(int rmid, XID *xid, long flags)
             case COLL_GET_CS_ERROR:
                 ret_cod = TMER_TMERR;
                 break;
+            case OUT_OF_RANGE:
+                ret_cod = TMER_INVAL;
+                break;
             case NOT_DYNAMIC:
             case INVALID_TX_STATE:
             case MSG_SERIALIZE_ERROR:
@@ -205,6 +209,7 @@ int ax_reg(int rmid, XID *xid, long flags)
 int ax_unreg(int rmid, long flags)
 {
     enum Exception { COLL_GET_CS_ERROR
+                     , OUT_OF_RANGE
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
                      , NONE } excp;
@@ -237,7 +242,7 @@ int ax_unreg(int rmid, long flags)
         /* check the rmid value is not out of range */
         if (0 > rmid || global_ccc.actconf.rsrmgrs->len <= rmid) {
             LIXA_TRACE(("ax_unreg: rmid out of range\n"));
-            xa_ret_cod = TMER_INVAL;
+            THROW(OUT_OF_RANGE);
         }
         
         /* check the resource manager declared dynamic registration */
@@ -303,6 +308,9 @@ int ax_unreg(int rmid, long flags)
         switch (excp) {
             case COLL_GET_CS_ERROR:
                 ret_cod = TMER_TMERR;
+                break;
+            case OUT_OF_RANGE:
+                ret_cod = TMER_INVAL;
                 break;
             case MSG_SERIALIZE_ERROR:
             case SEND_ERROR:

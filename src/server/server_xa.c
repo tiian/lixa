@@ -66,7 +66,7 @@ int server_ax_reg(struct thread_status_s *ts,
             THROW(INVALID_BLOCK_ID);
         /* check rmid */
         if (ax_reg_exec->rmid < 0 ||
-            ax_reg_exec->rmid > ts->curr_status[block_id].sr.data.pld.ph.n)
+            ax_reg_exec->rmid >= ts->curr_status[block_id].sr.data.pld.ph.n)
             THROW(RMID_OUT_OF_RANGE);
         
         slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
@@ -132,7 +132,7 @@ int server_ax_unreg(struct thread_status_s *ts,
             THROW(INVALID_BLOCK_ID);
         /* check rmid */
         if (ax_unreg_exec->rmid < 0 ||
-            ax_unreg_exec->rmid > ts->curr_status[block_id].sr.data.pld.ph.n)
+            ax_unreg_exec->rmid >= ts->curr_status[block_id].sr.data.pld.ph.n)
             THROW(RMID_OUT_OF_RANGE);
         
         slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
