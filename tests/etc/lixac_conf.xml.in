@@ -10,6 +10,10 @@
     <rsrmgr name="LIXAmonkey1staRM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_stareg.so" xa_open_info="monkey1s.conf" xa_close_info="" />
     <rsrmgr name="LIXAmonkey2staRM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_stareg.so" xa_open_info="monkey2s.conf" xa_close_info="" />
     <rsrmgr name="LIXAmonkey3staRM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_stareg.so" xa_open_info="monkey3s.conf" xa_close_info="" />
+    <rsrmgr name="LIXAdummy1RM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_dummyrm.so" xa_open_info="" xa_close_info="" />
+    <rsrmgr name="LIXAdummy2RM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_dummyrm.so" 
+     xa_open_info="1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456" 
+     xa_close_info="1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456" />
     <rsrmgr name="OracleXE_dynreg" switch_file="@abs_top_builddir@/src/client/switch/oracle/.libs/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
     <rsrmgr name="OracleXE_stareg" switch_file="@abs_top_builddir@/src/client/switch/oracle/.libs/switch_oracle_stareg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
     <rsrmgr name="IBMDB2_dynreg" switch_file="@abs_top_builddir@/src/client/switch/ibmdb2/.libs/switch_ibmdb2_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" />
@@ -88,6 +92,22 @@
       </trnmgrs>
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0008">
+      <trnmgrs>
+        <trnmgr>TestTM</trnmgr>
+      </trnmgrs>
+      <rsrmgrs>
+        <rsrmgr>LIXAdummy2RM</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0009">
+      <trnmgrs>
+        <trnmgr>TestTM</trnmgr>
+      </trnmgrs>
+      <rsrmgrs>
+        <rsrmgr>LIXAdummy1RM</rsrmgr>
       </rsrmgrs>
     </profile>
   </profiles>
