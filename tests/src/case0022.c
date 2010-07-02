@@ -23,6 +23,9 @@
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -33,10 +36,11 @@
 
 
 #include <tx.h>
-#include <liblixamonkey.h>
 
 
-/* This case test is for tx_begin() */
+
+/* This case test is for tx_begin() & xa_close */
+
 
 
 int main(int argc, char *argv[])
@@ -45,7 +49,7 @@ int main(int argc, char *argv[])
     int rc, test_rc;
     
     if (argc < 2) {
-        fprintf(stderr, "%s: at least two options must be specified\n",
+        fprintf(stderr, "%s: at least one option must be specified\n",
                 argv[0]);
         exit (1);
     }

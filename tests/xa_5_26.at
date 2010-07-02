@@ -1,4 +1,4 @@
-AT_BANNER([XA: 5.26 ax_reg])
+AT_BANNER([XA: 5.26 ax_reg/ax_unreg])
 
 AT_SETUP([XA/5.26/0.0 (ax_reg)])
 # XA specification: page 26

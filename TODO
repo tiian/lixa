@@ -1,7 +1,4 @@
-Convert case0028 (ax_reg) to ax_unreg() 
-
-Develop XA driven specification case tests (xa_5_26.at)
-- xa_open/xa_close: test xa_info (255 chars + NULL)
+Develop XA driven specification case tests
 - tests all possible return codes for every function and an invalid one too
 
 Stability test with valgrind must be performed

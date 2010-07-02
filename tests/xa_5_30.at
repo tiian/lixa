@@ -1,0 +1,18 @@
+AT_BANNER([XA: 5.30 xa_close])
+
+# The argument xa_info points to a null-terminated character string that may
+# contain instance-specific information for the resource manager. The maximum
+# length of this string is 256 bytes (including the null terminator). The
+# argument xa_info may point to an empty string if the resource manager does
+# not require instance-specific information to be available. The argument
+# xa_info must not be a null pointer.
+AT_SETUP([XA/5.30/0.0 (xa_info)])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset start case0022 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep "lixa_dummyrm_close: xa_info='123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345'" $TESTS_TMP_FILE2], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XA/5.30/0.1 (xa_info)])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0009 ; lixa_test_exec.sh noreset stop case0022 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep "lixa_dummyrm_close: xa_info=''" $TESTS_TMP_FILE2], [0], [ignore], [ignore])
+AT_CLEANUP
+
