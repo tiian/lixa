@@ -92,6 +92,9 @@
 #define LIXA_SYSLOG_LXC018I "LXC018I resource manager '%s' returned " \
     "XAER_NOTA during recovery rollback: the resource manager already " \
     "rolled back the transaction with xid '%s'"
+#define LIXA_SYSLOG_LXC019W "LXC019W resource manager '%s' (rmid=%d) " \
+    "returned an unexpected return code (%d) to xa_close() call; this might " \
+    "be the symptom of a bug inside the resource manager code"
 
 
 

@@ -103,6 +103,11 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
                     *txrc = TX_FAIL;
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 default:
+                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC019W,
+                           (char *)act_rsrmgr->generic->name, i, rc);
+                    LIXA_TRACE(("lixa_xa_close: resource manager # %d "
+                                "returned unexpected return code: %d\n",
+                                i, rc));
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);                    
             } /* switch (rc) */
