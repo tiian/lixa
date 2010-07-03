@@ -6,13 +6,62 @@ AT_BANNER([XA: 5.30 xa_close])
 # argument xa_info may point to an empty string if the resource manager does
 # not require instance-specific information to be available. The argument
 # xa_info must not be a null pointer.
+#
+# Configured string is 256 characters length, but only 255 can be used and
+# this test case checks it
 AT_SETUP([XA/5.30/0.0 (xa_info)])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset start case0022 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep "lixa_dummyrm_close: xa_info='123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345'" $TESTS_TMP_FILE2], [0], [ignore], [ignore])
 AT_CLEANUP
 
+# What's happen with an empty xa_info string? This case test checks is!
 AT_SETUP([XA/5.30/0.1 (xa_info)])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0009 ; lixa_test_exec.sh noreset stop case0022 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0009 ; lixa_test_exec.sh noreset none case0022 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep "lixa_dummyrm_close: xa_info=''" $TESTS_TMP_FILE2], [0], [ignore], [ignore])
 AT_CLEANUP
 
+# Checks return code result
+AT_SETUP([XA/5.30/1.0 (return values)])
+# XA_OK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0022 0], [0], [ignore], [ignore])
+# XAER_ASYNC
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_close/-2
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0022 -7], [0], [ignore], [ignore])
+# XAER_RMERR
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_close/-3
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0022 -6], [0], [ignore], [ignore])
+# XAER_INVAL
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_close/-5
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0022 -7], [0], [ignore], [ignore])
+# XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_close/-6
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0022 -7], [0], [ignore], [ignore])
+# Invalid XA return code
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_close/-10
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset stop case0022 -7], [0], [ignore], [ignore])
+AT_CLEANUP
