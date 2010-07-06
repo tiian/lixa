@@ -79,7 +79,9 @@ int main(int argc, char *argv[])
     assert(test_rc == rc);
 
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-    if (chained && test_rc > TX_NO_BEGIN)
+    if (TX_FAIL == test_rc)
+        assert(TX_FAIL == rc);
+    else if (chained && test_rc > TX_NO_BEGIN)
         assert(TX_PROTOCOL_ERROR == rc);
     else
         assert(TX_OK == rc);
