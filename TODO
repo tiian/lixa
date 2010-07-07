@@ -1,7 +1,3 @@
-xa_commit() case tests: test xa_forget() is not missed for heuristically
-completed transactions...
-Develop the one phase commit test case set: the program must be changed   
-because it calls back the second resource manager
 
 Develop XA driven specification case tests
 - tests all possible return codes for every function and an invalid one too
