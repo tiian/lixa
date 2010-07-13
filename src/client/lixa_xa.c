@@ -664,12 +664,13 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
 
 int lixa_xa_forget(client_status_t *cs, int finished)
 {
-    enum Exception { ASYNC_NOT_IMPLEMENTED
-                     , INTERNAL_ERROR
+    enum Exception { INTERNAL_ERROR
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int xa_rc = XA_OK;
+    char *ser_xid = NULL;
     
     LIXA_TRACE(("lixa_xa_forget\n"));
     TRY {
@@ -678,7 +679,6 @@ int lixa_xa_forget(client_status_t *cs, int finished)
         int fd;
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
-        char *ser_xid;
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -713,33 +713,53 @@ int lixa_xa_forget(client_status_t *cs, int finished)
                             "= %d\n",
                             NULL != ser_xid ? ser_xid : "",
                             record.rmid, record.flags, record.rc));
-                if (NULL != ser_xid) {
-                    free(ser_xid);
-                    ser_xid = NULL;
-                }
                 switch (record.rc) {
                     case XA_OK:
                         csr->common.xa_s_state = XA_STATE_S0;
                         break;
                     case XAER_ASYNC:
-                        THROW(ASYNC_NOT_IMPLEMENTED);
+                        syslog(LOG_WARNING, LIXA_SYSLOG_LXC020W,
+                               (char *)act_rsrmgr->generic->name, record.rmid,
+                               NULL != ser_xid ? ser_xid : "");
+                        LIXA_TRACE(("lixa_xa_forget: xa_forget returned "
+                                    "XAER_ASYNC for rmid=%d,xid='%s' but "
+                                    "TMASYNC flag was not set\n",
+                                    record.rmid,
+                                    NULL != ser_xid ? ser_xid : ""));
+                        xa_rc = record.rc;
                         break;
                     case XAER_RMERR:
-                    case XAER_RMFAIL:
                         msg.body.forget_8.conthr.finished = FALSE;
+                        syslog(LOG_NOTICE, LIXA_SYSLOG_LXC021N,
+                               (char *)act_rsrmgr->generic->name, record.rmid,
+                               NULL != ser_xid ? ser_xid : "");
                         LIXA_TRACE(("lixa_xa_forget: resource manager # %d "
                                     "is not able to forget this xid\n",
                                     record.rmid));
+                        xa_rc = record.rc;
+                        break;
+                    case XAER_RMFAIL:
+                        msg.body.forget_8.conthr.finished = FALSE;
+                        LIXA_TRACE(("lixa_xa_forget: resource manager # %d "
+                                    "returned %d and is unavailable\n",
+                                    record.rmid));
+                        xa_rc = record.rc;
                         break;
                     case XAER_NOTA:
                         csr->common.xa_s_state = XA_STATE_S0;
+                        syslog(LOG_NOTICE, LIXA_SYSLOG_LXC022N,
+                               (char *)act_rsrmgr->generic->name, record.rmid,
+                               NULL != ser_xid ? ser_xid : "");
                         LIXA_TRACE(("lixa_xa_forget: resource manager # %d "
                                     "does not recognize as 'Heuristically "
                                     "Completed' the transaction...\n",
                                     record.rmid));
+                        xa_rc = record.rc;
                         break;
                     case XAER_INVAL:
                     case XAER_PROTO:
+                        xa_rc = record.rc;
+                        break;
                     default:
                         THROW(INTERNAL_ERROR);
                 }
@@ -770,9 +790,6 @@ int lixa_xa_forget(client_status_t *cs, int finished)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case ASYNC_NOT_IMPLEMENTED:
-                ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
-                break;
             case INTERNAL_ERROR:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
@@ -782,11 +799,30 @@ int lixa_xa_forget(client_status_t *cs, int finished)
                 ret_cod = LIXA_RC_SEND_ERROR;
                 break;
             case NONE:
-                ret_cod = LIXA_RC_OK;
+                switch (xa_rc) {
+                    case XA_OK:
+                    case XAER_RMERR:
+                    case XAER_NOTA:
+                        ret_cod = LIXA_RC_OK;
+                        break;
+                    case XAER_ASYNC:
+                        ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
+                        break;
+                    case XAER_RMFAIL:
+                        ret_cod = LIXA_RC_XA_ERROR;
+                        break;
+                    default:
+                        ret_cod = LIXA_RC_INTERNAL_ERROR;
+                        break;
+                }
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (NULL != ser_xid) {
+            free(ser_xid);
+            ser_xid = NULL;
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_forget/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
