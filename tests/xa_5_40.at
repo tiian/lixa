@@ -1,0 +1,79 @@
+AT_BANNER([XA: 5.40 xa_forget])
+
+# Checks return code result
+AT_SETUP([XA/5.40/0.0 (return values)])
+# XA_OK
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_commit/7
+xa_forget/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh reset start case0029 1 0], [0], [ignore], [ignore])
+# XAER_ASYNC
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_commit/7
+xa_forget/-2
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0029 1 -7], [0], [ignore], [ignore])
+# XAER_RMERR
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_commit/7
+xa_forget/-3
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0029 1 0], [0], [ignore], [ignore])
+# XAER_RMFAIL
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_commit/7
+xa_forget/-7
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0029 1 -7], [0], [ignore], [ignore])
+# XAER_NOTA
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_commit/7
+xa_forget/-4
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0029 1 0], [0], [ignore], [ignore])
+# XAER_INVAL
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_commit/7
+xa_forget/-5
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0029 1 -7], [0], [ignore], [ignore])
+# XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_commit/7
+xa_forget/-6
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset stop case0029 1 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+

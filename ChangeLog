@@ -2,6 +2,7 @@ LOG:
 
          - 0.5.17 implemented test cases XA/5.32/*.*
                   implemented test cases XA/5.37/*.*
+                  implemented test cases XA/5.40/*.*
 
 20100703 - 0.5.16 implemented test cases XA/5.26/0.*
                   fixed bugs # 3021563, # 3021831, # 3021839, # 3024015

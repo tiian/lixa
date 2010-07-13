@@ -86,7 +86,10 @@ int main(int argc, char *argv[])
         printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(expected_rc == rc);
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-    assert(TX_OK == rc);
+    if (TX_FAIL == expected_rc)
+        assert(TX_FAIL == rc);
+    else
+        assert(TX_OK == rc);
     printf("%s| ...finished\n", pgm);
     return 0;
 }
