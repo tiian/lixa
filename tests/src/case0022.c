@@ -39,31 +39,37 @@
 
 
 
-/* This case test is for tx_begin() & xa_close */
+/* This case test is for tx_begin() & xa_close, xa_open */
 
 
 
 int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
-    int rc, test_rc;
+    int rc, test_rc, xaopen;
     
-    if (argc < 2) {
-        fprintf(stderr, "%s: at least one option must be specified\n",
+    if (argc < 3) {
+        fprintf(stderr, "%s: at least two options must be specified\n",
                 argv[0]);
         exit (1);
     }
 
-    test_rc = strtol(argv[1], NULL, 0);
+    xaopen = strtol(argv[1], NULL, 0);
+    test_rc = strtol(argv[2], NULL, 0);
 
     printf("%s| starting...\n", pgm);
 
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
-    assert(TX_OK == rc);
+    if (xaopen)
+        assert(test_rc == rc);
+    else
+        assert(TX_OK == rc);
 
-    printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-    assert(test_rc == rc);
-
+    if (!xaopen) {
+        printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+        assert(test_rc == rc);
+    }
+    
     printf("%s| ...finished\n", pgm);
     return 0;
 }
