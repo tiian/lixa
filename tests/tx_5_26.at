@@ -67,7 +67,7 @@ xa_open/0
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/-5
-xa_close/0
+xa_close/-5
 xa_open/0
 ]])
 #
