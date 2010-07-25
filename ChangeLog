@@ -4,6 +4,8 @@ LOG:
                   implemented test cases XA/5.37/*.*
                   implemented test cases XA/5.40/*.*
                   implemented test cases XA/5.42/*.*
+                  implementing test cases XA/5.44/*.*
+                  fixed bug # 3034270
 
 20100703 - 0.5.16 implemented test cases XA/5.26/0.*
                   fixed bugs # 3021563, # 3021831, # 3021839, # 3024015
