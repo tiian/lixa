@@ -944,7 +944,6 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/100
-xa_rollback/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -965,7 +964,6 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/100
-xa_rollback/0
 xa_start/0
 xa_close/0
 ]])

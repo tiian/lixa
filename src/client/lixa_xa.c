@@ -1305,6 +1305,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
 {
     enum Exception { TX_RC_ADD_ERROR1
                      , TX_RC_ADD_ERROR2
+                     , TX_RC_ADD_ERROR3
                      , ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
                      , MSG_SERIALIZE_ERROR
@@ -1351,6 +1352,20 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             struct lixa_msg_body_rollback_8_xa_rollback_execs_s record;
             record.rmid = i;
             
+            /* bypass resource managers rolled back at xa_prepare() level */
+            if (csr->common.xa_s_state == XA_STATE_S0 &&
+                csr->prepare_rc >= XA_RBBASE && csr->prepare_rc <= XA_RBEND) {
+                LIXA_TRACE(("lixa_xa_rollback: resource manager # %i "
+                            "(xa_s_state=%d) returned %d (XA_RB*) at "
+                            "xa_prepare() call, skipping...\n",
+                            record.rmid, csr->common.xa_s_state,
+                            csr->prepare_rc));
+                if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(
+                                       &ltr, csr->prepare_rc)))
+                    THROW(TX_RC_ADD_ERROR1);
+                continue;
+            }
+            
             /* bypass resource managers have not dynamically registered and
                statically ended the transaction */
             if (csr->common.dynamic && csr->common.xa_s_state != XA_STATE_S2 &&
@@ -1363,10 +1378,10 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                             record.rmid, csr->common.xa_s_state));
                 if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(
                                        &ltr, csr->prepare_rc)))
-                    THROW(TX_RC_ADD_ERROR1);
+                    THROW(TX_RC_ADD_ERROR2);
                 continue;
             }
-            
+
             record.flags = TMNOFLAGS;
             record.rc = act_rsrmgr->xa_switch->xa_rollback_entry(
                 client_status_get_xid(cs), record.rmid, record.flags);
@@ -1406,7 +1421,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             }
             
             if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(&ltr, record.rc)))
-                THROW(TX_RC_ADD_ERROR2);
+                THROW(TX_RC_ADD_ERROR3);
             
             switch (record.rc) {
                 case XA_HEURHAZ:
@@ -1499,6 +1514,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
         switch (excp) {
             case TX_RC_ADD_ERROR1:
             case TX_RC_ADD_ERROR2:
+            case TX_RC_ADD_ERROR3:
                 break;
             case ASYNC_NOT_IMPLEMENTED:
                 ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;

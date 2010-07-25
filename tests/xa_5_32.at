@@ -221,7 +221,7 @@ xa_end/0
 xa_commit/-10
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset stop case0029 1 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0029 1 -7], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Checks return code result
@@ -230,12 +230,14 @@ AT_SETUP([XA/5.32/0.1 (xa_forget(), one phase commit)])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
+# this commit recovers previous transaction
+xa_commit/0
 xa_start/0
 xa_end/0
 xa_commit/8
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh reset recycle case0029 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0029 1 0], [134], [ignore], [ignore])
 # XA_HEURCOM
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
@@ -265,7 +267,7 @@ xa_end/0
 xa_commit/5
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset stop case0029 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0029 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 # Checks return code result
@@ -290,7 +292,7 @@ xa_commit/8
 xa_forget/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset start case0021 1 0 -4], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 0 -4], [0], [ignore], [ignore])
 # XA_HEURCOM
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
@@ -723,7 +725,7 @@ xa_prepare/0
 xa_commit/8
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset recycle case0021 1 0 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset start case0021 1 0 0], [134], [ignore], [ignore])
 # XA_HEURCOM
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
