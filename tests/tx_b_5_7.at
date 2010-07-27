@@ -592,7 +592,6 @@ AT_DATA([monkey2d.conf],
 xa_open/0
 xa_end/0
 xa_prepare/-7
-xa_rollback/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0024 1 3 -7], [0], [ignore], [ignore])
 # XA_RDONLY + XAER_INVAL
@@ -622,6 +621,8 @@ xa_rollback/0
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
+# this rollback recovers previous transaction
+xa_rollback/0
 xa_end/0
 xa_prepare/-5
 xa_rollback/0

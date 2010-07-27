@@ -107,6 +107,11 @@
     "returned XAER_NOTA to xa_forget() for xid '%s', it has not recognized " \
     "the transaction as heuristically completed; this condition will not be " \
     "notified to the Application Program"
+#define LIXA_SYSLOG_LXC023W "LXC023W Resource Manager '%s' (rmid=%d) " \
+    "returned XAER_NOTA to xa_prepare() for xid '%s', but it did not " \
+    "return XAER_NOTA to xa_end(): this might be a bug inside resource " \
+    "manager code; this condition will not be " \
+    "notified to the Application Program"
 
 
 
