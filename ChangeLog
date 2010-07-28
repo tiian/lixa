@@ -1,10 +1,10 @@
 LOG:
 
-         - 0.5.17 implemented test cases XA/5.32/*.*
+20100728 - 0.5.17 implemented test cases XA/5.32/*.*
                   implemented test cases XA/5.37/*.*
                   implemented test cases XA/5.40/*.*
                   implemented test cases XA/5.42/*.*
-                  implementing test cases XA/5.44/*.*
+                  implemented test cases XA/5.44/*.*
                   fixed bugs # 3034270, # 3035528
 
 20100703 - 0.5.16 implemented test cases XA/5.26/0.*
