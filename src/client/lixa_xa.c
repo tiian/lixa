@@ -1383,22 +1383,8 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                 continue;
             }
             
-            /* bypass resource managers have not dynamically registered and
-               statically ended the transaction */
-            if (csr->common.dynamic && csr->common.xa_s_state != XA_STATE_S2 &&
-                csr->common.xa_s_state != XA_STATE_S3 &&
-                csr->common.xa_s_state != XA_STATE_S4) {
-                LIXA_TRACE(("lixa_xa_rollback: resource manager # %i "
-                            "(xa_s_state=%d) "
-                            "has not yet dynamically registered and/or "
-                            "statically ended/prepared, skipping...\n",
-                            record.rmid, csr->common.xa_s_state));
-                if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(
-                                       &ltr, csr->prepare_rc)))
-                    THROW(TX_RC_ADD_ERROR3);
-                continue;
-            }
-
+            /* bypass resource managers returned XAER_NOTA at
+               xa_prepare() level */
             if (csr->common.xa_s_state == XA_STATE_S0 &&
                 csr->prepare_rc == XAER_NOTA) {
                 LIXA_TRACE(("lixa_xa_rollback: resource manager # %i "
@@ -1414,10 +1400,26 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                     free(ser_xid);
                 if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(
                                        &ltr, csr->prepare_rc)))
-                    THROW(TX_RC_ADD_ERROR4);
+                    THROW(TX_RC_ADD_ERROR3);
                 continue;
             }
             
+            /* bypass resource managers have not dynamically registered and
+               statically ended the transaction */
+            if (csr->common.dynamic && csr->common.xa_s_state != XA_STATE_S2 &&
+                csr->common.xa_s_state != XA_STATE_S3 &&
+                csr->common.xa_s_state != XA_STATE_S4) {
+                LIXA_TRACE(("lixa_xa_rollback: resource manager # %i "
+                            "(xa_s_state=%d) "
+                            "has not yet dynamically registered and/or "
+                            "statically ended/prepared, skipping...\n",
+                            record.rmid, csr->common.xa_s_state));
+                if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(
+                                       &ltr, csr->prepare_rc)))
+                    THROW(TX_RC_ADD_ERROR4);
+                continue;
+            }
+
             record.flags = TMNOFLAGS;
             record.rc = act_rsrmgr->xa_switch->xa_rollback_entry(
                 client_status_get_xid(cs), record.rmid, record.flags);
