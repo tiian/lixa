@@ -1,0 +1,127 @@
+AT_BANNER([XA: 5.47 xa_recover])
+
+AT_SETUP([XA/5.47/0.0 (XAER_RMERR)])
+# XAER_RMERR
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/-3
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset start lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/1
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_recover/-3
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XA/5.47/0.1 (XAER_RMFAIL)])
+# XAER_RMFAIL
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/-7
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/1
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_recover/-7
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XA/5.47/0.2 (XAER_INVAL)])
+# XAER_INVAL
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/-5
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/1
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_recover/-5
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XA/5.47/0.3 (XAER_PROTO)])
+# XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/-6
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/1
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_recover/-6
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XA/5.47/0.4 (Invalid RC)])
+# XAER_PROTO
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/-10
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/1
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_recover/-10
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
+AT_CLEANUP
+
