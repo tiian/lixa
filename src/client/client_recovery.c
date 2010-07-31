@@ -507,14 +507,18 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                         act_rsrmgr->xa_switch->name));
             do {
                 int j;
+                long flags = first ? TMSTARTRSCAN : TMNOFLAGS;
                 found = act_rsrmgr->xa_switch->xa_recover_entry(
-                    xid_array, count, (int)i,
-                    first ? TMSTARTRSCAN : TMNOFLAGS);
+                    xid_array, count, (int)i, flags);
                 first = FALSE;
                 LIXA_TRACE(("client_recovery_scan: rmid=%u, found=%d\n",
                             i, found));
-                if (found < 0)
+                if (found < 0) {
+                    syslog(LOG_ERR, LIXA_SYSLOG_LXC024E,
+                           act_rsrmgr->xa_switch->name, i, found, flags,
+                           count);
                     THROW(RECOVER_ERROR1);
+                }
                 for (j=0; j<found; ++j) {
                     XID *xid;
                     GArray *node;

@@ -173,7 +173,8 @@ int main(int argc, char *argv[])
                            report, commit, rollback, bypass_bqual_check,
                            bypass_formatid_check, xid, xid_file))) {
         printf("There was an error while recoverying transactions: "
-               "%d ('%s')\n", rc, lixa_strerror(rc));
+               "%d ('%s'); look at system log to collect additional "
+               "information\n", rc, lixa_strerror(rc));
         exit(1);
     }
 
