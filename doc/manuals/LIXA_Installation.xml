@@ -1,7 +1,7 @@
 <chapter>
   <title>Installation</title>
   <para>
-    This chapter explains how to download, install, verify the software
+    This chapter explains how to download, install and verify the software
     released by LIXA project.
   </para>
   <section>
@@ -221,7 +221,7 @@
 	<envar>CPPFLAGS</envar> before configure process to add your custom
 	path:
 	<screen>
-	  export CPPFLAGS=-I/path/to/libxml2
+	  export CPPFLAGS=-I/path/to/libuuid
 	  ./configure
 	  make
 	</screen>
@@ -362,7 +362,7 @@
     <para>
       LIXA has its own test suite implemented with 
       <application>Autotest</application>. A specific build configuration is
-      suggested to enable all the tests:
+      <emphasis>necessary</emphasis> to enable all the tests:
       <screen>
 	tar xvzf lixa-X.Y.Z.tar.gz
 	cd lixa-X.Y.Z

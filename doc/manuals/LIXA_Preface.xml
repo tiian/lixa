@@ -9,7 +9,7 @@
     <citation>XAspec</citation>.
   </para>
   <para>
-    The main goals of LIXA project are:
+    The main goals of the LIXA project are:
     <itemizedlist mark='bullet'>
       <listitem>
 	<para>implementing an XA compliant Transaction Manager</para>
