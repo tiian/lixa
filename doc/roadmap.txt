@@ -17,11 +17,15 @@ Milestone:
 	- all the designed test cases work
 	- a deep review of X/Open specifications does not suggest more test
 	  cases
+	- all @@@ was removed and fixed or tested without bug
+	- documentation is good enought to understand how LIXA can be used
 Exit: alpha test stage
 
 0.7.x : minor development cycle
 
 Milestone:
+	- add "exercises" to the documentation: a set of practical usages
+	  with different resource managers
 	- all the relevant suggestions (RFNF) was implemented
 	- no known bugs
 	- a selection of VIRM (Very Important Resource Managers) was tested

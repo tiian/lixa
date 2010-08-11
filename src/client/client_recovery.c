@@ -565,10 +565,15 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                     }
                     /* add the id to the array */
                     g_array_append_val(node, i);
-                }
+                } /* for (j=0; j<found; ++j) */
             } while (found == count);
             /* stop the scan */
             /* @@@ not able to make it run properly :( see later...
+               tested only against Oracle; try it with DB2
+               it might be the flag can be used only if the resource
+               manager is really paging the result (try with a short array
+               - 1 element - and 2 recovery pending transaction
+               @@@ then expand test case xa_5_47.at
             if (found > 0 &&
                 XA_OK != (xa_rc = act_rsrmgr->xa_switch->xa_recover_entry(
                               xid_array, 0, (int)i, TMENDRSCAN))) {
