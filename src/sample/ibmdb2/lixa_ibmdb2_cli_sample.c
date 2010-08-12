@@ -44,13 +44,31 @@ int main(int argc, char *argv[])
         "(DEPTNUMB, DEPTNAME, MANAGER, DIVISION, LOCATION) "
         "VALUES(150, 'Europe', 231, 'R&D', 'Mojan')";
     SQLCHAR sql_stat_d[] = "DELETE FROM ORG WHERE LOCATION='Mojan'";
+    SQLCHAR sql_stat_id[] = "INSERT INTO DEPT "
+        "(DEPTNO, DEPTNAME, ADMRDEPT) "
+        "VALUES('Z99', 'RESEARCH & DEVELOPMENT', 'E01')";
+    SQLCHAR sql_stat_dd[] = "DELETE DEPT WHERE DEPTNO='Z99'";
     SQLCHAR *sql_stat = NULL;
     int txrc;
 
+    int delete = 0;
+    int dept = 0;
+
     if (argc > 1 && (!strcmp(argv[1], "delete") || !strcmp(argv[1], "DELETE")))
-        sql_stat = sql_stat_d;
+        delete = 1;
+    if (argc > 2 && (!strcmp(argv[2], "dept") ||
+                     !strcmp(argv[2], "DEPT")))
+        dept = 1;
+    if (delete)
+        if (dept)
+            sql_stat = sql_stat_dd;
+        else
+            sql_stat = sql_stat_d;
     else
-        sql_stat = sql_stat_i;
+        if (dept)
+            sql_stat = sql_stat_id;
+        else
+            sql_stat = sql_stat_i;
     
     /* open the resource manager(s) */
     if (TX_OK != (txrc = tx_open())) {
