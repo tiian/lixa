@@ -44,6 +44,7 @@
       </trnmgrs>
       <rsrmgrs>
         <rsrmgr>IBMDB2_dynreg</rsrmgr>
+        <rsrmgr>LIXAdummyRM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="AM74">
