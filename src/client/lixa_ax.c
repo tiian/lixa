@@ -113,6 +113,7 @@ int ax_reg(int rmid, XID *xid, long flags)
                     break;
                 case TX_STATE_S3:
                 case TX_STATE_S4:
+                    ser_xid = xid_serialize(client_status_get_xid(cs));
 #ifdef _TRACE
                     LIXA_TRACE(("ax_reg: the application program has "
                                 "started a transaction (TX states S%d); "
