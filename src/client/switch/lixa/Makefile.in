@@ -68,6 +68,10 @@ switch_lixa_monkeyrm_dynreg_la_DEPENDENCIES = liblixamonkey.la
 am_switch_lixa_monkeyrm_dynreg_la_OBJECTS = lixa_monkeyrm_dynreg.lo
 switch_lixa_monkeyrm_dynreg_la_OBJECTS =  \
 	$(am_switch_lixa_monkeyrm_dynreg_la_OBJECTS)
+switch_lixa_monkeyrm_dynreg_la_LINK = $(LIBTOOL) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) \
+	$(switch_lixa_monkeyrm_dynreg_la_LDFLAGS) $(LDFLAGS) -o $@
 switch_lixa_monkeyrm_stareg_la_DEPENDENCIES = liblixamonkey.la
 am_switch_lixa_monkeyrm_stareg_la_OBJECTS = lixa_monkeyrm_stareg.lo
 switch_lixa_monkeyrm_stareg_la_OBJECTS =  \
@@ -248,6 +252,10 @@ AM_CPPFLAGS = -I$(srcdir)/../../../common
 AM_CFLAGS = -Wall
 AM_LDFLAGS = -module
 liblixamonkey_la_LDFLAGS = 
+# the dynamic version is compiled with multithread library, the static version
+# is compiled without: this allow to mix single thread/multi thread switch
+# files and to simulate a more complex environment
+switch_lixa_monkeyrm_dynreg_la_LDFLAGS = -module -lpthread
 switch_lixa_monkeyrm_dynreg_la_LIBADD = liblixamonkey.la
 switch_lixa_monkeyrm_stareg_la_LIBADD = liblixamonkey.la
 all: all-am
@@ -315,7 +323,7 @@ liblixamonkey.la: $(liblixamonkey_la_OBJECTS) $(liblixamonkey_la_DEPENDENCIES)
 switch_lixa_dummyrm.la: $(switch_lixa_dummyrm_la_OBJECTS) $(switch_lixa_dummyrm_la_DEPENDENCIES) 
 	$(LINK) -rpath $(libdir) $(switch_lixa_dummyrm_la_OBJECTS) $(switch_lixa_dummyrm_la_LIBADD) $(LIBS)
 switch_lixa_monkeyrm_dynreg.la: $(switch_lixa_monkeyrm_dynreg_la_OBJECTS) $(switch_lixa_monkeyrm_dynreg_la_DEPENDENCIES) 
-	$(LINK) -rpath $(libdir) $(switch_lixa_monkeyrm_dynreg_la_OBJECTS) $(switch_lixa_monkeyrm_dynreg_la_LIBADD) $(LIBS)
+	$(switch_lixa_monkeyrm_dynreg_la_LINK) -rpath $(libdir) $(switch_lixa_monkeyrm_dynreg_la_OBJECTS) $(switch_lixa_monkeyrm_dynreg_la_LIBADD) $(LIBS)
 switch_lixa_monkeyrm_stareg.la: $(switch_lixa_monkeyrm_stareg_la_OBJECTS) $(switch_lixa_monkeyrm_stareg_la_DEPENDENCIES) 
 	$(LINK) -rpath $(libdir) $(switch_lixa_monkeyrm_stareg_la_OBJECTS) $(switch_lixa_monkeyrm_stareg_la_LIBADD) $(LIBS)
 switch_lixa_randomrm.la: $(switch_lixa_randomrm_la_OBJECTS) $(switch_lixa_randomrm_la_DEPENDENCIES) 
