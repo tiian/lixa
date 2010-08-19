@@ -1,4 +1,3 @@
 # (Documented) Bug related case tests
 m4_include([bug_2944441.at])
 m4_include([bug_2983464.at])
-m4_include([bug_3045668.at])
