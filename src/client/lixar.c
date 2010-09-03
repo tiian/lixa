@@ -63,6 +63,7 @@ static gboolean rollback = FALSE;
 static gboolean print_version = FALSE;
 static gboolean bypass_bqual_check = FALSE;
 static gboolean bypass_formatid_check = FALSE;
+static gboolean use_tmendrscan_flag = FALSE;
 /* command line options: DO NOT CHANGE ORDER, only append!!! */
 static GOptionEntry entries[] =
 {
@@ -74,6 +75,7 @@ static GOptionEntry entries[] =
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
     { "bypass-bqual-check", 'b', 0, G_OPTION_ARG_NONE, &bypass_bqual_check, "Bypass xid branch qualifier check", NULL },
     { "bypass-formatid-check", 'B', 0, G_OPTION_ARG_NONE, &bypass_formatid_check, "Bypass xid format id check", NULL },
+    { "use-tmendrscan-flag", 'e', 0, G_OPTION_ARG_NONE, &use_tmendrscan_flag, "Use TMENDRSCAN flag for last xa_recover call", NULL },
     { NULL }
 };
 
@@ -171,7 +173,8 @@ int main(int argc, char *argv[])
 
     if (LIXA_RC_OK != (rc = lixa_tx_recover(
                            report, commit, rollback, bypass_bqual_check,
-                           bypass_formatid_check, xid, xid_file))) {
+                           bypass_formatid_check, use_tmendrscan_flag,
+                           xid, xid_file))) {
         printf("There was an error while recoverying transactions: "
                "%d ('%s'); look at system log to collect additional "
                "information\n", rc, lixa_strerror(rc));
@@ -234,6 +237,8 @@ void output_options(void)
     printf("\t- bypass xid branch qualifier check = %s\n",
            bypass_bqual_check ? true_string : false_string);
     printf("\t- bypass xid format id check = %s\n\n",
-           bypass_formatid_check ? true_string : false_string);    
+           bypass_formatid_check ? true_string : false_string);
+    printf("\t- use TMENDRSCAN flag for last xa_recover call = %s\n\n",
+           use_tmendrscan_flag ? true_string : false_string);
     return;
 }

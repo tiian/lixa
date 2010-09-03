@@ -161,12 +161,14 @@ extern "C" {
      * @param rollback IN rollback prepared and in-doubt transactions
      * @param bbqc IN bypass branch qualifier check (TRUE/FALSE)
      * @param bfic IN bypass format id qualifier check (TRUE/FALSE)
+     * @param utf IN use TMENDRSCAN flag for last xa_recover call (TRUE/FALSE)
      * @param xid IN transaction to commit/rollback
      * @param xid_file IN (file) list of transaction(s) to commit/rollback
      * @return a standardized return code
      */
     int lixa_tx_recover(int report, int commit, int rollback, int bbqc,
-                        int bfic, const char *xid, const char *xid_file);
+                        int bfic, int utf, const char *xid,
+                        const char *xid_file);
 
 
     

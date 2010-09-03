@@ -479,7 +479,7 @@ int client_recovery_rollback(const client_status_t *cs,
 
 
 int client_recovery_scan(const client_status_t *cs, GTree *crt,
-                         int bbqc, int bfic)
+                         int bbqc, int bfic, int utf)
 {
     enum Exception { RECOVER_ERROR1
                      , G_ARRAY_NEW
@@ -497,7 +497,7 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
         
         /* scan all the resource managers associated to the current profile */
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
-            XID xid_array[10];
+            XID xid_array[100];
             int found, first = TRUE;
             int count = sizeof(xid_array)/sizeof(XID);
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
@@ -568,20 +568,17 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                     g_array_append_val(node, i);
                 } /* for (j=0; j<found; ++j) */
             } while (found == count);
-            /* stop the scan */
-            /* @@@ not able to make it run properly :( see later...
-               tested only against Oracle; try it with DB2
-               it might be the flag can be used only if the resource
-               manager is really paging the result (try with a short array
-               - 1 element - and 2 recovery pending transaction
-               @@@ then expand test case xa_5_47.at
-            */
-            xa_rc = act_rsrmgr->xa_switch->xa_recover_entry(
-                xid_array, 0, (int)i, TMENDRSCAN);
-            LIXA_TRACE(("client_recovery_scan: rmid=%u, xa_rc=%d\n",
-                        i, xa_rc));
-            if (XA_OK != xa_rc) {
-                THROW(RECOVER_ERROR2);
+            if (utf) {
+                /* stop the scan; Oracle XE 10.2 does not like this call,
+                   while it is accepted by DB2 Express-C 9.7; it's an optional
+                   flag on lixar command line */
+                xa_rc = act_rsrmgr->xa_switch->xa_recover_entry(
+                    xid_array, 0, (int)i, TMENDRSCAN);
+                LIXA_TRACE(("client_recovery_scan: rmid=%u, xa_rc=%d\n",
+                            i, xa_rc));
+                if (XA_OK != xa_rc) {
+                    THROW(RECOVER_ERROR2);
+                }
             }
         }
         
