@@ -1,9 +1,4 @@
 Go on with xa_recover test cases (think deeply about it... :)
-- understand how TMSTARTRSCAN and TMENDRSCAN effectively works: compare DB2
-  behavior with Oracle behavior
-- try a 1 position array, with 2 recovery pending transaction (we probably
-  need a sample updating two different tables because row level lock is not
-  frequently used)
 - complete xa_5_47.at test case with these considerations (with a more
   sofisticated implementation of xa_recover in liblixamonkey: introduce some
   special cases (1, 3, 5...)

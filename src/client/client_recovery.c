@@ -574,8 +574,8 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                    flag on lixar command line */
                 xa_rc = act_rsrmgr->xa_switch->xa_recover_entry(
                     xid_array, 0, (int)i, TMENDRSCAN);
-                LIXA_TRACE(("client_recovery_scan: rmid=%u, xa_rc=%d\n",
-                            i, xa_rc));
+                LIXA_TRACE(("client_recovery_scan: rmid=%u, flag=0x%lx "
+                            "(TMENDRSCAN), xa_rc=%d\n", i, TMENDRSCAN, xa_rc));
                 if (XA_OK != xa_rc) {
                     THROW(RECOVER_ERROR2);
                 }

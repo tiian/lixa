@@ -236,7 +236,7 @@ void output_options(void)
            rollback ? true_string : false_string);
     printf("\t- bypass xid branch qualifier check = %s\n",
            bypass_bqual_check ? true_string : false_string);
-    printf("\t- bypass xid format id check = %s\n\n",
+    printf("\t- bypass xid format id check = %s\n",
            bypass_formatid_check ? true_string : false_string);
     printf("\t- use TMENDRSCAN flag for last xa_recover call = %s\n\n",
            use_tmendrscan_flag ? true_string : false_string);
