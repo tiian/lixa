@@ -493,10 +493,11 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
     LIXA_TRACE(("client_recovery_scan\n"));
     TRY {
         guint i;
+        int xa_rc;
         
         /* scan all the resource managers associated to the current profile */
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
-            XID xid_array[100];
+            XID xid_array[10];
             int found, first = TRUE;
             int count = sizeof(xid_array)/sizeof(XID);
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
@@ -574,14 +575,14 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                manager is really paging the result (try with a short array
                - 1 element - and 2 recovery pending transaction
                @@@ then expand test case xa_5_47.at
-            if (found > 0 &&
-                XA_OK != (xa_rc = act_rsrmgr->xa_switch->xa_recover_entry(
-                              xid_array, 0, (int)i, TMENDRSCAN))) {
-                LIXA_TRACE(("client_recovery_scan: rmid=%u, xa_rc=%d\n",
-                            i, xa_rc));
+            */
+            xa_rc = act_rsrmgr->xa_switch->xa_recover_entry(
+                xid_array, 0, (int)i, TMENDRSCAN);
+            LIXA_TRACE(("client_recovery_scan: rmid=%u, xa_rc=%d\n",
+                        i, xa_rc));
+            if (XA_OK != xa_rc) {
                 THROW(RECOVER_ERROR2);
             }
-            */
         }
         
         THROW(NONE);
