@@ -116,10 +116,11 @@ extern "C" {
      * @param crt OUT reference to the cold recovery table
      * @param bbqc IN bypass the brach qualifier check (TRUE/FALSE)
      * @param bfic IN bypass the format id check (TRUE/FALSE)
+     * @param utf IN use TMENDRSCAN flag for last xa_recover call (TRUE/FALSE)
      * @return a standardized reason code
      */
     int client_recovery_scan(const client_status_t *cs, GTree *crt,
-                             int bbqc, int bfic);
+                             int bbqc, int bfic, int utf);
 
 
 
