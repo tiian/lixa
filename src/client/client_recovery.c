@@ -482,9 +482,10 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                          int bbqc, int bfic, int utf)
 {
     enum Exception { RECOVER_ERROR1
+                     , RECOVER_ERROR2
                      , G_ARRAY_NEW
                      , MALLOC_ERROR
-                     , RECOVER_ERROR2
+                     , RECOVER_ERROR3
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -519,6 +520,12 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                            act_rsrmgr->xa_switch->name, i, found, flags,
                            count);
                     THROW(RECOVER_ERROR1);
+                }
+                if (found > count) {
+                    syslog(LOG_ERR, LIXA_SYSLOG_LXC025C,
+                           act_rsrmgr->xa_switch->name, i, found, flags,
+                           count);
+                    THROW(RECOVER_ERROR2);
                 }
                 for (j=0; j<found; ++j) {
                     XID *xid;
@@ -577,7 +584,7 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                 LIXA_TRACE(("client_recovery_scan: rmid=%u, flag=0x%lx "
                             "(TMENDRSCAN), xa_rc=%d\n", i, TMENDRSCAN, xa_rc));
                 if (XA_OK != xa_rc) {
-                    THROW(RECOVER_ERROR2);
+                    THROW(RECOVER_ERROR3);
                 }
             }
         }
@@ -586,6 +593,7 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
     } CATCH {
         switch (excp) {
             case RECOVER_ERROR1:
+            case RECOVER_ERROR2:
                 ret_cod = LIXA_RC_XA_ERROR;
                 break;
             case G_ARRAY_NEW:
@@ -594,7 +602,7 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
                 break;
-            case RECOVER_ERROR2:
+            case RECOVER_ERROR3:
                 ret_cod = LIXA_RC_XA_ERROR;
                 break;
             case NONE:

@@ -100,8 +100,22 @@ xa_recover/-6
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([XA/5.47/0.4 (2)])
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/103
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_recover/3
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p], [0], [ignore], [ignore])
+AT_CLEANUP
+
 AT_SETUP([XA/5.47/0.4 (Invalid RC)])
-# XAER_PROTO
+# An invalid return code
 AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0

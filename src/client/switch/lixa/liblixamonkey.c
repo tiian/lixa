@@ -828,6 +828,15 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
                    "7777-8888-9999-000000000000");
             /* this is a constant value used to perform basic testing */
             xid_deserialize(ser_xid, xid);
+        } else if (1 < xa_rc) {
+            long n = xa_rc < count ? xa_rc : count;
+            long i,j;
+            for (i=0; i<n; ++i) {
+                for (j=0; j<sizeof(XID)/sizeof(long); ++j) {
+                    long *p = ((long *)(xid+i)+j);
+                    *p = random();
+                }
+            }
         }
         
         THROW(NONE);
