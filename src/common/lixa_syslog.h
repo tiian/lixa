@@ -113,6 +113,7 @@
     "manager code; this condition will not be " \
     "notified to the Application Program"
 #define LIXA_SYSLOG_LXC024E "LXC024E Resource Manager '%s' (rmid=%d) returned %d while performing xa_recover() with flags=0x%lx and count=%d"
+#define LIXA_SYSLOG_LXC025C "LXC025C Resource Manager '%s' (rmid=%d) returned %d while performing xa_recover() with flags=0x%lx and count=%d: the stack pointer could be now corrupted and the process will be interrupted as soon as possible; this might be a bug inside resource manager code"
 
 
 
