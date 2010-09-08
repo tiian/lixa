@@ -1,18 +1,3 @@
-Go on with xa_recover test cases (think deeply about it... :)
-- complete xa_5_47.at test case with these considerations (with a more
-  sofisticated implementation of xa_recover in liblixamonkey: introduce some
-  special cases (1, 3, 5...)
-  - If this value is less than count, there are no more XIDs to recover and the
-    current scan ends. (That is, the transaction manager need not call 
-    xa_recover () again with TMENDRSCAN set in flags.)
-  - It is the transaction manager.s responsibility to ignore XIDs that do not 
-    belong to it.
-
-Now DB2 example is able do insert/commit in 2 distinct tables: ORG, DEPT
-This should suffice to create two recovery pending transactions and experiment
-with xa_recover scan...
-
-
 Develop XA driven specification case tests
 - tests all possible return codes for every function and an invalid one too
 
