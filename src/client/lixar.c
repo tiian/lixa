@@ -177,7 +177,8 @@ int main(int argc, char *argv[])
                            xid, xid_file))) {
         printf("There was an error while recoverying transactions: "
                "%d ('%s'); look at system log to collect additional "
-               "information\n", rc, lixa_strerror(rc));
+               "information or activate the trace to debug the problem\n",
+               rc, lixa_strerror(rc));
         exit(1);
     }
 

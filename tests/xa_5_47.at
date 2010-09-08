@@ -100,20 +100,6 @@ xa_recover/-6
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XA/5.47/0.4 (2)])
-AT_DATA([monkey1s.conf],
-[[# first monkey R.M. config
-xa_open/0
-xa_recover/103
-]])
-AT_DATA([monkey1d.conf],
-[[# third monkey R.M. config
-xa_open/0
-xa_recover/3
-]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p], [0], [ignore], [ignore])
-AT_CLEANUP
-
 AT_SETUP([XA/5.47/0.4 (Invalid RC)])
 # An invalid return code
 AT_DATA([monkey1s.conf],
@@ -136,6 +122,76 @@ AT_DATA([monkey1d.conf],
 xa_open/0
 xa_recover/-10
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XA/5.47/0.5 (R.M. answer is out of range)])
+# out of range response
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/103
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_recover/3
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XA/5.47/0.6 (R.M. needs another step)])
+# the value specified must be THE SAME used by client_recovery_scan function
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/100
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_recover/3
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -B -p], [134], [ignore], [ignore])
+# the value specified must be THE SAME used by client_recovery_scan function
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/100
+xa_recover/2
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_recover/3
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -B -p], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XA/5.47/0.7 (skip other T.M.s' xids)])
+# the value specified must be THE SAME used by client_recovery_scan function
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/5
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_recover/5
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none lixar -b -p | tee $TESTS_TMP_FILE1; grep '^There are no prepared and in-doubt transactions to list' $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+# the value specified must be THE SAME used by client_recovery_scan function
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_recover/5
+]])
+AT_DATA([monkey1d.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_recover/5
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop lixar -b -B -p | tee $TESTS_TMP_FILE1; grep '^xid=' $TESTS_TMP_FILE1 | wc -l | grep 10], [0], [ignore], [ignore])
 AT_CLEANUP
 
