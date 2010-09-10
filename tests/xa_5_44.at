@@ -512,7 +512,7 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_start/0
 xa_end/0
-xa_prepare/-10
+xa_prepare/-20
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
@@ -537,7 +537,7 @@ xa_open/0
 # this rollback recovers previous transaction
 xa_rollback/0
 xa_end/0
-xa_prepare/-10
+xa_prepare/-20
 xa_rollback/0
 xa_close/0
 ]])
