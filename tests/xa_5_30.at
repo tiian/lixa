@@ -61,7 +61,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none ca
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
-xa_close/-10
+xa_close/-20
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset stop case0022 0 -7], [0], [ignore], [ignore])
 AT_CLEANUP

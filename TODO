@@ -1,3 +1,8 @@
+Change lixa_xa.c row 1458: do not propagate XA_HEURHAZ, but a custom value
+LIXA_HAZARD defined in lixa_tx_rc.h
+After this change, all the test cases must be passed before xa_5_49.at row
+577 can be modified to reproduce the bug.
+
 Develop XA driven specification case tests
 - tests all possible return codes for every function and an invalid one too
 

@@ -218,7 +218,7 @@ xa_open/0
 xa_commit/0
 xa_start/0
 xa_end/0
-xa_commit/-10
+xa_commit/-20
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0029 1 -7], [0], [ignore], [ignore])
@@ -689,7 +689,7 @@ xa_commit/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-10
+xa_commit/-20
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -699,7 +699,7 @@ xa_open/0
 xa_commit/0
 xa_end/0
 xa_prepare/0
-xa_commit/-10
+xa_commit/-20
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop case0021 1 0 -7], [0], [ignore], [ignore])
