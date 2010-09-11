@@ -1440,11 +1440,12 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             if (tx_commit &&
                 XA_OK != record.rc && XA_HEURRB != record.rc &&
                 XAER_RMFAIL != record.rc && XA_HEURCOM != record.rc &&
+                XA_HEURHAZ != record. rc && XA_HEURMIX != record.rc &&
                 (XA_RBBASE > record.rc || XA_RBEND < record.rc) &&
                 (XAER_RMERR == csr->prepare_rc ||
                  XAER_PROTO == csr->prepare_rc)) {
                 LIXA_TRACE(("lixa_xa_rollback: tx_commit=%d, record.rc=%d, "
-                            "csr->prepare_rc=%d, forcing XA_HEURHAZ for this "
+                            "csr->prepare_rc=%d, forcing LIXA_XAER_HAZARD "
                             "rollback\n", tx_commit, record.rc,
                             csr->prepare_rc));
                 ser_xid = xid_serialize(client_status_get_xid(cs));
@@ -1455,7 +1456,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                 if (NULL != ser_xid)
                     free(ser_xid);
                 /* force the return code of xa_rollback() to a different one */
-                record.rc = XA_HEURHAZ;
+                record.rc = LIXA_XAER_HAZARD;
             }
             
             if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(&ltr, record.rc)))
@@ -1484,6 +1485,9 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                     break;                    
                 case XAER_ASYNC:
                     THROW(ASYNC_NOT_IMPLEMENTED);
+                case LIXA_XAER_HAZARD: /* keeping the same state changed by
+                                          xa_prepare() */
+                    break;
                 case XAER_RMERR:
                     csr->common.xa_s_state = XA_STATE_S0;
                     break;

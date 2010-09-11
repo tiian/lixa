@@ -1,7 +1,7 @@
 LOG:
 
          - 0.5.19 implemented test cases XA/5.49/*.*
-                  fixing bug # 3063897
+                  fixed bug # 3063897
 
 20100819 - 0.5.18 implemented test cases XA/5.47/0.*
                   fixed bug # 3045668
