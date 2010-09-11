@@ -49,6 +49,16 @@
 
 
 
+
+/**
+ * This is a special XAER return code used to manage the special situation
+ * of xa_prepare with errors and xa_rollback with errors. This is not an XA
+ * extension, but an internal LIXA implementation dependent value
+ */
+#define LIXA_XAER_HAZARD   -10
+
+
+
 /**
  * This struct is the body of the "class" used to compute TX_* return codes
  * from XA_* return codes

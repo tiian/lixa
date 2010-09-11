@@ -105,6 +105,7 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
                 case XAER_NOTA:
                 case XAER_INVAL:
                 case XAER_PROTO:
+                case LIXA_XAER_HAZARD:
                     break;
                 case XAER_ASYNC:
                     LIXA_TRACE(("lixa_tx_rc_add: XAER_ASYNC can not be "
@@ -301,7 +302,8 @@ int lixa_tx_rc_get(lixa_tx_rc_t *ltr)
                         lixa_tx_rc_hierarchy(ltr->tx_rc))
                         ltr->tx_rc = TX_MIXED;
                 /* [XA_HEURHAZ]       any          ->      [TX_HAZARD] */
-                if (XA_HEURHAZ == first || XA_HEURHAZ == second)
+                if (XA_HEURHAZ == first || XA_HEURHAZ == second ||
+                    LIXA_XAER_HAZARD == first || LIXA_XAER_HAZARD == second)
                     if (lixa_tx_rc_hierarchy(TX_HAZARD) <
                         lixa_tx_rc_hierarchy(ltr->tx_rc))
                         ltr->tx_rc = TX_HAZARD;

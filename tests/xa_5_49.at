@@ -574,8 +574,7 @@ xa_rollback/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-#xa_rollback/-3
-xa_commit/-3
+xa_rollback/-3
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -584,13 +583,11 @@ xa_open/0
 # this rollback recovers previous transaction
 xa_rollback/0
 xa_end/0
-xa_prepare/0
-#xa_prepare/-3
-#xa_rollback/-3
-xa_commit/-3
+xa_prepare/-3
+xa_rollback/-3
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 0 -2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 0 -4], [0], [ignore], [ignore])
 # XAER_RMFAIL
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
@@ -598,37 +595,39 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-7
+xa_rollback/-7
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
 xa_open/0
 xa_end/0
-xa_prepare/0
-xa_commit/-7
+xa_prepare/-3
+xa_rollback/-7
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 0 -7], [0], [ignore], [ignore])
 # XAER_NOTA
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
-# this commit recovers previous transaction
-xa_commit/0
+# this rollback recovers previous transaction
+xa_rollback/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-4
+xa_rollback/-4
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
 xa_open/0
-# this commit recovers previous transaction
-xa_commit/0
+# this rollback recovers previous transaction
+xa_rollback/0
 xa_end/0
-xa_prepare/0
-xa_commit/-4
+xa_prepare/-3
+xa_rollback/-4
+xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 0 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 0 -4], [0], [ignore], [ignore])
 # XAER_INVAL
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
@@ -636,57 +635,57 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-5
+xa_rollback/-5
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
 xa_open/0
 xa_end/0
-xa_prepare/0
-xa_commit/-5
+xa_prepare/-3
+xa_rollback/-5
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 0 -7], [0], [ignore], [ignore])
 # XAER_PROTO
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
-# this commit recovers previous transaction
-xa_commit/0
+# this rollback recovers previous transaction
+xa_rollback/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-6
+xa_rollback/-6
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
 xa_open/0
-# this commit recovers previous transaction
-xa_commit/0
+# this rollback recovers previous transaction
+xa_rollback/0
 xa_end/0
-xa_prepare/0
-xa_commit/-6
+xa_prepare/-3
+xa_rollback/-6
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 0 -7], [0], [ignore], [ignore])
 # Invalid XA return code
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
-# this commit recovers previous transaction
-xa_commit/0
+# this rollback recovers previous transaction
+xa_rollback/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/-20
+xa_rollback/-20
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
 xa_open/0
-# this commit recovers previous transaction
-xa_commit/0
+# this rollback recovers previous transaction
+xa_rollback/0
 xa_end/0
-xa_prepare/0
-xa_commit/-20
+xa_prepare/-3
+xa_rollback/-20
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop case0021 1 0 -7], [0], [ignore], [ignore])
@@ -701,15 +700,15 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/8
+xa_rollback/8
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
 xa_open/0
 xa_end/0
-xa_prepare/0
-xa_commit/8
+xa_prepare/-3
+xa_rollback/8
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset start case0021 1 0 0], [134], [ignore], [ignore])
@@ -720,15 +719,15 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/7
+xa_rollback/7
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
 xa_open/0
 xa_end/0
-xa_prepare/0
-xa_commit/7
+xa_prepare/-3
+xa_rollback/7
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 0 0], [134], [ignore], [ignore])
@@ -739,15 +738,15 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/6
+xa_rollback/6
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
 xa_open/0
 xa_end/0
-xa_prepare/0
-xa_commit/6
+xa_prepare/-3
+xa_rollback/6
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 0 0], [134], [ignore], [ignore])
@@ -758,15 +757,15 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
-xa_commit/5
+xa_rollback/5
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
 xa_open/0
 xa_end/0
-xa_prepare/0
-xa_commit/5
+xa_prepare/-3
+xa_rollback/5
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset stop case0021 1 0 0], [134], [ignore], [ignore])
