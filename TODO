@@ -1,23 +1,5 @@
-Restart from xa_5_52.at test case...
-
 Develop XA driven specification case tests
-- tests all possible return codes for every function and an invalid one too
-
-Understand this sentence (XA pag. 52):
-The first argument, xid, is a pointer to the XID that a resource manager must associate
-with the calling thread of control. The transaction manager guarantees the XID to be
-unique for different transaction branches. The transaction manager may generate a
-new branch qualifier within the XID when it calls xa_start() for a new thread of control
-association (that is, when TMRESUME is not set in flags; see TMRESUME below). If
-the transaction manager elects to reuse a branch qualifier previously given to the
-resource manager for the XID, the transaction manager must inform the resource
-manager that it is doing so (by setting TMJOIN in flags; see TMJOIN below).
-
-
-This could be related to a multithread application: can I create a multithread
-application using TX and with parallel branches? How can I distinguish this
-situation from indipendent threads?
-
+- test state tables (chapter 6)
 
 Stability test with valgrind must be performed
 
