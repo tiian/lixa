@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.5.20 implementing test cases XA/5.52/*.*
+         - 0.5.20 implemented test cases XA/5.52/*.*
 
 20100911 - 0.5.19 implemented test cases XA/5.49/*.*
                   fixed bug # 3063897
