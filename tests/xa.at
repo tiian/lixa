@@ -1,7 +1,5 @@
 # XA Specification compliance case tests
 
-m4_include([xa_6_1.at])
-
 m4_include([xa_5_26.at])
 m4_include([xa_5_30.at])
 m4_include([xa_5_32.at])
