@@ -1,6 +1,3 @@
-Develop XA driven specification case tests
-- test state tables (chapter 6)
-
 Stability test with valgrind must be performed
 
 Stress test must be performed
