@@ -305,9 +305,6 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
         if (NULL != doc) {
             /* free parsed document */
             xmlFreeDoc(doc);
-            /* release libxml2 stuff
-            xmlCleanupParser();
-            */
         }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize/excp=%d/"

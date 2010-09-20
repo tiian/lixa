@@ -179,9 +179,6 @@ int client_config(client_config_coll_t *ccc)
         xmlFreeDoc(ccc->lixac_conf);
         ccc->lixac_conf = NULL;
         
-        /* release libxml2 stuff */
-        xmlCleanupParser();
-        
         /* resolve address */
         LIXA_TRACE(("client_config: resolving address for '%s'\n",
                     ccc->actconf.trnmgr->address));
@@ -249,8 +246,6 @@ int client_config(client_config_coll_t *ccc)
         if (excp < NONE && ccc->lixac_conf != NULL) {
             /* free parsed document */
             xmlFreeDoc(ccc->lixac_conf);
-            /* release libxml2 stuff */
-            xmlCleanupParser();
         }
         /* free memory allocated by getadrinfo function */
         if (NULL != res)
@@ -258,6 +253,8 @@ int client_config(client_config_coll_t *ccc)
         /* unlock mutex (locked for configuration activity) */
         LIXA_TRACE(("client_config: releasing exclusive mutex\n"));
         g_static_mutex_unlock(&ccc->mutex);
+        /* release libxml2 stuff */
+        xmlCleanupParser();
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
