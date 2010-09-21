@@ -520,6 +520,15 @@ extern "C" {
                                   int lock);
 
 
+
+    /**
+     * Check if client status collection is empty
+     * @param csc IN object reference
+     * @return a boolean value
+     */
+    int client_status_coll_is_empty(const client_status_coll_t *csc);
+
+
     
 #ifdef __cplusplus
 }
