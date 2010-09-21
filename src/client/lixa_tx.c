@@ -306,6 +306,12 @@ int lixa_tx_close(int *txrc)
         if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))
             THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
         */
+
+        if (client_status_coll_is_empty(&global_csc)) {
+            int rc = client_unconfig(&global_ccc);
+            if (LIXA_RC_OK != rc)
+                LIXA_TRACE(("lixa_tx_close/client_unconfig/ret_cod=%d\n", rc));
+        }
         
         /* release libxml2 stuff */
         xmlCleanupParser();

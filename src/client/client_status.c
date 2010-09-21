@@ -546,3 +546,19 @@ int client_status_coll_get_cs(client_status_coll_t *csc,
     return ret_cod;
 }
 
+
+
+int client_status_coll_is_empty(const client_status_coll_t *csc)
+{
+    int ret_cod = FALSE;
+    
+    LIXA_TRACE(("client_status_coll_is_empty: acquiring shared rwlock\n"));
+    g_static_rw_lock_reader_lock(&(csc->rwlock));
+    
+    if (csc->index_size < 1)
+        ret_cod = TRUE;
+    
+    LIXA_TRACE(("client_status_coll_is_empty: releasing shared rwlock\n"));
+    g_static_rw_lock_reader_unlock(&(csc->rwlock));
+    return ret_cod;
+}

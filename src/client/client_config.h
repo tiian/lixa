@@ -334,6 +334,15 @@ extern "C" {
 
 
     /**
+     * Unload configuration and release memory
+     * @param ccc OUT the object that contains the client configuration
+     * @return a standardized return code
+     */
+    int client_unconfig(client_config_coll_t *ccc);
+
+    
+
+    /**
      * Unload the configured switch file
      * @param ccc IN configuration object reference
      * @return a standardized return code
