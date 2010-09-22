@@ -1,0 +1,3 @@
+# Multi thread specific test cases
+
+m4_include([mt_1_0.at])
