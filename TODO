@@ -1,3 +1,5 @@
+Continue with case0031.c
+
 Develop client_unconfig and check it.
 
 Stability test with valgrind must be performed
