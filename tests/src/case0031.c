@@ -40,6 +40,10 @@
 
 
 
+#define THREAD_NUMBER 2
+
+
+
 /* this case test is used for multithread tests */
 struct thread_data_s {
     int commit;
@@ -60,7 +64,8 @@ int main(int argc, char *argv[])
     int commit;
     int expected_rc;
     struct thread_data_s data;
-    pthread_t tid;
+    pthread_t tids[THREAD_NUMBER];
+    int i;
 
     if (argc < 3) {
         fprintf(stderr, "%s: at least two option must be specified\n",
@@ -82,10 +87,14 @@ int main(int argc, char *argv[])
     data.commit = commit;
     data.expected_rc = expected_rc;
     data.pgm = pgm;
-    rc = pthread_create(&tid, NULL, transaction, (void *)&data);
-    assert(0 == rc);
-    rc = pthread_join(tid, NULL);
-    assert(0 == rc);
+    for (i=0; i<THREAD_NUMBER; ++i) {
+        rc = pthread_create(tids+i, NULL, transaction, (void *)&data);
+        assert(0 == rc);
+    }
+    for (i=0; i<THREAD_NUMBER; ++i) {    
+        rc = pthread_join(tids[i], NULL);
+        assert(0 == rc);
+    }
     printf("%s| ...finished\n", pgm);
     return 0;
 }
