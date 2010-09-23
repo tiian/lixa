@@ -522,6 +522,7 @@ int client_status_coll_get_cs(client_status_coll_t *csc,
             THROW(COLL_SEARCH_ERROR);
 
         *cs = csc->status_data + csc->index_data[pos].value;
+        LIXA_TRACE(("client_status_coll_get_cs: *cs = %p\n", *cs));
         
         THROW(NONE);
     } CATCH {
@@ -548,7 +549,7 @@ int client_status_coll_get_cs(client_status_coll_t *csc,
 
 
 
-int client_status_coll_is_empty(const client_status_coll_t *csc)
+int client_status_coll_is_empty(client_status_coll_t *csc)
 {
     int ret_cod = FALSE;
     

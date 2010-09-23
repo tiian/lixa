@@ -526,7 +526,7 @@ extern "C" {
      * @param csc IN object reference
      * @return a boolean value
      */
-    int client_status_coll_is_empty(const client_status_coll_t *csc);
+    int client_status_coll_is_empty(client_status_coll_t *csc);
 
 
     

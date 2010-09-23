@@ -890,6 +890,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
+        LIXA_TRACE(("lixa_xa_open: fd = %d\n", fd));
         
         /* build the message */
         msg.header.level = LIXA_MSG_LEVEL;
@@ -931,8 +932,8 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
         memset(&msg, 0, sizeof(msg));
         
         LIXA_TRACE(("lixa_xa_open: sending " SIZE_T_FORMAT
-                    " bytes ('%s') to the server for step 8\n",
-                    buffer_size, buffer));
+                    " bytes ('%s') to the server for step 8 (socket fd %d)\n",
+                    buffer_size, buffer, fd));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR1);
         
