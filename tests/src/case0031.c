@@ -40,7 +40,7 @@
 
 
 
-#define THREAD_NUMBER 2
+#define THREAD_NUMBER 100
 
 
 
@@ -120,7 +120,7 @@ void *transaction(void *parm)
      * equivalent of a SQLExecDirect function call */
     lixa_monkeyrm_call_ax_reg(2);
     lixa_monkeyrm_call_ax_reg(3);
-
+    
     /* wait 100 milliseconds */
     to.tv_sec = 0;
     to.tv_usec = 100000;

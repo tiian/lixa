@@ -693,6 +693,7 @@ int lixa_tx_open(int *txrc, int mmode)
 {
     enum Exception { CLIENT_STATUS_FAILED
                      , CLIENT_STATUS_COLL_REGISTER_ERROR
+                     , ADDED_AND_NOT_FOUND
                      , CLIENT_STATUS_COLL_GET_CS_ERROR
                      , CLIENT_CONFIG_ERROR
                      , CLIENT_CONNECT_ERROR
@@ -714,7 +715,7 @@ int lixa_tx_open(int *txrc, int mmode)
     LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_open\n"));    
     TRY {
-        int txstate, next_txstate, pos = 0;
+        int txstate, next_txstate;
 
         /* check if the thread is already registered and
          * retrieve a reference to the status of the current thread */
@@ -726,10 +727,16 @@ int lixa_tx_open(int *txrc, int mmode)
                 break;
             case LIXA_RC_OBJ_NOT_FOUND: /* first time, it must be registered */
                 /* register this thread in library status */
-                if (LIXA_RC_OK != (ret_cod = client_status_coll_register(
-                                       &global_csc, &pos)))
+                if (LIXA_RC_OK != (ret_cod = client_status_coll_add(
+                                       &global_csc)))
                     THROW(CLIENT_STATUS_COLL_REGISTER_ERROR);
-                cs = client_status_coll_get_status(&global_csc, pos);
+                if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(
+                                       &global_csc, &cs))) {
+                    LIXA_TRACE(("lixa_tx_open: the status was added but "
+                                "it can not be retrieved; this is a severe "
+                                "internal error!\n"));
+                    THROW(ADDED_AND_NOT_FOUND);
+                }
                 break;
             default:
                 THROW(CLIENT_STATUS_COLL_GET_CS_ERROR);
@@ -771,6 +778,10 @@ int lixa_tx_open(int *txrc, int mmode)
                 ret_cod = LIXA_RC_TX_FAIL;
                 break;
             case CLIENT_STATUS_COLL_REGISTER_ERROR:
+                break;
+            case ADDED_AND_NOT_FOUND:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
             case CLIENT_STATUS_COLL_GET_CS_ERROR:
             case CLIENT_CONFIG_ERROR:
             case CLIENT_CONNECT_ERROR:

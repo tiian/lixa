@@ -300,6 +300,15 @@ extern "C" {
 
 
     /**
+     * Display the content of a common status control thread object
+     * @param csc IN object reference
+     */
+    void common_status_conthr_display(
+        const struct common_status_conthr_s *csc);
+
+    
+    
+    /**
      * Use an MD5 digest to set the global bqual
      * <b>Note:</b> this function is not thread safe and MUST be called
      * with a serialization technique

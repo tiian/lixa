@@ -131,29 +131,6 @@ typedef struct client_status_s client_status_t;
 
 
 
-#define KEY_NOT_FOUND -1
-#define KEY_ERROR     -2
-
-
-
-/**
- * This structure is used to create an index (key,value) couples necessary
- * to efficiently manage the client status set; it's a private structure
- * not exposed to the world
- */
-struct client_status_index_s {
-    /**
-     * thread_id returned by pthread_self is the search key
-     */
-    pthread_t          key;
-    /**
-     * position inside array is the value associated to the key
-     */
-    int                value;
-};
-
-
-
 /**
  * It's used to store the status of all the thread connected to a
  * lixa transaction manager
@@ -164,25 +141,10 @@ struct client_status_coll_s {
      */
     GStaticRWLock                 rwlock;
     /**
-     * Number of elements allocated in index data array
+     * The hash table contains the pointer to the client status objects; the
+     * hash table is indexed using thread ids
      */
-    int                           index_size;
-    /**
-     * Index elements
-     */
-    struct client_status_index_s *index_data;
-    /**
-     * Number of allocated data elements
-     */
-    int                           status_size;
-    /**
-     * Number of used data elements
-     */
-    int                           status_used;
-    /**
-     * Elements
-     */
-    client_status_t              *status_data;
+    GHashTable                   *status_data;
 };
 
 typedef struct client_status_coll_s client_status_coll_t;
@@ -238,6 +200,14 @@ extern "C" {
      * @param cs OUT object reference
      */
     void client_status_free(client_status_t *cs);
+
+
+
+    /**
+     * Display the content of a client status object
+     * @param cs IN object reference
+     */
+    void client_status_display(const client_status_t *cs);
 
 
     
@@ -453,20 +423,6 @@ extern "C" {
     
 
     /**
-     * Return the status of a specific thread; this method MUST be protected
-     * by a rdlock because the array can change while the method is in progress
-     * @param csc IN object reference
-     * @param pos IN position of the desired thread
-     *               ( @ref client_status_coll_search )
-     * @return a reference to the desired object
-     */
-    static inline client_status_t *client_status_coll_get_status(
-        client_status_coll_t *csc, int pos) {
-        return &csc->status_data[pos]; }
-
-    
-
-    /**
      * Retrieve a (stable) reference to the current thread client status; this
      * method is safe because it's internally lock protected
      * @param csc IN object reference
@@ -480,22 +436,11 @@ extern "C" {
 
     
     /**
-     * Register the current thread in the status set
-     * @param csc IN/OUT object reference
-     * @param pos OUT the position of the slot assigned to this thread
-     * @return a standardized return code
-     */
-    int client_status_coll_register(client_status_coll_t *csc, int *pos);
-
-
-
-    /**
      * Add a new client status to the set
      * @param csc IN/OUT object reference
-     * @param status_pos OUT the position of the slot added and reserved
      * @return a standardized return code
      */
-    int client_status_coll_add(client_status_coll_t *csc, int *status_pos);
+    int client_status_coll_add(client_status_coll_t *csc);
 
 
 
@@ -508,19 +453,6 @@ extern "C" {
 
 
     
-    /**
-     * Search the position of the current thread inside the index
-     * @param csc IN object reference
-     * @param pos OUT the position inside status
-     * @param lock IN should the method lock the container: FALSE if the
-     *                container is already locked, TRUE otherwise
-     * @return a standardized return code
-     */
-    int client_status_coll_search(client_status_coll_t *csc, int *pos,
-                                  int lock);
-
-
-
     /**
      * Check if client status collection is empty
      * @param csc IN object reference

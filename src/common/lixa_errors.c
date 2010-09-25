@@ -127,7 +127,8 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_XA_ERROR:
             return "ERROR: an XA function returned an unexpcted return code";
         case LIXA_RC_MALLOC_ERROR:
-            return "ERROR: 'malloc' function returned an error condition";
+            return "ERROR: 'malloc'/'g_malloc' function returned an error "
+                "condition";
         case LIXA_RC_REALLOC_ERROR:
             return "ERROR: 'realloc' function returned an error condition";
         case LIXA_RC_STRDUP_ERROR:
