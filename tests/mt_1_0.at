@@ -1,7 +1,7 @@
 AT_BANNER([Multithread specific test cases])
 
-# Checks return code result
-AT_SETUP([MT/1.0/0.0])
+# a lot of commits
+AT_SETUP([MT/1.0/0.0 multithread commit])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
@@ -36,6 +36,41 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh reset recycle case0031 commit 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh reset start case0031 commit 0], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# a lot of rollbacks
+AT_SETUP([MT/1.0/0.1 multithread rollback])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M.config
+xa_open/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh none stop case0031 rollback 0], [0], [ignore], [ignore])
 AT_CLEANUP
 

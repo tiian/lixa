@@ -840,8 +840,11 @@ int status_record_insert(struct thread_status_s *ts,
                         "empty, status file resize in progres...\n"));
             
             /* open the file for append: we must add new records */
-            if (-1 == (fd = open(status_filename, O_RDWR | O_APPEND)))
+            if (-1 == (fd = open(status_filename, O_RDWR | O_APPEND))) {
+                LIXA_TRACE(("status_record_insert: error while opening status "
+                            "file '%s' (errno=%d)\n", status_filename, errno));
                 THROW(OPEN_ERROR);
+            }
             /* retrieve size */
             if (0 != fstat(fd, &fd_stat))
                 THROW(FSTAT_ERROR);
