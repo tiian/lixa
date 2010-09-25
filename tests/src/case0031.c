@@ -123,7 +123,7 @@ void *transaction(void *parm)
     
     /* wait 100 milliseconds */
     to.tv_sec = 0;
-    to.tv_usec = 100000;
+    to.tv_usec = 50000;
     select(0, NULL, NULL, NULL, &to);
     
     if (data->commit)
