@@ -221,7 +221,7 @@
 #define LIXA_RC_XA_ERROR                       -99
 
 /**
- * "malloc" function error
+ * "malloc"/"g_malloc" function error
  */
 #define LIXA_RC_MALLOC_ERROR                  -100
 /**

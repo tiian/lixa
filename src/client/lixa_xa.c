@@ -1612,7 +1612,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
         int fd;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
-
+        
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
 
@@ -1679,7 +1679,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_start_24_xa_start_execs_s),
             global_ccc.actconf.rsrmgrs->len);
-        
+
         /* loop on all the resource managers and call xa_start function */
         *txrc = TX_OK;
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {

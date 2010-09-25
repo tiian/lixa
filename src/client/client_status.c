@@ -54,10 +54,6 @@
  * linking the library; the structure i protected by a mutex to avoid
  * concurrency issues */
 client_status_coll_t global_csc = { G_STATIC_RW_LOCK_INIT,
-                                    0,
-                                    NULL,
-                                    0,
-                                    0,
                                     NULL};
 
 
@@ -108,163 +104,58 @@ void client_status_free(client_status_t *cs)
 
 
 
-int client_status_coll_register(client_status_coll_t *csc, int *pos)
+void client_status_display(const client_status_t *cs)
 {
-    enum Exception { INTERNAL_ERROR
-                     , REGISTER_ERROR
-                     , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("client_status_coll_register\n"));
-    TRY {
-        *pos = 0;
-
-        switch (ret_cod = client_status_coll_search(csc, pos, TRUE)) {
-            case LIXA_RC_OK:
-                LIXA_TRACE(("client_status_coll_register: thread already "
-                            "registered.\n"));
-                break;
-            case LIXA_RC_OBJ_NOT_FOUND:
-                /* register the new thread */
-                if (LIXA_RC_OK != (ret_cod = client_status_coll_add(csc, pos)))
-                    THROW(REGISTER_ERROR);
-                break;
-            default:
-                THROW(INTERNAL_ERROR);
-                break;
-        } /* switch (pos) */
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case INTERNAL_ERROR:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-                break;
-            case REGISTER_ERROR:
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("client_status_coll_register/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
+    LIXA_TRACE(("client_status_display: active=%d, sockfd=%d\n", cs->active,
+                cs->sockfd));
+    common_status_conthr_display(&cs->state);
 }
 
 
 
-int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
+int client_status_coll_add(client_status_coll_t *csc)
 {
-    enum Exception { MALLOC_ERROR
-                     , OBJ_CORRUPTED
-                     , REALLOC_ERROR
+    enum Exception { YET_ADDED
+                     , MALLOC_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    struct client_status_index_s *new_index_data = NULL;
-    client_status_t *new_status_data = NULL;
+    client_status_t *cs = NULL;
     
     LIXA_TRACE(("client_status_coll_add\n"));
     TRY {
         pthread_t key = pthread_self();
-        int new_index_size = 0, i = 0;
-        int free_slot = 0;
-        int new_status_size = csc->status_size;
-        int inserted = FALSE;
 
         /* take an exclusive lock to avoid collisions */
         LIXA_TRACE(("client_status_coll_add: acquiring exclusive rwlock\n"));
         g_static_rw_lock_writer_lock(&(csc->rwlock));
 
-        /* allocate a new index */
-        new_index_size = csc->index_size + 1;
-        if (NULL == (new_index_data = malloc(
-                         sizeof(struct client_status_index_s) *
-                         new_index_size)))
+        /* verify the thread was not already registered */
+        if (NULL != (cs = (client_status_t *)g_hash_table_lookup(
+                         csc->status_data, (gconstpointer)key))) {
+            LIXA_TRACE(("client_status_coll_add: status for thread "
+                        PTHREAD_T_FORMAT " yet added, skipping...\n", key));
+            THROW(YET_ADDED);
+        }
+        
+        /* allocate a new status object */
+        if (NULL == (cs = (client_status_t *)g_malloc(
+                         sizeof(client_status_t))))
             THROW(MALLOC_ERROR);
 
-        /* copy & insert */
-        if (csc->index_size > 0) {
-            while (i < csc->index_size) {
-                assert(csc->index_data[i].key != key);
-                if (csc->index_data[i].key < key)
-                    new_index_data[i] = csc->index_data[i];
-                else {
-                    /* insert new key */
-                    new_index_data[i].key = key;
-                    inserted = TRUE;
-                    memcpy(new_index_data + i + 1, csc->index_data + i,
-                           (csc->index_size - i) *
-                           sizeof(struct client_status_index_s));
-                    break;
-                }
-                ++i;
-            } /* while (i < new_index_size) */
-        }
-        if (!inserted)
-            new_index_data[i].key = key;
-        LIXA_TRACE(("client_status_coll_add: index key inserted at pos %d, "
-                    "old index size = %d, new index size = %d\n",
-                    i, csc->index_size, new_index_size));
-        /* now i is the pos in index of the new key */
-
-        LIXA_TRACE(("client_status_coll_add: status_used = %d, "
-                    "status_size = %d\n", csc->status_used,
-                    csc->status_size));
-        if (csc->status_used < csc->status_size) {
-            /* there must be at least one free slot */
-            int j;
-            for (j = 0; j < csc->status_size; ++j) {
-                if (!client_status_is_active(&(csc->status_data[j])))
-                    break;
-            }
-            if (client_status_is_active(&(csc->status_data[j])))
-                THROW(OBJ_CORRUPTED);
-            free_slot = j;
-        } else {
-            new_status_size = csc->status_size + 1;
-            if (NULL == (new_status_data = realloc(
-                             csc->status_data,
-                             sizeof(client_status_t) * new_status_size)))
-                THROW(REALLOC_ERROR);
-            csc->status_data = new_status_data;
-            free_slot = csc->status_size;
-        }
-        LIXA_TRACE(("client_status_coll_add: status inserted at pos %d, "
-                    "old status size = %d, new status size = %d, "
-                    "old used status = %d\n", free_slot, csc->status_size,
-                    new_status_size, csc->status_used));
         /* reset & set slot */
-        client_status_init(&(csc->status_data[free_slot]));
-        client_status_active(&(csc->status_data[free_slot]));
+        client_status_init(cs);
+        client_status_active(cs);
 
-        /* finalize operations */
-        *status_pos = free_slot;
-        csc->status_size = new_status_size;
-        csc->status_used++;
-        csc->index_size = new_index_size;
-        if (NULL != csc->index_data)
-            free(csc->index_data);
-        LIXA_TRACE(("client_status_coll_add: after free\n"));
-        csc->index_data = new_index_data;
-        csc->index_data[i].value = free_slot;
-        
-        LIXA_TRACE(("client_status_coll_add: index key = "
-                    PTHREAD_T_FORMAT ", index value = %d\n", key, free_slot));
-        
+        g_hash_table_insert(csc->status_data, (gpointer)key, (gpointer)cs);
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case YET_ADDED:
+                ret_cod = LIXA_RC_OK;
+                break;
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
-                break;
-            case OBJ_CORRUPTED:
-                ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                break;
-            case REALLOC_ERROR:
-                ret_cod = LIXA_RC_REALLOC_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -273,13 +164,6 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         
-        /* recovery actions */
-        if (NONE != excp)
-            LIXA_TRACE(("client_status_coll_add: values before recovery "
-                        "actions excp=%d/ret_cod=%d/errno=%d\n",
-                        excp, ret_cod, errno));
-        if (excp > MALLOC_ERROR && excp < NONE)
-            free(new_index_data);
         /* release exclusive lock */
         LIXA_TRACE(("client_status_coll_add: releasing exclusive rwlock\n"));
         g_static_rw_lock_writer_unlock(&(csc->rwlock));
@@ -294,92 +178,49 @@ int client_status_coll_add(client_status_coll_t *csc, int *status_pos)
 
 int client_status_coll_del(client_status_coll_t *csc)
 {
-    enum Exception { EMPTY_INDEX
-                     , COLL_SEARCH
+    enum Exception { OBJ_NOT_FOUND
                      , OBJ_CORRUPTED
-                     , MALLOC_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    struct client_status_index_s *new_index_data = NULL;
 
+    client_status_t *cs = NULL;
+    
     LIXA_TRACE(("client_status_coll_del\n"));
     TRY {
-        int new_index_size = 0, pos = 0;
+        pthread_t key = pthread_self();
         
         /* take an exclusive lock to avoid collisions */
         LIXA_TRACE(("client_status_coll_del: acquiring exclusive rwlock\n"));
         g_static_rw_lock_writer_lock(&(csc->rwlock));
 
-        if (csc->index_size < 1)
-            THROW(EMPTY_INDEX);
-
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_search(
-                               csc, &pos, FALSE)))
-            THROW(COLL_SEARCH);
-        
-        if (pos >= csc->index_size)
-            THROW(OBJ_CORRUPTED);
-
-#ifdef LIXA_DEBUG
-    {
-        pthread_t whoami = pthread_self();
-        if (csc->index_data[pos].key != whoami) {
-            LIXA_TRACE(("client_status_coll_del: whoami = "
-                        PTHREAD_T_FORMAT ", csc->index_data[pos].key = "
-                        PTHREAD_T_FORMAT "\n", whoami,
-                        csc->index_data[pos].key));
-            assert(csc->index_data[pos].key != whoami);
+        /* retrieve client status */
+        if (NULL == (cs = (client_status_t *)g_hash_table_lookup(
+                         csc->status_data, (gconstpointer)key))) {
+            LIXA_TRACE(("client_status_coll_del: status for thread "
+                        PTHREAD_T_FORMAT " not found, skipping...\n", key));
+            THROW(OBJ_NOT_FOUND);
         }
-    }
-#endif /* LIXA_DEBUG */
-
+        
         /* free dynamic memory */
-        client_status_free(&(csc->status_data[csc->index_data[pos].value]));
-        /* reset the status slot */
-        client_status_init(&(csc->status_data[csc->index_data[pos].value]));
-        csc->status_used--;
-        
-        new_index_size = csc->index_size - 1;
-        LIXA_TRACE(("client_status_coll_del: index size = %d, "
-                    "new index size = %d, pos = %d\n", csc->index_size,
-                    new_index_size, pos));
-        if (new_index_size > 0) {
-            if (NULL == (new_index_data = malloc(
-                         sizeof(struct client_status_index_s) *
-                         new_index_size)))
-                THROW(MALLOC_ERROR);
-            if (pos > 0)
-                memcpy(new_index_data, csc->index_data,
-                       pos * sizeof(struct client_status_index_s));
-            if (pos < csc->index_size - 1)
-                memcpy(new_index_data + pos, csc->index_data + pos + 1,
-                       (csc->index_size - pos - 1) *
-                       sizeof(struct client_status_index_s));
-            csc->index_size = new_index_size;
-            free(csc->index_data);
-            csc->index_data = new_index_data;
-        } else {
-            csc->index_size = 0;
-            free(csc->index_data);
-            csc->index_data = NULL;
+        client_status_free(cs);
+        g_free(cs);
+        cs = NULL;
+
+        /* remove from hast table */
+        if (!g_hash_table_remove(csc->status_data, (gconstpointer)key)) {
+            LIXA_TRACE(("client_status_coll_del: the key was found by "
+                        "g_hash_table_lookup, but was not removed by "
+                        "g_hast_table_remove; this is a severe error!\n"));
+            THROW(OBJ_CORRUPTED);
         }
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case EMPTY_INDEX:
-                LIXA_TRACE(("client_status_coll_del: the index is empty (%d), "
-                            "no client status can be removed from the "
-                            "container\n", csc->index_size));
-                ret_cod = LIXA_RC_EMPTY_CONTAINER;
-                break;
-            case COLL_SEARCH:
+            case OBJ_NOT_FOUND:
                 break;
             case OBJ_CORRUPTED:
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                break;
-            case MALLOC_ERROR:
-                ret_cod = LIXA_RC_MALLOC_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -388,87 +229,11 @@ int client_status_coll_del(client_status_coll_t *csc)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         
-        /* recovery actions */
-        if (NONE != excp)
-            LIXA_TRACE(("client_status_coll_del: values before recovery "
-                        "actions excp=%d/ret_cod=%d/errno=%d\n",
-                        excp, ret_cod, errno));
         /* release exclusive lock */
         LIXA_TRACE(("client_status_coll_del: releasing exclusive rwlock\n"));
         g_static_rw_lock_writer_unlock(&(csc->rwlock));        
     } /* TRY-CATCH */
     LIXA_TRACE(("client_status_coll_del/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-int client_status_coll_search(client_status_coll_t *csc, int *pos, int lock)
-{
-    enum Exception { NOT_FOUND1
-                     , OBJ_CORRUPTED
-                     , NONE
-                     , NOT_FOUND2 } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("client_status_coll_search\n"));
-    TRY {
-        int p,u,m;
-        pthread_t key = pthread_self();
-
-        /* take a shared lock to avoid collisions */
-        if (lock) {
-            LIXA_TRACE(("client_status_coll_search: acquiring shared "
-                        "rwlock\n"));
-            g_static_rw_lock_reader_lock(&(csc->rwlock));
-        }
-
-        if (NULL == csc->index_data)
-            THROW(NOT_FOUND1);
-        if (1 > csc->index_size)
-            THROW(OBJ_CORRUPTED);
-        p = 0;
-        u = csc->index_size - 1;
-        while (p <= u) {
-            m = (p+u)/2;
-            if (csc->index_data[m].key == key) {
-                *pos = m;
-                THROW(NONE);
-            }
-            if (csc->index_data[m].key < key)
-                p = m + 1;
-            else
-                u = m - 1;
-        }
-
-        THROW(NOT_FOUND2);
-    } CATCH {
-        switch (excp) {
-            case NOT_FOUND1:
-            case NOT_FOUND2:
-                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
-                break;
-            case OBJ_CORRUPTED:
-                ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        if (NONE != excp)
-            LIXA_TRACE(("client_status_coll_search: values before recovery "
-                        "actions excp=%d/ret_cod=%d/errno=%d\n",
-                        excp, ret_cod, errno));
-        if (lock) {
-            LIXA_TRACE(("client_status_coll_search: releasing shared "
-                        "rwlock\n"));
-            g_static_rw_lock_reader_unlock(&(csc->rwlock));
-        }
-    } /* TRY-CATCH */
-    LIXA_TRACE(("client_status_coll_search/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -502,32 +267,52 @@ int client_status_could_one_phase(const client_status_t *cs)
 
 
 
+gboolean client_status_coll_gequal(gconstpointer a, gconstpointer b) {
+    return a == b;
+}
+
+
+
 int client_status_coll_get_cs(client_status_coll_t *csc,
                               client_status_t **cs)
 {
-    enum Exception { COLL_SEARCH_ERROR
+    enum Exception { HASH_TABLE_NEW
+                     , OBJ_NOT_FOUND
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("client_status_coll_get_cs\n"));
     TRY {
-        int pos = 0;
+        pthread_t key = pthread_self();
         
         /* take a shared lock to avoid collisions */
         LIXA_TRACE(("client_status_coll_get_cs: acquiring shared rwlock\n"));
         g_static_rw_lock_reader_lock(&(csc->rwlock));
 
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_search(
-                               csc, &pos, FALSE)))
-            THROW(COLL_SEARCH_ERROR);
+        if (NULL == csc->status_data) {
+            LIXA_TRACE(("client_status_coll_get_cs: initializing hash "
+                        "table for client status...\n"));
+            if (NULL == (csc->status_data = g_hash_table_new(
+                             g_direct_hash, client_status_coll_gequal)))
+                THROW(HASH_TABLE_NEW);
+        }
 
-        *cs = csc->status_data + csc->index_data[pos].value;
-        LIXA_TRACE(("client_status_coll_get_cs: *cs = %p\n", *cs));
+        /* retrieve client status */
+        if (NULL == (*cs = (client_status_t *)g_hash_table_lookup(
+                         csc->status_data, (gconstpointer)key))) {
+            LIXA_TRACE(("client_status_coll_get_cs: status for thread "
+                        PTHREAD_T_FORMAT " not found, skipping...\n", key));
+            THROW(OBJ_NOT_FOUND);
+        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case COLL_SEARCH_ERROR:
+            case HASH_TABLE_NEW:
+                ret_cod = LIXA_RC_G_RETURNED_NULL;
+                break;
+            case OBJ_NOT_FOUND:
+                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -535,10 +320,6 @@ int client_status_coll_get_cs(client_status_coll_t *csc,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        if (NONE != excp)
-            LIXA_TRACE(("client_status_coll_get_cs: values before recovery "
-                        "actions excp=%d/ret_cod=%d/errno=%d\n",
-                        excp, ret_cod, errno));
         LIXA_TRACE(("client_status_coll_get_cs: releasing shared rwlock\n"));
         g_static_rw_lock_reader_unlock(&(csc->rwlock));
     } /* TRY-CATCH */
@@ -556,8 +337,7 @@ int client_status_coll_is_empty(client_status_coll_t *csc)
     LIXA_TRACE(("client_status_coll_is_empty: acquiring shared rwlock\n"));
     g_static_rw_lock_reader_lock(&(csc->rwlock));
     
-    if (csc->index_size < 1)
-        ret_cod = TRUE;
+    ret_cod = (0 == g_hash_table_size(csc->status_data));
     
     LIXA_TRACE(("client_status_coll_is_empty: releasing shared rwlock\n"));
     g_static_rw_lock_reader_unlock(&(csc->rwlock));

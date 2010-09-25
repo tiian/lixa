@@ -28,6 +28,7 @@
 
 #include <lixa_errors.h>
 #include <lixa_common_status.h>
+#include <lixa_trace.h>
 
 
 
@@ -46,6 +47,18 @@ uuid_t lixa_xid_global_bqual;
 #if MD5_DIGEST_LENGTH != SIZEOF_UUID_T
 # error MD5 digest and uuid_t differs in length
 #endif
+
+
+
+void common_status_conthr_display(const struct common_status_conthr_s *csc)
+{
+    LIXA_TRACE(("common_status_conthr_display: finished=%d, txstate=%d, "
+                "will_commit=%d, will_rollback=%d\n",
+                csc->finished, csc->txstate, csc->will_commit,
+                csc->will_rollback));
+    LIXA_TRACE_HEX_DATA("common_status_conthr_display: xid = ",
+                        &csc->xid, sizeof(XID));
+}
 
 
 
