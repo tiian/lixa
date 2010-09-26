@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.5.21 
+
 20100925 - 0.5.20 implemented test cases XA/5.52/*.*
                   implemented test case MT/1.0/0.*
                   fixed bug # 3074315

@@ -137,9 +137,9 @@ typedef struct client_status_s client_status_t;
  */
 struct client_status_coll_s {
     /**
-     * This lock is used to serialize read & update access to the array
+     * This lock is used to serialize accesses to thehash table
      */
-    GStaticRWLock                 rwlock;
+    GStaticMutex                  mutex;
     /**
      * The hash table contains the pointer to the client status objects; the
      * hash table is indexed using thread ids

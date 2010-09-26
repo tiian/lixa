@@ -53,7 +53,7 @@
 /* this static structure is used by all the threads of the program
  * linking the library; the structure i protected by a mutex to avoid
  * concurrency issues */
-client_status_coll_t global_csc = { G_STATIC_RW_LOCK_INIT,
+client_status_coll_t global_csc = { G_STATIC_MUTEX_INIT,
                                     NULL};
 
 
@@ -127,8 +127,8 @@ int client_status_coll_add(client_status_coll_t *csc)
         pthread_t key = pthread_self();
 
         /* take an exclusive lock to avoid collisions */
-        LIXA_TRACE(("client_status_coll_add: acquiring exclusive rwlock\n"));
-        g_static_rw_lock_writer_lock(&(csc->rwlock));
+        LIXA_TRACE(("client_status_coll_add: acquiring mutex\n"));
+        g_static_mutex_lock(&(csc->mutex));
 
         /* verify the thread was not already registered */
         if (NULL != (cs = (client_status_t *)g_hash_table_lookup(
@@ -165,8 +165,8 @@ int client_status_coll_add(client_status_coll_t *csc)
         } /* switch (excp) */
         
         /* release exclusive lock */
-        LIXA_TRACE(("client_status_coll_add: releasing exclusive rwlock\n"));
-        g_static_rw_lock_writer_unlock(&(csc->rwlock));
+        LIXA_TRACE(("client_status_coll_add: releasing mutex\n"));
+        g_static_mutex_unlock(&(csc->mutex));
         
     } /* TRY-CATCH */
     LIXA_TRACE(("client_status_coll_add/excp=%d/"
@@ -190,8 +190,8 @@ int client_status_coll_del(client_status_coll_t *csc)
         pthread_t key = pthread_self();
         
         /* take an exclusive lock to avoid collisions */
-        LIXA_TRACE(("client_status_coll_del: acquiring exclusive rwlock\n"));
-        g_static_rw_lock_writer_lock(&(csc->rwlock));
+        LIXA_TRACE(("client_status_coll_del: acquiring mutex\n"));
+        g_static_mutex_lock(&(csc->mutex));
 
         /* retrieve client status */
         if (NULL == (cs = (client_status_t *)g_hash_table_lookup(
@@ -230,8 +230,8 @@ int client_status_coll_del(client_status_coll_t *csc)
         } /* switch (excp) */
         
         /* release exclusive lock */
-        LIXA_TRACE(("client_status_coll_del: releasing exclusive rwlock\n"));
-        g_static_rw_lock_writer_unlock(&(csc->rwlock));        
+        LIXA_TRACE(("client_status_coll_del: releasing mutex\n"));
+        g_static_mutex_unlock(&(csc->mutex));
     } /* TRY-CATCH */
     LIXA_TRACE(("client_status_coll_del/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -286,8 +286,8 @@ int client_status_coll_get_cs(client_status_coll_t *csc,
         pthread_t key = pthread_self();
         
         /* take a shared lock to avoid collisions */
-        LIXA_TRACE(("client_status_coll_get_cs: acquiring shared rwlock\n"));
-        g_static_rw_lock_reader_lock(&(csc->rwlock));
+        LIXA_TRACE(("client_status_coll_get_cs: acquiring mutex\n"));
+        g_static_mutex_lock(&(csc->mutex));
 
         if (NULL == csc->status_data) {
             LIXA_TRACE(("client_status_coll_get_cs: initializing hash "
@@ -320,8 +320,8 @@ int client_status_coll_get_cs(client_status_coll_t *csc,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        LIXA_TRACE(("client_status_coll_get_cs: releasing shared rwlock\n"));
-        g_static_rw_lock_reader_unlock(&(csc->rwlock));
+        LIXA_TRACE(("client_status_coll_get_cs: releasing mutex\n"));
+        g_static_mutex_unlock(&(csc->mutex));
     } /* TRY-CATCH */
     LIXA_TRACE(("client_status_coll_get_cs/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -334,12 +334,12 @@ int client_status_coll_is_empty(client_status_coll_t *csc)
 {
     int ret_cod = FALSE;
     
-    LIXA_TRACE(("client_status_coll_is_empty: acquiring shared rwlock\n"));
-    g_static_rw_lock_reader_lock(&(csc->rwlock));
+    LIXA_TRACE(("client_status_coll_is_empty: acquiring mutex\n"));
+    g_static_mutex_lock(&(csc->mutex));
     
     ret_cod = (0 == g_hash_table_size(csc->status_data));
     
-    LIXA_TRACE(("client_status_coll_is_empty: releasing shared rwlock\n"));
-    g_static_rw_lock_reader_unlock(&(csc->rwlock));
+    LIXA_TRACE(("client_status_coll_is_empty: releasing mutex\n"));
+    g_static_mutex_unlock(&(csc->mutex));
     return ret_cod;
 }

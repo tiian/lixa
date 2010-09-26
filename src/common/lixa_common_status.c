@@ -57,7 +57,7 @@ void common_status_conthr_display(const struct common_status_conthr_s *csc)
                 csc->finished, csc->txstate, csc->will_commit,
                 csc->will_rollback));
     LIXA_TRACE_HEX_DATA("common_status_conthr_display: xid = ",
-                        &csc->xid, sizeof(XID));
+                        (const byte_t *)&csc->xid, sizeof(XID));
 }
 
 
