@@ -206,12 +206,20 @@ int client_status_coll_del(client_status_coll_t *csc)
         g_free(cs);
         cs = NULL;
 
-        /* remove from hast table */
+        /* remove from hash table */
         if (!g_hash_table_remove(csc->status_data, (gconstpointer)key)) {
             LIXA_TRACE(("client_status_coll_del: the key was found by "
                         "g_hash_table_lookup, but was not removed by "
                         "g_hast_table_remove; this is a severe error!\n"));
             THROW(OBJ_CORRUPTED);
+        }
+
+        /* if hash table is empty, remove hash table */
+        if (0 == g_hash_table_size(csc->status_data)) {
+            LIXA_TRACE(("client_status_coll_del: the hash table is empty, "
+                        "removing it...\n"));
+            g_hash_table_destroy(csc->status_data);
+            csc->status_data = NULL;
         }
         
         THROW(NONE);
@@ -336,8 +344,11 @@ int client_status_coll_is_empty(client_status_coll_t *csc)
     
     LIXA_TRACE(("client_status_coll_is_empty: acquiring mutex\n"));
     g_static_mutex_lock(&(csc->mutex));
-    
-    ret_cod = (0 == g_hash_table_size(csc->status_data));
+
+    if (NULL != csc->status_data)
+        ret_cod = (0 == g_hash_table_size(csc->status_data));
+    else
+        ret_cod = TRUE;
     
     LIXA_TRACE(("client_status_coll_is_empty: releasing mutex\n"));
     g_static_mutex_unlock(&(csc->mutex));

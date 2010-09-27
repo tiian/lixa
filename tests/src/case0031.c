@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     int expected_rc;
     struct thread_data_s data;
     pthread_t tids[THREAD_NUMBER];
-    int i;
+    int i,j;
 
     if (argc < 3) {
         fprintf(stderr, "%s: at least two option must be specified\n",
@@ -87,13 +87,17 @@ int main(int argc, char *argv[])
     data.commit = commit;
     data.expected_rc = expected_rc;
     data.pgm = pgm;
-    for (i=0; i<THREAD_NUMBER; ++i) {
-        rc = pthread_create(tids+i, NULL, transaction, (void *)&data);
-        assert(0 == rc);
-    }
-    for (i=0; i<THREAD_NUMBER; ++i) {    
-        rc = pthread_join(tids[i], NULL);
-        assert(0 == rc);
+    for (j=0; j<3; ++j) {
+        for (i=0; i<THREAD_NUMBER; ++i) {
+            rc = pthread_create(tids+i, NULL, transaction, (void *)&data);
+            assert(0 == rc);
+        }
+        for (i=0; i<THREAD_NUMBER; ++i) {    
+            rc = pthread_join(tids[i], NULL);
+            assert(0 == rc);
+        }
+        printf("%s| sleeping...\n", pgm);
+        sleep(1);
     }
     printf("%s| ...finished\n", pgm);
     return 0;
