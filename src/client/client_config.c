@@ -575,7 +575,18 @@ int client_unconfig(client_config_coll_t *ccc)
     
     LIXA_TRACE(("client_unconfig\n"));
     TRY {
-        
+        /* activating this clean-up it seems liblixamonkey forget state...
+        free(ccc->job);
+        ccc->job = NULL;
+        g_array_free(ccc->profiles, TRUE);
+        ccc->profiles = NULL;
+        g_array_free(ccc->rsrmgrs, TRUE);
+        ccc->rsrmgrs = NULL;
+        g_array_free(ccc->trnmgrs, TRUE);
+        ccc->trnmgrs = NULL;
+
+        ccc->configured = FALSE;
+        */
         THROW(NONE);
     } CATCH {
         switch (excp) {
