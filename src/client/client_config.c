@@ -575,18 +575,49 @@ int client_unconfig(client_config_coll_t *ccc)
     
     LIXA_TRACE(("client_unconfig\n"));
     TRY {
-        /* activating this clean-up it seems liblixamonkey forget state...
+        guint i;
+        
         free(ccc->job);
         ccc->job = NULL;
+
+        ccc->lixac_conf_filename = NULL;
+        if (NULL != ccc->profile) {
+            free(ccc->profile);
+            ccc->profile = NULL;
+        }
+        
+        g_array_free(ccc->actconf.rsrmgrs, TRUE);
+
+        for (i=0; i<ccc->profiles->len; ++i) {
+            struct profile_config_s *profile = &g_array_index(
+                ccc->profiles, struct profile_config_s, i);
+            xmlFree(profile->name);
+            g_array_free(profile->trnmgrs, TRUE);
+            g_array_free(profile->rsrmgrs, TRUE);
+        }
         g_array_free(ccc->profiles, TRUE);
         ccc->profiles = NULL;
+
+        for (i=0; i<ccc->rsrmgrs->len; ++i) {
+            struct rsrmgr_config_s *rsrmgr = &g_array_index(
+                ccc->rsrmgrs, struct rsrmgr_config_s, i);
+            xmlFree(rsrmgr->name);
+            xmlFree(rsrmgr->switch_file);
+        }
         g_array_free(ccc->rsrmgrs, TRUE);
         ccc->rsrmgrs = NULL;
+
+        for (i=0; i<ccc->trnmgrs->len; ++i) {
+            struct trnmgr_config_s *trnmgr = &g_array_index(
+                ccc->trnmgrs, struct trnmgr_config_s, i);
+            xmlFree(trnmgr->name);
+            xmlFree(trnmgr->address);
+        }
         g_array_free(ccc->trnmgrs, TRUE);
         ccc->trnmgrs = NULL;
 
         ccc->configured = FALSE;
-        */
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
