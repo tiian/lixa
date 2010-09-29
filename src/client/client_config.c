@@ -576,18 +576,23 @@ int client_unconfig(client_config_coll_t *ccc)
     LIXA_TRACE(("client_unconfig\n"));
     TRY {
         guint i;
-        
-        free(ccc->job);
-        ccc->job = NULL;
 
+        if (NULL != ccc->job) {
+            free(ccc->job);
+            ccc->job = NULL;
+        }
+        
         ccc->lixac_conf_filename = NULL;
         if (NULL != ccc->profile) {
             free(ccc->profile);
             ccc->profile = NULL;
         }
-        
-        g_array_free(ccc->actconf.rsrmgrs, TRUE);
 
+        if (NULL != ccc->actconf.rsrmgrs) {
+            g_array_free(ccc->actconf.rsrmgrs, TRUE);
+            ccc->actconf.rsrmgrs = NULL;
+        }
+        
         for (i=0; i<ccc->profiles->len; ++i) {
             struct profile_config_s *profile = &g_array_index(
                 ccc->profiles, struct profile_config_s, i);
