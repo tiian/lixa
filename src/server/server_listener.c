@@ -221,6 +221,8 @@ int server_listener_loop(const struct server_config_s *sc,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
+    struct thread_status_s *ts = &(tsa->array[0]);
+    
     LIXA_TRACE(("server_listener_loop\n"));
     TRY {
         int shutdown = FALSE;    
@@ -228,7 +230,6 @@ int server_listener_loop(const struct server_config_s *sc,
         nfds_t n = (nfds_t)lsa->n + 1;
         nfds_t i;
         int ready_fd, found_fd;
-        struct thread_status_s *ts = &(tsa->array[0]);
 
         if (NULL == (ts->poll_array = malloc(
                          n * sizeof(struct pollfd))))
@@ -376,6 +377,12 @@ int server_listener_loop(const struct server_config_s *sc,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* cleaning-up memory */
+        if (NULL != ts->poll_array) {
+            free(ts->poll_array);
+            ts->poll_array = NULL;
+            ts->poll_size = 0;
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("server_listener_loop/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

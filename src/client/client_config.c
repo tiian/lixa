@@ -575,7 +575,7 @@ int client_unconfig(client_config_coll_t *ccc)
     
     LIXA_TRACE(("client_unconfig\n"));
     TRY {
-        guint i;
+        guint i, j;
 
         if (NULL != ccc->job) {
             free(ccc->job);
@@ -597,7 +597,17 @@ int client_unconfig(client_config_coll_t *ccc)
             struct profile_config_s *profile = &g_array_index(
                 ccc->profiles, struct profile_config_s, i);
             xmlFree(profile->name);
+            for (j=0; j<profile->trnmgrs->len; ++j) {
+                xmlChar *key = g_array_index(
+                    profile->trnmgrs, xmlChar *, j);
+                xmlFree(key);
+            }
             g_array_free(profile->trnmgrs, TRUE);
+            for (j=0; j<profile->rsrmgrs->len; ++j) {
+                xmlChar *key = g_array_index(
+                    profile->rsrmgrs, xmlChar *, j);
+                xmlFree(key);
+            }            
             g_array_free(profile->rsrmgrs, TRUE);
         }
         g_array_free(ccc->profiles, TRUE);
@@ -1141,9 +1151,6 @@ int client_parse_profiles(struct client_config_coll_s *ccc,
     } CATCH {
         switch (excp) {
             case PARSE_PROFILE_ERROR:
-                /*
-            case CLIENT_PARSE_PROFILES_ERROR:
-                */
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

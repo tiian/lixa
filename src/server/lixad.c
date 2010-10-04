@@ -133,9 +133,6 @@ int main(int argc, char *argv[])
 
     option_context = g_option_context_new("- LIXA server");
     g_option_context_add_main_entries(option_context, entries, NULL);
-    /*
-    g_option_context_add_group (context, gtk_get_option_group (TRUE));
-    */
     if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
         syslog(LOG_ERR, LIXA_SYSLOG_LXD001E, error->message);
         g_print("option parsing failed: %s\n", error->message);
@@ -206,6 +203,9 @@ int main(int argc, char *argv[])
         return rc;
     }
 
+    /* clean-up memory to enhance memory leak detection */
+    server_unconfig(&sc);
+    
     /* it's time to exit */
     syslog(LOG_NOTICE, LIXA_SYSLOG_LXD006N);
 

@@ -1,4 +1,4 @@
-Develop client_unconfig and check it: developed, test client with Valgrind again 
+Develop server_unconfig and check it: developed, test server with Valgrind again 
 Stability test with valgrind must be performed
 
 Stress test must be performed

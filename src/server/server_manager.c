@@ -389,7 +389,13 @@ void server_manager_thread_cleanup(struct thread_status_s *ts)
             LIXA_TRACE(("server_manager_thread_cleanup: error while writing "
                         "to thread id %d (errno=%d)\n", i, errno));
     }
-    
+
+    /* clean-up memory */
+    if (NULL != ts->poll_array) {
+        free(ts->poll_array);
+        ts->poll_array = NULL;
+        ts->poll_size = 0;
+    }
     return;
 }
 
@@ -936,7 +942,8 @@ int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id)
         if (new_poll_size <= ts->active_clients) {
             LIXA_TRACE(("server_manager_free_slots: new_poll_size = "
                         SIZE_T_FORMAT ", ts->active_clients = "
-                        SIZE_T_FORMAT "\n", new_poll_size, ts->active_clients));
+                        SIZE_T_FORMAT "\n", new_poll_size,
+                        ts->active_clients));
             THROW(INTERNAL_ERROR);
         }
         

@@ -321,6 +321,9 @@ int lixa_job_set_source_ip(lixa_job_t *job, int fd)
         if (source_ip_len > LIXA_JOB_SOURCE_IP_LEN)
             source_ip_len = LIXA_JOB_SOURCE_IP_LEN;
         strncpy(job->fields.source_ip, tmp_source_ip, source_ip_len);
+        /*
+        free(tmp_source_ip);
+        */
         g_static_mutex_unlock(&mutex);
         job->fields.separator = LIXA_PATH_SEPARATOR;
         job->fields.terminator = '\0';

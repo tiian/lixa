@@ -177,6 +177,43 @@ int server_config(struct server_config_s *sc,
 
 
 
+int server_unconfig(struct server_config_s *sc)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_unconfig\n"));
+    TRY {
+        int i;
+        
+        xmlFree(sc->pid_file);
+        sc->pid_file = NULL;
+        for (i=0; i<sc->listeners.n; ++i)
+            xmlFree(sc->listeners.array[i].address);
+        free(sc->listeners.array);
+        sc->listeners.array = NULL;
+        for (i=0; i<sc->managers.n; ++i)
+            xmlFree(sc->managers.array[i].status_file);
+        free(sc->managers.array);
+        sc->managers.array = NULL;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_unconfig/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int server_parse(struct server_config_s *sc,
                  struct thread_pipe_array_s *tpa,
                  xmlNode *a_node)
