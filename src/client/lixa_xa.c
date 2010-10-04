@@ -671,10 +671,10 @@ int lixa_xa_forget(client_status_t *cs, int finished)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int xa_rc = XA_OK;
     char *ser_xid = NULL;
+    struct lixa_msg_s msg;
     
     LIXA_TRACE(("lixa_xa_forget\n"));
     TRY {
-        struct lixa_msg_s msg;
         size_t buffer_size = 0;
         int fd;
         guint i;
@@ -774,13 +774,6 @@ int lixa_xa_forget(client_status_t *cs, int finished)
                                    &msg, buffer, sizeof(buffer),
                                    &buffer_size)))
                 THROW(MSG_SERIALIZE_ERROR);
-
-            /* this object contains references to external stuff and
-               cannot be freed using standard lixa_msg_free; we are freeing the
-               array to avoid memory leaks */
-            g_array_free(msg.body.forget_8.xa_forget_execs, TRUE);
-            memset(&msg, 0, sizeof(msg));
-        
             LIXA_TRACE(("lixa_xa_forget: sending " SIZE_T_FORMAT
                         " bytes to the server for step 8\n", buffer_size));
             if (buffer_size != send(fd, buffer, buffer_size, 0))
@@ -823,6 +816,10 @@ int lixa_xa_forget(client_status_t *cs, int finished)
             free(ser_xid);
             ser_xid = NULL;
         }
+        /* this object contains references to external stuff and
+           cannot be freed using standard lixa_msg_free; we are freeing the
+           array to avoid memory leaks */
+        g_array_free(msg.body.forget_8.xa_forget_execs, TRUE);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_forget/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
