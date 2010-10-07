@@ -125,9 +125,6 @@ int server_config(struct server_config_s *sc,
         /* free parsed document */
         xmlFreeDoc(doc);
 
-        /* release libxml2 stuff */
-        xmlCleanupParser();
-
         if (sc->listeners.n == 0)
             THROW(ZERO_LISTENTERS);
         if (sc->managers.n == 0)
@@ -177,12 +174,13 @@ int server_config(struct server_config_s *sc,
 
 
 
-int server_unconfig(struct server_config_s *sc)
+int server_cleanup(struct server_config_s *sc,
+                   struct thread_pipe_array_s *tpa)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("server_unconfig\n"));
+    LIXA_TRACE(("server_cleanup\n"));
     TRY {
         int i;
         
@@ -196,7 +194,14 @@ int server_unconfig(struct server_config_s *sc)
             xmlFree(sc->managers.array[i].status_file);
         free(sc->managers.array);
         sc->managers.array = NULL;
+
+        free(tpa->array);
+        tpa->array = NULL;
+        tpa->n = 0;
         
+        /* release libxml2 stuff */
+        xmlCleanupParser();
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -207,7 +212,7 @@ int server_unconfig(struct server_config_s *sc)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("server_unconfig/excp=%d/"
+    LIXA_TRACE(("server_cleanup/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

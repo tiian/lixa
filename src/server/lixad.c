@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
     }
 
     /* clean-up memory to enhance memory leak detection */
-    server_unconfig(&sc);
+    server_cleanup(&sc, &tpa);
     
     /* it's time to exit */
     syslog(LOG_NOTICE, LIXA_SYSLOG_LXD006N);
