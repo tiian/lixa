@@ -396,6 +396,10 @@ void server_manager_thread_cleanup(struct thread_status_s *ts)
         ts->poll_array = NULL;
         ts->poll_size = 0;
     }
+
+    /* release libxml2 stuff */
+    xmlCleanupParser();
+
     return;
 }
 

@@ -154,9 +154,11 @@ extern "C" {
      * memory and to avoid false memory leak notification when inspecting the
      * run time behavior
      * @param sc OUT the object containing the server configuration
+     * @param tpa OUT threads communication pipes
      * @return a standardized return code
      */
-    int server_unconfig(struct server_config_s *sc);
+    int server_cleanup(struct server_config_s *sc,
+                       struct thread_pipe_array_s *tpa);
 
 
     
