@@ -106,6 +106,11 @@ int srvr_rcvr_tbl_delete(srvr_rcvr_tbl_t *srt)
     TRY {
         /* @@@ must be implemented and called from shutdown procedure to
            avoid not significative memory leak detection */
+        if (NULL != srt->mutex) {
+            g_mutex_free(srt->mutex);
+            srt->mutex = NULL;
+        }
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {

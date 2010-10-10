@@ -1,3 +1,5 @@
+Go on with srvr_rcvr_tbl_delete: all levels of the structure must be destroyed (use automatic destruction if possible).
+
 Develop server_unconfig and check it: developed, test server with Valgrind again 
 Stability test with valgrind must be performed
 

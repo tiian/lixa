@@ -175,7 +175,9 @@ int server_config(struct server_config_s *sc,
 
 
 int server_cleanup(struct server_config_s *sc,
-                   struct thread_pipe_array_s *tpa)
+                   struct thread_pipe_array_s *tpa,
+                   struct thread_status_array_s *tsa,
+                   srvr_rcvr_tbl_t *srt)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -195,10 +197,23 @@ int server_cleanup(struct server_config_s *sc,
         free(sc->managers.array);
         sc->managers.array = NULL;
 
-        free(tpa->array);
-        tpa->array = NULL;
-        tpa->n = 0;
-        
+        /* release thread communication pipe array */
+        if (NULL != tpa->array) {
+            free(tpa->array);
+            tpa->array = NULL;
+            tpa->n = 0;
+        }
+
+        /* release thread status array */
+        if (NULL != tsa->array) {
+            free(tsa->array);
+            tsa->array = NULL;
+            tsa->n = 0;
+        }
+
+        /* release server recovery table mutex */
+        srvr_rcvr_tbl_delete(srt);
+
         /* release libxml2 stuff */
         xmlCleanupParser();
 
