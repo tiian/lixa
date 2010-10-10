@@ -155,10 +155,14 @@ extern "C" {
      * run time behavior
      * @param sc OUT the object containing the server configuration
      * @param tpa OUT threads communication pipes
+     * @param tsa OUT status of all threads
+     * @param srt OUT reference to the recovery table object
      * @return a standardized return code
      */
     int server_cleanup(struct server_config_s *sc,
-                       struct thread_pipe_array_s *tpa);
+                       struct thread_pipe_array_s *tpa,
+                       struct thread_status_array_s *tsa,
+                       srvr_rcvr_tbl_t *srt);
 
 
     

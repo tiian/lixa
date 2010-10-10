@@ -198,6 +198,14 @@ int server_listener(const struct server_config_s *sc,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        
+        /* release listener status array */
+        if (NULL != lsa->array) {
+            free(lsa->array);
+            lsa->array = NULL;
+            lsa->n = 0;
+        }
+        
     } /* TRY-CATCH */
     LIXA_TRACE(("server_listener/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
