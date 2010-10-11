@@ -53,6 +53,25 @@ int srvr_rcrv_tbl_key1_job_comp(gconstpointer a, gconstpointer b,
 
 
 
+void srvr_rcvr_tbl_value1_destroy(gpointer data)
+{
+    GArray *lvl2_tsid;
+    GQueue *queue;
+    gint i;
+    
+    LIXA_TRACE(("srvr_rcvr_tbl_value1_destroy: data=%p\n", data));
+    lvl2_tsid = (GArray *)data;
+    for (i=0; i<lvl2_tsid->len; ++i) {
+        queue = &g_array_index(lvl2_tsid, GQueue, i);
+        while (!g_queue_is_empty(queue)) {
+            g_queue_pop_tail(queue);
+        }
+    }
+    g_array_free(lvl2_tsid, TRUE);
+}
+
+
+
 int srvr_rcvr_tbl_new(srvr_rcvr_tbl_t *srt, guint tsid_array_size)
 {
     enum Exception { OBJ_NOT_INITIALIZED
@@ -69,7 +88,7 @@ int srvr_rcvr_tbl_new(srvr_rcvr_tbl_t *srt, guint tsid_array_size)
             THROW(G_MUTEX_NEW_ERROR);
         if (NULL == (srt->lvl1_job = g_tree_new_full(
                          srvr_rcrv_tbl_key1_job_comp, NULL,
-                         free, NULL)))
+                         free, srvr_rcvr_tbl_value1_destroy)))
             THROW(G_TREE_NEW_ERROR);
         srt->lvl2_tsid_array_size = tsid_array_size;
         
@@ -104,12 +123,13 @@ int srvr_rcvr_tbl_delete(srvr_rcvr_tbl_t *srt)
     
     LIXA_TRACE(("srvr_rcvr_tbl_delete\n"));
     TRY {
-        /* @@@ must be implemented and called from shutdown procedure to
-           avoid not significative memory leak detection */
         if (NULL != srt->mutex) {
             g_mutex_free(srt->mutex);
             srt->mutex = NULL;
         }
+
+        g_tree_destroy(srt->lvl1_job);
+        srt->lvl1_job = NULL;
         
         THROW(NONE);
     } CATCH {

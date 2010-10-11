@@ -125,6 +125,14 @@ extern "C" {
                                     gpointer user_data);
 
 
+
+    /**
+     * Destroy function: used to automatically remove values from tree
+     * @param data IN reference to the element to be destroyed (released)
+     */
+    void srvr_rcvr_tbl_value1_destroy(gpointer data);
+
+
     
     /**
      * Create a new object: initialization must be performed only ONCE

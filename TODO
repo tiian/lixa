@@ -1,6 +1,3 @@
-Go on with srvr_rcvr_tbl_delete: all levels of the structure must be destroyed (use automatic destruction if possible).
-
-Develop server_unconfig and check it: developed, test server with Valgrind again 
 Stability test with valgrind must be performed
 
 Stress test must be performed
@@ -9,3 +6,6 @@ Crash test must be performed
 
 Remove all @@@ from source code: every one was/is an "open point"
 
+After beta release, after interesting stuff like Python and PHP bindings, the 
+custom containers developed for LIXA could be substituted with glib standard 
+containers.
