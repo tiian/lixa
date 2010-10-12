@@ -95,6 +95,14 @@ extern "C" {
 
 
     /**
+     * Release the memory allocated to a thread status object
+     * @param ts OUT reference to the structure must be destroyed
+     */
+    void thread_status_destroy(struct thread_status_s *ts);
+
+
+    
+    /**
      * Dump the content of the thread status files
      * WARNING: THIS FUNCTION IS *** NOT *** THREAD SAFE
      * @param ts IN thread status reference

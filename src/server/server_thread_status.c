@@ -78,7 +78,10 @@ void thread_status_init(struct thread_status_s *ts, int id,
     ts->status1_filename = ts->status2_filename = NULL;
     ts->status1 = ts->status2 = NULL;
     ts->curr_status = NULL;
-    ts->updated_records = g_tree_new(size_t_compare_func);
+    if (id)
+        ts->updated_records = g_tree_new(size_t_compare_func);
+    else /* listener does not need this structure */
+        ts->updated_records = NULL;
     ts->recovery_table = NULL;
     ts->mmode = mmode;
     ts->excp = ts->ret_cod = ts->last_errno = 0;
@@ -88,6 +91,35 @@ void thread_status_init(struct thread_status_s *ts, int id,
         ts->tid = 0;
     ts->shutdown_type = SHUTDOWN_NULL;
     LIXA_TRACE(("thread_status_init: end initialization (id = %d)\n", id));
+}
+
+
+
+void thread_status_destroy(struct thread_status_s *ts)
+{
+    LIXA_TRACE(("thread_status_destroy\n"));
+
+    if (NULL != ts->poll_array) {
+        free(ts->poll_array);
+        ts->poll_array = NULL;
+        ts->poll_size = 0;
+    }
+    if (NULL != ts->client_array) {
+        free(ts->client_array);
+        ts->client_array = NULL;
+    }
+    if (NULL != ts->updated_records) {
+        g_tree_destroy(ts->updated_records);
+        ts->updated_records = NULL;
+    }
+    if (NULL != ts->status1_filename) {
+        g_free(ts->status1_filename);
+        ts->status1_filename = NULL;
+    }
+    if (NULL != ts->status2_filename) {
+        g_free(ts->status2_filename);
+        ts->status2_filename = NULL;
+    }
 }
 
 
