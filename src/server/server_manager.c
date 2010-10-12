@@ -391,16 +391,7 @@ void server_manager_thread_cleanup(struct thread_status_s *ts)
     }
 
     /* clean-up memory */
-    if (NULL != ts->poll_array) {
-        free(ts->poll_array);
-        ts->poll_array = NULL;
-        ts->poll_size = 0;
-    }
-    if (NULL != ts->client_array) {
-        free(ts->client_array);
-        ts->client_array = NULL;
-    }
-
+    thread_status_destroy(ts);
     /* release libxml2 stuff */
     xmlCleanupParser();
 
