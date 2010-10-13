@@ -243,7 +243,9 @@ int server_listener_loop(const struct server_config_s *sc,
                          n * sizeof(struct pollfd))))
             THROW(MALLOC_ERROR);
         ts->poll_size = n;
-        
+        /*
+        memset(ts->poll_array, 0, n);
+        */
         for (i = 0; i < n; ++i) {
             if (!i)
                 /* control pipe */

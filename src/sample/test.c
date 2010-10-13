@@ -25,6 +25,7 @@
 #include <tx.h>
 
 
+
 void *a_thread(void *useless)
 {
     int i;
@@ -44,9 +45,9 @@ void *a_thread(void *useless)
 
 int main(int argc, char *argv[])
 {
+    /*
     int foo;
 
-    /*
     fprintf(stderr, "pathconf -> %ld\n", pathconf("/home/tiian/lixa", _PC_PATH_MAX));
  
     for (load=0; load<10; ++load) {
@@ -74,15 +75,13 @@ int main(int argc, char *argv[])
     sleep(30);
     */
     
-
 /*    
+    a_thread(&foo);
     a_thread(&foo);
     a_thread(&foo);
     a_thread(&foo);
     a_thread(&foo);
 */
 
-    a_thread(&foo);
-    
     return 0;
 }
