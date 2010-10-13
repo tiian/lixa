@@ -1,4 +1,5 @@
-Stability test with valgrind must be performed
+Stability test with valgrind must be performed: use the multithread case test
+to stress the memory allocation and discover potential memory leaks.
 
 Stress test must be performed
 

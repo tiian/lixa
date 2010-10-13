@@ -392,9 +392,6 @@ void server_manager_thread_cleanup(struct thread_status_s *ts)
 
     /* clean-up memory */
     thread_status_destroy(ts);
-    /* release libxml2 stuff */
-    xmlCleanupParser();
-
     return;
 }
 
