@@ -1,3 +1,8 @@
+Activating client_config_unload_switch in lixa_tx.c:306 break multithread
+case test.
+Trying valgrind against case31 shows many memory leaks...
+Go deep!!!
+
 Stability test with valgrind must be performed: use the multithread case test
 to stress the memory allocation and discover potential memory leaks.
 

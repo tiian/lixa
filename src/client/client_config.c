@@ -632,7 +632,10 @@ int client_unconfig(client_config_coll_t *ccc)
         ccc->trnmgrs = NULL;
 
         ccc->configured = FALSE;
-        
+
+        xmlFreeDoc(ccc->lixac_conf);
+        ccc->lixac_conf = NULL;
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
