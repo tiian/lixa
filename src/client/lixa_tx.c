@@ -247,7 +247,6 @@ int lixa_tx_close(int *txrc)
                      , INVALID_STATUS
                      , LIXA_XA_CLOSE_ERROR
                      , CLIENT_DISCONNECT_ERROR
-                     , CLIENT_CONFIG_UNLOAD_SWITCH_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int tmp_txrc = TX_OK;
@@ -259,7 +258,7 @@ int lixa_tx_close(int *txrc)
     LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_close\n"));
     TRY {
-        int txstate;
+        int txstate, rc;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -300,19 +299,10 @@ int lixa_tx_close(int *txrc)
         if (LIXA_RC_OK != (ret_cod = client_disconnect(&global_csc)))
             THROW(CLIENT_DISCONNECT_ERROR);
 
-        /* @@@ due to a suspected memory leak inside glib discovered with
-           valgrind, the modules are not unloaded: only process exit will
-           unload them...
-        if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))
-            THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
-        */
-
-        if (client_status_coll_is_empty(&global_csc)) {
-            int rc = client_unconfig(&global_ccc);
-            if (LIXA_RC_OK != rc)
-                LIXA_TRACE(("lixa_tx_close/client_unconfig/ret_cod=%d\n", rc));
-        }
-        
+        rc = client_unconfig(&global_ccc);
+        if (LIXA_RC_OK != rc)
+            LIXA_TRACE(("lixa_tx_close/client_unconfig/ret_cod=%d\n", rc));
+            
         /* release libxml2 stuff */
         xmlCleanupParser();
         
@@ -336,7 +326,6 @@ int lixa_tx_close(int *txrc)
                 *txrc = tmp_txrc;
                 break;
             case CLIENT_DISCONNECT_ERROR:
-            case CLIENT_CONFIG_UNLOAD_SWITCH_ERROR:
                 *txrc = TX_ERROR;
                 break;
             case NONE:
