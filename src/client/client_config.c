@@ -95,8 +95,9 @@ int client_config(client_config_coll_t *ccc)
         LIXA_TRACE(("client_config: acquiring exclusive mutex\n"));
         g_static_mutex_lock(&ccc->mutex);
 
-        if (ccc->configured) {
-            LIXA_TRACE(("client_config: already configured, skipping...\n"));
+        if (ccc->configured++) {
+            LIXA_TRACE(("client_config: already configured (%d), "
+                        "skipping...\n", ccc->configured));
             THROW(NONE);
         } 
 
@@ -570,13 +571,24 @@ int client_config_load_switch(const client_config_coll_t *ccc)
 
 int client_unconfig(client_config_coll_t *ccc)
 {
-    enum Exception { NONE } excp;
+    enum Exception { CLIENT_CONFIG_UNLOAD_SWITCH_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("client_unconfig\n"));
     TRY {
         guint i, j;
 
+        /* lock mutex to start deconfiguration activity */
+        LIXA_TRACE(("client_unconfig: acquiring exclusive mutex\n"));
+        g_static_mutex_lock(&ccc->mutex);
+
+        if (--ccc->configured != 0) {
+            LIXA_TRACE(("client_unconfig: can not yet unconfigure (%d), "
+                        "skipping...\n", ccc->configured));
+            THROW(NONE);
+        }
+        
         if (NULL != ccc->job) {
             free(ccc->job);
             ccc->job = NULL;
@@ -633,18 +645,30 @@ int client_unconfig(client_config_coll_t *ccc)
 
         ccc->configured = FALSE;
 
+        /* @@@ due to a suspected memory leak inside glib discovered with
+           valgrind, the modules are not unloaded: only process exit will
+           unload them...
+        if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))
+            THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
+        */
+
         xmlFreeDoc(ccc->lixac_conf);
         ccc->lixac_conf = NULL;
 
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_CONFIG_UNLOAD_SWITCH_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* unlock mutex (locked for deconfiguration activity) */
+        LIXA_TRACE(("client_unconfig: releasing exclusive mutex\n"));
+        g_static_mutex_unlock(&ccc->mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("client_unconfig/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -679,6 +703,7 @@ int client_config_unload_switch(const client_config_coll_t *ccc)
                             g_module_error()));
                 THROW(G_MODULE_CLOSE_ERROR);
             }
+            act_rsrmgr->module = NULL;
         }
         
         THROW(NONE);
