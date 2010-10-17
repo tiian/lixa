@@ -589,6 +589,13 @@ int client_unconfig(client_config_coll_t *ccc)
             THROW(NONE);
         }
         
+        /* @@@ due to a suspected memory leak inside glib discovered with
+           valgrind, the modules are not unloaded: only process exit will
+           unload them...
+        */
+        if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))
+            THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
+
         if (NULL != ccc->job) {
             free(ccc->job);
             ccc->job = NULL;
@@ -644,13 +651,6 @@ int client_unconfig(client_config_coll_t *ccc)
         ccc->trnmgrs = NULL;
 
         ccc->configured = FALSE;
-
-        /* @@@ due to a suspected memory leak inside glib discovered with
-           valgrind, the modules are not unloaded: only process exit will
-           unload them...
-        if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))
-            THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
-        */
 
         xmlFreeDoc(ccc->lixac_conf);
         ccc->lixac_conf = NULL;
