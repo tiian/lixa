@@ -65,10 +65,10 @@ int main(int argc, char *argv[])
     int expected_rc;
     struct thread_data_s data;
     pthread_t tids[THREAD_NUMBER];
-    int i,j;
+    int i,j,n;
 
-    if (argc < 3) {
-        fprintf(stderr, "%s: at least two option must be specified\n",
+    if (argc < 4) {
+        fprintf(stderr, "%s: at least three options must be specified\n",
                 argv[0]);
         exit (1);
     }
@@ -82,17 +82,21 @@ int main(int argc, char *argv[])
         exit (1);
     }
     expected_rc = (int)strtol(argv[2], NULL, 0);
-
+    n = (int)strtol(argv[3], NULL, 0);
+    if (n < 1)
+        n = 1;
+    else if (n > THREAD_NUMBER)
+        n = THREAD_NUMBER;
     printf("%s| starting (%s/%d)...\n", pgm, argv[1], expected_rc);
     data.commit = commit;
     data.expected_rc = expected_rc;
     data.pgm = pgm;
     for (j=0; j<3; ++j) {
-        for (i=0; i<THREAD_NUMBER; ++i) {
+        for (i=0; i<n; ++i) {
             rc = pthread_create(tids+i, NULL, transaction, (void *)&data);
             assert(0 == rc);
         }
-        for (i=0; i<THREAD_NUMBER; ++i) {    
+        for (i=0; i<n; ++i) {    
             rc = pthread_join(tids[i], NULL);
             assert(0 == rc);
         }

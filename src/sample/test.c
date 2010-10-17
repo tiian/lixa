@@ -82,6 +82,6 @@ int main(int argc, char *argv[])
     a_thread(&foo);
     a_thread(&foo);
 */
-
+    g_thread_init(NULL);
     return 0;
 }

@@ -83,7 +83,5 @@ int main(int argc, char *argv[])
     printf("lixa hello: tx_close(): %d\n", tx_close());
     printf("lixa hello after second tx_close()\n");
 
-
-
     return 0;
 }

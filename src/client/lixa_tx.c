@@ -249,7 +249,7 @@ int lixa_tx_close(int *txrc)
                      , CLIENT_DISCONNECT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int tmp_txrc = TX_OK;
+    int tmp_txrc = TX_OK, rc;
     client_status_t *cs = NULL;
 
     *txrc = TX_FAIL;
@@ -258,7 +258,7 @@ int lixa_tx_close(int *txrc)
     LIXA_CRASH_INIT;
     LIXA_TRACE(("lixa_tx_close\n"));
     TRY {
-        int txstate, rc;
+        int txstate;
         
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -299,13 +299,6 @@ int lixa_tx_close(int *txrc)
         if (LIXA_RC_OK != (ret_cod = client_disconnect(&global_csc)))
             THROW(CLIENT_DISCONNECT_ERROR);
 
-        rc = client_unconfig(&global_ccc);
-        if (LIXA_RC_OK != rc)
-            LIXA_TRACE(("lixa_tx_close/client_unconfig/ret_cod=%d\n", rc));
-            
-        /* release libxml2 stuff */
-        xmlCleanupParser();
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -337,7 +330,15 @@ int lixa_tx_close(int *txrc)
                 break;
         } /* switch (excp) */
         if (TX_FAIL == *txrc && NULL != cs)
-            client_status_failed(cs);        
+            client_status_failed(cs);
+
+        rc = client_unconfig(&global_ccc);
+        if (LIXA_RC_OK != rc)
+            LIXA_TRACE(("lixa_tx_close/client_unconfig/ret_cod=%d\n", rc));
+
+        /* release libxml2 stuff */
+        xmlCleanupParser();
+        
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_close/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
