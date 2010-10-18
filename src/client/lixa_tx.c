@@ -332,13 +332,13 @@ int lixa_tx_close(int *txrc)
         if (TX_FAIL == *txrc && NULL != cs)
             client_status_failed(cs);
 
-        rc = client_unconfig(&global_ccc);
-        if (LIXA_RC_OK != rc)
-            LIXA_TRACE(("lixa_tx_close/client_unconfig/ret_cod=%d\n", rc));
-
-        /* release libxml2 stuff */
-        xmlCleanupParser();
-        
+        if (TX_PROTOCOL_ERROR != *txrc) {
+            rc = client_unconfig(&global_ccc);
+            if (LIXA_RC_OK != rc)
+                LIXA_TRACE(("lixa_tx_close/client_unconfig/ret_cod=%d\n", rc));
+            /* release libxml2 stuff */
+            xmlCleanupParser();
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_close/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
