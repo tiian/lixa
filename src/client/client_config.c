@@ -571,7 +571,8 @@ int client_config_load_switch(const client_config_coll_t *ccc)
 
 int client_unconfig(client_config_coll_t *ccc)
 {
-    enum Exception { CLIENT_CONFIG_UNLOAD_SWITCH_ERROR
+    enum Exception { OUT_OF_RANGE
+                     , CLIENT_CONFIG_UNLOAD_SWITCH_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -583,16 +584,19 @@ int client_unconfig(client_config_coll_t *ccc)
         LIXA_TRACE(("client_unconfig: acquiring exclusive mutex\n"));
         g_static_mutex_lock(&ccc->mutex);
 
-        if (--ccc->configured != 0) {
-            LIXA_TRACE(("client_unconfig: can not yet unconfigure (%d), "
-                        "skipping...\n", ccc->configured));
-            THROW(NONE);
+        if (ccc->configured > 0) {
+            ccc->configured--;
+            if (0 != ccc->configured) {
+                LIXA_TRACE(("client_unconfig: can not unconfigure (%d), "
+                            "skipping...\n", ccc->configured));
+                THROW(NONE);
+            }
+        } else {
+            LIXA_TRACE(("client_unconfig: ccc->configured=%d\n",
+                        ccc->configured));
+            THROW(OUT_OF_RANGE);
         }
         
-        /* @@@ due to a suspected memory leak inside glib discovered with
-           valgrind, the modules are not unloaded: only process exit will
-           unload them...
-        */
         if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))
             THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
 
@@ -658,6 +662,9 @@ int client_unconfig(client_config_coll_t *ccc)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OUT_OF_RANGE:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
             case CLIENT_CONFIG_UNLOAD_SWITCH_ERROR:
                 break;
             case NONE:
