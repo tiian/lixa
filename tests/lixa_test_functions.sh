@@ -49,7 +49,12 @@ exec_test() {
 	echo "Starting case test $1"
 	PGM=$1
 	shift
-	$PGM $*
+	if [ "$MEMCHECK" = "yes" ]
+	then
+		libtool --mode=execute valgrind --leak-check=full --show-reachable=yes --num-callers=1000 $TESTS_SRC_DIR/$PGM $*
+	else
+		$PGM $*
+	fi
 	rc=$?
 	return $rc
 }
