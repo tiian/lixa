@@ -20,6 +20,9 @@
 PATH=@abs_top_builddir@/tests/src/:@abs_top_builddir@/src/server:@abs_top_builddir@/src/client:$PATH
 export PATH
 
+TESTS_SRC_DIR=@abs_top_builddir@/tests/src
+export TESTS_SRC_DIR
+
 TESTS_ETC_DIR=@abs_top_builddir@/tests/etc
 export TESTS_ETC_DIR
 
