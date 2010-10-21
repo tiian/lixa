@@ -10,7 +10,7 @@ noinst_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0006 case0007 case0008 case0009 case0010 case0011 case0012 \
 	case0013 case0014 case0015 case0016 case0017 case0018 case0019 \
 	case0020 case0021 case0022 case0023 case0024 case0025 case0026 \
-	case0027 case0028 case0029 case0030 case0031
+	case0027 case0028 case0029 case0030 case0031 case0032
 case0000_SOURCES = case0000.c
 case0001_SOURCES = case0001.c
 case0002_SOURCES = case0002.c
@@ -43,3 +43,4 @@ case0028_SOURCES = case0028.c
 case0029_SOURCES = case0029.c
 case0030_SOURCES = case0030.c
 case0031_SOURCES = case0031.c
+case0032_SOURCES = case0032.c

@@ -250,6 +250,14 @@ extern "C" {
 
 
 
+    /**
+     * This function is used to release the dynamic memory allocated by
+     * monkey resource manager and its useful for memory leak detection only
+     */
+    void lixa_monkeyrm_call_cleanup(void);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

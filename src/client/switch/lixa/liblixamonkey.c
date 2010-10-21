@@ -1052,6 +1052,20 @@ int lixa_monkeyrm_call_ax_unreg(int rmid)
 
 
 
+void lixa_monkeyrm_call_cleanup(void)
+{
+    LIXA_TRACE(("lixa_monkeyrm_call_cleanup\n"));
+    g_static_mutex_lock(&monkey_mutex);
+    if (NULL != monkey_status) {
+        g_hash_table_destroy(monkey_status);
+        monkey_status = NULL;
+    }
+    g_static_mutex_unlock(&monkey_mutex);
+    LIXA_TRACE(("lixa_monkeyrm_call_cleanup: terminated\n"));
+}
+
+
+
 /**
  * This is the struct pointing to monkey functions (static registration
  * version)
