@@ -39,6 +39,9 @@
 #include <liblixamonkey.h>
 
 
+#include <gmodule.h>
+
+
 
 /* This case test is for memory leak inspection */
 
@@ -48,6 +51,7 @@ int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
     int rc;
+    GModule *m;
 
     /*
     if (argc < 1) {
@@ -59,13 +63,19 @@ int main(int argc, char *argv[])
     
     printf("%s| starting...\n", pgm);
 
+    /*
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     assert(TX_OK == rc);
 
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     assert(TX_OK == rc);
-
     lixa_monkeyrm_call_cleanup();
+    */
+
+
+    m = g_module_open("/tmp/lixa/lib/switch_lixa_monkeyrm_stareg.so",
+                      0);
+    g_module_close(m);
     
     printf("%s| ...finished\n", pgm);
     return 0;

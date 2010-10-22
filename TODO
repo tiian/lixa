@@ -1,4 +1,6 @@
-Review lixa_monkey_call_cleanup from dynamic structure allocation...
+g_module_open/g_module_close does not release all the memory: this is showed by
+case0032.c
+The issue must be inspected deeply
 
 Use case test ML/0.0 to exploit memory leaks in the lixa_monkey library...
 
