@@ -81,6 +81,9 @@ void monkey_status_destroy1(gpointer data) {
 
 
 void monkey_status_destroy2(gpointer data) {
+    struct monkey_status_s *mss = (struct monkey_status_s *)data;
+    if (NULL != mss->records)
+        g_array_free(mss->records, TRUE);
     g_free(data);
 }
 
