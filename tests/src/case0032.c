@@ -40,6 +40,7 @@
 
 
 #include <gmodule.h>
+#include <libxml/parser.h>
 
 
 
@@ -52,7 +53,8 @@ int main(int argc, char *argv[])
     char *pgm = argv[0];
     int rc;
     GModule *m;
-
+    xmlDocPtr doc;
+    
     /*
     if (argc < 1) {
         fprintf(stderr, "%s: at least two options must be specified\n",
@@ -72,11 +74,18 @@ int main(int argc, char *argv[])
     lixa_monkeyrm_call_cleanup();
     */
 
-
+/*
     m = g_module_open("/tmp/lixa/lib/switch_lixa_monkeyrm_stareg.so",
-                      0);
+                      G_MODULE_BIND_LOCAL);
     g_module_close(m);
-    
+*/
+    /* try with multithread ... */
+    doc = xmlReadFile("/tmp/lixa/etc/lixac_conf.xml", NULL, 0);
+    xmlFreeDoc(doc);
+    doc = xmlReadFile("/tmp/lixa/etc/lixad_conf.xml", NULL, 0);
+    xmlFreeDoc(doc);
+    xmlCleanupParser();
+
     printf("%s| ...finished\n", pgm);
     return 0;
 }
