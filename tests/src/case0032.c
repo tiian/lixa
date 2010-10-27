@@ -26,6 +26,9 @@
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -44,7 +47,15 @@
 
 
 
+#define THREAD_NUMBER 100
+
+
+
 /* This case test is for memory leak inspection */
+
+
+
+void *transaction(void *parm);
 
 
 
@@ -52,40 +63,64 @@ int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
     int rc;
-    GModule *m;
-    xmlDocPtr doc;
+    pthread_t tids[THREAD_NUMBER];
+    int i,n;
     
-    /*
-    if (argc < 1) {
-        fprintf(stderr, "%s: at least two options must be specified\n",
+    if (argc < 2) {
+        fprintf(stderr, "%s: at least one option must be specified\n",
                 argv[0]);
         exit (1);
     }
-    */
     
+    n = (int)strtol(argv[1], NULL, 0);
+    if (n < 1)
+        n = 1;
+    else if (n > THREAD_NUMBER)
+        n = THREAD_NUMBER;
     printf("%s| starting...\n", pgm);
 
-    /*
-    printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
+    xmlInitParser();
+    
+    for (i=0; i<n; ++i) {
+        rc = pthread_create(tids+i, NULL, transaction, NULL);
+        assert(0 == rc);
+    }
+    for (i=0; i<n; ++i) {    
+        rc = pthread_join(tids[i], NULL);
+        assert(0 == rc);
+    }
+    
+    xmlCleanupParser();
+    lixa_monkeyrm_call_cleanup();
+
+    printf("%s| ...finished\n", pgm);
+    return 0;
+}
+
+
+
+void *transaction(void *parm)
+{
+    GModule *m;
+    xmlDocPtr doc;
+    int rc;
+    
+    printf("tx_open(): %d\n", rc = tx_open());
     assert(TX_OK == rc);
 
-    printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+    printf("tx_close(): %d\n", rc = tx_close());
     assert(TX_OK == rc);
-    lixa_monkeyrm_call_cleanup();
-    */
 
 /*
     m = g_module_open("/tmp/lixa/lib/switch_lixa_monkeyrm_stareg.so",
                       G_MODULE_BIND_LOCAL);
     g_module_close(m);
 */
-    /* try with multithread ... */
+    
     doc = xmlReadFile("/tmp/lixa/etc/lixac_conf.xml", NULL, 0);
     xmlFreeDoc(doc);
     doc = xmlReadFile("/tmp/lixa/etc/lixad_conf.xml", NULL, 0);
     xmlFreeDoc(doc);
-    xmlCleanupParser();
 
-    printf("%s| ...finished\n", pgm);
-    return 0;
+    return NULL;
 }

@@ -101,6 +101,10 @@ int client_config(client_config_coll_t *ccc)
             THROW(NONE);
         } 
 
+        /* initialize libxml2 library */
+        LIXA_TRACE(("client_config/xmlInitParser\n"));
+        xmlInitParser();
+        
         /* open system log */
         lixa_get_program_name(program_name, sizeof(program_name));
         openlog(program_name, LOG_PID, LOG_DAEMON);
@@ -152,6 +156,7 @@ int client_config(client_config_coll_t *ccc)
         ccc->lixac_conf_filename = file_name;
         
         /* loading config file */
+        LIXA_TRACE(("client_config/xmlReadFile\n"));
         if (NULL == (ccc->lixac_conf = xmlReadFile(file_name, NULL, 0)))
             THROW(XML_READ_FILE_ERROR);
         
@@ -177,6 +182,7 @@ int client_config(client_config_coll_t *ccc)
         fd = LIXA_NULL_FD;
         
         /* free parsed document */
+        LIXA_TRACE(("client_config/xmlFreeDoc\n"));
         xmlFreeDoc(ccc->lixac_conf);
         ccc->lixac_conf = NULL;
         
@@ -246,6 +252,7 @@ int client_config(client_config_coll_t *ccc)
             close(fd);
         if (excp < NONE && ccc->lixac_conf != NULL) {
             /* free parsed document */
+            LIXA_TRACE(("client_config/xmlFreeDoc\n"));
             xmlFreeDoc(ccc->lixac_conf);
         }
         /* free memory allocated by getadrinfo function */
@@ -255,6 +262,7 @@ int client_config(client_config_coll_t *ccc)
         LIXA_TRACE(("client_config: releasing exclusive mutex\n"));
         g_static_mutex_unlock(&ccc->mutex);
         /* release libxml2 stuff */
+        LIXA_TRACE(("client_config/xmlCleanupParser\n"));
         xmlCleanupParser();
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config/excp=%d/"
@@ -656,6 +664,7 @@ int client_unconfig(client_config_coll_t *ccc)
 
         ccc->configured = FALSE;
 
+        LIXA_TRACE(("client_unconfig/xmlFreeDoc\n"));
         xmlFreeDoc(ccc->lixac_conf);
         ccc->lixac_conf = NULL;
 

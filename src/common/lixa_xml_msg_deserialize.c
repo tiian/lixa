@@ -79,6 +79,7 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
 
         LIXA_TRACE(("lixa_msg_deserialize: deserializing message |%*.*s|\n",
                     buffer_len, buffer_len, buffer));
+        LIXA_TRACE(("lixa_msg_deserialize/xmlReadMemory\n"));
         if (NULL == (doc = xmlReadMemory(
                          buffer, buffer_len, "buffer.xml", NULL, 0)))
             THROW(XML_READ_MEMORY);
@@ -304,6 +305,7 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
         /* recover resources */
         if (NULL != doc) {
             /* free parsed document */
+            LIXA_TRACE(("lixa_msg_deserialize/xmlFreeDoc\n"));
             xmlFreeDoc(doc);
         }
     } /* TRY-CATCH */
