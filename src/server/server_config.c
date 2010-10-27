@@ -112,6 +112,7 @@ int server_config(struct server_config_s *sc,
         tpa->n++;
         
         /* loading config file */
+        LIXA_TRACE(("server_config/xmlReadFile\n"));
         if (NULL == (doc = xmlReadFile(file_name, NULL, 0)))
             THROW(XML_READ_FILE_ERROR);
 
@@ -123,6 +124,7 @@ int server_config(struct server_config_s *sc,
             THROW(PARSE_CONFIG_ERROR);
         
         /* free parsed document */
+        LIXA_TRACE(("server_config/xmlFreeDoc\n"));
         xmlFreeDoc(doc);
 
         if (sc->listeners.n == 0)
@@ -215,6 +217,7 @@ int server_cleanup(struct server_config_s *sc,
         srvr_rcvr_tbl_delete(srt);
 
         /* release libxml2 stuff */
+        LIXA_TRACE(("server_cleanup/xmlCleanupParser\n"));
         xmlCleanupParser();
 
         THROW(NONE);

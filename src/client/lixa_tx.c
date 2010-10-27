@@ -337,6 +337,7 @@ int lixa_tx_close(int *txrc)
             if (LIXA_RC_OK != rc)
                 LIXA_TRACE(("lixa_tx_close/client_unconfig/ret_cod=%d\n", rc));
             /* release libxml2 stuff */
+            LIXA_TRACE(("lixa_tx_close/xmlCleanupParser\n"));
             xmlCleanupParser();
         }
     } /* TRY-CATCH */

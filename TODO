@@ -1,3 +1,9 @@
+xmlInitParser
+xmlReadFile
+xmlReadMemory
+xmlFreeDoc
+xmlCleanupParser
+
 g_module_open/g_module_close does not release all the memory: this is showed by
 case0032.c
 The issue must be inspected deeply
