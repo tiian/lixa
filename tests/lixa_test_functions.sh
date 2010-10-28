@@ -51,6 +51,7 @@ exec_test() {
 	shift
 	if [ "$MEMCHECK" = "yes" ]
 	then
+		export G_SLICE=always-malloc
 		libtool --mode=execute valgrind --leak-check=full --show-reachable=yes --num-callers=1000 $TESTS_SRC_DIR/$PGM $*
 	else
 		$PGM $*

@@ -1,12 +1,5 @@
-xmlInitParser
-xmlReadFile
-xmlReadMemory
-xmlFreeDoc
-xmlCleanupParser
-
-g_module_open/g_module_close does not release all the memory: this is showed by
-case0032.c
-The issue must be inspected deeply
+liblixamonkey need more cleanup to avoid false memory leak shown by valgrind:
+it seem there is an issue in the state dynamic structure allocated...
 
 Use case test ML/0.0 to exploit memory leaks in the lixa_monkey library...
 
