@@ -261,9 +261,6 @@ int client_config(client_config_coll_t *ccc)
         /* unlock mutex (locked for configuration activity) */
         LIXA_TRACE(("client_config: releasing exclusive mutex\n"));
         g_static_mutex_unlock(&ccc->mutex);
-        /* release libxml2 stuff */
-        LIXA_TRACE(("client_config/xmlCleanupParser\n"));
-        xmlCleanupParser();
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -664,10 +661,16 @@ int client_unconfig(client_config_coll_t *ccc)
 
         ccc->configured = FALSE;
 
-        LIXA_TRACE(("client_unconfig/xmlFreeDoc\n"));
-        xmlFreeDoc(ccc->lixac_conf);
-        ccc->lixac_conf = NULL;
+        if (NULL != ccc->lixac_conf) {
+            LIXA_TRACE(("client_unconfig/xmlFreeDoc\n"));
+            xmlFreeDoc(ccc->lixac_conf);
+            ccc->lixac_conf = NULL;
+        }
 
+        /* release libxml2 stuff */
+        LIXA_TRACE(("client_unconfig/xmlCleanupParser\n"));
+        xmlCleanupParser();
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {

@@ -75,6 +75,8 @@ gboolean monkey_status_gequal(gconstpointer a, gconstpointer b) {
 
 
 void monkey_status_destroy1(gpointer data) {
+    LIXA_TRACE(("monkey_status_destroy1/g_hash_table_remove_all(%p)\n",
+                data));
     g_hash_table_remove_all((GHashTable *)data);
 }
 
@@ -82,8 +84,11 @@ void monkey_status_destroy1(gpointer data) {
 
 void monkey_status_destroy2(gpointer data) {
     struct monkey_status_s *mss = (struct monkey_status_s *)data;
+    LIXA_TRACE(("monkey_status_destroy2/g_array_free(%p)\n",
+                mss->records));
     if (NULL != mss->records)
         g_array_free(mss->records, TRUE);
+    LIXA_TRACE(("monkey_status_destroy2/g_free(%p)\n", data));
     g_free(data);
 }
 
@@ -187,6 +192,8 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
                              g_direct_hash, monkey_status_gequal,
                              NULL, monkey_status_destroy2)))
                 THROW(HASH_TABLE_NEW2);
+            LIXA_TRACE(("lixa_monkeyrm_open/g_hash_table_new_full/slht: "
+                        "%p\n", slht));
             g_hash_table_insert(monkey_status, (gpointer)tid, (gpointer)slht);
         }
 
@@ -200,6 +207,7 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
             if (LIXA_RC_OK != lixa_monkeyrm_open_init(
                     xa_info, rmid, flags, mss))
                 THROW(OPEN_INIT);
+            LIXA_TRACE(("lixa_monkeyrm_open/g_malloc/mss: %p\n", mss));
             g_hash_table_insert(slht, (gpointer)rmid, (gpointer)mss);
         }
 
@@ -259,6 +267,8 @@ int lixa_monkeyrm_open_init(char *xa_info, int rmid, long flags,
         if (NULL == (mss->records = g_array_new(
                          FALSE, FALSE, sizeof(struct monkey_status_record_s))))
             THROW(ARRAY_NEW_ERROR);
+        LIXA_TRACE(("lixa_monkeyrm_open_init/g_array_new/mss->records: "
+                    "%p \n", mss->records));
         
         if (NULL == (config = fopen(xa_info, "r")))
             THROW(FOPEN_ERROR);
@@ -1060,6 +1070,7 @@ void lixa_monkeyrm_call_cleanup(void)
     LIXA_TRACE(("lixa_monkeyrm_call_cleanup\n"));
     g_static_mutex_lock(&monkey_mutex);
     if (NULL != monkey_status) {
+        LIXA_TRACE(("lixa_monkeyrm_call_cleanup/g_hash_table_destroy\n"));
         g_hash_table_destroy(monkey_status);
         monkey_status = NULL;
     }

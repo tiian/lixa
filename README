@@ -27,7 +27,6 @@ the build before installing it, use:
 To check memory usage with valgrind, an environment variable must be exported
 before check:
 	export MEMCHECK=yes
-	export G_SLICE=always-malloc
 	make check
 
 You must set LIXA_TRACE_MASK environment variable according to values 
