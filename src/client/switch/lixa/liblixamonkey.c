@@ -75,9 +75,9 @@ gboolean monkey_status_gequal(gconstpointer a, gconstpointer b) {
 
 
 void monkey_status_destroy1(gpointer data) {
-    LIXA_TRACE(("monkey_status_destroy1/g_hash_table_remove_all(%p)\n",
+    LIXA_TRACE(("monkey_status_destroy1/g_hash_table_destroy(%p)\n",
                 data));
-    g_hash_table_remove_all((GHashTable *)data);
+    g_hash_table_destroy((GHashTable *)data);
 }
 
 
@@ -179,6 +179,8 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
                              g_direct_hash, monkey_status_gequal,
                              NULL, monkey_status_destroy1)))
                 THROW(HASH_TABLE_NEW1);
+            LIXA_TRACE(("lixa_monkeyrm_open/g_hash_table_new_full/"
+                        "monkey_status: %p\n", monkey_status));
         }
 
         /* search current thread id in the hash table */
@@ -204,10 +206,10 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
             LIXA_TRACE(("lixa_monkeyrm_open: creating new status block for "
                         "tid=" PTHREAD_T_FORMAT ", rmid=%d\n", tid, rmid));
             mss = g_malloc(sizeof(struct monkey_status_s));
+            LIXA_TRACE(("lixa_monkeyrm_open/g_malloc/mss: %p\n", mss));
             if (LIXA_RC_OK != lixa_monkeyrm_open_init(
                     xa_info, rmid, flags, mss))
                 THROW(OPEN_INIT);
-            LIXA_TRACE(("lixa_monkeyrm_open/g_malloc/mss: %p\n", mss));
             g_hash_table_insert(slht, (gpointer)rmid, (gpointer)mss);
         }
 
@@ -1070,7 +1072,8 @@ void lixa_monkeyrm_call_cleanup(void)
     LIXA_TRACE(("lixa_monkeyrm_call_cleanup\n"));
     g_static_mutex_lock(&monkey_mutex);
     if (NULL != monkey_status) {
-        LIXA_TRACE(("lixa_monkeyrm_call_cleanup/g_hash_table_destroy\n"));
+        LIXA_TRACE(("lixa_monkeyrm_call_cleanup/g_hash_table_destroy(%p)\n",
+                    monkey_status));
         g_hash_table_destroy(monkey_status);
         monkey_status = NULL;
     }

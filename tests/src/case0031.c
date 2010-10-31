@@ -40,7 +40,7 @@
 
 
 
-#define THREAD_NUMBER 100
+#define THREAD_NUMBER 1000
 
 
 
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     data.commit = commit;
     data.expected_rc = expected_rc;
     data.pgm = pgm;
-    for (j=0; j<3; ++j) {
+    for (j=0; j<2; ++j) {
         for (i=0; i<n; ++i) {
             rc = pthread_create(tids+i, NULL, transaction, (void *)&data);
             assert(0 == rc);
@@ -103,7 +103,11 @@ int main(int argc, char *argv[])
         printf("%s| sleeping...\n", pgm);
         sleep(1);
     }
+    /* clean-up monkeyrm stuff (memory leak detection) */
+    lixa_monkeyrm_call_cleanup();
+    
     printf("%s| ...finished\n", pgm);
+
     return 0;
 }
 
@@ -122,14 +126,18 @@ void *transaction(void *parm)
     assert(TX_OK == rc);
     printf("%s| tx_info(): %d\n", data->pgm, rc = tx_info(&info));
     assert(1 == rc);
-
+    /***
+    */
+    
     /* emulate callback registration from resource manager when accessing
      * resource manager owned resources; you may imagine these are the
      * equivalent of a SQLExecDirect function call */
     lixa_monkeyrm_call_ax_reg(2);
     lixa_monkeyrm_call_ax_reg(3);
+    /***
+    */
     
-    /* wait 100 milliseconds */
+    /* wait some milliseconds */
     to.tv_sec = 0;
     to.tv_usec = 50000;
     select(0, NULL, NULL, NULL, &to);
@@ -139,10 +147,13 @@ void *transaction(void *parm)
     else
         printf("%s| tx_rollback(): %d\n", data->pgm, rc = tx_rollback());
     assert(data->expected_rc == rc);
+    /***
+    */
     printf("%s| tx_close(): %d\n", data->pgm, rc = tx_close());
     if (TX_FAIL == data->expected_rc)
         assert(TX_FAIL == rc);
     else
         assert(TX_OK == rc);
+
     return NULL;
 }

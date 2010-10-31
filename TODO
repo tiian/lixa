@@ -1,6 +1,3 @@
-liblixamonkey need more cleanup to avoid false memory leak shown by valgrind:
-it seem there is an issue in the state dynamic structure allocated...
-
 Use case test ML/0.0 to exploit memory leaks in the lixa_monkey library...
 
 Stability test with valgrind must be performed: use the multithread case test
