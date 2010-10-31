@@ -20,6 +20,9 @@
 PATH=@abs_top_builddir@/tests/src/:@abs_top_builddir@/src/server:@abs_top_builddir@/src/client:$PATH
 export PATH
 
+TESTS_DIR=@abs_top_builddir@/tests
+export TESTS_DIR
+
 TESTS_SRC_DIR=@abs_top_builddir@/tests/src
 export TESTS_SRC_DIR
 
@@ -42,6 +45,12 @@ export TESTS_TMP_FILE2
 
 LIXA_CONFIG_FILE=@abs_top_builddir@/tests/etc/lixac_conf.xml
 export LIXA_CONFIG_FILE
+
+LIXAD_CONFIG_FILE=@abs_top_builddir@/tests/etc/lixad_conf.xml
+export LIXAD_CONFIG_FILE
+
+SAMPLE_SWITCH_FILE=@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_stareg.so
+export SAMPLE_SWITCH_FILE
 
 LIXA_CRASH=@LIXA_CRASH@
 export LIXA_CRASH

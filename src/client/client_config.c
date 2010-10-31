@@ -254,6 +254,7 @@ int client_config(client_config_coll_t *ccc)
             /* free parsed document */
             LIXA_TRACE(("client_config/xmlFreeDoc\n"));
             xmlFreeDoc(ccc->lixac_conf);
+            ccc->lixac_conf = NULL;
         }
         /* free memory allocated by getadrinfo function */
         if (NULL != res)

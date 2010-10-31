@@ -1,21 +1,11 @@
-AT_BANNER([Memory leak check])
+AT_BANNER([Memory leak checks])
 
 AT_SETUP([ML/0.0 g_module_open/close])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_close/0
-]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh reset start case0032 2 0x00000001], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh reset start case0032 2 2 0x00000001 $LIXA_CONFIG_FILE $LIXAD_CONFIG_FILE $SAMPLE_SWITCH_FILE], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ML/0.1 xmlRead/Free])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_close/0
-]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0032 2 0x00000002], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0032 2 2 0x00000002 $LIXA_CONFIG_FILE $LIXAD_CONFIG_FILE $SAMPLE_SWITCH_FILE], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ML/0.2 tx_open/close])
@@ -23,7 +13,13 @@ AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
+xa_open/0
+xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset stop case0032 2 0x00000004], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0032 2 2 0x00000004 $LIXA_CONFIG_FILE $LIXAD_CONFIG_FILE $SAMPLE_SWITCH_FILE], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([ML/0.3 g_thread_init])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset stop case0032 2 2 0x00000008 $LIXA_CONFIG_FILE $LIXAD_CONFIG_FILE $SAMPLE_SWITCH_FILE], [0], [ignore], [ignore])
 AT_CLEANUP
 

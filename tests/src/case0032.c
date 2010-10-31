@@ -52,6 +52,7 @@
 #define MODE_MODULE_OPEN_CLOSE 0x00000001
 #define MODE_XML_READ_FREE     0x00000002
 #define MODE_TX_OPEN_CLOSE     0x00000004
+#define MODE_THREAD_INIT       0x00000008
 
 /* This case test is for memory leak inspection */
 
@@ -60,41 +61,54 @@
 void *transaction(void *parm);
 
 
+char *LIXAC, *LIXAD, *SWITCH;
+
+
 
 int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
     int rc;
     pthread_t tids[THREAD_NUMBER];
-    int i,n;
+    int i,j,n,m;
     long mode;
     
-    if (argc < 3) {
-        fprintf(stderr, "%s: at least two options must be specified\n",
+    if (argc < 7) {
+        fprintf(stderr, "%s: at least six options must be specified\n",
                 argv[0]);
         exit (1);
     }
-    
-    n = (int)strtol(argv[1], NULL, 0);
+
+    m = (int)strtol(argv[1], NULL, 0);
+    if (m < 1)
+        m = 1;
+
+    n = (int)strtol(argv[2], NULL, 0);
     if (n < 1)
         n = 1;
     else if (n > THREAD_NUMBER)
         n = THREAD_NUMBER;
 
-    mode = strtol(argv[2], NULL, 0);
+    mode = strtol(argv[3], NULL, 0);
+
+    LIXAC = argv[4];
+    LIXAD = argv[5];
+    SWITCH = argv[6];
     
     printf("%s| starting...\n", pgm);
 
     if (MODE_XML_READ_FREE & mode)
         xmlInitParser();
-    
-    for (i=0; i<n; ++i) {
-        rc = pthread_create(tids+i, NULL, transaction, (void *)&mode);
-        assert(0 == rc);
-    }
-    for (i=0; i<n; ++i) {    
-        rc = pthread_join(tids[i], NULL);
-        assert(0 == rc);
+
+    for (j=0; j<m; ++j) {
+        for (i=0; i<n; ++i) {
+            rc = pthread_create(tids+i, NULL, transaction, (void *)&mode);
+            assert(0 == rc);
+        }
+        for (i=0; i<n; ++i) {    
+            rc = pthread_join(tids[i], NULL);
+            assert(0 == rc);
+        }
     }
     
     if (MODE_XML_READ_FREE & mode)
@@ -115,6 +129,7 @@ void *transaction(void *parm)
     xmlDocPtr doc;
     int rc;
     long *mode = (long *)parm;
+    static const char *XMLBUFFER = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><msg level=\"0\" verb=\"1\" step=\"8\"><client job=\"00c974e08d8d0e70ccbc420434f45198/127.0.0.1      \" config_digest=\"00c974e08d8d0e70ccbc420434f45198\" maint=\"0\"/><rsrmgrs><rsrmgr rmid=\"0\" dynamic=\"0\" name=\"LIXAmonkey1staRM\" xa_name=\"LIXA Monkey RM (static)\"/></rsrmgrs></msg>";
 
     if (MODE_TX_OPEN_CLOSE & *mode) {
         printf("tx_open(): %d\n", rc = tx_open());
@@ -125,17 +140,24 @@ void *transaction(void *parm)
     }
 
     if (MODE_MODULE_OPEN_CLOSE & *mode) {
-        m = g_module_open("/tmp/lixa/lib/switch_lixa_monkeyrm_stareg.so",
-                          G_MODULE_BIND_LOCAL);
+        m = g_module_open(SWITCH, G_MODULE_BIND_LOCAL);
         g_module_close(m);
     }
 
     if (MODE_XML_READ_FREE & *mode) {
-        doc = xmlReadFile("/tmp/lixa/etc/lixac_conf.xml", NULL, 0);
+        doc = xmlReadFile(LIXAC, NULL, 0);
         xmlFreeDoc(doc);
-        doc = xmlReadFile("/tmp/lixa/etc/lixad_conf.xml", NULL, 0);
+        doc = xmlReadFile(LIXAD, NULL, 0);
+        xmlFreeDoc(doc);
+
+        doc = xmlReadMemory(XMLBUFFER, strlen(XMLBUFFER), "buffer.xml",
+                            NULL, 0);
         xmlFreeDoc(doc);
     }
 
+    if (MODE_THREAD_INIT & *mode)
+        if (!g_thread_supported ())
+            g_thread_init(NULL);
+    
     return NULL;
 }

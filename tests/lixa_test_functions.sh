@@ -52,7 +52,9 @@ exec_test() {
 	if [ "$MEMCHECK" = "yes" ]
 	then
 		export G_SLICE=always-malloc
-		libtool --mode=execute valgrind --leak-check=full --show-reachable=yes --num-callers=1000 $TESTS_SRC_DIR/$PGM $*
+		#libtool --mode=execute valgrind --leak-check=full --show-reachable=yes --num-callers=1000 --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
+		#libtool --mode=execute valgrind --leak-check=full --show-reachable=yes --num-callers=1000 --suppressions=$TESTS_DIR/lixa.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
+		libtool --mode=execute valgrind --leak-check=full --show-reachable=yes --num-callers=1000 --suppressions=$TESTS_DIR/lixa.supp $TESTS_SRC_DIR/$PGM $*
 	else
 		$PGM $*
 	fi
