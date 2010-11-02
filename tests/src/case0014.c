@@ -90,6 +90,8 @@ int main(int argc, char *argv[])
     assert(test_rc == rc);
     if (TX_FAIL == test_rc) {
         /* test can not go on after TX_FAIL */
+        /* memory leak prevention */
+        lixa_monkeyrm_call_cleanup();    
         printf("%s| ...finished\n", pgm);
         return 0;
     }
@@ -106,6 +108,9 @@ int main(int argc, char *argv[])
     
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     assert(TX_OK == rc);
+
+    /* memory leak prevention */
+    lixa_monkeyrm_call_cleanup();    
 
     printf("%s| ...finished\n", pgm);
     return 0;

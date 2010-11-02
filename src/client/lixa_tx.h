@@ -171,6 +171,15 @@ extern "C" {
                         const char *xid_file);
 
 
+
+    /**
+     * This function is used to clean-up the environment when a function
+     * ends with TX_FAIL and the calling program can not call other functions
+     * but tx_open. The primary usage is avoiding memory leaks.
+     */
+    void lixa_tx_cleanup(void);
+
+
     
 #ifdef __cplusplus
 }

@@ -33,6 +33,7 @@
 
 
 #include <tx.h>
+#include <liblixamonkey.h>
 
 
 
@@ -94,6 +95,8 @@ int main(int argc, char *argv[])
         printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
         assert(TX_FAIL == rc);
         printf("%s| ...finished (TX_FAIL)\n", pgm);
+        /* memory leak prevention */
+        lixa_monkeyrm_call_cleanup();
         return 0;
     }
     
@@ -107,6 +110,8 @@ int main(int argc, char *argv[])
     if (1 == fail_point) {
         assert(TX_FAIL == rc);
         printf("%s| ...finished (TX_FAIL)\n", pgm);
+        /* memory leak prevention */
+        lixa_monkeyrm_call_cleanup();
         return 0;
     } else
         assert(TX_OK == rc);
@@ -121,7 +126,9 @@ int main(int argc, char *argv[])
     if (2 == fail_point) {
         assert(TX_FAIL == rc);
         printf("%s| ...finished (TX_FAIL)\n", pgm);
-        exit(0);
+        /* memory leak prevention */
+        lixa_monkeyrm_call_cleanup();
+        return 0;
     } else
         assert(TX_OK == rc);
     

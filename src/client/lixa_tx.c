@@ -231,6 +231,8 @@ int lixa_tx_begin(int *txrc)
         } /* switch (excp) */
         if (TX_FAIL == *txrc && NULL != cs)
             client_status_failed(cs);
+        if (TX_FAIL == *txrc)
+            lixa_tx_cleanup();
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_begin/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -559,6 +561,8 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         } /* switch (excp) */
         if (TX_FAIL == *txrc && NULL != cs)
             client_status_failed(cs);
+        if (TX_FAIL == *txrc)
+            lixa_tx_cleanup();
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_commit/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -944,6 +948,8 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
         } /* switch (excp) */
         if (TX_FAIL == *txrc && NULL != cs)
             client_status_failed(cs);
+        if (TX_FAIL == *txrc)
+            lixa_tx_cleanup();
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_rollback/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -1442,3 +1448,13 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
 
 
 
+void lixa_tx_cleanup(void)
+{
+    int ret_cod;
+    
+    LIXA_TRACE(("lixa_tx_cleanup: emergency socket & memory clean-up\n"));
+    ret_cod = client_disconnect(&global_csc);
+    LIXA_TRACE(("lixa_tx_cleanup/client_disconnect/ret_cod=%d\n", ret_cod));
+    ret_cod = client_unconfig(&global_ccc);
+    LIXA_TRACE(("lixa_tx_cleanup/client_unconfig/ret_cod=%d\n", ret_cod));
+}

@@ -69,6 +69,13 @@ int main(int argc, char *argv[])
     /* check the transaction context was not changed */
     assert(memcmp(&info1, &info2, sizeof(TXINFO)) == 0);
 
+    /* memory leak prevention */
+    printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
+    assert(TX_OK == rc);
+    printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+    assert(TX_OK == rc);
+    lixa_monkeyrm_call_cleanup();
+    
     printf("%s| ...finished\n", pgm);
     return 0;
 }

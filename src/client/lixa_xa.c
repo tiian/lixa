@@ -708,7 +708,8 @@ int lixa_xa_forget(client_status_t *cs, int finished)
                 record.flags = TMNOFLAGS;
                 record.rc = act_rsrmgr->xa_switch->xa_forget_entry(
                     client_status_get_xid(cs), record.rmid, record.flags);
-                ser_xid = xid_serialize(client_status_get_xid(cs));
+                if (NULL == ser_xid)
+                    ser_xid = xid_serialize(client_status_get_xid(cs));
                 LIXA_TRACE(("lixa_xa_forget: xa_forget_entry('%s', %d, 0x%lx) "
                             "= %d\n",
                             NULL != ser_xid ? ser_xid : "",
@@ -1600,10 +1601,11 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                      , XA_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    struct lixa_msg_s msg; 
     
     LIXA_TRACE(("lixa_xa_start\n"));
     TRY {
-        struct lixa_msg_s msg; 
         size_t buffer_size = 0;
         guint i;
         int fd;
@@ -1840,6 +1842,11 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* memory recovery */
+        if (NULL != msg.body.start_24.xa_start_execs) {
+            g_array_free(msg.body.start_24.xa_start_execs, TRUE);
+            msg.body.start_24.xa_start_execs = NULL;
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

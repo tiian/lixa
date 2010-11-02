@@ -69,9 +69,11 @@ GStaticMutex lixa_trace_mutex = G_STATIC_MUTEX_INIT;
  */
 void lixa_trace_init(void)
 {
+    /* initialize thread system if necessary */
+    if (!g_thread_supported ()) g_thread_init(NULL);
+
+    g_static_mutex_lock(&lixa_trace_mutex);
     if (!lixa_trace_initialized) {
-        /* initialize thread system if necessary */
-        if (!g_thread_supported ()) g_thread_init(NULL);
         /* retrieve environemnt variable */
         if (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL)
             lixa_trace_mask = strtoul(
@@ -80,6 +82,8 @@ void lixa_trace_init(void)
             lixa_trace_mask = 0x0;
         lixa_trace_initialized = TRUE;
     }
+    /* remove the lock from mutex */
+    g_static_mutex_unlock(&lixa_trace_mutex);
 }
 
 

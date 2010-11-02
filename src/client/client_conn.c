@@ -163,8 +163,11 @@ int client_disconnect(client_status_coll_t *csc)
         LIXA_TRACE(("client_disconnect: close socket, fd = %d\n", fd));
         if (0 != close(fd))
             THROW(CLOSE_ERROR);
-        
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_del(csc)))
+
+        if (client_status_is_failed(cs)) {
+            LIXA_TRACE(("client_disconnect: client_status_is_failed()"
+                        "==TRUE, bypassing status deletion\n"));
+        } else if (LIXA_RC_OK != (ret_cod = client_status_coll_del(csc)))
             THROW(COLL_DEL_ERROR);
         
         THROW(NONE);

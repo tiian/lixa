@@ -1,0 +1,224 @@
+{
+   g_module_open_00
+   Memcheck:Addr4
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   fun:dlopen
+   fun:g_module_open
+}
+{
+   g_module_open_01
+   Memcheck:Addr4
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   fun:dlopen
+   fun:g_module_open
+}
+{
+   g_module_open_02
+   Memcheck:Addr4
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   fun:dlopen
+   fun:g_module_open
+}
+{
+   g_module_open_03
+   Memcheck:Addr4
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   fun:dlopen
+   fun:g_module_open
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   g_module_open_04
+   Memcheck:Addr4
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libc-2.7.so
+   fun:_dl_sym
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   fun:dlsym
+   fun:g_module_symbol
+   fun:g_module_open
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   g_module_open_10
+   Memcheck:Leak
+   fun:malloc
+   fun:realloc
+   fun:g_realloc
+   obj:/usr/lib/libglib-2.0.so.0.1600.6
+   fun:g_array_set_size
+   fun:g_static_private_set
+   fun:g_module_open
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:malloc
+   fun:g_malloc
+   fun:g_strdup
+   fun:g_module_open
+   fun:transaction
+   fun:start_thread
+   fun:clone
+}
+{
+   g_module_open_11
+   Memcheck:Leak
+   fun:malloc
+   fun:g_malloc
+   fun:g_slice_alloc
+   fun:g_array_sized_new
+   fun:g_array_new
+   fun:g_static_private_set
+   fun:g_module_open
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   g_module_open_12
+   Memcheck:Leak
+   fun:calloc
+   fun:g_malloc0
+   fun:g_thread_self
+   fun:g_static_private_set
+   fun:g_module_open
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   g_module_open_13
+   Memcheck:Leak
+   fun:malloc
+   fun:realloc
+   fun:g_realloc
+   obj:/usr/lib/libglib-2.0.so.0.1600.6
+   fun:g_array_set_size
+   fun:g_static_private_set
+   fun:g_module_open
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   g_module_open_14
+   Memcheck:Leak
+   fun:calloc
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   fun:dlopen
+   fun:g_module_open
+}
+{
+   g_thread_init_00
+   Memcheck:Leak
+   fun:calloc
+   fun:g_malloc0
+   obj:/usr/lib/libglib-2.0.so.0.1600.6
+   obj:/usr/lib/libglib-2.0.so.0.1600.6
+   fun:g_thread_init_glib
+   fun:g_thread_init
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   g_thread_init_01
+   Memcheck:Leak
+   fun:malloc
+   fun:g_malloc
+   obj:/usr/lib/libgthread-2.0.so.0.1600.6
+   fun:g_thread_init_glib
+   fun:g_thread_init
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   g_thread_init_02
+   Memcheck:Leak
+   fun:realloc
+   fun:g_realloc
+   obj:/usr/lib/libglib-2.0.so.0.1600.6
+   fun:g_array_set_size
+   fun:g_static_private_set
+   fun:g_get_language_names
+   fun:g_thread_init
+}
+{
+   g_thread_init_03
+   Memcheck:Leak
+   fun:calloc
+   fun:g_malloc0
+   fun:g_thread_self
+   fun:g_thread_init_glib
+   fun:g_thread_init
+}
+{
+   gethostid_00
+   Memcheck:Addr4
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libc-2.7.so
+   obj:/lib/ld-2.7.so
+   fun:__libc_dlopen_mode
+   fun:__nss_lookup_function
+   obj:/lib/tls/i686/cmov/libc-2.7.so
+   fun:__nss_hosts_lookup
+   fun:gethostbyname_r
+   fun:gethostid
+}
+{
+   inet_ntoa_00
+   Memcheck:Leak
+   fun:malloc
+   fun:inet_ntoa
+}
