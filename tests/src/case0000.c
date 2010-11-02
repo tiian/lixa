@@ -33,6 +33,7 @@
 
 
 #include <tx.h>
+#include <liblixamonkey.h>
 
 
 
@@ -49,6 +50,11 @@ int main(int argc, char *argv[])
     
     printf("%s| starting...\n", pgm);
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
+    if (TX_ERROR == rc) {
+        /* memory leak prevention */
+        printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+        lixa_monkeyrm_call_cleanup();
+    }
     assert(TX_OK == rc);
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OK == rc);

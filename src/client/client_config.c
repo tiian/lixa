@@ -84,8 +84,6 @@ int client_config(client_config_coll_t *ccc)
     xmlNode *root_element = NULL;
     struct addrinfo hints, *res = NULL;
 
-    ccc->lixac_conf = NULL;
-    
     LIXA_TRACE(("client_config\n"));
     TRY {
         char *tmp_str;
@@ -101,6 +99,9 @@ int client_config(client_config_coll_t *ccc)
             THROW(NONE);
         } 
 
+        /* reset XML document root */
+        ccc->lixac_conf = NULL;
+    
         /* initialize libxml2 library */
         LIXA_TRACE(("client_config/xmlInitParser\n"));
         xmlInitParser();
@@ -660,8 +661,10 @@ int client_unconfig(client_config_coll_t *ccc)
         g_array_free(ccc->trnmgrs, TRUE);
         ccc->trnmgrs = NULL;
 
+        /* @@@ remove this useless instruction
         ccc->configured = FALSE;
-
+        */
+        
         if (NULL != ccc->lixac_conf) {
             LIXA_TRACE(("client_unconfig/xmlFreeDoc\n"));
             xmlFreeDoc(ccc->lixac_conf);

@@ -49,12 +49,22 @@ exec_test() {
 	echo "Starting case test $1"
 	PGM=$1
 	shift
-	if [ "$MEMCHECK" = "yes" ]
+	if [ "x$VALGRIND" != "x" ] 
 	then
-		export G_SLICE=always-malloc
-		#libtool --mode=execute valgrind --leak-check=full --show-reachable=yes --num-callers=1000 --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
-		#libtool --mode=execute valgrind --leak-check=full --show-reachable=yes --num-callers=1000 --suppressions=$TESTS_DIR/lixa.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
-		libtool --mode=execute valgrind --leak-check=full --show-reachable=yes --num-callers=1000 --suppressions=$TESTS_DIR/lixa.supp $TESTS_SRC_DIR/$PGM $*
+		case "$CHECK_TYPE" in
+		memory)
+			export G_SLICE=always-malloc
+			#libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=1000 --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
+			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=1000 --suppressions=$TESTS_DIR/lixac.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
+			#libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=1000 --suppressions=$TESTS_DIR/lixac.supp $TESTS_SRC_DIR/$PGM $*
+		;;
+		thread)
+			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=1000 --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
+		;;
+		*)
+			$PGM $*
+		;;
+		esac
 	else
 		$PGM $*
 	fi

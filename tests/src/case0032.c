@@ -63,6 +63,8 @@ void *transaction(void *parm);
 
 char *LIXAC, *LIXAD, *SWITCH;
 
+GStaticMutex mutex = G_STATIC_MUTEX_INIT;
+
 
 
 int main(int argc, char *argv[])
@@ -140,8 +142,14 @@ void *transaction(void *parm)
     }
 
     if (MODE_MODULE_OPEN_CLOSE & *mode) {
+        printf("locking mutex...\n");
+        g_static_mutex_lock(&mutex);
+        printf("opening module...\n");
         m = g_module_open(SWITCH, G_MODULE_BIND_LOCAL);
+        printf("closing module...\n");
         g_module_close(m);
+        printf("unlocking mutex...\n");
+        g_static_mutex_unlock(&mutex);
     }
 
     if (MODE_XML_READ_FREE & *mode) {

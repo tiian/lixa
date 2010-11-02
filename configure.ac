@@ -116,6 +116,9 @@ else
 	AC_MSG_RESULT([yes])
 fi
 
+# Checking pkg-config is available
+AC_CHECK_PROGS(VALGRIND, [valgrind], [])
+
 AC_CHECK_HEADERS(arpa/inet.h assert.h)
 AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)

@@ -1,13 +1,37 @@
-Use case test ML/0.0 to exploit memory leaks in the lixa_monkey library...
+Go on with tests/parse_check_output.sh for memory leak detection; add
+lixa_tx_cleanup() call to functions need it in lixa_tx.c
 
 Stability test with valgrind must be performed: use the multithread case test
 to stress the memory allocation and discover potential memory leaks.
+
+Concurrency test with valgrind --tool=helgrind must be performed
 
 Stress test must be performed
 
 Crash test must be performed
 
 Remove all @@@ from source code: every one was/is an "open point"
+
+Document a memory leak introduced by libxml2:
+xmlInitParser()
+xmlCleanupParser()
+must be called from the same thread (cite the thread/libxml2 URL).
+If xmlCleanupParser() is called from a different thread, 1 block of 24 bytes
+is definitely lost.
+It seems the leak is limited to 24 bytes, but some critical pattern might
+exploit a recursive behavior... :(
+This could be an issue for some situations:
+if the called functions are executed inside threads and the main program is the
+transaction monitor itself, there is no way to assure the same thread called
+xmlInitParser() is able to call xmlCleanupParser() too because the first thread
+should remain locked until all the thread completed.
+From a LIXA point of view, xmlInitParser() is called from the first thread
+that calls tx_open() and xmlCleanupParser() is called from the last thread
+that leaves tx_close(). The issue must be discussed with libxml2 development
+team. Unfortunately, tx_open() can no be called from the main program and the
+following functions from a different thread because this behavior would violate
+XA standard: to avoid this issue a "proxy thread" should be used for XA
+functions, but the "solution" is worst then the "problem".
 
 After beta release, after interesting stuff like Python and PHP bindings, the 
 custom containers developed for LIXA could be substituted with glib standard 
