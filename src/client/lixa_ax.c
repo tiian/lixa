@@ -178,6 +178,8 @@ int ax_reg(int rmid, XID *xid, long flags)
     } CATCH {
         switch (excp) {
             case CLIENT_NOT_INITIALIZED:
+                ret_cod = TMER_PROTO;
+                break;
             case COLL_GET_CS_ERROR:
                 ret_cod = TMER_TMERR;
                 break;
