@@ -208,15 +208,15 @@ struct actual_config_s {
  */
 struct client_config_coll_s {
     /**
-     * TRUE if the configuration has been successfully loaded, FALSE otherwise
-     */
-    int                          configured;
-    /**
      * This mutex is used to assure only the first thread load the
      * configuration for all the following threads. It must be statically
      * initialized because this code is a library fetched by something else.
      */
     GStaticMutex                 mutex;
+    /**
+     * Set of thread are "opened" and "configured"
+     */
+    GHashTable                  *config_threads;
     /**
      * Transactional profile associated to the threads of this process (it
      * must be an heap allocated variable)

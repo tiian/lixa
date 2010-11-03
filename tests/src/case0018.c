@@ -44,6 +44,8 @@ int main(int argc, char *argv[])
     char *pgm = argv[0];
     int rc, test_rc;
     int rmid = 1;
+
+    LIXA_TRACE_INIT;
     
     if (argc < 2) {
         fprintf(stderr, "%s: at least one option must be specified\n",
@@ -56,7 +58,7 @@ int main(int argc, char *argv[])
 
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
-    assert(TMER_TMERR == rc);
+    assert(TMER_PROTO == rc);
 
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_PROTOCOL_ERROR == rc);

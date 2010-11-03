@@ -23,6 +23,9 @@
 #ifdef HAVE_NETDB_H
 # include <netdb.h>
 #endif
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -65,7 +68,8 @@
 
 int client_config(client_config_coll_t *ccc)
 {
-    enum Exception { STRDUP_ERROR
+    enum Exception { G_HASH_TABLE_NEW_ERROR
+                     , STRDUP_ERROR
                      , OPEN_CONFIG_ERROR
                      , XML_READ_FILE_ERROR
                      , XML_DOC_GET_ROOT_ELEMENT_ERROR
@@ -88,14 +92,34 @@ int client_config(client_config_coll_t *ccc)
     TRY {
         char *tmp_str;
         static char program_name[31];
+        pthread_t tid;
+        int configured = FALSE;
         
         /* lock mutex to start configuration activity */
         LIXA_TRACE(("client_config: acquiring exclusive mutex\n"));
         g_static_mutex_lock(&ccc->mutex);
 
-        if (ccc->configured++) {
-            LIXA_TRACE(("client_config: already configured (%d), "
-                        "skipping...\n", ccc->configured));
+        /* is the process already configured? */
+        if (NULL == ccc->config_threads) {
+            if (NULL == (ccc->config_threads = g_hash_table_new(
+                             g_direct_hash, g_direct_equal)))
+                THROW(G_HASH_TABLE_NEW_ERROR);
+        } else
+            configured = TRUE;
+
+        /* is the thread already "opened"? */
+        tid = pthread_self();
+        if (NULL == g_hash_table_lookup(ccc->config_threads,
+                                        (gconstpointer)tid)) {
+            g_hash_table_insert(ccc->config_threads, (gpointer)tid,
+                                (gpointer)1);
+            LIXA_TRACE(("client_config: registering this thread\n"));
+        }
+        
+        if (configured) {
+            LIXA_TRACE(("client_config: already configured (%u), "
+                        "skipping...\n",
+                        g_hash_table_size(ccc->config_threads)));
             THROW(NONE);
         } 
 
@@ -207,12 +231,12 @@ int client_config(client_config_coll_t *ccc)
         if (LIXA_RC_OK != (ret_cod = client_config_load_switch(&global_ccc)))
             THROW(CLIENT_CONFIG_LOAD_SWITCH_ERROR);
         
-        /* now the client is CONFIGURED */
-        ccc->configured = TRUE;
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case G_HASH_TABLE_NEW_ERROR:
+                ret_cod = LIXA_RC_G_RETURNED_NULL;
+                break;
             case STRDUP_ERROR:
                 ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
@@ -586,22 +610,27 @@ int client_unconfig(client_config_coll_t *ccc)
     LIXA_TRACE(("client_unconfig\n"));
     TRY {
         guint i, j;
+        pthread_t tid = pthread_self();
 
         /* lock mutex to start deconfiguration activity */
         LIXA_TRACE(("client_unconfig: acquiring exclusive mutex\n"));
         g_static_mutex_lock(&ccc->mutex);
 
-        if (ccc->configured > 0) {
-            ccc->configured--;
-            if (0 != ccc->configured) {
-                LIXA_TRACE(("client_unconfig: can not unconfigure (%d), "
-                            "skipping...\n", ccc->configured));
+        if (NULL != ccc->config_threads) {
+            g_hash_table_remove(ccc->config_threads, (gconstpointer)tid);
+            if (g_hash_table_size(ccc->config_threads) != 0) {
+                LIXA_TRACE(("client_unconfig: can not unconfigure (%u), "
+                            "skipping...\n",
+                            g_hash_table_size(ccc->config_threads)));
                 THROW(NONE);
+            } else {
+                g_hash_table_destroy(ccc->config_threads);
+                ccc->config_threads = NULL;
             }
         } else {
-            LIXA_TRACE(("client_unconfig: ccc->configured=%d\n",
-                        ccc->configured));
-            THROW(OUT_OF_RANGE);
+            LIXA_TRACE(("client_unconfig: can not unconfigure (%p), "
+                        "skipping...\n", ccc->config_threads));
+            THROW(NONE);
         }
         
         if (LIXA_RC_OK != (ret_cod = client_config_unload_switch(&global_ccc)))

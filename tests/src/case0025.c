@@ -56,11 +56,11 @@ int main(int argc, char *argv[])
 
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid1, rc = lixa_monkeyrm_call_ax_reg(rmid1));
-    assert(TMER_TMERR == rc);
+    assert(TMER_PROTO == rc);
 
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid2, rc = lixa_monkeyrm_call_ax_reg(rmid2));
-    assert(TMER_TMERR == rc);
+    assert(TMER_PROTO == rc);
 
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_PROTOCOL_ERROR == rc);

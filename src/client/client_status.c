@@ -61,8 +61,8 @@ client_status_coll_t global_csc = { G_STATIC_MUTEX_INIT,
 /* this static structure is used by all the threads of the program and contains
  * the configuration read by the first thread and used by all the thread
  * hosted by the same process */
-client_config_coll_t global_ccc = { FALSE,
-                                    G_STATIC_MUTEX_INIT,
+client_config_coll_t global_ccc = { G_STATIC_MUTEX_INIT,
+                                    NULL,
                                     NULL,
                                     NULL,
                                     NULL,
