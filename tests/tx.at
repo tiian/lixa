@@ -1,8 +1,5 @@
 # TX (Transaction Demarcation) Specification compliance case tests
 
-m4_include([tx_5_26.at])
-m4_include([tx_5_27.at])
-m4_include([tx_7_52.at])
 m4_include([tx_b_2.at])
 m4_include([tx_b_4.at])
 m4_include([tx_b_5.at])
@@ -20,3 +17,6 @@ m4_include([tx_5_20.at])
 m4_include([tx_5_22.at])
 m4_include([tx_5_23.at])
 m4_include([tx_5_25.at])
+m4_include([tx_5_26.at])
+m4_include([tx_5_27.at])
+m4_include([tx_7_52.at])

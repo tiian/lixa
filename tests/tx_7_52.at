@@ -76,6 +76,10 @@ xa_start/0
 xa_end/0
 xa_rollback/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
@@ -137,6 +141,8 @@ xa_rollback/0
 # tx_set_transaction_control S1
 xa_end/0
 xa_rollback/0
+# memory leak prevention
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset start case0020 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -227,6 +233,10 @@ xa_start/0
 xa_end/0
 xa_rollback/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
@@ -293,6 +303,8 @@ xa_rollback/0
 # tx_set_transaction_control S1
 xa_end/0
 xa_rollback/0
+# memory leak prevention
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0020 1 0], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -373,6 +385,10 @@ xa_start/0
 xa_end/0
 xa_rollback/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
@@ -448,6 +464,10 @@ xa_start/0
 xa_end/0
 xa_rollback/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none case0020 0 2], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -538,6 +558,10 @@ xa_start/0
 xa_end/0
 xa_rollback/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
@@ -623,6 +647,10 @@ xa_start/0
 xa_end/0
 xa_rollback/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none case0020 1 2], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -689,6 +717,8 @@ xa_rollback/0
 # tx_set_transaction_control S1
 xa_end/0
 xa_rollback/0
+# memory leak prevention
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
@@ -750,6 +780,8 @@ xa_rollback/0
 # tx_set_transaction_control S1
 xa_end/0
 xa_rollback/0
+# memory leak prevention
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0005 ; lixa_test_exec.sh noreset none case0020 0 1], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -821,6 +853,8 @@ xa_rollback/0
 # tx_set_transaction_control S1
 xa_end/0
 xa_rollback/0
+# memory leak prevention
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
@@ -887,6 +921,8 @@ xa_rollback/0
 # tx_set_transaction_control S1
 xa_end/0
 xa_rollback/0
+# memory leak prevention
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0005 ; lixa_test_exec.sh noreset none case0020 1 1], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -923,6 +959,9 @@ xa_end/0
 xa_prepare/0
 xa_commit/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -931,6 +970,7 @@ xa_open/0
 xa_end/0
 xa_prepare/0
 xa_commit/0
+# memory leak prevention
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 1 0], [0], [ignore], [ignore])
@@ -965,6 +1005,9 @@ xa_start/0
 xa_end/0
 xa_prepare/100
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -972,6 +1015,7 @@ AT_DATA([monkey1d.conf],
 xa_open/0
 xa_end/0
 xa_rollback/0
+# memory leak prevention
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 1 -2], [0], [ignore], [ignore])
@@ -1010,6 +1054,9 @@ xa_end/0
 xa_prepare/0
 xa_commit/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -1019,6 +1066,7 @@ xa_end/0
 xa_prepare/0
 xa_commit/5
 xa_forget/0
+# memory leak prevention
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 1 -3], [0], [ignore], [ignore])
@@ -1057,6 +1105,9 @@ xa_end/0
 xa_prepare/0
 xa_commit/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -1066,6 +1117,7 @@ xa_end/0
 xa_prepare/0
 xa_commit/8
 xa_forget/0
+# memory leak prevention
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 1 1 -4], [0], [ignore], [ignore])
@@ -1193,6 +1245,9 @@ xa_start/0
 xa_end/0
 xa_rollback/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -1200,6 +1255,7 @@ AT_DATA([monkey1d.conf],
 xa_open/0
 xa_end/0
 xa_rollback/0
+# memory leak prevention
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 0 1 0], [0], [ignore], [ignore])
@@ -1237,6 +1293,9 @@ xa_end/0
 xa_rollback/7
 xa_forget/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -1245,6 +1304,7 @@ xa_open/0
 xa_end/0
 xa_rollback/7
 xa_forget/0
+# memory leak prevention
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 0 1 -9], [0], [ignore], [ignore])
@@ -1280,6 +1340,9 @@ xa_start/0
 xa_end/0
 xa_rollback/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -1288,6 +1351,7 @@ xa_open/0
 xa_end/0
 xa_rollback/7
 xa_forget/0
+# memory leak prevention
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 0 1 -3], [0], [ignore], [ignore])
@@ -1323,6 +1387,9 @@ xa_start/0
 xa_end/0
 xa_rollback/0
 xa_start/0
+# memory leak prevention
+xa_end/0
+xa_rollback/0
 xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
@@ -1331,6 +1398,7 @@ xa_open/0
 xa_end/0
 xa_rollback/8
 xa_forget/0
+# memory leak prevention
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh noreset none case0021 0 1 -4], [0], [ignore], [ignore])
