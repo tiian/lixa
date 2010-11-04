@@ -81,9 +81,19 @@ int main(int argc, char *argv[])
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     if (TX_FAIL == test_rc)
         assert(TX_FAIL == rc);
-    else if (chained && test_rc > TX_NO_BEGIN)
+    else if (chained && test_rc > TX_NO_BEGIN) {
         assert(TX_PROTOCOL_ERROR == rc);
-    else
+
+        /* memory leak prevention */
+        printf("%s| tx_set_transaction_control(): %d\n", pgm,
+               rc = tx_set_transaction_control(TX_UNCHAINED));
+        assert(TX_OK == rc);
+        printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());        
+        assert(TX_OK == rc);
+        printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+        assert(TX_OK == rc);
+        lixa_monkeyrm_call_cleanup();
+    } else
         assert(TX_OK == rc);
 
     printf("%s| ...finished\n", pgm);
