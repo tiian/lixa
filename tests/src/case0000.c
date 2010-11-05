@@ -64,6 +64,10 @@ int main(int argc, char *argv[])
     assert(TX_OK == rc);
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     assert(TX_OK == rc);
+
+    /* memory leak prevention */
+    lixa_monkeyrm_call_cleanup();
+
     printf("%s| ...finished\n", pgm);
     return 0;
 }

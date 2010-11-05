@@ -36,6 +36,7 @@
 
 
 #include <tx.h>
+#include <liblixamonkey.h>
 
 
 
@@ -70,6 +71,9 @@ int main(int argc, char *argv[])
         assert(test_rc == rc);
     }
     
+    /* memory leak prevention */
+    lixa_monkeyrm_call_cleanup();
+
     printf("%s| ...finished\n", pgm);
     return 0;
 }

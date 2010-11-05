@@ -297,10 +297,12 @@ int lixa_tx_close(int *txrc)
         
         if (LIXA_RC_OK != (ret_cod = lixa_xa_close(cs, &tmp_txrc)))
             THROW(LIXA_XA_CLOSE_ERROR);
-            
+
+        /*
         if (LIXA_RC_OK != (ret_cod = client_disconnect(&global_csc)))
             THROW(CLIENT_DISCONNECT_ERROR);
-
+        */
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -335,9 +337,10 @@ int lixa_tx_close(int *txrc)
             client_status_failed(cs);
 
         if (TX_PROTOCOL_ERROR != *txrc) {
+            rc = client_disconnect(&global_csc);
+            LIXA_TRACE(("lixa_tx_close/client_disconnect/rc=%d\n", rc));
             rc = client_unconfig(&global_ccc);
-            if (LIXA_RC_OK != rc)
-                LIXA_TRACE(("lixa_tx_close/client_unconfig/ret_cod=%d\n", rc));
+            LIXA_TRACE(("lixa_tx_close/client_unconfig/rc=%d\n", rc));
         }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_close/TX_*=%d/excp=%d/"
