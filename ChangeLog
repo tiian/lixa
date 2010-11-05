@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.5.21 
+20101103 - 0.5.21 fixed bug # 3102459
 
 20100925 - 0.5.20 implemented test cases XA/5.52/*.*
                   implemented test case MT/1.0/0.*
