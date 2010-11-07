@@ -251,7 +251,7 @@ int lixa_tx_close(int *txrc)
                      , CLIENT_DISCONNECT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int tmp_txrc = TX_OK, rc;
+    int tmp_txrc = TX_OK;
     client_status_t *cs = NULL;
 
     *txrc = TX_FAIL;
@@ -298,11 +298,6 @@ int lixa_tx_close(int *txrc)
         if (LIXA_RC_OK != (ret_cod = lixa_xa_close(cs, &tmp_txrc)))
             THROW(LIXA_XA_CLOSE_ERROR);
 
-        /*
-        if (LIXA_RC_OK != (ret_cod = client_disconnect(&global_csc)))
-            THROW(CLIENT_DISCONNECT_ERROR);
-        */
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -335,17 +330,24 @@ int lixa_tx_close(int *txrc)
         } /* switch (excp) */
         if (TX_FAIL == *txrc && NULL != cs)
             client_status_failed(cs);
-
-        if (TX_PROTOCOL_ERROR != *txrc) {
-            rc = client_disconnect(&global_csc);
-            LIXA_TRACE(("lixa_tx_close/client_disconnect/rc=%d\n", rc));
-            rc = client_unconfig(&global_ccc);
-            LIXA_TRACE(("lixa_tx_close/client_unconfig/rc=%d\n", rc));
-        }
+        if (TX_PROTOCOL_ERROR != *txrc)
+            lixa_tx_cleanup();
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_close/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+void lixa_tx_close_cleanup(void)
+{
+    client_status_t *cs;
+
+    LIXA_TRACE(("lixa_tx_close_cleanup\n"));
+    if (LIXA_RC_OK == client_status_coll_get_cs(&global_csc, &cs)) {
+        client_status_coll_del(&global_csc);
+    }
 }
 
 

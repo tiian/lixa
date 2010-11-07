@@ -56,6 +56,16 @@ extern "C" {
     int lixa_tx_close(int *txrc);
 
 
+
+    /**
+     * This function can be used to clean-up memory after a TX_FAIL condition;
+     * the primary usage is related to memory leak control and detection.
+     * The normal behavior when a TX_FAIL return code happens is a (small)
+     * memory leak to avoid the same thread of control uses the library again.
+     */
+    void lixa_tx_close_cleanup(void);
+
+
     
     /**
      * This function implements the real logic underlaying @ref tx_commit
