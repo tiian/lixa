@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
     }
     
     /* memory leak prevention */
+    lixa_tx_close_cleanup();
     lixa_monkeyrm_call_cleanup();
 
     printf("%s| ...finished\n", pgm);
