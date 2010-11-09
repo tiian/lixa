@@ -299,7 +299,6 @@ AT_DATA([monkey1s.conf],
 [[# first monkey R.M. config
 xa_open/0
 xa_start/-9
-xa_end/0
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0023 0 -1], [0], [ignore], [ignore])
