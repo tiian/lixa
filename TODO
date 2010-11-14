@@ -1,3 +1,12 @@
+TX/B.4/7.17
+The case test returns XA_RETRY to xa_commit and TMONEPHASE is set: this is
+explicity prohibited at page 33 of XA specification.
+The case test exploits a possible bug: if tx_close() is issued after tx_commit()
+the "recovery pending" status is loss and the following transaction does not
+have to recover the status. If tx_close() is not issued, the "recovery pending"
+is persisted and the following transaction must recover the status.
+This behavior must be inspected.
+
 Go on with tests/parse_check_output.sh for memory leak detection; add
 lixa_tx_cleanup() call to functions need it in lixa_tx.c
 
