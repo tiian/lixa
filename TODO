@@ -1,4 +1,6 @@
-Fix case0024 new bug (TX/B.5/7.0)
+Bug 3110828: tx_b_5_8.at
+
+Bug 3110744: tx_b_5_7.at line 88: a sample of xa_prepare/3 --> xa_rollback
 
 Go on with tests/parse_check_output.sh for memory leak detection; add
 lixa_tx_cleanup() call to functions need it in lixa_tx.c
