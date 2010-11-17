@@ -114,6 +114,11 @@
     "notified to the Application Program"
 #define LIXA_SYSLOG_LXC024E "LXC024E Resource Manager '%s' (rmid=%d) returned %d while performing xa_recover() with flags=0x%lx and count=%d"
 #define LIXA_SYSLOG_LXC025C "LXC025C Resource Manager '%s' (rmid=%d) returned %d while performing xa_recover() with flags=0x%lx and count=%d: the stack pointer could be now corrupted and the process will be interrupted as soon as possible; this might be a bug inside resource manager code"
+#define LIXA_SYSLOG_LXC026W "LXC026W Resource Manager '%s' (rmid=%d) " \
+    "returned XA_RETRY (%d) for xid '%s', but the Transaction Manager " \
+    "called xa_commit() with TMONEPHASE flag: there probably is a bug " \
+    "inside the RM code. The transaction is marked as completed: " \
+    "consistency matters are delegated to Resource Manager behavior"
 
 
 
