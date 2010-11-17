@@ -300,7 +300,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
                     csr->common.xa_s_state = XA_STATE_S0;
-                    if (TMONEPHASE != record.flags) {
+                    if (!(TMONEPHASE & record.flags)) {
                         ser_xid = xid_serialize(client_status_get_xid(cs));
                         syslog(LOG_WARNING, LIXA_SYSLOG_LXC017W,
                                (char *)act_rsrmgr->generic->name, record.rmid,
@@ -322,8 +322,25 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 case XAER_RMERR:
                     csr->common.xa_s_state = XA_STATE_S0;
                     break;
-                case XA_RETRY: /* state does not change, this will become a
-                                  recovery pending transaction */
+                case XA_RETRY:
+                    if (TMONEPHASE & record.flags) {
+                        /* transaction consistency is delegated to
+                           Resource Manager behavior */
+                        csr->common.xa_s_state = XA_STATE_S0;
+                        ser_xid = xid_serialize(client_status_get_xid(cs));
+                        syslog(LOG_WARNING, LIXA_SYSLOG_LXC026W,
+                               (char *)act_rsrmgr->generic->name, record.rmid,
+                               record.rc, NULL != ser_xid ? ser_xid : "");
+                        LIXA_TRACE(("lixa_xa_commit: xa_commit returned "
+                                    "XA_RETRY (%d) for rmid=%d,xid='%s' and "
+                                    "TMONEPHASE was used\n",
+                                    record.rc, record.rmid,
+                                    NULL != ser_xid ? ser_xid : ""));
+                        if (NULL != ser_xid) {
+                            free(ser_xid);
+                            ser_xid = NULL;
+                        }
+                    }
                     break;
                 case XAER_RMFAIL:
                     csr->common.xa_r_state = XA_STATE_R0;
