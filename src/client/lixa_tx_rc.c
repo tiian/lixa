@@ -220,7 +220,10 @@ int lixa_tx_rc_get(lixa_tx_rc_t *ltr)
             ltr->tx_rc = TX_FAIL;
             break;
         case XA_RETRY:
-            ltr->tx_rc = TX_ERROR;
+            if (1 == ltr->xa_rc->len)
+                ltr->tx_rc = TX_ERROR;
+            else
+                ltr->tx_rc = TX_FAIL;
             break;
         default:
             LIXA_TRACE(("lixa_tx_get_rc: first=%d, invalid value\n", first));
@@ -261,11 +264,11 @@ int lixa_tx_rc_get(lixa_tx_rc_t *ltr)
                     if (lixa_tx_rc_hierarchy(TX_HAZARD) <
                         lixa_tx_rc_hierarchy(ltr->tx_rc))
                         ltr->tx_rc = TX_HAZARD;
-                /* [XA_RETRY]         any          ->      [TX_ERROR] */
+                /* [XA_RETRY]         any          ->      [TX_FAIL] */
                 if (XA_RETRY == first || XA_RETRY == second)
                     if (lixa_tx_rc_hierarchy(TX_ERROR) <
                         lixa_tx_rc_hierarchy(ltr->tx_rc))
-                        ltr->tx_rc = TX_ERROR;
+                        ltr->tx_rc = TX_FAIL;
                 /* any commit         any commit   ->      [TX_OK]
                    no check must be performed */
                 /* any commit         any rollback ->      [TX_MIXED] */
@@ -307,11 +310,11 @@ int lixa_tx_rc_get(lixa_tx_rc_t *ltr)
                     if (lixa_tx_rc_hierarchy(TX_HAZARD) <
                         lixa_tx_rc_hierarchy(ltr->tx_rc))
                         ltr->tx_rc = TX_HAZARD;
-                /* [XA_RETRY]         any          ->      [TX_ERROR] */
+                /* [XA_RETRY]         any          ->      [TX_FAIL] */
                 if (XA_RETRY == first || XA_RETRY == second)
                     if (lixa_tx_rc_hierarchy(TX_ERROR) <
                         lixa_tx_rc_hierarchy(ltr->tx_rc))
-                        ltr->tx_rc = TX_ERROR;
+                        ltr->tx_rc = TX_FAIL;
                 /* [XA_HEURCOM]       [XA_HEURCOM] ->      Note 3 */
                 if (XA_HEURCOM == first && XA_HEURCOM == second)
                     if (!ltr->tx_commit)
