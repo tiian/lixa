@@ -95,9 +95,9 @@ int main(int argc, char *argv[])
 
     /* memory leak prevention */
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-    /*
     if (TX_FAIL == rc)
         lixa_tx_close_cleanup();
+    /*
     lixa_monkeyrm_call_cleanup();
     */
     
