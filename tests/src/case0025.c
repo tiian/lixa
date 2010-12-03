@@ -34,6 +34,8 @@
 
 #include <tx.h>
 #include <liblixamonkey.h>
+#include <lixa_trace.h>
+
 
 
 /* This case test is for tx_begin() */
@@ -44,7 +46,7 @@ int main(int argc, char *argv[])
     char *pgm = argv[0];
     int rc, test_rc;
     int rmid1 = 2, rmid2 = 3;
-    
+
     if (argc < 2) {
         fprintf(stderr, "%s: at least one option must be specified\n",
                 argv[0]);
@@ -76,6 +78,10 @@ int main(int argc, char *argv[])
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     assert(TX_OK == rc);
 
+    /* memory leak prevention */
+    printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+    lixa_monkeyrm_call_cleanup();
+    
     printf("%s| ...finished\n", pgm);
     return 0;
 }

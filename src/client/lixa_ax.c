@@ -50,7 +50,8 @@ int ax_reg(int rmid, XID *xid, long flags)
     int xa_ret_cod = TM_OK;
 
     char *ser_xid = NULL;
-    
+
+    LIXA_TRACE_INIT;
     LIXA_TRACE(("ax_reg: rmid=%d, xid=%p, flags=0x%lx\n", rmid, xid, flags));
     TRY {
         client_status_t *cs;

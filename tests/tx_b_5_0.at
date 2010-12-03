@@ -17,24 +17,28 @@ AT_DATA([monkey1s.conf],
 xa_open/-3
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start case0025 -6], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
@@ -42,24 +46,28 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/-3
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -6], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
@@ -67,24 +75,28 @@ AT_DATA([monkey1s.conf],
 xa_open/-3
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/-3
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -6], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
@@ -92,24 +104,28 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/-3
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/-3
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -6], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
@@ -117,24 +133,28 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/-3
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/-3
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -6], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -148,24 +168,28 @@ AT_DATA([monkey1s.conf],
 xa_open/-5
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -7], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
@@ -173,24 +197,28 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/-5
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -7], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
@@ -198,24 +226,28 @@ AT_DATA([monkey1s.conf],
 xa_open/-5
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/-5
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -7], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
@@ -223,24 +255,28 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/-5
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/-5
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -7], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
@@ -248,24 +284,28 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/-5
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/-5
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -7], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -279,24 +319,28 @@ AT_DATA([monkey1s.conf],
 xa_open/-6
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -7], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
@@ -304,24 +348,28 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/-6
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -7], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
@@ -329,24 +377,28 @@ AT_DATA([monkey1s.conf],
 xa_open/-6
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/-6
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -7], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
@@ -354,24 +406,28 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/-6
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/-6
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0025 -7], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
@@ -379,24 +435,28 @@ AT_DATA([monkey1s.conf],
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/-6
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/-6
 xa_close/0
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0025 -7], [0], [ignore], [ignore])
 AT_CLEANUP
