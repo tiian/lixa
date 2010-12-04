@@ -92,6 +92,14 @@ int main(int argc, char *argv[])
            pgm, 4, rc = lixa_monkeyrm_call_ax_reg(4));
     assert(TMER_INVAL == rc);
 
+    printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
+    assert(TX_OK == rc);
+    
+    printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+    assert(TX_OK == rc);
+
+    lixa_monkeyrm_call_cleanup();
+    
     printf("%s| ...finished\n", pgm);
     return 0;
 }

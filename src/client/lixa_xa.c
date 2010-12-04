@@ -1350,12 +1350,13 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
+    struct lixa_msg_s msg; 
     lixa_tx_rc_t ltr = LIXA_TX_RC_T_INIT;
     *txrc = TX_FAIL;
+    msg.body.rollback_8.xa_rollback_execs = NULL;
     
     LIXA_TRACE(("lixa_xa_rollback\n"));
     TRY {
-        struct lixa_msg_s msg; 
         size_t buffer_size = 0;
         int fd;
         guint i;
@@ -1589,12 +1590,6 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
 
-        /* this object contains references to external stuff and
-           cannot be freed using standard lixa_msg_free; we are freeing the
-           array to avoid memory leaks */
-        g_array_free(msg.body.rollback_8.xa_rollback_execs, TRUE);
-        memset(&msg, 0, sizeof(msg));
-        
         LIXA_TRACE(("lixa_xa_rollback: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
@@ -1629,6 +1624,13 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
         } /* switch (excp) */
         /* release memory */
         lixa_tx_rc_delete(&ltr);
+        
+        /* this object contains references to external stuff and
+           cannot be freed using standard lixa_msg_free; we are freeing the
+           array to avoid memory leaks */
+        if (NULL != msg.body.rollback_8.xa_rollback_execs)
+            g_array_free(msg.body.rollback_8.xa_rollback_execs, TRUE);
+        
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

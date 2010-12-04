@@ -34,9 +34,12 @@
 
 #include <tx.h>
 #include <liblixamonkey.h>
+#include <lixa_tx.h>
+
 
 
 /* This case test is for tx_begin() */
+
 
 
 int main(int argc, char *argv[])
@@ -97,9 +100,7 @@ int main(int argc, char *argv[])
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     if (TX_FAIL == rc)
         lixa_tx_close_cleanup();
-    /*
     lixa_monkeyrm_call_cleanup();
-    */
     
     printf("%s| ...finished\n", pgm);
     return 0;
