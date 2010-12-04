@@ -1,6 +1,9 @@
 Go on with tests/parse_check_output.sh for memory leak detection; add
 lixa_tx_cleanup() call to functions need it in lixa_tx.c
 
+Does ax_unreg need LIXA_TRACE_INIT like ax_reg?! Try a test case with
+ax_unreg called before tx_open (xa_open).
+
 Stability test with valgrind must be performed: use the multithread case test
 to stress the memory allocation and discover potential memory leaks.
 
