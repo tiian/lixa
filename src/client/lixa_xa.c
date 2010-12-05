@@ -467,9 +467,11 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
+    struct lixa_msg_s msg;
+    msg.body.end_24.xa_end_execs = NULL;    
+    
     LIXA_TRACE(("lixa_xa_end\n"));
     TRY {
-        struct lixa_msg_s msg; 
         size_t buffer_size = 0;
         int fd;
         guint i;
@@ -641,12 +643,6 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR2);
 
-        /* this object contains references to external stuff and
-           cannot be freed using standard lixa_msg_free; we are freeing the
-           array to avoid memory leaks */
-        g_array_free(msg.body.end_24.xa_end_execs, TRUE);
-        memset(&msg, 0, sizeof(msg));
-        
         LIXA_TRACE(("lixa_xa_end: sending " SIZE_T_FORMAT
                     " bytes to the server for step 24\n", buffer_size));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
@@ -689,6 +685,13 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        
+        /* this object contains references to external stuff and
+           cannot be freed using standard lixa_msg_free; we are freeing the
+           array to avoid memory leaks */
+        if (NULL != msg.body.end_24.xa_end_execs)
+            g_array_free(msg.body.end_24.xa_end_execs, TRUE);
+        
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_end/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
