@@ -34,6 +34,7 @@
 
 #include <tx.h>
 #include <liblixamonkey.h>
+#include <lixa_tx.h>
 
 
 /* This case test is for tx_begin() */
@@ -79,9 +80,10 @@ int main(int argc, char *argv[])
     assert(test_rc == rc);
 
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-    if (TX_FAIL == test_rc)
+    if (TX_FAIL == test_rc) {
         assert(TX_FAIL == rc);
-    else if (chained && test_rc > TX_NO_BEGIN) {
+        lixa_tx_close_cleanup();
+    } else if (chained && test_rc > TX_NO_BEGIN) {
         assert(TX_PROTOCOL_ERROR == rc);
 
         /* memory leak prevention */
