@@ -47,6 +47,11 @@ stop_server() {
 
 exec_test() {
 	echo "Starting case test $1"
+	# check lixar link
+	if [ ! -h $TESTS_SRC_DIR/lixar ]
+	then
+		ln -s $CLIENT_DIR/lixar $TESTS_SRC_DIR/lixar
+	fi
 	PGM=$1
 	shift
 	if [ "x$VALGRIND" != "x" ] 
