@@ -790,6 +790,7 @@ int lixa_tx_open(int *txrc, int mmode)
             case LIXA_XA_OPEN_ERROR:
                 /* clean-up socket and free thread status */
                 client_disconnect(&global_csc);
+                lixa_tx_cleanup();
                 *txrc = tmp_txrc;
                 break;
             case ALREADY_OPENED:
@@ -803,8 +804,10 @@ int lixa_tx_open(int *txrc, int mmode)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* @@@
         if (TX_FAIL == *txrc && NULL != cs)
             client_status_failed(cs);
+        */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_open/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));

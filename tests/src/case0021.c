@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     if (TX_FAIL == test_rc) {
         assert(TX_FAIL == rc);
+        /* memory leak prevention */
         lixa_tx_close_cleanup();
     } else if (chained && test_rc > TX_NO_BEGIN) {
         assert(TX_PROTOCOL_ERROR == rc);
@@ -94,10 +95,12 @@ int main(int argc, char *argv[])
         assert(TX_OK == rc);
         printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
         assert(TX_OK == rc);
-        lixa_monkeyrm_call_cleanup();
     } else
         assert(TX_OK == rc);
 
+    /* memory leak prevention */
+    lixa_monkeyrm_call_cleanup();
+    
     printf("%s| ...finished\n", pgm);
     return 0;
 }

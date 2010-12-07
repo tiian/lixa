@@ -67,7 +67,10 @@ int main(int argc, char *argv[])
     else
         assert(TX_OK == rc);
 
-    if (!xaopen) {
+    if (xaopen && TX_OK == test_rc) {
+        printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+        assert(TX_OK == rc);
+    } else if (!xaopen) {
         printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
         assert(test_rc == rc);
     }

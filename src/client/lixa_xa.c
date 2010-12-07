@@ -883,11 +883,12 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
                      , CLIENT_RECOVERY_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    struct lixa_msg_s msg;
     
+    msg.body.open_24.xa_open_execs = NULL;
     LIXA_TRACE(("lixa_xa_open\n"));
     TRY {
         struct lixa_msg_body_open_8_client_s client;
-        struct lixa_msg_s msg;
         int fd;
         size_t buffer_size = 0;
         guint i;
@@ -1059,12 +1060,6 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR2);
         
-        /* this object contains references to external stuff and
-           cannot be freed using standard lixa_msg_free; we are freeing the
-           array to avoid memory leaks */
-        g_array_free(msg.body.open_24.xa_open_execs, TRUE);
-        memset(&msg, 0, sizeof(msg));
-        
         LIXA_TRACE(("lixa_xa_open: sending " SIZE_T_FORMAT
                     " bytes to the server for step 24\n", buffer_size));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
@@ -1127,6 +1122,13 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        
+        /* this object contains references to external stuff and
+           cannot be freed using standard lixa_msg_free; we are freeing the
+           array to avoid memory leaks */
+        if (NULL != msg.body.open_24.xa_open_execs)
+            g_array_free(msg.body.open_24.xa_open_execs, TRUE);
+        
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_open/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

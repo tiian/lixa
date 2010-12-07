@@ -26,12 +26,14 @@ AT_SETUP([XA/5.42/1.0 (return values)])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0022 1 0], [0], [ignore], [ignore])
 # XAER_ASYNC
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/-2
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0022 1 -7], [0], [ignore], [ignore])
 # XAER_RMERR
