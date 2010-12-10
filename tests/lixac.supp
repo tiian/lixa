@@ -77,6 +77,24 @@
    obj:*
 }
 {
+   g_module_open_05
+   Memcheck:Addr4
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   fun:dlopen
+   fun:g_module_open
+}
+{
    g_module_open_10
    Memcheck:Leak
    fun:malloc

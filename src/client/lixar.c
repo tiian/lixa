@@ -90,7 +90,7 @@ void output_options(void);
 int main(int argc, char *argv[])
 {
     int rc = LIXA_RC_OK;
-    int tx_rc;
+    int tx_rc, exit_code = 0;
     
     GError *error = NULL;
     GOptionContext *option_context;
@@ -168,18 +168,19 @@ int main(int argc, char *argv[])
     }
     if (TX_OK != tx_rc) {
         syslog(LOG_ERR, LIXA_SYSLOG_LXR003E, tx_rc);
-        exit(1);
+        exit_code = 1;
     }
 
-    if (LIXA_RC_OK != (rc = lixa_tx_recover(
-                           report, commit, rollback, bypass_bqual_check,
-                           bypass_formatid_check, use_tmendrscan_flag,
-                           xid, xid_file))) {
+    if (0 == exit_code &&
+        (LIXA_RC_OK != (rc = lixa_tx_recover(
+                            report, commit, rollback, bypass_bqual_check,
+                            bypass_formatid_check, use_tmendrscan_flag,
+                            xid, xid_file)))) {
         printf("There was an error while recoverying transactions: "
                "%d ('%s'); look at system log to collect additional "
                "information or activate the trace to debug the problem\n",
                rc, lixa_strerror(rc));
-        exit(1);
+        exit_code = 1;
     }
 
     if (xid)
@@ -187,11 +188,14 @@ int main(int argc, char *argv[])
     if (xid_file)
         g_free(xid_file);
     
+    lixa_tx_close(&tx_rc);
+    LIXA_TRACE(("lixar/tx_close: tx_rc = %d\n", tx_rc));
+    
     /* it's time to exit */
     syslog(LOG_NOTICE, LIXA_SYSLOG_LXR002I);
 
     LIXA_TRACE(("lixar/main: exiting\n"));    
-    return 0;
+    return exit_code;
 }
 
 
