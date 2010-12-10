@@ -7,6 +7,7 @@ xa_open/0
 xa_recover/1
 xa_commit/5
 xa_forget/-3
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# second monkey R.M. config
@@ -14,6 +15,7 @@ xa_open/0
 xa_recover/1
 xa_commit/6
 xa_forget/-4
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# third monkey R.M. config
@@ -21,6 +23,7 @@ xa_open/0
 xa_recover/1
 xa_commit/7
 xa_forget/-7
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# fourth monkey R.M. config
@@ -28,6 +31,7 @@ xa_open/0
 xa_recover/1
 xa_commit/8
 xa_forget/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -39,6 +43,7 @@ xa_open/0
 xa_recover/1
 xa_rollback/5
 xa_forget/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# second monkey R.M. config
@@ -46,6 +51,7 @@ xa_open/0
 xa_recover/1
 xa_rollback/6
 xa_forget/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# third monkey R.M. config
@@ -53,6 +59,7 @@ xa_open/0
 xa_recover/1
 xa_rollback/7
 xa_forget/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# fourth monkey R.M. config
@@ -60,6 +67,7 @@ xa_open/0
 xa_recover/1
 xa_rollback/8
 xa_forget/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset recycle lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -r], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -110,6 +118,7 @@ xa_open/0
 xa_recover/1
 xa_commit/5
 xa_forget/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# second monkey R.M. config
@@ -117,6 +126,7 @@ xa_open/0
 xa_recover/1
 xa_commit/6
 xa_forget/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# third monkey R.M. config
@@ -124,6 +134,7 @@ xa_open/0
 xa_recover/1
 xa_commit/7
 xa_forget/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# fourth monkey R.M. config
@@ -131,6 +142,7 @@ xa_open/0
 xa_recover/1
 xa_commit/8
 xa_forget/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -c], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -177,6 +189,7 @@ xa_open/0
 xa_recover/1
 xa_rollback/5
 xa_forget/0
+xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# second monkey R.M. config
@@ -184,6 +197,7 @@ xa_open/0
 xa_recover/1
 xa_rollback/6
 xa_forget/0
+xa_close/0
 ]])
 AT_DATA([monkey1d.conf],
 [[# third monkey R.M. config
@@ -191,6 +205,7 @@ xa_open/0
 xa_recover/1
 xa_rollback/7
 xa_forget/0
+xa_close/0
 ]])
 AT_DATA([monkey2d.conf],
 [[# fourth monkey R.M. config
@@ -198,6 +213,7 @@ xa_open/0
 xa_recover/1
 xa_rollback/8
 xa_forget/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop lixar -b -p -x 11111111-2222-3333-4444-555555555555.66666666-7777-8888-9999-000000000000 -r], [0], [ignore], [ignore])
 AT_CLEANUP
