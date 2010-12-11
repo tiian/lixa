@@ -93,6 +93,33 @@
    obj:/lib/tls/i686/cmov/libdl-2.7.so
    fun:dlopen
    fun:g_module_open
+   fun:client_config_load_switch
+   fun:client_config
+   fun:lixa_tx_open
+   fun:main
+}
+{
+   g_module_open_06
+   Memcheck:Addr4
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   obj:/lib/ld-2.7.so
+   obj:/lib/tls/i686/cmov/libdl-2.7.so
+   fun:dlopen
+   fun:g_module_open
+   fun:client_config_load_switch
+   fun:client_config
+   fun:lixa_tx_open
+   fun:main
 }
 {
    g_module_open_10
