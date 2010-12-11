@@ -359,7 +359,8 @@ int lixa_monkeyrm_close(char *xa_info, int rmid, long flags)
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int xa_rc = XA_OK;
-    
+    static const char *FM_STRING = "FREE MEMORY";
+        
     LIXA_TRACE(("lixa_monkeyrm_close: xa_info='%s', rmid=%d, flags=0x%lx\n",
                 xa_info, rmid, flags));
     TRY {
@@ -388,7 +389,7 @@ int lixa_monkeyrm_close(char *xa_info, int rmid, long flags)
         /* retrieve the return code must be returned */
         if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_CLOSE, &xa_rc))
             THROW(GET_RC_ERROR);
-        
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -412,6 +413,9 @@ int lixa_monkeyrm_close(char *xa_info, int rmid, long flags)
         } /* switch (excp) */
         /* unlock mutex */
         g_static_mutex_unlock(&monkey_mutex);
+        /* free memory if requested */
+        if (!strncmp(FM_STRING, xa_info, sizeof(FM_STRING)))
+            lixa_monkeyrm_call_cleanup();
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_close/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",

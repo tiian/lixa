@@ -706,7 +706,7 @@ int clnt_rcvr_xid_compare(gconstpointer a, gconstpointer b, gpointer foo) {
 
 
 void clnt_rcvr_array_free(gpointer data) {
-    g_array_free((GArray *)data, FALSE);
+    g_array_free((GArray *)data, TRUE);
 }
 
 

@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     int tx_rc, exit_code = 0;
     
     GError *error = NULL;
-    GOptionContext *option_context;
+    GOptionContext *option_context = NULL;
 
     LIXA_TRACE_INIT;
     LIXA_CRASH_INIT;
@@ -140,6 +140,9 @@ int main(int argc, char *argv[])
                 entries[2].short_name, entries[2].long_name);
         exit(1);
     }
+
+    g_option_context_free(option_context);
+    option_context = NULL;
     
     /* initialize libxml2 library */
     LIBXML_TEST_VERSION;
@@ -182,7 +185,7 @@ int main(int argc, char *argv[])
                rc, lixa_strerror(rc));
         exit_code = 1;
     }
-
+   
     if (xid)
         g_free(xid);
     if (xid_file)
