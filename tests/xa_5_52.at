@@ -5,7 +5,7 @@ AT_SETUP([XA/5.52/0.0 (xa_start & dyn RM)])
 AT_DATA([monkey1d.conf],
 [[# monkey R.M.config
 xa_open/0
-xa_start/-6
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0006 ; lixa_test_exec.sh reset start case0030 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep "xa_start_entry" $TESTS_TMP_FILE2], [1], [ignore], [ignore])
