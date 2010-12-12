@@ -147,8 +147,8 @@ int lixa_tx_begin(int *txrc)
             if (dupid_or_proto) {
                 int txrc2 = TX_FAIL;
                 LIXA_TRACE(("lixa_tx_begin: XAER_DUPID or XAER_PROTO "
-                            "returned from any resource manager xa_start; "
-                            "trying a new synchronization with "
+                            "returned from any resource manager after "
+                            "xa_start call; trying a new synchronization with "
                             "tx_rollback...\n"));
                 if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
                                        cs, &txrc2, FALSE))) {
