@@ -17,6 +17,7 @@ AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
 xa_start/4
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0030 -6], [0], [ignore], [ignore])
 # XA_OK
@@ -24,6 +25,9 @@ AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
 xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0030 0], [0], [ignore], [ignore])
 # XA_RBROLLBACK
@@ -94,6 +98,7 @@ AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
 xa_start/-3
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0030 -6], [0], [ignore], [ignore])
 # XAER_DUPID
@@ -104,6 +109,9 @@ xa_start/-8
 xa_end/0
 xa_rollback/0
 xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0030 0], [0], [ignore], [ignore])
 # XAER_DUPID XAER_DUPID
@@ -121,6 +129,7 @@ AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
 xa_start/-9
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0030 -1], [0], [ignore], [ignore])
 # XAER_NOTA
@@ -145,6 +154,9 @@ xa_start/-6
 xa_end/0
 xa_rollback/0
 xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0030 0], [0], [ignore], [ignore])
 # XAER_PROTO XAER_PROTO
