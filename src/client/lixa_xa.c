@@ -710,7 +710,8 @@ int lixa_xa_forget(client_status_t *cs, int finished)
     int xa_rc = XA_OK;
     char *ser_xid = NULL;
     struct lixa_msg_s msg;
-    
+
+    msg.body.forget_8.xa_forget_execs = NULL;
     LIXA_TRACE(("lixa_xa_forget\n"));
     TRY {
         size_t buffer_size = 0;
@@ -858,7 +859,8 @@ int lixa_xa_forget(client_status_t *cs, int finished)
         /* this object contains references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
-        g_array_free(msg.body.forget_8.xa_forget_execs, TRUE);
+        if (NULL != msg.body.forget_8.xa_forget_execs)
+            g_array_free(msg.body.forget_8.xa_forget_execs, TRUE);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_forget/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -1148,10 +1150,11 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
                      , ERROR_FROM_SERVER
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    struct lixa_msg_s msg; 
     
+    msg.body.prepare_8.xa_prepare_execs = NULL;
     LIXA_TRACE(("lixa_xa_prepare\n"));
     TRY {
-        struct lixa_msg_s msg; 
         size_t buffer_size = 0;
         int fd, break_prepare;
         guint i;
@@ -1274,17 +1277,15 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
 
-        /* this object contains references to external stuff and
-           cannot be freed using standard lixa_msg_free; we are freeing the
-           array to avoid memory leaks */
-        g_array_free(msg.body.prepare_8.xa_prepare_execs, TRUE);
-        memset(&msg, 0, sizeof(msg));
-        
         LIXA_TRACE(("lixa_xa_prepare: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
 
+        /* memory clean-up */
+        g_array_free(msg.body.prepare_8.xa_prepare_execs, TRUE);
+        msg.body.prepare_8.xa_prepare_execs = NULL;
+        
         /* wait server answer */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
                                fd, buffer, sizeof(buffer)-1, &read_bytes)))
@@ -1332,6 +1333,11 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* this object contains references to external stuff and
+           cannot be freed using standard lixa_msg_free; we are freeing the
+           array to avoid memory leaks */
+        if (NULL != msg.body.prepare_8.xa_prepare_execs)
+            g_array_free(msg.body.prepare_8.xa_prepare_execs, TRUE);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_prepare/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
