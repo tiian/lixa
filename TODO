@@ -1,3 +1,5 @@
+Change case0033 to multithread and try to reproduce the memory leak.
+
 Go on with tests/parse_check_output.sh for memory leak detection; add
 lixa_tx_cleanup() call to functions need it in lixa_tx.c
 

@@ -24,6 +24,10 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none ca
 AT_CLEANUP
 
 AT_SETUP([ML/0.3 g_thread_init])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset stop case0032 2 2 0x00000008 $LIXA_CONFIG_FILE $LIXAD_CONFIG_FILE $SAMPLE_SWITCH_FILE], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0032 2 2 0x00000008 $LIXA_CONFIG_FILE $LIXAD_CONFIG_FILE $SAMPLE_SWITCH_FILE], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([ML/0.4 xmlInitParser/xmlCleanupParser])
+AT_CHECK([lixa_test_exec.sh noreset stop case0033], [0], [ignore], [ignore])
 AT_CLEANUP
 

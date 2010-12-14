@@ -690,10 +690,6 @@ int client_unconfig(client_config_coll_t *ccc)
         g_array_free(ccc->trnmgrs, TRUE);
         ccc->trnmgrs = NULL;
 
-        /* @@@ remove this useless instruction
-        ccc->configured = FALSE;
-        */
-        
         if (NULL != ccc->lixac_conf) {
             LIXA_TRACE(("client_unconfig/xmlFreeDoc\n"));
             xmlFreeDoc(ccc->lixac_conf);
@@ -703,7 +699,7 @@ int client_unconfig(client_config_coll_t *ccc)
         /* release libxml2 stuff */
         LIXA_TRACE(("client_unconfig/xmlCleanupParser\n"));
         xmlCleanupParser();
-        
+
         THROW(NONE);
     } CATCH {
         switch (excp) {

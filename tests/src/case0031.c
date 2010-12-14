@@ -49,6 +49,7 @@ struct thread_data_s {
     int commit;
     int expected_rc;
     const char *pgm;
+    int i;
 };
 
 
@@ -93,6 +94,7 @@ int main(int argc, char *argv[])
     data.pgm = pgm;
     for (j=0; j<2; ++j) {
         for (i=0; i<n; ++i) {
+            data.i = i;
             rc = pthread_create(tids+i, NULL, transaction, (void *)&data);
             assert(0 == rc);
         }
@@ -148,7 +150,10 @@ void *transaction(void *parm)
         printf("%s| tx_rollback(): %d\n", data->pgm, rc = tx_rollback());
     assert(data->expected_rc == rc);
     /***
+    if (0 == data->i)
+        sleep(3);
     */
+    
     printf("%s| tx_close(): %d\n", data->pgm, rc = tx_close());
     if (TX_FAIL == data->expected_rc)
         assert(TX_FAIL == rc);
