@@ -47,12 +47,14 @@
 
 
 
-#define THREAD_NUMBER 100
+#define THREAD_NUMBER 1000
 
 #define MODE_MODULE_OPEN_CLOSE 0x00000001
 #define MODE_XML_READ_FREE     0x00000002
 #define MODE_TX_OPEN_CLOSE     0x00000004
 #define MODE_THREAD_INIT       0x00000008
+#define MODE_XML_INIT_PARSER   0x00000010
+
 
 /* This case test is for memory leak inspection */
 
@@ -166,6 +168,12 @@ void *transaction(void *parm)
     if (MODE_THREAD_INIT & *mode)
         if (!g_thread_supported ())
             g_thread_init(NULL);
+
+    if (MODE_XML_INIT_PARSER & *mode) {
+        xmlInitParser();
+        sleep(1);
+        xmlCleanupParser();
+    }
     
     return NULL;
 }
