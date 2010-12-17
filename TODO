@@ -1,10 +1,7 @@
-Change case0033 to multithread and try to reproduce the memory leak.
-
-Go on with tests/parse_check_output.sh for memory leak detection; add
-lixa_tx_cleanup() call to functions need it in lixa_tx.c
-
 Does ax_unreg need LIXA_TRACE_INIT like ax_reg?! Try a test case with
 ax_unreg called before tx_open (xa_open).
+
+Inspect memory leak in server code with valgrind
 
 Stability test with valgrind must be performed: use the multithread case test
 to stress the memory allocation and discover potential memory leaks.
@@ -37,6 +34,14 @@ team. Unfortunately, tx_open() can no be called from the main program and the
 following functions from a different thread because this behavior would violate
 XA standard: to avoid this issue a "proxy thread" should be used for XA
 functions, but the "solution" is worst then the "problem".
+If the multithreaded application has a main program - you are not writing a
+library or a module - you can call
+tx_open() in the main, before every thread is started
+tx_close() in the main, after every thread is completed
+this should avoid the memory leak. Pay attention the tx_open() at main level
+is not inherited at the thread level: every thread must call its own tx_open()
+too; this is only a workaround to force xmlInitParser() and xmlCleanupParser()
+only at main program instead of at first starting thread / last ending thread.
 
 After beta release, after interesting stuff like Python and PHP bindings, the 
 custom containers developed for LIXA could be substituted with glib standard 

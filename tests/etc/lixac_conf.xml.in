@@ -7,6 +7,7 @@
     <rsrmgr name="LIXAmonkey1dynRM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_dynreg.so" xa_open_info="monkey1d.conf" xa_close_info="" />
     <rsrmgr name="LIXAmonkey1dynRM-FM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_dynreg.so" xa_open_info="monkey1d.conf" xa_close_info="FREE MEMORY" />
     <rsrmgr name="LIXAmonkey2dynRM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_dynreg.so" xa_open_info="monkey2d.conf" xa_close_info="" />
+    <rsrmgr name="LIXAmonkey2dynRM-FM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_dynreg.so" xa_open_info="monkey2d.conf" xa_close_info="FREE MEMORY" />
     <rsrmgr name="LIXAmonkey3dynRM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_dynreg.so" xa_open_info="monkey3d.conf" xa_close_info="" />
     <rsrmgr name="LIXAmonkey1staRM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_stareg.so" xa_open_info="monkey1s.conf" xa_close_info="" />
     <rsrmgr name="LIXAmonkey2staRM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_stareg.so" xa_open_info="monkey2s.conf" xa_close_info="" />
@@ -50,6 +51,17 @@
         <rsrmgr>LIXAmonkey2staRM</rsrmgr>
         <rsrmgr>LIXAmonkey1dynRM</rsrmgr>
         <rsrmgr>LIXAmonkey2dynRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0002_FM">
+      <trnmgrs>
+        <trnmgr>TestTM</trnmgr>
+      </trnmgrs>
+      <rsrmgrs>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+        <rsrmgr>LIXAmonkey2staRM</rsrmgr>
+        <rsrmgr>LIXAmonkey1dynRM</rsrmgr>
+        <rsrmgr>LIXAmonkey2dynRM-FM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0003">
