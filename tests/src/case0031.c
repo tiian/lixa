@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
     else if (n > THREAD_NUMBER)
         n = THREAD_NUMBER;
     printf("%s| starting (%s/%d)...\n", pgm, argv[1], expected_rc);
+
     data.commit = commit;
     data.expected_rc = expected_rc;
     data.pgm = pgm;
@@ -105,6 +106,7 @@ int main(int argc, char *argv[])
         printf("%s| sleeping...\n", pgm);
         sleep(1);
     }
+
     /* clean-up monkeyrm stuff (memory leak detection) */
     lixa_monkeyrm_call_cleanup();
     

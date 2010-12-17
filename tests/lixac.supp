@@ -267,3 +267,56 @@
    fun:malloc
    fun:inet_ntoa
 }
+{
+   xmlInitParse_leak_00
+   Memcheck:Leak
+   fun:malloc
+   fun:xmlNewMutex
+   fun:xmlInitGlobals
+   fun:xmlInitializeGlobalState
+   fun:xmlGetGlobalState
+   fun:__xmlGenericError
+   fun:xmlInitParser
+   fun:client_config
+   fun:lixa_tx_open
+   fun:tx_open
+   fun:transaction
+   fun:start_thread
+   fun:clone
+}
+{
+   xmlInitParse_leak_01
+   Memcheck:Leak
+   fun:malloc
+   fun:xmlNewMutex
+   fun:xmlInitGlobals
+   fun:xmlInitializeGlobalState
+   fun:xmlGetGlobalState
+   fun:__xmlGenericError
+   fun:xmlInitParser
+   fun:thread1
+   fun:start_thread
+   fun:clone
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   xmlInitParse_leak_02
+   Memcheck:Leak
+   fun:malloc
+   fun:xmlNewMutex
+   fun:xmlInitGlobals
+   fun:xmlInitializeGlobalState
+   fun:xmlGetGlobalState
+   fun:__xmlGenericError
+   fun:xmlInitParser
+   fun:client_config
+   fun:lixa_tx_open
+   fun:tx_open
+   fun:transaction
+   fun:start_thread
+   fun:clone
+}
+

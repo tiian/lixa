@@ -54,9 +54,16 @@ exec_test() {
 	fi
 	PGM=$1
 	shift
+	REAL_CHECK_TYPE="$CHECK_TYPE"
+	#using valgrind in crash test simulation is foolish
+	if [ "x$LIXA_CRASH_POINT" != "x" ]
+	then
+		REAL_CHECK_TYPE=""
+	fi
+	echo "REAL_CHECK_TYPE=$REAL_CHECK_TYPE"
 	if [ "x$VALGRIND" != "x" ] 
 	then
-		case "$CHECK_TYPE" in
+		case "$REAL_CHECK_TYPE" in
 		memory)
 			export G_SLICE=always-malloc
 			#libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=1000 --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
