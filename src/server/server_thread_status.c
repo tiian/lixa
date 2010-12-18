@@ -469,7 +469,7 @@ int thread_status_load_files(struct thread_status_s *ts,
         if (LIXA_RC_OK != (ret_cod = status_record_load(
                                &(ts->status1),
                                (const char *)ts->status1_filename,
-                               ts->updated_records, tsds->dump)))
+                               &(ts->updated_records), tsds->dump)))
             THROW(STATUS_RECORD_LOAD_1_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status1))) {
@@ -485,7 +485,7 @@ int thread_status_load_files(struct thread_status_s *ts,
         if (LIXA_RC_OK != (ret_cod = status_record_load(
                                &(ts->status2),
                                (const char *)ts->status2_filename,
-                               ts->updated_records, tsds->dump)))
+                               &(ts->updated_records), tsds->dump)))
             THROW(STATUS_RECORD_LOAD_2_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status2))) {
@@ -954,7 +954,11 @@ int thread_status_sync_files(struct thread_status_s *ts)
         }
 #endif /* LIXA_DEBUG */
         /* clean updated records set */
+        /* @@@
         thread_status_updated_records_clean(ts->updated_records);
+        */
+        g_tree_destroy(ts->updated_records);
+        ts->updated_records = g_tree_new(size_t_compare_func);
         /* recover the pointer in thread status structure... */
         *status_is = alt_status;
         /* switch to alternate status mapped file */

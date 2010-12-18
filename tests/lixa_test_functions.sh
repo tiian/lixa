@@ -29,8 +29,34 @@ reset_server() {
 }
 
 start_server() {
+	PWD=$(pwd)
 	echo "Starting LIXA server"
-	lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$TESTS_TMP_DIR/lixad.trace
+
+	REAL_CHECK_TYPE="$CHECK_TYPE"
+	#using valgrind in crash test simulation is foolish
+	if [ "x$LIXA_CRASH_POINT" != "x" ]
+	then
+		REAL_CHECK_TYPE=""
+	fi
+	echo "REAL_CHECK_TYPE=$REAL_CHECK_TYPE"
+	if [ "x$VALGRIND" != "x" ] 
+	then
+		case "$REAL_CHECK_TYPE" in
+		memory)
+			export G_SLICE=always-malloc
+			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=1000 --suppressions=$TESTS_DIR/lixac.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
+		;;
+		thread)
+			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=1000 --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace
+		;;
+		*)
+			$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace
+		;;
+		esac
+	else
+		$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace
+	fi
+
 	echo "LIXA server is running with PID " $(cat $TESTS_VAR_DIR/run.pid)
 }
 
@@ -66,9 +92,7 @@ exec_test() {
 		case "$REAL_CHECK_TYPE" in
 		memory)
 			export G_SLICE=always-malloc
-			#libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=1000 --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
 			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=1000 --suppressions=$TESTS_DIR/lixac.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
-			#libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=1000 --suppressions=$TESTS_DIR/lixac.supp $TESTS_SRC_DIR/$PGM $*
 		;;
 		thread)
 			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=1000 --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*

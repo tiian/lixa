@@ -349,9 +349,9 @@ int server_listener_loop(const struct server_config_s *sc,
         } /* while (TRUE) */
 
         for (i=1; i<tsa->n; ++i) {
-            LIXA_TRACE(("server_listener_loop: waiting thread id "
+            LIXA_TRACE(("server_listener_loop: waiting thread (%d) id "
                         PTHREAD_T_FORMAT " termination...\n",
-                        tsa->array[i].tid));
+                        i, tsa->array[i].tid));
             pthread_join(tsa->array[i].tid, NULL);
         }
         

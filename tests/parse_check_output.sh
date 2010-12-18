@@ -5,7 +5,7 @@ echo "Checking testsuite.log file produced with last 'make check' command"
 LIST=/tmp/parse_check_output.$$.txt
 AWKPGM=/tmp/parse_check_output.awk
 
-find . -name testsuite.log | sort > $LIST
+find . -name testsuite.log -o -name lixad.trace | sort > $LIST
 
 cat > $AWKPGM <<EOL
 /==[0-9]+==.*definitely lost: / { if ($ 4 > 0) print }

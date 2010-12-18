@@ -818,7 +818,7 @@ extern "C" {
      */
     int status_record_load(status_record_t **sr,
                            const char *status_file,
-                           GTree *updated_records,
+                           GTree **updated_records,
                            int readonly);
 
 
