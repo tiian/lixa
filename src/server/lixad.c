@@ -82,10 +82,8 @@
  * changing parent group
  * This function is copied from an example showed by Richard Stevens in
  * UNIX network programming book
- * @param pid_file_name IN specify the file where the process pid must be
- *        stored
  */
-void daemonize(const char *pid_file_name);
+void daemonize(void);
 
 
 
@@ -123,6 +121,7 @@ int main(int argc, char *argv[])
     GOptionContext *option_context;
     struct ts_dump_spec_s tsds;
     struct ts_recovery_spec_s tsrs;
+    FILE *pid_file = NULL;
 
     LIXA_TRACE_INIT;
     LIXA_CRASH_INIT;
@@ -157,6 +156,10 @@ int main(int argc, char *argv[])
     if (maintenance)
         syslog(LOG_WARNING, LIXA_SYSLOG_LXD020N);
     
+    /* daemonize the server process */
+    if (run_as_daemon)
+        daemonize();
+
     /* initialize libxml2 library */
     LIBXML_TEST_VERSION;
 
@@ -168,9 +171,13 @@ int main(int argc, char *argv[])
         return rc;
     }
 
-    /* daemonize the server process */
-    if (run_as_daemon)
-        daemonize(sc.pid_file);
+    /* write pid file */
+    if (NULL == (pid_file = fopen(sc.pid_file, "w")))
+        syslog(LOG_WARNING, LIXA_SYSLOG_LXD015W, sc.pid_file);
+    else {
+        fprintf(pid_file, PID_T_FORMAT "\n", getpid());
+        fclose(pid_file);
+    }
 
     if (LIXA_RC_OK != (rc = server_pipes_init(&tpa))) {
         LIXA_TRACE(("main/server_pipes_init: rc = %d\n", rc));
@@ -219,11 +226,10 @@ int main(int argc, char *argv[])
 /**
  * Courtesy of Mr. Richard Stevens, UNIX Network Programming
  */
-void daemonize(const char *pid_file_name)
+void daemonize(void)
 {
     pid_t pid;
     int i;
-    FILE *pid_file = NULL;
     
     LIXA_TRACE(("lixad/daemonize: fork()\n"));
     if (0 != (pid = fork()))
@@ -248,20 +254,12 @@ void daemonize(const char *pid_file_name)
     for (i = 0; i < 64; ++i)
         close(i);
     
-    /* write pid file */
-    if (NULL == (pid_file = fopen(pid_file_name, "w")))
-        syslog(LOG_WARNING, LIXA_SYSLOG_LXD015W, pid_file_name);
-    else {
-        fprintf(pid_file, PID_T_FORMAT "\n", getpid());
-        fclose(pid_file);
-    }
-
-    syslog(LOG_NOTICE, LIXA_SYSLOG_LXD014N);
-    
     if (NULL != trace_file)
         freopen(trace_file, "a", stderr);
     else
         freopen("/dev/null", "a", stderr);
+    
+    syslog(LOG_NOTICE, LIXA_SYSLOG_LXD014N);
     
     LIXA_TRACE(("lixad/daemonize: now daemonized!\n"));
     

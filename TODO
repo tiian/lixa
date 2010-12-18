@@ -1,3 +1,7 @@
+Fix the new bug happened after traverse_and_delete removal
+
+Remove traverse_and_delete and thread_status_updated_records_clean and substitute them with g_tree_destroy
+
 Does ax_unreg need LIXA_TRACE_INIT like ax_reg?! Try a test case with
 ax_unreg called before tx_open (xa_open).
 

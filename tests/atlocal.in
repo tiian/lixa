@@ -23,6 +23,9 @@ export PATH
 CLIENT_DIR=@abs_top_builddir@/src/client
 export CLIENT_DIR
 
+SERVER_DIR=@abs_top_builddir@/src/server
+export SERVER_DIR
+
 TESTS_DIR=@abs_top_builddir@/tests
 export TESTS_DIR
 
