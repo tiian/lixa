@@ -212,7 +212,8 @@ int ax_reg(int rmid, XID *xid, long flags)
 
 int ax_unreg(int rmid, long flags)
 {
-    enum Exception { COLL_GET_CS_ERROR
+    enum Exception { COLL_GET_CS_NOT_FOUND
+                     , COLL_GET_CS_ERROR
                      , OUT_OF_RANGE
                      , MSG_SERIALIZE_ERROR
                      , SEND_ERROR
@@ -220,6 +221,7 @@ int ax_unreg(int rmid, long flags)
     int ret_cod = TMER_TMERR;
     int xa_ret_cod = TM_OK;
     
+    LIXA_TRACE_INIT;
     LIXA_TRACE(("ax_unreg: rmid=%d, flags=0x%lx\n", rmid, flags));
     TRY {
         client_status_t *cs;
@@ -237,7 +239,7 @@ int ax_unreg(int rmid, long flags)
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 LIXA_TRACE(("ax_unreg: status not found\n"));
-                xa_ret_cod = TMER_PROTO;
+                THROW(COLL_GET_CS_NOT_FOUND);
                 break;
             default:
                 THROW(COLL_GET_CS_ERROR);
@@ -310,6 +312,9 @@ int ax_unreg(int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case COLL_GET_CS_NOT_FOUND:
+                ret_cod = TMER_PROTO;
+                break;
             case COLL_GET_CS_ERROR:
                 ret_cod = TMER_TMERR;
                 break;

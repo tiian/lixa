@@ -69,17 +69,6 @@ struct thread_pipe_array_s tpa;
 
 
 
-gboolean traverse_and_delete(gpointer key, gpointer value, gpointer data)
-{
-    /* ignore value, data is the GTree... */
-    LIXA_TRACE(("traverse_and_delete: removing block " UINTPTR_T_FORMAT "\n",
-                (uintptr_t)key));
-    g_tree_remove((GTree *)data, key);
-    return FALSE;
-}
-
-
-
 gboolean traverse_and_sync(gpointer key, gpointer value, gpointer data)
 {
     /* ignore value, data is the thread status */
@@ -461,9 +450,6 @@ int status_record_load(status_record_t **sr,
             }
         }
         /* clean updated records set */
-        /* @@@
-        thread_status_updated_records_clean(updated_records);
-        */
         g_tree_destroy(*updated_records);
         *updated_records = g_tree_new(size_t_compare_func);
         

@@ -709,19 +709,6 @@ extern "C" {
     
 
     /**
-     * This is a convenience function used as delete call back function for
-     * GTree
-     * @param key IN the key of the traversed node, it's the key must be
-     *               deleted from GTree
-     * @param value IN useless for updated_records use case
-     * @param data IN references the GTree object itself
-     * @return FALSE because TRUE would break tree traversal
-     */
-    gboolean traverse_and_delete(gpointer key, gpointer value, gpointer data);
-
-    
-
-    /**
      * This is a callback function used for traversing and synchronizing all
      * the records stored in the tree structure
      * @param key IN the key of the traversed node, it is casted to

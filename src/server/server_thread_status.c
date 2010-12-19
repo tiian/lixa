@@ -954,9 +954,6 @@ int thread_status_sync_files(struct thread_status_s *ts)
         }
 #endif /* LIXA_DEBUG */
         /* clean updated records set */
-        /* @@@
-        thread_status_updated_records_clean(ts->updated_records);
-        */
         g_tree_destroy(ts->updated_records);
         ts->updated_records = g_tree_new(size_t_compare_func);
         /* recover the pointer in thread status structure... */
