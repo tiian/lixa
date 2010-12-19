@@ -190,18 +190,6 @@ extern "C" {
 
 
     
-    /**
-     * Remove all records from an updated records tree
-     * @param ur IN/OUT the reference to updated records GTree structure
-     */
-    static inline void thread_status_updated_records_clean(GTree *ur) {
-        LIXA_TRACE(("thread_status_updated_records_clean: cleaning "
-                    "tree allocated at %p\n", ur));
-        g_tree_foreach(ur, traverse_and_delete, ur);
-    }
-
-
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
