@@ -467,6 +467,7 @@ void server_listener_signal_action(int signo)
     const char *shutdown_type = "";
     
     LIXA_TRACE(("server_listener_signal_action: signo=%d\n", signo));
+    memset(&msg, 0, sizeof(msg));
     msg.type = SRV_MSG_TYPE_SHUTDOWN;
     if (SIGQUIT == signo) {
         msg.body.sd.type = SHUTDOWN_QUIESCE;
