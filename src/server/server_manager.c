@@ -118,6 +118,8 @@ int server_manager(struct server_config_s *sc,
                               &(tsa->array[i].tid), NULL,
                               server_manager_thread, tsa->array + i)))
                     THROW(PTHREAD_CREATE_ERROR);
+                LIXA_TRACE(("server_manager: started thread "
+                            PTHREAD_T_FORMAT "\n", tsa->array[i].tid));
             }
         }
         
@@ -336,7 +338,7 @@ void *server_manager_thread(void *void_ts)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_thread/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    pthread_exit(void_ts);
+    pthread_exit(&(ts->ret_cod));
 }
 
 
@@ -373,6 +375,7 @@ void server_manager_thread_cleanup(struct thread_status_s *ts)
     }
 
     /* notify a shutdown message to all the threads */
+    memset(&msg, 0, sizeof(msg));
     msg.type = SRV_MSG_TYPE_SHUTDOWN;
     msg.body.sd.type = SHUTDOWN_IMMEDIATE;
     for (i=0; i<tpa.n; ++i) {
