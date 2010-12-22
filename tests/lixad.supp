@@ -1,0 +1,62 @@
+{
+   g_thread_init_00
+   Memcheck:Leak
+   fun:realloc
+   fun:g_realloc
+   obj:*
+   fun:g_array_set_size
+   fun:g_static_private_set
+   fun:g_get_language_names
+   fun:g_thread_init
+   fun:lixa_trace_init
+   fun:main
+}
+{
+   g_thread_init_01
+   Memcheck:Leak
+   fun:malloc
+   fun:g_malloc
+   obj:*
+   fun:g_thread_init_glib
+   fun:g_thread_init
+   fun:lixa_trace_init
+   fun:main
+}
+{
+   g_thread_init_02
+   Memcheck:Leak
+   fun:memalign
+   fun:posix_memalign
+   obj:*
+   fun:g_slice_alloc
+   fun:g_array_sized_new
+   fun:g_array_new
+   fun:g_static_private_set
+   fun:g_get_filename_charsets
+   obj:*
+   fun:g_thread_init_glib
+   fun:g_thread_init
+   fun:lixa_trace_init
+   fun:main
+}
+{
+   g_thread_init_03
+   Memcheck:Leak
+   fun:calloc
+   fun:g_malloc0
+   fun:g_thread_self
+   fun:g_thread_init_glib
+   fun:g_thread_init
+   fun:lixa_trace_init
+   fun:main
+}
+{
+   inet_ntoa_00
+   Memcheck:Leak
+   fun:malloc
+   fun:inet_ntoa
+   fun:server_listener_loop
+   fun:server_listener
+   fun:main
+}
+

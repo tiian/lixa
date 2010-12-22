@@ -1,5 +1,3 @@
-Inspect memory leak in server code with valgrind
-
 Stability test with valgrind must be performed: use the multithread case test
 to stress the memory allocation and discover potential memory leaks.
 

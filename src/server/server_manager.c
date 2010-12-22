@@ -338,7 +338,7 @@ void *server_manager_thread(void *void_ts)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_thread/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    pthread_exit(&(ts->ret_cod));
+    return NULL;
 }
 
 
