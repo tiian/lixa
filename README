@@ -26,15 +26,21 @@ the build before installing it, use:
 
 To check memory usage with valgrind, an environment variable must be exported
 before check:
-	export CHECK_TYPE=memory
+	export CLIENT_CHECK_TYPE=memory
+	export SERVER_CHECK_TYPE=memory
 	make check
 Script tests/parse_check_output.sh can be used to pick-up relevant info from
 output logs.
 
 To check thread usage with valgrind, an environment variable must be exported
 before check:
-	export CHECK_TYPE=thread
+	export CLIENT_CHECK_TYPE=thread
+	export SERVER_CHECK_TYPE=thread
 	make check
+
+Check type can be set independently: you may check memory behavior of the
+client component without checking memory behavior of the server component and
+vice versa.
 
 You must set LIXA_TRACE_MASK environment variable according to values 
 described in file src/common/lixa_trace.h to see debug output messages
