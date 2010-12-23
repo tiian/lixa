@@ -1,9 +1,4 @@
-Stability test with valgrind must be performed: use the multithread case test
-to stress the memory allocation and discover potential memory leaks.
-
 Concurrency test with valgrind --tool=helgrind must be performed
-
-Stress test must be performed
 
 Crash test must be performed
 
