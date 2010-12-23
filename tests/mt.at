@@ -1,3 +1,4 @@
 # Multi thread specific test cases
 
 m4_include([mt_1_0.at])
+m4_include([mt_2_0.at])

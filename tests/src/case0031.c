@@ -23,6 +23,9 @@
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
@@ -40,7 +43,7 @@
 
 
 
-#define THREAD_NUMBER 1000
+#define THREAD_NUMBER 10000
 
 
 
@@ -50,6 +53,7 @@ struct thread_data_s {
     int expected_rc;
     const char *pgm;
     int i;
+    int rnd;
 };
 
 
@@ -66,10 +70,10 @@ int main(int argc, char *argv[])
     int expected_rc;
     struct thread_data_s data;
     pthread_t tids[THREAD_NUMBER];
-    int i,j,n;
+    int i, j, n, rnd;
 
-    if (argc < 4) {
-        fprintf(stderr, "%s: at least three options must be specified\n",
+    if (argc < 5) {
+        fprintf(stderr, "%s: at least four options must be specified\n",
                 argv[0]);
         exit (1);
     }
@@ -88,11 +92,14 @@ int main(int argc, char *argv[])
         n = 1;
     else if (n > THREAD_NUMBER)
         n = THREAD_NUMBER;
+    rnd = (int)strtol(argv[4], NULL, 0);
+    printf("%s| max random delay (%s): %d\n", pgm, argv[4], rnd);
     printf("%s| starting (%s/%d)...\n", pgm, argv[1], expected_rc);
 
     data.commit = commit;
     data.expected_rc = expected_rc;
     data.pgm = pgm;
+    data.rnd = rnd;
     for (j=0; j<2; ++j) {
         for (i=0; i<n; ++i) {
             data.i = i;
@@ -103,8 +110,6 @@ int main(int argc, char *argv[])
             rc = pthread_join(tids[i], NULL);
             assert(0 == rc);
         }
-        printf("%s| sleeping...\n", pgm);
-        sleep(1);
     }
 
     /* clean-up monkeyrm stuff (memory leak detection) */
@@ -126,36 +131,59 @@ void *transaction(void *parm)
     
     printf("%s| tx_open(): %d\n", data->pgm, rc = tx_open());
     assert(TX_OK == rc);
+    if (data->rnd) {
+        to.tv_sec = 0;
+        to.tv_usec = random() % data->rnd;
+        printf("%s| waiting %ld us\n", data->pgm, to.tv_usec);
+        select(0, NULL, NULL, NULL, &to);
+    }
     printf("%s| tx_begin(): %d\n", data->pgm, rc = tx_begin());
     assert(TX_OK == rc);
+    if (data->rnd) {
+        to.tv_sec = 0;
+        to.tv_usec = random() % data->rnd;
+        printf("%s| waiting %ld us\n", data->pgm, to.tv_usec);
+        select(0, NULL, NULL, NULL, &to);
+    }
     printf("%s| tx_info(): %d\n", data->pgm, rc = tx_info(&info));
     assert(1 == rc);
-    /***
-    */
     
     /* emulate callback registration from resource manager when accessing
      * resource manager owned resources; you may imagine these are the
      * equivalent of a SQLExecDirect function call */
+    if (data->rnd) {
+        to.tv_sec = 0;
+        to.tv_usec = random() % data->rnd;
+        printf("%s| waiting %ld us\n", data->pgm, to.tv_usec);
+        select(0, NULL, NULL, NULL, &to);
+    }
     lixa_monkeyrm_call_ax_reg(2);
+    if (data->rnd) {
+        to.tv_sec = 0;
+        to.tv_usec = random() % data->rnd;
+        printf("%s| waiting %ld us\n", data->pgm, to.tv_usec);
+        select(0, NULL, NULL, NULL, &to);
+    }
     lixa_monkeyrm_call_ax_reg(3);
-    /***
-    */
     
-    /* wait some milliseconds */
-    to.tv_sec = 0;
-    to.tv_usec = 50000;
-    select(0, NULL, NULL, NULL, &to);
-    
+    if (data->rnd) {
+        to.tv_sec = 0;
+        to.tv_usec = random() % data->rnd;
+        printf("%s| waiting %ld us\n", data->pgm, to.tv_usec);
+        select(0, NULL, NULL, NULL, &to);
+    }
     if (data->commit)
         printf("%s| tx_commit(): %d\n", data->pgm, rc = tx_commit());
     else
         printf("%s| tx_rollback(): %d\n", data->pgm, rc = tx_rollback());
     assert(data->expected_rc == rc);
-    /***
-    if (0 == data->i)
-        sleep(3);
-    */
     
+    if (data->rnd) {
+        to.tv_sec = 0;
+        to.tv_usec = random() % data->rnd;
+        printf("%s| waiting %ld us\n", data->pgm, to.tv_usec);
+        select(0, NULL, NULL, NULL, &to);
+    }
     printf("%s| tx_close(): %d\n", data->pgm, rc = tx_close());
     if (TX_FAIL == data->expected_rc)
         assert(TX_FAIL == rc);
