@@ -1,3 +1,6 @@
+Write a test case with an array of two elements and every thread uses only one
+slot of the array. This test case will reproduce the thread status array.
+
 Concurrency test with valgrind --tool=helgrind must be performed
 
 Crash test must be performed
