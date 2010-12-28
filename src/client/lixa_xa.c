@@ -973,6 +973,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
         LIXA_TRACE(("lixa_xa_open: sending " SIZE_T_FORMAT
                     " bytes ('%s') to the server for step 8 (socket fd %d)\n",
                     buffer_size, buffer, fd));
+        
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR1);
         
