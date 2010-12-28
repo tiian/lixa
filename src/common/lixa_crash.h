@@ -53,13 +53,16 @@
 /**
  * No crash point set
  */
-#define LIXA_CRASH_POINT_NULL          0
+#define LIXA_CRASH_POINT_NULL               0
 /**
  * The Transaction Manager will crash after successfully prepared all the
  * resource manager
  */
-#define LIXA_CRASH_POINT_PREPARE_1     1
-
+#define LIXA_CRASH_POINT_PREPARE_1          1
+/**
+ * The client crashes after a successful connection
+ */
+#define LIXA_CRASH_POINT_CLIENT_CONNECT_1   2
 
 
 #ifdef __cplusplus
