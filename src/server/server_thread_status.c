@@ -788,6 +788,10 @@ int thread_status_check_recovery_pending(
         LIXA_TRACE(("thread_status_check_recovery_pending: "
                     "verb=%d, step=%d\n", last->verb, last->step));
         switch (last->verb) {
+            case LIXA_MSG_VERB_NULL:
+                LIXA_TRACE(("thread_status_check_recovery_pending: verb is "
+                            "LIXA_MSG_VERB_NULL, nothing to do\n"));
+                break;
             case LIXA_MSG_VERB_OPEN:
             case LIXA_MSG_VERB_CLOSE:
             case LIXA_MSG_VERB_UNREG:
