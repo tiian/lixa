@@ -394,6 +394,7 @@ extern "C" {
 
 
 
+#ifdef _CRASH
     /**
      * Get a writable reference to crash_count property
      * @param cs IN object reference
@@ -403,7 +404,8 @@ extern "C" {
     static inline int *client_status_get_crash_count(client_status_t *cs) {
         return &cs->crash_count;
     }
-
+#endif /* _CRASH */
+    
 
 
     /**
