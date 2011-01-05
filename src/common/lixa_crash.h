@@ -63,6 +63,11 @@
  * The client crashes after a successful connection
  */
 #define LIXA_CRASH_POINT_CLIENT_CONNECT_1   2
+/**
+ * The client crashes after successful message xa_open/step=8
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_OPEN_1     3
+
 
 
 #ifdef __cplusplus

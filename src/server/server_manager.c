@@ -251,12 +251,18 @@ void *server_manager_thread(void *void_ts)
                             ts->poll_array[i].revents & POLLNVAL));
                 if (ts->poll_array[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL)) {
-                    found_fd++;
-                    LIXA_TRACE(("server_manager_thread: unespected "
-                                "network event on slot " NFDS_T_FORMAT
-                                ", fd = %d\n", i, ts->poll_array[i].fd));
-                    /* @@@ this piece of code must be improved */
-                    THROW(NETWORK_EVENT_ERROR);
+                    if (ts->poll_array[i].revents & (POLLERR | POLLHUP)) {
+                        LIXA_TRACE(("server_manager_thread: hang-up event, "
+                                    "the client broke the connection, "
+                                    "ignoring it\n"));
+                        /* @@@ restart from here */
+                    } else {
+                        found_fd++;
+                        LIXA_TRACE(("server_manager_thread: unespected "
+                                    "network event on slot " NFDS_T_FORMAT
+                                    ", fd = %d\n", i, ts->poll_array[i].fd));
+                        THROW(NETWORK_EVENT_ERROR);
+                    }
                 }
                 if (ts->poll_array[i].revents & POLLIN) {
                     found_fd++;
