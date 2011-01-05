@@ -977,6 +977,9 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR1);
         
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_OPEN_1,
+                   client_status_get_crash_count(cs));
+        
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
                                fd, buffer, sizeof(buffer)-1, &read_bytes)))
             THROW(MSG_RETRIEVE_ERROR);
