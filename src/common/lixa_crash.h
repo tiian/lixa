@@ -64,9 +64,17 @@
  */
 #define LIXA_CRASH_POINT_CLIENT_CONNECT_1   2
 /**
- * The client crashes after successful message xa_open/step=8
+ * The client crashes after successful message send xa_open/step=8
  */
 #define LIXA_CRASH_POINT_LIXA_XA_OPEN_1     3
+/**
+ * The client crashes after successful message retrieve xa_open/step=16
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_OPEN_2     4
+/**
+ * The client crashes after successful message send xa_open/step=24
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_OPEN_3     5
 
 
 

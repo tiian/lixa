@@ -196,6 +196,7 @@ void *server_manager_thread(void *void_ts)
                      , THREAD_STATUS_SYNC_FILES_ERROR
                      , FIX_POLL_ERROR
                      , POLL_ERROR
+                     , DROP_CLIENT_ERROR
                      , NETWORK_EVENT_ERROR
                      , POLLIN_CTRL_ERROR
                      , POLLIN_DATA_ERROR
@@ -251,20 +252,23 @@ void *server_manager_thread(void *void_ts)
                             ts->poll_array[i].revents & POLLNVAL));
                 if (ts->poll_array[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL)) {
-                    if (ts->poll_array[i].revents & (POLLERR | POLLHUP)) {
-                        LIXA_TRACE(("server_manager_thread: hang-up event, "
-                                    "the client broke the connection, "
-                                    "ignoring it\n"));
-                        /* @@@ restart from here */
-                    } else {
+                    if ((ts->poll_array[i].revents & POLLERR) &&
+                        (ts->poll_array[i].revents & POLLHUP)) {
                         found_fd++;
+                        LIXA_TRACE(("server_manager_thread: hang-up event, "
+                                    "the client broke the connection\n"));
+                        if (LIXA_RC_OK != (
+                                ret_cod = server_manager_drop_client(
+                                    ts, i)))
+                            THROW(DROP_CLIENT_ERROR);
+                        connection_closed = TRUE;
+                    } else {
                         LIXA_TRACE(("server_manager_thread: unespected "
                                     "network event on slot " NFDS_T_FORMAT
                                     ", fd = %d\n", i, ts->poll_array[i].fd));
                         THROW(NETWORK_EVENT_ERROR);
                     }
-                }
-                if (ts->poll_array[i].revents & POLLIN) {
+                } else if (ts->poll_array[i].revents & POLLIN) {
                     found_fd++;
                     if (!i) {
                         ret_cod = server_manager_pollin_ctrl(
@@ -318,6 +322,8 @@ void *server_manager_thread(void *void_ts)
                 break;
             case POLL_ERROR:
                 ret_cod = LIXA_RC_POLL_ERROR;
+                break;
+            case DROP_CLIENT_ERROR:
                 break;
             case NETWORK_EVENT_ERROR:
                 ret_cod = LIXA_RC_NETWORK_EVENT_ERROR;
