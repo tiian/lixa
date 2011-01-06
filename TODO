@@ -1,5 +1,3 @@
-Restart from server_manager.c line 1077
-
 Crash test must be performed
 Augment the test with premature exit checks: after a call to a function, the
 client program exits: what happens at server side?
