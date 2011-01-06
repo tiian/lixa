@@ -1,6 +1,7 @@
 LOG:
 
          - 0.5.25 fixed bug # 3147263
+                  fixed bug # 3152044
 
 20101223 - 0.5.24 the client side code (lixac) passed valgrind memory leak
                   the server side code (lixad) passed valgring memory leak

@@ -105,8 +105,9 @@ void lixa_crash(lixa_word_t crash_point, int *count)
         g_static_mutex_lock(&lixa_crash_mutex);
         *count = *count + 1;
         if (*count >= lixa_crash_count_threshold) {
-            LIXA_TRACE(("lixa_crash: crash threshold reached (%d), "
-                        "crashing!\n", *count));
+            LIXA_TRACE(("lixa_crash: crash threshold reached (%d) for crash "
+                        "point "UINT32_T_FORMAT", crashing!\n",
+                        *count, crash_point));
             abort();
         }
         g_static_mutex_unlock(&lixa_crash_mutex);
