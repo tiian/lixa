@@ -118,13 +118,24 @@ extern "C" {
      * due to client actions
      * @param ts IN/OUT thread status
      * @param slot_id IN the slot associated to the file descriptor raised
-     *                   the POLLIN event
+     *                   the poll (POLLIN) event
      * @return a standardized return code
      */
     int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id);
 
 
 
+    /**
+     * Drop client connection
+     * @param ts IN/OUT thread status
+     * @param slot_id IN the slot associated to the file descriptor raised
+     *                   the poll event
+     * @return a standardized return code
+     */
+    int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id);
+    
+
+    
     /**
      * Switch the connected client to a different thread, phase 1:
      * the source thread send a message with the switch information to the
