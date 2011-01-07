@@ -822,6 +822,10 @@ int thread_status_check_recovery_pending(
                     data->pld.ph.state.txstate != TX_STATE_S4)
                     THROW(NOT_STARTED_TRANSACTION3);
                 break;
+            case LIXA_MSG_VERB_QRCVR:
+                /* this is a crash after a crash: returning TRUE and keep the
+                   status */
+                break;
             default:
                 THROW(INVALID_VERB);
         }

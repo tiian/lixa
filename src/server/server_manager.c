@@ -211,8 +211,8 @@ void *server_manager_thread(void *void_ts)
         int ready_fd, found_fd;
         nfds_t place = 0, i, n;
         
-        LIXA_TRACE(("server_manager_thread: id = %d, "
-                    "tid = " PTHREAD_T_FORMAT "\n", ts->id, ts->tid));
+        LIXA_TRACE(("server_manager_thread: id=%d, "
+                    "tid=" PTHREAD_T_FORMAT "\n", ts->id, ts->tid));
         if (LIXA_RC_OK != (ret_cod = server_manager_add_poll(
                                ts, ts->tpa->array[ts->id].pipefd[0], &place)))
             THROW(ADD_POLL_ERROR);
@@ -235,21 +235,27 @@ void *server_manager_thread(void *void_ts)
                         ts->id));
             if (0 >= (ready_fd = poll(ts->poll_array, ts->poll_size, -1)))
                 THROW(POLL_ERROR);
-            LIXA_TRACE(("server_manager_thread: id = %d, ready file "
-                        "descriptors = %d\n", ts->id, ready_fd));
+            LIXA_TRACE(("server_manager_thread: id=%d, ready file "
+                        "descriptors=%d\n", ts->id, ready_fd));
             found_fd = 0;
             n = ts->poll_size;
             for (i = 0; i < n; ++i) {
                 int connection_closed = FALSE;
                 LIXA_TRACE(("server_manager_thread: slot=" NFDS_T_FORMAT
                             ", fd=%d, POLLIN=%d, POLLOUT=%d, POLLERR=%d, "
-                            "POLLHUP=%d, POLLNVAL=%d\n",
+                            "POLLHUP=%d, POLLNVAL=%d, control_only=%d\n",
                             i, ts->poll_array[i].fd,
                             ts->poll_array[i].revents & POLLIN,
                             ts->poll_array[i].revents & POLLOUT,
                             ts->poll_array[i].revents & POLLERR,
                             ts->poll_array[i].revents & POLLHUP,
-                            ts->poll_array[i].revents & POLLNVAL));
+                            ts->poll_array[i].revents & POLLNVAL,
+                            i ? ts->client_array[i].control_only : 0));
+                if (LIXA_NULL_FD == ts->poll_array[i].fd) {
+                    LIXA_TRACE(("server_manager_thread: this slot must "
+                                "be temporary skipped\n"));
+                    continue;
+                }
                 if (ts->poll_array[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL)) {
                     if ((ts->poll_array[i].revents & POLLERR) &&
@@ -263,9 +269,9 @@ void *server_manager_thread(void *void_ts)
                             THROW(DROP_CLIENT_ERROR);
                         connection_closed = TRUE;
                     } else {
-                        LIXA_TRACE(("server_manager_thread: unespected "
-                                    "network event on slot " NFDS_T_FORMAT
-                                    ", fd = %d\n", i, ts->poll_array[i].fd));
+                        LIXA_TRACE(("server_manager_thread: unexpected "
+                                    "network event slot=" NFDS_T_FORMAT
+                                    ", fd=%d\n", i, ts->poll_array[i].fd));
                         THROW(NETWORK_EVENT_ERROR);
                     }
                 } else if (ts->poll_array[i].revents & POLLIN) {
@@ -663,10 +669,10 @@ int server_manager_switch_1(struct thread_status_s *ts,
         struct thread_status_switch_s *tss =
             &(ts->client_array[slot_id].switch_thread);
         
-        LIXA_TRACE(("server_manager_switch_1: source thread id is %d, "
-                    "source slot id is " SIZE_T_FORMAT ", source block id is "
+        LIXA_TRACE(("server_manager_switch_1: source thread id=%d, "
+                    "source slot id=" SIZE_T_FORMAT ", source block id="
                     UINT32_T_FORMAT ", destination thread "
-                    "id is %d, input buffer is '%s'\n",
+                    "id=%d, input buffer is '%s'\n",
                     ts->id, slot_id, block_id, tss->id, tss->buffer));
         /* prepare the message for the destination thread */
         memset(&msg, 0, sizeof(msg));
@@ -1157,8 +1163,8 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
         /* retrieve the block is storing the status of the client inside
            memory mapped status file */
         block_id = ts->client_array[slot_id].pers_status_slot_id;
-        LIXA_TRACE(("server_manager_inmsg_proc: I/O slot_id = "
-                    UINT32_T_FORMAT ", status block_id = " UINT32_T_FORMAT
+        LIXA_TRACE(("server_manager_inmsg_proc: I/O slot_id="
+                    UINT32_T_FORMAT ", status block_id=" UINT32_T_FORMAT
                     "\n", slot_id, block_id));
         
         /* set output message */
@@ -1521,8 +1527,10 @@ int server_manager_fix_poll(struct thread_status_s *ts)
 
         for (i=1; i<ts->poll_size; ++i) {
             /* skip records are not used */
-            if (ts->poll_array[i].fd == LIXA_NULL_FD)
+            if (ts->poll_array[i].fd == LIXA_NULL_FD) {
+                ts->poll_array[i].events = 0;
                 continue;
+            }
             if (ts->client_array[i].control_only)
                 ts->poll_array[i].events = 0;
             else if (ts->client_array[i].output_buffer == NULL)
