@@ -187,8 +187,11 @@ int payload_header_store_verb_step(struct thread_status_s *ts,
             &(ts->curr_status[block_id].sr.data.pld);
 
         /* check the record is a payload header */
-        if (pld->type != DATA_PAYLOAD_TYPE_HEADER)
+        if (pld->type != DATA_PAYLOAD_TYPE_HEADER) {
+            LIXA_TRACE(("payload_header_store_verb_step: block_id="
+                        UINT32_T_FORMAT ", type=%d\n", block_id, pld->type));
             THROW(INVALID_RECORD);
+        }
         for (i=0; i<PAYLOAD_HEADER_VERB_STEP-1; ++i) {
             LIXA_TRACE(("payload_header_store_verb_step:"
                         "(verb,step): (%d,%d) --> (%d,%d)\n",
