@@ -84,6 +84,18 @@
  * query_recovery/step=16
  */
 #define LIXA_CRASH_POINT_CLIENT_RECOVERY_2  7
+/**
+ * The client crashes after successful message sent xa_start/step=8
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_START_1    8
+/**
+ * The client crashes after successful message retrieved xa_start/step=16
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_START_2    9
+/**
+ * The client crashes after successful message sent xa_start/step=24
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_START_3   10
 
 
 

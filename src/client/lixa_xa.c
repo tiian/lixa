@@ -1727,12 +1727,18 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
         
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_START_1,
+                   client_status_get_crash_count(cs));
+        
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
                                fd, buffer, sizeof(buffer)-1, &read_bytes)))
             THROW(MSG_RETRIEVE_ERROR);
         LIXA_TRACE(("lixa_xa_start: receiving %d"
                     " bytes from the server |%*.*s|\n",
                     read_bytes, read_bytes, read_bytes, buffer));
+        
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_START_2,
+                   client_status_get_crash_count(cs));
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
                                buffer, read_bytes, &msg)))
@@ -1879,6 +1885,9 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR2);
 
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_START_3,
+                   client_status_get_crash_count(cs));
+        
         if (TX_OK != *txrc)
             THROW(XA_ERROR);
         
