@@ -500,12 +500,18 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
         
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_END_1,
+                   client_status_get_crash_count(cs));
+        
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
                                fd, buffer, sizeof(buffer)-1, &read_bytes)))
             THROW(MSG_RETRIEVE_ERROR);
         LIXA_TRACE(("lixa_xa_end: receiving %d"
                     " bytes from the server |%*.*s|\n",
                     read_bytes, read_bytes, read_bytes, buffer));
+        
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_END_2,
+                   client_status_get_crash_count(cs));
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
                                buffer, read_bytes, &msg)))
@@ -648,6 +654,9 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR2);
 
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_END_3,
+                   client_status_get_crash_count(cs));
+        
         if (TX_OK != *txrc)
             THROW(XA_ERROR);
         
@@ -1292,6 +1301,9 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
 
+        LIXA_CRASH(LIXA_CRASH_POINT_PREPARE_1,
+                   client_status_get_crash_count(cs));
+        
         /* memory clean-up */
         g_array_free(msg.body.prepare_8.xa_prepare_execs, TRUE);
         msg.body.prepare_8.xa_prepare_execs = NULL;
@@ -1314,7 +1326,7 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
         if (LIXA_RC_OK != (ret_cod = msg.body.prepare_16.answer.rc))
             THROW(ERROR_FROM_SERVER);
 
-        LIXA_CRASH(LIXA_CRASH_POINT_PREPARE_1,
+        LIXA_CRASH(LIXA_CRASH_POINT_PREPARE_2,
                    client_status_get_crash_count(cs));
         
         THROW(NONE);
