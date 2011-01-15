@@ -55,11 +55,6 @@
  */
 #define LIXA_CRASH_POINT_NULL               0
 /**
- * The Transaction Manager will crash after successfully prepared all the
- * resource manager
- */
-#define LIXA_CRASH_POINT_PREPARE_1          1
-/**
  * The client crashes after a successful connection
  */
 #define LIXA_CRASH_POINT_CLIENT_CONNECT_1   2
@@ -96,6 +91,28 @@
  * The client crashes after successful message sent xa_start/step=24
  */
 #define LIXA_CRASH_POINT_LIXA_XA_START_3   10
+/**
+ * The client crashes after successful message sent xa_end/step=8
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_END_1     11
+/**
+ * The client crashes after successful message retrieved xa_end/step=16
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_END_2     12
+/**
+ * The client crashes after successful message sent xa_end/step=24
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_END_3     13
+/**
+ * The client crashes after successful message sent xa_prepare/step=8
+ */
+#define LIXA_CRASH_POINT_PREPARE_1         14
+/**
+ * The Transaction Manager will crash after successfully prepared all the
+ * resource manager
+ * The client crashes after successful message retrieved xa_prepare/step=16
+ */
+#define LIXA_CRASH_POINT_PREPARE_2         15
 
 
 
