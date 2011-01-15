@@ -149,6 +149,9 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
 
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_CLOSE_1,
+                   client_status_get_crash_count(cs));
+        
         if (TX_OK != *txrc)
             THROW(XA_ERROR);
         
@@ -408,6 +411,9 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                     " bytes to the server for step 8\n", buffer_size));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
+        
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_COMMIT_1,
+                   client_status_get_crash_count(cs));
         
         THROW(NONE);
     } CATCH {
@@ -1627,6 +1633,9 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                     " bytes to the server for step 8\n", buffer_size));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
+        
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_ROLLBACK_1,
+                   client_status_get_crash_count(cs));
         
         THROW(NONE);
     } CATCH {
