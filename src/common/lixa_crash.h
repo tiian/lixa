@@ -53,66 +53,78 @@
 /**
  * No crash point set
  */
-#define LIXA_CRASH_POINT_NULL               0
+#define LIXA_CRASH_POINT_NULL                  0
 /**
  * The client crashes after a successful connection
  */
-#define LIXA_CRASH_POINT_CLIENT_CONNECT_1   2
+#define LIXA_CRASH_POINT_CLIENT_CONNECT_1      2
 /**
  * The client crashes after successful message sent xa_open/step=8
  */
-#define LIXA_CRASH_POINT_LIXA_XA_OPEN_1     3
+#define LIXA_CRASH_POINT_LIXA_XA_OPEN_1        3
 /**
  * The client crashes after successful message retrieved xa_open/step=16
  */
-#define LIXA_CRASH_POINT_LIXA_XA_OPEN_2     4
+#define LIXA_CRASH_POINT_LIXA_XA_OPEN_2        4
 /**
  * The client crashes after successful message sent xa_open/step=24
  */
-#define LIXA_CRASH_POINT_LIXA_XA_OPEN_3     5
+#define LIXA_CRASH_POINT_LIXA_XA_OPEN_3        5
 /**
  * The client crashes after successful message sent query_recovery/step=8
  */
-#define LIXA_CRASH_POINT_CLIENT_RECOVERY_1  6
+#define LIXA_CRASH_POINT_CLIENT_RECOVERY_1     6
 /**
  * The client crashes after it has successful retrieved the message
  * query_recovery/step=16
  */
-#define LIXA_CRASH_POINT_CLIENT_RECOVERY_2  7
+#define LIXA_CRASH_POINT_CLIENT_RECOVERY_2     7
 /**
  * The client crashes after successful message sent xa_start/step=8
  */
-#define LIXA_CRASH_POINT_LIXA_XA_START_1    8
+#define LIXA_CRASH_POINT_LIXA_XA_START_1       8
 /**
  * The client crashes after successful message retrieved xa_start/step=16
  */
-#define LIXA_CRASH_POINT_LIXA_XA_START_2    9
+#define LIXA_CRASH_POINT_LIXA_XA_START_2       9
 /**
  * The client crashes after successful message sent xa_start/step=24
  */
-#define LIXA_CRASH_POINT_LIXA_XA_START_3   10
+#define LIXA_CRASH_POINT_LIXA_XA_START_3      10
 /**
  * The client crashes after successful message sent xa_end/step=8
  */
-#define LIXA_CRASH_POINT_LIXA_XA_END_1     11
+#define LIXA_CRASH_POINT_LIXA_XA_END_1        11
 /**
  * The client crashes after successful message retrieved xa_end/step=16
  */
-#define LIXA_CRASH_POINT_LIXA_XA_END_2     12
+#define LIXA_CRASH_POINT_LIXA_XA_END_2        12
 /**
  * The client crashes after successful message sent xa_end/step=24
  */
-#define LIXA_CRASH_POINT_LIXA_XA_END_3     13
+#define LIXA_CRASH_POINT_LIXA_XA_END_3        13
 /**
  * The client crashes after successful message sent xa_prepare/step=8
  */
-#define LIXA_CRASH_POINT_PREPARE_1         14
+#define LIXA_CRASH_POINT_PREPARE_1            14
 /**
  * The Transaction Manager will crash after successfully prepared all the
  * resource manager
  * The client crashes after successful message retrieved xa_prepare/step=16
  */
-#define LIXA_CRASH_POINT_PREPARE_2         15
+#define LIXA_CRASH_POINT_PREPARE_2            15
+/**
+ * The client crashes after successful message sent xa_commit/step=8
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_COMMIT_1     16
+/**
+ * The client crashes after successful message sent xa_rollback/step=8
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_ROLLBACK_1   17
+/**
+ * The client crashes after successful message sent xa_close/step=8
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_CLOSE_1      18
 
 
 
