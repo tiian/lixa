@@ -64,7 +64,8 @@
 
 
 void thread_status_init(struct thread_status_s *ts, int id,
-                        struct thread_pipe_array_s *tpa, int mmode)
+                        struct thread_pipe_array_s *tpa, int mmode,
+                        long *crash_count)
 {
     LIXA_TRACE(("thread_status_init: initializing thread status (id = %d)\n",
                 id));
@@ -90,6 +91,9 @@ void thread_status_init(struct thread_status_s *ts, int id,
     else
         ts->tid = 0;
     ts->shutdown_type = SHUTDOWN_NULL;
+#ifdef _CRASH
+    ts->crash_count = crash_count;
+#endif
     LIXA_TRACE(("thread_status_init: end initialization (id = %d)\n", id));
 }
 

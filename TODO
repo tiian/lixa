@@ -1,3 +1,4 @@
+Restart from ct_1_0.at ...
 Crash test must be performed: put a crash point inside thread_status_sync_files
 
 Remove all @@@ from source code: every one was/is an "open point"

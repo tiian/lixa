@@ -99,7 +99,7 @@ void lixa_crash_init(void)
 
 
 
-void lixa_crash(lixa_word_t crash_point, int *count)
+void lixa_crash(lixa_word_t crash_point, long *count)
 {
     if (crash_point == lixa_crash_point) {
         g_static_mutex_lock(&lixa_crash_mutex);

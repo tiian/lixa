@@ -652,6 +652,12 @@ struct thread_status_s {
      * Type of shutdown must be performed
      */
     enum shutdown_type_e           shutdown_type;
+#ifdef _CRASH
+    /**
+     * Counter used for crash simulation feature
+     */
+    long                          *crash_count;
+#endif
 };
 
 
@@ -909,6 +915,21 @@ extern "C" {
      */
     int size_t_compare_func(gconstpointer a, gconstpointer b);
 
+
+
+#ifdef _CRASH
+    /**
+     * Get a writable reference to crash_count property
+     * @param ts IN struct reference
+     * @return a writable reference to the number of times the crash point
+     * was traversed
+     */
+    static inline long *thread_status_get_crash_count(
+        struct thread_status_s *ts) {
+        return ts->crash_count;
+    }
+#endif /* _CRASH */
+    
 
 
 #ifdef __cplusplus
