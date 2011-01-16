@@ -137,6 +137,14 @@
  * The client crashes after successful sent message xa_forget/step=8
  */
 #define LIXA_CRASH_POINT_LIXA_XA_FORGET_1     21
+/**
+ * The server crashes after server_xa_open_8
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_OPEN_8       22
+/**
+ * The server crashes after server_xa_open_24
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_OPEN_24      23
 
 
 
@@ -163,7 +171,7 @@ extern "C" {
      * @param count IN/OUT keeps track of the number of times the crash point
      *              has been already traversed
      */
-    void lixa_crash(lixa_word_t crash_point, int *count);
+    void lixa_crash(lixa_word_t crash_point, long *count);
 
     
 

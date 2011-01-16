@@ -74,6 +74,7 @@ int server_manager(struct server_config_s *sc,
     LIXA_TRACE(("server_manager\n"));
     TRY {
         int i;
+        static long crash_count = 0; /* this mimics a global var */
 
         LIXA_TRACE(("server_manager: number of managers to activate = %d\n",
                     sc->managers.n));
@@ -90,7 +91,7 @@ int server_manager(struct server_config_s *sc,
         /* first thread slot is for listener: it's the main thread of the
          * process, it's IMPLICITLY created */
         for (i = 0; i < tsa->n; ++i) {
-            thread_status_init(&(tsa->array[i]), i, tpa, mmode);
+            thread_status_init(&(tsa->array[i]), i, tpa, mmode, &crash_count);
             if (i) {
                 /* load status file for thread != listener */
                 if (LIXA_RC_OK != (
