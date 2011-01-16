@@ -71,6 +71,11 @@ int main(int argc, char *argv[])
     assert(TX_OK == rc);
     if (1 == exit_point)
         exit(1);
+
+    /* emulate operations without XA transaction management */
+    lixa_monkeyrm_call_ax_reg(2);
+    lixa_monkeyrm_call_ax_unreg(2);
+
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OK == rc);
     if (2 == exit_point)

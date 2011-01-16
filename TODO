@@ -1,6 +1,4 @@
-Crash test must be performed
-Augment the test with premature exit checks: after a call to a function, the
-client program exits: what happens at server side?
+Crash test must be performed: put a crash point inside thread_status_sync_files
 
 Remove all @@@ from source code: every one was/is an "open point"
 

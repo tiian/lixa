@@ -172,6 +172,9 @@ int ax_reg(int rmid, XID *xid, long flags)
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
         
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_AX_REG_1,
+                   client_status_get_crash_count(cs));
+        
         /* new resource manager state */
         csr->common.xa_td_state = next_xa_td_state;
         
@@ -305,6 +308,9 @@ int ax_unreg(int rmid, long flags)
                     " bytes to the server for step 8\n", buffer_size));
         if (buffer_size != send(fd, buffer, buffer_size, 0))
             THROW(SEND_ERROR);
+        
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_AX_UNREG_1,
+                   client_status_get_crash_count(cs));
         
         /* new resource manager state */
         csr->common.xa_td_state = XA_STATE_D0;

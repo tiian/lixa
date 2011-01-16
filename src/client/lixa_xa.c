@@ -833,6 +833,9 @@ int lixa_xa_forget(client_status_t *cs, int finished)
                         " bytes to the server for step 8\n", buffer_size));
             if (buffer_size != send(fd, buffer, buffer_size, 0))
                 THROW(SEND_ERROR);
+
+            LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_FORGET_1,
+                       client_status_get_crash_count(cs));
         }
         
         THROW(NONE);

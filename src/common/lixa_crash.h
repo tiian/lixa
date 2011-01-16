@@ -125,6 +125,18 @@
  * The client crashes after successful message sent xa_close/step=8
  */
 #define LIXA_CRASH_POINT_LIXA_XA_CLOSE_1      18
+/**
+ * The client crashes after successful sent message ax_reg/step=8
+ */
+#define LIXA_CRASH_POINT_LIXA_AX_REG_1        19
+/**
+ * The client crashes after successful sent message ax_unreg/step=8
+ */
+#define LIXA_CRASH_POINT_LIXA_AX_UNREG_1      20
+/**
+ * The client crashes after successful sent message xa_forget/step=8
+ */
+#define LIXA_CRASH_POINT_LIXA_XA_FORGET_1     21
 
 
 
