@@ -119,6 +119,9 @@
     "called xa_commit() with TMONEPHASE flag: there probably is a bug " \
     "inside the RM code. The transaction is marked as completed: " \
     "consistency matters are delegated to Resource Manager behavior"
+#define LIXA_SYSLOG_LXC027N "LXC027N can not send a message to the server " \
+    "because it disconnected the socket (pid=" PID_T_FORMAT "/tid=" \
+    PTHREAD_T_FORMAT ")"
 
 
 

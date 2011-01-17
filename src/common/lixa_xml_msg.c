@@ -20,17 +20,29 @@
 
 
 
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
+#endif
+#ifdef HAVE_POLL_H
+# include <poll.h>
 #endif
 
 
@@ -39,6 +51,7 @@
 #include <lixa_trace.h>
 #include <lixa_xml_msg.h>
 #include <lixa_common_status.h>
+#include <lixa_syslog.h>
 
 
 
@@ -189,6 +202,67 @@ int lixa_msg_retrieve(int fd,
     return ret_cod;
 }
 
+
+
+int lixa_msg_send(int fd, const char *buf, size_t buf_size)
+{
+    enum Exception { CONNECTION_CLOSED
+                     , SEND_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_msg_send\n"));
+    TRY {
+        struct pollfd check_fd[1];
+        ssize_t wrote_bytes;
+        
+        check_fd[0].fd = fd;
+        check_fd[0].events = POLLIN | POLLOUT;
+        ret_cod = poll(check_fd, 1, 0);
+        LIXA_TRACE(("lixa_msg_send: ret_cod=%d, fd=%d, "
+                    "POLLIN=%d, POLLOUT=%d, POLLERR=%d, "
+                    "POLLHUP=%d, POLLNVAL=%d\n", ret_cod, fd,
+                    check_fd[0].revents & POLLIN,
+                    check_fd[0].revents & POLLOUT,
+                    check_fd[0].revents & POLLERR,
+                    check_fd[0].revents & POLLHUP,
+                    check_fd[0].revents & POLLNVAL));
+        if ((POLLERR & check_fd[0].revents) &&
+            (POLLHUP & check_fd[0].revents)) {
+            syslog(LOG_NOTICE, LIXA_SYSLOG_LXC027N, getpid(), pthread_self());
+            THROW(CONNECTION_CLOSED);
+        }
+
+        LIXA_TRACE(("lixa_msg_send: sending " SIZE_T_FORMAT
+                    " bytes to the server...\n", buf_size));
+        wrote_bytes = send(fd, buf, buf_size, 0);
+        if (buf_size != wrote_bytes) {
+            LIXA_TRACE(("lixa_msg_send: sent " SSIZE_T_FORMAT
+                        " bytes instead of " SIZE_T_FORMAT " to the server\n",
+                        wrote_bytes, buf_size));
+            THROW(SEND_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case CONNECTION_CLOSED:
+                ret_cod = LIXA_RC_CONNECTION_CLOSED;
+                break;
+            case SEND_ERROR:
+                ret_cod = LIXA_RC_SEND_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_send/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
 
 
 int lixa_msg_free(struct lixa_msg_s *msg)
