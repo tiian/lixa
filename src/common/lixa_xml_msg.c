@@ -41,9 +41,6 @@
 #ifdef HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
 #endif
-#ifdef HAVE_POLL_H
-# include <poll.h>
-#endif
 
 
 
@@ -206,30 +203,27 @@ int lixa_msg_retrieve(int fd,
 
 int lixa_msg_send(int fd, const char *buf, size_t buf_size)
 {
-    enum Exception { CONNECTION_CLOSED
+    enum Exception { GETSOCKOPT_ERROR
+                     , CONNECTION_CLOSED
                      , SEND_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_msg_send\n"));
     TRY {
-        struct pollfd check_fd[1];
         ssize_t wrote_bytes;
-        
-        check_fd[0].fd = fd;
-        check_fd[0].events = POLLIN | POLLOUT;
-        ret_cod = poll(check_fd, 1, 0);
-        LIXA_TRACE(("lixa_msg_send: ret_cod=%d, fd=%d, "
-                    "POLLIN=%d, POLLOUT=%d, POLLERR=%d, "
-                    "POLLHUP=%d, POLLNVAL=%d\n", ret_cod, fd,
-                    check_fd[0].revents & POLLIN,
-                    check_fd[0].revents & POLLOUT,
-                    check_fd[0].revents & POLLERR,
-                    check_fd[0].revents & POLLHUP,
-                    check_fd[0].revents & POLLNVAL));
-        if ((POLLERR & check_fd[0].revents) &&
-            (POLLHUP & check_fd[0].revents)) {
+        int optval;
+        socklen_t optlen = sizeof(optval);
+
+        if (0 != getsockopt(fd, SOL_SOCKET, SO_ERROR, &optval, &optlen))
+            THROW(GETSOCKOPT_ERROR);
+        LIXA_TRACE(("lixa_msg_send: so_error=%d (EPIPE=%d)\n", optval, EPIPE));
+        if (EPIPE == optval) {
+            int rc = 0;
             syslog(LOG_NOTICE, LIXA_SYSLOG_LXC027N, getpid(), pthread_self());
+            rc = shutdown(fd, SHUT_RDWR);
+            LIXA_TRACE(("lixa_msg_send: socket with fd=%d was shutdown "
+                        "(rc=%d,errno=%d)\n", fd, rc, errno));
             THROW(CONNECTION_CLOSED);
         }
 
@@ -246,6 +240,9 @@ int lixa_msg_send(int fd, const char *buf, size_t buf_size)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case GETSOCKOPT_ERROR:
+                ret_cod = LIXA_RC_GETSOCKOPT_ERROR;
+                break;
             case CONNECTION_CLOSED:
                 ret_cod = LIXA_RC_CONNECTION_CLOSED;
                 break;

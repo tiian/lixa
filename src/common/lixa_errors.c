@@ -207,6 +207,8 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: 'socket' function returned an error condition";
         case LIXA_RC_SETSOCKOPT_ERROR:
             return "ERROR: 'setsockopt' function returned an error condition";
+        case LIXA_RC_GETSOCKOPT_ERROR:
+            return "ERROR: 'getsockopt' function returned an error condition";
         case LIXA_RC_BIND_ERROR:
             return "ERROR: 'bind' function returned an error condition";
         case LIXA_RC_LISTEN_ERROR:

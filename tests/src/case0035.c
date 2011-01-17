@@ -74,12 +74,16 @@ int main(int argc, char *argv[])
 
     /* emulate operations without XA transaction management */
     lixa_monkeyrm_call_ax_reg(2);
+    lixa_monkeyrm_call_ax_reg(3);
     lixa_monkeyrm_call_ax_unreg(2);
+    lixa_monkeyrm_call_ax_unreg(3);
+    if (2 == exit_point)
+        exit(2);
 
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OK == rc);
-    if (2 == exit_point)
-        exit(2);
+    if (3 == exit_point)
+        exit(3);
     printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info));
     assert(1 == rc);
 
@@ -88,20 +92,20 @@ int main(int argc, char *argv[])
      * equivalent of a SQLExecDirect function call */
     lixa_monkeyrm_call_ax_reg(2);
     lixa_monkeyrm_call_ax_reg(3);
-    if (3 == exit_point)
-        exit(3);
+    if (4 == exit_point)
+        exit(4);
 
     if (commit)
         printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
     else
         printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
     assert(TX_OK == rc);
-    if (4 == exit_point)
-        exit(4);
-    printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-    assert(TX_OK == rc);
     if (5 == exit_point)
         exit(5);
+    printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+    assert(TX_OK == rc);
+    if (6 == exit_point)
+        exit(6);
     printf("%s| ...finished\n", pgm);
     return 0;
 }

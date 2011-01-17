@@ -44,7 +44,7 @@ int ax_reg(int rmid, XID *xid, long flags)
                      , NOT_DYNAMIC
                      , INVALID_TX_STATE
                      , MSG_SERIALIZE_ERROR
-                     , SEND_ERROR
+                     , MSG_SEND_ERROR
                      , NONE } excp;
     int ret_cod = TMER_TMERR;
     int xa_ret_cod = TM_OK;
@@ -169,8 +169,11 @@ int ax_reg(int rmid, XID *xid, long flags)
         fd = client_status_get_sockfd(cs);
         LIXA_TRACE(("ax_reg: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR);
+        }
         
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_AX_REG_1,
                    client_status_get_crash_count(cs));
@@ -193,7 +196,7 @@ int ax_reg(int rmid, XID *xid, long flags)
             case NOT_DYNAMIC:
             case INVALID_TX_STATE:
             case MSG_SERIALIZE_ERROR:
-            case SEND_ERROR:
+            case MSG_SEND_ERROR:
                 ret_cod = TMER_TMERR;
                 break;
             case NONE:
@@ -219,7 +222,7 @@ int ax_unreg(int rmid, long flags)
                      , COLL_GET_CS_ERROR
                      , OUT_OF_RANGE
                      , MSG_SERIALIZE_ERROR
-                     , SEND_ERROR
+                     , MSG_SEND_ERROR
                      , NONE } excp;
     int ret_cod = TMER_TMERR;
     int xa_ret_cod = TM_OK;
@@ -306,8 +309,8 @@ int ax_unreg(int rmid, long flags)
         fd = client_status_get_sockfd(cs);
         LIXA_TRACE(("ax_unreg: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0 /* MSG_NOSIGNAL */))
-            THROW(SEND_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size)))
+            THROW(MSG_SEND_ERROR);
         
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_AX_UNREG_1,
                    client_status_get_crash_count(cs));
@@ -328,7 +331,7 @@ int ax_unreg(int rmid, long flags)
                 ret_cod = TMER_INVAL;
                 break;
             case MSG_SERIALIZE_ERROR:
-            case SEND_ERROR:
+            case MSG_SEND_ERROR:
                 ret_cod = TMER_TMERR;
                 break;
             case NONE:

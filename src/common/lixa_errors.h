@@ -354,45 +354,49 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_SETSOCKOPT_ERROR               -131
 /**
- * "bind" function error
+ * "getsockopt" function error
  */
-#define LIXA_RC_BIND_ERROR                     -132
+#define LIXA_RC_GETSOCKOPT_ERROR               -132
 /**
  * "bind" function error
  */
-#define LIXA_RC_LISTEN_ERROR                   -133
+#define LIXA_RC_BIND_ERROR                     -133
+/**
+ * "bind" function error
+ */
+#define LIXA_RC_LISTEN_ERROR                   -134
 /**
  * "accept" function error
  */
-#define LIXA_RC_ACCEPT_ERROR                   -134
+#define LIXA_RC_ACCEPT_ERROR                   -135
 /**
  * "shutdown" function error
  */
-#define LIXA_RC_SHUTDOWN_ERROR                 -135
+#define LIXA_RC_SHUTDOWN_ERROR                 -136
 /**
  * "getaddrinfo" function error
  */
-#define LIXA_RC_GETADDRINFO_ERROR              -136
+#define LIXA_RC_GETADDRINFO_ERROR              -137
 /**
  * "connect" function error
  */
-#define LIXA_RC_CONNECT_ERROR                  -137
+#define LIXA_RC_CONNECT_ERROR                  -138
 /**
  * "recv" function error
  */
-#define LIXA_RC_SEND_ERROR                     -138
+#define LIXA_RC_SEND_ERROR                     -139
 /**
  * "recv" function error
  */
-#define LIXA_RC_RECV_ERROR                     -139
+#define LIXA_RC_RECV_ERROR                     -140
 /**
  * "getsockname" function error
  */
-#define LIXA_RC_GETSOCKNAME_ERROR              -140
+#define LIXA_RC_GETSOCKNAME_ERROR              -141
 /**
  * "getsockname" function error
  */
-#define LIXA_RC_GETPEERNAME_ERROR              -141
+#define LIXA_RC_GETPEERNAME_ERROR              -142
 /**
  * "pthread_create" function error
  */

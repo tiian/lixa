@@ -123,7 +123,7 @@ xa_commit/0
 xa_close/0
 ]])
 # the first client exits after tx_commit()
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0035 commit 4], [4], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0035 commit 5], [5], [ignore], [ignore])
 # the second client checks the server is up and running
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0035 commit 0], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -165,7 +165,7 @@ xa_forget/0
 xa_close/0
 ]])
 # the first client exits after tx_commit()
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0035 commit 4], [4], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0035 commit 5], [5], [ignore], [ignore])
 # the second client checks the server is up and running
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0035 commit 0], [0], [ignore], [ignore])
 AT_CLEANUP
