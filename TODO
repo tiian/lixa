@@ -1,5 +1,5 @@
 Substitue simple send with lixa_msg_send: it checks the socket and avoid
-SIGPIPE signal.
+SIGPIPE signal all over the code
 Restart from ct_1_0.at ...
 Crash test must be performed: put a crash point inside thread_status_sync_files
 
