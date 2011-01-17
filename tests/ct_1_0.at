@@ -118,7 +118,7 @@ xa_commit/0
 xa_close/0
 ]])
 # this client restarts and crashes the server
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=23 ; lixa_test_exec.sh noreset start case0035 commit 1], [1], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=23 ; lixa_test_exec.sh noreset start case0035 commit 0], [0], [ignore], [ignore])
 # this client checks the server is crashed
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0022 1 -7], [0], [ignore], [ignore])
 AT_CLEANUP

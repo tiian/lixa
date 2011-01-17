@@ -306,7 +306,7 @@ int ax_unreg(int rmid, long flags)
         fd = client_status_get_sockfd(cs);
         LIXA_TRACE(("ax_unreg: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
+        if (buffer_size != send(fd, buffer, buffer_size, 0 /* MSG_NOSIGNAL */))
             THROW(SEND_ERROR);
         
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_AX_UNREG_1,

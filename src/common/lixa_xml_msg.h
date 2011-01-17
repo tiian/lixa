@@ -1211,6 +1211,17 @@ extern "C" {
                           ssize_t *read_bytes);
 
 
+
+    /**
+     * Send a message to a TCP/IP socket (file descriptor)
+     * @param fd IN file descriptor associated to the TCP/IP socket
+     * @param buf IN buffer will be used to store the XML message
+     * @param buf_size IN size of buf
+     * @return a reason code
+     */
+    int lixa_msg_send(int fd, const char *buf, size_t buf_size);
+
+    
     
     /**
      * Free all the dynamically allocated strings previously allocated by
