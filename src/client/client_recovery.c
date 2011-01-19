@@ -49,7 +49,7 @@ int client_recovery(client_status_t *cs,
 {
     enum Exception { XML_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR1
-                     , SEND_ERROR1
+                     , MSG_SEND_ERROR1
                      , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , ABORTED_RECOVERY
@@ -57,7 +57,7 @@ int client_recovery(client_status_t *cs,
                      , COMMIT_ERROR
                      , ROLLBACK_ERROR
                      , MSG_SERIALIZE_ERROR2
-                     , SEND_ERROR2
+                     , MSG_SEND_ERROR2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -102,8 +102,12 @@ int client_recovery(client_status_t *cs,
             LIXA_TRACE(("client_recovery: sending " SIZE_T_FORMAT
                         " bytes ('%s') to the server for step %d\n",
                         buffer_size, buffer, rqst.header.pvs.step));
-            if (buffer_size != send(fd, buffer, buffer_size, 0))
-                THROW(SEND_ERROR1);
+            if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
+                                   fd, buffer, buffer_size))) {
+                if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                    client_status_set_sockfd(cs, LIXA_NULL_FD);
+                THROW(MSG_SEND_ERROR1);
+            }
 
             LIXA_CRASH(LIXA_CRASH_POINT_CLIENT_RECOVERY_1,
                        client_status_get_crash_count(cs));
@@ -184,8 +188,13 @@ int client_recovery(client_status_t *cs,
             LIXA_TRACE(("client_recovery: sending " SIZE_T_FORMAT
                         " bytes ('%s') to the server for step %d\n",
                         buffer_size, buffer, updt.header.pvs.step));
-            if (buffer_size != send(fd, buffer, buffer_size, 0))
-                THROW(SEND_ERROR2);
+            if (LIXA_RC_OK != (ret_cod =
+                               lixa_msg_send(fd, buffer, buffer_size))) {
+                if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                    client_status_set_sockfd(cs, LIXA_NULL_FD);
+                THROW(MSG_SEND_ERROR2);
+            }
+
             /* release messages */
             lixa_msg_free(&rqst);
             lixa_msg_free(&rpl);
@@ -199,9 +208,7 @@ int client_recovery(client_status_t *cs,
                 ret_cod = LIXA_RC_XML_STRDUP_ERROR;
                 break;
             case MSG_SERIALIZE_ERROR1:
-                break;
-            case SEND_ERROR1:
-                ret_cod = LIXA_RC_SEND_ERROR;
+            case MSG_SEND_ERROR1:
                 break;
             case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:
@@ -214,9 +221,7 @@ int client_recovery(client_status_t *cs,
             case ROLLBACK_ERROR:
                 break;
             case MSG_SERIALIZE_ERROR2:
-                break;
-            case SEND_ERROR2:
-                ret_cod = LIXA_RC_SEND_ERROR;
+            case MSG_SEND_ERROR2:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
