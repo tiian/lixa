@@ -61,7 +61,7 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
     enum Exception { ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
                      , MSG_SERIALIZE_ERROR
-                     , SEND_ERROR
+                     , MSG_SEND_ERROR
                      , XA_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -146,8 +146,11 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
         
         LIXA_TRACE(("lixa_xa_close: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR);
+        }
 
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_CLOSE_1,
                    client_status_get_crash_count(cs));
@@ -165,11 +168,8 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
             case MSG_SERIALIZE_ERROR:
+            case MSG_SEND_ERROR:
                 *txrc = TX_FAIL;
-                break;
-            case SEND_ERROR:
-                *txrc = TX_ERROR;
-                ret_cod = LIXA_RC_SEND_ERROR;
                 break;
             case XA_ERROR:
                 ret_cod = LIXA_RC_XA_ERROR;
@@ -197,7 +197,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                      , ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
                      , MSG_SERIALIZE_ERROR
-                     , SEND_ERROR
+                     , MSG_SEND_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -409,8 +409,11 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
 
         LIXA_TRACE(("lixa_xa_commit: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR);
+        }
         
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_COMMIT_1,
                    client_status_get_crash_count(cs));
@@ -431,9 +434,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
             case MSG_SERIALIZE_ERROR:
-                break;
-            case SEND_ERROR:
-                ret_cod = LIXA_RC_SEND_ERROR;
+            case MSG_SEND_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -461,14 +462,14 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
 int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
 {
     enum Exception { MSG_SERIALIZE_ERROR1
-                     , SEND_ERROR
+                     , MSG_SEND_ERROR
                      , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , ERROR_FROM_SERVER
                      , MSG_SERIALIZE_ERROR2
                      , ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
-                     , SEND_ERROR2
+                     , MSG_SEND_ERROR2
                      , XA_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -503,8 +504,11 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
         
         LIXA_TRACE(("lixa_xa_end: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR);
+        }
         
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_END_1,
                    client_status_get_crash_count(cs));
@@ -657,8 +661,11 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
 
         LIXA_TRACE(("lixa_xa_end: sending " SIZE_T_FORMAT
                     " bytes to the server for step 24\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR2);
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR2);
+        }
 
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_END_3,
                    client_status_get_crash_count(cs));
@@ -670,9 +677,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
     } CATCH {
         switch (excp) {
             case MSG_SERIALIZE_ERROR1:
+            case MSG_SEND_ERROR:
                 break;
-            case SEND_ERROR:
-                ret_cod = LIXA_RC_SEND_ERROR;
                 break;
             case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:
@@ -688,8 +694,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
             case UNEXPECTED_XA_RC:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
-            case SEND_ERROR2:
-                ret_cod = LIXA_RC_SEND_ERROR;
+            case MSG_SEND_ERROR2:
                 break;
             case XA_ERROR:
                 ret_cod = LIXA_RC_XA_ERROR;
@@ -719,7 +724,7 @@ int lixa_xa_forget(client_status_t *cs, int finished)
 {
     enum Exception { INTERNAL_ERROR
                      , MSG_SERIALIZE_ERROR
-                     , SEND_ERROR
+                     , MSG_SEND_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int xa_rc = XA_OK;
@@ -831,8 +836,12 @@ int lixa_xa_forget(client_status_t *cs, int finished)
                 THROW(MSG_SERIALIZE_ERROR);
             LIXA_TRACE(("lixa_xa_forget: sending " SIZE_T_FORMAT
                         " bytes to the server for step 8\n", buffer_size));
-            if (buffer_size != send(fd, buffer, buffer_size, 0))
-                THROW(SEND_ERROR);
+            if (LIXA_RC_OK != (ret_cod =
+                               lixa_msg_send(fd, buffer, buffer_size))) {
+                if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                    client_status_set_sockfd(cs, LIXA_NULL_FD);
+                THROW(MSG_SEND_ERROR);
+            }
 
             LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_FORGET_1,
                        client_status_get_crash_count(cs));
@@ -845,9 +854,7 @@ int lixa_xa_forget(client_status_t *cs, int finished)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
             case MSG_SERIALIZE_ERROR:
-                break;
-            case SEND_ERROR:
-                ret_cod = LIXA_RC_SEND_ERROR;
+            case MSG_SEND_ERROR:
                 break;
             case NONE:
                 switch (xa_rc) {
@@ -891,14 +898,14 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
 {
     enum Exception { OBJ_CORRUPTED
                      , MSG_SERIALIZE_ERROR1
-                     , SEND_ERROR1
+                     , MSG_SEND_ERROR1
                      , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , ERROR_FROM_SERVER
                      , MSG_SERIALIZE_ERROR2
                      , ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
-                     , SEND_ERROR2
+                     , MSG_SEND_ERROR2
                      , XA_ERROR
                      , CLIENT_RECOVERY_ERROR
                      , NONE } excp;
@@ -992,8 +999,11 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
                     " bytes ('%s') to the server for step 8 (socket fd %d)\n",
                     buffer_size, buffer, fd));
         
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR1);
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR1);
+        }
         
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_OPEN_1,
                    client_status_get_crash_count(cs));
@@ -1089,8 +1099,11 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
         
         LIXA_TRACE(("lixa_xa_open: sending " SIZE_T_FORMAT
                     " bytes to the server for step 24\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR2);
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR2);
+        }
 
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_OPEN_3,
                    client_status_get_crash_count(cs));
@@ -1117,9 +1130,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
                 break;
             case MSG_SERIALIZE_ERROR1:
-                break;
-            case SEND_ERROR1:
-                ret_cod = LIXA_RC_SEND_ERROR;
+            case MSG_SEND_ERROR1:
                 break;
             case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:
@@ -1135,8 +1146,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
             case UNEXPECTED_XA_RC:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
-            case SEND_ERROR2:
-                ret_cod = LIXA_RC_SEND_ERROR;
+            case MSG_SEND_ERROR2:
                 break;
             case XA_ERROR:
                 ret_cod = LIXA_RC_XA_ERROR;
@@ -1172,7 +1182,7 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
     enum Exception { ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
                      , MSG_SERIALIZE_ERROR
-                     , SEND_ERROR
+                     , MSG_SEND_ERROR
                      , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , ERROR_FROM_SERVER
@@ -1307,8 +1317,11 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
 
         LIXA_TRACE(("lixa_xa_prepare: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR);
+        }
 
         LIXA_CRASH(LIXA_CRASH_POINT_PREPARE_1,
                    client_status_get_crash_count(cs));
@@ -1348,10 +1361,7 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
             case MSG_SERIALIZE_ERROR:
-                break;
-            case SEND_ERROR:
-                ret_cod = LIXA_RC_SEND_ERROR;
-                break;
+            case MSG_SEND_ERROR:
             case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:
                 break;
@@ -1388,7 +1398,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                      , ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
                      , MSG_SERIALIZE_ERROR
-                     , SEND_ERROR
+                     , MSG_SEND_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -1634,8 +1644,11 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
 
         LIXA_TRACE(("lixa_xa_rollback: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR);
+        }
         
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_ROLLBACK_1,
                    client_status_get_crash_count(cs));
@@ -1657,9 +1670,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
             case MSG_SERIALIZE_ERROR:
-                break;
-            case SEND_ERROR:
-                ret_cod = LIXA_RC_SEND_ERROR;
+            case MSG_SEND_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1688,14 +1699,14 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                   int next_txstate, int *dupid_or_proto)
 {
     enum Exception { MSG_SERIALIZE_ERROR1
-                     , SEND_ERROR
+                     , MSG_SEND_ERROR
                      , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , ERROR_FROM_SERVER
                      , MSG_SERIALIZE_ERROR2
                      , ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
-                     , SEND_ERROR2
+                     , MSG_SEND_ERROR2
                      , XA_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1748,8 +1759,11 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
         
         LIXA_TRACE(("lixa_xa_start: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR);
+        }
         
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_START_1,
                    client_status_get_crash_count(cs));
@@ -1906,8 +1920,11 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
         
         LIXA_TRACE(("lixa_xa_start: sending " SIZE_T_FORMAT
                     " bytes to the server for step 24\n", buffer_size));
-        if (buffer_size != send(fd, buffer, buffer_size, 0))
-            THROW(SEND_ERROR2);
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR2);
+        }
 
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_START_3,
                    client_status_get_crash_count(cs));
@@ -1919,10 +1936,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
     } CATCH {
         switch (excp) {
             case MSG_SERIALIZE_ERROR1:
-                break;
-            case SEND_ERROR:
-                ret_cod = LIXA_RC_SEND_ERROR;
-                break;
+            case MSG_SEND_ERROR:
             case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:
                 break;
@@ -1937,8 +1951,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
             case UNEXPECTED_XA_RC:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
-            case SEND_ERROR2:
-                ret_cod = LIXA_RC_SEND_ERROR;
+            case MSG_SEND_ERROR2:
                 break;
             case XA_ERROR:
                 ret_cod = LIXA_RC_XA_ERROR;
