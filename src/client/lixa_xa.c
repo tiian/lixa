@@ -1011,7 +1011,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
                                fd, buffer, sizeof(buffer)-1, &read_bytes)))
             THROW(MSG_RETRIEVE_ERROR);
-        LIXA_TRACE(("lixa_xa_open: receiving %d"
+        LIXA_TRACE(("lixa_xa_open: received %d"
                     " bytes from the server |%*.*s|\n",
                     read_bytes, read_bytes, read_bytes, buffer));
         
@@ -1120,8 +1120,14 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
         
         /* manage recovery pending phase (see doc/seq_diagr.txt) */
         if (recovery_pending &&
-            LIXA_RC_OK != (ret_cod = client_recovery(cs, &client)))
+            LIXA_RC_OK != (ret_cod = client_recovery(cs, &client))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod) {
+                /* the server probably crashed */
+                syslog(LOG_NOTICE, LIXA_SYSLOG_LXC028N);
+            }
+            *txrc = TX_FAIL;
             THROW(CLIENT_RECOVERY_ERROR);
+        }
         
         THROW(NONE);
     } CATCH {
@@ -1152,9 +1158,6 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
                 ret_cod = LIXA_RC_XA_ERROR;
                 break;
             case CLIENT_RECOVERY_ERROR:
-                /* @@@ no way - based on the standard - to report this type
-                   of error to the application program: open point for future
-                   investigation */
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

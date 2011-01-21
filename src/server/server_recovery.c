@@ -33,6 +33,7 @@
 
 
 #include <lixa_errors.h>
+#include <lixa_crash.h>
 #include <lixa_trace.h>
 #include <lixa_syslog.h>
 #include <server_recovery.h>
@@ -190,6 +191,13 @@ int server_recovery_8(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_recovery_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+
+#ifdef _CRASH
+    if (THREAD_SWITCH != excp) {
+        LIXA_CRASH(LIXA_CRASH_POINT_SERVER_RECOVERY_8,
+                   thread_status_get_crash_count(ts));
+    }
+#endif
     return ret_cod;
 }
 
