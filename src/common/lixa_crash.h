@@ -138,13 +138,17 @@
  */
 #define LIXA_CRASH_POINT_LIXA_XA_FORGET_1     21
 /**
- * The server crashes after server_xa_open_8
+ * The server crashes in server_xa_open_8 function
  */
 #define LIXA_CRASH_POINT_LIXA_XA_OPEN_8       22
 /**
- * The server crashes after server_xa_open_24
+ * The server crashes in server_xa_open_24 function
  */
 #define LIXA_CRASH_POINT_LIXA_XA_OPEN_24      23
+/**
+ * The server crashes in server_recovery_8 function
+ */
+#define LIXA_CRASH_POINT_SERVER_RECOVERY_8    24
 
 
 

@@ -75,7 +75,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-# this client forces server crash
+# this client forces server crash in server_xa_open_8
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=22 ; lixa_test_exec.sh noreset start case0022 1 -7], [0], [ignore], [ignore])
 # this client checks the server restarts fine and run
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0], [0], [ignore], [ignore])
@@ -117,10 +117,102 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-# this client restarts and crashes the server
+# this client restarts and crashes the server in server_xa_open_24
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=23 ; lixa_test_exec.sh noreset start case0035 commit 2], [2], [ignore], [ignore])
 # this client checks the server is crashed
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0022 1 -7], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([CT/1.0/2.0 preparing recovery pending])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+# the first client crashed after xa_prepare to create a recovery pending
+# transaction
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset recycle case0035 commit 0], [134], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([CT/1.0/2.1 server_recovery (step=8)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit recovers the previous transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit recovers the previous transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit recovers the previous transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit recovers the previous transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+# this client forces server crash in server_recovery_8; the client must stop
+# with TX_FAIL
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=24 ; lixa_test_exec.sh noreset start case0022 1 -7], [0], [ignore], [ignore])
+# this client checks the server restarts fine and run
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([CT/1.0/99.0 server stop])
@@ -158,7 +250,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-# the second client checks the server is up and running
+# this client checks the server is up and running
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0], [0], [ignore], [ignore])
 AT_CLEANUP
 

@@ -122,6 +122,8 @@
 #define LIXA_SYSLOG_LXC027N "LXC027N can not send a message to the server " \
     "because it has disconnected the socket (pid=" PID_T_FORMAT "/tid=" \
     PTHREAD_T_FORMAT "); sending data would generate SIGPIPE signal"
+#define LIXA_SYSLOG_LXC028N "LXC028N the server closed the connection " \
+    "after a query recovery (step=8) message: it might be crashed"
 
 
 
