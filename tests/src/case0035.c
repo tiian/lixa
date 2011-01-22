@@ -74,9 +74,13 @@ int main(int argc, char *argv[])
 
     /* emulate operations without XA transaction management */
     lixa_monkeyrm_call_ax_reg(2);
+    sleep(1);
     lixa_monkeyrm_call_ax_reg(3);
+    sleep(1);
     lixa_monkeyrm_call_ax_unreg(2);
+    sleep(1);
     lixa_monkeyrm_call_ax_unreg(3);
+    sleep(1);
     if (2 == exit_point)
         exit(2);
 

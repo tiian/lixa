@@ -279,6 +279,9 @@ int server_recovery_24(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_recovery_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+
+    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_RECOVERY_24,
+               thread_status_get_crash_count(ts));
     return ret_cod;
 }
 
