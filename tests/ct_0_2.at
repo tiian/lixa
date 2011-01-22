@@ -37,9 +37,9 @@ xa_commit/0
 xa_close/0
 ]])
 # the first client crashes after message START/8
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh reset start case0035 commit 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh reset start case0035 commit 0 0], [134], [ignore], [ignore])
 # the second client checks the server is up and running
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0035 commit 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([CT/0.2/1.0 xa_end/receive (step=16)])
@@ -79,9 +79,9 @@ xa_commit/0
 xa_close/0
 ]])
 # the first client crashes after message START/16
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0035 commit 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0035 commit 0 0], [134], [ignore], [ignore])
 # the second client checks the server is up and running
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0035 commit 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([CT/0.2/2.0 xa_end/send (step=24)])
@@ -121,7 +121,7 @@ xa_commit/0
 xa_close/0
 ]])
 # the first client crashes after message START/24
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=13 ; lixa_test_exec.sh noreset none case0035 commit 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=13 ; lixa_test_exec.sh noreset none case0035 commit 0 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([CT/0.2/2.1 xa_end(rec.pend.)/send (step=24)])
@@ -169,6 +169,6 @@ xa_commit/0
 xa_close/0
 ]])
 # the second client checks the server is up and running
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0035 commit 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset stop case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 

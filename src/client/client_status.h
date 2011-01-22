@@ -253,6 +253,19 @@ extern "C" {
     
 
     /**
+     * Check the client is connected to the server: the connection could be
+     * broken in the meantime
+     * @param cs IN object reference
+     * @return a boolean value (TRUE if the client is really connected to the
+     *         server)
+     */
+    static inline int client_status_is_connected(client_status_t *cs) {
+        return LIXA_NULL_FD != cs->sockfd;
+    }
+
+
+    
+    /**
      * Get the TX state associated to the thread
      * @param cs IN object reference
      * @return the TX state
