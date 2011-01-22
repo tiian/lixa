@@ -49,9 +49,10 @@ int main(int argc, char *argv[])
     TXINFO info;
     int commit;
     int exit_point;
+    int test_rc;
 
-    if (argc < 3) {
-        fprintf(stderr, "%s: at least two option must be specified\n",
+    if (argc < 4) {
+        fprintf(stderr, "%s: at least three options must be specified\n",
                 argv[0]);
         exit (1);
     }
@@ -65,8 +66,9 @@ int main(int argc, char *argv[])
         exit (1);
     }
     exit_point = (int)strtol(argv[2], NULL, 0);
+    test_rc = (int)strtol(argv[3], NULL, 0);
     
-    printf("%s| starting (%s/%d)...\n", pgm, argv[1], exit_point);
+    printf("%s| starting (%s/%d/%d)...\n", pgm, argv[1], exit_point, test_rc);
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     assert(TX_OK == rc);
     if (1 == exit_point)
@@ -85,9 +87,13 @@ int main(int argc, char *argv[])
         exit(2);
 
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
-    assert(TX_OK == rc);
+    if (TX_OK != test_rc && 3 == exit_point)
+        assert(test_rc == rc);
+    else
+        assert(TX_OK == rc);
     if (3 == exit_point)
         exit(3);
+    
     printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info));
     assert(1 == rc);
 
@@ -95,7 +101,9 @@ int main(int argc, char *argv[])
      * resource manager owned resources; you may imagine these are the
      * equivalent of a SQLExecDirect function call */
     lixa_monkeyrm_call_ax_reg(2);
+    sleep(1);
     lixa_monkeyrm_call_ax_reg(3);
+    sleep(1);
     if (4 == exit_point)
         exit(4);
 

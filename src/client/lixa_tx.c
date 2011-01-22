@@ -59,6 +59,7 @@ int lixa_tx_begin(int *txrc)
     enum Exception { CLIENT_STATUS_FAILED
                      , STATUS_NOT_FOUND
                      , COLL_GET_CS_ERROR
+                     , CONNECTION_CLOSED
                      , PROTOCOL_ERROR1
                      , INVALID_STATUS
                      , OUTSIDE_ERROR
@@ -93,6 +94,10 @@ int lixa_tx_begin(int *txrc)
             default:
                 THROW(COLL_GET_CS_ERROR);
         }
+
+        /* check the connection to the server is still alive */
+        if (!client_status_is_connected(cs))
+            THROW(CONNECTION_CLOSED);
 
         /* check TX state (see Table 7-1) */
         txstate = client_status_get_txstate(cs);
@@ -203,6 +208,7 @@ int lixa_tx_begin(int *txrc)
                 ret_cod = LIXA_RC_PROTOCOL_ERROR;
                 break;
             case COLL_GET_CS_ERROR:
+            case CONNECTION_CLOSED:
                 break;
             case OUTSIDE_ERROR:
                 *txrc = TX_OUTSIDE;
