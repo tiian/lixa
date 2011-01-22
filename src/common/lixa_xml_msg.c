@@ -228,7 +228,7 @@ int lixa_msg_send(int fd, const char *buf, size_t buf_size)
         }
 
         LIXA_TRACE(("lixa_msg_send: sending " SIZE_T_FORMAT
-                    " bytes to the server...\n", buf_size));
+                    " bytes to the server (fd=%d)...\n", buf_size, fd));
         wrote_bytes = send(fd, buf, buf_size, 0);
         if (buf_size != wrote_bytes) {
             LIXA_TRACE(("lixa_msg_send: sent " SSIZE_T_FORMAT

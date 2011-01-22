@@ -140,15 +140,23 @@
 /**
  * The server crashes in server_xa_open_8 function
  */
-#define LIXA_CRASH_POINT_LIXA_XA_OPEN_8       22
+#define LIXA_CRASH_POINT_SERVER_XA_OPEN_8     22
 /**
  * The server crashes in server_xa_open_24 function
  */
-#define LIXA_CRASH_POINT_LIXA_XA_OPEN_24      23
+#define LIXA_CRASH_POINT_SERVER_XA_OPEN_24    23
 /**
  * The server crashes in server_recovery_8 function
  */
 #define LIXA_CRASH_POINT_SERVER_RECOVERY_8    24
+/**
+ * The server crashes in server_recovery_24 function
+ */
+#define LIXA_CRASH_POINT_SERVER_RECOVERY_24   25
+/**
+ * The server crashes in server_ax_reg function
+ */
+#define LIXA_CRASH_POINT_SERVER_AX_REG        26
 
 
 
