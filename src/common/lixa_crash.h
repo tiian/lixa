@@ -157,6 +157,18 @@
  * The server crashes in server_ax_reg function
  */
 #define LIXA_CRASH_POINT_SERVER_AX_REG        26
+/**
+ * The server crashes in server_ax_unreg function
+ */
+#define LIXA_CRASH_POINT_SERVER_AX_UNREG      27
+/**
+ * The server crashes in server_xa_start_8 function
+ */
+#define LIXA_CRASH_POINT_SERVER_XA_START_8    28
+/**
+ * The server crashes in server_xa_start_24 function
+ */
+#define LIXA_CRASH_POINT_SERVER_XA_START_24   29
 
 
 

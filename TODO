@@ -5,6 +5,22 @@ Crash test must be performed: put a crash point inside thread_status_sync_files
 
 Remove all @@@ from source code: every one was/is an "open point"
 
+Try this scenario:
+- a multithread application
+- one thread connects to a resource manager like Oracle or DB2 using tx_open()
+- after tx_open() the server crashes, for example in server_xa_start_24
+- the thread calls tx_commit() after some native SQL update operations
+- the server crashed, the thread receive TX_FAIL from the transaction manager
+- the thread can not close the connection to the database using tx_close()
+  because after TX_FAIL the transaction manager can no longer perform work on
+  behalf of the application
+- what happens with locks inside the database(s)?
+- is it right to document the application must close the resource managers by
+  itself after a TX_FAIL return code??
+- is it sufficient thread termination to clean-up database(s) state(s)?
+- generally tx_close() can not be executed: some times it may happen, some 
+  times it can not work properly
+
 Document a memory leak introduced by libxml2:
 xmlInitParser()
 xmlCleanupParser()
