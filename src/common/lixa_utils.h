@@ -28,6 +28,9 @@
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
+#ifdef HAVE_SYS_SELECT_H
+# include <sys/select.h>
+#endif
 
 
 
@@ -93,6 +96,14 @@ extern "C" {
      * @return a standardized reason code
      */
     int lixa_get_program_name(char *buf, size_t buf_size);
+
+
+
+    /**
+     * Micro seconds sleep based on select call
+     * @param usec IN micro seconds
+     */
+    void lixa_micro_sleep(long usec);
 
 
     

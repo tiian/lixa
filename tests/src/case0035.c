@@ -34,12 +34,16 @@
 
 #include <tx.h>
 #include <liblixamonkey.h>
+#include <lixa_utils.h>
 
 
 
 /* this is a special case test: it is a basic test for dynamically registered
    resource managers */
 
+
+/* this delay is necessary to exploits some bugs related to timing */
+#define DELAY 100000
 
 
 int main(int argc, char *argv[])
@@ -76,13 +80,13 @@ int main(int argc, char *argv[])
 
     /* emulate operations without XA transaction management */
     lixa_monkeyrm_call_ax_reg(2);
-    sleep(1);
+    lixa_micro_sleep(DELAY);
     lixa_monkeyrm_call_ax_reg(3);
-    sleep(1);
+    lixa_micro_sleep(DELAY);
     lixa_monkeyrm_call_ax_unreg(2);
-    sleep(1);
+    lixa_micro_sleep(DELAY);
     lixa_monkeyrm_call_ax_unreg(3);
-    sleep(1);
+    lixa_micro_sleep(DELAY);
     if (2 == exit_point)
         exit(2);
 
@@ -101,9 +105,9 @@ int main(int argc, char *argv[])
      * resource manager owned resources; you may imagine these are the
      * equivalent of a SQLExecDirect function call */
     lixa_monkeyrm_call_ax_reg(2);
-    sleep(1);
+    lixa_micro_sleep(DELAY);
     lixa_monkeyrm_call_ax_reg(3);
-    sleep(1);
+    lixa_micro_sleep(DELAY);
     if (4 == exit_point)
         exit(4);
 
@@ -111,7 +115,10 @@ int main(int argc, char *argv[])
         printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
     else
         printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
-    assert(TX_OK == rc);
+    if (TX_OK != test_rc && 5 == exit_point)
+        assert(test_rc == rc);
+    else
+        assert(TX_OK == rc);
     if (5 == exit_point)
         exit(5);
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());

@@ -183,3 +183,12 @@ int lixa_get_program_name(char *buf, size_t buf_size)
     return ret_cod;
 }
 
+
+
+void lixa_micro_sleep(long usec) {
+    struct timeval tv;
+    LIXA_TRACE(("lixa_micro_sleep: waiting %ld microseconds...\n", usec));
+    tv.tv_sec = 0;
+    tv.tv_usec = usec;
+    select(0, NULL, NULL, NULL, &tv);
+}
