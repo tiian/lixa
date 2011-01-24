@@ -169,6 +169,18 @@
  * The server crashes in server_xa_start_24 function
  */
 #define LIXA_CRASH_POINT_SERVER_XA_START_24   29
+/**
+ * The server crashes in server_xa_end_8 function
+ */
+#define LIXA_CRASH_POINT_SERVER_XA_END_8      30
+/**
+ * The server crashes in server_xa_end_24 function
+ */
+#define LIXA_CRASH_POINT_SERVER_XA_END_24     31
+/**
+ * The server crashes in server_xa_prepare_8 function
+ */
+#define LIXA_CRASH_POINT_SERVER_XA_PREPARE_8  32
 
 
 
