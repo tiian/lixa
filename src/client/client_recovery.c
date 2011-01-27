@@ -430,16 +430,26 @@ int client_recovery_rollback(const client_status_t *cs,
                 &g_array_index(global_ccc.actconf.rsrmgrs,
                                struct act_rsrmgr_config_s, i);
             struct lixa_msg_body_qrcvr_24_rsrmgr_s record;
-            
+
+            /*
+            if (XA_STATE_S0 == rsrmgr->s_state &&
+                LIXA_MSG_VERB_END == rsrmgr->next_verb) {
+                LIXA_TRACE(("client_recovery_rollback: resource manager "
+                            "rmid=%d needs recovery (s_state=%d, "
+                            "next_state=%d) because xa_prepare could be "
+                            "previously issued\n",
+                            rsrmgr->rmid, rsrmgr->s_state,
+                            rsrmgr->next_verb));
+                            } else */
             if (XA_STATE_S2 != rsrmgr->s_state &&
-                XA_STATE_S3 != rsrmgr->s_state &&
-                XA_STATE_S4 != rsrmgr->s_state) {
+                       XA_STATE_S3 != rsrmgr->s_state &&
+                       XA_STATE_S4 != rsrmgr->s_state) {
                 LIXA_TRACE(("client_recovery_rollback: resource manager "
                             "rmid=%d does not need recovery (s_state=%d)\n",
                             rsrmgr->rmid, rsrmgr->s_state));
                 continue;
             }
-            
+
             LIXA_TRACE(("client_recovery_rollback: xa_rollback for rmid=%d, "
                         "name='%s', xa_name='%s'...\n",
                         rsrmgr->rmid, (char *)act_rsrmgr->generic->name,
