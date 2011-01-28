@@ -1503,6 +1503,7 @@ int lixa_msg_deserialize_reg_8(xmlNodePtr cur, struct lixa_msg_s *msg)
                      , FLAGS_NOT_FOUND
                      , RC_NOT_FOUND
                      , TD_STATE_NOT_FOUND
+                     , S_STATE_NOT_FOUND
                      , XML_UNRECOGNIZED_TAG
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1533,6 +1534,11 @@ int lixa_msg_deserialize_reg_8(xmlNodePtr cur, struct lixa_msg_s *msg)
             msg->body.reg_8.ax_reg_exec.td_state =
                 (int)strtol((char *)tmp, NULL, 0);
             xmlFree(tmp);
+            if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_S_STATE)))
+                THROW(S_STATE_NOT_FOUND);
+            msg->body.reg_8.ax_reg_exec.s_state =
+                (int)strtol((char *)tmp, NULL, 0);
+            xmlFree(tmp);
         } else
             THROW(XML_UNRECOGNIZED_TAG);
         
@@ -1543,6 +1549,7 @@ int lixa_msg_deserialize_reg_8(xmlNodePtr cur, struct lixa_msg_s *msg)
             case FLAGS_NOT_FOUND:
             case RC_NOT_FOUND:
             case TD_STATE_NOT_FOUND:
+            case S_STATE_NOT_FOUND:
                 ret_cod = LIXA_RC_MALFORMED_XML_MSG;
                 break;                
             case XML_UNRECOGNIZED_TAG:
@@ -1775,6 +1782,7 @@ int lixa_msg_deserialize_start_24(xmlNodePtr cur, struct lixa_msg_s *msg)
                      , FLAGS_NOT_FOUND
                      , RC_NOT_FOUND
                      , TD_STATE_NOT_FOUND
+                     , S_STATE_NOT_FOUND
                      , XML_UNRECOGNIZED_TAG
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1830,6 +1838,13 @@ int lixa_msg_deserialize_start_24(xmlNodePtr cur, struct lixa_msg_s *msg)
                         xa_start_exec.td_state =
                             (int)strtol((char *)tmp, NULL, 0);
                         xmlFree(tmp);
+                        /* retrieve s_state */
+                        if (NULL == (tmp = xmlGetProp(
+                                         cur2, LIXA_XML_MSG_PROP_S_STATE)))
+                            THROW(S_STATE_NOT_FOUND);
+                        xa_start_exec.s_state =
+                            (int)strtol((char *)tmp, NULL, 0);
+                        xmlFree(tmp);
                         g_array_append_val(msg->body.start_24.xa_start_execs,
                                            xa_start_exec);
                     }
@@ -1849,6 +1864,7 @@ int lixa_msg_deserialize_start_24(xmlNodePtr cur, struct lixa_msg_s *msg)
             case FLAGS_NOT_FOUND:
             case RC_NOT_FOUND:
             case TD_STATE_NOT_FOUND:
+            case S_STATE_NOT_FOUND:
                 ret_cod = LIXA_RC_MALFORMED_XML_MSG;
                 break;
             case XML_UNRECOGNIZED_TAG:

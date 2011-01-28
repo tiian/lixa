@@ -77,6 +77,7 @@ int server_ax_reg(struct thread_status_s *ts,
                              ts->updated_records);
         sr = ts->curr_status + slot;
         sr->sr.data.pld.rm.state.xa_td_state = ax_reg_exec->td_state;
+        sr->sr.data.pld.rm.state.xa_s_state = ax_reg_exec->s_state;
         sr->sr.data.pld.rm.ax_reg_flags = ax_reg_exec->flags;
         sr->sr.data.pld.rm.ax_reg_rc = ax_reg_exec->rc;
         
@@ -1263,6 +1264,7 @@ int server_xa_start_24(struct thread_status_s *ts,
             status_record_update(ts->curr_status + slot, slot,
                                  ts->updated_records);
             sr->sr.data.pld.rm.state.xa_td_state = xa_start_execs->td_state;
+            sr->sr.data.pld.rm.state.xa_s_state = xa_start_execs->s_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
             sr->sr.data.pld.rm.xa_start_flags = xa_start_execs->flags;
             sr->sr.data.pld.rm.xa_start_rc = xa_start_execs->rc;

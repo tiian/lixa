@@ -588,9 +588,14 @@ struct lixa_msg_body_start_24_xa_start_execs_s {
     int             rc;
     /**
      * the new transaction branch association state associated to the resource
-     * manager after xa_end execution
+     * manager after xa_start execution
      */
     int             td_state;
+    /**
+     * the new transaction branch state associated to the resource
+     * manager after xa_start execution
+     */
+    int             s_state;
 };
 
 
@@ -1035,6 +1040,10 @@ struct lixa_msg_body_reg_8_ax_reg_exec_s {
      * the new transaction branch association state after ax_reg execution
      */
     int             td_state;
+    /**
+     * the new transaction branch state after ax_reg execution
+     */
+    int             s_state;
 };
 
 

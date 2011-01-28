@@ -667,11 +667,13 @@ int lixa_msg_trace_reg(const struct lixa_msg_s *msg)
         switch (msg->header.pvs.step) {
             case 8:
                 LIXA_TRACE(("lixa_msg_trace_reg: body[ax_reg_exec["
-                            "rmid=%d,flags=0x%lx,rc=%d,td_state=%d]]\n",
+                            "rmid=%d,flags=0x%lx,rc=%d,td_state=%d,"
+                            "s_state=%d]]\n",
                             msg->body.reg_8.ax_reg_exec.rmid,
                             msg->body.reg_8.ax_reg_exec.flags,
                             msg->body.reg_8.ax_reg_exec.rc,
-                            msg->body.reg_8.ax_reg_exec.td_state));
+                            msg->body.reg_8.ax_reg_exec.td_state,
+                            msg->body.reg_8.ax_reg_exec.s_state));
                 break;
             default:
                 THROW(INVALID_STEP);
@@ -814,11 +816,12 @@ int lixa_msg_trace_start(const struct lixa_msg_s *msg)
                                     "xa_start_execs["
                                     "xa_start_exec["
                                     "rmid=%d,flags=0x%lx,"
-                                    "rc=%d,td_state=%d]]]\n",
+                                    "rc=%d,td_state=%d,s_state=%d]]]\n",
                                     xa_start_exec->rmid,
                                     xa_start_exec->flags,
                                     xa_start_exec->rc,
-                                    xa_start_exec->td_state));
+                                    xa_start_exec->td_state,
+                                    xa_start_exec->s_state));
                     }
                 }
                 break;
