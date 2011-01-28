@@ -1493,7 +1493,7 @@ int lixa_msg_serialize_reg_8(const struct lixa_msg_s *msg,
         /* <ax_reg_exec> */
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "<%s %s=\"%d\" %s=\"0x%lx\" "
-                              "%s=\"%d\" %s=\"%d\"/>",
+                              "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
                               LIXA_XML_MSG_TAG_AX_REG_EXEC,
                               LIXA_XML_MSG_PROP_RMID,
                               msg->body.reg_8.ax_reg_exec.rmid,
@@ -1502,7 +1502,9 @@ int lixa_msg_serialize_reg_8(const struct lixa_msg_s *msg,
                               LIXA_XML_MSG_PROP_RC,
                               msg->body.reg_8.ax_reg_exec.rc,
                               LIXA_XML_MSG_PROP_TD_STATE,
-                              msg->body.reg_8.ax_reg_exec.td_state);
+                              msg->body.reg_8.ax_reg_exec.td_state,
+                              LIXA_XML_MSG_PROP_S_STATE,
+                              msg->body.reg_8.ax_reg_exec.s_state);
             if (used_chars >= *free_chars)
                 THROW(BUFFER_TOO_SHORT);
             *free_chars -= used_chars;
@@ -1797,7 +1799,7 @@ int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
                 struct lixa_msg_body_start_24_xa_start_execs_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%d\" %s=\"0x%lx\" "
-                                  "%s=\"%d\" %s=\"%d\"/>",
+                                  "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_XA_START_EXEC,
                                   LIXA_XML_MSG_PROP_RMID,
                                   xa_start_exec->rmid,
@@ -1806,7 +1808,9 @@ int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
                                   LIXA_XML_MSG_PROP_RC,
                                   xa_start_exec->rc,
                                   LIXA_XML_MSG_PROP_TD_STATE,
-                                  xa_start_exec->td_state);
+                                  xa_start_exec->td_state,
+                                  LIXA_XML_MSG_PROP_S_STATE,
+                                  xa_start_exec->s_state);
             if (used_chars >= *free_chars)
                 THROW(BUFFER_TOO_SHORT3);
             *free_chars -= used_chars;

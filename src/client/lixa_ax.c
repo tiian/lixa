@@ -160,6 +160,10 @@ int ax_reg(int rmid, XID *xid, long flags)
         msg.body.reg_8.ax_reg_exec.flags = flags;
         msg.body.reg_8.ax_reg_exec.rc = ret_cod;
         msg.body.reg_8.ax_reg_exec.td_state = next_xa_td_state;
+        if (XA_STATE_D1 == next_xa_td_state)
+            msg.body.reg_8.ax_reg_exec.s_state = XA_STATE_S1;
+        else
+            msg.body.reg_8.ax_reg_exec.s_state = csr->common.xa_s_state;
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
@@ -180,6 +184,8 @@ int ax_reg(int rmid, XID *xid, long flags)
         
         /* new resource manager state */
         csr->common.xa_td_state = next_xa_td_state;
+        if (XA_STATE_D1 == next_xa_td_state)
+            csr->common.xa_s_state = XA_STATE_S1;
         
         THROW(NONE);
     } CATCH {

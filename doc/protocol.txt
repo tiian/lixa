@@ -107,8 +107,8 @@ verb=3 (xa_start)
   <msg level="1" verb="3" step="24">
     <conthr txstate="3"/>
     <xa_start_execs>
-      <xa_start_exec rmid="0" flags="0x0" rc="0" td_state="11"/>
-      <xa_start_exec rmid="1" flags="0x0" rc="0" td_state="11"/>
+      <xa_start_exec rmid="0" flags="0x0" rc="0" td_state="11" s_state="31"/>
+      <xa_start_exec rmid="1" flags="0x0" rc="0" td_state="11" s_state="31"/>
     </xa_start_execs>
   </msg>
 
@@ -293,7 +293,7 @@ verb=8,step=24 -->			send recovery result
 
   client -> server message (async assertion)
   <msg level="1" verb="9" step="8">
-    <ax_reg_exec rmid="0" flags="0x0" rc="0" td_state="21"/>
+    <ax_reg_exec rmid="0" flags="0x0" rc="0" td_state="21" s_state="31"/>
   </msg>
 
 client			server		description

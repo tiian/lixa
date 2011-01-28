@@ -1831,6 +1831,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
             switch (record.rc) {
                 case XA_OK:
                     csr->common.xa_td_state = XA_STATE_T1;
+                    csr->common.xa_s_state = XA_STATE_S1;
                     break;
                 case XA_RETRY:
                     LIXA_TRACE(("lixa_xa_start: the resource manager returned "
@@ -1898,6 +1899,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                     THROW(UNEXPECTED_XA_RC);
             }
             record.td_state = csr->common.xa_td_state;
+            record.s_state = csr->common.xa_s_state;
             g_array_append_val(msg.body.start_24.xa_start_execs, record);
 
             if (lixa_tx_rc_hierarchy(tmp_txrc) <
