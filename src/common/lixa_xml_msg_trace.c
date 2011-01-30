@@ -277,21 +277,15 @@ int lixa_msg_trace_end(const struct lixa_msg_s *msg)
             case 8:
                 LIXA_TRACE(("lixa_msg_trace_end: body[conthr[commit["
                             "%d]]]\n", msg->body.end_8.conthr.commit));
-                break;
-            case 16:
-                LIXA_TRACE(("lixa_msg_trace_end: body[answer[rc[%d]]]\n",
-                            msg->body.end_16.answer.rc));
-                break;
-            case 24:
-                if (NULL != msg->body.end_24.xa_end_execs) {
-                    for (i=0; i<msg->body.end_24.xa_end_execs->len;
+                if (NULL != msg->body.end_8.xa_end_execs) {
+                    for (i=0; i<msg->body.end_8.xa_end_execs->len;
                          ++i) {
-                        struct lixa_msg_body_end_24_xa_end_execs_s
+                        struct lixa_msg_body_end_8_xa_end_execs_s
                             *xa_end_exec =
                             &g_array_index(
-                                msg->body.end_24.xa_end_execs,
+                                msg->body.end_8.xa_end_execs,
                                 struct
-                                lixa_msg_body_end_24_xa_end_execs_s,
+                                lixa_msg_body_end_8_xa_end_execs_s,
                                 i);
                         LIXA_TRACE(("lixa_msg_trace: body["
                                     "xa_end_execs["
@@ -305,6 +299,10 @@ int lixa_msg_trace_end(const struct lixa_msg_s *msg)
                                     xa_end_exec->td_state));
                     }
                 }
+                break;
+            case 16:
+                LIXA_TRACE(("lixa_msg_trace_end: body[answer[rc[%d]]]\n",
+                            msg->body.end_16.answer.rc));
                 break;
             default:
                 THROW(INVALID_STEP);

@@ -1,6 +1,8 @@
 LOG:
 
-         - 0.5.27 fixing bug # 3166737
+20110130 - 0.5.27 fixed bug # 3166737
+                  NOTE: the client/server communication protocol was changed:
+                  this change breaks backward compatibility 
 
 20110120 - 0.5.26 fixed bug # 3160058
  

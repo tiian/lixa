@@ -466,16 +466,14 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                      , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , ERROR_FROM_SERVER
-                     , MSG_SERIALIZE_ERROR2
                      , ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
-                     , MSG_SEND_ERROR2
                      , XA_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     struct lixa_msg_s msg;
-    msg.body.end_24.xa_end_execs = NULL;    
+    msg.body.end_8.xa_end_execs = NULL;    
     
     LIXA_TRACE(("lixa_xa_end\n"));
     TRY {
@@ -495,51 +493,10 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
         msg.header.pvs.verb = LIXA_MSG_VERB_END;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
-        msg.body.end_8.conthr.commit = commit;
-        
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer)-1, &buffer_size)))
-            THROW(MSG_SERIALIZE_ERROR1);
-        memset(&msg, 0, sizeof(msg));
-        
-        LIXA_TRACE(("lixa_xa_end: sending " SIZE_T_FORMAT
-                    " bytes to the server for step 8\n", buffer_size));
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
-            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
-                client_status_set_sockfd(cs, LIXA_NULL_FD);
-            THROW(MSG_SEND_ERROR);
-        }
-        
-        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_END_1,
-                   client_status_get_crash_count(cs));
-        
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer)-1, &read_bytes)))
-            THROW(MSG_RETRIEVE_ERROR);
-        LIXA_TRACE(("lixa_xa_end: receiving %d"
-                    " bytes from the server |%*.*s|\n",
-                    read_bytes, read_bytes, read_bytes, buffer));
-        
-        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_END_2,
-                   client_status_get_crash_count(cs));
-        
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                               buffer, read_bytes, &msg)))
-            THROW(MSG_DESERIALIZE_ERROR);
-#ifdef _TRACE
-        lixa_msg_trace(&msg);
-#endif
-        /* check the answer from the server */
-        if (LIXA_RC_OK != (ret_cod = msg.body.end_16.answer.rc))
-            THROW(ERROR_FROM_SERVER);
-
-        /* prepare the next message */
-        msg.header.level = LIXA_MSG_LEVEL;
-        msg.header.pvs.verb = LIXA_MSG_VERB_END;
-        msg.header.pvs.step = 24;
-        msg.body.end_24.xa_end_execs = g_array_sized_new(
+        msg.body.end_8.conthr.commit = commit;        
+        msg.body.end_8.xa_end_execs = g_array_sized_new(
             FALSE, FALSE,
-            sizeof(struct lixa_msg_body_end_24_xa_end_execs_s),
+            sizeof(struct lixa_msg_body_end_8_xa_end_execs_s),
             global_ccc.actconf.rsrmgrs->len);
         
         /* loop on all the resource managers and call xa_open function */
@@ -552,7 +509,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
             struct client_status_rsrmgr_s *csr = &g_array_index(
                 cs->rmstatus, struct client_status_rsrmgr_s, i);
-            struct lixa_msg_body_end_24_xa_end_execs_s record;
+            struct lixa_msg_body_end_8_xa_end_execs_s record;
 
             /* dynamic registered resource managers with unregistered state
                must be bypassed */
@@ -648,7 +605,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
             }
             record.s_state = csr->common.xa_s_state;
             record.td_state = csr->common.xa_td_state;
-            g_array_append_val(msg.body.end_24.xa_end_execs, record);
+            g_array_append_val(msg.body.end_8.xa_end_execs, record);
             
             if (lixa_tx_rc_hierarchy(tmp_txrc) <
                 lixa_tx_rc_hierarchy(*txrc))
@@ -656,20 +613,41 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
         } /* for (i=0; ...) */
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
-            THROW(MSG_SERIALIZE_ERROR2);
-
+                               &msg, buffer, sizeof(buffer)-1, &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR1);
+        memset(&msg, 0, sizeof(msg));
+        
         LIXA_TRACE(("lixa_xa_end: sending " SIZE_T_FORMAT
-                    " bytes to the server for step 24\n", buffer_size));
+                    " bytes to the server for step 8\n", buffer_size));
         if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
-            THROW(MSG_SEND_ERROR2);
+            THROW(MSG_SEND_ERROR);
         }
-
-        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_END_3,
+        
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_END_1,
                    client_status_get_crash_count(cs));
         
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
+                               fd, buffer, sizeof(buffer)-1, &read_bytes)))
+            THROW(MSG_RETRIEVE_ERROR);
+        LIXA_TRACE(("lixa_xa_end: receiving %d"
+                    " bytes from the server |%*.*s|\n",
+                    read_bytes, read_bytes, read_bytes, buffer));
+        
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_END_2,
+                   client_status_get_crash_count(cs));
+        
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
+                               buffer, read_bytes, &msg)))
+            THROW(MSG_DESERIALIZE_ERROR);
+#ifdef _TRACE
+        lixa_msg_trace(&msg);
+#endif
+        /* check the answer from the server */
+        if (LIXA_RC_OK != (ret_cod = msg.body.end_16.answer.rc))
+            THROW(ERROR_FROM_SERVER);
+
         if (TX_OK != *txrc)
             THROW(XA_ERROR);
         
@@ -686,15 +664,11 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
             case ERROR_FROM_SERVER:
                 ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
                 break;
-            case MSG_SERIALIZE_ERROR2:
-                break;
             case ASYNC_NOT_IMPLEMENTED:
                 ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
                 break;
             case UNEXPECTED_XA_RC:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
-                break;
-            case MSG_SEND_ERROR2:
                 break;
             case XA_ERROR:
                 ret_cod = LIXA_RC_XA_ERROR;
@@ -709,8 +683,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
         /* this object contains references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
-        if (NULL != msg.body.end_24.xa_end_execs)
-            g_array_free(msg.body.end_24.xa_end_execs, TRUE);
+        if (NULL != msg.body.end_8.xa_end_execs)
+            g_array_free(msg.body.end_8.xa_end_execs, TRUE);
         
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_end/excp=%d/"

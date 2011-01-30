@@ -630,29 +630,11 @@ struct lixa_msg_body_end_8_conthr_s {
     
 
 /**
- * Message body for verb "end", step "8"
- */
-struct lixa_msg_body_end_8_s {
-    struct lixa_msg_body_end_8_conthr_s   conthr;
-};
-
-
-
-/**
- * Message body for verb "end", step "16"
- */
-struct lixa_msg_body_end_16_s {
-    struct lixa_msg_body_answer_s   answer;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_end_24_s
+ * Convenience struct for @ref lixa_msg_body_end_8_s
  * xid is not stored in this structure because it was already stored by the
  * server after receiving step 8 message, see @ref lixa_msg_body_end_8_s
  */
-struct lixa_msg_body_end_24_xa_end_execs_s {
+struct lixa_msg_body_end_8_xa_end_execs_s {
     /**
      * rmid parameter as passed to xa_end routine
      */
@@ -680,13 +662,26 @@ struct lixa_msg_body_end_24_xa_end_execs_s {
 
 
 /**
- * Message body for verb "end", step "24"
+ * Message body for verb "end", step "8"
  */
-struct lixa_msg_body_end_24_s {
+struct lixa_msg_body_end_8_s {
+    /**
+     * Control thread information
+     */
+    struct lixa_msg_body_end_8_conthr_s      conthr;
     /**
      * Parameters and return value of xa_end executions
      */
     GArray                                  *xa_end_execs;
+};
+
+
+
+/**
+ * Message body for verb "end", step "16"
+ */
+struct lixa_msg_body_end_16_s {
+    struct lixa_msg_body_answer_s            answer;
 };
 
 
@@ -1175,7 +1170,6 @@ struct lixa_msg_s {
         struct lixa_msg_body_start_24_s        start_24;
         struct lixa_msg_body_end_8_s           end_8;
         struct lixa_msg_body_end_16_s          end_16;
-        struct lixa_msg_body_end_24_s          end_24;
         struct lixa_msg_body_prepare_8_s       prepare_8;
         struct lixa_msg_body_prepare_16_s      prepare_16;
         struct lixa_msg_body_commit_8_s        commit_8;
