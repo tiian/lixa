@@ -158,21 +158,6 @@ extern "C" {
     
 
     /**
-     * Executes the logic related to the third step of "xa_end" on the server
-     * side
-     * @param ts IN/OUT a reference to the current thread status
-     * @param lmi IN a reference to the message received from the client
-     * @param block_id IN position of the block is storing the status of the
-     *                    client is calling the server
-     * @return a reason code
-     */
-    int server_xa_end_24(struct thread_status_s *ts,
-                         const struct lixa_msg_s *lmi,
-                         uint32_t block_id);
-
-    
-    
-    /**
      * Executes the logic related to "xa_forget" on the server side
      * @param ts IN/OUT a reference to the current thread status
      * @param lmi IN a reference to the message received from the client

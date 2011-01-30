@@ -100,10 +100,6 @@
  */
 #define LIXA_CRASH_POINT_LIXA_XA_END_2        12
 /**
- * The client crashes after successful message sent xa_end/step=24
- */
-#define LIXA_CRASH_POINT_LIXA_XA_END_3        13
-/**
  * The client crashes after successful message sent xa_prepare/step=8
  */
 #define LIXA_CRASH_POINT_PREPARE_1            14
@@ -173,10 +169,6 @@
  * The server crashes in server_xa_end_8 function
  */
 #define LIXA_CRASH_POINT_SERVER_XA_END_8      30
-/**
- * The server crashes in server_xa_end_24 function
- */
-#define LIXA_CRASH_POINT_SERVER_XA_END_24     31
 /**
  * The server crashes in server_xa_prepare_8 function
  */

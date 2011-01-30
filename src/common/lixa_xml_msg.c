@@ -369,14 +369,12 @@ int lixa_msg_free(struct lixa_msg_s *msg)
             case LIXA_MSG_VERB_END: /* end */
                 switch (msg->header.pvs.step) {
                     case 8: /* nothing to do */
+                        if (NULL != msg->body.end_8.xa_end_execs) {
+                            g_array_free(msg->body.end_8.xa_end_execs, TRUE);
+                            msg->body.end_8.xa_end_execs = NULL;
+                        }
                         break;
                     case 16: /* nothing to release */
-                        break;
-                    case 24:
-                        if (NULL != msg->body.end_24.xa_end_execs) {
-                            g_array_free(msg->body.end_24.xa_end_execs, TRUE);
-                            msg->body.end_24.xa_end_execs = NULL;
-                        }
                         break;
                     default:
                         THROW(INVALID_STEP4);
