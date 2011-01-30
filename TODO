@@ -1,3 +1,4 @@
+Test query recovery step 24 crash: it needs a new crash point in client; what happens to the transaction? Will it passed a second time to a new client? See test case CT/0.0/6.1
 Restart from ct_1_2.at ...
 In server code, put crash point after message responses: they can exploit
 bugs in the client code.
