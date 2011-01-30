@@ -80,6 +80,11 @@
  */
 #define LIXA_CRASH_POINT_CLIENT_RECOVERY_2     7
 /**
+ * The client crashes after it has successful sent the message
+ * query_recovery/step=24
+ */
+#define LIXA_CRASH_POINT_CLIENT_RECOVERY_3    13
+/**
  * The client crashes after successful message sent xa_start/step=8
  */
 #define LIXA_CRASH_POINT_LIXA_XA_START_1       8
@@ -173,6 +178,14 @@
  * The server crashes in server_xa_prepare_8 function
  */
 #define LIXA_CRASH_POINT_SERVER_XA_PREPARE_8  32
+/**
+ * The server crashes in server_xa_commit_8 function
+ */
+#define LIXA_CRASH_POINT_SERVER_XA_COMMIT_8   33
+/**
+ * The server crashes in server_xa_forget_8 function
+ */
+#define LIXA_CRASH_POINT_SERVER_XA_FORGET_8   34
 
 
 

@@ -194,6 +194,9 @@ int client_recovery(client_status_t *cs,
                     client_status_set_sockfd(cs, LIXA_NULL_FD);
                 THROW(MSG_SEND_ERROR2);
             }
+                
+            LIXA_CRASH(LIXA_CRASH_POINT_CLIENT_RECOVERY_3,
+                       client_status_get_crash_count(cs));
 
             /* release messages */
             lixa_msg_free(&rqst);
