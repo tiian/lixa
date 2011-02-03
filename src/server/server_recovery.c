@@ -219,6 +219,11 @@ int server_recovery_24(struct thread_status_s *ts,
             sr.data.pld.ph.recoverying_block_id;
 
         if (!lmi->body.qrcvr_24.recovery.failed) {
+            struct payload_header_s *ph = &(
+                ts->curr_status[block_id].sr.data.pld.ph);
+            /* avoid this transaction might be kept in recovery pending table
+               if the client crashed */
+            ph->state.finished = TRUE;
             LIXA_TRACE(("server_recovery_24: client completed the recovery "
                         "phase successfully; release block # " UINT32_T_FORMAT
                         " and its chain\n", recoverying_block_id));
