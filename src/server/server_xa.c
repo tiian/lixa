@@ -70,6 +70,9 @@ int server_ax_reg(struct thread_status_s *ts,
             ax_reg_exec->rmid >= ts->curr_status[block_id].sr.data.pld.ph.n)
             THROW(RMID_OUT_OF_RANGE);
         
+        /* reset finished state */
+        ts->curr_status[block_id].sr.data.pld.ph.state.finished = FALSE;
+        
         slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
             ax_reg_exec->rmid];
         /* update the block */
@@ -1143,6 +1146,8 @@ int server_xa_start_8(struct thread_status_s *ts,
                              ts->updated_records);
         ts->curr_status[block_id].sr.data.pld.ph.state.xid =
             lmi->body.start_8.conthr.xid;
+        /* reset finished state */
+        ts->curr_status[block_id].sr.data.pld.ph.state.finished = FALSE;
         
         /* store next_verb for not dynamically registering resource managers */
         for (i=0; i<lmi->body.start_8.rsrmgrs->len; ++i) {
