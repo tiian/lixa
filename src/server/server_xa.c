@@ -1070,6 +1070,9 @@ int server_xa_rollback_8(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_rollback_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+
+    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_ROLLBACK_8,
+               thread_status_get_crash_count(ts));    
     return ret_cod;
 }
 
