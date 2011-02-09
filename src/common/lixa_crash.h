@@ -186,6 +186,10 @@
  * The server crashes in server_xa_forget_8 function
  */
 #define LIXA_CRASH_POINT_SERVER_XA_FORGET_8   34
+/**
+ * The server crashes in server_xa_rollback_8 function
+ */
+#define LIXA_CRASH_POINT_SERVER_XA_ROLLBACK_8 35
 
 
 
