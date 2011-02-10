@@ -289,7 +289,6 @@ xa_open/0
 xa_rollback/-4
 xa_start/0
 xa_end/0
-xa_prepare/0
 xa_rollback/0
 xa_close/0
 ]])
@@ -300,7 +299,6 @@ xa_open/0
 xa_rollback/-4
 xa_start/0
 xa_end/0
-xa_prepare/0
 xa_rollback/0
 xa_close/0
 ]])
@@ -310,7 +308,6 @@ xa_open/0
 # this is a recovery pending commit; the resource manager already rolled back
 xa_rollback/-4
 xa_end/0
-xa_prepare/0
 xa_rollback/0
 xa_close/0
 ]])
@@ -318,9 +315,8 @@ AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
 # this is a recovery pending commit; the resource manager already rolled back
-xa_rollback/-7
+xa_rollback/-4
 xa_end/0
-xa_prepare/0
 xa_rollback/0
 xa_close/0
 ]])

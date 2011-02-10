@@ -190,6 +190,18 @@
  * The server crashes in server_xa_rollback_8 function
  */
 #define LIXA_CRASH_POINT_SERVER_XA_ROLLBACK_8 35
+/**
+ * The server crashes after it sent OPEN 16 message
+ */
+#define LIXA_CRASH_POINT_SERVER_POLLOUT_OPEN_16   36
+/**
+ * The server crashes after it sent START 16 message
+ */
+#define LIXA_CRASH_POINT_SERVER_POLLOUT_START_16  37
+/**
+ * The server crashes after it sent END 16 message
+ */
+#define LIXA_CRASH_POINT_SERVER_POLLOUT_END_16    38
 
 
 

@@ -32,6 +32,7 @@
 
 
 
+#include <lixa_crash.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_syslog.h>
@@ -927,6 +928,37 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
         free(ts->client_array[slot_id].output_buffer);
         ts->client_array[slot_id].output_buffer = NULL;
         ts->client_array[slot_id].output_buffer_size = 0;
+
+#ifdef _CRASH
+        switch (ts->client_array[slot_id].last_verb_step.verb) {
+            case LIXA_MSG_VERB_OPEN:
+                LIXA_CRASH(LIXA_CRASH_POINT_SERVER_POLLOUT_OPEN_16,
+                           thread_status_get_crash_count(ts));
+                break;
+            case LIXA_MSG_VERB_START:
+                LIXA_CRASH(LIXA_CRASH_POINT_SERVER_POLLOUT_START_16,
+                           thread_status_get_crash_count(ts));
+                break;
+            case LIXA_MSG_VERB_END:
+                LIXA_CRASH(LIXA_CRASH_POINT_SERVER_POLLOUT_END_16,
+                           thread_status_get_crash_count(ts));
+                break;
+            case LIXA_MSG_VERB_PREPARE:
+                break;
+            case LIXA_MSG_VERB_COMMIT:
+                break;
+            case LIXA_MSG_VERB_ROLLBACK:
+                break;
+            case LIXA_MSG_VERB_QRCVR:
+                break;
+            case LIXA_MSG_VERB_REG:
+                break;
+            case LIXA_MSG_VERB_UNREG:
+                break;
+            case LIXA_MSG_VERB_FORGET:
+                break;
+        }
+#endif /* _CRASH */
         
         /* retrieve the block is storing the status of the client inside
            memory mapped status file */

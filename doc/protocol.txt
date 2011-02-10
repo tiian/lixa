@@ -129,7 +129,7 @@ verb=4 (xa_end)
 
   level: message level, version
   verb:  xa_end -> 4
-  step:  8, 16, 24
+  step:  8, 16
 
   client->server message (send if the transaction is committing - commit="1" -
   		 	 or rolling back - commit="0")
