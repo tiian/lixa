@@ -398,11 +398,12 @@ int server_xa_end_8(struct thread_status_s *ts,
         ts->asked_sync = FALSE;
         if (lmi->body.end_8.conthr.commit) {
             ts->curr_status[block_id].sr.data.pld.ph.state.will_commit = TRUE;
-            /* the status file must be synchronized */
-            ts->asked_sync = TRUE;
         } else
             ts->curr_status[block_id].sr.data.pld.ph.state.will_rollback =
                 TRUE;
+        /* @@@ it should be better to sync anyway */
+        /* the status file must be synchronized */
+        ts->asked_sync = TRUE;
         
         /* store next_verb for all the resource managers */
         for (i=0; i<ts->curr_status[block_id].sr.data.pld.ph.n; ++i) {
