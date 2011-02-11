@@ -1,7 +1,3 @@
-server_manager_pollout go on with crash implementation
-
-In server code, put crash point after message responses: they can exploit
-bugs in the client code.
 Crash test must be performed: put a crash point inside thread_status_sync_files
 
 Remove all @@@ from source code: every one was/is an "open point"

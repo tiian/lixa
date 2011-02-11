@@ -53,155 +53,163 @@
 /**
  * No crash point set
  */
-#define LIXA_CRASH_POINT_NULL                  0
+#define LIXA_CRASH_POINT_NULL                      0
 /**
  * The client crashes after a successful connection
  */
-#define LIXA_CRASH_POINT_CLIENT_CONNECT_1      2
+#define LIXA_CRASH_POINT_CLIENT_CONNECT_1          2
 /**
  * The client crashes after successful message sent xa_open/step=8
  */
-#define LIXA_CRASH_POINT_LIXA_XA_OPEN_1        3
+#define LIXA_CRASH_POINT_LIXA_XA_OPEN_1            3
 /**
  * The client crashes after successful message retrieved xa_open/step=16
  */
-#define LIXA_CRASH_POINT_LIXA_XA_OPEN_2        4
+#define LIXA_CRASH_POINT_LIXA_XA_OPEN_2            4
 /**
  * The client crashes after successful message sent xa_open/step=24
  */
-#define LIXA_CRASH_POINT_LIXA_XA_OPEN_3        5
+#define LIXA_CRASH_POINT_LIXA_XA_OPEN_3            5
 /**
  * The client crashes after successful message sent query_recovery/step=8
  */
-#define LIXA_CRASH_POINT_CLIENT_RECOVERY_1     6
+#define LIXA_CRASH_POINT_CLIENT_RECOVERY_1         6
 /**
  * The client crashes after it has successful retrieved the message
  * query_recovery/step=16
  */
-#define LIXA_CRASH_POINT_CLIENT_RECOVERY_2     7
+#define LIXA_CRASH_POINT_CLIENT_RECOVERY_2         7
 /**
  * The client crashes after it has successful sent the message
  * query_recovery/step=24
  */
-#define LIXA_CRASH_POINT_CLIENT_RECOVERY_3    13
+#define LIXA_CRASH_POINT_CLIENT_RECOVERY_3        13
 /**
  * The client crashes after successful message sent xa_start/step=8
  */
-#define LIXA_CRASH_POINT_LIXA_XA_START_1       8
+#define LIXA_CRASH_POINT_LIXA_XA_START_1           8
 /**
  * The client crashes after successful message retrieved xa_start/step=16
  */
-#define LIXA_CRASH_POINT_LIXA_XA_START_2       9
+#define LIXA_CRASH_POINT_LIXA_XA_START_2           9
 /**
  * The client crashes after successful message sent xa_start/step=24
  */
-#define LIXA_CRASH_POINT_LIXA_XA_START_3      10
+#define LIXA_CRASH_POINT_LIXA_XA_START_3          10
 /**
  * The client crashes after successful message sent xa_end/step=8
  */
-#define LIXA_CRASH_POINT_LIXA_XA_END_1        11
+#define LIXA_CRASH_POINT_LIXA_XA_END_1            11
 /**
  * The client crashes after successful message retrieved xa_end/step=16
  */
-#define LIXA_CRASH_POINT_LIXA_XA_END_2        12
+#define LIXA_CRASH_POINT_LIXA_XA_END_2            12
 /**
  * The client crashes after successful message sent xa_prepare/step=8
  */
-#define LIXA_CRASH_POINT_PREPARE_1            14
+#define LIXA_CRASH_POINT_PREPARE_1                14
 /**
  * The Transaction Manager will crash after successfully prepared all the
  * resource manager
  * The client crashes after successful message retrieved xa_prepare/step=16
  */
-#define LIXA_CRASH_POINT_PREPARE_2            15
+#define LIXA_CRASH_POINT_PREPARE_2                15
 /**
  * The client crashes after successful message sent xa_commit/step=8
  */
-#define LIXA_CRASH_POINT_LIXA_XA_COMMIT_1     16
+#define LIXA_CRASH_POINT_LIXA_XA_COMMIT_1         16
 /**
  * The client crashes after successful message sent xa_rollback/step=8
  */
-#define LIXA_CRASH_POINT_LIXA_XA_ROLLBACK_1   17
+#define LIXA_CRASH_POINT_LIXA_XA_ROLLBACK_1       17
 /**
  * The client crashes after successful message sent xa_close/step=8
  */
-#define LIXA_CRASH_POINT_LIXA_XA_CLOSE_1      18
+#define LIXA_CRASH_POINT_LIXA_XA_CLOSE_1          18
 /**
  * The client crashes after successful sent message ax_reg/step=8
  */
-#define LIXA_CRASH_POINT_LIXA_AX_REG_1        19
+#define LIXA_CRASH_POINT_LIXA_AX_REG_1            19
 /**
  * The client crashes after successful sent message ax_unreg/step=8
  */
-#define LIXA_CRASH_POINT_LIXA_AX_UNREG_1      20
+#define LIXA_CRASH_POINT_LIXA_AX_UNREG_1          20
 /**
  * The client crashes after successful sent message xa_forget/step=8
  */
-#define LIXA_CRASH_POINT_LIXA_XA_FORGET_1     21
+#define LIXA_CRASH_POINT_LIXA_XA_FORGET_1         21
 /**
  * The server crashes in server_xa_open_8 function
  */
-#define LIXA_CRASH_POINT_SERVER_XA_OPEN_8     22
+#define LIXA_CRASH_POINT_SERVER_XA_OPEN_8         22
 /**
  * The server crashes in server_xa_open_24 function
  */
-#define LIXA_CRASH_POINT_SERVER_XA_OPEN_24    23
+#define LIXA_CRASH_POINT_SERVER_XA_OPEN_24        23
 /**
  * The server crashes in server_recovery_8 function
  */
-#define LIXA_CRASH_POINT_SERVER_RECOVERY_8    24
+#define LIXA_CRASH_POINT_SERVER_RECOVERY_8        24
 /**
  * The server crashes in server_recovery_24 function
  */
-#define LIXA_CRASH_POINT_SERVER_RECOVERY_24   25
+#define LIXA_CRASH_POINT_SERVER_RECOVERY_24       25
 /**
  * The server crashes in server_ax_reg function
  */
-#define LIXA_CRASH_POINT_SERVER_AX_REG        26
+#define LIXA_CRASH_POINT_SERVER_AX_REG            26
 /**
  * The server crashes in server_ax_unreg function
  */
-#define LIXA_CRASH_POINT_SERVER_AX_UNREG      27
+#define LIXA_CRASH_POINT_SERVER_AX_UNREG          27
 /**
  * The server crashes in server_xa_start_8 function
  */
-#define LIXA_CRASH_POINT_SERVER_XA_START_8    28
+#define LIXA_CRASH_POINT_SERVER_XA_START_8        28
 /**
  * The server crashes in server_xa_start_24 function
  */
-#define LIXA_CRASH_POINT_SERVER_XA_START_24   29
+#define LIXA_CRASH_POINT_SERVER_XA_START_24       29
 /**
  * The server crashes in server_xa_end_8 function
  */
-#define LIXA_CRASH_POINT_SERVER_XA_END_8      30
+#define LIXA_CRASH_POINT_SERVER_XA_END_8          30
 /**
  * The server crashes in server_xa_prepare_8 function
  */
-#define LIXA_CRASH_POINT_SERVER_XA_PREPARE_8  32
+#define LIXA_CRASH_POINT_SERVER_XA_PREPARE_8      32
 /**
  * The server crashes in server_xa_commit_8 function
  */
-#define LIXA_CRASH_POINT_SERVER_XA_COMMIT_8   33
+#define LIXA_CRASH_POINT_SERVER_XA_COMMIT_8       33
 /**
  * The server crashes in server_xa_forget_8 function
  */
-#define LIXA_CRASH_POINT_SERVER_XA_FORGET_8   34
+#define LIXA_CRASH_POINT_SERVER_XA_FORGET_8       34
 /**
  * The server crashes in server_xa_rollback_8 function
  */
-#define LIXA_CRASH_POINT_SERVER_XA_ROLLBACK_8 35
+#define LIXA_CRASH_POINT_SERVER_XA_ROLLBACK_8     35
 /**
  * The server crashes after it sent OPEN 16 message
  */
-#define LIXA_CRASH_POINT_SERVER_POLLOUT_OPEN_16   36
+#define LIXA_CRASH_POINT_SERVER_POLLOUT_OPEN      36
 /**
  * The server crashes after it sent START 16 message
  */
-#define LIXA_CRASH_POINT_SERVER_POLLOUT_START_16  37
+#define LIXA_CRASH_POINT_SERVER_POLLOUT_START     37
 /**
  * The server crashes after it sent END 16 message
  */
-#define LIXA_CRASH_POINT_SERVER_POLLOUT_END_16    38
+#define LIXA_CRASH_POINT_SERVER_POLLOUT_END       38
+/**
+ * The server crashes after it sent PREPARE 16 message
+ */
+#define LIXA_CRASH_POINT_SERVER_POLLOUT_PREPARE   39
+/**
+ * The server crashes after it sent RECOVERY 16 message
+ */
+#define LIXA_CRASH_POINT_SERVER_POLLOUT_RECOVERY  40
 
 
 

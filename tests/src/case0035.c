@@ -122,7 +122,10 @@ int main(int argc, char *argv[])
     if (5 == exit_point)
         exit(5);
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-    assert(TX_OK == rc);
+    if (TX_OK != test_rc && 6 == exit_point)
+        assert(test_rc == rc);
+    else
+        assert(TX_OK == rc);
     if (6 == exit_point)
         exit(6);
     printf("%s| ...finished\n", pgm);
