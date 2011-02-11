@@ -930,32 +930,28 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
         ts->client_array[slot_id].output_buffer_size = 0;
 
 #ifdef _CRASH
+        LIXA_TRACE(("server_manager_pollout: verb=%d\n",
+                    ts->client_array[slot_id].last_verb_step.verb));
         switch (ts->client_array[slot_id].last_verb_step.verb) {
             case LIXA_MSG_VERB_OPEN:
-                LIXA_CRASH(LIXA_CRASH_POINT_SERVER_POLLOUT_OPEN_16,
+                LIXA_CRASH(LIXA_CRASH_POINT_SERVER_POLLOUT_OPEN,
                            thread_status_get_crash_count(ts));
                 break;
             case LIXA_MSG_VERB_START:
-                LIXA_CRASH(LIXA_CRASH_POINT_SERVER_POLLOUT_START_16,
+                LIXA_CRASH(LIXA_CRASH_POINT_SERVER_POLLOUT_START,
                            thread_status_get_crash_count(ts));
                 break;
             case LIXA_MSG_VERB_END:
-                LIXA_CRASH(LIXA_CRASH_POINT_SERVER_POLLOUT_END_16,
+                LIXA_CRASH(LIXA_CRASH_POINT_SERVER_POLLOUT_END,
                            thread_status_get_crash_count(ts));
                 break;
             case LIXA_MSG_VERB_PREPARE:
-                break;
-            case LIXA_MSG_VERB_COMMIT:
-                break;
-            case LIXA_MSG_VERB_ROLLBACK:
+                LIXA_CRASH(LIXA_CRASH_POINT_SERVER_POLLOUT_PREPARE,
+                           thread_status_get_crash_count(ts));
                 break;
             case LIXA_MSG_VERB_QRCVR:
-                break;
-            case LIXA_MSG_VERB_REG:
-                break;
-            case LIXA_MSG_VERB_UNREG:
-                break;
-            case LIXA_MSG_VERB_FORGET:
+                LIXA_CRASH(LIXA_CRASH_POINT_SERVER_POLLOUT_RECOVERY,
+                           thread_status_get_crash_count(ts));
                 break;
         }
 #endif /* _CRASH */
