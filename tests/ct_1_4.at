@@ -160,7 +160,7 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.4/2.0 server pollout end])
+AT_SETUP([CT/1.4/2.0 server pollout end (commit)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -201,7 +201,7 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=38 ; lixa_test_exec.sh noreset start case0035 commit 5 -7], [5], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.4/2.1 server pollout end])
+AT_SETUP([CT/1.4/2.1 server pollout end (commit)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -248,7 +248,87 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.4/3.0 server pollout prepare])
+AT_SETUP([CT/1.4/3.0 server pollout end (rollback)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+# this client forces server crash in server_manager_pollout; the client must 
+# stop with TX_FAIL
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=38 ; lixa_test_exec.sh noreset start case0035 rollback 6 -7], [6], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([CT/1.4/3.1 server pollout end (rollback)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback terminates the previous transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback terminates the previous transaction
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback terminates the previous transaction
+xa_rollback/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this rollback terminates the previous transaction
+xa_rollback/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 rollback 0 0], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([CT/1.4/4.0 server pollout prepare])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -289,7 +369,7 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=39 ; lixa_test_exec.sh noreset start case0035 commit 6 -7], [6], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.4/3.1 server pollout prepare])
+AT_SETUP([CT/1.4/4.1 server pollout prepare])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -336,7 +416,7 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.4/4.0 preparing recovery pending])
+AT_SETUP([CT/1.4/5.0 preparing recovery pending])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -377,7 +457,7 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.4/4.1 server pollout query recovery])
+AT_SETUP([CT/1.4/5.1 server pollout query recovery])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -426,7 +506,7 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=36 ; lixa_test_exec.sh noreset start case0022 1 -7], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.4/4.2 server pollout query recovery])
+AT_SETUP([CT/1.4/5.2 server pollout query recovery])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config

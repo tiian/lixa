@@ -210,6 +210,18 @@
  * The server crashes after it sent RECOVERY 16 message
  */
 #define LIXA_CRASH_POINT_SERVER_POLLOUT_RECOVERY  40
+/**
+ * The server crashes before block copy
+ */
+#define LIXA_CRASH_POINT_SERVER_BLOCK_COPY        41
+/**
+ * The server crashes before msync
+ */
+#define LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC      42
+/**
+ * The server crashes after msync
+ */
+#define LIXA_CRASH_POINT_SERVER_AFTER_MSYNC       43
 
 
 

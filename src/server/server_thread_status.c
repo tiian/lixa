@@ -47,6 +47,7 @@
 
 
 
+#include <lixa_crash.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_utils.h>
@@ -888,6 +889,9 @@ int thread_status_sync_files(struct thread_status_s *ts)
         struct two_status_record_s tsr;
         off_t curr_status_size = 0;
         
+        LIXA_CRASH(LIXA_CRASH_POINT_SERVER_BLOCK_COPY,
+                   thread_status_get_crash_count(ts));
+        
         if (LIXA_RC_OK != (ret_cod = gettimeofday(
                                &ts->curr_status->sr.ctrl.last_sync, NULL)))
             THROW(GETTIMEOFDAY_ERROR);
@@ -900,11 +904,18 @@ int thread_status_sync_files(struct thread_status_s *ts)
             THROW(STATUS_RECORD_CHECK_INTEGRITY_ERROR);
 #endif /* LIXA_DEBUG */
         LIXA_TRACE(("thread_status_sync_files: before msync\n"));
+        LIXA_CRASH(LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC,
+                   thread_status_get_crash_count(ts));
+        
         if (-1 == msync(ts->curr_status,
                         ts->curr_status->sr.ctrl.number_of_blocks *
                         sizeof(status_record_t), MS_SYNC))
             THROW(MSYNC_ERROR);
+        
         LIXA_TRACE(("thread_status_sync_files: after first msync\n"));
+        LIXA_CRASH(LIXA_CRASH_POINT_SERVER_AFTER_MSYNC,
+                   thread_status_get_crash_count(ts));
+        
         /* current status file can become the baseline, discover and process
            alternate status file */
         if (ts->curr_status == ts->status1) {

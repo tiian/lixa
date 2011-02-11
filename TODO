@@ -1,4 +1,4 @@
-Crash test must be performed: put a crash point inside thread_status_sync_files
+Crash test must be performed: put a crash point inside thread_status_sync_files; go on with single phase commit/rollback
 
 Remove all @@@ from source code: every one was/is an "open point"
 
