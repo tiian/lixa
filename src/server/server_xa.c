@@ -401,7 +401,6 @@ int server_xa_end_8(struct thread_status_s *ts,
         } else
             ts->curr_status[block_id].sr.data.pld.ph.state.will_rollback =
                 TRUE;
-        /* @@@ it should be better to sync anyway */
         /* the status file must be synchronized */
         ts->asked_sync = TRUE;
         
