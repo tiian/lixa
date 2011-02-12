@@ -340,9 +340,7 @@ int server_listener_loop(const struct server_config_s *sc,
                         
                         found_fd++;
                     }
-                }
-                /* @@@ */
-                
+                }                
                 if (ready_fd == found_fd)
                     break; /* the loop is now useless */
             } /* for (i = 0; i < n; ++i) */

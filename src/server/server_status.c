@@ -575,7 +575,8 @@ int status_record_check_integrity(status_record_t *sr)
             THROW(DIGEST_SIZE_ERROR);
         }
 #endif /* LIXA_DEBUG */
-        /* @@@ substitute with g_checksum_reset when available */
+        /* this g_checksum_free could be substituted with g_checksum_reset if
+           it was available */
         g_checksum_free(checksum);
         checksum = NULL;
         LIXA_TRACE_HEX_DATA("status_record_check_integrity: "
@@ -626,7 +627,8 @@ int status_record_check_integrity(status_record_t *sr)
             g_checksum_update(checksum, (const guchar *)curr_block,
                               STATUS_RECORD_CHECKSUM_SIZE);
             g_checksum_get_digest(checksum, digest, &digest_len);
-            /* @@@ substitute with g_checksum_reset when available */
+            /* this g_checksum_free could be substituted with g_checksum_reset
+               if it was available */
             g_checksum_free(checksum);
             checksum = NULL;
             
