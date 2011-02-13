@@ -135,7 +135,7 @@
     "exit"
 #define LIXA_SYSLOG_LXD004E "LXD004E error (%s) while starting manager(s), " \
     "premature exit"
-#define LIXA_SYSLOG_LXD005E "LXD005E error (%s) while starting listener(s), " \
+#define LIXA_SYSLOG_LXD005E "LXD005E error (%s) running listener(s), " \
     "premature exit"
 #define LIXA_SYSLOG_LXD006N "LXD006N server terminated activities"
 #define LIXA_SYSLOG_LXD007W "LXD007W first status file ('%s') did not pass " \
@@ -163,6 +163,7 @@
 #define LIXA_SYSLOG_LXD020N "LXD020N the server is operating in MAINTENANCE MODE ONLY"
 #define LIXA_SYSLOG_LXD021I "LXD021I transaction '%s' is in recovery failed status; removing it from status file"
 #define LIXA_SYSLOG_LXD022N "LXD022N the server is going to clean all the previous recovery failed transactions"
+#define LIXA_SYSLOG_LXD023E "LXD023E the listener got a non recoverable error while polling its own socket (poll revents=0x%hx, errno=%d '%s'); starting premature quiesce shutdown..."
 
 
 

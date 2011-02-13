@@ -629,8 +629,10 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                    client_status_get_crash_count(cs));
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer)-1, &read_bytes)))
+                               fd, buffer, sizeof(buffer)-1, &read_bytes))) {
+            client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
+        }
         LIXA_TRACE(("lixa_xa_end: receiving %d"
                     " bytes from the server |%*.*s|\n",
                     read_bytes, read_bytes, read_bytes, buffer));
@@ -983,8 +985,10 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
                    client_status_get_crash_count(cs));
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer)-1, &read_bytes)))
+                               fd, buffer, sizeof(buffer)-1, &read_bytes))) {
+            client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
+        }
         LIXA_TRACE(("lixa_xa_open: received %d"
                     " bytes from the server |%*.*s|\n",
                     read_bytes, read_bytes, read_bytes, buffer));
@@ -1309,8 +1313,10 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit)
         
         /* wait server answer */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer)-1, &read_bytes)))
+                               fd, buffer, sizeof(buffer)-1, &read_bytes))) {
+            client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
+        }
         LIXA_TRACE(("lixa_xa_prepare: receiving %d"
                     " bytes from the server |%*.*s|\n",
                     read_bytes, read_bytes, read_bytes, buffer));
@@ -1746,8 +1752,10 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                    client_status_get_crash_count(cs));
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer)-1, &read_bytes)))
+                               fd, buffer, sizeof(buffer)-1, &read_bytes))) {
+            client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
+        }
         LIXA_TRACE(("lixa_xa_start: receiving %d"
                     " bytes from the server |%*.*s|\n",
                     read_bytes, read_bytes, read_bytes, buffer));
