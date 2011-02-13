@@ -113,8 +113,11 @@ int client_recovery(client_status_t *cs,
                        client_status_get_crash_count(cs));
         
             if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                                   fd, buffer, sizeof(buffer)-1, &read_bytes)))
+                                   fd, buffer, sizeof(buffer)-1,
+                                   &read_bytes))) {
+                client_status_check_socket(cs, ret_cod);
                 THROW(MSG_RETRIEVE_ERROR);
+            }
             LIXA_TRACE(("client_recovery: receiving %d"
                         " bytes from the server |%*.*s|\n",
                         read_bytes, read_bytes, read_bytes, buffer));

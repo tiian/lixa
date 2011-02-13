@@ -25,6 +25,9 @@
 
 
 
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
+#endif
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
@@ -39,6 +42,7 @@
 
 #include <tx.h>
 #include <lixa_crash.h>
+#include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_common_status.h>
 #include <client_config.h>
@@ -264,7 +268,26 @@ extern "C" {
     }
 
 
-    
+
+    /**
+     * Checks the return code retrieved from a previous lixa function and
+     * errno to understand if the socket is now invalid
+     * @param cs IN/OUT object reference
+     * @param ret_cod IN return code of a previous lixa function
+     */
+    static inline void client_status_check_socket(
+        client_status_t *cs, int ret_cod) {
+        if (LIXA_RC_RECV_ERROR == ret_cod &&
+            ECONNRESET == errno) {
+            LIXA_TRACE(("client_status_check_socket: ret_cod=%d (%s), "
+                        "errno=%d (ECONNRESET); the socket is now invalid\n",
+                        ret_cod, lixa_strerror(ret_cod), errno));
+            client_status_set_sockfd(cs, LIXA_NULL_FD);
+        }
+    }
+
+
+
     /**
      * Get the TX state associated to the thread
      * @param cs IN object reference

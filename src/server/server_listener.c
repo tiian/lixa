@@ -276,7 +276,7 @@ int server_listener_loop(const struct server_config_s *sc,
                 struct sockaddr_in cliaddr;
                 socklen_t clilen;
                 int conn_fd;
-                
+
                 LIXA_TRACE(("server_listener_loop: slot=" NFDS_T_FORMAT
                             ", fd=%d, POLLIN=%d, POLLERR=%d, "
                             "POLLHUP=%d, POLLNVAL=%d\n",
@@ -288,13 +288,21 @@ int server_listener_loop(const struct server_config_s *sc,
 
                 if (ts->poll_array[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL)) {
+                    char buffer[513];
                     LIXA_TRACE(("server_listener_loop: unespected "
                                 "network event on slot " NFDS_T_FORMAT
                                 ", fd = %d\n", i, ts->poll_array[i].fd));
-                    /* @@@ this piece of code must be improved */
+                    /* without a working listener, lixad server becomes
+                       useless: forcing process termination */
+                    strerror_r(errno, buffer, sizeof(buffer));
+                    syslog(LOG_ERR, LIXA_SYSLOG_LXD023E,
+                           ts->poll_array[i].revents, errno, buffer);
+                    kill(getpid(), SIGQUIT);
+                    sleep(3);
+                    /* exit anyway after three seconds */
                     THROW(NETWORK_EVENT_ERROR);
                 }
-                
+
                 if (ts->poll_array[i].revents & POLLIN) {
                     if (!i) {
                         /* control pipe */
