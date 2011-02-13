@@ -1,5 +1,5 @@
 AT_INIT
-AT_COPYRIGHT([Copyright (c) 2009-2010, Christian Ferrari <tiian@users.sourceforge.net>])
+AT_COPYRIGHT([Copyright (c) 2009-2011, Christian Ferrari <tiian@users.sourceforge.net>])
 
 AT_BANNER([LIXA case tests start-up])
 AT_SETUP([check lixad process is NOT active...])
@@ -7,13 +7,13 @@ AT_CHECK([ps -ef | grep lixad | grep -v grep], [1], [ignore], [ignore])
 AT_CLEANUP
 
 # these case tests are memory leak free (2010-12-13)
+m4_include([ct.at])
+m4_include([bug.at])
 m4_include([generic.at])
 m4_include([memory.at])
 m4_include([tx.at])
 m4_include([xa.at])
 m4_include([mt.at])
-m4_include([ct.at])
-m4_include([bug.at])
 
 AT_BANNER([LIXA case tests clean-up])
 AT_SETUP([check lixad process is NOT active...])
