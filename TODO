@@ -1,5 +1,3 @@
-Change the copyright banners
-
 Try this scenario:
 - a multithread application
 - one thread connects to a resource manager like Oracle or DB2 using tx_open()

@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
         assert(TX_OK == rc);
     if (5 == exit_point)
         exit(5);
+    lixa_micro_sleep(DELAY);
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     if (TX_OK != test_rc && 6 == exit_point)
         assert(test_rc == rc);
