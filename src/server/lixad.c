@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     /* initialize configuration structure */
     server_config_init(&sc, &tpa);
     if (LIXA_RC_OK != (rc = server_config(&sc, &tpa, config_file))) {
-        LIXA_TRACE(("main/server_config: rc = %d\n", rc));
+        LIXA_TRACE(("main/server_config: rc=%d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD003E, lixa_strerror(rc));
         return rc;
     }
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
     }
 
     if (LIXA_RC_OK != (rc = server_pipes_init(&tpa))) {
-        LIXA_TRACE(("main/server_pipes_init: rc = %d\n", rc));
+        LIXA_TRACE(("main/server_pipes_init: rc=%d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD017E);
         return rc;
     }
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     if (LIXA_RC_OK != (rc = server_manager(
                            &sc, &tpa, &tsa, &srt, &tsds, &tsrs,
                            maintenance))) {
-        LIXA_TRACE(("main/server_manager: rc = %d\n", rc));
+        LIXA_TRACE(("main/server_manager: rc=%d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD004E, lixa_strerror(rc));
         return rc;
     }
@@ -206,11 +206,18 @@ int main(int argc, char *argv[])
     /* start configured listener(s) */
     if (NULL == dump_specs &&
         LIXA_RC_OK != (rc = server_listener(&sc, &lsa, &tsa))) {
-        LIXA_TRACE(("main/server_listener: rc = %d\n", rc));
+        LIXA_TRACE(("main/server_listener: rc=%d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD005E, lixa_strerror(rc));
         return rc;
     }
 
+    /* removing pid file */
+    if (0 != (unlink(sc.pid_file))) {
+        LIXA_TRACE(("main/unlink: errno=%d ('%s')\n", errno, strerror(errno)));
+        syslog(LOG_NOTICE, LIXA_SYSLOG_LXD024N, sc.pid_file, errno,
+               strerror(errno));
+    }
+    
     /* clean-up memory to enhance memory leak detection */
     server_cleanup(&sc, &tpa, &tsa, &srt);
     

@@ -1,7 +1,8 @@
 <chapter>
   <title>Configuration</title>
   <para>
-    Two components constitute LIXA: client and server. The figure
+    A LIXA system is the assembling of two components: the client and 
+    the server. The figure
     below shows a typical configuration with three distinct Application
     Programs and four different Resource Managers.
   </para>
@@ -17,27 +18,27 @@
     <title>Architectural elements</title>
     <para>
       The <command>lixad</command> daemon process can be executed on any
-      system: there is no need it is hosted in the same system is hosting
+      system: there is no need it is executed on the same system is hosting
       the Application Programs. The communications between 
-      <command>lixac</command> and <command>lixad</command> use TCP/IP sockets.
+      the client and the server (<command>lixad</command>) uses TCP/IP sockets.
     </para>
     <para>
       The <command>lixac</command> library is embedded in the Application
-      Programs; the communication between Application Program and
-      <command>lixac</command> is based on TX (Transaction Demarcation)
-      API, see <citation>TXspec</citation>. The library contains the logic
-      of the LIXA Transaction Manager.
+      Programs; the communication between the Application Program and
+      the <command>lixac</command> library uses TX (Transaction Demarcation)
+      API, see <citation>TXspec</citation>. The <command>lixac</command> 
+      library contains all the logic of the LIXA Transaction Manager.
     </para>
     <para>
       The communication between the Application Program and the Resource
-      Managers depends on Resource Managers configuration: it may be cross
-      memory based, TCP/IP based, etc...
+      Managers depends on Resource Managers type and configuration: 
+      it may be cross memory based, TCP/IP based, System V IPC, etc...
       The communication between the <command>lixac</command> library and the
       Resource Manager depends on Resource Manager configuration and must be
-      the same used by the Application Program.
+      of the same used by the Application Program.
     </para>
     <para>
-      The communication between <command>lixac</command> and 
+      The communication between <command>lixac</command> library and 
       <command>lixad</command> is ever istantiated by the client: the
       server never calls the clients.
     </para>
@@ -68,15 +69,16 @@
       properties of the XML file are described below:
       <itemizedlist mark='bullet'>
 	<listitem><para>
-	    <varname>pid_file</varname>: the file used by the server to store
-	    the daemon <acronym>PID</acronym>
+	    <varname>pid_file</varname>: it is the file used by the server 
+	    to store the daemon <acronym>PID</acronym>; the server creates
+	    the file at start-up and destroys it at shutdown
 	</para></listitem>
 	<listitem><para>
 	    <varname>listener</varname>: the server can activate one or more
 	    listeners; most of the times one listener is sufficient, but if
-	    you want to listen only on a subset of the addresses defined at the
-	    operating system level you have to configure many: one for every
-	    desired address
+	    you want to use only a subset of the IP addresses defined at
+	    the operating system level, you have do configure a dedicated
+	    listener for every desired address
 	</para></listitem>
 	<listitem><para>
 	    <varname>domain</varname>: the type of socket must be used to
@@ -109,7 +111,10 @@
 	<listitem><para>
 	    <varname>status_file</varname>: the physical path must be used to
 	    create the status files (a couple) for a manager; this generally is
-	    a persistent and reliable storage device like a RAID partition 
+	    a persistent and reliable storage device like a RAID partition.
+	    The string specified by the tag <varname>status_file</varname>
+	    is used as a prefix: every manager (thread) creates two files
+	    with the same prefix and different suffix.
 	</para></listitem>
       </itemizedlist>
     </para>
@@ -168,13 +173,13 @@
       properties of the XML file are described below:
       <itemizedlist mark='bullet'>
 	<listitem><para>
-	    <varname>trnmgr</varname>: every manager (see 
-	    <filename>lixad_conf.xml</filename>) that must be reached by the 
-	    clients configured with this file must be listed here
+	    <varname>trnmgr</varname>: this section is used to describe a
+	    manager (a LIXA server instance) that must be reached by any
+	    client described below
 	</para></listitem>
 	<listitem><para>
 	    <varname>trnmgr/name</varname>: a name associated to the 
-	    manager; it will be used below
+	    manager; it is a logical name that is referenced will be used below
 	</para></listitem>
 	<listitem><para>
 	    <varname>domain</varname>: the same domain specified in
