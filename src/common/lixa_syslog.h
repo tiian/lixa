@@ -164,6 +164,7 @@
 #define LIXA_SYSLOG_LXD021I "LXD021I transaction '%s' is in recovery failed status; removing it from status file"
 #define LIXA_SYSLOG_LXD022N "LXD022N the server is going to clean all the previous recovery failed transactions"
 #define LIXA_SYSLOG_LXD023E "LXD023E the listener got a non recoverable error while polling its own socket (poll revents=0x%hx, errno=%d '%s'); starting premature quiesce shutdown..."
+#define LIXA_SYSLOG_LXD024N "LXD024N the server is not able to remove the file '%s' (errno=%d '%s')"
 
 
 
