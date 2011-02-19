@@ -179,48 +179,63 @@
 	</para></listitem>
 	<listitem><para>
 	    <varname>trnmgr/name</varname>: a name associated to the 
-	    manager; it is a logical name that is referenced will be used below
+	    manager; it is a logical name that is referenced by the profiles
+	    defined below
 	</para></listitem>
 	<listitem><para>
-	    <varname>domain</varname>: the same domain specified in
+	    <varname>domain</varname>: it must be the same domain specified 
+	    by the listener that must be reached; the listener is configured
+	    in <filename>lixad_conf.xml</filename> (see above) and may be
+	    local or remote
+	</para></listitem>
+	<listitem><para>
+	    <varname>address</varname>: it must be the same same address 
+	    specified by the listener that must be reached; the listener is
+	    configured in <filename>lixad_conf.xml</filename> (see above)
+	    and may be local or remote
+	</para></listitem>
+	<listitem><para>
+	    <varname>port</varname>: it must be the same port specified
+	    by the listener that must be reached; the listener is
+	    configured in
 	    <filename>lixad_conf.xml</filename> (see above)
+	    and may be local or remote
 	</para></listitem>
 	<listitem><para>
-	    <varname>address</varname>: the same address specified in
-	    <filename>lixad_conf.xml</filename> (see above)
-	</para></listitem>
-	<listitem><para>
-	    <varname>port</varname>: the same port specified in
-	    <filename>lixad_conf.xml</filename> (see above)
-	</para></listitem>
-	<listitem><para>
-	    <varname>rsrmgr</varname>: every resource manager will be used
-	    by the Application Programs configured to use this client
-	    configuration must be listed here
+	    <varname>rsrmgr</varname>: this section is used to describe 
+	    any resource manager that will be used by the
+	    Application Programs configured below (see profiles)
 	</para></listitem>
 	<listitem><para>
 	    <varname>rsrmgr/name</varname>: a name associated to the 
-	    Resource Manager; it will be used below
+	    Resource Manager; it is a logical name that is referenced by
+	    the profile defined below
 	</para></listitem>
 	<listitem><para>
-	    <varname>switch_file</varname>: name of the file containing the
-	    XA switch structure; the file is produced with the installation
+	    <varname>switch_file</varname>: name of the file that contains 
+	    the XA switch structure; the file is produced by the installation
 	    procedure
 	</para></listitem>
 	<listitem><para>
-	    <varname>xa_open_info</varname>: parameters must be passed to
-	    the Resource Manager with xa_open() function call; the content
+	    <varname>xa_open_info</varname>: it is the string of parameters
+	    that must be passed to the Resource Manager by the xa_open() 
+	    function call; the content
 	    of the string depends on the Resource Manager, see its
-	    documentation. The string can not exceeds 255 characters
+	    documentation. The string can not exceed 255 characters
 	</para></listitem>
 	<listitem><para>
-	    <varname>xa_close_info</varname>: parameters must be passed to
-	    the Resource Manager with xa_close() function call; the content
+	    <varname>xa_close_info</varname>: it is the string of parameters
+	    that must be passed to the Resource Manager by the xa_open() 
+	    function call; the content
 	    of the string depends on the Resource Manager, see its
-	    documentation. The string can not exceeds 255 characters
+	    documentation. The string can not exceed 255 characters
 	</para></listitem>
 	<listitem><para>
-	    <varname>profile</varname>: every transactional profile must be
+	    <varname>profile</varname>: it contains the description of the
+	    LIXA 
+
+
+every transactional profile must be
 	    used by the Application Programs needs to be listed here
 	</para></listitem>
 	<listitem><para>
