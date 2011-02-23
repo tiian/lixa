@@ -29,8 +29,8 @@
     </itemizedlist>
   </para>
   <para>
-    From the following links you can buy and/or download official X/Open 
-    documentation:
+    From the following links you can buy and/or download for free the official
+    X/Open documentation:
     <itemizedlist mark='bullet'>
       <listitem>
 	<para>
@@ -87,13 +87,13 @@
 	  </para>
 	</listitem>
 	<listitem>
-	  <para>system administrators have to install, configure and manage
-	  LIXA project instances
+	  <para>system administrators that have to install, configure and
+	    manage LIXA project instances
 	  </para>
 	</listitem>
 	<listitem>
-	  <para>curious people want to discover the features offered by the
-	    LIXA project
+	  <para>curious people that want to discover the features offered by
+	    the LIXA project
 	  </para>
 	</listitem>
       </itemizedlist>
@@ -102,8 +102,8 @@
   <note><title>Language</title>
     <para>
       Unfortunately English is not my mother tongue. This manual may contain
-      a lot of language mistakes. If you sent me revisioned versions of the
-      Docbook sources (XML), I would promptly accept them.
+      a lot of language mistakes. If you sent me a revisioned versions of the
+      Docbook sources (XML), I would accept it promptly .
     </para>
   </note>
 </preface>

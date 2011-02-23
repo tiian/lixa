@@ -22,7 +22,7 @@ LIXA.fo:	LIXA.xml \
 
 %.html:	%.xml
 	xsltproc -o $@ $(STYLESHEETS_DIR)/xhtml/docbook.xsl $<
-	cp $@ /var/www/lixa
+	cp $@ *.svg *.png /var/www/lixa
 
 %.fo:	%.xml
 	xsltproc -o $@ $(STYLESHEETS_DIR)/fo/docbook.xsl $<

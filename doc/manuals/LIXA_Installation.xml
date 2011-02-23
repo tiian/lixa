@@ -108,7 +108,7 @@
 	</orderedlist>
 	There is not a list of <emphasis>supported</emphasis> third party
 	resource managers, because LIXA is a project and not a product; this
-	is the list of third party resource managers have been tested in
+	is the list of third party resource managers that have been tested in
 	conjuction with LIXA transaction manager:
 	<itemizedlist mark='bullet'>
 	  <listitem><para><productname>
@@ -132,7 +132,7 @@
       </para>
       <note><para>
 	  LIXA client communicates to LIXA server (daemon) throught TCP/IP and
-	  client processes do not access the status files located in
+	  the client processes do not access the status files located in
 	  <filename>/opt/lixa/var</filename>, only the 
 	  <command>lixad</command> has to access the status files.
       </para></note>
@@ -157,7 +157,8 @@
     </para>
     <para>
       Alternatively you can fetch the source code using a subversion client,
-      but you should pay attention many commits on the subversion repository
+      but you should pay attention that many commits on the subversion 
+      repository
       are intermediate works and can give you partial or broken under
       construction features.
     </para>
@@ -165,8 +166,8 @@
   <section>
     <title>Configure, build and install</title>
     <para>
-      LIXA project tries to adhere the GNU <emphasis>de facto</emphasis>
-      standard. Supposing you downloaded package 
+      LIXA project tries to adhere to the GNU <emphasis>de facto</emphasis>
+      standard. Supposing you downloaded the package 
       <filename>lixa-X.Y.Z.tar.gz</filename>, the basic sequence is:
       <screen>
 	tar xvzf lixa-X.Y.Z.tar.gz
@@ -188,7 +189,7 @@
 	At very first install <filename>/tmp</filename> could be a good
 	destination:
 	<screen>
-	  ./configure --prefix=/tmp/lixa
+	./configure --prefix=/tmp/lixa
 	</screen>
       </para>
       <para>
@@ -209,7 +210,7 @@
       <para>
 	You can split code and data with something like this:
 	<screen>
-	  ./configure --prefix=/ --exec-prefix=/usr/local
+	./configure --prefix=/ --exec-prefix=/usr/local
 	</screen>
       </para>
     </simplesect>
@@ -218,29 +219,33 @@
       <para>
 	If any of the pre-requisite library include files are not in the
 	standard search <envar>PATH</envar>, you can export 
-	<envar>CPPFLAGS</envar> before configure process to add your custom
-	path:
+	<envar>CPPFLAGS</envar> before the configure process to add 
+	your custom path:
 	<screen>
-	  export CPPFLAGS=-I/path/to/libuuid
-	  ./configure
-	  make
+	export CPPFLAGS=-I/path/to/libuuid
+	./configure
+	make
 	</screen>
-	to see a list of environment variables can affect the build process
-	use the command <synopsis>./configure --help</synopsis>
+	to see the list of environment variables that can affect the build 
+	process
+	use the command
+	<screen>
+	./configure --help
+	</screen>
       </para>
     </simplesect>
     <section>
       <title>Optional features</title>
       <para>
 	The supplied defaults are generally good enought to start working with
-	LIXA, but if you have to perform some hacking you might be interested
+	LIXA, but if you want to perform some hacking you might be interested
 	in activating/deactivating some optional features.
       </para>
       <simplesect>
 	<title>Tracing</title>
 	<para>
 	  The tracing feature is enabled by default: the binary objects
-	  produced by the build procedure contains a lot of messages can
+	  produced by the build procedure contains a lot of messages that can
 	  be displayed turning on tracing at run time.
 	</para>
 	<para>
@@ -251,7 +256,7 @@
 	<important>
 	  <para>
 	    Disabling tracing seems a good way to increase the performance of
-	    the software, but unfortunately without trace it is quite 
+	    the software, but unfortunately without a trace it is quite 
 	    impossible to debug some issues. Only rock stable software can
 	    be compiled without tracing, and this is not the case of LIXA.
 	  </para>
@@ -260,15 +265,15 @@
 	  To disable tracing, use <option>--disable-trace</option> on
 	  <command>./configure</command> command line:
 	  <screen>
-	    ./configure --disable-trace
+	  ./configure --disable-trace
 	  </screen>
 	</para>
       </simplesect>
       <simplesect>
 	<title>Extra debug code</title>
 	<para>
-	  To enable extra debug code, basically some checks can signal
-	  internal errors in the code use <option>--enable-debug</option> on
+	  To enable extra debug code, that's basically some redundant check
+	  code use <option>--enable-debug</option> on
 	  <command>./configure</command> command line:
 	  <screen>
 	    ./configure --enable-debug
@@ -298,7 +303,7 @@
 	To link an already tested third party resource manager you can use
 	a specific option on <command>./configure</command> command; to
 	link a new resource manager, you have to hack the Makefiles and
-	put all you need in place or you may perform a manual link.
+	put all you need in place or you can perform a manual link.
       </para>
       <section>
 	<title>IBM DB2 Express-C 9.7<footnote><para>
@@ -340,7 +345,7 @@
     <section>
       <title>Summary</title>
       <para>
-	The option illustrated above can be combined to obtain a specific
+	The options illustrated above can be combined to obtain a specific
 	configuration. This is an example of a IBM DB2 + Oracle enabled
 	installation using an alternate installation path:
 	<screen>
