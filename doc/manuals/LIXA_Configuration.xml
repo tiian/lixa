@@ -3,17 +3,87 @@
   <para>
     A LIXA system is the assembling of two components: the client and 
     the server. The figure
-    below shows a typical configuration with three distinct Application
-    Programs and four different Resource Managers.
+    below shows a typical configuration with one Application
+    Programs and two Resource Managers.
   </para>
   <figure xml:id="config1">
-    <title>Typical LIXA topology</title>
+    <title>A typical LIXA topology</title>
     <mediaobject>
       <imageobject>
 	<imagedata fileref="LIXA_Configuration_1.png"/>
       </imageobject>
     </mediaobject>
   </figure>
+  <para>
+    The model shows logical and phisycal blocks:
+    <itemizedlist mark='bullet'>
+      <listitem><para>
+	  "Application Program code" is the code of your own application
+      </para></listitem>
+      <listitem><para>
+	  "librm1" is the code of the library your application must use to
+	  communicate with "RM1" (the first resource manager)
+      </para></listitem>
+      <listitem><para>
+	  "librm2" is the code of the library your application must use to
+	  communicate with "RM2" (the second resource manager)
+      </para></listitem>
+      <listitem><para>
+	  "liblixac" is the code of the library your application must use to
+	  invoke the TX verbs and send instruction to the Transaction Manager
+      </para></listitem>
+      <listitem><para>
+	  "Application Program code" + "librm1" + "librm2" + "liblixac" must
+	  be linked togheter to produce the Application Program; the
+	  Application Program is an executable object
+      </para></listitem>
+      <listitem><para>
+	  "RM1" is the first resource manager; it may be a relational database
+	  (RDBMS)
+      </para></listitem>
+      <listitem><para>
+	  "RM2" is the second resource manager; it may be an object oriented
+	  database (OODBMS)
+      </para></listitem>
+      <listitem><para>
+	  "lixad" is the <emphasis>daemon</emphasis> used by "liblixac" to
+	  store the states of the transactions
+      </para></listitem>
+    </itemizedlist>
+  </para>
+  <para>
+    The model shows how the blocks communicate:
+    <itemizedlist mark='bullet'>
+      <listitem><para>
+	  (A1): is the protocol supplied by the first resource manager; 
+	  SQL/CLI is an example and is supplied by IBM DB2, 
+	  SQL/OCI is another example and is supplied by Oracle Database Server
+      </para></listitem>
+      <listitem><para>
+	  (B1): is the protocol supplied by the second resource manager; every
+	  resource manager has its own protocol and its own API
+      </para></listitem>
+      <listitem><para>
+	  (TX): is the protocol supplied by the LIXA project and is described
+	  in <citation>TXspec</citation>; it's a standard protocol and API
+      </para></listitem>
+      <listitem><para>
+	  (A2): is the internal protocol used by the client of RM1 to 
+	  communicate with RM1 server process(es); it can be a cross memory
+	  or a network protocol and it depends on RM1 configuration
+      </para></listitem>
+      <listitem><para>
+	  (B2): is the internal protocol used by the client of RM2 to 
+	  communicate with RM2 server process(es); it can be a cross memory
+	  or a network protocol and it depends on RM2 configuration
+      </para></listitem>
+      <listitem><para>
+	  (LX): is the internal protocol used by the client of LIXA to 
+	  communicate with LIXA server process (lixad); it is a network 
+	  protocol.
+      </para></listitem>
+    </itemizedlist>
+  </para>
   <section>
     <title>Architectural elements</title>
     <para>
