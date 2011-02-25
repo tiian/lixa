@@ -7,7 +7,7 @@
     Programs and two Resource Managers.
   </para>
   <figure xml:id="config1">
-    <title>A typical LIXA topology</title>
+    <title>Typical LIXA topology</title>
     <mediaobject>
       <imageobject>
 	<imagedata fileref="LIXA_Configuration_1.png"/>
@@ -64,10 +64,6 @@
 	  resource manager has its own protocol and its own API
       </para></listitem>
       <listitem><para>
-	  (TX): is the protocol supplied by the LIXA project and is described
-	  in <citation>TXspec</citation>; it's a standard protocol and API
-      </para></listitem>
-      <listitem><para>
 	  (A2): is the internal protocol used by the client of RM1 to 
 	  communicate with RM1 server process(es); it can be a cross memory
 	  or a network protocol and it depends on RM1 configuration
@@ -78,9 +74,18 @@
 	  or a network protocol and it depends on RM2 configuration
       </para></listitem>
       <listitem><para>
+	  (TX): is the protocol supplied by the LIXA project and is described
+	  in <citation>TXspec</citation>; it's a standard protocol and API
+      </para></listitem>
+      <listitem><para>
+	  (XA): is the standard protocol used by the LIXA project to 
+	  communicateand with the resource managers and is described
+	  in <citation>XAspec</citation>; it's a standard protocol and API
+      </para></listitem>
+      <listitem><para>
 	  (LX): is the internal protocol used by the client of LIXA to 
-	  communicate with LIXA server process (lixad); it is a network 
-	  protocol.
+	  communicate with the LIXA server process (lixad); it is a network 
+	  protocol
       </para></listitem>
     </itemizedlist>
   </para>
@@ -88,7 +93,7 @@
     <title>Architectural elements</title>
     <para>
       The <command>lixad</command> daemon process can be executed on any
-      system: there is no need it is executed on the same system is hosting
+      system: there is no need it is executed on the same system that's hosting
       the Application Programs. The communications between 
       the client and the server (<command>lixad</command>) uses TCP/IP sockets.
     </para>
@@ -102,7 +107,7 @@
     <para>
       The communication between the Application Program and the Resource
       Managers depends on Resource Managers type and configuration: 
-      it may be cross memory based, TCP/IP based, System V IPC, etc...
+      it may be cross memory, TCP/IP, System V IPC, etc...
       The communication between the <command>lixac</command> library and the
       Resource Manager depends on Resource Manager configuration and must be
       of the same used by the Application Program.
@@ -112,6 +117,119 @@
       <command>lixad</command> is ever istantiated by the client: the
       server never calls the clients.
     </para>
+    <section>
+      <title>Deployment models</title>
+      <para>
+	This section explains some different deployment models you can
+	set up leveraging the LIXA project technology.
+      </para>
+      <section>
+	<title>The easiest non trivial model</title>
+	<para>
+	  The easiest non trivial deployment of a distributed transaction
+	  processing system based on the LIXA project is showed below: a single
+	  node hosts the Application Program, the Resource Managers and the
+	  LIXA server.
+	</para>
+	<figure xml:id="config2">
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="LIXA_Configuration_2.png"/>
+	    </imageobject>
+	  </mediaobject>
+	  <title>Easiest non trivial deployment model</title>
+	</figure>
+      </section>
+      <section>
+	<title>The easiest trivial model</title>
+	<para>
+	  The easiest trivial deployment of a distributed transaction
+	  processing system based on the LIXA project is showed below: a single
+	  node hosts the Application Program, the Resource Manager and the
+	  LIXA server. This configuration is obtained from the previous one
+	  after a Resource Manager was removed.
+	</para>
+	<para>
+	  Using only one Resource Manager is supported by the LIXA project
+	  technology, but it's quite useless because you don't need a
+	  transaction manager to perform 
+	  <emphasis>single phase commit</emphasis> against one
+	  Resource Manager. This type of configuration will not be described
+	  more deeply.
+	</para>
+	<figure xml:id="config3">
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="LIXA_Configuration_3.png"/>
+	    </imageobject>
+	  </mediaobject>
+	  <title>Easiest trivial deployment model</title>
+	</figure>
+      </section>
+      <section>
+	<title>A fully distributed model</title>
+	<para>
+	  A fully distributed transaction processing system can be achieved
+	  splitting every component in to a different node.
+	  The picture below shows 4 different nodes:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+		an application server node hosting the Application Program
+	    </para></listitem>
+	    <listitem><para>
+		a transaction manager dedicated node hosting the 
+		LIXA server
+	    </para></listitem>
+	    <listitem><para>
+		two resource manager dedicated nodes hosting the
+		Reosurce Manager
+	    </para></listitem>
+	  </itemizedlist>
+	</para>
+	<figure xml:id="config4">
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="LIXA_Configuration_4.png"/>
+	    </imageobject>
+	  </mediaobject>
+	  <title>Fully distributed deployment model</title>
+	</figure>
+      </section>
+      <section>
+	<title>A more complex distributed model</title>
+	<para>
+	  A more complex distributed transaction processing system 
+	  can be achieved introducing a second application server and a third
+	  Resource Manager; in the picture below the third Resource Manager 
+	  is hosted in the same node of the second Resource Manager.
+	</para>
+	<para>
+	  The two different Application Programs do not need to be hosted in
+	  different application server. They are different 
+	  Application Programs because they use a different mix of the
+	  available Resource Managers.
+	</para>
+	<figure xml:id="config5">
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="LIXA_Configuration_5.png"/>
+	    </imageobject>
+	  </mediaobject>
+	  <title>Complex distributed deployment model</title>
+	</figure>
+	<para>
+	  Further complexity can be reached introducing an Application
+	  Program that uses three (or more) different Resource Managers,
+	  but this document will not go on this path to preserve
+	  understandability
+	  <footnote><para>
+	      The dashed box named "Transaction Manager" was removed to
+	      simplify the picture.
+	  </para></footnote>
+	  .
+	</para>
+      </section>
+    </section>
   </section>
   <section>
     <title>Configuring the server</title>
