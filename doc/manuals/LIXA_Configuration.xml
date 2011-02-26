@@ -4,7 +4,7 @@
     A LIXA system is the assembling of two components: the client and 
     the server. The figure
     below shows a typical configuration with one Application
-    Programs and two Resource Managers.
+    Program and two Resource Managers.
   </para>
   <figure xml:id="config1">
     <title>Typical LIXA topology</title>
@@ -15,7 +15,7 @@
     </mediaobject>
   </figure>
   <para>
-    The model shows logical and phisycal blocks:
+    The model shows logical and "phisycal" blocks:
     <itemizedlist mark='bullet'>
       <listitem><para>
 	  "Application Program code" is the code of your own application
@@ -141,19 +141,20 @@
 	</figure>
       </section>
       <section>
-	<title>The easiest trivial model</title>
+	<title>A trivial model</title>
 	<para>
-	  The easiest trivial deployment of a distributed transaction
+	  A trivial deployment of a distributed transaction
 	  processing system based on the LIXA project is showed below: a single
 	  node hosts the Application Program, the Resource Manager and the
 	  LIXA server. This configuration is obtained from the previous one
-	  after a Resource Manager was removed.
+	  removing a Resource Manager.
 	</para>
 	<para>
 	  Using only one Resource Manager is supported by the LIXA project
 	  technology, but it's quite useless because you don't need a
 	  transaction manager to perform 
-	  <emphasis>single phase commit</emphasis> against one
+	  <emphasis>single phase commit</emphasis> against 
+	  <emphasis>one</emphasis>
 	  Resource Manager. This type of configuration will not be described
 	  more deeply.
 	</para>
@@ -163,25 +164,25 @@
 	      <imagedata fileref="LIXA_Configuration_3.png"/>
 	    </imageobject>
 	  </mediaobject>
-	  <title>Easiest trivial deployment model</title>
+	  <title>Trivial deployment model</title>
 	</figure>
       </section>
       <section>
 	<title>A fully distributed model</title>
 	<para>
 	  A fully distributed transaction processing system can be achieved
-	  splitting every component in to a different node.
+	  hosting every component in a different node.
 	  The picture below shows 4 different nodes:
 	  <itemizedlist mark='bullet'>
 	    <listitem><para>
 		an application server node hosting the Application Program
 	    </para></listitem>
 	    <listitem><para>
-		a transaction manager dedicated node hosting the 
+		a Transaction Manager dedicated node hosting the 
 		LIXA server
 	    </para></listitem>
 	    <listitem><para>
-		two resource manager dedicated nodes hosting the
+		two Resource Manager dedicated nodes hosting the
 		Reosurce Manager
 	    </para></listitem>
 	  </itemizedlist>
@@ -205,9 +206,9 @@
 	</para>
 	<para>
 	  The two different Application Programs do not need to be hosted in
-	  different application server. They are different 
-	  Application Programs because they use a different mix of the
-	  available Resource Managers.
+	  different application servers. They are different 
+	  Application Programs because they use a different mix of
+	  Resource Managers.
 	</para>
 	<figure xml:id="config5">
 	  <mediaobject>
@@ -232,13 +233,72 @@
     </section>
   </section>
   <section>
-    <title>Configuring the server</title>
+    <title>Configuring LIXA components</title>
     <para>
-      The default configuration file is <filename>etc/lixad_conf.xml</filename>
-      and is located at the root installation path (i.e.
-      <filename>/opt/lixa/etc/lixad_conf.xml</filename>). 
-      Below there is a sample configuration file:
-      <screen>
+      The picture below emphasizes the LIXA components must be configured
+      in a simple scenario:
+    </para>
+    <figure xml:id="config6">
+      <title>The LIXA components and the necessary configuration files</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Configuration_6.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      The client component (<command>lixac</command>) is configured using the
+      <filename>etc/lixac_conf.xml</filename> file; the server component
+      (<command>lixad</command>) is configured using the
+      <filename>etc/lixad_conf.xml</filename> file.
+    </para>
+    <para>
+      If a node hosts both the client and the server components, both the
+      files must be configured. If a node hosts only one component, only
+      one configuration file is necessary
+      <footnote><para>
+	  The standard installation procedure installs both the files with
+	  default content; it's your responsability to customize the content
+	  of the files.
+      </para></footnote>.
+    </para>
+    <section>
+      <title>Configuring the server</title>
+      <para>
+	The default configuration file is 
+	<filename>etc/lixad_conf.xml</filename>
+	and is located at the root installation path (i.e.
+	<filename>/opt/lixa/etc/lixad_conf.xml</filename>).
+      </para>
+      <para>
+	The file is composed of three sections:
+	<figure xml:id="config7">
+	  <title>The structure of lixad_conf.xml</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="LIXA_Configuration_7.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	      the <emphasis>server</emphasis> section contains the global
+	      parameters of the server
+	  </para></listitem>
+	  <listitem><para>
+	      the <emphasis>listeners</emphasis> section specifies how many
+	      TCP/IP addresses and ports must be listened to accept incoming
+	      client connections
+	  </para></listitem>
+	  <listitem><para>
+	      the <emphasis>managers</emphasis> section specifies how many
+	      parallel threads must be activated to serve the LIXA clients
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Below there is a sample configuration file:
+	<screen>
 &lt;?xml version="1.0" encoding="UTF-8" ?&gt;
   &lt;server pid_file="/tmp/lixa/var/run.pid"&gt;
   &lt;listeners&gt;
@@ -252,69 +312,108 @@
   &lt;/managers&gt;
 &lt;/server&gt;
       </screen>
-      
-      The tags and the
-      properties of the XML file are described below:
-      <itemizedlist mark='bullet'>
-	<listitem><para>
-	    <varname>pid_file</varname>: it is the file used by the server 
-	    to store the daemon <acronym>PID</acronym>; the server creates
-	    the file at start-up and destroys it at shutdown
-	</para></listitem>
-	<listitem><para>
-	    <varname>listener</varname>: the server can activate one or more
-	    listeners; most of the times one listener is sufficient, but if
-	    you want to use only a subset of the IP addresses defined at
-	    the operating system level, you have do configure a dedicated
-	    listener for every desired address
-	</para></listitem>
-	<listitem><para>
-	    <varname>domain</varname>: the type of socket must be used to
-	    listen for clients. The only allowed type is 
-	    <constant>AF_INET</constant>; this may change in the future
-	</para></listitem>
-	<listitem><para>
-	    <varname>address</varname>: the address must be used to listen for
-	    clients; the special value <constant>0.0.0.0</constant> means
-	    any address
-	</para></listitem>
-	<listitem><para>
-	    <varname>port</varname>: the port must be used to listen for
-	    clients; it must be a free port (use command 
-	    <command>netstat</command> to find out one)
-	</para></listitem>
-	<listitem><para>
-	    <varname>manager</varname>: any configured 
-	    <emphasis>manager</emphasis> is a server worker and has its own
-	    associated thread. The number of managers should be activated 
-	    depends on the workload; if D is the number of indipendent 
-	    hard disk devices and P is the number of processors/cores, the
-	    suggested values are in the range:
-	    <equation><title>Suggested range for the number of managers</title>
-	      <mathphrase>
-		[min(D,P) ; D*P]
-	      </mathphrase>
-	    </equation>
-	</para></listitem>
-	<listitem><para>
-	    <varname>status_file</varname>: the physical path must be used to
-	    create the status files (a couple) for a manager; this generally is
-	    a persistent and reliable storage device like a RAID partition.
-	    The string specified by the tag <varname>status_file</varname>
-	    is used as a prefix: every manager (thread) creates two files
-	    with the same prefix and different suffix.
-	</para></listitem>
-      </itemizedlist>
-    </para>
-  </section>
-  <section>
-    <title>Configuring the client</title>
-    <para>
-      The default configuration file is <filename>etc/lixac_conf.xml</filename>
-      and is located at the root installation path (i.e.
-      <filename>/opt/lixa/etc/lixac_conf.xml</filename>). 
-      Below there is a sample configuration file:
-      <screen>
+	The tags and the
+	properties of the XML file are described below:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	      <varname>pid_file</varname>: it is the file used by the server 
+	      to store the daemon <acronym>PID</acronym>; the server creates
+	      the file at start-up and destroys it at shutdown
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>listener</varname>: the server can activate one or more
+	      listeners; most of the times one listener is sufficient, but if
+	      you want to use only a subset of the IP addresses defined at
+	      the operating system level, you have to configure a dedicated
+	      listener for every desired address
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>domain</varname>: the type of socket must be used to
+	      listen for clients. The only allowed type is 
+	      <constant>AF_INET</constant>; this may change in the future
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>address</varname>: the address that must be used 
+	      to listen for
+	      clients; the special value "<constant>0.0.0.0</constant>" means
+	      <emphasis>any</emphasis> address
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>port</varname>: the port that must be used to listen for
+	      clients; it must be a free port (use command 
+	      <command>netstat</command> to find out one)
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>manager</varname>: any configured 
+	      <emphasis>manager</emphasis> is a server worker and runs as
+	      a dedicated thread. The number of managers that should 
+	      be activated 
+	      depends on the workload; if D is the number of indipendent 
+	      hard disk devices and P is the number of processors/cores, the
+	      suggested values are in the range:
+	      <equation>
+		<title>Suggested range for the number of managers</title>
+		<mathphrase>
+		  [min(D,P) ; D*P]
+		</mathphrase>
+	      </equation>
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>status_file</varname>: the physical path that 
+	      must be used to
+	      create the status files (a couple) for a manager; 
+	      this generally is
+	      a persistent and reliable storage device like a RAID partition.
+	      The string specified by the tag <varname>status_file</varname>
+	      is used as a prefix: every manager (thread) creates two files
+	      with the same prefix and different suffix.
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+    </section>
+    <section>
+      <title>Configuring the client</title>
+      <para>
+	The default configuration file is 
+	<filename>etc/lixac_conf.xml</filename>
+	and is located at the root installation path (i.e.
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename>). 
+      </para>
+      <para>
+	The file is composed of three sections:
+	<figure xml:id="config8">
+	  <title>The structure of lixac_conf.xml</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="LIXA_Configuration_8.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	      the <emphasis>servers</emphasis> section 
+	      contains a list of the available LIXA servers and how they
+	      can be contacted
+	  </para></listitem>
+	  <listitem><para>
+	      the <emphasis>resource managers</emphasis> section
+	      contains a list of the available Resource Managers and how they
+	      can be managed by LIXA using XA standard API and protocol
+	  </para></listitem>
+	  <listitem><para>
+	      the <emphasis>profiles</emphasis> section
+	      contains a set of possibly different profiles: every
+	      Application Program can use only one profile; if you had
+	      different Application Programs with different requirements,
+	      you should create different profiles. Every profile contains
+	      a set of servers and a set of Resource Managers that must be
+	      used to support the Application Program.
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Below there is a sample configuration file:
+	<screen>
 &lt;?xml version="1.0" encoding="UTF-8" ?&gt;
 &lt;client&gt;
   &lt;trnmgrs&gt;
@@ -356,142 +455,142 @@
     &lt;/profile&gt;
   &lt;/profiles&gt;
 &lt;/client&gt;
-      </screen>
-      The tags and the
-      properties of the XML file are described below:
-      <itemizedlist mark='bullet'>
-	<listitem><para>
-	    <varname>trnmgr</varname>: this section is used to describe a
-	    manager (a LIXA server instance) that must be reached by any
-	    client described below
-	</para></listitem>
-	<listitem><para>
-	    <varname>trnmgr/name</varname>: a name associated to the 
-	    manager; it is a logical name that is referenced by the profiles
-	    defined below
-	</para></listitem>
-	<listitem><para>
-	    <varname>domain</varname>: it must be the same domain specified 
-	    by the listener that must be reached; the listener is configured
-	    in <filename>lixad_conf.xml</filename> (see above) and may be
-	    local or remote
-	</para></listitem>
-	<listitem><para>
-	    <varname>address</varname>: it must be the same same address 
-	    specified by the listener that must be reached; the listener is
-	    configured in <filename>lixad_conf.xml</filename> (see above)
-	    and may be local or remote
-	</para></listitem>
-	<listitem><para>
-	    <varname>port</varname>: it must be the same port specified
-	    by the listener that must be reached; the listener is
-	    configured in
-	    <filename>lixad_conf.xml</filename> (see above)
-	    and may be local or remote
-	</para></listitem>
-	<listitem><para>
-	    <varname>rsrmgr</varname>: this section is used to describe 
-	    any resource manager that will be used by the
-	    Application Programs configured below (see profiles)
-	</para></listitem>
-	<listitem><para>
-	    <varname>rsrmgr/name</varname>: a name associated to the 
-	    Resource Manager; it is a logical name that is referenced by
-	    the profile defined below
-	</para></listitem>
-	<listitem><para>
-	    <varname>switch_file</varname>: name of the file that contains 
-	    the XA switch structure; the file is produced by the installation
-	    procedure
-	</para></listitem>
-	<listitem><para>
-	    <varname>xa_open_info</varname>: it is the string of parameters
-	    that must be passed to the Resource Manager by the xa_open() 
-	    function call; the content
-	    of the string depends on the Resource Manager, see its
-	    documentation. The string can not exceed 255 characters
-	</para></listitem>
-	<listitem><para>
-	    <varname>xa_close_info</varname>: it is the string of parameters
-	    that must be passed to the Resource Manager by the xa_open() 
-	    function call; the content
-	    of the string depends on the Resource Manager, see its
-	    documentation. The string can not exceed 255 characters
-	</para></listitem>
-	<listitem><para>
-	    <varname>profile</varname>: it contains the description of the
-	    LIXA 
-
-
-every transactional profile must be
-	    used by the Application Programs needs to be listed here
-	</para></listitem>
-	<listitem><para>
-	    <varname>profile/name</varname>: the name associated to the
-	    transaction profile; this name is used in different places and
-	    it is suggested to avoid special characters, blanks and possibly
-	    mixed case (these hints may help you in troubleshooting)
-	</para></listitem>
-	<listitem><para>
-	    <varname>profile/trnmgr</varname>: manager will be used to store
-	    the transactional information associated to this profile; more
-	    than one manager can be specified but <emphasis>only</emphasis> 
-	    the first one is used with current release software
-	</para></listitem>
-	<listitem><para>
-	    <varname>profile/rsrmgr</varname>: every Resource Manager must be
-	    used by the Application Programs associated to this transactional
-	    profile needs to be listed here. There is no a limit: you can
-	    specify 1, 2, 3, ... resource managers. Avoid useless resource
-	    manager because xa_open() and xa_close() will be performed 
-	    against all the listed resource managers. If you can choose 
-	    between a "dynamic" and a "static" version of the same resource
-	    manager, the "dynamic" one is more efficient	    
-	</para></listitem>
-      </itemizedlist>
-    </para>
-    <section>
-      <title>Client configuration explanation</title>
-      <para>
-	The client configuration file contains three sections:
+	</screen>
+	The tags and the
+	properties of the XML file are described below:
 	<itemizedlist mark='bullet'>
 	  <listitem><para>
-	      <varname>trnmgrs</varname>: the list of the LIXA daemons you are
-	      running inside your network and you will use to manage the
-	      persistent state of the clients will use the configuration
-	      file; many times a single LIXA server is sufficient, but
-	      sometimes you need more (development, test and production
-	      environment might use different LIXA servers)
+	      <varname>trnmgr</varname>: this section is used to describe a
+	      manager (a LIXA server instance) that must be reached by any
+	      client described below
 	  </para></listitem>
 	  <listitem><para>
-	      <varname>rsrmgrs</varname>: the list of the resource managers
-	      necessary to Application Programs execution; there is no limit
-	      to the number of resource managers from a LIXA point of view
+	      <varname>trnmgr/name</varname>: a name associated to the 
+	      manager; it is a logical name that is referenced by the profiles
+	      defined below
 	  </para></listitem>
 	  <listitem><para>
-	      <varname>profiles</varname>: the list of the available
-	      transactional profiles for your Application Programs. This
-	      concept allows you a great configuration flexibility: the same
-	      configuration file can be used for completely different
-	      Application Programs and completely different environment.
-	      As an example, imagine you have 3 distinct applications and
-	      every application uses a different mix of resource managers; then
-	      you manage 3 different environments (development, test and
-	      production): with 9 profiles you can completely model your
-	      transactional needs (APP1DEV, APP2DEV, APP3DEV, APP1TEST,
-	      APP2TEST, APP3TEST, APP1PROD, APP2PROD, APP3PROD).
+	      <varname>domain</varname>: it must be the same domain specified 
+	      by the listener that must be reached; the listener is configured
+	      in <filename>lixad_conf.xml</filename> (see above) and may be
+	      local or remote
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>address</varname>: it must be the same same address 
+	      specified by the listener that must be reached; the listener is
+	      configured in <filename>lixad_conf.xml</filename> (see above)
+	      and may be local or remote
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>port</varname>: it must be the same port specified
+	      by the listener that must be reached; the listener is
+	      configured in
+	      <filename>lixad_conf.xml</filename> (see above)
+	      and may be local or remote
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>rsrmgr</varname>: this section is used to describe 
+	      any resource manager that will be used by the
+	      Application Programs configured below (see profiles)
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>rsrmgr/name</varname>: a name associated to the 
+	      Resource Manager; it is a logical name that is referenced by
+	      the profile defined below
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>switch_file</varname>: name of the file that contains 
+	      the XA switch structure; the file is produced by the installation
+	      procedure
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>xa_open_info</varname>: it is the string of parameters
+	      that must be passed to the Resource Manager by the xa_open() 
+	      function call; the content
+	      of the string depends on the Resource Manager, see its
+	      documentation. The string can not exceed 255 characters
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>xa_close_info</varname>: it is the string of parameters
+	      that must be passed to the Resource Manager by the xa_open() 
+	      function call; the content
+	      of the string depends on the Resource Manager, see its
+	      documentation. The string can not exceed 255 characters
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>profile</varname>: it contains the description of the
+	      LIXA every transactional profile must be
+	      used by the Application Programs needs to be listed here
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>profile/name</varname>: the name associated to the
+	      transaction profile; this name is used in different places and
+	      it is suggested to avoid special characters, blanks and possibly
+	      mixed case (these hints may help you in troubleshooting)
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>profile/trnmgr</varname>: manager will be used to store
+	      the transactional information associated to this profile; more
+	      than one manager can be specified but <emphasis>only</emphasis> 
+	      the first one is used with current release software
+	  </para></listitem>
+	  <listitem><para>
+	      <varname>profile/rsrmgr</varname>: every Resource Manager must be
+	      used by the Application Programs associated to this transactional
+	      profile needs to be listed here. There is no a limit: you can
+	      specify 1, 2, 3, ... resource managers. Avoid useless resource
+	      manager because xa_open() and xa_close() will be performed 
+	      against all the listed resource managers. If you can choose 
+	      between a "dynamic" and a "static" version of the same resource
+	      manager, the "dynamic" one is more efficient	    
 	  </para></listitem>
 	</itemizedlist>
-	The <varname>LIXA_PROFILE</varname> environment variable must be used 
-	to specify the transactional profile associated to the Application 
-	Program.
-	If you do not specify a valid transactional profile, the first profile
-	of the list will be applied.
-	<note><para>
-	    There is not an alternate way to specify the transactional profile:
-	    <function>tx_open</function> does not allow parameters.
-	</para></note>
       </para>
+      <section>
+	<title>Client configuration explanation</title>
+	<para>
+	  The client configuration file contains three sections:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+		<varname>trnmgrs</varname>: the list of the LIXA daemons you are
+		running inside your network and you will use to manage the
+		persistent state of the clients will use the configuration
+		file; many times a single LIXA server is sufficient, but
+		sometimes you need more (development, test and production
+		environment might use different LIXA servers)
+	    </para></listitem>
+	    <listitem><para>
+		<varname>rsrmgrs</varname>: the list of the resource managers
+		necessary to Application Programs execution; there is no limit
+		to the number of resource managers from a LIXA point of view
+	    </para></listitem>
+	    <listitem><para>
+		<varname>profiles</varname>: the list of the available
+		transactional profiles for your Application Programs. This
+		concept allows you a great configuration flexibility: the same
+		configuration file can be used for completely different
+		Application Programs and completely different environment.
+		As an example, imagine you have 3 distinct applications and
+		every application uses a different mix of resource managers; 
+		then
+		you manage 3 different environments (development, test and
+		production): with 9 profiles you can completely model your
+		transactional needs (APP1DEV, APP2DEV, APP3DEV, APP1TEST,
+		APP2TEST, APP3TEST, APP1PROD, APP2PROD, APP3PROD).
+	    </para></listitem>
+	  </itemizedlist>
+	  The <varname>LIXA_PROFILE</varname> environment variable must be used 
+	  to specify the transactional profile associated to the Application 
+	  Program.
+	  If you do not specify a valid transactional profile, the first profile
+	  of the list will be applied.
+	  <note><para>
+	      There is not an alternate way to specify the 
+	      transactional profile:
+	      <function>tx_open</function> does not allow parameters.
+	  </para></note>
+	</para>
+      </section>
     </section>
   </section>
   <section>
