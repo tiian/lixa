@@ -1,3 +1,6 @@
+Change "trnmgr" with "server" and "trnmgrs" with "servers" in lixac_conf.xml 
+files because the TRaNsaction ManaGeR acronym is misleading.
+
 Try this scenario:
 - a multithread application
 - one thread connects to a resource manager like Oracle or DB2 using tx_open()
