@@ -416,10 +416,10 @@
 	<screen>
 &lt;?xml version="1.0" encoding="UTF-8" ?&gt;
 &lt;client&gt;
-  &lt;trnmgrs&gt;
-    &lt;trnmgr name="server1" domain="AF_INET" address="10.23.45.67" port="2345" /&gt;
-    &lt;trnmgr name="server2" domain="AF_INET" address="10.23.46.91" port="3456" /&gt;
-  &lt;/trnmgrs&gt;
+  &lt;sttsrvs&gt;
+    &lt;sttsrv name="server1" domain="AF_INET" address="10.23.45.67" port="2345" /&gt;
+    &lt;sttsrv name="server2" domain="AF_INET" address="10.23.46.91" port="3456" /&gt;
+  &lt;/sttsrvs&gt;
   &lt;rsrmgrs&gt;
     &lt;rsrmgr name="OracleXE_dynreg" switch_file="/tmp/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
     &lt;rsrmgr name="OracleXE_stareg" switch_file="/tmp/lixa/lib/switch_oracle_stareg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
@@ -428,27 +428,27 @@
   &lt;/rsrmgrs&gt;
   &lt;profiles&gt;
     &lt;profile name="GT71"&gt;
-      &lt;trnmgrs&gt;
-        &lt;trnmgr&gt;local_1&lt;/trnmgr&gt;
-      &lt;/trnmgrs&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
       &lt;rsrmgrs&gt;
         &lt;rsrmgr&gt;OracleXE_stareg&lt;/rsrmgr&gt;
         &lt;rsrmgr&gt;IBMDB2_stareg&lt;/rsrmgr&gt;
       &lt;/rsrmgrs&gt;
     &lt;/profile&gt;
     &lt;profile name="VZ67"&gt;
-      &lt;trnmgrs&gt;
-        &lt;trnmgr&gt;local_1&lt;/trnmgr&gt;
-      &lt;/trnmgrs&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
       &lt;rsrmgrs&gt;
         &lt;rsrmgr&gt;OracleXE_dynreg&lt;/rsrmgr&gt;
         &lt;rsrmgr&gt;IBMDB2_dynreg&lt;/rsrmgr&gt;
       &lt;/rsrmgrs&gt;
     &lt;/profile&gt;
     &lt;profile name="AG71"&gt;
-      &lt;trnmgrs&gt;
-        &lt;trnmgr&gt;local_2&lt;/trnmgr&gt;
-      &lt;/trnmgrs&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_2&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
       &lt;rsrmgrs&gt;
         &lt;rsrmgr&gt;IBMDB2_dynreg&lt;/rsrmgr&gt;
       &lt;/rsrmgrs&gt;
@@ -460,12 +460,12 @@
 	properties of the XML file are described below:
 	<itemizedlist mark='bullet'>
 	  <listitem><para>
-	      <varname>trnmgr</varname>: this section is used to describe a
+	      <varname>sttsrv</varname>: this section is used to describe a
 	      manager (a LIXA server instance) that must be reached by any
 	      client described below
 	  </para></listitem>
 	  <listitem><para>
-	      <varname>trnmgr/name</varname>: a name associated to the 
+	      <varname>sttsrv/name</varname>: a name associated to the 
 	      manager; it is a logical name that is referenced by the profiles
 	      defined below
 	  </para></listitem>
@@ -529,7 +529,7 @@
 	      mixed case (these hints may help you in troubleshooting)
 	  </para></listitem>
 	  <listitem><para>
-	      <varname>profile/trnmgr</varname>: manager will be used to store
+	      <varname>profile/sttsrv</varname>: manager will be used to store
 	      the transactional information associated to this profile; more
 	      than one manager can be specified but <emphasis>only</emphasis> 
 	      the first one is used with current release software
@@ -552,7 +552,7 @@
 	  The client configuration file contains three sections:
 	  <itemizedlist mark='bullet'>
 	    <listitem><para>
-		<varname>trnmgrs</varname>: the list of the LIXA daemons you are
+		<varname>sttsrvs</varname>: the list of the LIXA daemons you are
 		running inside your network and you will use to manage the
 		persistent state of the clients will use the configuration
 		file; many times a single LIXA server is sufficient, but

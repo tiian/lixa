@@ -162,9 +162,9 @@ A profile can be associated to only one transaction manager
 A transaction manager can be associated to many profiles
 
 The lixac_conf.xml file must radically change:
-1. <trnmgr> tag must be enriched with an ID property
-2. <trnmgr> tag must not contain a PROFILE property
-3. <trnmgr> tags must be enclosed inside <trnmgrs> tag
+1. <sttsrv> tag must be enriched with an ID property
+2. <sttsrv> tag must not contain a PROFILE property
+3. <sttsrv> tags must be enclosed inside <sttsrvs> tag
 4. <profiles> tag must be created
 5. <profile> tags must be created inside <profiles>
 6. <profile> tag must store switch load file and resource manager stuff

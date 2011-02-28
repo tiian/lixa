@@ -1,5 +1,11 @@
 LOG:
 
+20110228 - 0.5.28 changed "trnmgr" with "sttsrv" and "trnmgrs" with "sttsrvs"
+                  in the lixac_conf.xml file; the previous name was 
+                  misleading because the LIXA server is not a transaction
+                  manager but it only persists the state of the transaction
+                  managers (embedded in liblixac)
+
 20110130 - 0.5.27 fixed bug # 3166737
                   NOTE: the client/server communication protocol was changed:
                   this change breaks backward compatibility 
