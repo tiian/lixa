@@ -131,14 +131,14 @@ extern const xmlChar *LIXA_XML_CONFIG_MANAGER;
 extern const xmlChar *LIXA_XML_CONFIG_MANAGER_STATUS;
 
 /**
- * Label used to specify "trnmgr" tag
+ * Label used to specify "sttsrv" tag
  */
-extern const xmlChar *LIXA_XML_CONFIG_TRNMGR;
+extern const xmlChar *LIXA_XML_CONFIG_STTSRV;
 
 /**
- * Label used to specify "trnmgrs" tag
+ * Label used to specify "sttsrvs" tag
  */
-extern const xmlChar *LIXA_XML_CONFIG_TRNMGRS;
+extern const xmlChar *LIXA_XML_CONFIG_STTSRVS;
 
 /**
  * Label used to specify "rsrmgr" tag
@@ -151,7 +151,7 @@ extern const xmlChar *LIXA_XML_CONFIG_RSRMGR;
 extern const xmlChar *LIXA_XML_CONFIG_RSRMGRS;
 
 /**
- * Label used to specify "profile" property in "trnmgr" tag
+ * Label used to specify "profile" property in "sttsrv" tag
  */
 extern const xmlChar *LIXA_XML_CONFIG_PROFILE_PROPERTY;
 

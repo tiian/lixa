@@ -68,7 +68,7 @@
 int client_connect(client_status_coll_t *csc,
                    client_config_coll_t *ccc)
 {
-    enum Exception { GET_TRNMGR_ERROR
+    enum Exception { GET_STTSRV_ERROR
                      , SOCKET_ERROR
                      , CONNECT_ERROR
                      , CLIENT_STATUS_COLL_GET_CS_ERROR
@@ -76,15 +76,15 @@ int client_connect(client_status_coll_t *csc,
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     int out_socket;
-    struct trnmgr_config_s *tc;
+    struct sttsrv_config_s *tc;
     
     LIXA_TRACE(("client_connect\n"));
     TRY {
         client_status_t *cs;
 
         /* search connection parameters */
-        if (NULL == (tc = client_config_get_trnmgr(ccc)))
-            THROW(GET_TRNMGR_ERROR);
+        if (NULL == (tc = client_config_get_sttsrv(ccc)))
+            THROW(GET_STTSRV_ERROR);
 
         /* create new socket */
         if (LIXA_NULL_FD == (out_socket = socket(tc->domain, SOCK_STREAM, 0)))
@@ -109,7 +109,7 @@ int client_connect(client_status_coll_t *csc,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case GET_TRNMGR_ERROR:
+            case GET_STTSRV_ERROR:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case SOCKET_ERROR:

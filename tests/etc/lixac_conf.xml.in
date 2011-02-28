@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <client>
-  <trnmgrs>
-    <trnmgr name="TestTM" domain="AF_INET" address="127.0.0.1" port="2345" />
-  </trnmgrs>
+  <sttsrvs>
+    <sttsrv name="TestTM" domain="AF_INET" address="127.0.0.1" port="2345" />
+  </sttsrvs>
   <rsrmgrs>
     <rsrmgr name="LIXAmonkey1dynRM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_dynreg.so" xa_open_info="monkey1d.conf" xa_close_info="" />
     <rsrmgr name="LIXAmonkey1dynRM-FM" switch_file="@abs_top_builddir@/src/client/switch/lixa/.libs/switch_lixa_monkeyrm_dynreg.so" xa_open_info="monkey1d.conf" xa_close_info="FREE MEMORY" />
@@ -23,9 +23,9 @@
   </rsrmgrs>
   <profiles>
     <profile name="CASE_PROF_0000">
-      <trnmgrs>
-        <trnmgr>TestTM</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
         <rsrmgr>LIXAmonkey2staRM</rsrmgr>
@@ -33,9 +33,9 @@
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0001">
-      <trnmgrs>
-        <trnmgr>TestTM</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1dynRM</rsrmgr>
         <rsrmgr>LIXAmonkey2dynRM</rsrmgr>
@@ -43,9 +43,9 @@
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0002">
-      <trnmgrs>
-        <trnmgr>TestTM</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
         <rsrmgr>LIXAmonkey2staRM</rsrmgr>
@@ -54,9 +54,9 @@
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0002_FM">
-      <trnmgrs>
-        <trnmgr>TestTM</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
         <rsrmgr>LIXAmonkey2staRM</rsrmgr>
@@ -65,69 +65,69 @@
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0003">
-      <trnmgrs>
-        <trnmgr>TestTM</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
         <rsrmgr>LIXAmonkey1dynRM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0003_FM">
-      <trnmgrs>
-        <trnmgr>TestTM</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
         <rsrmgr>LIXAmonkey1dynRM-FM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0004">
-      <trnmgrs>
-        <trnmgr>TestTM</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
         <rsrmgr>LIXAmonkey2staRM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0005">
-      <trnmgrs>
-        <trnmgr>TestTM</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1dynRM</rsrmgr>
         <rsrmgr>LIXAmonkey2dynRM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0006">
-      <trnmgrs>
-        <trnmgr>TestTM</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1dynRM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0007">
-      <trnmgrs>
-        <trnmgr>TestTM</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0008">
-      <trnmgrs>
-        <trnmgr>TestTM</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAdummy2RM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0009">
-      <trnmgrs>
-        <trnmgr>TestTM</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAdummy1RM</rsrmgr>
       </rsrmgrs>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <client>
-  <trnmgrs>
-    <trnmgr name="local_1" domain="AF_INET" address="127.0.0.1" port="2345" />
-    <trnmgr name="local_2" domain="AF_INET" address="127.0.0.1" port="3456" />
-  </trnmgrs>
+  <sttsrvs>
+    <sttsrv name="local_1" domain="AF_INET" address="127.0.0.1" port="2345" />
+    <sttsrv name="local_2" domain="AF_INET" address="127.0.0.1" port="3456" />
+  </sttsrvs>
   <rsrmgrs>
     <rsrmgr name="OracleXE_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
     <rsrmgr name="OracleXE_stareg" switch_file="@EXPANDED_LIBDIR@/switch_oracle_stareg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
@@ -20,37 +20,37 @@
   </rsrmgrs>
   <profiles>
     <profile name="GT71">
-      <trnmgrs>
-        <trnmgr>local_1</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXArandomRM</rsrmgr>
         <rsrmgr>LIXAdummyRM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="VZ67">
-      <trnmgrs>
-        <trnmgr>local_1</trnmgr>
-        <trnmgr>local_2</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+        <sttsrv>local_2</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>OracleXE_dynreg</rsrmgr>
         <rsrmgr>LIXAdummyRM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="AG71">
-      <trnmgrs>
-        <trnmgr>local_2</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>local_2</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>IBMDB2_dynreg</rsrmgr>
         <rsrmgr>LIXAdummyRM</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="AM74">
-      <trnmgrs>
-        <trnmgr>local_1</trnmgr>
-      </trnmgrs>
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1dynRM</rsrmgr>
         <rsrmgr>LIXAmonkey2dynRM</rsrmgr>
