@@ -391,8 +391,8 @@
 	</figure>
 	<itemizedlist mark='bullet'>
 	  <listitem><para>
-	      the <emphasis>servers</emphasis> section 
-	      contains a list of the available LIXA servers and how they
+	      the <emphasis>state servers</emphasis> section 
+	      contains a list of the available LIXA state servers and how they
 	      can be contacted
 	  </para></listitem>
 	  <listitem><para>
@@ -461,13 +461,13 @@
 	<itemizedlist mark='bullet'>
 	  <listitem><para>
 	      <varname>sttsrv</varname>: this section is used to describe a
-	      manager (a LIXA server instance) that must be reached by any
+	      state server (a LIXA server instance) that must be reached by any
 	      client described below
 	  </para></listitem>
 	  <listitem><para>
 	      <varname>sttsrv/name</varname>: a name associated to the 
-	      manager; it is a logical name that is referenced by the profiles
-	      defined below
+	      state server; it is a logical name that is referenced by 
+	      the profiles defined below
 	  </para></listitem>
 	  <listitem><para>
 	      <varname>domain</varname>: it must be the same domain specified 
@@ -490,7 +490,7 @@
 	  </para></listitem>
 	  <listitem><para>
 	      <varname>rsrmgr</varname>: this section is used to describe 
-	      any resource manager that will be used by the
+	      a resource manager that will be used by the
 	      Application Programs configured below (see profiles)
 	  </para></listitem>
 	  <listitem><para>
@@ -507,15 +507,17 @@
 	      <varname>xa_open_info</varname>: it is the string of parameters
 	      that must be passed to the Resource Manager by the xa_open() 
 	      function call; the content
-	      of the string depends on the Resource Manager, see its
-	      documentation. The string can not exceed 255 characters
+	      of the string depends on the Resource Manager, please refer to
+	      the documentation distributed with the resource manager you
+	      are using. The string can not exceed 255 characters
 	  </para></listitem>
 	  <listitem><para>
 	      <varname>xa_close_info</varname>: it is the string of parameters
 	      that must be passed to the Resource Manager by the xa_open() 
 	      function call; the content
-	      of the string depends on the Resource Manager, see its
-	      documentation. The string can not exceed 255 characters
+	      of the string depends on the Resource Manager, please refer to
+	      the documentation distributed with the resource manager you
+	      are using. The string can not exceed 255 characters
 	  </para></listitem>
 	  <listitem><para>
 	      <varname>profile</varname>: it contains the description of the
@@ -529,13 +531,16 @@
 	      mixed case (these hints may help you in troubleshooting)
 	  </para></listitem>
 	  <listitem><para>
-	      <varname>profile/sttsrv</varname>: manager will be used to store
+	      <varname>profile/sttsrv</varname>: the state server that
+	      will be used to store
 	      the transactional information associated to this profile; more
-	      than one manager can be specified but <emphasis>only</emphasis> 
-	      the first one is used with current release software
+	      than one state servers can be specified but 
+	      <emphasis>only</emphasis> 
+	      the first one is used with the current release software
 	  </para></listitem>
 	  <listitem><para>
-	      <varname>profile/rsrmgr</varname>: every Resource Manager must be
+	      <varname>profile/rsrmgr</varname>: every Resource Manager that
+	      must be
 	      used by the Application Programs associated to this transactional
 	      profile needs to be listed here. There is no a limit: you can
 	      specify 1, 2, 3, ... resource managers. Avoid useless resource
@@ -552,17 +557,20 @@
 	  The client configuration file contains three sections:
 	  <itemizedlist mark='bullet'>
 	    <listitem><para>
-		<varname>sttsrvs</varname>: the list of the LIXA daemons you are
+		<varname>sttsrvs</varname>: is the list of the LIXA daemons 
+		you are
 		running inside your network and you will use to manage the
-		persistent state of the clients will use the configuration
-		file; many times a single LIXA server is sufficient, but
+		persistent state of the clients that are using the configuration
+		file; many times a single LIXA state server is sufficient, but
 		sometimes you need more (development, test and production
 		environment might use different LIXA servers)
 	    </para></listitem>
 	    <listitem><para>
-		<varname>rsrmgrs</varname>: the list of the resource managers
-		necessary to Application Programs execution; there is no limit
-		to the number of resource managers from a LIXA point of view
+		<varname>rsrmgrs</varname>: the list of the Resource Managers
+		necessary execute the Application Programs; there is no limit
+		to the number of resource managers you can specify from a LIXA
+		point of view, but you should avoid to list useless 
+		Resource Managers to obtain the best performance
 	    </para></listitem>
 	    <listitem><para>
 		<varname>profiles</varname>: the list of the available
@@ -579,6 +587,48 @@
 		APP2TEST, APP3TEST, APP1PROD, APP2PROD, APP3PROD).
 	    </para></listitem>
 	  </itemizedlist>
+	</para>
+	<para>
+	  The picture below models an environment that's using the sample
+	  <filename>etc/lixac_conf.xml</filename>
+	  showed above:
+	  <figure xml:id="config9">
+	    <title>A "real" environment</title>
+	    <mediaobject>
+	      <imageobject>
+		<imagedata fileref="LIXA_Configuration_9.png"/>
+	      </imageobject>
+	    </mediaobject>
+	  </figure>
+	  The scenario is composed of three distinct applications:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+		GT71: it's an application that uses both an Oracle and an
+		IBM DB2 DBMS; most of the transactions need to perform
+		distributed transaction processing and the profile specifies
+		the static registration versions of the switch files.
+	    </para></listitem>
+	    <listitem><para>
+		AG71: it's an application that uses only an
+		IBM DB2 DBMS; only few transactions need to perform
+		distributed transaction processing and the profile specifies
+		the dynamic registration versions of the switch files. This
+		application does not need an XA Transaction Manager because
+		it uses only one Resource Manager, but the development team
+		decided to use LIXA because it will use a second Resource
+		Manager in the next few months.
+	    </para></listitem>
+	    <listitem><para>
+		VZ67: it's an application that uses both an Oracle and an
+		IBM DB2 DBMS; only few transactions need to perform
+		distributed transaction processing and the profile specifies
+		the dynamic registration versions of the switch files.
+	    </para></listitem>
+	  </itemizedlist>
+	  The scenario uses two distinct LIXA state servers: this is an
+	  unusual situation but it's feasible.
+	</para>
+	<para>
 	  The <varname>LIXA_PROFILE</varname> environment variable must be used 
 	  to specify the transactional profile associated to the Application 
 	  Program.
@@ -589,6 +639,20 @@
 	      transactional profile:
 	      <function>tx_open</function> does not allow parameters.
 	  </para></note>
+	  With reference to scenario showed above, Application Program GT71
+	  must export <varname>LIXA_PROFILE</varname> before execution; if
+	  you are using <command>bash</command> shell you must specifiy
+	  something like this
+	  <screen>
+export LIXA_PROFILE=GT71
+	  </screen>
+	  before application execution. The same applies to Application Program
+	  AG71 and VZ67:
+	  <screen>
+export LIXA_PROFILE=AG71
+[...]
+export LIXA_PROFILE=VZ67
+	  </screen>
 	</para>
       </section>
     </section>
@@ -596,8 +660,9 @@
   <section>
     <title>Environment variables</title>
     <para>
-      Some environment variables are available to tailor the LIXA configuration
-      to your needs.
+      You can use some environment variables to tailor the LIXA configuration
+      to your needs. Some environment variables applies only to one component,
+      others apply to both client and server LIXA components.
 
       LIXA_PROFILE LIXA_CONFIG_FILE LIXA_JOB
       LIXA_CRASH_POINT LIXA_CRASH_COUNT
