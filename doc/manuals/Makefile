@@ -11,6 +11,7 @@ LIXA.html:	LIXA.xml \
 		LIXA_Introduction.xml \
 		LIXA_Installation.xml \
 		LIXA_Configuration.xml \
+		LIXA_In_Depth.xml \
 		LIXA_Bibliography.xml
 
 LIXA.fo:	LIXA.xml \

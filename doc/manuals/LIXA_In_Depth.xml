@@ -1,0 +1,13 @@
+<chapter>
+  <title>In Depth</title>
+  <para>
+    This chapter explains some internal details you can be interested in
+    when you are dealing with complex environments.
+  </para>
+  <section>
+    <title>Automatic and manual recovery</title>
+  </section>
+  <section xml:id="Workload_balanced_environments">
+    <title>Workload balanced environments</title>
+  </section>
+</chapter>
