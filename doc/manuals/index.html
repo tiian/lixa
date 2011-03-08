@@ -1,0 +1,1090 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>LIXA</title><meta name="generator" content="DocBook XSL Stylesheets V1.73.2" /></head><body><div class="book" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id3359094"></a>LIXA</h1></div><div><h2 class="subtitle">
+    A libre, free, open source implementation of the XA and the TX 
+    specifications
+  </h2></div><div><div class="author"><h3 class="author"><span class="firstname">Christian</span> <span class="surname">Ferrari</span></h3></div></div><div><p class="copyright">Copyright © 2011 Christian Ferrari</p></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="preface"><a href="#id3359275">Preface</a></span></dt><dt><span class="chapter"><a href="#id3359587">1. Introduction</a></span></dt><dd><dl><dt><span class="section"><a href="#id3359594">Why should I use LIXA project?</a></span></dt><dt><span class="section"><a href="#id3359710">Transaction Manager and Transaction Monitor</a></span></dt><dt><span class="section"><a href="#id3359837">LIXA Architecture</a></span></dt><dt><span class="section"><a href="#id3359872">Project, Projuct, Product</a></span></dt><dt><span class="section"><a href="#id3359873">LIXA and X/OPEN CAE specifications</a></span></dt></dl></dd><dt><span class="chapter"><a href="#id3360276">2. Installation</a></span></dt><dd><dl><dt><span class="section"><a href="#id3360289">System requirements</a></span></dt><dd><dl><dt><span class="section"><a href="#id3360336">Pre-requisites</a></span></dt><dt><span class="section"><a href="#id3360486">Co-requisites</a></span></dt><dt><span class="section"><a href="#id3360576">Authorization</a></span></dt></dl></dd><dt><span class="section"><a href="#id3360609">Software download</a></span></dt><dt><span class="section"><a href="#id3360656">Configure, build and install</a></span></dt><dd><dl><dt><span class="section"><a href="#id3360774">Optional features</a></span></dt><dt><span class="section"><a href="#id3360889">Linking third party resource managers</a></span></dt><dt><span class="section"><a href="#id3360975">Summary</a></span></dt></dl></dd><dt><span class="section"><a href="#id3360996">Checking</a></span></dt></dl></dd><dt><span class="chapter"><a href="#id3361032">3. Configuration</a></span></dt><dd><dl><dt><span class="section"><a href="#id3361205">Architectural elements</a></span></dt><dd><dl><dt><span class="section"><a href="#id3361276">Deployment models</a></span></dt></dl></dd><dt><span class="section"><a href="#id3361505">Configuring LIXA components</a></span></dt><dd><dl><dt><span class="section"><a href="#id3361573">Configuring the server</a></span></dt><dt><span class="section"><a href="#id3361804">Configuring the client</a></span></dt></dl></dd><dt><span class="section"><a href="#id3362307">Environment variables</a></span></dt><dd><dl><dt><span class="section"><a href="#id3362322">LIXA_CONFIG_FILE</a></span></dt><dt><span class="section"><a href="#id3362359">LIXA_CRASH_COUNT</a></span></dt><dt><span class="section"><a href="#id3362380">LIXA_CRASH_POINT</a></span></dt><dt><span class="section"><a href="#id3362403">LIXA_JOB</a></span></dt><dt><span class="section"><a href="#id3362431">LIXA_PROFILE</a></span></dt><dt><span class="section"><a href="#id3362464">LIXA_TRACE_MASK</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#id3362524">4. In Depth</a></span></dt><dd><dl><dt><span class="section"><a href="#id3362536">Automatic and manual recovery</a></span></dt><dt><span class="section"><a href="#Workload_balanced_environments">Workload balanced environments</a></span></dt></dl></dd><dt><span class="bibliography"><a href="#id3362558">Bibliography</a></span></dt></dl></div><div class="list-of-figures"><p><b>List of Figures</b></p><dl><dt>3.1. <a href="#config1">Typical LIXA topology</a></dt><dt>3.2. <a href="#config2">Easiest non trivial deployment model</a></dt><dt>3.3. <a href="#config3">Trivial deployment model</a></dt><dt>3.4. <a href="#config4">Fully distributed deployment model</a></dt><dt>3.5. <a href="#config5">Complex distributed deployment model</a></dt><dt>3.6. <a href="#config6">The LIXA components and the necessary configuration files</a></dt><dt>3.7. <a href="#config7">The structure of lixad_conf.xml</a></dt><dt>3.8. <a href="#config8">The structure of lixac_conf.xml</a></dt><dt>3.9. <a href="#config9">A "real" environment</a></dt></dl></div><div class="list-of-equations"><p><b>List of Equations</b></p><dl><dt>3.1. <a href="#id3361766">Suggested range for the number of managers</a></dt></dl></div><div class="preface" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="id3359275"></a>Preface</h2></div></div></div><p>
+    LIXA is acronym of LIbre XA: it's a free, libre, open source
+    implementation of two X/Open specifications: "Distributed Transaction
+    Processing: The TX (Transaction Demarcation) Specification" 
+    [<a class="citation" href="#id3362603"><span class="citation">TXspec</span></a>]
+    and "Distributed Transaction Processing: The XA Specification"
+    [<a class="citation" href="#id3362638"><span class="citation">XAspec</span></a>].
+  </p><p>
+    The main goals of the LIXA project are:
+    </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>implementing an XA compliant Transaction Manager</p></li><li style="list-style-type: disc"><p>supplying a TX compliant Application Programming Interface
+	  (<acronym class="acronym">API</acronym>)
+	</p></li><li style="list-style-type: disc"><p><span class="emphasis"><em>to be free</em></span></p></li><li style="list-style-type: disc"><p>to be compliant as much as possible with X/Open CAE 
+	  specifications</p></li></ul></div><p>
+  </p><p>
+    From the following links you can buy and/or download for free the official
+    X/Open documentation:
+    </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>
+	  [<a class="citation" href="#id3362569"><span class="citation">RefModel</span></a>]
+	  <a class="ulink" href="http://www.opengroup.org/pubs/catalog/g504.htm" target="_top">
+	    <em class="citetitle">
+	      Distributed Transaction Processing: Reference Model, Version 3
+	    </em>
+	  </a>
+	</p></li><li style="list-style-type: disc"><p>
+	  [<a class="citation" href="#id3362603"><span class="citation">TXspec</span></a>]
+	  <a class="ulink" href="http://www.opengroup.org/pubs/catalog/c504.htm" target="_top">
+	    <em class="citetitle">
+	      Distributed Transaction Processing: The TX (Transaction 
+	      Demarcation) Specification
+	    </em>
+	  </a>
+	</p></li><li style="list-style-type: disc"><p>
+	  [<a class="citation" href="#id3362638"><span class="citation">XAspec</span></a>]
+	  <a class="ulink" href="http://www.opengroup.org/pubs/catalog/c193.htm" target="_top">
+	    <em class="citetitle">
+	      Distributed Transaction Processing: The XA Specification
+	    </em>
+	  </a>
+	</p></li><li style="list-style-type: disc"><p>
+	  [<a class="citation" href="#id3362673"><span class="citation">XA+spec</span></a>]
+	  <a class="ulink" href="http://www.opengroup.org/pubs/catalog/s423.htm" target="_top">
+	    <em class="citetitle">
+	      Distributed Transaction Processing: The XA+ Specification
+	      Version 2
+	    </em>
+	  </a>
+	</p></li></ul></div><p>
+    LIXA documentation tries to avoid duplication with the content of the
+    above books.
+  </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Intended audience</h3><p>
+      This manual is maintained in the hope it can help:
+      </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>developers who want to use LIXA project to develop applications
+	  </p></li><li style="list-style-type: disc"><p>system administrators that have to install, configure and
+	    manage LIXA project instances
+	  </p></li><li style="list-style-type: disc"><p>curious people that want to discover the features offered by
+	    the LIXA project
+	  </p></li></ul></div><p>
+    </p></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Language</h3><p>
+      Unfortunately English is not my mother tongue. This manual may contain
+      a lot of language mistakes. If you sent me a revisioned versions of the
+      Docbook sources (XML), I would accept it promptly .
+    </p></div></div><div class="chapter" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="id3359587"></a>Chapter 1. Introduction</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#id3359594">Why should I use LIXA project?</a></span></dt><dt><span class="section"><a href="#id3359710">Transaction Manager and Transaction Monitor</a></span></dt><dt><span class="section"><a href="#id3359837">LIXA Architecture</a></span></dt><dt><span class="section"><a href="#id3359872">Project, Projuct, Product</a></span></dt><dt><span class="section"><a href="#id3359873">LIXA and X/OPEN CAE specifications</a></span></dt></dl></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3359594"></a>Why should I use LIXA project?</h2></div></div></div><p>
+      LIXA project allows you to develop an Application Program that performs
+      two phase commit transactions against two ore more Resource Managers.
+      Two phase commit is a transactional protocol designed to 
+      “<span class="quote">guarantee</span>” <acronym class="acronym">ACID</acronym> (Atomicity, Consistency,
+      Isolation, Durability) transactionality.
+      XA specification is not the only two phase commit protocol implementation
+      but it is probably the best known and widespread. For detailed
+      explanation please refer to [<a class="citation" href="#id3362569"><span class="citation">RefModel</span></a>].
+    </p></div><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>
+      The reference model ([<a class="citation" href="#id3362569"><span class="citation">RefModel</span></a>]) technical guide
+      available on the <span class="trademark">Open Group</span>™ web site is more
+      recent than the XA specification ([<a class="citation" href="#id3362638"><span class="citation">XAspec</span></a>]); 
+      after XA, the X/Open Company developed the XA+ specification and the 
+      reference model was improved with the concepts necessary for XA+. 
+      LIXA project does <span class="emphasis"><em>not</em></span> implement
+      the XA+ specification, but only XA and the following concepts explained 
+      in [<a class="citation" href="#id3362569"><span class="citation">RefModel</span></a>] does not apply to the LIXA project:
+      </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>3.1: Superior Node</p></li><li style="list-style-type: disc"><p>3.1: Subordinate Node</p></li><li style="list-style-type: disc"><p>3.1: Communication Resource Manager (<acronym class="acronym">CRM</acronym>)</p></li><li style="list-style-type: disc"><p>3.5: Distributed Communication Facilities</p></li><li style="list-style-type: disc"><p>3.6: Activity between Functional Components Involving Two or More APs</p></li><li style="list-style-type: disc"><p>3.7: CRM Communication Paradigms with APs</p></li><li style="list-style-type: disc"><p>3.8: High-level TP Language</p></li></ul></div><p>
+      XA specification was designed to implement the two phase commit protocol
+      in the case there is only one Application Program running inside a
+      Transaction Monitor and using a Transaction Manager to coordinate any
+      number of Resource Managers. XA+ specification was designed to
+      implement the two phase commit protocol in the case there are two or
+      more Application Programs running inside distinct Transaction Monitors
+      and using distinct Transaction Managers to coordinate any number of
+      Resource Managers.
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3359710"></a>Transaction Manager and Transaction Monitor</h2></div></div></div><p>
+      As explained in Appendix A of [<a class="citation" href="#id3362569"><span class="citation">RefModel</span></a>] a 
+      Transaction Manager can be though as a subset of a Transaction Monitor.
+      Most commercial products tend to merge the features
+      in a single bundle; this is good if you need a Transaction Monitor,
+      this may be bad if you only need a Transaction Manager.
+    </p><p>
+      IBM TXSeries<sup>[<a id="id3359732" href="#ftn.id3359732" class="footnote">1</a>]</sup> is a Transaction Monitor with an
+      integrated Transaction Manager.
+      Oracle (BEA) Tuxedo<sup>[<a id="id3359740" href="#ftn.id3359740" class="footnote">2</a>]</sup> is a Transaction Monitor with an
+      integrated Transaction Manager.
+      JBOSS<sup>[<a id="id3359731" href="#ftn.id3359731" class="footnote">3</a>]</sup> is a <acronym class="acronym">JEE</acronym>
+      (Java Enterprise Edition) application server; it is a Transaction
+      Monitor with an integrated Transaction Manager for bytecode based
+      applications.
+    </p><p>
+      <a class="ulink" href="http://www.springsource.com/" target="_top">
+	<em class="citetitle">Spring JTA Transaction Manager</em>
+      </a>,
+      <a class="ulink" href="http://jotm.objectweb.org/index.html" target="_top">
+	<em class="citetitle">JOTM (Java Open Transaction Manager)</em>
+      </a>
+      and
+      <a class="ulink" href="http://www.bitronix.be/" target="_top">
+	<em class="citetitle">BTM (Bitronix JTA Transaction Manager)</em>
+      </a> 
+      are Transaction Managers, but they are not Transaction Monitors and they
+      can be used in conjunction with a
+      <acronym class="acronym">JVM</acronym> (Java Virtual Machine) and 
+      <span class="emphasis"><em>possibly</em></span> any
+      Transaction Monitor. Unfortunately they are Java based technologies and 
+      not native ones; in the Java arena there are a few stand-alone 
+      Transaction
+      Manager, while in the C language arena it is not easy to find out one.
+    </p><p>
+      LIXA project implements a stand-alone Transaction Manager that your 
+      Application Program can use in many different ways:
+      </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>from a C application launched from shell</p></li><li style="list-style-type: disc"><p>from a C application launched via CGI from a web server</p></li><li style="list-style-type: disc"><p>from a scripting language application<sup>[<a id="id3359828" href="#ftn.id3359828" class="footnote">4</a>]</sup>.</p></li></ul></div><p>
+      With the aid of the LIXA Transaction Manager potentially any web server 
+      can be converted in an Application Server with two phase commit support.
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3359837"></a>LIXA Architecture</h2></div></div></div><p>
+      From an architectural point of view, the LIXA project adopts an original
+      approach: an Application Program links the LIXA client library and
+      embeds the Transaction Manager logic. Every Application Program instance
+      runs its own Transaction Manager instance and every Transaction
+      Manager instance uses the LIXA server daemon to save and retrieve the
+      state of the managed transactions.
+      LIXA project was designed to allow massive parallelism and embedding at
+      the same time: the parallelism is necessary to support high volume
+      workloads while the embeddable property is necessary to avoid conflicts
+      with the process and thread management feature of any Transaction 
+      Monitors.
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3359872"></a>Project, Projuct, Product</h2></div></div></div><p>
+      LIXA is a <span class="emphasis"><em>project</em></span>: a software artifact you can pick
+      up to try, use, modify and distribute according to GPL license terms. 
+      The project is hosted on 
+      <a class="ulink" href="http://sourceforge.net/projects/lixa/" target="_top">
+	<em class="citetitle">SourceForge</em>
+      </a>
+      collaborative portal and you can use the portal
+      to interact with the author and other users.
+      LIXA is not supported because it is not a product: you can use it AS IS
+      without any guarantee.
+    </p><p>
+      A projuct is a software artifact that initially was a project financed 
+      by a
+      customer. A second customer was interested in the same software
+      artifact, it was selled again. When the third customer knocked the door,
+      the team that developed the project started a new business with a new
+      <span class="emphasis"><em>product</em></span>. But it should be called 
+      <span class="emphasis"><em>projuct</em></span> 
+      because it was designed and modeled on the needs of the first customer.
+    </p><p>
+      In my honest opinion a <span class="emphasis"><em>product</em></span> is a software 
+      artifact with some characteristics:
+      </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>it is produced by a software factory</p></li><li style="list-style-type: disc"><p>it is sold by a commercial network</p></li><li style="list-style-type: disc"><p>it does have a team of specialists you can 
+	    contact to have support</p></li><li style="list-style-type: disc"><p>it does have a team of specialists that can visit and 
+	    help you with installation, configuration, problem determination, 
+	    etc...</p></li><li style="list-style-type: disc"><p>it is fully documented</p></li><li style="list-style-type: disc"><p>it is certified to run properly on some documented 
+	    hardware and software platforms</p></li><li style="list-style-type: disc"><p>it has a certified compatibility matrix the customer
+	    can use to find out a valid mix of distinct software components
+	    (i.e. different Resource Managers, for an XA Transaction 
+	    Manager)</p></li><li style="list-style-type: disc"><p>it can be installed, updated and removed from a system
+	    using the standard tool of the platform (i.e. dpkg, rpm, pkg,
+	    etc....)</p></li><li style="list-style-type: disc"><p>it can be upgraded to a successive version without
+	    side effects for the product and/or the hosting system
+	</p></li></ul></div><p>
+      </p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Important</h3><p>LIXA project is not a product.</p></div><p>
+    </p><p>
+      If you were running a business that is interested in developing a 
+      product based 
+      on the technology implemented by the LIXA project you should
+      contact the author through       
+      <a class="ulink" href="http://sourceforge.net/projects/lixa/" target="_top">
+	<em class="citetitle">SourceForge</em>
+      </a>
+      collaborative portal.
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3359873"></a>LIXA and X/OPEN CAE specifications</h2></div></div></div><p>
+      The LIXA project tries to be as compliant as possible with the X/Open CAE
+      specifications cited in bibliography. Below there are the not implemented
+      and/or not implementable features.
+    </p><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3360036"></a>The commit_return Characteristic</h3></div></div></div><p>
+	As explained in [<a class="citation" href="#id3362603"><span class="citation">TXspec</span></a>] (3.4, 3.8.1) two values
+	are available:
+	</p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p><code class="constant">TX_COMMIT_COMPLETED
+	    </code></p></li><li style="list-style-type: disc"><p><code class="constant">TX_COMMIT_DECISION_LOGGED
+	    </code></p></li></ul></div><p>
+	LIXA TX API implementation supports only
+	<code class="constant">TX_COMMIT_COMPLETED</code>
+	this behavior is allowed by the specification.
+      </p></div><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3360076"></a>The transaction state element</h3></div></div></div><p>
+	As explained in [<a class="citation" href="#id3362603"><span class="citation">TXspec</span></a>] (4.2, page 16)
+	<code class="function">tx_info()</code> can return three values:
+	</p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p><code class="constant">TX_ACTIVE
+	    </code></p></li><li style="list-style-type: disc"><p><code class="constant">TX_TIMEOUT_ROLLBACK_ONLY
+	    </code></p></li><li style="list-style-type: disc"><p><code class="constant">TX_ROLLBACK_ONLY
+	    </code></p></li></ul></div><p>
+      </p>
+      LIXA <code class="function">tx_info()</code> does not return
+      <code class="constant">TX_ROLLBACK_ONLY</code>. This does not hurt the
+      X/Open CAE specification.
+    </div><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3360126"></a>XA -&gt; TX return code mappings</h3></div></div></div><p>
+	In [<a class="citation" href="#id3362603"><span class="citation">TXspec</span></a>] (Appendix B.4, page 64) it is suggested
+	to return the value <code class="constant">TX_ERROR</code> when the Resource
+	Manager returns <code class="constant">XA_RETRY</code>; this is explained in
+	“<span class="quote">note 1</span>”. 
+      </p><p>
+	The LIXA implementation of 
+	For <code class="function">tx_commit()</code> and
+	<code class="function">tx_rollback()</code> returns 
+	<code class="constant">TX_NO_BEGIN</code> instead of 
+	<code class="constant">TX_ERROR</code> because it seems a more useful 
+	information for the Application Program: the transaction has been
+	successfully committed/rolled back, but a new transaction can not be
+	started
+	<sup>[<a id="id3360175" href="#ftn.id3360175" class="footnote">5</a>]</sup>.
+      </p></div><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3360189"></a><code class="function">xa_rollback()</code> and 
+	<code class="constant">XA_RETRY</code> return code</h3></div></div></div><p>
+	In [<a class="citation" href="#id3362603"><span class="citation">TXspec</span></a>] (Appendix B.5, page 69) it is 
+	explained <code class="constant">XA_RETRY</code> is a valid return code for
+	function <code class="function">xa_rollback()</code>. Unfortunately
+	[<a class="citation" href="#id3362638"><span class="citation">XAspec</span></a>] does not agree with this point of view: the
+	<code class="constant">XA_RETRY</code> is not a valid return code for 
+	function <code class="function">xa_rollback()</code>. It may be an error in
+	[<a class="citation" href="#id3362603"><span class="citation">TXspec</span></a>]: the same row could be copied from the 
+	previous table (page 68).
+      </p><p>
+	[<a class="citation" href="#id3362673"><span class="citation">XA+spec</span></a>] does not list 
+	<code class="constant">XA_RETRY</code> as a valid return code for 
+	function <code class="function">xa_rollback()</code>; it lists
+	<code class="constant">XA_RETRY_COMMFAIL</code> but it does not apply to LIXA
+	implementation because it is related to the 
+	<span class="emphasis"><em>Communication Resource Manager</em></span> concept that is
+	not supported by LIXA implementation.
+      </p><p>
+	The LIXA implementation sticks to [<a class="citation" href="#id3362638"><span class="citation">XAspec</span></a>]: if a
+	resource manager returned <code class="constant">XA_RETRY</code> it would be
+	considered a bug inside the resource manager.
+      </p></div></div><div class="footnotes"><br /><hr width="100" align="left" /><div class="footnote"><p><sup>[<a id="ftn.id3359732" href="#id3359732" class="para">1</a>] </sup>TXSeries is a registered trademark of 
+	  IBM corporation</p></div><div class="footnote"><p><sup>[<a id="ftn.id3359740" href="#id3359740" class="para">2</a>] </sup>Tuxedo is a registered trademark of
+	  Oracle corporation</p></div><div class="footnote"><p><sup>[<a id="ftn.id3359731" href="#id3359731" class="para">3</a>] </sup>JBOSS is a registered trademark of Red Hat
+	  corporation</p></div><div class="footnote"><p><sup>[<a id="ftn.id3359828" href="#id3359828" class="para">4</a>] </sup>You must wrap the TX C API to be able to use it from Perl, PHP, Python, Ruby...</p></div><div class="footnote"><p><sup>[<a id="ftn.id3360175" href="#id3360175" class="para">5</a>] </sup>The X/Open CAE specification document
+	    “<span class="quote">suggests</span>” the mapping and it seems there is some
+	    flesibility in the suggestions. From a LIXA perspective all this
+	    stuff is academic because <code class="constant">TMNOWAIT</code> is not
+	    used by LIXA implementation.</p></div></div></div><div class="chapter" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="id3360276"></a>Chapter 2. Installation</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#id3360289">System requirements</a></span></dt><dd><dl><dt><span class="section"><a href="#id3360336">Pre-requisites</a></span></dt><dt><span class="section"><a href="#id3360486">Co-requisites</a></span></dt><dt><span class="section"><a href="#id3360576">Authorization</a></span></dt></dl></dd><dt><span class="section"><a href="#id3360609">Software download</a></span></dt><dt><span class="section"><a href="#id3360656">Configure, build and install</a></span></dt><dd><dl><dt><span class="section"><a href="#id3360774">Optional features</a></span></dt><dt><span class="section"><a href="#id3360889">Linking third party resource managers</a></span></dt><dt><span class="section"><a href="#id3360975">Summary</a></span></dt></dl></dd><dt><span class="section"><a href="#id3360996">Checking</a></span></dt></dl></div><p>
+    This chapter explains how to download, install and verify the software
+    released by LIXA project.
+  </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3360289"></a>System requirements</h2></div></div></div><p>
+      LIXA project is developed on an x86 based 
+      <a class="ulink" href="http://www.ubuntu.com/" target="_top">
+	<em class="citetitle">Ubuntu 8.04 system</em>
+      </a>; it
+      compiles and runs on both <span class="emphasis"><em>server</em></span> and
+      <span class="emphasis"><em>desktop</em></span> flavors. Installation on a different 
+      GNU/Linux
+      distribution should be quite straightforward; installation on a different
+      <span class="trademark">UNIX</span>™ like system would probably need some work.
+    </p><p>
+      If you successfully installed LIXA on a different system, you might
+      publish your experience on the public forum hosted on SourceForge.net 
+      and share your results with other users. 
+    </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3360336"></a>Pre-requisites</h3></div></div></div><p>
+	To compile LIXA software the GNU tools are needed: gcc, gmake, libtool.
+	Autoconf and automake are used, but should not be necessary if you want
+	to install the original tarball.
+      </p><p>
+	Some <span class="emphasis"><em>libraries (run time and development stuff)</em></span> 
+	are necessary too:
+	</p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p><span class="application">libdl</span></p></li><li style="list-style-type: disc"><p><span class="application">libglib</span></p></li><li style="list-style-type: disc"><p><span class="application">libgmodule</span></p></li><li style="list-style-type: disc"><p><span class="application">libgthread</span></p></li><li style="list-style-type: disc"><p><span class="application">libm</span></p></li><li style="list-style-type: disc"><p><span class="application">libpthread</span></p></li><li style="list-style-type: disc"><p><span class="application">libuuid</span></p></li><li style="list-style-type: disc"><p><span class="application">libxml2</span></p></li></ul></div><p>
+	<span class="application">libglib</span> (and others libg*) and 
+	<span class="application">libxml2</span> are discovered with 
+	<span class="command"><strong>pkg-config</strong></span> command, while the others must be in
+	standard include <code class="envar">PATH</code>.
+      </p><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id3360426"></a>Low level pre-requisites</h4></div></div></div><p>
+	  If you are trying to install LIXA software on a different operating
+	  system, these are some fundamental requirements:
+	  </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p><code class="function">poll</code>: 
+		LIXA daemon uses this function for high parallelism network
+		operations
+	    </p></li><li style="list-style-type: disc"><p><code class="function">mmap</code>:
+		LIXA daemon uses this function for high performance disk
+		access
+	    </p></li><li style="list-style-type: disc"><p><code class="function">dlopen</code>:
+		LIXA transaction manager uses this function to dynamically load
+		resource managers XA switch structures 
+	    </p></li><li style="list-style-type: disc"><p><code class="function">uuid_generate</code>:
+		LIXA transaction manager uses this function to generate unique
+		transaction identifiers (xid)
+	    </p></li></ul></div><p>
+	  Without the above functions, a specific porting process is necessary
+	  to adapt LIXA to your system.
+	</p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3360486"></a>Co-requisites</h3></div></div></div><p>
+	An XA transaction manager is used to coordinate one or more XA
+	resource managers. From a LIXA perspective there are basically 3 type
+	of resource managers:
+	</p><div class="orderedlist"><ol type="1"><li><p>
+	      <span class="emphasis"><em>LIXA:</em></span> resource managers
+	      provided by the project for testing and as sample implementations
+	  </p></li><li><p>
+	      <span class="emphasis"><em>F/OSS:</em></span> resource managers provided by
+	      Free/Open Source Software projects; at the time of this
+	      writing this set is empty, but it could improve in the near
+	      future
+	      <sup>[<a id="id3360522" href="#ftn.id3360522" class="footnote">6</a>]</sup>
+	  </p></li><li><p>
+	      <span class="emphasis"><em>Proprietary:</em></span> resource managers
+	      provided by business corporations using commercial licensing.
+	  </p></li></ol></div><p>
+	There is not a list of <span class="emphasis"><em>supported</em></span> third party
+	resource managers, because LIXA is a project and not a product; this
+	is the list of third party resource managers that have been tested in
+	conjuction with LIXA transaction manager:
+	</p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p><span class="productname">
+		IBM DB2 Express-C 9.7
+	  </span></p></li><li style="list-style-type: disc"><p><span class="productname">
+		Oracle XE 10.2
+	  </span></p></li></ul></div><p>
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3360576"></a>Authorization</h3></div></div></div><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Important</h3><p>
+	The software produced by the LIXA project does not require any
+	special authorization to run.
+      </p></div><p>
+	You can run the processes with the desired UNIX users you prefer; you
+	may assign a specific user and group, but it is not mandatory.
+      </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	  LIXA client communicates to LIXA server (daemon) throught TCP/IP and
+	  the client processes do not access the status files located in
+	  <code class="filename">/opt/lixa/var</code>, only the 
+	  <span class="command"><strong>lixad</strong></span> has to access the status files.
+      </p></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3360609"></a>Software download</h2></div></div></div><p>
+      The LIXA project is hosted on SourceForge.net portal at this URL:
+      <a class="ulink" href="http://sourceforge.net/projects/lixa/" target="_top">
+	<em class="citetitle">http://sourceforge.net/projects/lixa/</em>
+      </a>
+    </p><p>
+      The software is available only as a <span class="emphasis"><em>source code</em></span>
+      tarball; no
+      pre-compiled packages are available: you need C development tools
+      installed to have success in LIXA installation. It is suggested to 
+      download the gzipped tarball from the main page: the latest available
+      release is generally what you need; you could download a previous release
+      if you had a reason to do it.
+    </p><p>
+      Alternatively you can fetch the source code using a subversion client,
+      but you should pay attention that many commits on the subversion 
+      repository
+      are intermediate works and can give you partial or broken under
+      construction features.
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3360656"></a>Configure, build and install</h2></div></div></div><p>
+      LIXA project tries to adhere to the GNU <span class="emphasis"><em>de facto</em></span>
+      standard. Supposing you downloaded the package 
+      <code class="filename">lixa-X.Y.Z.tar.gz</code>, the basic sequence is:
+      </p><pre class="screen">
+	tar xvzf lixa-X.Y.Z.tar.gz
+	cd lixa-X.Y.Z
+	./configure
+	make
+	make install
+      </pre><p>
+      The above commands, if nothing goes wrong, install the LIXA software
+      artifacts in <code class="filename">/opt/lixa</code> default directory.
+    </p><p>
+      There are many options you can pass to <span class="command"><strong>configure</strong></span>
+      command to meet your needs (see below).
+    </p><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3360695"></a>Choosing a different installation <code class="envar">PATH</code></h3></div></div></div><p>
+	At very first install <code class="filename">/tmp</code> could be a good
+	destination:
+	</p><pre class="screen">
+	./configure --prefix=/tmp/lixa
+	</pre><p>
+      </p><p>
+      After some testing, you might prefer your home directory:
+      </p><pre class="screen">
+	./configure --prefix=$HOME/lixa
+      </pre><p>
+      and you will get a layout like this:
+      </p><pre class="screen">
+        $HOME/lixa/bin
+        $HOME/lixa/etc
+        $HOME/lixa/include
+        $HOME/lixa/lib
+        $HOME/lixa/sbin
+        $HOME/lixa/var
+      </pre><p>
+      </p><p>
+	You can split code and data with something like this:
+	</p><pre class="screen">
+	./configure --prefix=/ --exec-prefix=/usr/local
+	</pre><p>
+      </p></div><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3360743"></a>Locating pre-requisites libraries</h3></div></div></div><p>
+	If any of the pre-requisite library include files are not in the
+	standard search <code class="envar">PATH</code>, you can export 
+	<code class="envar">CPPFLAGS</code> before the configure process to add 
+	your custom path:
+	</p><pre class="screen">
+	export CPPFLAGS=-I/path/to/libuuid
+	./configure
+	make
+	</pre><p>
+	to see the list of environment variables that can affect the build 
+	process
+	use the command
+	</p><pre class="screen">
+	./configure --help
+	</pre><p>
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3360774"></a>Optional features</h3></div></div></div><p>
+	The supplied defaults are generally good enought to start working with
+	LIXA, but if you want to perform some hacking you might be interested
+	in activating/deactivating some optional features.
+      </p><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id3360790"></a>Tracing</h4></div></div></div><p>
+	  The tracing feature is enabled by default: the binary objects
+	  produced by the build procedure contains a lot of messages that can
+	  be displayed turning on tracing at run time.
+	</p><p>
+	  Removing the tracing feature can save RAM (smaller binary objects)
+	  and CPU (every trace message is tested against run time 
+	  configuration).
+	</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Important</h3><p>
+	    Disabling tracing seems a good way to increase the performance of
+	    the software, but unfortunately without a trace it is quite 
+	    impossible to debug some issues. Only rock stable software can
+	    be compiled without tracing, and this is not the case of LIXA.
+	  </p></div><p>
+	  To disable tracing, use <code class="option">--disable-trace</code> on
+	  <span class="command"><strong>./configure</strong></span> command line:
+	  </p><pre class="screen">
+	  ./configure --disable-trace
+	  </pre><p>
+	</p></div><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id3360837"></a>Extra debug code</h4></div></div></div><p>
+	  To enable extra debug code, that's basically some redundant check
+	  code use <code class="option">--enable-debug</code> on
+	  <span class="command"><strong>./configure</strong></span> command line:
+	  </p><pre class="screen">
+	    ./configure --enable-debug
+	  </pre><p>
+	  This feature could be interesting when porting the LIXA project
+	  software to a different platform; for normal use, the extra
+	  debugging code is useless.
+	</p></div><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id3360864"></a>Crash simulation</h4></div></div></div><p>
+	  This feature is useful when testing the software: with crash
+	  simulation the software can be tested against simulated software
+	  crashes and, on some extents, power outages.
+	  To enable crash simulation use <code class="option">--enable-crash</code> on
+	  <span class="command"><strong>./configure</strong></span> command line:
+	  </p><pre class="screen">
+	    ./configure --enable-crash
+	  </pre><p>
+	</p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3360889"></a>Linking third party resource managers</h3></div></div></div><p>
+	To link an already tested third party resource manager you can use
+	a specific option on <span class="command"><strong>./configure</strong></span> command; to
+	link a new resource manager, you have to hack the Makefiles and
+	put all you need in place or you can perform a manual link.
+      </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id3360907"></a>IBM DB2 Express-C 9.7<sup>[<a id="id3360913" href="#ftn.id3360913" class="footnote">7</a>]</sup></h4></div></div></div><p>
+	  This step is useful if you want to use IBM DB2 as a Resource
+	  Manager coordinated by LIXA; only version Express-C 9.7 has been
+	  tested, but there should not be relevant differences with a
+	  different version. Use something like this:
+	  </p><pre class="screen">
+	    ./configure --with-ibmdb2=/opt/ibm/db2/V9.7
+	  </pre><p>
+	  to create a loadable module containing the switch structure.
+	</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id3360938"></a>Oracle XE 10.2<sup>[<a id="id3360943" href="#ftn.id3360943" class="footnote">8</a>]</sup></h4></div></div></div><p>
+	  This step is useful if you want to use Oracle Database as a Resource
+	  Manager coordinated by LIXA; only version XE 10.2 has been
+	  tested, but there should not be relevant differences with a
+	  different version. Use something like this:
+	  </p><pre class="screen">
+	    ./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+	  </pre><p>
+	  to create a loadable module containing the switch structure.
+	</p><p>
+	  Extra configuration is needed in order to use Oracle DBMS; the
+	  necessary steps are documented in the configuration chapter.
+	</p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3360975"></a>Summary</h3></div></div></div><p>
+	The options illustrated above can be combined to obtain a specific
+	configuration. This is an example of a IBM DB2 + Oracle enabled
+	installation using an alternate installation path:
+	</p><pre class="screen">
+	  tar xvzf lixa-X.Y.Z.tar.gz
+	  cd lixa-X.Y.Z
+	  ./configure --prefix=$HOME/lixa --with-ibmdb2=/opt/ibm/db2/V9.7 --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+	  make
+	  make install
+	</pre><p>
+      </p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3360996"></a>Checking</h2></div></div></div><p>
+      Before using LIXA to manage your transactions you might be interested
+      in checking the compiled software quality.
+    </p><p>
+      LIXA has its own test suite implemented with 
+      <span class="application">Autotest</span>. A specific build configuration is
+      <span class="emphasis"><em>necessary</em></span> to enable all the tests:
+      </p><pre class="screen">
+	tar xvzf lixa-X.Y.Z.tar.gz
+	cd lixa-X.Y.Z
+	./configure --prefix=/tmp/lixa --enable-crash
+	make check
+      </pre><p>
+      If the binary code produced by the compiler is fine, and your system
+      is fine too, all the test <span class="emphasis"><em>must</em></span> complete without
+      errors.
+    </p></div><div class="footnotes"><br /><hr width="100" align="left" /><div class="footnote"><p><sup>[<a id="ftn.id3360522" href="#id3360522" class="para">6</a>] </sup>
+		  I think the lack of the XA interface in the implementation 
+		  of 
+		  the F/OSS resource managers is a consequence of the lack of
+		  a F/OSS transaction manager; looking at the Java ecosystem,
+		  both MySQL and PostgreSQL supports JTA, that's basically
+		  “<span class="quote">a Java XA wrapper</span>”, because there are JTA
+		  compliant application server like Jboss, JOnAS and Jeronimo.
+	      </p></div><div class="footnote"><p><sup>[<a id="ftn.id3360913" href="#id3360913" class="para">7</a>] </sup>
+	      IBM and DB2 are trademark of <span class="trademark">IBM</span>™
+	      corporation
+	</p></div><div class="footnote"><p><sup>[<a id="ftn.id3360943" href="#id3360943" class="para">8</a>] </sup>
+	      Oracle is a trademark of <span class="trademark">Oracle</span>™
+	      corporation
+	</p></div></div></div><div class="chapter" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="id3361032"></a>Chapter 3. Configuration</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#id3361205">Architectural elements</a></span></dt><dd><dl><dt><span class="section"><a href="#id3361276">Deployment models</a></span></dt></dl></dd><dt><span class="section"><a href="#id3361505">Configuring LIXA components</a></span></dt><dd><dl><dt><span class="section"><a href="#id3361573">Configuring the server</a></span></dt><dt><span class="section"><a href="#id3361804">Configuring the client</a></span></dt></dl></dd><dt><span class="section"><a href="#id3362307">Environment variables</a></span></dt><dd><dl><dt><span class="section"><a href="#id3362322">LIXA_CONFIG_FILE</a></span></dt><dt><span class="section"><a href="#id3362359">LIXA_CRASH_COUNT</a></span></dt><dt><span class="section"><a href="#id3362380">LIXA_CRASH_POINT</a></span></dt><dt><span class="section"><a href="#id3362403">LIXA_JOB</a></span></dt><dt><span class="section"><a href="#id3362431">LIXA_PROFILE</a></span></dt><dt><span class="section"><a href="#id3362464">LIXA_TRACE_MASK</a></span></dt></dl></dd></dl></div><p>
+    A LIXA system is the assembling of two components: the client and 
+    the server. The figure
+    below shows a typical configuration with one Application
+    Program and two Resource Managers.
+  </p><div class="figure"><a id="config1"></a><p class="title"><b>Figure 3.1. Typical LIXA topology</b></p><div class="figure-contents"><div class="mediaobject"><img src="LIXA_Configuration_1.png" alt="Typical LIXA topology" /></div></div></div><br class="figure-break" /><p>
+    The model shows logical and "phisycal" blocks:
+    </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>
+	  "Application Program code" is the code of your own application
+      </p></li><li style="list-style-type: disc"><p>
+	  "librm1" is the code of the library your application must use to
+	  communicate with "RM1" (the first resource manager)
+      </p></li><li style="list-style-type: disc"><p>
+	  "librm2" is the code of the library your application must use to
+	  communicate with "RM2" (the second resource manager)
+      </p></li><li style="list-style-type: disc"><p>
+	  "liblixac" is the code of the library your application must use to
+	  invoke the TX verbs and send instruction to the Transaction Manager
+      </p></li><li style="list-style-type: disc"><p>
+	  "Application Program code" + "librm1" + "librm2" + "liblixac" must
+	  be linked togheter to produce the Application Program; the
+	  Application Program is an executable object
+      </p></li><li style="list-style-type: disc"><p>
+	  "RM1" is the first resource manager; it may be a relational database
+	  (RDBMS)
+      </p></li><li style="list-style-type: disc"><p>
+	  "RM2" is the second resource manager; it may be an object oriented
+	  database (OODBMS)
+      </p></li><li style="list-style-type: disc"><p>
+	  "lixad" is the <span class="emphasis"><em>daemon</em></span> used by "liblixac" to
+	  store the states of the transactions
+      </p></li></ul></div><p>
+  </p><p>
+    The model shows how the blocks communicate:
+    </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>
+	  (A1): is the protocol supplied by the first resource manager; 
+	  SQL/CLI is an example and is supplied by IBM DB2, 
+	  SQL/OCI is another example and is supplied by Oracle Database Server
+      </p></li><li style="list-style-type: disc"><p>
+	  (B1): is the protocol supplied by the second resource manager; every
+	  resource manager has its own protocol and its own API
+      </p></li><li style="list-style-type: disc"><p>
+	  (A2): is the internal protocol used by the client of RM1 to 
+	  communicate with RM1 server process(es); it can be a cross memory
+	  or a network protocol and it depends on RM1 configuration
+      </p></li><li style="list-style-type: disc"><p>
+	  (B2): is the internal protocol used by the client of RM2 to 
+	  communicate with RM2 server process(es); it can be a cross memory
+	  or a network protocol and it depends on RM2 configuration
+      </p></li><li style="list-style-type: disc"><p>
+	  (TX): is the protocol supplied by the LIXA project and is described
+	  in [<a class="citation" href="#id3362603"><span class="citation">TXspec</span></a>]; it's a standard protocol and API
+      </p></li><li style="list-style-type: disc"><p>
+	  (XA): is the standard protocol used by the LIXA project to 
+	  communicateand with the resource managers and is described
+	  in [<a class="citation" href="#id3362638"><span class="citation">XAspec</span></a>]; it's a standard protocol and API
+      </p></li><li style="list-style-type: disc"><p>
+	  (LX): is the internal protocol used by the client of LIXA to 
+	  communicate with the LIXA server process (lixad); it is a network 
+	  protocol
+      </p></li></ul></div><p>
+  </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3361205"></a>Architectural elements</h2></div></div></div><p>
+      The <span class="command"><strong>lixad</strong></span> daemon process can be executed on any
+      system: there is no need it is executed on the same system that's hosting
+      the Application Programs. The communications between 
+      the client and the server (<span class="command"><strong>lixad</strong></span>) uses TCP/IP sockets.
+    </p><p>
+      The <span class="command"><strong>lixac</strong></span> library is embedded in the Application
+      Programs; the communication between the Application Program and
+      the <span class="command"><strong>lixac</strong></span> library uses TX (Transaction Demarcation)
+      API, see [<a class="citation" href="#id3362603"><span class="citation">TXspec</span></a>]. The <span class="command"><strong>lixac</strong></span> 
+      library contains all the logic of the LIXA Transaction Manager.
+    </p><p>
+      The communication between the Application Program and the Resource
+      Managers depends on Resource Managers type and configuration: 
+      it may be cross memory, TCP/IP, System V IPC, etc...
+      The communication between the <span class="command"><strong>lixac</strong></span> library and the
+      Resource Manager depends on Resource Manager configuration and must be
+      of the same used by the Application Program.
+    </p><p>
+      The communication between <span class="command"><strong>lixac</strong></span> library and 
+      <span class="command"><strong>lixad</strong></span> is ever istantiated by the client: the
+      server never calls the clients.
+    </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3361276"></a>Deployment models</h3></div></div></div><p>
+	This section explains some different deployment models you can
+	set up leveraging the LIXA project technology.
+      </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id3361289"></a>The easiest non trivial model</h4></div></div></div><p>
+	  The easiest non trivial deployment of a distributed transaction
+	  processing system based on the LIXA project is showed below: a single
+	  node hosts the Application Program, the Resource Managers and the
+	  LIXA server.
+	</p><div class="figure"><a id="config2"></a><p class="title"><b>Figure 3.2. Easiest non trivial deployment model</b></p><div class="figure-contents"><div class="mediaobject"><img src="LIXA_Configuration_2.png" alt="Easiest non trivial deployment model" /></div></div></div><br class="figure-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id3361325"></a>A trivial model</h4></div></div></div><p>
+	  A trivial deployment of a distributed transaction
+	  processing system based on the LIXA project is showed below: a single
+	  node hosts the Application Program, the Resource Manager and the
+	  LIXA server. This configuration is obtained from the previous one
+	  removing a Resource Manager.
+	</p><p>
+	  Using only one Resource Manager is supported by the LIXA project
+	  technology, but it's quite useless because you don't need a
+	  transaction manager to perform 
+	  <span class="emphasis"><em>single phase commit</em></span> against 
+	  <span class="emphasis"><em>one</em></span>
+	  Resource Manager. This type of configuration will not be described
+	  more deeply.
+	</p><div class="figure"><a id="config3"></a><p class="title"><b>Figure 3.3. Trivial deployment model</b></p><div class="figure-contents"><div class="mediaobject"><img src="LIXA_Configuration_3.png" alt="Trivial deployment model" /></div></div></div><br class="figure-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id3361379"></a>A fully distributed model</h4></div></div></div><p>
+	  A fully distributed transaction processing system can be achieved
+	  hosting every component in a different node.
+	  The picture below shows 4 different nodes:
+	  </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>
+		an application server node hosting the Application Program
+	    </p></li><li style="list-style-type: disc"><p>
+		a Transaction Manager dedicated node hosting the 
+		LIXA server
+	    </p></li><li style="list-style-type: disc"><p>
+		two Resource Manager dedicated nodes hosting the
+		Reosurce Manager
+	    </p></li></ul></div><p>
+	</p><div class="figure"><a id="config4"></a><p class="title"><b>Figure 3.4. Fully distributed deployment model</b></p><div class="figure-contents"><div class="mediaobject"><img src="LIXA_Configuration_4.png" alt="Fully distributed deployment model" /></div></div></div><br class="figure-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id3361445"></a>A more complex distributed model</h4></div></div></div><p>
+	  A more complex distributed transaction processing system 
+	  can be achieved introducing a second application server and a third
+	  Resource Manager; in the picture below the third Resource Manager 
+	  is hosted in the same node of the second Resource Manager.
+	</p><p>
+	  The two different Application Programs do not need to be hosted in
+	  different application servers. They are different 
+	  Application Programs because they use a different mix of
+	  Resource Managers.
+	</p><div class="figure"><a id="config5"></a><p class="title"><b>Figure 3.5. Complex distributed deployment model</b></p><div class="figure-contents"><div class="mediaobject"><img src="LIXA_Configuration_5.png" alt="Complex distributed deployment model" /></div></div></div><br class="figure-break" /><p>
+	  Further complexity can be reached introducing an Application
+	  Program that uses three (or more) different Resource Managers,
+	  but this document will not go on this path to preserve
+	  understandability
+	  <sup>[<a id="id3361490" href="#ftn.id3361490" class="footnote">9</a>]</sup>
+	  .
+	</p></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3361505"></a>Configuring LIXA components</h2></div></div></div><p>
+      The picture below emphasizes the LIXA components must be configured
+      in a simple scenario:
+    </p><div class="figure"><a id="config6"></a><p class="title"><b>Figure 3.6. The LIXA components and the necessary configuration files</b></p><div class="figure-contents"><div class="mediaobject"><img src="LIXA_Configuration_6.png" alt="The LIXA components and the necessary configuration files" /></div></div></div><br class="figure-break" /><p>
+      The client component (<span class="command"><strong>lixac</strong></span>) is configured using the
+      <code class="filename">etc/lixac_conf.xml</code> file; the server component
+      (<span class="command"><strong>lixad</strong></span>) is configured using the
+      <code class="filename">etc/lixad_conf.xml</code> file.
+    </p><p>
+      If a node hosts both the client and the server components, both the
+      files must be configured. If a node hosts only one component, only
+      one configuration file is necessary
+      <sup>[<a id="id3361564" href="#ftn.id3361564" class="footnote">10</a>]</sup>.
+    </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3361573"></a>Configuring the server</h3></div></div></div><p>
+	The default configuration file is 
+	<code class="filename">etc/lixad_conf.xml</code>
+	and is located at the root installation path (i.e.
+	<code class="filename">/opt/lixa/etc/lixad_conf.xml</code>).
+      </p><p>
+	The file is composed of three sections:
+	</p><div class="figure"><a id="config7"></a><p class="title"><b>Figure 3.7. The structure of lixad_conf.xml</b></p><div class="figure-contents"><div class="mediaobject"><img src="LIXA_Configuration_7.png" alt="The structure of lixad_conf.xml" /></div></div></div><p><br class="figure-break" />
+	</p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>
+	      the <span class="emphasis"><em>server</em></span> section contains the global
+	      parameters of the server
+	  </p></li><li style="list-style-type: disc"><p>
+	      the <span class="emphasis"><em>listeners</em></span> section specifies how many
+	      TCP/IP addresses and ports must be listened to accept incoming
+	      client connections
+	  </p></li><li style="list-style-type: disc"><p>
+	      the <span class="emphasis"><em>managers</em></span> section specifies how many
+	      parallel threads must be activated to serve the LIXA clients
+	  </p></li></ul></div><p>
+      </p><p>
+	Below there is a sample configuration file:
+	</p><pre class="screen">
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+  &lt;server pid_file="/tmp/lixa/var/run.pid"&gt;
+  &lt;listeners&gt;
+    &lt;listener domain="AF_INET" address="127.0.0.1" port="3456"/&gt;
+    &lt;listener domain="AF_INET" address="0.0.0.0" port="2345"/&gt;
+  &lt;/listeners&gt;
+  &lt;managers&gt;
+    &lt;manager status_file="/tmp/lixa/var/lixad_status1"/&gt;
+    &lt;manager status_file="/tmp/lixa/var/lixad_status2"/&gt;
+    &lt;manager status_file="/tmp/lixa/var/lixad_status3"/&gt;
+  &lt;/managers&gt;
+&lt;/server&gt;
+      </pre><p>
+	The tags and the
+	properties of the XML file are described below:
+	</p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>
+	      <code class="varname">pid_file</code>: it is the file used by the server 
+	      to store the daemon <acronym class="acronym">PID</acronym>; the server creates
+	      the file at start-up and destroys it at shutdown
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">listener</code>: the server can activate one or more
+	      listeners; most of the times one listener is sufficient, but if
+	      you want to use only a subset of the IP addresses defined at
+	      the operating system level, you have to configure a dedicated
+	      listener for every desired address
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">domain</code>: the type of socket must be used to
+	      listen for clients. The only allowed type is 
+	      <code class="constant">AF_INET</code>; this may change in the future
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">address</code>: the address that must be used 
+	      to listen for
+	      clients; the special value "<code class="constant">0.0.0.0</code>" means
+	      <span class="emphasis"><em>any</em></span> address
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">port</code>: the port that must be used to listen for
+	      clients; it must be a free port (use command 
+	      <span class="command"><strong>netstat</strong></span> to find out one)
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">manager</code>: any configured 
+	      <span class="emphasis"><em>manager</em></span> is a server worker and runs as
+	      a dedicated thread. The number of managers that should 
+	      be activated 
+	      depends on the workload; if D is the number of indipendent 
+	      hard disk devices and P is the number of processors/cores, the
+	      suggested values are in the range:
+	      </p><div class="equation"><a id="id3361766"></a><p class="title"><b>Equation 3.1. Suggested range for the number of managers</b></p><div class="equation-contents"><span class="mathphrase">
+		  [min(D,P) ; D*P]
+		</span></div></div><p><br class="equation-break" />
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">status_file</code>: the physical path that 
+	      must be used to
+	      create the status files (a couple) for a manager; 
+	      this generally is
+	      a persistent and reliable storage device like a RAID partition.
+	      The string specified by the tag <code class="varname">status_file</code>
+	      is used as a prefix: every manager (thread) creates two files
+	      with the same prefix and different suffix.
+	  </p></li></ul></div><p>
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3361804"></a>Configuring the client</h3></div></div></div><p>
+	The default configuration file is 
+	<code class="filename">etc/lixac_conf.xml</code>
+	and is located at the root installation path (i.e.
+	<code class="filename">/opt/lixa/etc/lixac_conf.xml</code>). 
+      </p><p>
+	The file is composed of three sections:
+	</p><div class="figure"><a id="config8"></a><p class="title"><b>Figure 3.8. The structure of lixac_conf.xml</b></p><div class="figure-contents"><div class="mediaobject"><img src="LIXA_Configuration_8.png" alt="The structure of lixac_conf.xml" /></div></div></div><p><br class="figure-break" />
+	</p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>
+	      the <span class="emphasis"><em>state servers</em></span> section 
+	      contains a list of the available LIXA state servers and how they
+	      can be contacted
+	  </p></li><li style="list-style-type: disc"><p>
+	      the <span class="emphasis"><em>resource managers</em></span> section
+	      contains a list of the available Resource Managers and how they
+	      can be managed by LIXA using XA standard API and protocol
+	  </p></li><li style="list-style-type: disc"><p>
+	      the <span class="emphasis"><em>profiles</em></span> section
+	      contains a set of possibly different profiles: every
+	      Application Program can use only one profile; if you had
+	      different Application Programs with different requirements,
+	      you should create different profiles. Every profile contains
+	      a set of servers and a set of Resource Managers that must be
+	      used to support the Application Program.
+	  </p></li></ul></div><p>
+      </p><p>
+	Below there is a sample configuration file:
+	</p><pre class="screen">
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;client&gt;
+  &lt;sttsrvs&gt;
+    &lt;sttsrv name="server1" domain="AF_INET" address="10.23.45.67" port="2345" /&gt;
+    &lt;sttsrv name="server2" domain="AF_INET" address="10.23.46.91" port="3456" /&gt;
+  &lt;/sttsrvs&gt;
+  &lt;rsrmgrs&gt;
+    &lt;rsrmgr name="OracleXE_dynreg" switch_file="/tmp/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
+    &lt;rsrmgr name="OracleXE_stareg" switch_file="/tmp/lixa/lib/switch_oracle_stareg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
+    &lt;rsrmgr name="IBMDB2_dynreg" switch_file="/tmp/lixa/lib/switch_ibmdb2_dynreg.so" xa_open_info="axlib=/tmp/lixa/lib/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+    &lt;rsrmgr name="IBMDB2_stareg" switch_file="/tmp/lixa/lib/switch_ibmdb2_stareg.so" xa_open_info="axlib=/tmp/lixa/lib/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+  &lt;/rsrmgrs&gt;
+  &lt;profiles&gt;
+    &lt;profile name="GT71"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;OracleXE_stareg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;IBMDB2_stareg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+    &lt;profile name="VZ67"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;OracleXE_dynreg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;IBMDB2_dynreg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+    &lt;profile name="AG71"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_2&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;IBMDB2_dynreg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/client&gt;
+	</pre><p>
+	The tags and the
+	properties of the XML file are described below:
+	</p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>
+	      <code class="varname">sttsrv</code>: this section is used to describe a
+	      state server (a LIXA server instance) that must be reached by any
+	      client described below
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">sttsrv/name</code>: a name associated to the 
+	      state server; it is a logical name that is referenced by 
+	      the profiles defined below
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">domain</code>: it must be the same domain specified 
+	      by the listener that must be reached; the listener is configured
+	      in <code class="filename">lixad_conf.xml</code> (see above) and may be
+	      local or remote
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">address</code>: it must be the same same address 
+	      specified by the listener that must be reached; the listener is
+	      configured in <code class="filename">lixad_conf.xml</code> (see above)
+	      and may be local or remote
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">port</code>: it must be the same port specified
+	      by the listener that must be reached; the listener is
+	      configured in
+	      <code class="filename">lixad_conf.xml</code> (see above)
+	      and may be local or remote
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">rsrmgr</code>: this section is used to describe 
+	      a resource manager that will be used by the
+	      Application Programs configured below (see profiles)
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">rsrmgr/name</code>: a name associated to the 
+	      Resource Manager; it is a logical name that is referenced by
+	      the profile defined below
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">switch_file</code>: name of the file that contains 
+	      the XA switch structure; the file is produced by the installation
+	      procedure
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">xa_open_info</code>: it is the string of parameters
+	      that must be passed to the Resource Manager by the xa_open() 
+	      function call; the content
+	      of the string depends on the Resource Manager, please refer to
+	      the documentation distributed with the resource manager you
+	      are using. The string can not exceed 255 characters
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">xa_close_info</code>: it is the string of parameters
+	      that must be passed to the Resource Manager by the xa_open() 
+	      function call; the content
+	      of the string depends on the Resource Manager, please refer to
+	      the documentation distributed with the resource manager you
+	      are using. The string can not exceed 255 characters
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">profile</code>: it contains the description of the
+	      LIXA every transactional profile must be
+	      used by the Application Programs needs to be listed here
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">profile/name</code>: the name associated to the
+	      transaction profile; this name is used in different places and
+	      it is suggested to avoid special characters, blanks and possibly
+	      mixed case (these hints may help you in troubleshooting)
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">profile/sttsrv</code>: the state server that
+	      will be used to store
+	      the transactional information associated to this profile; more
+	      than one state servers can be specified but 
+	      <span class="emphasis"><em>only</em></span> 
+	      the first one is used with the current release software
+	  </p></li><li style="list-style-type: disc"><p>
+	      <code class="varname">profile/rsrmgr</code>: every Resource Manager that
+	      must be
+	      used by the Application Programs associated to this transactional
+	      profile needs to be listed here. There is no a limit: you can
+	      specify 1, 2, 3, ... resource managers. Avoid useless resource
+	      manager because xa_open() and xa_close() will be performed 
+	      against all the listed resource managers. If you can choose 
+	      between a "dynamic" and a "static" version of the same resource
+	      manager, the "dynamic" one is more efficient	    
+	  </p></li></ul></div><p>
+      </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="Client_configuration_explanation"></a>Client configuration explanation</h4></div></div></div><p>
+	  The client configuration file contains three sections:
+	  </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>
+		<code class="varname">sttsrvs</code>: is the list of the LIXA daemons 
+		you are
+		running inside your network and you will use to manage the
+		persistent state of the clients that are using the configuration
+		file; many times a single LIXA state server is sufficient, but
+		sometimes you need more (development, test and production
+		environment might use different LIXA servers)
+	    </p></li><li style="list-style-type: disc"><p>
+		<code class="varname">rsrmgrs</code>: the list of the Resource Managers
+		necessary execute the Application Programs; there is no limit
+		to the number of resource managers you can specify from a LIXA
+		point of view, but you should avoid to list useless 
+		Resource Managers to obtain the best performance
+	    </p></li><li style="list-style-type: disc"><p>
+		<code class="varname">profiles</code>: the list of the available
+		transactional profiles for your Application Programs. This
+		concept allows you a great configuration flexibility: the same
+		configuration file can be used for completely different
+		Application Programs and completely different environment.
+		As an example, imagine you have 3 distinct applications and
+		every application uses a different mix of resource managers; 
+		then
+		you manage 3 different environments (development, test and
+		production): with 9 profiles you can completely model your
+		transactional needs (APP1DEV, APP2DEV, APP3DEV, APP1TEST,
+		APP2TEST, APP3TEST, APP1PROD, APP2PROD, APP3PROD).
+	    </p></li></ul></div><p>
+	</p><p>
+	  The picture below models an environment that's using the sample
+	  <code class="filename">etc/lixac_conf.xml</code>
+	  showed above:
+	  </p><div class="figure"><a id="config9"></a><p class="title"><b>Figure 3.9. A "real" environment</b></p><div class="figure-contents"><div class="mediaobject"><img src="LIXA_Configuration_9.png" alt="A &quot;real&quot; environment" /></div></div></div><p><br class="figure-break" />
+	  The scenario is composed of three distinct applications:
+	  </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>
+		GT71: it's an application that uses both an Oracle and an
+		IBM DB2 DBMS; most of the transactions need to perform
+		distributed transaction processing and the profile specifies
+		the static registration versions of the switch files.
+	    </p></li><li style="list-style-type: disc"><p>
+		AG71: it's an application that uses only an
+		IBM DB2 DBMS; only few transactions need to perform
+		distributed transaction processing and the profile specifies
+		the dynamic registration versions of the switch files. This
+		application does not need an XA Transaction Manager because
+		it uses only one Resource Manager, but the development team
+		decided to use LIXA because it will use a second Resource
+		Manager in the next few months.
+	    </p></li><li style="list-style-type: disc"><p>
+		VZ67: it's an application that uses both an Oracle and an
+		IBM DB2 DBMS; only few transactions need to perform
+		distributed transaction processing and the profile specifies
+		the dynamic registration versions of the switch files.
+	    </p></li></ul></div><p>
+	  The scenario uses two distinct LIXA state servers: this is an
+	  unusual situation but it works.
+	</p><p>
+	  The <code class="varname">LIXA_PROFILE</code> environment variable must be used 
+	  to specify the transactional profile associated to the Application 
+	  Program.
+	  If you do not specify a valid transactional profile, the first profile
+	  of the list will be applied (in the above example it's
+	  <code class="varname">GT71</code>).
+	  </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	      There is not an alternate way to specify the 
+	      transactional profile:
+	      <code class="function">tx_open</code> does not allow parameters.
+	  </p></div><p>
+	  With reference to scenario showed above, Application Program GT71
+	  must export <code class="varname">LIXA_PROFILE</code> before execution; if
+	  you are using <span class="command"><strong>bash</strong></span> shell you must specifiy
+	  something like this
+	  </p><pre class="screen">
+export LIXA_PROFILE=GT71
+	  </pre><p>
+	  before application execution. The same applies to Application Program
+	  AG71 and VZ67:
+	  </p><pre class="screen">
+export LIXA_PROFILE=AG71
+[...]
+export LIXA_PROFILE=VZ67
+	  </pre><p>
+	</p></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3362307"></a>Environment variables</h2></div></div></div><p>
+      You can use some environment variables to tailor the LIXA configuration
+      to your needs. Some environment variables applies only to one component,
+      others apply to both client and server LIXA components.
+    </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3362322"></a>LIXA_CONFIG_FILE</h3></div></div></div><p>
+	  This environment variable can be used to specify an alternate
+	  configuration file for your application. 
+	  Example: if you are trying a new configuration, but you 
+	  wont to modify the default
+	  <code class="filename">etc/lixac_conf.xml</code>
+	  file, you can export the variable before program execution:
+	  </p><pre class="screen">
+export LIXA_CONFIG_FILE=/tmp/my_lixac
+./myapp
+	  </pre><p>
+	  <span class="command"><strong>myapp</strong></span> will be executed using the configuration
+	  stored inside
+	  <code class="filename">/tmp/my_lixac</code>
+	  instead of the configuration stored inside the default
+	  <code class="filename">etc/lixac_conf.xml</code>
+	  client configuration file.
+	</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3362359"></a>LIXA_CRASH_COUNT</h3></div></div></div><p>
+	  This environment variable must be used only in a development
+	  environment: after the program crossed the
+	  <span class="emphasis"><em>crash point</em></span> as many times as the value of
+	  this variable (default = 1), the process crashes. See
+	  environemt variable
+	  <code class="varname">LIXA_CRASH_POINT</code> too.
+	</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3362380"></a>LIXA_CRASH_POINT</h3></div></div></div><p>
+	  This environment variable must be used only in a development
+	  environment: it specifies the crash point inside the LIXA
+	  code. The acceptable values for this variable are listed
+	  inside the C header file
+	  <code class="filename">src/common/lixa_crash.h</code>
+	  LIXA project uses 
+	  the <code class="function">abort()</code> function to simulated a soft
+	  crash.
+	</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3362403"></a>LIXA_JOB</h3></div></div></div><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>
+	      This environment variable may be very useful to deal with some
+	      specific requirements, but it changes how the automatic
+	      recovery process works and the final result could be strange
+	      or "unpredictable" if you didn't understand the whole picture.
+	  </p></div><p>
+	  Use this environment variable to associate a specific transactional
+	  job identifier instead of the automatically assigned one. 
+	  See <a class="xref" href="#Workload_balanced_environments" title="Workload balanced environments">the section called “Workload balanced environments”</a> 
+	  for more information.
+	</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3362431"></a>LIXA_PROFILE</h3></div></div></div><p>
+	  This environment variable must be used 
+	  to specify the transactional profile associated to the Application 
+	  Program.
+	  If you do not specify a valid transactional profile, the first
+	  profile listed inside 
+	  <code class="filename">etc/lixac_conf.xml</code>
+	  will be applied.
+	  See <a class="xref" href="#Client_configuration_explanation" title="Client configuration explanation">the section called “Client configuration explanation”</a> too.
+	</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3362464"></a>LIXA_TRACE_MASK</h3></div></div></div><p>
+	  This environment variable specifies which internal modules must
+	  be traced at run-time. 
+	  The C header file
+	  <code class="filename">src/common/lixa_trace.h</code>
+	  contains the exadecimal value of every internal module; if you 
+	  want to trace two or more modules you have make the logical OR
+	  among all the desired values.
+	</p><p>
+	  You are interested in tracing what happens inside 
+	  <span class="emphasis"><em>"server listener"</em></span>,
+	  <span class="emphasis"><em>"server manager"</em></span> and
+	  <span class="emphasis"><em>"server status"</em></span> modules.
+	  Looking at file
+	  <code class="filename">src/common/lixa_trace.h</code>:
+	  </p><pre class="screen">
+#define LIXA_TRACE_MOD_SERVER_LISTENER    0x00000004
+#define LIXA_TRACE_MOD_SERVER_MANAGER     0x00000008
+#define LIXA_TRACE_MOD_SERVER_STATUS      0x00000010
+	  </pre><p>
+	  the resulting value is 0x0000001C:
+	  </p><pre class="screen">
+export LIXA_TRACE_MASK=0x00000010
+	  </pre><p>
+	  The <span class="emphasis"><em>"trace all"</em></span> value is 0xffffffff:
+	  </p><pre class="screen">
+export LIXA_TRACE_MASK=0xffffffff
+	  </pre><p>
+	  </p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>
+	      Tracing too much is dangerous: it slows down your system and
+	      possibly fill-up your filesystems.
+	  </p></div><p>
+	  Establishing the internal modules that must be traced is a typical
+	  troubleshooting task you can acquire working with LIXA project.
+	</p></div></div><div class="footnotes"><br /><hr width="100" align="left" /><div class="footnote"><p><sup>[<a id="ftn.id3361490" href="#id3361490" class="para">9</a>] </sup>
+	      The dashed box named "Transaction Manager" was removed to
+	      simplify the picture.
+	  </p></div><div class="footnote"><p><sup>[<a id="ftn.id3361564" href="#id3361564" class="para">10</a>] </sup>
+	  The standard installation procedure installs both the files with
+	  default content; it's your responsability to customize the content
+	  of the files.
+      </p></div></div></div><div class="chapter" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="id3362524"></a>Chapter 4. In Depth</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#id3362536">Automatic and manual recovery</a></span></dt><dt><span class="section"><a href="#Workload_balanced_environments">Workload balanced environments</a></span></dt></dl></div><p>
+    This chapter explains some internal details you can be interested in
+    when you are dealing with complex environments.
+  </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3362536"></a>Automatic and manual recovery</h2></div></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="Workload_balanced_environments"></a>Workload balanced environments</h2></div></div></div></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="id3362558"></a>Bibliography</h2></div></div></div><div class="bibliodiv"><h3 class="title">Books</h3><div class="biblioentry"><a id="id3362569"></a><p>[<abbr class="abbrev">RefModel</abbr>] <span class="copyright">Copyright © 1996 X/Open Company Limited. </span><span class="biblioid">1-85912-170-5. </span><span class="publisher"><span class="publishername">X/Open Company Ltd., U.K.. </span></span><span class="title"><i>Distributed Transaction Processing: Reference Model, Version 3</i>. </span></p></div><div class="biblioentry"><a id="id3362603"></a><p>[<abbr class="abbrev">TXspec</abbr>] <span class="copyright">Copyright © 1995 X/Open Company Limited. </span><span class="biblioid">1-85912-094-6. </span><span class="publisher"><span class="publishername">X/Open Company Ltd., U.K.. </span></span><span class="title"><i>Distributed Transaction Processing: The TX (Transaction Demarcation) Specification</i>. </span></p></div><div class="biblioentry"><a id="id3362638"></a><p>[<abbr class="abbrev">XAspec</abbr>] <span class="copyright">Copyright © 1991 X/Open Company Limited. </span><span class="biblioid">1-872630-24-3. </span><span class="publisher"><span class="publishername">X/Open Company Ltd., U.K.. </span></span><span class="title"><i>Distributed Transaction Processing: The XA Specification</i>. </span></p></div><div class="biblioentry"><a id="id3362673"></a><p>[<abbr class="abbrev">XA+spec</abbr>] <span class="copyright">Copyright © 1994 X/Open Company Limited. </span><span class="biblioid">1-85912-046-6. </span><span class="publisher"><span class="publishername">X/Open Company Ltd., U.K.. </span></span><span class="title"><i>Distributed Transaction Processing: The XA+ Specification
+      Version 2</i>. </span></p></div></div></div></div></body></html>

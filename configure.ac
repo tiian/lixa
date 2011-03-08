@@ -10,6 +10,7 @@ AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
   doc/Makefile
+  doc/manuals/Makefile
   etc/lixac_conf.xml
   etc/lixad_conf.xml
   etc/Makefile
@@ -118,6 +119,8 @@ fi
 
 # Checking pkg-config is available
 AC_CHECK_PROGS(VALGRIND, [valgrind], [])
+AC_CHECK_PROGS(XSLTPROC, [xsltproc], [])
+AM_CONDITIONAL([HAVE_XSLTPROC], [test -n "$XSLTPROC"])
 
 AC_CHECK_HEADERS(arpa/inet.h assert.h)
 AC_CHECK_HEADERS(errno.h)
@@ -184,6 +187,7 @@ AC_SUBST(EXPANDED_SYSCONFDIR)
 AC_SUBST(EXPANDED_LOCALSTATEDIR)
 AC_SUBST(EXPANDED_LIBDIR)
 AC_SUBST(LIXA_CRASH)
+AC_SUBST(XSLTPROC)
 
 AC_OUTPUT
 
