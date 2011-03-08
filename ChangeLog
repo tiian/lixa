@@ -1,5 +1,10 @@
 LOG:
 
+         - 0.5.29 "make install" installs the HTML version of the manual in
+                  the standard doc directory
+                  "make dist" injects the HTML version of the manual in the
+                  package
+
 20110228 - 0.5.28 changed "trnmgr" with "sttsrv" and "trnmgrs" with "sttsrvs"
                   in the lixac_conf.xml file; the previous name was 
                   misleading because the LIXA server is not a transaction

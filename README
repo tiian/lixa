@@ -127,6 +127,14 @@ something like this:
 	./configure --with-ibmdb2=/opt/ibm/db2/V9.7
 	make
 
+Manual  
+There is an HTML version manual you can install in your system; if you 
+configured LIXA as below:
+	./configure --prefix=/tmp/lixa
+	make install
+it would install the HTML formatted manual at PATH 
+/tmp/lixa/share/doc/lixa-$(VERSION)/html/
+
 Doxygen documentation.
 There is a minimal configuration for Doxygen inside LIXA.
 Please update doxygen.conf.in and change /var/www/lixa to a suitable 
