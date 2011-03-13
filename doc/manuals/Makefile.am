@@ -1,8 +1,14 @@
 STYLESHEETS_DIR = /usr/share/xml/docbook/stylesheet/nwalsh
 
-manual_sources = LIXA_Bibliography.xml LIXA_In_Depth.xml \
-	LIXA_Introduction.xml LIXA.xml LIXA_Configuration.xml \
-	LIXA_Installation.xml LIXA_Preface.xml
+manual_sources = LIXA.xml \
+	LIXA_Bibliography.xml \
+	LIXA_Configuration.xml \
+	LIXA_Execution.xml \
+	LIXA_In_Depth.xml \
+	LIXA_Installation.xml \
+	LIXA_Introduction.xml \
+	LIXA_Preface.xml \
+	LIXA_Recovery.xml
 
 dia_images = LIXA_Configuration_1.dia  LIXA_Configuration_4.dia \
 	LIXA_Configuration_7.dia LIXA_Configuration_2.dia \

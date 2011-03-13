@@ -1,4 +1,4 @@
-<chapter>
+<chapter xml:id="Configuration">
   <title>Configuration</title>
   <para>
     A LIXA system is the assembling of two components: the client and 
@@ -560,7 +560,8 @@
 		<varname>sttsrvs</varname>: is the list of the LIXA daemons 
 		you are
 		running inside your network and you will use to manage the
-		persistent state of the clients that are using the configuration
+		persistent state of the clients that are using the
+		configuration
 		file; many times a single LIXA state server is sufficient, but
 		sometimes you need more (development, test and production
 		environment might use different LIXA servers)
@@ -632,7 +633,8 @@
 	  The <varname>LIXA_PROFILE</varname> environment variable must be used 
 	  to specify the transactional profile associated to the Application 
 	  Program.
-	  If you do not specify a valid transactional profile, the first profile
+	  If you do not specify a valid transactional profile, 
+	  the first profile
 	  of the list will be applied (in the above example it's
 	  <varname>GT71</varname>).
 	  <note><para>
@@ -771,7 +773,7 @@ export LIXA_TRACE_MASK=0xffffffff
 	  </screen>
 	  <warning><para>
 	      Tracing too much is dangerous: it slows down your system and
-	      possibly fill-up your filesystems.
+	      possibly fills-up your filesystems.
 	  </para></warning>
 	  Establishing the internal modules that must be traced is a typical
 	  troubleshooting task you can acquire working with LIXA project.
