@@ -1,0 +1,112 @@
+<chapter>
+  <title>Execution</title>
+  <para>
+    Once you have installed (see <xref linkend="Installation"/>)
+    and configured (see <xref linkend="Configuration"/>)
+    your environment, you are ready to run LIXA.
+    <note><para>
+	In this chapter it is assumed you installed the LIXA project
+	software at the default path <filename>/opt/lixa</filename>; if you
+	installed the software at a different path, you'd need to adjust
+	the shown commands consequently.
+    </para></note>
+  </para>
+  <section>
+    <title>Starting the state server</title>
+    <para>
+      The first step you must perform is starting the
+      <emphasis>state server</emphasis>; it's name is 
+      <command>lixad</command> (LIXA daemon). The command
+    </para>
+    <screen>
+tiian@ubuntu:~/lixa$ /opt/lixa/sbin/lixad --help
+Usage:
+  lixad [OPTION...] - LIXA server
+
+Help Options:
+  -?, --help             Show help options
+
+Application Options:
+  -d, --daemon           Run the process as a daemon
+  -m, --maintenance      Start the server in maintenance mode only
+  -u, --dump             Dump the content of status files using order [ufs] (u=used, f=free, s=sequential)
+  -c, --config-file      Specify an alternate configuration file
+  -t, --trace-file       Specify trace file name
+  -l, --clean-failed     Clean recovery failed transactions at start-up
+  -v, --version          Print package info and exit
+    </screen>
+    <para>
+      displays the available command line options. Running the command
+      without options blocks your shell and runs the state server in
+      foreground; this is not terribly useful but it may help you when
+      you are debugging some issue. Use these commands, from a different
+      terminal, to retrieve the PID
+      (process id) and to stop the state server:
+    </para>
+    <screen>
+tiian@ubuntu:~$ ps -ef|grep lixad|grep -v grep
+tiian    12564  5841  0 17:23 pts/1    00:00:00 /opt/lixa/sbin/lixad
+tiian@ubuntu:~$ kill 12564
+    </screen>
+    <para>
+      Alternatively you can strike ^C to break the foreground execution.
+      A foreground execution is generally more useful if some 
+      tracing is enabled:
+    </para>
+    <screen>
+tiian@ubuntu:~/lixa$ export LIXA_TRACE_MASK=0x00000001
+tiian@ubuntu:~/lixa$ /opt/lixa/sbin/lixad
+2011-03-13 17:36:41.707133 [14483/3074496240] lixad/main: starting
+2011-03-13 17:36:46.234200 [14483/3074496240] lixad/main: exiting
+    </screen>
+    <section>
+      <title>Background (<emphasis>daemon</emphasis>) execution</title>
+      <para>
+	The most useful command option is <command>--daemon</command>: it
+	allows you to run the state server as a <emphasis>daemon</emphasis>
+	detached from any terminal:
+      </para>
+      <screen>
+tiian@ubuntu:~/lixa$ /opt/lixa/sbin/lixad --daemon
+tiian@ubuntu:~/lixa$ ps -ef|grep lixad|grep -v grep
+tiian    16370     1  0 17:54 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+      </screen>
+      <para>
+	when running the state server as a daemon you need to perform some 
+	special tasks to understand the process is up &amp; running.
+	With <command>ps -ef|grep lixad|grep -v grep</command> you can
+	verify the process is running.
+	The state server registers its PID in a special file:
+	<filename>/opt/lixa/var/run.pid</filename>; if the content of the file
+	is different than the result retrieved with the <command>grep</command>
+	command, something is not running well.
+      </para>
+      <screen>
+tiian@ubuntu:~/lixa$ cat /opt/lixa/var/run.pid
+16370
+      </screen>
+      <para>
+	To stop a daemonized state server you must use the
+	<command>kill</command> command as shown below:
+      </para>
+      <screen>
+tiian@ubuntu:~/lixa$ kill $(cat /opt/lixa/var/run.pid)
+tiian@ubuntu:~/lixa$ ps -ef|grep lixad|grep -v grep
+      </screen>
+      <para>
+	The <command>grep</command> command returns an empty result because
+	the state server is not running. The state server publishes some
+	messages using the <function>syslog</function> facility; Ubuntu 8.04
+	sends default messages to the file
+	<filename>/var/log/daemon.log</filename>; below there are some standard
+	messages:
+      </para>
+      <screen>
+tiian@ubuntu:~/lixa$ sudo cat /var/log/daemon.log|grep lixad|grep 16370
+Mar 13 17:54:04 ubuntu lixad[16370]: LXD014N LIXA server entered daemon status
+Mar 13 18:13:16 ubuntu lixad[16370]: LXD019N received signal 15, server immediate shutdown in progress...
+Mar 13 18:13:16 ubuntu lixad[16370]: LXD006N server terminated activities
+      </screen>
+    </section>
+  </section>
+</chapter>

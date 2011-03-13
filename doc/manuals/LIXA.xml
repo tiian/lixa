@@ -5,6 +5,8 @@
 <!ENTITY intro SYSTEM "LIXA_Introduction.xml">
 <!ENTITY install SYSTEM "LIXA_Installation.xml">
 <!ENTITY config SYSTEM "LIXA_Configuration.xml">
+<!ENTITY execut SYSTEM "LIXA_Execution.xml">
+<!ENTITY recovery SYSTEM "LIXA_Recovery.xml">
 <!ENTITY indepth SYSTEM "LIXA_In_Depth.xml">
 <!ENTITY biblio SYSTEM "LIXA_Bibliography.xml">
 ]>
@@ -30,6 +32,8 @@
   &intro;
   &install;
   &config;
+  &execut;
+  &recovery;
   &indepth;
   &biblio;
 </book>

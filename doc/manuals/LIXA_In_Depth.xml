@@ -5,6 +5,12 @@
     when you are dealing with complex environments.
   </para>
   <section>
+    <title>Tracing</title>
+  </section>
+  <section>
+    <title>Logging</title>
+  </section>
+  <section>
     <title>Automatic and manual recovery</title>
   </section>
   <section xml:id="Workload_balanced_environments">
