@@ -108,5 +108,105 @@ Mar 13 18:13:16 ubuntu lixad[16370]: LXD019N received signal 15, server immediat
 Mar 13 18:13:16 ubuntu lixad[16370]: LXD006N server terminated activities
       </screen>
     </section>
+    <section>
+      <title>Maintenance mode execution</title>
+      <para>
+	The <command>--maintenance</command> option allows you to start
+	the state server to perform some special actions; only special
+	clients can connect to the server when the server is operating
+	in <emphasis>maintenance</emphasis> mode: customer developed
+	Application Programs can not perform distributed transactions.
+	A special client is <command>lixar</command>: a command line
+	utility designed for recovery purposes
+	(see <xref linkend="Recovery"/> for more information).
+      </para>
+      <warning>
+	A state server that's operating in maintenance mode is not
+	serving the LIXA infrastructure and Distributed Transaction
+	Processing can not be performed: use this option 
+	<emphasis>only</emphasis> if you really need it.
+      </warning>
+      <para>
+	There's no way to turn a server operating in maintenance mode in
+	a server operating in standard mode: you have to stop and start
+	the LIXA state server again.
+      </para>
+    </section>
+    <section>
+      <title>Dump execution</title>
+      <para>
+	Use <command>--dump</command> option to get a dump of the content
+	of the state currently persisted in the status files. The option
+	must specify one or more flags:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	      "s": dump all the blocks, in sequential order
+	  </para></listitem>
+	  <listitem><para>
+	      "u": dump all the <emphasis>used</emphasis> blocks, 
+	      travelling the used block chain
+	  </para></listitem>
+	  <listitem><para>
+	      "f": dump all the <emphasis>free</emphasis> blocks, 
+	      travelling the free block chain
+	  </para></listitem>
+	</itemizedlist>
+	You may specify two or more flags on the same command line:
+	the output will duplicate some blocks.
+      </para>
+      <para>
+	The example below shows the output produced when dumping the
+	content of a single status file with no current transactions
+	in progress (the free block chain contains all the blocks):
+      </para>
+      <screen>
+tiian@ubuntu:~/lixa$ /opt/lixa/sbin/lixad --dump f
+========================================================================
+First file ('/tmp/lixa/var/lixad_status1_1') will be dumped
+Magic number is: 24848 (24848)
+Level is: 1 (1)
+Last sync timestamp: 2011-03-13T18:13:16.127779+0100
+Size: 10 blocks
+Used block chain starts at: 0 (empty chain)
+Free block chain starts at: 1
+Dumping records following physical order: 0
+Dumping records following free block chain: 1
+Dumping records following used block chain: 0
+------------------------------------------------------------------------
+Block: 1, next block in chain: 2
+Block type: unknown (0)
+------------------------------------------------------------------------
+Block: 2, next block in chain: 3
+Block type: unknown (0)
+------------------------------------------------------------------------
+Block: 3, next block in chain: 4
+Block type: unknown (0)
+------------------------------------------------------------------------
+Block: 4, next block in chain: 5
+Block type: unknown (0)
+------------------------------------------------------------------------
+Block: 5, next block in chain: 6
+Block type: unknown (0)
+------------------------------------------------------------------------
+Block: 6, next block in chain: 7
+Block type: unknown (0)
+------------------------------------------------------------------------
+Block: 7, next block in chain: 8
+Block type: unknown (0)
+------------------------------------------------------------------------
+Block: 8, next block in chain: 9
+Block type: unknown (0)
+------------------------------------------------------------------------
+Block: 9, next block in chain: 0
+Block type: unknown (0)
+      </screen>
+      <note>
+	The dump can be performed while the state server is running:
+	the dump will output the content of the currently sinchronized
+	status file and you will not be able to see the last updates.
+	Dumps performed at different times may produce different
+	results if there is a running state server.
+      </note>
+    </section>
   </section>
 </chapter>
