@@ -59,10 +59,10 @@ tiian@ubuntu:~/lixa$ /opt/lixa/sbin/lixad
 2011-03-13 17:36:41.707133 [14483/3074496240] lixad/main: starting
 2011-03-13 17:36:46.234200 [14483/3074496240] lixad/main: exiting
     </screen>
-    <section>
+    <section xml:id="Background_execution">
       <title>Background (<emphasis>daemon</emphasis>) execution</title>
       <para>
-	The most useful command option is <command>--daemon</command>: it
+	The most useful command option is <option>--daemon</option>: it
 	allows you to run the state server as a <emphasis>daemon</emphasis>
 	detached from any terminal:
       </para>
@@ -111,7 +111,7 @@ Mar 13 18:13:16 ubuntu lixad[16370]: LXD006N server terminated activities
     <section>
       <title>Maintenance mode execution</title>
       <para>
-	The <command>--maintenance</command> option allows you to start
+	The <option>--maintenance</option> option allows you to start
 	the state server to perform some special actions; only special
 	clients can connect to the server when the server is operating
 	in <emphasis>maintenance</emphasis> mode: customer developed
@@ -135,7 +135,7 @@ Mar 13 18:13:16 ubuntu lixad[16370]: LXD006N server terminated activities
     <section>
       <title>Dump execution</title>
       <para>
-	Use <command>--dump</command> option to get a dump of the content
+	Use <option>--dump</option> option to get a dump of the content
 	of the state currently persisted in the status files. The option
 	must specify one or more flags:
 	<itemizedlist mark='bullet'>
@@ -208,5 +208,154 @@ Block type: unknown (0)
 	results if there is a running state server.
       </note>
     </section>
+    <section>
+      <title>Additional options</title>
+      <para>
+	Some additional options are available: they don't radically change the 
+	state server behavior, but supply some features.
+      </para>
+      <section>
+	<title>Specifying a different configuration file</title>
+	<para>
+	  With option <option>--config-file</option> you can specify a
+	  non default configuration file; this option can be useful if you
+	  want to test a different configuration without damaging your
+	  production config file. It can be used if you want to
+	  run different instances of the state server in the same
+	  operating system image, too.
+	</para>
+	<para>
+	  Below there is a sample invocation:
+	</para>
+	<screen>
+tiian@ubuntu:~$ /opt/lixa/sbin/lixad --config-file /tmp/lixad_conf.xml
+	</screen>
+      </section>
+      <section>
+	<title>Specifying a trace file</title>
+	<para>
+	  With option <option>--trace-file</option> you can specify a
+	  different trace file instead of the default 
+	  <emphasis>stderr</emphasis>
+	  process stream; this option is especially useful when you are
+	  running the state server as a daemon (see
+	  <xref linkend="Background_execution"/>).
+	  Below there is a sample invocation:
+	</para>
+	<screen>
+tiian@ubuntu:~$ export LIXA_TRACE_MASK=0x01
+tiian@ubuntu:~$ /opt/lixa/sbin/lixad --daemon --trace-file /tmp/lixad.trace
+tiian@ubuntu:~$ ls -la /tmp/lixad.trace
+-rw-r--r-- 1 tiian tiian 349 2011-03-18 16:14 /tmp/lixad.trace
+	</screen>
+	<para>
+	  Take a look to
+	  <xref linkend="Tracing"/>
+	  for additional details.
+	</para>
+      </section>
+      <section>
+	<title>Clean-up recovery failed transactions</title>
+	<para>
+	  Use option <option>--clean-failed</option> to clean-up the
+	  state of the transactions that LIXA was not able to recover
+	  automatically: this option is useful to remove useless information
+	  from the state file, but you must pay attention to these
+	  <emphasis>warnings</emphasis>.
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+		If your LIXA installation worked properly, you would not
+		need to clean-up the state file.
+	    </para></listitem>
+	    <listitem><para>
+		Removing recovery failed transactions cleans-up the history
+		of your issues: you should understand why your state file
+		is accumulating recovery failed transaction records
+		need to clean-up the state file.
+	    </para></listitem>
+	  </itemizedlist>
+	  Don't use this option without a deep review of the content of
+	  <xref linkend="Recovery"/>.	  
+	</para>
+      </section>
+      <section>
+	<title>Retrieving software version</title>
+	<para>
+	  Use option <option>--version</option> to retrieve the 
+	  version of the installed software as shown below:
+	</para>
+	<screen>
+tiian@ubuntu:~$ /opt/lixa/sbin/lixad --version
+LIXA: a Libre XA implementation
+Copyright (c) 2009-2011, Christian Ferrari; all rights reserved.
+License: GPL (GNU Public License) version 2
+Package name: lixa; package version: 0.5.29
+Access http://sourceforge.net/projects/lixa/ to report bugs and partecipate to the project
+	</screen>
+	<para>
+	  The <command>lixad</command> command does not start a real state 
+	  server: it prints version information on 
+	  <emphasis>stdout</emphasis> and exits.
+	</para>
+      </section>
+    </section>
+  </section>
+  <section>
+    <title>Starting the recovery utility</title>
+    <para>
+      The LIXA project supplies a recovery utility you must use to 
+      perform some special tasks related to distributed transaction
+      recovery. The command is named <command>lixar</command> and is
+      located in the <filename>bin</filename> directory; use 
+      <option>--help</option> option to retrieve the list of 
+      the available options:
+    </para>
+    <screen>
+tiian@ubuntu:~$ /opt/lixa/bin/lixar --help
+Usage:
+  lixar [OPTION...] - LIXA recovery utility
+
+Help Options:
+  -?, --help                      Show help options
+
+Application Options:
+  -p, --print                     Print a report of all the prepared and in-doubt transactions compatible with current configuration and profile
+  -x, --xid                       Select specified transaction for rollback/commit
+  -X, --xid-file                  Select specified file as a list of transaction to rollback/commit
+  -c, --commit                    Commit prepared &amp; in-doubt transactions
+  -r, --rollback                  Rollback prepared &amp; in-doubt transactions
+  -v, --version                   Print package info and exit
+  -b, --bypass-bqual-check        Bypass xid branch qualifier check
+  -B, --bypass-formatid-check     Bypass xid format id check
+  -e, --use-tmendrscan-flag       Use TMENDRSCAN flag for last xa_recover call
+    </screen>
+    <para>
+      The usage of the <command>lixar</command> command is strictly related
+      to <emphasis>recovery</emphasis> tasks and is explained in
+      <xref linkend="Recovery"/>.
+    </para>
+    <note>
+      All the option except <option>--commit</option> and 
+      <option>--rollback</option> are <emphasis>safe</emphasis>; only
+      specifying <quote>commit</quote> and <quote>rollback</quote> can
+      damage the state of the data managed by your resource managers.
+    </note>
+    <para>
+      You must start the state server before you can start 
+      <command>lixar</command>; if you don't start the state server, you
+      will get something like shown below:
+    </para>
+    <screen>
+tiian@ubuntu:~$ /opt/lixa/bin/lixar
+Execution options:
+        - print report = no
+        - transaction(s) will be committed = no
+        - transaction(s) will be rolled back = no
+        - bypass xid branch qualifier check = no
+        - bypass xid format id check = no
+        - use TMENDRSCAN flag for last xa_recover call = no
+
+tx_open() returned TX_FAIL: unable to proceed
+    </screen>
   </section>
 </chapter>
