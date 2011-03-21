@@ -2,5 +2,5 @@ This manual is published at this URL too:
 http://lixa.sourceforge.net/manuals/
 
 sftp tiian@web.sourceforge.net
-cd /home/project-web/lixa/htdocs/index.html
-put ...
+cd /home/project-web/lixa/htdocs/manuals/
+put index.html

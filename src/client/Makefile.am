@@ -15,8 +15,12 @@ liblixacmt_la_CPPFLAGS = -DLIXA_MULTITHREAD=1 -I$(srcdir)/../common
 liblixacmt_la_LIBADD = ../common/liblixabmt.la
 #liblixac_la_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_GMODULE@ @LDFLAGS_XML2@ -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
 liblixacmt_la_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_GMODULE@ @LDFLAGS_GTHREAD@ @LDFLAGS_XML2@ -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
-bin_PROGRAMS = lixar
+bin_PROGRAMS = lixar lixat
 #lixar_CPPFLAGS = -DLIXA_MULTITHREAD=0 -I$(srcdir)/../common
 lixar_CPPFLAGS = -I$(srcdir)/../common
 lixar_LDADD = ../common/liblixabmt.la liblixacmt.la
 lixar_SOURCES = lixar.c
+#lixat_CPPFLAGS = -DLIXA_MULTITHREAD=0 -I$(srcdir)/../common
+lixat_CPPFLAGS = -I$(srcdir)/../common
+lixat_LDADD = ../common/liblixabmt.la liblixacmt.la
+lixat_SOURCES = lixat.c
