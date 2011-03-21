@@ -34,7 +34,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = lixar$(EXEEXT)
+bin_PROGRAMS = lixar$(EXEEXT) lixat$(EXEEXT)
 subdir = src/client
 DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -73,6 +73,9 @@ PROGRAMS = $(bin_PROGRAMS)
 am_lixar_OBJECTS = lixar-lixar.$(OBJEXT)
 lixar_OBJECTS = $(am_lixar_OBJECTS)
 lixar_DEPENDENCIES = ../common/liblixabmt.la liblixacmt.la
+am_lixat_OBJECTS = lixat-lixat.$(OBJEXT)
+lixat_OBJECTS = $(am_lixat_OBJECTS)
+lixat_DEPENDENCIES = ../common/liblixabmt.la liblixacmt.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -85,8 +88,9 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(liblixacmt_la_SOURCES) $(lixar_SOURCES)
-DIST_SOURCES = $(liblixacmt_la_SOURCES) $(lixar_SOURCES)
+SOURCES = $(liblixacmt_la_SOURCES) $(lixar_SOURCES) $(lixat_SOURCES)
+DIST_SOURCES = $(liblixacmt_la_SOURCES) $(lixar_SOURCES) \
+	$(lixat_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -257,6 +261,10 @@ liblixacmt_la_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_GMODULE@ @LDFLAGS_GTHREAD@ @LDFL
 lixar_CPPFLAGS = -I$(srcdir)/../common
 lixar_LDADD = ../common/liblixabmt.la liblixacmt.la
 lixar_SOURCES = lixar.c
+#lixat_CPPFLAGS = -DLIXA_MULTITHREAD=0 -I$(srcdir)/../common
+lixat_CPPFLAGS = -I$(srcdir)/../common
+lixat_LDADD = ../common/liblixabmt.la liblixacmt.la
+lixat_SOURCES = lixat.c
 all: all-recursive
 
 .SUFFIXES:
@@ -350,6 +358,9 @@ clean-binPROGRAMS:
 lixar$(EXEEXT): $(lixar_OBJECTS) $(lixar_DEPENDENCIES) 
 	@rm -f lixar$(EXEEXT)
 	$(LINK) $(lixar_OBJECTS) $(lixar_LDADD) $(LIBS)
+lixat$(EXEEXT): $(lixat_OBJECTS) $(lixat_DEPENDENCIES) 
+	@rm -f lixat$(EXEEXT)
+	$(LINK) $(lixat_OBJECTS) $(lixat_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -367,6 +378,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixacmt_la-lixa_xa.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixacmt_la-tx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixar-lixar.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixat-lixat.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -465,6 +477,20 @@ lixar-lixar.obj: lixar.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixar.c' object='lixar-lixar.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixar_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lixar-lixar.obj `if test -f 'lixar.c'; then $(CYGPATH_W) 'lixar.c'; else $(CYGPATH_W) '$(srcdir)/lixar.c'; fi`
+
+lixat-lixat.o: lixat.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lixat-lixat.o -MD -MP -MF $(DEPDIR)/lixat-lixat.Tpo -c -o lixat-lixat.o `test -f 'lixat.c' || echo '$(srcdir)/'`lixat.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/lixat-lixat.Tpo $(DEPDIR)/lixat-lixat.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixat.c' object='lixat-lixat.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lixat-lixat.o `test -f 'lixat.c' || echo '$(srcdir)/'`lixat.c
+
+lixat-lixat.obj: lixat.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lixat-lixat.obj -MD -MP -MF $(DEPDIR)/lixat-lixat.Tpo -c -o lixat-lixat.obj `if test -f 'lixat.c'; then $(CYGPATH_W) 'lixat.c'; else $(CYGPATH_W) '$(srcdir)/lixat.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/lixat-lixat.Tpo $(DEPDIR)/lixat-lixat.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixat.c' object='lixat-lixat.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lixat-lixat.obj `if test -f 'lixat.c'; then $(CYGPATH_W) 'lixat.c'; else $(CYGPATH_W) '$(srcdir)/lixat.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
