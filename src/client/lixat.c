@@ -19,24 +19,8 @@
 #include <config.h>
 
 
-
 #ifdef HAVE_GLIB_H
 # include <glib.h>
-#endif
-#ifdef HAVE_STDIO_H
-# include <stdio.h>
-#endif
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
-#ifdef HAVE_ASSERT_H
-# include <assert.h>
 #endif
 
 
@@ -62,6 +46,10 @@ static GOptionEntry entries[] =
 
 
 
+void print_info(TXINFO *info);
+
+
+
 int main(int argc, char *argv[])
 {
     GError *error = NULL;
@@ -79,41 +67,43 @@ int main(int argc, char *argv[])
     }
 
     printf("tx_open(): %d\n", rc = tx_open());
-    assert(TX_OK == rc);
+    if (TX_OK != rc) exit(1);
     
     if (commit) {
-        char *ser_xid = NULL;
-        
         printf("tx_begin(): %d\n", rc = tx_begin());
-        assert(TX_OK == rc);
+        if (TX_OK != rc) exit(1);
         printf("tx_info(): %d\n", rc = tx_info(&info));
-        assert(1 == rc);
-        ser_xid = xid_serialize(&info.xid);
-        printf("\txid[formatID]    = 0x%lx\n", info.xid.formatID);
-        printf("\txid[gtrid.bqual] = %s\n", ser_xid);
-        if (NULL != ser_xid)
-            free(ser_xid);
+        if (1 != rc) exit(1);
+        print_info(&info);
         printf("tx_commit(): %d\n", rc = tx_commit());
-        assert(TX_OK == rc);
+        if (TX_OK != rc) exit(1);
     }
     
     if (rollback) {
-        char *ser_xid = NULL;
-        
         printf("tx_begin(): %d\n", rc = tx_begin());
-        assert(TX_OK == rc);
+        if (TX_OK != rc) exit(1);
         printf("tx_info(): %d\n", rc = tx_info(&info));
-        assert(1 == rc);
-        ser_xid = xid_serialize(&info.xid);
-        printf("\txid[formatID]    = 0x%lx\n", info.xid.formatID);
-        printf("\txid[gtrid.bqual] = %s\n", ser_xid);
-        if (NULL != ser_xid)
-            free(ser_xid);
+        if (1 != rc) exit(1);
+        print_info(&info);
         printf("tx_rollback(): %d\n", rc = tx_rollback());
-        assert(TX_OK == rc);
+        if (TX_OK != rc) exit(1);
     }
     
     printf("tx_close(): %d\n", rc = tx_close());
-    assert(TX_OK == rc);
+    if (TX_OK != rc) exit(1);
     return 0;
+}
+
+
+
+void print_info(TXINFO *info)
+{
+    char *ser_xid = NULL;
+    
+    ser_xid = xid_serialize(&info->xid);
+    printf("\txid/formatID    = 0x%lx\n", info->xid.formatID);
+    printf("\txid/gtrid.bqual = %s\n", ser_xid);
+    if (NULL != ser_xid)
+        free(ser_xid);
+    return;
 }

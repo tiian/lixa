@@ -301,6 +301,108 @@ Access http://sourceforge.net/projects/lixa/ to report bugs and partecipate to t
     </section>
   </section>
   <section>
+    <title>Starting the test utility</title>
+    <para>
+      The LIXA project supplies a test utility you can use to 
+      perform basic tests on your LIXA environment. 
+      The command is named <command>lixat</command> and is
+      located in the <filename>bin</filename> directory; use 
+      <option>--help</option> option to retrieve the list of 
+      the available options:
+    </para>
+    <screen>
+tiian@ubuntu:~$ /opt/lixa/bin/lixat --help
+Usage:
+  lixat [OPTION...] - LIXA test utility
+
+Help Options:
+  -?, --help         Show help options
+
+Application Options:
+  -c, --commit       Perform a commit transaction
+  -r, --rollback     Perform a rollback transaction
+    </screen>
+    <para>
+      The <command>lixat</command> command does nothing useful but trying 
+      to contact the state server and optionally perform a commit and/or 
+      rollback dummy distributed transaction.
+      Below there's the output of a trivial execution: the program connects
+      to the state server, performs tx_open() against all the configured 
+      resource managers and performs tx_close() against all the configured
+      resource managers.
+    </para>
+    <screen>
+tiian@ubuntu:~$ /opt/lixa/bin/lixat
+tx_open(): 0
+tx_close(): 0
+    </screen>
+    <para>
+      With <option>--commit</option> option the test program performs a
+      dummy commit against all the configured resource managers too:
+    </para>
+    <screen>
+tiian@ubuntu:~$ /opt/lixa/bin/lixat --commit
+tx_open(): 0
+tx_begin(): 0
+tx_info(): 1
+        xid/formatID    = 0x494c4158
+        xid/gtrid.bqual = 080f2b63-a380-4bfb-bdd3-347ca7607ba3.ef954655-163e-dff9-fee6-62b12f881c97
+tx_commit(): 0
+tx_close(): 0
+    </screen>
+    <para>
+      A <emphasis>dummy commit</emphasis> does not damage your data because
+      the program does not contains instructions that modify the content
+      of the resource managers. A dummy rollback can be performed as well:
+    </para>
+    <screen>
+tiian@ubuntu:~$ /opt/lixa/bin/lixat --rollback
+tx_open(): 0
+tx_begin(): 0
+tx_info(): 1
+        xid/formatID    = 0x494c4158
+        xid/gtrid.bqual = c651f0f2-efb2-49bd-92f3-f2b5a76741a5.ef954655-163e-dff9-fee6-62b12f881c97
+tx_rollback(): 0
+tx_close(): 0
+    </screen>
+    <para>
+      The test utility can be used to:
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	    check the state server is up and running
+	    <screen>
+	      tiian@ubuntu:~$ /opt/lixa/bin/lixat
+	      tx_open(): -7
+	      tiian@ubuntu:~$ echo $?
+	      1
+	    </screen>
+	    (the state server is not running)
+	</para></listitem>
+	<listitem><para>
+	    check the content of <filename>etc/lixac_conf.xml</filename>
+	    is ok
+	    <screen>
+	      tiian@ubuntu:~$ export LIXA_PROFILE=XXXX
+	      tiian@ubuntu:~$ /opt/lixa/bin/lixat
+	      tx_open(): -7
+	      tiian@ubuntu:~$ echo $?
+	      1
+	    </screen>
+	    (the profile <quote>XXXX</quote> does not exist)
+	</para></listitem>
+	<listitem><para>
+	    try different profiles described inside
+	    <filename>etc/lixac_conf.xml</filename>
+	</para></listitem>
+	<listitem><para>
+	    ...
+	</para></listitem>
+      </itemizedlist>
+      You can <emphasis>safely</emphasis> experiment by yourself using 
+      <command>lixat</command> command.
+    </para>
+  </section>
+  <section>
     <title>Starting the recovery utility</title>
     <para>
       The LIXA project supplies a recovery utility you must use to 
