@@ -17,6 +17,9 @@ Try this scenario:
 - generally tx_close() can not be executed: some times it may happen, some 
   times it can not work properly
 
+Try what happens if lixax_conf.xml contains a profile without resource 
+managers.
+
 Document a memory leak introduced by libxml2:
 xmlInitParser()
 xmlCleanupParser()

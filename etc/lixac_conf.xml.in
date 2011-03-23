@@ -19,6 +19,15 @@
     <rsrmgr name="LIXAmonkey3staRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_stareg.so" xa_open_info="random open string" xa_close_info="" />
   </rsrmgrs>
   <profiles>
+    <profile name="CF05">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>LIXAdummyRM</rsrmgr>
+        <rsrmgr>LIXAdummyRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
     <profile name="GT71">
       <sttsrvs>
         <sttsrv>local_1</sttsrv>
