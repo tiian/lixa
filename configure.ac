@@ -10,6 +10,7 @@ AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
   doc/Makefile
+  doc/examples/Makefile
   doc/manuals/Makefile
   etc/lixac_conf.xml
   etc/lixad_conf.xml
