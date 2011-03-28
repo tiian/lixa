@@ -20589,7 +20589,7 @@ fi
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files Makefile doc/Makefile doc/manuals/Makefile etc/lixac_conf.xml etc/lixad_conf.xml etc/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/ibmdb2/Makefile src/client/switch/oracle/Makefile src/server/Makefile src/sample/Makefile src/sample/ibmdb2/Makefile src/sample/oracle/Makefile tests/Makefile tests/atlocal tests/etc/lixac_conf.xml tests/etc/lixad_conf.xml tests/etc/Makefile tests/src/Makefile var/Makefile doxygen.conf"
+ac_config_files="$ac_config_files Makefile doc/Makefile doc/examples/Makefile doc/manuals/Makefile etc/lixac_conf.xml etc/lixad_conf.xml etc/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/ibmdb2/Makefile src/client/switch/oracle/Makefile src/server/Makefile src/sample/Makefile src/sample/ibmdb2/Makefile src/sample/oracle/Makefile tests/Makefile tests/atlocal tests/etc/lixac_conf.xml tests/etc/lixad_conf.xml tests/etc/Makefile tests/src/Makefile var/Makefile doxygen.conf"
 
 ac_config_commands="$ac_config_commands tests/atconfig"
 
@@ -30458,6 +30458,7 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
+    "doc/examples/Makefile") CONFIG_FILES="$CONFIG_FILES doc/examples/Makefile" ;;
     "doc/manuals/Makefile") CONFIG_FILES="$CONFIG_FILES doc/manuals/Makefile" ;;
     "etc/lixac_conf.xml") CONFIG_FILES="$CONFIG_FILES etc/lixac_conf.xml" ;;
     "etc/lixad_conf.xml") CONFIG_FILES="$CONFIG_FILES etc/lixad_conf.xml" ;;

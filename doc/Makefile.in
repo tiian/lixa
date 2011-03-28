@@ -190,7 +190,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = manuals
+SUBDIRS = examples manuals
 EXTRA_DIST = analysis.txt doxygen_footer.html doxygen_header.html \
 	protocol.txt roadmap.txt seq_diagr.txt
 
