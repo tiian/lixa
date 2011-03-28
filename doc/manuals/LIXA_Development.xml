@@ -1,0 +1,93 @@
+<chapter>
+  <title>Development</title>
+  <para>
+    This chapter explains how you can develop your own application
+    using the libraries and the tools supplied by LIXA project.
+  </para>
+  <para>
+    LIXA project ships some example C programs you can find in directory
+    <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/</filename> after
+    software installation (see <xref linkend="Installation"/>).
+  </para>
+  <section>
+    <title>The first example</title>
+    <para>
+      Create a working directory in a place you are comfortable with:
+      <screen>
+tiian@ubuntu:~$ cd
+tiian@ubuntu:~$ mkdir tmp
+tiian@ubuntu:~$ cd tmp
+tiian@ubuntu:~/tmp$
+      </screen>
+    </para>
+    <para>
+      Copy file <filename>example1.c</filename> in your working dir:
+      <screen>
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example1.c .
+      </screen>
+      Substitute <quote>lixa-X.Y.Z</quote> with the actual version of
+      the software you installed.
+    </para>
+    <para>
+      Compile and link the C example program:
+      <screen>
+tiian@ubuntu:~/tmp$ gcc example1.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixacmt -o example1
+      </screen>
+      Check the output of the linker:
+      <screen>
+tiian@ubuntu:~/tmp$ ldd example1
+        linux-gate.so.1 =>  (0xb77a9000)
+        liblixacmt.so.0 => not found
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7653000)
+        /lib/ld-linux.so.2 (0xb77aa000)
+      </screen>
+      <filename>liblixacmt.so.0</filename> library is not resolved because
+      the LIXA libraries are not in system standard library path. You can
+      bypass the issue exporting <varname>LD_LIBRARY_PATH</varname>
+      variable and checking it again:
+      <screen>
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
+tiian@ubuntu:~/tmp$ ldd example1
+        linux-gate.so.1 =>  (0xb773f000)
+        liblixacmt.so.0 => /opt/lixa/lib/liblixacmt.so.0 (0xb7724000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb75d0000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb75cb000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb75c7000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb75c2000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb75b9000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb7508000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb73e8000)
+        liblixabmt.so.0 => /opt/lixa/lib/liblixabmt.so.0 (0xb73d4000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb73bc000)
+        /lib/ld-linux.so.2 (0xb7740000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb7395000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb7380000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb735b000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb7356000)
+      </screen>
+      Now you are ready to start your first application:
+      <screen>
+tiian@ubuntu:~/tmp$ ./example1
+tx_open(): -7
+      </screen>
+      The <function>tx_open()</function> function returned the value 
+      <quote>-7</quote> (<constant>TX_FAIL</constant>) 
+      because the state server is not running.
+      Start the state server (see <xref linkend="Background_execution"/>)
+      and try again:
+      <screen>
+tiian@ubuntu:~/tmp$ /opt/lixa/sbin/lixad --daemon
+tiian@ubuntu:~/tmp$ ./example1
+tx_open(): 0
+tx_begin(): 0
+tx_commit(): 0
+tx_begin(): 0
+tx_rollback(): 0
+tx_close(): 0
+      </screen>
+      Your first program has connected to the state server and has performed
+      two dummy distributed transactions: <emphasis>commit</emphasis> and 
+      <emphasis>rollback</emphasis>.
+    </para>
+  </section>
+</chapter>

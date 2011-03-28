@@ -3,6 +3,7 @@ STYLESHEETS_DIR = /usr/share/xml/docbook/stylesheet/nwalsh
 manual_sources = LIXA.xml \
 	LIXA_Bibliography.xml \
 	LIXA_Configuration.xml \
+	LIXA_Development.xml \
 	LIXA_Execution.xml \
 	LIXA_In_Depth.xml \
 	LIXA_Installation.xml \
