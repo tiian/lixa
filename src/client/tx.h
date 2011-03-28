@@ -43,10 +43,6 @@
 
 
 
-#include <config.h>
-
-
-
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE

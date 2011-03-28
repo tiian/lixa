@@ -16,11 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <stdio.h>
+#include <stdlib.h>
+
 #include <tx.h>
 
 
 
-/* this basic sample shows simple usage of the LIXA software */
+/* this basic example shows simple usage of the LIXA software */
 
 
 
