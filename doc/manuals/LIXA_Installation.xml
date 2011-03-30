@@ -127,13 +127,23 @@
 	special authorization to run.
       </para></important>
       <para>
-	You can run the processes with the desired UNIX users you prefer; you
-	may assign a specific user and group, but it is not mandatory.
+	You can run the processes with the desired UNIX user you prefer; 
+	in this manual specific user and group will be used as a suggestion.
+	Use this command in an Ubuntu based Linux system to create the
+	<systemitem class="username">lixa</systemitem> user:
+	<screen>
+tiian@ubuntu:~$ sudo adduser --system --no-create-home --disabled-login lixa
+Adding system user `lixa' (UID 106) ...
+Adding new user `lixa' (UID 106) with group `nogroup' ...
+Not creating home directory `/home/lixa'.
+	</screen>
+	Refer to the man page of your Linux distribution if the above
+	command fails.
       </para>
       <note><para>
 	  LIXA client communicates to LIXA server (daemon) throught TCP/IP and
 	  the client processes do not access the status files located in
-	  <filename>/opt/lixa/var</filename>, only the 
+	  <filename>/opt/lixa/var/</filename>, only the 
 	  <command>lixad</command> has to access the status files.
       </para></note>
     </section>
@@ -170,14 +180,29 @@
       standard. Supposing you downloaded the package 
       <filename>lixa-X.Y.Z.tar.gz</filename>, the basic sequence is:
       <screen>
-	tar xvzf lixa-X.Y.Z.tar.gz
-	cd lixa-X.Y.Z
-	./configure
-	make
-	make install
+tar xvzf lixa-X.Y.Z.tar.gz
+cd lixa-X.Y.Z
+./configure
+make
+      </screen>
+      To install the software you need root access. With some distributions, 
+      like Ubuntu, root access is available with the 
+      <command>sudo</command> command and your own password:
+      <screen>
+sudo make install
+      </screen>
+      If the previous command does not work, root access is available with the
+      <command>su</command> command and the root password: 
+      <screen>
+su; make install; exit
       </screen>
       The above commands, if nothing goes wrong, install the LIXA software
       artifacts in <filename>/opt/lixa</filename> default directory.
+      After the installation it is suggested to change the authorization
+      assigned to the installed software:
+      <screen>
+sudo chown -R lixa /opt/lixa
+      </screen>
     </para>
     <para>
       There are many options you can pass to <command>configure</command>
@@ -189,28 +214,28 @@
 	At very first install <filename>/tmp</filename> could be a good
 	destination:
 	<screen>
-	./configure --prefix=/tmp/lixa
+./configure --prefix=/tmp/lixa
 	</screen>
       </para>
       <para>
       After some testing, you might prefer your home directory:
       <screen>
-	./configure --prefix=$HOME/lixa
+./configure --prefix=$HOME/lixa
       </screen>
       and you will get a layout like this:
       <screen>
-        $HOME/lixa/bin
-        $HOME/lixa/etc
-        $HOME/lixa/include
-        $HOME/lixa/lib
-        $HOME/lixa/sbin
-        $HOME/lixa/var
+$HOME/lixa/bin
+$HOME/lixa/etc
+$HOME/lixa/include
+$HOME/lixa/lib
+$HOME/lixa/sbin
+$HOME/lixa/var
       </screen>
       </para>
       <para>
 	You can split code and data with something like this:
 	<screen>
-	./configure --prefix=/ --exec-prefix=/usr/local
+./configure --prefix=/ --exec-prefix=/usr/local
 	</screen>
       </para>
     </simplesect>
@@ -222,15 +247,15 @@
 	<envar>CPPFLAGS</envar> before the configure process to add 
 	your custom path:
 	<screen>
-	export CPPFLAGS=-I/path/to/libuuid
-	./configure
-	make
+export CPPFLAGS=-I/path/to/libuuid
+./configure
+make
 	</screen>
 	to see the list of environment variables that can affect the build 
 	process
 	use the command
 	<screen>
-	./configure --help
+./configure --help
 	</screen>
       </para>
     </simplesect>
@@ -265,7 +290,7 @@
 	  To disable tracing, use <option>--disable-trace</option> on
 	  <command>./configure</command> command line:
 	  <screen>
-	  ./configure --disable-trace
+./configure --disable-trace
 	  </screen>
 	</para>
       </simplesect>
@@ -276,7 +301,7 @@
 	  code use <option>--enable-debug</option> on
 	  <command>./configure</command> command line:
 	  <screen>
-	    ./configure --enable-debug
+./configure --enable-debug
 	  </screen>
 	  This feature could be interesting when porting the LIXA project
 	  software to a different platform; for normal use, the extra
@@ -292,7 +317,7 @@
 	  To enable crash simulation use <option>--enable-crash</option> on
 	  <command>./configure</command> command line:
 	  <screen>
-	    ./configure --enable-crash
+./configure --enable-crash
 	  </screen>
 	</para>
       </simplesect>
@@ -316,7 +341,7 @@
 	  tested, but there should not be relevant differences with a
 	  different version. Use something like this:
 	  <screen>
-	    ./configure --with-ibmdb2=/opt/ibm/db2/V9.7
+./configure --with-ibmdb2=/opt/ibm/db2/V9.7
 	  </screen>
 	  to create a loadable module containing the switch structure.
 	</para>
@@ -332,7 +357,7 @@
 	  tested, but there should not be relevant differences with a
 	  different version. Use something like this:
 	  <screen>
-	    ./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
 	  </screen>
 	  to create a loadable module containing the switch structure.
 	</para>
@@ -349,11 +374,11 @@
 	configuration. This is an example of a IBM DB2 + Oracle enabled
 	installation using an alternate installation path:
 	<screen>
-	  tar xvzf lixa-X.Y.Z.tar.gz
-	  cd lixa-X.Y.Z
-	  ./configure --prefix=$HOME/lixa --with-ibmdb2=/opt/ibm/db2/V9.7 --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
-	  make
-	  make install
+tar xvzf lixa-X.Y.Z.tar.gz
+cd lixa-X.Y.Z
+./configure --prefix=$HOME/lixa --with-ibmdb2=/opt/ibm/db2/V9.7 --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+make
+sudo make install
 	</screen>
       </para>
     </section>
@@ -369,10 +394,10 @@
       <application>Autotest</application>. A specific build configuration is
       <emphasis>necessary</emphasis> to enable all the tests:
       <screen>
-	tar xvzf lixa-X.Y.Z.tar.gz
-	cd lixa-X.Y.Z
-	./configure --prefix=/tmp/lixa --enable-crash
-	make check
+tar xvzf lixa-X.Y.Z.tar.gz
+cd lixa-X.Y.Z
+./configure --prefix=/tmp/lixa --enable-crash
+make check
       </screen>
       If the binary code produced by the compiler is fine, and your system
       is fine too, all the test <emphasis>must</emphasis> complete without

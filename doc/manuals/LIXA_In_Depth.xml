@@ -22,6 +22,12 @@
       [...]
     </para>
   </section>
+  <section xml:id="Non_root_installation">
+    <title>Non root installation</title>
+    <para>
+      [...]
+    </para>
+  </section>
   <section xml:id="Workload_balanced_environments">
     <title>Workload balanced environments</title>
     <para>
