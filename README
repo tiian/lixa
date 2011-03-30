@@ -2,6 +2,8 @@
 
 LIXA is a software libre implementation of a transaction manager XA compliant.
 
+Point your browser to doc/manuals/index.html to read the LIXA manual.
+
 LIBXML2 dependency:
 This software needs libxml2 and glib2 to be compiled and executed.
 Just for the sake of "simplicity" LIXA uses pkg-config tool to retrieve
