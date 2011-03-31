@@ -36,7 +36,27 @@ Application Options:
   -v, --version          Print package info and exit
     </screen>
     <para>
-      displays the available command line options. Running the command
+      displays the available command line options. 
+    </para>
+    <para>
+      If you tried to start the state server without the appropriate 
+      privileges it should happen something like this:
+      <screen>
+tiian@mojan:~$ /opt/lixa/sbin/lixad
+tiian@mojan:~$ sudo tail /var/log/daemon.log
+[...]
+Mar 31 22:53:10 mojan lixad[5891]: LXD000N this process is starting a new LIXA server (lixa package version is 0.5.29)
+Mar 31 22:53:10 mojan lixad[5891]: LXD015W unable to open pid file '/opt/lixa/var/run.pid'
+Mar 31 22:53:10 mojan lixad[5891]: LXD004E error (ERROR: 'open' function returned an error condition) while starting manager(s), premature exit
+      </screen>
+      because the process is not able to update the content of the
+      <filename>/opt/lixa/var/</filename> directory; use the administrative
+      user and try again:
+      <screen>
+sudo su - lixa
+/opt/lixa/sbin/lixad
+      </screen>
+      Running the command
       without options blocks your shell and runs the state server in
       foreground; this is not terribly useful but it may help you when
       you are debugging some issue. Use these commands, from a different
@@ -44,9 +64,10 @@ Application Options:
       (process id) and to stop the state server:
     </para>
     <screen>
-tiian@ubuntu:~$ ps -ef|grep lixad|grep -v grep
-tiian    12564  5841  0 17:23 pts/1    00:00:00 /opt/lixa/sbin/lixad
-tiian@ubuntu:~$ kill 12564
+tiian@mojan:~$ sudo su - lixa
+lixa@mojan:~$ ps -ef|grep lixad|grep -v grep
+lixa      5909  5906  0 22:56 pts/1    00:00:00 /opt/lixa/sbin/lixad
+lixa@mojan:~$ kill 5909
     </screen>
     <para>
       Alternatively you can strike ^C to break the foreground execution.
@@ -54,10 +75,10 @@ tiian@ubuntu:~$ kill 12564
       tracing is enabled:
     </para>
     <screen>
-tiian@ubuntu:~/lixa$ export LIXA_TRACE_MASK=0x00000001
-tiian@ubuntu:~/lixa$ /opt/lixa/sbin/lixad
-2011-03-13 17:36:41.707133 [14483/3074496240] lixad/main: starting
-2011-03-13 17:36:46.234200 [14483/3074496240] lixad/main: exiting
+lixa@mojan:~$ export LIXA_TRACE_MASK=0x00000001
+lixa@mojan:~$ /opt/lixa/sbin/lixad 
+2011-03-31 22:58:32.244333 [5920/3073509104] lixad/main: starting
+2011-03-31 22:58:34.864062 [5920/3073509104] lixad/main: exiting
     </screen>
     <section xml:id="Background_execution">
       <title>Background (<emphasis>daemon</emphasis>) execution</title>
@@ -67,9 +88,9 @@ tiian@ubuntu:~/lixa$ /opt/lixa/sbin/lixad
 	detached from any terminal:
       </para>
       <screen>
-tiian@ubuntu:~/lixa$ /opt/lixa/sbin/lixad --daemon
-tiian@ubuntu:~/lixa$ ps -ef|grep lixad|grep -v grep
-tiian    16370     1  0 17:54 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+lixa@mojan:~$ /opt/lixa/sbin/lixad --daemon
+lixa@mojan:~$ ps -ef|grep lixad|grep -v grep
+lixa      5926     1  0 22:59 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
       </screen>
       <para>
 	when running the state server as a daemon you need to perform some 
@@ -82,16 +103,16 @@ tiian    16370     1  0 17:54 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 	command, something is not running well.
       </para>
       <screen>
-tiian@ubuntu:~/lixa$ cat /opt/lixa/var/run.pid
-16370
+lixa@mojan:~$ cat /opt/lixa/var/run.pid 
+5926
       </screen>
       <para>
 	To stop a daemonized state server you must use the
 	<command>kill</command> command as shown below:
       </para>
       <screen>
-tiian@ubuntu:~/lixa$ kill $(cat /opt/lixa/var/run.pid)
-tiian@ubuntu:~/lixa$ ps -ef|grep lixad|grep -v grep
+lixa@mojan:~$ kill $(cat /opt/lixa/var/run.pid)
+lixa@mojan:~$ ps -ef|grep lixad|grep -v grep
       </screen>
       <para>
 	The <command>grep</command> command returns an empty result because
@@ -102,10 +123,10 @@ tiian@ubuntu:~/lixa$ ps -ef|grep lixad|grep -v grep
 	messages:
       </para>
       <screen>
-tiian@ubuntu:~/lixa$ sudo cat /var/log/daemon.log|grep lixad|grep 16370
-Mar 13 17:54:04 ubuntu lixad[16370]: LXD014N LIXA server entered daemon status
-Mar 13 18:13:16 ubuntu lixad[16370]: LXD019N received signal 15, server immediate shutdown in progress...
-Mar 13 18:13:16 ubuntu lixad[16370]: LXD006N server terminated activities
+tiian@mojan:~$ sudo cat /var/log/daemon.log|grep lixad|grep 5926
+Mar 31 22:59:11 mojan lixad[5926]: LXD014N LIXA server entered daemon status
+Mar 31 23:00:48 mojan lixad[5926]: LXD019N received signal 15, server immediate shutdown in progress...
+Mar 31 23:00:48 mojan lixad[5926]: LXD006N server terminated activities
       </screen>
     </section>
     <section>
@@ -160,12 +181,13 @@ Mar 13 18:13:16 ubuntu lixad[16370]: LXD006N server terminated activities
 	in progress (the free block chain contains all the blocks):
       </para>
       <screen>
-tiian@ubuntu:~/lixa$ /opt/lixa/sbin/lixad --dump f
+tiian@mojan:~$ sudo su - lixa
+lixa@mojan:~$ /opt/lixa/sbin/lixad --dump f
 ========================================================================
-First file ('/tmp/lixa/var/lixad_status1_1') will be dumped
+First file ('/opt/lixa/var/lixad_status1_1') will be dumped
 Magic number is: 24848 (24848)
 Level is: 1 (1)
-Last sync timestamp: 2011-03-13T18:13:16.127779+0100
+Last sync timestamp: 2011-03-31T23:00:48.829787+0200
 Size: 10 blocks
 Used block chain starts at: 0 (empty chain)
 Free block chain starts at: 1
@@ -228,7 +250,7 @@ Block type: unknown (0)
 	  Below there is a sample invocation:
 	</para>
 	<screen>
-tiian@ubuntu:~$ /opt/lixa/sbin/lixad --config-file /tmp/lixad_conf.xml
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --config-file /tmp/lixad_conf.xml
 	</screen>
       </section>
       <section>
@@ -243,10 +265,10 @@ tiian@ubuntu:~$ /opt/lixa/sbin/lixad --config-file /tmp/lixad_conf.xml
 	  Below there is a sample invocation:
 	</para>
 	<screen>
-tiian@ubuntu:~$ export LIXA_TRACE_MASK=0x01
-tiian@ubuntu:~$ /opt/lixa/sbin/lixad --daemon --trace-file /tmp/lixad.trace
-tiian@ubuntu:~$ ls -la /tmp/lixad.trace
--rw-r--r-- 1 tiian tiian 349 2011-03-18 16:14 /tmp/lixad.trace
+lixa@ubuntu:~$ export LIXA_TRACE_MASK=0x01
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon --trace-file /tmp/lixad.trace
+lixa@ubuntu:~$ ls -la /tmp/lixad.trace
+-rw-r--r-- 1 lixa lixa 349 2011-03-18 16:14 /tmp/lixad.trace
 	</screen>
 	<para>
 	  Take a look to
@@ -285,7 +307,7 @@ tiian@ubuntu:~$ ls -la /tmp/lixad.trace
 	  version of the installed software as shown below:
 	</para>
 	<screen>
-tiian@ubuntu:~$ /opt/lixa/sbin/lixad --version
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --version
 LIXA: a Libre XA implementation
 Copyright (c) 2009-2011, Christian Ferrari; all rights reserved.
 License: GPL (GNU Public License) version 2
@@ -322,6 +344,11 @@ Application Options:
   -c, --commit       Perform a commit transaction
   -r, --rollback     Perform a rollback transaction
     </screen>
+    <important><para>
+	The LIXA test utility is a LIXA client program and it does not need
+	any special authorization to run because it does not need to write
+	the content of <filename>/opt/lixa/var/</filename> directory.
+    </para></important>
     <para>
       The <command>lixat</command> command does nothing useful but trying 
       to contact the state server and optionally perform a commit and/or 
@@ -431,6 +458,11 @@ Application Options:
   -B, --bypass-formatid-check     Bypass xid format id check
   -e, --use-tmendrscan-flag       Use TMENDRSCAN flag for last xa_recover call
     </screen>
+    <important><para>
+	The LIXA test utility is a LIXA client program and it does not need
+	any special authorization to run because it does not need to write
+	the content of <filename>/opt/lixa/var/</filename> directory.
+    </para></important>
     <para>
       The usage of the <command>lixar</command> command is strictly related
       to <emphasis>recovery</emphasis> tasks and is explained in
