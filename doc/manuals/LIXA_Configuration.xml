@@ -250,7 +250,13 @@
       The client component (<command>lixac</command>) is configured using the
       <filename>etc/lixac_conf.xml</filename> file; the server component
       (<command>lixad</command>) is configured using the
-      <filename>etc/lixad_conf.xml</filename> file.
+      <filename>etc/lixad_conf.xml</filename> file
+      <footnote><para>
+	  Both the files reside in <filename>/opt/lixa/etc/</filename>
+	  directory and must be managed by
+	  <systemitem class="username">lixa</systemitem> user, the
+	  LIXA administrative user
+      </para></footnote>.
     </para>
     <para>
       If a node hosts both the client and the server components, both the
@@ -300,15 +306,15 @@
 	Below there is a sample configuration file:
 	<screen>
 &lt;?xml version="1.0" encoding="UTF-8" ?&gt;
-  &lt;server pid_file="/tmp/lixa/var/run.pid"&gt;
+  &lt;server pid_file="/opt/lixa/var/run.pid"&gt;
   &lt;listeners&gt;
     &lt;listener domain="AF_INET" address="127.0.0.1" port="3456"/&gt;
     &lt;listener domain="AF_INET" address="0.0.0.0" port="2345"/&gt;
   &lt;/listeners&gt;
   &lt;managers&gt;
-    &lt;manager status_file="/tmp/lixa/var/lixad_status1"/&gt;
-    &lt;manager status_file="/tmp/lixa/var/lixad_status2"/&gt;
-    &lt;manager status_file="/tmp/lixa/var/lixad_status3"/&gt;
+    &lt;manager status_file="/opt/lixa/var/lixad_status1"/&gt;
+    &lt;manager status_file="/opt/lixa/var/lixad_status2"/&gt;
+    &lt;manager status_file="/opt/lixa/var/lixad_status3"/&gt;
   &lt;/managers&gt;
 &lt;/server&gt;
       </screen>
@@ -421,10 +427,10 @@
     &lt;sttsrv name="server2" domain="AF_INET" address="10.23.46.91" port="3456" /&gt;
   &lt;/sttsrvs&gt;
   &lt;rsrmgrs&gt;
-    &lt;rsrmgr name="OracleXE_dynreg" switch_file="/tmp/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
-    &lt;rsrmgr name="OracleXE_stareg" switch_file="/tmp/lixa/lib/switch_oracle_stareg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
-    &lt;rsrmgr name="IBMDB2_dynreg" switch_file="/tmp/lixa/lib/switch_ibmdb2_dynreg.so" xa_open_info="axlib=/tmp/lixa/lib/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
-    &lt;rsrmgr name="IBMDB2_stareg" switch_file="/tmp/lixa/lib/switch_ibmdb2_stareg.so" xa_open_info="axlib=/tmp/lixa/lib/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+    &lt;rsrmgr name="OracleXE_dynreg" switch_file="/opt/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
+    &lt;rsrmgr name="OracleXE_stareg" switch_file="/opt/lixa/lib/switch_oracle_stareg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
+    &lt;rsrmgr name="IBMDB2_dynreg" switch_file="/opt/lixa/lib/switch_ibmdb2_dynreg.so" xa_open_info="axlib=/opt/lixa/lib/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+    &lt;rsrmgr name="IBMDB2_stareg" switch_file="/opt/lixa/lib/switch_ibmdb2_stareg.so" xa_open_info="axlib=/opt/lixa/lib/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
   &lt;/rsrmgrs&gt;
   &lt;profiles&gt;
     &lt;profile name="GT71"&gt;

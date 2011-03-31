@@ -123,22 +123,32 @@
     <section>
       <title>Authorization</title>
       <important><para>
-	The software produced by the LIXA project does not require any
+	The software produced by the LIXA project 
+	<emphasis>does</emphasis> not require any
 	special authorization to run.
       </para></important>
       <para>
-	You can run the processes with the desired UNIX user you prefer; 
+	You can run the processes with the desired UNIX user you prefer but
 	in this manual specific user and group will be used as a suggestion.
-	Use this command in an Ubuntu based Linux system to create the
-	<systemitem class="username">lixa</systemitem> user:
+	Use this commands in an Ubuntu based Linux system to create the
+	<systemitem class="username">lixa</systemitem> user and the
+	<systemitem class="groupname">lixa</systemitem> group:
 	<screen>
-tiian@ubuntu:~$ sudo adduser --system --no-create-home --disabled-login lixa
-Adding system user `lixa' (UID 106) ...
-Adding new user `lixa' (UID 106) with group `nogroup' ...
-Not creating home directory `/home/lixa'.
+tiian@mojan:~$ sudo su -
+root@mojan:~# id
+uid=0(root) gid=0(root) gruppi=0(root)
+root@mojan:~# addgroup --system lixa
+[...]
+root@mojan:~# adduser --system --ingroup lixa --shell /bin/bash lixa
+[...]
+root@mojan:~# su -c id lixa
+uid=118(lixa) gid=129(lixa) groups=129(lixa)
+root@mojan:~# exit
+tiian@mojan:~$ 
 	</screen>
 	Refer to the man page of your Linux distribution if the above
-	command fails.
+	commands fail; on some distributions you must use
+	<command>su -</command> instead of <command>sudo su -</command>.
       </para>
       <note><para>
 	  LIXA client communicates to LIXA server (daemon) throught TCP/IP and
@@ -196,131 +206,158 @@ sudo make install
       <screen>
 su; make install; exit
       </screen>
-      The above commands, if nothing goes wrong, install the LIXA software
+      If nothing goes wrong, the above commands install the LIXA software
       artifacts in <filename>/opt/lixa</filename> default directory.
-      After the installation it is suggested to change the authorization
-      assigned to the installed software:
+      After the installation you should change the authorization
+      assigned to some directories. Use <command>sudo su -</command> or
+      <command>su -</command> to gain root privileges and then:
       <screen>
-sudo chown -R lixa /opt/lixa
+root@mojan:~# chown -R lixa:lixa /opt/lixa/etc/ /opt/lixa/var/
+root@mojan:~# ls -la /opt/lixa/etc/ /opt/lixa/var/
+/opt/lixa/etc/:
+totale 16
+drwxr-xr-x 2 lixa lixa 4096 2011-03-31 22:11 .
+drwxr-xr-x 9 root root 4096 2011-03-31 22:12 ..
+-rw-r--r-- 1 lixa lixa 3542 2011-03-31 22:11 lixac_conf.xml
+-rw-r--r-- 1 lixa lixa  447 2011-03-31 22:11 lixad_conf.xml
+
+/opt/lixa/var/:
+totale 12
+drwxr-xr-x 2 lixa lixa 4096 2011-03-31 22:12 .
+drwxr-xr-x 9 root root 4096 2011-03-31 22:12 ..
+-rw-r--r-- 1 lixa lixa  178 2011-03-31 22:12 README
       </screen>
+      The succesful execution of the above commands guarantees the
+      configuration and the state files can be managed using the
+      LIXA administrative account (
+      user=<systemitem class="username">lixa</systemitem>,
+      group=<systemitem class="groupname">lixa</systemitem>).
     </para>
-    <para>
-      There are many options you can pass to <command>configure</command>
-      command to meet your needs (see below).
-    </para>
-    <simplesect>
-      <title>Choosing a different installation <envar>PATH</envar></title>
+    <section>
+      <title>Advanced configuration</title>
       <para>
-	At very first install <filename>/tmp</filename> could be a good
-	destination:
-	<screen>
-./configure --prefix=/tmp/lixa
-	</screen>
+	There are many options you can pass to <command>configure</command>
+	command to meet your needs (see below).
       </para>
-      <para>
-      After some testing, you might prefer your home directory:
-      <screen>
+      <simplesect>
+	<title>Choosing a different installation <envar>PATH</envar></title>
+	<note><para>
+	    The commands explained in the previous section should be
+	    adapted to different paths, if you choosed a non standard
+	    installation path.
+	</para></note>
+	<para>
+	  Performing the very first install <filename>/tmp</filename> 
+	  could be a good destination:
+	  <screen>
+./configure --prefix=/tmp/lixa
+	  </screen>
+	</para>
+	<para>
+	  After some testing, you might prefer your home directory:
+	  <screen>
 ./configure --prefix=$HOME/lixa
-      </screen>
-      and you will get a layout like this:
-      <screen>
+	  </screen>
+	  and you will get a layout like this:
+	  <screen>
 $HOME/lixa/bin
 $HOME/lixa/etc
 $HOME/lixa/include
 $HOME/lixa/lib
 $HOME/lixa/sbin
 $HOME/lixa/var
-      </screen>
-      </para>
-      <para>
-	You can split code and data with something like this:
-	<screen>
+	  </screen>
+	</para>
+	<para>
+	  You can split code and data with something like this:
+	  <screen>
 ./configure --prefix=/ --exec-prefix=/usr/local
-	</screen>
-      </para>
-    </simplesect>
-    <simplesect>
-      <title>Locating pre-requisites libraries</title>
-      <para>
-	If any of the pre-requisite library include files are not in the
-	standard search <envar>PATH</envar>, you can export 
-	<envar>CPPFLAGS</envar> before the configure process to add 
-	your custom path:
-	<screen>
+	  </screen>
+	</para>
+      </simplesect>
+      <simplesect>
+	<title>Locating pre-requisites libraries</title>
+	<para>
+	  If any of the pre-requisite library include files are not in the
+	  standard search <envar>PATH</envar>, you can export 
+	  <envar>CPPFLAGS</envar> before the configure process to add 
+	  your custom path:
+	  <screen>
 export CPPFLAGS=-I/path/to/libuuid
 ./configure
 make
-	</screen>
-	to see the list of environment variables that can affect the build 
-	process
-	use the command
-	<screen>
+	  </screen>
+	  to see the list of environment variables that can affect the build 
+	  process
+	  use the command
+	  <screen>
 ./configure --help
-	</screen>
-      </para>
-    </simplesect>
-    <section>
-      <title>Optional features</title>
-      <para>
-	The supplied defaults are generally good enought to start working with
-	LIXA, but if you want to perform some hacking you might be interested
-	in activating/deactivating some optional features.
-      </para>
-      <simplesect>
-	<title>Tracing</title>
-	<para>
-	  The tracing feature is enabled by default: the binary objects
-	  produced by the build procedure contains a lot of messages that can
-	  be displayed turning on tracing at run time.
+	  </screen>
 	</para>
+      </simplesect>
+      <section>
+	<title>Optional features</title>
 	<para>
-	  Removing the tracing feature can save RAM (smaller binary objects)
-	  and CPU (every trace message is tested against run time 
-	  configuration).
+	  The supplied defaults are generally good enought to start working with
+	  LIXA, but if you want to perform some hacking you might be interested
+	  in activating/deactivating some optional features.
 	</para>
-	<important>
+	<simplesect>
+	  <title>Tracing</title>
 	  <para>
-	    Disabling tracing seems a good way to increase the performance of
-	    the software, but unfortunately without a trace it is quite 
-	    impossible to debug some issues. Only rock stable software can
-	    be compiled without tracing, and this is not the case of LIXA.
+	    The tracing feature is enabled by default: the binary objects
+	    produced by the build procedure contains a lot of messages that can
+	    be displayed turning on tracing at run time.
 	  </para>
-	</important>
-	<para>
-	  To disable tracing, use <option>--disable-trace</option> on
-	  <command>./configure</command> command line:
-	  <screen>
+	  <para>
+	    Removing the tracing feature can save RAM (smaller binary objects)
+	    and CPU (every trace message is tested against run time 
+	    configuration).
+	  </para>
+	  <important>
+	    <para>
+	      Disabling tracing seems a good way to increase the performance of
+	      the software, but unfortunately without a trace it is quite 
+	      impossible to debug some issues. Only rock stable software can
+	      be compiled without tracing, and this is not the case of LIXA.
+	    </para>
+	  </important>
+	  <para>
+	    To disable tracing, use <option>--disable-trace</option> on
+	    <command>./configure</command> command line:
+	    <screen>
 ./configure --disable-trace
-	  </screen>
-	</para>
-      </simplesect>
-      <simplesect>
-	<title>Extra debug code</title>
-	<para>
-	  To enable extra debug code, that's basically some redundant check
-	  code use <option>--enable-debug</option> on
-	  <command>./configure</command> command line:
-	  <screen>
+	    </screen>
+	  </para>
+	</simplesect>
+	<simplesect>
+	  <title>Extra debug code</title>
+	  <para>
+	    To enable extra debug code, that's basically some redundant check
+	    code use <option>--enable-debug</option> on
+	    <command>./configure</command> command line:
+	    <screen>
 ./configure --enable-debug
-	  </screen>
-	  This feature could be interesting when porting the LIXA project
-	  software to a different platform; for normal use, the extra
-	  debugging code is useless.
-	</para>
-      </simplesect>
-      <simplesect>
-	<title>Crash simulation</title>
-	<para>
-	  This feature is useful when testing the software: with crash
-	  simulation the software can be tested against simulated software
-	  crashes and, on some extents, power outages.
-	  To enable crash simulation use <option>--enable-crash</option> on
-	  <command>./configure</command> command line:
-	  <screen>
+	    </screen>
+	    This feature could be interesting when porting the LIXA project
+	    software to a different platform; for normal use, the extra
+	    debugging code is useless.
+	  </para>
+	</simplesect>
+	<simplesect>
+	  <title>Crash simulation</title>
+	  <para>
+	    This feature is useful when testing the software: with crash
+	    simulation the software can be tested against simulated software
+	    crashes and, on some extents, power outages.
+	    To enable crash simulation use <option>--enable-crash</option> on
+	    <command>./configure</command> command line:
+	    <screen>
 ./configure --enable-crash
-	  </screen>
-	</para>
-      </simplesect>
+	    </screen>
+	  </para>
+	</simplesect>
+      </section>
     </section>
     <section>
       <title>Linking third party resource managers</title>
