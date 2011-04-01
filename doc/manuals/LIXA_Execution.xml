@@ -19,7 +19,7 @@
       <command>lixad</command> (LIXA daemon). The command
     </para>
     <screen>
-tiian@ubuntu:~/lixa$ /opt/lixa/sbin/lixad --help
+tiian@ubuntu:~$ /opt/lixa/sbin/lixad --help
 Usage:
   lixad [OPTION...] - LIXA server
 
@@ -42,19 +42,20 @@ Application Options:
       If you tried to start the state server without the appropriate 
       privileges it should happen something like this:
       <screen>
-tiian@mojan:~$ /opt/lixa/sbin/lixad
-tiian@mojan:~$ sudo tail /var/log/daemon.log
+tiian@ubuntu:~$ /opt/lixa/sbin/lixad
+tiian@ubuntu:~$ sudo su -c "tail /var/log/daemon.log"
 [...]
-Mar 31 22:53:10 mojan lixad[5891]: LXD000N this process is starting a new LIXA server (lixa package version is 0.5.29)
-Mar 31 22:53:10 mojan lixad[5891]: LXD015W unable to open pid file '/opt/lixa/var/run.pid'
-Mar 31 22:53:10 mojan lixad[5891]: LXD004E error (ERROR: 'open' function returned an error condition) while starting manager(s), premature exit
+Mar 31 22:53:10 ubuntu lixad[5891]: LXD000N this process is starting a new LIXA server (lixa package version is 0.5.29)
+Mar 31 22:53:10 ubuntu lixad[5891]: LXD015W unable to open pid file '/opt/lixa/var/run.pid'
+Mar 31 22:53:10 ubuntu lixad[5891]: LXD004E error (ERROR: 'open' function returned an error condition) while starting manager(s), premature exit
       </screen>
       because the process is not able to update the content of the
       <filename>/opt/lixa/var/</filename> directory; use the administrative
       user and try again:
       <screen>
-sudo su - lixa
-/opt/lixa/sbin/lixad
+tiian@ubuntu:~$ sudo su - lixa
+[sudo] password for tiian:
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad
       </screen>
       Running the command
       without options blocks your shell and runs the state server in
@@ -64,10 +65,12 @@ sudo su - lixa
       (process id) and to stop the state server:
     </para>
     <screen>
-tiian@mojan:~$ sudo su - lixa
-lixa@mojan:~$ ps -ef|grep lixad|grep -v grep
+tiian@ubuntu:~$ sudo su - lixa
+lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
 lixa      5909  5906  0 22:56 pts/1    00:00:00 /opt/lixa/sbin/lixad
-lixa@mojan:~$ kill 5909
+lixa@ubuntu:~$ kill 5909
+lixa@ubuntu:~$ exit
+logout
     </screen>
     <para>
       Alternatively you can strike ^C to break the foreground execution.
@@ -75,8 +78,8 @@ lixa@mojan:~$ kill 5909
       tracing is enabled:
     </para>
     <screen>
-lixa@mojan:~$ export LIXA_TRACE_MASK=0x00000001
-lixa@mojan:~$ /opt/lixa/sbin/lixad 
+lixa@ubuntu:~$ export LIXA_TRACE_MASK=0x00000001
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad 
 2011-03-31 22:58:32.244333 [5920/3073509104] lixad/main: starting
 2011-03-31 22:58:34.864062 [5920/3073509104] lixad/main: exiting
     </screen>
@@ -88,8 +91,8 @@ lixa@mojan:~$ /opt/lixa/sbin/lixad
 	detached from any terminal:
       </para>
       <screen>
-lixa@mojan:~$ /opt/lixa/sbin/lixad --daemon
-lixa@mojan:~$ ps -ef|grep lixad|grep -v grep
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
 lixa      5926     1  0 22:59 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
       </screen>
       <para>
@@ -103,7 +106,7 @@ lixa      5926     1  0 22:59 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 	command, something is not running well.
       </para>
       <screen>
-lixa@mojan:~$ cat /opt/lixa/var/run.pid 
+lixa@ubuntu:~$ cat /opt/lixa/var/run.pid 
 5926
       </screen>
       <para>
@@ -111,8 +114,8 @@ lixa@mojan:~$ cat /opt/lixa/var/run.pid
 	<command>kill</command> command as shown below:
       </para>
       <screen>
-lixa@mojan:~$ kill $(cat /opt/lixa/var/run.pid)
-lixa@mojan:~$ ps -ef|grep lixad|grep -v grep
+lixa@ubuntu:~$ kill $(cat /opt/lixa/var/run.pid)
+lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
       </screen>
       <para>
 	The <command>grep</command> command returns an empty result because
@@ -123,10 +126,10 @@ lixa@mojan:~$ ps -ef|grep lixad|grep -v grep
 	messages:
       </para>
       <screen>
-tiian@mojan:~$ sudo cat /var/log/daemon.log|grep lixad|grep 5926
-Mar 31 22:59:11 mojan lixad[5926]: LXD014N LIXA server entered daemon status
-Mar 31 23:00:48 mojan lixad[5926]: LXD019N received signal 15, server immediate shutdown in progress...
-Mar 31 23:00:48 mojan lixad[5926]: LXD006N server terminated activities
+tiian@ubuntu:~$ sudo su -c "cat /var/log/daemon.log|grep lixad|grep 5926"
+Mar 31 22:59:11 ubuntu lixad[5926]: LXD014N LIXA server entered daemon status
+Mar 31 23:00:48 ubuntu lixad[5926]: LXD019N received signal 15, server immediate shutdown in progress...
+Mar 31 23:00:48 ubuntu lixad[5926]: LXD006N server terminated activities
       </screen>
     </section>
     <section>
@@ -181,8 +184,8 @@ Mar 31 23:00:48 mojan lixad[5926]: LXD006N server terminated activities
 	in progress (the free block chain contains all the blocks):
       </para>
       <screen>
-tiian@mojan:~$ sudo su - lixa
-lixa@mojan:~$ /opt/lixa/sbin/lixad --dump f
+tiian@ubuntu:~$ sudo su - lixa
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --dump f
 ========================================================================
 First file ('/opt/lixa/var/lixad_status1_1') will be dumped
 Magic number is: 24848 (24848)
@@ -345,12 +348,13 @@ Application Options:
   -r, --rollback     Perform a rollback transaction
     </screen>
     <important><para>
-	The LIXA test utility is a LIXA client program and it does not need
+	The LIXA test utility is a LIXA client program and it 
+	does <emphasis>not</emphasis> need
 	any special authorization to run because it does not need to write
 	the content of <filename>/opt/lixa/var/</filename> directory.
     </para></important>
     <para>
-      The <command>lixat</command> command does nothing useful but trying 
+      The <command>lixat</command> command does nothing useful except trying 
       to contact the state server and optionally perform a commit and/or 
       rollback dummy distributed transaction.
       Below there's the output of a trivial execution: the program connects
@@ -459,7 +463,8 @@ Application Options:
   -e, --use-tmendrscan-flag       Use TMENDRSCAN flag for last xa_recover call
     </screen>
     <important><para>
-	The LIXA test utility is a LIXA client program and it does not need
+	The LIXA test utility is a LIXA client program and it does 
+	<emphasis>not</emphasis> need
 	any special authorization to run because it does not need to write
 	the content of <filename>/opt/lixa/var/</filename> directory.
     </para></important>
