@@ -1,10 +1,10 @@
 LOG:
 
-         - 0.5.29 "make install" installs the HTML version of the manual in
+20110401 - 0.5.29 "make install" installs the HTML version of the manual in
                   the standard doc directory
                   "make dist" injects the HTML version of the manual in the
                   package
-                  utility "lixat" (LIXA test) has been added
+                  utility "lixat" (LIXA test) has been added 
 
 20110228 - 0.5.28 changed "trnmgr" with "sttsrv" and "trnmgrs" with "sttsrvs"
                   in the lixac_conf.xml file; the previous name was 

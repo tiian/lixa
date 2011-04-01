@@ -76,7 +76,10 @@ tx_open(): -7
       Start the state server (see <xref linkend="Background_execution"/>)
       and try again:
       <screen>
-tiian@ubuntu:~/tmp$ /opt/lixa/sbin/lixad --daemon
+tiian@ubuntu:~/tmp$ sudo su - lixa
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ exit
+logout
 tiian@ubuntu:~/tmp$ ./example1
 tx_open(): 0
 tx_begin(): 0
