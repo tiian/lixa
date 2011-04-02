@@ -217,8 +217,9 @@ int lixa_msg_send(int fd, const char *buf, size_t buf_size)
 
         if (0 != getsockopt(fd, SOL_SOCKET, SO_ERROR, &optval, &optlen))
             THROW(GETSOCKOPT_ERROR);
-        LIXA_TRACE(("lixa_msg_send: so_error=%d (EPIPE=%d)\n", optval, EPIPE));
-        if (EPIPE == optval) {
+        LIXA_TRACE(("lixa_msg_send: so_error=%d (EPIPE=%d, ECONNRESET=%d)\n",
+                    optval, EPIPE, ECONNRESET));
+        if (EPIPE == optval || ECONNRESET == optval) {
             int rc = 0;
             syslog(LOG_NOTICE, LIXA_SYSLOG_LXC027N, getpid(), pthread_self());
             rc = shutdown(fd, SHUT_RDWR);
