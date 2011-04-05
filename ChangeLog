@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.5.30
+
 20110401 - 0.5.29 "make install" installs the HTML version of the manual in
                   the standard doc directory
                   "make dist" injects the HTML version of the manual in the
