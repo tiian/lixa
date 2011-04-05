@@ -80,6 +80,9 @@ tiian@ubuntu:~/tmp$ sudo su - lixa
 lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
 lixa@ubuntu:~$ exit
 logout
+tiian@ubuntu:~/tmp$ ps -ef|grep lixad|grep -v grep
+lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
 tiian@ubuntu:~/tmp$ ./example1
 tx_open(): 0
 tx_begin(): 0
@@ -91,6 +94,109 @@ tx_close(): 0
       Your first program has connected to the state server and has performed
       two dummy distributed transactions: <emphasis>commit</emphasis> and 
       <emphasis>rollback</emphasis>.
+    </para>
+    <section>
+      <title>Some details about the example</title>
+      <para>
+	You have not specified a specific profile:
+	<screen>
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+
+	</screen>
+	The LIXA client library used the default one, the first listed in
+	<filename>etc/lixac_conf.xml</filename>. If you inspected the 
+	configuration file <filename>/opt/lixa/etc/lixac_conf.xml</filename> 
+	you would see something like this:
+	<screen>
+tiian@ubuntu:~/tmp$ cat /opt/lixa/etc/lixac_conf.xml
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;client&gt;
+  &lt;sttsrvs&gt;
+    &lt;sttsrv name="local_1" domain="AF_INET" address="127.0.0.1" port="2345" /&gt;
+[...]
+    &lt;rsrmgr name="LIXAdummyRM" switch_file="/opt/lixa/lib/switch_lixa_dummyrm.so" xa_open_info="dummy open string" xa_close_info="dummy close string" /&gt;
+[...]
+  &lt;profiles&gt;
+    &lt;profile name="CF05"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;LIXAdummyRM&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;LIXAdummyRM&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+    &lt;profile name="GT71"&gt;
+[...]
+  &lt;/profiles&gt;
+&lt;/client&gt;
+	</screen>
+	The default profile is named <quote>CF05</quote> and lists two
+	resource managers of the same type: <quote>LIXAdummyRM</quote>;
+	the related switch file is the file 
+	<filename>/opt/lixa/lib/switch_lixa_dummyrm.so</filename>.
+	The dummy resource managers supplied by the LIXA project is
+	a special trivial resource managers: it ever returns
+	<constant>XA_OK</constant>. If you are interested in LIXA dummy
+	Resource Manager implementation, take a look to the source file
+	<filename>src/client/switch/lixa/lixa_dummyrm.c</filename>.
+	To verify that the program is using the dummy resource manager,
+	execute it with <varname>LIXA_TRACE_MASK</varname> environment
+	variable set to <constant>0x00008000</constant>:
+	<screen>
+tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00008000
+tiian@ubuntu:~/tmp$ ./example1
+[...]
+2011-04-05 22:07:59.953844 [29359/3073444096] client_config_load_switch
+2011-04-05 22:07:59.953875 [29359/3073444096] client_config_load_switch: resource manager # 0, name='LIXAdummyRM', switch_file='/opt/lixa/lib/switch_lixa_dummyrm.so'
+2011-04-05 22:07:59.954220 [29359/3073444096] client_config_load_switch: module address 0x804e410, function lixa_get_xa_switch found at address 0xb76dd790
+2011-04-05 22:07:59.954254 [29359/3073444096] client_config_load_switch: lixa_getxa_switch()->name = 'lixa_dummyrm', lixa_get_xa_switch()->flags = 0
+2011-04-05 22:07:59.954279 [29359/3073444096] client_config_load_switch: resource manager dynamically registers: false
+2011-04-05 22:07:59.954302 [29359/3073444096] client_config_load_switch: resource manager does not support association migration: false
+2011-04-05 22:07:59.954325 [29359/3073444096] client_config_load_switch: resource manager supports asynchronous operations: false
+2011-04-05 22:07:59.954348 [29359/3073444096] client_config_load_switch: resource manager # 1, name='LIXAdummyRM', switch_file='/opt/lixa/lib/switch_lixa_dummyrm.so'
+2011-04-05 22:07:59.954379 [29359/3073444096] client_config_load_switch: module address 0x804e410, function lixa_get_xa_switch found at address 0xb76dd790
+2011-04-05 22:07:59.954405 [29359/3073444096] client_config_load_switch: lixa_getxa_switch()->name = 'lixa_dummyrm', lixa_get_xa_switch()->flags = 0
+2011-04-05 22:07:59.954429 [29359/3073444096] client_config_load_switch: resource manager dynamically registers: false
+2011-04-05 22:07:59.954451 [29359/3073444096] client_config_load_switch: resource manager does not support association migration: false
+2011-04-05 22:07:59.954474 [29359/3073444096] client_config_load_switch: resource manager supports asynchronous operations: false
+[...]
+tx_open(): 0
+tx_begin(): 0
+tx_commit(): 0
+tx_begin(): 0
+tx_rollback(): 0
+2011-04-05 22:08:00.128531 [29359/3073444096] client_unconfig
+2011-04-05 22:08:00.128883 [29359/3073444096] client_unconfig: acquiring exclusive mutex
+2011-04-05 22:08:00.129174 [29359/3073444096] client_config_unload_switch
+2011-04-05 22:08:00.129399 [29359/3073444096] client_config_unload_switch: resource manager # 0, defined in config as 'LIXAdummyRM', module address 0x804e410, xa_switch->name='lixa_dummyrm', xa_switch->flags=0
+2011-04-05 22:08:00.129594 [29359/3073444096] client_config_unload_switch: resource manager # 1, defined in config as 'LIXAdummyRM', module address 0x804e410, xa_switch->name='lixa_dummyrm', xa_switch->flags=0
+2011-04-05 22:08:00.129852 [29359/3073444096] client_config_unload_switch/excp=1/ret_cod=0/errno=0
+2011-04-05 22:08:00.130024 [29359/3073444096] client_unconfig/xmlCleanupParser
+2011-04-05 22:08:00.130215 [29359/3073444096] client_unconfig: releasing exclusive mutex
+2011-04-05 22:08:00.130371 [29359/3073444096] client_unconfig/excp=2/ret_cod=0/errno=0
+tx_close(): 0
+	</screen>
+      </para>
+    </section>
+  </section>
+  <section>
+    <title>An example with a <quote>real</quote> Resource Manager (Oracle DBMS)</title>
+    <para>
+      Using a real Resource Manager, like a DBMS, requires some extra effort
+      because you have to set-up the environment needed by the Resource
+      Manager. The example explained in this section was developed for
+      Oracle Database 10g Release 2 (10.2) Express Edition: if you used 
+      a different version, you might need to fix some of the details 
+      showed by this example.
+      <important><para>
+	  If you did not yet installed the software provided by Oracle,
+	  please refer to the official Oracle site to download the
+	  software and the information necessary to install and configure
+	  the database. This manual does not give you information related
+	  to Oracle technology: it is assumed you already installed and
+	  configured the database.
+      </para></important>
     </para>
   </section>
 </chapter>
