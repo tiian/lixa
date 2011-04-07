@@ -198,5 +198,135 @@ tx_close(): 0
 	  configured the database.
       </para></important>
     </para>
+    <section>
+      <title>Create XA views in Oracle database</title>
+      <note><para>
+	  The steps explained below might be not necessary with some
+	  versions of the Oracle software. With Oracle XE 10.2.0.1 they
+	  are necessary.
+      </para></note>
+      <para>
+	First of all you must be able to connect as <quote>SYSDBA</quote>
+	from a terminal session; my dummy installation has user 
+	<systemitem class="username">sys</systemitem> with password
+	<quote>oracle</quote>; the commands below show what's happen when
+	I connect to the Oracle server:
+	<screen>
+tiian@ubuntu:~$ sudo su - oracle
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
+oracle@ubuntu:~$ echo $ORACLE_HOME
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:23:56 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+	</screen>
+	You must check the file <filename>xaview.sql</filename> is available:
+	<screen>
+oracle@ubuntu:~$ ls -la $ORACLE_HOME/rdbms/admin/xaview.sql
+-rw-r--r-- 1 oracle dba 1754 2006-02-24 06:18 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/admin/xaview.sql
+	</screen>
+	It contains the SQL instructions necessary to create two specific
+	system views that could be not defined in your database; the
+	following commands are related to a database that contains the
+	desired views:
+	<screen>
+oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:32:45 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> select * from v$pending_xatrans$;
+
+no rows selected
+
+SQL> select * from v$xatrans$;
+
+no rows selected
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+	</screen>
+	If the command failed the views would be not defined; you can
+	create them with a command like this:
+	<screen>
+oracle@ubuntu:~$ cat $ORACLE_HOME/rdbms/admin/xaview.sql | sqlplus "sys/oracle as sysdba"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:37:06 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL>
+View dropped.
+
+SQL>
+View dropped.
+
+SQL> SQL> SQL>   2    3    4    5    6    7    8
+View created.
+
+SQL> SQL> SQL> SQL>   2    3    4    5    6    7    8    9   10   11
+View created.
+
+SQL> SQL> SQL> Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Authorize XA views in Oracle database</title>
+      <para>
+	The example programs supplied by the LIXA project are designed
+	to use the 
+	<systemitem class="username">hr</systemitem> user; you 
+	<emphasis>must</emphasis> grant
+	the necessary privileges to all the users you want to use for
+	your Application Programs. The below commands show the necessary
+	<command>grant</command> commands:
+	<screen>
+oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:44:44 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> grant select on dba_pending_transactions to hr;
+
+Grant succeeded.
+
+SQL> grant select on v$pending_xatrans$ to hr;
+
+Grant succeeded.
+
+SQL> grant select on v$xatrans$ to hr;
+
+Grant succeeded.
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+	</screen>
+      </para>
+    </section>
   </section>
 </chapter>
