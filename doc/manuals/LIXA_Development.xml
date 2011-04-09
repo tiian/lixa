@@ -298,8 +298,8 @@ SQL> SQL> SQL> Disconnected from Oracle Database 10g Express Edition Release 10.
 	<systemitem class="username">hr</systemitem> user; you 
 	<emphasis>must</emphasis> grant
 	the necessary privileges to all the users you want to use for
-	your Application Programs. The below commands show the necessary
-	<command>grant</command> commands:
+	your Application Programs. The below commands show how to grant
+	the necessary privileges to it:
 	<screen>
 oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
 
@@ -326,6 +326,43 @@ Grant succeeded.
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
 	</screen>
+      </para>
+      <note><para>
+	  In the case of user
+	  <systemitem class="username">hr</systemitem> did not exist and
+	  the above commands failed,
+	  you should read Oracle documentation and pick-up the necessary
+	  information to create it.
+      </para></note>
+    </section>
+    <section>
+      <title>Unlock <quote>hr</quote> Oracle user</title>
+      <para>
+	The example programs supplied by the LIXA project are designed
+	to use the 
+	<systemitem class="username">hr</systemitem> user; it might be 
+	<emphasis>locked</emphasis> after Oracle software installation.
+	The below commands show how to unlock it:
+	<screen>
+oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:44:44 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> alter user hr account unlock;
+
+User altered.
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+	</screen>
+	You may perform the same operation using the graphical (web based)
+	interface.
       </para>
     </section>
   </section>
