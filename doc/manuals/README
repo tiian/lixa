@@ -4,3 +4,343 @@ http://lixa.sourceforge.net/manuals/
 sftp tiian@web.sourceforge.net
 cd /home/project-web/lixa/htdocs/manuals/
 put index.html
+
+
+
+Draft for Oracle example:
+
+Start the Oracle server (Ubuntu installation):
+
+tiian@ubuntu:~/tmp$ sudo /etc/init.d/oracle-xe enable
+tiian@ubuntu:~/tmp$ sudo /etc/init.d/oracle-xe start
+Starting Oracle Net Listener.
+Starting Oracle Database 10g Express Edition Instance.
+
+
+
+Start the server:
+
+tiian@ubuntu:~/tmp$ sudo su - lixa
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ exit
+logout
+tiian@ubuntu:~/tmp$ ps -ef|grep lixad|grep -v grep
+lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+
+
+
+Prepare and start the client:
+
+sudo su - oracle
+
+mkdir tmp
+
+cd tmp
+
+cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example2_ora.c .
+
+gcc example2_ora.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixacmt -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -o example2_ora
+
+oracle@ubuntu:~/tmp$ ldd example2_ora
+        linux-gate.so.1 =>  (0xb77c4000)
+        liblixacmt.so.0 => not found
+        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb6a09000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb68b9000)
+        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb66b4000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb66b0000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb668b000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb6673000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb665a000)
+        /lib/ld-linux.so.2 (0xb77c5000)
+oracle@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:
+
+oracle@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+oracle@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
+
+oracle@ubuntu:~/tmp$ ldd example2_ora
+        linux-gate.so.1 =>  (0xb7790000)
+        liblixacmt.so.0 => /opt/lixa/lib/liblixacmt.so.0 (0xb7776000)
+        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb69c2000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb686d000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb6869000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb6865000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb6860000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb6857000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb67a6000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb6685000)
+        liblixabmt.so.0 => /opt/lixa/lib/liblixabmt.so.0 (0xb6672000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb665a000)
+        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6455000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb6430000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb6417000)
+        /lib/ld-linux.so.2 (0xb7791000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb63f0000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb63db000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb63d7000)
+
+oracle@ubuntu:~/tmp$ echo $LIXA_PROFILE
+
+oracle@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_DYN
+oracle@ubuntu:~/tmp$ echo $LIXA_PROFILE
+ORA_DYN
+
+
+Check the table does not contain the record "RS":
+
+
+oracle@ubuntu:~/tmp$ sqlplus "hr/hr"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Sat Apr 9 15:44:08 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+
+
+
+Execute the client:
+
+oracle@ubuntu:~/tmp$ ./example2_ora
+INSERT statement executed!
+First arg is not 'DELETE', bypassing DELETE statement...
+
+
+
+Check the table contains the record "RS":
+
+
+oracle@ubuntu:~/tmp$ sqlplus "hr/hr"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Sat Apr 9 15:48:49 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+CO COUNTRY_NAME                              REGION_ID
+-- ---------------------------------------- ----------
+RS Repubblica San Marino                             1
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+
+
+
+Execute the client to delete the record:
+
+
+oracle@ubuntu:~/tmp$ ./example2_ora delete
+First arg is 'delete', bypassing INSERT statement...
+DELETE statement executed!
+
+
+
+oracle@ubuntu:~/tmp$ sqlplus "hr/hr"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Sat Apr 9 16:17:22 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+
+
+oracle@ubuntu:~/tmp$ ls -la /tmp/xa_*trc
+-rw-r--r-- 1 oracle dba 14567 2011-04-09 16:31 /tmp/xa_NULL04092011.trc
+
+
+ORACLE XA: Version 10.2.0.1.0. RM name = 'Oracle_XA'.
+
+175552.7456.3057059568.0:
+xaoopen: xa_info=Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true,rmid=0,flags=0x0
+
+175552.7456.3057059568.0:
+xaolgn_help: version#: 169869568 banner: Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+175552.7456.3057059568.0:
+xaolgn: sqlxrc/sqlxss completed
+
+175552.7456.3057059568.0:
+xaolgn2: return XA_OK
+
+175552.7456.3057059568.0:
+xaoopen: xaolgn completed
+
+175552.7456.3057059568.0:
+xaoopen: return 0
+
+175552.7456.3057059568.0:
+ax_reg: xid=0x494c4158-e3891dfa4f5b4f5097610ccf2048edbc-a154ad9214d0544a3abbd33c8c2ba36f, rmid=0, flags=0x0
+
+175552.7456.3057059568.0:
+OCITransStart: Attempting
+
+175552.7456.3057059568.0:
+OCITransStart: Succeeded
+
+175552.7456.3057059568.0:
+xaodynpo 2: rmid=0, state=3
+
+175552.7456.3057059568.0:
+xaoend: xid=0x494c4158-e3891dfa4f5b4f5097610ccf2048edbc-a154ad9214d0544a3abbd33c8c2ba36f, rmid=0, flags=0x4000000
+
+175552.7456.3057059568.0:
+OCITransDetach: Attempting
+
+175552.7456.3057059568.0:
+OCITransDetach: Succeeded
+
+175552.7456.3057059568.0:
+xaoend: return 0
+
+175553.7456.3057059568.0:
+xaocommit: xid=0x494c4158-e3891dfa4f5b4f5097610ccf2048edbc-a154ad9214d0544a3abbd33c8c2ba36f, rmid=0, flags=0x40000000
+
+175553.7456.3057059568.0:
+OCITransCommit: Attempting
+
+175553.7456.3057059568.0:
+xaodynpo 2: rmid=0, state=1
+
+175553.7456.3057059568.0:
+OCITransCommit: Succeeded
+
+175553.7456.3057059568.0:
+xaocommit: rtn 0
+
+175553.7456.3057059568.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+175553.7456.3057059568.0:
+OCIServerDetach: Attempting
+
+175553.7456.3057059568.0:
+OCIServerDetach: Succeeded
+
+175553.7456.3057059568.0:
+xaoclose: rtn 0
+
+
+
+
+
+Change the profile for static registration:
+
+oracle@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_STA
+oracle@ubuntu:~/tmp$ echo $LIXA_PROFILE
+ORA_STA
+
+
+Executing again:
+
+oracle@ubuntu:~/tmp$ ./example2_ora
+INSERT statement executed!
+First arg is not 'DELETE', bypassing DELETE statement...
+oracle@ubuntu:~/tmp$ ./example2_ora delete
+First arg is 'delete', bypassing INSERT statement...
+DELETE statement executed!
+
+
+oracle@ubuntu:~/tmp$ ls -la /tmp/xa_*trc
+-rw-r--r-- 1 oracle dba 14567 2011-04-09 16:31 /tmp/xa_NULL04092011.trc
+
+
+oracle@ubuntu:~/tmp$ cat /tmp/xa_NULL04092011.trc
+
+
+ORACLE XA: Version 10.2.0.1.0. RM name = 'Oracle_XA'.
+
+174041.7347.3056936688.0:
+xaoopen: xa_info=Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true,rmid=0,flags=0x0
+
+174041.7347.3056936688.0:
+xaolgn_help: version#: 169869568 banner: Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+174041.7347.3056936688.0:
+xaolgn: sqlxrc/sqlxss completed
+
+174041.7347.3056936688.0:
+xaolgn: return XA_OK
+
+174041.7347.3056936688.0:
+xaoopen: xaolgn completed
+
+174041.7347.3056936688.0:
+xaoopen: return 0
+
+174041.7347.3056936688.0:
+xaostart: xid=0x494c4158-27ce11299e7e434fa408adfb937ad7d0-55263ef9237e27f8ae34f46936ce295d, rmid=0, flags=0x0
+
+174041.7347.3056936688.0:
+OCITransStart: Attempting
+
+174041.7347.3056936688.0:
+OCITransStart: Succeeded
+
+174041.7347.3056936688.0:
+xaostart: return XA_OK
+
+174041.7347.3056936688.0:
+xaoend: xid=0x494c4158-27ce11299e7e434fa408adfb937ad7d0-55263ef9237e27f8ae34f46936ce295d, rmid=0, flags=0x4000000
+
+174041.7347.3056936688.0:
+OCITransDetach: Attempting
+
+174041.7347.3056936688.0:
+OCITransDetach: Succeeded
+
+174041.7347.3056936688.0:
+xaoend: return 0
+
+174041.7347.3056936688.0:
+xaocommit: xid=0x494c4158-27ce11299e7e434fa408adfb937ad7d0-55263ef9237e27f8ae34f46936ce295d, rmid=0, flags=0x40000000
+
+174041.7347.3056936688.0:
+OCITransCommit: Attempting
+
+174041.7347.3056936688.0:
+OCITransCommit: Succeeded
+
+174041.7347.3056936688.0:
+xaocommit: rtn 0
+
+174041.7347.3056936688.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+174041.7347.3056936688.0:
+OCIServerDetach: Attempting
+
+174041.7347.3056936688.0:
+OCIServerDetach: Succeeded
+
+174041.7347.3056936688.0:
+xaoclose: rtn 0
+
+
+
