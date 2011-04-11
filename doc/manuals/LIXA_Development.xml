@@ -185,33 +185,55 @@ tx_close(): 0
     <para>
       Using a real Resource Manager, like a DBMS, requires some extra effort
       because you have to set-up the environment needed by the Resource
-      Manager. The example explained in this section was developed for
+      Manager. The example explained in this section was developed using
       Oracle Database 10g Release 2 (10.2) Express Edition: if you used 
       a different version, you might need to fix some of the details 
       showed by this example.
       <important><para>
 	  If you did not yet installed the software provided by Oracle,
 	  please refer to the official Oracle site to download the
-	  software and the information necessary to install and configure
+	  software and to pick-up the information necessary to install 
+	  and configure
 	  the database. This manual does not give you information related
 	  to Oracle technology: it is assumed you already installed and
 	  configured the database.
       </para></important>
+      The LIXA software must be configured to support the Oracle Database
+      Server resource manager as explained in 
+      <xref linkend="Linking_third_party_resource_managers"/>.
     </para>
     <section>
-      <title>Create XA views in Oracle database</title>
-      <note><para>
-	  The steps explained below might be not necessary with some
-	  versions of the Oracle software. With Oracle XE 10.2.0.1 they
-	  are necessary.
-      </para></note>
-      <para>
-	First of all you must be able to connect as <quote>SYSDBA</quote>
-	from a terminal session; my dummy installation has user 
-	<systemitem class="username">sys</systemitem> with password
-	<quote>oracle</quote>; the commands below show what's happen when
-	I connect to the Oracle server:
-	<screen>
+      <title>Set-up Oracle environment</title>
+      <section>
+	<title>Start-up the Oracle server</title>
+	<para>
+	  If the database server was not running, you could start it
+	  with these commands:
+	  <screen>
+tiian@ubuntu:~/tmp$ sudo /etc/init.d/oracle-xe enable
+tiian@ubuntu:~/tmp$ sudo /etc/init.d/oracle-xe start
+Starting Oracle Net Listener.
+Starting Oracle Database 10g Express Edition Instance.
+
+Start the LIXA state server:
+
+	  </screen>
+	</para>
+      </section>
+      <section>
+	<title>Create XA views in Oracle database</title>
+	<note><para>
+	    The steps explained below might be not necessary with some
+	    versions of the Oracle software, but they are necessary
+	    with Oracle XE 10.2.0.1.
+	</para></note>
+	<para>
+	  First of all you must be able to connect as <quote>SYSDBA</quote>
+	  from a terminal session; the commands below show what's happen when
+	  I connect to the Oracle server using the user 
+	  <systemitem class="username">sys</systemitem> with password
+	  <quote>oracle</quote>:
+	  <screen>
 tiian@ubuntu:~$ sudo su - oracle
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
@@ -229,17 +251,18 @@ Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	</screen>
-	You must check the file <filename>xaview.sql</filename> is available:
-	<screen>
+	  </screen>
+	  You must check the file <filename>xaview.sql</filename> that's 
+	  available at this path:
+	  <screen>
 oracle@ubuntu:~$ ls -la $ORACLE_HOME/rdbms/admin/xaview.sql
 -rw-r--r-- 1 oracle dba 1754 2006-02-24 06:18 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/admin/xaview.sql
-	</screen>
-	It contains the SQL instructions necessary to create two specific
-	system views that could be not defined in your database; the
-	following commands are related to a database that contains the
-	desired views:
-	<screen>
+	  </screen>
+	  It contains the SQL instructions necessary to create two specific
+	  system views that could be not defined in your database; the
+	  following commands are related to a database that contains the
+	  desired views:
+	  <screen>
 oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:32:45 2011
@@ -260,10 +283,10 @@ no rows selected
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	</screen>
-	If the command failed the views would be not defined; you can
-	create them with a command like this:
-	<screen>
+	  </screen>
+	  If the command failed the views would be not defined; you can
+	  create them with a command like this:
+	  <screen>
 oracle@ubuntu:~$ cat $ORACLE_HOME/rdbms/admin/xaview.sql | sqlplus "sys/oracle as sysdba"
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:37:06 2011
@@ -287,20 +310,21 @@ SQL> SQL> SQL> SQL>   2    3    4    5    6    7    8    9   10   11
 View created.
 
 SQL> SQL> SQL> Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	</screen>
-      </para>
-    </section>
-    <section>
-      <title>Authorize XA views in Oracle database</title>
-      <para>
-	The example programs supplied by the LIXA project are designed
-	to use the 
-	<systemitem class="username">hr</systemitem> user; you 
-	<emphasis>must</emphasis> grant
-	the necessary privileges to all the users you want to use for
-	your Application Programs. The below commands show how to grant
-	the necessary privileges to it:
-	<screen>
+	  </screen>
+	</para>
+      </section>
+      <section>
+	<title>Authorize XA views in Oracle database</title>
+	<para>
+	  The example programs supplied by the LIXA project are designed
+	  to use the 
+	  <systemitem class="username">hr</systemitem> user; you 
+	  <emphasis>must</emphasis> grant
+	  the necessary privileges to all the users you want to use for
+	  your Application Programs. The below commands show how to grant
+	  the necessary privileges to
+	  <systemitem class="username">hr</systemitem>:
+	  <screen>
 oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:44:44 2011
@@ -325,25 +349,25 @@ Grant succeeded.
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	</screen>
-      </para>
-      <note><para>
-	  In the case of user
-	  <systemitem class="username">hr</systemitem> did not exist and
-	  the above commands failed,
-	  you should read Oracle documentation and pick-up the necessary
-	  information to create it.
-      </para></note>
-    </section>
-    <section>
-      <title>Unlock <quote>hr</quote> Oracle user</title>
-      <para>
-	The example programs supplied by the LIXA project are designed
-	to use the 
-	<systemitem class="username">hr</systemitem> user; it might be 
-	<emphasis>locked</emphasis> after Oracle software installation.
-	The below commands show how to unlock it:
-	<screen>
+	  </screen>
+	</para>
+	<note><para>
+	    In the case of user
+	    <systemitem class="username">hr</systemitem> did not exist and
+	    the above commands failed,
+	    you should read Oracle documentation and pick-up the necessary
+	    information to create it.
+	</para></note>
+      </section>
+      <section>
+	<title>Unlock <quote>hr</quote> Oracle user</title>
+	<para>
+	  The example programs supplied by the LIXA project are designed
+	  to use the 
+	  <systemitem class="username">hr</systemitem> user; it might be 
+	  <emphasis>locked</emphasis> after Oracle software installation.
+	  The below commands show how to unlock it:
+	  <screen>
 oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:44:44 2011
@@ -360,9 +384,100 @@ User altered.
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+	  </screen>
+	  You may perform the same operation using the graphical (web based)
+	  interface.
+	</para>
+      </section>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
+	Start the state server as showed below:
+	<screen>
+tiian@ubuntu:~$ sudo su - lixa
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ exit
+logout
+tiian@ubuntu:~$ ps -ef|grep lixad|grep -v grep
+lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 	</screen>
-	You may perform the same operation using the graphical (web based)
-	interface.
+	Prepare the client (Application Program) using the below commands:
+	<screen>
+tiian@ubuntu:~$ mkdir tmp
+tiian@ubuntu:~$ cd tmp
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-0.5.30/examples/example2_ora.c .
+tiian@ubuntu:~/tmp$ gcc example2_ora.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixacmt -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 -o example2_ora
+	</screen>
+	Verify the executable produced by gcc:
+	<screen>
+tiian@ubuntu:~/tmp$ ldd example2_ora
+        linux-gate.so.1 =>  (0xb776d000)
+        liblixacmt.so.0 => not found
+        libclntsh.so.10.1 => not found
+        libnnz10.so => not found
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7616000)
+        /lib/ld-linux.so.2 (0xb776e000)
+	</screen>
+	There are three unresolved references that can be fixed setting up
+	the environment properly:
+	<screen>
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/opt/lixa/lib
+
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/opt/lixa/lib
+	</screen>
+	Check again the executable:
+	<screen>
+tiian@ubuntu:~/tmp$ ldd example2_ora
+        linux-gate.so.1 =>  (0xb7749000)
+        liblixacmt.so.0 => /opt/lixa/lib/liblixacmt.so.0 (0xb772f000)
+        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb697b000)
+        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6775000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb6621000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb661d000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb6619000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb6614000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb660a000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb6559000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb6439000)
+        liblixabmt.so.0 => /opt/lixa/lib/liblixabmt.so.0 (0xb6426000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb640e000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb63e9000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb63d0000)
+        /lib/ld-linux.so.2 (0xb774a000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb63a9000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb6394000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb6390000)
+	</screen>
+	Set-up the necessary environment variables:
+	<screen>
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_DYN
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+ORA_DYN
+
+tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
+
+tiian@ubuntu:~/tmp$ export ORACLE_HOME=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+
+tiian@ubuntu:~/tmp$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+tiian@ubuntu:~/tmp$ export PATH=$PATH:$ORACLE_HOME/bin
+tiian@ubuntu:~/tmp$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin
+
+tiian@ubuntu:~/tmp$ echo $ORACLE_SID
+
+tiian@ubuntu:~/tmp$ export ORACLE_SID=XE
+tiian@ubuntu:~/tmp$ echo $ORACLE_SID
+XE
+	</screen>
       </para>
     </section>
   </section>
