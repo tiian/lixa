@@ -309,8 +309,9 @@ make
       <section>
 	<title>Optional features</title>
 	<para>
-	  The supplied defaults are generally good enought to start working with
-	  LIXA, but if you want to perform some hacking you might be interested
+	  The supplied defaults are generally good enought to start 
+	  working with LIXA, but if you want to perform some hacking 
+	  you might be interested
 	  in activating/deactivating some optional features.
 	</para>
 	<section>
