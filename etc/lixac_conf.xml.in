@@ -28,22 +28,28 @@
         <rsrmgr>LIXAdummyRM</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="ORA_DYN">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>OracleXE_dynreg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="ORA_STA">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>OracleXE_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
     <profile name="GT71">
       <sttsrvs>
         <sttsrv>local_1</sttsrv>
       </sttsrvs>
       <rsrmgrs>
         <rsrmgr>LIXArandomRM</rsrmgr>
-        <rsrmgr>LIXAdummyRM</rsrmgr>
-      </rsrmgrs>
-    </profile>
-    <profile name="VZ67">
-      <sttsrvs>
-        <sttsrv>local_1</sttsrv>
-        <sttsrv>local_2</sttsrv>
-      </sttsrvs>
-      <rsrmgrs>
-        <rsrmgr>OracleXE_dynreg</rsrmgr>
         <rsrmgr>LIXAdummyRM</rsrmgr>
       </rsrmgrs>
     </profile>

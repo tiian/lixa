@@ -215,13 +215,11 @@ tiian@ubuntu:~/tmp$ sudo /etc/init.d/oracle-xe start
 Starting Oracle Net Listener.
 Starting Oracle Database 10g Express Edition Instance.
 
-Start the LIXA state server:
-
 	  </screen>
 	</para>
       </section>
       <section>
-	<title>Create XA views in Oracle database</title>
+	<title>Create the XA related views</title>
 	<note><para>
 	    The steps explained below might be not necessary with some
 	    versions of the Oracle software, but they are necessary
@@ -229,7 +227,7 @@ Start the LIXA state server:
 	</para></note>
 	<para>
 	  First of all you must be able to connect as <quote>SYSDBA</quote>
-	  from a terminal session; the commands below show what's happen when
+	  from a terminal session; the commands below show what happens when
 	  I connect to the Oracle server using the user 
 	  <systemitem class="username">sys</systemitem> with password
 	  <quote>oracle</quote>:
@@ -252,16 +250,15 @@ Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
 	  </screen>
-	  You must check the file <filename>xaview.sql</filename> that's 
-	  available at this path:
+	  You must check the file <filename>xaview.sql</filename>:
 	  <screen>
 oracle@ubuntu:~$ ls -la $ORACLE_HOME/rdbms/admin/xaview.sql
 -rw-r--r-- 1 oracle dba 1754 2006-02-24 06:18 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/admin/xaview.sql
 	  </screen>
 	  It contains the SQL instructions necessary to create two specific
 	  system views that could be not defined in your database; the
-	  following commands are related to a database that contains the
-	  desired views:
+	  following commands are related to a database that contains
+	  the desired views:
 	  <screen>
 oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
 
@@ -314,7 +311,7 @@ SQL> SQL> SQL> Disconnected from Oracle Database 10g Express Edition Release 10.
 	</para>
       </section>
       <section>
-	<title>Authorize XA views in Oracle database</title>
+	<title>Authorize the XA related views</title>
 	<para>
 	  The example programs supplied by the LIXA project are designed
 	  to use the 
@@ -352,7 +349,7 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
 	  </screen>
 	</para>
 	<note><para>
-	    In the case of user
+	    If the user
 	    <systemitem class="username">hr</systemitem> did not exist and
 	    the above commands failed,
 	    you should read Oracle documentation and pick-up the necessary
@@ -360,7 +357,7 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
 	</para></note>
       </section>
       <section>
-	<title>Unlock <quote>hr</quote> Oracle user</title>
+	<title>Unlock <quote><systemitem class="username">hr</systemitem></quote> Oracle user</title>
 	<para>
 	  The example programs supplied by the LIXA project are designed
 	  to use the 
@@ -391,7 +388,7 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
       </section>
     </section>
     <section>
-      <title>Set-up LIXA environment</title>
+      <title>Start the LIXA state server</title>
       <para>
 	Start the state server as showed below:
 	<screen>
@@ -402,11 +399,16 @@ logout
 tiian@ubuntu:~$ ps -ef|grep lixad|grep -v grep
 lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Build the client program</title>
+      <para>
 	Prepare the client (Application Program) using the below commands:
 	<screen>
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
-tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-0.5.30/examples/example2_ora.c .
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example2_ora.c .
 tiian@ubuntu:~/tmp$ gcc example2_ora.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixacmt -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 -o example2_ora
 	</screen>
 	Verify the executable produced by gcc:
@@ -419,6 +421,11 @@ tiian@ubuntu:~/tmp$ ldd example2_ora
         libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7616000)
         /lib/ld-linux.so.2 (0xb776e000)
 	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
 	There are three unresolved references that can be fixed setting up
 	the environment properly:
 	<screen>
@@ -478,6 +485,363 @@ tiian@ubuntu:~/tmp$ export ORACLE_SID=XE
 tiian@ubuntu:~/tmp$ echo $ORACLE_SID
 XE
 	</screen>
+	It is suggested to set the necessary environment variables in your 
+	profile if you are going to execute the programs many times.
+	This is the list of the suggested variables:
+	<varname>LD_LIBRARY_PATH</varname>,
+	<varname>LIXA_PROFILE</varname>,
+	<varname>ORACLE_HOME</varname>,
+	<varname>ORACLE_SID</varname>,
+	<varname>PATH</varname>.
+      </para>
+    </section>
+    <section>
+      <title>Check the data table before execution</title>
+      <para>
+	Execute the below commands using  
+	<systemitem class="username">oracle</systemitem>
+	user:
+	<screen>
+oracle@ubuntu:~$ sqlplus "hr/hr"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 14 22:04:55 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+	</screen>
+	That's OK because the table does not contain the row we 
+	are going to insert.
+      </para>
+    </section>
+    <section>
+      <title>Some checks before program execution</title>
+      <para>
+	We set <varname>LIXA_PROFILE</varname> to value
+	<quote>ORA_DYN</quote>, looking at
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename>:
+	<screen>
+    &lt;profile name="ORA_DYN"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;OracleXE_dynreg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+	</screen>
+	the profile references the Resource Manager named
+	<quote>OracleXE_dynreg</quote>, looking again at the config file:
+	<screen>
+    &lt;rsrmgr name="OracleXE_dynreg" switch_file="/opt/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
+	</screen>
+	we can discover that our application will access the Oracle
+	database using <systemitem class="username">hr</systemitem>
+	user and writing the trace file to directory <filename>/tmp</filename>
+	(see <constant>LogDir</constant>)
+	<footnote><para>
+	    The content of <constant>xa_open_info</constant> string are
+	    described in chapter 15 "Developing Applications with Oracle XA"
+	    of the "Oracle Database Application Developer's Guide"
+	    manual; please refer to the documentation published by
+	    Oracle Corporation for further details.
+	</para></footnote>. Verify no trace file exists:
+	<screen>
+tiian@ubuntu:~/tmp$ ls -la /tmp/xa*
+ls: cannot access /tmp/xa*: No such file or directory
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Program execution (dynamic registration)</title>
+      <para>
+	Execute the client program as shown below:
+	<screen>
+tiian@ubuntu:~/tmp$ ./example2_ora
+INSERT statement executed!
+First arg is not 'DELETE', bypassing DELETE statement...
+	</screen>
+	Check the table after program execution:
+	<screen>
+tiian@ubuntu:~/tmp$ sqlplus "hr/hr"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Sun Apr 10 10:34:23 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+CO COUNTRY_NAME                              REGION_ID
+-- ---------------------------------------- ----------
+RS Repubblica San Marino                             1
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+	</screen>
+	The example program <filename>example2_ora</filename> inserted a
+	row in table <constant>COUNTRIES</constant>. Take a look to the
+	trace produced by the Oracle client library:
+	<screen>
+tiian@ubuntu:~/tmp$ ls -la /tmp/xa*
+-rw-r--r-- 1 tiian tiian 1723 2011-04-10 10:33 /tmp/xa_NULL04102011.trc
+tiian@ubuntu:~/tmp$ cat /tmp/xa_NULL04102011.trc
+
+ORACLE XA: Version 10.2.0.1.0. RM name = 'Oracle_XA'.
+
+103352.5300.3057182448.0:
+xaoopen: xa_info=Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true,rmid=0,flags=0x0
+
+103352.5300.3057182448.0:
+xaolgn_help: version#: 169869568 banner: Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+103352.5300.3057182448.0:
+xaolgn: sqlxrc/sqlxss completed
+
+103352.5300.3057182448.0:
+xaolgn2: return XA_OK
+
+103352.5300.3057182448.0:
+xaoopen: xaolgn completed
+
+103352.5300.3057182448.0:
+xaoopen: return 0
+
+103352.5300.3057182448.0:
+ax_reg: xid=0x494c4158-8c6122ac9fd0477ebfe5f650e21a3539-a154ad9214d0544a3abbd33c8c2ba36f, rmid=0, flags=0x0
+
+103352.5300.3057182448.0:
+OCITransStart: Attempting
+
+103352.5300.3057182448.0:
+OCITransStart: Succeeded
+
+103352.5300.3057182448.0:
+xaodynpo 2: rmid=0, state=3
+
+103352.5300.3057182448.0:
+xaoend: xid=0x494c4158-8c6122ac9fd0477ebfe5f650e21a3539-a154ad9214d0544a3abbd33c8c2ba36f, rmid=0, flags=0x4000000
+
+103352.5300.3057182448.0:
+OCITransDetach: Attempting
+
+103352.5300.3057182448.0:
+OCITransDetach: Succeeded
+
+103352.5300.3057182448.0:
+xaoend: return 0
+
+103352.5300.3057182448.0:
+xaocommit: xid=0x494c4158-8c6122ac9fd0477ebfe5f650e21a3539-a154ad9214d0544a3abbd33c8c2ba36f, rmid=0, flags=0x40000000
+
+103352.5300.3057182448.0:
+OCITransCommit: Attempting
+
+103352.5300.3057182448.0:
+xaodynpo 2: rmid=0, state=1
+
+103352.5300.3057182448.0:
+OCITransCommit: Succeeded
+
+103352.5300.3057182448.0:
+xaocommit: rtn 0
+
+103352.5300.3057182448.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+103352.5300.3057182448.0:
+OCIServerDetach: Attempting
+
+103352.5300.3057182448.0:
+OCIServerDetach: Succeeded
+
+103352.5300.3057182448.0:
+xaoclose: rtn 0
+	</screen>
+	The <function>ax_reg</function> function was called because the
+	dynamic registration configuration was used 
+	(<constant>LIXA_PROFILE=ORA_DYN</constant>). 
+	Now you can remove
+	the inserted record using the same program:
+	<screen>
+tiian@ubuntu:~/tmp$ ./example2_ora delete
+First arg is 'delete', bypassing INSERT statement...
+DELETE statement executed!
+	</screen>
+	Check the content of the table again:
+	<screen>
+tiian@ubuntu:~/tmp$ sqlplus "hr/hr"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Sun Apr 10 10:40:25 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+	</screen>
+	The row was deleted. Please remove the trace file before a new
+	execution:
+	<screen>
+tiian@ubuntu:~/tmp$ rm /tmp/xa_NULL04102011.trc
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Program execution (dynamic registration)</title>
+      <para>
+	Switch from dynamic registration to static registration:
+	<screen>
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+ORA_DYN
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_STA
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+ORA_STA
+	</screen>
+	Execute the program again:
+	<screen>
+tiian@ubuntu:~/tmp$ ./example2_ora
+INSERT statement executed!
+First arg is not 'DELETE', bypassing DELETE statement...
+tiian@ubuntu:~/tmp$ sqlplus "hr/hr"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Sun Apr 10 10:53:05 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+CO COUNTRY_NAME                              REGION_ID
+-- ---------------------------------------- ----------
+RS Repubblica San Marino                             1
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+	</screen>
+	Inspect the produced trace file:
+	<screen>
+tiian@ubuntu:~/tmp$ ls -la /tmp/xa_*
+-rw-r--r-- 1 tiian tiian 1661 2011-04-10 10:52 /tmp/xa_NULL04102011.trc
+tiian@ubuntu:~/tmp$ cat /tmp/xa_NULL04102011.trc
+
+ORACLE XA: Version 10.2.0.1.0. RM name = 'Oracle_XA'.
+
+105236.5392.3057456880.0:
+xaoopen: xa_info=Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true,rmid=0,flags=0x0
+
+105236.5392.3057456880.0:
+xaolgn_help: version#: 169869568 banner: Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+105236.5392.3057456880.0:
+xaolgn: sqlxrc/sqlxss completed
+
+105236.5392.3057456880.0:
+xaolgn: return XA_OK
+
+105236.5392.3057456880.0:
+xaoopen: xaolgn completed
+
+105236.5392.3057456880.0:
+xaoopen: return 0
+
+105236.5392.3057456880.0:
+xaostart: xid=0x494c4158-6119154810784a87b0d0aa83ea497a72-55263ef9237e27f8ae34f46936ce295d, rmid=0, flags=0x0
+
+105236.5392.3057456880.0:
+OCITransStart: Attempting
+
+105236.5392.3057456880.0:
+OCITransStart: Succeeded
+
+105236.5392.3057456880.0:
+xaostart: return XA_OK
+
+105236.5392.3057456880.0:
+xaoend: xid=0x494c4158-6119154810784a87b0d0aa83ea497a72-55263ef9237e27f8ae34f46936ce295d, rmid=0, flags=0x4000000
+
+105236.5392.3057456880.0:
+OCITransDetach: Attempting
+
+105236.5392.3057456880.0:
+OCITransDetach: Succeeded
+
+105236.5392.3057456880.0:
+xaoend: return 0
+
+105236.5392.3057456880.0:
+xaocommit: xid=0x494c4158-6119154810784a87b0d0aa83ea497a72-55263ef9237e27f8ae34f46936ce295d, rmid=0, flags=0x40000000
+
+105236.5392.3057456880.0:
+OCITransCommit: Attempting
+
+105236.5392.3057456880.0:
+OCITransCommit: Succeeded
+
+105236.5392.3057456880.0:
+xaocommit: rtn 0
+
+105236.5392.3057456880.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+105236.5392.3057456880.0:
+OCIServerDetach: Attempting
+
+105236.5392.3057456880.0:
+OCIServerDetach: Succeeded
+
+105236.5392.3057456880.0:
+xaoclose: rtn 0
+	</screen>
+	The <function>xa_start (xaostart)</function> function was called 
+	because the static registration configuration was used 
+	(<constant>LIXA_PROFILE=ORA_STA</constant>). 
+	Remove the inserted row again:
+	<screen>
+tiian@ubuntu:~/tmp$ ./example2_ora delete
+First arg is 'delete', bypassing INSERT statement...
+DELETE statement executed!
+tiian@ubuntu:~/tmp$ sqlplus "hr/hr"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Sun Apr 10 11:01:32 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+	</screen>
+	You successfully executed a program that uses Oracle Database Server
+	as a Resource Manager.
       </para>
     </section>
   </section>
