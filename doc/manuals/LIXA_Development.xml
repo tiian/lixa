@@ -11,6 +11,14 @@
   </para>
   <section>
     <title>The first example</title>
+    <figure xml:id="develop1">
+      <title>Deploy model of an example with two dummy resource managers</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Development_1.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
     <para>
       Create a working directory in a place you are comfortable with:
       <screen>
@@ -182,6 +190,14 @@ tx_close(): 0
   </section>
   <section>
     <title>An example with a <quote>real</quote> Resource Manager (Oracle DBMS)</title>
+    <figure xml:id="develop2">
+      <title>Deploy model of an example with Oracle Database Server</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Development_2.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
     <para>
       Using a real Resource Manager, like a DBMS, requires some extra effort
       because you have to set-up the environment needed by the Resource
