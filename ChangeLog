@@ -1,6 +1,7 @@
 LOG:
 
-         - 0.5.30
+20110419 - 0.5.30 the package supplies an example that shows how LIXA can
+                  be used in conjunction with Oracle Database Server
 
 20110401 - 0.5.29 "make install" installs the HTML version of the manual in
                   the standard doc directory
