@@ -1,5 +1,8 @@
 LOG:
 
+         - 0.5.31 the package supplies an example that shows how LIXA can
+                  be used in conjunction with IBM DB2
+
 20110419 - 0.5.30 the package supplies an example that shows how LIXA can
                   be used in conjunction with Oracle Database Server
 

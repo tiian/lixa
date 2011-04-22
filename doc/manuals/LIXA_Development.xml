@@ -948,8 +948,8 @@ DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
 	basic running installation.
       </para>
     </section>
-    <section xml:id="Setting_up_DB2_environment">
-      <title>Setting-up DB2 environment</title>
+    <section xml:id="Set_up_DB2_environment">
+      <title>Set-up DB2 environment</title>
       <para>
 	We want to execute our example program with a generic user,
 	not just using <systemitem class="username">db2inst1</systemitem>
@@ -1169,7 +1169,7 @@ tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 DB2_DYN
 	</screen>
 	No additional DB2 variables are needed because they are automatically
-	set at login (see <xref linkend="Setting_up_DB2_environment"/>).
+	set at login (see <xref linkend="Set_up_DB2_environment"/>).
       </para>
     </section>
     <section>
@@ -1275,7 +1275,7 @@ DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
 	</screen>
 	Execute the program:
 	<screen>
-tiian@ubuntu:~/tmp$ ./example3_db2
+tiian@ubuntu:~/tmp$ ./example3_db2 insert org
 	</screen>
 	Check the content of the table again:
 	<screen>
@@ -1298,9 +1298,9 @@ DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
 	</screen>
 	The example program inserted the last row! You can execute it again
 	<screen>
-tiian@ubuntu:~/tmp$ ./example3_db2
+tiian@ubuntu:~/tmp$ ./example3_db2 insert org
 	</screen>
-	and insert another row:
+	and it inserts another row:
 	<screen>
 db2 => select * from DB2INST1.ORG
 
@@ -1320,7 +1320,181 @@ DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
   10 record(s) selected.
 
 	</screen>
-	Because there is no an unique constraint on this table.
+	Because there is no an unique constraint on this table; if you
+	want to check an error while inserting, use <quote>DEPT</quote>
+	table instead.
+	<screen>
+db2 => select * from DB2INST1.DEPT
+
+DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
+------ ------------------------------------ ------ -------- ----------------
+A00    SPIFFY COMPUTER SERVICE DIV.         000010 A00      -
+B01    PLANNING                             000020 A00      -
+C01    INFORMATION CENTER                   000030 A00      -
+D01    DEVELOPMENT CENTER                   -      A00      -
+D11    MANUFACTURING SYSTEMS                000060 D01      -
+D21    ADMINISTRATION SYSTEMS               000070 D01      -
+E01    SUPPORT SERVICES                     000050 A00      -
+E11    OPERATIONS                           000090 E01      -
+E21    SOFTWARE SUPPORT                     000100 E01      -
+F22    BRANCH OFFICE F2                     -      E01      -
+G22    BRANCH OFFICE G2                     -      E01      -
+H22    BRANCH OFFICE H2                     -      E01      -
+I22    BRANCH OFFICE I2                     -      E01      -
+J22    BRANCH OFFICE J2                     -      E01      -
+
+  14 record(s) selected.
+
+	</screen>
+	Try to insert the same row twice:
+	<screen>
+tiian@ubuntu:~/tmp$ ./example3_db2 insert dept
+tiian@ubuntu:~/tmp$ ./example3_db2 insert dept
+Unable to execute the SQL statement ('INSERT INTO DB2INST1.DEPT (DEPTNO, DEPTNAME, ADMRDEPT) VALUES('Z99', 'RESEARCH &amp; DEVELOPMENT', 'E01')'): -1
+	</screen>
+	Check the table content:
+	<screen>
+db2 => select * from DB2INST1.DEPT
+
+DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
+------ ------------------------------------ ------ -------- ----------------
+A00    SPIFFY COMPUTER SERVICE DIV.         000010 A00      -
+B01    PLANNING                             000020 A00      -
+C01    INFORMATION CENTER                   000030 A00      -
+D01    DEVELOPMENT CENTER                   -      A00      -
+D11    MANUFACTURING SYSTEMS                000060 D01      -
+D21    ADMINISTRATION SYSTEMS               000070 D01      -
+E01    SUPPORT SERVICES                     000050 A00      -
+E11    OPERATIONS                           000090 E01      -
+E21    SOFTWARE SUPPORT                     000100 E01      -
+F22    BRANCH OFFICE F2                     -      E01      -
+G22    BRANCH OFFICE G2                     -      E01      -
+H22    BRANCH OFFICE H2                     -      E01      -
+I22    BRANCH OFFICE I2                     -      E01      -
+J22    BRANCH OFFICE J2                     -      E01      -
+Z99    RESEARCH &amp; DEVELOPMENT               -      E01      -
+
+  15 record(s) selected.
+
+	</screen>
+	Only one record was inserted. As a final step, clean up both the
+	tables:
+	<screen>
+tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
+tiian@ubuntu:~/tmp$ ./example3_db2 delete org
+	</screen>
+	and check the table was cleaned-up:
+	<screen>
+db2 => select * from DB2INST1.DEPT
+
+DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
+------ ------------------------------------ ------ -------- ----------------
+A00    SPIFFY COMPUTER SERVICE DIV.         000010 A00      -
+B01    PLANNING                             000020 A00      -
+C01    INFORMATION CENTER                   000030 A00      -
+D01    DEVELOPMENT CENTER                   -      A00      -
+D11    MANUFACTURING SYSTEMS                000060 D01      -
+D21    ADMINISTRATION SYSTEMS               000070 D01      -
+E01    SUPPORT SERVICES                     000050 A00      -
+E11    OPERATIONS                           000090 E01      -
+E21    SOFTWARE SUPPORT                     000100 E01      -
+F22    BRANCH OFFICE F2                     -      E01      -
+G22    BRANCH OFFICE G2                     -      E01      -
+H22    BRANCH OFFICE H2                     -      E01      -
+I22    BRANCH OFFICE I2                     -      E01      -
+J22    BRANCH OFFICE J2                     -      E01      -
+
+  14 record(s) selected.
+
+db2 => select * from DB2INST1.ORG
+
+DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
+-------- -------------- ------- ---------- -------------
+      10 Head Office        160 Corporate  New York
+      15 New England         50 Eastern    Boston
+      20 Mid Atlantic        10 Eastern    Washington
+      38 South Atlantic      30 Eastern    Atlanta
+      42 Great Lakes        100 Midwest    Chicago
+      51 Plains             140 Midwest    Dallas
+      66 Pacific            270 Western    San Francisco
+      84 Mountain           290 Western    Denver
+
+  8 record(s) selected.
+
+	</screen>
+	To verify the LIXA Transaction Manager and DB2 Resource Manager
+	are using the dynamic transaction registration, you can inspect
+	the trace produced by the LIXA client library:
+	<screen>
+tiian@ubuntu:~/tmp$ ./example3_db2 insert dept 2>&amp;1 | grep ax_reg
+2011-04-22 22:08:40.650458 [6654/3039381232] ax_reg: rmid=0, xid=0xbfcd65d0, flags=0x0
+2011-04-22 22:08:40.650858 [6654/3039381232] ax_reg: the application program has started a transaction (TX states S3); this XID '9a73b024-b7ab-4018-915b-54761d3dcd79.e4120582-0a9c-7222-1857-8c0eeec6a27c' will be returned
+2011-04-22 22:08:40.651156 [6654/3039381232] ax_reg: sending 153 bytes to the server for step 8
+2011-04-22 22:08:40.651316 [6654/3039381232] ax_reg/excp=7/ret_cod=0/errno=2
+	</screen>
+	I don't know how you can retrieve the same information on the
+	DB2 side, but there probably is a way to do it. Clean-up again
+	the table...
+	<screen>
+tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Program execution (static registration)</title>
+      <para>
+	If you desire static transaction registration instead of the
+	dynamic one, you can switch the <varname>LIXA_PROFILE</varname>:
+	<screen>
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=DB2_STA
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+DB2_STA
+tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00002000
+tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
+0x00002000
+	</screen>
+	you can verify in file
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename>
+	that <quote>DB2_STA</quote> is associated to static registration.
+	Execute the program:
+	<screen>
+tiian@ubuntu:~/tmp$ ./example3_db2 insert dept 2>&amp;1 | grep xa_start
+2011-04-22 22:19:45.717003 [6745/3038836464] lixa_xa_start
+[...]
+2011-04-22 22:19:45.758075 [6745/3038836464] lixa_xa_start: xa_start_entry(xid, 0, 0x0) = 0
+2011-04-22 22:19:45.758321 [6745/3038836464] lixa_xa_start: sending 210 bytes to the server for step 24
+2011-04-22 22:19:45.758681 [6745/3038836464] lixa_xa_start/excp=10/ret_cod=0/errno=2
+	</screen>
+	Check the content of the table:
+	<screen>
+db2 => select * from DB2INST1.DEPT
+
+DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
+------ ------------------------------------ ------ -------- ----------------
+A00    SPIFFY COMPUTER SERVICE DIV.         000010 A00      -
+B01    PLANNING                             000020 A00      -
+C01    INFORMATION CENTER                   000030 A00      -
+D01    DEVELOPMENT CENTER                   -      A00      -
+D11    MANUFACTURING SYSTEMS                000060 D01      -
+D21    ADMINISTRATION SYSTEMS               000070 D01      -
+E01    SUPPORT SERVICES                     000050 A00      -
+E11    OPERATIONS                           000090 E01      -
+E21    SOFTWARE SUPPORT                     000100 E01      -
+F22    BRANCH OFFICE F2                     -      E01      -
+G22    BRANCH OFFICE G2                     -      E01      -
+H22    BRANCH OFFICE H2                     -      E01      -
+I22    BRANCH OFFICE I2                     -      E01      -
+J22    BRANCH OFFICE J2                     -      E01      -
+Z99    RESEARCH &amp; DEVELOPMENT               -      E01      -
+
+  15 record(s) selected.
+
+	</screen>
+	And clean the table again:
+	<screen>
+tiian@ubuntu:~/tmp$ unset LIXA_TRACE_MASK
+tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
+	</screen>
       </para>
     </section>
   </section>
