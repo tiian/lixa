@@ -44,6 +44,22 @@
         <rsrmgr>OracleXE_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="DB2_DYN">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>IBMDB2_dynreg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="DB2_STA">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>IBMDB2_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
     <profile name="GT71">
       <sttsrvs>
         <sttsrv>local_1</sttsrv>
