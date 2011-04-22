@@ -863,6 +863,14 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
   </section>
   <section>
     <title>An example with IBM DB2 DBMS</title>
+    <figure xml:id="develop3">
+      <title>Deploy model of an example with IBM DB2 DBMS</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Development_3.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
     <para>
       This example was developed using DB2 Express-C 9.7 for Linux (Ubuntu).
       If you were using a different version you would need to adapt some
