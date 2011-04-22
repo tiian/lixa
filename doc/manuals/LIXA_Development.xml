@@ -861,4 +861,189 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
       </para>
     </section>
   </section>
+  <section>
+    <title>An example with IBM DB2 DBMS</title>
+    <para>
+      This example was developed using DB2 Express-C 9.7 for Linux (Ubuntu).
+      If you were using a different version you would need to adapt some
+      commands to your environment.
+    </para>
+    <section>
+      <title>Setting up DB2 environment</title>
+      <section>
+	<title>Start-up the DB2 server</title>
+	<para>
+	  If your server didn't start-up automatically at boot time, you
+	  could start it with the following commands:
+	  <screen>
+tiian@ubuntu:~$ ps -ef | grep db2 | grep -v grep
+tiian@ubuntu:~$ sudo /etc/init.d/db2exc start
+  * Starting DAS:                       done.
+  * Instance db2inst1 ( db2c_db2inst1 ):        done.
+  * Activating database SAMPLE          done.
+tiian@ubuntu:~$ ps -ef | grep db2 | grep -v grep
+dasusr1  22959     1  0 10:54 pts/2    00:00:00 /home/dasusr1/das/adm/db2dasrrm
+root     23190     1  2 10:54 pts/2    00:00:00 db2wdog                         
+db2inst1 23192 23190  4 10:54 pts/2    00:00:01 db2sysc                         
+root     23193 23192  0 10:54 pts/2    00:00:00 db2ckpwd                        
+root     23194 23192  0 10:54 pts/2    00:00:00 db2ckpwd                        
+root     23195 23192  0 10:54 pts/2    00:00:00 db2ckpwd                        
+db2inst1 23206 23190  2 10:54 pts/2    00:00:00 db2acd   ,0,0,0,1,0,0,0,1,0,8a6614,14,1e014,2,0,1,11fd0,0x12600000,0x12600000,1600000,740002,2,a0800d
+	  </screen>
+	  Switch to user <systemitem class="username">db2inst1</systemitem>
+	  and try to connect to database <quote>SAMPLE</quote>:
+	  <screen>
+tiian@ubuntu:~$ sudo su - db2inst1
+db2inst1@ubuntu:~$ db2
+(c) Copyright IBM Corporation 1993,2007
+Command Line Processor for DB2 Client 9.7.1
+
+You can issue database manager commands and SQL statements from the command
+prompt. For example:
+    db2 => connect to sample
+    db2 => bind sample.bnd
+
+For general help, type: ?.
+For command help, type: ? command, where command can be
+the first few keywords of a database manager command. For example:
+ ? CATALOG DATABASE for help on the CATALOG DATABASE command
+ ? CATALOG          for help on all of the CATALOG commands.
+
+To exit db2 interactive mode, type QUIT at the command prompt. Outside
+interactive mode, all commands must be prefixed with 'db2'.
+To list the current command option settings, type LIST COMMAND OPTIONS.
+
+For more detailed help, refer to the Online Reference Manual.
+
+db2 => connect to sample
+
+   Database Connection Information
+
+ Database server        = DB2/LINUX 9.7.1
+ SQL authorization ID   = DB2INST1
+ Local database alias   = SAMPLE
+
+	  </screen>
+	  Check the <quote>ORG</quote> table exists and contains some data:
+	  <screen>
+db2 => select * from ORG
+
+DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
+-------- -------------- ------- ---------- -------------
+      10 Head Office        160 Corporate  New York
+      15 New England         50 Eastern    Boston
+      20 Mid Atlantic        10 Eastern    Washington
+      38 South Atlantic      30 Eastern    Atlanta
+      42 Great Lakes        100 Midwest    Chicago
+      51 Plains             140 Midwest    Dallas
+      66 Pacific            270 Western    San Francisco
+      84 Mountain           290 Western    Denver
+
+  8 record(s) selected.
+
+	  </screen>
+	  OK, the <quote>SAMPLE</quote> database is installed and the 
+	  <quote>ORG</quote> table is
+	  populated. If something goes wrong, please refer to IBM DB2
+	  documentation to fix the issues before the next step because
+	  you will not be able to execute the sample program without a
+	  basic running installation.
+	</para>
+      </section>
+      <section>
+	<title>Setting-up the environment</title>
+	<para>
+	  We want to execute our example program with a generic user,
+	  not just using <systemitem class="username">db2inst1</systemitem>
+	  because it's the system user dedicated to the database
+	  instance execution. The commands below explain as the generic
+	  user <systemitem class="username">tiian</systemitem> (my own 
+	  user) can be used instead of 
+	  <systemitem class="username">db2inst1</systemitem>.
+	</para>
+	<para>
+	  Grant <constant>DBADM</constant> privilege to the user
+	  <systemitem class="username">tiian</systemitem>:
+	  <screen>
+db2 => grant DBADM on database to user tiian
+DB20000I  The SQL command completed successfully.
+	  </screen>
+	  <constant>DBADM</constant> is not the lowest authorization
+	  level necessary to execute our example, but for the sake of 
+	  this example it's good enought.
+	</para>
+	<para>
+	  Add something like the 4 lines below to your
+	  <filename>$HOME/.profile</filename> or equivalent profile
+	  configuration:
+	  <screen>
+# The following three lines have been added by IBM DB2 instance utilities.
+if [ -f /home/db2inst1/sqllib/db2profile ]; then
+    . /home/db2inst1/sqllib/db2profile
+fi
+	  </screen>
+	  Then login again and check your environment:
+	  <screen>
+tiian@ubuntu:~$ env|grep -i db2
+DB2INSTANCE=db2inst1
+LD_LIBRARY_PATH=/home/db2inst1/sqllib/lib32
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/home/db2inst1/sqllib/bin:/home/db2inst1/sqllib/adm:/home/db2inst1/sqllib/misc:/home/db2inst1/sqllib/db2tss/bin
+CLASSPATH=/home/db2inst1/sqllib/java/db2java.zip:/home/db2inst1/sqllib/java/db2jcc.jar:/home/db2inst1/sqllib/java/sqlj.zip:/home/db2inst1/sqllib/function:/home/db2inst1/sqllib/java/db2jcc_license_cu.jar:.
+	  </screen>
+	  As shown above,
+	  <varname>DB2INSTANCE</varname>, <varname>LD_LIBRARY_PATH</varname>,
+	  <varname>PATH</varname> variables should refer to DB2 stuff too.
+	  Connect to the database using your own user instead of
+	  <systemitem class="username">db2inst1</systemitem>:
+	  <screen>
+tiian@ubuntu:~$ db2
+(c) Copyright IBM Corporation 1993,2007
+Command Line Processor for DB2 Client 9.7.1
+
+You can issue database manager commands and SQL statements from the command
+prompt. For example:
+    db2 => connect to sample
+    db2 => bind sample.bnd
+
+For general help, type: ?.
+For command help, type: ? command, where command can be
+the first few keywords of a database manager command. For example:
+ ? CATALOG DATABASE for help on the CATALOG DATABASE command
+ ? CATALOG          for help on all of the CATALOG commands.
+
+To exit db2 interactive mode, type QUIT at the command prompt. Outside
+interactive mode, all commands must be prefixed with 'db2'.
+To list the current command option settings, type LIST COMMAND OPTIONS.
+
+For more detailed help, refer to the Online Reference Manual.
+
+db2 => connect to sample
+
+   Database Connection Information
+
+ Database server        = DB2/LINUX 9.7.1
+ SQL authorization ID   = TIIAN
+ Local database alias   = SAMPLE
+
+db2 => select * from DB2INST1.ORG
+
+DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
+-------- -------------- ------- ---------- -------------
+      10 Head Office        160 Corporate  New York
+      15 New England         50 Eastern    Boston
+      20 Mid Atlantic        10 Eastern    Washington
+      38 South Atlantic      30 Eastern    Atlanta
+      42 Great Lakes        100 Midwest    Chicago
+      51 Plains             140 Midwest    Dallas
+      66 Pacific            270 Western    San Francisco
+      84 Mountain           290 Western    Denver
+
+  8 record(s) selected.
+
+	  </screen>
+	  
+	</para>
+      </section>
+    </section>
+  </section>
 </chapter>
