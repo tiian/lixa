@@ -896,8 +896,8 @@ root     23194 23192  0 10:54 pts/2    00:00:00 db2ckpwd
 root     23195 23192  0 10:54 pts/2    00:00:00 db2ckpwd                        
 db2inst1 23206 23190  2 10:54 pts/2    00:00:00 db2acd   ,0,0,0,1,0,0,0,1,0,8a6614,14,1e014,2,0,1,11fd0,0x12600000,0x12600000,1600000,740002,2,a0800d
 	</screen>
-	Switch to user <systemitem class="username">db2inst1</systemitem>
-	and try to connect to database <quote>SAMPLE</quote>:
+	Switch to user <systemitem class="username">db2inst1</systemitem>,
+	try to connect to database <quote>SAMPLE</quote>:
 	<screen>
 tiian@ubuntu:~$ sudo su - db2inst1
 db2inst1@ubuntu:~$ db2
@@ -930,7 +930,8 @@ db2 => connect to sample
  Local database alias   = SAMPLE
 
 	</screen>
-	Check the <quote>ORG</quote> table exists and contains some data:
+	Check the tables <quote>ORG</quote> and <quote>DEPT</quote> exist
+	and contain some data:
 	<screen>
 db2 => select * from ORG
 
@@ -947,12 +948,33 @@ DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
 
   8 record(s) selected.
 
+db2 => select * from DEPT
+
+DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
+------ ------------------------------------ ------ -------- ----------------
+A00    SPIFFY COMPUTER SERVICE DIV.         000010 A00      -
+B01    PLANNING                             000020 A00      -
+C01    INFORMATION CENTER                   000030 A00      -
+D01    DEVELOPMENT CENTER                   -      A00      -
+D11    MANUFACTURING SYSTEMS                000060 D01      -
+D21    ADMINISTRATION SYSTEMS               000070 D01      -
+E01    SUPPORT SERVICES                     000050 A00      -
+E11    OPERATIONS                           000090 E01      -
+E21    SOFTWARE SUPPORT                     000100 E01      -
+F22    BRANCH OFFICE F2                     -      E01      -
+G22    BRANCH OFFICE G2                     -      E01      -
+H22    BRANCH OFFICE H2                     -      E01      -
+I22    BRANCH OFFICE I2                     -      E01      -
+J22    BRANCH OFFICE J2                     -      E01      -
+
+  14 record(s) selected.
+
 	</screen>
-	OK, the <quote>SAMPLE</quote> database is installed and the 
-	<quote>ORG</quote> table is
-	populated. If something goes wrong, please refer to IBM DB2
-	documentation to fix the issues before the next step because
-	you will not be able to execute the sample program without a
+	OK, the <quote>ORG</quote> and <quote>DEPT</quote>
+	tables are populated. 
+	If something went wrong, you should refer to IBM DB2
+	documentation to fix the issue before the next step because
+	you would not be able to execute the sample program without a
 	basic running installation.
       </para>
     </section>
@@ -961,7 +983,7 @@ DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
       <para>
 	We want to execute our example program with a generic user,
 	not just using <systemitem class="username">db2inst1</systemitem>
-	because it's the system user dedicated to the database
+	because that's the system user dedicated to the database
 	instance execution. The commands below explain as the generic
 	user <systemitem class="username">tiian</systemitem> (my own 
 	user) can be used instead of 
@@ -1069,7 +1091,11 @@ J22    BRANCH OFFICE J2                     -      E01      -
 
 db2 => quit
 DB20000I  The QUIT command completed successfully.
-	</screen>	  
+	</screen>
+	You have just verified that a generic user, like
+	<systemitem class="username">tiian</systemitem>	
+	in the example above, can connect to the database and execute
+	some query.
       </para>
     </section>
     <section>
@@ -1126,8 +1152,8 @@ tiian@ubuntu:~/tmp$ ldd example3_db2
     <section>
       <title>Set-up LIXA environment</title>
       <para>
-	There is an unresolved reference to liblixacmt: it can be fixed 
-	setting up the proper environment:
+	There is an unresolved reference to liblixacmt.so.0: it can be fixed 
+	setting up the proper environment variable:
 	<screen>
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /home/db2inst1/sqllib/lib32
@@ -1168,7 +1194,7 @@ tiian@ubuntu:~/tmp$ ldd example3_db2
         libz.so.1 => /usr/lib/libz.so.1 (0xb5282000)
         libuuid.so.1 => /lib/libuuid.so.1 (0xb527d000)
 	</screen>
-	Set-up the necessary environment variable:
+	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
 	<screen>
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 
@@ -1204,9 +1230,9 @@ DB2_DYN
 	we can discover how the DB2 database is configured for XA
 	<footnote><para>
 	    The content of <constant>xa_open_info</constant> string is
-	    documented in IBM Infocenter: search the string
+	    documented at IBM Infocenter: search the string
 	    <quote>xa_open string formats</quote> in the documentation
-	    relevant to your installed version; this is a valid link
+	    relevant to your installed version; this is a link
 	    <link xlink:href="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.admin.2pc.doc/doc/r0005080.html">
 	      http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.admin.2pc.doc/doc/r0005080.html
 	    </link>
@@ -1391,7 +1417,7 @@ Z99    RESEARCH &amp; DEVELOPMENT               -      E01      -
 tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
 tiian@ubuntu:~/tmp$ ./example3_db2 delete org
 	</screen>
-	and check the table was cleaned-up:
+	and check the tables were cleaned-up:
 	<screen>
 db2 => select * from DB2INST1.DEPT
 
