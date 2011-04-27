@@ -25,7 +25,6 @@ AC_CONFIG_FILES([
   src/client/switch/oracle/Makefile
   src/server/Makefile
   src/sample/Makefile
-  src/sample/ibmdb2/Makefile
   tests/Makefile
   tests/atlocal
   tests/etc/lixac_conf.xml
