@@ -205,7 +205,7 @@ tx_close(): 0
       Oracle Database 10g Release 2 (10.2) Express Edition: if you used 
       a different version, you might need to fix some of the details 
       showed by this example.
-      <important><para>
+      <note><para>
 	  If you did not yet installed the software provided by Oracle,
 	  please refer to the official Oracle site to download the
 	  software and to pick-up the information necessary to install 
@@ -213,10 +213,12 @@ tx_close(): 0
 	  the database. This manual does not give you information related
 	  to Oracle technology: it is assumed you already installed and
 	  configured the database.
-      </para></important>
+      </para></note>
+      <important><para>
       The LIXA software must be configured to support the Oracle Database
       Server resource manager as explained in 
       <xref linkend="Linking_third_party_resource_managers"/>.
+      </para></important>
     </para>
     <section>
       <title>Set-up Oracle environment</title>
@@ -246,7 +248,16 @@ Starting Oracle Database 10g Express Edition Instance.
 	  from a terminal session; the commands below show what happens when
 	  I connect to the Oracle server using the user 
 	  <systemitem class="username">sys</systemitem> with password
-	  <quote>oracle</quote>:
+	  <quote>oracle</quote>
+	  <footnote><para>
+	      I put this line
+	      <computeroutput>. /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh</computeroutput>
+	      in the file <filename>$HOME/.profile</filename> of the
+	      <systemitem class="username">oracle</systemitem> user to set-up
+	      the default administration environment; it complains about
+	      two shell errors, but for the sake of our example it's
+	      safe.
+	  </para></footnote>:
 	  <screen>
 tiian@ubuntu:~$ sudo su - oracle
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
@@ -297,12 +308,12 @@ no rows selected
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
 	  </screen>
-	  If the command failed the views would be not defined; you can
-	  create them with a command like this:
+	  If the command failed the views would be not defined and you
+	  would get something like this:
 	  <screen>
-oracle@ubuntu:~$ cat $ORACLE_HOME/rdbms/admin/xaview.sql | sqlplus "sys/oracle as sysdba"
+oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
 
-SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:37:06 2011
+SQL*Plus: Release 10.2.0.1.0 - Production on Fri Apr 29 22:20:01 2011
 
 Copyright (c) 1982, 2005, Oracle.  All rights reserved.
 
@@ -310,11 +321,46 @@ Copyright (c) 1982, 2005, Oracle.  All rights reserved.
 Connected to:
 Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
 
-SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL>
-View dropped.
+SQL> select * from v$pending_xatrans$;
+select * from v$pending_xatrans$
+              *
+ERROR at line 1:
+ORA-00942: table or view does not exist
 
-SQL>
-View dropped.
+
+SQL> select * from v$xatrans$;
+select * from v$xatrans$
+              *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+SQL> exit
+Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+	  </screen>
+	  you can create them with a command like this:
+	  <screen>
+oracle@ubuntu:~$ cat $ORACLE_HOME/rdbms/admin/xaview.sql | sqlplus "sys/oracle as sysdba"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Fri Apr 29 22:25:48 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> DROP VIEW v$xatrans$
+*
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+SQL> DROP VIEW v$pending_xatrans$
+*
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
 
 SQL> SQL> SQL>   2    3    4    5    6    7    8
 View created.
@@ -514,11 +560,9 @@ XE
     <section>
       <title>Check the data table before execution</title>
       <para>
-	Execute the below commands using  
-	<systemitem class="username">oracle</systemitem>
-	user:
+	Execute the below commands:
 	<screen>
-oracle@ubuntu:~$ sqlplus "hr/hr"
+tiian@ubuntu:~$ sqlplus "hr/hr"
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 14 22:04:55 2011
 
@@ -876,6 +920,20 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
       If you were using a different version you would need to adapt some
       commands to your environment.
     </para>
+      <note><para>
+	  If you did not yet installed the software provided by IBM,
+	  please refer to the official IBM site to download the
+	  software and to pick-up the information necessary to install 
+	  and configure
+	  the database. This manual does not give you information related
+	  to IBM DB2 technology: it is assumed you already installed and
+	  configured the database.
+      </para></note>
+      <important><para>
+      The LIXA software must be configured to support the IBM DB2
+      server resource manager as explained in 
+      <xref linkend="Linking_third_party_resource_managers"/>.
+      </para></important>
     <section>
       <title>Start-up the DB2 server</title>
       <para>
