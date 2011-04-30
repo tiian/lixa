@@ -19,6 +19,14 @@
 
 
 
+/*
+ * This is an example that shows as you can use LIXA TX (Transaction
+ * Demarcation) API and CLI (IBM DB2 C) API together.
+ * Please refer to LIXA manual for more information about this sample.
+ */
+
+
+
 /* standard C & UNIX headers */
 #include <stdio.h>
 #include <string.h>
