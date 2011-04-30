@@ -1590,4 +1590,97 @@ tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
       </para>
     </section>
   </section>
+  <section>
+    <title>An example with two distinct Resource Manager: Oracle DBMS and
+      IBM DB2DBMS</title>
+    <screen>
+tiian@ubuntu:~/lixa$ ./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --with-ibmdb2=/opt/ibm/db2/V9.7
+    </screen>
+
+    <screen>
+tiian@ubuntu:~/tmp$ gcc example4_ora_db2.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixacmt -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 -I /opt/ibm/db2/V9.7/include/ -L /opt/ibm/db2/V9.7/lib32/ -l db2 -o example4_ora_db2
+    </screen>
+
+    <screen>
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+/home/db2inst1/sqllib/lib32
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/opt/lixa/lib
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH                                       /home/db2inst1/sqllib/lib32:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/opt/lixa/lib
+    </screen>
+
+    <screen>
+tiian@ubuntu:~/tmp$ ldd example4_ora_db2
+        linux-gate.so.1 =>  (0xb77aa000)
+        liblixacmt.so.0 => /opt/lixa/lib/liblixacmt.so.0 (0xb7790000)
+        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb69dc000)
+        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb67d6000)
+        libdb2.so.1 => /home/db2inst1/sqllib/lib32/libdb2.so.1 (0xb52a4000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb5147000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb5143000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb513f000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb5139000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb5130000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb507f000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb4f5f000)
+        liblixabmt.so.0 => /opt/lixa/lib/liblixabmt.so.0 (0xb4f4c000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb4f34000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb4f0e000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb4ef6000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb4ec3000)
+        libpam.so.0 => /lib/libpam.so.0 (0xb4eb9000)
+        libdb2dascmn.so.1 => /home/db2inst1/sqllib/lib32/libdb2dascmn.so.1 (0xb4e8c000)
+        libdb2g11n.so.1 => /home/db2inst1/sqllib/lib32/libdb2g11n.so.1 (0xb481e000)
+        libdb2genreg.so.1 => /home/db2inst1/sqllib/lib32/libdb2genreg.so.1 (0xb47de000)
+        libdb2install.so.1 => /home/db2inst1/sqllib/lib32/libdb2install.so.1 (0xb47d2000)
+        libdb2locale.so.1 => /home/db2inst1/sqllib/lib32/libdb2locale.so.1 (0xb47bf000)
+        libdb2osse.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse.so.1 (0xb44ba000)
+        libdb2osse_db2.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse_db2.so.1 (0xb444a000)
+        libdb2trcapi.so.1 => /home/db2inst1/sqllib/lib32/libdb2trcapi.so.1 (0xb4437000)
+        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb4343000)
+        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb4338000)
+        /lib/ld-linux.so.2 (0xb77ab000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb4311000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb42fc000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb42f8000)
+    </screen>
+
+    <screen>
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_DYN_DB2_DYN
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+ORA_DYN_DB2_DYN
+    </screen>
+
+    <screen>
+tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
+
+tiian@ubuntu:~/tmp$ export ORACLE_HOME=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+    </screen>
+
+    <screen>
+tiian@ubuntu:~/tmp$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/home/db2inst1/sqllib/bin:/home/db2inst1/sqllib/adm:/home/db2inst1/sqllib/misc:/home/db2inst1/sqllib/db2tss/bin
+tiian@ubuntu:~/tmp$ export PATH=$PATH:$ORACLE_HOME/bin
+tiian@ubuntu:~/tmp$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/home/db2inst1/sqllib/bin:/home/db2inst1/sqllib/adm:/home/db2inst1/sqllib/misc:/home/db2inst1/sqllib/db2tss/bin:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin
+    </screen>
+
+    <screen>
+tiian@ubuntu:~/tmp$ echo $ORACLE_SID
+
+tiian@ubuntu:~/tmp$ export ORACLE_SID=XE
+tiian@ubuntu:~/tmp$ echo $ORACLE_SID
+XE
+    </screen>
+
+    <screen>
+    </screen>
+
+    <screen>
+    </screen>
+
+  </section>
 </chapter>

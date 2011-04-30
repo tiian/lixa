@@ -20,23 +20,9 @@
 
 
 /*
- * This is a trivial sample to show how you can use Lixa TX (Transaction
+ * This is an example that shows as you can use LIXA TX (Transaction
  * Demarcation) API and OCI (Oracle C Interface) API together.
- * To run this program:
- * 0. install Oracle XE
- * 1. compile and install Lixa
- * 2. activate "hr/hr" Oracle internal user
- * 3. check hr schema contains "COUNTRIES" table
- * 4. configure lixac_conf.xml with a valid Oracle xa_open_info string
- * 5. switch to "oracle" UNIX account or equivalent account with a running
- *    Oracle environment
- * 6. execute this sample with:
- *    ...somepath.../lixa_oracle_sample
- *    or
- *    ...somepath.../lixa_oracle_sample delete
- * 7. check with web object browser interface - or the Oracle interface of
- *    your choice - the record is inserted/deleted from the table
- *    ...hope you'll enjoy it ;)
+ * Please refer to LIXA manual for more information about this sample.
  */
 
 
