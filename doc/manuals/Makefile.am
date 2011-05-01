@@ -16,14 +16,16 @@ dia_images = LIXA_Configuration_1.dia  LIXA_Configuration_4.dia \
 	LIXA_Configuration_5.dia LIXA_Configuration_8.dia \
 	LIXA_Configuration_3.dia LIXA_Configuration_6.dia \
 	LIXA_Configuration_9.dia \
-	LIXA_Development_1.dia LIXA_Development_2.dia LIXA_Development_3.dia
+	LIXA_Development_1.dia LIXA_Development_2.dia LIXA_Development_3.dia \
+	LIXA_Development_4.dia
 
 png_images = LIXA_Configuration_1.png  LIXA_Configuration_4.png \
 	LIXA_Configuration_7.png LIXA_Configuration_2.png \
 	LIXA_Configuration_5.png LIXA_Configuration_8.png \
 	LIXA_Configuration_3.png LIXA_Configuration_6.png \
 	LIXA_Configuration_9.png \
-	LIXA_Development_1.png LIXA_Development_2.png LIXA_Development_3.png
+	LIXA_Development_1.png LIXA_Development_2.png LIXA_Development_3.png \
+	LIXA_Development_4.png
 
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/html
 doc_DATA = index.html $(png_images)

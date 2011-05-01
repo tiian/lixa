@@ -1,4 +1,4 @@
-<chapter>
+<chapter xml:id="Development">
   <title>Development</title>
   <para>
     This chapter explains how you can develop your own application
@@ -188,7 +188,7 @@ tx_close(): 0
       </para>
     </section>
   </section>
-  <section>
+  <section xml:id="Development_example2_ora">
     <title>An example with a <quote>real</quote> Resource Manager (Oracle DBMS)</title>
     <figure xml:id="develop2">
       <title>Deploy model of an example with Oracle Database Server</title>
@@ -220,7 +220,7 @@ tx_close(): 0
       <xref linkend="Linking_third_party_resource_managers"/>.
       </para></important>
     </para>
-    <section>
+    <section xml:id="Development_setup_Oracle_environment">
       <title>Set-up Oracle environment</title>
       <section>
 	<title>Start-up the Oracle server</title>
@@ -449,7 +449,7 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
 	</para>
       </section>
     </section>
-    <section>
+    <section xml:id="Development_start_LIXA_server">
       <title>Start the LIXA state server</title>
       <para>
 	Start the state server as shown below:
@@ -905,7 +905,7 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
       </para>
     </section>
   </section>
-  <section>
+  <section xml:id="Development_example3_db2">
     <title>An example with IBM DB2 DBMS</title>
     <figure xml:id="develop3">
       <title>Deploy model of an example with IBM DB2 DBMS</title>
@@ -920,26 +920,28 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
       If you were using a different version you would need to adapt some
       commands to your environment.
     </para>
-      <note><para>
-	  If you did not yet installed the software provided by IBM,
-	  please refer to the official IBM site to download the
-	  software and to pick-up the information necessary to install 
-	  and configure
-	  the database. This manual does not give you information related
-	  to IBM DB2 technology: it is assumed you already installed and
-	  configured the database.
-      </para></note>
-      <important><para>
-      The LIXA software must be configured to support the IBM DB2
-      server resource manager as explained in 
-      <xref linkend="Linking_third_party_resource_managers"/>.
-      </para></important>
-    <section>
-      <title>Start-up the DB2 server</title>
-      <para>
-	If your server didn't start-up automatically at boot time, you
-	could start it with the following commands:
-	<screen>
+    <note><para>
+	If you did not yet installed the software provided by IBM,
+	please refer to the official IBM site to download the
+	software and to pick-up the information necessary to install 
+	and configure
+	the database. This manual does not give you information related
+	to IBM DB2 technology: it is assumed you already installed and
+	configured the database.
+    </para></note>
+    <important><para>
+	The LIXA software must be configured to support the IBM DB2
+	server resource manager as explained in 
+	<xref linkend="Linking_third_party_resource_managers"/>.
+    </para></important>
+    <section xml:id="Development_setup_DB2_environment">
+      <title>Set-up DB2 environment</title>
+      <section>
+	<title>Start-up the DB2 server</title>
+	<para>
+	  If your server didn't start-up automatically at boot time, you
+	  could start it with the following commands:
+	  <screen>
 tiian@ubuntu:~$ ps -ef | grep db2 | grep -v grep
 tiian@ubuntu:~$ sudo /etc/init.d/db2exc start
   * Starting DAS:                       done.
@@ -953,10 +955,10 @@ root     23193 23192  0 10:54 pts/2    00:00:00 db2ckpwd
 root     23194 23192  0 10:54 pts/2    00:00:00 db2ckpwd                        
 root     23195 23192  0 10:54 pts/2    00:00:00 db2ckpwd                        
 db2inst1 23206 23190  2 10:54 pts/2    00:00:00 db2acd   ,0,0,0,1,0,0,0,1,0,8a6614,14,1e014,2,0,1,11fd0,0x12600000,0x12600000,1600000,740002,2,a0800d
-	</screen>
-	Switch to user <systemitem class="username">db2inst1</systemitem>,
-	try to connect to database <quote>SAMPLE</quote>:
-	<screen>
+	  </screen>
+	  Switch to user <systemitem class="username">db2inst1</systemitem>,
+	  try to connect to database <quote>SAMPLE</quote>:
+	  <screen>
 tiian@ubuntu:~$ sudo su - db2inst1
 db2inst1@ubuntu:~$ db2
 (c) Copyright IBM Corporation 1993,2007
@@ -987,10 +989,10 @@ db2 => connect to sample
  SQL authorization ID   = DB2INST1
  Local database alias   = SAMPLE
 
-	</screen>
-	Check the tables <quote>ORG</quote> and <quote>DEPT</quote> exist
-	and contain some data:
-	<screen>
+	  </screen>
+	  Check the tables <quote>ORG</quote> and <quote>DEPT</quote> exist
+	  and contain some data:
+	  <screen>
 db2 => select * from ORG
 
 DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
@@ -1027,61 +1029,61 @@ J22    BRANCH OFFICE J2                     -      E01      -
 
   14 record(s) selected.
 
-	</screen>
-	OK, the <quote>ORG</quote> and <quote>DEPT</quote>
-	tables are populated. 
-	If something went wrong, you should refer to IBM DB2
-	documentation to fix the issue before the next step because
-	you would not be able to execute the sample program without a
-	basic running installation.
-      </para>
-    </section>
-    <section xml:id="Set_up_DB2_environment">
-      <title>Set-up DB2 environment</title>
-      <para>
-	We want to execute our example program with a generic user,
-	not just using <systemitem class="username">db2inst1</systemitem>
-	because that's the system user dedicated to the database
-	instance execution. The commands below explain as the generic
-	user <systemitem class="username">tiian</systemitem> (my own 
-	user) can be used instead of 
-	<systemitem class="username">db2inst1</systemitem>.
-      </para>
-      <para>
-	Grant <constant>DBADM</constant> privilege to the user
-	<systemitem class="username">tiian</systemitem>:
-	<screen>
+	  </screen>
+	  OK, the <quote>ORG</quote> and <quote>DEPT</quote>
+	  tables are populated. 
+	  If something went wrong, you should refer to IBM DB2
+	  documentation to fix the issue before the next step because
+	  you would not be able to execute the sample program without a
+	  basic running installation.
+	</para>
+      </section>
+      <section>
+	<title>User customization</title>
+	<para>
+	  We want to execute our example program with a generic user,
+	  not just using <systemitem class="username">db2inst1</systemitem>
+	  because that's the system user dedicated to the database
+	  instance execution. The commands below explain as the generic
+	  user <systemitem class="username">tiian</systemitem> (my own 
+	  user) can be used instead of 
+	  <systemitem class="username">db2inst1</systemitem>.
+	</para>
+	<para>
+	  Grant <constant>DBADM</constant> privilege to the user
+	  <systemitem class="username">tiian</systemitem>:
+	  <screen>
 db2 => grant DBADM on database to user tiian
 DB20000I  The SQL command completed successfully.
-	</screen>
-	<constant>DBADM</constant> is not the lowest authorization
-	level necessary to execute our example, but for the sake of 
-	this example it's a <quote>good enought</quote> choice.
-      </para>
-      <para>
-	Add something like the 4 lines below to your
-	<filename>$HOME/.profile</filename> or equivalent profile
-	configuration:
-	<screen>
+	  </screen>
+	  <constant>DBADM</constant> is not the lowest authorization
+	  level necessary to execute our example, but for the sake of 
+	  this example it's a <quote>good enought</quote> choice.
+	</para>
+	<para>
+	  Add something like the 4 lines below to your
+	  <filename>$HOME/.profile</filename> or equivalent profile
+	  configuration:
+	  <screen>
 # The following three lines have been added by IBM DB2 instance utilities.
 if [ -f /home/db2inst1/sqllib/db2profile ]; then
     . /home/db2inst1/sqllib/db2profile
 fi
-	</screen>
-	Then login again and check your environment:
-	<screen>
+	  </screen>
+	  Then login again and check your environment:
+	  <screen>
 tiian@ubuntu:~$ env|grep -i db2
 DB2INSTANCE=db2inst1
 LD_LIBRARY_PATH=/home/db2inst1/sqllib/lib32
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/home/db2inst1/sqllib/bin:/home/db2inst1/sqllib/adm:/home/db2inst1/sqllib/misc:/home/db2inst1/sqllib/db2tss/bin
 CLASSPATH=/home/db2inst1/sqllib/java/db2java.zip:/home/db2inst1/sqllib/java/db2jcc.jar:/home/db2inst1/sqllib/java/sqlj.zip:/home/db2inst1/sqllib/function:/home/db2inst1/sqllib/java/db2jcc_license_cu.jar:.
-	</screen>
-	As shown above,
-	<varname>DB2INSTANCE</varname>, <varname>LD_LIBRARY_PATH</varname>,
-	<varname>PATH</varname> variables should refer to DB2 stuff too.
-	Connect to the database using your own user instead of
-	<systemitem class="username">db2inst1</systemitem>:
-	<screen>
+	  </screen>
+	  As shown above,
+	  <varname>DB2INSTANCE</varname>, <varname>LD_LIBRARY_PATH</varname>,
+	  <varname>PATH</varname> variables should refer to DB2 stuff too.
+	  Connect to the database using your own user instead of
+	  <systemitem class="username">db2inst1</systemitem>:
+	  <screen>
 tiian@ubuntu:~$ db2
 (c) Copyright IBM Corporation 1993,2007
 Command Line Processor for DB2 Client 9.7.1
@@ -1149,12 +1151,13 @@ J22    BRANCH OFFICE J2                     -      E01      -
 
 db2 => quit
 DB20000I  The QUIT command completed successfully.
-	</screen>
-	You have just verified that a generic user, like
-	<systemitem class="username">tiian</systemitem>	
-	in the example above, can connect to the database and execute
-	some query.
-      </para>
+	  </screen>
+	  You have just verified that a generic user, like
+	  <systemitem class="username">tiian</systemitem>	
+	  in the example above, can connect to the database and execute
+	  some query.
+	</para>
+      </section>
     </section>
     <section>
       <title>Start the LIXA state server</title>
@@ -1261,7 +1264,7 @@ tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 DB2_DYN
 	</screen>
 	No additional DB2 variables are needed because they are automatically
-	set at login (see <xref linkend="Set_up_DB2_environment"/>).
+	set at login (see <xref linkend="Development_setup_DB2_environment"/>).
       </para>
     </section>
     <section>
@@ -1593,9 +1596,74 @@ tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
   <section>
     <title>An example with two distinct Resource Manager: Oracle DBMS and
       IBM DB2DBMS</title>
-    <screen>
-tiian@ubuntu:~/lixa$ ./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --with-ibmdb2=/opt/ibm/db2/V9.7
-    </screen>
+    <figure xml:id="develop4">
+      <title>Deploy model of an example showing a distributed transaction with Oracle and IBM DB2</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Development_4.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      This example should be considered a milestone because it shows as
+      you can implement DTP (Distributed Transaction Processing) with two
+      Resource Managers (Oracle Database Server and IBM DB2 DBMS)
+      coordinated by the LIXA Transaction Manager.
+      It's strongly suggested you have played with the
+      examples previously shown in this chapter (see
+      <xref linkend="Development"/>) before starting this more complex one.
+    </para>
+    <note>
+      <para>
+	If you did not yet installed the software provided by Oracle,
+	please refer to the official Oracle site to download the
+	software and to pick-up the information necessary to install 
+	and configure
+	the database. This manual does not give you information related
+	to Oracle technology: it is assumed you already installed and
+	configured the database.
+      </para>
+      <para>
+	If you did not yet installed the software provided by IBM,
+	please refer to the official IBM site to download the
+	software and to pick-up the information necessary to install 
+	and configure
+	the database. This manual does not give you information related
+	to IBM DB2 technology: it is assumed you already installed and
+	configured the database.
+      </para>
+    </note>
+    <important>
+      <para>
+	The LIXA software must be configured to support the Oracle Database
+	Server and the IVM DB2 resource manager as explained in 
+	<xref linkend="Linking_third_party_resource_managers"/>.
+	As a little hint, you should configure LIXA as below:
+	<screen>
+./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --with-ibmdb2=/opt/ibm/db2/V9.7
+	</screen>
+	Please don't forget you must compile and install every time you
+	re-configure.
+      </para>
+    </important>
+    <para>
+      Please follow the instructions explained 
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	    in <xref linkend="Development_setup_Oracle_environment"/>
+	    to set-up a running environment for Oracle Database Server
+	</para></listitem>
+	<listitem><para>
+	    in <xref linkend="Development_setup_DB2_environment"/>
+	    to set-up a running environment for IBM DB2 server
+	</para></listitem>
+	<listitem><para>
+	    in <xref linkend="Development_start_LIXA_server"/>
+	    to start up the LIXA state server
+	</para></listitem>
+      </itemizedlist>
+
+    </para>
 
     <screen>
 tiian@ubuntu:~/tmp$ gcc example4_ora_db2.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixacmt -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 -I /opt/ibm/db2/V9.7/include/ -L /opt/ibm/db2/V9.7/lib32/ -l db2 -o example4_ora_db2
