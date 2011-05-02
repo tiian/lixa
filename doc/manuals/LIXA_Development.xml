@@ -466,12 +466,18 @@ lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
     <section>
       <title>Build the client program</title>
       <para>
-	Prepare the client (Application Program) using the below commands:
+	Prepare the client (Application Program) using the below commands
+	(<command>gcc</command> command was splitted on several lines 
+	using <command>\</command> to help readability, but you may use
+	a single line):
 	<screen>
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example2_ora.c .
-tiian@ubuntu:~/tmp$ gcc example2_ora.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixacmt -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 -o example2_ora
+tiian@ubuntu:~/tmp$ gcc example2_ora.c -Wall \
+> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixacmt \
+> -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
+> -o example2_ora
 	</screen>
 	Verify the executable produced by <command>gcc</command>:
 	<screen>
@@ -1038,7 +1044,7 @@ J22    BRANCH OFFICE J2                     -      E01      -
 	  basic running installation.
 	</para>
       </section>
-      <section>
+      <section xml:id="Development_setup_DB2_user_customization">
 	<title>User customization</title>
 	<para>
 	  We want to execute our example program with a generic user,
@@ -1176,12 +1182,17 @@ lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
     <section>
       <title>Build the client program</title>
       <para>
-	Prepare the client (Application Program) using the below commands:
+	Prepare the client (Application Program) using the below commands
+	(<command>gcc</command> command was splitted on several lines 
+	using <command>\</command> to help readability, but you may use
+	a single line):
 	<screen>
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example3_db2.c .
-tiian@ubuntu:~/tmp$ gcc example3_db2.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixacmt -I /opt/ibm/db2/V9.7/include/ -L /opt/ibm/db2/V9.7/lib32/ -l db2 -o example3_db2
+tiian@ubuntu:~/tmp$ gcc example3_db2.c -Wall \
+> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixacmt -I /opt/ibm/db2/V9.7/include/ -L /opt/ibm/db2/V9.7/lib32/ -l db2 \
+> -o example3_db2
 	</screen>
 	Verify the executable produced by <command>gcc</command>:
 	<screen>
@@ -1662,86 +1673,216 @@ tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
 	    to start up the LIXA state server
 	</para></listitem>
       </itemizedlist>
-
     </para>
 
-    <screen>
-tiian@ubuntu:~/tmp$ gcc example4_ora_db2.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixacmt -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 -I /opt/ibm/db2/V9.7/include/ -L /opt/ibm/db2/V9.7/lib32/ -l db2 -o example4_ora_db2
-    </screen>
-
-    <screen>
+    <section>
+      <title>Build the client program</title>
+      <para>
+	Prepare the client (Application Program) using the below commands
+	(<command>gcc</command> command was splitted on several lines 
+	using <command>\</command> to help readability, but you may use
+	a single line):
+	<screen>
+tiian@ubuntu:~$ mkdir tmp
+tiian@ubuntu:~$ cd tmp
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example4_ora_db2.c .
+tiian@ubuntu:~/tmp$ gcc example4_ora_db2.c -Wall \
+> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixacmt \
+> -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
+> -I /opt/ibm/db2/V9.7/include/ -L /opt/ibm/db2/V9.7/lib32/ -l db2 \
+> -o example4_ora_db2
+	</screen>
+	Verify the executable produced by <command>gcc</command>:
+	<screen>
+tiian@ubuntu:~/tmp$ ldd example4_ora_db2
+        linux-gate.so.1 =>  (0xb779c000)
+        liblixacmt.so.0 => not found
+        libclntsh.so.10.1 => not found
+        libnnz10.so => not found
+        libdb2.so.1 => /home/db2inst1/sqllib/lib32/libdb2.so.1 (0xb6259000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb610a000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb60d7000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb60d3000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb60bb000)
+        libpam.so.0 => /lib/libpam.so.0 (0xb60b1000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb608c000)
+        libdb2dascmn.so.1 => /home/db2inst1/sqllib/lib32/libdb2dascmn.so.1 (0xb605e000)
+        libdb2g11n.so.1 => /home/db2inst1/sqllib/lib32/libdb2g11n.so.1 (0xb59f0000)
+        libdb2genreg.so.1 => /home/db2inst1/sqllib/lib32/libdb2genreg.so.1 (0xb59b0000)
+        libdb2install.so.1 => /home/db2inst1/sqllib/lib32/libdb2install.so.1 (0xb59a5000)
+        libdb2locale.so.1 => /home/db2inst1/sqllib/lib32/libdb2locale.so.1 (0xb5992000)
+        libdb2osse.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse.so.1 (0xb568d000)
+        libdb2osse_db2.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse_db2.so.1 (0xb561c000)
+        libdb2trcapi.so.1 => /home/db2inst1/sqllib/lib32/libdb2trcapi.so.1 (0xb5609000)
+        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb5516000)
+        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb550b000)
+        /lib/ld-linux.so.2 (0xb779d000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb5501000)
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
+	There are three unresolved references that can be fixed setting up
+	the environment properly
+	<footnote><para>
+	    IBM DB2 references should be resolved due to the suggested 
+	    customization of your user explained in 
+	    <xref linkend="Development_setup_DB2_user_customization"/>
+	</para></footnote>:
+	<screen>
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /home/db2inst1/sqllib/lib32
 tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/opt/lixa/lib
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH                                       /home/db2inst1/sqllib/lib32:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/opt/lixa/lib
-    </screen>
-
-    <screen>
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+/home/db2inst1/sqllib/lib32:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/opt/lixa/lib
+	</screen>
+	Check again the executable:
+	<screen>
 tiian@ubuntu:~/tmp$ ldd example4_ora_db2
-        linux-gate.so.1 =>  (0xb77aa000)
-        liblixacmt.so.0 => /opt/lixa/lib/liblixacmt.so.0 (0xb7790000)
-        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb69dc000)
-        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb67d6000)
-        libdb2.so.1 => /home/db2inst1/sqllib/lib32/libdb2.so.1 (0xb52a4000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb5147000)
-        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb5143000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb513f000)
-        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb5139000)
-        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb5130000)
-        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb507f000)
-        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb4f5f000)
-        liblixabmt.so.0 => /opt/lixa/lib/liblixabmt.so.0 (0xb4f4c000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb4f34000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb4f0e000)
-        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb4ef6000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb4ec3000)
-        libpam.so.0 => /lib/libpam.so.0 (0xb4eb9000)
-        libdb2dascmn.so.1 => /home/db2inst1/sqllib/lib32/libdb2dascmn.so.1 (0xb4e8c000)
-        libdb2g11n.so.1 => /home/db2inst1/sqllib/lib32/libdb2g11n.so.1 (0xb481e000)
-        libdb2genreg.so.1 => /home/db2inst1/sqllib/lib32/libdb2genreg.so.1 (0xb47de000)
-        libdb2install.so.1 => /home/db2inst1/sqllib/lib32/libdb2install.so.1 (0xb47d2000)
-        libdb2locale.so.1 => /home/db2inst1/sqllib/lib32/libdb2locale.so.1 (0xb47bf000)
-        libdb2osse.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse.so.1 (0xb44ba000)
-        libdb2osse_db2.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse_db2.so.1 (0xb444a000)
-        libdb2trcapi.so.1 => /home/db2inst1/sqllib/lib32/libdb2trcapi.so.1 (0xb4437000)
-        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb4343000)
-        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb4338000)
-        /lib/ld-linux.so.2 (0xb77ab000)
-        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb4311000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb42fc000)
-        libuuid.so.1 => /lib/libuuid.so.1 (0xb42f8000)
-    </screen>
-
-    <screen>
+        linux-gate.so.1 =>  (0xb775d000)
+        liblixacmt.so.0 => /opt/lixa/lib/liblixacmt.so.0 (0xb7743000)
+        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb698f000)
+        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6789000)
+        libdb2.so.1 => /home/db2inst1/sqllib/lib32/libdb2.so.1 (0xb5257000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb50fa000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb50f6000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb50f2000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb50ec000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb50e3000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb5032000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb4f12000)
+        liblixabmt.so.0 => /opt/lixa/lib/liblixabmt.so.0 (0xb4eff000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb4ee7000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb4ec1000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb4ea9000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb4e76000)
+        libpam.so.0 => /lib/libpam.so.0 (0xb4e6c000)
+        libdb2dascmn.so.1 => /home/db2inst1/sqllib/lib32/libdb2dascmn.so.1 (0xb4e3f000)
+        libdb2g11n.so.1 => /home/db2inst1/sqllib/lib32/libdb2g11n.so.1 (0xb47d1000)
+        libdb2genreg.so.1 => /home/db2inst1/sqllib/lib32/libdb2genreg.so.1 (0xb4791000)
+        libdb2install.so.1 => /home/db2inst1/sqllib/lib32/libdb2install.so.1 (0xb4785000)
+        libdb2locale.so.1 => /home/db2inst1/sqllib/lib32/libdb2locale.so.1 (0xb4772000)
+        libdb2osse.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse.so.1 (0xb446d000)
+        libdb2osse_db2.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse_db2.so.1 (0xb43fd000)
+        libdb2trcapi.so.1 => /home/db2inst1/sqllib/lib32/libdb2trcapi.so.1 (0xb43ea000)
+        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb42f6000)
+        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb42eb000)
+        /lib/ld-linux.so.2 (0xb775e000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb42c4000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb42af000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb42ab000)
+	</screen>
+	Set-up the necessary environment variables:
+	<screen>
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 
 tiian@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_DYN_DB2_DYN
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
-ORA_DYN_DB2_DYN
-    </screen>
+ORA_DYN_DB2_SYN
 
-    <screen>
 tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
 
 tiian@ubuntu:~/tmp$ export ORACLE_HOME=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
 tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server
-    </screen>
 
-    <screen>
 tiian@ubuntu:~/tmp$ echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/home/db2inst1/sqllib/bin:/home/db2inst1/sqllib/adm:/home/db2inst1/sqllib/misc:/home/db2inst1/sqllib/db2tss/bin
 tiian@ubuntu:~/tmp$ export PATH=$PATH:$ORACLE_HOME/bin
 tiian@ubuntu:~/tmp$ echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/home/db2inst1/sqllib/bin:/home/db2inst1/sqllib/adm:/home/db2inst1/sqllib/misc:/home/db2inst1/sqllib/db2tss/bin:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin
-    </screen>
 
-    <screen>
 tiian@ubuntu:~/tmp$ echo $ORACLE_SID
 
 tiian@ubuntu:~/tmp$ export ORACLE_SID=XE
 tiian@ubuntu:~/tmp$ echo $ORACLE_SID
 XE
+	</screen>
+	It is suggested to set the necessary environment variables in your 
+	profile if you are going to execute the programs many times.
+	This is the list of the suggested variables:
+	<varname>LD_LIBRARY_PATH</varname>,
+	<varname>LIXA_PROFILE</varname>,
+	<varname>ORACLE_HOME</varname>,
+	<varname>ORACLE_SID</varname>,
+	<varname>PATH</varname>.
+      </para>
+    </section>
+    <section>
+      <title>Some checks before program execution</title>
+      <para>
+	We set <varname>LIXA_PROFILE</varname> to value
+	<quote>ORA_DYN_DB2_DYN</quote>, looking at
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename>:
+	<screen>
+    &lt;profile name="ORA_DYN_DB2_DYN"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;OracleXE_dynreg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;IBMDB2_stareg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+	</screen>
+	the profile references two Resource Managers:
+	<quote>OracleXE_dynreg</quote> and <quote>IBMDB2_stareg</quote>, 
+	looking again at the config file:
+	<screen>
+    &lt;rsrmgr name="OracleXE_dynreg" switch_file="/opt/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
+    &lt;rsrmgr name="IBMDB2_dynreg" switch_file="/opt/lixa/lib/switch_ibmdb2_dynreg.so" xa_open_info="axlib=/opt/lixa/lib/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+	</screen>
+	we can discover how our application will access the resource
+	managers
+	<footnote>
+	  <para>
+	    The content of <constant>xa_open_info</constant> string is
+	    described in chapter 15 "Developing Applications with Oracle XA"
+	    of the "Oracle Database Application Developer's Guide"
+	    manual; please refer to the documentation published by
+	    Oracle Corporation for further details.
+	  </para>
+	  <para>
+	    The content of <constant>xa_open_info</constant> string is
+	    documented at IBM Infocenter: search the string
+	    <quote>xa_open string formats</quote> in the documentation
+	    relevant to your installed version; this is a link
+	    <link xlink:href="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.admin.2pc.doc/doc/r0005080.html">
+	      http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.admin.2pc.doc/doc/r0005080.html
+	    </link>
+	    but it may change in the future.
+	  </para>
+	</footnote>. 
+	Verify no (Oracle) trace file exists:
+	<screen>
+tiian@ubuntu:~/tmp$ ls -la /tmp/xa*
+ls: cannot access /tmp/xa*: No such file or directory
+	</screen>
+      </para>
+    </section>
+      
+
+    <screen>
+    </screen>
+
+    <screen>
+    </screen>
+
+    <screen>
+    </screen>
+
+    <screen>
+    </screen>
+
+    <screen>
+    </screen>
+
+    <screen>
+    </screen>
+
+    <screen>
     </screen>
 
     <screen>
