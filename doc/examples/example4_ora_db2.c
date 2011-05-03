@@ -173,7 +173,8 @@ int main(int argc, char *argv[])
                             "SQL statement ('%s'): %d\n", sql_iorg, rc_cli);
                     error = 1;
                     break;
-                }
+                } else
+                    fprintf(stderr, "INSERT INTO DB2INST1.ORG executed!\n");
             } else if (!strcmp(argv[i], "dorg")) {
                 /* DELETE FROM DB2INST1.ORG (DB2) table */
                 if (SQL_SUCCESS != (rc_cli = SQLExecDirect(
@@ -182,7 +183,8 @@ int main(int argc, char *argv[])
                             "SQL statement ('%s'): %d\n", sql_dorg, rc_cli);
                     error = 1;
                     break;
-                }
+                } else
+                    fprintf(stderr, "DELETE FROM DB2INST1.ORG executed!\n");
             } else if (!strcmp(argv[i], "idept")) {
                 /* INSERT INTO DB2INST1.DEPT (DB2) table */
                 if (SQL_SUCCESS != (rc_cli = SQLExecDirect(
@@ -191,7 +193,8 @@ int main(int argc, char *argv[])
                             "SQL statement ('%s'): %d\n", sql_idept, rc_cli);
                     error = 1;
                     break;
-                }
+                } else
+                    fprintf(stderr, "INSERT INTO DB2INST1.DEPT executed!\n");
             } else if (!strcmp(argv[i], "ddept")) {
                 /* DELETE FROM DB2INST1.DEPT (DB2) table */
                 if (SQL_SUCCESS != (rc_cli = SQLExecDirect(
@@ -200,7 +203,8 @@ int main(int argc, char *argv[])
                             "SQL statement ('%s'): %d\n", sql_ddept, rc_cli);
                     error = 1;
                     break;
-                }
+                } else
+                    fprintf(stderr, "DELETE FROM DB2INST1.DEPT executed!\n");
             } else if (!strcmp(argv[i], "icountries")) {
                 /* INSERT INTO COUNTRIES (ORACLE) table */
                 if (OCI_SUCCESS != OCIStmtPrepare(
