@@ -1725,18 +1725,31 @@ tiian@ubuntu:~/tmp$ ldd example4_ora_db2
       <title>Set-up LIXA environment</title>
       <para>
 	There are three unresolved references that can be fixed setting up
-	the environment properly
-	<footnote><para>
-	    IBM DB2 references should be resolved due to the suggested 
-	    customization of your user explained in 
-	    <xref linkend="Development_setup_DB2_user_customization"/>
-	</para></footnote>:
+	the environment properly; you can fix the environment manually or
+	using these scripts supplied by Oracle and IBM:
+	<filename>/home/db2inst1/sqllib/db2profile</filename> and
+	<filename>/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh</filename>
 	<screen>
+tiian@ubuntu:~$ echo $LD_LIBRARY_PATH
+
+tiian@ubuntu:~$ . /home/db2inst1/sqllib/db2profile
+tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh<footnote><para>
+If you got some errors like these:
+<screen>
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
+</screen>
+you could edit the file <filename>/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh</filename> and substitute 
+<computeroutput>#!/bin/sh</computeroutput> with
+<computeroutput>#!/bin/bash</computeroutput> in the first row as explained 
+here:
+<link xlink:href="http://forums.oracle.com/forums/thread.jspa?messageID=1542334">http://forums.oracle.com/forums/thread.jspa?messageID=1542334</link>
+</para></footnote>
+tiian@ubuntu:~$ echo $LD_LIBRARY_PATH
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/home/db2inst1/sqllib/lib32
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/home/db2inst1/sqllib/lib32
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/opt/lixa/lib
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/home/db2inst1/sqllib/lib32:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/opt/lixa/lib
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/home/db2inst1/sqllib/lib32:/opt/lixa/lib
 	</screen>
 	Check again the executable:
 	<screen>
@@ -1781,22 +1794,14 @@ tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 tiian@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_DYN_DB2_DYN
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 ORA_DYN_DB2_SYN
-
-tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
-
-tiian@ubuntu:~/tmp$ export ORACLE_HOME=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+	</screen>
+	The below environment variables were set by the previous sourced
+	script; take a look to them:
+	<screen>
 tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server
-
 tiian@ubuntu:~/tmp$ echo $PATH
-/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/home/db2inst1/sqllib/bin:/home/db2inst1/sqllib/adm:/home/db2inst1/sqllib/misc:/home/db2inst1/sqllib/db2tss/bin
-tiian@ubuntu:~/tmp$ export PATH=$PATH:$ORACLE_HOME/bin
-tiian@ubuntu:~/tmp$ echo $PATH
-/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/home/db2inst1/sqllib/bin:/home/db2inst1/sqllib/adm:/home/db2inst1/sqllib/misc:/home/db2inst1/sqllib/db2tss/bin:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin
-
-tiian@ubuntu:~/tmp$ echo $ORACLE_SID
-
-tiian@ubuntu:~/tmp$ export ORACLE_SID=XE
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/home/db2inst1/sqllib/bin:/home/db2inst1/sqllib/adm:/home/db2inst1/sqllib/misc:/home/db2inst1/sqllib/db2tss/bin
 tiian@ubuntu:~/tmp$ echo $ORACLE_SID
 XE
 	</screen>
@@ -1862,34 +1867,219 @@ ls: cannot access /tmp/xa*: No such file or directory
 	</screen>
       </para>
     </section>
-      
+    <section>
+      <title>Program execution (dynamic registration)</title>
+      <para>
+	It is suggested to open three different reminals: 
+	the first one connected to <quote>SAMPLE</quote> DB2 database,
+	the second one connected to Oracle database and the
+	third one pointing to the directory where the compiled program 
+	example4_ora_db2 lives. First teminal session: 
+	<screen>
+tiian@ubuntu:~$ . /home/db2inst1/sqllib/db2profile
+tiian@ubuntu:~$ db2
+(c) Copyright IBM Corporation 1993,2007
+Command Line Processor for DB2 Client 9.7.1
 
-    <screen>
-    </screen>
+You can issue database manager commands and SQL statements from the command
+prompt. For example:
+    db2 => connect to sample
+    db2 => bind sample.bnd
 
-    <screen>
-    </screen>
+For general help, type: ?.
+For command help, type: ? command, where command can be
+the first few keywords of a database manager command. For example:
+ ? CATALOG DATABASE for help on the CATALOG DATABASE command
+ ? CATALOG          for help on all of the CATALOG commands.
 
-    <screen>
-    </screen>
+To exit db2 interactive mode, type QUIT at the command prompt. Outside
+interactive mode, all commands must be prefixed with 'db2'.
+To list the current command option settings, type LIST COMMAND OPTIONS.
 
-    <screen>
-    </screen>
+For more detailed help, refer to the Online Reference Manual.
 
-    <screen>
-    </screen>
+db2 => connect to SAMPLE
 
-    <screen>
-    </screen>
+   Database Connection Information
 
-    <screen>
-    </screen>
+ Database server        = DB2/LINUX 9.7.1
+ SQL authorization ID   = TIIAN
+ Local database alias   = SAMPLE
 
-    <screen>
-    </screen>
+db2 =>
+	</screen>
+	Second terminal session:
+	<screen>
+tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
+tiian@ubuntu:~$ sqlplus "hr/hr"                                                 
+SQL*Plus: Release 10.2.0.1.0 - Production on Tue May 3 21:52:06 2011
 
-    <screen>
-    </screen>
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL>
+	</screen>
+	Third terminal session:
+	<screen>
+tiian@ubuntu:~/tmp$ ls -la
+total 36
+drwxr-xr-x  2 tiian tiian  4096 2011-05-03 21:53 .
+drwxr-xr-x 40 tiian tiian  4096 2011-05-03 21:04 ..
+-rwxr-xr-x  1 tiian tiian 14422 2011-05-02 21:53 example4_ora_db2
+-rw-r--r--  1 tiian tiian 11892 2011-05-02 21:52 example4_ora_db2.c
+	</screen>
+	Check the content of the Oracle table (<quote>COUNTRIES</quote>):
+	<screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	</screen>
+	Check the content of the DB2 tables (<quote>DB2INST1.ORG</quote> and
+	<quote>DB2INST1.DEPT</quote>):
+	<screen>
+db2 => select * from DB2INST1.ORG where DEPTNUMB = 150
+
+DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
+-------- -------------- ------- ---------- -------------
+
+  0 record(s) selected.
+
+db2 => select * from DB2INST1.DEPT where DEPTNO='Z99'
+
+DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
+------ ------------------------------------ ------ -------- ----------------
+
+  0 record(s) selected.
+
+	</screen>
+	<command>example4_ora_db2</command> example accepts some arguments
+	you can tune to experiment different transactions:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	      <quote>iorg</quote>: insert a row into 
+	      <quote>DB2INST1.ORG</quote> table
+	  </para></listitem>
+	  <listitem><para>
+	      <quote>dorg</quote>: delete rows from 
+	      <quote>DB2INST1.ORG</quote> table
+	  </para></listitem>
+	  <listitem><para>
+	      <quote>idept</quote>: insert a row into 
+	      <quote>DB2INST1.DEPT</quote> table
+	  </para></listitem>
+	  <listitem><para>
+	      <quote>ddept</quote>: delete rows from 
+	      <quote>DB2INST1.DEPT</quote> table
+	  </para></listitem>
+	  <listitem><para>
+	      <quote>icountries</quote>: insert a row into 
+	      <quote>COUNTRIES</quote> table
+	  </para></listitem>
+	  <listitem><para>
+	      <quote>dcountries</quote>: delete rows from 
+	      <quote>COUNTRIES</quote> table
+	  </para></listitem>
+	  <listitem><para>
+	      <quote>rollback</quote>: force a transaction rollback (the
+	      default behavior is commit)
+	  </para></listitem>
+	</itemizedlist>
+	Insert a row in all the tables and check the contents of the tables
+	after the transaction execution:
+	<screen>
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 idept icountries iorg
+INSERT INTO DB2INST1.DEPT executed!
+INSERT INTO COUNTRIES executed!
+INSERT INTO DB2INST1.ORG executed!
+COMMIT performed!
+	</screen>
+	Now you can verify the content of the tables after the transaction:
+	<screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+CO COUNTRY_NAME                              REGION_ID
+-- ---------------------------------------- ----------
+RS Repubblica San Marino                             1
+
+db2 => select * from DB2INST1.ORG where DEPTNUMB = 150
+
+DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
+-------- -------------- ------- ---------- -------------
+     150 Europe             231 R&amp;D        Mojan
+
+  1 record(s) selected.
+
+db2 =>  select * from DB2INST1.DEPT where DEPTNO='Z99'
+
+DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
+------ ------------------------------------ ------ -------- ----------------
+Z99    RESEARCH &amp; DEVELOPMENT               -      E01      -
+
+  1 record(s) selected.
+
+	</screen>
+	With the opposite command you can remove the rows from the tables:
+	<screen>
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 ddept dcountries dorg
+DELETE FROM DB2INST1.DEPT executed!
+DELETE FROM COUNTRIES executed!
+DELETE FROM DB2INST1.ORG executed!
+COMMIT performed!
+	</screen>
+	and check the content of the tables again:
+	<screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+
+db2 => select * from DB2INST1.ORG where DEPTNUMB = 150
+
+DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
+-------- -------------- ------- ---------- -------------
+
+  0 record(s) selected.
+
+db2 => select * from DB2INST1.DEPT where DEPTNO='Z99'
+
+DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
+------ ------------------------------------ ------ -------- ----------------
+
+  0 record(s) selected.
+
+	</screen>
+	This sequence shows what happens trying to insert a duplicated row
+	in a table that does not allow duplicates:
+	<screen>
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept
+INSERT INTO DB2INST1.ORG executed!
+INSERT INTO COUNTRIES executed!
+INSERT INTO DB2INST1.DEPT executed!
+COMMIT performed!
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept
+INSERT INTO DB2INST1.ORG executed!
+OCIStmtExecute/Error while executing INSERT statement; ocirc = -1
+ROLLBACK performed!
+	</screen>
+	Verify that table <quote>DB2INST1.ORG</quote> contains only one row
+	because the second transaction was rolled back after the error
+	occurred while inserting a duplicate in <quote>COUNTRIES</quote>
+	table:
+	<screen>
+db2 => select * from DB2INST1.ORG where DEPTNUMB = 150
+
+DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
+-------- -------------- ------- ---------- -------------
+     150 Europe             231 R&amp;D        Mojan
+
+  1 record(s) selected.
+
+	</screen>
+      </para>
+    </section>
+
 
   </section>
 </chapter>
