@@ -1606,7 +1606,7 @@ tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
   </section>
   <section>
     <title>An example with two distinct Resource Manager: Oracle DBMS and
-      IBM DB2DBMS</title>
+      IBM DB2 DBMS</title>
     <figure xml:id="develop4">
       <title>Deploy model of an example showing a distributed transaction with Oracle and IBM DB2</title>
       <mediaobject>
@@ -1647,7 +1647,7 @@ tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
     <important>
       <para>
 	The LIXA software must be configured to support the Oracle Database
-	Server and the IVM DB2 resource manager as explained in 
+	Server and the IBM DB2 resource manager as explained in 
 	<xref linkend="Linking_third_party_resource_managers"/>.
 	As a little hint, you should configure LIXA as below:
 	<screen>
@@ -1870,12 +1870,14 @@ ls: cannot access /tmp/xa*: No such file or directory
     <section>
       <title>Program execution (dynamic registration)</title>
       <para>
-	It is suggested to open three different reminals: 
+	It is suggested to open three different terminals: 
 	the first one connected to <quote>SAMPLE</quote> DB2 database,
 	the second one connected to Oracle database and the
 	third one pointing to the directory where the compiled program 
-	example4_ora_db2 lives. First teminal session: 
-	<screen>
+	example4_ora_db2 lives.
+	<table frame="box">
+	  <thead><tr><td>[IBM DB2 terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~$ . /home/db2inst1/sqllib/db2profile
 tiian@ubuntu:~$ db2
 (c) Copyright IBM Corporation 1993,2007
@@ -1907,9 +1909,11 @@ db2 => connect to SAMPLE
  Local database alias   = SAMPLE
 
 db2 =>
-	</screen>
-	Second terminal session:
-	<screen>
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
 tiian@ubuntu:~$ sqlplus "hr/hr"                                                 
 SQL*Plus: Release 10.2.0.1.0 - Production on Tue May 3 21:52:06 2011
@@ -1921,25 +1925,33 @@ Connected to:
 Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
 
 SQL>
-	</screen>
-	Third terminal session:
-	<screen>
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ls -la
 total 36
 drwxr-xr-x  2 tiian tiian  4096 2011-05-03 21:53 .
 drwxr-xr-x 40 tiian tiian  4096 2011-05-03 21:04 ..
 -rwxr-xr-x  1 tiian tiian 14422 2011-05-02 21:53 example4_ora_db2
 -rw-r--r--  1 tiian tiian 11892 2011-05-02 21:52 example4_ora_db2.c
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Check the content of the Oracle table (<quote>COUNTRIES</quote>):
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
 
 no rows selected
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Check the content of the DB2 tables (<quote>DB2INST1.ORG</quote> and
 	<quote>DB2INST1.DEPT</quote>):
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[IBM DB2 terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 db2 => select * from DB2INST1.ORG where DEPTNUMB = 150
 
 DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
@@ -1953,57 +1965,66 @@ DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
 ------ ------------------------------------ ------ -------- ----------------
 
   0 record(s) selected.
-
-	</screen>
-	<command>example4_ora_db2</command> example accepts some arguments
+	  </screen></td></tr></tbody>
+	</table>
+	<command>example4_ora_db2</command> program accepts some arguments
 	you can tune to experiment different transactions:
 	<itemizedlist mark="bullet">
 	  <listitem><para>
-	      <quote>iorg</quote>: insert a row into 
+	      <option>iorg</option>: insert a row into 
 	      <quote>DB2INST1.ORG</quote> table
 	  </para></listitem>
 	  <listitem><para>
-	      <quote>dorg</quote>: delete rows from 
+	      <option>dorg</option>: delete rows from 
 	      <quote>DB2INST1.ORG</quote> table
 	  </para></listitem>
 	  <listitem><para>
-	      <quote>idept</quote>: insert a row into 
+	      <option>idept</option>: insert a row into 
 	      <quote>DB2INST1.DEPT</quote> table
 	  </para></listitem>
 	  <listitem><para>
-	      <quote>ddept</quote>: delete rows from 
+	      <option>ddept</option>: delete rows from 
 	      <quote>DB2INST1.DEPT</quote> table
 	  </para></listitem>
 	  <listitem><para>
-	      <quote>icountries</quote>: insert a row into 
+	      <option>icountries</option>: insert a row into 
 	      <quote>COUNTRIES</quote> table
 	  </para></listitem>
 	  <listitem><para>
-	      <quote>dcountries</quote>: delete rows from 
+	      <option>dcountries</option>: delete rows from 
 	      <quote>COUNTRIES</quote> table
 	  </para></listitem>
 	  <listitem><para>
-	      <quote>rollback</quote>: force a transaction rollback (the
+	      <option>rollback</option>: force a transaction rollback (the
 	      default behavior is commit)
 	  </para></listitem>
 	</itemizedlist>
 	Insert a row in all the tables and check the contents of the tables
 	after the transaction execution:
-	<screen>
-tiian@ubuntu:~/tmp$ ./example4_ora_db2 idept icountries iorg
-INSERT INTO DB2INST1.DEPT executed!
-INSERT INTO COUNTRIES executed!
+	<table frame="box">
+	  <thead><tr><td>[Third terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept
 INSERT INTO DB2INST1.ORG executed!
+INSERT INTO COUNTRIES executed!
+INSERT INTO DB2INST1.DEPT executed!
 COMMIT performed!
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Now you can verify the content of the tables after the transaction:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
 
 CO COUNTRY_NAME                              REGION_ID
 -- ---------------------------------------- ----------
 RS Repubblica San Marino                             1
-
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[IBM DB2 terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 db2 => select * from DB2INST1.ORG where DEPTNUMB = 150
 
 DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
@@ -2019,22 +2040,31 @@ DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
 Z99    RESEARCH &amp; DEVELOPMENT               -      E01      -
 
   1 record(s) selected.
-
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	With the opposite command you can remove the rows from the tables:
-	<screen>
-tiian@ubuntu:~/tmp$ ./example4_ora_db2 ddept dcountries dorg
-DELETE FROM DB2INST1.DEPT executed!
-DELETE FROM COUNTRIES executed!
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 dorg dcountries ddept
 DELETE FROM DB2INST1.ORG executed!
+DELETE FROM COUNTRIES executed!
+DELETE FROM DB2INST1.DEPT executed!
 COMMIT performed!
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	and check the content of the tables again:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
 
 no rows selected
-
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[IBM DB2 terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 db2 => select * from DB2INST1.ORG where DEPTNUMB = 150
 
 DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
@@ -2048,11 +2078,13 @@ DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
 ------ ------------------------------------ ------ -------- ----------------
 
   0 record(s) selected.
-
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	This sequence shows what happens trying to insert a duplicated row
 	in a table that does not allow duplicates:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept
 INSERT INTO DB2INST1.ORG executed!
 INSERT INTO COUNTRIES executed!
@@ -2062,12 +2094,15 @@ tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept
 INSERT INTO DB2INST1.ORG executed!
 OCIStmtExecute/Error while executing INSERT statement; ocirc = -1
 ROLLBACK performed!
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Verify that table <quote>DB2INST1.ORG</quote> contains only one row
 	because the second transaction was rolled back after the error
-	occurred while inserting a duplicate in <quote>COUNTRIES</quote>
+	occurred while inserting a duplicated row in <quote>COUNTRIES</quote>
 	table:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[IBM DB2 terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 db2 => select * from DB2INST1.ORG where DEPTNUMB = 150
 
 DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
@@ -2075,11 +2110,161 @@ DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
      150 Europe             231 R&amp;D        Mojan
 
   1 record(s) selected.
-
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
+	Remove the rows from the tables:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 dorg dcountries ddept
+DELETE FROM DB2INST1.ORG executed!
+DELETE FROM COUNTRIES executed!
+DELETE FROM DB2INST1.DEPT executed!
+COMMIT performed!
+	  </screen></td></tr></tbody>
+	</table>
+	We can introduce the usage of the <option>rollback</option> option 
+	to check dynamic registration behavior:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00002000
+tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
+0x00002000
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept rollback 2>&amp;1 | grep ax_reg
+2011-05-04 22:35:07.919522 [8962/3023124208] ax_reg: rmid=1, xid=0xbfe8d1f0, flags=0x0
+2011-05-04 22:35:07.920026 [8962/3023124208] ax_reg: the application program has started a transaction (TX states S3); this XID '47b3b615-6976-4774-bfc1-e5f79ef725ae.818e85f2-9a0c-09e2-2f0c-75f89ca17658' will be returned
+2011-05-04 22:35:07.920276 [8962/3023124208] ax_reg: sending 153 bytes to the server for step 8
+2011-05-04 22:35:07.920527 [8962/3023124208] ax_reg/excp=7/ret_cod=0/errno=2
+2011-05-04 22:35:07.921592 [8962/3023124208] ax_reg: rmid=0, xid=0xbfe8b09c, flags=0x0
+2011-05-04 22:35:07.921812 [8962/3023124208] ax_reg: the application program has started a transaction (TX states S3); this XID '47b3b615-6976-4774-bfc1-e5f79ef725ae.818e85f2-9a0c-09e2-2f0c-75f89ca17658' will be returned
+2011-05-04 22:35:07.921979 [8962/3023124208] ax_reg: sending 153 bytes to the server for step 8
+2011-05-04 22:35:07.922128 [8962/3023124208] ax_reg/excp=7/ret_cod=0/errno=2
+	  </screen></td></tr></tbody>
+	</table>
+	The second resource manager for profile
+	<quote>ORA_DYN_DB2_DYN</quote> is <quote>IBMDB2_dynreg</quote>
+	and it calls <function>ax_reg</function> with 
+	<parameter>rmid=1</parameter> before the first resource manager
+	that's <quote>OracleXE_dynreg</quote> and calls
+	<function>ax_reg</function> with <parameter>rmid=0</parameter>
+	later.
       </para>
     </section>
+    <section>
+      <title>Program execution (mixed registration)</title>
+      <para>
+	Switching to a different registration type is quite easy; we can start
+	with dynamic registration for Oracle and static registration for
+	IBM DB2:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00002000
+tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
+0x00002000
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_DYN_DB2_STA
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+ORA_DYN_DB2_STA
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept rollback 2>&amp;1 | grep ax_reg
+2011-05-04 22:47:11.812256 [9122/3022382832] ax_reg: rmid=0, xid=0xbfc0f59c, flags=0x0
+2011-05-04 22:47:11.813114 [9122/3022382832] ax_reg: the application program has started a transaction (TX states S3); this XID 'a7450895-4f77-4509-a939-ad9580bca2b8.03460325-a8fe-89a8-c813-4b6dea4b782e' will be returned
+2011-05-04 22:47:11.813631 [9122/3022382832] ax_reg: sending 153 bytes to the server for step 8
+2011-05-04 22:47:11.814037 [9122/3022382832] ax_reg/excp=7/ret_cod=0/errno=2
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept rollback 2>&amp;1 | grep xa_start
+2011-05-04 22:47:38.081183 [9126/3022632688] lixa_xa_start
+[...]
+2011-05-04 22:47:38.124749 [9126/3022632688] lixa_xa_start: resource manager # 0 registers dynamically, skipping...
+2011-05-04 22:47:38.125154 [9126/3022632688] lixa_xa_start: xa_start_entry(xid, 1, 0x0) = 0
+2011-05-04 22:47:38.125330 [9126/3022632688] lixa_xa_start: sending 210 bytes to the server for step 24
+2011-05-04 22:47:38.125654 [9126/3022632688] lixa_xa_start/excp=10/ret_cod=0/errno=2
+	  </screen></td></tr></tbody>
+	</table>
+	Oracle is defined as the first resource manager and calls
+	<function>ax_reg</function> using <parameter>rmid=0</parameter>.
+	IBM DB2 is defined as the second resource manager and its
+	<function>xa_start</function> function is called
+	from the LIXA transaction manager using <parameter>rmid=1</parameter>.
+	<note><para>
+	    The LIXA Transaction Manager skips the first resource manager
+	    because it is configured for dynamic registration.
+	</para></note>
+	Using static registration for Oracle and dynamic registration for
+	IBM DB2 is easy as well:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_STA_DB2_DYN
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+ORA_STA_DB2_DYN
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept rollback 2>&amp;1 | grep ax_reg
+2011-05-04 22:57:37.235541 [9346/3023226608] ax_reg: rmid=1, xid=0xbfcf8880, flags=0x0
+2011-05-04 22:57:37.236410 [9346/3023226608] ax_reg: the application program has started a transaction (TX states S3); this XID '1bf330d6-0c04-42e4-b615-39214a413ecb.79fecb55-351d-b582-95eb-f99c9bf09a70' will be returned
+2011-05-04 22:57:37.236859 [9346/3023226608] ax_reg: sending 153 bytes to the server for step 8
+2011-05-04 22:57:37.237581 [9346/3023226608] ax_reg/excp=7/ret_cod=0/errno=2
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept rollback 2>&amp;1 | grep xa_start
+2011-05-04 22:58:10.258562 [9350/3022706416] lixa_xa_start
+[...]
+2011-05-04 22:58:10.296182 [9350/3022706416] lixa_xa_start: xa_start_entry(xid, 0, 0x0) = 0
+2011-05-04 22:58:10.296448 [9350/3022706416] lixa_xa_start: resource manager # 1 registers dynamically, skipping...
+2011-05-04 22:58:10.296625 [9350/3022706416] lixa_xa_start: sending 210 bytes to the server for step 24
+2011-05-04 22:58:10.296990 [9350/3022706416] lixa_xa_start/excp=10/ret_cod=0/errno=2
+	  </screen></td></tr></tbody>
+	</table>
+	Now the roles of Oracle and IBM DB2 swapped. As a final example
+	you can try the static registration for Oracle and IBM DB2 too:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_STA_DB2_STA
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+ORA_STA_DB2_STA
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept rollback 2>&amp;1 | grep ax_reg
+tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept rollback 2>&amp;1 | grep xa_start
+2011-05-04 23:00:27.871131 [9356/3022927600] lixa_xa_start
+[...]
+2011-05-04 23:00:27.917087 [9356/3022927600] lixa_xa_start: xa_start_entry(xid, 0, 0x0) = 0
+2011-05-04 23:00:27.918251 [9356/3022927600] lixa_xa_start: xa_start_entry(xid, 1, 0x0) = 0
+2011-05-04 23:00:27.918741 [9356/3022927600] lixa_xa_start: sending 281 bytes to the server for step 24
+2011-05-04 23:00:27.919389 [9356/3022927600] lixa_xa_start/excp=10/ret_cod=0/errno=2
+	  </screen></td></tr></tbody>
+	</table>
+	No resource manager calls <function>ax_reg</function> with this
+	configuration: this is exactly what's expected.
+      </para>
+      <para>
+	As a final check, we can verify all the tables have no rows:
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
 
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[IBM DB2 terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+db2 => select * from DB2INST1.ORG where DEPTNUMB = 150
 
+DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
+-------- -------------- ------- ---------- -------------
+
+  0 record(s) selected.
+
+db2 => select * from DB2INST1.DEPT where DEPTNO='Z99'
+
+DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
+------ ------------------------------------ ------ -------- ----------------
+
+  0 record(s) selected.
+	  </screen></td></tr></tbody>
+	</table>
+	Congratulations! You have just completed a full discovery of
+	a Distributed Transaction Processing example with a simple
+	Application Program, LIXA Transaction Manager and two widespread
+	Resource Managers: Oracle Database Server and IBM DB2 DBMS.
+      </para>
+    </section>
   </section>
 </chapter>
