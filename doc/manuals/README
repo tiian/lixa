@@ -34,3 +34,7 @@ testdb=> select * from authors;
 (0 rows)
 
 
+gcc example5_pql.c -I /usr/include/postgresql -l pq
+./a.out
+
+
