@@ -23,6 +23,7 @@ AC_CONFIG_FILES([
   src/client/switch/lixa/Makefile
   src/client/switch/ibmdb2/Makefile
   src/client/switch/oracle/Makefile
+  src/client/switch/postgresql/Makefile
   src/server/Makefile
   src/sample/Makefile
   tests/Makefile
@@ -44,9 +45,14 @@ test "x$exec_prefix" = "xNONE" -a "x$prefix" != "xNONE" && exec_prefix=$prefix
 m4_include(m4include/ax_lib_oracle_oci.m4)
 AX_LIB_ORACLE_OCI
 AM_CONDITIONAL([COMPILE_ORACLE_STUFF], [test -n "$oracle_home_dir"])
+# Include IBM DB2 test
 m4_include(m4include/ax_lib_ibmdb2_cli.m4)
 AX_LIB_IBMDB2_CLI
 AM_CONDITIONAL([COMPILE_IBMDB2_STUFF], [test -n "$ibmdb2_home_dir"])
+# Include PostgreSQL test
+m4_include(m4include/ax_lib_postgresql.m4)
+AX_LIB_POSTGRESQL
+AM_CONDITIONAL([COMPILE_POSTGRESQL_STUFF], [test -n "$postgresql_stuff"])
 
 # LT Version numbers, remember to change them just *before* a release.
 #   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)

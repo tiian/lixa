@@ -41,6 +41,7 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
 	$(top_srcdir)/m4include/ax_lib_ibmdb2_cli.m4 \
+	$(top_srcdir)/m4include/ax_lib_postgresql.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -56,7 +57,7 @@ am_lixad_OBJECTS = lixad.$(OBJEXT) server_config.$(OBJEXT) \
 	server_thread_status.$(OBJEXT) server_status.$(OBJEXT) \
 	server_xa.$(OBJEXT) srvr_rcvr_tbl.$(OBJEXT)
 lixad_OBJECTS = $(am_lixad_OBJECTS)
-lixad_DEPENDENCIES = ../common/liblixabmt.la
+lixad_DEPENDENCIES = ../common/liblixab.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -148,6 +149,8 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+POSTGRESQL_CPPFLAGS = @POSTGRESQL_CPPFLAGS@
+POSTGRESQL_LDFLAGS = @POSTGRESQL_LDFLAGS@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -215,7 +218,7 @@ noinst_HEADERS = ../common/lixa_trace.h server_config.h server_listener.h \
 AM_CPPFLAGS = -DLIXA_MULTITHREAD=1 -I$(srcdir)/../common
 AM_CFLAGS = -Wall
 AM_LDFLAGS = @LDFLAGS_XML2@ @LDFLAGS_GLIB@ @LDFLAGS_GTHREAD@ -lpthread
-lixad_LDADD = ../common/liblixabmt.la
+lixad_LDADD = ../common/liblixab.la
 lixad_SOURCES = lixad.c server_config.c server_listener.c server_manager.c \
 	server_recovery.c server_reply.c server_thread_status.c \
 	server_status.c server_xa.c srvr_rcvr_tbl.c

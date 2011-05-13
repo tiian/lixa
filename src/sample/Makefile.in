@@ -39,6 +39,7 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
 	$(top_srcdir)/m4include/ax_lib_ibmdb2_cli.m4 \
+	$(top_srcdir)/m4include/ax_lib_postgresql.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -49,11 +50,11 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_hello_OBJECTS = hello.$(OBJEXT)
 hello_OBJECTS = $(am_hello_OBJECTS)
 hello_LDADD = $(LDADD)
-hello_DEPENDENCIES = ../common/liblixabmt.la ../client/liblixacmt.la
+hello_DEPENDENCIES = ../common/liblixab.la ../client/liblixac.la
 am_test_OBJECTS = test.$(OBJEXT)
 test_OBJECTS = $(am_test_OBJECTS)
 test_LDADD = $(LDADD)
-test_DEPENDENCIES = ../common/liblixabmt.la ../client/liblixacmt.la
+test_DEPENDENCIES = ../common/liblixab.la ../client/liblixac.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -144,6 +145,8 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+POSTGRESQL_CPPFLAGS = @POSTGRESQL_CPPFLAGS@
+POSTGRESQL_LDFLAGS = @POSTGRESQL_LDFLAGS@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -206,7 +209,7 @@ top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I$(srcdir)/../client
 AM_CFLAGS = -Wall
 AM_LDFLAGS = -lpthread @LDFLAGS_GMODULE@
-LDADD = ../common/liblixabmt.la ../client/liblixacmt.la
+LDADD = ../common/liblixab.la ../client/liblixac.la
 hello_SOURCES = hello.c
 test_SOURCES = test.c
 all: all-am

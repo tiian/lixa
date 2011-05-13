@@ -45,11 +45,11 @@ tiian@ubuntu:~/tmp$ gcc example1.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/
       <screen>
 tiian@ubuntu:~/tmp$ ldd example1
         linux-gate.so.1 =>  (0xb77a9000)
-        liblixacmt.so.0 => not found
+        liblixac.so.0 => not found
         libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7653000)
         /lib/ld-linux.so.2 (0xb77aa000)
       </screen>
-      <filename>liblixacmt.so.0</filename> library is not resolved because
+      <filename>liblixac.so.0</filename> library is not resolved because
       the LIXA libraries are not in system standard library path. You can
       bypass the issue exporting <varname>LD_LIBRARY_PATH</varname>
       variable and checking it again:
@@ -57,7 +57,7 @@ tiian@ubuntu:~/tmp$ ldd example1
 tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
 tiian@ubuntu:~/tmp$ ldd example1
         linux-gate.so.1 =>  (0xb773f000)
-        liblixacmt.so.0 => /opt/lixa/lib/liblixacmt.so.0 (0xb7724000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7724000)
         libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb75d0000)
         libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb75cb000)
         libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb75c7000)
@@ -65,7 +65,7 @@ tiian@ubuntu:~/tmp$ ldd example1
         librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb75b9000)
         libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb7508000)
         libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb73e8000)
-        liblixabmt.so.0 => /opt/lixa/lib/liblixabmt.so.0 (0xb73d4000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb73d4000)
         libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb73bc000)
         /lib/ld-linux.so.2 (0xb7740000)
         libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb7395000)
@@ -483,7 +483,7 @@ tiian@ubuntu:~/tmp$ gcc example2_ora.c -Wall \
 	<screen>
 tiian@ubuntu:~/tmp$ ldd example2_ora
         linux-gate.so.1 =>  (0xb776d000)
-        liblixacmt.so.0 => not found
+        liblixac.so.0 => not found
         libclntsh.so.10.1 => not found
         libnnz10.so => not found
         libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7616000)
@@ -508,7 +508,7 @@ tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 	<screen>
 tiian@ubuntu:~/tmp$ ldd example2_ora
         linux-gate.so.1 =>  (0xb7749000)
-        liblixacmt.so.0 => /opt/lixa/lib/liblixacmt.so.0 (0xb772f000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb772f000)
         libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb697b000)
         libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6775000)
         libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb6621000)
@@ -518,7 +518,7 @@ tiian@ubuntu:~/tmp$ ldd example2_ora
         librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb660a000)
         libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb6559000)
         libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb6439000)
-        liblixabmt.so.0 => /opt/lixa/lib/liblixabmt.so.0 (0xb6426000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb6426000)
         libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb640e000)
         libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb63e9000)
         libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb63d0000)
@@ -1198,7 +1198,7 @@ tiian@ubuntu:~/tmp$ gcc example3_db2.c -Wall \
 	<screen>
 tiian@ubuntu:~/tmp$ ldd example3_db2
         linux-gate.so.1 =>  (0xb7711000)
-        liblixacmt.so.0 => not found
+        liblixac.so.0 => not found
         libdb2.so.1 => /home/db2inst1/sqllib/lib32/libdb2.so.1 (0xb61cf000)
         libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb607f000)
         libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb604d000)
@@ -1224,7 +1224,7 @@ tiian@ubuntu:~/tmp$ ldd example3_db2
     <section>
       <title>Set-up LIXA environment</title>
       <para>
-	There is an unresolved reference to liblixacmt.so.0: it can be fixed 
+	There is an unresolved reference to liblixac.so.0: it can be fixed 
 	setting up the proper environment variable:
 	<screen>
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
@@ -1237,7 +1237,7 @@ tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 	<screen>
 tiian@ubuntu:~/tmp$ ldd example3_db2
         linux-gate.so.1 =>  (0xb775f000)
-        liblixacmt.so.0 => /opt/lixa/lib/liblixacmt.so.0 (0xb7744000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7744000)
         libdb2.so.1 => /home/db2inst1/sqllib/lib32/libdb2.so.1 (0xb6212000)
         libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb60b4000)
         libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb60b0000)
@@ -1246,7 +1246,7 @@ tiian@ubuntu:~/tmp$ ldd example3_db2
         librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb609e000)
         libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb5fed000)
         libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb5ecc000)
-        liblixabmt.so.0 => /opt/lixa/lib/liblixabmt.so.0 (0xb5eb9000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb5eb9000)
         libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb5ea1000)
         libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb5e6e000)
         libpam.so.0 => /lib/libpam.so.0 (0xb5e64000)
@@ -1297,7 +1297,7 @@ DB2_DYN
 	the profile references the Resource Manager named
 	<quote>IBMDB2_dynreg</quote>, looking again at the config file:
 	<screen>
-    &lt;rsrmgr name="IBMDB2_dynreg" switch_file="/opt/lixa/lib/switch_ibmdb2_dynreg.so" xa_open_info="axlib=/opt/lixa/lib/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+    &lt;rsrmgr name="IBMDB2_dynreg" switch_file="/opt/lixa/lib/switch_ibmdb2_dynreg.so" xa_open_info="axlib=/opt/lixa/lib/liblixac.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
 	</screen>
 	we can discover how the DB2 database is configured for XA
 	<footnote><para>
@@ -1696,7 +1696,7 @@ tiian@ubuntu:~/tmp$ gcc example4_ora_db2.c -Wall \
 	<screen>
 tiian@ubuntu:~/tmp$ ldd example4_ora_db2
         linux-gate.so.1 =>  (0xb779c000)
-        liblixacmt.so.0 => not found
+        liblixac.so.0 => not found
         libclntsh.so.10.1 => not found
         libnnz10.so => not found
         libdb2.so.1 => /home/db2inst1/sqllib/lib32/libdb2.so.1 (0xb6259000)
@@ -1755,7 +1755,7 @@ tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 	<screen>
 tiian@ubuntu:~/tmp$ ldd example4_ora_db2
         linux-gate.so.1 =>  (0xb775d000)
-        liblixacmt.so.0 => /opt/lixa/lib/liblixacmt.so.0 (0xb7743000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7743000)
         libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb698f000)
         libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6789000)
         libdb2.so.1 => /home/db2inst1/sqllib/lib32/libdb2.so.1 (0xb5257000)
@@ -1766,7 +1766,7 @@ tiian@ubuntu:~/tmp$ ldd example4_ora_db2
         librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb50e3000)
         libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb5032000)
         libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb4f12000)
-        liblixabmt.so.0 => /opt/lixa/lib/liblixabmt.so.0 (0xb4eff000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb4eff000)
         libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb4ee7000)
         libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb4ec1000)
         libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb4ea9000)
@@ -1837,7 +1837,7 @@ XE
 	looking again at the config file:
 	<screen>
     &lt;rsrmgr name="OracleXE_dynreg" switch_file="/opt/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
-    &lt;rsrmgr name="IBMDB2_dynreg" switch_file="/opt/lixa/lib/switch_ibmdb2_dynreg.so" xa_open_info="axlib=/opt/lixa/lib/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+    &lt;rsrmgr name="IBMDB2_dynreg" switch_file="/opt/lixa/lib/switch_ibmdb2_dynreg.so" xa_open_info="axlib=/opt/lixa/lib/liblixac.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
 	</screen>
 	we can discover how our application will access the resource
 	managers
