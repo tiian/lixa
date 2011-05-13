@@ -77,6 +77,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=17 ; lixa
 AT_CLEANUP
 
 AT_SETUP([CT/0.5/2.0 xa_rollback/exit])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0

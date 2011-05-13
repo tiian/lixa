@@ -7,8 +7,8 @@
   <rsrmgrs>
     <rsrmgr name="OracleXE_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
     <rsrmgr name="OracleXE_stareg" switch_file="@EXPANDED_LIBDIR@/switch_oracle_stareg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
-    <rsrmgr name="IBMDB2_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_ibmdb2_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" />
-    <rsrmgr name="IBMDB2_stareg" switch_file="@EXPANDED_LIBDIR@/switch_ibmdb2_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" />
+    <rsrmgr name="IBMDB2_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_ibmdb2_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,db=sample,tpm=lixa" xa_close_info="" />
+    <rsrmgr name="IBMDB2_stareg" switch_file="@EXPANDED_LIBDIR@/switch_ibmdb2_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,db=sample,tpm=lixa" xa_close_info="" />
     <rsrmgr name="LIXAdummyRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_dummyrm.so" xa_open_info="dummy open string" xa_close_info="dummy close string" />
     <rsrmgr name="LIXArandomRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_randomrm.so" xa_open_info="random open string" xa_close_info="random close string" />
     <rsrmgr name="LIXAmonkey1dynRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_dynreg.so" xa_open_info="/tmp/monkey.conf" xa_close_info="" />

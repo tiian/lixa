@@ -5,6 +5,9 @@ sftp tiian@web.sourceforge.net
 cd /home/project-web/lixa/htdocs/manuals/
 put index.html
 
+#########################################################################
+
+./configure --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib
 
 postgres@ubuntu:~$ createuser --createdb tiian
 Shall the new role be a superuser? (y/n) n

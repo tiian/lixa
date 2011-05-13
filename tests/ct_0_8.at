@@ -87,6 +87,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none ca
 AT_CLEANUP
 
 AT_SETUP([CT/0.8/1.0 xa_forget/exit])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -129,6 +130,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none ca
 AT_CLEANUP
 
 AT_SETUP([CT/0.8/1.1 xa_forget{2}/exit])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0

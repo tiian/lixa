@@ -51,6 +51,7 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
 	$(top_srcdir)/m4include/ax_lib_ibmdb2_cli.m4 \
+	$(top_srcdir)/m4include/ax_lib_postgresql.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -61,218 +62,218 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_case0000_OBJECTS = case0000.$(OBJEXT)
 case0000_OBJECTS = $(am_case0000_OBJECTS)
 case0000_LDADD = $(LDADD)
-case0000_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0000_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0001_OBJECTS = case0001.$(OBJEXT)
 case0001_OBJECTS = $(am_case0001_OBJECTS)
 case0001_LDADD = $(LDADD)
-case0001_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0001_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0002_OBJECTS = case0002.$(OBJEXT)
 case0002_OBJECTS = $(am_case0002_OBJECTS)
 case0002_LDADD = $(LDADD)
-case0002_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0002_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0003_OBJECTS = case0003.$(OBJEXT)
 case0003_OBJECTS = $(am_case0003_OBJECTS)
 case0003_LDADD = $(LDADD)
-case0003_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0003_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0004_OBJECTS = case0004.$(OBJEXT)
 case0004_OBJECTS = $(am_case0004_OBJECTS)
 case0004_LDADD = $(LDADD)
-case0004_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0004_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0005_OBJECTS = case0005.$(OBJEXT)
 case0005_OBJECTS = $(am_case0005_OBJECTS)
 case0005_LDADD = $(LDADD)
-case0005_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0005_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0006_OBJECTS = case0006.$(OBJEXT)
 case0006_OBJECTS = $(am_case0006_OBJECTS)
 case0006_LDADD = $(LDADD)
-case0006_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0006_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0007_OBJECTS = case0007.$(OBJEXT)
 case0007_OBJECTS = $(am_case0007_OBJECTS)
 case0007_LDADD = $(LDADD)
-case0007_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0007_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0008_OBJECTS = case0008.$(OBJEXT)
 case0008_OBJECTS = $(am_case0008_OBJECTS)
 case0008_LDADD = $(LDADD)
-case0008_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0008_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0009_OBJECTS = case0009.$(OBJEXT)
 case0009_OBJECTS = $(am_case0009_OBJECTS)
 case0009_LDADD = $(LDADD)
-case0009_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0009_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0010_OBJECTS = case0010.$(OBJEXT)
 case0010_OBJECTS = $(am_case0010_OBJECTS)
 case0010_LDADD = $(LDADD)
-case0010_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0010_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0011_OBJECTS = case0011.$(OBJEXT)
 case0011_OBJECTS = $(am_case0011_OBJECTS)
 case0011_LDADD = $(LDADD)
-case0011_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0011_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0012_OBJECTS = case0012.$(OBJEXT)
 case0012_OBJECTS = $(am_case0012_OBJECTS)
 case0012_LDADD = $(LDADD)
-case0012_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0012_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0013_OBJECTS = case0013.$(OBJEXT)
 case0013_OBJECTS = $(am_case0013_OBJECTS)
 case0013_LDADD = $(LDADD)
-case0013_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0013_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0014_OBJECTS = case0014.$(OBJEXT)
 case0014_OBJECTS = $(am_case0014_OBJECTS)
 case0014_LDADD = $(LDADD)
-case0014_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0014_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0015_OBJECTS = case0015.$(OBJEXT)
 case0015_OBJECTS = $(am_case0015_OBJECTS)
 case0015_LDADD = $(LDADD)
-case0015_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0015_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0016_OBJECTS = case0016.$(OBJEXT)
 case0016_OBJECTS = $(am_case0016_OBJECTS)
 case0016_LDADD = $(LDADD)
-case0016_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0016_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0017_OBJECTS = case0017.$(OBJEXT)
 case0017_OBJECTS = $(am_case0017_OBJECTS)
 case0017_LDADD = $(LDADD)
-case0017_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0017_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0018_OBJECTS = case0018.$(OBJEXT)
 case0018_OBJECTS = $(am_case0018_OBJECTS)
 case0018_LDADD = $(LDADD)
-case0018_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0018_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0019_OBJECTS = case0019.$(OBJEXT)
 case0019_OBJECTS = $(am_case0019_OBJECTS)
 case0019_LDADD = $(LDADD)
-case0019_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0019_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0020_OBJECTS = case0020.$(OBJEXT)
 case0020_OBJECTS = $(am_case0020_OBJECTS)
 case0020_LDADD = $(LDADD)
-case0020_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0020_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0021_OBJECTS = case0021.$(OBJEXT)
 case0021_OBJECTS = $(am_case0021_OBJECTS)
 case0021_LDADD = $(LDADD)
-case0021_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0021_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0022_OBJECTS = case0022.$(OBJEXT)
 case0022_OBJECTS = $(am_case0022_OBJECTS)
 case0022_LDADD = $(LDADD)
-case0022_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0022_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0023_OBJECTS = case0023.$(OBJEXT)
 case0023_OBJECTS = $(am_case0023_OBJECTS)
 case0023_LDADD = $(LDADD)
-case0023_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0023_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0024_OBJECTS = case0024.$(OBJEXT)
 case0024_OBJECTS = $(am_case0024_OBJECTS)
 case0024_LDADD = $(LDADD)
-case0024_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0024_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0025_OBJECTS = case0025.$(OBJEXT)
 case0025_OBJECTS = $(am_case0025_OBJECTS)
 case0025_LDADD = $(LDADD)
-case0025_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0025_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0026_OBJECTS = case0026.$(OBJEXT)
 case0026_OBJECTS = $(am_case0026_OBJECTS)
 case0026_LDADD = $(LDADD)
-case0026_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0026_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0027_OBJECTS = case0027.$(OBJEXT)
 case0027_OBJECTS = $(am_case0027_OBJECTS)
 case0027_LDADD = $(LDADD)
-case0027_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0027_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0028_OBJECTS = case0028.$(OBJEXT)
 case0028_OBJECTS = $(am_case0028_OBJECTS)
 case0028_LDADD = $(LDADD)
-case0028_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0028_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0029_OBJECTS = case0029.$(OBJEXT)
 case0029_OBJECTS = $(am_case0029_OBJECTS)
 case0029_LDADD = $(LDADD)
-case0029_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0029_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0030_OBJECTS = case0030.$(OBJEXT)
 case0030_OBJECTS = $(am_case0030_OBJECTS)
 case0030_LDADD = $(LDADD)
-case0030_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0030_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0031_OBJECTS = case0031.$(OBJEXT)
 case0031_OBJECTS = $(am_case0031_OBJECTS)
 case0031_LDADD = $(LDADD)
-case0031_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0031_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0032_OBJECTS = case0032.$(OBJEXT)
 case0032_OBJECTS = $(am_case0032_OBJECTS)
 case0032_LDADD = $(LDADD)
-case0032_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0032_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0033_OBJECTS = case0033.$(OBJEXT)
 case0033_OBJECTS = $(am_case0033_OBJECTS)
 case0033_LDADD = $(LDADD)
-case0033_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0033_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0034_OBJECTS = case0034.$(OBJEXT)
 case0034_OBJECTS = $(am_case0034_OBJECTS)
 case0034_LDADD = $(LDADD)
-case0034_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0034_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0035_OBJECTS = case0035.$(OBJEXT)
 case0035_OBJECTS = $(am_case0035_OBJECTS)
 case0035_LDADD = $(LDADD)
-case0035_DEPENDENCIES = ../../src/common/liblixabmt.la \
-	../../src/client/liblixacmt.la \
+case0035_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -387,6 +388,8 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+POSTGRESQL_CPPFLAGS = @POSTGRESQL_CPPFLAGS@
+POSTGRESQL_LDFLAGS = @POSTGRESQL_LDFLAGS@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -454,7 +457,7 @@ AM_CPPFLAGS = -I../../src/client -I../../src/common \
 
 AM_CFLAGS = -Wall
 #AM_LDFLAGS = -lpthread @LIBLTDL@ @LDFLAGS_GMODULE@
-LDADD = ../../src/common/liblixabmt.la ../../src/client/liblixacmt.la \
+LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 
 case0000_SOURCES = case0000.c
