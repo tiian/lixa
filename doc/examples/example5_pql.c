@@ -19,7 +19,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* PostgreSQL */
 #include <libpq-fe.h>
+
+/* TX (Transaction Demarcation) header */
+#include <tx.h>
 
 
 
@@ -33,12 +37,21 @@ static void exit_nicely(PGconn *conn)
 
 int main(int argc, char *argv[])
 {
+    /* generic variables */
+    int         txrc;
+    /* PostgreSQL variables */
     const char *conninfo;
     PGconn     *conn;
     PGresult   *res;
 
     conninfo = "dbname = testdb";
     
+    /* open the resource manager(s) */
+    if (TX_OK != (txrc = tx_open())) {
+        fprintf(stderr, "tx_open error: %d\n", txrc);
+        exit(txrc);
+    }
+
     conn = PQconnectdb(conninfo);
     if (CONNECTION_OK != PQstatus(conn)) {
         fprintf(stderr, "Connection to database failed: %s",

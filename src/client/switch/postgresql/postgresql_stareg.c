@@ -24,21 +24,58 @@
 
 
 /*
- * This is Oracle specific: the xa_switch_t struct supplied is named xaosw
- * for XA static registration
+ * This is an external implementation of a partial XA interface for
+ * PostgreSQL.
+ * The intent of this piece of software is allowing user to start using
+ * LIXA with any recent version of PostgreSQL.
+ * A definitive XA interface should be implemented inside PostgreSQL
+ * client library.
+ * Wrapping the standard interface, only the static registration can be
+ * implemented.
  */
+
+
+
+#include <lixa_trace.h>
+#include <lixa_common_status.h>
+#include <liblixapq.h>
+
+
+
+/* set module trace flag */
+#ifdef LIXA_TRACE_MODULE
+# undef LIXA_TRACE_MODULE
+#endif /* LIXA_TRACE_MODULE */
+#define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_XA
+
+
+
 /*
-extern struct xa_switch_t xaosw;
-*/
+ * This is the struct pointing to dummy functions
+ */
+struct xa_switch_t lixa_dummyrm_sw = {
+    "lixa_postgresql",
+    TMNOFLAGS,
+    0,
+    lixa_pq_open,
+    lixa_pq_close,
+    lixa_pq_start,
+    lixa_pq_end,
+    lixa_pq_rollback,
+    lixa_pq_prepare,
+    lixa_pq_commit,
+    lixa_pq_recover,
+    lixa_pq_forget,
+    lixa_pq_complete
+};
+
 
 
 /*
  * The function is exported and dynamically retrieved afted the module was
  * fetched
  */
-/*
 struct xa_switch_t *lixa_get_xa_switch()
 {
-    return &xaosw;
+    return &lixa_dummyrm_sw;
 }
-*/
