@@ -17,5 +17,6 @@ liblixamonkey_la_LDFLAGS =
 # is compiled without: this allow to mix single thread/multi thread switch
 # files and to simulate a more complex environment
 switch_lixa_monkeyrm_dynreg_la_LDFLAGS = -module -lpthread
+switch_lixa_monkeyrm_stareg_la_LDFLAGS = -module -lpthread
 switch_lixa_monkeyrm_dynreg_la_LIBADD = liblixamonkey.la
 switch_lixa_monkeyrm_stareg_la_LIBADD = liblixamonkey.la
