@@ -32,7 +32,7 @@ dnl       --with-postgresql-lib - path to directory with PostgreSQL libraries
 dnl
 dnl This macro calls:
 dnl
-dnl   AC_SUBST(POSTGRESQL_CFLAGS)
+dnl   AC_SUBST(POSTGRESQL_CPPFLAGS)
 dnl   AC_SUBST(POSTGRESQL_LDFLAGS)
 dnl
 dnl And sets:
