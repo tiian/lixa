@@ -26,6 +26,13 @@
 
 
 /**
+ * This struct contains the pointers to XA methods and properties
+ */
+struct xa_switch_t xapqls;
+
+
+
+/**
  * Implementation of "xa_open" for PostgreSQL;
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description

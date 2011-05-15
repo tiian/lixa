@@ -24,7 +24,7 @@
 
 
 /*
- * This is Oracle specific: the xa_switch_t struct supplied is named xaosw
+ * This is Oracle specific: the xa_switch_t struct supplied is named xaoswd
  * for XA dynamic registration
  */
 extern struct xa_switch_t xaoswd;
@@ -32,7 +32,7 @@ extern struct xa_switch_t xaoswd;
 
 
 /*
- * The function is exported and dynamically retrieved afted the module was
+ * The function is exported and dynamically retrieved after the module was
  * fetched
  */
 struct xa_switch_t *lixa_get_xa_switch()
