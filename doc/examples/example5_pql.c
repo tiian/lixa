@@ -25,6 +25,9 @@
 /* TX (Transaction Demarcation) header */
 #include <tx.h>
 
+/* LIXA help library for PostgreSQL */
+#include <lixapq.h>
+
 
 
 static void exit_nicely(PGconn *conn)
@@ -52,7 +55,10 @@ int main(int argc, char *argv[])
         exit(txrc);
     }
 
+    conn = lixa_pq_get_conn();
+    /*
     conn = PQconnectdb(conninfo);
+    */
     if (CONNECTION_OK != PQstatus(conn)) {
         fprintf(stderr, "Connection to database failed: %s",
                 PQerrorMessage(conn));
