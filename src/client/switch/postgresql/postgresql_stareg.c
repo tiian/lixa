@@ -51,31 +51,18 @@
 
 
 /*
- * This is the struct pointing to dummy functions
+ * This is PostgreSQL specific: the xa_switch_t struct supplied is named xapqls
+ * for XA static registration
  */
-struct xa_switch_t lixa_dummyrm_sw = {
-    "lixa_postgresql",
-    TMNOFLAGS,
-    0,
-    lixa_pq_open,
-    lixa_pq_close,
-    lixa_pq_start,
-    lixa_pq_end,
-    lixa_pq_rollback,
-    lixa_pq_prepare,
-    lixa_pq_commit,
-    lixa_pq_recover,
-    lixa_pq_forget,
-    lixa_pq_complete
-};
+extern struct xa_switch_t xapqls;
 
 
 
 /*
- * The function is exported and dynamically retrieved afted the module was
+ * The function is exported and dynamically retrieved after the module was
  * fetched
  */
 struct xa_switch_t *lixa_get_xa_switch()
 {
-    return &lixa_dummyrm_sw;
+    return &xapqls;
 }

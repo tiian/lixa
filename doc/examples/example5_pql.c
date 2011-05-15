@@ -109,5 +109,10 @@ int main(int argc, char *argv[])
 
     PQfinish(conn);
 
+    if (TX_OK != (txrc = tx_close())) {
+        fprintf(stderr, "tx_close error: %d\n", txrc);
+        exit(txrc);
+    }
+
     return 0;
 }

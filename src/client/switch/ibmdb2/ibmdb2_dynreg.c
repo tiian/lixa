@@ -32,7 +32,7 @@ extern struct xa_switch_t *db2xacic_std(void);
 
 
 /*
- * The function is exported and dynamically retrieved afted the module was
+ * The function is exported and dynamically retrieved after the module was
  * fetched
  */
 struct xa_switch_t *lixa_get_xa_switch()

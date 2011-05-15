@@ -517,6 +517,7 @@ INPUT                  = src/client \
                          src/client/switch/lixa \
                          src/client/switch/ibmdb2 \
                          src/client/switch/oracle \
+                         src/client/switch/postgresql \
                          src/common \
                          src/sample \
                          src/sample/ibmdb2 \
