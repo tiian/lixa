@@ -1,3 +1,4 @@
+include_HEADERS = lixapq.h
 lib_LTLIBRARIES = liblixapq.la switch_postgresql_stareg.la
 liblixapq_la_SOURCES = liblixapq.c
 switch_postgresql_stareg_la_SOURCES = postgresql_stareg.c
