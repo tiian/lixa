@@ -20,6 +20,9 @@
 
 
 
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 #ifdef HAVE_GMODULE_H
 # include <gmodule.h>
 #endif
@@ -35,7 +38,9 @@
 /* LIXA standard trace library: it could be removed if "TRACE" calls would
  * be removed from this source */
 #include <lixa_trace.h>
-
+/* LIXA convenience macros: it could be removed if "TRY/CATCH" statement
+ * would be removed from this source */
+#include <lixa_defines.h>
 
 
 /* set module trace flag */
@@ -64,6 +69,19 @@ struct xa_switch_t xapqls = {
 
 
 
+/**
+ * This mutex is used to protect the status structure when the library is
+ * used in a multithread environment
+ */
+GStaticMutex lixa_pq_status_mutex = G_STATIC_MUTEX_INIT;
+/**
+ * The status is saved in a hash table: there is an element for every
+ * thread
+ */
+GHashTable  *lixa_pq_status = NULL;
+
+
+
 const gchar *g_module_check_init(GModule *module)
 {
     LIXA_TRACE(("lixa_pq/g_module_check_init: initializing module\n"));
@@ -81,29 +99,56 @@ void g_module_unload(GModule *module)
 
 int lixa_pq_open(char *xa_info, int rmid, long flags)
 {
+    enum Exception { ASYNC_NOT_SUPPORTED
+                     , PQ_CONNECTDB_ERROR
+                     , NONE } excp;
+    int xa_rc = XAER_RMFAIL;
+
     PGconn     *conn;
     
     LIXA_TRACE(("lixa_pq_open: xa_info='%s', rmid=%d, flags=%ld\n",
                 xa_info, rmid, flags));
+    TRY {
+        /* asynchronous operations are not supported */
+        if (TMASYNC & flags) {
+            LIXA_TRACE(("lixa_pq_open: TMASYNC flag is not supported\n"));
+            THROW(ASYNC_NOT_SUPPORTED);
+        }
 
-    /* asynchronous operations are not supported */
-    if (TMASYNC & flags) {
-        LIXA_TRACE(("lixa_pq_open: TMASYNC flag is not supported\n"));
-        return XAER_ASYNC;
-    }
-
-    /* check if the connection was already established */
-    /* @@@ */
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+        
+        /* check if the connection was already established */
+        /* @@@ */
     
-    conn = PQconnectdb(xa_info);
-    if (CONNECTION_OK != PQstatus(conn)) {
-        LIXA_TRACE(("lixa_pq_open: error while connecting to the database: "
-                    "%s", PQerrorMessage(conn)));
-        PQfinish(conn);
-        return XAER_RMERR;
-    }
-    
-    return XA_OK;
+        conn = PQconnectdb(xa_info);
+        if (CONNECTION_OK != PQstatus(conn)) {
+            LIXA_TRACE(("lixa_pq_open: error while connecting to the "
+                        "database: %s", PQerrorMessage(conn)));
+            PQfinish(conn);
+            THROW(PQ_CONNECTDB_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case ASYNC_NOT_SUPPORTED:
+                xa_rc = XAER_ASYNC;
+                break;
+            case PQ_CONNECTDB_ERROR:
+                xa_rc = XAER_RMERR;
+                break;
+            case NONE:
+                xa_rc = XA_OK;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+        /* unlock the status mutex */
+        g_static_mutex_unlock(&lixa_pq_status_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_pq_open/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
 }
 
 

@@ -56,6 +56,25 @@
 
 
 
+/***********************************************************************
+ *                                                                     *
+ * Exception macros                                                    *
+ *                                                                     *
+ ***********************************************************************/
+#ifndef TRY
+#define TRY
+#endif /* TRY */
+        
+#ifndef CATCH
+#define CATCH ExcpHand:
+#endif /* CATCH */
+
+#ifndef THROW
+#define THROW(e) { excp = e; goto ExcpHand; }
+#endif /* THROW */
+
+
+
 /**
  * This value is the null file descriptor convention
  */

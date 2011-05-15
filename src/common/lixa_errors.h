@@ -473,25 +473,6 @@ define LIXA_RC_UNLINK_ERROR                  -129
 
 
 
-/***********************************************************************
- *                                                                     *
- * Exception macros                                                    *
- *                                                                     *
- ***********************************************************************/
-#ifndef TRY
-#define TRY
-#endif /* TRY */
-        
-#ifndef CATCH
-#define CATCH ExcpHand:
-#endif /* CATCH */
-
-#ifndef THROW
-#define THROW(e) { excp = e; goto ExcpHand; }
-#endif /* THROW */
-
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
