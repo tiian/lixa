@@ -44,16 +44,6 @@ struct xa_switch_t xapqls;
 struct lixa_pq_status_rm_s {
     /** Resource Manager ID */
     int     rmid;
-    /** PostgreSQL connection */
-    PGconn *conn;
-};
-
-
-
-/**
- * This is the status record associated to a thread
- */
-struct lixa_pq_status_s {
     struct {
         /** Resource Manager State:
          *  0=Un-initialized,
@@ -73,8 +63,18 @@ struct lixa_pq_status_s {
          *  5=Heuristically Completed */
         int S;
     } state;
+    /** PostgreSQL connection */
+    PGconn *conn;
+};
+
+
+
+/**
+ * This is the status record associated to a thread
+ */
+struct lixa_pq_status_s {
     /** Store the context of every PostgreSQL resource manager used by the
-     * transaction */
+     *  transaction */
     GArray *rm;
 };
 
@@ -89,7 +89,6 @@ typedef struct lixa_pq_status_s lixa_pq_status_t;
  * @param lps IN/OUT object reference
  */
 static inline void lixa_pq_status_init(lixa_pq_status_t *lps) {
-    lps->state.R = lps->state.T = lps->state.S = 0;
     lps->rm = g_array_new(FALSE, FALSE, sizeof(struct lixa_pq_status_rm_s));
 }
 

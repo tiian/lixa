@@ -38,6 +38,21 @@ extern "C" {
 
 
 
+    /**
+     * Retrieve the connection established by tx_open/xa_open to one of the
+     * PostgreSQL Resource Managers; this function should be used instead of
+     * @ref lixa_pq_get_conn when you are using more than one PostgreSQL
+     * database.
+     * @param rmid IN it can be 0, 1, 2, 3, ... in accordance to
+     *                lixac_conf.xml
+     * @return a valid connection handle or NULL if rmid is not a PostgreSQL
+     *         Resource Manager or rmid is a valid PostgreSQL Resource
+     *         Manager, but there is no a valid connection
+     */
+    PGconn *lixa_pq_get_conn_by_rmid(int rmid);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

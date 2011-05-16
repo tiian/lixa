@@ -1,9 +1,6 @@
 Go on with liblixapq.c
-- implement a state record (thread based)
+- go on with lixa_pq_close
 - check state protocol (prevent invalid call sequences)
-- save the opened connection for future use:
-  lixa_pq_get_conn()
-  lixa_pq_get_conn_by_id()   two or more postgresql db connected
 
 Try this scenario:
 - a multithread application
