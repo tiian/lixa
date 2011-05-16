@@ -57,14 +57,16 @@ int main(int argc, char *argv[])
 
     conn = lixa_pq_get_conn();
     /*
+    conn = lixa_pq_get_conn_by_rmid(1);
+    */
+    /*
     conn = PQconnectdb(conninfo);
     */
     if (CONNECTION_OK != PQstatus(conn)) {
         fprintf(stderr, "Connection to database failed: %s",
                 PQerrorMessage(conn));
         exit_nicely(conn);
-    } else
-        printf("conn=%p\n", conn);
+    }
     
     res = PQexec(conn, "BEGIN");
     if (PGRES_COMMAND_OK != PQresultStatus(res))
@@ -113,12 +115,14 @@ int main(int argc, char *argv[])
     }
     PQclear(res);
 
-    PQfinish(conn);
-
     if (TX_OK != (txrc = tx_close())) {
         fprintf(stderr, "tx_close error: %d\n", txrc);
         exit(txrc);
     }
 
+    /*
+    PQfinish(conn);
+    */
+    
     return 0;
 }

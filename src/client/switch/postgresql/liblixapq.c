@@ -126,7 +126,7 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
 {
     enum Exception { ASYNC_NOT_SUPPORTED
                      , G_HASH_TABLE_NEW_FULL_ERROR
-                     , G_MALLOC_ERROR
+                     , MALLOC_ERROR
                      , PQ_CONNECTDB_ERROR
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
@@ -165,11 +165,11 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
                          lixa_pq_status, (gconstpointer)key))) {
             LIXA_TRACE(("lixa_pq_open: status for thread " PTHREAD_T_FORMAT
                         " not found, allocating it...\n", key));
-            if (NULL == (lps = (lixa_pq_status_t *)g_malloc(
+            if (NULL == (lps = (lixa_pq_status_t *)malloc(
                              sizeof(lixa_pq_status_t)))) {
                 LIXA_TRACE(("lixa_pq_open: unable to allocate %u bytes\n",
                             sizeof(lixa_pq_status_t)));
-                THROW(G_MALLOC_ERROR);
+                THROW(MALLOC_ERROR);
             }
             lixa_pq_status_init(lps);
         }
@@ -186,7 +186,7 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
 
         if (NULL == conn) {
             /* create a new connection */
-            struct lixa_pq_status_rm_s lpsr = { 0, NULL };
+            struct lixa_pq_status_rm_s lpsr = { 0, {0, 0, 0}, NULL };
             conn = PQconnectdb(xa_info);
             if (CONNECTION_OK != PQstatus(conn)) {
                 LIXA_TRACE(("lixa_pq_open: error while connecting to the "
@@ -196,14 +196,12 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
             }
             /* save the connection for this thread/rmid */
             lpsr.rmid = rmid;
+            lpsr.state.R = 1;
             lpsr.conn = conn;
             g_array_append_val(lps->rm, lpsr);
             g_hash_table_insert(lixa_pq_status, (gpointer)key, (gpointer)lps);
         }
 
-        /* Change state to "Initialized" */
-        lps->state.R = 1;
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -211,7 +209,7 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
                 xa_rc = XAER_ASYNC;
                 break;
             case G_HASH_TABLE_NEW_FULL_ERROR:
-            case G_MALLOC_ERROR:
+            case MALLOC_ERROR:
             case PQ_CONNECTDB_ERROR:
                 xa_rc = XAER_RMERR;
                 break;
@@ -234,7 +232,71 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
 
 int lixa_pq_close(char *xa_info, int rmid, long flags)
 {
-    return XA_OK;
+    enum Exception { ASYNC_NOT_SUPPORTED
+                     , NOTHING_TO_DO1
+                     , NOTHING_TO_DO2
+                     , NONE } excp;
+    int xa_rc = XAER_RMFAIL;
+    
+    LIXA_TRACE(("lixa_pq_close\n"));
+    TRY {
+        pthread_t         key = pthread_self();
+        lixa_pq_status_t *lps = NULL;
+
+        /* asynchronous operations are not supported */
+        if (TMASYNC & flags) {
+            LIXA_TRACE(("lixa_pq_open: TMASYNC flag is not supported\n"));
+            THROW(ASYNC_NOT_SUPPORTED);
+        }
+
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
+        if (NULL == lixa_pq_status) {
+            /* the status structure does not exist, this is a dummy xa_close */
+            THROW(NOTHING_TO_DO1);
+        }
+            
+        if (NULL == (lps = (lixa_pq_status_t *)g_hash_table_lookup(
+                         lixa_pq_status, (gconstpointer)key))) {
+            /* the status structure does not contain a record for this
+               thread, this is a dummy xa_close */
+            THROW(NOTHING_TO_DO2);
+        }
+
+        /* check the status of the resource manager */
+        
+        /* check if rmid is really connected */
+        /*
+        for (i=0; i<lps->rm->len; ++i) {
+            struct lixa_pq_status_rm_s *lpsr = &g_array_index(
+                lps->rm, struct lixa_pq_status_rm_s, i);
+            if (lpsr->rmid == rmid) {
+                conn = lpsr->conn;
+                break;
+            }
+        }
+        */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case ASYNC_NOT_SUPPORTED:
+                xa_rc = XAER_ASYNC;
+                break;
+            case NOTHING_TO_DO1:
+            case NOTHING_TO_DO2:
+            case NONE:
+                xa_rc = XA_OK;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+        /* unlock the status mutex */
+        g_static_mutex_unlock(&lixa_pq_status_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_pq_close/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
 }
 
 
@@ -320,6 +382,50 @@ PGconn *lixa_pq_get_conn(void)
         }
     } else {
         LIXA_TRACE(("lixa_pq_get_conn: status is NULL\n"));
+    }
+    
+    /* unlock the mutex */
+    g_static_mutex_unlock(&lixa_pq_status_mutex);
+
+    return conn;
+}
+
+
+
+PGconn *lixa_pq_get_conn_by_rmid(int rmid)
+{
+    PGconn *conn = NULL;
+    
+    /* lock the mutex */
+    g_static_mutex_lock(&lixa_pq_status_mutex);
+
+    if (NULL != lixa_pq_status) {
+        pthread_t key = pthread_self();
+        lixa_pq_status_t *lps = NULL;
+        if (NULL != (lps = (lixa_pq_status_t *)g_hash_table_lookup(
+                         lixa_pq_status, (gconstpointer)key))) {
+            if (0 < lps->rm->len) {
+                guint i;
+                for (i=0; i<lps->rm->len; ++i) {
+                    struct lixa_pq_status_rm_s *lpsr = &g_array_index(
+                        lps->rm, struct lixa_pq_status_rm_s, i);
+                    if (lpsr->rmid == rmid) {
+                        conn = lpsr->conn;
+                        break;
+                    }
+                }
+                if (NULL == conn)
+                    LIXA_TRACE(("lixa_pq_get_conn_by_rmid: no connection "
+                                "found for rmid=%d\n", rmid));
+            } else {
+                LIXA_TRACE(("lixa_pq_get_conn_by_rmid: no connection "
+                            "found to PostgreSQL databases\n"));
+            }
+        } else {
+            LIXA_TRACE(("lixa_pq_get_conn_by_rmid: thread not registered\n"));
+        }
+    } else {
+        LIXA_TRACE(("lixa_pq_get_conn_by_rmid: status is NULL\n"));
     }
     
     /* unlock the mutex */
