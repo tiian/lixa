@@ -37,7 +37,7 @@ testdb=> select * from authors;
 (0 rows)
 
 
-gcc example5_pql.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -I /usr/include/postgresql -l pq -o example5_pql
+gcc example5_pql.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq -I /usr/include/postgresql -l pq -o example5_pql
 ./example5_pql
 
 

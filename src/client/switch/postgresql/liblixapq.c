@@ -116,7 +116,7 @@ void lixa_pq_status_destroy(gpointer data)
     LIXA_TRACE(("lixa_pq_status_destroy: %p\n", data));
     if (NULL != lps) {
         g_array_free(lps->rm, TRUE);
-        g_free(lps);
+        free(lps);
     }
 }
 
@@ -235,17 +235,20 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
     enum Exception { ASYNC_NOT_SUPPORTED
                      , NOTHING_TO_DO1
                      , NOTHING_TO_DO2
+                     , PROTOCOL_ERROR
+                     , NOTHING_TO_DO3
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
     
     LIXA_TRACE(("lixa_pq_close\n"));
     TRY {
+        guint             i;
         pthread_t         key = pthread_self();
         lixa_pq_status_t *lps = NULL;
 
         /* asynchronous operations are not supported */
         if (TMASYNC & flags) {
-            LIXA_TRACE(("lixa_pq_open: TMASYNC flag is not supported\n"));
+            LIXA_TRACE(("lixa_pq_close: TMASYNC flag is not supported\n"));
             THROW(ASYNC_NOT_SUPPORTED);
         }
 
@@ -264,19 +267,30 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
             THROW(NOTHING_TO_DO2);
         }
 
-        /* check the status of the resource manager */
-        
-        /* check if rmid is really connected */
-        /*
+        /* check the state of the resource manager */
         for (i=0; i<lps->rm->len; ++i) {
             struct lixa_pq_status_rm_s *lpsr = &g_array_index(
                 lps->rm, struct lixa_pq_status_rm_s, i);
             if (lpsr->rmid == rmid) {
-                conn = lpsr->conn;
-                break;
+                /* state found, checking protocol errors */
+                if (lpsr->state.T == 1 ||
+                    lpsr->state.S == 1) {
+                    LIXA_TRACE(("lixa_pq_close: state is T%d, S%d and "
+                                "xa_close() cannot be called\n",
+                                lpsr->state.T, lpsr->state.S));
+                    THROW(PROTOCOL_ERROR);
+                }
+                /* state found, checking "Un-initialized" state */
+                if (lpsr->state.R == 0)
+                    THROW(NOTHING_TO_DO3);
+                /* closing database connection if any */
+                if (NULL != lpsr->conn) {
+                    PQfinish(lpsr->conn);
+                    lpsr->conn = NULL;
+                }
+                lpsr->state.R = 0;
             }
         }
-        */
         
         THROW(NONE);
     } CATCH {
@@ -286,6 +300,12 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
                 break;
             case NOTHING_TO_DO1:
             case NOTHING_TO_DO2:
+                xa_rc = XA_OK;
+                break;
+            case PROTOCOL_ERROR:
+                xa_rc = XAER_PROTO;
+                break;
+            case NOTHING_TO_DO3:
             case NONE:
                 xa_rc = XA_OK;
                 break;
@@ -358,40 +378,6 @@ int lixa_pq_complete(int *handle, int *retval, int rmid, long flags)
 
 
 
-PGconn *lixa_pq_get_conn(void)
-{
-    PGconn *conn = NULL;
-    
-    /* lock the mutex */
-    g_static_mutex_lock(&lixa_pq_status_mutex);
-
-    if (NULL != lixa_pq_status) {
-        pthread_t key = pthread_self();
-        lixa_pq_status_t *lps = NULL;
-        if (NULL != (lps = (lixa_pq_status_t *)g_hash_table_lookup(
-                         lixa_pq_status, (gconstpointer)key))) {
-            if (0 < lps->rm->len) {
-                struct lixa_pq_status_rm_s *lpsr = &g_array_index(
-                    lps->rm, struct lixa_pq_status_rm_s, 0);
-                conn = lpsr->conn;
-            } else {
-                LIXA_TRACE(("lixa_pq_get_conn: no connection found\n"));
-            }
-        } else {
-            LIXA_TRACE(("lixa_pq_get_conn: thread not registered\n"));
-        }
-    } else {
-        LIXA_TRACE(("lixa_pq_get_conn: status is NULL\n"));
-    }
-    
-    /* unlock the mutex */
-    g_static_mutex_unlock(&lixa_pq_status_mutex);
-
-    return conn;
-}
-
-
-
 PGconn *lixa_pq_get_conn_by_rmid(int rmid)
 {
     PGconn *conn = NULL;
@@ -426,6 +412,41 @@ PGconn *lixa_pq_get_conn_by_rmid(int rmid)
         }
     } else {
         LIXA_TRACE(("lixa_pq_get_conn_by_rmid: status is NULL\n"));
+    }
+    
+    /* unlock the mutex */
+    g_static_mutex_unlock(&lixa_pq_status_mutex);
+
+    return conn;
+}
+
+
+
+PGconn *lixa_pq_get_conn_by_pos(int pos)
+{
+    PGconn *conn = NULL;
+    
+    /* lock the mutex */
+    g_static_mutex_lock(&lixa_pq_status_mutex);
+
+    if (NULL != lixa_pq_status) {
+        pthread_t key = pthread_self();
+        lixa_pq_status_t *lps = NULL;
+        if (NULL != (lps = (lixa_pq_status_t *)g_hash_table_lookup(
+                         lixa_pq_status, (gconstpointer)key))) {
+            if (pos < lps->rm->len) {
+                struct lixa_pq_status_rm_s *lpsr = &g_array_index(
+                    lps->rm, struct lixa_pq_status_rm_s, pos);
+                conn = lpsr->conn;
+            } else {
+                LIXA_TRACE(("lixa_pq_get_conn_by_pos: %d exceeds %d, "
+                            "the last position\n", pos, lps->rm->len));
+            }
+        } else {
+            LIXA_TRACE(("lixa_pq_get_conn_by_pos: thread not registered\n"));
+        }
+    } else {
+        LIXA_TRACE(("lixa_pq_get_conn_by_pos: status is NULL\n"));
     }
     
     /* unlock the mutex */

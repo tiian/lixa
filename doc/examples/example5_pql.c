@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
 
     conn = lixa_pq_get_conn();
     /*
+    conn = lixa_pq_get_conn_by_pos(1);
     conn = lixa_pq_get_conn_by_rmid(1);
     */
     /*
