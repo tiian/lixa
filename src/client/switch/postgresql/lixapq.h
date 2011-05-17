@@ -28,17 +28,6 @@ extern "C" {
 
 
     /**
-     * Retrieve the connection established by tx_open/xa_open to the
-     * PostgreSQL Resource Manager; this is necessary because tx_open
-     * does not return values and PQconnectdb returns a new connection
-     * every time it's called from the same process/thread
-     * @return a valid connection handle or NULL if the handle is not available
-     */
-    PGconn *lixa_pq_get_conn(void);
-
-
-
-    /**
      * Retrieve the connection established by tx_open/xa_open to one of the
      * PostgreSQL Resource Managers; this function should be used instead of
      * @ref lixa_pq_get_conn when you are using more than one PostgreSQL
@@ -53,6 +42,36 @@ extern "C" {
 
 
     
+    /**
+     * Retrieve the connection established by tx_open/xa_open to one of the
+     * PostgreSQL Resource Managers; this function should be used instead of
+     * @ref lixa_pq_get_conn when you are using more than one PostgreSQL
+     * database.
+     * @param pos IN it can be 0, 1, 2, 3, ... and it's the position in the
+     *                list of PostgreSQL Resource Managers (the first is
+     *                in position 0, the second is in position 1 and so on
+     * @return a valid connection handle or NULL if rmid is not a PostgreSQL
+     *         Resource Manager or rmid is a valid PostgreSQL Resource
+     *         Manager, but there is no a valid connection
+     */
+    PGconn *lixa_pq_get_conn_by_pos(int pos);
+
+
+    
+    /**
+     * Retrieve the connection established by tx_open/xa_open to the
+     * PostgreSQL Resource Manager; this is necessary because tx_open
+     * does not return values and PQconnectdb returns a new connection
+     * every time it's called from the same process/thread; this is the
+     * same of lixa_pq_get_conn_by_pos(0)
+     * @return a valid connection handle or NULL if the handle is not available
+     */
+    static inline PGconn *lixa_pq_get_conn(void) {
+        return lixa_pq_get_conn_by_pos(0);
+    }
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
