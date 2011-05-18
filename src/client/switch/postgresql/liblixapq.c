@@ -186,7 +186,8 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
 
         if (NULL == conn) {
             /* create a new connection */
-            struct lixa_pq_status_rm_s lpsr = { 0, {0, 0, 0}, NULL };
+            struct lixa_pq_status_rm_s lpsr;
+            lixa_pq_status_rm_init(&lpsr);
             conn = PQconnectdb(xa_info);
             if (CONNECTION_OK != PQstatus(conn)) {
                 LIXA_TRACE(("lixa_pq_open: error while connecting to the "
@@ -323,7 +324,33 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
 
 int lixa_pq_start(XID *xid, int rmid, long flags)
 {
-    return XA_OK;
+    enum Exception { NONE
+                     , INVALID_FLAGS} excp;
+    int xa_rc = XAER_RMFAIL;
+    
+    LIXA_TRACE(("lixa_pq_start\n"));
+    TRY {
+        if (TMNOFLAGS != flags) {
+            LIXA_TRACE(("lixa_pq_start: flags %ld are not supported\n",
+                        flags));
+            THROW(INVALID_FLAGS);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_FLAGS:
+                xa_rc = XAER_INVAL;
+                break;
+            case NONE:
+                xa_rc = XA_OK;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_pq_start/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
 }
 
 
