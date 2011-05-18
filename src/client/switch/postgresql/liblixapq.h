@@ -25,6 +25,12 @@
 
 
 
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+
+
+
 /* PostgreSQL front-end */
 #include <libpq-fe.h>
 
@@ -63,6 +69,8 @@ struct lixa_pq_status_rm_s {
          *  5=Heuristically Completed */
         int S;
     } state;
+    /** Transaction ID as passed by the Transaction Manager */
+    XID     xid;
     /** PostgreSQL connection */
     PGconn *conn;
 };
@@ -90,6 +98,18 @@ typedef struct lixa_pq_status_s lixa_pq_status_t;
  */
 static inline void lixa_pq_status_init(lixa_pq_status_t *lps) {
     lps->rm = g_array_new(FALSE, FALSE, sizeof(struct lixa_pq_status_rm_s));
+}
+
+
+/**
+ * Reset the content of an object
+ * @param lpsr IN/OUT object reference
+ */
+static inline void lixa_pq_status_rm_init(struct lixa_pq_status_rm_s *lpsr) {
+    lpsr->rmid = 0;
+    lpsr->state.R = lpsr->state.T = lpsr->state.S = 0;
+    memset(&(lpsr->xid), 0, sizeof(XID));
+    lpsr->conn = NULL;
 }
 
 
