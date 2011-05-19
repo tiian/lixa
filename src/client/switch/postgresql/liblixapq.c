@@ -221,7 +221,7 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
         if (NONE != excp && NULL != lps)
-            g_free(lps);
+            free(lps);
         /* unlock the status mutex */
         g_static_mutex_unlock(&lixa_pq_status_mutex);
     } /* TRY-CATCH */
@@ -324,17 +324,81 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
 
 int lixa_pq_start(XID *xid, int rmid, long flags)
 {
-    enum Exception { NONE
-                     , INVALID_FLAGS} excp;
+    enum Exception { INVALID_FLAGS
+                     , PROTOCOL_ERROR1
+                     , PROTOCOL_ERROR2
+                     , PROTOCOL_ERROR3
+                     , PROTOCOL_ERROR4
+                     , NULL_CONN
+                     , BEGIN_ERROR
+                     , NONE} excp;
     int xa_rc = XAER_RMFAIL;
+    PGresult *res = NULL;
     
     LIXA_TRACE(("lixa_pq_start\n"));
     TRY {
+        guint i;
+        pthread_t key = pthread_self();
+        lixa_pq_status_t *lps = NULL;
+        struct lixa_pq_status_rm_s *lpsr = NULL;
+        
         if (TMNOFLAGS != flags) {
             LIXA_TRACE(("lixa_pq_start: flags %ld are not supported\n",
                         flags));
             THROW(INVALID_FLAGS);
         }
+        
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
+        if (NULL == lixa_pq_status) {
+            LIXA_TRACE(("lixa_pq_start: lixa_pq_status is NULL\n"));
+            THROW(PROTOCOL_ERROR1);
+        }
+        
+        if (NULL == (lps = (lixa_pq_status_t *)g_hash_table_lookup(
+                         lixa_pq_status, (gconstpointer)key))) {
+            LIXA_TRACE(("lixa_pq_start: thread " PTHREAD_T_FORMAT
+                        "not registered\n"));
+            THROW(PROTOCOL_ERROR2);
+        }
+
+        /* look for rmid */
+        for (i=0; i<lps->rm->len; ++i) {
+            lpsr = &g_array_index(lps->rm, struct lixa_pq_status_rm_s, i);
+            if (lpsr->rmid == rmid)
+                break;
+        }
+
+        if (i == lps->rm->len) {
+            LIXA_TRACE(("lixa_pq_start: rmid %d is not registered\n", rmid));
+            THROW(PROTOCOL_ERROR3);            
+        }
+        
+        if (lpsr->state.R != 1 || lpsr->state.T != 0 ||
+            (lpsr->state.S != 0 && lpsr->state.S != 2)) {
+            LIXA_TRACE(("lixa_pq_start: rmid %d state(R,S,T)={%d,%d,%d}\n",
+                        rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
+            THROW(PROTOCOL_ERROR4);
+        }
+
+        /* this is an internal error :( */
+        if (NULL == lpsr->conn) {
+            LIXA_TRACE(("lixa_pq_start: conn is NULL for rmid %d\n", rmid));
+            THROW(NULL_CONN);
+        }
+
+        /* saving xid */
+        lpsr->xid = *xid;
+        /* starting transaction */
+        res = PQexec(lpsr->conn, "BEGIN");
+        if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+            LIXA_TRACE(("lixa_pq_start: error while executing BEGIN command "
+                        "(%s)\n", PQerrorMessage(lpsr->conn)));
+            THROW(BEGIN_ERROR);
+        }
+        PQclear(res);
+        res = NULL;
         
         THROW(NONE);
     } CATCH {
@@ -342,12 +406,28 @@ int lixa_pq_start(XID *xid, int rmid, long flags)
             case INVALID_FLAGS:
                 xa_rc = XAER_INVAL;
                 break;
+            case PROTOCOL_ERROR1:
+            case PROTOCOL_ERROR2:
+            case PROTOCOL_ERROR3:
+            case PROTOCOL_ERROR4:
+                xa_rc = XAER_PROTO;
+                break;
+            case NULL_CONN:
+                xa_rc = XAER_RMFAIL;
+                break;
+            case BEGIN_ERROR:
+                xa_rc = XAER_RMERR;
+                break;
             case NONE:
                 xa_rc = XA_OK;
                 break;
             default:
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
+        /* unlock the status mutex */
+        g_static_mutex_unlock(&lixa_pq_status_mutex);
+        if (NULL != res)
+            PQclear(res);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_pq_start/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
@@ -480,4 +560,11 @@ PGconn *lixa_pq_get_conn_by_pos(int pos)
     g_static_mutex_unlock(&lixa_pq_status_mutex);
 
     return conn;
+}
+
+
+
+PGconn *lixa_pq_get_conn(void)
+{
+    return lixa_pq_get_conn_by_pos(0);
 }

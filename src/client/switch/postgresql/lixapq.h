@@ -66,9 +66,7 @@ extern "C" {
      * same of lixa_pq_get_conn_by_pos(0)
      * @return a valid connection handle or NULL if the handle is not available
      */
-    static inline PGconn *lixa_pq_get_conn(void) {
-        return lixa_pq_get_conn_by_pos(0);
-    }
+    PGconn *lixa_pq_get_conn(void);
 
 
 

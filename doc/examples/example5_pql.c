@@ -57,18 +57,25 @@ int main(int argc, char *argv[])
 
     conn = lixa_pq_get_conn();
     /*
-    conn = lixa_pq_get_conn_by_pos(1);
-    conn = lixa_pq_get_conn_by_rmid(1);
+    conn = lixa_pq_get_conn_by_pos(0);
+    conn = lixa_pq_get_conn_by_rmid(0);
     */
-    /*
+
+    /* replaced by tx_open()
     conn = PQconnectdb(conninfo);
-    */
     if (CONNECTION_OK != PQstatus(conn)) {
         fprintf(stderr, "Connection to database failed: %s",
                 PQerrorMessage(conn));
         exit_nicely(conn);
     }
+    */
     
+    /* start a new transaction */
+    if (TX_OK != (txrc = tx_begin())) {
+        fprintf(stderr, "tx_begin error: %d\n", txrc);
+        exit(txrc);
+    }
+    /* replaced by tx_begin()
     res = PQexec(conn, "BEGIN");
     if (PGRES_COMMAND_OK != PQresultStatus(res))
     {
@@ -77,6 +84,7 @@ int main(int argc, char *argv[])
         exit_nicely(conn);
     }
     PQclear(res);
+    */ 
 
     res = PQexec(conn,
                  "INSERT INTO authors VALUES(1, 'Ferrari', 'Christian');");
