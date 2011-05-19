@@ -1,5 +1,6 @@
 Go on with liblixapq.c
-- go on with lixa_pq_close
+- implement a new XID serialization: <formatid>:<gtrid>:<bqual>
+- go on with lixa_pq_*
 - check state protocol (prevent invalid call sequences)
 
 Try this scenario:
