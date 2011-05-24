@@ -1,7 +1,18 @@
 Go on with liblixapq.c
 - implement a new XID serialization: <formatid>:<gtrid>:<bqual>
-- go on with lixa_pq_*
+- go on with lixa_pq_rollback
 - check state protocol (prevent invalid call sequences)
+
+When tx_rollback() is called, LIXA does not call xa_end(TMFAIL), but xa_end(TMSUCCESS); this is not
+an error, but it does not inform the resource manager as soon as possible of the transaction manager
+next action; try to change this piece of code of lixa_xa.c:
+xa_end_flags=TMSUCCESS; (line 504)
+with something like
+if (commit)
+  xa_end_flags=TMSUCCESS;
+else
+  xa_end_flags=TMFAIL;
+A full regression test must be performed...
 
 Try this scenario:
 - a multithread application

@@ -115,6 +115,16 @@ static inline void lixa_pq_status_rm_init(struct lixa_pq_status_rm_s *lpsr) {
 
 
 /**
+ * Retrieve a pointer to the status of the resource manager for the current
+ * thread
+ * @param rmid IN Resource Manager ID
+ * @return the pointer to the desired status or NULL
+ */
+struct lixa_pq_status_rm_s *lixa_pq_status_rm_get(int rmid);
+
+
+
+/**
  * Destroy an object of type @ref lixa_pq_status_t
  * @param data IN reference to the object
  */

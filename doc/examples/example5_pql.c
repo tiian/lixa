@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
         exit_nicely(conn);
     }
     PQclear(res);
-
+/*
     res = PQexec(conn, "PREPARE TRANSACTION 'foo-bar';");
     if (PGRES_COMMAND_OK != PQresultStatus(res))
     {
@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
         exit_nicely(conn);
     }
     PQclear(res);
+*/
 /*
     res = PQexec(conn, "ROLLBACK PREPARED 'foo-bar';");
     if (PGRES_COMMAND_OK != PQresultStatus(res))
@@ -114,7 +115,7 @@ int main(int argc, char *argv[])
     }
     PQclear(res);
 */
-
+/*
     res = PQexec(conn, "COMMIT PREPARED 'foo-bar';");
     if (PGRES_COMMAND_OK != PQresultStatus(res))
     {
@@ -123,6 +124,12 @@ int main(int argc, char *argv[])
         exit_nicely(conn);
     }
     PQclear(res);
+*/
+
+    if (TX_OK != (txrc = tx_rollback())) {
+        fprintf(stderr, "tx_rollback error: %d\n", txrc);
+        exit(txrc);
+    }
 
     if (TX_OK != (txrc = tx_close())) {
         fprintf(stderr, "tx_close error: %d\n", txrc);
