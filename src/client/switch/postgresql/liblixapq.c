@@ -122,9 +122,43 @@ void lixa_pq_status_destroy(gpointer data)
 
 
 
+struct lixa_pq_status_rm_s *lixa_pq_status_rm_get(int rmid)
+{
+    guint i;
+    pthread_t key = pthread_self();
+    lixa_pq_status_t *lps = NULL;
+    struct lixa_pq_status_rm_s *lpsr = NULL;
+    
+    if (NULL == lixa_pq_status) {
+        LIXA_TRACE(("lixa_pq_status_rm_get: lixa_pq_status is NULL\n"));
+        return NULL;
+    }   
+    if (NULL == (lps = (lixa_pq_status_t *)g_hash_table_lookup(
+                     lixa_pq_status, (gconstpointer)key))) {
+        LIXA_TRACE(("lixa_pq_status_rm_get: thread " PTHREAD_T_FORMAT
+                    "not registered\n"));
+        return NULL;
+    }
+    /* look for rmid */
+    for (i=0; i<lps->rm->len; ++i) {
+        lpsr = &g_array_index(lps->rm, struct lixa_pq_status_rm_s, i);
+        if (lpsr->rmid == rmid)
+            break;
+    }    
+    if (i == lps->rm->len) {
+        LIXA_TRACE(("lixa_pq_status_rm_get: rmid %d is not registered\n",
+                    rmid));
+        return NULL;
+    }
+    return lpsr;
+}
+
+
+
 int lixa_pq_open(char *xa_info, int rmid, long flags)
 {
-    enum Exception { ASYNC_NOT_SUPPORTED
+    enum Exception { INVALID_FLAGS
+                     , ASYNC_NOT_SUPPORTED
                      , G_HASH_TABLE_NEW_FULL_ERROR
                      , MALLOC_ERROR
                      , PQ_CONNECTDB_ERROR
@@ -139,6 +173,12 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
     TRY {
         pthread_t key = pthread_self();
         guint i;
+        const long valid_flags = TMASYNC|TMNOFLAGS;
+        
+        if ((flags|valid_flags) != valid_flags) {
+            LIXA_TRACE(("lixa_pq_open: invalid flag in 0x%x\n", flags));
+            THROW(INVALID_FLAGS);
+        }
         
         /* asynchronous operations are not supported */
         if (TMASYNC & flags) {
@@ -206,6 +246,9 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INVALID_FLAGS:
+                xa_rc = XAER_INVAL;
+                break;
             case ASYNC_NOT_SUPPORTED:
                 xa_rc = XAER_ASYNC;
                 break;
@@ -233,7 +276,8 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
 
 int lixa_pq_close(char *xa_info, int rmid, long flags)
 {
-    enum Exception { ASYNC_NOT_SUPPORTED
+    enum Exception { INVALID_FLAGS
+                     , ASYNC_NOT_SUPPORTED
                      , NOTHING_TO_DO1
                      , NOTHING_TO_DO2
                      , PROTOCOL_ERROR
@@ -246,6 +290,12 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
         guint             i;
         pthread_t         key = pthread_self();
         lixa_pq_status_t *lps = NULL;
+        const long valid_flags = TMASYNC|TMNOFLAGS;
+        
+        if ((flags|valid_flags) != valid_flags) {
+            LIXA_TRACE(("lixa_pq_open: invalid flag in 0x%x\n", flags));
+            THROW(INVALID_FLAGS);
+        }
 
         /* asynchronous operations are not supported */
         if (TMASYNC & flags) {
@@ -296,6 +346,9 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INVALID_FLAGS:
+                xa_rc = XAER_INVAL;
+                break;
             case ASYNC_NOT_SUPPORTED:
                 xa_rc = XAER_ASYNC;
                 break;
@@ -324,11 +377,10 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
 
 int lixa_pq_start(XID *xid, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS
+    enum Exception { INVALID_FLAGS1
+                     , INVALID_FLAGS2
                      , PROTOCOL_ERROR1
                      , PROTOCOL_ERROR2
-                     , PROTOCOL_ERROR3
-                     , PROTOCOL_ERROR4
                      , NULL_CONN
                      , BEGIN_ERROR
                      , NONE} excp;
@@ -337,49 +389,31 @@ int lixa_pq_start(XID *xid, int rmid, long flags)
     
     LIXA_TRACE(("lixa_pq_start\n"));
     TRY {
-        guint i;
-        pthread_t key = pthread_self();
-        lixa_pq_status_t *lps = NULL;
         struct lixa_pq_status_rm_s *lpsr = NULL;
+        const long valid_flags = TMJOIN|TMRESUME|TMNOWAIT|TMASYNC|TMNOFLAGS;
+
+        if ((flags|valid_flags) != valid_flags) {
+            LIXA_TRACE(("lixa_pq_end: invalid flag in 0x%x\n", flags));
+            THROW(INVALID_FLAGS1);
+        }
         
         if (TMNOFLAGS != flags) {
-            LIXA_TRACE(("lixa_pq_start: flags %ld are not supported\n",
+            LIXA_TRACE(("lixa_pq_start: flags 0x%x are not supported\n",
                         flags));
-            THROW(INVALID_FLAGS);
+            THROW(INVALID_FLAGS2);
         }
         
         /* lock the status mutex */
         g_static_mutex_lock(&lixa_pq_status_mutex);
 
-        if (NULL == lixa_pq_status) {
-            LIXA_TRACE(("lixa_pq_start: lixa_pq_status is NULL\n"));
+        if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
             THROW(PROTOCOL_ERROR1);
-        }
-        
-        if (NULL == (lps = (lixa_pq_status_t *)g_hash_table_lookup(
-                         lixa_pq_status, (gconstpointer)key))) {
-            LIXA_TRACE(("lixa_pq_start: thread " PTHREAD_T_FORMAT
-                        "not registered\n"));
-            THROW(PROTOCOL_ERROR2);
-        }
-
-        /* look for rmid */
-        for (i=0; i<lps->rm->len; ++i) {
-            lpsr = &g_array_index(lps->rm, struct lixa_pq_status_rm_s, i);
-            if (lpsr->rmid == rmid)
-                break;
-        }
-
-        if (i == lps->rm->len) {
-            LIXA_TRACE(("lixa_pq_start: rmid %d is not registered\n", rmid));
-            THROW(PROTOCOL_ERROR3);            
-        }
         
         if (lpsr->state.R != 1 || lpsr->state.T != 0 ||
             (lpsr->state.S != 0 && lpsr->state.S != 2)) {
             LIXA_TRACE(("lixa_pq_start: rmid %d state(R,S,T)={%d,%d,%d}\n",
                         rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
-            THROW(PROTOCOL_ERROR4);
+            THROW(PROTOCOL_ERROR2);
         }
 
         /* this is an internal error :( */
@@ -399,17 +433,19 @@ int lixa_pq_start(XID *xid, int rmid, long flags)
         }
         PQclear(res);
         res = NULL;
+
+        lpsr->state.T = 1;
+        lpsr->state.S = 1;
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case INVALID_FLAGS:
+            case INVALID_FLAGS1:
+            case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
                 break;
             case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
-            case PROTOCOL_ERROR3:
-            case PROTOCOL_ERROR4:
                 xa_rc = XAER_PROTO;
                 break;
             case NULL_CONN:
@@ -437,7 +473,87 @@ int lixa_pq_start(XID *xid, int rmid, long flags)
 
 int lixa_pq_end(XID *xid, int rmid, long flags)
 {
-    return XA_OK;
+    enum Exception { INVALID_FLAGS1
+                     , INVALID_FLAGS2
+                     , PROTOCOL_ERROR1
+                     , PROTOCOL_ERROR2
+                     , NULL_CONN
+                     , ROLLBACK_ONLY
+                     , NONE } excp;
+    int xa_rc = XAER_RMFAIL;
+    
+    LIXA_TRACE(("lixa_pq_end\n"));
+    TRY {
+        struct lixa_pq_status_rm_s *lpsr = NULL;
+        const long valid_flags = TMSUSPEND|TMMIGRATE|TMSUCCESS|TMFAIL|TMASYNC;
+
+        if ((flags|valid_flags) != valid_flags) {
+            LIXA_TRACE(("lixa_pq_end: invalid flag in 0x%x\n", flags));
+            THROW(INVALID_FLAGS1);
+        }
+        
+        if ((TMSUSPEND|TMMIGRATE|TMASYNC) & flags) {
+            LIXA_TRACE(("lixa_pq_end: flags 0x%x are not supported\n",
+                        flags));
+            THROW(INVALID_FLAGS2);
+        }
+        
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
+        if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
+        
+        if (lpsr->state.R != 1 || lpsr->state.T != 1 ||
+            (lpsr->state.S != 1 && lpsr->state.S != 2)) {
+            LIXA_TRACE(("lixa_pq_end: rmid %d state(R,S,T)={%d,%d,%d}\n",
+                        rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
+            THROW(PROTOCOL_ERROR2);
+        }
+
+        /* this is an internal error :( */
+        if (NULL == lpsr->conn) {
+            LIXA_TRACE(("lixa_pq_end: conn is NULL for rmid %d\n", rmid));
+            THROW(NULL_CONN);
+        }
+
+        /* check if the TM marked as failed the transaction */
+        if (TMFAIL & flags) {
+            LIXA_TRACE(("lixa_pq_end: TMFAIL detected, entering 'Rollback "
+                        "Only' state\n"));
+            lpsr->state.S = 4;
+            THROW(ROLLBACK_ONLY);
+        } else
+            lpsr->state.S = 2;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_FLAGS1:
+            case INVALID_FLAGS2:
+                xa_rc = XAER_INVAL;
+                break;
+            case PROTOCOL_ERROR1:
+            case PROTOCOL_ERROR2:
+                xa_rc = XAER_PROTO;
+                break;
+            case NULL_CONN:
+                xa_rc = XAER_RMFAIL;
+                break;
+            case ROLLBACK_ONLY:
+                xa_rc = XA_RBROLLBACK;
+                break;
+            case NONE:
+                xa_rc = XA_OK;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+        /* unlock the status mutex */
+        g_static_mutex_unlock(&lixa_pq_status_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_pq_end/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
 }
 
 
