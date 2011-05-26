@@ -1,5 +1,5 @@
 Go on with liblixapq.c
-- implement a new XID serialization: <formatid>:<gtrid>:<bqual>
+- implement a new XID serialization & deserialization: <formatid>-<gtrid>-<bqual>
 - go on with lixa_pq_rollback
 - check state protocol (prevent invalid call sequences)
 
