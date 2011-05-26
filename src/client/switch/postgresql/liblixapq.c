@@ -87,6 +87,51 @@ GHashTable  *lixa_pq_status = NULL;
 
 
 
+int lixa_pq_ser_xid_serialize(lixa_pq_ser_xid_t lpsx, XID *xid)
+{
+    int i = 0, j = 0;
+    byte_t *p;
+    long len = sizeof(xid->formatID)*2 /* formatID */ +
+        1 /* '-' separator */ +
+        xid->gtrid_length*2 /* gtrid */ +
+        1 /* '-' separator */ +
+        xid->bqual_length*2 /* bqual */ +
+        1 /* '\0' terminator */ ;
+    /* check the XID can be serialized for PostgreSQL by this routine */
+    if (len > sizeof(lixa_pq_ser_xid_t)) {
+        LIXA_TRACE(("lixa_pq_ser_xid_serialize: xid can not be serialized "
+                    "because it would need %ld bytes instead of %d\n",
+                    len, sizeof(lixa_pq_ser_xid_t)));
+        return FALSE;
+    }
+    /* serialize formatID */
+    p = (byte_t *)&(xid->formatID);
+    for (i=0; i<sizeof(xid->formatID); ++i) {
+        sprintf(lpsx+j, "%2.2x", p[i]);
+        j += 2;
+    }
+    *(lpsx+j) = LIXA_PQ_SER_XID_SEPARATOR;
+    j += 1;
+    p = (byte_t *)&(xid->data[0]);
+    for (i=0; i<xid->gtrid_length; ++i) {
+        sprintf(lpsx+j, "%2.2x", p[i]);
+        j += 2;
+    }
+    *(lpsx+j) = LIXA_PQ_SER_XID_SEPARATOR;
+    j += 1;
+    p = (byte_t *)&(xid->data[xid->gtrid_length]);
+    for (i=0; i<xid->bqual_length; ++i) {
+        sprintf(lpsx+j, "%2.2x", p[i]);
+        j += 2;
+    }
+    *(lpsx+j) = '\0';
+    
+    LIXA_TRACE(("lixa_pq_ser_xid_serialize: '%s'\n", lpsx));
+    return TRUE;
+}
+
+
+
 const gchar *g_module_check_init(GModule *module)
 {
     LIXA_TRACE(("lixa_pq/g_module_check_init: initializing module\n"));
@@ -436,7 +481,12 @@ int lixa_pq_start(XID *xid, int rmid, long flags)
 
         lpsr->state.T = 1;
         lpsr->state.S = 1;
-        
+
+    {
+        lixa_pq_ser_xid_t foo;
+        lixa_pq_ser_xid_serialize(foo, xid);
+    }
+    
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -522,9 +572,12 @@ int lixa_pq_end(XID *xid, int rmid, long flags)
             LIXA_TRACE(("lixa_pq_end: TMFAIL detected, entering 'Rollback "
                         "Only' state\n"));
             lpsr->state.S = 4;
+            lpsr->state.T = 0;
             THROW(ROLLBACK_ONLY);
-        } else
+        } else {
             lpsr->state.S = 2;
+            lpsr->state.T = 0;
+        }
         
         THROW(NONE);
     } CATCH {
@@ -560,7 +613,98 @@ int lixa_pq_end(XID *xid, int rmid, long flags)
 
 int lixa_pq_rollback(XID *xid, int rmid, long flags)
 {
-    return XA_OK;
+    enum Exception { INVALID_FLAGS1
+                     , INVALID_FLAGS2
+                     , PROTOCOL_ERROR1
+                     , PROTOCOL_ERROR2
+                     , NULL_CONN
+                     , ROLLBACK_ERROR2
+                     , NONE } excp;
+    int xa_rc = XAER_RMFAIL;
+    PGresult *res = NULL;
+    
+    LIXA_TRACE(("lixa_pq_rollback\n"));
+    TRY {
+        struct lixa_pq_status_rm_s *lpsr = NULL;
+        const long valid_flags = TMFAIL|TMASYNC;
+
+        if ((flags|valid_flags) != valid_flags) {
+            LIXA_TRACE(("lixa_pq_rollback: invalid flag in 0x%x\n", flags));
+            THROW(INVALID_FLAGS1);
+        }
+        
+        if (TMASYNC & flags) {
+            LIXA_TRACE(("lixa_pq_rollback: flags 0x%x are not supported\n",
+                        flags));
+            THROW(INVALID_FLAGS2);
+        }
+        
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
+        if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
+        
+        if (lpsr->state.R != 1 || lpsr->state.T != 0 ||
+            (lpsr->state.S != 2 && lpsr->state.S != 3 && lpsr->state.S != 4)) {
+            LIXA_TRACE(("lixa_pq_rollback: rmid %d state(R,S,T)={%d,%d,%d}\n",
+                        rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
+            THROW(PROTOCOL_ERROR2);
+        }
+
+        /* this is an internal error :( */
+        if (NULL == lpsr->conn) {
+            LIXA_TRACE(("lixa_pq_rollback: conn is NULL for rmid %d\n", rmid));
+            THROW(NULL_CONN);
+        }
+
+        if (lpsr->state.S == 3) {
+            /* the transaction is in prepared state */
+            /* @@@ */
+        } else {
+            /* the transaction is NOT in prepared state */
+            res = PQexec(lpsr->conn, "ROLLBACK");
+            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+                LIXA_TRACE(("lixa_pq_rollback: error while executing "
+                            "ROLLBACK command (%s)\n",
+                            PQerrorMessage(lpsr->conn)));
+                THROW(ROLLBACK_ERROR2);
+            }
+            PQclear(res);
+            res = NULL;
+            lpsr->state.S = 0;
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_FLAGS1:
+            case INVALID_FLAGS2:
+                xa_rc = XAER_INVAL;
+                break;
+            case PROTOCOL_ERROR1:
+            case PROTOCOL_ERROR2:
+                xa_rc = XAER_PROTO;
+                break;
+            case NULL_CONN:
+                xa_rc = XAER_RMFAIL;
+                break;
+            case ROLLBACK_ERROR2:
+                xa_rc = XAER_RMERR;
+                break;
+            case NONE:
+                xa_rc = XA_OK;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+        /* unlock the status mutex */
+        g_static_mutex_unlock(&lixa_pq_status_mutex);
+        if (NULL != res)
+            PQclear(res);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_pq_rollback/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
 }
 
 
