@@ -125,9 +125,14 @@ int main(int argc, char *argv[])
     }
     PQclear(res);
 */
-
+/*
     if (TX_OK != (txrc = tx_rollback())) {
         fprintf(stderr, "tx_rollback error: %d\n", txrc);
+        exit(txrc);
+    }
+*/
+    if (TX_OK != (txrc = tx_commit())) {
+        fprintf(stderr, "tx_commit error: %d\n", txrc);
         exit(txrc);
     }
 

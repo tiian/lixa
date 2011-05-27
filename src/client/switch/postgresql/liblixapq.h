@@ -105,9 +105,11 @@ typedef char lixa_pq_ser_xid_t[200];
 
 
 /**
- * The separator used for serialization/deserialization of XIDs
+ * Retrieve the LIXA format ID serialized; it's useful to query PostgreSQL
+ * and retrieve all the current prepared transactions (xa_recover function)
+ * @param lpsx OUT the serialized format ID
  */
-#define LIXA_PQ_SER_XID_SEPARATOR '-'
+void lixa_pq_ser_xid_formatid(lixa_pq_ser_xid_t lpsx);
 
 
 
