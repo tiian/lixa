@@ -93,47 +93,6 @@ typedef struct lixa_pq_status_s lixa_pq_status_t;
 
 
 /**
- * A string used to serialize a XID and use it with PostgreSQL.
- * NOTE: this is not XA standard compliant, but it just works in
- * conjunction with LIXA Transaction Manager.
- * 200 chars are documented for 'PREPARE TRANSACTION' command:
- * "The identifier must be written as a string literal, and must be less
- * than 200 bytes long."
- */
-typedef char lixa_pq_ser_xid_t[200];
-
-
-
-/**
- * Retrieve the LIXA format ID serialized; it's useful to query PostgreSQL
- * and retrieve all the current prepared transactions (xa_recover function)
- * @param lpsx OUT the serialized format ID
- */
-void lixa_pq_ser_xid_formatid(lixa_pq_ser_xid_t lpsx);
-
-
-
-/**
- * Serialize XID to a string compatible with PostgreSQL
- * @param lpsx OUT the serialized XID
- * @param xid IN the XID to be serialized
- * @return TRUE if serialization was completed, FALSE if there was an error
- */
-int lixa_pq_ser_xid_serialize(lixa_pq_ser_xid_t lpsx, XID *xid);
-
-
-
-/**
- * Deserialize a string compatible with PostgreSQL to a XID
- * @param lpsx IN the string must be deserialized
- * @param xid OUT the deserialized XID
- * @return TRUE if deserialization was completed, FALSE if there was an error
- */
-int lixa_pq_ser_xid_deserialize(lixa_pq_ser_xid_t lpsx, XID *xid);
-
-
-
-/**
  * Reset the content of an object
  * @param lps IN/OUT object reference
  */

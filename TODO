@@ -1,5 +1,6 @@
 Go on with liblixapq.c
-- implement a new XID serialization & deserialization: <formatid>-<gtrid>-<bqual>
+- understand why tests do not work anymore (fails test 6)
+- replace XID serialization with new implementation
 - go on with lixa_pq_rollback
 - check state protocol (prevent invalid call sequences)
 

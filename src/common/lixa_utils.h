@@ -31,8 +31,15 @@
 #ifdef HAVE_SYS_SELECT_H
 # include <sys/select.h>
 #endif
+#ifdef HAVE_UUID_UUID_H
+# include <uuid/uuid.h>
+#endif
 
 
+
+#include <xa.h>
+
+    
 
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
@@ -55,6 +62,21 @@
  * name, it will retrieve this value
  */
 #define DEFAULT_PROGRAM_NAME "lixac"
+/**
+ * Length of a string that can contain a serialized XID:
+ * formatID + separator + gtrid + separator + bqual + terminator
+ */
+#define LIXA_XID_SERIALIZE_LENGTH (2*sizeof(long)+1+2*sizeof(uuid_t)+1+2*sizeof(uuid_t)+1)
+
+
+
+/**
+ * A string used to serialize a XID and use it with PostgreSQL.
+ * NOTE: this is not XA standard compliant, but it just works in
+ * conjunction with LIXA Transaction Manager.
+ */
+typedef char lixa_ser_xid_t[LIXA_XID_SERIALIZE_LENGTH];
+
 
 
 #ifdef __cplusplus
@@ -107,6 +129,36 @@ extern "C" {
 
 
     
+    /**
+     * Retrieve the LIXA format ID serialized; it's useful to query PostgreSQL
+     * and retrieve all the current prepared transactions (xa_recover function)
+     * @param lsx OUT the serialized format ID
+     */
+    void lixa_ser_xid_formatid(lixa_ser_xid_t lsx);
+
+
+
+    /**
+     * Serialize XID to a string compatible with PostgreSQL
+     * @param lsx OUT the serialized XID
+     * @param xid IN the XID to be serialized
+     * @return TRUE if serialization was completed, FALSE if there was an error
+     */
+    int lixa_ser_xid_serialize(lixa_ser_xid_t lsx, XID *xid);
+
+
+
+    /**
+     * Deserialize a string compatible with PostgreSQL to a XID
+     * @param lsx IN the string must be deserialized
+     * @param xid OUT the deserialized XID
+     * @return TRUE if deserialization was completed,
+     *         FALSE if there was an error
+     */
+    int lixa_ser_xid_deserialize(lixa_ser_xid_t lsx, XID *xid);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
