@@ -192,3 +192,121 @@ void lixa_micro_sleep(long usec) {
     tv.tv_usec = usec;
     select(0, NULL, NULL, NULL, &tv);
 }
+
+
+
+void lixa_ser_xid_formatid(lixa_ser_xid_t lsx)
+{
+    long formatid = LIXA_XID_FORMAT_ID;
+    /* serialize formatID */
+    sprintf(lsx, "%*.*lx", sizeof(long)*2, sizeof(long)*2, formatid);
+    lsx[sizeof(long)*2] = LIXA_XID_SEPARATOR;
+    lsx[sizeof(long)*2+1] = '\0';
+}
+
+
+
+int lixa_ser_xid_serialize(lixa_ser_xid_t lsx, XID *xid)
+{
+    int i = 0, j = 0;
+    byte_t *p;
+    long len = sizeof(xid->formatID)*2 /* formatID */ +
+        1 /* '-' separator */ +
+        xid->gtrid_length*2 /* gtrid */ +
+        1 /* '-' separator */ +
+        xid->bqual_length*2 /* bqual */ +
+        1 /* '\0' terminator */ ;
+    /* check the XID can be serialized for PostgreSQL by this routine */
+    if (len > sizeof(lixa_ser_xid_t)) {
+        LIXA_TRACE(("lixa_ser_xid_serialize: xid can not be serialized "
+                    "because it would need %ld bytes instead of %d\n",
+                    len, sizeof(lixa_ser_xid_t)));
+        return FALSE;
+    }
+    /* serialize formatID and put the first separator */
+    lixa_ser_xid_formatid(lsx);
+    /* serialize gtrid */
+    j = strlen(lsx);
+    p = (byte_t *)&(xid->data[0]);
+    for (i=0; i<xid->gtrid_length; ++i) {
+        sprintf(lsx+j, "%2.2x", p[i]);
+        j += 2;
+    }
+    /* put the second separator */
+    *(lsx+j) = LIXA_XID_SEPARATOR;
+    j += 1;
+    p = (byte_t *)&(xid->data[xid->gtrid_length]);
+    for (i=0; i<xid->bqual_length; ++i) {
+        sprintf(lsx+j, "%2.2x", p[i]);
+        j += 2;
+    }
+    *(lsx+j) = '\0';
+    
+    LIXA_TRACE(("lixa_ser_xid_serialize: '%s'\n", lsx));
+    return TRUE;
+}
+
+
+
+int lixa_ser_xid_deserialize(lixa_ser_xid_t lsx, XID *xid)
+{
+    long len = 0, i;
+    char *p = NULL;
+    char tmp[sizeof(long)*2+1];
+    unsigned long l = 0;
+    unsigned int b = 0;
+
+    /* deserialize formatID */
+    tmp[sizeof(long)*2] = '\0';
+    p = lsx;
+    strncpy(tmp, lsx, sizeof(long)*2);
+    sscanf(tmp, "%lx", &l);
+    xid->formatID = l;
+
+    /* check the first separator */
+    if (LIXA_XID_SEPARATOR != lsx[sizeof(long)*2]) {
+        LIXA_TRACE(("lixa_ser_xid_deserialize: position %d ('%c') does not "
+                    "contain the separator '%c'\n", sizeof(long)*2,
+                    lsx[sizeof(long)], LIXA_XID_SEPARATOR));
+        return FALSE;
+    }
+    
+    /* deserialize gtrid */
+    p = lsx + sizeof(long)*2 + 1;
+    len = sizeof(uuid_t);
+    xid->gtrid_length = len;
+    tmp[2] = '\0';
+    for (i=0; i<len; ++i) {
+        tmp[0] = p[i*2];
+        tmp[1] = p[i*2+1];
+        sscanf(tmp, "%x", &b);
+        xid->data[i] = b;
+    }
+    
+    /* check the second separator */
+    if (LIXA_XID_SEPARATOR != lsx[sizeof(long)*2+1+sizeof(uuid_t)*2]) {
+        LIXA_TRACE(("lixa_ser_xid_deserialize: position %d ('%c') does not "
+                    "contain the separator '%c'\n",
+                    sizeof(long)*2+1+sizeof(uuid_t)*2,
+                    lsx[sizeof(long)*2+1+sizeof(uuid_t)*2],
+                    LIXA_XID_SEPARATOR));
+        return FALSE;
+    }
+    
+    /* deserialize gtrid */
+    p = lsx + sizeof(long)*2+1+sizeof(uuid_t)*2+1;
+    len = sizeof(uuid_t);
+    xid->bqual_length = len;
+    tmp[2] = '\0';
+    for (i=0; i<len; ++i) {
+        tmp[0] = p[i*2];
+        tmp[1] = p[i*2+1];
+        sscanf(tmp, "%x", &b);
+        xid->data[i+sizeof(uuid_t)] = b;
+    }
+    
+    return TRUE;
+}
+
+
+

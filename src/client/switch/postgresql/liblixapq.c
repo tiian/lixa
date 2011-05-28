@@ -52,6 +52,8 @@
 /* LIXA convenience macros: it could be removed if "TRY/CATCH" statement
  * would be removed from this source */
 #include <lixa_defines.h>
+/* LIXA utilities: it contains XID serialization/deserialization utilities */
+#include <lixa_utils.h>
 
 
 
@@ -91,120 +93,6 @@ GStaticMutex lixa_pq_status_mutex = G_STATIC_MUTEX_INIT;
  * thread
  */
 GHashTable  *lixa_pq_status = NULL;
-
-
-
-void lixa_pq_ser_xid_formatid(lixa_pq_ser_xid_t lpsx)
-{
-    int i = 0, j = 0;
-    byte_t *p;
-    long formatid = LIXA_XID_FORMAT_ID;
-    /* serialize formatID */
-    p = (byte_t *)&(formatid);
-    for (i=0; i<sizeof(formatid); ++i) {
-        sprintf(lpsx+j, "%2.2x", p[i]);
-        j += 2;
-    }
-    *(lpsx+j) = LIXA_XID_SEPARATOR;
-    j += 1;
-    *(lpsx+j) = '\0';
-}
-
-
-
-int lixa_pq_ser_xid_serialize(lixa_pq_ser_xid_t lpsx, XID *xid)
-{
-    int i = 0, j = 0;
-    byte_t *p;
-    long len = sizeof(xid->formatID)*2 /* formatID */ +
-        1 /* '-' separator */ +
-        xid->gtrid_length*2 /* gtrid */ +
-        1 /* '-' separator */ +
-        xid->bqual_length*2 /* bqual */ +
-        1 /* '\0' terminator */ ;
-    /* check the XID can be serialized for PostgreSQL by this routine */
-    if (len > sizeof(lixa_pq_ser_xid_t)) {
-        LIXA_TRACE(("lixa_pq_ser_xid_serialize: xid can not be serialized "
-                    "because it would need %ld bytes instead of %d\n",
-                    len, sizeof(lixa_pq_ser_xid_t)));
-        return FALSE;
-    }
-    /* serialize formatID */
-    lixa_pq_ser_xid_formatid(lpsx);
-    j = strlen(lpsx);
-    p = (byte_t *)&(xid->data[0]);
-    for (i=0; i<xid->gtrid_length; ++i) {
-        sprintf(lpsx+j, "%2.2x", p[i]);
-        j += 2;
-    }
-    *(lpsx+j) = LIXA_XID_SEPARATOR;
-    j += 1;
-    p = (byte_t *)&(xid->data[xid->gtrid_length]);
-    for (i=0; i<xid->bqual_length; ++i) {
-        sprintf(lpsx+j, "%2.2x", p[i]);
-        j += 2;
-    }
-    *(lpsx+j) = '\0';
-    
-    LIXA_TRACE(("lixa_pq_ser_xid_serialize: '%s'\n", lpsx));
-    return TRUE;
-}
-
-
-
-int lixa_pq_ser_xid_deserialize(lixa_pq_ser_xid_t lpsx, XID *xid)
-{
-    long len = 0, i;
-    char *start = NULL, *stop = NULL, *p = NULL;
-    lixa_pq_ser_xid_t lpsx_tmp;
-    /* prepare the prefix (format id) and check it against the string */
-    lixa_pq_ser_xid_formatid(lpsx_tmp);
-    if (0 != strncmp(lpsx, lpsx_tmp, strlen(lpsx_tmp))) {
-        LIXA_TRACE(("lixa_pq_ser_xid_deserialize: '%s' cannot be deserialized "
-                    "because the prefix is wrong (it should be '%s')\n",
-                    lpsx, lpsx_tmp));
-        return FALSE;
-    }
-    xid->formatID = LIXA_XID_FORMAT_ID;
-    memset(lpsx_tmp, 0, sizeof(lpsx_tmp));
-    strcpy(lpsx_tmp, lpsx);
-    /* splitting gtrid and bqual using separators */
-    if (NULL == (start = strchr(lpsx_tmp, LIXA_XID_SEPARATOR))) {
-        LIXA_TRACE(("lixa_pq_ser_xid_deserialize: cannot find the first "
-                    "separator in '%s'\n", lpsx_tmp));
-        return FALSE;
-    }
-    *(start++) = '\0';
-    if (NULL == (stop = strchr(start, LIXA_XID_SEPARATOR))) {
-        LIXA_TRACE(("lixa_pq_ser_xid_deserialize: cannot find the second "
-                    "separator in '%s'\n", lpsx_tmp));
-        return FALSE;
-    }
-    *(stop++) = '\0';
-    LIXA_TRACE(("lixa_pq_ser_xid_deserialize: start points to '%s'\n", start));
-    LIXA_TRACE(("lixa_pq_ser_xid_deserialize: stop points to '%s'\n", stop));
-    /* deserializing gtrid */
-    p = start;
-    len = strlen(start);
-    if (len % 2) {
-        LIXA_TRACE(("lixa_pq_ser_xid_deserialize: gtrid serialized len can"
-                    "not be odd (%ld)\n", len));
-        return FALSE;
-    }
-    len /= 2;
-    xid->gtrid_length = len;
-    for (i=0; i<len; ++i) {
-        char tmp[3];
-        unsigned int b = 0;
-        strncpy(tmp, p+i*2, 2);
-        tmp[2] = '\0';
-        sscanf(tmp, "%x", &b);
-        LIXA_TRACE(("lixa_pq_ser_xid_deserialize: '%s' -> %2.2x\n", tmp, b));
-        xid->data[i] = b;
-    }
-    /* @@@ */
-    return TRUE;
-}
 
 
 
@@ -559,9 +447,13 @@ int lixa_pq_start(XID *xid, int rmid, long flags)
         lpsr->state.S = 1;
 
     {
-        lixa_pq_ser_xid_t foo;
-        lixa_pq_ser_xid_serialize(foo, xid);
-        lixa_pq_ser_xid_deserialize(foo, xid);
+        lixa_ser_xid_t foo;
+        XID xid2;
+        lixa_ser_xid_serialize(foo, xid);
+        LIXA_TRACE(("lixa_pq_start: xid --> '%s'\n", foo));
+        lixa_ser_xid_deserialize(foo, &xid2);
+        lixa_ser_xid_serialize(foo, &xid2);
+        LIXA_TRACE(("lixa_pq_start: xid2 --> '%s'\n", foo));
     }
     
         THROW(NONE);
