@@ -1,8 +1,14 @@
+Discover the bug that crashes lixad; try every revision starting from 531;
+0.5.31 works fine, current head in SVN fails with a core dump when lixad
+closes
+
+
 Go on with liblixapq.c
 - understand why tests do not work anymore (fails test 6)
-- replace XID serialization with new implementation
 - go on with lixa_pq_rollback
 - check state protocol (prevent invalid call sequences)
+
+- replace XID serialization with new implementation
 
 When tx_rollback() is called, LIXA does not call xa_end(TMFAIL), but xa_end(TMSUCCESS); this is not
 an error, but it does not inform the resource manager as soon as possible of the transaction manager
