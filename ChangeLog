@@ -1,7 +1,11 @@
 LOG:
 
-         - 0.5.32 library liblixabmt was renamed to liblixab
+         - 0.5.33 library liblixabmt was renamed to liblixab
                   library liblixacmt was renamed to liblixac
+
+20110504 - 0.5.32 the package supplies an example that shows how LIXA can
+                  be used in conjunction with Oracle Database Server and IBM
+                  DB2, performing a real distributed transaction
 
 20110426 - 0.5.31 the package supplies an example that shows how LIXA can
                   be used in conjunction with IBM DB2

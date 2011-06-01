@@ -1,8 +1,3 @@
-Discover the bug that crashes lixad; try every revision starting from 531;
-0.5.31 works fine, current head in SVN fails with a core dump when lixad
-closes
-
-
 Go on with liblixapq.c
 - understand why tests do not work anymore (fails test 6)
 - go on with lixa_pq_rollback
