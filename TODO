@@ -1,7 +1,6 @@
 Go on with liblixapq.c
-- lixa_pq_prepare
-- check state protocol (prevent invalid call sequences)
-
+- lixa_pq_recover
+- write a full case test for the PostgreSQL resource manager
 - replace XID serialization with new implementation
 
 When tx_rollback() is called, LIXA does not call xa_end(TMFAIL), but xa_end(TMSUCCESS); this is not
