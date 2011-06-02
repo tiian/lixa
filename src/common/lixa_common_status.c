@@ -210,27 +210,3 @@ int xid_deserialize(char *ser_xid, XID *xid)
 
 
 
-int xid_compare(const XID *a, const XID *b)
-{
-    int result;
-    
-    if (a->formatID < b->formatID)
-        return -1;
-    else if (a->formatID > b->formatID)
-        return 1;
-    if (a->gtrid_length < b->gtrid_length)
-        return -1;
-    else if (a->gtrid_length > b->gtrid_length)
-        return 1;
-    if (a->bqual_length < b->bqual_length)
-        return -1;
-    else if (a->bqual_length > b->bqual_length)
-        return 1;
-    if (0 != (result = memcmp(a->data, b->data, a->gtrid_length)))
-        return result;
-    if (0 != (result = memcmp(a->data + a->gtrid_length,
-                              b->data + b->gtrid_length,
-                              a->bqual_length)))
-        return result;
-    return 0;
-}

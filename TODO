@@ -1,6 +1,5 @@
 Go on with liblixapq.c
-- understand why tests do not work anymore (fails test 6)
-- go on with lixa_pq_rollback
+- lixa_pq_prepare
 - check state protocol (prevent invalid call sequences)
 
 - replace XID serialization with new implementation
