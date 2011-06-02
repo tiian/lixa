@@ -367,18 +367,6 @@ extern "C" {
     
 
     /**
-     * Compare two xids
-     * @param a IN first object to compare
-     * @param b IN second object to compare
-     * @return if (a==b) --> 0 <br>
-     *         if (a<b) --> -1 <br>
-     *         if (a>b) --> +1
-     */
-    int xid_compare(const XID *a, const XID *b);
-
-
-
-    /**
      * Reset a xid structure
      * @param xid IN/OUT transaction id to be resetted
      */

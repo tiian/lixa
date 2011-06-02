@@ -159,6 +159,18 @@ extern "C" {
 
 
 
+    /**
+     * Compare two xids
+     * @param a IN first object to compare
+     * @param b IN second object to compare
+     * @return if (a==b) --> 0 <br>
+     *         if (a<b) --> -1 <br>
+     *         if (a>b) --> +1
+     */
+    int xid_compare(const XID *a, const XID *b);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

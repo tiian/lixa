@@ -27,6 +27,7 @@
 
 
 #include <lixa_errors.h>
+#include <lixa_utils.h>
 #include <lixa_common_status.h>
 #include <lixa_xml_msg_deserialize.h>
 #include <lixa_xml_msg_serialize.h>

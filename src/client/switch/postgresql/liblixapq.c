@@ -682,7 +682,105 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
 
 int lixa_pq_prepare(XID *xid, int rmid, long flags)
 {
-    return XA_OK;
+    enum Exception { INVALID_FLAGS1
+                     , INVALID_FLAGS2
+                     , PROTOCOL_ERROR1
+                     , PROTOCOL_ERROR2
+                     , NULL_CONN
+                     , XID_SERIALIZE_ERROR
+                     , XID_MISMATCH
+                     , NONE } excp;
+    int xa_rc = XAER_RMFAIL;
+    PGresult *res = NULL;
+    
+    LIXA_TRACE(("lixa_pq_prepare\n"));
+    TRY {
+        struct lixa_pq_status_rm_s *lpsr = NULL;
+        const long valid_flags = TMFAIL|TMASYNC;
+        lixa_ser_xid_t lsx;
+
+        if ((flags|valid_flags) != valid_flags) {
+            LIXA_TRACE(("lixa_pq_prepare: invalid flag in 0x%x\n", flags));
+            THROW(INVALID_FLAGS1);
+        }
+        
+        if (TMASYNC & flags) {
+            LIXA_TRACE(("lixa_pq_prepare: flags 0x%x are not supported\n",
+                        flags));
+            THROW(INVALID_FLAGS2);
+        }
+                
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
+        if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
+        
+        if (lpsr->state.R != 1 || lpsr->state.T != 0 || lpsr->state.S != 2) {
+            LIXA_TRACE(("lixa_pq_prepare: rmid %d state(R,S,T)={%d,%d,%d}\n",
+                        rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
+            THROW(PROTOCOL_ERROR2);
+        }
+
+        /* this is an internal error :( */
+        if (NULL == lpsr->conn) {
+            LIXA_TRACE(("lixa_pq_prepare: conn is NULL for rmid %d\n", rmid));
+            THROW(NULL_CONN);
+        }
+
+        /* serialize XID */
+        if (!lixa_ser_xid_serialize(lsx, xid)) {
+            LIXA_TRACE(("lixa_pq_prepare: unable to serialize XID\n"));
+            THROW(XID_SERIALIZE_ERROR);
+        }
+        LIXA_TRACE(("lixa_pq_prepare: preparing XID '%s'\n", lsx));
+
+        /* @@@ try what happens with different xids */
+        
+        /* checking xid is the started one */
+        if (0 != xid_compare(xid, &(lpsr->xid))) {
+            lixa_ser_xid_t lsx2;
+            lixa_ser_xid_serialize(lsx2, &(lpsr->xid));
+            LIXA_TRACE(("lixa_pq_prepare: preparing XID '%s' is not the same "
+                        "of started XID '%s'\n", lsx, lsx2));
+            THROW(XID_MISMATCH);
+        }
+
+        /* @@@ go on with PostgreSQL command... */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_FLAGS1:
+            case INVALID_FLAGS2:
+                xa_rc = XAER_INVAL;
+                break;
+            case PROTOCOL_ERROR1:
+            case PROTOCOL_ERROR2:
+                xa_rc = XAER_PROTO;
+                break;
+            case NULL_CONN:
+                xa_rc = XAER_RMFAIL;
+                break;
+            case XID_SERIALIZE_ERROR:
+                xa_rc = XAER_INVAL;
+                break;
+            case XID_MISMATCH:
+                xa_rc = XAER_NOTA;
+                break;
+            case NONE:
+                xa_rc = XA_OK;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+        /* unlock the status mutex */
+        g_static_mutex_unlock(&lixa_pq_status_mutex);
+        if (NULL != res)
+            PQclear(res);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_pq_prepare/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
 }
 
 
