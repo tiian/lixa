@@ -1,4 +1,18 @@
 Go on with liblixapq.c
+- an interesting logical bug was discovered. For cold recovery, LIXA need to
+  issue xa_commit/xa_rollback to the resource manager, but this could be
+  performed only traversing "idle" state; "idle" state needs xa_start/xa_end,
+  but in cold recovery no transaction can be started. The logical solution 
+  seems to be implementing xa_start(TMRESUME) xa_end() and than xa_commit or
+  xa_rollback could be called. But another problem arises: TMRESUME could be
+  used by another transaction manager (if someone re-use the wrapper library)
+  and it would be bugged because PostgreSQL does not implement it at the
+  low level.
+  This behavior should be tested against Oracle and DB2 too... I'm not sure
+  they refuse xa_commit/xa_rollback: they are probably violating the XA
+  state table protocol.
+  Another dirty trick might be to create a flag: allowing xa_commit/xa_rollback
+  after xa_recover... but it does not seem to me a brillian solution...
 - lixa_pq_recover
 - write a full case test for the PostgreSQL resource manager
 - replace XID serialization with new implementation
