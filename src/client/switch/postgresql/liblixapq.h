@@ -73,6 +73,12 @@ struct lixa_pq_status_rm_s {
     XID     xid;
     /** PostgreSQL connection */
     PGconn *conn;
+    /**
+     * Boolean value to track the state of the cursors used to fetch
+     * table pg_prepared_xacts that contains the list of the prepared
+     * transactions
+     */
+    int     recover_cursor;
 };
 
 
@@ -110,6 +116,7 @@ static inline void lixa_pq_status_rm_init(struct lixa_pq_status_rm_s *lpsr) {
     lpsr->state.R = lpsr->state.T = lpsr->state.S = 0;
     memset(&(lpsr->xid), 0, sizeof(XID));
     lpsr->conn = NULL;
+    lpsr->recover_cursor = FALSE;
 }
 
 

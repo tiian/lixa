@@ -184,6 +184,9 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
         guint i;
         const long valid_flags = TMASYNC|TMNOFLAGS;
         
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_open: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS);
@@ -194,9 +197,6 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
             LIXA_TRACE(("lixa_pq_open: TMASYNC flag is not supported\n"));
             THROW(ASYNC_NOT_SUPPORTED);
         }
-
-        /* lock the status mutex */
-        g_static_mutex_lock(&lixa_pq_status_mutex);
 
         if (NULL == lixa_pq_status) {
             /* the status structure must be initialized from scratch */
@@ -301,6 +301,9 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
         lixa_pq_status_t *lps = NULL;
         const long valid_flags = TMASYNC|TMNOFLAGS;
         
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_open: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS);
@@ -311,9 +314,6 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
             LIXA_TRACE(("lixa_pq_close: TMASYNC flag is not supported\n"));
             THROW(ASYNC_NOT_SUPPORTED);
         }
-
-        /* lock the status mutex */
-        g_static_mutex_lock(&lixa_pq_status_mutex);
 
         if (NULL == lixa_pq_status) {
             /* the status structure does not exist, this is a dummy xa_close */
@@ -403,6 +403,9 @@ int lixa_pq_start(XID *xid, int rmid, long flags)
         const long valid_flags = TMJOIN|TMRESUME|TMNOWAIT|TMASYNC|TMNOFLAGS;
         lixa_ser_xid_t lsx;
 
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_end: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
@@ -414,9 +417,6 @@ int lixa_pq_start(XID *xid, int rmid, long flags)
             THROW(INVALID_FLAGS2);
         }
         
-        /* lock the status mutex */
-        g_static_mutex_lock(&lixa_pq_status_mutex);
-
         if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
             THROW(PROTOCOL_ERROR1);
         
@@ -511,6 +511,9 @@ int lixa_pq_end(XID *xid, int rmid, long flags)
         const long valid_flags = TMSUSPEND|TMMIGRATE|TMSUCCESS|TMFAIL|TMASYNC;
         lixa_ser_xid_t lsx;
 
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_end: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
@@ -522,9 +525,6 @@ int lixa_pq_end(XID *xid, int rmid, long flags)
             THROW(INVALID_FLAGS2);
         }
         
-        /* lock the status mutex */
-        g_static_mutex_lock(&lixa_pq_status_mutex);
-
         if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
             THROW(PROTOCOL_ERROR1);
         
@@ -628,6 +628,9 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
         const long valid_flags = TMFAIL|TMASYNC;
         lixa_ser_xid_t lsx;
 
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_rollback: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
@@ -639,9 +642,6 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
             THROW(INVALID_FLAGS2);
         }
         
-        /* lock the status mutex */
-        g_static_mutex_lock(&lixa_pq_status_mutex);
-
         if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
             THROW(PROTOCOL_ERROR1);
         
@@ -766,6 +766,9 @@ int lixa_pq_prepare(XID *xid, int rmid, long flags)
         const char PREPARE_TRANS_FMT[] = "PREPARE TRANSACTION '%s';";
         char pq_cmd_buf[sizeof(PREPARE_TRANS_FMT) + sizeof(lixa_ser_xid_t)];
         
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_prepare: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
@@ -777,9 +780,6 @@ int lixa_pq_prepare(XID *xid, int rmid, long flags)
             THROW(INVALID_FLAGS2);
         }
                 
-        /* lock the status mutex */
-        g_static_mutex_lock(&lixa_pq_status_mutex);
-
         if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
             THROW(PROTOCOL_ERROR1);
         
@@ -889,6 +889,9 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
         lixa_ser_xid_t lsx;
         int one_phase = flags & TMONEPHASE;
 
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_commit: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
@@ -900,9 +903,6 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
             THROW(INVALID_FLAGS2);
         }
         
-        /* lock the status mutex */
-        g_static_mutex_lock(&lixa_pq_status_mutex);
-
         if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
             THROW(PROTOCOL_ERROR1);
         
@@ -1009,7 +1009,212 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
 
 int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
 {
-    return 0;
+    enum Exception { INVALID_FLAGS
+                     , INVALID_OPTIONS1
+                     , PROTOCOL_ERROR1
+                     , INVALID_OPTIONS2
+                     , PROTOCOL_ERROR2
+                     , NULL_CONN
+                     , CLOSE_CURSOR_ERROR1
+                     , END_ERROR1
+                     , BEGIN_ERROR
+                     , OPEN_CURSOR_ERROR
+                     , FETCH_ERROR
+                     , CLOSE_CURSOR_ERROR2
+                     , END_ERROR2
+                     , NONE } excp;
+    int xa_rc = XAER_RMFAIL;
+    long out_count = 0;
+    PGresult *res = NULL;
+    
+    LIXA_TRACE(("lixa_pq_recover\n"));
+    TRY {
+        struct lixa_pq_status_rm_s *lpsr = NULL;
+        const long valid_flags = TMSTARTRSCAN|TMENDRSCAN|TMNOFLAGS;
+        const char *CLOSE_CURSOR = "CLOSE lixa_pq_recover_cursor;";
+        const char OPEN_CURSOR_FMT[] = "DECLARE lixa_pq_recover_cursor CURSOR "
+            "FOR SELECT gid FROM pg_prepared_xacts WHERE gid LIKE '%s%%' "
+            "ORDER BY prepared;";
+        lixa_ser_xid_t lsx;
+        char open_cursor[sizeof(OPEN_CURSOR_FMT) + sizeof(lsx)];
+        const char *BEGIN = "BEGIN;";
+        const char *END = "END;";
+        const char FETCH_COUNT_FMT[] = "FETCH %ld FROM "
+            "lixa_pq_recover_cursor;";
+        char fetch_count[sizeof(FETCH_COUNT_FMT) + sizeof(long)*3];
+        int row;
+
+        /* lock the status mutex */
+        g_static_mutex_lock(&lixa_pq_status_mutex);
+
+        if ((flags|valid_flags) != valid_flags) {
+            LIXA_TRACE(("lixa_pq_recover: invalid flag in 0x%x\n", flags));
+            THROW(INVALID_FLAGS);
+        }
+
+        if ((NULL == xids && count > 0) || (count < 0)) {
+            LIXA_TRACE(("lixa_pq_recover: xids=%p, count=%ld\n", xids, count));
+            THROW(INVALID_OPTIONS1);
+        }
+        
+        if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
+        
+        if (lpsr->recover_cursor && !(flags & TMSTARTRSCAN)) {
+            LIXA_TRACE(("lixa_pq_recover: there's no a recovery scan opened "
+                        "and TMSTARTRSCAN flag is not set\n"));
+            THROW(INVALID_OPTIONS2);
+        }
+        
+        if (lpsr->state.R != 1) {
+            LIXA_TRACE(("lixa_pq_recover: rmid %d state(R,S,T)={%d,%d,%d}\n",
+                        rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
+            THROW(PROTOCOL_ERROR2);
+        }
+
+        /* this is an internal error :( */
+        if (NULL == lpsr->conn) {
+            LIXA_TRACE(("lixa_pq_recover: conn is NULL for rmid %d\n", rmid));
+            THROW(NULL_CONN);
+        }
+
+        /* close the previous cursor */
+        if (lpsr->recover_cursor && (flags & TMSTARTRSCAN)) {
+            LIXA_TRACE(("lixa_pq_recover: cursor is open, but TMSTARTRSCAN "
+                        "is set, closing it\n"));
+            res = PQexec(lpsr->conn, CLOSE_CURSOR);
+            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+                LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
+                            "command (%s)\n", CLOSE_CURSOR,
+                            PQerrorMessage(lpsr->conn)));
+                THROW(CLOSE_CURSOR_ERROR1);
+            }
+            PQclear(res);
+            res = NULL;
+            res = PQexec(lpsr->conn, END);
+            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+                LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
+                            "command (%s)\n", END,
+                            PQerrorMessage(lpsr->conn)));
+                THROW(END_ERROR1);
+            }
+            PQclear(res);
+            res = NULL;
+            lpsr->recover_cursor = FALSE;
+        }
+
+        /* open the cursor if necessary */
+        if (flags & TMSTARTRSCAN) {
+            LIXA_TRACE(("lixa_pq_recover: cursor is not open, opening it\n"));
+            res = PQexec(lpsr->conn, BEGIN);
+            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+                LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
+                            "command (%s)\n", BEGIN,
+                            PQerrorMessage(lpsr->conn)));
+                THROW(BEGIN_ERROR);
+            }
+            PQclear(res);
+            res = NULL;
+            lixa_ser_xid_formatid(lsx);
+            snprintf(open_cursor, sizeof(open_cursor), OPEN_CURSOR_FMT, lsx);
+            LIXA_TRACE(("lixa_pq_start: '%s'\n", open_cursor));
+            res = PQexec(lpsr->conn, open_cursor);
+            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+                LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
+                            "command (%s)\n", open_cursor,
+                            PQerrorMessage(lpsr->conn)));
+                THROW(OPEN_CURSOR_ERROR);
+            }
+            PQclear(res);
+            res = NULL;
+            lpsr->recover_cursor = TRUE;
+        }
+
+        /* fetching records */
+        snprintf(fetch_count, sizeof(fetch_count), FETCH_COUNT_FMT, count);
+        res = PQexec(lpsr->conn, fetch_count);
+        if (PGRES_TUPLES_OK != PQresultStatus(res)) {
+            LIXA_TRACE(("lixa_pq_prepare: error while executing "
+                        "'%s' command (%d/%s)\n", fetch_count,
+                        PQresultStatus(res),
+                        PQerrorMessage(lpsr->conn)));
+            THROW(FETCH_ERROR);
+        }
+        for (row=0; row<PQntuples(res); ++row) {
+            XID xid;
+            
+            if (lixa_ser_xid_deserialize(PQgetvalue(res, row, 0), &xid)) {
+                LIXA_TRACE(("lixa_pq_prepare: xids[%d]='%s'\n", out_count,
+                            PQgetvalue(res, row, 0)));
+                xids[out_count++] = xid;
+            }
+        }
+        PQclear(res);
+        res = NULL;
+        
+        /* close the cursor if necessary */
+        if (flags & TMENDRSCAN) {
+            LIXA_TRACE(("lixa_pq_recover: TMENDRSCAN is set, closing it\n"));
+            res = PQexec(lpsr->conn, CLOSE_CURSOR);
+            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+                LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
+                            "command (%s)\n", CLOSE_CURSOR,
+                            PQerrorMessage(lpsr->conn)));
+                THROW(CLOSE_CURSOR_ERROR2);
+            }
+            PQclear(res);
+            res = NULL;
+            res = PQexec(lpsr->conn, END);
+            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+                LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
+                            "command (%s)\n", END,
+                            PQerrorMessage(lpsr->conn)));
+                THROW(END_ERROR2);
+            }
+            PQclear(res);
+            res = NULL;
+            lpsr->recover_cursor = FALSE;
+        }
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_FLAGS:
+            case INVALID_OPTIONS1:
+            case INVALID_OPTIONS2:
+                xa_rc = XAER_INVAL;
+                break;
+            case PROTOCOL_ERROR1:
+            case PROTOCOL_ERROR2:
+                xa_rc = XAER_PROTO;
+                break;
+            case NULL_CONN:
+                xa_rc = XAER_RMFAIL;
+                break;
+            case CLOSE_CURSOR_ERROR1:
+            case END_ERROR1:
+            case BEGIN_ERROR:
+            case OPEN_CURSOR_ERROR:
+            case FETCH_ERROR:
+                xa_rc = XAER_RMFAIL;
+                break;
+            case CLOSE_CURSOR_ERROR2:
+            case END_ERROR2:
+                xa_rc = XAER_RMFAIL;
+                break;
+            case NONE:
+                xa_rc = out_count;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+        /* unlock the status mutex */
+        g_static_mutex_unlock(&lixa_pq_status_mutex);
+        if (NULL != res)
+            PQclear(res);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_pq_recover/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
 }
 
 
