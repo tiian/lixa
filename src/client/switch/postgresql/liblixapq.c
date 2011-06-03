@@ -615,6 +615,8 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
+                     , SELECT_ERROR
+                     , PROTOCOL_ERROR3
                      , XID_MISMATCH
                      , ROLLBACK_ERROR1
                      , ROLLBACK_ERROR2
@@ -645,13 +647,12 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
         if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
             THROW(PROTOCOL_ERROR1);
         
-        if (lpsr->state.R != 1 || lpsr->state.T != 0 ||
-            (lpsr->state.S != 2 && lpsr->state.S != 3 && lpsr->state.S != 4)) {
+        if (lpsr->state.R != 1 || lpsr->state.T != 0) {
             LIXA_TRACE(("lixa_pq_rollback: rmid %d state(R,S,T)={%d,%d,%d}\n",
                         rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
             THROW(PROTOCOL_ERROR2);
         }
-
+        
         /* this is an internal error :( */
         if (NULL == lpsr->conn) {
             LIXA_TRACE(("lixa_pq_rollback: conn is NULL for rmid %d\n", rmid));
@@ -664,6 +665,37 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
             THROW(XID_SERIALIZE_ERROR);
         }
 
+        if (lpsr->state.S != 2 && lpsr->state.S != 3 && lpsr->state.S != 4) {
+            const char SELECT_FMT[] = "SELECT COUNT(*) FROM pg_prepared_xacts "
+                "WHERE gid = '%s';";
+            char select[sizeof(SELECT_FMT) + sizeof(lsx)];
+            /* check the database state, it could be a prepared transaction */
+            snprintf(select, sizeof(select), SELECT_FMT, lsx);
+            res = PQexec(lpsr->conn, select);
+            if (PGRES_TUPLES_OK != PQresultStatus(res)) {
+                LIXA_TRACE(("lixa_pq_rollback: error while executing "
+                            "'%s' command (%d/%s)\n", select,
+                            PQresultStatus(res), PQerrorMessage(lpsr->conn)));
+                THROW(SELECT_ERROR);
+            }
+            if (PQntuples(res) == 1) {
+                long count = strtol(PQgetvalue(res, 0, 0), NULL, 10);
+                if (count > 0) {
+                    /* it's a prepared transaction */
+                    lpsr->state.S = 3;
+                    lpsr->xid = *xid;
+                }
+            }
+            PQclear(res);
+            res = NULL;
+        }
+
+        if (lpsr->state.S != 2 && lpsr->state.S != 3 && lpsr->state.S != 4) {
+            LIXA_TRACE(("lixa_pq_rollback: rmid %d state(R,S,T)={%d,%d,%d}\n",
+                        rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
+            THROW(PROTOCOL_ERROR3);
+        }
+        
         /* checking xid is the started one */
         if (0 != xid_compare(xid, &(lpsr->xid))) {
             lixa_ser_xid_t lsx2;
@@ -678,6 +710,7 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
             const char ROLLBACK_PREP_FMT[] = "ROLLBACK PREPARED '%s';";
             char pq_cmd_buf[sizeof(ROLLBACK_PREP_FMT) +
                             sizeof(lixa_ser_xid_t)];
+            lpsr->state.S = 0;
             /* rolling back the transaction */
             snprintf(pq_cmd_buf, sizeof(pq_cmd_buf), ROLLBACK_PREP_FMT, lsx);
             res = PQexec(lpsr->conn, pq_cmd_buf);
@@ -685,22 +718,20 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
                 LIXA_TRACE(("lixa_pq_rollback: error while executing "
                             "ROLLBACK PREPARED command (%s)\n",
                             PQerrorMessage(lpsr->conn)));
-                lpsr->state.S = 0;
                 THROW(ROLLBACK_ERROR1);
             }
         } else {
+            lpsr->state.S = 0;
             /* the transaction is NOT in prepared state */
             res = PQexec(lpsr->conn, "ROLLBACK");
             if (PGRES_COMMAND_OK != PQresultStatus(res)) {
                 LIXA_TRACE(("lixa_pq_rollback: error while executing "
                             "ROLLBACK command (%s)\n",
                             PQerrorMessage(lpsr->conn)));
-                lpsr->state.S = 0;
                 THROW(ROLLBACK_ERROR2);
             }
             PQclear(res);
             res = NULL;
-            lpsr->state.S = 0;
         }
         
         THROW(NONE);
@@ -712,6 +743,7 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
                 break;
             case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
+            case PROTOCOL_ERROR3:
                 xa_rc = XAER_PROTO;
                 break;
             case NULL_CONN:
@@ -719,6 +751,9 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
                 break;
             case XID_SERIALIZE_ERROR:
                 xa_rc = XAER_INVAL;
+                break;
+            case SELECT_ERROR:
+                xa_rc = XAER_RMERR;
                 break;
             case XID_MISMATCH:
                 xa_rc = XAER_NOTA;
@@ -816,7 +851,8 @@ int lixa_pq_prepare(XID *xid, int rmid, long flags)
         res = PQexec(lpsr->conn, pq_cmd_buf);
         if (PGRES_COMMAND_OK != PQresultStatus(res)) {
             LIXA_TRACE(("lixa_pq_prepare: error while executing "
-                        "PREPARE TRANSACTION command (%s)\n",
+                        "PREPARE TRANSACTION command (%d/%s)\n",
+                        PQresultStatus(res),
                         PQerrorMessage(lpsr->conn)));
             /* the resource manager could unilaterally rollback and return
                XA_RBROLLBACK to the transaction manager, but it is leaved
@@ -875,6 +911,8 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
+                     , SELECT_ERROR
+                     , PROTOCOL_ERROR3
                      , XID_MISMATCH
                      , COMMIT_ERROR1
                      , COMMIT_ERROR2
@@ -906,13 +944,9 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
         if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
             THROW(PROTOCOL_ERROR1);
         
-        if (lpsr->state.R != 1 || lpsr->state.T != 0 ||
-            (lpsr->state.S != 2 && one_phase) ||
-            (lpsr->state.S != 3 && !one_phase)) {
-            LIXA_TRACE(("lixa_pq_commit: rmid %d state(R,S,T)={%d,%d,%d}, "
-                        "one_phase_commit=%d\n",
-                        rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T,
-                        one_phase));
+        if (lpsr->state.R != 1 || lpsr->state.T != 0) {
+            LIXA_TRACE(("lixa_pq_commit: rmid %d state(R,S,T)={%d,%d,%d}\n",
+                        rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
             THROW(PROTOCOL_ERROR2);
         }
 
@@ -928,6 +962,40 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
             THROW(XID_SERIALIZE_ERROR);
         }
 
+        if (lpsr->state.S != 3 && !one_phase) {
+            const char SELECT_FMT[] = "SELECT COUNT(*) FROM pg_prepared_xacts "
+                "WHERE gid = '%s';";
+            char select[sizeof(SELECT_FMT) + sizeof(lsx)];
+            /* check the database state, it could be a prepared transaction */
+            snprintf(select, sizeof(select), SELECT_FMT, lsx);
+            res = PQexec(lpsr->conn, select);
+            if (PGRES_TUPLES_OK != PQresultStatus(res)) {
+                LIXA_TRACE(("lixa_pq_commit: error while executing "
+                            "'%s' command (%d/%s)\n", select,
+                            PQresultStatus(res), PQerrorMessage(lpsr->conn)));
+                THROW(SELECT_ERROR);
+            }
+            if (PQntuples(res) == 1) {
+                long count = strtol(PQgetvalue(res, 0, 0), NULL, 10);
+                if (count > 0) {
+                    /* it's a prepared transaction */
+                    lpsr->state.S = 3;
+                    lpsr->xid = *xid;
+                }
+            }
+            PQclear(res);
+            res = NULL;
+        }
+
+        if ((lpsr->state.S != 2 && one_phase) ||
+            (lpsr->state.S != 3 && !one_phase)) {
+            LIXA_TRACE(("lixa_pq_commit: rmid %d state(R,S,T)={%d,%d,%d}, "
+                        "one_phase_commit=%d\n",
+                        rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T,
+                        one_phase));
+            THROW(PROTOCOL_ERROR3);
+        }
+
         /* checking xid is the started one */
         if (0 != xid_compare(xid, &(lpsr->xid))) {
             lixa_ser_xid_t lsx2;
@@ -941,6 +1009,7 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
         if (lpsr->state.S == 3) {
             const char COMMIT_PREP_FMT[] = "COMMIT PREPARED '%s';";
             char pq_cmd_buf[sizeof(COMMIT_PREP_FMT) + sizeof(lixa_ser_xid_t)];
+            lpsr->state.S = 0;
             /* committing transaction */
             snprintf(pq_cmd_buf, sizeof(pq_cmd_buf), COMMIT_PREP_FMT, lsx);
             res = PQexec(lpsr->conn, pq_cmd_buf);
@@ -948,10 +1017,10 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
                 LIXA_TRACE(("lixa_pq_commit: error while executing "
                             "COMMIT PREPARED command (%s)\n",
                             PQerrorMessage(lpsr->conn)));
-                lpsr->state.S = 0;
                 THROW(COMMIT_ERROR1);
             }
         } else {
+            lpsr->state.S = 0;
             /* the transaction is NOT in prepared state */
             res = PQexec(lpsr->conn, "COMMIT");
             if (PGRES_COMMAND_OK != PQresultStatus(res)) {
@@ -963,7 +1032,6 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
             }
             PQclear(res);
             res = NULL;
-            lpsr->state.S = 0;
         }
         
         THROW(NONE);
@@ -975,6 +1043,7 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
                 break;
             case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
+            case PROTOCOL_ERROR3:
                 xa_rc = XAER_PROTO;
                 break;
             case NULL_CONN:
@@ -982,6 +1051,9 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
                 break;
             case XID_SERIALIZE_ERROR:
                 xa_rc = XAER_INVAL;
+                break;
+            case SELECT_ERROR:
+                xa_rc = XAER_RMERR;
                 break;
             case XID_MISMATCH:
                 xa_rc = XAER_NOTA;
@@ -1015,13 +1087,11 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
                      , INVALID_OPTIONS2
                      , PROTOCOL_ERROR2
                      , NULL_CONN
-                     , CLOSE_CURSOR_ERROR1
-                     , END_ERROR1
                      , BEGIN_ERROR
                      , OPEN_CURSOR_ERROR
                      , FETCH_ERROR
-                     , CLOSE_CURSOR_ERROR2
-                     , END_ERROR2
+                     , CLOSE_CURSOR_ERROR
+                     , END_ERROR
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
     long out_count = 0;
@@ -1060,9 +1130,8 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
         if (NULL == (lpsr = lixa_pq_status_rm_get(rmid)))
             THROW(PROTOCOL_ERROR1);
         
-        if (lpsr->recover_cursor && !(flags & TMSTARTRSCAN)) {
-            LIXA_TRACE(("lixa_pq_recover: there's no a recovery scan opened "
-                        "and TMSTARTRSCAN flag is not set\n"));
+        if (!(flags & TMSTARTRSCAN)) {
+            LIXA_TRACE(("lixa_pq_recover: TMSTARTRSCAN flag must be set\n"));
             THROW(INVALID_OPTIONS2);
         }
         
@@ -1076,31 +1145,6 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
         if (NULL == lpsr->conn) {
             LIXA_TRACE(("lixa_pq_recover: conn is NULL for rmid %d\n", rmid));
             THROW(NULL_CONN);
-        }
-
-        /* close the previous cursor */
-        if (lpsr->recover_cursor && (flags & TMSTARTRSCAN)) {
-            LIXA_TRACE(("lixa_pq_recover: cursor is open, but TMSTARTRSCAN "
-                        "is set, closing it\n"));
-            res = PQexec(lpsr->conn, CLOSE_CURSOR);
-            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-                LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
-                            "command (%s)\n", CLOSE_CURSOR,
-                            PQerrorMessage(lpsr->conn)));
-                THROW(CLOSE_CURSOR_ERROR1);
-            }
-            PQclear(res);
-            res = NULL;
-            res = PQexec(lpsr->conn, END);
-            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-                LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
-                            "command (%s)\n", END,
-                            PQerrorMessage(lpsr->conn)));
-                THROW(END_ERROR1);
-            }
-            PQclear(res);
-            res = NULL;
-            lpsr->recover_cursor = FALSE;
         }
 
         /* open the cursor if necessary */
@@ -1127,7 +1171,6 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
             }
             PQclear(res);
             res = NULL;
-            lpsr->recover_cursor = TRUE;
         }
 
         /* fetching records */
@@ -1141,8 +1184,7 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
             THROW(FETCH_ERROR);
         }
         for (row=0; row<PQntuples(res); ++row) {
-            XID xid;
-            
+            XID xid;            
             if (lixa_ser_xid_deserialize(PQgetvalue(res, row, 0), &xid)) {
                 LIXA_TRACE(("lixa_pq_prepare: xids[%d]='%s'\n", out_count,
                             PQgetvalue(res, row, 0)));
@@ -1153,28 +1195,25 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
         res = NULL;
         
         /* close the cursor if necessary */
-        if (flags & TMENDRSCAN) {
-            LIXA_TRACE(("lixa_pq_recover: TMENDRSCAN is set, closing it\n"));
-            res = PQexec(lpsr->conn, CLOSE_CURSOR);
-            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-                LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
-                            "command (%s)\n", CLOSE_CURSOR,
-                            PQerrorMessage(lpsr->conn)));
-                THROW(CLOSE_CURSOR_ERROR2);
-            }
-            PQclear(res);
-            res = NULL;
-            res = PQexec(lpsr->conn, END);
-            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-                LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
-                            "command (%s)\n", END,
-                            PQerrorMessage(lpsr->conn)));
-                THROW(END_ERROR2);
-            }
-            PQclear(res);
-            res = NULL;
-            lpsr->recover_cursor = FALSE;
+        LIXA_TRACE(("lixa_pq_recover: TMENDRSCAN is set, closing it\n"));
+        res = PQexec(lpsr->conn, CLOSE_CURSOR);
+        if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+            LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
+                        "command (%s)\n", CLOSE_CURSOR,
+                        PQerrorMessage(lpsr->conn)));
+            THROW(CLOSE_CURSOR_ERROR);
         }
+        PQclear(res);
+        res = NULL;
+        res = PQexec(lpsr->conn, END);
+        if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+            LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
+                        "command (%s)\n", END,
+                        PQerrorMessage(lpsr->conn)));
+            THROW(END_ERROR);
+        }
+        PQclear(res);
+        res = NULL;
 
         THROW(NONE);
     } CATCH {
@@ -1191,15 +1230,13 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
             case NULL_CONN:
                 xa_rc = XAER_RMFAIL;
                 break;
-            case CLOSE_CURSOR_ERROR1:
-            case END_ERROR1:
             case BEGIN_ERROR:
             case OPEN_CURSOR_ERROR:
             case FETCH_ERROR:
                 xa_rc = XAER_RMFAIL;
                 break;
-            case CLOSE_CURSOR_ERROR2:
-            case END_ERROR2:
+            case CLOSE_CURSOR_ERROR:
+            case END_ERROR:
                 xa_rc = XAER_RMFAIL;
                 break;
             case NONE:
