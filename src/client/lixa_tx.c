@@ -35,7 +35,7 @@
 #include <lixa_crash.h>
 #include <lixa_errors.h>
 #include <lixa_trace.h>
-#include <lixa_common_status.h>
+#include <lixa_xid.h>
 #include <lixa_tx.h>
 #include <lixa_xa.h>
 #include <lixa_xml_msg.h>
@@ -643,7 +643,7 @@ int lixa_tx_info(int *txrc, TXINFO *info)
 
         if (NULL != info) {
 #ifdef _TRACE
-            char *xid_str;
+            lixa_ser_xid_t xid_str = "";
 #endif
             memcpy(&info->xid, client_status_get_xid(cs), sizeof(XID));
             /* Lixa supports only this option; it's constant */
@@ -657,13 +657,12 @@ int lixa_tx_info(int *txrc, TXINFO *info)
             info->transaction_timeout = client_status_get_tx_timeout(cs);
             info->transaction_state = client_status_get_tx_state(cs);
 #ifdef _TRACE
-            xid_str = xid_serialize(&info->xid);
+            lixa_ser_xid_serialize(xid_str, &info->xid);
             LIXA_TRACE(("lixa_tx_info: xid='%s', when_return=%ld, "
                         "transaction_control=%ld, transaction_timeout=%ld, "
                         "transaction_state=%ld\n", xid_str, info->when_return,
                         info->transaction_control, info->transaction_timeout,
                         info->transaction_state));
-            free(xid_str);
 #endif
         }
 
@@ -1390,7 +1389,7 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
 
         i = 0;
         while (xid || xid_file) {
-            char buffer[2*LIXA_XID_SERIALIZED_BUFFER_SIZE];
+            char buffer[2*LIXA_XID_SERIALIZE_LENGTH];
             XID tmp_xid;
             gpointer tree_record;
             
@@ -1411,13 +1410,13 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
                 if (NULL != (p = strchr(buffer, '\n')))
                     *p = '\0';
             }
-            if (strlen(buffer) != LIXA_XID_SERIALIZED_BUFFER_SIZE-1) {
+            if (strlen(buffer) > LIXA_XID_SERIALIZE_LENGTH-1) {
                 LIXA_TRACE(("lixa_tx_recover: record # %d is of wrong "
                             "size, discarded ('%s')\n", i, buffer));
                 continue;
             }
             printf("Analizing transaction '%s':\n", buffer);
-            if (LIXA_RC_OK != (ret_cod = xid_deserialize(buffer, &tmp_xid)))
+            if (!lixa_ser_xid_deserialize(buffer, &tmp_xid))
                 THROW(XID_DESERIALIZE_ERROR);
             
             /* look for xid */

@@ -26,7 +26,10 @@
 
 
 #include <tx.h>
+/* @@@
 #include <lixa_common_status.h>
+*/
+#include <lixa_xid.h>
 
 
 
@@ -98,12 +101,10 @@ int main(int argc, char *argv[])
 
 void print_info(TXINFO *info)
 {
-    char *ser_xid = NULL;
+    lixa_ser_xid_t ser_xid = "";
     
-    ser_xid = xid_serialize(&info->xid);
+    lixa_ser_xid_serialize(ser_xid, &info->xid);
     printf("\txid/formatID    = 0x%lx\n", info->xid.formatID);
     printf("\txid/gtrid.bqual = %s\n", ser_xid);
-    if (NULL != ser_xid)
-        free(ser_xid);
     return;
 }

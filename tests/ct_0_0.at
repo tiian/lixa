@@ -1,4 +1,3 @@
-
 AT_BANNER([Client side xa_open crash --> server test])
 
 AT_SETUP([CT/0.0/0.0 xa_open/connect])

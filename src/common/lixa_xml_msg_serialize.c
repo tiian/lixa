@@ -32,7 +32,10 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_xml_msg_serialize.h>
+/* @@@
 #include <lixa_common_status.h>
+*/
+#include <lixa_xid.h>
 
 
 
@@ -1202,15 +1205,15 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    char *ser_xid = NULL;
+    lixa_ser_xid_t ser_xid;
 
     LIXA_TRACE(("lixa_msg_serialize_qrcvr_16\n"));
     TRY {
         int used_chars;
         guint i;
         
-        if (NULL == (ser_xid = xid_serialize(
-                         &msg->body.qrcvr_16.client.state.xid)))
+        if (!lixa_ser_xid_serialize(ser_xid,
+                                    &msg->body.qrcvr_16.client.state.xid))
             THROW(XID_SERIALIZE_ERROR);
         
         /* <answer> */
@@ -1344,9 +1347,6 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        /* memory recovery */
-        if (NULL != ser_xid)
-            free(ser_xid);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_qrcvr_16/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -1596,14 +1596,14 @@ int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    char *ser_xid = NULL;
+    lixa_ser_xid_t ser_xid;
     
     LIXA_TRACE(("lixa_msg_serialize_start_8\n"));
     TRY {
         int used_chars;
         guint i;
 
-        if (NULL == (ser_xid = xid_serialize(&msg->body.start_8.conthr.xid)))
+        if (!lixa_ser_xid_serialize(ser_xid, &msg->body.start_8.conthr.xid))
             THROW(XID_SERIALIZE_ERROR);
         
         /* <conthr> */
@@ -1666,9 +1666,6 @@ int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        /* memory recovery */
-        if (NULL != ser_xid)
-            free(ser_xid);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_start_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

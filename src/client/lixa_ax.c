@@ -24,6 +24,7 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_xml_msg_serialize.h>
+#include <lixa_xid.h>
 #include <xa.h>
 
 
@@ -49,8 +50,6 @@ int ax_reg(int rmid, XID *xid, long flags)
     int ret_cod = TMER_TMERR;
     int xa_ret_cod = TM_OK;
 
-    char *ser_xid = NULL;
-
     LIXA_TRACE_INIT;
     LIXA_TRACE(("ax_reg: rmid=%d, xid=%p, flags=0x%lx\n", rmid, xid, flags));
     TRY {
@@ -61,6 +60,7 @@ int ax_reg(int rmid, XID *xid, long flags)
         int fd, txstate, next_xa_td_state = XA_STATE_D1;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         struct act_rsrmgr_config_s *act_rsrmgr;
+        lixa_ser_xid_t ser_xid = "";
 
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -114,7 +114,7 @@ int ax_reg(int rmid, XID *xid, long flags)
                     break;
                 case TX_STATE_S3:
                 case TX_STATE_S4:
-                    ser_xid = xid_serialize(client_status_get_xid(cs));
+                    lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
 #ifdef _TRACE
                     LIXA_TRACE(("ax_reg: the application program has "
                                 "started a transaction (TX states S%d); "
@@ -211,9 +211,6 @@ int ax_reg(int rmid, XID *xid, long flags)
             default:
                 ret_cod = TMER_TMERR;
         } /* switch (excp) */
-        /* memory recovery */
-        if (NULL != ser_xid)
-            free(ser_xid);
     } /* TRY-CATCH */
     LIXA_TRACE(("ax_reg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

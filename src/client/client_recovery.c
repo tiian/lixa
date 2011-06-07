@@ -27,8 +27,10 @@
 
 
 #include <lixa_errors.h>
-#include <lixa_utils.h>
+#include <lixa_xid.h>
+/*
 #include <lixa_common_status.h>
+*/
 #include <lixa_xml_msg_deserialize.h>
 #include <lixa_xml_msg_serialize.h>
 #include <lixa_xml_msg_trace.h>
@@ -53,6 +55,7 @@ int client_recovery(client_status_t *cs,
                      , MSG_SEND_ERROR1
                      , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
+                     , SERIALIZE_ERROR
                      , ABORTED_RECOVERY
                      , ANALYZE_ERROR
                      , COMMIT_ERROR
@@ -62,7 +65,6 @@ int client_recovery(client_status_t *cs,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    char *ser_xid = NULL;
     struct lixa_msg_s rqst, rpl, updt;
     
     LIXA_TRACE(("client_recovery\n"));
@@ -72,6 +74,7 @@ int client_recovery(client_status_t *cs,
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
         int commit;
+        lixa_ser_xid_t ser_xid;
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -141,7 +144,9 @@ int client_recovery(client_status_t *cs,
                 break;
             }
             
-            ser_xid = xid_serialize(&rpl.body.qrcvr_16.client.state.xid);
+            if (!lixa_ser_xid_serialize(
+                    ser_xid, &rpl.body.qrcvr_16.client.state.xid))
+                THROW(SERIALIZE_ERROR);
         
             /* check config digest */
             if (strncmp(rqst.body.qrcvr_8.client.config_digest,
@@ -153,7 +158,7 @@ int client_recovery(client_status_t *cs,
                             "by this client\n",
                             rpl.body.qrcvr_16.client.config_digest,
                             rqst.body.qrcvr_8.client.config_digest));
-                syslog(LOG_ERR, LIXA_SYSLOG_LXC001E, ser_xid ? ser_xid : "",
+                syslog(LOG_ERR, LIXA_SYSLOG_LXC001E, ser_xid,
                        rpl.body.qrcvr_16.client.config_digest,
                        rqst.body.qrcvr_8.client.config_digest);
                 THROW(ABORTED_RECOVERY);
@@ -220,6 +225,9 @@ int client_recovery(client_status_t *cs,
             case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:
                 break;
+            case SERIALIZE_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
             case ABORTED_RECOVERY:
                 ret_cod = LIXA_RC_ABORTED_RECOVERY;
                 break;
@@ -236,7 +244,6 @@ int client_recovery(client_status_t *cs,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        if (ser_xid) free(ser_xid);
         /* release messages */
         lixa_msg_free(&rqst);
         lixa_msg_free(&rpl);
@@ -318,17 +325,20 @@ int client_recovery_commit(const client_status_t *cs,
                            struct lixa_msg_s *rpl,
                            struct lixa_msg_s *updt)
 {
-    enum Exception { NONE } excp;
+    enum Exception { SERIALIZE_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    char *ser_xid = NULL;
     
     LIXA_TRACE(("client_recovery_commit\n"));
     TRY {
         guint i;
         int failed = FALSE;
+        lixa_ser_xid_t ser_xid;
         
-        ser_xid = xid_serialize(&rpl->body.qrcvr_16.client.state.xid);
+        if (!lixa_ser_xid_serialize(
+                ser_xid, &rpl->body.qrcvr_16.client.state.xid))
+            THROW(SERIALIZE_ERROR);
         LIXA_TRACE(("client_recovery_commit: committing transaction '%s'\n",
                     ser_xid));
         
@@ -389,13 +399,15 @@ int client_recovery_commit(const client_status_t *cs,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case SERIALIZE_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        if (ser_xid) free(ser_xid);
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -409,17 +421,19 @@ int client_recovery_rollback(const client_status_t *cs,
                              struct lixa_msg_s *rpl,
                              struct lixa_msg_s *updt)
 {
-    enum Exception { NONE } excp;
+    enum Exception { SERIALIZE_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    char *ser_xid = NULL;
-    
     LIXA_TRACE(("client_recovery_rollback\n"));
     TRY {
         guint i;
         int failed = FALSE;
+        lixa_ser_xid_t ser_xid;
         
-        ser_xid = xid_serialize(&rpl->body.qrcvr_16.client.state.xid);
+        if (!lixa_ser_xid_serialize(
+                ser_xid, &rpl->body.qrcvr_16.client.state.xid))
+            THROW(SERIALIZE_ERROR);
         LIXA_TRACE(("client_recovery_rollback: rolling back "
                     "transaction '%s'\n", ser_xid));
         
@@ -491,13 +505,15 @@ int client_recovery_rollback(const client_status_t *cs,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case SERIALIZE_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        if (ser_xid) free(ser_xid);
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -517,12 +533,11 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    char *ser_xid = NULL;
-    
     LIXA_TRACE(("client_recovery_scan\n"));
     TRY {
         guint i;
         int xa_rc;
+        lixa_ser_xid_t ser_xid;
         
         /* scan all the resource managers associated to the current profile */
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
@@ -559,12 +574,10 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                     XID *xid;
                     GArray *node;
 #ifdef _TRACE
-                    ser_xid = xid_serialize(xid_array+j);
-                    LIXA_TRACE(("client_recovery_scan: rmid=%u returned xid "
-                                "'%s'\n", i, ser_xid));
-                    
-                    free(ser_xid);
-                    ser_xid = NULL;
+                    if (lixa_ser_xid_serialize(ser_xid, xid_array+j)) {
+                        LIXA_TRACE(("client_recovery_scan: rmid=%u returned "
+                                    "xid '%s'\n", i, ser_xid));
+                    }
 #endif
                     /* check XID format id */
                     if (!bfic && LIXA_XID_FORMAT_ID != xid_array[j].formatID) {
@@ -639,7 +652,6 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        if (ser_xid) free(ser_xid);
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery_scan/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -699,13 +711,12 @@ gboolean client_recovery_report_foreach(gpointer key, gpointer value,
     XID *xid = (XID *)key;
     GArray *rsrmgrs = (GArray *)value;
     FILE *stream = (FILE *)data;
-
-    char *ser_xid;
+    lixa_ser_xid_t ser_xid;
     guint i;
 
-    if (NULL == (ser_xid = xid_serialize(xid))) {
-        LIXA_TRACE(("client_recovery_report_foreach: unable to allocate "
-                    "memory for xid serialization\n"));
+    if (!lixa_ser_xid_serialize(ser_xid, xid)) {
+        LIXA_TRACE(("client_recovery_report_foreach: xid serialization "
+                    "error\n"));
         return TRUE;
     }
     fprintf(stream, "xid='%s': ", ser_xid);
@@ -715,7 +726,6 @@ gboolean client_recovery_report_foreach(gpointer key, gpointer value,
     }
     fprintf(stream, "\n");
     
-    free(ser_xid);
     return FALSE;
 }
 
@@ -771,7 +781,8 @@ int client_recovery_cold_commit(const client_status_t *cs,
                    act_rsrmgr->xa_switch->name, xa_rc);
             if (XA_HEURCOM == xa_rc || XA_HEURRB == xa_rc ||
                 XA_HEURMIX == xa_rc || XA_HEURHAZ == xa_rc) {
-                char *ser_xid = xid_serialize(xid);
+                lixa_ser_xid_t ser_xid = "";
+                lixa_ser_xid_serialize(ser_xid, xid);
                 LIXA_TRACE(("client_recovery_cold_commit: the resource "
                             "manager returned heuristic completion, calling "
                             "xa_forget...\n"));
@@ -784,7 +795,6 @@ int client_recovery_cold_commit(const client_status_t *cs,
                 printf("xa_forget --> rmid=%d, lixa_name='%s', xa_name='%s', "
                        "rc=%d\n", *rmid, act_rsrmgr->generic->name,
                        act_rsrmgr->xa_switch->name, xa_rc);
-                free(ser_xid);
             }
         }
         
@@ -837,7 +847,8 @@ int client_recovery_cold_rollback(const client_status_t *cs,
                    act_rsrmgr->xa_switch->name, xa_rc);
             if (XA_HEURCOM == xa_rc || XA_HEURRB == xa_rc ||
                 XA_HEURMIX == xa_rc || XA_HEURHAZ == xa_rc) {
-                char *ser_xid = xid_serialize(xid);
+                lixa_ser_xid_t ser_xid = "";
+                lixa_ser_xid_serialize(ser_xid, xid);
                 LIXA_TRACE(("client_recovery_cold_rollback: the resource "
                             "manager returned heuristic completion, calling "
                             "xa_forget...\n"));
@@ -850,7 +861,6 @@ int client_recovery_cold_rollback(const client_status_t *cs,
                 printf("xa_forget --> rmid=%d, lixa_name='%s', xa_name='%s', "
                        "rc=%d\n", *rmid, act_rsrmgr->generic->name,
                        act_rsrmgr->xa_switch->name, xa_rc);
-                free(ser_xid);
             }
         }
 
