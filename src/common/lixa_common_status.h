@@ -25,16 +25,6 @@
 
 
 
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif
-#ifdef HAVE_UUID_UUID_H
-# include <uuid/uuid.h>
-#endif
-
-
-
-#include <xa.h>
 #include <lixa_xml_msg.h>
 #include <lixa_trace.h>
 #include <lixa_config.h>
@@ -149,14 +139,6 @@
 
 
 /**
- * Minimum size of a buffer used to store a serialized xid (the null terminator
- * is computed in this constant
- */
-#define LIXA_XID_SERIALIZED_BUFFER_SIZE  (2*(2*sizeof(uuid_t)+4)+2)
-
-
-
-/**
  * Store the status of the current control thread is partecipating in the
  * transaction; the client keeps a volatile copy, the server stores the
  * persistent copy
@@ -235,14 +217,6 @@ struct common_status_rsrmgr_s {
 
 
 
-/**
- * Global branch qualifier: it's unique for every thread of a process;
- * every process acts as a distinct transaction manager
- */
-extern uuid_t lixa_xid_global_bqual;
-
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -291,91 +265,6 @@ extern "C" {
         const struct common_status_conthr_s *csc);
 
     
-    
-    /**
-     * Use an MD5 digest to set the global bqual
-     * <b>Note:</b> this function is not thread safe and MUST be called
-     * with a serialization technique
-     * @param md5_digest_hex IN pointer to a string of
-     * @ref MD5_DIGEST_LENGTH * 2 characters
-     */
-    void xid_set_global_bqual(const char *md5_digest_hex);
-
-
-
-    /**
-     * Check if the branch qualifier of the transaction matched the global
-     * branch qualifier of current running transaction manager instance
-     * @param xid IN transaction id to inspect
-     * @return a boolean value
-     */
-    int xid_bqual_is_global(const XID *xid);
-
-    
-                            
-    /**
-     * Create a new XID
-     * @param xid OUT the generated unique transaction id
-     */
-    void xid_create_new(XID *xid);
-
-
-
-    /**
-     * Retrieve an ASCII string with the human readable version of the gtrid
-     * (Global TRansaction ID).
-     * @param xid IN unique transaction id
-     * @return a string MUST be freed by the caller using "free" function or
-     *         NULL if an error happens
-     */
-    char *xid_get_gtrid_ascii(const XID *xid);
-
-
-    
-    /**
-     * Retrieve an ASCII string with the human readable version of the bqual
-     * (Branch QUALifier).
-     * @param xid IN unique transaction id
-     * @return a string MUST be freed by the caller using "free" function or
-     *         NULL if an error happens
-     */
-    char *xid_get_bqual_ascii(const XID *xid);
-
-
-
-    /**
-     * Retrieve an ASCII string with the human readable version of the 
-     * transaction id; the serialized string can be transmitted over a network
-     * without encoding issues
-     * @param xid IN unique transaction id
-     * @return a string MUST be freed by the caller using "free" function or
-     *         NULL if an error happens
-     */
-    char *xid_serialize(const XID *xid);
-
-
-
-    /**
-     * Retrieve a XID object from a serialized version
-     * @param ser_xid IN string containing a serialized XID (
-     * @ref xid_serialize )
-     * @param xid OUT transaction id object
-     * @return a standardized return code
-     */
-    int xid_deserialize(char *ser_xid, XID *xid);
-
-    
-
-    /**
-     * Reset a xid structure
-     * @param xid IN/OUT transaction id to be resetted
-     */
-    static inline void xid_reset(XID *xid) {
-        memset(xid, 0, sizeof(XID));
-        xid->formatID = NULLXID;
-    }
-
-
     
 #ifdef __cplusplus
 }

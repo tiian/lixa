@@ -52,8 +52,8 @@
 /* LIXA convenience macros: it could be removed if "TRY/CATCH" statement
  * would be removed from this source */
 #include <lixa_defines.h>
-/* LIXA utilities: it contains XID serialization/deserialization utilities */
-#include <lixa_utils.h>
+/* LIXA xid: it contains XID serialization/deserialization utilities */
+#include <lixa_xid.h>
 
 
 

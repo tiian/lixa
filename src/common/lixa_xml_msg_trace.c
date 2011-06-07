@@ -32,7 +32,10 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_xml_msg_trace.h>
+/* @@@
 #include <lixa_common_status.h>
+*/
+#include <lixa_xid.h>
 
 
 
@@ -553,7 +556,7 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    char *ser_xid = NULL;
+    lixa_ser_xid_t ser_xid = "";
 
     LIXA_TRACE(("lixa_msg_trace_qrcvr\n"));
     TRY {
@@ -571,8 +574,8 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
                             msg->body.qrcvr_16.answer.rc));
                 if (LIXA_RC_OBJ_NOT_FOUND == msg->body.qrcvr_16.answer.rc)
                     break;
-                if (NULL == (ser_xid = xid_serialize(
-                                 &msg->body.qrcvr_16.client.state.xid)))
+                if (!lixa_ser_xid_serialize(
+                        ser_xid, &msg->body.qrcvr_16.client.state.xid))
                     THROW(XID_SERIALIZE_ERROR);
                 LIXA_TRACE(("lixa_msg_trace_qrcvr: body[client[job="
                             "'%s',config_digest='%s']]]\n",
@@ -643,9 +646,6 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        /* memory recovery */
-        if (NULL != ser_xid)
-            free(ser_xid);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_trace_qrcvr/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -768,16 +768,17 @@ int lixa_msg_trace_start(const struct lixa_msg_s *msg)
     LIXA_TRACE(("lixa_msg_trace_start\n"));
     TRY {
         guint i;
-        char *xid_str = NULL;
+        lixa_ser_xid_t xid_str;
         
         switch (msg->header.pvs.step) {
             case 8:
 #ifdef _TRACE
-                xid_str = xid_serialize(&msg->body.start_8.conthr.xid);
-                LIXA_TRACE(("lixa_msg_trace_start: body[conthr[xid["
-                            "%s]]]\n", xid_str != NULL ?
-                            xid_str : (char *)nil_str));
-                free(xid_str);
+                if (lixa_ser_xid_serialize(
+                       xid_str, &msg->body.start_8.conthr.xid)) {
+                    LIXA_TRACE(("lixa_msg_trace_start: body[conthr[xid["
+                                "%s]]]\n", xid_str != NULL ?
+                                xid_str : (char *)nil_str));
+                }
 #endif /* _TRACE */
                 if (NULL != msg->body.start_8.rsrmgrs) {
                     for (i=0; i<msg->body.start_8.rsrmgrs->len; ++i) {

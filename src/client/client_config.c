@@ -51,6 +51,7 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_utils.h>
+#include <lixa_xid.h>
 #include <lixa_syslog.h>
 #include <client_config.h>
 #include <client_status.h>

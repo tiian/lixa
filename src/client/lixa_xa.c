@@ -35,6 +35,7 @@
 #include <lixa_crash.h>
 #include <lixa_trace.h>
 #include <lixa_errors.h>
+#include <lixa_xid.h>
 #include <lixa_tx_rc.h>
 #include <lixa_xa.h>
 #include <lixa_syslog.h>
@@ -212,7 +213,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
         int fd;
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
-        char *ser_xid;
+        lixa_ser_xid_t ser_xid = "";
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -320,7 +321,8 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 case XA_RBTRANSIENT:
                     csr->common.xa_s_state = XA_STATE_S0;
                     if (!(TMONEPHASE & record.flags)) {
-                        ser_xid = xid_serialize(client_status_get_xid(cs));
+                        lixa_ser_xid_serialize(
+                            ser_xid, client_status_get_xid(cs));
                         syslog(LOG_WARNING, LIXA_SYSLOG_LXC017W,
                                (char *)act_rsrmgr->generic->name, record.rmid,
                                record.rc, NULL != ser_xid ? ser_xid : "");
@@ -329,10 +331,6 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                                     "TMONEPHASE was not used\n",
                                     record.rc, record.rmid,
                                     NULL != ser_xid ? ser_xid : ""));
-                        if (NULL != ser_xid) {
-                            free(ser_xid);
-                            ser_xid = NULL;
-                        }
                         THROW(INVALID_XA_RC);
                     }
                     break;                    
@@ -346,7 +344,8 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                         /* transaction consistency is delegated to
                            Resource Manager behavior */
                         csr->common.xa_s_state = XA_STATE_S0;
-                        ser_xid = xid_serialize(client_status_get_xid(cs));
+                        lixa_ser_xid_serialize(
+                            ser_xid, client_status_get_xid(cs));
                         syslog(LOG_WARNING, LIXA_SYSLOG_LXC026W,
                                (char *)act_rsrmgr->generic->name, record.rmid,
                                record.rc, NULL != ser_xid ? ser_xid : "");
@@ -355,10 +354,6 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                                     "TMONEPHASE was used\n",
                                     record.rc, record.rmid,
                                     NULL != ser_xid ? ser_xid : ""));
-                        if (NULL != ser_xid) {
-                            free(ser_xid);
-                            ser_xid = NULL;
-                        }
                     }
                     break;
                 case XAER_RMFAIL:
@@ -383,12 +378,10 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
         *txrc = lixa_tx_rc_get(&ltr);
 
         if (TX_MIXED == *txrc || TX_HAZARD == *txrc) {
-            ser_xid = xid_serialize(client_status_get_xid(cs));
+            lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
             syslog(LOG_WARNING, LIXA_SYSLOG_LXC011W,
                    NULL != ser_xid ? ser_xid : "",
                    TX_MIXED == *txrc ? "TX_MIXED" : "TX_HAZARD");
-            if (NULL != ser_xid)
-                free(ser_xid);
         }
         
         switch (*txrc) {
@@ -504,7 +497,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
         xa_end_flags = TMSUCCESS;
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             int tmp_txrc = TX_OK;
-            char *ser_xid;
+            lixa_ser_xid_t ser_xid = "";
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
             struct client_status_rsrmgr_s *csr = &g_array_index(
@@ -533,7 +526,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                 case XA_NOMIGRATE:
                     tmp_txrc = TX_FAIL;
                     csr->common.xa_td_state = XA_STATE_T0;
-                    ser_xid = xid_serialize(client_status_get_xid(cs));
+                    lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC015W,
                            (char *)act_rsrmgr->generic->name, record.rmid,
                            NULL != ser_xid ? ser_xid : "");
@@ -541,10 +534,6 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                                 "XA_NOMIGRATE for rmid=%d,xid='%s' and this "
                                 "should NOT happen!\n", record.rmid,
                                 NULL != ser_xid ? ser_xid : ""));
-                    if (NULL != ser_xid) {
-                        free(ser_xid);
-                        ser_xid = NULL;
-                    }
                     break;
                 case XA_OK:
                     csr->common.xa_td_state =
@@ -704,7 +693,7 @@ int lixa_xa_forget(client_status_t *cs, int finished)
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int xa_rc = XA_OK;
-    char *ser_xid = NULL;
+    lixa_ser_xid_t ser_xid = "";
     struct lixa_msg_s msg;
 
     msg.body.forget_8.xa_forget_execs = NULL;
@@ -728,7 +717,7 @@ int lixa_xa_forget(client_status_t *cs, int finished)
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_forget_8_xa_forget_execs_s),
             global_ccc.actconf.rsrmgrs->len);
-        
+        lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
@@ -743,8 +732,6 @@ int lixa_xa_forget(client_status_t *cs, int finished)
                 record.flags = TMNOFLAGS;
                 record.rc = act_rsrmgr->xa_switch->xa_forget_entry(
                     client_status_get_xid(cs), record.rmid, record.flags);
-                if (NULL == ser_xid)
-                    ser_xid = xid_serialize(client_status_get_xid(cs));
                 LIXA_TRACE(("lixa_xa_forget: xa_forget_entry('%s', %d, 0x%lx) "
                             "= %d\n",
                             NULL != ser_xid ? ser_xid : "",
@@ -853,10 +840,6 @@ int lixa_xa_forget(client_status_t *cs, int finished)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        if (NULL != ser_xid) {
-            free(ser_xid);
-            ser_xid = NULL;
-        }
         /* this object contains references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
@@ -1396,7 +1379,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
         int fd;
         guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
-        char *ser_xid;
+        lixa_ser_xid_t ser_xid = "";
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -1477,12 +1460,10 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                             "xa_prepare() call, skipping...\n",
                             record.rmid, csr->common.xa_s_state,
                             csr->prepare_rc));
-                ser_xid = xid_serialize(client_status_get_xid(cs));
+                lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
                 syslog(LOG_WARNING, LIXA_SYSLOG_LXC023W,
                        (char *)act_rsrmgr->generic->name, record.rmid,
                        NULL != ser_xid ? ser_xid : "");
-                if (NULL != ser_xid)
-                    free(ser_xid);
                 if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(
                                        &ltr, csr->prepare_rc)))
                     THROW(TX_RC_ADD_ERROR4);
@@ -1533,13 +1514,11 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                             "csr->prepare_rc=%d, forcing LIXA_XAER_HAZARD "
                             "rollback\n", tx_commit, record.rc,
                             csr->prepare_rc));
-                ser_xid = xid_serialize(client_status_get_xid(cs));
+                lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
                 syslog(LOG_WARNING, LIXA_SYSLOG_LXC016W,
                        (char *)act_rsrmgr->generic->name, record.rmid,
                        csr->prepare_rc, record.rc,
                        NULL != ser_xid ? ser_xid : "");
-                if (NULL != ser_xid)
-                    free(ser_xid);
                 /* force the return code of xa_rollback() to a different one */
                 record.rc = LIXA_XAER_HAZARD;
             }
@@ -1601,12 +1580,10 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
         *txrc = lixa_tx_rc_get(&ltr);
 
         if (TX_MIXED == *txrc || TX_HAZARD == *txrc) {
-            ser_xid = xid_serialize(client_status_get_xid(cs));
+            lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
             syslog(LOG_WARNING, LIXA_SYSLOG_LXC012W,
                    NULL != ser_xid ? ser_xid : "",
                    TX_MIXED == *txrc ? "TX_MIXED" : "TX_HAZARD");
-            if (NULL != ser_xid)
-                free(ser_xid);
         }
         
         switch (*txrc) {
@@ -1793,7 +1770,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
             long xa_start_flags = TMNOFLAGS;
             int rc;
             int tmp_txrc = TX_OK;
-            char *ser_xid = NULL;
+            lixa_ser_xid_t ser_xid = "";
 
             /* if resource manager supports dynamic registration, xa_start
                must not be performed */
@@ -1833,18 +1810,13 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                     *dupid_or_proto = TRUE;
                     tmp_txrc = TX_ERROR;
                     csr->common.xa_td_state = XA_STATE_T0;
-                    ser_xid = xid_serialize(xid);
+                    lixa_ser_xid_serialize(ser_xid, xid);
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC009W,
                            (char *)act_rsrmgr->generic->name, record.rmid,
                            NULL != ser_xid ? ser_xid : "");
                     LIXA_TRACE(("lixa_xa_start: xa_start returned XAER_DUPID "
                                 "for rmid=%d,xid='%s' and this should NOT "
-                                "happen!\n", record.rmid,
-                                NULL != ser_xid ? ser_xid : ""));
-                    if (NULL != ser_xid) {
-                        free(ser_xid);
-                        ser_xid = NULL;
-                    }
+                                "happen!\n", record.rmid, ser_xid));
                     break;
                 case XAER_OUTSIDE:
                     tmp_txrc = TX_OUTSIDE;
@@ -1857,18 +1829,13 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                     *dupid_or_proto = TRUE;
                     tmp_txrc = TX_ERROR;
                     csr->common.xa_td_state = XA_STATE_T0;
-                    ser_xid = xid_serialize(xid);
+                    lixa_ser_xid_serialize(ser_xid, xid);
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC010W,
                            (char *)act_rsrmgr->generic->name, record.rmid,
-                           NULL != ser_xid ? ser_xid : "");
+                           ser_xid);
                     LIXA_TRACE(("lixa_xa_start: xa_start returned XAER_PROTO "
                                 "for rmid=%d,xid='%s' and this should NOT "
-                                "happen!\n", record.rmid,
-                                NULL != ser_xid ? ser_xid : ""));
-                    if (NULL != ser_xid) {
-                        free(ser_xid);
-                        ser_xid = NULL;
-                    }
+                                "happen!\n", record.rmid, ser_xid));
                     break;
                 case XAER_ASYNC:
                     *txrc = TX_FAIL;

@@ -1,6 +1,8 @@
+The code of XID serialization/deserialization must be cleaned-up in a standard
+way.
+
 Go on with liblixapq.c
 - write a full case test for the PostgreSQL resource manager
-- replace XID serialization with new implementation
 
 When tx_rollback() is called, LIXA does not call xa_end(TMFAIL), but xa_end(TMSUCCESS); this is not
 an error, but it does not inform the resource manager as soon as possible of the transaction manager

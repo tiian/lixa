@@ -51,6 +51,7 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_utils.h>
+#include <lixa_xid.h>
 #include <lixa_syslog.h>
 #include <server_thread_status.h>
 
@@ -311,7 +312,7 @@ int thread_status_dump_header(const struct payload_header_s *ph)
     TRY {
         int i;
         char tmp_str_time[ISO_TIMESTAMP_BUFFER_SIZE];
-        char *xid_str = NULL;
+        lixa_ser_xid_t xid_str = "";
         
         printf("\tTrnhdr/number of resource managers: %d\n", ph->n);
         if (ph->n > 0) {
@@ -342,15 +343,14 @@ int thread_status_dump_header(const struct payload_header_s *ph)
                        PAYLOAD_HEADER_VERB_STEP-i-1].step);
         } /* for (i=0; ... */
         printf("]\n");
-        xid_str = xid_serialize(&ph->state.xid);
+        lixa_ser_xid_serialize(xid_str, &ph->state.xid);
         printf("\tTrnhdr/state/finished: %d\n"
                "\tTrnhdr/state/txstate: %d\n"
                "\tTrnhdr/state/will commit: %d\n"
                "\tTrnhdr/state/will rollback: %d\n"
                "\tTrnhdr/state/xid: '%s'\n", 
                ph->state.finished, ph->state.txstate, ph->state.will_commit,
-               ph->state.will_rollback,
-               xid_str != NULL ? xid_str : "(nil)");
+               ph->state.will_rollback, xid_str);
         if (LIXA_RC_OK != (ret_cod = lixa_utils_iso_timestamp(
                                &ph->recovery_failed_time, tmp_str_time,
                                sizeof(tmp_str_time))))
@@ -702,7 +702,8 @@ int thread_status_clean_failed(struct thread_status_s *ts)
                 &(ts->curr_status[i].sr.data);
             if (DATA_PAYLOAD_TYPE_HEADER == record->pld.type &&
                 record->pld.ph.recovery_failed) {
-                char *ser_xid = xid_serialize(&record->pld.ph.state.xid);
+                lixa_ser_xid_t ser_xid = "";
+                lixa_ser_xid_serialize(ser_xid, &record->pld.ph.state.xid);
                 LIXA_TRACE(("thread_status_clean_failed: block # "
                             UINT32_T_FORMAT " contains a recovery failed "
                             "transaction ('%s'), cleaning it\n", i,
@@ -710,8 +711,7 @@ int thread_status_clean_failed(struct thread_status_s *ts)
                 ret_cod = payload_chain_release(ts, i);
                 switch (ret_cod) {
                     case LIXA_RC_OK:
-                        syslog(LOG_INFO, LIXA_SYSLOG_LXD021I,
-                               NULL != ser_xid ? ser_xid : "");
+                        syslog(LOG_INFO, LIXA_SYSLOG_LXD021I, ser_xid);
                         break;
                     case LIXA_RC_OBJ_NOT_FOUND:
                         LIXA_TRACE(("thread_status_clean_failed: block # "
@@ -722,7 +722,6 @@ int thread_status_clean_failed(struct thread_status_s *ts)
                         THROW(PAYLOAD_CHAIN_RELEASE_ERROR);
                         break;
                 }
-                free(ser_xid);
             }
         } /* for (i=1; ... */
         

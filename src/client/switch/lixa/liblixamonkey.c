@@ -39,6 +39,7 @@
 
 
 #include <lixa_errors.h>
+#include <lixa_xid.h>
 #include <liblixamonkey.h>
 
 
@@ -436,10 +437,11 @@ int lixa_monkeyrm_start(XID *xid, int rmid, long flags)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int xa_rc = XA_OK;
     
-    char *xid_str = xid_serialize(xid);
-    LIXA_TRACE(("lixa_monkeyrm_start: xid='%s', rmid=%d, flags=0x%lx\n",
-                xid_str, rmid, flags));
-    free(xid_str);
+    lixa_ser_xid_t xid_str;
+    if (lixa_ser_xid_serialize(xid_str, xid)) {
+        LIXA_TRACE(("lixa_monkeyrm_start: xid='%s', rmid=%d, flags=0x%lx\n",
+                    xid_str, rmid, flags));
+    }
     
     TRY {
         pthread_t tid;
@@ -511,10 +513,11 @@ int lixa_monkeyrm_end(XID *xid, int rmid, long flags)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int xa_rc = XA_OK;
     
-    char *xid_str = xid_serialize(xid);
-    LIXA_TRACE(("lixa_monkeyrm_end: xid='%s', rmid=%d, flags=0x%lx\n",
-                xid_str, rmid, flags));
-    free(xid_str);
+    lixa_ser_xid_t xid_str;
+    if (lixa_ser_xid_serialize(xid_str, xid)) {
+        LIXA_TRACE(("lixa_monkeyrm_end: xid='%s', rmid=%d, flags=0x%lx\n",
+                    xid_str, rmid, flags));
+    }
     
     TRY {
         pthread_t tid;
@@ -586,10 +589,11 @@ int lixa_monkeyrm_rollback(XID *xid, int rmid, long flags)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int xa_rc = XA_OK;
     
-    char *xid_str = xid_serialize(xid);
-    LIXA_TRACE(("lixa_monkeyrm_rollback: xid='%s', rmid=%d, flags=0x%lx\n",
-                xid_str, rmid, flags));
-    free(xid_str);
+    lixa_ser_xid_t xid_str;
+    if (lixa_ser_xid_serialize(xid_str, xid)) {
+        LIXA_TRACE(("lixa_monkeyrm_rollback: xid='%s', rmid=%d, flags=0x%lx\n",
+                    xid_str, rmid, flags));
+    }
     
     TRY {
         pthread_t tid;
@@ -661,10 +665,11 @@ int lixa_monkeyrm_prepare(XID *xid, int rmid, long flags)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int xa_rc = XA_OK;
     
-    char *xid_str = xid_serialize(xid);
-    LIXA_TRACE(("lixa_monkeyrm_prepare: xid='%s', rmid=%d, flags=0x%lx\n",
-                xid_str, rmid, flags));
-    free(xid_str);
+    lixa_ser_xid_t xid_str;
+    if (lixa_ser_xid_serialize(xid_str, xid)) {
+        LIXA_TRACE(("lixa_monkeyrm_prepare: xid='%s', rmid=%d, flags=0x%lx\n",
+                    xid_str, rmid, flags));
+    }
     
     TRY {
         pthread_t tid;
@@ -736,10 +741,11 @@ int lixa_monkeyrm_commit(XID *xid, int rmid, long flags)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int xa_rc = XA_OK;
     
-    char *xid_str = xid_serialize(xid);
-    LIXA_TRACE(("lixa_monkeyrm_commit: xid='%s', rmid=%d, flags=0x%lx\n",
-                xid_str, rmid, flags));
-    free(xid_str);
+    lixa_ser_xid_t xid_str;
+    if (lixa_ser_xid_serialize(xid_str, xid)) {
+        LIXA_TRACE(("lixa_monkeyrm_commit: xid='%s', rmid=%d, flags=0x%lx\n",
+                    xid_str, rmid, flags));
+    }
     
     TRY {
         pthread_t tid;
@@ -842,18 +848,17 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
             THROW(GET_RC_ERROR);
 
         if (1 == xa_rc) {
-            char ser_xid[LIXA_XID_SERIALIZED_BUFFER_SIZE];
-            strcpy(ser_xid, "11111111-2222-3333-4444-555555555555.66666666-"
-                   "7777-8888-9999-000000000000");
+            lixa_ser_xid_t ser_xid = "4c495841.11111111222233334444555555555555.66666666777788889999000000000000";
             /* this is a constant value used to perform basic testing */
-            xid_deserialize(ser_xid, xid);
+            lixa_ser_xid_deserialize(ser_xid, xid);
         } else if (1 < xa_rc) {
             long n = xa_rc < count ? xa_rc : count;
             long i,j;
             for (i=0; i<n; ++i) {
-                for (j=0; j<sizeof(XID)/sizeof(long); ++j) {
-                    long *p = ((long *)(xid+i)+j);
-                    *p = random();
+                xid[i].formatID = (long)random();
+                xid[i].gtrid_length = xid[i].bqual_length = 16;
+                for (j=0; j<32; ++j) {
+                    xid[i].data[j] = (char)random();
                 }
             }
         }
@@ -901,10 +906,11 @@ int lixa_monkeyrm_forget(XID *xid, int rmid, long flags)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int xa_rc = XA_OK;
     
-    char *xid_str = xid_serialize(xid); 
-    LIXA_TRACE(("lixa_monkeyrm_forget: xid='%s', rmid=%d, flags=0x%lx\n",
-                xid_str, rmid, flags));
-    free(xid_str);
+    lixa_ser_xid_t xid_str;
+    if (lixa_ser_xid_serialize(xid_str, xid)) { 
+        LIXA_TRACE(("lixa_monkeyrm_forget: xid='%s', rmid=%d, flags=0x%lx\n",
+                    xid_str, rmid, flags));
+    }
     
     TRY {
         pthread_t tid;
