@@ -147,7 +147,7 @@ extern "C" {
 
     
     /**
-     * This is a wrapper for @ref xid_compare
+     * This is a wrapper for @ref lixa_xid_compare
      */
     int clnt_rcvr_xid_compare(gconstpointer a, gconstpointer b, gpointer foo);
 

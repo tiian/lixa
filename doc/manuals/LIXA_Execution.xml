@@ -346,6 +346,7 @@ Help Options:
 Application Options:
   -c, --commit       Perform a commit transaction
   -r, --rollback     Perform a rollback transaction
+  -v, --version      Print package info and exit
     </screen>
     <important><para>
 	The LIXA test utility is a LIXA client program and it 
@@ -376,8 +377,7 @@ tiian@ubuntu:~$ /opt/lixa/bin/lixat --commit
 tx_open(): 0
 tx_begin(): 0
 tx_info(): 1
-        xid/formatID    = 0x494c4158
-        xid/gtrid.bqual = 080f2b63-a380-4bfb-bdd3-347ca7607ba3.ef954655-163e-dff9-fee6-62b12f881c97
+        xid/formatID.gtrid.bqual = 4c495841.080f2b63a3804bfbbdd3347ca7607ba3.ef954655163edff9fee662b12f881c97
 tx_commit(): 0
 tx_close(): 0
     </screen>
@@ -391,8 +391,7 @@ tiian@ubuntu:~$ /opt/lixa/bin/lixat --rollback
 tx_open(): 0
 tx_begin(): 0
 tx_info(): 1
-        xid/formatID    = 0x494c4158
-        xid/gtrid.bqual = c651f0f2-efb2-49bd-92f3-f2b5a76741a5.ef954655-163e-dff9-fee6-62b12f881c97
+        xid/formatID.gtrid.bqual = 4c495841.c651f0f2efb249bd92f3f2b5a76741a5.ef954655163edff9fee6-62b12f881c97
 tx_rollback(): 0
 tx_close(): 0
     </screen>

@@ -333,7 +333,7 @@ int server_recovery_result(struct thread_status_s *ts,
                    lmo->body.qrcvr_16.client.config_digest,
                    sizeof(md5_digest_hex_t))) {
             lixa_ser_xid_t ser_xid = "";
-            lixa_ser_xid_serialize(ser_xid, &pld->ph.state.xid);
+            lixa_xid_serialize(&pld->ph.state.xid, ser_xid);
             
             lmo->body.qrcvr_16.answer.rc = LIXA_RC_LIXAC_CONF_CHANGED;
             syslog(LOG_WARNING, LIXA_SYSLOG_LXD011W,

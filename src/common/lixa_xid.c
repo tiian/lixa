@@ -55,7 +55,7 @@ uuid_t lixa_xid_global_bqual;
 
 
 
-void xid_set_global_bqual(const char *md5_digest_hex)
+void lixa_xid_set_global_bqual(const char *md5_digest_hex)
 {
     int i;
     unsigned char *p = (unsigned char *)&lixa_xid_global_bqual;
@@ -73,7 +73,7 @@ void xid_set_global_bqual(const char *md5_digest_hex)
 
 
 
-int xid_bqual_is_global(const XID *xid)
+int lixa_xid_bqual_is_global(const XID *xid)
 {
     if (xid->bqual_length != MD5_DIGEST_LENGTH)
         return FALSE;
@@ -83,7 +83,7 @@ int xid_bqual_is_global(const XID *xid)
 
 
 
-void xid_create_new(XID *xid)
+void lixa_xid_create_new(XID *xid)
 {
     uuid_t uuid_obj;
     char *gtrid, *bqual;
@@ -96,10 +96,11 @@ void xid_create_new(XID *xid)
     memcpy(xid->data, uuid_obj, sizeof(uuid_t));
     memcpy(xid->data + sizeof(uuid_t), lixa_xid_global_bqual, sizeof(uuid_t));
 #ifdef _TRACE
-    gtrid = xid_get_gtrid_ascii(xid);
-    bqual = xid_get_bqual_ascii(xid);
+    gtrid = lixa_xid_get_gtrid_ascii(xid);
+    bqual = lixa_xid_get_bqual_ascii(xid);
     if (NULL != gtrid && NULL != bqual)
-        LIXA_TRACE(("xid_create_new: gtrid='%s'; bqual='%s'\n", gtrid, bqual));
+        LIXA_TRACE(("lixa_xid_create_new: gtrid='%s'; bqual='%s'\n",
+                    gtrid, bqual));
     if (NULL != bqual) free(bqual);
     if (NULL != gtrid) free(gtrid);
 #endif /* _TRACE */
@@ -107,7 +108,7 @@ void xid_create_new(XID *xid)
 
 
 
-char *xid_get_gtrid_ascii(const XID *xid)
+char *lixa_xid_get_gtrid_ascii(const XID *xid)
 {
     char *gtrid;
     if (NULL == (gtrid = (char *)malloc(2*sizeof(uuid_t)+4+1)))
@@ -118,7 +119,7 @@ char *xid_get_gtrid_ascii(const XID *xid)
 
 
 
-char *xid_get_bqual_ascii(const XID *xid)
+char *lixa_xid_get_bqual_ascii(const XID *xid)
 {
     char *bqual;
     if (NULL == (bqual = (char *)malloc(2*sizeof(uuid_t)+4+1)))
@@ -128,106 +129,18 @@ char *xid_get_bqual_ascii(const XID *xid)
 }
 
 
-/* @@@
-char *xid_serialize(const XID *xid)
-{
-    char *ser;
-    if (NULL == (ser = (char *)malloc(LIXA_XID_SERIALIZED_BUFFER_SIZE)))
-        return NULL;
-    uuid_unparse((unsigned char *)xid->data, ser);
-    uuid_unparse((unsigned char *)xid->data + sizeof(uuid_t),
-                 ser + (2*sizeof(uuid_t)+4+1));
-    ser[2*sizeof(uuid_t)+4] = LIXA_XID_SEPARATOR;
-    return ser;
-}
-*/
 
-
- /* @@@
-int xid_deserialize(char *ser_xid, XID *xid)
-{
-    enum Exception { SEPARATOR_NOT_FOUND
-                     , UUID_PARSE_ERROR1
-                     , UUID_PARSE_ERROR2
-                     , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("xid_deserialize\n"));
-    TRY {
-        uuid_t uuid_obj;
- */ 
-        /* check separator */
-        /*
-        if (LIXA_XID_SEPARATOR != ser_xid[2*sizeof(uuid_t)+4])
-            THROW(SEPARATOR_NOT_FOUND);
-        */
-            /* initialize the format */
-        /*
-        xid->formatID = LIXA_XID_FORMAT_ID;
-        */
-        /* separates gtrid from bqual strings */
-        /*
-        ser_xid[2*sizeof(uuid_t)+4] = '\0';
-        */
-        /* parse & store gtrid */
-        /*
-        LIXA_TRACE(("xid_deserialize: gtrid='%s'\n", ser_xid));
-        if (0 != uuid_parse(ser_xid, uuid_obj))
-            THROW(UUID_PARSE_ERROR1);
-        memcpy(xid->data, uuid_obj, sizeof(uuid_t));
-        xid->gtrid_length = sizeof(uuid_t);
-        */
-        /* parse & store bqual */
-        /*
-        LIXA_TRACE(("xid_deserialize: bqual='%s'\n",
-                    ser_xid + (2*sizeof(uuid_t)+4+1)));
-        if (0 != uuid_parse(ser_xid + (2*sizeof(uuid_t)+4+1), uuid_obj))
-            THROW(UUID_PARSE_ERROR2);
-        memcpy(xid->data + sizeof(uuid_t), uuid_obj, sizeof(uuid_t));
-        xid->bqual_length = sizeof(uuid_t);
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case SEPARATOR_NOT_FOUND:
-                ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                break;
-            case UUID_PARSE_ERROR1:
-            case UUID_PARSE_ERROR2:
-                ret_cod = LIXA_RC_UUID_PARSE_ERROR;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-                } */ /* switch (excp) */
-        /* restore original separator */
-        /*
-        if (SEPARATOR_NOT_FOUND < ret_cod)
-            ser_xid[2*sizeof(uuid_t)+4] = LIXA_XID_SEPARATOR;
-            } */ /* TRY-CATCH */
-        /*
-        LIXA_TRACE(("xid_deserialize/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-                return ret_cod;
-    }
-*/
-
-
-
-void lixa_ser_xid_formatid(lixa_ser_xid_t lsx)
+void lixa_xid_formatid(lixa_ser_xid_t lsx)
 {
     /* serialize formatID */
     strncpy(lsx, LIXA_SER_XID_FORMAT_ID, sizeof(LIXA_SER_XID_FORMAT_ID));
     lsx[sizeof(LIXA_SER_XID_FORMAT_ID)] = LIXA_XID_SEPARATOR;
     lsx[sizeof(LIXA_SER_XID_FORMAT_ID)+1] = '\0';
-    LIXA_TRACE(("lixa_ser_xid_formatid: '%s'\n", lsx));
 }
 
 
 
-int lixa_ser_xid_serialize(lixa_ser_xid_t lsx, const XID *xid)
+int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx)
 {
     int i = 0, j = 0;
     byte_t *p;
@@ -239,16 +152,14 @@ int lixa_ser_xid_serialize(lixa_ser_xid_t lsx, const XID *xid)
         1 /* '\0' terminator */ ;
     /* check the XID can be serialized for PostgreSQL by this routine */
     if (len > sizeof(lixa_ser_xid_t)) {
-        LIXA_TRACE(("lixa_ser_xid_serialize: xid can not be serialized "
+        LIXA_TRACE(("lixa_xid_serialize: xid can not be serialized "
                     "because it would need %ld bytes instead of %d\n",
                     len, sizeof(lixa_ser_xid_t)));
         return FALSE;
     }
     /* serialize formatID and put the first separator */
-    LIXA_TRACE(("lixa_ser_xid_serialize: %lx, %lx\n", 
-                LIXA_XID_FORMAT_ID, xid->formatID));
     if (LIXA_XID_FORMAT_ID == xid->formatID)
-        lixa_ser_xid_formatid(lsx);
+        lixa_xid_formatid(lsx);
     else
         sprintf(lsx, "%lx%c", xid->formatID, LIXA_XID_SEPARATOR);
 
@@ -269,13 +180,13 @@ int lixa_ser_xid_serialize(lixa_ser_xid_t lsx, const XID *xid)
     }
     *(lsx+j) = '\0';
     
-    LIXA_TRACE(("lixa_ser_xid_serialize: '%s'\n", lsx));
+    LIXA_TRACE(("lixa_xid_serialize: '%s'\n", lsx));
     return TRUE;
 }
 
 
 
-int lixa_ser_xid_deserialize(lixa_ser_xid_t lsx, XID *xid)
+int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
 {
     enum Exception { SEPARATOR1
                      , INVALID_CHAR1
@@ -285,7 +196,7 @@ int lixa_ser_xid_deserialize(lixa_ser_xid_t lsx, XID *xid)
                      , NONE } excp;
     int ret_cod = FALSE;
     
-    LIXA_TRACE(("lixa_ser_xid_deserialize\n"));
+    LIXA_TRACE(("lixa_xid_deserialize\n"));
     TRY {
         long i;
         char *p = NULL, *q = NULL;
@@ -309,7 +220,7 @@ int lixa_ser_xid_deserialize(lixa_ser_xid_t lsx, XID *xid)
     
         /* check the first separator */
         if (LIXA_XID_SEPARATOR != lsx[sizeof(long)*2]) {
-            LIXA_TRACE(("lixa_ser_xid_deserialize: position %d ('%c') does "
+            LIXA_TRACE(("lixa_xid_deserialize: position %d ('%c') does "
                         "not contain the separator '%c'\n", sizeof(long)*2,
                         lsx[sizeof(long)], LIXA_XID_SEPARATOR));
             THROW(SEPARATOR1);
@@ -320,7 +231,6 @@ int lixa_ser_xid_deserialize(lixa_ser_xid_t lsx, XID *xid)
         i = 0;
         tmp[2] = '\0';
         /* deserialize gtrid */
-        LIXA_TRACE(("lixa_ser_xid_deserialize: p=%p, lsx=%p\n", p, lsx));
         while (p < lsx+sizeof(lixa_ser_xid_t)-1 && i<XIDDATASIZE) {
             q = p+1;
             if (((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f')) &&
@@ -332,7 +242,7 @@ int lixa_ser_xid_deserialize(lixa_ser_xid_t lsx, XID *xid)
             } else if (*p == LIXA_XID_SEPARATOR) {
                 break;
             } else {
-                LIXA_TRACE(("lixa_ser_xid_deserialize: '%s' invalid "
+                LIXA_TRACE(("lixa_xid_deserialize: '%s' invalid "
                             "characters found in gtrid part\n", p));
                 THROW(INVALID_CHAR1);
             }
@@ -340,14 +250,13 @@ int lixa_ser_xid_deserialize(lixa_ser_xid_t lsx, XID *xid)
         }
         /* check the separator between gtrid and bqual */
         if (*p != LIXA_XID_SEPARATOR) {
-            LIXA_TRACE(("lixa_ser_xid_deserialize: '%c' is not the "
+            LIXA_TRACE(("lixa_xid_deserialize: '%c' is not the "
                         "separator\n", *p));
             THROW(SEPARATOR2);
         }
         xid->gtrid_length = i;
         p++;
         /* deserialize bqual */
-        LIXA_TRACE(("lixa_ser_xid_deserialize: p=%p, lsx=%p\n", p, lsx));
         while (p < lsx+sizeof(lixa_ser_xid_t)-1 && i<XIDDATASIZE) {
             q = p+1;
             if (((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f')) &&
@@ -359,7 +268,7 @@ int lixa_ser_xid_deserialize(lixa_ser_xid_t lsx, XID *xid)
             } else if (*p == '\0') {
                 break;
             } else {
-                LIXA_TRACE(("lixa_ser_xid_deserialize: '%s' invalid "
+                LIXA_TRACE(("lixa_xid_deserialize: '%s' invalid "
                             "characters found in bqual part\n", p));
                 THROW(INVALID_CHAR2);
             }
@@ -367,7 +276,7 @@ int lixa_ser_xid_deserialize(lixa_ser_xid_t lsx, XID *xid)
         }
         /* check the terminator */
         if (*p != '\0') {
-            LIXA_TRACE(("lixa_ser_xid_deserialize: '%c' is not the "
+            LIXA_TRACE(("lixa_xid_deserialize: '%c' is not the "
                         "terminator\n", *p));
             THROW(TERMINATOR);
         }
@@ -390,14 +299,14 @@ int lixa_ser_xid_deserialize(lixa_ser_xid_t lsx, XID *xid)
                 ret_cod = FALSE;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_ser_xid_deserialize/excp=%d/ret_cod=%d\n",
+    LIXA_TRACE(("lixa_xid_deserialize/excp=%d/ret_cod=%d\n",
                 excp, ret_cod));
     return ret_cod;
 }
 
 
 
-int xid_compare(const XID *a, const XID *b)
+int lixa_xid_compare(const XID *a, const XID *b)
 {
     int result;
     

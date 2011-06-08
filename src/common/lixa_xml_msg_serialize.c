@@ -32,9 +32,6 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_xml_msg_serialize.h>
-/* @@@
-#include <lixa_common_status.h>
-*/
 #include <lixa_xid.h>
 
 
@@ -1212,8 +1209,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
         int used_chars;
         guint i;
         
-        if (!lixa_ser_xid_serialize(ser_xid,
-                                    &msg->body.qrcvr_16.client.state.xid))
+        if (!lixa_xid_serialize(&msg->body.qrcvr_16.client.state.xid, ser_xid))
             THROW(XID_SERIALIZE_ERROR);
         
         /* <answer> */
@@ -1603,7 +1599,7 @@ int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
         int used_chars;
         guint i;
 
-        if (!lixa_ser_xid_serialize(ser_xid, &msg->body.start_8.conthr.xid))
+        if (!lixa_xid_serialize(&msg->body.start_8.conthr.xid, ser_xid))
             THROW(XID_SERIALIZE_ERROR);
         
         /* <conthr> */

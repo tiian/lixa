@@ -34,9 +34,6 @@
 
 
 #include <lixa_trace.h>
-/* @@@
-#include <lixa_common_status.h>
-*/
 #include <lixa_xid.h>
 #include <xa.h>
 
@@ -85,7 +82,7 @@ int lixa_randomrm_close(char *xa_info, int rmid, long flags) {
  */ 
 int lixa_randomrm_start(XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
-    if (lixa_ser_xid_serialize(xid_str, xid)) {
+    if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_randomrm_start: xid='%s', rmid=%d, flags=0x%lx\n",
                     xid_str, rmid, flags));
     }
@@ -101,7 +98,7 @@ int lixa_randomrm_start(XID *xid, int rmid, long flags) {
  */ 
 int lixa_randomrm_end(XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
-    if (lixa_ser_xid_serialize(xid_str, xid)) {
+    if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_randomrm_end: xid='%s', rmid=%d, flags=0x%lx\n",
                     xid_str, rmid, flags));
     }
@@ -117,7 +114,7 @@ int lixa_randomrm_end(XID *xid, int rmid, long flags) {
  */ 
 int lixa_randomrm_rollback(XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
-    if (lixa_ser_xid_serialize(xid_str, xid)) {
+    if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_randomrm_rollback: xid='%s', rmid=%d, flags=0x%lx\n",
                     xid_str, rmid, flags));
     }
@@ -133,7 +130,7 @@ int lixa_randomrm_rollback(XID *xid, int rmid, long flags) {
  */ 
 int lixa_randomrm_prepare(XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
-    if (lixa_ser_xid_serialize(xid_str, xid)) {
+    if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_randomrm_prepare: xid='%s', rmid=%d, flags=0x%lx\n",
                     xid_str, rmid, flags));
     }
@@ -147,7 +144,7 @@ int lixa_randomrm_prepare(XID *xid, int rmid, long flags) {
  */ 
 int lixa_randomrm_commit(XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
-    if (lixa_ser_xid_serialize(xid_str, xid)) {
+    if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_randomrm_commit: xid='%s', rmid=%d, flags=0x%lx\n",
                     xid_str, rmid, flags));
     }
@@ -176,7 +173,7 @@ int lixa_randomrm_recover(XID *xid, long count, int rmid, long flags) {
  */ 
 int lixa_randomrm_forget(XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
-    if (lixa_ser_xid_serialize(xid_str, xid)) {
+    if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_randomrm_forget: xid='%s', rmid=%d, flags=0x%lx\n",
                     xid_str, rmid, flags));
     }

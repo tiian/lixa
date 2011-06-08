@@ -144,8 +144,8 @@ int client_recovery(client_status_t *cs,
                 break;
             }
             
-            if (!lixa_ser_xid_serialize(
-                    ser_xid, &rpl.body.qrcvr_16.client.state.xid))
+            if (!lixa_xid_serialize(
+                    &rpl.body.qrcvr_16.client.state.xid, ser_xid))
                 THROW(SERIALIZE_ERROR);
         
             /* check config digest */
@@ -336,8 +336,8 @@ int client_recovery_commit(const client_status_t *cs,
         int failed = FALSE;
         lixa_ser_xid_t ser_xid;
         
-        if (!lixa_ser_xid_serialize(
-                ser_xid, &rpl->body.qrcvr_16.client.state.xid))
+        if (!lixa_xid_serialize(
+                &rpl->body.qrcvr_16.client.state.xid, ser_xid))
             THROW(SERIALIZE_ERROR);
         LIXA_TRACE(("client_recovery_commit: committing transaction '%s'\n",
                     ser_xid));
@@ -431,8 +431,8 @@ int client_recovery_rollback(const client_status_t *cs,
         int failed = FALSE;
         lixa_ser_xid_t ser_xid;
         
-        if (!lixa_ser_xid_serialize(
-                ser_xid, &rpl->body.qrcvr_16.client.state.xid))
+        if (!lixa_xid_serialize(
+                &rpl->body.qrcvr_16.client.state.xid, ser_xid))
             THROW(SERIALIZE_ERROR);
         LIXA_TRACE(("client_recovery_rollback: rolling back "
                     "transaction '%s'\n", ser_xid));
@@ -574,7 +574,7 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                     XID *xid;
                     GArray *node;
 #ifdef _TRACE
-                    if (lixa_ser_xid_serialize(ser_xid, xid_array+j)) {
+                    if (lixa_xid_serialize(xid_array+j, ser_xid)) {
                         LIXA_TRACE(("client_recovery_scan: rmid=%u returned "
                                     "xid '%s'\n", i, ser_xid));
                     }
@@ -589,7 +589,7 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                         continue;
                     }
                     /* check XID branch qualifier */
-                    if (!bbqc && !xid_bqual_is_global(xid_array + j)) {
+                    if (!bbqc && !lixa_xid_bqual_is_global(xid_array + j)) {
                         LIXA_TRACE(("client_recovery_scan: the branch "
                                     "qualifier of this transaction does not "
                                     "match current global branch qualifier "
@@ -714,7 +714,7 @@ gboolean client_recovery_report_foreach(gpointer key, gpointer value,
     lixa_ser_xid_t ser_xid;
     guint i;
 
-    if (!lixa_ser_xid_serialize(ser_xid, xid)) {
+    if (!lixa_xid_serialize(xid, ser_xid)) {
         LIXA_TRACE(("client_recovery_report_foreach: xid serialization "
                     "error\n"));
         return TRUE;
@@ -732,13 +732,7 @@ gboolean client_recovery_report_foreach(gpointer key, gpointer value,
 
 
 int clnt_rcvr_xid_compare(gconstpointer a, gconstpointer b, gpointer foo) {
-    /*
-    LIXA_TRACE(("clnt_rcvr_xid_compare: "));
-    LIXA_TRACE_HEX_DATA(a, sizeof(XID));
-    LIXA_TRACE(("clnt_rcvr_xid_compare: "));
-    LIXA_TRACE_HEX_DATA(b, sizeof(XID));
-    */
-    return xid_compare((const XID *)a, (const XID *)b);
+    return lixa_xid_compare((const XID *)a, (const XID *)b);
 }
 
 
@@ -782,7 +776,7 @@ int client_recovery_cold_commit(const client_status_t *cs,
             if (XA_HEURCOM == xa_rc || XA_HEURRB == xa_rc ||
                 XA_HEURMIX == xa_rc || XA_HEURHAZ == xa_rc) {
                 lixa_ser_xid_t ser_xid = "";
-                lixa_ser_xid_serialize(ser_xid, xid);
+                lixa_xid_serialize(xid, ser_xid);
                 LIXA_TRACE(("client_recovery_cold_commit: the resource "
                             "manager returned heuristic completion, calling "
                             "xa_forget...\n"));
@@ -848,7 +842,7 @@ int client_recovery_cold_rollback(const client_status_t *cs,
             if (XA_HEURCOM == xa_rc || XA_HEURRB == xa_rc ||
                 XA_HEURMIX == xa_rc || XA_HEURHAZ == xa_rc) {
                 lixa_ser_xid_t ser_xid = "";
-                lixa_ser_xid_serialize(ser_xid, xid);
+                lixa_xid_serialize(xid, ser_xid);
                 LIXA_TRACE(("client_recovery_cold_rollback: the resource "
                             "manager returned heuristic completion, calling "
                             "xa_forget...\n"));

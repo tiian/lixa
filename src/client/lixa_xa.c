@@ -321,8 +321,8 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                 case XA_RBTRANSIENT:
                     csr->common.xa_s_state = XA_STATE_S0;
                     if (!(TMONEPHASE & record.flags)) {
-                        lixa_ser_xid_serialize(
-                            ser_xid, client_status_get_xid(cs));
+                        lixa_xid_serialize(
+                            client_status_get_xid(cs), ser_xid);
                         syslog(LOG_WARNING, LIXA_SYSLOG_LXC017W,
                                (char *)act_rsrmgr->generic->name, record.rmid,
                                record.rc, NULL != ser_xid ? ser_xid : "");
@@ -344,8 +344,8 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
                         /* transaction consistency is delegated to
                            Resource Manager behavior */
                         csr->common.xa_s_state = XA_STATE_S0;
-                        lixa_ser_xid_serialize(
-                            ser_xid, client_status_get_xid(cs));
+                        lixa_xid_serialize(
+                            client_status_get_xid(cs), ser_xid);
                         syslog(LOG_WARNING, LIXA_SYSLOG_LXC026W,
                                (char *)act_rsrmgr->generic->name, record.rmid,
                                record.rc, NULL != ser_xid ? ser_xid : "");
@@ -378,7 +378,7 @@ int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit)
         *txrc = lixa_tx_rc_get(&ltr);
 
         if (TX_MIXED == *txrc || TX_HAZARD == *txrc) {
-            lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
+            lixa_xid_serialize(client_status_get_xid(cs), ser_xid);
             syslog(LOG_WARNING, LIXA_SYSLOG_LXC011W,
                    NULL != ser_xid ? ser_xid : "",
                    TX_MIXED == *txrc ? "TX_MIXED" : "TX_HAZARD");
@@ -526,7 +526,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
                 case XA_NOMIGRATE:
                     tmp_txrc = TX_FAIL;
                     csr->common.xa_td_state = XA_STATE_T0;
-                    lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
+                    lixa_xid_serialize(client_status_get_xid(cs), ser_xid);
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC015W,
                            (char *)act_rsrmgr->generic->name, record.rmid,
                            NULL != ser_xid ? ser_xid : "");
@@ -717,7 +717,7 @@ int lixa_xa_forget(client_status_t *cs, int finished)
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_forget_8_xa_forget_execs_s),
             global_ccc.actconf.rsrmgrs->len);
-        lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
+        lixa_xid_serialize(client_status_get_xid(cs), ser_xid);
         for (i=0; i<global_ccc.actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
@@ -1460,7 +1460,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                             "xa_prepare() call, skipping...\n",
                             record.rmid, csr->common.xa_s_state,
                             csr->prepare_rc));
-                lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
+                lixa_xid_serialize(client_status_get_xid(cs), ser_xid);
                 syslog(LOG_WARNING, LIXA_SYSLOG_LXC023W,
                        (char *)act_rsrmgr->generic->name, record.rmid,
                        NULL != ser_xid ? ser_xid : "");
@@ -1514,7 +1514,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
                             "csr->prepare_rc=%d, forcing LIXA_XAER_HAZARD "
                             "rollback\n", tx_commit, record.rc,
                             csr->prepare_rc));
-                lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
+                lixa_xid_serialize(client_status_get_xid(cs), ser_xid);
                 syslog(LOG_WARNING, LIXA_SYSLOG_LXC016W,
                        (char *)act_rsrmgr->generic->name, record.rmid,
                        csr->prepare_rc, record.rc,
@@ -1580,7 +1580,7 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
         *txrc = lixa_tx_rc_get(&ltr);
 
         if (TX_MIXED == *txrc || TX_HAZARD == *txrc) {
-            lixa_ser_xid_serialize(ser_xid, client_status_get_xid(cs));
+            lixa_xid_serialize(client_status_get_xid(cs), ser_xid);
             syslog(LOG_WARNING, LIXA_SYSLOG_LXC012W,
                    NULL != ser_xid ? ser_xid : "",
                    TX_MIXED == *txrc ? "TX_MIXED" : "TX_HAZARD");
@@ -1810,7 +1810,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                     *dupid_or_proto = TRUE;
                     tmp_txrc = TX_ERROR;
                     csr->common.xa_td_state = XA_STATE_T0;
-                    lixa_ser_xid_serialize(ser_xid, xid);
+                    lixa_xid_serialize(xid, ser_xid);
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC009W,
                            (char *)act_rsrmgr->generic->name, record.rmid,
                            NULL != ser_xid ? ser_xid : "");
@@ -1829,7 +1829,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                     *dupid_or_proto = TRUE;
                     tmp_txrc = TX_ERROR;
                     csr->common.xa_td_state = XA_STATE_T0;
-                    lixa_ser_xid_serialize(ser_xid, xid);
+                    lixa_xid_serialize(xid, ser_xid);
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC010W,
                            (char *)act_rsrmgr->generic->name, record.rmid,
                            ser_xid);

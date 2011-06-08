@@ -20,14 +20,14 @@ int main(int argc, char *argv[])
         for (j=1; j<=64; ++j) {
             xid1.gtrid_length = i;
             xid1.bqual_length = j;
-            if (!lixa_ser_xid_serialize(ser_xid1, &xid1))
+            if (!lixa_xid_serialize(&xid1, ser_xid1))
                 return 1;
             printf("i=%d,j=%d\txid='%s'\n", i, j, ser_xid1);
-            if (!lixa_ser_xid_deserialize(ser_xid1, &xid2))
+            if (!lixa_xid_deserialize(&xid2, ser_xid1))
                 return 1;
-            if (!lixa_ser_xid_serialize(ser_xid2, &xid2))
+            if (!lixa_xid_serialize(&xid2, ser_xid2))
                 return 1;
-            if (xid_compare(&xid1, &xid2)) {
+            if (lixa_xid_compare(&xid1, &xid2)) {
                 printf("xid1='%s' != xid2='%s'\n", ser_xid1, ser_xid2);
                 return 1;
             }

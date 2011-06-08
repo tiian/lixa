@@ -1,6 +1,3 @@
-The code of XID serialization/deserialization must be cleaned-up in a standard
-way.
-
 Go on with liblixapq.c
 - write a full case test for the PostgreSQL resource manager
 
