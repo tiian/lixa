@@ -32,9 +32,6 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_xml_msg_deserialize.h>
-/* @@@
-#include <lixa_common_status.h>
-*/
 #include <lixa_xid.h>
 
 
@@ -1264,9 +1261,9 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
                         if (NULL == (tmp = xmlGetProp(
                                          cur2, LIXA_XML_MSG_PROP_XID)))
                             THROW(XID_NOT_FOUND);
-                        if (!lixa_ser_xid_deserialize(
-                                (char *)tmp, 
-                                &msg->body.qrcvr_16.client.state.xid)) {
+                        if (!lixa_xid_deserialize(
+                                &msg->body.qrcvr_16.client.state.xid,
+                                (char *)tmp)) {
                             xmlFree(tmp);
                             THROW(XID_DESERIALIZE_ERROR);
                         } else
@@ -1659,9 +1656,8 @@ int lixa_msg_deserialize_start_8(xmlNodePtr cur, struct lixa_msg_s *msg)
                 /* retrieve xid properties */
                 if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_XID)))
                     THROW(XID_NOT_FOUND);
-                if (!lixa_ser_xid_deserialize(
-                        (char *)tmp, 
-                        &msg->body.start_8.conthr.xid)) {
+                if (!lixa_xid_deserialize(
+                        &msg->body.start_8.conthr.xid, (char *)tmp)) {
                     xmlFree(tmp);
                     THROW(XID_DESERIALIZE_ERROR);
                 } else

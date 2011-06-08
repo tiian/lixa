@@ -202,7 +202,7 @@ int client_config(client_config_coll_t *ccc)
         if (LIXA_RC_OK != (ret_cod = lixa_config_digest(
                                fd, ccc->profile, ccc->config_digest)))
             THROW(LIXA_CONFIG_DIGEST_ERROR);
-        xid_set_global_bqual(ccc->config_digest);
+        lixa_xid_set_global_bqual(ccc->config_digest);
         if (-1 == (ret_cod = close(fd)))
             THROW(CLOSE_ERROR);
         fd = LIXA_NULL_FD;

@@ -26,10 +26,8 @@
 
 
 #include <tx.h>
-/* @@@
-#include <lixa_common_status.h>
-*/
 #include <lixa_xid.h>
+#include <lixa_utils.h>
 
 
 
@@ -40,10 +38,12 @@
 /* default command line options */
 static gboolean commit = FALSE;
 static gboolean rollback = FALSE;
+static gboolean print_version = FALSE;
 static GOptionEntry entries[] =
 {
     { "commit", 'c', 0, G_OPTION_ARG_NONE, &commit, "Perform a commit transaction", NULL },
     { "rollback", 'r', 0, G_OPTION_ARG_NONE, &rollback, "Perform a rollback transaction", NULL },
+    { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
     { NULL }
 };
 
@@ -69,6 +69,13 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    g_option_context_free(option_context);
+    
+    if (print_version) {
+        lixa_print_version(stdout);
+        exit(0);
+    }
+    
     printf("tx_open(): %d\n", rc = tx_open());
     if (TX_OK != rc) exit(1);
     
@@ -103,8 +110,7 @@ void print_info(TXINFO *info)
 {
     lixa_ser_xid_t ser_xid = "";
     
-    lixa_ser_xid_serialize(ser_xid, &info->xid);
-    printf("\txid/formatID    = 0x%lx\n", info->xid.formatID);
-    printf("\txid/gtrid.bqual = %s\n", ser_xid);
+    lixa_xid_serialize(&info->xid, ser_xid);
+    printf("\txid/formatID.gtrid.bqual = %s\n", ser_xid);
     return;
 }

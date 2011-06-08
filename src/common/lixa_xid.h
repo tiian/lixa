@@ -76,14 +76,6 @@ extern const char LIXA_SER_XID_FORMAT_ID[];
 
 
 /**
- * Minimum size of a buffer used to store a serialized xid (the null terminator
- * is computed in this constant
- */
-#define LIXA_XID_SERIALIZED_BUFFER_SIZE  (2*(2*sizeof(uuid_t)+4)+2)
-
-
-
-/**
  * Length of a string that can contain a serialized XID:
  * formatID + separator + gtrid + separator + bqual + terminator
  */
@@ -121,7 +113,7 @@ extern "C" {
      * @param md5_digest_hex IN pointer to a string of
      * @ref MD5_DIGEST_LENGTH * 2 characters
      */
-    void xid_set_global_bqual(const char *md5_digest_hex);
+    void lixa_xid_set_global_bqual(const char *md5_digest_hex);
 
 
 
@@ -131,7 +123,7 @@ extern "C" {
      * @param xid IN transaction id to inspect
      * @return a boolean value
      */
-    int xid_bqual_is_global(const XID *xid);
+    int lixa_xid_bqual_is_global(const XID *xid);
 
     
                             
@@ -139,7 +131,7 @@ extern "C" {
      * Create a new XID
      * @param xid OUT the generated unique transaction id
      */
-    void xid_create_new(XID *xid);
+    void lixa_xid_create_new(XID *xid);
 
 
 
@@ -150,7 +142,7 @@ extern "C" {
      * @return a string MUST be freed by the caller using "free" function or
      *         NULL if an error happens
      */
-    char *xid_get_gtrid_ascii(const XID *xid);
+    char *lixa_xid_get_gtrid_ascii(const XID *xid);
 
 
     
@@ -161,42 +153,15 @@ extern "C" {
      * @return a string MUST be freed by the caller using "free" function or
      *         NULL if an error happens
      */
-    char *xid_get_bqual_ascii(const XID *xid);
+    char *lixa_xid_get_bqual_ascii(const XID *xid);
 
 
-
-    /**
-     * Retrieve an ASCII string with the human readable version of the 
-     * transaction id; the serialized string can be transmitted over a network
-     * without encoding issues
-     * @param xid IN unique transaction id
-     * @return a string MUST be freed by the caller using "free" function or
-     *         NULL if an error happens
-     */
-    /*
-    char *xid_serialize(const XID *xid);
-    */
-
-    
-
-    /**
-     * Retrieve a XID object from a serialized version
-     * @param ser_xid IN string containing a serialized XID (
-     * @ref xid_serialize )
-     * @param xid OUT transaction id object
-     * @return a standardized return code
-     */
-    /*
-    int xid_deserialize(char *ser_xid, XID *xid);
-    */
-    
-    
 
     /**
      * Reset a xid structure
      * @param xid IN/OUT transaction id to be resetted
      */
-    static inline void xid_reset(XID *xid) {
+    static inline void lixa_xid_reset(XID *xid) {
         memset(xid, 0, sizeof(XID));
         xid->formatID = NULLXID;
     }
@@ -208,28 +173,28 @@ extern "C" {
      * and retrieve all the current prepared transactions (xa_recover function)
      * @param lsx OUT the serialized format ID
      */
-    void lixa_ser_xid_formatid(lixa_ser_xid_t lsx);
+    void lixa_xid_formatid(lixa_ser_xid_t lsx);
 
 
 
     /**
      * Serialize XID to a string compatible with PostgreSQL
-     * @param lsx OUT the serialized XID
      * @param xid IN the XID to be serialized
+     * @param lsx OUT the serialized XID
      * @return TRUE if serialization was completed, FALSE if there was an error
      */
-    int lixa_ser_xid_serialize(lixa_ser_xid_t lsx, const XID *xid);
+    int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx);
 
 
 
     /**
      * Deserialize a string compatible with PostgreSQL to a XID
-     * @param lsx IN the string must be deserialized
      * @param xid OUT the deserialized XID
+     * @param lsx IN the string must be deserialized
      * @return TRUE if deserialization was completed,
      *         FALSE if there was an error
      */
-    int lixa_ser_xid_deserialize(lixa_ser_xid_t lsx, XID *xid);
+    int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx);
 
 
 
@@ -241,7 +206,7 @@ extern "C" {
      *         if (a<b) --> -1 <br>
      *         if (a>b) --> +1
      */
-    int xid_compare(const XID *a, const XID *b);
+    int lixa_xid_compare(const XID *a, const XID *b);
 
 
 

@@ -32,9 +32,6 @@
 #include <lixa_errors.h>
 #include <lixa_trace.h>
 #include <lixa_xml_msg_trace.h>
-/* @@@
-#include <lixa_common_status.h>
-*/
 #include <lixa_xid.h>
 
 
@@ -574,8 +571,8 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
                             msg->body.qrcvr_16.answer.rc));
                 if (LIXA_RC_OBJ_NOT_FOUND == msg->body.qrcvr_16.answer.rc)
                     break;
-                if (!lixa_ser_xid_serialize(
-                        ser_xid, &msg->body.qrcvr_16.client.state.xid))
+                if (!lixa_xid_serialize(
+                        &msg->body.qrcvr_16.client.state.xid, ser_xid))
                     THROW(XID_SERIALIZE_ERROR);
                 LIXA_TRACE(("lixa_msg_trace_qrcvr: body[client[job="
                             "'%s',config_digest='%s']]]\n",
@@ -773,8 +770,8 @@ int lixa_msg_trace_start(const struct lixa_msg_s *msg)
         switch (msg->header.pvs.step) {
             case 8:
 #ifdef _TRACE
-                if (lixa_ser_xid_serialize(
-                       xid_str, &msg->body.start_8.conthr.xid)) {
+                if (lixa_xid_serialize(
+                        &msg->body.start_8.conthr.xid, xid_str)) {
                     LIXA_TRACE(("lixa_msg_trace_start: body[conthr[xid["
                                 "%s]]]\n", xid_str != NULL ?
                                 xid_str : (char *)nil_str));

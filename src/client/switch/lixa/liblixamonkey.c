@@ -438,7 +438,7 @@ int lixa_monkeyrm_start(XID *xid, int rmid, long flags)
     int xa_rc = XA_OK;
     
     lixa_ser_xid_t xid_str;
-    if (lixa_ser_xid_serialize(xid_str, xid)) {
+    if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_monkeyrm_start: xid='%s', rmid=%d, flags=0x%lx\n",
                     xid_str, rmid, flags));
     }
@@ -514,7 +514,7 @@ int lixa_monkeyrm_end(XID *xid, int rmid, long flags)
     int xa_rc = XA_OK;
     
     lixa_ser_xid_t xid_str;
-    if (lixa_ser_xid_serialize(xid_str, xid)) {
+    if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_monkeyrm_end: xid='%s', rmid=%d, flags=0x%lx\n",
                     xid_str, rmid, flags));
     }
@@ -590,7 +590,7 @@ int lixa_monkeyrm_rollback(XID *xid, int rmid, long flags)
     int xa_rc = XA_OK;
     
     lixa_ser_xid_t xid_str;
-    if (lixa_ser_xid_serialize(xid_str, xid)) {
+    if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_monkeyrm_rollback: xid='%s', rmid=%d, flags=0x%lx\n",
                     xid_str, rmid, flags));
     }
@@ -666,7 +666,7 @@ int lixa_monkeyrm_prepare(XID *xid, int rmid, long flags)
     int xa_rc = XA_OK;
     
     lixa_ser_xid_t xid_str;
-    if (lixa_ser_xid_serialize(xid_str, xid)) {
+    if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_monkeyrm_prepare: xid='%s', rmid=%d, flags=0x%lx\n",
                     xid_str, rmid, flags));
     }
@@ -742,7 +742,7 @@ int lixa_monkeyrm_commit(XID *xid, int rmid, long flags)
     int xa_rc = XA_OK;
     
     lixa_ser_xid_t xid_str;
-    if (lixa_ser_xid_serialize(xid_str, xid)) {
+    if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_monkeyrm_commit: xid='%s', rmid=%d, flags=0x%lx\n",
                     xid_str, rmid, flags));
     }
@@ -850,7 +850,7 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
         if (1 == xa_rc) {
             lixa_ser_xid_t ser_xid = "4c495841.11111111222233334444555555555555.66666666777788889999000000000000";
             /* this is a constant value used to perform basic testing */
-            lixa_ser_xid_deserialize(ser_xid, xid);
+            lixa_xid_deserialize(xid, ser_xid);
         } else if (1 < xa_rc) {
             long n = xa_rc < count ? xa_rc : count;
             long i,j;
@@ -907,7 +907,7 @@ int lixa_monkeyrm_forget(XID *xid, int rmid, long flags)
     int xa_rc = XA_OK;
     
     lixa_ser_xid_t xid_str;
-    if (lixa_ser_xid_serialize(xid_str, xid)) { 
+    if (lixa_xid_serialize(xid, xid_str)) { 
         LIXA_TRACE(("lixa_monkeyrm_forget: xid='%s', rmid=%d, flags=0x%lx\n",
                     xid_str, rmid, flags));
     }

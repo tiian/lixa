@@ -343,7 +343,7 @@ int thread_status_dump_header(const struct payload_header_s *ph)
                        PAYLOAD_HEADER_VERB_STEP-i-1].step);
         } /* for (i=0; ... */
         printf("]\n");
-        lixa_ser_xid_serialize(xid_str, &ph->state.xid);
+        lixa_xid_serialize(&ph->state.xid, xid_str);
         printf("\tTrnhdr/state/finished: %d\n"
                "\tTrnhdr/state/txstate: %d\n"
                "\tTrnhdr/state/will commit: %d\n"
@@ -703,7 +703,7 @@ int thread_status_clean_failed(struct thread_status_s *ts)
             if (DATA_PAYLOAD_TYPE_HEADER == record->pld.type &&
                 record->pld.ph.recovery_failed) {
                 lixa_ser_xid_t ser_xid = "";
-                lixa_ser_xid_serialize(ser_xid, &record->pld.ph.state.xid);
+                lixa_xid_serialize(&record->pld.ph.state.xid, ser_xid);
                 LIXA_TRACE(("thread_status_clean_failed: block # "
                             UINT32_T_FORMAT " contains a recovery failed "
                             "transaction ('%s'), cleaning it\n", i,

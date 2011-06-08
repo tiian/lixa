@@ -141,7 +141,7 @@ int lixa_tx_begin(int *txrc)
         }
         
         /* generate the transction id */
-        xid_create_new(&xid);
+        lixa_xid_create_new(&xid);
         client_status_set_xid(cs, &xid);
         
         /* the real logic must be put here */
@@ -532,7 +532,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         /* update the TX state, now TX_STATE_S0 */
         client_status_set_txstate(cs, next_txstate);
         /* reset the transaction id */
-        xid_reset(client_status_get_xid(cs));
+        lixa_xid_reset(client_status_get_xid(cs));
         
         if (TX_STATE_S2 == next_txstate) /* start a new transaction */
             *begin_new = TRUE;
@@ -657,7 +657,7 @@ int lixa_tx_info(int *txrc, TXINFO *info)
             info->transaction_timeout = client_status_get_tx_timeout(cs);
             info->transaction_state = client_status_get_tx_state(cs);
 #ifdef _TRACE
-            lixa_ser_xid_serialize(xid_str, &info->xid);
+            lixa_xid_serialize(&info->xid, xid_str);
             LIXA_TRACE(("lixa_tx_info: xid='%s', when_return=%ld, "
                         "transaction_control=%ld, transaction_timeout=%ld, "
                         "transaction_state=%ld\n", xid_str, info->when_return,
@@ -928,7 +928,7 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
         /* update the TX state, now TX_STATE_S0 */
         client_status_set_txstate(cs, next_txstate);
         /* reset the transaction id */
-        xid_reset(client_status_get_xid(cs));
+        lixa_xid_reset(client_status_get_xid(cs));
 
         if (TX_STATE_S2 == next_txstate) /* start a new transaction */
             *begin_new = TRUE;
@@ -1416,7 +1416,7 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
                 continue;
             }
             printf("Analizing transaction '%s':\n", buffer);
-            if (!lixa_ser_xid_deserialize(buffer, &tmp_xid))
+            if (!lixa_xid_deserialize(&tmp_xid, buffer))
                 THROW(XID_DESERIALIZE_ERROR);
             
             /* look for xid */

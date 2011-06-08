@@ -434,7 +434,7 @@ int lixa_pq_start(XID *xid, int rmid, long flags)
         }
 
         /* serialize XID */
-        if (!lixa_ser_xid_serialize(lsx, xid)) {
+        if (!lixa_xid_serialize(xid, lsx)) {
             LIXA_TRACE(("lixa_pq_start: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
@@ -542,15 +542,15 @@ int lixa_pq_end(XID *xid, int rmid, long flags)
         }
 
         /* serialize XID */
-        if (!lixa_ser_xid_serialize(lsx, xid)) {
+        if (!lixa_xid_serialize(xid, lsx)) {
             LIXA_TRACE(("lixa_pq_end: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
 
         /* checking xid is the started one */
-        if (0 != xid_compare(xid, &(lpsr->xid))) {
+        if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
             lixa_ser_xid_t lsx2;
-            lixa_ser_xid_serialize(lsx2, &(lpsr->xid));
+            lixa_xid_serialize(&(lpsr->xid), lsx2);
             LIXA_TRACE(("lixa_pq_end: ending XID '%s' is not the same "
                         "of started XID '%s'\n", lsx, lsx2));
             THROW(XID_MISMATCH);
@@ -660,7 +660,7 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
         }
 
         /* serialize XID */
-        if (!lixa_ser_xid_serialize(lsx, xid)) {
+        if (!lixa_xid_serialize(xid, lsx)) {
             LIXA_TRACE(("lixa_pq_rollback: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
@@ -697,9 +697,9 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
         }
         
         /* checking xid is the started one */
-        if (0 != xid_compare(xid, &(lpsr->xid))) {
+        if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
             lixa_ser_xid_t lsx2;
-            lixa_ser_xid_serialize(lsx2, &(lpsr->xid));
+            lixa_xid_serialize(&(lpsr->xid), lsx2);
             LIXA_TRACE(("lixa_pq_rollback: rolling back XID '%s' is not the "
                         "same of started XID '%s'\n", lsx, lsx2));
             THROW(XID_MISMATCH);
@@ -831,15 +831,15 @@ int lixa_pq_prepare(XID *xid, int rmid, long flags)
         }
 
         /* serialize XID */
-        if (!lixa_ser_xid_serialize(lsx, xid)) {
+        if (!lixa_xid_serialize(xid, lsx)) {
             LIXA_TRACE(("lixa_pq_prepare: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
 
         /* checking xid is the started one */
-        if (0 != xid_compare(xid, &(lpsr->xid))) {
+        if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
             lixa_ser_xid_t lsx2;
-            lixa_ser_xid_serialize(lsx2, &(lpsr->xid));
+            lixa_xid_serialize(&(lpsr->xid), lsx2);
             LIXA_TRACE(("lixa_pq_prepare: preparing XID '%s' is not the same "
                         "of started XID '%s'\n", lsx, lsx2));
             THROW(XID_MISMATCH);
@@ -957,7 +957,7 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
         }
 
         /* serialize XID */
-        if (!lixa_ser_xid_serialize(lsx, xid)) {
+        if (!lixa_xid_serialize(xid, lsx)) {
             LIXA_TRACE(("lixa_pq_commit: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
@@ -997,9 +997,9 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
         }
 
         /* checking xid is the started one */
-        if (0 != xid_compare(xid, &(lpsr->xid))) {
+        if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
             lixa_ser_xid_t lsx2;
-            lixa_ser_xid_serialize(lsx2, &(lpsr->xid));
+            lixa_xid_serialize(&(lpsr->xid), lsx2);
             LIXA_TRACE(("lixa_pq_commit: committing XID '%s' is not the "
                         "same of started XID '%s'\n", lsx, lsx2));
             THROW(XID_MISMATCH);
@@ -1159,7 +1159,7 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
             }
             PQclear(res);
             res = NULL;
-            lixa_ser_xid_formatid(lsx);
+            lixa_xid_formatid(lsx);
             snprintf(open_cursor, sizeof(open_cursor), OPEN_CURSOR_FMT, lsx);
             LIXA_TRACE(("lixa_pq_start: '%s'\n", open_cursor));
             res = PQexec(lpsr->conn, open_cursor);
@@ -1185,7 +1185,7 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
         }
         for (row=0; row<PQntuples(res); ++row) {
             XID xid;            
-            if (lixa_ser_xid_deserialize(PQgetvalue(res, row, 0), &xid)) {
+            if (lixa_xid_deserialize(&xid, PQgetvalue(res, row, 0))) {
                 LIXA_TRACE(("lixa_pq_prepare: xids[%d]='%s'\n", out_count,
                             PQgetvalue(res, row, 0)));
                 xids[out_count++] = xid;
