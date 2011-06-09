@@ -848,7 +848,10 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
             THROW(GET_RC_ERROR);
 
         if (1 == xa_rc) {
-            lixa_ser_xid_t ser_xid = "4c495841.11111111222233334444555555555555.66666666777788889999000000000000";
+            lixa_ser_xid_t ser_xid;
+            lixa_xid_formatid(ser_xid);
+            strcat(ser_xid,
+                   "11111111222233334444555555555555.66666666777788889999000000000000");
             /* this is a constant value used to perform basic testing */
             lixa_xid_deserialize(xid, ser_xid);
         } else if (1 < xa_rc) {

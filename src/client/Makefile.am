@@ -9,10 +9,13 @@ AM_CFLAGS = -Wall -fno-strict-aliasing
 liblixac_la_CPPFLAGS = -DLIXA_MULTITHREAD=1 -I$(srcdir)/../common
 liblixac_la_LIBADD = ../common/liblixab.la
 liblixac_la_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_GMODULE@ @LDFLAGS_GTHREAD@ @LDFLAGS_XML2@ -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
-bin_PROGRAMS = lixar lixat
+bin_PROGRAMS = lixar lixat lixau
 lixar_CPPFLAGS = -I$(srcdir)/../common
 lixar_LDADD = ../common/liblixab.la liblixac.la
 lixar_SOURCES = lixar.c
 lixat_CPPFLAGS = -I$(srcdir)/../common
 lixat_LDADD = ../common/liblixab.la liblixac.la
 lixat_SOURCES = lixat.c
+lixau_CPPFLAGS = -I$(srcdir)/../common
+lixau_LDADD = ../common/liblixab.la liblixac.la
+lixau_SOURCES = lixau.c
