@@ -34,7 +34,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = lixar$(EXEEXT) lixat$(EXEEXT)
+bin_PROGRAMS = lixar$(EXEEXT) lixat$(EXEEXT) lixau$(EXEEXT)
 subdir = src/client
 DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -77,6 +77,9 @@ lixar_DEPENDENCIES = ../common/liblixab.la liblixac.la
 am_lixat_OBJECTS = lixat-lixat.$(OBJEXT)
 lixat_OBJECTS = $(am_lixat_OBJECTS)
 lixat_DEPENDENCIES = ../common/liblixab.la liblixac.la
+am_lixau_OBJECTS = lixau-lixau.$(OBJEXT)
+lixau_OBJECTS = $(am_lixau_OBJECTS)
+lixau_DEPENDENCIES = ../common/liblixab.la liblixac.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -89,9 +92,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(liblixac_la_SOURCES) $(lixar_SOURCES) $(lixat_SOURCES)
+SOURCES = $(liblixac_la_SOURCES) $(lixar_SOURCES) $(lixat_SOURCES) \
+	$(lixau_SOURCES)
 DIST_SOURCES = $(liblixac_la_SOURCES) $(lixar_SOURCES) \
-	$(lixat_SOURCES)
+	$(lixat_SOURCES) $(lixau_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -260,6 +264,9 @@ lixar_SOURCES = lixar.c
 lixat_CPPFLAGS = -I$(srcdir)/../common
 lixat_LDADD = ../common/liblixab.la liblixac.la
 lixat_SOURCES = lixat.c
+lixau_CPPFLAGS = -I$(srcdir)/../common
+lixau_LDADD = ../common/liblixab.la liblixac.la
+lixau_SOURCES = lixau.c
 all: all-recursive
 
 .SUFFIXES:
@@ -356,6 +363,9 @@ lixar$(EXEEXT): $(lixar_OBJECTS) $(lixar_DEPENDENCIES)
 lixat$(EXEEXT): $(lixat_OBJECTS) $(lixat_DEPENDENCIES) 
 	@rm -f lixat$(EXEEXT)
 	$(LINK) $(lixat_OBJECTS) $(lixat_LDADD) $(LIBS)
+lixau$(EXEEXT): $(lixau_OBJECTS) $(lixau_DEPENDENCIES) 
+	@rm -f lixau$(EXEEXT)
+	$(LINK) $(lixau_OBJECTS) $(lixau_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -374,6 +384,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-tx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixar-lixar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixat-lixat.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixau-lixau.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -486,6 +497,20 @@ lixat-lixat.obj: lixat.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixat.c' object='lixat-lixat.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lixat-lixat.obj `if test -f 'lixat.c'; then $(CYGPATH_W) 'lixat.c'; else $(CYGPATH_W) '$(srcdir)/lixat.c'; fi`
+
+lixau-lixau.o: lixau.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixau_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lixau-lixau.o -MD -MP -MF $(DEPDIR)/lixau-lixau.Tpo -c -o lixau-lixau.o `test -f 'lixau.c' || echo '$(srcdir)/'`lixau.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/lixau-lixau.Tpo $(DEPDIR)/lixau-lixau.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixau.c' object='lixau-lixau.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixau_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lixau-lixau.o `test -f 'lixau.c' || echo '$(srcdir)/'`lixau.c
+
+lixau-lixau.obj: lixau.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixau_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lixau-lixau.obj -MD -MP -MF $(DEPDIR)/lixau-lixau.Tpo -c -o lixau-lixau.obj `if test -f 'lixau.c'; then $(CYGPATH_W) 'lixau.c'; else $(CYGPATH_W) '$(srcdir)/lixau.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/lixau-lixau.Tpo $(DEPDIR)/lixau-lixau.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lixau.c' object='lixau-lixau.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixau_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lixau-lixau.obj `if test -f 'lixau.c'; then $(CYGPATH_W) 'lixau.c'; else $(CYGPATH_W) '$(srcdir)/lixau.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

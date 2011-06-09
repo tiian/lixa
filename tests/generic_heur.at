@@ -33,7 +33,7 @@ xa_commit/8
 xa_forget/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002_FM ; lixa_test_exec.sh reset recycle lixar -b -p -x 4c495841.11111111222233334444555555555555.66666666777788889999000000000000 -c], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002_FM ; lixa_test_exec.sh reset recycle lixar -b -p -x $(lixau -f)11111111222233334444555555555555.66666666777788889999000000000000 -c], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Cold rollback heuristically completed TX])
@@ -69,7 +69,7 @@ xa_rollback/8
 xa_forget/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002_FM ; lixa_test_exec.sh reset recycle lixar -b -p -x 4c495841.11111111222233334444555555555555.66666666777788889999000000000000 -r], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002_FM ; lixa_test_exec.sh reset recycle lixar -b -p -x $(lixau -f)11111111222233334444555555555555.66666666777788889999000000000000 -r], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Cold commit heuristically completed TX 2])
@@ -144,7 +144,7 @@ xa_commit/8
 xa_forget/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002_FM ; lixa_test_exec.sh noreset stop lixar -b -p -x 4c495841.11111111222233334444555555555555.66666666777788889999000000000000 -c], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002_FM ; lixa_test_exec.sh noreset stop lixar -b -p -x $(lixau -f)11111111222233334444555555555555.66666666777788889999000000000000 -c], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Cold rollback heuristically completed TX 2])
@@ -215,6 +215,6 @@ xa_rollback/8
 xa_forget/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002_FM ; lixa_test_exec.sh noreset stop lixar -b -p -x 4c495841.11111111222233334444555555555555.66666666777788889999000000000000 -r], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002_FM ; lixa_test_exec.sh noreset stop lixar -b -p -x $(lixau -f)11111111222233334444555555555555.66666666777788889999000000000000 -r], [0], [ignore], [ignore])
 AT_CLEANUP
 
