@@ -42,11 +42,12 @@ dnl
 
 AC_DEFUN([AX_LIB_POSTGRESQL],
 [
+    POSTGRESQL_STUFF="no"
     AC_ARG_WITH([postgresql],
         AC_HELP_STRING([--with-postgresql=@<:@DIR@:>@],
             [use PostgreSQL API from given path]
         ),
-        [postgresql_home_dir="$withval";postgresql_stuff="yes"],
+        [postgresql_home_dir="$withval";POSTGRESQL_STUFF="yes"],
         [postgresql_home_dir=""]
     )
 
@@ -54,14 +55,14 @@ AC_DEFUN([AX_LIB_POSTGRESQL],
         AC_HELP_STRING([--with-postgresql-include=@<:@DIR@:>@],
             [use PostgreSQL API headers from given path]
         ),
-        [postgresql_home_include_dir="$withval";postgresql_stuff="yes"],
+        [postgresql_home_include_dir="$withval";POSTGRESQL_STUFF="yes"],
         [postgresql_home_include_dir=""]
     )
     AC_ARG_WITH([postgresql-lib],
         AC_HELP_STRING([--with-postgresql-lib=@<:@DIR@:>@],
             [use PostgreSQL API libraries from given path]
         ),
-        [postgresql_home_lib_dir="$withval";postgresql_stuff="yes"],
+        [postgresql_home_lib_dir="$withval";POSTGRESQL_STUFF="yes"],
         [postgresql_home_lib_dir=""]
     )
 
@@ -187,4 +188,5 @@ return 0;
 
     AC_SUBST([POSTGRESQL_CPPFLAGS])
     AC_SUBST([POSTGRESQL_LDFLAGS])
+    AC_SUBST([POSTGRESQL_STUFF])
 ])

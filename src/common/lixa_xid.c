@@ -38,13 +38,6 @@ const long LIXA_XID_FORMAT_ID = 0x4c495841;
 
 
 
-const char LIXA_SER_XID_FORMAT_ID[8] = { 0x34, 0x63, /* L */
-                                         0x34, 0x39, /* I */
-                                         0x35, 0x38, /* X */
-                                         0x34, 0x31  /* A */ };
-
-
-
 uuid_t lixa_xid_global_bqual;
 
 
@@ -132,10 +125,8 @@ char *lixa_xid_get_bqual_ascii(const XID *xid)
 
 void lixa_xid_formatid(lixa_ser_xid_t lsx)
 {
-    /* serialize formatID */
-    strncpy(lsx, LIXA_SER_XID_FORMAT_ID, sizeof(LIXA_SER_XID_FORMAT_ID));
-    lsx[sizeof(LIXA_SER_XID_FORMAT_ID)] = LIXA_XID_SEPARATOR;
-    lsx[sizeof(LIXA_SER_XID_FORMAT_ID)+1] = '\0';
+    /* serialize LIXA formatID */
+    sprintf(lsx, "%lx%c", LIXA_XID_FORMAT_ID, LIXA_XID_SEPARATOR); 
 }
 
 
@@ -158,10 +149,7 @@ int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx)
         return FALSE;
     }
     /* serialize formatID and put the first separator */
-    if (LIXA_XID_FORMAT_ID == xid->formatID)
-        lixa_xid_formatid(lsx);
-    else
-        sprintf(lsx, "%lx%c", xid->formatID, LIXA_XID_SEPARATOR);
+    sprintf(lsx, "%lx%c", xid->formatID, LIXA_XID_SEPARATOR);
 
     /* serialize gtrid */
     j = strlen(lsx);
@@ -207,17 +195,11 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
         /* deserialize formatID; this algorithm is bugged because two
          * serialized
          * xids are mapped to LIXA_XID_FORMAT_ID, but it's unlikely */
-        if (strncmp(lsx, LIXA_SER_XID_FORMAT_ID,
-                    sizeof(LIXA_SER_XID_FORMAT_ID))) {
-            tmp[sizeof(long)*2] = '\0';
-            p = lsx;
-            strncpy(tmp, lsx, sizeof(long)*2);
-            sscanf(tmp, "%lx", &l);
-            xid->formatID = l;
-        } else {
-            xid->formatID = LIXA_XID_FORMAT_ID;
-        }
-    
+        tmp[sizeof(long)*2] = '\0';
+        p = lsx;
+        strncpy(tmp, lsx, sizeof(long)*2);
+        sscanf(tmp, "%lx", &l);
+        xid->formatID = l;
         /* check the first separator */
         if (LIXA_XID_SEPARATOR != lsx[sizeof(long)*2]) {
             LIXA_TRACE(("lixa_xid_deserialize: position %d ('%c') does "
