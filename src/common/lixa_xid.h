@@ -59,15 +59,6 @@ extern const long LIXA_XID_FORMAT_ID;
 
 
 
-
-/**
- * This is the serialized version of formatID; it's not calculated from
- * @ref LIXA_XID_FORMAT_ID to avoid big endian/little endian issues
- */
-extern const char LIXA_SER_XID_FORMAT_ID[];
-
-
-
 /**
  * Character separator used when serializing/deserializing a xid
  */

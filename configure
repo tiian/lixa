@@ -883,6 +883,7 @@ COMPILE_IBMDB2_STUFF_TRUE
 COMPILE_IBMDB2_STUFF_FALSE
 POSTGRESQL_CPPFLAGS
 POSTGRESQL_LDFLAGS
+POSTGRESQL_STUFF
 COMPILE_POSTGRESQL_STUFF_TRUE
 COMPILE_POSTGRESQL_STUFF_FALSE
 PKG_CONFIG
@@ -4371,7 +4372,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4374 "configure"' > conftest.$ac_ext
+  echo '#line 4375 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7428,11 +7429,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7431: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7432: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7435: \$? = $ac_status" >&5
+   echo "$as_me:7436: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7718,11 +7719,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7721: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7722: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7725: \$? = $ac_status" >&5
+   echo "$as_me:7726: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7822,11 +7823,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7825: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7826: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7829: \$? = $ac_status" >&5
+   echo "$as_me:7830: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10199,7 +10200,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10202 "configure"
+#line 10203 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10299,7 +10300,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10302 "configure"
+#line 10303 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12700,11 +12701,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12703: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12704: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12707: \$? = $ac_status" >&5
+   echo "$as_me:12708: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -12804,11 +12805,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12807: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12808: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12811: \$? = $ac_status" >&5
+   echo "$as_me:12812: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14402,11 +14403,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14405: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14406: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14409: \$? = $ac_status" >&5
+   echo "$as_me:14410: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14506,11 +14507,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14509: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14510: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14513: \$? = $ac_status" >&5
+   echo "$as_me:14514: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16726,11 +16727,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16729: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16730: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16733: \$? = $ac_status" >&5
+   echo "$as_me:16734: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17016,11 +17017,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17019: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17020: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17023: \$? = $ac_status" >&5
+   echo "$as_me:17024: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17120,11 +17121,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17123: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17124: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17127: \$? = $ac_status" >&5
+   echo "$as_me:17128: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -21162,10 +21163,11 @@ fi
 
 
 
+    POSTGRESQL_STUFF="no"
 
 # Check whether --with-postgresql was given.
 if test "${with_postgresql+set}" = set; then
-  withval=$with_postgresql; postgresql_home_dir="$withval";postgresql_stuff="yes"
+  withval=$with_postgresql; postgresql_home_dir="$withval";POSTGRESQL_STUFF="yes"
 else
   postgresql_home_dir=""
 
@@ -21175,7 +21177,7 @@ fi
 
 # Check whether --with-postgresql-include was given.
 if test "${with_postgresql_include+set}" = set; then
-  withval=$with_postgresql_include; postgresql_home_include_dir="$withval";postgresql_stuff="yes"
+  withval=$with_postgresql_include; postgresql_home_include_dir="$withval";POSTGRESQL_STUFF="yes"
 else
   postgresql_home_include_dir=""
 
@@ -21184,7 +21186,7 @@ fi
 
 # Check whether --with-postgresql-lib was given.
 if test "${with_postgresql_lib+set}" = set; then
-  withval=$with_postgresql_lib; postgresql_home_lib_dir="$withval";postgresql_stuff="yes"
+  withval=$with_postgresql_lib; postgresql_home_lib_dir="$withval";POSTGRESQL_STUFF="yes"
 else
   postgresql_home_lib_dir=""
 
@@ -21405,7 +21407,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
- if test -n "$postgresql_stuff"; then
+
+ if test -n "$POSTGRESQL_STUFF"; then
   COMPILE_POSTGRESQL_STUFF_TRUE=
   COMPILE_POSTGRESQL_STUFF_FALSE='#'
 else
@@ -30974,6 +30977,7 @@ COMPILE_IBMDB2_STUFF_TRUE!$COMPILE_IBMDB2_STUFF_TRUE$ac_delim
 COMPILE_IBMDB2_STUFF_FALSE!$COMPILE_IBMDB2_STUFF_FALSE$ac_delim
 POSTGRESQL_CPPFLAGS!$POSTGRESQL_CPPFLAGS$ac_delim
 POSTGRESQL_LDFLAGS!$POSTGRESQL_LDFLAGS$ac_delim
+POSTGRESQL_STUFF!$POSTGRESQL_STUFF$ac_delim
 COMPILE_POSTGRESQL_STUFF_TRUE!$COMPILE_POSTGRESQL_STUFF_TRUE$ac_delim
 COMPILE_POSTGRESQL_STUFF_FALSE!$COMPILE_POSTGRESQL_STUFF_FALSE$ac_delim
 PKG_CONFIG!$PKG_CONFIG$ac_delim
@@ -31001,7 +31005,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 43; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 44; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

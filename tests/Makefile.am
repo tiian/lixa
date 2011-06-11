@@ -37,7 +37,7 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	ct_1_0.at ct_1_1.at ct_1_2.at ct_1_3.at ct_1_4.at ct_1_5.at \
 	ct_1_6.at ct_1_7.at ct_1_8.at ct_1_9.at ct_1_10.at ct_1_11.at \
 	ct_1_12.at ct_1_13.at \
-	memory.at \
+	memory.at postgresql.at xid.at \
 	package.m4 \
 	$(TESTSUITE) atlocal.in lixa_test_exec.sh lixa_test_functions.sh
 TESTSUITE = $(srcdir)/testsuite
@@ -89,7 +89,8 @@ $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/xa_6_62.at \
 		$(srcdir)/mt.at \
 		$(srcdir)/mt_1_0.at $(srcdir)/mt_2_0.at \
-		$(srcdir)/memory.at \
+		$(srcdir)/memory.at $(srcdir)/postgresql.at \
+		$(srcdir)/xid.at \
 		$(srcdir)/ct.at $(srcdir)/ct_0_0.at \
 		$(srcdir)/ct_0_1.at $(srcdir)/ct_0_2.at \
 		$(srcdir)/ct_0_3.at $(srcdir)/ct_0_4.at \
