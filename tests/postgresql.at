@@ -19,3 +19,47 @@ AT_SETUP([PQ/0.0/0.3 DELETE FROM authors])
 AT_CHECK([if test "$POSTGRESQL_STUFF" = "no"; then exit 77; fi])
 AT_CHECK([echo "DELETE FROM authors;" | psql testdb >$TESTS_TMP_FILE1 && grep DELETE $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
+# try one phase commit
+AT_SETUP([PQ/0.1/0.0 One phase commit])
+AT_CHECK([if test "$POSTGRESQL_STUFF" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0010 ; lixa_test_exec.sh reset start case0037 1 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0010 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CLEANUP
+# try two phase commit
+AT_SETUP([PQ/0.1/0.1 Two phase commit])
+AT_CHECK([if test "$POSTGRESQL_STUFF" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 1 0], [0], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CLEANUP
+# try rollback after prepare
+AT_SETUP([PQ/0.1/0.2 Rollback after prepare])
+AT_CHECK([if test "$POSTGRESQL_STUFF" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset stop case0037 1 0 -2], [0], [ignore], [ignore])
+AT_CLEANUP
