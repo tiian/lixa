@@ -883,7 +883,7 @@ COMPILE_IBMDB2_STUFF_TRUE
 COMPILE_IBMDB2_STUFF_FALSE
 POSTGRESQL_CPPFLAGS
 POSTGRESQL_LDFLAGS
-POSTGRESQL_STUFF
+HAVE_POSTGRESQL
 COMPILE_POSTGRESQL_STUFF_TRUE
 COMPILE_POSTGRESQL_STUFF_FALSE
 PKG_CONFIG
@@ -21163,11 +21163,11 @@ fi
 
 
 
-    POSTGRESQL_STUFF="no"
+    HAVE_POSTGRESQL="no"
 
 # Check whether --with-postgresql was given.
 if test "${with_postgresql+set}" = set; then
-  withval=$with_postgresql; postgresql_home_dir="$withval";POSTGRESQL_STUFF="yes"
+  withval=$with_postgresql; postgresql_home_dir="$withval";HAVE_POSTGRESQL="yes"
 else
   postgresql_home_dir=""
 
@@ -21177,7 +21177,7 @@ fi
 
 # Check whether --with-postgresql-include was given.
 if test "${with_postgresql_include+set}" = set; then
-  withval=$with_postgresql_include; postgresql_home_include_dir="$withval";POSTGRESQL_STUFF="yes"
+  withval=$with_postgresql_include; postgresql_home_include_dir="$withval";HAVE_POSTGRESQL="yes"
 else
   postgresql_home_include_dir=""
 
@@ -21186,7 +21186,7 @@ fi
 
 # Check whether --with-postgresql-lib was given.
 if test "${with_postgresql_lib+set}" = set; then
-  withval=$with_postgresql_lib; postgresql_home_lib_dir="$withval";POSTGRESQL_STUFF="yes"
+  withval=$with_postgresql_lib; postgresql_home_lib_dir="$withval";HAVE_POSTGRESQL="yes"
 else
   postgresql_home_lib_dir=""
 
@@ -21408,7 +21408,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
- if test -n "$POSTGRESQL_STUFF"; then
+ if test "$HAVE_POSTGRESQL" = "yes"; then
   COMPILE_POSTGRESQL_STUFF_TRUE=
   COMPILE_POSTGRESQL_STUFF_FALSE='#'
 else
@@ -30977,7 +30977,7 @@ COMPILE_IBMDB2_STUFF_TRUE!$COMPILE_IBMDB2_STUFF_TRUE$ac_delim
 COMPILE_IBMDB2_STUFF_FALSE!$COMPILE_IBMDB2_STUFF_FALSE$ac_delim
 POSTGRESQL_CPPFLAGS!$POSTGRESQL_CPPFLAGS$ac_delim
 POSTGRESQL_LDFLAGS!$POSTGRESQL_LDFLAGS$ac_delim
-POSTGRESQL_STUFF!$POSTGRESQL_STUFF$ac_delim
+HAVE_POSTGRESQL!$HAVE_POSTGRESQL$ac_delim
 COMPILE_POSTGRESQL_STUFF_TRUE!$COMPILE_POSTGRESQL_STUFF_TRUE$ac_delim
 COMPILE_POSTGRESQL_STUFF_FALSE!$COMPILE_POSTGRESQL_STUFF_FALSE$ac_delim
 PKG_CONFIG!$PKG_CONFIG$ac_delim
