@@ -7,7 +7,11 @@ put index.html
 
 #########################################################################
 
+Ubuntu packages: postgresql-client postgresql libpq-dev
+
 ./configure --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib
+
+sudo su - postgres
 
 postgres@ubuntu:~$ createuser --createdb tiian
 Shall the new role be a superuser? (y/n) n
