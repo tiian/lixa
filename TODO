@@ -1,5 +1,5 @@
 Go on with liblixapq.c
-test case PQ/0.1/1.1 produce a recovery failed record because xa_rollback
+test case PQ/0.1/2.1 produce a recovery failed record because xa_rollback
 return -6 (XAER_PROTO ?!): fix it!!!
 - write a full case test for the PostgreSQL resource manager (crash after
   prepare!)
