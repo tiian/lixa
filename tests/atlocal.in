@@ -66,3 +66,11 @@ export VALGRIND
 
 HAVE_POSTGRESQL=@HAVE_POSTGRESQL@
 export HAVE_POSTGRESQL
+
+HAVE_ORACLE=@HAVE_ORACLE@
+export HAVE_ORACLE
+
+if test "$HAVE_ORACLE" = "yes"
+then
+. /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
+fi
