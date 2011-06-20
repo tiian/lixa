@@ -31,11 +31,12 @@ dnl @license AllPermissive
 
 AC_DEFUN([AX_LIB_ORACLE_OCI],
 [
+    HAVE_ORACLE="no"
     AC_ARG_WITH([oracle],
         AC_HELP_STRING([--with-oracle=@<:@DIR@:>@],
             [use Oracle OCI API from given path to Oracle home directory]
         ),
-        [oracle_home_dir="$withval"],
+        [oracle_home_dir="$withval";HAVE_ORACLE="yes"],
         [oracle_home_dir=""]
     )
 
@@ -43,14 +44,14 @@ AC_DEFUN([AX_LIB_ORACLE_OCI],
         AC_HELP_STRING([--with-oracle-include=@<:@DIR@:>@],
             [use Oracle OCI API headers from given path]
         ),
-        [oracle_home_include_dir="$withval"],
+        [oracle_home_include_dir="$withval";HAVE_ORACLE="yes"],
         [oracle_home_include_dir=""]
     )
     AC_ARG_WITH([oracle-lib],
         AC_HELP_STRING([--with-oracle-lib=@<:@DIR@:>@],
             [use Oracle OCI API libraries from given path]
         ),
-        [oracle_home_lib_dir="$withval"],
+        [oracle_home_lib_dir="$withval";HAVE_ORACLE="yes"],
         [oracle_home_lib_dir=""]
     )
 
@@ -215,4 +216,5 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
     AC_SUBST([ORACLE_OCI_VERSION])
     AC_SUBST([ORACLE_OCI_CFLAGS])
     AC_SUBST([ORACLE_OCI_LDFLAGS])
+    AC_SUBST([HAVE_ORACLE])
 ])
