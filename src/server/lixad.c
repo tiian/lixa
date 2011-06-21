@@ -172,13 +172,15 @@ int main(int argc, char *argv[])
     }
 
     /* write pid file */
-    if (NULL == (pid_file = fopen(sc.pid_file, "w")))
-        syslog(LOG_WARNING, LIXA_SYSLOG_LXD015W, sc.pid_file);
-    else {
-        fprintf(pid_file, PID_T_FORMAT "\n", getpid());
-        fclose(pid_file);
+    if (!dump_specs) {
+        if (NULL == (pid_file = fopen(sc.pid_file, "w")))
+            syslog(LOG_WARNING, LIXA_SYSLOG_LXD015W, sc.pid_file);
+        else {
+            fprintf(pid_file, PID_T_FORMAT "\n", getpid());
+            fclose(pid_file);
+        }
     }
-
+    
     if (LIXA_RC_OK != (rc = server_pipes_init(&tpa))) {
         LIXA_TRACE(("main/server_pipes_init: rc=%d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD017E);
@@ -213,10 +215,13 @@ int main(int argc, char *argv[])
     }
 
     /* removing pid file */
-    if (0 != (unlink(sc.pid_file))) {
-        LIXA_TRACE(("main/unlink: errno=%d ('%s')\n", errno, strerror(errno)));
-        syslog(LOG_NOTICE, LIXA_SYSLOG_LXD024N, sc.pid_file, errno,
-               strerror(errno));
+    if (!dump_specs) {
+        if (0 != (unlink(sc.pid_file))) {
+            LIXA_TRACE(("main/unlink: errno=%d ('%s')\n",
+                        errno, strerror(errno)));
+            syslog(LOG_NOTICE, LIXA_SYSLOG_LXD024N, sc.pid_file, errno,
+                   strerror(errno));
+        }
     }
     
     /* clean-up memory to enhance memory leak detection */

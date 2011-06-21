@@ -150,5 +150,39 @@
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="CASE_PROF_0012">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>OracleXE_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0013">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>OracleXE_stareg</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0014">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>OracleXE_dynreg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0015">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>OracleXE_dynreg</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
   </profiles>
 </client>

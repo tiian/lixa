@@ -1,4 +1,4 @@
-Go on with "ORA/0.1/0.0 One phase commit"
+Oracle does not complain about xa_rollback in recovery phase, try DB2.
 
 Go on with liblixapq.c
 test case PQ/0.1/2.1 produce a recovery failed record because xa_rollback
