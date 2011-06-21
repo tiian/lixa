@@ -12,24 +12,19 @@ AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
 AT_CHECK([echo "SELECT * FROM countries;" | sqlplus "hr/hr" >$TESTS_TMP_FILE1 && grep "rows selected" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
 
-# check the current user has INSERT privilege on table authors
-AT_SETUP([ORA/0.0/0.2 INSERT INTO countries])
+# check the current user has DELETE & INSERT privilege on table authors
+AT_SETUP([ORA/0.0/0.2 DELETE & INSERT INTO countries])
 AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([echo "DELETE FROM countries WHERE COUNTRY_ID = 'IS';" | sqlplus "hr/hr" >$TESTS_TMP_FILE1 && grep "rows* deleted" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CHECK([echo "INSERT INTO countries VALUES('IS','Iceland',1);" | sqlplus "hr/hr" >$TESTS_TMP_FILE1 && grep "row created" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
-AT_CLEANUP
-
-# check the current user has DELETE privilege on table authors
-AT_SETUP([ORA/0.0/0.3 DELETE FROM countries])
-AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
 AT_CHECK([echo "DELETE FROM countries WHERE COUNTRY_ID = 'IS';" | sqlplus "hr/hr" >$TESTS_TMP_FILE1 && grep "row deleted" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # try one phase commit
 AT_SETUP([ORA/0.1/0.0 One phase commit])
 AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
-AT_CHECK([exit 1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0010 ; lixa_test_exec.sh reset start case0037 1 1 0], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0010 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012 ; lixa_test_exec.sh reset start case0038 1 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # try two phase commit
@@ -44,7 +39,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 1 0], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -54,7 +49,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # try rollback after prepare
@@ -69,7 +64,7 @@ xa_prepare/-3
 xa_rollback/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 0 -2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 -2], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ORA/0.1/1.0 Crash after connect])
@@ -81,7 +76,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=2 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=2 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ORA/0.1/1.1 Crash in the middle of xa_open])
@@ -93,7 +88,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=3 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=3 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ORA/0.1/1.2 Crash in the middle of xa_open (2)])
@@ -105,7 +100,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=4 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=4 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ORA/0.1/1.3 Crash after xa_open])
@@ -117,7 +112,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=5 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=5 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ORA/0.1/2.0 Crash in the middle of xa_end])
@@ -129,7 +124,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ORA/0.1/2.1 Automatic recovery])
@@ -145,7 +140,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
 AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|tee $TESTS_TMP_FILE1 ; grep 'recovery failed: 1' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
 AT_CLEANUP
 
@@ -158,7 +153,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ORA/0.1/2.3 Automatic recovery])
@@ -174,7 +169,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
 AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|tee $TESTS_TMP_FILE1 ; grep 'recovery failed: 1' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
 AT_CLEANUP
 
@@ -189,7 +184,7 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=14 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=14 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ORA/0.1/3.1 Automatic recovery])
@@ -205,7 +200,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # crash after prepare
@@ -219,7 +214,7 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ORA/0.1/4.1 Automatic recovery])
@@ -235,7 +230,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # crash after prepare
@@ -249,7 +244,7 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset stop case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset stop case0038 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ORA/0.1/5.1 Manual recovery])
@@ -261,8 +256,8 @@ xa_open/0
 xa_recover/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh reset start lixar -p >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh reset start lixar -p >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CHECK([grep '^xid=' $TESTS_TMP_FILE1 | cut -d "'" -f 2 > $TESTS_TMP_FILE2], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset stop lixar -p -r -X $TESTS_TMP_FILE2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset stop lixar -p -r -X $TESTS_TMP_FILE2], [0], [ignore], [ignore])
 AT_CLEANUP
 

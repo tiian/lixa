@@ -12,15 +12,11 @@ AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
 AT_CHECK([echo "SELECT * FROM AUTHORS;" | psql testdb >$TESTS_TMP_FILE1 && grep row $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
 
-# check the current user has INSERT privilege on table authors
-AT_SETUP([PQ/0.0/0.2 INSERT INTO authors])
+# check the current user has DELETE & INSERT privilege on table authors
+AT_SETUP([PQ/0.0/0.2 DELETE & INSERT INTO authors])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([echo "DELETE FROM authors;" | psql testdb >$TESTS_TMP_FILE1 && grep DELETE $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CHECK([echo "INSERT INTO authors VALUES(999,'surname','name');" | psql testdb >$TESTS_TMP_FILE1 && grep INSERT $TESTS_TMP_FILE1], [0], [ignore], [ignore])
-AT_CLEANUP
-
-# check the current user has DELETE privilege on table authors
-AT_SETUP([PQ/0.0/0.3 DELETE FROM authors])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
 AT_CHECK([echo "DELETE FROM authors;" | psql testdb >$TESTS_TMP_FILE1 && grep DELETE $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
 

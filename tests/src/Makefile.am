@@ -9,12 +9,15 @@ LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 if COMPILE_POSTGRESQL_STUFF
   MAYBE_POSTGRESQL = case0037
 endif
+if COMPILE_ORACLE_STUFF
+  MAYBE_ORACLE = case0038
+endif
 noinst_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0006 case0007 case0008 case0009 case0010 case0011 case0012 \
 	case0013 case0014 case0015 case0016 case0017 case0018 case0019 \
 	case0020 case0021 case0022 case0023 case0024 case0025 case0026 \
 	case0027 case0028 case0029 case0030 case0031 case0032 case0033 \
-	case0034 case0035 case0036 $(MAYBE_POSTGRESQL)
+	case0034 case0035 case0036 $(MAYBE_POSTGRESQL) $(MAYBE_ORACLE)
 case0000_SOURCES = case0000.c
 case0001_SOURCES = case0001.c
 case0002_SOURCES = case0002.c
@@ -58,3 +61,8 @@ case0037_CPPFLAGS = @POSTGRESQL_CPPFLAGS@ \
 	-I../../src/client/switch/postgresql
 case0037_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
         ../../src/client/switch/postgresql/liblixapq.la
+case0038_SOURCES = case0038.c
+case0038_CPPFLAGS = @ORACLE_OCI_CFLAGS@ -I../../src/client
+case0038_LDFLAGS = @ORACLE_OCI_LDFLAGS@
+#case0038_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la
+case0038_LDADD = ../../src/client/liblixac.la
