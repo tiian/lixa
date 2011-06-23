@@ -1,3 +1,5 @@
+Go on with DB2/0.0/0.2
+
 Oracle does not complain about xa_rollback in recovery phase, try DB2.
 
 Go on with liblixapq.c

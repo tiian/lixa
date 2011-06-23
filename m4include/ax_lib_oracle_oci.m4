@@ -58,6 +58,7 @@ AC_DEFUN([AX_LIB_ORACLE_OCI],
     ORACLE_OCI_CFLAGS=""
     ORACLE_OCI_LDFLAGS=""
     ORACLE_OCI_VERSION=""
+    ORACLE_ENV_SH=""
 
     dnl
     dnl Collect include/lib paths
@@ -213,8 +214,15 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
         ORACLE_OCI_VERSION="$oracle_version_major.$oracle_version_minor"
     fi
 
+    dnl set oracle_env.sh absolute position
+    if test -f $oracle_home_dir/bin/oracle_env.sh
+    then
+      ORACLE_ENV_SH=$oracle_home_dir/bin/oracle_env.sh
+    fi
+
     AC_SUBST([ORACLE_OCI_VERSION])
     AC_SUBST([ORACLE_OCI_CFLAGS])
     AC_SUBST([ORACLE_OCI_LDFLAGS])
+    AC_SUBST([ORACLE_ENV_SH])
     AC_SUBST([HAVE_ORACLE])
 ])

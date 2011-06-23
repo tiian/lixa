@@ -70,7 +70,15 @@ export HAVE_POSTGRESQL
 HAVE_ORACLE=@HAVE_ORACLE@
 export HAVE_ORACLE
 
+HAVE_IBMDB2=@HAVE_IBMDB2@
+export HAVE_IBMDB2
+
 if test "$HAVE_ORACLE" = "yes"
 then
-. /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
+. @ORACLE_ENV_SH@
+fi
+
+if test "$HAVE_IBMDB2" = "yes"
+then
+. /home/db2inst1/sqllib/db2profile
 fi
