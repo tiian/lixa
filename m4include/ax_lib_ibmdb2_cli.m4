@@ -42,11 +42,12 @@ dnl
 
 AC_DEFUN([AX_LIB_IBMDB2_CLI],
 [
+    HAVE_IBMDB2="no"
     AC_ARG_WITH([ibmdb2],
         AC_HELP_STRING([--with-ibmdb2=@<:@DIR@:>@],
             [use IBM DB2 CLI API from given path to DB2 home directory]
         ),
-        [ibmdb2_home_dir="$withval"],
+        [ibmdb2_home_dir="$withval";HAVE_IBMDB2="yes"],
         [ibmdb2_home_dir=""]
     )
 
@@ -54,14 +55,14 @@ AC_DEFUN([AX_LIB_IBMDB2_CLI],
         AC_HELP_STRING([--with-ibmdb2-include=@<:@DIR@:>@],
             [use IBM DB2 CLI API headers from given path]
         ),
-        [ibmdb2_home_include_dir="$withval"],
+        [ibmdb2_home_include_dir="$withval";HAVE_IBMDB2="yes"],
         [ibmdb2_home_include_dir=""]
     )
     AC_ARG_WITH([ibmdb2-lib],
         AC_HELP_STRING([--with-ibmdb2-lib=@<:@DIR@:>@],
             [use IBM DB2 CLI API libraries from given path]
         ),
-        [ibmdb2_home_lib_dir="$withval"],
+        [ibmdb2_home_lib_dir="$withval";HAVE_IBMDB2="yes"],
         [ibmdb2_home_lib_dir=""]
     )
 
@@ -188,4 +189,5 @@ if (SQL_SUCCESS != cli_rc) return 1; else return 0;
 
     AC_SUBST([IBMDB2_CLI_CPPFLAGS])
     AC_SUBST([IBMDB2_CLI_LDFLAGS])
+    AC_SUBST([HAVE_IBMDB2])
 ])

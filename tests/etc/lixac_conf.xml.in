@@ -184,5 +184,39 @@
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="CASE_PROF_0016">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>IBMDB2_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0017">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>IBMDB2_stareg</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0018">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>IBMDB2_dynreg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0019">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>IBMDB2_dynreg</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
   </profiles>
 </client>
