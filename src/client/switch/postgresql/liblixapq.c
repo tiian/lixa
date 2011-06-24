@@ -616,6 +616,7 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
                      , SELECT_ERROR
+                     , XID_NOT_AVAILABLE
                      , PROTOCOL_ERROR3
                      , XID_MISMATCH
                      , ROLLBACK_ERROR1
@@ -684,6 +685,12 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
                     /* it's a prepared transaction */
                     lpsr->state.S = 3;
                     lpsr->xid = *xid;
+                } else {
+                    PQclear(res);
+                    res = NULL;
+                    LIXA_TRACE(("lixa_pq_rollback: xid '%s' is not "
+                                "available\n", lsx));
+                    THROW(XID_NOT_AVAILABLE);
                 }
             }
             PQclear(res);
@@ -745,6 +752,9 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
             case PROTOCOL_ERROR2:
             case PROTOCOL_ERROR3:
                 xa_rc = XAER_PROTO;
+                break;
+            case XID_NOT_AVAILABLE:
+                xa_rc = XAER_NOTA;
                 break;
             case NULL_CONN:
                 xa_rc = XAER_RMFAIL;
@@ -912,6 +922,7 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
                      , SELECT_ERROR
+                     , XID_NOT_AVAILABLE
                      , PROTOCOL_ERROR3
                      , XID_MISMATCH
                      , COMMIT_ERROR1
@@ -981,6 +992,12 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
                     /* it's a prepared transaction */
                     lpsr->state.S = 3;
                     lpsr->xid = *xid;
+                } else {
+                    PQclear(res);
+                    res = NULL;
+                    LIXA_TRACE(("lixa_pq_commit: xid '%s' is not "
+                                "available\n", lsx));
+                    THROW(XID_NOT_AVAILABLE);
                 }
             }
             PQclear(res);
@@ -1045,6 +1062,9 @@ int lixa_pq_commit(XID *xid, int rmid, long flags)
             case PROTOCOL_ERROR2:
             case PROTOCOL_ERROR3:
                 xa_rc = XAER_PROTO;
+                break;
+            case XID_NOT_AVAILABLE:
+                xa_rc = XAER_NOTA;
                 break;
             case NULL_CONN:
                 xa_rc = XAER_RMFAIL;

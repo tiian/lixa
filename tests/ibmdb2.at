@@ -1,3 +1,8 @@
+#
+# WARNING
+# This file must be manually kept synchronized with the content of 
+# "oracle.at", "postgresql.at", etc...
+#
 AT_BANNER([IBM DB2])
 
 # check the schema "hr" is available and the user can connect to it
@@ -20,22 +25,36 @@ connect to SAMPLE
 SELECT * FROM db2inst1.dept
 QUIT
 ]])
-AT_CHECK([cat input.db2 | db2 >$TESTS_TMP_FILE1 && grep "record.*selected" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([db2 -f input.db2 >$TESTS_TMP_FILE1 && grep "record.*selected" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # check the current user has DELETE & INSERT privilege on table authors
 AT_SETUP([DB2/0.0/0.2 DELETE & INSERT INTO countries])
 AT_CHECK([if test "$HAVE_IBMDB2" = "no"; then exit 77; fi])
-AT_CHECK([echo "DELETE FROM countries WHERE COUNTRY_ID = 'IS';" | sqlplus "hr/hr" >$TESTS_TMP_FILE1 && grep "rows* deleted" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
-AT_CHECK([echo "INSERT INTO countries VALUES('IS','Iceland',1);" | sqlplus "hr/hr" >$TESTS_TMP_FILE1 && grep "row created" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
-AT_CHECK([echo "DELETE FROM countries WHERE COUNTRY_ID = 'IS';" | sqlplus "hr/hr" >$TESTS_TMP_FILE1 && grep "row deleted" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+# the command is duplicated to force rc=1
+AT_DATA([input1.db2],
+[[
+connect to SAMPLE
+DELETE FROM db2inst1.dept WHERE deptno = 'Y69'
+DELETE FROM db2inst1.dept WHERE deptno = 'Y69'
+QUIT
+]])
+AT_CHECK([db2 -f input1.db2], [1], [ignore], [ignore])
+AT_DATA([input2.db2],
+[[
+connect to SAMPLE
+INSERT INTO DB2INST1.DEPT (DEPTNO, DEPTNAME, ADMRDEPT) VALUES('Y69', 'MARKETING', 'E01')
+QUIT
+]])
+AT_CHECK([db2 -f input2.db2 >$TESTS_TMP_FILE1 && grep "^DB20000I" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([db2 -f input1.db2 >$TESTS_TMP_FILE1 && grep "^DB20000I" $TESTS_TMP_FILE1], [1], [ignore], [ignore])
 AT_CLEANUP
 
 # try one phase commit
 AT_SETUP([DB2/0.1/0.0 One phase commit])
 AT_CHECK([if test "$HAVE_IBMDB2" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012 ; lixa_test_exec.sh reset start case0038 1 1 0], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0016 ; lixa_test_exec.sh reset start case0039 1 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0016 ; lixa_test_exec.sh noreset none case0039 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # try two phase commit
@@ -50,7 +69,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; lixa_test_exec.sh noreset none case0039 1 1 0], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -60,7 +79,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; lixa_test_exec.sh noreset none case0039 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # try rollback after prepare
@@ -75,7 +94,7 @@ xa_prepare/-3
 xa_rollback/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 -2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; lixa_test_exec.sh noreset none case0039 1 1 -2], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([DB2/0.1/1.0 Crash after connect])
@@ -87,7 +106,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=2 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; export LIXA_CRASH_POINT=2 ; lixa_test_exec.sh noreset none case0039 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([DB2/0.1/1.1 Crash in the middle of xa_open])
@@ -99,7 +118,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=3 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; export LIXA_CRASH_POINT=3 ; lixa_test_exec.sh noreset none case0039 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([DB2/0.1/1.2 Crash in the middle of xa_open (2)])
@@ -111,7 +130,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=4 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; export LIXA_CRASH_POINT=4 ; lixa_test_exec.sh noreset none case0039 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([DB2/0.1/1.3 Crash after xa_open])
@@ -123,7 +142,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=5 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; export LIXA_CRASH_POINT=5 ; lixa_test_exec.sh noreset none case0039 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([DB2/0.1/2.0 Crash in the middle of xa_end])
@@ -135,7 +154,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh noreset none case0039 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([DB2/0.1/2.1 Automatic recovery])
@@ -151,7 +170,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; lixa_test_exec.sh noreset none case0039 1 1 0], [0], [ignore], [ignore])
 AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|tee $TESTS_TMP_FILE1 ; grep 'recovery failed: 1' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
 AT_CLEANUP
 
@@ -164,7 +183,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0039 1 0 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([DB2/0.1/2.3 Automatic recovery])
@@ -180,7 +199,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; lixa_test_exec.sh noreset none case0039 1 0 0], [0], [ignore], [ignore])
 AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|tee $TESTS_TMP_FILE1 ; grep 'recovery failed: 1' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
 AT_CLEANUP
 
@@ -195,7 +214,7 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=14 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; export LIXA_CRASH_POINT=14 ; lixa_test_exec.sh noreset none case0039 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([DB2/0.1/3.1 Automatic recovery])
@@ -211,7 +230,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; lixa_test_exec.sh noreset none case0039 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # crash after prepare
@@ -225,7 +244,7 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset none case0039 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([DB2/0.1/4.1 Automatic recovery])
@@ -241,7 +260,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; lixa_test_exec.sh noreset none case0039 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # crash after prepare
@@ -255,7 +274,7 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset stop case0038 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset stop case0039 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([DB2/0.1/5.1 Manual recovery])
@@ -267,8 +286,8 @@ xa_open/0
 xa_recover/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh reset start lixar -p >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; lixa_test_exec.sh reset start lixar -p >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CHECK([grep '^xid=' $TESTS_TMP_FILE1 | cut -d "'" -f 2 > $TESTS_TMP_FILE2], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset stop lixar -p -r -X $TESTS_TMP_FILE2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0017 ; lixa_test_exec.sh noreset stop lixar -p -r -X $TESTS_TMP_FILE2], [0], [ignore], [ignore])
 AT_CLEANUP
 

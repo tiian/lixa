@@ -1,3 +1,8 @@
+#
+# WARNING
+# This file must be manually kept synchronized with the content of 
+# "postgresql.at", "ibmdb2.at", etc...
+#
 AT_BANNER([Oracle])
 
 # check the schema "hr" is available and the user can connect to it
@@ -64,7 +69,7 @@ xa_prepare/-3
 xa_rollback/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 -2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 1 -2], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ORA/0.1/1.0 Crash after connect])
@@ -140,7 +145,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; lixa_test_exec.sh noreset none case0038 1 1 0], [0], [ignore], [ignore])
 AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|tee $TESTS_TMP_FILE1 ; grep 'recovery failed: 1' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
 AT_CLEANUP
 
@@ -153,7 +158,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0038 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0013 ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0038 1 0 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ORA/0.1/2.3 Automatic recovery])

@@ -1,13 +1,3 @@
-Go on with DB2/0.0/0.2
-
-Oracle does not complain about xa_rollback in recovery phase, try DB2.
-
-Go on with liblixapq.c
-test case PQ/0.1/2.1 produce a recovery failed record because xa_rollback
-return -6 (XAER_PROTO ?!): fix it!!!
-- write a full case test for the PostgreSQL resource manager (crash after
-  prepare!)
-
 When tx_rollback() is called, LIXA does not call xa_end(TMFAIL), but xa_end(TMSUCCESS); this is not
 an error, but it does not inform the resource manager as soon as possible of the transaction manager
 next action; try to change this piece of code of lixa_xa.c:
