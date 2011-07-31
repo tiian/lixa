@@ -415,6 +415,43 @@ make
 	  necessary steps are documented in the configuration chapter.
 	</para>
       </section>
+      <section>
+	<title>PostgreSQL 8.3<footnote><para>
+	      Trademark Policy is available at this link:
+	      <link xlink:href="http://wiki.postgresql.org/wiki/Trademark_Policy">
+		http://wiki.postgresql.org/wiki/Trademark_Policy</link>
+	</para></footnote></title>
+	<para>
+	  This step is useful if you want to use PostgreSQL as a Resource
+	  Manager coordinated by LIXA; only version 8.3.15 has been
+	  tested, but there should not be relevant differences with a
+	  different version. Use something like this:
+	  <screen>
+./configure --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib
+	  </screen>
+	  to create a loadable module containing the switch structure.
+	</para>
+	<note><para>
+	    PostgreSQL does not supply an XA standard switch structure, but
+	    only some SQL non standard statements (
+	    <code>PREPARE TRANSACTION, COMMIT PREPARED, ROLLBACK PREPARED</code>
+	    ) that can be used to implement some XA features.
+	    This is good enought to build a ...
+	</para></note>
+      </section>
+      <section>
+	<title>Two or more resource managers</title>
+	<para>
+	  If you want to use two or more resource managers, and this is a
+	  typical condition for the XA usage, you must concatenate two or more
+	  <parameter>--with-</parameter> parameters.
+	  This command, for instance, can be used to build IBM DB2, Oracle
+	  and PostgreSQL loadable modules:
+	  <screen>
+./configure --with-ibmdb2=/opt/ibm/db2/V9.7 --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib
+	  </screen>
+	</para>
+      </section>
     </section>
     <section>
       <title>Summary</title>
