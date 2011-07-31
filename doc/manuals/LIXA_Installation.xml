@@ -417,7 +417,7 @@ make
       </section>
       <section>
 	<title>PostgreSQL 8.3<footnote><para>
-	      Trademark Policy is available at this link:
+	      The Trademark Policy of PostgreSQL is available at this link:
 	      <link xlink:href="http://wiki.postgresql.org/wiki/Trademark_Policy">
 		http://wiki.postgresql.org/wiki/Trademark_Policy</link>
 	</para></footnote></title>
@@ -436,7 +436,9 @@ make
 	    only some SQL non standard statements (
 	    <code>PREPARE TRANSACTION, COMMIT PREPARED, ROLLBACK PREPARED</code>
 	    ) that can be used to implement some XA features.
-	    This is good enought to build a ...
+	    This is good enought to build a loadable module that can be
+	    used by the LIXA transaction manager, but some XA standard features
+	    - like dynamic registration - can not be implemented.
 	</para></note>
       </section>
       <section>
