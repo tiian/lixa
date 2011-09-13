@@ -2530,50 +2530,47 @@ tiian@ubuntu:~/tmp$ ldd example5_pql
 	<screen>
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 
-tiian@ubuntu:~/tmp$ export LIXA_PROFILE=DB2_DYN
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=PQL_STA
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
-DB2_DYN
+PQL_STA
 	</screen>
-	No additional DB2 variables are needed because they are automatically
-	set at login (see <xref linkend="Development_setup_DB2_environment"/>).
       </para>
     </section>
     <section>
       <title>Some checks before program execution</title>
       <para>
 	We set <varname>LIXA_PROFILE</varname> to value
-	<quote>DB2_DYN</quote>, looking at
+	<quote>PQL_STA</quote>, looking at
 	<filename>/opt/lixa/etc/lixac_conf.xml</filename>:
 	<screen>
-    &lt;profile name="DB2_DYN"&gt;
+    &lt;profile name="PQL_STA"&gt;
       &lt;sttsrvs&gt;
         &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
       &lt;/sttsrvs&gt;
       &lt;rsrmgrs&gt;
-        &lt;rsrmgr&gt;IBMDB2_dynreg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;PostgreSQL_stareg&lt;/rsrmgr&gt;
       &lt;/rsrmgrs&gt;
     &lt;/profile&gt;
 	</screen>
 	the profile references the Resource Manager named
-	<quote>IBMDB2_dynreg</quote>, looking again at the config file:
+	<quote>PostgreSQL_stareg</quote>, looking again at the config file:
 	<screen>
-    &lt;rsrmgr name="IBMDB2_dynreg" switch_file="/opt/lixa/lib/switch_ibmdb2_dynreg.so" xa_open_info="axlib=/opt/lixa/lib/liblixac.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+    &lt;rsrmgr name="PostgreSQL_stareg" switch_file="/opt/lixa/lib/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" /&gt;
 	</screen>
-	we can discover how the DB2 database is configured for XA
+	we can discover how the PostgreSQL database is configured for XA
 	<footnote><para>
-	    The content of <constant>xa_open_info</constant> string is
-	    documented at IBM Infocenter: search the string
-	    <quote>xa_open string formats</quote> in the documentation
-	    relevant to your installed version; this is a link
-	    <link xlink:href="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.admin.2pc.doc/doc/r0005080.html">
-	      http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.admin.2pc.doc/doc/r0005080.html
-	    </link>
-	    but it may change in the future.
+	    The content of <constant>xa_open_info</constant> is passed to
+	    <function>PQconnectdb</function> function: you can refer to 
+	    PostgreSQL official
+	    documentation to discover what you can pass to this function.
+	    Please pay attention the <varname>xa_open_info</varname> can
+	    contain a maximum of 255 characters: this limitation is
+	    documented in <citation>XAspec</citation>.
 	</para></footnote>.
       </para>
     </section>
     <section>
-      <title>Program execution (dynamic registration)</title>
+      <title>@@@ Program execution (dynamic registration)</title>
       <para>
 	It is suggested to open two different terminals: the first one
 	connected to <quote>SAMPLE</quote> DB2 database and the second
