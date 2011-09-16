@@ -2352,17 +2352,20 @@ DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
 	<para>
 	  If your server didn't start-up automatically at boot time, you
 	  could start it with the following commands:
-	  <screen>
-tiian@ubuntu:~$ ps -ef | grep postgres | grep -v grep
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu:~$ ps -ef|grep postgres|grep -v grep
 tiian@ubuntu:~$ sudo /etc/init.d/postgresql-8.3 start
  * Starting PostgreSQL 8.3 database server                               [ OK ]
-tiian@ubuntu:~$ ps -ef | grep postgres | grep -v grep
+tiian@ubuntu:~$ ps -ef|grep postgres|grep -v grep
 postgres  6086     1 24 11:25 ?        00:00:01 /usr/lib/postgresql/8.3/bin/postgres -D /var/lib/postgresql/8.3/main -c config_file=/etc/postgresql/8.3/main/postgresql.conf
 postgres  6088  6086  0 11:25 ?        00:00:00 postgres: writer process                                                                                        
 postgres  6089  6086  0 11:25 ?        00:00:00 postgres: wal writer process                                                                                    
 postgres  6090  6086  0 11:25 ?        00:00:00 postgres: autovacuum launcher process                                                                           
 postgres  6091  6086  0 11:25 ?        00:00:00 postgres: stats collector process
-	  </screen>
+	    </screen></td></tr></tbody>
+	  </table>
 	  Switch to user <systemitem class="username">postgres</systemitem>,
 	  associate your user to a matching database user
 	  <footnote><para>
@@ -2374,16 +2377,21 @@ postgres  6091  6086  0 11:25 ?        00:00:00 postgres: stats collector proces
 	  </para></footnote>
 	  ; my personal account is 
 	  <systemitem class="username">tiian</systemitem>
-	  and I create the same user inside PostgreSQL database:
-	  <screen>
+	  and I created the same user inside PostgreSQL database:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
 tiian@ubuntu:~$ sudo su - postgres
 [sudo] password for tiian:
 postgres@ubuntu:~$ createuser --createdb tiian
 Shall the new role be a superuser? (y/n) n
 Shall the new role be allowed to create more new roles? (y/n) n
-	  </screen>
+	    </screen></td></tr></tbody>
+	  </table>
 	  Create a new database and a table necessary to store some data:
-	  <screen>
+	  <table frame="box">
+	    <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
 tiian@ubuntu:~$ createdb testdb
 tiian@ubuntu:~$ psql testdb
 Welcome to psql 8.3.15, the PostgreSQL interactive terminal.
@@ -2406,7 +2414,8 @@ testdb=> select * from authors;
  id | last_name | first_name
 ----+-----------+------------
 (0 rows)
-	  </screen>
+	    </screen></td></tr></tbody>
+	  </table>
 	  OK, the <quote>authors</quote> table was created. 
 	  If something went wrong, you should refer to PostgreSQL
 	  documentation to fix the issue before the next step because
@@ -2419,14 +2428,17 @@ testdb=> select * from authors;
       <title>Start the LIXA state server</title>
       <para>
 	Start the state server as shown below:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~$ sudo su - lixa
 lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
 lixa@ubuntu:~$ exit
 logout
 tiian@ubuntu:~$ ps -ef|grep lixad|grep -v grep
 lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
       </para>
     </section>
     <section>
@@ -2436,7 +2448,9 @@ lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 	(<command>gcc</command> command was splitted on several lines 
 	using <command>\</command> to help readability, but you may use
 	a single line):
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example5_pql.c .
@@ -2444,9 +2458,12 @@ tiian@ubuntu:~/tmp$ gcc example5_pql.c -Wall \
 > -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq \
 > -I /usr/include/postgresql -l pq \
 > -o example5_pql
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Verify the executable produced by <command>gcc</command>:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ldd example5_pql
         linux-gate.so.1 =>  (0xb7701000)
         liblixac.so.0 => not found
@@ -2474,7 +2491,8 @@ tiian@ubuntu:~/tmp$ ldd example5_pql
         libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb71b1000)
         libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb7164000)
         libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb715f000)
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
       </para>
     </section>
     <section>
@@ -2483,15 +2501,20 @@ tiian@ubuntu:~/tmp$ ldd example5_pql
 	There are two unresolved references to liblixac.so.0 and 
 	liblixapq.so.0: they can be fixed 
 	setting up the proper environment variable:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 
 tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /opt/lixa/lib
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Check again the executable:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ldd example5_pql
         linux-gate.so.1 =>  (0xb7711000)
         liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb76f6000)
@@ -2528,15 +2551,19 @@ tiian@ubuntu:~/tmp$ ldd example5_pql
         libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb6f58000)
         libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb6f0b000)
         libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb6f07000)
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 
 tiian@ubuntu:~/tmp$ export LIXA_PROFILE=PQL_STA
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 PQL_STA
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
       </para>
     </section>
     <section>
@@ -2580,7 +2607,9 @@ PQL_STA
 	one pointing to the directory where the compiled program
 	<filename>example5_pql</filename> lives.
 	First teminal session:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~$ psql testdb
 Welcome to psql 8.3.15, the PostgreSQL interactive terminal.
 
@@ -2591,52 +2620,70 @@ Type:  \copyright for distribution terms
        \q to quit
 
 testdb=> 
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Second teminal session:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ls -la
 total 21
 drwxr-xr-x   2 tiian tiian  112 2011-09-14 21:14 .
 drwxrwx--x 101 tiian tiian 5064 2011-09-14 21:13 ..
 -rwxr-xr-x   1 tiian tiian 8293 2011-09-13 21:27 example5_pql
 -rw-r--r--   1 tiian tiian 3735 2011-09-13 21:26 example5_pql.c
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Check the content of <quote>AUTHORS</quote> table before
 	program execution:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 testdb=> select * from AUTHORS;
  id | last_name | first_name 
 ----+-----------+------------
 (0 rows)
-
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Execute the program:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ./example5_pql insert
 Inserting a row in the table...
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Check the content of the table again:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 testdb=> select * from AUTHORS;
  id | last_name | first_name 
 ----+-----------+------------
   1 | Foo       | Bar
 (1 rows)
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	The example program inserted the row with id=1. You can not insert
 	the same row twice because there is a unique constraint on this table,
 	but you can remove the row using
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ./example5_pql delete
 Deleting a row from the table...
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Check the table content again:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 testdb=> select * from AUTHORS;
  id | last_name | first_name 
 ----+-----------+------------
 (0 rows)
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	you can verify in file
 	<filename>/opt/lixa/etc/lixac_conf.xml</filename>
 	that <quote>PQL_STA</quote> is associated to static registration
@@ -2646,7 +2693,9 @@ testdb=> select * from AUTHORS;
 	</para></footnote>
 	.
 	Execute the program:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00002000
 tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
 0x00002000
@@ -2656,13 +2705,17 @@ tiian@ubuntu:~/tmp$ ./example5_pql insert 2>&amp;1 | grep xa_start
 2011-09-14 21:53:13.448918 [9766/3069609728] lixa_xa_start: xa_start_entry(xid, 0, 0x0) = 0
 2011-09-14 21:53:13.448977 [9766/3069609728] lixa_xa_start: sending 210 bytes to the server for step 24
 2011-09-14 21:53:13.449104 [9766/3069609728] lixa_xa_start/excp=10/ret_cod=0/errno=0
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	Finally, clean up the table again:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ unset LIXA_TRACE_MASK
 tiian@ubuntu:~/tmp$ ./example5_pql delete
 Deleting a row from the table...
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
       </para>
     </section>
   </section>
