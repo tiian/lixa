@@ -21,39 +21,53 @@
     </figure>
     <para>
       Create a working directory in a place you are comfortable with:
-      <screen>
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
 tiian@ubuntu:~$ cd
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$
-      </screen>
+	</screen></td></tr></tbody>
+      </table>
     </para>
     <para>
       Copy file <filename>example1.c</filename> in your working dir:
-      <screen>
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example1.c .
-      </screen>
+	</screen></td></tr></tbody>
+      </table>
       Substitute <quote>lixa-X.Y.Z</quote> with the actual version of
       the software you installed.
     </para>
     <para>
       Compile and link the C example program:
-      <screen>
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ gcc example1.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -o example1
-      </screen>
+	</screen></td></tr></tbody>
+      </table>
       Check the output of the linker:
-      <screen>
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ldd example1
         linux-gate.so.1 =>  (0xb77a9000)
         liblixac.so.0 => not found
         libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7653000)
         /lib/ld-linux.so.2 (0xb77aa000)
-      </screen>
+	</screen></td></tr></tbody>
+      </table>
       <filename>liblixac.so.0</filename> library is not resolved because
       the LIXA libraries are not in system standard library path. You can
       bypass the issue exporting <varname>LD_LIBRARY_PATH</varname>
       variable and checking it again:
-      <screen>
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
 tiian@ubuntu:~/tmp$ ldd example1
         linux-gate.so.1 =>  (0xb773f000)
@@ -72,18 +86,24 @@ tiian@ubuntu:~/tmp$ ldd example1
         libz.so.1 => /usr/lib/libz.so.1 (0xb7380000)
         libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb735b000)
         libuuid.so.1 => /lib/libuuid.so.1 (0xb7356000)
-      </screen>
+	</screen></td></tr></tbody>
+      </table>
       Now you are ready to start your first application:
-      <screen>
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ./example1
 tx_open(): -7
-      </screen>
+	</screen></td></tr></tbody>
+      </table>
       The <function>tx_open()</function> function returned the value 
       <quote>-7</quote> (<constant>TX_FAIL</constant>) 
       because the state server is not running.
       Start the state server (see <xref linkend="Background_execution"/>)
       and try again:
-      <screen>
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ sudo su - lixa
 lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
 lixa@ubuntu:~$ exit
@@ -98,7 +118,8 @@ tx_commit(): 0
 tx_begin(): 0
 tx_rollback(): 0
 tx_close(): 0
-      </screen>
+	</screen></td></tr></tbody>
+      </table>
       Your first program has connected to the state server and has performed
       two dummy distributed transactions: <emphasis>commit</emphasis> and 
       <emphasis>rollback</emphasis>.
@@ -107,15 +128,19 @@ tx_close(): 0
       <title>Some details about the example</title>
       <para>
 	You have not specified a specific profile:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
-
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	The LIXA client library used the default one, the first listed in
 	<filename>etc/lixac_conf.xml</filename>. If you inspected the 
 	configuration file <filename>/opt/lixa/etc/lixac_conf.xml</filename> 
 	you would see something like this:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ cat /opt/lixa/etc/lixac_conf.xml
 &lt;?xml version="1.0" encoding="UTF-8" ?&gt;
 &lt;client&gt;
@@ -138,7 +163,8 @@ tiian@ubuntu:~/tmp$ cat /opt/lixa/etc/lixac_conf.xml
 [...]
   &lt;/profiles&gt;
 &lt;/client&gt;
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
 	The default profile is named <quote>CF05</quote> and lists two
 	resource managers of the same type: <quote>LIXAdummyRM</quote>;
 	the related switch file is the file 
@@ -151,7 +177,9 @@ tiian@ubuntu:~/tmp$ cat /opt/lixa/etc/lixac_conf.xml
 	To verify that the program is using the dummy resource manager,
 	execute it with <varname>LIXA_TRACE_MASK</varname> environment
 	variable set to <constant>0x00008000</constant>:
-	<screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00008000
 tiian@ubuntu:~/tmp$ ./example1
 [...]
@@ -184,7 +212,8 @@ tx_rollback(): 0
 2011-04-05 22:08:00.130215 [29359/3073444096] client_unconfig: releasing exclusive mutex
 2011-04-05 22:08:00.130371 [29359/3073444096] client_unconfig/excp=2/ret_cod=0/errno=0
 tx_close(): 0
-	</screen>
+	  </screen></td></tr></tbody>
+	</table>
       </para>
     </section>
   </section>
@@ -2718,5 +2747,21 @@ Deleting a row from the table...
 	</table>
       </para>
     </section>
+  </section>
+  <section xml:id="Development_example6_pql_ora">
+    <title>An example with two distinct Resource Managers: PostgreSQL &amp; 
+      Oracle DBMS</title>
+    <para>
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ gcc example6_pql_ora.c -Wall \
+>  -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq \
+> -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
+> -I /usr/include/postgresql -l pq \
+> -o example6_pql_ora
+	</screen></td></tr></tbody>
+      </table>
+    </para>
   </section>
 </chapter>
