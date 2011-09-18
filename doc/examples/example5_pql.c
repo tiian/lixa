@@ -16,6 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+
+
+/*
+ * This is an example that shows as you can use LIXA TX (Transaction
+ * Demarcation) API and PostgreSQL together.
+ * Please refer to LIXA manual for more information about this sample.
+ */
+
+
+
+/* UNIX standard headers */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,6 +73,7 @@ int main(int argc, char *argv[])
         exit(txrc);
     }
 
+    /* retrieve PostgreSQL connection */
     conn = lixa_pq_get_conn();
     /*
      * These functions can be used when there are more than one PostgreSQL

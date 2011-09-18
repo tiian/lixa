@@ -417,7 +417,7 @@ all: index.html
 
 @HAVE_XSLTPROC_TRUE@index.html: $(manual_sources) $(png_images)
 @HAVE_XSLTPROC_TRUE@	@echo "Creating HTML manual..."
-@HAVE_XSLTPROC_TRUE@	xsltproc -o index.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
+@HAVE_XSLTPROC_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
 @HAVE_XSLTPROC_FALSE@index.html: $(manual_sources) $(png_images)
 @HAVE_XSLTPROC_FALSE@	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

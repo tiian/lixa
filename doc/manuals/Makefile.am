@@ -37,7 +37,7 @@ all: index.html
 if HAVE_XSLTPROC
 index.html: $(manual_sources) $(png_images)
 	@echo "Creating HTML manual..."
-	xsltproc -o index.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
+	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
 else
 index.html: $(manual_sources) $(png_images)
 	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
