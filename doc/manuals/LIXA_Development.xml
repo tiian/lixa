@@ -1706,7 +1706,6 @@ tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
 	</para></listitem>
       </itemizedlist>
     </para>
-
     <section>
       <title>Build the client program</title>
       <para>
@@ -2751,17 +2750,284 @@ Deleting a row from the table...
   <section xml:id="Development_example6_pql_ora">
     <title>An example with two distinct Resource Managers: PostgreSQL &amp; 
       Oracle DBMS</title>
+    <figure xml:id="develop6">
+      <title>Deploy model of an example showing a distributed transaction with PostgreSQL and Oracle</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Development_6.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
     <para>
-      <table frame="box">
-	<thead><tr><td>[Shell terminal session]</td></tr></thead>
-	<tbody><tr><td><screen>
+      This example shows as
+      you can implement DTP (Distributed Transaction Processing) with two
+      Resource Managers (PostgreSQL and Oracle Database Server)
+      coordinated by the LIXA Transaction Manager.
+      It's strongly suggested you have played with the
+      examples previously shown in this chapter (see
+      <xref linkend="Development"/>) before starting this more complex one.
+    </para>
+    <note>
+      <para>
+	If you did not yet installed the software provided by PostgreSQL,
+	please refer to the official PostgreSQL site to download the
+	software and to pick-up the information necessary to install 
+	and configure
+	the database. This manual does not give you information related
+	to PostgreSQL technology: it is assumed you already installed and
+	configured the database.
+      </para>
+      <para>
+	If you did not yet installed the software provided by Oracle,
+	please refer to the official Oracle site to download the
+	software and to pick-up the information necessary to install 
+	and configure
+	the database. This manual does not give you information related
+	to Oracle technology: it is assumed you already installed and
+	configured the database.
+      </para>
+    </note>
+    <important>
+      <para>
+	The LIXA software must be configured to support the PostgreSQL and
+	the Oracle Database Server resource manager as explained in 
+	<xref linkend="Linking_third_party_resource_managers"/>.
+	As a little hint, you should configure LIXA as below:
+	<screen>
+./configure --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib \
+> --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+	</screen>
+	Please don't forget you must compile and install every time you
+	re-configure.
+      </para>
+    </important>
+    <para>
+      Please follow the instructions explained 
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	    in <xref linkend="Development_setup_PostgreSQL_environment"/>
+	    to set-up a running environment for PostgreSQL server
+	</para></listitem>
+	<listitem><para>
+	    in <xref linkend="Development_setup_Oracle_environment"/>
+	    to set-up a running environment for Oracle Database Server
+	</para></listitem>
+	<listitem><para>
+	    in <xref linkend="Development_start_LIXA_server"/>
+	    to start up the LIXA state server
+	</para></listitem>
+      </itemizedlist>
+    </para>
+    <section>
+      <title>Build the client program</title>
+      <para>
+	Prepare the client (Application Program) using the below commands
+	(<command>gcc</command> command was splitted on several lines 
+	using <command>\</command> to help readability, but you may use
+	a single line):
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~$ mkdir tmp
+tiian@ubuntu:~$ cd tmp
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example6_pql_ora.c .
 tiian@ubuntu:~/tmp$ gcc example6_pql_ora.c -Wall \
->  -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq \
-> -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
+> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq \
+> -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public \
+> -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
 > -I /usr/include/postgresql -l pq \
 > -o example6_pql_ora
-	</screen></td></tr></tbody>
-      </table>
-    </para>
+	  </screen></td></tr></tbody>
+	</table>
+	Verify the executable produced by <command>gcc</command>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ldd example6_pql_ora
+        linux-gate.so.1 =>  (0xb77ba000)
+        liblixac.so.0 => not found
+        liblixapq.so.0 => not found
+        libclntsh.so.10.1 => not found
+        libnnz10.so => not found
+        libpq.so.5 => /usr/lib/libpq.so.5 (0xb778a000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb763b000)
+        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb75f6000)
+        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb74b3000)
+        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb7426000)
+        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb7423000)
+        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb73fa000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb73c8000)
+        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb7388000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb736f000)
+        /lib/ld-linux.so.2 (0xb77bb000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb736b000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb7356000)
+        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb7333000)
+        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb732b000)
+        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb7327000)
+        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb7314000)
+        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb7307000)
+        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb72f0000)
+        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb727a000)
+        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb7269000)
+        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb721c000)
+        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb7218000)
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
+	There are four unresolved references that can be fixed setting up
+	the environment properly; you can fix the environment manually or
+	using this script supplied by Oracle:
+	<filename>/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh</filename>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~$ echo $LD_LIBRARY_PATH
+
+tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
+tiian@ubuntu:~$ echo $LD_LIBRARY_PATH
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/home/db2inst1/sqllib/lib32
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/home/db2inst1/sqllib/lib32:/opt/lixa/lib
+	  </screen></td></tr></tbody>
+	</table>
+	Check again the executable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ldd example6_pql_ora
+        linux-gate.so.1 =>  (0xb7731000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7716000)
+        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb770f000)
+        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb695a000)
+        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6755000)
+        libpq.so.5 => /usr/lib/libpq.so.5 (0xb6728000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb65d9000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb65d5000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb65d0000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb65cb000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb65c2000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb6511000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb63f1000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb63dd000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb63c4000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb639f000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb6387000)
+        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb6342000)
+        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb6200000)
+        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb6172000)
+        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb616f000)
+        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb6146000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb6114000)
+        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb60d4000)
+        /lib/ld-linux.so.2 (0xb7732000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb60ac000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb6097000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb6093000)
+        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb6070000)
+        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb6068000)
+        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb6064000)
+        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb6051000)
+        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb6044000)
+        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb602d000)
+        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb5fb7000)
+        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb5fa6000)
+        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb5f59000)
+        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb5f55000)
+	  </screen></td></tr></tbody>
+	</table>
+	Set-up the necessary environment variables:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=PQL_STA_ORA_DYN
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+PQL_STA_ORA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	The below environment variables were set by the previous sourced
+	script; take a look to them:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+tiian@ubuntu:~/tmp$ echo $PATH
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+tiian@ubuntu:~/tmp$ echo $ORACLE_SID
+XE
+	  </screen></td></tr></tbody>
+	</table>
+	It is suggested to set the necessary environment variables in your 
+	profile if you are going to execute the programs many times.
+	This is the list of the suggested variables:
+	<varname>LD_LIBRARY_PATH</varname>,
+	<varname>LIXA_PROFILE</varname>,
+	<varname>ORACLE_HOME</varname>,
+	<varname>ORACLE_SID</varname>,
+	<varname>PATH</varname>.
+      </para>
+    </section>
+    <section>
+      <title>Some checks before program execution</title>
+      <para>
+	We set <varname>LIXA_PROFILE</varname> to value
+	<quote>PQL_STA_ORA_DYN</quote>, looking at
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename>:
+	<screen>
+    &lt;profile name="PQL_STA_ORA_DYN"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;PostgreSQL_stareg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;OracleXE_dynreg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+	</screen>
+	the profile references two Resource Managers:
+	<quote>PostgreSQL_stareg</quote> and <quote>OracleXE_dynreg</quote>, 
+	looking again at the config file:
+	<screen>
+    &lt;rsrmgr name="PostgreSQL_stareg" switch_file="/opt/lixa/lib/switch_postgresql_stareg.so" xa_open_info="axlib=/opt/lixa/lib/liblixac.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+    &lt;rsrmgr name="OracleXE_dynreg" switch_file="/opt/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
+	</screen>
+	we can discover how our application will access the resource
+	managers
+	<footnote>
+	  <para>
+	    The content of <constant>xa_open_info</constant> is passed to
+	    <function>PQconnectdb</function> function: you can refer to 
+	    PostgreSQL official
+	    documentation to discover what you can pass to this function.
+	    Please pay attention the <varname>xa_open_info</varname> can
+	    contain a maximum of 255 characters: this limitation is
+	    documented in <citation>XAspec</citation>.
+	  </para>
+	  <para>
+	    The content of <constant>xa_open_info</constant> string is
+	    described in chapter 15 "Developing Applications with Oracle XA"
+	    of the "Oracle Database Application Developer's Guide"
+	    manual; please refer to the documentation published by
+	    Oracle Corporation for further details.
+	  </para>
+	</footnote>. 
+	</para>
+	<para>
+	  @@@
+	  Verify no (Oracle) trace file exists:
+	  <screen>
+tiian@ubuntu:~/tmp$ ls -la /tmp/xa*
+ls: cannot access /tmp/xa*: No such file or directory
+	  </screen>
+	</para>
+    </section>
   </section>
 </chapter>
