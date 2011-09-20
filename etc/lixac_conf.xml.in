@@ -123,6 +123,15 @@
         <rsrmgr>OracleXE_dynreg</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="PQL_STA_ORA_STA">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
+        <rsrmgr>OracleXE_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
     <profile name="GT71">
       <sttsrvs>
         <sttsrv>local_1</sttsrv>
