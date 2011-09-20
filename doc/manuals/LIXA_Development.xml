@@ -2890,10 +2890,10 @@ tiian@ubuntu:~$ echo $LD_LIBRARY_PATH
 
 tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
 tiian@ubuntu:~$ echo $LD_LIBRARY_PATH
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/home/db2inst1/sqllib/lib32
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:
 tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/home/db2inst1/sqllib/lib32:/opt/lixa/lib
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
 	  </screen></td></tr></tbody>
 	</table>
 	Check again the executable:
@@ -2996,7 +2996,7 @@ XE
 	<quote>PostgreSQL_stareg</quote> and <quote>OracleXE_dynreg</quote>, 
 	looking again at the config file:
 	<screen>
-    &lt;rsrmgr name="PostgreSQL_stareg" switch_file="/opt/lixa/lib/switch_postgresql_stareg.so" xa_open_info="axlib=/opt/lixa/lib/liblixac.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+    &lt;rsrmgr name="PostgreSQL_stareg" switch_file="/opt/lixa/lib/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" /&gt;
     &lt;rsrmgr name="OracleXE_dynreg" switch_file="/opt/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
 	</screen>
 	we can discover how our application will access the resource
@@ -3011,6 +3011,8 @@ XE
 	    contain a maximum of 255 characters: this limitation is
 	    documented in <citation>XAspec</citation>.
 	  </para>
+	</footnote>
+	<footnote>
 	  <para>
 	    The content of <constant>xa_open_info</constant> string is
 	    described in chapter 15 "Developing Applications with Oracle XA"
@@ -3019,15 +3021,200 @@ XE
 	    Oracle Corporation for further details.
 	  </para>
 	</footnote>. 
-	</para>
-	<para>
-	  @@@
-	  Verify no (Oracle) trace file exists:
-	  <screen>
+      </para>
+      <para>
+	Verify no (Oracle) trace file exists:
+	<screen>
 tiian@ubuntu:~/tmp$ ls -la /tmp/xa*
 ls: cannot access /tmp/xa*: No such file or directory
-	  </screen>
-	</para>
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Program execution (dynamic registration)</title>
+      <para>
+	It is suggested to open three different terminals: 
+	the first one connected to <quote>testdb</quote> PostgreSQL database,
+	the second one connected to Oracle database and the
+	third one pointing to the directory where the compiled program 
+	example6_pql_ora lives.
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~$ psql testdb
+Welcome to psql 8.3.15, the PostgreSQL interactive terminal.
+
+Type:  \copyright for distribution terms
+       \h for help with SQL commands
+       \? for help with psql commands
+       \g or terminate with semicolon to execute query
+       \q to quit
+
+testdb=>
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
+tiian@ubuntu:~$ sqlplus "hr/hr"                                                 
+SQL*Plus: Release 10.2.0.1.0 - Production on Tue May 3 21:52:06 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL>
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ls -la
+total 28
+drwxr-xr-x  2 tiian tiian  4096 2011-09-20 21:53 .
+drwxr-xr-x 40 tiian tiian  4096 2011-09-19 20:54 ..
+-rwxr-xr-x  1 tiian tiian 11219 2011-09-18 21:24 example6_pql_ora
+-rw-r--r--  1 tiian tiian  7176 2011-09-18 21:24 example6_pql_ora.c
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of the PostgreSQL table (<quote>AUTHORS</quote>):
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name
+----+-----------+------------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of the Oracle table (<quote>COUNTRIES</quote>):
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	Insert a row in all the tables and check the contents of the tables
+	after the transaction execution:
+	<table frame="box">
+	  <thead><tr><td>[Third terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ./example6_pql_ora insert
+Inserting a row in the tables...
+Oracle INSERT statement executed!
+	  </screen></td></tr></tbody>
+	</table>
+	Now you can verify the content of the tables after the transaction:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name
+----+-----------+------------
+  1 | Foo       | Bar
+(1 row)
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+CO COUNTRY_NAME                              REGION_ID
+-- ---------------------------------------- ----------
+RS Repubblica San Marino                             1
+	  </screen></td></tr></tbody>
+	</table>
+	With the opposite command you can remove the rows from the tables:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ./example6_pql_ora delete
+Deleting a row from the tables...
+Oracle DELETE statement executed!
+	  </screen></td></tr></tbody>
+	</table>
+	and check the content of the tables again:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name
+----+-----------+------------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	We can verify the dynamic registration behavior of Oracle:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00002000
+tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
+0x00002000
+tiian@ubuntu:~/tmp$ ./example6_pql_ora insert 2>&amp;1 | grep ax_reg
+2011-09-20 22:11:01.669440 [6844/3052865280] ax_reg: rmid=1, xid=0xbfe4cdcc, flags=0x0
+2011-09-20 22:11:01.669537 [6844/3052865280] ax_reg: the application program has started a transaction (TX states S3); this XID '4c495841.ce4993340a46495e94f07dbbdd5d0366.6e8ecf5972a778ab648b5950c0f96dd6' will be returned
+2011-09-20 22:11:01.669591 [6844/3052865280] ax_reg: sending 153 bytes to the server for step 8
+2011-09-20 22:11:01.669639 [6844/3052865280] ax_reg/excp=7/ret_cod=0/errno=0
+	  </screen></td></tr></tbody>
+	</table>
+	We can check the static registration behavior of Oracle with a 
+	different profile:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=PQL_STA_ORA_STA
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+PQL_STA_ORA_STA
+tiian@ubuntu:~/tmp$ ./example6_pql_ora delete 2>&amp;1 | grep xa_start
+2011-09-20 22:22:22.561677 [22658/3052615424] lixa_xa_start
+[...]
+2011-09-20 22:22:22.608794 [22658/3052615424] lixa_xa_start: xa_start_entry(xid, 0, 0x0) = 0
+2011-09-20 22:22:22.610649 [22658/3052615424] lixa_xa_start: xa_start_entry(xid, 1, 0x0) = 0
+2011-09-20 22:22:22.610694 [22658/3052615424] lixa_xa_start: sending 281 bytes to the server for step 24
+2011-09-20 22:22:22.610757 [22658/3052615424] lixa_xa_start/excp=10/ret_cod=0/errno=0
+	  </screen></td></tr></tbody>
+	</table>
+	and check the content of the tables again:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name
+----+-----------+------------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	The activity of the Oracle database can be analyzed in the trace file:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL09202011.trc
+-rw-r--r-- 1 tiian tiian 12042 2011-09-20 22:22 /tmp/xa_NULL09202011.trc
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
     </section>
   </section>
 </chapter>
