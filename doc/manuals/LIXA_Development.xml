@@ -3214,6 +3214,13 @@ tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL09202011.trc
 -rw-r--r-- 1 tiian tiian 12042 2011-09-20 22:22 /tmp/xa_NULL09202011.trc
 	  </screen></td></tr></tbody>
 	</table>
+	<screen>
+tiian@ubuntu:~/lixa/doc/examples$ gcc example7_pql_db2.c -Wall \
+> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq \
+> -I /usr/include/postgresql -l pq \
+> -I /opt/ibm/db2/V9.7/include/ -L /opt/ibm/db2/V9.7/lib32/ -l db2 \
+> -o example7_pql_db2
+	</screen>
       </para>
     </section>
   </section>
