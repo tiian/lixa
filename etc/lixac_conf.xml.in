@@ -132,6 +132,24 @@
         <rsrmgr>OracleXE_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="PQL_STA_DB2_DYN">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
+        <rsrmgr>IBMDB2_dynreg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="PQL_STA_DB2_STA">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
+        <rsrmgr>IBMDB2_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
     <profile name="GT71">
       <sttsrvs>
         <sttsrv>local_1</sttsrv>
