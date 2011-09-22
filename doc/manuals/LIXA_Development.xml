@@ -2886,10 +2886,10 @@ tiian@ubuntu:~/tmp$ ldd example6_pql_ora
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~$ echo $LD_LIBRARY_PATH
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 
-tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
-tiian@ubuntu:~$ echo $LD_LIBRARY_PATH
+tiian@ubuntu:~/tmp$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:
 tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
@@ -3214,13 +3214,286 @@ tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL09202011.trc
 -rw-r--r-- 1 tiian tiian 12042 2011-09-20 22:22 /tmp/xa_NULL09202011.trc
 	  </screen></td></tr></tbody>
 	</table>
+      </para>
+    </section>
+  </section>
+  <section xml:id="Development_example7_pql_ora">
+    <title>An example with two distinct Resource Managers: PostgreSQL &amp; 
+      IBM DB2</title>
+    <figure xml:id="develop7">
+      <title>Deploy model of an example showing a distributed transaction with PostgreSQL and IBM DB2</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Development_7.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      This example shows as
+      you can implement DTP (Distributed Transaction Processing) with two
+      Resource Managers (PostgreSQL and IBM DB2)
+      coordinated by the LIXA Transaction Manager.
+      It's strongly suggested you have played with the
+      examples previously shown in this chapter (see
+      <xref linkend="Development"/>) before starting this more complex one.
+    </para>
+    <note>
+      <para>
+	If you did not yet installed the software provided by PostgreSQL,
+	please refer to the official PostgreSQL site to download the
+	software and to pick-up the information necessary to install 
+	and configure
+	the database. This manual does not give you information related
+	to PostgreSQL technology: it is assumed you already installed and
+	configured the database.
+      </para>
+      <para>
+	If you did not yet installed the software provided by IBM,
+	please refer to the official IBM site to download the
+	software and to pick-up the information necessary to install 
+	and configure
+	the database. This manual does not give you information related
+	to IBM DB2 technology: it is assumed you already installed and
+	configured the database.
+      </para>
+    </note>
+    <important>
+      <para>
+	The LIXA software must be configured to support the PostgreSQL and
+	the IBM DB2 resource manager as explained in 
+	<xref linkend="Linking_third_party_resource_managers"/>.
+	As a little hint, you should configure LIXA as below:
 	<screen>
+./configure --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib \
+> --with-ibmdb2=/opt/ibm/db2/V9.7
+	</screen>
+	Please don't forget you must compile and install every time you
+	re-configure.
+      </para>
+    </important>
+    <para>
+      Please follow the instructions explained 
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	    in <xref linkend="Development_setup_PostgreSQL_environment"/>
+	    to set-up a running environment for PostgreSQL server
+	</para></listitem>
+	<listitem><para>
+	    in <xref linkend="Development_setup_DB2_environment"/>
+	    to set-up a running environment for IBM DB2
+	</para></listitem>
+	<listitem><para>
+	    in <xref linkend="Development_start_LIXA_server"/>
+	    to start up the LIXA state server
+	</para></listitem>
+      </itemizedlist>
+    </para>
+    <section>
+      <title>Build the client program</title>
+      <para>
+	Prepare the client (Application Program) using the below commands
+	(<command>gcc</command> command was splitted on several lines 
+	using <command>\</command> to help readability, but you may use
+	a single line):
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~$ mkdir tmp
+tiian@ubuntu:~$ cd tmp
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example7_pql_db2.c .
 tiian@ubuntu:~/lixa/doc/examples$ gcc example7_pql_db2.c -Wall \
 > -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq \
 > -I /usr/include/postgresql -l pq \
 > -I /opt/ibm/db2/V9.7/include/ -L /opt/ibm/db2/V9.7/lib32/ -l db2 \
 > -o example7_pql_db2
+	  </screen></td></tr></tbody>
+	</table>
+	Verify the executable produced by <command>gcc</command>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ldd example7_pql_db2
+        linux-gate.so.1 =>  (0xb772a000)
+        liblixac.so.0 => not found
+        liblixapq.so.0 => not found
+        libpq.so.5 => /usr/lib/libpq.so.5 (0xb76fa000)
+        libdb2.so.1 => /usr/lib/libdb2.so.1 (0xb61c8000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb6079000)
+        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb6034000)
+        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb5ef2000)
+        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb5e65000)
+        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb5e61000)
+        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb5e38000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb5e06000)
+        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb5dc6000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb5dae000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb5da9000)
+        libpam.so.0 => /lib/libpam.so.0 (0xb5d9f000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb5d7a000)
+        libdb2dascmn.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2dascmn.so.1 (0xb5d4c000)
+        libdb2g11n.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2g11n.so.1 (0xb56de000)
+        libdb2genreg.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2genreg.so.1 (0xb569e000)
+        libdb2install.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2install.so.1 (0xb5693000)
+        libdb2locale.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2locale.so.1 (0xb5680000)
+        libdb2osse.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2osse.so.1 (0xb537a000)
+        libdb2osse_db2.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2osse_db2.so.1 (0xb530a000)
+        libdb2trcapi.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2trcapi.so.1 (0xb52f7000)
+        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb5204000)
+        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb51f9000)
+        /lib/ld-linux.so.2 (0xb772b000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb51e3000)
+        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb51c0000)
+        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb51b8000)
+        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb51b5000)
+        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb51a2000)
+        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb5194000)
+        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb517d000)
+        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb5107000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb50fd000)
+        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb50ed000)
+        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb50a0000)
+        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb509c000)
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
+	There are two unresolved references that can be fixed setting up
+	the environment properly:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+/opt/lixa/lib
+	  </screen></td></tr></tbody>
+	</table>
+	Check again the executable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ldd example7_pql_db2
+        linux-gate.so.1 =>  (0xb774c000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7731000)
+        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb772a000)
+        libpq.so.5 => /usr/lib/libpq.so.5 (0xb76fc000)
+        libdb2.so.1 => /usr/lib/libdb2.so.1 (0xb61ca000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb607b000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb6077000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb6073000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb606e000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb6064000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb5fb3000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb5e93000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb5e7f000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb5e67000)
+        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb5e21000)
+        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb5cdf000)
+        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb5c52000)
+        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb5c4f000)
+        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb5c26000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb5bf3000)
+        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb5bb3000)
+        libpam.so.0 => /lib/libpam.so.0 (0xb5ba9000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb5b84000)
+        libdb2dascmn.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2dascmn.so.1 (0xb5b56000)
+        libdb2g11n.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2g11n.so.1 (0xb54e8000)
+        libdb2genreg.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2genreg.so.1 (0xb54a8000)
+        libdb2install.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2install.so.1 (0xb549d000)
+        libdb2locale.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2locale.so.1 (0xb548a000)
+        libdb2osse.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2osse.so.1 (0xb5184000)
+        libdb2osse_db2.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2osse_db2.so.1 (0xb5114000)
+        libdb2trcapi.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2trcapi.so.1 (0xb5101000)
+        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb500e000)
+        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb5003000)
+        /lib/ld-linux.so.2 (0xb774d000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb4fdb000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb4fc6000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb4fc2000)
+        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb4f9f000)
+        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb4f97000)
+        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb4f93000)
+        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb4f80000)
+        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb4f73000)
+        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb4f5c000)
+        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb4ee6000)
+        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb4ed5000)
+        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb4e88000)
+        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb4e84000)
+	  </screen></td></tr></tbody>
+	</table>
+	Set-up the necessary environment variables:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=PQL_STA_DB2_DYN
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+PQL_STA_DB2_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	It is suggested to set the necessary environment variables in your 
+	profile if you are going to execute the programs many times.
+	This is the list of the suggested variables:
+	<varname>LD_LIBRARY_PATH</varname>,
+	<varname>LIXA_PROFILE</varname>,
+	<varname>PATH</varname>.
+      </para>
+    </section>
+    <section>
+      <title>Some checks before program execution</title>
+      <para>
+	We set <varname>LIXA_PROFILE</varname> to value
+	<quote>PQL_STA_DB2_DYN</quote>, looking at
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename>:
+	<screen>
+    &lt;profile name="PQL_STA_DB2_DYN"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;PostgreSQL_stareg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;IBMDB2_dynreg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
 	</screen>
+	the profile references two Resource Managers:
+	<quote>PostgreSQL_stareg</quote> and <quote>IBMDB2_dynreg</quote>, 
+	looking again at the config file:
+	<screen>
+    &lt;rsrmgr name="PostgreSQL_stareg" switch_file="/opt/lixa/lib/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" /&gt;
+    &lt;rsrmgr name="IBMDB2_dynreg" switch_file="/opt/lixa/lib/switch_ibmdb2_dynreg.so" xa_open_info="axlib=/opt/lixa/lib/liblixac.so,db=sample,tpm=lixa" xa_close_info="" /&gt;
+	</screen>
+	we can discover how our application will access the resource
+	managers
+	<footnote>
+	  <para>
+	    The content of <constant>xa_open_info</constant> is passed to
+	    <function>PQconnectdb</function> function: you can refer to 
+	    PostgreSQL official
+	    documentation to discover what you can pass to this function.
+	    Please pay attention the <varname>xa_open_info</varname> can
+	    contain a maximum of 255 characters: this limitation is
+	    documented in <citation>XAspec</citation>.
+	  </para>
+	</footnote>
+	<footnote>
+	  <para>
+	    The content of <constant>xa_open_info</constant> string is
+	    documented at IBM Infocenter: search the string
+	    <quote>xa_open string formats</quote> in the documentation
+	    relevant to your installed version; this is a link
+	    <link xlink:href="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.admin.2pc.doc/doc/r0005080.html">
+	      http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.admin.2pc.doc/doc/r0005080.html
+	    </link>
+	    but it may change in the future.
+	  </para>
+	</footnote>. 
       </para>
     </section>
   </section>
