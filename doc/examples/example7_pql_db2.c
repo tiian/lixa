@@ -58,7 +58,7 @@ static void exit_nicely(PGconn *conn, int exitrc)
 int main(int argc, char *argv[])
 {
     /* generic variables */
-    int         txrc, delete, dept = 0;
+    int         txrc, delete = 0, dept = 0;
     /* PostgreSQL variables */
     const char *conninfo;
     PGconn     *pq_conn;
@@ -78,6 +78,9 @@ int main(int argc, char *argv[])
         "VALUES('Z99', 'RESEARCH & DEVELOPMENT', 'E01')";
     SQLCHAR sql_stat_dd[] = "DELETE DB2INST1.DEPT WHERE DEPTNO='Z99'";
     SQLCHAR *sql_stat = NULL;
+    char psql_stat_i[] = "INSERT INTO authors VALUES(1, 'Foo', 'Bar');";
+    char psql_stat_d[] = "DELETE FROM authors WHERE id=1;";
+    char *psql_stat = NULL;
 
     conninfo = "dbname = testdb";
     
@@ -86,16 +89,19 @@ int main(int argc, char *argv[])
     if (argc > 2 && (!strcmp(argv[2], "dept") ||
                      !strcmp(argv[2], "DEPT")))
         dept = 1;
-    if (delete)
+    if (delete) {
+        psql_stat = psql_stat_d;
         if (dept)
             sql_stat = sql_stat_dd;
         else
             sql_stat = sql_stat_d;
-    else
+    } else {
+        psql_stat = psql_stat_i;
         if (dept)
             sql_stat = sql_stat_id;
         else
             sql_stat = sql_stat_i;
+    }
     
     /* open the resource manager(s) */
     if (TX_OK != (txrc = tx_open())) {
@@ -158,34 +164,20 @@ int main(int argc, char *argv[])
         exit_nicely(pq_conn, txrc);
     }
 
-    if (delete) {
-        printf("Deleting rows from the tables...\n");
-        res = PQexec(pq_conn,
-                     "DELETE FROM authors WHERE id=1;");
-        if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-                fprintf(stderr, "DELETE FROM authors: %s",
-                        PQerrorMessage(pq_conn));
-                PQclear(res);
-                exit_nicely(pq_conn, 1);
-        }
-        PQclear(res);
-    } else {
-        printf("Inserting rows in the tables...\n");
-        res = PQexec(pq_conn,
-                     "INSERT INTO authors VALUES(1, 'Foo', 'Bar');");
-        if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-                fprintf(stderr, "INSERT INTO authors: %s",
-                        PQerrorMessage(pq_conn));
-                PQclear(res);
-                exit_nicely(pq_conn, 1);
-        }
-        PQclear(res);
-    }
+    printf("Executing DB2 statement '%s'...\n", sql_stat);
     if (SQL_SUCCESS != (rc_cli = SQLExecDirect(stat, sql_stat, SQL_NTS))) {
         fprintf(stderr, "Unable to execute the SQL statement ('%s'): %d\n",
                 sql_stat, rc_cli);
         exit_nicely(pq_conn, 1);
     }
+    printf("Executing PostgreSQL statement '%s'...\n", psql_stat);
+    res = PQexec(pq_conn, psql_stat);
+    if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+        fprintf(stderr, "PostgreSQL error: %s", PQerrorMessage(pq_conn));
+        PQclear(res);
+        exit_nicely(pq_conn, 1);
+    }
+    PQclear(res);
 
     /* this is to test tx_commit */
     if (TX_OK != (txrc = tx_commit())) {
