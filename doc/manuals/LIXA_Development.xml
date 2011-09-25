@@ -218,7 +218,7 @@ tx_close(): 0
     </section>
   </section>
   <section xml:id="Development_example2_ora">
-    <title>An example with a <quote>real</quote> Resource Manager (Oracle DBMS)</title>
+    <title>An example with Oracle Database Server</title>
     <figure xml:id="develop2">
       <title>Deploy model of an example with Oracle Database Server</title>
       <mediaobject>
@@ -485,10 +485,10 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
 	<screen>
 tiian@ubuntu:~$ sudo su - lixa
 lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
+lixa      6787     1  0 17:36 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 lixa@ubuntu:~$ exit
 logout
-tiian@ubuntu:~$ ps -ef|grep lixad|grep -v grep
-lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 	</screen>
       </para>
     </section>
@@ -1637,8 +1637,7 @@ tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
     </section>
   </section>
   <section>
-    <title>An example with two distinct Resource Manager: Oracle DBMS and
-      IBM DB2 DBMS</title>
+    <title>An example with Oracle and IBM DB2</title>
     <figure xml:id="develop4">
       <title>Deploy model of an example showing a distributed transaction with Oracle and IBM DB2</title>
       <mediaobject>
@@ -2299,7 +2298,7 @@ DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
     </section>
   </section>
   <section xml:id="Development_example5_pql">
-    <title>An example with PostgreSQL DBMS</title>
+    <title>An example with PostgreSQL</title>
     <figure xml:id="develop5">
       <title>Deploy model of an example with PostgreSQL DBMS</title>
       <mediaobject>
@@ -2748,8 +2747,7 @@ Deleting a row from the table...
     </section>
   </section>
   <section xml:id="Development_example6_pql_ora">
-    <title>An example with two distinct Resource Managers: PostgreSQL &amp; 
-      Oracle DBMS</title>
+    <title>An example with PostgreSQL &amp; Oracle</title>
     <figure xml:id="develop6">
       <title>Deploy model of an example showing a distributed transaction with PostgreSQL and Oracle</title>
       <mediaobject>
@@ -3218,8 +3216,7 @@ tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL09202011.trc
     </section>
   </section>
   <section xml:id="Development_example7_pql_ora">
-    <title>An example with two distinct Resource Managers: PostgreSQL &amp; 
-      IBM DB2</title>
+    <title>An example with PostgreSQL &amp; IBM DB2</title>
     <figure xml:id="develop7">
       <title>Deploy model of an example showing a distributed transaction with PostgreSQL and IBM DB2</title>
       <mediaobject>
@@ -3495,6 +3492,213 @@ PQL_STA_DB2_DYN
 	  </para>
 	</footnote>. 
       </para>
+    </section>
+    <section>
+      <title>Program execution (dynamic registration)</title>
+      <para>
+	It is suggested to open three different terminals: 
+	the first one connected to <quote>TESTDB</quote> PostgreSQL database,
+	the second one connected to <quote>SAMPLE</quote> DB2 database
+	and the	third one pointing to the directory where the compiled program 
+	example7_pql_db2 lives.
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~$ psql testdb
+Welcome to psql 8.3.15, the PostgreSQL interactive terminal.
+
+Type:  \copyright for distribution terms
+       \h for help with SQL commands
+       \? for help with psql commands
+       \g or terminate with semicolon to execute query
+       \q to quit
+
+testdb=>
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[IBM DB2 terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~$ . /home/db2inst1/sqllib/db2profile
+tiian@ubuntu:~$ db2
+(c) Copyright IBM Corporation 1993,2007
+Command Line Processor for DB2 Client 9.7.1
+
+You can issue database manager commands and SQL statements from the command
+prompt. For example:
+    db2 => connect to sample
+    db2 => bind sample.bnd
+
+For general help, type: ?.
+For command help, type: ? command, where command can be
+the first few keywords of a database manager command. For example:
+ ? CATALOG DATABASE for help on the CATALOG DATABASE command
+ ? CATALOG          for help on all of the CATALOG commands.
+
+To exit db2 interactive mode, type QUIT at the command prompt. Outside
+interactive mode, all commands must be prefixed with 'db2'.
+To list the current command option settings, type LIST COMMAND OPTIONS.
+
+For more detailed help, refer to the Online Reference Manual.
+
+db2 => connect to SAMPLE
+
+   Database Connection Information
+
+ Database server        = DB2/LINUX 9.7.1
+ SQL authorization ID   = TIIAN
+ Local database alias   = SAMPLE
+
+db2 =>
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ls -la
+total 32
+drwxr-xr-x  2 tiian tiian  4096 2011-09-25 17:11 .
+drwxr-xr-x 40 tiian tiian  4096 2011-09-22 22:24 ..
+-rwxr-xr-x  1 tiian tiian 12429 2011-09-22 22:47 example7_pql_db2
+-rw-r--r--  1 tiian tiian  7541 2011-09-22 22:46 example7_pql_db2.c
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of the PostgreSQL table (<quote>AUTHORS</quote>):
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name
+----+-----------+------------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of the DB2 tables (<quote>DB2INST1.ORG</quote> and
+	<quote>DB2INST1.DEPT</quote>):
+	<table frame="box">
+	  <thead><tr><td>[IBM DB2 terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+db2 => select * from DB2INST1.ORG where DEPTNUMB = 150
+
+DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
+-------- -------------- ------- ---------- -------------
+
+  0 record(s) selected.
+
+db2 => select * from DB2INST1.DEPT where DEPTNO='Z99'
+
+DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
+------ ------------------------------------ ------ -------- ----------------
+
+  0 record(s) selected.
+	  </screen></td></tr></tbody>
+	</table>
+	Insert a row in PostgreSQL <quote>AUTHORS</quote> table and in
+	DB2 <quote>ORG</quote> table and check the contents of the tables
+	after the transaction execution:
+	<table frame="box">
+	  <thead><tr><td>[Third terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ . /home/db2inst1/sqllib/db2profile
+tiian@ubuntu:~/tmp$ ./example7_pql_db2 insert org
+Executing DB2 statement 'INSERT INTO DB2INST1.ORG(DEPTNUMB, DEPTNAME, MANAGER, DIVISION, LOCATION) VALUES(150, 'Europe', 231, 'R&amp;D', 'Mojan')'...
+Executing PostgreSQL statement 'INSERT INTO authors VALUES(1, 'Foo', 'Bar');'...	  </screen></td></tr></tbody>
+	</table>
+	Now you can verify the content of the tables after the transaction:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from authors;
+ id | last_name | first_name
+----+-----------+------------
+  1 | Foo       | Bar
+(1 row)
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[IBM DB2 terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+db2 => select * from DB2INST1.ORG where DEPTNUMB = 150
+
+DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
+-------- -------------- ------- ---------- -------------
+     150 Europe             231 R&amp;D        Mojan
+
+  1 record(s) selected.
+	  </screen></td></tr></tbody>
+	</table>
+	If you try to insert the same row again you can verify an automatic
+	rollback due to an error thrown by the second resource manager:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ./example7_pql_db2 insert org
+Executing DB2 statement 'INSERT INTO DB2INST1.ORG(DEPTNUMB, DEPTNAME, MANAGER, DIVISION, LOCATION) VALUES(150, 'Europe', 231, 'R&amp;D', 'Mojan')'...
+Executing PostgreSQL statement 'INSERT INTO authors VALUES(1, 'Foo', 'Bar');'...
+PostgreSQL error: ERROR:  duplicate key value violates unique constraint "authors_pkey"
+	  </screen></td></tr></tbody>
+	</table>
+	DB2 table (<quote>ORG</quote>) allows multiple rows, PostgreSQL table
+	(<quote>AUTHORS</quote>) does not allow multiple rows: the error stops
+	the program execution and the resource managers automatically
+	rollback the changes. You can verify there is only one row in the
+	tables:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from authors;
+ id | last_name | first_name
+----+-----------+------------
+  1 | Foo       | Bar
+(1 row)
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[IBM DB2 terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+db2 => select * from DB2INST1.ORG where DEPTNUMB = 150
+
+DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
+-------- -------------- ------- ---------- -------------
+     150 Europe             231 R&amp;D        Mojan
+
+  1 record(s) selected.
+	  </screen></td></tr></tbody>
+	</table>
+	You can easily verify there are no prepared transactions inside
+	PostgreSQL database:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from pg_prepared_xacts;
+ transaction | gid | prepared | owner | database
+-------------+-----+----------+-------+----------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	We can verify that DB2 is using dynamic registration:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00002000
+tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
+0x00002000
+tiian@ubuntu:~/tmp$ ./example7_pql_db2 delete org 2>&amp;1 | grep ax_reg
+2011-09-25 18:15:38.499702 [13586/3035527472] ax_reg: rmid=1, xid=0xbf9b2630, flags=0x0
+2011-09-25 18:15:38.500405 [13586/3035527472] ax_reg: the application program has started a transaction (TX states S3); this XID '4c495841.0565b518222345ba852b4c4a09a660ae.725d0414e912e62f9ef42209ef693f36' will be returned
+2011-09-25 18:15:38.500970 [13586/3035527472] ax_reg: sending 153 bytes to the server for step 8
+2011-09-25 18:15:38.501415 [13586/3035527472] ax_reg/excp=7/ret_cod=0/errno=0
+	  </screen></td></tr></tbody>
+	</table>
+	If you used <quote>PQL_STA_DB2_STA</quote> profile instead of 
+	<quote>PQL_STA_DB2_DYN</quote> you could switch the DB2 to
+	static behavior.
+      </para>
+      <note><para>
+	  Combining the previous two examples you can realize a program that
+	  access 3 resource managers: PostgreSQL, Oracle and DB2.
+	  It is left as an exercise to the reader.
+      </para></note>
     </section>
   </section>
 </chapter>
