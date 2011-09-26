@@ -34,8 +34,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = src/client/switch/postgresql
-DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -83,7 +83,7 @@ SOURCES = $(liblixapq_la_SOURCES) \
 DIST_SOURCES = $(liblixapq_la_SOURCES) \
 	$(switch_postgresql_stareg_la_SOURCES)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
-HEADERS = $(include_HEADERS)
+HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -226,6 +226,7 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 include_HEADERS = lixapq.h
+noinst_HEADERS = liblixapq.h
 lib_LTLIBRARIES = liblixapq.la switch_postgresql_stareg.la
 liblixapq_la_SOURCES = liblixapq.c
 switch_postgresql_stareg_la_SOURCES = postgresql_stareg.c
