@@ -1,8 +1,11 @@
 LOG:
 
-         - 0.5.33 library liblixabmt was renamed to liblixab
+20110927 - 0.5.33 library liblixabmt was renamed to liblixab
                   library liblixacmt was renamed to liblixac
                   a switch file for PostgreSQL is now available
+                  the package supplies some examples that show how LIXA can
+                  be used in conjunction with PostgreSQL, Oracle and DB2
+                  performing distributed transaction processing
 
 20110504 - 0.5.32 the package supplies an example that shows how LIXA can
                   be used in conjunction with Oracle Database Server and IBM
