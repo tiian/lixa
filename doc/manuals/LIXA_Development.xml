@@ -3298,7 +3298,7 @@ tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL09202011.trc
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example7_pql_db2.c .
-tiian@ubuntu:~/lixa/doc/examples$ gcc example7_pql_db2.c -Wall \
+tiian@ubuntu:~/tmp$ gcc example7_pql_db2.c -Wall \
 > -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq \
 > -I /usr/include/postgresql -l pq \
 > -I /opt/ibm/db2/V9.7/include/ -L /opt/ibm/db2/V9.7/lib32/ -l db2 \
