@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.5.34
+
 20110927 - 0.5.33 library liblixabmt was renamed to liblixab
                   library liblixacmt was renamed to liblixac
                   a switch file for PostgreSQL is now available
