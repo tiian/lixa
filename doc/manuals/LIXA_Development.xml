@@ -3701,4 +3701,152 @@ tiian@ubuntu:~/tmp$ ./example7_pql_db2 delete org 2>&amp;1 | grep ax_reg
       </para></note>
     </section>
   </section>
+  <section xml:id="Development_example8_mys">
+    <title>An example with MySQL</title>
+    <figure xml:id="develop8">
+      <title>Deploy model of an example with MySQL DBMS</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Development_8.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      This example was developed using MySQL 5.0.51a for Linux (Ubuntu).
+      If you were using a different version you would need to adapt some
+      commands to your environment.
+    </para>
+    <note><para>
+	If you did not yet installed the software, please refer to the 
+	official site for your Linux distribution or to the official site
+	of MySQL if your operating system does not distribute the
+	software or you want to use a different MySQL version.
+	Using Ubuntu Linux this packages are necessary:
+	<variablelist>
+	  <varlistentry>
+	    <term><package>mysql-server</package></term>
+	    <listitem><para>
+		MySQL server
+	    </para></listitem>
+	  </varlistentry>	  
+	  <varlistentry>
+	    <term><package>libmysqlclient15-dev</package></term>
+	    <listitem><para>
+		MySQL C client development library
+	    </para></listitem>
+	  </varlistentry>
+	</variablelist>
+	This manual does not give you information related
+	to MySQL: it is assumed you already installed and
+	configured the database
+	<footnote><para>
+	    This is the sample command for Ubuntu 8.04 operating system:
+	    <computeroutput>sudo apt-get install mysql-server libmysqlclient15-dev</computeroutput>
+	</para></footnote>.
+    </para></note>
+    <note><para>
+	This example uses a client running in the same host used by
+	MySQL server: this is not a technical limitation, but a way to
+	make it easy. Client/server configuration must work as well: 
+	please refer to the database documentation.
+    </para></note>
+    <important><para>
+	The LIXA software must be configured to support the MySQL 
+	server resource manager as explained in 
+	<xref linkend="Linking_third_party_resource_managers"/> @@@ .
+    </para></important>
+    <section xml:id="Development_setup_MySQL_environment">
+      <title>Set-up MySQL environment</title>
+      <section>
+	<title>Start-up the MySQL server</title>
+	<para>
+	  If your server didn't start-up automatically at boot time, you
+	  could start it with the following commands:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@mojan:~$ sudo /etc/init.d/mysql start
+ * Starting MySQL database server mysqld                                 [ OK ] 
+ * Checking for corrupt, not cleanly closed and upgrade needing tables.
+tiian@mojan:~$ ps -ef|grep mysql|grep -v grep
+root      7666     1  0 21:52 ?        00:00:26 /bin/sh /usr/bin/mysqld_safe
+root      9060     1  0 22:46 pts/1    00:00:00 /bin/sh /usr/bin/mysqld_safe
+mysql     9099  9060  1 22:46 pts/1    00:00:00 /usr/sbin/mysqld --basedir=/usr --datadir=/var/lib/mysql --user=mysql --pid-file=/var/run/mysqld/mysqld.pid --skip-external-locking --port=3306 --socket=/var/run/mysqld/mysqld.sock
+root      9101  9060  0 22:46 pts/1    00:00:00 logger -p daemon.err -t mysqld_safe -i -t mysqld
+	    </screen></td></tr></tbody>
+	  </table>
+	  Create a new user authorization and a new database
+	  <footnote><para>
+	      You need the password of MySQL root user to execute
+	      these commands
+	  </para></footnote>:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu:~$ mysql -u root -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 1
+Server version: 5.0.51a-3ubuntu5.8 (Ubuntu)
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql> GRANT ALL ON lixa.* TO 'lixa'@'localhost';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> CREATE DATABASE lixa;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> quit
+Bye
+	    </screen></td></tr></tbody>
+	  </table>
+	  The <systemitem class="username">lixa@localhost</systemitem> user
+	  has been created with all privileges on the <quote>lixa</quote>
+	  database. Now a sample table must be created using this new user:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu:~$ mysql -h localhost -u lixa -p lixa
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 3
+Server version: 5.0.51a-3ubuntu5.8 (Ubuntu)
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql> SELECT DATABASE();
++------------+
+| DATABASE() |
++------------+
+| lixa       |
++------------+
+1 row in set (0.01 sec)
+
+mysql> CREATE TABLE authors (id INTEGER NOT NULL PRIMARY KEY, last_name TEXT, first_name TEXT) ENGINE=InnoDB;
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> DESCRIBE authors;
++------------+---------+------+-----+---------+-------+
+| Field      | Type    | Null | Key | Default | Extra |
++------------+---------+------+-----+---------+-------+
+| id         | int(11) | NO   | PRI | NULL    |       |
+| last_name  | text    | YES  |     | NULL    |       |
+| first_name | text    | YES  |     | NULL    |       |
++------------+---------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+mysql> select * from authors;
+Empty set (0.00 sec)
+	    </screen></td></tr></tbody>
+	  </table>
+	  OK, the <quote>authors</quote> table was created. 
+	  If something went wrong, you should refer to MySQL
+	  documentation to fix the issue before the next step because
+	  you would not be able to execute the sample program without a
+	  basic running installation.
+	</para>
+      </section>
+    </section>
+  </section>
 </chapter>
