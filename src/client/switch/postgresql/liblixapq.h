@@ -31,6 +31,8 @@
 
 
 
+/* Utilities for resource manager without standard switch file */
+#include <lixa_sw.h>
 /* PostgreSQL front-end */
 #include <libpq-fe.h>
 
@@ -43,95 +45,6 @@ struct xa_switch_t xapqls;
 
 
 
-/**
- * Used to build an array of connections; useful when there are two or more
- * PostgreSQL resource managers in the same transaction
- */
-struct lixa_pq_status_rm_s {
-    /** Resource Manager ID */
-    int     rmid;
-    struct {
-        /** Resource Manager State:
-         *  0=Un-initialized,
-         *  1=Initialized */
-        int R;
-        /** Transaction Branch Association State:
-         *  0=Not Associated,
-         *  1=Associated,
-         *  2=Association Suspended (UNSUPPORTED) */
-        int T;
-        /** Transaction Branch State:
-         *  0=Non-existent Transaction,
-         *  1=Active,
-         *  2=Idle,
-         *  3=Prepared,
-         *  4=Rollback Only,
-         *  5=Heuristically Completed */
-        int S;
-    } state;
-    /** Transaction ID as passed by the Transaction Manager */
-    XID     xid;
-    /** PostgreSQL connection */
-    PGconn *conn;
-};
-
-
-
-/**
- * This is the status record associated to a thread
- */
-struct lixa_pq_status_s {
-    /** Store the context of every PostgreSQL resource manager used by the
-     *  transaction */
-    GArray *rm;
-};
-
-
-
-typedef struct lixa_pq_status_s lixa_pq_status_t;
-
-
-
-/**
- * Reset the content of an object
- * @param lps IN/OUT object reference
- */
-static inline void lixa_pq_status_init(lixa_pq_status_t *lps) {
-    lps->rm = g_array_new(FALSE, FALSE, sizeof(struct lixa_pq_status_rm_s));
-}
-
-
-/**
- * Reset the content of an object
- * @param lpsr IN/OUT object reference
- */
-static inline void lixa_pq_status_rm_init(struct lixa_pq_status_rm_s *lpsr) {
-    lpsr->rmid = 0;
-    lpsr->state.R = lpsr->state.T = lpsr->state.S = 0;
-    memset(&(lpsr->xid), 0, sizeof(XID));
-    lpsr->conn = NULL;
-}
-
-
-
-/**
- * Retrieve a pointer to the status of the resource manager for the current
- * thread
- * @param rmid IN Resource Manager ID
- * @return the pointer to the desired status or NULL
- */
-struct lixa_pq_status_rm_s *lixa_pq_status_rm_get(int rmid);
-
-
-
-/**
- * Destroy an object of type @ref lixa_pq_status_t
- * @param data IN reference to the object
- */
-void lixa_pq_status_destroy(gpointer data);
-
-
-    
 /**
  * Implementation of "xa_open" for PostgreSQL;
  * refer to "Distributed Transaction Processing: The XA Specification" for
