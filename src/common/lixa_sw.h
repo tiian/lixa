@@ -46,6 +46,19 @@
 
 
 /**
+ * This mutex is used to protect the status structure when the library is
+ * used in a multithread environment
+ */
+extern GStaticMutex lixa_sw_status_mutex;
+/**
+ * The status is saved in a hash table: there is an element for every
+ * thread
+ */
+extern GHashTable  *lixa_sw_status;
+
+
+
+/**
  * Used to build an array of connections; useful when there are two or more
  * identical resource managers in the same transaction
  */
@@ -133,5 +146,23 @@ struct lixa_sw_status_rm_s *lixa_sw_status_rm_get(int rmid);
 void lixa_sw_status_destroy(gpointer data);
 
 
-    
+
+/**
+ * Retrieve the connection pointer of a generic resource manager
+ * @param rmid IN Resource Manager ID
+ * @return the pointer to the desired status or NULL
+ */
+gpointer lixa_sw_get_conn_by_rmid(int rmid);
+
+
+
+/**
+ * Retrieve the connection pointer of a generic resource manager
+ * @param pos IN Resource Manager position
+ * @return the pointer to the desired status or NULL
+ */
+gpointer lixa_sw_get_conn_by_pos(int pos);
+
+
+
 #endif /* LIXA_SW_H */

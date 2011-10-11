@@ -45,15 +45,7 @@
 
 
 
-/**
- * This mutex is used to protect the status structure when the library is
- * used in a multithread environment
- */
 GStaticMutex lixa_sw_status_mutex = G_STATIC_MUTEX_INIT;
-/**
- * The status is saved in a hash table: there is an element for every
- * thread
- */
 GHashTable  *lixa_sw_status = NULL;
 
 
@@ -99,6 +91,85 @@ struct lixa_sw_status_rm_s *lixa_sw_status_rm_get(int rmid)
         return NULL;
     }
     return lpsr;
+}
+
+
+
+gpointer lixa_sw_get_conn_by_rmid(int rmid)
+{
+    gpointer conn = NULL;
+    
+    /* lock the mutex */
+    g_static_mutex_lock(&lixa_sw_status_mutex);
+
+    if (NULL != lixa_sw_status) {
+        pthread_t key = pthread_self();
+        lixa_sw_status_t *lps = NULL;
+        if (NULL != (lps = (lixa_sw_status_t *)g_hash_table_lookup(
+                         lixa_sw_status, (gconstpointer)key))) {
+            if (0 < lps->rm->len) {
+                guint i;
+                for (i=0; i<lps->rm->len; ++i) {
+                    struct lixa_sw_status_rm_s *lpsr = &g_array_index(
+                        lps->rm, struct lixa_sw_status_rm_s, i);
+                    if (lpsr->rmid == rmid) {
+                        conn = lpsr->conn;
+                        break;
+                    }
+                }
+                if (NULL == conn)
+                    LIXA_TRACE(("lixa_sw_get_conn_by_rmid: no connection "
+                                "found for rmid=%d\n", rmid));
+            } else {
+                LIXA_TRACE(("lixa_sw_get_conn_by_rmid: no connection "
+                            "found to PostgreSQL databases\n"));
+            }
+        } else {
+            LIXA_TRACE(("lixa_sw_get_conn_by_rmid: thread not registered\n"));
+        }
+    } else {
+        LIXA_TRACE(("lixa_sw_get_conn_by_rmid: status is NULL\n"));
+    }
+    
+    /* unlock the mutex */
+    g_static_mutex_unlock(&lixa_sw_status_mutex);
+
+    return conn;
+}
+
+
+
+gpointer lixa_sw_get_conn_by_pos(int pos)
+{
+    gpointer conn = NULL;
+    
+    /* lock the mutex */
+    g_static_mutex_lock(&lixa_sw_status_mutex);
+
+    if (NULL != lixa_sw_status) {
+        pthread_t key = pthread_self();
+        lixa_sw_status_t *lps = NULL;
+        if (NULL != (lps = (lixa_sw_status_t *)g_hash_table_lookup(
+                         lixa_sw_status, (gconstpointer)key))) {
+            if (pos < lps->rm->len) {
+                struct lixa_sw_status_rm_s *lpsr = &g_array_index(
+                    lps->rm, struct lixa_sw_status_rm_s, pos);
+                conn = lpsr->conn;
+            } else {
+                LIXA_TRACE(("lixa_sw_get_conn_by_pos: %d exceeds %d, "
+                            "the last position\n", pos, lps->rm->len));
+            }
+        } else {
+            LIXA_TRACE(("lixa_sw_get_conn_by_pos: thread not registered\n"));
+        }
+    } else {
+        LIXA_TRACE(("lixa_sw_get_conn_by_pos: status is NULL\n"));
+    }
+    
+    /* unlock the mutex */
+    g_static_mutex_unlock(&lixa_sw_status_mutex);
+
+    return conn;
 }
 
 
