@@ -24,6 +24,7 @@ AC_CONFIG_FILES([
   src/client/switch/ibmdb2/Makefile
   src/client/switch/oracle/Makefile
   src/client/switch/postgresql/Makefile
+  src/client/switch/mysql/Makefile
   src/server/Makefile
   src/sample/Makefile
   tests/Makefile
@@ -53,6 +54,10 @@ AM_CONDITIONAL([COMPILE_IBMDB2_STUFF], [test -n "$ibmdb2_home_dir"])
 m4_include(m4include/ax_lib_postgresql.m4)
 AX_LIB_POSTGRESQL
 AM_CONDITIONAL([COMPILE_POSTGRESQL_STUFF], [test "$HAVE_POSTGRESQL" = "yes"])
+# Include MySQL test
+m4_include(m4include/ax_lib_mysql.m4)
+AX_LIB_MYSQL
+AM_CONDITIONAL([COMPILE_MYSQL_STUFF], [test "$HAVE_MYSQL" = "yes"])
 
 # LT Version numbers, remember to change them just *before* a release.
 #   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)

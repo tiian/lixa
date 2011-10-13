@@ -29,28 +29,28 @@ extern "C" {
 
     /**
      * Retrieve the connection established by tx_open/xa_open to one of the
-     * PostgreSQL Resource Managers; this function should be used instead of
-     * @ref lixa_pq_get_conn when you are using more than one PostgreSQL
+     * MySQL Resource Managers; this function should be used instead of
+     * @ref lixa_pq_get_conn when you are using more than one MySQL
      * database.
      * @param rmid IN it can be 0, 1, 2, 3, ... in accordance to
      *                lixac_conf.xml
-     * @return a valid connection handle or NULL if rmid is not a PostgreSQL
-     *         Resource Manager or rmid is a valid PostgreSQL Resource
+     * @return a valid connection handle or NULL if rmid is not a MySQL
+     *         Resource Manager or rmid is a valid MySQL Resource
      *         Manager, but there is no a valid connection
      */
-    PGconn *lixa_pq_get_conn_by_rmid(int rmid);
+    MYSQL *lixa_my_get_conn_by_rmid(int rmid);
 
 
     
     /**
      * Retrieve the connection established by tx_open/xa_open to the
-     * PostgreSQL Resource Manager; this is necessary because tx_open
+     * MySQL Resource Manager; this is necessary because tx_open
      * does not return values and PQconnectdb returns a new connection
      * every time it's called from the same process/thread; this is the
-     * same of lixa_pq_get_conn_by_pos(0)
+     * same of lixa_my_get_conn_by_pos(0)
      * @return a valid connection handle or NULL if the handle is not available
      */
-    PGconn *lixa_pq_get_conn(void);
+    MYSQL *lixa_my_get_conn(void);
 
 
 

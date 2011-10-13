@@ -39,6 +39,7 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
 	$(top_srcdir)/m4include/ax_lib_ibmdb2_cli.m4 \
 	$(top_srcdir)/m4include/ax_lib_postgresql.m4 \
+	$(top_srcdir)/m4include/ax_lib_mysql.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -93,6 +94,7 @@ F77 = @F77@
 FFLAGS = @FFLAGS@
 GREP = @GREP@
 HAVE_IBMDB2 = @HAVE_IBMDB2@
+HAVE_MYSQL = @HAVE_MYSQL@
 HAVE_ORACLE = @HAVE_ORACLE@
 HAVE_POSTGRESQL = @HAVE_POSTGRESQL@
 IBMDB2_CLI_CPPFLAGS = @IBMDB2_CLI_CPPFLAGS@
@@ -123,6 +125,9 @@ LT_LIXAC_CURRENT = @LT_LIXAC_CURRENT@
 LT_LIXAC_REVISION = @LT_LIXAC_REVISION@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
+MYSQL_CONFIG = @MYSQL_CONFIG@
+MYSQL_CPPFLAGS = @MYSQL_CPPFLAGS@
+MYSQL_LDFLAGS = @MYSQL_LDFLAGS@
 NMEDIT = @NMEDIT@
 OBJEXT = @OBJEXT@
 ORACLE_ENV_SH = @ORACLE_ENV_SH@
