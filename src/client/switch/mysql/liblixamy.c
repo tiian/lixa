@@ -108,6 +108,101 @@ void g_module_unload(GModule *module)
 
 
 
+int lixa_my_parse_xa_info(const char *xa_info,
+                          struct lixa_mysql_real_connect_s *lmrc)
+{
+    enum Exception { BUFFER_OVERFLOW
+                     , SYNTAX_ERROR1
+                     , NONE } excp;
+    int xa_rc = XAER_RMFAIL;
+    size_t i = 0, l;
+    char key[RMNAMESZ], value[RMNAMESZ];
+    int k, v;
+    enum State { UNDEF, KEY, VALUE, SEPAR, ASSIGN } state;
+    enum Token { TK_SEPAR, TK_ASSIGN, TK_CHAR } token;
+    
+    LIXA_TRACE(("lixa_my_parse_xa_info\n"));
+    TRY {
+        /* check the string is not a buffer overflow attack */
+        if (RMNAMESZ <= (l = strlen(xa_info))) {
+            LIXA_TRACE(("lixa_my_parse_xa_info: xa_info is too long ("
+                        SIZE_T_FORMAT ")\n", l));
+            THROW(BUFFER_OVERFLOW);
+        }
+        /* reset the struct */
+        memset(lmrc, 0, sizeof(struct lixa_mysql_real_connect_s));
+        lmrc->host = lmrc->user = lmrc->passwd = lmrc->db = lmrc->unix_socket =
+            NULL;
+        state = UNDEF;
+        k = v = 0;
+        while (i<l) {
+            char current, next;
+            int escaping = FALSE;
+            current = xa_info[i];
+            if (i<l-1)
+                next = xa_info[i+1];
+            else
+                next = '\0';
+            /* recognize double separator or double assignator (those are
+               escaping sequences) */
+            if ((LIXA_MYSQL_XA_INFO_SEPARATOR == current &&
+                 LIXA_MYSQL_XA_INFO_SEPARATOR == next) ||
+                (LIXA_MYSQL_XA_INFO_ASSIGN == current &&
+                 LIXA_MYSQL_XA_INFO_ASSIGN == next))
+                escaping = TRUE;
+            token = TK_CHAR;
+            if (!escaping) {
+                if (LIXA_MYSQL_XA_INFO_SEPARATOR == current)
+                    token = TK_SEPAR;
+                else if (LIXA_MYSQL_XA_INFO_ASSIGN == current)
+                    token = TK_ASSIGN;
+            }
+            switch (token) {
+                case TK_SEPAR:
+                    if (UNDEF == state || KEY == state) {
+                        LIXA_TRACE(("lixa_my_parse_xa_info: separator '%c' "
+                                    "unexpected at pos " SIZE_T_FORMAT
+                                    " of xa_info '%s'\n",
+                                    current, i, xa_info));
+                        THROW(SYNTAX_ERROR1);
+                    }
+                    /* value terminated */
+                    value[v] = '\0';
+                    state = KEY;
+                    /* @@@ */
+                    break;
+                case TK_ASSIGN:
+                    break;
+                default:
+                    break;
+            } /* switch (token) */
+            /* shift one (or two) char(s) */
+            if (escaping)
+                i = i+2;
+            else
+                i++;
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_OVERFLOW:
+            case SYNTAX_ERROR1:
+                xa_rc = XAER_INVAL;
+                break;
+            case NONE:
+                xa_rc = XA_OK;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_my_parse_xa_info/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
+}
+
+
+
 int lixa_my_open(char *xa_info, int rmid, long flags)
 {
     enum Exception { INVALID_FLAGS
@@ -118,7 +213,7 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
 
-    PGconn           *conn = NULL;
+    MYSQL            *conn = NULL;
     lixa_sw_status_t *lps = NULL;
     
     LIXA_TRACE(("lixa_my_open: xa_info='%s', rmid=%d, flags=%ld\n",

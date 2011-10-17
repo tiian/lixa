@@ -46,6 +46,53 @@ struct xa_switch_t xapqls;
 
 
 /**
+ * This struct is used to split xa_info passed from configuration file
+ * (lixac_conf.xml) to broken down values that can be passed to
+ * mysql_real_connect() function. The field of the structure are the same
+ * of the parameter of mysql_real_connect(); the _buffer fields are used to
+ * avoid useless dynamic allocation (xa_info is a length contrained string)
+ */
+struct lixa_mysql_real_connect_s {
+    char         *host;
+    char          host_buffer[RMNAMESZ];
+    char         *user;
+    char          user_buffer[RMNAMESZ];
+    char         *passwd;
+    char          passwd_buffer[RMNAMESZ];
+    char         *db;
+    char          db_buffer[RMNAMESZ];
+    unsigned int  port;
+    char         *unix_socket;
+    char          unix_socket_buffer[RMNAMESZ];
+    unsigned long client_flag;
+};
+
+
+
+/**
+ * Char used to separe a key=value field from the following one
+ */
+#define LIXA_MYSQL_XA_INFO_SEPARATOR ','
+/**
+ * Char used to separe a key from a value
+ */
+#define LIXA_MYSQL_XA_INFO_ASSIGN    '='
+
+
+
+/**
+ * Parses an xa_info string and creates a broken down structure with the
+ * fields necessary to invoke mysql_real_connect() function
+ * @param xa_info IN the string passed to xa_open from lixac_conf.xml file
+ * @param lmrc OUT the corresponding broken down structure
+ * @return a reason code
+ */
+int lixa_my_parse_xa_info(const char *xa_info,
+                          struct lixa_mysql_real_connect_s *lmrc);
+
+
+
+/**
  * Implementation of "xa_open" for MySQL;
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description
