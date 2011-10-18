@@ -11,6 +11,19 @@ sudo apt-get install mysql-server libmysqlclient15-dev
 
 ##
 
+./configure ... --with-mysql
+it uses "mysql_config" utility program to retrive installation directories
+
+##
+
+gcc example8_my.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixamy $(mysql_config --include --libs) -o example8_my
+
+export LIXA_PROFILE=MYS_STA
+export LIXA_TRACE_MASK=0x2000
+export LD_LIBRARY_PATH=/opt/lixa/lib
+
+##
+
 tiian@ubuntu:~$ mysql -u root -p
 Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
