@@ -38,7 +38,7 @@
 
 #include <lixa_trace.h>
 #include <lixa_common_status.h>
-#include <liblixapq.h>
+#include <liblixamy.h>
 
 
 
