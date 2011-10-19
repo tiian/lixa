@@ -45,7 +45,7 @@ noinst_PROGRAMS = case0000$(EXEEXT) case0001$(EXEEXT) \
 	case0029$(EXEEXT) case0030$(EXEEXT) case0031$(EXEEXT) \
 	case0032$(EXEEXT) case0033$(EXEEXT) case0034$(EXEEXT) \
 	case0035$(EXEEXT) case0036$(EXEEXT) $(am__EXEEXT_1) \
-	$(am__EXEEXT_2) $(am__EXEEXT_3)
+	$(am__EXEEXT_2) $(am__EXEEXT_3) $(am__EXEEXT_4)
 subdir = tests/src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -63,6 +63,7 @@ CONFIG_CLEAN_FILES =
 @COMPILE_POSTGRESQL_STUFF_TRUE@am__EXEEXT_1 = case0037$(EXEEXT)
 @COMPILE_ORACLE_STUFF_TRUE@am__EXEEXT_2 = case0038$(EXEEXT)
 @COMPILE_IBMDB2_STUFF_TRUE@am__EXEEXT_3 = case0039$(EXEEXT)
+@COMPILE_MYSQL_STUFF_TRUE@am__EXEEXT_4 = case0040$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_case0000_OBJECTS = case0000.$(OBJEXT)
 case0000_OBJECTS = $(am_case0000_OBJECTS)
@@ -303,6 +304,12 @@ case0039_DEPENDENCIES = ../../src/client/liblixac.la
 case0039_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(case0039_LDFLAGS) \
 	$(LDFLAGS) -o $@
+am_case0040_OBJECTS = case0040.$(OBJEXT)
+case0040_OBJECTS = $(am_case0040_OBJECTS)
+case0040_LDADD = $(LDADD)
+case0040_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
+	../../src/client/switch/lixa/liblixamonkey.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -328,7 +335,7 @@ SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) $(case0002_SOURCES) \
 	$(case0030_SOURCES) $(case0031_SOURCES) $(case0032_SOURCES) \
 	$(case0033_SOURCES) $(case0034_SOURCES) $(case0035_SOURCES) \
 	$(case0036_SOURCES) $(case0037_SOURCES) $(case0038_SOURCES) \
-	$(case0039_SOURCES)
+	$(case0039_SOURCES) $(case0040_SOURCES)
 DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0002_SOURCES) $(case0003_SOURCES) $(case0004_SOURCES) \
 	$(case0005_SOURCES) $(case0006_SOURCES) $(case0007_SOURCES) \
@@ -342,7 +349,7 @@ DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0029_SOURCES) $(case0030_SOURCES) $(case0031_SOURCES) \
 	$(case0032_SOURCES) $(case0033_SOURCES) $(case0034_SOURCES) \
 	$(case0035_SOURCES) $(case0036_SOURCES) $(case0037_SOURCES) \
-	$(case0038_SOURCES) $(case0039_SOURCES)
+	$(case0038_SOURCES) $(case0039_SOURCES) $(case0040_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -499,6 +506,7 @@ AM_CFLAGS = -Wall
 LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 
+@COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL = case0040
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL = case0037
 @COMPILE_ORACLE_STUFF_TRUE@MAYBE_ORACLE = case0038
 @COMPILE_IBMDB2_STUFF_TRUE@MAYBE_IBMDB2 = case0039
@@ -545,7 +553,7 @@ case0037_CPPFLAGS = @POSTGRESQL_CPPFLAGS@ \
 	-I../../src/client/switch/postgresql
 
 case0037_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
-        ../../src/client/switch/postgresql/liblixapq.la
+	../../src/client/switch/postgresql/liblixapq.la
 
 case0038_SOURCES = case0038.c
 case0038_CPPFLAGS = @ORACLE_OCI_CFLAGS@ -I../../src/client
@@ -555,6 +563,7 @@ case0039_SOURCES = case0039.c
 case0039_CPPFLAGS = @IBMDB2_CLI_CPPFLAGS@ -I../../src/client
 case0039_LDFLAGS = @IBMDB2_CLI_LDFLAGS@
 case0039_LDADD = ../../src/client/liblixac.la
+case0040_SOURCES = case0040.c
 all: all-am
 
 .SUFFIXES:
@@ -715,6 +724,9 @@ case0038$(EXEEXT): $(case0038_OBJECTS) $(case0038_DEPENDENCIES)
 case0039$(EXEEXT): $(case0039_OBJECTS) $(case0039_DEPENDENCIES) 
 	@rm -f case0039$(EXEEXT)
 	$(case0039_LINK) $(case0039_OBJECTS) $(case0039_LDADD) $(LIBS)
+case0040$(EXEEXT): $(case0040_OBJECTS) $(case0040_DEPENDENCIES) 
+	@rm -f case0040$(EXEEXT)
+	$(LINK) $(case0040_OBJECTS) $(case0040_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -762,6 +774,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0037-case0037.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0038-case0038.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0039-case0039.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0040.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
