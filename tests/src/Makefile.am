@@ -6,6 +6,9 @@ AM_CFLAGS = -Wall
 #AM_LDFLAGS = -lpthread @LIBLTDL@ @LDFLAGS_GMODULE@
 LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
+if COMPILE_MYSQL_STUFF
+  MAYBE_MYSQL = case0040
+endif
 if COMPILE_POSTGRESQL_STUFF
   MAYBE_POSTGRESQL = case0037
 endif
@@ -21,7 +24,7 @@ noinst_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0020 case0021 case0022 case0023 case0024 case0025 case0026 \
 	case0027 case0028 case0029 case0030 case0031 case0032 case0033 \
 	case0034 case0035 case0036 $(MAYBE_POSTGRESQL) $(MAYBE_ORACLE) \
-	$(MAYBE_IBMDB2)
+	$(MAYBE_IBMDB2) $(MAYBE_MYSQL)
 case0000_SOURCES = case0000.c
 case0001_SOURCES = case0001.c
 case0002_SOURCES = case0002.c
@@ -64,7 +67,7 @@ case0037_CPPFLAGS = @POSTGRESQL_CPPFLAGS@ \
 	-I../../src/client -I../../src/common \
 	-I../../src/client/switch/postgresql
 case0037_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
-        ../../src/client/switch/postgresql/liblixapq.la
+	../../src/client/switch/postgresql/liblixapq.la
 case0038_SOURCES = case0038.c
 case0038_CPPFLAGS = @ORACLE_OCI_CFLAGS@ -I../../src/client
 case0038_LDFLAGS = @ORACLE_OCI_LDFLAGS@
@@ -73,3 +76,4 @@ case0039_SOURCES = case0039.c
 case0039_CPPFLAGS = @IBMDB2_CLI_CPPFLAGS@ -I../../src/client
 case0039_LDFLAGS = @IBMDB2_CLI_LDFLAGS@
 case0039_LDADD = ../../src/client/liblixac.la
+case0040_SOURCES = case0040.c
