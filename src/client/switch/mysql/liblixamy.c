@@ -113,20 +113,22 @@ int lixa_my_parse_xa_info(const char *xa_info,
 {
     enum Exception { BUFFER_OVERFLOW
                      , SYNTAX_ERROR1
+                     , PARSE_KEY_VALUE1
                      , SYNTAX_ERROR2
                      , INTERNAL_ERROR
+                     , PARSE_KEY_VALUE2
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
     size_t i = 0, l;
-    char key[RMNAMESZ], value[RMNAMESZ];
+    char key[MAXINFOSIZE], value[MAXINFOSIZE];
     int k, v;
-    enum State { ST_KEY, ST_VALUE /* , ST_SEPAR, ST_ASSIGN */ } state;
+    enum State { ST_KEY, ST_VALUE } state;
     enum Token { TK_SEPAR, TK_ASSIGN, TK_CHAR } token;
     
     LIXA_TRACE(("lixa_my_parse_xa_info\n"));
     TRY {
         /* check the string is not a buffer overflow attack */
-        if (RMNAMESZ <= (l = strlen(xa_info))) {
+        if (MAXINFOSIZE <= (l = strlen(xa_info))) {
             LIXA_TRACE(("lixa_my_parse_xa_info: xa_info is too long ("
                         SIZE_T_FORMAT ")\n", l));
             THROW(BUFFER_OVERFLOW);
@@ -172,9 +174,12 @@ int lixa_my_parse_xa_info(const char *xa_info,
                     value[v] = '\0';
                     state = ST_KEY;
                     k = 0;
-                    /* @@@ transfer key/value */
                     LIXA_TRACE(("lixa_my_parse_xa_info: (key=value) -> "
                                 "(%s=%s)\n", key, value));
+                    /* registering key/value in broken down structure */
+                    if (XA_OK != (xa_rc = lixa_my_parse_key_value(
+                                      lmrc, key, value)))
+                        THROW(PARSE_KEY_VALUE1);
                     /* resetting... */
                     key[0] = value[0] = '\0';
                     break;
@@ -216,6 +221,19 @@ int lixa_my_parse_xa_info(const char *xa_info,
         }
         LIXA_TRACE(("lixa_my_parse_xa_info: (key=value) -> "
                     "(%s=%s)\n", key, value));
+        /* registering key/value in broken down structure */
+        if (XA_OK != (xa_rc = lixa_my_parse_key_value(lmrc, key, value)))
+            THROW(PARSE_KEY_VALUE2);
+        /* display brokendown structure */
+        LIXA_TRACE(("lixa_my_parse_xa_info: lmrc[host=%s,user=%s,passwd=%s,"
+                    "db=%s,port=%d,unix_socket=%s,client_flag=%ld\n",
+                    lmrc->host != NULL ? lmrc->host : "NULL",
+                    lmrc->user != NULL ? lmrc->user : "NULL",
+                    lmrc->passwd != NULL ? lmrc->passwd : "NULL",
+                    lmrc->db != NULL ? lmrc->db : "NULL",
+                    lmrc->port,
+                    lmrc->unix_socket != NULL ? lmrc->unix_socket : "NULL",
+                    lmrc->client_flag));
         
         THROW(NONE);
     } CATCH {
@@ -224,6 +242,9 @@ int lixa_my_parse_xa_info(const char *xa_info,
             case SYNTAX_ERROR1:
             case SYNTAX_ERROR2:
                 xa_rc = XAER_INVAL;
+                break;
+            case PARSE_KEY_VALUE1:
+            case PARSE_KEY_VALUE2:
                 break;
             case INTERNAL_ERROR:
                 xa_rc = XAER_RMFAIL;
@@ -241,6 +262,94 @@ int lixa_my_parse_xa_info(const char *xa_info,
 
 
 
+int lixa_my_parse_key_value(struct lixa_mysql_real_connect_s *lmrc,
+                            const char *key, const char *value)
+{
+    enum Exception { KEY_NOT_RECOGNIZED
+                     , INTERNAL_ERROR
+                     , NONE } excp;
+    int xa_rc = XAER_RMFAIL;
+    enum Key { KY_HOST, KY_USER, KY_PASSWD, KY_DB, KY_PORT, KY_UNIX_SOCKET,
+               KY_CLIENT_FLAG } ky;
+    
+    LIXA_TRACE(("lixa_my_parse_key_value\n"));
+    TRY {
+        /* recognize key */
+        if (!strcmp(key, "host"))
+            ky = KY_HOST;
+        else if (!strcmp(key, "user"))
+            ky = KY_USER;
+        else if (!strcmp(key, "passwd"))
+            ky = KY_PASSWD;
+        else if (!strcmp(key, "db"))
+            ky = KY_DB;
+        else if (!strcmp(key, "port"))
+            ky = KY_PORT;
+        else if (!strcmp(key, "unix_socket"))
+            ky = KY_UNIX_SOCKET;
+        else if (!strcmp(key, "client_flag"))
+            ky = KY_CLIENT_FLAG;
+        else {
+            LIXA_TRACE(("lixa_my_parse_key_value: key='%s' is not recognized"
+                        "\n", key));
+            THROW(KEY_NOT_RECOGNIZED);
+        }
+        /* move in broken down structure */
+        switch (ky) {
+            case KY_HOST:
+                strcpy(lmrc->host_buffer, value);
+                lmrc->host = lmrc->host_buffer;
+                break;
+            case KY_USER:
+                strcpy(lmrc->user_buffer, value);
+                lmrc->user = lmrc->user_buffer;
+                break;
+            case KY_PASSWD:
+                strcpy(lmrc->passwd_buffer, value);
+                lmrc->passwd = lmrc->passwd_buffer;
+                break;
+            case KY_DB:
+                strcpy(lmrc->db_buffer, value);
+                lmrc->db = lmrc->db_buffer;
+                break;
+            case KY_PORT:
+                lmrc->port = strtoul(value, NULL, 0);
+                break;
+            case KY_UNIX_SOCKET:
+                strcpy(lmrc->unix_socket_buffer, value);
+                lmrc->unix_socket = lmrc->unix_socket_buffer;
+                break;
+            case KY_CLIENT_FLAG:
+                lmrc->client_flag = strtoul(value, NULL, 0);
+                break;
+            default:
+                LIXA_TRACE(("lixa_my_parse_key_value: ky=%d invalid KY_ value"
+                            "\n", ky));
+                THROW(INTERNAL_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case KEY_NOT_RECOGNIZED:
+                xa_rc = XAER_INVAL;
+                break;
+            case INTERNAL_ERROR:
+                xa_rc = XAER_RMFAIL;
+                break;
+            case NONE:
+                xa_rc = XA_OK;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_my_parse_key_value/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
+}
+
+
+    
 int lixa_my_open(char *xa_info, int rmid, long flags)
 {
     enum Exception { INVALID_FLAGS

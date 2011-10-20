@@ -54,16 +54,16 @@ struct xa_switch_t xapqls;
  */
 struct lixa_mysql_real_connect_s {
     char         *host;
-    char          host_buffer[RMNAMESZ];
+    char          host_buffer[MAXINFOSIZE];
     char         *user;
-    char          user_buffer[RMNAMESZ];
+    char          user_buffer[MAXINFOSIZE];
     char         *passwd;
-    char          passwd_buffer[RMNAMESZ];
+    char          passwd_buffer[MAXINFOSIZE];
     char         *db;
-    char          db_buffer[RMNAMESZ];
+    char          db_buffer[MAXINFOSIZE];
     unsigned int  port;
     char         *unix_socket;
-    char          unix_socket_buffer[RMNAMESZ];
+    char          unix_socket_buffer[MAXINFOSIZE];
     unsigned long client_flag;
 };
 
@@ -85,10 +85,22 @@ struct lixa_mysql_real_connect_s {
  * fields necessary to invoke mysql_real_connect() function
  * @param xa_info IN the string passed to xa_open from lixac_conf.xml file
  * @param lmrc OUT the corresponding broken down structure
- * @return a reason code
+ * @return an XA reason code
  */
 int lixa_my_parse_xa_info(const char *xa_info,
                           struct lixa_mysql_real_connect_s *lmrc);
+
+
+
+/**
+ * Parses a key/value couple and put into parameters structure
+ * @param lmrc OUT the broken down (parameters) structure
+ * @param key IN key string
+ * @param value IN value string
+ * @return an XA reason code
+ */
+int lixa_my_parse_key_value(struct lixa_mysql_real_connect_s *lmrc,
+                            const char *key, const char *value);
 
 
 
