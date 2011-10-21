@@ -6,8 +6,30 @@
 AT_BANNER([MySQL])
 
 # check the xa_info parsing function inside liblixamy
-AT_SETUP([MY/0.0/0.0 MySQL xa_info parsing])
+AT_SETUP([MY/0.0/0.0 MySQL xa_open_info parsing])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020 ; lixa_test_exec.sh reset start case0040], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# check the xa_info parsing function inside liblixamy
+# the xa_open_info string contains a trailing comma
+AT_SETUP([MY/0.0/0.1 MySQL xa_open_info parsing])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0021 ; lixa_test_exec.sh reset start case0040], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# check the xa_info parsing function inside liblixamy
+# the xa_open_info string contains == and ,,
+AT_SETUP([MY/0.0/0.2 MySQL xa_open_info parsing])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0022 ; lixa_test_exec.sh reset start case0040], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# check the xa_info parsing function inside liblixamy
+# the xa_open_info string contains blank and tab
+AT_SETUP([MY/0.0/0.3 MySQL xa_open_info parsing])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0023 ; lixa_test_exec.sh reset start case0040], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # these case tests now fails... they will developed lately

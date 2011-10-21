@@ -22,6 +22,9 @@
     <rsrmgr name="IBMDB2_stareg" switch_file="@abs_top_builddir@/src/client/switch/ibmdb2/.libs/switch_ibmdb2_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" />
     <rsrmgr name="PostgreSQL_stareg" switch_file="@abs_top_builddir@/src/client/switch/postgresql/.libs/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" />
     <rsrmgr name="MySQL_stareg" switch_file="@abs_top_builddir@/src/client/switch/mysql/.libs/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,db=lixa,client_flag=0" xa_close_info="" />
+    <rsrmgr name="MySQL_stareg_1" switch_file="@abs_top_builddir@/src/client/switch/mysql/.libs/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,db=lixa,client_flag=0," xa_close_info="" />
+    <rsrmgr name="MySQL_stareg_2" switch_file="@abs_top_builddir@/src/client/switch/mysql/.libs/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,,==,db=lixa,client_flag=0" xa_close_info="" />
+    <rsrmgr name="MySQL_stareg_3" switch_file="@abs_top_builddir@/src/client/switch/mysql/.libs/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,,	== ,db=lixa,client_flag=0" xa_close_info="" />
   </rsrmgrs>
   <profiles>
     <profile name="CASE_PROF_0000">
@@ -225,6 +228,30 @@
       </sttsrvs>
       <rsrmgrs>
         <rsrmgr>MySQL_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0021">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>MySQL_stareg_1</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0022">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>MySQL_stareg_2</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0023">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>MySQL_stareg_3</rsrmgr>
       </rsrmgrs>
     </profile>
   </profiles>
