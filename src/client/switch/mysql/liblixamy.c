@@ -133,6 +133,7 @@ int lixa_my_parse_xa_info(const char *xa_info,
                         SIZE_T_FORMAT ")\n", l));
             THROW(BUFFER_OVERFLOW);
         }
+        LIXA_TRACE(("lixa_my_parse_xa_info: parsing '%s'\n", xa_info));
         /* reset the struct */
         memset(lmrc, 0, sizeof(struct lixa_mysql_real_connect_s));
         lmrc->host = lmrc->user = lmrc->passwd = lmrc->db = lmrc->unix_socket =
@@ -270,7 +271,7 @@ int lixa_my_parse_key_value(struct lixa_mysql_real_connect_s *lmrc,
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
     enum Key { KY_HOST, KY_USER, KY_PASSWD, KY_DB, KY_PORT, KY_UNIX_SOCKET,
-               KY_CLIENT_FLAG } ky;
+               KY_CLIENT_FLAG, KY_NULL } ky;
     
     LIXA_TRACE(("lixa_my_parse_key_value\n"));
     TRY {
@@ -289,6 +290,8 @@ int lixa_my_parse_key_value(struct lixa_mysql_real_connect_s *lmrc,
             ky = KY_UNIX_SOCKET;
         else if (!strcmp(key, "client_flag"))
             ky = KY_CLIENT_FLAG;
+        else if (0 == strlen(key))
+            ky = KY_NULL;
         else {
             LIXA_TRACE(("lixa_my_parse_key_value: key='%s' is not recognized"
                         "\n", key));
@@ -321,6 +324,10 @@ int lixa_my_parse_key_value(struct lixa_mysql_real_connect_s *lmrc,
                 break;
             case KY_CLIENT_FLAG:
                 lmrc->client_flag = strtoul(value, NULL, 0);
+                break;
+            case KY_NULL:
+                LIXA_TRACE(("lixa_my_parse_key_value: WARNING there is a null "
+                            "key in xa_open_info string\n"));
                 break;
             default:
                 LIXA_TRACE(("lixa_my_parse_key_value: ky=%d invalid KY_ value"
