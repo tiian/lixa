@@ -8,8 +8,8 @@ AT_CLEANUP
 
 # these case tests are memory leak free (2010-12-13)
 
-m4_include([mysql.at])
 m4_include([postgresql.at])
+m4_include([mysql.at])
 m4_include([oracle.at])
 m4_include([ibmdb2.at])
 m4_include([xid.at])

@@ -118,7 +118,7 @@ int lixa_my_parse_xa_info(const char *xa_info,
                      , INTERNAL_ERROR
                      , PARSE_KEY_VALUE2
                      , NONE } excp;
-    int xa_rc = XAER_RMFAIL;
+    int xa_rc = XAER_RMERR;
     size_t i = 0, l;
     char key[MAXINFOSIZE], value[MAXINFOSIZE];
     int k, v;
@@ -248,13 +248,13 @@ int lixa_my_parse_xa_info(const char *xa_info,
             case PARSE_KEY_VALUE2:
                 break;
             case INTERNAL_ERROR:
-                xa_rc = XAER_RMFAIL;
+                xa_rc = XAER_RMERR;
                 break;
             case NONE:
                 xa_rc = XA_OK;
                 break;
             default:
-                xa_rc = XAER_RMFAIL;
+                xa_rc = XAER_RMERR;
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_parse_xa_info/excp=%d/xa_rc=%d\n", excp, xa_rc));
@@ -269,7 +269,7 @@ int lixa_my_parse_key_value(struct lixa_mysql_real_connect_s *lmrc,
     enum Exception { KEY_NOT_RECOGNIZED
                      , INTERNAL_ERROR
                      , NONE } excp;
-    int xa_rc = XAER_RMFAIL;
+    int xa_rc = XAER_RMERR;
     enum Key { KY_HOST, KY_USER, KY_PASSWD, KY_DB, KY_PORT, KY_UNIX_SOCKET,
                KY_CLIENT_FLAG, KY_NULL } ky;
     
@@ -342,13 +342,13 @@ int lixa_my_parse_key_value(struct lixa_mysql_real_connect_s *lmrc,
                 xa_rc = XAER_INVAL;
                 break;
             case INTERNAL_ERROR:
-                xa_rc = XAER_RMFAIL;
+                xa_rc = XAER_RMERR;
                 break;
             case NONE:
                 xa_rc = XA_OK;
                 break;
             default:
-                xa_rc = XAER_RMFAIL;
+                xa_rc = XAER_RMERR;
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_parse_key_value/excp=%d/xa_rc=%d\n", excp, xa_rc));
@@ -364,9 +364,11 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
                      , G_HASH_TABLE_NEW_FULL_ERROR
                      , MALLOC_ERROR
                      , PARSE_ERROR
+                     , MYSQL_INIT_ERROR
+                     , MYSQL_REAL_CONNECT_ERROR
                      , PQ_CONNECTDB_ERROR
                      , NONE } excp;
-    int xa_rc = XAER_RMFAIL;
+    int xa_rc = XAER_RMERR;
 
     MYSQL            *conn = NULL;
     lixa_sw_status_t *lps = NULL;
@@ -428,22 +430,28 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
             }
         }
 
-        if (XA_OK != (xa_rc = lixa_my_parse_xa_info(xa_info, &lmrc)))
-            THROW(PARSE_ERROR);
-        
         if (NULL == conn) {
             /* create a new connection */
             struct lixa_sw_status_rm_s lpsr;
             lixa_sw_status_rm_init(&lpsr);
-            /* ###
-            conn = PQconnectdb(xa_info);
-            if (CONNECTION_OK != PQstatus(conn)) {
-                LIXA_TRACE(("lixa_my_open: error while connecting to the "
-                            "database: %s", PQerrorMessage(conn)));
-                PQfinish(conn);
-                THROW(PQ_CONNECTDB_ERROR);
+
+            if (XA_OK != (xa_rc = lixa_my_parse_xa_info(xa_info, &lmrc)))
+                THROW(PARSE_ERROR);
+        
+            if (NULL == (conn = mysql_init(NULL))) {
+                LIXA_TRACE(("lixa_my_open: mysql_init(NULL) returned NULL\n"));
+                THROW(MYSQL_INIT_ERROR);
             }
-            */
+
+            if (NULL == mysql_real_connect(
+                    conn, lmrc.host, lmrc.user, lmrc.passwd, lmrc.db, lmrc.port,
+                    lmrc.unix_socket, lmrc.client_flag)) {
+                LIXA_TRACE(("lixa_my_open: mysql_real_connect returned error: "
+                            "%u: %s\n", mysql_errno(conn), mysql_error(conn)));
+                mysql_close(conn);
+                THROW(MYSQL_REAL_CONNECT_ERROR);
+            }
+            
             /* save the connection for this thread/rmid */
             lpsr.rmid = rmid;
             lpsr.state.R = 1;
@@ -468,11 +476,15 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
                 break;
             case PARSE_ERROR:
                 break;
+            case MYSQL_INIT_ERROR:
+            case MYSQL_REAL_CONNECT_ERROR:
+                xa_rc = XAER_RMERR;
+                break;
             case NONE:
                 xa_rc = XA_OK;
                 break;
             default:
-                xa_rc = XAER_RMFAIL;
+                xa_rc = XAER_RMERR;
         } /* switch (excp) */
         if (NONE != excp && NULL != lps)
             free(lps);
@@ -547,9 +559,7 @@ int lixa_my_close(char *xa_info, int rmid, long flags)
                     THROW(NOTHING_TO_DO3);
                 /* closing database connection if any */
                 if (NULL != lpsr->conn) {
-                    /* ###
-                    PQfinish(lpsr->conn);
-                    */
+                    mysql_close((MYSQL *)lpsr->conn);
                     lpsr->conn = NULL;
                 }
                 lpsr->state.R = 0;

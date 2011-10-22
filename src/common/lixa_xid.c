@@ -126,7 +126,7 @@ char *lixa_xid_get_bqual_ascii(const XID *xid)
 void lixa_xid_formatid(lixa_ser_xid_t lsx)
 {
     /* serialize LIXA formatID */
-    sprintf(lsx, "%lx%c", LIXA_XID_FORMAT_ID, LIXA_XID_SEPARATOR); 
+    sprintf(lsx, "%lx", LIXA_XID_FORMAT_ID); 
 }
 
 

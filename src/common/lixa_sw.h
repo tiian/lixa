@@ -140,7 +140,7 @@ struct lixa_sw_status_rm_s *lixa_sw_status_rm_get(int rmid);
 
 
 /**
- * Destroy an object of type @ref lixa_pq_status_t
+ * Destroy an object of type @ref lixa_sw_status_t
  * @param data IN reference to the object
  */
 void lixa_sw_status_destroy(gpointer data);

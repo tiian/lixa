@@ -20,6 +20,9 @@
 
 
 
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -45,12 +48,21 @@ int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
     int rc;
+    int tx_open_rc, tx_close_rc;
+
+    if (argc < 3) {
+        fprintf(stderr, "%s: at least two options must be specified\n",
+                argv[0]);
+        exit (1);
+    }
+    tx_open_rc = strtol(argv[1], NULL, 0);
+    tx_close_rc = strtol(argv[2], NULL, 0);
     
     printf("%s| starting...\n", pgm);
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
-    assert(TX_OK == rc);
+    assert(tx_open_rc == rc);
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-    assert(TX_OK == rc);
+    assert(tx_close_rc == rc);
     printf("%s| ...finished\n", pgm);
     return 0;
 }
