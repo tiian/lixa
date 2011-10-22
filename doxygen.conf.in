@@ -518,6 +518,7 @@ INPUT                  = src/client \
                          src/client/switch/ibmdb2 \
                          src/client/switch/oracle \
                          src/client/switch/postgresql \
+                         src/client/switch/mysql \
                          src/common \
                          src/sample \
                          src/server
