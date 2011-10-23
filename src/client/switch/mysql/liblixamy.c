@@ -444,8 +444,8 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
             }
 
             if (NULL == mysql_real_connect(
-                    conn, lmrc.host, lmrc.user, lmrc.passwd, lmrc.db, lmrc.port,
-                    lmrc.unix_socket, lmrc.client_flag)) {
+                    conn, lmrc.host, lmrc.user, lmrc.passwd, lmrc.db,
+                    lmrc.port, lmrc.unix_socket, lmrc.client_flag)) {
                 LIXA_TRACE(("lixa_my_open: mysql_real_connect returned error: "
                             "%u: %s\n", mysql_errno(conn), mysql_error(conn)));
                 mysql_close(conn);
@@ -609,6 +609,7 @@ int lixa_my_start(XID *xid, int rmid, long flags)
                      , BEGIN_ERROR
                      , NONE} excp;
     int xa_rc = XAER_RMFAIL;
+    char *gtrid = NULL, *bqual = NULL;
     /* ###
     PGresult *res = NULL;
     */
@@ -650,12 +651,16 @@ int lixa_my_start(XID *xid, int rmid, long flags)
         }
 
         /* serialize XID */
-        if (!lixa_xid_serialize(xid, lsx)) {
+        lixa_xid_formatid(lsx);
+        if (NULL == (gtrid = lixa_xid_get_gtrid_ascii(xid)) ||
+            NULL == (bqual = lixa_xid_get_bqual_ascii(xid))) {
             LIXA_TRACE(("lixa_my_start: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
         LIXA_TRACE(("lixa_my_start: starting XID '%s'\n", lsx));
 
+        @@@
+        
         /* saving xid */
         lpsr->xid = *xid;
         /* starting transaction */
@@ -705,6 +710,10 @@ int lixa_my_start(XID *xid, int rmid, long flags)
         if (NULL != res)
             PQclear(res);
         */
+        if (NULL != gtrid)
+            free(gtrid);
+        if (NULL != bqual)
+            free(bqual);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_start/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
