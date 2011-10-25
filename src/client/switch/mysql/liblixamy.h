@@ -105,6 +105,17 @@ int lixa_my_parse_key_value(struct lixa_mysql_real_connect_s *lmrc,
 
 
 /**
+ * MySQL necessitates a different XID serialization; from manual:
+ * 'gtrid','bqual',formatID
+ * @param xid IN the XID that must be serialized
+ * @return NULL if an error happens, a pointer to a string that MUST BE
+ *         released by caller if the serialization is performed
+ */
+char *lixa_my_xid_serialize(const XID *xid);
+
+
+
+/**
  * Implementation of "xa_open" for MySQL;
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description
