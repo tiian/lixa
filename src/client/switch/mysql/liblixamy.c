@@ -357,6 +357,35 @@ int lixa_my_parse_key_value(struct lixa_mysql_real_connect_s *lmrc,
 
 
     
+char *lixa_my_xid_serialize(const XID *xid)
+{
+    lixa_ser_xid_t lsx;
+    char *gtrid, *bqual, *ser_xid;
+    size_t size;
+    
+    LIXA_TRACE(("lixa_my_xid_serialize\n"));
+    /* specific MySQL serialization */
+    if (NULL == (gtrid = lixa_xid_get_gtrid_ascii(xid)))
+        return NULL;
+    if (NULL == (bqual = lixa_xid_get_bqual_ascii(xid))) {
+        free(gtrid);
+        return NULL;
+    }
+    size = strlen(gtrid) + strlen(bqual) + 30;
+    if (NULL == (ser_xid = malloc(size))) {
+        free(bqual);
+        return NULL;
+    }
+    if (size <= snprintf(ser_xid, size, "'%s','%s',%lu",
+                         gtrid, bqual, xid->formatID)) {
+        free(ser_xid);
+        return NULL;
+    }
+    return ser_xid;
+}
+
+
+
 int lixa_my_open(char *xa_info, int rmid, long flags)
 {
     enum Exception { INVALID_FLAGS
@@ -606,20 +635,19 @@ int lixa_my_start(XID *xid, int rmid, long flags)
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
-                     , BEGIN_ERROR
+                     , MALLOC_ERROR
+                     , MYSQL_ERROR
                      , NONE} excp;
     int xa_rc = XAER_RMFAIL;
-    char *gtrid = NULL, *bqual = NULL;
-    /* ###
-    PGresult *res = NULL;
-    */
+    char *ser_xid = NULL, *stmt = NULL;
     
     LIXA_TRACE(("lixa_my_start\n"));
     TRY {
         struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMJOIN|TMRESUME|TMNOWAIT|TMASYNC|TMNOFLAGS;
-        lixa_ser_xid_t lsx;
-
+        const char stmt_fmt[] = "XA START %s";
+        size_t stmt_size;
+        
         /* lock the status mutex */
         g_static_mutex_lock(&lixa_sw_status_mutex);
 
@@ -651,29 +679,26 @@ int lixa_my_start(XID *xid, int rmid, long flags)
         }
 
         /* serialize XID */
-        lixa_xid_formatid(lsx);
-        if (NULL == (gtrid = lixa_xid_get_gtrid_ascii(xid)) ||
-            NULL == (bqual = lixa_xid_get_bqual_ascii(xid))) {
+        if (NULL == (ser_xid = lixa_my_xid_serialize(xid))) {
             LIXA_TRACE(("lixa_my_start: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
-        LIXA_TRACE(("lixa_my_start: starting XID '%s'\n", lsx));
-
-        @@@
+        LIXA_TRACE(("lixa_my_start: starting XID %s\n", ser_xid));
         
         /* saving xid */
         lpsr->xid = *xid;
+        /* preparing statement */
+        stmt_size = strlen(ser_xid) + sizeof(stmt_fmt);
+        if (NULL == (stmt = malloc(stmt_size)))
+            THROW(MALLOC_ERROR);
+        snprintf(stmt, stmt_size, stmt_fmt, ser_xid);
         /* starting transaction */
-        /* ###
-        res = PQexec(lpsr->conn, "BEGIN");
-        if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-            LIXA_TRACE(("lixa_my_start: error while executing BEGIN command "
-                        "(%s)\n", PQerrorMessage(lpsr->conn)));
-            THROW(BEGIN_ERROR);
+        if (mysql_query(lpsr->conn, stmt)) {
+            LIXA_TRACE(("lixa_my_start: MySQL error while executing "
+                        "'%s': %u/%s\n", stmt,
+                        mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
+            THROW(MYSQL_ERROR);
         }
-        PQclear(res);
-        res = NULL;
-        */
 
         lpsr->state.T = 1;
         lpsr->state.S = 1;
@@ -693,9 +718,10 @@ int lixa_my_start(XID *xid, int rmid, long flags)
                 xa_rc = XAER_RMFAIL;
                 break;
             case XID_SERIALIZE_ERROR:
+            case MALLOC_ERROR:
                 xa_rc = XAER_INVAL;
-                break;
-            case BEGIN_ERROR:
+                break;                
+            case MYSQL_ERROR:
                 xa_rc = XAER_RMERR;
                 break;
             case NONE:
@@ -706,14 +732,10 @@ int lixa_my_start(XID *xid, int rmid, long flags)
         } /* switch (excp) */
         /* unlock the status mutex */
         g_static_mutex_unlock(&lixa_sw_status_mutex);
-        /* ###
-        if (NULL != res)
-            PQclear(res);
-        */
-        if (NULL != gtrid)
-            free(gtrid);
-        if (NULL != bqual)
-            free(bqual);
+        if (NULL != ser_xid)
+            free(ser_xid);
+        if (NULL != stmt)
+            free(stmt);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_start/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
@@ -728,17 +750,22 @@ int lixa_my_end(XID *xid, int rmid, long flags)
                      , PROTOCOL_ERROR1
                      , PROTOCOL_ERROR2
                      , NULL_CONN
-                     , XID_SERIALIZE_ERROR
+                     , XID_SERIALIZE_ERROR1
                      , XID_MISMATCH
+                     , XID_SERIALIZE_ERROR2
+                     , MALLOC_ERROR
+                     , MYSQL_ERROR
                      , ROLLBACK_ONLY
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
+    char *ser_xid = NULL, *stmt = NULL;
     
     LIXA_TRACE(("lixa_my_end\n"));
     TRY {
         struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMSUSPEND|TMMIGRATE|TMSUCCESS|TMFAIL|TMASYNC;
-        lixa_ser_xid_t lsx;
+        const char stmt_fmt[] = "XA END %s";
+        size_t stmt_size;
 
         /* lock the status mutex */
         g_static_mutex_lock(&lixa_sw_status_mutex);
@@ -771,21 +798,42 @@ int lixa_my_end(XID *xid, int rmid, long flags)
         }
 
         /* serialize XID */
-        if (!lixa_xid_serialize(xid, lsx)) {
-            LIXA_TRACE(("lixa_my_end: unable to serialize XID\n"));
-            THROW(XID_SERIALIZE_ERROR);
-        }
 
         /* checking xid is the started one */
         if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
-            lixa_ser_xid_t lsx2;
-            lixa_xid_serialize(&(lpsr->xid), lsx2);
+            lixa_ser_xid_t lsx, lsx2;
+            if (!lixa_xid_serialize(xid, lsx) ||
+                !lixa_xid_serialize(&(lpsr->xid), lsx2)) {
+                LIXA_TRACE(("lixa_my_end: unable to serialize XID\n"));
+                THROW(XID_SERIALIZE_ERROR1);
+            }
             LIXA_TRACE(("lixa_my_end: ending XID '%s' is not the same "
                         "of started XID '%s'\n", lsx, lsx2));
             THROW(XID_MISMATCH);
         }
-        LIXA_TRACE(("lixa_my_end: ending XID '%s'\n", lsx));
 
+        /* serialize XID */
+        if (NULL == (ser_xid = lixa_my_xid_serialize(xid))) {
+            LIXA_TRACE(("lixa_my_end: unable to serialize XID\n"));
+            THROW(XID_SERIALIZE_ERROR2);
+        }
+        LIXA_TRACE(("lixa_my_end: ending XID %s\n", ser_xid));
+        
+        /* saving xid */
+        lpsr->xid = *xid;
+        /* preparing statement */
+        stmt_size = strlen(ser_xid) + sizeof(stmt_fmt);
+        if (NULL == (stmt = malloc(stmt_size)))
+            THROW(MALLOC_ERROR);
+        snprintf(stmt, stmt_size, stmt_fmt, ser_xid);
+        /* starting transaction */
+        if (mysql_query(lpsr->conn, stmt)) {
+            LIXA_TRACE(("lixa_my_end: MySQL error while executing "
+                        "'%s': %u/%s\n", stmt,
+                        mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
+            THROW(MYSQL_ERROR);
+        }
+        
         /* check if the TM marked as failed the transaction */
         if (TMFAIL & flags) {
             LIXA_TRACE(("lixa_my_end: TMFAIL detected, entering 'Rollback "
@@ -812,11 +860,20 @@ int lixa_my_end(XID *xid, int rmid, long flags)
             case NULL_CONN:
                 xa_rc = XAER_RMFAIL;
                 break;
-            case XID_SERIALIZE_ERROR:
+            case XID_SERIALIZE_ERROR1:
                 xa_rc = XAER_INVAL;
                 break;
             case XID_MISMATCH:
                 xa_rc = XAER_NOTA;
+                break;
+            case XID_SERIALIZE_ERROR2:
+                xa_rc = XAER_INVAL;
+                break;
+            case MALLOC_ERROR:
+                xa_rc = XAER_INVAL;
+                break;                
+            case MYSQL_ERROR:
+                xa_rc = XAER_RMERR;
                 break;
             case ROLLBACK_ONLY:
                 xa_rc = XA_RBROLLBACK;
@@ -829,6 +886,10 @@ int lixa_my_end(XID *xid, int rmid, long flags)
         } /* switch (excp) */
         /* unlock the status mutex */
         g_static_mutex_unlock(&lixa_sw_status_mutex);
+        if (NULL != ser_xid)
+            free(ser_xid);
+        if (NULL != stmt)
+            free(stmt);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_end/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
