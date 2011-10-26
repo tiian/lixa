@@ -75,7 +75,7 @@ extern const long LIXA_XID_FORMAT_ID;
 
 
 /**
- * A string used to serialize a XID and use it with PostgreSQL.
+ * A string used to serialize a XID.
  * NOTE: this is not XA standard compliant, but it just works in
  * conjunction with LIXA Transaction Manager.
  */
@@ -169,7 +169,7 @@ extern "C" {
 
 
     /**
-     * Serialize XID to a string compatible with PostgreSQL
+     * Serialize XID to a string
      * @param xid IN the XID to be serialized
      * @param lsx OUT the serialized XID
      * @return TRUE if serialization was completed, FALSE if there was an error

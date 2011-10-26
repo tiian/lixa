@@ -62,7 +62,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020 ; lixa_test_exec.sh noreset none ca
 AT_CLEANUP
 
 # try two phase commit
-AT_SETUP([PQ/0.1/0.1 Two phase commit])
+AT_SETUP([MY/0.1/0.1 Two phase commit])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -73,7 +73,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0024 ; lixa_test_exec.sh noreset none case0041 1 1 0], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -83,7 +83,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0024 ; lixa_test_exec.sh noreset none case0041 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # try rollback after prepare
