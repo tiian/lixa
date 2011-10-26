@@ -254,5 +254,14 @@
         <rsrmgr>MySQL_stareg_3</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="CASE_PROF_0024">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>MySQL_stareg</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
   </profiles>
 </client>

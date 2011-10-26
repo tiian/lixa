@@ -357,31 +357,55 @@ int lixa_my_parse_key_value(struct lixa_mysql_real_connect_s *lmrc,
 
 
     
-char *lixa_my_xid_serialize(const XID *xid)
+int lixa_my_xid_serialize(const XID *xid, lixa_my_ser_xid_t lmsx)
 {
-    lixa_ser_xid_t lsx;
-    char *gtrid, *bqual, *ser_xid;
-    size_t size;
-    
-    LIXA_TRACE(("lixa_my_xid_serialize\n"));
-    /* specific MySQL serialization */
-    if (NULL == (gtrid = lixa_xid_get_gtrid_ascii(xid)))
-        return NULL;
-    if (NULL == (bqual = lixa_xid_get_bqual_ascii(xid))) {
-        free(gtrid);
-        return NULL;
+    int i = 0, j = 0;
+    byte_t *p;
+    long len = 1 /* first ' */ +
+        xid->gtrid_length*2 /* gtrid */ +
+        3 /* ',' */ +
+        xid->bqual_length*2 /* bqual */ +
+        2 /* ', */ +
+        LIXA_MY_XID_SERIALIZE_FORMATID_DIGITS /* formatID */ +
+        1 /* '\0' terminator */ ;
+    /* check the XID can be serialized for MySQL by this routine */
+    if (len > sizeof(lixa_my_ser_xid_t)) {
+        LIXA_TRACE(("lixa_my_xid_serialize: xid can not be serialized "
+                    "because it would need %ld bytes instead of "
+                    SIZE_T_FORMAT "\n", len, sizeof(lixa_ser_xid_t)));
+        return FALSE;
     }
-    size = strlen(gtrid) + strlen(bqual) + 30;
-    if (NULL == (ser_xid = malloc(size))) {
-        free(bqual);
-        return NULL;
+    /* put the first apostrophe */
+    lmsx[0] = '\'';
+    lmsx[1] = '\0';
+    /* serialize gtrid */
+    j = 1;
+    p = (byte_t *)&(xid->data[0]);
+    for (i=0; i<xid->gtrid_length; ++i) {
+        sprintf(lmsx+j, "%2.2x", p[i]);
+        j += 2;
     }
-    if (size <= snprintf(ser_xid, size, "'%s','%s',%lu",
-                         gtrid, bqual, xid->formatID)) {
-        free(ser_xid);
-        return NULL;
+    /* put the second apostrophe */
+    *(lmsx+j) = '\'';
+    j += 1;
+    /* put a comma */
+    *(lmsx+j) = ',';
+    j += 1;
+    /* put the third apostrophe */
+    *(lmsx+j) = '\'';
+    j += 1;
+    /* serialize bqual */
+    p = (byte_t *)&(xid->data[xid->gtrid_length]);
+    for (i=0; i<xid->bqual_length; ++i) {
+        sprintf(lmsx+j, "%2.2x", p[i]);
+        j += 2;
     }
-    return ser_xid;
+    /* put the last apostrophe, a comma and formatID */
+    /* serialize formatID */
+    sprintf(lmsx+j, "',%lu", xid->formatID);
+
+    LIXA_TRACE(("lixa_my_xid_serialize: %s\n", lmsx));
+    return TRUE;
 }
 
 
@@ -639,7 +663,7 @@ int lixa_my_start(XID *xid, int rmid, long flags)
                      , MYSQL_ERROR
                      , NONE} excp;
     int xa_rc = XAER_RMFAIL;
-    char *ser_xid = NULL, *stmt = NULL;
+    char *stmt = NULL;
     
     LIXA_TRACE(("lixa_my_start\n"));
     TRY {
@@ -647,6 +671,7 @@ int lixa_my_start(XID *xid, int rmid, long flags)
         const long valid_flags = TMJOIN|TMRESUME|TMNOWAIT|TMASYNC|TMNOFLAGS;
         const char stmt_fmt[] = "XA START %s";
         size_t stmt_size;
+        lixa_my_ser_xid_t lmsx;
         
         /* lock the status mutex */
         g_static_mutex_lock(&lixa_sw_status_mutex);
@@ -679,19 +704,19 @@ int lixa_my_start(XID *xid, int rmid, long flags)
         }
 
         /* serialize XID */
-        if (NULL == (ser_xid = lixa_my_xid_serialize(xid))) {
+        if (!lixa_my_xid_serialize(xid, lmsx)) {
             LIXA_TRACE(("lixa_my_start: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
-        LIXA_TRACE(("lixa_my_start: starting XID %s\n", ser_xid));
+        LIXA_TRACE(("lixa_my_start: starting XID %s\n", lmsx));
         
         /* saving xid */
         lpsr->xid = *xid;
         /* preparing statement */
-        stmt_size = strlen(ser_xid) + sizeof(stmt_fmt);
+        stmt_size = strlen(lmsx) + sizeof(stmt_fmt);
         if (NULL == (stmt = malloc(stmt_size)))
             THROW(MALLOC_ERROR);
-        snprintf(stmt, stmt_size, stmt_fmt, ser_xid);
+        snprintf(stmt, stmt_size, stmt_fmt, lmsx);
         /* starting transaction */
         if (mysql_query(lpsr->conn, stmt)) {
             LIXA_TRACE(("lixa_my_start: MySQL error while executing "
@@ -732,8 +757,6 @@ int lixa_my_start(XID *xid, int rmid, long flags)
         } /* switch (excp) */
         /* unlock the status mutex */
         g_static_mutex_unlock(&lixa_sw_status_mutex);
-        if (NULL != ser_xid)
-            free(ser_xid);
         if (NULL != stmt)
             free(stmt);
     } /* TRY-CATCH */
@@ -758,7 +781,7 @@ int lixa_my_end(XID *xid, int rmid, long flags)
                      , ROLLBACK_ONLY
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
-    char *ser_xid = NULL, *stmt = NULL;
+    char *stmt = NULL;
     
     LIXA_TRACE(("lixa_my_end\n"));
     TRY {
@@ -766,6 +789,7 @@ int lixa_my_end(XID *xid, int rmid, long flags)
         const long valid_flags = TMSUSPEND|TMMIGRATE|TMSUCCESS|TMFAIL|TMASYNC;
         const char stmt_fmt[] = "XA END %s";
         size_t stmt_size;
+        lixa_my_ser_xid_t lmsx;
 
         /* lock the status mutex */
         g_static_mutex_lock(&lixa_sw_status_mutex);
@@ -801,31 +825,31 @@ int lixa_my_end(XID *xid, int rmid, long flags)
 
         /* checking xid is the started one */
         if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
-            lixa_ser_xid_t lsx, lsx2;
-            if (!lixa_xid_serialize(xid, lsx) ||
-                !lixa_xid_serialize(&(lpsr->xid), lsx2)) {
+            lixa_my_ser_xid_t lmsx1, lmsx2;
+            if (!lixa_my_xid_serialize(xid, lmsx1) ||
+                !lixa_my_xid_serialize(&(lpsr->xid), lmsx2)) {
                 LIXA_TRACE(("lixa_my_end: unable to serialize XID\n"));
                 THROW(XID_SERIALIZE_ERROR1);
             }
-            LIXA_TRACE(("lixa_my_end: ending XID '%s' is not the same "
-                        "of started XID '%s'\n", lsx, lsx2));
+            LIXA_TRACE(("lixa_my_end: ending XID %s is not the same "
+                        "of started XID %s\n", lmsx1, lmsx2));
             THROW(XID_MISMATCH);
         }
 
         /* serialize XID */
-        if (NULL == (ser_xid = lixa_my_xid_serialize(xid))) {
+        if (!lixa_my_xid_serialize(xid,lmsx)) {
             LIXA_TRACE(("lixa_my_end: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR2);
         }
-        LIXA_TRACE(("lixa_my_end: ending XID %s\n", ser_xid));
+        LIXA_TRACE(("lixa_my_end: ending XID %s\n", lmsx));
         
         /* saving xid */
         lpsr->xid = *xid;
         /* preparing statement */
-        stmt_size = strlen(ser_xid) + sizeof(stmt_fmt);
+        stmt_size = strlen(lmsx) + sizeof(stmt_fmt);
         if (NULL == (stmt = malloc(stmt_size)))
             THROW(MALLOC_ERROR);
-        snprintf(stmt, stmt_size, stmt_fmt, ser_xid);
+        snprintf(stmt, stmt_size, stmt_fmt, lmsx);
         /* starting transaction */
         if (mysql_query(lpsr->conn, stmt)) {
             LIXA_TRACE(("lixa_my_end: MySQL error while executing "
@@ -886,8 +910,6 @@ int lixa_my_end(XID *xid, int rmid, long flags)
         } /* switch (excp) */
         /* unlock the status mutex */
         g_static_mutex_unlock(&lixa_sw_status_mutex);
-        if (NULL != ser_xid)
-            free(ser_xid);
         if (NULL != stmt)
             free(stmt);
     } /* TRY-CATCH */
@@ -913,15 +935,12 @@ int lixa_my_rollback(XID *xid, int rmid, long flags)
                      , ROLLBACK_ERROR2
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
-    /* ###
-    PGresult *res = NULL;
-    */
     
     LIXA_TRACE(("lixa_my_rollback\n"));
     TRY {
         struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMFAIL|TMASYNC;
-        lixa_ser_xid_t lsx;
+        lixa_my_ser_xid_t lmsx;
 
         /* lock the status mutex */
         g_static_mutex_lock(&lixa_sw_status_mutex);
@@ -953,7 +972,7 @@ int lixa_my_rollback(XID *xid, int rmid, long flags)
         }
 
         /* serialize XID */
-        if (!lixa_xid_serialize(xid, lsx)) {
+        if (!lixa_my_xid_serialize(xid, lmsx)) {
             LIXA_TRACE(("lixa_my_rollback: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
@@ -961,9 +980,9 @@ int lixa_my_rollback(XID *xid, int rmid, long flags)
         if (lpsr->state.S != 2 && lpsr->state.S != 3 && lpsr->state.S != 4) {
             const char SELECT_FMT[] = "SELECT COUNT(*) FROM pg_prepared_xacts "
                 "WHERE gid = '%s';";
-            char select[sizeof(SELECT_FMT) + sizeof(lsx)];
+            char select[sizeof(SELECT_FMT) + sizeof(lmsx)];
             /* check the database state, it could be a prepared transaction */
-            snprintf(select, sizeof(select), SELECT_FMT, lsx);
+            snprintf(select, sizeof(select), SELECT_FMT, lmsx);
             /* ###
             res = PQexec(lpsr->conn, select);
             if (PGRES_TUPLES_OK != PQresultStatus(res)) {
@@ -999,34 +1018,31 @@ int lixa_my_rollback(XID *xid, int rmid, long flags)
         
         /* checking xid is the started one */
         if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
-            lixa_ser_xid_t lsx2;
-            lixa_xid_serialize(&(lpsr->xid), lsx2);
+            lixa_my_ser_xid_t lmsx2;
+            lixa_my_xid_serialize(&(lpsr->xid), lmsx2);
             LIXA_TRACE(("lixa_my_rollback: rolling back XID '%s' is not the "
-                        "same of started XID '%s'\n", lsx, lsx2));
+                        "same of started XID '%s'\n", lmsx, lmsx2));
             THROW(XID_MISMATCH);
         }
-        LIXA_TRACE(("lixa_my_rollback: rolling back XID '%s'\n", lsx));
+        LIXA_TRACE(("lixa_my_rollback: rolling back XID %s\n", lmsx));
 
-        if (lpsr->state.S == 3) {
-            const char ROLLBACK_PREP_FMT[] = "ROLLBACK PREPARED '%s';";
-            char pq_cmd_buf[sizeof(ROLLBACK_PREP_FMT) +
-                            sizeof(lixa_ser_xid_t)];
+        /* ### if (lpsr->state.S == 3) */ {
+            const char ROLLBACK_PREP_FMT[] = "XA ROLLBACK %s";
+            char my_cmd_buf[sizeof(ROLLBACK_PREP_FMT) +
+                            sizeof(lixa_my_ser_xid_t)];
             lpsr->state.S = 0;
             /* rolling back the transaction */
-            snprintf(pq_cmd_buf, sizeof(pq_cmd_buf), ROLLBACK_PREP_FMT, lsx);
-            /* ###
-            res = PQexec(lpsr->conn, pq_cmd_buf);
-            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+            snprintf(my_cmd_buf, sizeof(my_cmd_buf), ROLLBACK_PREP_FMT, lmsx);
+            if (mysql_query(lpsr->conn, my_cmd_buf)) {
                 LIXA_TRACE(("lixa_my_rollback: error while executing "
-                            "ROLLBACK PREPARED command (%s)\n",
-                            PQerrorMessage(lpsr->conn)));
+                            "'%s': %u/%s\n", my_cmd_buf,
+                            mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
                 THROW(ROLLBACK_ERROR1);
             }
-            */
-        } else {
+        } /* else {
             lpsr->state.S = 0;
-            /* the transaction is NOT in prepared state */
-            /* ###
+            * the transaction is NOT in prepared state
+             ###
             res = PQexec(lpsr->conn, "ROLLBACK");
             if (PGRES_COMMAND_OK != PQresultStatus(res)) {
                 LIXA_TRACE(("lixa_my_rollback: error while executing "
@@ -1036,8 +1052,8 @@ int lixa_my_rollback(XID *xid, int rmid, long flags)
             }
             PQclear(res);
             res = NULL;
-            */
-        }
+           
+            } */
         
         THROW(NONE);
     } CATCH {
@@ -1101,17 +1117,14 @@ int lixa_my_prepare(XID *xid, int rmid, long flags)
                      , PREPARE_ERROR
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
-    /* ###
-    PGresult *res = NULL;
-    */
     
     LIXA_TRACE(("lixa_my_prepare\n"));
     TRY {
         struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMFAIL|TMASYNC;
-        lixa_ser_xid_t lsx;
-        const char PREPARE_TRANS_FMT[] = "PREPARE TRANSACTION '%s';";
-        char pq_cmd_buf[sizeof(PREPARE_TRANS_FMT) + sizeof(lixa_ser_xid_t)];
+        lixa_my_ser_xid_t lmsx;
+        const char PREPARE_TRANS_FMT[] = "XA PREPARE %s";
+        char my_cmd_buf[sizeof(PREPARE_TRANS_FMT) + sizeof(lixa_my_ser_xid_t)];
         
         /* lock the status mutex */
         g_static_mutex_lock(&lixa_sw_status_mutex);
@@ -1143,38 +1156,32 @@ int lixa_my_prepare(XID *xid, int rmid, long flags)
         }
 
         /* serialize XID */
-        if (!lixa_xid_serialize(xid, lsx)) {
+        if (!lixa_my_xid_serialize(xid, lmsx)) {
             LIXA_TRACE(("lixa_my_prepare: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
 
         /* checking xid is the started one */
         if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
-            lixa_ser_xid_t lsx2;
-            lixa_xid_serialize(&(lpsr->xid), lsx2);
-            LIXA_TRACE(("lixa_my_prepare: preparing XID '%s' is not the same "
-                        "of started XID '%s'\n", lsx, lsx2));
+            lixa_my_ser_xid_t lmsx2;
+            lixa_my_xid_serialize(&(lpsr->xid), lmsx2);
+            LIXA_TRACE(("lixa_my_prepare: preparing XID %s is not the same "
+                        "of started XID %s\n", lmsx, lmsx2));
             THROW(XID_MISMATCH);
         }
-        LIXA_TRACE(("lixa_my_prepare: preparing XID '%s'\n", lsx));
+        LIXA_TRACE(("lixa_my_prepare: preparing XID %s\n", lmsx));
 
         /* preparing transaction */
-        snprintf(pq_cmd_buf, sizeof(pq_cmd_buf), PREPARE_TRANS_FMT, lsx);
-        /* ###
-        res = PQexec(lpsr->conn, pq_cmd_buf);
-        if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+        snprintf(my_cmd_buf, sizeof(my_cmd_buf), PREPARE_TRANS_FMT, lmsx);
+        if (mysql_query(lpsr->conn, my_cmd_buf)) {
             LIXA_TRACE(("lixa_my_prepare: error while executing "
-                        "PREPARE TRANSACTION command (%d/%s)\n",
-                        PQresultStatus(res),
-                        PQerrorMessage(lpsr->conn)));
-               // the resource manager could unilaterally rollback and return
-               // XA_RBROLLBACK to the transaction manager, but it is leaved
-               // as a future improvment if necessary
+                        "'%s': %u/%s)\n", my_cmd_buf,
+                        mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
+            /* the resource manager could unilaterally rollback and return
+             * XA_RBROLLBACK to the transaction manager, but it is leaved
+             * as a future improvment if necessary */
             THROW(PREPARE_ERROR);
         }
-        PQclear(res);
-        res = NULL;
-        */
         lpsr->state.S = 3;
 
         THROW(NONE);
@@ -1208,10 +1215,6 @@ int lixa_my_prepare(XID *xid, int rmid, long flags)
         } /* switch (excp) */
         /* unlock the status mutex */
         g_static_mutex_unlock(&lixa_sw_status_mutex);
-        /* ###
-        if (NULL != res)
-            PQclear(res);
-        */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_prepare/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;

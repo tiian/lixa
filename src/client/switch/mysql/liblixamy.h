@@ -46,6 +46,31 @@ struct xa_switch_t xapqls;
 
 
 /**
+ * Number of digits used to for formatID (10 should be sufficient, but some
+ * spare space is not dangerous)
+ */
+#define LIXA_MY_XID_SERIALIZE_FORMATID_DIGITS 20
+
+
+
+/**
+ * Length of a string that can contain a serialized XID for MySQL:
+ * ' + gtrid + ',' + bqual + ', + formatID
+ */
+#define LIXA_MY_XID_SERIALIZE_LENGTH (2*XIDDATASIZE+5+LIXA_MY_XID_SERIALIZE_FORMATID_DIGITS+1)
+
+
+
+/**
+ * A string used to serialize a XID for MySQL.
+ * NOTE: this is not XA standard compliant, but it just works in
+ * conjunction with LIXA Transaction Manager.
+ */
+typedef char lixa_my_ser_xid_t[LIXA_MY_XID_SERIALIZE_LENGTH];
+
+
+
+/**
  * This struct is used to split xa_info passed from configuration file
  * (lixac_conf.xml) to broken down values that can be passed to
  * mysql_real_connect() function. The field of the structure are the same
@@ -105,13 +130,12 @@ int lixa_my_parse_key_value(struct lixa_mysql_real_connect_s *lmrc,
 
 
 /**
- * MySQL necessitates a different XID serialization; from manual:
- * 'gtrid','bqual',formatID
- * @param xid IN the XID that must be serialized
- * @return NULL if an error happens, a pointer to a string that MUST BE
- *         released by caller if the serialization is performed
+ * Serialize XID to a string compatible with MySQL XA commands
+ * @param xid IN the XID to be serialized
+ * @param lmsx OUT the serialized XID
+ * @return TRUE if serialization was completed, FALSE if there was an error
  */
-char *lixa_my_xid_serialize(const XID *xid);
+int lixa_my_xid_serialize(const XID *xid, lixa_my_ser_xid_t lmsx);
 
 
 

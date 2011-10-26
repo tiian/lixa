@@ -144,7 +144,8 @@ int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx)
     /* check the XID can be serialized for PostgreSQL by this routine */
     if (len > sizeof(lixa_ser_xid_t)) {
         LIXA_TRACE(("lixa_xid_serialize: xid can not be serialized "
-                    "because it would need %ld bytes instead of %d\n",
+                    "because it would need %ld bytes instead of "
+                    SIZE_T_FORMAT "\n",
                     len, sizeof(lixa_ser_xid_t)));
         return FALSE;
     }
