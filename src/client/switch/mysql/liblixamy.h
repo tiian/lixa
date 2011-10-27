@@ -140,6 +140,22 @@ int lixa_my_xid_serialize(const XID *xid, lixa_my_ser_xid_t lmsx);
 
 
 /**
+ * Deserialize the string fetched after XA RECOVER command and build a
+ * XID standard object
+ * @param xid OUT resulting XID (XA standard)
+ * @param formatID IN a string containing formatID
+ * @param gtrid_length IN a string containing the length of gtrid part
+ * @param bqual_length IN a string containing the length of bqual part
+ * @param data IN a string containing the concatenation of gtrid and bqual
+ * @return TRUE if deserialization was completed, FALSE if there was an error
+ */
+int lixa_my_xid_deserialize(XID *xid, const char *formatID,
+                            const char *gtrid_length, const char *bqual_length,
+                            const char *data);
+
+
+
+/**
  * Implementation of "xa_open" for MySQL;
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description
