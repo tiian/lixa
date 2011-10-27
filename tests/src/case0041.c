@@ -78,29 +78,21 @@ int main(int argc, char *argv[])
     }
 
     /* insert data */
-    /*
     if (insert) {
-        res = PQexec(
-            conn, "INSERT INTO authors VALUES(9, 'Name', 'Surname');");
-        if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-            fprintf(stderr,
-                    "INSERT INTO authors: %s", PQerrorMessage(conn));
-            PQclear(res);
+        if (mysql_query(conn,
+                        "INSERT INTO authors VALUES(9, 'Name', 'Surname')")) {
+            fprintf(stderr, "INSERT INTO authors: %u/%s",
+                    mysql_errno(conn), mysql_error(conn));
             exit_nicely(conn);
         }
-        PQclear(res);
     } else {
-        res = PQexec(
-            conn, "DELETE FROM authors;");
-        if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-            fprintf(stderr,
-                    "DELETE FROM authors: %s", PQerrorMessage(conn));
-            PQclear(res);
+        if (mysql_query(conn, "DELETE FROM authors")) {
+            fprintf(stderr, "DELETE FROM  authors: %u/%s",
+                    mysql_errno(conn), mysql_error(conn));
             exit_nicely(conn);
         }
-        PQclear(res);
     }
-    */
+    
     /* commit transaction */
     if (commit) {
         if (test_rc != (txrc = tx_commit())) {

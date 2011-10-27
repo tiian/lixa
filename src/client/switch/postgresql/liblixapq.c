@@ -1116,7 +1116,7 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
             LIXA_TRACE(("lixa_pq_recover: cursor is not open, opening it\n"));
             res = PQexec(lpsr->conn, BEGIN);
             if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-                LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
+                LIXA_TRACE(("lixa_pq_recover: error while executing '%s' "
                             "command (%s)\n", BEGIN,
                             PQerrorMessage(lpsr->conn)));
                 THROW(BEGIN_ERROR);
@@ -1125,10 +1125,10 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
             res = NULL;
             lixa_xid_formatid(lsx);
             snprintf(open_cursor, sizeof(open_cursor), OPEN_CURSOR_FMT, lsx);
-            LIXA_TRACE(("lixa_pq_start: '%s'\n", open_cursor));
+            LIXA_TRACE(("lixa_pq_recover: '%s'\n", open_cursor));
             res = PQexec(lpsr->conn, open_cursor);
             if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-                LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
+                LIXA_TRACE(("lixa_pq_recover: error while executing '%s' "
                             "command (%s)\n", open_cursor,
                             PQerrorMessage(lpsr->conn)));
                 THROW(OPEN_CURSOR_ERROR);
@@ -1141,7 +1141,7 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
         snprintf(fetch_count, sizeof(fetch_count), FETCH_COUNT_FMT, count);
         res = PQexec(lpsr->conn, fetch_count);
         if (PGRES_TUPLES_OK != PQresultStatus(res)) {
-            LIXA_TRACE(("lixa_pq_prepare: error while executing "
+            LIXA_TRACE(("lixa_pq_recover: error while executing "
                         "'%s' command (%d/%s)\n", fetch_count,
                         PQresultStatus(res),
                         PQerrorMessage(lpsr->conn)));
@@ -1150,7 +1150,7 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
         for (row=0; row<PQntuples(res); ++row) {
             XID xid;            
             if (lixa_xid_deserialize(&xid, PQgetvalue(res, row, 0))) {
-                LIXA_TRACE(("lixa_pq_prepare: xids[%d]='%s'\n", out_count,
+                LIXA_TRACE(("lixa_pq_recover: xids[%d]='%s'\n", out_count,
                             PQgetvalue(res, row, 0)));
                 xids[out_count++] = xid;
             }
@@ -1162,7 +1162,7 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
         LIXA_TRACE(("lixa_pq_recover: TMENDRSCAN is set, closing it\n"));
         res = PQexec(lpsr->conn, CLOSE_CURSOR);
         if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-            LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
+            LIXA_TRACE(("lixa_pq_recover: error while executing '%s' "
                         "command (%s)\n", CLOSE_CURSOR,
                         PQerrorMessage(lpsr->conn)));
             THROW(CLOSE_CURSOR_ERROR);
@@ -1171,7 +1171,7 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
         res = NULL;
         res = PQexec(lpsr->conn, END);
         if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-            LIXA_TRACE(("lixa_pq_start: error while executing '%s' "
+            LIXA_TRACE(("lixa_pq_recover: error while executing '%s' "
                         "command (%s)\n", END,
                         PQerrorMessage(lpsr->conn)));
             THROW(END_ERROR);
