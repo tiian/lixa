@@ -402,7 +402,7 @@ int lixa_my_xid_serialize(const XID *xid, lixa_my_ser_xid_t lmsx)
     }
     /* put the last apostrophe, a comma and formatID */
     /* serialize formatID */
-    sprintf(lmsx+j, "',%lu", xid->formatID);
+    sprintf(lmsx+j, "',%ld", xid->formatID);
 
     LIXA_TRACE(("lixa_my_xid_serialize: %s\n", lmsx));
     return TRUE;
@@ -414,7 +414,48 @@ int lixa_my_xid_deserialize(XID *xid, const char *formatID,
                             const char *gtrid_length, const char *bqual_length,
                             const char *data)
 {
-    @@@
+    long i, s;
+    const char *p, *q;
+    char tmp[3];
+    unsigned int b = 0;
+    
+    LIXA_TRACE(("lixa_my_xid_deserialize\n"));
+    xid->formatID = strtol(formatID, NULL, 0);
+    xid->gtrid_length = strtol(gtrid_length, NULL, 0) / 2;
+    xid->bqual_length = strtol(bqual_length, NULL, 0) / 2;
+    s = xid->gtrid_length + xid->bqual_length;
+    if (XIDDATASIZE < s) {
+        LIXA_TRACE(("lixa_my_xid_deserialize: gtrid_length (%ld) + "
+                    "bqual_length (%ld)"
+                    "exceeds XIDDATASIZE (%d)\n", xid->gtrid_length,
+                    xid->bqual_length, XIDDATASIZE));
+        return FALSE;
+    }
+    if (strlen(data) > s*2) {
+        LIXA_TRACE(("lixa_my_xid_deserialize: data length ("
+                    SIZE_T_FORMAT ") exceeds "
+                    "gtrid and bqual length (%ld)\n", strlen(data), s));
+        return FALSE;
+    }
+    tmp[2] = '\0';
+
+    p = data;
+    for (i=0; i<s; ++i) {
+        q = p+1;
+        if (((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f')) &&
+            ((*q >= '0' && *q <= '9') || (*q >= 'a' && *q <= 'f'))) {
+            tmp[0] = *p;
+            tmp[1] = *q;
+            sscanf(tmp, "%x", &b);
+            xid->data[i++] = b;
+        } else {
+            LIXA_TRACE(("lixa_my_xid_deserialize: '%s' invalid "
+                        "characters found:\n", p));
+            return FALSE;
+        }
+        p += 2;
+    }
+    return TRUE;
 }
 
 
@@ -986,25 +1027,40 @@ int lixa_my_rollback(XID *xid, int rmid, long flags)
         }
 
         if (lpsr->state.S != 2 && lpsr->state.S != 3 && lpsr->state.S != 4) {
-            int retrieved = 0, i;
-            XID xids[1000]; /* this is bugged,but should be good enought :( */
-            retrieved = lixa_my_recover(xids, sizeof(xids)/sizeof(XID), rmid,
-                                        TMSTARTRSCAN);
-            if (retrieved < 0) {
-                LIXA_TRACE(("lixa_my_rollback: lixa_my_recover returned %d",
-                            retrieved));
+            MYSQL_RES *res;
+            MYSQL_ROW row;
+            XID xid_r;
+            int num_fields;
+            if (mysql_query(lpsr->conn, "XA RECOVER")) {
+                LIXA_TRACE(("lixa_my_rollback: error while executing "
+                            "'XA RECOVER' command: %u/%s\n",
+                            mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
                 THROW(XA_RECOVER_ERROR);
             }
-
-            for (i=0; i<retrieved; ++i) {
-                if (lixa_xid_compare(xid, &(xids[i]))) {
+            res = mysql_store_result(lpsr->conn);
+            num_fields = mysql_num_fields(res);
+            while ((row = mysql_fetch_row(res))) {
+                const char *formatID = row[0] ? row[0] : "";
+                const char *gtrid_length = row[1] ? row[1] : "";
+                const char *bqual_length = row[2] ? row[2] : "";
+                const char *data = row[3] ? row[3] : "";
+                LIXA_TRACE(("lixa_my_rollback: formatID=%s, "
+                            "gtrid_length=%s, bqual_length=%s, data=%s\n",
+                            formatID, gtrid_length, bqual_length, data));
+                if (!lixa_my_xid_deserialize(&xid_r, formatID, gtrid_length,
+                                            bqual_length, data)) {
+                    LIXA_TRACE(("lixa_my_rollback: unable to deserialize the "
+                                "XID retrieved with XA RECOVER\n"));
+                }
+                if (lixa_xid_compare(xid, &xid_r)) {
                     LIXA_TRACE(("lixa_my_rollback: the transaction %s is in "
                                 "prepared state\n", lmsx));
                     lpsr->state.S = 3;
-                    lpsr->xid = xid[i];
+                    lpsr->xid = xid_r;
                     break;
                 }
             }
+            mysql_free_result(res);
             if (lpsr->state.S != 3) {
                 LIXA_TRACE(("lixa_my_rollback: the transaction %s is not "
                             "available\n", lmsx));
@@ -1448,12 +1504,13 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
             THROW(NULL_CONN);
         }
 
-        /* open the cursor if necessary */
+        /* execute XA RECOVER */
         if (flags & TMSTARTRSCAN) {
             MYSQL_RES *res;
             MYSQL_ROW row;
             XID xid;
             int num_fields;
+            LIXA_TRACE(("lixa_my_recover: executing XA RECOVER\n"));
             if (mysql_query(lpsr->conn, "XA RECOVER")) {
                 LIXA_TRACE(("lixa_my_recover: error while executing "
                             "'XA RECOVER' command: %u/%s\n",
@@ -1462,6 +1519,7 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
             }
             res = mysql_store_result(lpsr->conn);
             num_fields = mysql_num_fields(res);
+            LIXA_TRACE(("lixa_my_recover: num_fields=%d\n", num_fields));
             while ((row = mysql_fetch_row(res)) && (out_count < count)) {
                 const char *formatID = row[0] ? row[0] : "";
                 const char *gtrid_length = row[1] ? row[1] : "";
