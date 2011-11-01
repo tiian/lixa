@@ -3753,7 +3753,7 @@ tiian@ubuntu:~/tmp$ ./example7_pql_db2 delete org 2>&amp;1 | grep ax_reg
     <important><para>
 	The LIXA software must be configured to support the MySQL 
 	server resource manager as explained in 
-	<xref linkend="Linking_third_party_resource_managers"/> @@@ .
+	<xref linkend="Linking_third_party_resource_managers"/>.
     </para></important>
     <section xml:id="Development_setup_MySQL_environment">
       <title>Set-up MySQL environment</title>
@@ -3840,7 +3840,8 @@ mysql> select * from authors;
 Empty set (0.00 sec)
 	    </screen></td></tr></tbody>
 	  </table>
-	  OK, the <quote>authors</quote> table was created. 
+	  OK, the <quote>authors</quote> table was created using 
+	  the <quote>InnoDB</quote> engine. 
 	  If something went wrong, you should refer to MySQL
 	  documentation to fix the issue before the next step because
 	  you would not be able to execute the sample program without a

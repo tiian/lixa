@@ -442,6 +442,79 @@ make
 	</para></note>
       </section>
       <section>
+	<title>MySQL 5.0.51a<footnote><para>
+	      MySQL is a trademark of <trademark>Oracle</trademark> 
+	      corporation; details are available at this link:
+	      <link xlink:href="http://www.mysql.com/about/legal/">
+		http://www.mysql.com/about/legal/</link>
+	  </para></footnote>
+	</title>
+	<para>
+	  This step is useful if you want to use MySQL as a Resource
+	  Manager coordinated by LIXA; only version 5.0.51a has been
+	  tested, but there should not be relevant differences with a
+	  different version. Use something like this:
+	  <screen>
+./configure --with-mysql
+	  </screen>
+	  to create a loadable module containing the switch structure. It's
+	  not necessary to specify the MySQL installation directory because
+	  the <command>mysql_config</command> utility command is used.
+	</para>
+	<note><para>
+	    MySQL does not supply an XA standard switch structure, but
+	    only some SQL non standard statements (
+	    <code>XA START, XA END, XA PREPARE, XA COMMIT, XA ROLLBACK, 
+	      XA RECOVER</code>
+	    ) that can be used to implement some XA features.
+	    This is good enought to build a loadable module that can be
+	    used by the LIXA transaction manager, but some XA standard features
+	    - like dynamic registration - can not be implemented.
+	</para></note>
+	<warning><para>
+	    At the time of this writing there is a
+	    <link xlink:href="http://bugs.mysql.com/bug.php?id=12161">
+	      seriuos documented bug (# 12161)</link>
+	    related to the XA implementation of MySQL. The symptoms perceived
+	    while developing LIXA are described below:
+	    <orderedlist enumeration='arabic'>
+	      <listitem><para>
+		  a MySQL client application invokes XA START
+	      </para></listitem>
+	      <listitem><para>
+		  it updates some data in the database
+	      </para></listitem>
+	      <listitem><para>
+		  it invokes XA END and XA PREPARE
+	      </para></listitem>
+	      <listitem><para>
+		  it crashes and disconnects from the MySQL server 
+	      </para></listitem>
+	      <listitem><para>
+		  MySQL server rollbacks the transaction and there's no way to
+		  see it again using XA RECOVER
+	      </para></listitem>
+	    </orderedlist>
+	    This behavior violates the XA specification: below there is an 
+	    excerpt for <function>xa_prepare</function> from man page (
+	    <citation>XAspec</citation>, page 44)
+	    <quote>Once this function successfully returns, 
+	      the resource manager 
+	      must guarantee that the transaction branch may be either 
+	      committed or rolled back regardless of failures. A resource 
+	      manager cannot erase its knowledge of a branch until the 
+	      transaction manager calls either xa_commit() or xa_rollback () 
+	      to complete the branch
+	    </quote>.
+	  </para>
+	  <para>
+	    The impact of this bug is quite severe and seriously compromise
+	    the ACID properties of the resulting system (application program
+	    + MySQL resource manager + LIXA transaction manager).
+	  </para>
+	</warning>
+      </section>
+      <section>
 	<title>Two or more resource managers</title>
 	<para>
 	  If you want to use two or more resource managers, and this is a
