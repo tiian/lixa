@@ -469,7 +469,6 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
                      , PARSE_ERROR
                      , MYSQL_INIT_ERROR
                      , MYSQL_REAL_CONNECT_ERROR
-                     , PQ_CONNECTDB_ERROR
                      , NONE } excp;
     int xa_rc = XAER_RMERR;
 
@@ -562,7 +561,6 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
             g_array_append_val(lps->rm, lpsr);
             g_hash_table_insert(lixa_sw_status, (gpointer)key, (gpointer)lps);
         }
-
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -574,7 +572,6 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
                 break;
             case G_HASH_TABLE_NEW_FULL_ERROR:
             case MALLOC_ERROR:
-            case PQ_CONNECTDB_ERROR:
                 xa_rc = XAER_RMERR;
                 break;
             case PARSE_ERROR:
@@ -667,8 +664,7 @@ int lixa_my_close(char *xa_info, int rmid, long flags)
                 }
                 lpsr->state.R = 0;
             }
-        }
-        
+        }        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -774,10 +770,8 @@ int lixa_my_start(XID *xid, int rmid, long flags)
                         mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
             THROW(MYSQL_ERROR);
         }
-
         lpsr->state.T = 1;
         lpsr->state.S = 1;
-
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -918,8 +912,7 @@ int lixa_my_end(XID *xid, int rmid, long flags)
         } else {
             lpsr->state.S = 2;
             lpsr->state.T = 0;
-        }
-        
+        }        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -1267,12 +1260,11 @@ int lixa_my_commit(XID *xid, int rmid, long flags)
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
-                     , SELECT_ERROR
+                     , XA_RECOVER_ERROR
                      , XID_NOT_AVAILABLE
-                     , PROTOCOL_ERROR3
                      , XID_MISMATCH
-                     , COMMIT_ERROR1
-                     , COMMIT_ERROR2
+                     , PROTOCOL_ERROR3
+                     , COMMIT_ERROR
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
     
@@ -1319,45 +1311,45 @@ int lixa_my_commit(XID *xid, int rmid, long flags)
         }
 
         if (lpsr->state.S != 3 && !one_phase) {
-            const char SELECT_FMT[] = "SELECT COUNT(*) FROM pg_prepared_xacts "
-                "WHERE gid = '%s';";
-            char select[sizeof(SELECT_FMT) + sizeof(lmsx)];
-            /* check the database state, it could be a prepared transaction */
-            snprintf(select, sizeof(select), SELECT_FMT, lmsx);
-            /* ###
-            res = PQexec(lpsr->conn, select);
-            if (PGRES_TUPLES_OK != PQresultStatus(res)) {
+            MYSQL_RES *res;
+            MYSQL_ROW row;
+            XID xid_r;
+            int num_fields;
+            if (mysql_query(lpsr->conn, "XA RECOVER")) {
                 LIXA_TRACE(("lixa_my_commit: error while executing "
-                            "'%s' command (%d/%s)\n", select,
-                            PQresultStatus(res), PQerrorMessage(lpsr->conn)));
-                THROW(SELECT_ERROR);
+                            "'XA RECOVER' command: %u/%s\n",
+                            mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
+                THROW(XA_RECOVER_ERROR);
             }
-            if (PQntuples(res) == 1) {
-                long count = strtol(PQgetvalue(res, 0, 0), NULL, 10);
-                if (count > 0) {
-                    // it's a prepared transaction
+            res = mysql_store_result(lpsr->conn);
+            num_fields = mysql_num_fields(res);
+            while ((row = mysql_fetch_row(res))) {
+                const char *formatID = row[0] ? row[0] : "";
+                const char *gtrid_length = row[1] ? row[1] : "";
+                const char *bqual_length = row[2] ? row[2] : "";
+                const char *data = row[3] ? row[3] : "";
+                LIXA_TRACE(("lixa_my_commit: formatID=%s, "
+                            "gtrid_length=%s, bqual_length=%s, data=%s\n",
+                            formatID, gtrid_length, bqual_length, data));
+                if (!lixa_my_xid_deserialize(&xid_r, formatID, gtrid_length,
+                                            bqual_length, data)) {
+                    LIXA_TRACE(("lixa_my_commit: unable to deserialize the "
+                                "XID retrieved with XA RECOVER\n"));
+                }
+                if (lixa_xid_compare(xid, &xid_r)) {
+                    LIXA_TRACE(("lixa_my_commit: the transaction %s is in "
+                                "prepared state\n", lmsx));
                     lpsr->state.S = 3;
-                    lpsr->xid = *xid;
-                } else {
-                    PQclear(res);
-                    res = NULL;
-                    LIXA_TRACE(("lixa_my_commit: xid '%s' is not "
-                                "available\n", lsx));
-                    THROW(XID_NOT_AVAILABLE);
+                    lpsr->xid = xid_r;
+                    break;
                 }
             }
-            PQclear(res);
-            res = NULL;
-            */
-        }
-
-        if ((lpsr->state.S != 2 && one_phase) ||
-            (lpsr->state.S != 3 && !one_phase)) {
-            LIXA_TRACE(("lixa_my_commit: rmid %d state(R,S,T)={%d,%d,%d}, "
-                        "one_phase_commit=%d\n",
-                        rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T,
-                        one_phase));
-            THROW(PROTOCOL_ERROR3);
+            mysql_free_result(res);
+            if (lpsr->state.S != 3) {
+                LIXA_TRACE(("lixa_my_commit: the transaction %s is not "
+                            "available\n", lmsx));
+                THROW(XID_NOT_AVAILABLE);
+            }
         }
 
         /* checking xid is the started one */
@@ -1370,7 +1362,14 @@ int lixa_my_commit(XID *xid, int rmid, long flags)
         }
         LIXA_TRACE(("lixa_my_commit: committing XID %s\n", lmsx));
 
-        /* if (lpsr->state.S == 3) */ {
+        if ((lpsr->state.S != 2 && one_phase) ||
+            (lpsr->state.S != 3 && !one_phase)) {
+            LIXA_TRACE(("lixa_my_commit: rmid %d state(R,S,T)={%d,%d,%d}, "
+                        "one_phase_commit=%d\n",
+                        rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T,
+                        one_phase));
+            THROW(PROTOCOL_ERROR3);
+        } else {
             const char COMMIT_1_FMT[] = "XA COMMIT %s ONE PHASE";
             const char COMMIT_2_FMT[] = "XA COMMIT %s";
             char my_cmd_buf[sizeof(COMMIT_1_FMT) +
@@ -1383,25 +1382,9 @@ int lixa_my_commit(XID *xid, int rmid, long flags)
                 LIXA_TRACE(("lixa_my_commit: error while executing "
                             "'%s': %u/%s\n", my_cmd_buf,
                             mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
-                THROW(COMMIT_ERROR1);
+                THROW(COMMIT_ERROR);
             }
-        } /* else {
-            lpsr->state.S = 0;
-            * the transaction is NOT in prepared state *
-            * ###
-            res = PQexec(lpsr->conn, "COMMIT");
-            if (PGRES_COMMAND_OK != PQresultStatus(res)) {
-                LIXA_TRACE(("lixa_my_commit: error while executing "
-                            "COMMIT command (%s)\n",
-                            PQerrorMessage(lpsr->conn)));
-                lpsr->state.S = 0;
-                THROW(COMMIT_ERROR2);
-            }
-            PQclear(res);
-            res = NULL;
-           
         }
-          */
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -1417,20 +1400,17 @@ int lixa_my_commit(XID *xid, int rmid, long flags)
             case XID_NOT_AVAILABLE:
                 xa_rc = XAER_NOTA;
                 break;
+            case XA_RECOVER_ERROR:
             case NULL_CONN:
                 xa_rc = XAER_RMFAIL;
                 break;
             case XID_SERIALIZE_ERROR:
                 xa_rc = XAER_INVAL;
                 break;
-            case SELECT_ERROR:
-                xa_rc = XAER_RMERR;
-                break;
             case XID_MISMATCH:
                 xa_rc = XAER_NOTA;
                 break;
-            case COMMIT_ERROR1:
-            case COMMIT_ERROR2:
+            case COMMIT_ERROR:
                 xa_rc = XAER_RMERR;
                 break;
             case NONE:
@@ -1441,10 +1421,6 @@ int lixa_my_commit(XID *xid, int rmid, long flags)
         } /* switch (excp) */
         /* unlock the status mutex */
         g_static_mutex_unlock(&lixa_sw_status_mutex);
-/* ###
-        if (NULL != res)
-            PQclear(res);
-*/
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_commit/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
@@ -1461,7 +1437,6 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XA_RECOVER_ERROR
-                     , DESERIALIZE_ERROR
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
     long out_count = 0;
@@ -1555,7 +1530,6 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
                 xa_rc = XAER_RMFAIL;
                 break;
             case XA_RECOVER_ERROR:
-            case DESERIALIZE_ERROR:
                 xa_rc = XAER_RMFAIL;
                 break;
             case NONE:

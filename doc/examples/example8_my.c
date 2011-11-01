@@ -45,9 +45,7 @@
 
 static void exit_nicely(MYSQL *conn)
 {
-    /* ###
-    PQfinish(conn);
-    */
+    mysql_close(conn);
     exit(1);
 }
 
@@ -59,9 +57,6 @@ int main(int argc, char *argv[])
     int         txrc, delete;
     /* MySQL variables */
     MYSQL      *conn;
-    /* ###
-    PGresult   *res;
-    */
     
     if (argc > 1 && (!strcmp(argv[1], "delete") || !strcmp(argv[1], "DELETE")))
         delete = 1;
@@ -79,11 +74,10 @@ int main(int argc, char *argv[])
     /*
      * These functions can be used when there are more than one PostgreSQL
      * configured as a resource manager
-     * conn = lixa_pq_get_conn_by_rmid(0);
+     * conn = lixa_my_get_conn_by_rmid(0);
      */
 
     /* start a new transaction */
-    /*
     if (TX_OK != (txrc = tx_begin())) {
         fprintf(stderr, "tx_begin error: %d\n", txrc);
         exit(txrc);
@@ -91,42 +85,33 @@ int main(int argc, char *argv[])
 
     if (delete) {
         printf("Deleting a row from the table...\n");
-        res = PQexec(conn,
-                     "DELETE FROM authors WHERE id=1;");
-        if (PGRES_COMMAND_OK != PQresultStatus(res))
-            {
-                fprintf(stderr, "DELETE FROM authors: %s",
-                        PQerrorMessage(conn));
-                PQclear(res);
-                exit_nicely(conn);
-            }
-        PQclear(res);
+        if (mysql_query(conn, "DELETE FROM authors")) {
+            fprintf(stderr, "DELETE FROM  authors: %u/%s",
+                    mysql_errno(conn), mysql_error(conn));
+            exit_nicely(conn);
+        }
     } else {
         printf("Inserting a row in the table...\n");
-        res = PQexec(conn,
-                     "INSERT INTO authors VALUES(1, 'Foo', 'Bar');");
-        if (PGRES_COMMAND_OK != PQresultStatus(res))
-            {
-                fprintf(stderr, "INSERT INTO authors: %s",
-                        PQerrorMessage(conn));
-                PQclear(res);
-                exit_nicely(conn);
-            }
-        PQclear(res);
+        if (mysql_query(conn,
+                        "INSERT INTO authors VALUES(1, 'Foo', 'Bar')")) {
+            fprintf(stderr, "INSERT INTO authors: %u/%s",
+                    mysql_errno(conn), mysql_error(conn));
+            exit_nicely(conn);
+        }
     }
     
     if (TX_OK != (txrc = tx_commit())) {
         fprintf(stderr, "tx_commit error: %d\n", txrc);
         exit(txrc);
     }
- *
- * This function can be used if you want to rollback instead of commit the
- * transaction
+    /*
+     * This function can be used if you want to rollback instead of commit the
+     * transaction
     if (TX_OK != (txrc = tx_rollback())) {
         fprintf(stderr, "tx_rollback error: %d\n", txrc);
         exit(txrc);
     }
-*/
+    */
 
     if (TX_OK != (txrc = tx_close())) {
         fprintf(stderr, "tx_close error: %d\n", txrc);
