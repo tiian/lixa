@@ -10,7 +10,7 @@
     <rsrmgr name="IBMDB2_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_ibmdb2_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,db=sample,tpm=lixa" xa_close_info="" />
     <rsrmgr name="IBMDB2_stareg" switch_file="@EXPANDED_LIBDIR@/switch_ibmdb2_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,db=sample,tpm=lixa" xa_close_info="" />
     <rsrmgr name="PostgreSQL_stareg" switch_file="@EXPANDED_LIBDIR@/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" />
-    <rsrmgr name="MySQL_stareg" switch_file="@EXPANDED_LIBDIR@/switch_mysql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" />
+    <rsrmgr name="MySQL_stareg" switch_file="@EXPANDED_LIBDIR@/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,db=lixa,client_flag=0" xa_close_info="" />
     <rsrmgr name="LIXAdummyRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_dummyrm.so" xa_open_info="dummy open string" xa_close_info="dummy close string" />
     <rsrmgr name="LIXArandomRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_randomrm.so" xa_open_info="random open string" xa_close_info="random close string" />
     <rsrmgr name="LIXAmonkey1dynRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_dynreg.so" xa_open_info="/tmp/monkey.conf" xa_close_info="" />
