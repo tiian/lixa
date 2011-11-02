@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     if (delete) {
         printf("Deleting a row from the table...\n");
         if (mysql_query(conn, "DELETE FROM authors")) {
-            fprintf(stderr, "DELETE FROM  authors: %u/%s",
+            fprintf(stderr, "DELETE FROM  authors: %u/%s\n",
                     mysql_errno(conn), mysql_error(conn));
             exit_nicely(conn);
         }
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
         printf("Inserting a row in the table...\n");
         if (mysql_query(conn,
                         "INSERT INTO authors VALUES(1, 'Foo', 'Bar')")) {
-            fprintf(stderr, "INSERT INTO authors: %u/%s",
+            fprintf(stderr, "INSERT INTO authors: %u/%s\n",
                     mysql_errno(conn), mysql_error(conn));
             exit_nicely(conn);
         }

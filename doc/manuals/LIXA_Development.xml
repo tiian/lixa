@@ -3878,17 +3878,17 @@ lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
-tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example8_my.c .
-tiian@ubuntu:~/tmp$ gcc example8_my.c -Wall -I /opt/lixa/include/ \
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example8_mys.c .
+tiian@ubuntu:~/tmp$ gcc example8_mys.c -Wall -I /opt/lixa/include/ \
 > -L /opt/lixa/lib/ -l lixac -l lixamy \
-> $(mysql_config --include --libs) -o example8_my
+> $(mysql_config --include --libs_r) -o example8_mys
 	  </screen></td></tr></tbody>
 	</table>
 	Verify the executable produced by <command>gcc</command>:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ldd example8_my
+tiian@ubuntu:~/tmp$ ldd example8_mys
         linux-gate.so.1 =>  (0xb7780000)
         liblixac.so.0 => not found
         liblixamy.so.0 => not found
@@ -3924,28 +3924,27 @@ tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ldd example8_my
-        linux-gate.so.1 =>  (0xb77d9000)
-        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb77be000)
-        liblixamy.so.0 => /opt/lixa/lib/liblixamy.so.0 (0xb77b6000)
-        libmysqlclient.so.15 => /usr/lib/libmysqlclient.so.15 (0xb75c7000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7478000)
-        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb7474000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb7470000)
-        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb746b000)
-        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb7461000)
-        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb73b0000)
-        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb7290000)
-        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb727b000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb7263000)
-        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb7081000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb704e000)
-        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb7036000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb7011000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb6ffc000)
-        /lib/ld-linux.so.2 (0xb77da000)
-        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb6fd5000)
-        libuuid.so.1 => /lib/libuuid.so.1 (0xb6fd0000)
+tiian@ubuntu:~/tmp$ ldd example8_mys
+        linux-gate.so.1 =>  (0xb7737000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb771c000)
+        liblixamy.so.0 => /opt/lixa/lib/liblixamy.so.0 (0xb7714000)
+        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb7523000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb73d4000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb73d0000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb73cc000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb73c7000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb73bd000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb730c000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb71ec000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb71d7000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb71bf000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb718d000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb7174000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb714f000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb713a000)
+        /lib/ld-linux.so.2 (0xb7738000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb7113000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb710f000)
 	  </screen></td></tr></tbody>
 	</table>
 	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
@@ -3987,10 +3986,19 @@ MYS_STA
 	<link xlink:href="http://dev.mysql.com/doc/refman/5.0/en/mysql-real-connect.html"><function>mysql_real_connect</function></link>
 	function after some parsing has occurred.
 	This is the prototype of the <function>mysql_real_connect</function>
-	function as described in the official manual:
-	<screen>
-MYSQL *mysql_real_connect(MYSQL *mysql, const char *host, const char *user, const char *passwd, const char *db, unsigned int port, const char *unix_socket, unsigned long client_flag)
-	</screen>
+	function as described in the official manual
+	<funcsynopsis>
+	  <funcprototype>
+	    <?dbhtml funcsynopsis-style='ANSI'?>
+	    <funcdef>MYSQL *<function>mysql_real_connect</function></funcdef>
+	    <paramdef>const char *<parameter>host</parameter></paramdef>
+	    <paramdef>const char *<parameter>passwd</parameter></paramdef>
+	    <paramdef>const char *<parameter>db</parameter></paramdef>
+	    <paramdef>unsigned int <parameter>port</parameter></paramdef>
+	    <paramdef>const char *<parameter>unix_socket</parameter></paramdef>
+	    <paramdef>unsigned long <parameter>client_flag</parameter></paramdef>
+	  </funcprototype>
+	</funcsynopsis>
 	and these are the tokens accepted by LIXA inside 
 	<constant>xa_open_info</constant>:
 	<itemizedlist mark='bullet'>
@@ -4021,30 +4029,33 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *host, const char *user, cons
 	<orderedlist numeration="arabic">
 	  <listitem><para>
 	      an element is composed by
-	      &lt;token&gt;=&lt;value&gt; where &lt;token&gt; is one of the 
-	      keywords listed above
+	      <token>&lt;token&gt;</token>=<token>&lt;value&gt;</token> where 
+	      <token>&lt;token&gt;</token> is one of the keywords listed above
 	  </para></listitem>
 	  <listitem><para>
 	      a comma <quote>,</quote> separates two elements 
 	  </para></listitem>
 	  <listitem><para>
-	      &lt;value&gt; may be empty (like <constant>passwd</constant> 
+	      <token>&lt;value&gt;</token> may be empty 
+	      (like <constant>passwd</constant> 
 	      in the above example): it will passed as an empty string ("")
 	      to <function>mysql_real_connect</function>
 	  </para></listitem>
 	  <listitem><para>
-	      if a &lt;token&gt; is not specified in 
+	      if a <token>&lt;token&gt;</token> is not specified in 
 	      <constant>xa_open_info</constant>, LIXA will pass to 
 	      <function>mysql_real_connect</function> a NULL pointer if the
 	      missing token refers to a character string and 0 value if the
 	      missing token refers to a number
 	  </para></listitem>
 	  <listitem><para>
-	      if you must put an equal symbol ("=") inside &lt;value&gt;
+	      if you must put an equal symbol ("=") inside 
+	      <token>&lt;value&gt;</token>
 	      you must put two instead of one: "=="
 	  </para></listitem>
 	  <listitem><para>
-	      if you must put a comma symbol (",") inside &lt;value&gt;
+	      if you must put a comma symbol (",") inside 
+	      <token>&lt;value&gt;</token>
 	      you must put two instead of one: ",,"
 	  </para></listitem>
 	  <listitem><para>
@@ -4054,18 +4065,142 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *host, const char *user, cons
 	</orderedlist>
 	Using this configuration:
 	<constant>xa_open_info="host=localhost,user=lixa,passwd=,db=lixa,client_flag=0"</constant>
-	LIXA will call <function>mysql_real_connect</function> as below:
-	<screen>
-mysql_real_connect(conn, "localhost", "lixa", "", "lixa", 0, NULL, 0);
-	</screen>
+	LIXA will call <function>mysql_real_connect</function> as
+      </para>
+      <para>
+	<function>mysql_real_connect</function>(<parameter>conn</parameter>,
+	<parameter>"localhost"</parameter>, <parameter>"lixa"</parameter>,
+	<parameter>""</parameter>, <parameter>"lixa"</parameter>,
+	<parameter>0</parameter>, <parameter>NULL</parameter>,
+	<parameter>0</parameter>)
+      </para>
+      <para>
 	You should refer to MySQL official documentation to discover how you
 	can configure <constant>xa_open_info</constant>.
 	<warning><para>
 	    <constant>xa_open_info</constant> can contain a maximum of 255
 	    characters (plus \0 string terminator); if you need more space,
 	    consider to move some parameters to <filename>mycnf</filename> file
-	    (see MySQL official documentation to grab the details).
+	    (see MySQL official documentation to pick-up the details).
 	</para></warning>
+      </para>
+    </section>
+    <section>
+      <title>Program execution</title>
+      <para>
+	It is suggested to open two different terminals: the first one
+	connected to <quote>lixa</quote> MySQL database and the second
+	one pointing to the directory where the compiled program
+	<filename>example8_mys</filename> lives.
+	First teminal session:
+	<table frame="box">
+	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~$ mysql -h localhost -u lixa lixa
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 7
+Server version: 5.0.51a-3ubuntu5.8 (Ubuntu)
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql>
+	  </screen></td></tr></tbody>
+	</table>
+	Second teminal session:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ls -la
+total 21
+drwxr-xr-x   2 tiian tiian  112 2011-09-14 21:14 .
+drwxrwx--x 101 tiian tiian 5064 2011-09-14 21:13 ..
+-rwxr-xr-x  1 tiian tiian  8828 2011-11-02 15:01 example8_mys
+-rw-r--r--  1 tiian tiian  3174 2011-11-02 15:00 example8_mys.c
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of <quote>authors</quote> table before
+	program execution:
+	<table frame="box">
+	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> SELECT * FROM authors;
+Empty set (0.04 sec)
+	  </screen></td></tr></tbody>
+	</table>
+	Execute the program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ./example8_mys insert
+Inserting a row in the table...
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of the table again:
+	<table frame="box">
+	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> SELECT * FROM authors;
++----+-----------+------------+
+| id | last_name | first_name |
++----+-----------+------------+
+|  1 | Foo       | Bar        |
++----+-----------+------------+
+1 row in set (0.00 sec)
+	  </screen></td></tr></tbody>
+	</table>
+	The example program inserted the row with id=1. You can not insert
+	the same row twice because there is a unique constraint on this table,
+	but you can remove the row using
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ./example8_mys delete
+Deleting a row from the table...
+	  </screen></td></tr></tbody>
+	</table>
+	Check the table content again:
+	<table frame="box">
+	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> SELECT * FROM authors;
+Empty set (0.00 sec)
+	  </screen></td></tr></tbody>
+	</table>
+	you can verify in file
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename>
+	that <quote>MYS_STA</quote> is associated to static registration
+	<footnote><para>
+	    The current implementation does not support dynamic registration
+	    for MySQL.
+	</para></footnote>
+	.
+	Execute the program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00002000
+tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
+0x00002000
+tiian@ubuntu:~/tmp$ ./example8_mys insert 2>&amp;1 | grep xa_start
+2011-11-02 22:10:45.425495 [25927/3069150960] lixa_xa_start
+[...]
+2011-11-02 22:10:45.473079 [25927/3069150960] lixa_xa_start: xa_start_entry(xid, 0, 0x0) = 0
+2011-11-02 22:10:45.473633 [25927/3069150960] lixa_xa_start: sending 210 bytes to the server for step 24
+2011-11-02 22:10:45.474534 [25927/3069150960] lixa_xa_start/excp=10/ret_cod=0/errno=0
+	  </screen></td></tr></tbody>
+	</table>
+	Finally, clean up the table again:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ unset LIXA_TRACE_MASK
+tiian@ubuntu:~/tmp$ ./example8_mys delete
+Deleting a row from the table...
+	  </screen></td></tr></tbody>
+	</table>
       </para>
     </section>
   </section>
