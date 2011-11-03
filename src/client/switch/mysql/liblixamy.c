@@ -65,7 +65,7 @@
 
 
 
-struct xa_switch_t xapqls = {
+struct xa_switch_t xamyls = {
     "MySQL[LIXA]",
     TMNOFLAGS,
     0,
@@ -227,7 +227,7 @@ int lixa_my_parse_xa_info(const char *xa_info,
             THROW(PARSE_KEY_VALUE2);
         /* display brokendown structure */
         LIXA_TRACE(("lixa_my_parse_xa_info: lmrc[host=%s,user=%s,passwd=%s,"
-                    "db=%s,port=%d,unix_socket=%s,client_flag=%ld\n",
+                    "db=%s,port=%d,unix_socket=%s,client_flag=%ld]\n",
                     lmrc->host != NULL ? lmrc->host : "NULL",
                     lmrc->user != NULL ? lmrc->user : "NULL",
                     lmrc->passwd != NULL ? lmrc->passwd : "NULL",

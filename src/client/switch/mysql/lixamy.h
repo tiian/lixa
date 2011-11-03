@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIXAPQ_H
-# define LIXAPQ_H
+#ifndef LIXAMY_H
+# define LIXAMY_H
 
 
 
@@ -60,4 +60,4 @@ extern "C" {
 
 
 
-#endif /* LIXAPQ_H */
+#endif /* LIXAMY_H */

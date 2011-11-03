@@ -21,7 +21,7 @@
 
 /*
  * This is an example that shows as you can use LIXA TX (Transaction
- * Demarcation) API and MySQL together.
+ * Demarcation) API, MySQL and PostgreSQL together.
  * Please refer to LIXA manual for more information about this sample.
  */
 
@@ -35,17 +35,24 @@
 /* MySQL */
 #include <mysql.h>
 
+/* PostgreSQL */
+#include <libpq-fe.h>
+
 /* TX (Transaction Demarcation) header */
 #include <tx.h>
 
 /* LIXA help library for MySQL */
 #include <lixamy.h>
 
+/* LIXA help library for PostgreSQL */
+#include <lixapq.h>
 
 
-static void exit_nicely(MYSQL *conn)
+
+static void exit_nicely(MYSQL *conn_my, PGconn *conn_pq)
 {
-    mysql_close(conn);
+    mysql_close(conn_my);
+    PQfinish(conn_pq);
     exit(1);
 }
 
@@ -56,25 +63,36 @@ int main(int argc, char *argv[])
     /* generic variables */
     int         txrc, delete;
     /* MySQL variables */
-    MYSQL      *conn;
+    MYSQL      *conn_my;
+    /* PostgreSQL variables */
+    PGconn     *conn_pq;
+    PGresult   *res;
     
     if (argc > 1 && (!strcmp(argv[1], "delete") || !strcmp(argv[1], "DELETE")))
         delete = 1;
     else
         delete = 0;
  
-    /* open the resource manager(s) */
+    /* open the resource managers */
     if (TX_OK != (txrc = tx_open())) {
         fprintf(stderr, "tx_open error: %d\n", txrc);
         exit(txrc);
     }
 
     /* retrieve MySQL connection */
-    conn = lixa_my_get_conn();
+    conn_my = lixa_my_get_conn();
     /*
      * These functions can be used when there are more than one PostgreSQL
      * configured as a resource manager
-     * conn = lixa_my_get_conn_by_rmid(0);
+     * conn_my = lixa_my_get_conn_by_rmid(0);
+     */
+
+    /* retrieve PostgreSQL connection */
+    conn_pq = lixa_pq_get_conn();
+    /*
+     * These functions can be used when there are more than one PostgreSQL
+     * configured as a resource manager
+     * conn_pq = lixa_pq_get_conn_by_rmid(0);
      */
 
     /* start a new transaction */
@@ -84,20 +102,42 @@ int main(int argc, char *argv[])
     }
 
     if (delete) {
-        printf("Deleting a row from the table...\n");
-        if (mysql_query(conn, "DELETE FROM authors")) {
+        printf("Deleting a row from MySQL  table...\n");
+        if (mysql_query(conn_my, "DELETE FROM authors")) {
             fprintf(stderr, "DELETE FROM  authors: %u/%s\n",
-                    mysql_errno(conn), mysql_error(conn));
-            exit_nicely(conn);
+                    mysql_errno(conn_my), mysql_error(conn_my));
+            exit_nicely(conn_my, conn_pq);
         }
+        printf("Deleting a row from PostgreSQL table...\n");
+        res = PQexec(conn_pq,
+                     "DELETE FROM authors WHERE id=1;");
+        if (PGRES_COMMAND_OK != PQresultStatus(res))
+            {
+                fprintf(stderr, "DELETE FROM authors: %s",
+                        PQerrorMessage(conn_pq));
+                PQclear(res);
+                exit_nicely(conn_my, conn_pq);
+            }
+        PQclear(res);
     } else {
-        printf("Inserting a row in the table...\n");
-        if (mysql_query(conn,
+        printf("Inserting a row in MySQL table...\n");
+        if (mysql_query(conn_my,
                         "INSERT INTO authors VALUES(1, 'Foo', 'Bar')")) {
             fprintf(stderr, "INSERT INTO authors: %u/%s\n",
-                    mysql_errno(conn), mysql_error(conn));
-            exit_nicely(conn);
+                    mysql_errno(conn_my), mysql_error(conn_my));
+            exit_nicely(conn_my, conn_pq);
         }
+        printf("Inserting a row in PostgreSQL table...\n");
+        res = PQexec(conn_pq,
+                     "INSERT INTO authors VALUES(1, 'Foo', 'Bar');");
+        if (PGRES_COMMAND_OK != PQresultStatus(res))
+            {
+                fprintf(stderr, "INSERT INTO authors: %s",
+                        PQerrorMessage(conn_pq));
+                PQclear(res);
+                exit_nicely(conn_my, conn_pq);
+            }
+        PQclear(res);
     }
     
     if (TX_OK != (txrc = tx_commit())) {
@@ -120,3 +160,5 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+
