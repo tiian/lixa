@@ -41,7 +41,7 @@
 /**
  * This struct contains the pointers to XA methods and properties
  */
-struct xa_switch_t xapqls;
+struct xa_switch_t xamyls;
 
 
 

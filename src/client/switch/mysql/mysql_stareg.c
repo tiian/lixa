@@ -54,7 +54,7 @@
  * This is MySQL specific: the xa_switch_t struct supplied is named xapqls
  * for XA static registration
  */
-extern struct xa_switch_t xapqls;
+extern struct xa_switch_t xamyls;
 
 
 
@@ -64,5 +64,5 @@ extern struct xa_switch_t xapqls;
  */
 struct xa_switch_t *lixa_get_xa_switch()
 {
-    return &xapqls;
+    return &xamyls;
 }

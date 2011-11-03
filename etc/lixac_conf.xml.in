@@ -159,35 +159,13 @@
         <rsrmgr>MySQL_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
-    <profile name="GT71">
+    <profile name="MYS_STA_PQL_STA">
       <sttsrvs>
         <sttsrv>local_1</sttsrv>
       </sttsrvs>
       <rsrmgrs>
-        <rsrmgr>LIXArandomRM</rsrmgr>
-        <rsrmgr>LIXAdummyRM</rsrmgr>
-      </rsrmgrs>
-    </profile>
-    <profile name="AG71">
-      <sttsrvs>
-        <sttsrv>local_2</sttsrv>
-      </sttsrvs>
-      <rsrmgrs>
-        <rsrmgr>IBMDB2_dynreg</rsrmgr>
-        <rsrmgr>LIXAdummyRM</rsrmgr>
-      </rsrmgrs>
-    </profile>
-    <profile name="AM74">
-      <sttsrvs>
-        <sttsrv>local_1</sttsrv>
-      </sttsrvs>
-      <rsrmgrs>
-        <rsrmgr>LIXAmonkey1dynRM</rsrmgr>
-        <rsrmgr>LIXAmonkey2dynRM</rsrmgr>
-        <rsrmgr>LIXAmonkey3dynRM</rsrmgr>
-        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
-        <rsrmgr>LIXAmonkey2staRM</rsrmgr>
-        <rsrmgr>LIXAmonkey3staRM</rsrmgr>
+        <rsrmgr>MySQL_stareg</rsrmgr>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
   </profiles>
