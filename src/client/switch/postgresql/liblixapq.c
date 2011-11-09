@@ -127,6 +127,7 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
         pthread_t key = pthread_self();
         guint i;
         const long valid_flags = TMASYNC|TMNOFLAGS;
+        int insert_in_lixa_sw_status = FALSE;
         
         /* lock the status mutex */
         g_static_mutex_lock(&lixa_sw_status_mutex);
@@ -165,6 +166,7 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
                 THROW(MALLOC_ERROR);
             }
             lixa_sw_status_init(lps);
+            insert_in_lixa_sw_status = TRUE;
         }
 
         /* check if rmid is already connected */
@@ -193,7 +195,9 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
             lpsr.state.R = 1;
             lpsr.conn = (gpointer)conn;
             g_array_append_val(lps->rm, lpsr);
-            g_hash_table_insert(lixa_sw_status, (gpointer)key, (gpointer)lps);
+            if (insert_in_lixa_sw_status)
+                g_hash_table_insert(lixa_sw_status, (gpointer)key,
+                                    (gpointer)lps);
         }
 
         THROW(NONE);
@@ -1243,7 +1247,6 @@ PGconn *lixa_pq_get_conn_by_rmid(int rmid) {
 
 
 
-PGconn *lixa_pq_get_conn(void)
-{
+PGconn *lixa_pq_get_conn(void) {
     return lixa_sw_get_conn_by_pos(0);
 }
