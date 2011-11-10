@@ -115,6 +115,7 @@ int main(int argc, char *argv[])
      * These functions can be used when there are more than one PostgreSQL
      * configured as a resource manager
      * pq_conn = lixa_pq_get_conn_by_rmid(0);
+     * pq_conn = lixa_pq_get_conn_by_pos(0);
      */
 
     if (SQL_SUCCESS != (rc_cli = SQLAllocHandle(

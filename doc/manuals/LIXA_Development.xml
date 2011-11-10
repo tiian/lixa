@@ -3807,7 +3807,7 @@ Bye
 	  <table frame="box">
 	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	    <tbody><tr><td><screen>
-tiian@ubuntu:~$ mysql -h localhost -u lixa -p lixa
+tiian@ubuntu:~$ mysql -h localhost -u lixa lixa
 Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 3

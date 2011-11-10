@@ -95,7 +95,7 @@ struct lixa_sw_status_rm_s *lixa_sw_status_rm_get(int rmid)
 
 
 
-gpointer lixa_sw_get_conn_by_rmid(int rmid)
+gpointer lixa_sw_get_conn_by_rmid(int rmid, int rm_type)
 {
     gpointer conn = NULL;
     
@@ -112,8 +112,14 @@ gpointer lixa_sw_get_conn_by_rmid(int rmid)
                 for (i=0; i<lps->rm->len; ++i) {
                     struct lixa_sw_status_rm_s *lpsr = &g_array_index(
                         lps->rm, struct lixa_sw_status_rm_s, i);
-                    if (lpsr->rmid == rmid) {
-                        conn = lpsr->conn;
+                    if (rmid == lpsr->rmid) {
+                        if (rm_type != lpsr->rm_type) {
+                            LIXA_TRACE(("lixa_sw_get_conn_by_rmid: rmid %d "
+                                        "is of type %d while caller is "
+                                        "expecting type %d\n",
+                                        rmid, lpsr->rm_type, rm_type));
+                        } else 
+                            conn = lpsr->conn;
                         break;
                     }
                 }
@@ -122,7 +128,7 @@ gpointer lixa_sw_get_conn_by_rmid(int rmid)
                                 "found for rmid=%d\n", rmid));
             } else {
                 LIXA_TRACE(("lixa_sw_get_conn_by_rmid: no connection "
-                            "found to PostgreSQL databases\n"));
+                            "found to PostgreSQL/MySQL databases\n"));
             }
         } else {
             LIXA_TRACE(("lixa_sw_get_conn_by_rmid: thread not registered\n"));
@@ -139,7 +145,7 @@ gpointer lixa_sw_get_conn_by_rmid(int rmid)
 
 
 
-gpointer lixa_sw_get_conn_by_pos(int pos)
+gpointer lixa_sw_get_conn_by_pos(int pos, int rm_type)
 {
     gpointer conn = NULL;
     
@@ -151,13 +157,26 @@ gpointer lixa_sw_get_conn_by_pos(int pos)
         lixa_sw_status_t *lps = NULL;
         if (NULL != (lps = (lixa_sw_status_t *)g_hash_table_lookup(
                          lixa_sw_status, (gconstpointer)key))) {
-            if (pos < lps->rm->len) {
-                struct lixa_sw_status_rm_s *lpsr = &g_array_index(
-                    lps->rm, struct lixa_sw_status_rm_s, pos);
-                conn = lpsr->conn;
-            } else {
-                LIXA_TRACE(("lixa_sw_get_conn_by_pos: %d exceeds %d, "
-                            "the last position\n", pos, lps->rm->len));
+            if (0 < lps->rm->len) {
+                guint i;
+                int j=0;
+                for (i=0; i<lps->rm->len; ++i) {
+                    struct lixa_sw_status_rm_s *lpsr = &g_array_index(
+                        lps->rm, struct lixa_sw_status_rm_s, i);
+                    LIXA_TRACE(("lixa_sw_get_conn_by_pos: i=%d, rm_type=%d\n",
+                                i, lpsr->rm_type));
+                    if (lpsr->rm_type == rm_type) {
+                        if (j == pos) {
+                            conn = lpsr->conn;
+                            break;
+                        } else
+                            j++;
+                    }
+                }
+            }
+            if (NULL == conn) {
+                LIXA_TRACE(("lixa_sw_get_conn_by_pos: %d-th resource manager "
+                            "of type %d not found\n", pos, rm_type));
             }
         } else {
             LIXA_TRACE(("lixa_sw_get_conn_by_pos: thread not registered\n"));

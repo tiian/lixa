@@ -33,7 +33,9 @@ extern "C" {
      * @ref lixa_pq_get_conn when you are using more than one PostgreSQL
      * database.
      * @param rmid IN it can be 0, 1, 2, 3, ... in accordance to
-     *                lixac_conf.xml
+     *                lixac_conf.xml (the position of the interested
+     *                PostgreSQL resource manager inside the resource
+     *                manager list of the current profile)
      * @return a valid connection handle or NULL if rmid is not a PostgreSQL
      *         Resource Manager or rmid is a valid PostgreSQL Resource
      *         Manager, but there is no a valid connection
@@ -42,6 +44,19 @@ extern "C" {
 
 
     
+    /**
+     * Retrieve the connection established by tx_open/xa_open to the
+     * PostgreSQL Resource Manager; this is necessary because tx_open
+     * does not return values and PQconnectdb returns a new connection
+     * every time it's called from the same process/thread;
+     * @param pos IN the position of the interested PostgreSQL resource manager
+     *               inside PostgreSQL only resource manager list
+     * @return a valid connection handle or NULL if the handle is not available
+     */
+    PGconn *lixa_pq_get_conn_by_pos(int pos);
+
+
+
     /**
      * Retrieve the connection established by tx_open/xa_open to the
      * PostgreSQL Resource Manager; this is necessary because tx_open

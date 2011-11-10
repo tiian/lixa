@@ -85,6 +85,7 @@ int main(int argc, char *argv[])
      * These functions can be used when there are more than one PostgreSQL
      * configured as a resource manager
      * conn_my = lixa_my_get_conn_by_rmid(0);
+     * conn_my = lixa_my_get_conn_by_pos(0);
      */
 
     /* retrieve PostgreSQL connection */
@@ -92,7 +93,8 @@ int main(int argc, char *argv[])
     /*
      * These functions can be used when there are more than one PostgreSQL
      * configured as a resource manager
-     * conn_pq = lixa_pq_get_conn_by_rmid(0);
+     * conn_pq = lixa_pq_get_conn_by_rmid(1);
+     * conn_pq = lixa_pq_get_conn_by_pos(0);
      */
 
     /* start a new transaction */
