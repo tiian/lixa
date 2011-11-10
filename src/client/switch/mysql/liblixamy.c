@@ -466,6 +466,7 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
                      , ASYNC_NOT_SUPPORTED
                      , G_HASH_TABLE_NEW_FULL_ERROR
                      , MALLOC_ERROR
+                     , RM_TYPE_ERROR
                      , PARSE_ERROR
                      , MYSQL_INIT_ERROR
                      , MYSQL_REAL_CONNECT_ERROR
@@ -528,7 +529,14 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
         for (i=0; i<lps->rm->len; ++i) {
             struct lixa_sw_status_rm_s *lpsr = &g_array_index(
                 lps->rm, struct lixa_sw_status_rm_s, i);
-            if (lpsr->rmid == rmid) {
+            if (rmid == lpsr->rmid) {
+                if (LIXA_SW_STATUS_RM_TYPE_MYSQL != lpsr->rm_type) {
+                    LIXA_TRACE(("lixa_my_open: internal error {lpsr->rmid=%d, "
+                                "lpsr->rm_type=%d} (expected value %d)\n",
+                                lpsr->rmid, lpsr->rm_type,
+                                LIXA_SW_STATUS_RM_TYPE_MYSQL));
+                    THROW(RM_TYPE_ERROR);
+                }
                 conn = (MYSQL *)lpsr->conn;
                 break;
             }
@@ -558,6 +566,7 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
             
             /* save the connection for this thread/rmid */
             lpsr.rmid = rmid;
+            lpsr.rm_type = LIXA_SW_STATUS_RM_TYPE_MYSQL;
             lpsr.state.R = 1;
             lpsr.conn = (gpointer)conn;
             g_array_append_val(lps->rm, lpsr);
@@ -576,9 +585,11 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
                 break;
             case G_HASH_TABLE_NEW_FULL_ERROR:
             case MALLOC_ERROR:
+            case RM_TYPE_ERROR:
                 xa_rc = XAER_RMERR;
                 break;
             case PARSE_ERROR:
+                xa_rc = XAER_INVAL;
                 break;
             case MYSQL_INIT_ERROR:
             case MYSQL_REAL_CONNECT_ERROR:
@@ -1569,12 +1580,20 @@ int lixa_my_complete(int *handle, int *retval, int rmid, long flags)
 
 
 MYSQL *lixa_my_get_conn_by_rmid(int rmid) {
-    return (MYSQL *)lixa_sw_get_conn_by_rmid(rmid);
+    return (MYSQL *)lixa_sw_get_conn_by_rmid(
+        rmid, LIXA_SW_STATUS_RM_TYPE_MYSQL);
+}
+
+
+
+MYSQL *lixa_my_get_conn_by_pos(int pos)
+{
+    return lixa_sw_get_conn_by_pos(pos, LIXA_SW_STATUS_RM_TYPE_MYSQL);
 }
 
 
 
 MYSQL *lixa_my_get_conn(void)
 {
-    return lixa_sw_get_conn_by_pos(0);
+    return lixa_sw_get_conn_by_pos(0, LIXA_SW_STATUS_RM_TYPE_MYSQL);
 }

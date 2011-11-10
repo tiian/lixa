@@ -114,6 +114,7 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
                      , ASYNC_NOT_SUPPORTED
                      , G_HASH_TABLE_NEW_FULL_ERROR
                      , MALLOC_ERROR
+                     , RM_TYPE_ERROR
                      , PQ_CONNECTDB_ERROR
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
@@ -173,7 +174,14 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
         for (i=0; i<lps->rm->len; ++i) {
             struct lixa_sw_status_rm_s *lpsr = &g_array_index(
                 lps->rm, struct lixa_sw_status_rm_s, i);
-            if (lpsr->rmid == rmid) {
+            if (rmid == lpsr->rmid) {
+                if (LIXA_SW_STATUS_RM_TYPE_POSTGRESQL != lpsr->rm_type) {
+                    LIXA_TRACE(("lixa_pq_open: internal error {lpsr->rmid=%d, "
+                                "lpsr->rm_type=%d} (expected value %d)\n",
+                                lpsr->rmid, lpsr->rm_type,
+                                LIXA_SW_STATUS_RM_TYPE_POSTGRESQL));
+                    THROW(RM_TYPE_ERROR);
+                }
                 conn = (PGconn *)lpsr->conn;
                 break;
             }
@@ -192,6 +200,7 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
             }
             /* save the connection for this thread/rmid */
             lpsr.rmid = rmid;
+            lpsr.rm_type = LIXA_SW_STATUS_RM_TYPE_POSTGRESQL;
             lpsr.state.R = 1;
             lpsr.conn = (gpointer)conn;
             g_array_append_val(lps->rm, lpsr);
@@ -211,6 +220,7 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
                 break;
             case G_HASH_TABLE_NEW_FULL_ERROR:
             case MALLOC_ERROR:
+            case RM_TYPE_ERROR:
             case PQ_CONNECTDB_ERROR:
                 xa_rc = XAER_RMERR;
                 break;
@@ -1242,11 +1252,18 @@ int lixa_pq_complete(int *handle, int *retval, int rmid, long flags)
 
 
 PGconn *lixa_pq_get_conn_by_rmid(int rmid) {
-    return (PGconn *)lixa_sw_get_conn_by_rmid(rmid);
+    return (PGconn *)lixa_sw_get_conn_by_rmid(
+        rmid, LIXA_SW_STATUS_RM_TYPE_POSTGRESQL);
+}
+
+
+
+PGconn *lixa_pq_get_conn_by_pos(int pos) {
+    return lixa_sw_get_conn_by_pos(pos, LIXA_SW_STATUS_RM_TYPE_POSTGRESQL);
 }
 
 
 
 PGconn *lixa_pq_get_conn(void) {
-    return lixa_sw_get_conn_by_pos(0);
+    return lixa_sw_get_conn_by_pos(0, LIXA_SW_STATUS_RM_TYPE_POSTGRESQL);
 }

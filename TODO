@@ -1,5 +1,6 @@
-fix  lixa_pq_get_conn and lixa_my_get_conn : they cannot be implemented with
-	lixa_sw_get_conn_by_pos(0) because PostgreSQL and MySQL now co-exist
+Test two resource managers of the same type: 2 MySQL, 2 PostgreSQL, etc...
+
+Compile on 64 bit platform
 
 When tx_rollback() is called, LIXA does not call xa_end(TMFAIL), but xa_end(TMSUCCESS); this is not
 an error, but it does not inform the resource manager as soon as possible of the transaction manager
@@ -30,10 +31,6 @@ Try this scenario:
 
 Try what happens if lixax_conf.xml contains a profile without resource 
 managers.
-
-Test two resource managers of the same type: 2 MySQL, 2 PostgreSQL, etc...
-
-Compile on 64 bit platform
 
 Document a memory leak introduced by libxml2:
 xmlInitParser()
