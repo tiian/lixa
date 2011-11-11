@@ -5,7 +5,7 @@
 #
 AT_BANNER([MySQL])
 
-# check the database "testdb" is available and the user can connect to it
+# check the database "lixa" is available and the user can connect to it
 AT_SETUP([MY/0.0/0.0 MySQL availability])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
 AT_CHECK([echo "\q" | mysql -h localhost -u lixa lixa], [0], [ignore], [ignore])
@@ -37,8 +37,6 @@ AT_SETUP([MY/0.0/0.4 MySQL xa_open_info parsing])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0023 ; lixa_test_exec.sh noreset none case0040 -6 0], [0], [ignore], [ignore])
 AT_CLEANUP
-
-# these case tests now fails... they will developed lately
 
 # check the current user has SELECT privilege on table authors
 AT_SETUP([MY/0.0/1.0 authors table exists])

@@ -12,6 +12,9 @@ endif
 if COMPILE_POSTGRESQL_STUFF
   MAYBE_POSTGRESQL = case0037
 endif
+if COMPILE_MYSQL_POSTGRESQL_STUFF
+  MAYBE_MYSQL_POSTGRESQL = case0042
+endif
 if COMPILE_ORACLE_STUFF
   MAYBE_ORACLE = case0038
 endif
@@ -24,7 +27,7 @@ noinst_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0020 case0021 case0022 case0023 case0024 case0025 case0026 \
 	case0027 case0028 case0029 case0030 case0031 case0032 case0033 \
 	case0034 case0035 case0036 $(MAYBE_POSTGRESQL) $(MAYBE_ORACLE) \
-	$(MAYBE_IBMDB2) $(MAYBE_MYSQL)
+	$(MAYBE_IBMDB2) $(MAYBE_MYSQL) $(MAYBE_MYSQL_POSTGRESQL)
 case0000_SOURCES = case0000.c
 case0001_SOURCES = case0001.c
 case0002_SOURCES = case0002.c
@@ -83,4 +86,11 @@ case0041_CPPFLAGS = @MYSQL_CPPFLAGS@ \
 	-I../../src/client/switch/mysql
 case0041_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la
-
+case0042_CPPFLAGS = @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@ \
+	-I../../src/client -I../../src/common \
+	-I../../src/client/switch/mysql \
+	-I../../src/client/switch/postgresql
+case0042_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
+	../../src/common/liblixab.la ../../src/client/liblixac.la \
+	../../src/client/switch/mysql/liblixamy.la \
+	../../src/client/switch/postgresql/liblixapq.la

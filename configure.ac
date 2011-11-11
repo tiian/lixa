@@ -58,6 +58,7 @@ AM_CONDITIONAL([COMPILE_POSTGRESQL_STUFF], [test "$HAVE_POSTGRESQL" = "yes"])
 m4_include(m4include/ax_lib_mysql.m4)
 AX_LIB_MYSQL
 AM_CONDITIONAL([COMPILE_MYSQL_STUFF], [test "$HAVE_MYSQL" = "yes"])
+AM_CONDITIONAL([COMPILE_MYSQL_POSTGRESQL_STUFF], [test "$HAVE_MYSQL" = "yes" -a "$HAVE_POSTGRESQL" = "yes"])
 
 # LT Version numbers, remember to change them just *before* a release.
 #   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)

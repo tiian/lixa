@@ -2837,7 +2837,6 @@ tiian@ubuntu:~/tmp$ gcc example6_pql_ora.c -Wall \
 > -o example6_pql_ora
 	  </screen></td></tr></tbody>
 	</table>
-	@@@
 	Verify the executable produced by <command>gcc</command>:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
@@ -2995,8 +2994,8 @@ XE
 	<quote>PostgreSQL_stareg</quote> and <quote>OracleXE_dynreg</quote>, 
 	looking again at the config file:
 	<screen>
-    &lt;rsrmgr name="PostgreSQL_stareg" switch_file="/opt/lixa/lib/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" /&gt;
     &lt;rsrmgr name="OracleXE_dynreg" switch_file="/opt/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
+    &lt;rsrmgr name="PostgreSQL_stareg" switch_file="/opt/lixa/lib/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" /&gt;
 	</screen>
 	we can discover how our application will access the resource
 	managers
@@ -3030,7 +3029,7 @@ ls: cannot access /tmp/xa*: No such file or directory
       </para>
     </section>
     <section>
-      <title>Program execution (dynamic registration)</title>
+      <title>Program execution (dynamic registration for Oracle)</title>
       <para>
 	It is suggested to open three different terminals: 
 	the first one connected to <quote>testdb</quote> PostgreSQL database,
@@ -4701,37 +4700,39 @@ tiian@ubuntu:~/tmp$ gcc example10_mys_pql_ora.c -Wall \
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ldd example9_mys_pql
-        linux-gate.so.1 =>  (0xb77aa000)
+tiian@ubuntu:~/tmp$ ldd example10_mys_pql_ora
+        linux-gate.so.1 =>  (0xb7717000)
         liblixac.so.0 => not found
         liblixamy.so.0 => not found
         liblixapq.so.0 => not found
-        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb75b7000)
-        libpq.so.5 => /usr/lib/libpq.so.5 (0xb7598000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7449000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb7431000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb73fe000)
-        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb73e6000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb73c1000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb73ac000)
-        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb7367000)
-        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb7224000)
-        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb7197000)
-        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb7194000)
-        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb716b000)
-        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb712b000)
-        /lib/ld-linux.so.2 (0xb77ab000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb7126000)
-        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb7103000)
-        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb70fb000)
-        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb70f8000)
-        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb70e5000)
-        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb70d7000)
-        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb70c0000)
-        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb704a000)
-        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb703a000)
-        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb6fed000)
-        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb6fe8000)
+        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb7524000)
+        libpq.so.5 => /usr/lib/libpq.so.5 (0xb7505000)
+        libclntsh.so.10.1 => not found
+        libnnz10.so => not found
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb73b5000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb739d000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb736b000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb7353000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb732e000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb7319000)
+        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb72d3000)
+        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb7191000)
+        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb7104000)
+        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb7101000)
+        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb70d8000)
+        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb7097000)
+        /lib/ld-linux.so.2 (0xb7718000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb7093000)
+        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb7070000)
+        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb7068000)
+        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb7065000)
+        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb7051000)
+        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb7044000)
+        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb702d000)
+        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb6fb7000)
+        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb6fa7000)
+        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb6f59000)
+        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb6f55000)
 	  </screen></td></tr></tbody>
 	</table>
       </para>
@@ -4739,61 +4740,66 @@ tiian@ubuntu:~/tmp$ ldd example9_mys_pql
     <section>
       <title>Set-up LIXA environment</title>
       <para>
-	There are three unresolved references that can be fixed setting up
+	There are five unresolved references that can be fixed setting up
 	the environment properly:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
+tiian@ubuntu:~/tmp$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/opt/lixa/lib
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
 	  </screen></td></tr></tbody>
 	</table>
 	Check again the executable:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ldd example9_mys_pql
-        linux-gate.so.1 =>  (0xb76f6000)
-        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb76db000)
-        liblixamy.so.0 => /opt/lixa/lib/liblixamy.so.0 (0xb76d3000)
-        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb76cb000)
-        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb74db000)
-        libpq.so.5 => /usr/lib/libpq.so.5 (0xb74bc000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb736d000)
-        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb7369000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb7365000)
-        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb735f000)
-        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb7356000)
-        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb72a5000)
-        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb7185000)
-        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb7170000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb7157000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb7125000)
-        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb710d000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb70e8000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb70d3000)
-        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb708e000)
-        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb6f4b000)
-        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb6ebe000)
-        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb6ebb000)
-        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb6e92000)
-        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb6e52000)
-        /lib/ld-linux.so.2 (0xb76f7000)
-        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb6e2a000)
-        libuuid.so.1 => /lib/libuuid.so.1 (0xb6e26000)
-        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb6e03000)
-        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb6dfb000)
-        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb6df8000)
-        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb6de4000)
-        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb6dd7000)
-        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb6dc0000)
-        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb6d4a000)
-        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb6d3a000)
-        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb6cec000)
-        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb6ce8000)
+tiian@ubuntu:~/tmp$ ldd example10_mys_pql_ora
+        linux-gate.so.1 =>  (0xb7736000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb771b000)
+        liblixamy.so.0 => /opt/lixa/lib/liblixamy.so.0 (0xb7713000)
+        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb770b000)
+        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb751b000)
+        libpq.so.5 => /usr/lib/libpq.so.5 (0xb74fc000)
+        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb6748000)
+        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6543000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb63f3000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb63ef000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb63eb000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb63e6000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb63dd000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb632c000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb620b000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb61f6000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb61de000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb61ac000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb6194000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb616e000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb6159000)
+        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb6114000)
+        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb5fd2000)
+        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb5f45000)
+        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb5f41000)
+        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb5f18000)
+        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb5ed8000)
+        /lib/ld-linux.so.2 (0xb7737000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb5eb1000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb5ead000)
+        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb5e89000)
+        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb5e81000)
+        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb5e7e000)
+        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb5e6b000)
+        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb5e5e000)
+        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb5e46000)
+        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb5dd0000)
+        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb5dc0000)
+        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb5d73000)
+        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb5d6f000)
 	  </screen></td></tr></tbody>
 	</table>
 	Set-up the necessary environment variables:
@@ -4802,9 +4808,9 @@ tiian@ubuntu:~/tmp$ ldd example9_mys_pql
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 
-tiian@ubuntu:~/tmp$ export LIXA_PROFILE=MYS_STA_PQL_STA
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=MYS_STA_PQL_STA_ORA_DYN
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
-MYS_STA_PQL_STA
+MYS_STA_PQL_STA_ORA_DYN
 	  </screen></td></tr></tbody>
 	</table>
 	It is suggested to set the necessary environment variables in your 
@@ -4812,31 +4818,37 @@ MYS_STA_PQL_STA
 	This is the list of the suggested variables:
 	<varname>LD_LIBRARY_PATH</varname>,
 	<varname>LIXA_PROFILE</varname>.
+	<varname>ORACLE_HOME</varname>,
+	<varname>ORACLE_SID</varname>,
+	<varname>PATH</varname>.
       </para>
     </section>
     <section>
       <title>Some checks before program execution</title>
       <para>
 	We set <varname>LIXA_PROFILE</varname> to value
-	<quote>MYS_STA_PQL_STA</quote>, looking at
+	<quote>MYS_STA_PQL_STA_ORA_DYN</quote>, looking at
 	<filename>/opt/lixa/etc/lixac_conf.xml</filename>:
 	<screen>
-    &lt;profile name="MYS_STA_PQL_STA"&gt;
+    &lt;profile name="MYS_STA_PQL_STA_ORA_DYN"&gt;
       &lt;sttsrvs&gt;
         &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
       &lt;/sttsrvs&gt;
       &lt;rsrmgrs&gt;
         &lt;rsrmgr&gt;MySQL_stareg&lt;/rsrmgr&gt;
         &lt;rsrmgr&gt;PostgreSQL_stareg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;OracleXE_dynreg&lt;/rsrmgr&gt;
       &lt;/rsrmgrs&gt;
     &lt;/profile&gt;
 	</screen>
-	the profile references two Resource Managers:
-	<quote>MySQL_stareg</quote> and <quote>PostgreSQL_stareg</quote>, 
+	the profile references three Resource Managers:
+	<quote>MySQL_stareg</quote>, <quote>PostgreSQL_stareg</quote> 
+	and <quote>OracleXE_dynreg</quote>,
 	looking again at the config file:
 	<screen>
     &lt;rsrmgr name="MySQL_stareg" switch_file="/opt/lixa/lib/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,db=lixa,client_flag=0" xa_close_info="" /&gt;
     &lt;rsrmgr name="PostgreSQL_stareg" switch_file="/opt/lixa/lib/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" /&gt;
+    &lt;rsrmgr name="OracleXE_dynreg" switch_file="/opt/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
 	</screen>
 	we can discover how our application will access the resource
 	managers
@@ -4857,18 +4869,34 @@ MYS_STA_PQL_STA
 	    contain a maximum of 255 characters: this limitation is
 	    documented in <citation>XAspec</citation>.
 	  </para>
-	</footnote>.
+	</footnote>
+	<footnote>
+	  <para>
+	    The content of <constant>xa_open_info</constant> string is
+	    described in chapter 15 "Developing Applications with Oracle XA"
+	    of the "Oracle Database Application Developer's Guide"
+	    manual; please refer to the documentation published by
+	    Oracle Corporation for further details.
+	  </para>
+	</footnote>. 
+      </para>
+      <para>
+	Verify no (Oracle) trace file exists:
+	<screen>
+tiian@ubuntu:~/tmp$ ls -la /tmp/xa*
+ls: cannot access /tmp/xa*: No such file or directory
+	</screen>
       </para>
     </section>
     <section>
-      <title>Program execution</title>
+      <title>Program execution (dynamic registration for Oracle)</title>
       <para>
-	It is suggested to open three different terminals: 
+	It is suggested to open four different terminals: 
 	the first one connected to <quote>lixa</quote> MySQL database,
-	the second one connected to <quote>testdb</quote> PostgreSQL database
-	and the
-	third one pointing to the directory where the compiled program 
-	example9_mys_pql lives.
+	the second one connected to <quote>testdb</quote> PostgreSQL database,
+	the third one connected to Oracle database and the
+	fourth one pointing to the directory where the compiled program 
+	example10_mys_pql_ora lives.
 	<table frame="box">
 	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -4901,14 +4929,30 @@ testdb=>
 	  </screen></td></tr></tbody>
 	</table>
 	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
+tiian@ubuntu:~$ sqlplus "hr/hr"                                                 
+SQL*Plus: Release 10.2.0.1.0 - Production on Tue May 3 21:52:06 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL>
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ls -la
-total 28
-drwxr-xr-x  2 tiian tiian  4096 2011-09-20 21:53 .
-drwxr-xr-x 40 tiian tiian  4096 2011-09-19 20:54 ..
--rwxr-xr-x  1 tiian tiian 10096 2011-11-03 20:45 example9_mys_pql
--rw-r--r--  1 tiian tiian  4602 2011-11-03 20:45 example9_mys_pql.c
+total 152
+drwxr-xr-x  2 tiian tiian  4096 2011-11-11 21:06 .
+drwxr-xr-x 40 tiian tiian  4096 2011-11-11 15:47 ..
+-rwxr-xr-x  1 tiian tiian 12317 2011-11-11 21:06 example10_mys_pql_ora
+-rw-r--r--  1 tiian tiian  8422 2011-11-11 21:05 example10_mys_pql_ora.c
 	  </screen></td></tr></tbody>
 	</table>
 	Check the content of the MySQL table (<quote>authors</quote>):
@@ -4929,14 +4973,24 @@ testdb=> select * from AUTHORS;
 (0 rows)
 	  </screen></td></tr></tbody>
 	</table>
+	Check the content of the Oracle table (<quote>COUNTRIES</quote>):
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
 	Insert a row in all the tables and check the contents of the tables
 	after the transaction execution:
 	<table frame="box">
-	  <thead><tr><td>[Third terminal session]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ./example9_mys_pql insert
+tiian@ubuntu:~/tmp$ ./example10_mys_pql_ora insert
 Inserting a row in MySQL table...
 Inserting a row in PostgreSQL table...
+Inserting a row in Oracle table...
 	  </screen></td></tr></tbody>
 	</table>
 	Now you can verify the content of the tables after the transaction:
@@ -4962,13 +5016,24 @@ testdb=> select * from AUTHORS;
 (1 row)
 	  </screen></td></tr></tbody>
 	</table>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+CO COUNTRY_NAME                              REGION_ID
+-- ---------------------------------------- ----------
+RS Repubblica San Marino                             1
+	  </screen></td></tr></tbody>
+	</table>
 	With the opposite command you can remove the rows from the tables:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ./example9_mys_pql delete
+tiian@ubuntu:~/tmp$ ./example10_mys_pql_ora delete
 Deleting a row from MySQL  table...
 Deleting a row from PostgreSQL table...
+Deleting a row from Oracle table...
 	  </screen></td></tr></tbody>
 	</table>
 	and check the content of the tables again:
@@ -4986,6 +5051,79 @@ testdb=> select * from AUTHORS;
  id | last_name | first_name
 ----+-----------+------------
 (0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	We can verify the dynamic registration behavior of Oracle:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00002000
+tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
+0x00002000
+tiian@ubuntu:~/tmp$ ./example10_mys_pql_ora insert 2>&amp;1 | grep ax_reg
+2011-11-11 21:39:40.850356 [23176/3051161344] ax_reg: rmid=2, xid=0xbfecc68c, flags=0x0
+2011-11-11 21:39:40.850451 [23176/3051161344] ax_reg: the application program has started a transaction (TX states S3); this XID '4c495841.0600c467d21b42b38f1c89d912fc125d.8be5bdb35ba638bb997258e6bd8b9d88' will be returned
+2011-11-11 21:39:40.850565 [23176/3051161344] ax_reg: sending 153 bytes to the server for step 8
+2011-11-11 21:39:40.850602 [23176/3051161344] ax_reg/excp=7/ret_cod=0/errno=0
+	  </screen></td></tr></tbody>
+	</table>
+	We can check the static registration behavior of Oracle with a 
+	different profile:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=MYS_STA_PQL_STA_ORA_STA
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+MYS_STA_PQL_STA_ORA_STA
+tiian@ubuntu:~/tmp$ ./example10_mys_pql_ora delete 2>&amp;1 | grep xa_start
+2011-11-11 21:41:52.953050 [23204/3050981120] lixa_xa_start
+[...]
+2011-11-11 21:41:53.005001 [23204/3050981120] lixa_xa_start: xa_start_entry(xid, 0, 0x0) = 0
+2011-11-11 21:41:53.007040 [23204/3050981120] lixa_xa_start: xa_start_entry(xid, 1, 0x0) = 0
+2011-11-11 21:41:53.009927 [23204/3050981120] lixa_xa_start: xa_start_entry(xid, 2, 0x0) = 0
+2011-11-11 21:41:53.010004 [23204/3050981120] lixa_xa_start: sending 352 bytes to the server for step 24
+2011-11-11 21:41:53.010095 [23204/3050981120] lixa_xa_start/excp=10/ret_cod=0/errno=0
+	  </screen></td></tr></tbody>
+	</table>
+	and check the content of the tables again:
+	<table frame="box">
+	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> SELECT * FROM authors;
+Empty set (0.00 sec)
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name
+----+-----------+------------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	The activity of the Oracle database can be analyzed in the trace file:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL11112011.trc
+-rw-r--r-- 1 tiian tiian 22112 2011-11-11 21:47 /tmp/xa_NULL11112011.trc
 	  </screen></td></tr></tbody>
 	</table>
       </para>

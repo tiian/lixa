@@ -263,5 +263,24 @@
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="CASE_PROF_0025">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
+        <rsrmgr>MySQL_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+  </profiles>
+    <profile name="CASE_PROF_0026">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>MySQL_stareg</rsrmgr>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
   </profiles>
 </client>
