@@ -270,9 +270,9 @@
       <rsrmgrs>
         <rsrmgr>PostgreSQL_stareg</rsrmgr>
         <rsrmgr>MySQL_stareg</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
       </rsrmgrs>
     </profile>
-  </profiles>
     <profile name="CASE_PROF_0026">
       <sttsrvs>
         <sttsrv>TestTM</sttsrv>
@@ -280,6 +280,7 @@
       <rsrmgrs>
         <rsrmgr>MySQL_stareg</rsrmgr>
         <rsrmgr>PostgreSQL_stareg</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
       </rsrmgrs>
     </profile>
   </profiles>
