@@ -28,20 +28,42 @@ AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
 AT_CHECK([echo "SELECT * FROM AUTHORS;" | psql testdb >$TESTS_TMP_FILE1 && grep row $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
 
+# check the current user has DELETE & INSERT privilege on table authors
+AT_SETUP([MP/0.0/2.0 DELETE & INSERT INTO authors])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([echo "DELETE FROM authors;" | mysql -h localhost -u lixa lixa], [0], [ignore], [ignore])
+AT_CHECK([echo "INSERT INTO authors VALUES(999,'surname','name');" | mysql -h localhost -u lixa lixa], [0], [ignore], [ignore])
+AT_CHECK([echo "DELETE FROM authors;" | mysql -h localhost -u lixa lixa], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# check the current user has DELETE & INSERT privilege on table authors
+AT_SETUP([MP/0.0/2.1 DELETE & INSERT INTO authors])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([echo "DELETE FROM authors;" | psql testdb >$TESTS_TMP_FILE1 && grep DELETE $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([echo "INSERT INTO authors VALUES(999,'surname','name');" | psql testdb >$TESTS_TMP_FILE1 && grep INSERT $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([echo "DELETE FROM authors;" | psql testdb >$TESTS_TMP_FILE1 && grep DELETE $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CLEANUP
+
 # try two phase commit
 AT_SETUP([MP/0.1/0.1 Two phase commit])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0025 ; lixa_test_exec.sh reset start case0042 1 1 0], [0], [ignore], [ignore])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0026 ; lixa_test_exec.sh noreset none case0042 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
-
-# @@@@@@@@@@@@@
-
-
 # try rollback after prepare
-AT_SETUP([MY/0.1/0.2 Rollback after prepare])
+AT_SETUP([MP/0.1/0.2 Rollback after prepare])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -52,11 +74,21 @@ xa_prepare/-3
 xa_rollback/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0024 ; lixa_test_exec.sh noreset none case0041 1 1 -2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0025 ; lixa_test_exec.sh noreset none case0042 1 1 -2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0026 ; lixa_test_exec.sh noreset none case0042 1 1 -2], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([MY/0.1/1.0 Crash after connect])
+AT_SETUP([MP/0.1/1.0 Crash after connect])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0025 ; export LIXA_CRASH_POINT=2 ; lixa_test_exec.sh noreset none case0042 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0026 ; export LIXA_CRASH_POINT=2 ; lixa_test_exec.sh noreset none case0042 1 1 0], [134], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MP/0.1/1.1 Crash in the middle of xa_open])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -64,11 +96,13 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0024 ; export LIXA_CRASH_POINT=2 ; lixa_test_exec.sh noreset none case0041 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0025 ; export LIXA_CRASH_POINT=3 ; lixa_test_exec.sh noreset none case0042 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0026 ; export LIXA_CRASH_POINT=3 ; lixa_test_exec.sh noreset none case0042 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([MY/0.1/1.1 Crash in the middle of xa_open])
+AT_SETUP([MP/0.1/1.2 Crash in the middle of xa_open (2)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -76,11 +110,13 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0024 ; export LIXA_CRASH_POINT=3 ; lixa_test_exec.sh noreset none case0041 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0025 ; export LIXA_CRASH_POINT=4 ; lixa_test_exec.sh noreset none case0042 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0026 ; export LIXA_CRASH_POINT=4 ; lixa_test_exec.sh noreset none case0042 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([MY/0.1/1.2 Crash in the middle of xa_open (2)])
+AT_SETUP([MP/0.1/1.3 Crash after xa_open])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -88,11 +124,13 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0024 ; export LIXA_CRASH_POINT=4 ; lixa_test_exec.sh noreset none case0041 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0025 ; export LIXA_CRASH_POINT=5 ; lixa_test_exec.sh noreset none case0042 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0026 ; export LIXA_CRASH_POINT=5 ; lixa_test_exec.sh noreset none case0042 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([MY/0.1/1.3 Crash after xa_open])
+AT_SETUP([MP/0.1/2.0 Crash in the middle of xa_end])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -100,20 +138,11 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0024 ; export LIXA_CRASH_POINT=5 ; lixa_test_exec.sh noreset none case0041 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0025 ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh noreset none case0042 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0026 ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh noreset none case0042 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([MY/0.1/2.0 Crash in the middle of xa_end])
-AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0024 ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh noreset none case0041 1 1 0], [134], [ignore], [ignore])
-AT_CLEANUP
+# @@@
 
 AT_SETUP([MY/0.1/2.1 Automatic recovery])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
