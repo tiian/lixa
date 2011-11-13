@@ -4817,7 +4817,7 @@ MYS_STA_PQL_STA_ORA_DYN
 	profile if you are going to execute the programs many times.
 	This is the list of the suggested variables:
 	<varname>LD_LIBRARY_PATH</varname>,
-	<varname>LIXA_PROFILE</varname>.
+	<varname>LIXA_PROFILE</varname>,
 	<varname>ORACLE_HOME</varname>,
 	<varname>ORACLE_SID</varname>,
 	<varname>PATH</varname>.
@@ -5185,41 +5185,53 @@ tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL11112011.trc
 	    to start up the LIXA state server
 	</para></listitem>
       </itemizedlist>
-      To address a second MySQL server some additional steps must be completed.
+      To address a remote MySQL server some additional steps must be completed.
       The example explained here uses this configuration:
       <itemizedlist mark="bullet">
 	<listitem><para>
 	    IP address of the server running <command>lixad</command>
-	    (LIXA state server), application program and first MySQL
-	    server (reached using localhost 127.0.0.1 address): 192.168.1.2
+	    (LIXA state server), application program and local MySQL
+	    server (reached using localhost 
+	    <systemitem class="ipaddress">127.0.0.1</systemitem> 
+	    address): 
+	    <systemitem class="ipaddress">192.168.1.2</systemitem> 
 	</para></listitem>
 	<listitem><para>
-	    IP address of the server running the second MySQL server:
-	    192.168.1.3
+	    IP address of the server running the remote MySQL server:
+	    <systemitem class="ipaddress">192.168.1.3</systemitem> 
 	</para></listitem>
       </itemizedlist>
-      Connect to server 192.168.1.3 and change the parameter
+      Connect to server 
+      <systemitem class="ipaddress">192.168.1.3</systemitem> 
+      and change the parameter
       <parameter>bind-address</parameter> in the file
-      <filename>/etc/mysql/my.cnf</filename> to allow the connection from 
-      the network:
-      <screen>
+      <filename>/etc/mysql/my.cnf</filename> to allow network reachability:
+      <table frame="box">
+	<thead><tr><td>[Host:192.168.1.3 /etc/mysql/my.cnf]</td></tr></thead>
+	<tbody><tr><td><screen>
 # Instead of skip-networking the default is now to listen only on
 # localhost which is more compatible and is not less secure.
 #bind-address            = 127.0.0.1
 bind-address            = 192.168.1.3
-      </screen>
+	</screen></td></tr></tbody>
+      </table>
       restart MySQL server:
-      <screen>
+      <table frame="box">
+	<thead><tr><td>[Host:192.168.1.3 terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
 tiian@ubuntu:~$ sudo /etc/init.d/mysql restart
 [sudo] password for tiian:
  * Stopping MySQL database server mysqld                                 [ OK ]
  * Starting MySQL database server mysqld                                 [ OK ]
  * Checking for corrupt, not cleanly closed and upgrade needing tables.
-      </screen>
-      connect to that MySQL server from the same host and grant access to
+	</screen></td></tr></tbody>
+      </table>
+      connect to that MySQL server from the remote host and grant access to
       user <systemitem class="username">lixa</systemitem> from the server 
-      192.168.1.2:
-      <screen>
+      <systemitem class="ipaddress">192.168.1.2</systemitem>:
+      <table frame="box">
+	<thead><tr><td>[Host:192.168.1.3 terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
 tiian@mojan:~$ mysql -u root -p
 Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
@@ -5230,10 +5242,15 @@ Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
 
 mysql> GRANT ALL ON lixa.* TO 'lixa'@'192.168.1.2';
 Query OK, 0 rows affected (0.00 sec)
-      </screen>
+	</screen></td></tr></tbody>
+      </table>
       now you should be able to connect to the server running at
-      192.168.1.3 from the server 192.168.1.2:
-      <screen>
+      <systemitem class="ipaddress">192.168.1.3</systemitem> 
+      from the server 
+      <systemitem class="ipaddress">192.168.1.2</systemitem>:
+      <table frame="box">
+	<thead><tr><td>[Host:192.168.1.2 terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
 tiian@ubuntu:~$ mysql -h 192.168.1.3 -u lixa lixa
 Reading table information for completion of table and column names
 You can turn off this feature to get a quicker startup with -A
@@ -5243,9 +5260,12 @@ Your MySQL connection id is 13
 Server version: 5.0.51a-3ubuntu5.8 (Ubuntu)
 
 Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
-      </screen>
+	</screen></td></tr></tbody>
+      </table>
       and you must create the table necessary for the example program:
-      <screen>
+      <table frame="box">
+	<thead><tr><td>[MySQL (remote) terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
 mysql> CREATE TABLE authors (id INTEGER NOT NULL PRIMARY KEY, last_name TEXT, first_name TEXT) ENGINE=InnoDB;
 Query OK, 0 rows affected (0.01 sec)
 
@@ -5258,7 +5278,8 @@ mysql> DESCRIBE authors;
 | first_name | text    | YES  |     | NULL    |       |
 +------------+---------+------+-----+---------+-------+
 3 rows in set (0.01 sec)
-      </screen>
+	</screen></td></tr></tbody>
+      </table>
     </para>
     <section>
       <title>Build the client program</title>
@@ -5272,53 +5293,29 @@ mysql> DESCRIBE authors;
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
-tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example10_mys_pql_ora.c .
-tiian@ubuntu:~/tmp$ gcc example10_mys_pql_ora.c -Wall \
-> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixamy -l lixapq \
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example11_mys_mys.c .
+tiian@ubuntu:~/tmp$ gcc example11_mys_mys.c -Wall \
+> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixamy \
 > $(mysql_config --include --libs_r) \
-> -I /usr/include/postgresql -l pq \
-> -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public \
-> -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
-> -o example10_mys_pql_ora
+> -o example11_mys_mys
 	  </screen></td></tr></tbody>
 	</table>
 	Verify the executable produced by <command>gcc</command>:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ldd example10_mys_pql_ora
-        linux-gate.so.1 =>  (0xb7717000)
+tiian@ubuntu:~/tmp$ ldd example11_mys_mys
+        linux-gate.so.1 =>  (0xb76f2000)
         liblixac.so.0 => not found
         liblixamy.so.0 => not found
-        liblixapq.so.0 => not found
-        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb7524000)
-        libpq.so.5 => /usr/lib/libpq.so.5 (0xb7505000)
-        libclntsh.so.10.1 => not found
-        libnnz10.so => not found
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb73b5000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb739d000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb736b000)
-        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb7353000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb732e000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb7319000)
-        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb72d3000)
-        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb7191000)
-        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb7104000)
-        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb7101000)
-        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb70d8000)
-        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb7097000)
-        /lib/ld-linux.so.2 (0xb7718000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb7093000)
-        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb7070000)
-        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb7068000)
-        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb7065000)
-        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb7051000)
-        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb7044000)
-        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb702d000)
-        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb6fb7000)
-        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb6fa7000)
-        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb6f59000)
-        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb6f55000)
+        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb74ff000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb73b0000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb7398000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb7366000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb734e000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb7328000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb7313000)
+        /lib/ld-linux.so.2 (0xb76f3000)
 	  </screen></td></tr></tbody>
 	</table>
       </para>
@@ -5326,66 +5323,41 @@ tiian@ubuntu:~/tmp$ ldd example10_mys_pql_ora
     <section>
       <title>Set-up LIXA environment</title>
       <para>
-	There are five unresolved references that can be fixed setting up
+	There are two unresolved references that can be fixed setting up
 	the environment properly:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-
-tiian@ubuntu:~/tmp$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
+/opt/lixa/lib
 	  </screen></td></tr></tbody>
 	</table>
 	Check again the executable:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ldd example10_mys_pql_ora
-        linux-gate.so.1 =>  (0xb7736000)
-        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb771b000)
-        liblixamy.so.0 => /opt/lixa/lib/liblixamy.so.0 (0xb7713000)
-        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb770b000)
-        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb751b000)
-        libpq.so.5 => /usr/lib/libpq.so.5 (0xb74fc000)
-        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb6748000)
-        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6543000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb63f3000)
-        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb63ef000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb63eb000)
-        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb63e6000)
-        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb63dd000)
-        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb632c000)
-        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb620b000)
-        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb61f6000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb61de000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb61ac000)
-        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb6194000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb616e000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb6159000)
-        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb6114000)
-        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb5fd2000)
-        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb5f45000)
-        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb5f41000)
-        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb5f18000)
-        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb5ed8000)
-        /lib/ld-linux.so.2 (0xb7737000)
-        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb5eb1000)
-        libuuid.so.1 => /lib/libuuid.so.1 (0xb5ead000)
-        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb5e89000)
-        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb5e81000)
-        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb5e7e000)
-        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb5e6b000)
-        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb5e5e000)
-        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb5e46000)
-        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb5dd0000)
-        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb5dc0000)
-        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb5d73000)
-        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb5d6f000)
+tiian@ubuntu:~/tmp$ ldd example11_mys_mys
+        linux-gate.so.1 =>  (0xb777d000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7762000)
+        liblixamy.so.0 => /opt/lixa/lib/liblixamy.so.0 (0xb775a000)
+        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb7569000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb741a000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb7416000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb7412000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb740d000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb7403000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb7352000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb7232000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb721d000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb7205000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb71d3000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb71ba000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb7195000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb7180000)
+        /lib/ld-linux.so.2 (0xb777e000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb7159000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb7155000)
 	  </screen></td></tr></tbody>
 	</table>
 	Set-up the necessary environment variables:
@@ -5394,9 +5366,9 @@ tiian@ubuntu:~/tmp$ ldd example10_mys_pql_ora
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 
-tiian@ubuntu:~/tmp$ export LIXA_PROFILE=MYS_STA_PQL_STA_ORA_DYN
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=MYS_STA_MYS_STA
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
-MYS_STA_PQL_STA_ORA_DYN
+MYS_STA_MYS_STA
 	  </screen></td></tr></tbody>
 	</table>
 	It is suggested to set the necessary environment variables in your 
@@ -5404,37 +5376,31 @@ MYS_STA_PQL_STA_ORA_DYN
 	This is the list of the suggested variables:
 	<varname>LD_LIBRARY_PATH</varname>,
 	<varname>LIXA_PROFILE</varname>.
-	<varname>ORACLE_HOME</varname>,
-	<varname>ORACLE_SID</varname>,
-	<varname>PATH</varname>.
       </para>
     </section>
     <section>
       <title>Some checks before program execution</title>
       <para>
 	We set <varname>LIXA_PROFILE</varname> to value
-	<quote>MYS_STA_PQL_STA_ORA_DYN</quote>, looking at
+	<quote>MYS_STA_MYS_STA</quote>, looking at
 	<filename>/opt/lixa/etc/lixac_conf.xml</filename>:
 	<screen>
-    &lt;profile name="MYS_STA_PQL_STA_ORA_DYN"&gt;
+    &lt;profile name="MYS_STA_MYS_STA"&gt;
       &lt;sttsrvs&gt;
         &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
       &lt;/sttsrvs&gt;
       &lt;rsrmgrs&gt;
         &lt;rsrmgr&gt;MySQL_stareg&lt;/rsrmgr&gt;
-        &lt;rsrmgr&gt;PostgreSQL_stareg&lt;/rsrmgr&gt;
-        &lt;rsrmgr&gt;OracleXE_dynreg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;MySQL2_stareg&lt;/rsrmgr&gt;
       &lt;/rsrmgrs&gt;
     &lt;/profile&gt;
 	</screen>
-	the profile references three Resource Managers:
-	<quote>MySQL_stareg</quote>, <quote>PostgreSQL_stareg</quote> 
-	and <quote>OracleXE_dynreg</quote>,
+	the profile references two Resource Managers:
+	<quote>MySQL_stareg</quote> and <quote>MySQL2_stareg</quote> 
 	looking again at the config file:
 	<screen>
     &lt;rsrmgr name="MySQL_stareg" switch_file="/opt/lixa/lib/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,db=lixa,client_flag=0" xa_close_info="" /&gt;
-    &lt;rsrmgr name="PostgreSQL_stareg" switch_file="/opt/lixa/lib/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" /&gt;
-    &lt;rsrmgr name="OracleXE_dynreg" switch_file="/opt/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
+    &lt;rsrmgr name="MySQL2_stareg" switch_file="/opt/lixa/lib/switch_mysql_stareg.so" xa_open_info="host=192.168.1.3,user=lixa,passwd=,db=lixa,client_flag=0" xa_close_info="" /&gt;
 	</screen>
 	we can discover how our application will access the resource
 	managers
@@ -5444,47 +5410,19 @@ MYS_STA_PQL_STA_ORA_DYN
 	    described in 
 	    <xref linkend="Development_setup_MySQL_xa_open_info"/>.
 	  </para>
-	</footnote>
-	<footnote>
-	  <para>
-	    The content of <constant>xa_open_info</constant> is passed to
-	    <function>PQconnectdb</function> function: you can refer to 
-	    PostgreSQL official
-	    documentation to discover what you can pass to this function.
-	    Please pay attention the <varname>xa_open_info</varname> can
-	    contain a maximum of 255 characters: this limitation is
-	    documented in <citation>XAspec</citation>.
-	  </para>
-	</footnote>
-	<footnote>
-	  <para>
-	    The content of <constant>xa_open_info</constant> string is
-	    described in chapter 15 "Developing Applications with Oracle XA"
-	    of the "Oracle Database Application Developer's Guide"
-	    manual; please refer to the documentation published by
-	    Oracle Corporation for further details.
-	  </para>
 	</footnote>. 
-      </para>
-      <para>
-	Verify no (Oracle) trace file exists:
-	<screen>
-tiian@ubuntu:~/tmp$ ls -la /tmp/xa*
-ls: cannot access /tmp/xa*: No such file or directory
-	</screen>
       </para>
     </section>
     <section>
-      <title>Program execution (dynamic registration for Oracle)</title>
+      <title>Program execution</title>
       <para>
-	It is suggested to open four different terminals: 
-	the first one connected to <quote>lixa</quote> MySQL database,
-	the second one connected to <quote>testdb</quote> PostgreSQL database,
-	the third one connected to Oracle database and the
-	fourth one pointing to the directory where the compiled program 
-	example10_mys_pql_ora lives.
+	It is suggested to open three different terminals: 
+	the first one connected to <quote>lixa</quote> local MySQL database,
+	the second one connected to <quote>lixa</quote> remote MySQL database
+	and the	third one pointing to the directory where the compiled program 
+	example11_mys_mys lives.
 	<table frame="box">
-	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <thead><tr><td>[MySQL (local) terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~$ mysql -h localhost -u lixa lixa
 Reading table information for completion of table and column names
@@ -5500,72 +5438,44 @@ mysql>
 	  </screen></td></tr></tbody>
 	</table>
 	<table frame="box">
-	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <thead><tr><td>[MySQL (remote) terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~$ psql testdb
-Welcome to psql 8.3.15, the PostgreSQL interactive terminal.
+tiian@ubuntu:~$ mysql -h 192.168.1.3 -u lixa lixa
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
 
-Type:  \copyright for distribution terms
-       \h for help with SQL commands
-       \? for help with psql commands
-       \g or terminate with semicolon to execute query
-       \q to quit
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 7
+Server version: 5.0.51a-3ubuntu5.8 (Ubuntu)
 
-testdb=>
-	  </screen></td></tr></tbody>
-	</table>
-	<table frame="box">
-	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
-tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
-tiian@ubuntu:~$ sqlplus "hr/hr"                                                 
-SQL*Plus: Release 10.2.0.1.0 - Production on Tue May 3 21:52:06 2011
-
-Copyright (c) 1982, 2005, Oracle.  All rights reserved.
-
-
-Connected to:
-Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-
-SQL>
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
 	  </screen></td></tr></tbody>
 	</table>
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ls -la
-total 152
-drwxr-xr-x  2 tiian tiian  4096 2011-11-11 21:06 .
-drwxr-xr-x 40 tiian tiian  4096 2011-11-11 15:47 ..
--rwxr-xr-x  1 tiian tiian 12317 2011-11-11 21:06 example10_mys_pql_ora
--rw-r--r--  1 tiian tiian  8422 2011-11-11 21:05 example10_mys_pql_ora.c
+total 168
+drwxr-xr-x  2 tiian tiian  4096 2011-11-13 21:04 .
+drwxr-xr-x 40 tiian tiian  4096 2011-11-13 19:09 ..
+-rwxr-xr-x  1 tiian tiian  9201 2011-11-13 21:04 example11_mys_mys
+-rw-r--r--  1 tiian tiian  3977 2011-11-13 21:04 example11_mys_mys.c
 	  </screen></td></tr></tbody>
 	</table>
-	Check the content of the MySQL table (<quote>authors</quote>):
+	Check the content of the (local) MySQL table (<quote>authors</quote>):
 	<table frame="box">
-	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <thead><tr><td>[MySQL (local) terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 mysql> SELECT * FROM authors;
 Empty set (0.02 sec)
 	  </screen></td></tr></tbody>
 	</table>
-	Check the content of the PostgreSQL table (<quote>AUTHORS</quote>):
+	Check the content of the (remote) MySQL table (<quote>authors</quote>):
 	<table frame="box">
-	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <thead><tr><td>[MySQL (remote) terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-testdb=> select * from AUTHORS;
- id | last_name | first_name
-----+-----------+------------
-(0 rows)
-	  </screen></td></tr></tbody>
-	</table>
-	Check the content of the Oracle table (<quote>COUNTRIES</quote>):
-	<table frame="box">
-	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
-SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
-
-no rows selected
+mysql> SELECT * FROM authors;
+Empty set (0.01 sec)
 	  </screen></td></tr></tbody>
 	</table>
 	Insert a row in all the tables and check the contents of the tables
@@ -5573,15 +5483,14 @@ no rows selected
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ./example10_mys_pql_ora insert
-Inserting a row in MySQL table...
-Inserting a row in PostgreSQL table...
-Inserting a row in Oracle table...
+tiian@ubuntu:~/tmp$ ./example11_mys_mys insert
+Inserting a row in MySQL(1) table...
+Inserting a row in MySQL(2) table...
 	  </screen></td></tr></tbody>
 	</table>
 	Now you can verify the content of the tables after the transaction:
 	<table frame="box">
-	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <thead><tr><td>[MySQL (local) terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 mysql> SELECT * FROM authors;
 +----+-----------+------------+
@@ -5593,123 +5502,136 @@ mysql> SELECT * FROM authors;
 	  </screen></td></tr></tbody>
 	</table>
 	<table frame="box">
-	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <thead><tr><td>[MySQL (remote) terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-testdb=> select * from AUTHORS;
- id | last_name | first_name
-----+-----------+------------
-  1 | Foo       | Bar
-(1 row)
-	  </screen></td></tr></tbody>
-	</table>
-	<table frame="box">
-	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
-SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
-
-CO COUNTRY_NAME                              REGION_ID
--- ---------------------------------------- ----------
-RS Repubblica San Marino                             1
+mysql> SELECT * FROM authors;
++----+-----------+------------+
+| id | last_name | first_name |
++----+-----------+------------+
+|  1 | Foo       | Bar        |
++----+-----------+------------+
+1 row in set (0.01 sec)
 	  </screen></td></tr></tbody>
 	</table>
 	With the opposite command you can remove the rows from the tables:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ./example10_mys_pql_ora delete
-Deleting a row from MySQL  table...
-Deleting a row from PostgreSQL table...
-Deleting a row from Oracle table...
+tiian@ubuntu:~/tmp$ ./example11_mys_mys delete
+Deleting a row from MySQL(1) table...
+Deleting a row from MySQL(2) table...
 	  </screen></td></tr></tbody>
 	</table>
 	and check the content of the tables again:
 	<table frame="box">
-	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <thead><tr><td>[MySQL (local) terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 mysql> SELECT * FROM authors;
 Empty set (0.00 sec)
 	  </screen></td></tr></tbody>
 	</table>
 	<table frame="box">
-	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <thead><tr><td>[MySQL (remote) terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-testdb=> select * from AUTHORS;
- id | last_name | first_name
-----+-----------+------------
-(0 rows)
+mysql> SELECT * FROM authors;
+Empty set (0.00 sec)
 	  </screen></td></tr></tbody>
 	</table>
+	Finally, you can verify the two phase commit protocol is running as
+	expected. Insert a row in all the tables:
 	<table frame="box">
-	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+tiian@ubuntu:~/tmp$ ./example11_mys_mys insert
+Inserting a row in MySQL(1) table...
+Inserting a row in MySQL(2) table...
+	  </screen></td></tr></tbody>
+	</table>
+	manually remove the row from the local MySQL server only:
+	<table frame="box">
+	  <thead><tr><td>[MySQL (local) terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> SELECT * FROM authors;
++----+-----------+------------+
+| id | last_name | first_name |
++----+-----------+------------+
+|  1 | Foo       | Bar        |
++----+-----------+------------+
+1 row in set (0.00 sec)
 
-no rows selected
+mysql> DELETE FROM authors;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> SELECT * FROM authors;
+Empty set (0.00 sec)
 	  </screen></td></tr></tbody>
 	</table>
-	We can verify the dynamic registration behavior of Oracle:
+	try to insert the row again in all the tables:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00002000
-tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
-0x00002000
-tiian@ubuntu:~/tmp$ ./example10_mys_pql_ora insert 2>&amp;1 | grep ax_reg
-2011-11-11 21:39:40.850356 [23176/3051161344] ax_reg: rmid=2, xid=0xbfecc68c, flags=0x0
-2011-11-11 21:39:40.850451 [23176/3051161344] ax_reg: the application program has started a transaction (TX states S3); this XID '4c495841.0600c467d21b42b38f1c89d912fc125d.8be5bdb35ba638bb997258e6bd8b9d88' will be returned
-2011-11-11 21:39:40.850565 [23176/3051161344] ax_reg: sending 153 bytes to the server for step 8
-2011-11-11 21:39:40.850602 [23176/3051161344] ax_reg/excp=7/ret_cod=0/errno=0
+tiian@ubuntu:~/tmp$ ./example11_mys_mys insert
+Inserting a row in MySQL(1) table...
+Inserting a row in MySQL(2) table...
+INSERT INTO authors: 1062/Duplicate entry '1' for key 1
 	  </screen></td></tr></tbody>
 	</table>
-	We can check the static registration behavior of Oracle with a 
-	different profile:
+	the first (local) INSERT is ok, while the second one can not be
+	performed due to a duplicated key. 
+	Check the content of the tables again:
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ export LIXA_PROFILE=MYS_STA_PQL_STA_ORA_STA
-tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
-MYS_STA_PQL_STA_ORA_STA
-tiian@ubuntu:~/tmp$ ./example10_mys_pql_ora delete 2>&amp;1 | grep xa_start
-2011-11-11 21:41:52.953050 [23204/3050981120] lixa_xa_start
-[...]
-2011-11-11 21:41:53.005001 [23204/3050981120] lixa_xa_start: xa_start_entry(xid, 0, 0x0) = 0
-2011-11-11 21:41:53.007040 [23204/3050981120] lixa_xa_start: xa_start_entry(xid, 1, 0x0) = 0
-2011-11-11 21:41:53.009927 [23204/3050981120] lixa_xa_start: xa_start_entry(xid, 2, 0x0) = 0
-2011-11-11 21:41:53.010004 [23204/3050981120] lixa_xa_start: sending 352 bytes to the server for step 24
-2011-11-11 21:41:53.010095 [23204/3050981120] lixa_xa_start/excp=10/ret_cod=0/errno=0
-	  </screen></td></tr></tbody>
-	</table>
-	and check the content of the tables again:
-	<table frame="box">
-	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <thead><tr><td>[MySQL (local) terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 mysql> SELECT * FROM authors;
 Empty set (0.00 sec)
 	  </screen></td></tr></tbody>
 	</table>
 	<table frame="box">
-	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <thead><tr><td>[MySQL (remote) terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-testdb=> select * from AUTHORS;
- id | last_name | first_name
-----+-----------+------------
-(0 rows)
+mysql> SELECT * FROM authors;
++----+-----------+------------+
+| id | last_name | first_name |
++----+-----------+------------+
+|  1 | Foo       | Bar        |
++----+-----------+------------+
+1 row in set (0.01 sec)
 	  </screen></td></tr></tbody>
 	</table>
+	If you inspect the program
+	source code you will discover what the program will do:
 	<table frame="box">
-	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <thead><tr><td><filename>example11_mys_mys.c</filename></td></tr></thead>
 	  <tbody><tr><td><screen>
-SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+        [...]
 
-no rows selected
+        printf("Inserting a row in MySQL(2) table...\n");
+        if (mysql_query(conn2,
+                        "INSERT INTO authors VALUES(1, 'Foo', 'Bar')")) {
+            fprintf(stderr, "INSERT INTO authors: %u/%s\n",
+                    mysql_errno(conn2), mysql_error(conn2));
+            exit_nicely(conn1, conn2);
+        }
+
+        [...]
 	  </screen></td></tr></tbody>
 	</table>
-	The activity of the Oracle database can be analyzed in the trace file:
+	in case of error the program exits closing the connections...
+	XA protocol is a <quote>two phase commit with presumed 
+	rollback</quote>: if the transaction does not complete 
+	<function>xa_prepare</function>, the transaction will be rolled back.
+	An alternative way is the usage of <function>tx_rollback()</function>:
+	you can rollback the current transaction and start a new one without
+	program (and connection) termination.
+	Clean up the (remote) table:
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <thead><tr><td>[MySQL (remote) terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL11112011.trc
--rw-r--r-- 1 tiian tiian 22112 2011-11-11 21:47 /tmp/xa_NULL11112011.trc
+mysql> DELETE FROM authors;
+Query OK, 1 row affected (0.04 sec)
+
+mysql> SELECT * FROM authors;
+Empty set (0.00 sec)
 	  </screen></td></tr></tbody>
 	</table>
       </para>
