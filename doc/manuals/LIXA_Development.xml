@@ -4590,7 +4590,7 @@ testdb=> select * from AUTHORS;
     </section>
   </section>
   <section xml:id="Development_example10_mys_pql_ora">
-    <title>An example with MySQL &amp; PostgreSQL &amp; Oracle</title>
+    <title>An example with MySQL, PostgreSQL &amp; Oracle</title>
     <figure xml:id="develop10">
       <title>Deploy model of an example showing a distributed transaction with
 	MySQL, PostgreSQL and Oracle</title>

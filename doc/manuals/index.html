@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>LIXA</title><meta name="generator" content="DocBook XSL Stylesheets V1.73.2" /></head><body><div class="book" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id3385671"></a>LIXA</h1></div><div><h2 class="subtitle">
     A libre, free, open source implementation of the XA and the TX 
     specifications
-  </h2></div><div><div class="author"><h3 class="author"><span class="firstname">Christian</span> <span class="surname">Ferrari</span></h3></div></div><div><p class="copyright">Copyright © 2011 Christian Ferrari</p></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="preface"><a href="#id3385999">Preface</a></span></dt><dt><span class="chapter"><a href="#id3386240">1. Introduction</a></span></dt><dd><dl><dt><span class="section"><a href="#id3386248">Why should I use LIXA project?</a></span></dt><dt><span class="section"><a href="#id3386283">Transaction Manager and Transaction Monitor</a></span></dt><dt><span class="section"><a href="#id3386505">LIXA Architecture</a></span></dt><dt><span class="section"><a href="#id3386527">Project, Projuct, Product</a></span></dt><dt><span class="section"><a href="#id3386528">LIXA and X/OPEN CAE specifications</a></span></dt></dl></dd><dt><span class="chapter"><a href="#Installation">2. Installation</a></span></dt><dd><dl><dt><span class="section"><a href="#id3386942">System requirements</a></span></dt><dd><dl><dt><span class="section"><a href="#id3386990">Pre-requisites</a></span></dt><dt><span class="section"><a href="#id3387090">Co-requisites</a></span></dt><dt><span class="section"><a href="#id3387228">Authorization</a></span></dt></dl></dd><dt><span class="section"><a href="#id3387301">Software download</a></span></dt><dt><span class="section"><a href="#id3387312">Configure, build and install</a></span></dt><dd><dl><dt><span class="section"><a href="#id3387354">Advanced configuration</a></span></dt><dt><span class="section"><a href="#Linking_third_party_resource_managers">Linking third party resource managers</a></span></dt><dt><span class="section"><a href="#id3387971">Summary</a></span></dt></dl></dd><dt><span class="section"><a href="#id3387992">Checking</a></span></dt></dl></dd><dt><span class="chapter"><a href="#Configuration">3. Configuration</a></span></dt><dd><dl><dt><span class="section"><a href="#id3388208">Architectural elements</a></span></dt><dd><dl><dt><span class="section"><a href="#id3388280">Deployment models</a></span></dt></dl></dd><dt><span class="section"><a href="#id3388506">Configuring LIXA components</a></span></dt><dd><dl><dt><span class="section"><a href="#id3388594">Configuring the server</a></span></dt><dt><span class="section"><a href="#id3388824">Configuring the client</a></span></dt></dl></dd><dt><span class="section"><a href="#id3389321">Environment variables</a></span></dt><dd><dl><dt><span class="section"><a href="#id3389336">LIXA_CONFIG_FILE</a></span></dt><dt><span class="section"><a href="#id3389374">LIXA_CRASH_COUNT</a></span></dt><dt><span class="section"><a href="#id3389396">LIXA_CRASH_POINT</a></span></dt><dt><span class="section"><a href="#id3389421">LIXA_JOB</a></span></dt><dt><span class="section"><a href="#id3389450">LIXA_PROFILE</a></span></dt><dt><span class="section"><a href="#id3389469">LIXA_TRACE_MASK</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#id3389531">4. Execution</a></span></dt><dd><dl><dt><span class="section"><a href="#id3389577">Starting the state server</a></span></dt><dd><dl><dt><span class="section"><a href="#Background_execution">Background (<span class="emphasis"><em>daemon</em></span>) execution</a></span></dt><dt><span class="section"><a href="#id3389772">Maintenance mode execution</a></span></dt><dt><span class="section"><a href="#id3389824">Dump execution</a></span></dt><dt><span class="section"><a href="#id3389921">Additional options</a></span></dt></dl></dd><dt><span class="section"><a href="#id3389580">Starting the test utility</a></span></dt><dt><span class="section"><a href="#id3390098">Starting the recovery utility</a></span></dt></dl></dd><dt><span class="chapter"><a href="#Development">5. Development</a></span></dt><dd><dl><dt><span class="section"><a href="#id3390417">The first example</a></span></dt><dd><dl><dt><span class="section"><a href="#id3390512">Some details about the example</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example2_ora">An example with Oracle Database Server</a></span></dt><dd><dl><dt><span class="section"><a href="#Development_setup_Oracle_environment">Set-up Oracle environment</a></span></dt><dt><span class="section"><a href="#Development_start_LIXA_server">Start the LIXA state server</a></span></dt><dt><span class="section"><a href="#id3391208">Build the client program</a></span></dt><dt><span class="section"><a href="#id3391253">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3391337">Check the data table before execution</a></span></dt><dt><span class="section"><a href="#id3391362">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3391438">Program execution (dynamic registration)</a></span></dt><dt><span class="section"><a href="#id3391545">Program execution (static registration)</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example3_db2">An example with IBM DB2 DBMS</a></span></dt><dd><dl><dt><span class="section"><a href="#Development_setup_DB2_environment">Set-up DB2 environment</a></span></dt><dt><span class="section"><a href="#id3391930">Start the LIXA state server</a></span></dt><dt><span class="section"><a href="#id3392013">Build the client program</a></span></dt><dt><span class="section"><a href="#id3392076">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3392152">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3392211">Program execution (dynamic registration)</a></span></dt><dt><span class="section"><a href="#id3392449">Program execution (static registration)</a></span></dt></dl></dd><dt><span class="section"><a href="#id3391644">An example with Oracle and IBM DB2</a></span></dt><dd><dl><dt><span class="section"><a href="#id3392663">Build the client program</a></span></dt><dt><span class="section"><a href="#id3392727">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3392879">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3392977">Program execution (dynamic registration)</a></span></dt><dt><span class="section"><a href="#id3392987">Program execution (mixed registration)</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example5_pql">An example with PostgreSQL</a></span></dt><dd><dl><dt><span class="section"><a href="#Development_setup_PostgreSQL_environment">Set-up PostgreSQL environment</a></span></dt><dt><span class="section"><a href="#id3394064">Start the LIXA state server</a></span></dt><dt><span class="section"><a href="#id3394086">Build the client program</a></span></dt><dt><span class="section"><a href="#id3394194">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3394314">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3394379">Program execution</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example6_pql_ora">An example with PostgreSQL &amp; Oracle</a></span></dt><dd><dl><dt><span class="section"><a href="#id3394745">Build the client program</a></span></dt><dt><span class="section"><a href="#id3394866">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3395042">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3395142">Program execution (dynamic registration for Oracle)</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example7_pql_ora">An example with PostgreSQL &amp; IBM DB2</a></span></dt><dd><dl><dt><span class="section"><a href="#id3395685">Build the client program</a></span></dt><dt><span class="section"><a href="#id3395799">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3395940">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3396030">Program execution (dynamic registration)</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example8_mys">An example with MySQL</a></span></dt><dd><dl><dt><span class="section"><a href="#Development_setup_MySQL_environment">Set-up MySQL environment</a></span></dt><dt><span class="section"><a href="#id3396705">Start the LIXA state server</a></span></dt><dt><span class="section"><a href="#id3396741">Build the client program</a></span></dt><dt><span class="section"><a href="#id3396820">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#Development_setup_MySQL_xa_open_info">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3397300">Program execution</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example9_mys_pql">An example with MySQL &amp; PostgreSQL</a></span></dt><dd><dl><dt><span class="section"><a href="#id3397686">Build the client program</a></span></dt><dt><span class="section"><a href="#id3397786">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3397914">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3398007">Program execution</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example10_mys_pql_ora">An example with MySQL &amp; PostgreSQL &amp; Oracle</a></span></dt><dd><dl><dt><span class="section"><a href="#id3398442">Build the client program</a></span></dt><dt><span class="section"><a href="#id3398550">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3398695">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3398821">Program execution (dynamic registration for Oracle)</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#Recovery">6. Recovery</a></span></dt><dt><span class="chapter"><a href="#id3399355">7. In Depth</a></span></dt><dd><dl><dt><span class="section"><a href="#Tracing">Tracing</a></span></dt><dt><span class="section"><a href="#id3399382">Logging</a></span></dt><dt><span class="section"><a href="#id3399393">Automatic and manual recovery</a></span></dt><dt><span class="section"><a href="#Non_root_installation">Non root installation</a></span></dt><dt><span class="section"><a href="#Workload_balanced_environments">Workload balanced environments</a></span></dt></dl></dd><dt><span class="bibliography"><a href="#id3399432">Bibliography</a></span></dt></dl></div><div class="list-of-figures"><p><b>List of Figures</b></p><dl><dt>3.1. <a href="#config1">Typical LIXA topology</a></dt><dt>3.2. <a href="#config2">Easiest non trivial deployment model</a></dt><dt>3.3. <a href="#config3">Trivial deployment model</a></dt><dt>3.4. <a href="#config4">Fully distributed deployment model</a></dt><dt>3.5. <a href="#config5">Complex distributed deployment model</a></dt><dt>3.6. <a href="#config6">The LIXA components and the necessary configuration files</a></dt><dt>3.7. <a href="#config7">The structure of lixad_conf.xml</a></dt><dt>3.8. <a href="#config8">The structure of lixac_conf.xml</a></dt><dt>3.9. <a href="#config9">A "real" environment</a></dt><dt>5.1. <a href="#develop1">Deploy model of an example with two dummy resource managers</a></dt><dt>5.2. <a href="#develop2">Deploy model of an example with Oracle Database Server</a></dt><dt>5.3. <a href="#develop3">Deploy model of an example with IBM DB2 DBMS</a></dt><dt>5.4. <a href="#develop4">Deploy model of an example showing a distributed transaction with Oracle and IBM DB2</a></dt><dt>5.5. <a href="#develop5">Deploy model of an example with PostgreSQL DBMS</a></dt><dt>5.6. <a href="#develop6">Deploy model of an example showing a distributed transaction with PostgreSQL and Oracle</a></dt><dt>5.7. <a href="#develop7">Deploy model of an example showing a distributed transaction with PostgreSQL and IBM DB2</a></dt><dt>5.8. <a href="#develop8">Deploy model of an example with MySQL DBMS</a></dt><dt>5.9. <a href="#develop9">Deploy model of an example showing a distributed transaction with
+  </h2></div><div><div class="author"><h3 class="author"><span class="firstname">Christian</span> <span class="surname">Ferrari</span></h3></div></div><div><p class="copyright">Copyright © 2011 Christian Ferrari</p></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="preface"><a href="#id3386000">Preface</a></span></dt><dt><span class="chapter"><a href="#id3386240">1. Introduction</a></span></dt><dd><dl><dt><span class="section"><a href="#id3386248">Why should I use LIXA project?</a></span></dt><dt><span class="section"><a href="#id3386284">Transaction Manager and Transaction Monitor</a></span></dt><dt><span class="section"><a href="#id3386505">LIXA Architecture</a></span></dt><dt><span class="section"><a href="#id3386527">Project, Projuct, Product</a></span></dt><dt><span class="section"><a href="#id3386528">LIXA and X/OPEN CAE specifications</a></span></dt></dl></dd><dt><span class="chapter"><a href="#Installation">2. Installation</a></span></dt><dd><dl><dt><span class="section"><a href="#id3386943">System requirements</a></span></dt><dd><dl><dt><span class="section"><a href="#id3386990">Pre-requisites</a></span></dt><dt><span class="section"><a href="#id3387090">Co-requisites</a></span></dt><dt><span class="section"><a href="#id3387228">Authorization</a></span></dt></dl></dd><dt><span class="section"><a href="#id3387301">Software download</a></span></dt><dt><span class="section"><a href="#id3387312">Configure, build and install</a></span></dt><dd><dl><dt><span class="section"><a href="#id3387355">Advanced configuration</a></span></dt><dt><span class="section"><a href="#Linking_third_party_resource_managers">Linking third party resource managers</a></span></dt><dt><span class="section"><a href="#id3387971">Summary</a></span></dt></dl></dd><dt><span class="section"><a href="#id3387992">Checking</a></span></dt></dl></dd><dt><span class="chapter"><a href="#Configuration">3. Configuration</a></span></dt><dd><dl><dt><span class="section"><a href="#id3388208">Architectural elements</a></span></dt><dd><dl><dt><span class="section"><a href="#id3388280">Deployment models</a></span></dt></dl></dd><dt><span class="section"><a href="#id3388507">Configuring LIXA components</a></span></dt><dd><dl><dt><span class="section"><a href="#id3388594">Configuring the server</a></span></dt><dt><span class="section"><a href="#id3388824">Configuring the client</a></span></dt></dl></dd><dt><span class="section"><a href="#id3389321">Environment variables</a></span></dt><dd><dl><dt><span class="section"><a href="#id3389336">LIXA_CONFIG_FILE</a></span></dt><dt><span class="section"><a href="#id3389374">LIXA_CRASH_COUNT</a></span></dt><dt><span class="section"><a href="#id3389396">LIXA_CRASH_POINT</a></span></dt><dt><span class="section"><a href="#id3389421">LIXA_JOB</a></span></dt><dt><span class="section"><a href="#id3389450">LIXA_PROFILE</a></span></dt><dt><span class="section"><a href="#id3389469">LIXA_TRACE_MASK</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#id3389531">4. Execution</a></span></dt><dd><dl><dt><span class="section"><a href="#id3389578">Starting the state server</a></span></dt><dd><dl><dt><span class="section"><a href="#Background_execution">Background (<span class="emphasis"><em>daemon</em></span>) execution</a></span></dt><dt><span class="section"><a href="#id3389772">Maintenance mode execution</a></span></dt><dt><span class="section"><a href="#id3389824">Dump execution</a></span></dt><dt><span class="section"><a href="#id3389921">Additional options</a></span></dt></dl></dd><dt><span class="section"><a href="#id3389580">Starting the test utility</a></span></dt><dt><span class="section"><a href="#id3390098">Starting the recovery utility</a></span></dt></dl></dd><dt><span class="chapter"><a href="#Development">5. Development</a></span></dt><dd><dl><dt><span class="section"><a href="#id3390417">The first example</a></span></dt><dd><dl><dt><span class="section"><a href="#id3390512">Some details about the example</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example2_ora">An example with Oracle Database Server</a></span></dt><dd><dl><dt><span class="section"><a href="#Development_setup_Oracle_environment">Set-up Oracle environment</a></span></dt><dt><span class="section"><a href="#Development_start_LIXA_server">Start the LIXA state server</a></span></dt><dt><span class="section"><a href="#id3391208">Build the client program</a></span></dt><dt><span class="section"><a href="#id3391253">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3391337">Check the data table before execution</a></span></dt><dt><span class="section"><a href="#id3391362">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3391439">Program execution (dynamic registration)</a></span></dt><dt><span class="section"><a href="#id3391545">Program execution (static registration)</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example3_db2">An example with IBM DB2 DBMS</a></span></dt><dd><dl><dt><span class="section"><a href="#Development_setup_DB2_environment">Set-up DB2 environment</a></span></dt><dt><span class="section"><a href="#id3391930">Start the LIXA state server</a></span></dt><dt><span class="section"><a href="#id3392013">Build the client program</a></span></dt><dt><span class="section"><a href="#id3392076">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3392153">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3392211">Program execution (dynamic registration)</a></span></dt><dt><span class="section"><a href="#id3392449">Program execution (static registration)</a></span></dt></dl></dd><dt><span class="section"><a href="#id3391644">An example with Oracle and IBM DB2</a></span></dt><dd><dl><dt><span class="section"><a href="#id3392663">Build the client program</a></span></dt><dt><span class="section"><a href="#id3392727">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3392879">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3392978">Program execution (dynamic registration)</a></span></dt><dt><span class="section"><a href="#id3392987">Program execution (mixed registration)</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example5_pql">An example with PostgreSQL</a></span></dt><dd><dl><dt><span class="section"><a href="#Development_setup_PostgreSQL_environment">Set-up PostgreSQL environment</a></span></dt><dt><span class="section"><a href="#id3394064">Start the LIXA state server</a></span></dt><dt><span class="section"><a href="#id3394086">Build the client program</a></span></dt><dt><span class="section"><a href="#id3394194">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3394314">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3394379">Program execution</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example6_pql_ora">An example with PostgreSQL &amp; Oracle</a></span></dt><dd><dl><dt><span class="section"><a href="#id3394745">Build the client program</a></span></dt><dt><span class="section"><a href="#id3394867">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3395042">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3395142">Program execution (dynamic registration for Oracle)</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example7_pql_ora">An example with PostgreSQL &amp; IBM DB2</a></span></dt><dd><dl><dt><span class="section"><a href="#id3395685">Build the client program</a></span></dt><dt><span class="section"><a href="#id3395799">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3395940">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3396030">Program execution (dynamic registration)</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example8_mys">An example with MySQL</a></span></dt><dd><dl><dt><span class="section"><a href="#Development_setup_MySQL_environment">Set-up MySQL environment</a></span></dt><dt><span class="section"><a href="#id3396705">Start the LIXA state server</a></span></dt><dt><span class="section"><a href="#id3396741">Build the client program</a></span></dt><dt><span class="section"><a href="#id3396820">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#Development_setup_MySQL_xa_open_info">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3397300">Program execution</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example9_mys_pql">An example with MySQL &amp; PostgreSQL</a></span></dt><dd><dl><dt><span class="section"><a href="#id3397686">Build the client program</a></span></dt><dt><span class="section"><a href="#id3397786">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3397914">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3398007">Program execution</a></span></dt></dl></dd><dt><span class="section"><a href="#Development_example10_mys_pql_ora">An example with MySQL, PostgreSQL &amp; Oracle</a></span></dt><dd><dl><dt><span class="section"><a href="#id3398442">Build the client program</a></span></dt><dt><span class="section"><a href="#id3398550">Set-up LIXA environment</a></span></dt><dt><span class="section"><a href="#id3398696">Some checks before program execution</a></span></dt><dt><span class="section"><a href="#id3398821">Program execution (dynamic registration for Oracle)</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#Recovery">6. Recovery</a></span></dt><dt><span class="chapter"><a href="#id3399355">7. In Depth</a></span></dt><dd><dl><dt><span class="section"><a href="#Tracing">Tracing</a></span></dt><dt><span class="section"><a href="#id3399382">Logging</a></span></dt><dt><span class="section"><a href="#id3399393">Automatic and manual recovery</a></span></dt><dt><span class="section"><a href="#Non_root_installation">Non root installation</a></span></dt><dt><span class="section"><a href="#Workload_balanced_environments">Workload balanced environments</a></span></dt></dl></dd><dt><span class="bibliography"><a href="#id3399432">Bibliography</a></span></dt></dl></div><div class="list-of-figures"><p><b>List of Figures</b></p><dl><dt>3.1. <a href="#config1">Typical LIXA topology</a></dt><dt>3.2. <a href="#config2">Easiest non trivial deployment model</a></dt><dt>3.3. <a href="#config3">Trivial deployment model</a></dt><dt>3.4. <a href="#config4">Fully distributed deployment model</a></dt><dt>3.5. <a href="#config5">Complex distributed deployment model</a></dt><dt>3.6. <a href="#config6">The LIXA components and the necessary configuration files</a></dt><dt>3.7. <a href="#config7">The structure of lixad_conf.xml</a></dt><dt>3.8. <a href="#config8">The structure of lixac_conf.xml</a></dt><dt>3.9. <a href="#config9">A "real" environment</a></dt><dt>5.1. <a href="#develop1">Deploy model of an example with two dummy resource managers</a></dt><dt>5.2. <a href="#develop2">Deploy model of an example with Oracle Database Server</a></dt><dt>5.3. <a href="#develop3">Deploy model of an example with IBM DB2 DBMS</a></dt><dt>5.4. <a href="#develop4">Deploy model of an example showing a distributed transaction with Oracle and IBM DB2</a></dt><dt>5.5. <a href="#develop5">Deploy model of an example with PostgreSQL DBMS</a></dt><dt>5.6. <a href="#develop6">Deploy model of an example showing a distributed transaction with PostgreSQL and Oracle</a></dt><dt>5.7. <a href="#develop7">Deploy model of an example showing a distributed transaction with PostgreSQL and IBM DB2</a></dt><dt>5.8. <a href="#develop8">Deploy model of an example with MySQL DBMS</a></dt><dt>5.9. <a href="#develop9">Deploy model of an example showing a distributed transaction with
 	MySQL and PostgreSQL</a></dt><dt>5.10. <a href="#develop10">Deploy model of an example showing a distributed transaction with
-	MySQL, PostgreSQL and Oracle</a></dt></dl></div><div class="list-of-equations"><p><b>List of Equations</b></p><dl><dt>3.1. <a href="#id3388790">Suggested range for the number of managers</a></dt></dl></div><div class="preface" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="id3385999"></a>Preface</h2></div></div></div><p>
+	MySQL, PostgreSQL and Oracle</a></dt></dl></div><div class="list-of-equations"><p><b>List of Equations</b></p><dl><dt>3.1. <a href="#id3388790">Suggested range for the number of managers</a></dt></dl></div><div class="preface" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="id3386000"></a>Preface</h2></div></div></div><p>
     LIXA is acronym of LIbre XA: it's a free, libre, open source
     implementation of two X/Open specifications: "Distributed Transaction
     Processing: The TX (Transaction Demarcation) Specification" 
@@ -21,7 +21,7 @@
     From the following links you can buy and/or download for free the official
     X/Open documentation:
     </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>
-	  [<a class="citation" href="#id3399444"><span class="citation">RefModel</span></a>]
+	  [<a class="citation" href="#id3399445"><span class="citation">RefModel</span></a>]
 	  <a class="ulink" href="http://www.opengroup.org/pubs/catalog/g504.htm" target="_top">
 	    <em class="citetitle">
 	      Distributed Transaction Processing: Reference Model, Version 3
@@ -73,16 +73,16 @@
       Isolation, Durability) transactionality.
       XA specification is not the only two phase commit protocol implementation
       but it is probably the best known and widespread. For detailed
-      explanation please refer to [<a class="citation" href="#id3399444"><span class="citation">RefModel</span></a>].
+      explanation please refer to [<a class="citation" href="#id3399445"><span class="citation">RefModel</span></a>].
     </p></div><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>
-      The reference model ([<a class="citation" href="#id3399444"><span class="citation">RefModel</span></a>]) technical guide
+      The reference model ([<a class="citation" href="#id3399445"><span class="citation">RefModel</span></a>]) technical guide
       available on the <span class="trademark">Open Group</span>™ web site is more
       recent than the XA specification ([<a class="citation" href="#id3399514"><span class="citation">XAspec</span></a>]); 
       after XA, the X/Open Company developed the XA+ specification and the 
       reference model was improved with the concepts necessary for XA+. 
       LIXA project does <span class="emphasis"><em>not</em></span> implement
       the XA+ specification, but only XA and the following concepts explained 
-      in [<a class="citation" href="#id3399444"><span class="citation">RefModel</span></a>] does not apply to the LIXA project:
+      in [<a class="citation" href="#id3399445"><span class="citation">RefModel</span></a>] does not apply to the LIXA project:
       </p><div class="itemizedlist"><ul type="bullet"><li style="list-style-type: disc"><p>3.1: Superior Node</p></li><li style="list-style-type: disc"><p>3.1: Subordinate Node</p></li><li style="list-style-type: disc"><p>3.1: Communication Resource Manager (<acronym class="acronym">CRM</acronym>)</p></li><li style="list-style-type: disc"><p>3.5: Distributed Communication Facilities</p></li><li style="list-style-type: disc"><p>3.6: Activity between Functional Components Involving Two or More APs</p></li><li style="list-style-type: disc"><p>3.7: CRM Communication Paradigms with APs</p></li><li style="list-style-type: disc"><p>3.8: High-level TP Language</p></li></ul></div><p>
       XA specification was designed to implement the two phase commit protocol
       in the case there is only one Application Program running inside a
@@ -92,8 +92,8 @@
       more Application Programs running inside distinct Transaction Monitors
       and using distinct Transaction Managers to coordinate any number of
       Resource Managers.
-    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3386283"></a>Transaction Manager and Transaction Monitor</h2></div></div></div><p>
-      As explained in Appendix A of [<a class="citation" href="#id3399444"><span class="citation">RefModel</span></a>] a 
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3386284"></a>Transaction Manager and Transaction Monitor</h2></div></div></div><p>
+      As explained in Appendix A of [<a class="citation" href="#id3399445"><span class="citation">RefModel</span></a>] a 
       Transaction Manager can be though as a subset of a Transaction Monitor.
       Most commercial products tend to merge the features
       in a single bundle; this is good if you need a Transaction Monitor,
@@ -213,7 +213,7 @@
       LIXA <code class="function">tx_info()</code> does not return
       <code class="constant">TX_ROLLBACK_ONLY</code>. This does not hurt the
       X/Open CAE specification.
-    </div><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3386776"></a>XA -&gt; TX return code mappings</h3></div></div></div><p>
+    </div><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3386777"></a>XA -&gt; TX return code mappings</h3></div></div></div><p>
 	In [<a class="citation" href="#id3399479"><span class="citation">TXspec</span></a>] (Appendix B.4, page 64) it is suggested
 	to return the value <code class="constant">TX_ERROR</code> when the Resource
 	Manager returns <code class="constant">XA_RETRY</code>; this is explained in
@@ -227,7 +227,7 @@
 	information for the Application Program: the transaction has been
 	successfully committed/rolled back, but a new transaction can not be
 	started
-	<sup>[<a id="id3386825" href="#ftn.id3386825" class="footnote">5</a>]</sup>.
+	<sup>[<a id="id3386826" href="#ftn.id3386826" class="footnote">5</a>]</sup>.
       </p></div><div class="simplesect" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3386840"></a><code class="function">xa_rollback()</code> and 
 	<code class="constant">XA_RETRY</code> return code</h3></div></div></div><p>
 	In [<a class="citation" href="#id3399479"><span class="citation">TXspec</span></a>] (Appendix B.5, page 69) it is 
@@ -253,14 +253,14 @@
       </p></div></div><div class="footnotes"><br /><hr width="100" align="left" /><div class="footnote"><p><sup>[<a id="ftn.id3386392" href="#id3386392" class="para">1</a>] </sup>TXSeries is a registered trademark of 
 	  IBM corporation</p></div><div class="footnote"><p><sup>[<a id="ftn.id3386399" href="#id3386399" class="para">2</a>] </sup>Tuxedo is a registered trademark of
 	  Oracle corporation</p></div><div class="footnote"><p><sup>[<a id="ftn.id3386406" href="#id3386406" class="para">3</a>] </sup>JBOSS is a registered trademark of Red Hat
-	  corporation</p></div><div class="footnote"><p><sup>[<a id="ftn.id3386493" href="#id3386493" class="para">4</a>] </sup>You must wrap the TX C API to be able to use it from Perl, PHP, Python, Ruby...</p></div><div class="footnote"><p><sup>[<a id="ftn.id3386825" href="#id3386825" class="para">5</a>] </sup>The X/Open CAE specification document
+	  corporation</p></div><div class="footnote"><p><sup>[<a id="ftn.id3386493" href="#id3386493" class="para">4</a>] </sup>You must wrap the TX C API to be able to use it from Perl, PHP, Python, Ruby...</p></div><div class="footnote"><p><sup>[<a id="ftn.id3386826" href="#id3386826" class="para">5</a>] </sup>The X/Open CAE specification document
 	    “<span class="quote">suggests</span>” the mapping and it seems there is some
 	    flesibility in the suggestions. From a LIXA perspective all this
 	    stuff is academic because <code class="constant">TMNOWAIT</code> is not
 	    used by LIXA implementation.</p></div></div></div><div class="chapter" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="Installation"></a>Chapter 2. Installation</h2></div></div></div><p>
     This chapter explains how to download, install and verify the software
     released by LIXA project.
-  </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3386942"></a>System requirements</h2></div></div></div><p>
+  </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3386943"></a>System requirements</h2></div></div></div><p>
       LIXA project is developed on an x86 based 
       <a class="ulink" href="http://www.ubuntu.com/" target="_top">
 	<em class="citetitle">Ubuntu 8.04 system</em>
@@ -435,7 +435,7 @@ drwxr-xr-x 9 lixa root 4096 2011-03-30 23:14 ..
 	  The <span class="command"><strong>chown</strong></span> command must be executed after every
 	  <span class="command"><strong>make install</strong></span> execution.
       </p></div><p>
-    </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3387354"></a>Advanced configuration</h3></div></div></div><p>
+    </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3387355"></a>Advanced configuration</h3></div></div></div><p>
 	There are many options you can pass to <span class="command"><strong>configure</strong></span>
 	command to meet your needs (see below). Skip this section and
 	jump directly to
@@ -820,7 +820,7 @@ make check
 	  understandability
 	  <sup>[<a id="id3388499" href="#ftn.id3388499" class="footnote">11</a>]</sup>
 	  .
-	</p></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3388506"></a>Configuring LIXA components</h2></div></div></div><p>
+	</p></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3388507"></a>Configuring LIXA components</h2></div></div></div><p>
       The picture below emphasizes the LIXA components must be configured
       in a simple scenario:
     </p><div class="figure"><a id="config6"></a><p class="title"><b>Figure 3.6. The LIXA components and the necessary configuration files</b></p><div class="figure-contents"><div class="mediaobject"><img src="LIXA_Configuration_6.png" alt="The LIXA components and the necessary configuration files" /></div></div></div><br class="figure-break" /><p>
@@ -1262,7 +1262,7 @@ export LIXA_TRACE_MASK=0xffffffff
 	installed the software at a different path, you'd need to adjust
 	the shown commands consequently.
     </p></div><p>
-  </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3389577"></a>Starting the state server</h2></div></div></div><p>
+  </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3389578"></a>Starting the state server</h2></div></div></div><p>
       The first step you must perform is starting the
       <span class="emphasis"><em>state server</em></span>; it's name is 
       <span class="command"><strong>lixad</strong></span> (LIXA daemon). The command
@@ -1661,7 +1661,7 @@ tx_open() returned TX_FAIL: unable to proceed
     software installation (see <a class="xref" href="#Installation" title="Chapter 2. Installation">Chapter 2, <i>Installation</i></a>).
   </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id3390417"></a>The first example</h2></div></div></div><div class="figure"><a id="develop1"></a><p class="title"><b>Figure 5.1. Deploy model of an example with two dummy resource managers</b></p><div class="figure-contents"><div class="mediaobject"><img src="LIXA_Development_1.png" alt="Deploy model of an example with two dummy resource managers" /></div></div></div><br class="figure-break" /><p>
       Create a working directory in a place you are comfortable with:
-      </p><table xmlns="" frame="box" id="id3390452"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+      </p><table xmlns="" frame="box" id="id3390453"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~$ cd
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
@@ -1691,7 +1691,7 @@ tiian@ubuntu:~/tmp$ ldd example1
       the LIXA libraries are not in system standard library path. You can
       bypass the issue exporting <code class="varname">LD_LIBRARY_PATH</code>
       variable and checking it again:
-      </p><table xmlns="" frame="box" id="id3390568"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+      </p><table xmlns="" frame="box" id="id3390569"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
 tiian@ubuntu:~/tmp$ ldd example1
         linux-gate.so.1 =&gt;  (0xb773f000)
@@ -1742,7 +1742,7 @@ tx_close(): 0
       <span class="emphasis"><em>rollback</em></span>.
     </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3390512"></a>Some details about the example</h3></div></div></div><p>
 	You have not specified a specific profile:
-	</p><table xmlns="" frame="box" id="id3390690"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3390691"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 	  </pre></td></tr></tbody></table><p>
 	The LIXA client library used the default one, the first listed in
@@ -2192,7 +2192,7 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
 tiian@ubuntu:~/tmp$ ls -la /tmp/xa*
 ls: cannot access /tmp/xa*: No such file or directory
 	</pre><p>
-      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3391438"></a>Program execution (dynamic registration)</h3></div></div></div><p>
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3391439"></a>Program execution (dynamic registration)</h3></div></div></div><p>
 	Execute the client program as shown below:
 	</p><pre class="screen">
 tiian@ubuntu:~/tmp$ ./example2_ora
@@ -2796,7 +2796,7 @@ DB2_DYN
 	</pre><p>
 	No additional DB2 variables are needed because they are automatically
 	set at login (see <a class="xref" href="#Development_setup_DB2_environment" title="Set-up DB2 environment">the section called “Set-up DB2 environment”</a>).
-      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3392152"></a>Some checks before program execution</h3></div></div></div><p>
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3392153"></a>Some checks before program execution</h3></div></div></div><p>
 	We set <code class="varname">LIXA_PROFILE</code> to value
 	“<span class="quote">DB2_DYN</span>”, looking at
 	<code class="filename">/opt/lixa/etc/lixac_conf.xml</code>:
@@ -3300,7 +3300,7 @@ XE
 tiian@ubuntu:~/tmp$ ls -la /tmp/xa*
 ls: cannot access /tmp/xa*: No such file or directory
 	</pre><p>
-      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3392977"></a>Program execution (dynamic registration)</h3></div></div></div><p>
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3392978"></a>Program execution (dynamic registration)</h3></div></div></div><p>
 	It is suggested to open three different terminals: 
 	the first one connected to “<span class="quote">SAMPLE</span>” DB2 database,
 	the second one connected to Oracle database and the
@@ -3424,7 +3424,7 @@ CO COUNTRY_NAME                              REGION_ID
 -- ---------------------------------------- ----------
 RS Repubblica San Marino                             1
 	  </pre></td></tr></tbody></table><p>
-	</p><table xmlns="" frame="box" id="id3393282"><thead><tr><td>[IBM DB2 terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3393283"><thead><tr><td>[IBM DB2 terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 db2 =&gt; select * from DB2INST1.ORG where DEPTNUMB = 150
 
 DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
@@ -3506,7 +3506,7 @@ COMMIT performed!
 	  </pre></td></tr></tbody></table><p>
 	We can introduce the usage of the <code class="option">rollback</code> option 
 	to check dynamic registration behavior:
-	</p><table xmlns="" frame="box" id="id3393472"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3393473"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00002000
 tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
 0x00002000
@@ -3661,7 +3661,7 @@ DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
     </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="Development_setup_PostgreSQL_environment"></a>Set-up PostgreSQL environment</h3></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id3393914"></a>Start-up the PostgreSQL server</h4></div></div></div><p>
 	  If your server didn't start-up automatically at boot time, you
 	  could start it with the following commands:
-	  </p><table xmlns="" frame="box" id="id3393933"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	  </p><table xmlns="" frame="box" id="id3393934"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~$ ps -ef|grep postgres|grep -v grep
 tiian@ubuntu:~$ sudo /etc/init.d/postgresql-8.3 start
  * Starting PostgreSQL 8.3 database server                               [ OK ]
@@ -3717,7 +3717,7 @@ testdb=&gt; select * from authors;
 	  basic running installation.
 	</p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3394064"></a>Start the LIXA state server</h3></div></div></div><p>
 	Start the state server as shown below:
-	</p><table xmlns="" frame="box" id="id3394071"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3394072"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~$ sudo su - lixa
 lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
 lixa@ubuntu:~$ exit
@@ -3867,7 +3867,7 @@ Type:  \copyright for distribution terms
 testdb=&gt; 
 	  </pre></td></tr></tbody></table><p>
 	Second teminal session:
-	</p><table xmlns="" frame="box" id="id3394426"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3394427"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ ls -la
 total 21
 drwxr-xr-x   2 tiian tiian  112 2011-09-14 21:14 .
@@ -4028,7 +4028,7 @@ tiian@ubuntu:~/tmp$ ldd example6_pql_ora
         libgcrypt.so.11 =&gt; /lib/libgcrypt.so.11 (0xb721c000)
         libgpg-error.so.0 =&gt; /lib/libgpg-error.so.0 (0xb7218000)
 	  </pre></td></tr></tbody></table><p>
-      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3394866"></a>Set-up LIXA environment</h3></div></div></div><p>
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3394867"></a>Set-up LIXA environment</h3></div></div></div><p>
 	There are four unresolved references that can be fixed setting up
 	the environment properly; you can fix the environment manually or
 	using this script supplied by Oracle:
@@ -4044,7 +4044,7 @@ tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
 	  </pre></td></tr></tbody></table><p>
 	Check again the executable:
-	</p><table xmlns="" frame="box" id="id3394912"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3394913"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ ldd example6_pql_ora
         linux-gate.so.1 =&gt;  (0xb7731000)
         liblixac.so.0 =&gt; /opt/lixa/lib/liblixac.so.0 (0xb7716000)
@@ -4135,7 +4135,7 @@ XE
 	</pre><p>
 	we can discover how our application will access the resource
 	managers
-	<sup>[<a id="id3395090" href="#ftn.id3395090" class="footnote">22</a>]</sup>
+	<sup>[<a id="id3395091" href="#ftn.id3395091" class="footnote">22</a>]</sup>
 	<sup>[<a id="id3395117" href="#ftn.id3395117" class="footnote">23</a>]</sup>. 
       </p><p>
 	Verify no (Oracle) trace file exists:
@@ -4161,7 +4161,7 @@ Type:  \copyright for distribution terms
 
 testdb=&gt;
 	  </pre></td></tr></tbody></table><p>
-	</p><table xmlns="" frame="box" id="id3395189"><thead><tr><td>[Oracle terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3395190"><thead><tr><td>[Oracle terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
 tiian@ubuntu:~$ sqlplus "hr/hr"                                                 
 SQL*Plus: Release 10.2.0.1.0 - Production on Tue May 3 21:52:06 2011
@@ -4218,7 +4218,7 @@ CO COUNTRY_NAME                              REGION_ID
 RS Repubblica San Marino                             1
 	  </pre></td></tr></tbody></table><p>
 	With the opposite command you can remove the rows from the tables:
-	</p><table xmlns="" frame="box" id="id3395352"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3395353"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ ./example6_pql_ora delete
 Deleting a row from the tables...
 Oracle DELETE statement executed!
@@ -4273,7 +4273,7 @@ SQL&gt; select * from COUNTRIES where COUNTRY_ID = 'RS';
 no rows selected
 	  </pre></td></tr></tbody></table><p>
 	The activity of the Oracle database can be analyzed in the trace file:
-	</p><table xmlns="" frame="box" id="id3395527"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3395528"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL09202011.trc
 -rw-r--r-- 1 tiian tiian 12042 2011-09-20 22:22 /tmp/xa_NULL09202011.trc
 	  </pre></td></tr></tbody></table><p>
@@ -4394,7 +4394,7 @@ tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /opt/lixa/lib
 	  </pre></td></tr></tbody></table><p>
 	Check again the executable:
-	</p><table xmlns="" frame="box" id="id3395833"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3395834"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ ldd example7_pql_db2
         linux-gate.so.1 =&gt;  (0xb774c000)
         liblixac.so.0 =&gt; /opt/lixa/lib/liblixac.so.0 (0xb7731000)
@@ -4576,7 +4576,7 @@ tiian@ubuntu:~/tmp$ ./example7_pql_db2 insert org
 Executing DB2 statement 'INSERT INTO DB2INST1.ORG(DEPTNUMB, DEPTNAME, MANAGER, DIVISION, LOCATION) VALUES(150, 'Europe', 231, 'R&amp;D', 'Mojan')'...
 Executing PostgreSQL statement 'INSERT INTO authors VALUES(1, 'Foo', 'Bar');'...	  </pre></td></tr></tbody></table><p>
 	Now you can verify the content of the tables after the transaction:
-	</p><table xmlns="" frame="box" id="id3396249"><thead><tr><td>[PostgreSQL terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3396250"><thead><tr><td>[PostgreSQL terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 testdb=&gt; select * from authors;
  id | last_name | first_name
 ----+-----------+------------
@@ -4605,14 +4605,14 @@ PostgreSQL error: ERROR:  duplicate key value violates unique constraint "author
 	the program execution and the resource managers automatically
 	rollback the changes. You can verify there is only one row in the
 	tables:
-	</p><table xmlns="" frame="box" id="id3396330"><thead><tr><td>[PostgreSQL terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3396331"><thead><tr><td>[PostgreSQL terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 testdb=&gt; select * from authors;
  id | last_name | first_name
 ----+-----------+------------
   1 | Foo       | Bar
 (1 row)
 	  </pre></td></tr></tbody></table><p>
-	</p><table xmlns="" frame="box" id="id3396353"><thead><tr><td>[IBM DB2 terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3396354"><thead><tr><td>[IBM DB2 terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 db2 =&gt; select * from DB2INST1.ORG where DEPTNUMB = 150
 
 DEPTNUMB DEPTNAME       MANAGER DIVISION   LOCATION
@@ -4711,7 +4711,7 @@ Bye
 	  The <code class="systemitem">lixa@localhost</code> user
 	  has been created with all privileges on the “<span class="quote">lixa</span>”
 	  database. Now a sample table must be created using this new user:
-	  </p><table xmlns="" frame="box" id="id3396663"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	  </p><table xmlns="" frame="box" id="id3396664"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~$ mysql -h localhost -u lixa lixa
 Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
@@ -4800,7 +4800,7 @@ tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /opt/lixa/lib
 	  </pre></td></tr></tbody></table><p>
 	Check again the executable:
-	</p><table xmlns="" frame="box" id="id3396855"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3396856"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ ldd example8_mys
         linux-gate.so.1 =&gt;  (0xb7737000)
         liblixac.so.0 =&gt; /opt/lixa/lib/liblixac.so.0 (0xb771c000)
@@ -4824,7 +4824,7 @@ tiian@ubuntu:~/tmp$ ldd example8_mys
         libuuid.so.1 =&gt; /lib/libuuid.so.1 (0xb710f000)
 	  </pre></td></tr></tbody></table><p>
 	Set-up the <code class="varname">LIXA_PROFILE</code> environment variable:
-	</p><table xmlns="" frame="box" id="id3396899"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3396900"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 
 tiian@ubuntu:~/tmp$ export LIXA_PROFILE=MYS_STA
@@ -4943,7 +4943,7 @@ Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
 mysql&gt;
 	  </pre></td></tr></tbody></table><p>
 	Second teminal session:
-	</p><table xmlns="" frame="box" id="id3397349"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3397350"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ ls -la
 total 21
 drwxr-xr-x   2 tiian tiian  112 2011-09-14 21:14 .
@@ -4990,7 +4990,7 @@ Empty set (0.00 sec)
 	<sup>[<a id="id3397491" href="#ftn.id3397491" class="footnote">28</a>]</sup>
 	.
 	Execute the program:
-	</p><table xmlns="" frame="box" id="id3397497"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3397498"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00002000
 tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
 0x00002000
@@ -5193,7 +5193,7 @@ MYS_STA_PQL_STA
 	</pre><p>
 	we can discover how our application will access the resource
 	managers
-	<sup>[<a id="id3397961" href="#ftn.id3397961" class="footnote">29</a>]</sup>
+	<sup>[<a id="id3397962" href="#ftn.id3397962" class="footnote">29</a>]</sup>
 	<sup>[<a id="id3397987" href="#ftn.id3397987" class="footnote">30</a>]</sup>.
       </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3398007"></a>Program execution</h3></div></div></div><p>
 	It is suggested to open three different terminals: 
@@ -5227,7 +5227,7 @@ Type:  \copyright for distribution terms
 
 testdb=&gt;
 	  </pre></td></tr></tbody></table><p>
-	</p><table xmlns="" frame="box" id="id3398075"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3398076"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ ls -la
 total 28
 drwxr-xr-x  2 tiian tiian  4096 2011-09-20 21:53 .
@@ -5255,7 +5255,7 @@ Inserting a row in MySQL table...
 Inserting a row in PostgreSQL table...
 	  </pre></td></tr></tbody></table><p>
 	Now you can verify the content of the tables after the transaction:
-	</p><table xmlns="" frame="box" id="id3398178"><thead><tr><td>[MySQL terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3398179"><thead><tr><td>[MySQL terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 mysql&gt; SELECT * FROM authors;
 +----+-----------+------------+
 | id | last_name | first_name |
@@ -5282,13 +5282,13 @@ Deleting a row from PostgreSQL table...
 mysql&gt; SELECT * FROM authors;
 Empty set (0.00 sec)
 	  </pre></td></tr></tbody></table><p>
-	</p><table xmlns="" frame="box" id="id3398265"><thead><tr><td>[PostgreSQL terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3398266"><thead><tr><td>[PostgreSQL terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 testdb=&gt; select * from AUTHORS;
  id | last_name | first_name
 ----+-----------+------------
 (0 rows)
 	  </pre></td></tr></tbody></table><p>
-      </p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="Development_example10_mys_pql_ora"></a>An example with MySQL &amp; PostgreSQL &amp; Oracle</h2></div></div></div><div class="figure"><a id="develop10"></a><p class="title"><b>Figure 5.10. Deploy model of an example showing a distributed transaction with
+      </p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="Development_example10_mys_pql_ora"></a>An example with MySQL, PostgreSQL &amp; Oracle</h2></div></div></div><div class="figure"><a id="develop10"></a><p class="title"><b>Figure 5.10. Deploy model of an example showing a distributed transaction with
 	MySQL, PostgreSQL and Oracle</b></p><div class="figure-contents"><div class="mediaobject"><img src="LIXA_Development_10.png" alt="Deploy model of an example showing a distributed transaction with MySQL, PostgreSQL and Oracle" /></div></div></div><br class="figure-break" /><p>
       This example shows as
       you can implement DTP (Distributed Transaction Processing) with three
@@ -5474,7 +5474,7 @@ MYS_STA_PQL_STA_ORA_DYN
 	<code class="varname">ORACLE_HOME</code>,
 	<code class="varname">ORACLE_SID</code>,
 	<code class="varname">PATH</code>.
-      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3398695"></a>Some checks before program execution</h3></div></div></div><p>
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id3398696"></a>Some checks before program execution</h3></div></div></div><p>
 	We set <code class="varname">LIXA_PROFILE</code> to value
 	“<span class="quote">MYS_STA_PQL_STA_ORA_DYN</span>”, looking at
 	<code class="filename">/opt/lixa/etc/lixac_conf.xml</code>:
@@ -5576,7 +5576,7 @@ testdb=&gt; select * from AUTHORS;
 (0 rows)
 	  </pre></td></tr></tbody></table><p>
 	Check the content of the Oracle table (“<span class="quote">COUNTRIES</span>”):
-	</p><table xmlns="" frame="box" id="id3399003"><thead><tr><td>[Oracle terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3399004"><thead><tr><td>[Oracle terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 SQL&gt; select * from COUNTRIES where COUNTRY_ID = 'RS';
 
 no rows selected
@@ -5625,7 +5625,7 @@ Deleting a row from Oracle table...
 mysql&gt; SELECT * FROM authors;
 Empty set (0.00 sec)
 	  </pre></td></tr></tbody></table><p>
-	</p><table xmlns="" frame="box" id="id3399159"><thead><tr><td>[PostgreSQL terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3399160"><thead><tr><td>[PostgreSQL terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 testdb=&gt; select * from AUTHORS;
  id | last_name | first_name
 ----+-----------+------------
@@ -5637,7 +5637,7 @@ SQL&gt; select * from COUNTRIES where COUNTRY_ID = 'RS';
 no rows selected
 	  </pre></td></tr></tbody></table><p>
 	We can verify the dynamic registration behavior of Oracle:
-	</p><table xmlns="" frame="box" id="id3399202"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
+	</p><table xmlns="" frame="box" id="id3399203"><thead><tr><td>[Shell terminal session]</td></tr></thead><tbody><tr><td><pre xmlns="http://www.w3.org/1999/xhtml" class="screen">
 tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00002000
 tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
 0x00002000
@@ -5749,7 +5749,7 @@ here:
 	</p></div><div class="footnote"><p><sup>[<a id="ftn.id3394570" href="#id3394570" class="para">21</a>] </sup>
 	    The current implementation does not support dynamic registration
 	    for PostgreSQL.
-	</p></div><div class="footnote"><p><sup>[<a id="ftn.id3395090" href="#id3395090" class="para">22</a>] </sup>
+	</p></div><div class="footnote"><p><sup>[<a id="ftn.id3395091" href="#id3395091" class="para">22</a>] </sup>
 	    The content of <code class="constant">xa_open_info</code> is passed to
 	    <code class="function">PQconnectdb</code> function: you can refer to 
 	    PostgreSQL official
@@ -5789,7 +5789,7 @@ here:
 	  </p></div><div class="footnote"><p><sup>[<a id="ftn.id3397491" href="#id3397491" class="para">28</a>] </sup>
 	    The current implementation does not support dynamic registration
 	    for MySQL.
-	</p></div><div class="footnote"><p><sup>[<a id="ftn.id3397961" href="#id3397961" class="para">29</a>] </sup>
+	</p></div><div class="footnote"><p><sup>[<a id="ftn.id3397962" href="#id3397962" class="para">29</a>] </sup>
 	    The content of <code class="constant">xa_open_info</code> for MySQL is
 	    described in 
 	    <a class="xref" href="#Development_setup_MySQL_xa_open_info" title="Some checks before program execution">the section called “Some checks before program execution”</a>.
@@ -5834,5 +5834,5 @@ here:
       [...]
     </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="Workload_balanced_environments"></a>Workload balanced environments</h2></div></div></div><p>
       [...]
-    </p></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="id3399432"></a>Bibliography</h2></div></div></div><div class="bibliodiv"><h3 class="title">Books</h3><div class="biblioentry"><a id="id3399444"></a><p>[<abbr class="abbrev">RefModel</abbr>] <span class="copyright">Copyright © 1996 X/Open Company Limited. </span><span class="biblioid">1-85912-170-5. </span><span class="publisher"><span class="publishername">X/Open Company Ltd., U.K.. </span></span><span class="title"><i>Distributed Transaction Processing: Reference Model, Version 3</i>. </span></p></div><div class="biblioentry"><a id="id3399479"></a><p>[<abbr class="abbrev">TXspec</abbr>] <span class="copyright">Copyright © 1995 X/Open Company Limited. </span><span class="biblioid">1-85912-094-6. </span><span class="publisher"><span class="publishername">X/Open Company Ltd., U.K.. </span></span><span class="title"><i>Distributed Transaction Processing: The TX (Transaction Demarcation) Specification</i>. </span></p></div><div class="biblioentry"><a id="id3399514"></a><p>[<abbr class="abbrev">XAspec</abbr>] <span class="copyright">Copyright © 1991 X/Open Company Limited. </span><span class="biblioid">1-872630-24-3. </span><span class="publisher"><span class="publishername">X/Open Company Ltd., U.K.. </span></span><span class="title"><i>Distributed Transaction Processing: The XA Specification</i>. </span></p></div><div class="biblioentry"><a id="id3399549"></a><p>[<abbr class="abbrev">XA+spec</abbr>] <span class="copyright">Copyright © 1994 X/Open Company Limited. </span><span class="biblioid">1-85912-046-6. </span><span class="publisher"><span class="publishername">X/Open Company Ltd., U.K.. </span></span><span class="title"><i>Distributed Transaction Processing: The XA+ Specification
+    </p></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="id3399432"></a>Bibliography</h2></div></div></div><div class="bibliodiv"><h3 class="title">Books</h3><div class="biblioentry"><a id="id3399445"></a><p>[<abbr class="abbrev">RefModel</abbr>] <span class="copyright">Copyright © 1996 X/Open Company Limited. </span><span class="biblioid">1-85912-170-5. </span><span class="publisher"><span class="publishername">X/Open Company Ltd., U.K.. </span></span><span class="title"><i>Distributed Transaction Processing: Reference Model, Version 3</i>. </span></p></div><div class="biblioentry"><a id="id3399479"></a><p>[<abbr class="abbrev">TXspec</abbr>] <span class="copyright">Copyright © 1995 X/Open Company Limited. </span><span class="biblioid">1-85912-094-6. </span><span class="publisher"><span class="publishername">X/Open Company Ltd., U.K.. </span></span><span class="title"><i>Distributed Transaction Processing: The TX (Transaction Demarcation) Specification</i>. </span></p></div><div class="biblioentry"><a id="id3399514"></a><p>[<abbr class="abbrev">XAspec</abbr>] <span class="copyright">Copyright © 1991 X/Open Company Limited. </span><span class="biblioid">1-872630-24-3. </span><span class="publisher"><span class="publishername">X/Open Company Ltd., U.K.. </span></span><span class="title"><i>Distributed Transaction Processing: The XA Specification</i>. </span></p></div><div class="biblioentry"><a id="id3399549"></a><p>[<abbr class="abbrev">XA+spec</abbr>] <span class="copyright">Copyright © 1994 X/Open Company Limited. </span><span class="biblioid">1-85912-046-6. </span><span class="publisher"><span class="publishername">X/Open Company Ltd., U.K.. </span></span><span class="title"><i>Distributed Transaction Processing: The XA+ Specification
       Version 2</i>. </span></p></div></div></div></div></body></html>
