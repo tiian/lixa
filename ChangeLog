@@ -1,6 +1,9 @@
 LOG:
 
-         - 0.5.34
+20111113 - 0.5.34 a switch file for MySQL is now available
+                  the package supplies some examples that show how LIXA can
+                  be used in conjunction with MySQL, PostgreSQL, Oracle and
+                  DB2 performing DTP
 
 20110927 - 0.5.33 library liblixabmt was renamed to liblixab
                   library liblixacmt was renamed to liblixac
