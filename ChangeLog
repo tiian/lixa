@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.5.35
+
 20111113 - 0.5.34 a switch file for MySQL is now available
                   the package supplies some examples that show how LIXA can
                   be used in conjunction with MySQL, PostgreSQL, Oracle and
