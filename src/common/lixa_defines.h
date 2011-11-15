@@ -203,8 +203,12 @@
 
 
 /* This is necessary for xid.formatID serialization */
-#if (SIZEOF_LONG_INT != 4)
-# error "long cannot be serialized with 8 hexadecimals"
+#if (SIZEOF_LONG_INT == 4)
+# define LIXA_SERIALIZED_LONG_INT 10
+#elif (SIZEOF_LONG_INT == 8)
+# define LIXA_SERIALIZED_LONG_INT 20
+#else
+# error "Unable to determine serialized length of a long int"
 #endif
 
 

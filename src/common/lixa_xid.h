@@ -70,7 +70,7 @@ extern const long LIXA_XID_FORMAT_ID;
  * Length of a string that can contain a serialized XID:
  * formatID + separator + gtrid + separator + bqual + terminator
  */
-#define LIXA_XID_SERIALIZE_LENGTH (2*sizeof(long)+1+2*XIDDATASIZE+1+1)
+#define LIXA_XID_SERIALIZE_LENGTH (LIXA_SERIALIZED_LONG_INT+1+2*XIDDATASIZE+1+1)
 
 
 

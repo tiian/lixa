@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     lixa_ser_xid_t ser_xid1, ser_xid2;
     int i, j;
     
-    xid1.formatID = random();
+    xid1.formatID = (uint32_t)random();
     for (i=0; i<XIDDATASIZE; ++i) {
         xid1.data[i] = random();
     }
