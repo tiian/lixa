@@ -52,6 +52,9 @@
 	<application>docbook-xsl</application> and
 	<application>docbook-xsl-doc-html</application> are necessary on
 	Ubuntu systems to produce this manual.
+	<application>automake</application> and 
+	<application>autoconf</application> are 
+	necessary to run the test suite (<command>make check</command>).
       </para>
       <simplesect>
 	<title>Low level pre-requisites</title>

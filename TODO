@@ -1,3 +1,7 @@
+Compiling with 64 bit will produce a segmentation fault in multithread 
+MT/1.0/0.0 multithread commit
+case test...
+
 Compile on 64 bit platform
 
 END OF ALPHA test phase

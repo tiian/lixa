@@ -46,10 +46,10 @@ struct xa_switch_t xamyls;
 
 
 /**
- * Number of digits used to for formatID (10 should be sufficient, but some
+ * Number of digits used to for formatID (20 should be sufficient, but some
  * spare space is not dangerous)
  */
-#define LIXA_MY_XID_SERIALIZE_FORMATID_DIGITS 20
+#define LIXA_MY_XID_SERIALIZE_FORMATID_DIGITS 25
 
 
 

@@ -79,7 +79,6 @@ int lixa_xid_bqual_is_global(const XID *xid)
 void lixa_xid_create_new(XID *xid)
 {
     uuid_t uuid_obj;
-    char *gtrid, *bqual;
     
     xid->formatID = LIXA_XID_FORMAT_ID;
     xid->gtrid_length = sizeof(uuid_t);
@@ -88,7 +87,9 @@ void lixa_xid_create_new(XID *xid)
     uuid_generate(uuid_obj);
     memcpy(xid->data, uuid_obj, sizeof(uuid_t));
     memcpy(xid->data + sizeof(uuid_t), lixa_xid_global_bqual, sizeof(uuid_t));
-#ifdef _TRACE
+#ifdef LIXA_DEBUG
+    {
+    char *gtrid, *bqual;
     gtrid = lixa_xid_get_gtrid_ascii(xid);
     bqual = lixa_xid_get_bqual_ascii(xid);
     if (NULL != gtrid && NULL != bqual)
@@ -96,7 +97,8 @@ void lixa_xid_create_new(XID *xid)
                     gtrid, bqual));
     if (NULL != bqual) free(bqual);
     if (NULL != gtrid) free(gtrid);
-#endif /* _TRACE */
+    }
+#endif /* LIXA_DEBUG */
 }
 
 
@@ -135,10 +137,10 @@ int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx)
 {
     int i = 0, j = 0;
     byte_t *p;
-    long len = sizeof(xid->formatID)*2 /* formatID */ +
-        1 /* '-' separator */ +
+    long len = LIXA_SERIALIZED_LONG_INT /* formatID */ +
+        1 /* '.' separator */ +
         xid->gtrid_length*2 /* gtrid */ +
-        1 /* '-' separator */ +
+        1 /* '.' separator */ +
         xid->bqual_length*2 /* bqual */ +
         1 /* '\0' terminator */ ;
     /* check the XID can be serialized for PostgreSQL by this routine */
@@ -189,28 +191,26 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
     TRY {
         long i;
         char *p = NULL, *q = NULL;
-        char tmp[sizeof(long)*2+1];
+        char tmp[LIXA_SERIALIZED_LONG_INT+1];
         unsigned long l = 0;
         unsigned int b = 0;
         
-        /* deserialize formatID; this algorithm is bugged because two
-         * serialized
-         * xids are mapped to LIXA_XID_FORMAT_ID, but it's unlikely */
-        tmp[sizeof(long)*2] = '\0';
-        p = lsx;
-        strncpy(tmp, lsx, sizeof(long)*2);
-        sscanf(tmp, "%lx", &l);
-        xid->formatID = l;
-        /* check the first separator */
-        if (LIXA_XID_SEPARATOR != lsx[sizeof(long)*2]) {
-            LIXA_TRACE(("lixa_xid_deserialize: position %d ('%c') does "
-                        "not contain the separator '%c'\n", sizeof(long)*2,
-                        lsx[sizeof(long)], LIXA_XID_SEPARATOR));
-            THROW(SEPARATOR1);
+	/* discover first separator */
+	q = strchr(lsx, LIXA_XID_SEPARATOR);
+	if (NULL == q) {
+	    LIXA_TRACE(("lixa_xid_deserialize: '%s' does "
+	                "not contain the separator '%c'\n", lsx, 
+			LIXA_XID_SEPARATOR));
+	    THROW(SEPARATOR1);
         }
 
+	i = q-lsx;
+	strncpy(tmp, lsx, i);
+	tmp[i] = '\0';
+        sscanf(tmp, "%lx", &l);
+        xid->formatID = l;
         /* prepare cursors */
-        p = lsx + sizeof(long)*2 + 1;
+        p = q+1;
         i = 0;
         tmp[2] = '\0';
         /* deserialize gtrid */
