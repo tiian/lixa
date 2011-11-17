@@ -276,7 +276,7 @@ int lixa_job_set_raw(lixa_job_t *job, const char *raw_job)
               
         lixa_job_reset(job);
         strncpy(job->raw, raw_job, raw_size);
-        job->raw[LIXA_JOB_RAW_LEN] = '\0';
+        job->raw[LIXA_JOB_RAW_LEN-1] = '\0';
 
         THROW(NONE);
     } CATCH {

@@ -1,8 +1,8 @@
-Compiling with 64 bit will produce a segmentation fault in multithread 
-MT/1.0/0.0 multithread commit
-case test...
+Compiling with 64 bit produces a strange effect:
+MT/2.0/0.1 multithread stress rollback
+seems that the kill (15) to lixad arrives before case0031 completed; there should be some strange behavior in server start-up/close-down
 
-Compile on 64 bit platform
+Complete manual
 
 END OF ALPHA test phase
 
