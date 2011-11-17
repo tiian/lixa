@@ -139,8 +139,10 @@ int main(int argc, char *argv[])
     }
     g_option_context_free(option_context);
     
-    if (NULL != trace_file)
-        freopen(trace_file, "w", stderr);
+    if (NULL != trace_file) {
+        FILE *dummy;
+        dummy = freopen(trace_file, "w", stderr);
+    }
     
     if (print_version) {
         lixa_print_version(stdout);
@@ -243,6 +245,7 @@ void daemonize(void)
 {
     pid_t pid;
     int i;
+    FILE *dummy;
     
     LIXA_TRACE(("lixad/daemonize: fork()\n"));
     if (0 != (pid = fork()))
@@ -259,7 +262,7 @@ void daemonize(void)
         exit(0);
     
     LIXA_TRACE(("lixad/daemonize: chdir()\n"));
-    chdir("/");
+    i = chdir("/");
     
     LIXA_TRACE(("lixad/daemonize: umask()\n"));
     umask(0);
@@ -268,9 +271,9 @@ void daemonize(void)
         close(i);
     
     if (NULL != trace_file)
-        freopen(trace_file, "a", stderr);
+        dummy = freopen(trace_file, "a", stderr);
     else
-        freopen("/dev/null", "a", stderr);
+        dummy = freopen("/dev/null", "a", stderr);
     
     syslog(LOG_NOTICE, LIXA_SYSLOG_LXD014N);
     

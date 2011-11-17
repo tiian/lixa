@@ -202,7 +202,7 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
 
         /* search passed rmid in the second level hash table */
         if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
-                         slht, (gconstpointer)rmid))) {
+                         slht, (gconstpointer)((long)rmid)))) {
             /* first time for this rmid */
             LIXA_TRACE(("lixa_monkeyrm_open: creating new status block for "
                         "tid=" PTHREAD_T_FORMAT ", rmid=%d\n", tid, rmid));
@@ -211,7 +211,7 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
             if (LIXA_RC_OK != lixa_monkeyrm_open_init(
                     xa_info, rmid, flags, mss))
                 THROW(OPEN_INIT);
-            g_hash_table_insert(slht, (gpointer)rmid, (gpointer)mss);
+            g_hash_table_insert(slht, (gpointer)((long)rmid), (gpointer)mss);
         }
 
         /* retrieve the return code must be returned */
@@ -384,7 +384,7 @@ int lixa_monkeyrm_close(char *xa_info, int rmid, long flags)
         
         /* search passed rmid in the second level hash table */
         if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
-                         slht, (gconstpointer)rmid)))
+                         slht, (gconstpointer)((long)rmid))))
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
@@ -463,7 +463,7 @@ int lixa_monkeyrm_start(XID *xid, int rmid, long flags)
         
         /* search passed rmid in the second level hash table */
         if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
-                         slht, (gconstpointer)rmid)))
+                         slht, (gconstpointer)((long)rmid))))
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
@@ -539,7 +539,7 @@ int lixa_monkeyrm_end(XID *xid, int rmid, long flags)
         
         /* search passed rmid in the second level hash table */
         if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
-                         slht, (gconstpointer)rmid)))
+                         slht, (gconstpointer)((long)rmid))))
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
@@ -615,7 +615,7 @@ int lixa_monkeyrm_rollback(XID *xid, int rmid, long flags)
         
         /* search passed rmid in the second level hash table */
         if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
-                         slht, (gconstpointer)rmid)))
+                         slht, (gconstpointer)((long)rmid))))
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
@@ -691,7 +691,7 @@ int lixa_monkeyrm_prepare(XID *xid, int rmid, long flags)
         
         /* search passed rmid in the second level hash table */
         if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
-                         slht, (gconstpointer)rmid)))
+                         slht, (gconstpointer)((long)rmid))))
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
@@ -767,7 +767,7 @@ int lixa_monkeyrm_commit(XID *xid, int rmid, long flags)
         
         /* search passed rmid in the second level hash table */
         if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
-                         slht, (gconstpointer)rmid)))
+                         slht, (gconstpointer)((long)rmid))))
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
@@ -840,7 +840,7 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
         
         /* search passed rmid in the second level hash table */
         if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
-                         slht, (gconstpointer)rmid)))
+                         slht, (gconstpointer)((long)rmid))))
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
@@ -935,7 +935,7 @@ int lixa_monkeyrm_forget(XID *xid, int rmid, long flags)
         
         /* search passed rmid in the second level hash table */
         if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
-                         slht, (gconstpointer)rmid)))
+                         slht, (gconstpointer)((long)rmid))))
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */
@@ -1007,7 +1007,7 @@ int lixa_monkeyrm_complete(int *handle, int *retval, int rmid, long flags)
         
         /* search passed rmid in the second level hash table */
         if (NULL == (mss = (struct monkey_status_s *)g_hash_table_lookup(
-                         slht, (gconstpointer)rmid)))
+                         slht, (gconstpointer)((long)rmid))))
             THROW(INVALID_STATUS2);
 
         /* retrieve the return code must be returned */

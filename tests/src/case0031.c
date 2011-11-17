@@ -105,10 +105,12 @@ int main(int argc, char *argv[])
             data.i = i;
             rc = pthread_create(tids+i, NULL, transaction, (void *)&data);
             assert(0 == rc);
+            printf("%s| thread %d created\n", pgm, i);
         }
         for (i=0; i<n; ++i) {    
             rc = pthread_join(tids[i], NULL);
             assert(0 == rc);
+            printf("%s| thread %d joined\n", pgm, i);
         }
     }
 

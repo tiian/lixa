@@ -6,8 +6,6 @@ AT_SETUP([check lixad process is NOT active...])
 AT_CHECK([ps -ef | grep lixad | grep -v grep], [1], [ignore], [ignore])
 AT_CLEANUP
 
-# these case tests are memory leak free (2010-12-13)
-
 m4_include([mysql.at])
 m4_include([postgresql.at])
 m4_include([mysql_postgresql.at])
