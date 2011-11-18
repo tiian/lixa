@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
     struct thread_data_s data;
     pthread_t tids[THREAD_NUMBER];
     int i, j, n, rnd;
+    struct timeval to;
 
     if (argc < 5) {
         fprintf(stderr, "%s: at least four options must be specified\n",
@@ -106,6 +107,9 @@ int main(int argc, char *argv[])
             rc = pthread_create(tids+i, NULL, transaction, (void *)&data);
             assert(0 == rc);
             printf("%s| thread %d created\n", pgm, i);
+            to.tv_sec = 0;
+            to.tv_usec = 200;
+            select(0, NULL, NULL, NULL, &to);
         }
         for (i=0; i<n; ++i) {    
             rc = pthread_join(tids[i], NULL);

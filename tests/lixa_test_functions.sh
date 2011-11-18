@@ -43,10 +43,10 @@ start_server() {
 		case "$REAL_CHECK_TYPE" in
 		memory)
 			export G_SLICE=always-malloc
-			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=1000 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
+			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
 		;;
 		thread)
-			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=1000 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
+			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
 		;;
 		*)
 			$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
@@ -96,10 +96,10 @@ exec_test() {
 		case "$REAL_CHECK_TYPE" in
 		memory)
 			export G_SLICE=always-malloc
-			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=1000 --suppressions=$TESTS_DIR/lixac.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
+			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixac.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
 		;;
 		thread)
-			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=1000 --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
+			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=50 --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
 		;;
 		*)
 			$PGM $*
