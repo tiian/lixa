@@ -98,12 +98,12 @@ int client_connect(client_status_coll_t *csc,
             THROW(CONNECT_ERROR);
         }
 
-        LIXA_CRASH(LIXA_CRASH_POINT_CLIENT_CONNECT_1,
-                   client_status_get_crash_count(cs));
-        
         if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(csc, &cs)))
             THROW(CLIENT_STATUS_COLL_GET_CS_ERROR);
         LIXA_TRACE(("client_connect: cs = %p\n", cs));
+        LIXA_CRASH(LIXA_CRASH_POINT_CLIENT_CONNECT_1,
+                   client_status_get_crash_count(cs));
+        
         client_status_set_sockfd(cs, out_socket);
         
         THROW(NONE);

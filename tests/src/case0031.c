@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
             assert(0 == rc);
             printf("%s| thread %d created\n", pgm, i);
             to.tv_sec = 0;
-            to.tv_usec = 200;
+            to.tv_usec = 1000;
             select(0, NULL, NULL, NULL, &to);
         }
         for (i=0; i<n; ++i) {    
