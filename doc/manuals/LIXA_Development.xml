@@ -2413,6 +2413,8 @@ tiian@ubuntu:~$ sudo su - postgres
 postgres@ubuntu:~$ createuser --createdb tiian
 Shall the new role be a superuser? (y/n) n
 Shall the new role be allowed to create more new roles? (y/n) n
+postgres@ubuntu:~$ exit
+logout
 	    </screen></td></tr></tbody>
 	  </table>
 	  Create a new database and a table necessary to store some data:
@@ -2448,6 +2450,31 @@ testdb=> select * from authors;
 	  documentation to fix the issue before the next step because
 	  you would not be able to execute the sample program without a
 	  basic running installation.
+	</para>
+	<para>
+	  Change the 
+	  <systemitem class="constant">max_prepared_transactions</systemitem>
+	  parameter in file
+	  <filename>postgresql.conf</filename>
+	  to allow the desired number of prepared transactions (i.e. 10):
+	  <screen>
+shared_buffers = 24MB                   # min 128kB
+                                        # (change requires restart)
+#temp_buffers = 8MB                     # min 800kB
+max_prepared_transactions = 10          # zero disables the feature
+#max_prepared_transactions = 0          # zero disables the feature
+                                        # (change requires restart)
+# Note:  Increasing max_prepared_transactions costs ~600 bytes of shared memory
+# per transaction slot, plus lock space (see max_locks_per_transaction).
+# It is not advisable to set max_prepared_transactions nonzero unless you
+# actively intend to use prepared transactions.
+#work_mem = 1MB                         # min 64kB
+#maintenance_work_mem = 16MB            # min 1MB
+#max_stack_depth = 2MB                  # min 100kB
+	  </screen>
+	  and restart the PostgreSQL server with something like
+	  <screen>sudo service postgresql-8.4 restart</screen> or
+	  <screen>sudo /etc/init.d/postgresql-8.4 restart</screen>
 	</para>
       </section>
     </section>
