@@ -79,6 +79,7 @@ export HAVE_IBMDB2
 if test "$HAVE_ORACLE" = "yes"
 then
 . @ORACLE_ENV_SH@
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ORACLE_HOME/lib
 fi
 
 if test "$HAVE_IBMDB2" = "yes"
