@@ -261,7 +261,6 @@ tiian@ubuntu:~/tmp$ sudo /etc/init.d/oracle-xe enable
 tiian@ubuntu:~/tmp$ sudo /etc/init.d/oracle-xe start
 Starting Oracle Net Listener.
 Starting Oracle Database 10g Express Edition Instance.
-
 	  </screen>
 	</para>
       </section>
@@ -270,7 +269,7 @@ Starting Oracle Database 10g Express Edition Instance.
 	<note><para>
 	    The steps explained below might be not necessary with some
 	    versions of the Oracle software, but they are necessary
-	    with Oracle XE 10.2.0.1.
+	    with Oracle XE 10.2 and Oracle XE 11.2
 	</para></note>
 	<para>
 	  First of all you must be able to connect as <quote>SYSDBA</quote>
@@ -279,18 +278,30 @@ Starting Oracle Database 10g Express Edition Instance.
 	  <systemitem class="username">sys</systemitem> with password
 	  <quote>oracle</quote>
 	  <footnote><para>
-	      I put this line
+	      I put this line (Oracle 10.2 32 bit)
 	      <computeroutput>. /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh</computeroutput>
+	      or this line (Oracle 11.2 64 bit)
+	      <computeroutput>. /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh</computeroutput>
 	      in the file <filename>$HOME/.profile</filename> of the
 	      <systemitem class="username">oracle</systemitem> user to set-up
 	      the default administration environment; it complains about
 	      two shell errors, but for the sake of our example it's
 	      safe.
+	  </para></footnote>
+	  <footnote><para>
+	      If you got some errors like these:
+	      <screen>
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
+	      </screen>
+	      you could edit the file <filename>/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh</filename> and substitute 
+	      <computeroutput>#!/bin/sh</computeroutput> with
+	      <computeroutput>#!/bin/bash</computeroutput> in the first row as explained 
+	      here:
+	      <link xlink:href="http://forums.oracle.com/forums/thread.jspa?messageID=1542334">http://forums.oracle.com/forums/thread.jspa?messageID=1542334</link>
 	  </para></footnote>:
 	  <screen>
 tiian@ubuntu:~$ sudo su - oracle
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
 oracle@ubuntu:~$ echo $ORACLE_HOME
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server
 oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
@@ -466,7 +477,11 @@ Copyright (c) 1982, 2005, Oracle.  All rights reserved.
 Connected to:
 Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
 
-SQL> alter user hr account unlock;
+SQL> ALTER USER hr ACCOUNT UNLOCK;
+
+User altered.
+
+SQL> ALTER USER hr IDENTIFIED BY hr;
 
 User altered.
 
@@ -1763,18 +1778,7 @@ tiian@ubuntu:~/tmp$ ldd example4_ora_db2
 tiian@ubuntu:~$ echo $LD_LIBRARY_PATH
 
 tiian@ubuntu:~$ . /home/db2inst1/sqllib/db2profile
-tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh<footnote><para>
-If you got some errors like these:
-<screen>
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
-</screen>
-you could edit the file <filename>/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh</filename> and substitute 
-<computeroutput>#!/bin/sh</computeroutput> with
-<computeroutput>#!/bin/bash</computeroutput> in the first row as explained 
-here:
-<link xlink:href="http://forums.oracle.com/forums/thread.jspa?messageID=1542334">http://forums.oracle.com/forums/thread.jspa?messageID=1542334</link>
-</para></footnote>
+tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
 tiian@ubuntu:~$ echo $LD_LIBRARY_PATH
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/home/db2inst1/sqllib/lib32
 tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib

@@ -104,8 +104,14 @@ Please, locate Oracle directories using --with-oracle or \
         saved_CPPFLAGS="$CPPFLAGS"
         CPPFLAGS="$CPPFLAGS -I$oracle_include_dir"
 
+	dnl establish as libnnzXX is named for this Oracle version 
+	tmp0=$(find /u01/app/oracle/product/11.2.0/xe/lib/ -name 'libnnz*')
+	tmp1=$(basename $tmp0)
+	tmp2=${tmp1#lib}
+	ORACLE_OCI_NNZ=${tmp2%.*}
         saved_LDFLAGS="$LDFLAGS"
-        oci_ldflags="-L$oracle_lib_dir -lclntsh -lnnz10"
+        dnl oci_ldflags="-L$oracle_lib_dir -lclntsh -lnnz10"
+        oci_ldflags="-L$oracle_lib_dir -lclntsh -l$ORACLE_OCI_NNZ"
         LDFLAGS="$LDFLAGS $oci_ldflags"
 
         dnl
@@ -223,6 +229,7 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
     AC_SUBST([ORACLE_OCI_VERSION])
     AC_SUBST([ORACLE_OCI_CFLAGS])
     AC_SUBST([ORACLE_OCI_LDFLAGS])
+    AC_SUBST([ORACLE_OCI_NNZ])
     AC_SUBST([ORACLE_ENV_SH])
     AC_SUBST([HAVE_ORACLE])
 ])

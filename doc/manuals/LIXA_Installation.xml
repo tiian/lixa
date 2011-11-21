@@ -121,16 +121,16 @@
 	conjuction with LIXA transaction manager:
 	<itemizedlist mark='bullet'>
 	  <listitem><para><productname>
-		IBM DB2 Express-C 9.7
+		IBM DB2 Express-C 9.7 (32 bit)
 	  </productname></para></listitem>
 	  <listitem><para><productname>
-		MySQL 5.0
+		MySQL 5.0 (32 bit) / MySQL 5.1 (64 bit)
 	  </productname></para></listitem>
 	  <listitem><para><productname>
-		Oracle XE 10.2
+		Oracle XE 10.2 (32 bit) / Oracle XE 11.2 (64 bit)
 	  </productname></para></listitem>
 	  <listitem><para><productname>
-		PostgreSQL 8.3
+		PostgreSQL 8.3 (32 bit) / PostgreSQL 8.4 (64 bit)
 	  </productname></para></listitem>
 	</itemizedlist>
       </para>
@@ -459,9 +459,14 @@ make
 	  This step is useful if you want to use Oracle Database as a Resource
 	  Manager coordinated by LIXA; only version XE 10.2 has been
 	  tested, but there should not be relevant differences with a
-	  different version. Use something like this:
+	  different version. Use something like this for Oracle 10.2
+	  (32 bit architecture):
 	  <screen>
 ./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+	  </screen>
+	  and something like this for Oracle 11.2 (64 bit architecture):
+	  <screen>
+./configure --with-oracle=/u01/app/oracle/product/11.2.0/xe
 	  </screen>
 	  to create a loadable module containing the switch structure.
 	</para>
@@ -471,7 +476,7 @@ make
 	</para>
       </section>
       <section>
-	<title>PostgreSQL 8.3<footnote><para>
+	<title>PostgreSQL 8.3 / PostgreSQL 8.4<footnote><para>
 	      The Trademark Policy of PostgreSQL is available at this link:
 	      <link xlink:href="http://wiki.postgresql.org/wiki/Trademark_Policy">
 		http://wiki.postgresql.org/wiki/Trademark_Policy</link>
@@ -497,7 +502,7 @@ make
 	</para></note>
       </section>
       <section>
-	<title>MySQL 5.0.51a<footnote><para>
+	<title>MySQL 5.0 / MySQL 5.1<footnote><para>
 	      MySQL is a trademark of <trademark>Oracle</trademark> 
 	      corporation; details are available at this link:
 	      <link xlink:href="http://www.mysql.com/about/legal/">
