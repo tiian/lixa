@@ -105,7 +105,7 @@ Please, locate Oracle directories using --with-oracle or \
         CPPFLAGS="$CPPFLAGS -I$oracle_include_dir"
 
 	dnl establish as libnnzXX is named for this Oracle version 
-	tmp0=$(find /u01/app/oracle/product/11.2.0/xe/lib/ -name 'libnnz*')
+	tmp0=$(find $oracle_lib_dir -name 'libnnz*')
 	tmp1=$(basename $tmp0)
 	tmp2=${tmp1#lib}
 	ORACLE_OCI_NNZ=${tmp2%.*}
