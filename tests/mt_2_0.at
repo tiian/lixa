@@ -80,9 +80,9 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-# decrease 1000 to 500 or less if you experiment a "too many open file"
+# Decreased from 1000 to 500 due to a "too many open file"
 # condition (i.e. lixad receive a kill signal before the test completed)
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh reset start case0031 commit 0 1000 100], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh reset start case0031 commit 0 500 100], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # a lot of rollbacks
@@ -153,8 +153,8 @@ xa_end/0
 xa_rollback/0
 xa_close/0
 ]])
-# decrease 1000 to 500 or less if you experiment a "too many open file"
+# Decreased from 1000 to 500 due to a "too many open file"
 # condition (i.e. lixad receive a kill signal before the test completed)
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh none stop case0031 rollback 0 1000 100], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh none stop case0031 rollback 0 500 100], [0], [ignore], [ignore])
 AT_CLEANUP
 

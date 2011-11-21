@@ -78,6 +78,7 @@ stop_server() {
 exec_test() {
 	echo "Starting case test $1"
 	# check lixar link
+	echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 	if [ ! -h $TESTS_SRC_DIR/lixar ]
 	then
 		ln -s $CLIENT_DIR/lixar $TESTS_SRC_DIR/lixar
