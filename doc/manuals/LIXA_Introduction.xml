@@ -9,7 +9,7 @@
       <quote>guarantee</quote> <acronym>ACID</acronym> (Atomicity, Consistency,
       Isolation, Durability) transactionality.
       XA specification is not the only two phase commit protocol implementation
-      but it is probably the best known and widespread. For detailed
+      but it is probably the best known and widespread. For a detailed
       explanation please refer to <citation>RefModel</citation>.
     </para>
   </section>
@@ -85,11 +85,11 @@
       Manager, while in the C language arena it is not easy to find out one.
     </para>
     <para>
-      LIXA project implements a stand-alone Transaction Manager that your 
+      The LIXA project implements a stand-alone Transaction Manager that your 
       Application Program can use in many different ways:
       <itemizedlist mark='bullet'>
 	<listitem><para>from a C application launched from shell</para></listitem>
-	<listitem><para>from a C application launched via CGI from a web server</para></listitem>
+	<listitem><para>from a C application launched via CGI inside a web server</para></listitem>
 	<listitem><para>from a scripting language application<footnote><para>You must wrap the TX C API to be able to use it from Perl, PHP, Python, Ruby...</para></footnote>.</para></listitem>
       </itemizedlist>
       With the aid of the LIXA Transaction Manager potentially any web server 
@@ -116,7 +116,8 @@
     <title>Project, Projuct, Product</title>
     <para>
       LIXA is a <emphasis>project</emphasis>: a software artifact you can pick
-      up to try, use, modify and distribute according to GPL license terms. 
+      up to try, use, modify and distribute according to the terms of GPL 
+      license. 
       The project is hosted on 
       <link xlink:href="http://sourceforge.net/projects/lixa/">
 	<citetitle>SourceForge</citetitle>
@@ -129,12 +130,14 @@
     <para>
       A projuct is a software artifact that initially was a project financed 
       by a
-      customer. A second customer was interested in the same software
-      artifact, it was selled again. When the third customer knocked the door,
+      customer. Then a second customer was interested in the same software
+      artifact and the initial project was selled again. 
+      When the third customer knocked the door,
       the team that developed the project started a new business with a new
-      <emphasis>product</emphasis>. But it should be called 
+      <emphasis>product</emphasis>, but it should be called 
       <emphasis>projuct</emphasis> 
-      because it was designed and modeled on the needs of the first customer.
+      because it was designed and modeled using the requirements expressed
+      by the first customer.
     </para>
     <para>
       In my honest opinion a <emphasis>product</emphasis> is a software 
@@ -225,7 +228,7 @@
       </para>
       <para>
 	The LIXA implementation of 
-	For <function>tx_commit()</function> and
+	for <function>tx_commit()</function> and
 	<function>tx_rollback()</function> returns 
 	<constant>TX_NO_BEGIN</constant> instead of 
 	<constant>TX_ERROR</constant> because it seems a more useful 
@@ -249,8 +252,8 @@
 	<citation>XAspec</citation> does not agree with this point of view: the
 	<constant>XA_RETRY</constant> is not a valid return code for 
 	function <function>xa_rollback()</function>. It may be an error in
-	<citation>TXspec</citation>: the same row could be copied from the 
-	previous table (page 68).
+	<citation>TXspec</citation>: the same row could have been copied from 
+	the previous table (page 68).
       </para>
       <para>
 	<citation>XA+spec</citation> does not list 

@@ -589,8 +589,9 @@
 		every application uses a different mix of resource managers; 
 		then
 		you manage 3 different environments (development, test and
-		production): with 9 profiles you can completely model your
-		transactional needs (APP1DEV, APP2DEV, APP3DEV, APP1TEST,
+		production): with 9 profiles you can model your
+		transactional needs completely 
+		(APP1DEV, APP2DEV, APP3DEV, APP1TEST,
 		APP2TEST, APP3TEST, APP1PROD, APP2PROD, APP3PROD).
 	    </para></listitem>
 	  </itemizedlist>

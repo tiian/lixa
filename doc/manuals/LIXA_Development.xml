@@ -262,6 +262,14 @@ tiian@ubuntu:~/tmp$ sudo /etc/init.d/oracle-xe start
 Starting Oracle Net Listener.
 Starting Oracle Database 10g Express Edition Instance.
 	  </screen>
+	  on some systems, like Ubuntu 10.04, you would use somethig like
+	  this:
+	  <screen>
+tiian@ubuntu:~/tmp$ sudo service oracle-xe enable
+tiian@ubuntu:~/tmp$ sudo service oracle-xe start
+Starting Oracle Net Listener.
+Starting Oracle Database 11g Express Edition Instance.
+	  </screen>
 	</para>
       </section>
       <section>
@@ -523,6 +531,17 @@ tiian@ubuntu:~/tmp$ gcc example2_ora.c -Wall \
 > -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
 > -o example2_ora
 	</screen>
+	If you are using Oracle XE 11.2 the commands might be something like
+	these:
+	<screen>
+tiian@ubuntu:~$ mkdir tmp
+tiian@ubuntu:~$ cd tmp
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example2_ora.c .
+tiian@ubuntu:~/tmp$ gcc example2_ora.c -Wall \
+> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac \
+> -I /u01/app/oracle/product/11.2.0/xe/rdbms/public/ -L /u01/app/oracle/product/11.2.0/xe/lib/ -l clntsh -l nnz11 \
+> -o example2_ora
+	</screen>
 	Verify the executable produced by <command>gcc</command>:
 	<screen>
 tiian@ubuntu:~/tmp$ ldd example2_ora
@@ -603,8 +622,12 @@ XE
 	<varname>LD_LIBRARY_PATH</varname>,
 	<varname>LIXA_PROFILE</varname>,
 	<varname>ORACLE_HOME</varname>,
-	<varname>ORACLE_SID</varname>,
-	<varname>PATH</varname>.
+	<varname>ORACLE_SID</varname>.
+	<important><para>
+	    the third and fourth variables can be
+	    set sourcing <filename>oracle_env.sh</filename> script (it's
+	    installed in the Oracle's <filename>bin</filename> directory). 
+	</para></important>
       </para>
     </section>
     <section>
