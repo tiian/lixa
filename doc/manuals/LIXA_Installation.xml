@@ -12,8 +12,12 @@
 	<citetitle>Ubuntu 8.04 system</citetitle>
       </link>; it
       compiles and runs on both <emphasis>server</emphasis> and
-      <emphasis>desktop</emphasis> flavors. Installation on a different 
-      GNU/Linux
+      <emphasis>desktop</emphasis> flavors. 
+      LIXA project is ported on x86_64 architecture using
+      <link xlink:href="http://www.ubuntu.com/">
+	<citetitle>Ubuntu 10.04 system</citetitle>
+      </link>.
+      Installation on a different GNU/Linux
       distribution should be quite straightforward; installation on a different
       <trademark>UNIX</trademark> like system would probably need some work.
     </para>
@@ -52,6 +56,8 @@
 	<application>docbook-xsl</application> and
 	<application>docbook-xsl-doc-html</application> are necessary on
 	Ubuntu systems to produce this manual.
+      </para>
+      <para>
 	<application>automake</application> and 
 	<application>autoconf</application> are 
 	necessary to run the test suite (<command>make check</command>).
@@ -97,18 +103,7 @@
 	  </para></listitem>
 	  <listitem><para>
 	      <emphasis>F/OSS:</emphasis> resource managers provided by
-	      Free/Open Source Software projects; at the time of this
-	      writing this set is empty, but it could be different
-	      in the near future
-	      <footnote><para>
-		  I think the lack of the XA interface in the implementation 
-		  of 
-		  the F/OSS resource managers is a consequence of the lack of
-		  a F/OSS transaction manager; looking at the Java ecosystem,
-		  both MySQL and PostgreSQL supports JTA, that's basically
-		  <quote>a Java XA wrapper</quote>, because there are JTA
-		  compliant application server like Jboss, JOnAS and Jeronimo.
-	      </para></footnote>
+	      Free/Open Source Software projects
 	  </para></listitem>
 	  <listitem><para>
 	      <emphasis>Proprietary:</emphasis> resource managers
@@ -213,6 +208,9 @@ logout
 	</thead>
 	<tbody>
 	  <tr><td>Architecture:</td><td>x86_64 (physical)</td></tr>
+	  <tr><td>Resource Manager:</td><td>MySQL 5.1.41</td></tr>
+	  <tr><td>Resource Manager:</td><td>Oracle XE 11.2</td></tr>
+	  <tr><td>Resource Manager:</td><td>PostgreSQL 8.4</td></tr>
 	</tbody>
       </table>
     </para>
@@ -254,14 +252,22 @@ cd lixa-X.Y.Z
 ./configure
 make
       </screen>
-      To install the software you need root access. With some distributions, 
-      like Ubuntu, root access is available with the 
+      To install the software you need 
+      <systemitem class="username">root</systemitem> 
+      access. With some distributions, 
+      like Ubuntu, 
+      <systemitem class="username">root</systemitem> 
+      access is available with the 
       <command>sudo</command> command and your own password:
       <screen>
 sudo make install
       </screen>
-      If the previous command does not work, root access is available with the
-      <command>su</command> command and the root password: 
+      If the previous command does not work,
+      <systemitem class="username">root</systemitem> 
+      access is available with the
+      <command>su</command> command and the
+      <systemitem class="username">root</systemitem> 
+      password: 
       <screen>
 su; make install; exit
       </screen>
@@ -451,7 +457,7 @@ make
 	</para>
       </section>
       <section>
-	<title>Oracle XE 10.2<footnote><para>
+	<title>Oracle XE 10.2/11.2<footnote><para>
 	      Oracle is a trademark of <trademark>Oracle</trademark>
 	      corporation
 	</para></footnote></title>
@@ -476,14 +482,14 @@ make
 	</para>
       </section>
       <section>
-	<title>PostgreSQL 8.3 / PostgreSQL 8.4<footnote><para>
+	<title>PostgreSQL 8.3/8.4<footnote><para>
 	      The Trademark Policy of PostgreSQL is available at this link:
 	      <link xlink:href="http://wiki.postgresql.org/wiki/Trademark_Policy">
 		http://wiki.postgresql.org/wiki/Trademark_Policy</link>
 	</para></footnote></title>
 	<para>
 	  This step is useful if you want to use PostgreSQL as a Resource
-	  Manager coordinated by LIXA; only version 8.3.15 has been
+	  Manager coordinated by LIXA; only versions 8.3 and 8.4 have been
 	  tested, but there should not be relevant differences with a
 	  different version. Use something like this:
 	  <screen>
@@ -502,7 +508,7 @@ make
 	</para></note>
       </section>
       <section>
-	<title>MySQL 5.0 / MySQL 5.1<footnote><para>
+	<title>MySQL 5.0/5.1<footnote><para>
 	      MySQL is a trademark of <trademark>Oracle</trademark> 
 	      corporation; details are available at this link:
 	      <link xlink:href="http://www.mysql.com/about/legal/">
@@ -511,7 +517,7 @@ make
 	</title>
 	<para>
 	  This step is useful if you want to use MySQL as a Resource
-	  Manager coordinated by LIXA; only version 5.0.51a has been
+	  Manager coordinated by LIXA; only versions 5.0 and 5.1 have been
 	  tested, but there should not be relevant differences with a
 	  different version. Use something like this:
 	  <screen>
@@ -568,7 +574,7 @@ make
 	    </quote>.
 	  </para>
 	  <para>
-	    The impact of this bug is quite severe and seriously compromise
+	    The impact of this bug is quite severe and seriously compromises
 	    the ACID properties of the resulting system (application program
 	    + MySQL resource manager + LIXA transaction manager).
 	  </para>
@@ -583,7 +589,10 @@ make
 	  This command, for instance, can be used to build IBM DB2, Oracle
 	  and PostgreSQL loadable modules:
 	  <screen>
-./configure --with-ibmdb2=/opt/ibm/db2/V9.7 --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib
+./configure --with-ibmdb2=/opt/ibm/db2/V9.7 \
+> --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server \
+> --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib \
+> --with-mysql
 	  </screen>
 	</para>
       </section>
