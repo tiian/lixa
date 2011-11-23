@@ -1,4 +1,7 @@
-Check 64 bit manual: restart from "An example with PostgreSQL"
+A strange error happens in 
+133: ML/0.0 g_module_open/g_module_close             FAILED (memory.at:4)
+(with MySQL, PostgreSQL and Oracle configured... will it happen without
+external resource managers? why?)
 
 Complete manual
 

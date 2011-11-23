@@ -2891,6 +2891,18 @@ tiian@ubuntu:~/tmp$ gcc example6_pql_ora.c -Wall \
 > -o example6_pql_ora
 	  </screen></td></tr></tbody>
 	</table>
+	or if you are using Oracle 11.2 you will use something like this:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ gcc example6_pql_ora.c -Wall \
+> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq \
+> -I /u01/app/oracle/product/11.2.0/xe/rdbms/public \
+> -L /u01/app/oracle/product/11.2.0/xe/lib -l clntsh -l nnz11 \
+> -I /usr/include/postgresql -l pq \
+> -o example6_pql_ora
+	  </screen></td></tr></tbody>
+	</table>
 	Verify the executable produced by <command>gcc</command>:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
@@ -2946,6 +2958,19 @@ tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
+	  </screen></td></tr></tbody>
+	</table>
+	Oracle 11.2 <filename>oracle_env.sh</filename> does not set
+	environment variable <varname>LD_LIBRARY_PATH</varname> and you
+	should set-up it manually:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/u01/app/oracle/product/11.2.0/xe/lib:/opt/lixa/lib
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH/u01/app/oracle/product/11.2.0/xe/lib:/opt/lixa/lib
+/u01/app/oracle/product/11.2.0/xe/lib:/opt/lixa/lib
 	  </screen></td></tr></tbody>
 	</table>
 	Check again the executable:
