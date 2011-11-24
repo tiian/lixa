@@ -52,7 +52,6 @@
 #define MODE_MODULE_OPEN_CLOSE 0x00000001
 #define MODE_XML_READ_FREE     0x00000002
 #define MODE_TX_OPEN_CLOSE     0x00000004
-#define MODE_THREAD_INIT       0x00000008
 #define MODE_XML_INIT_PARSER   0x00000010
 
 
@@ -104,6 +103,9 @@ int main(int argc, char *argv[])
     if (MODE_XML_READ_FREE & mode)
         xmlInitParser();
 
+    if (!g_thread_supported ())
+        g_thread_init(NULL);
+
     for (j=0; j<m; ++j) {
         for (i=0; i<n; ++i) {
             rc = pthread_create(tids+i, NULL, transaction, (void *)&mode);
@@ -120,7 +122,7 @@ int main(int argc, char *argv[])
 
     if (MODE_TX_OPEN_CLOSE & mode)
         lixa_monkeyrm_call_cleanup();
-    
+  
     printf("%s| ...finished\n", pgm);
     return 0;
 }
@@ -132,6 +134,7 @@ void *transaction(void *parm)
     GModule *m;
     xmlDocPtr doc;
     int rc;
+    pid_t pid = pthread_self();
     long *mode = (long *)parm;
     static const char *XMLBUFFER = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><msg level=\"0\" verb=\"1\" step=\"8\"><client job=\"00c974e08d8d0e70ccbc420434f45198/127.0.0.1      \" config_digest=\"00c974e08d8d0e70ccbc420434f45198\" maint=\"0\"/><rsrmgrs><rsrmgr rmid=\"0\" dynamic=\"0\" name=\"LIXAmonkey1staRM\" xa_name=\"LIXA Monkey RM (static)\"/></rsrmgrs></msg>";
 
@@ -144,14 +147,17 @@ void *transaction(void *parm)
     }
 
     if (MODE_MODULE_OPEN_CLOSE & *mode) {
-        printf("locking mutex...\n");
+        printf("%u locking mutex... %p\n", pid, &mutex);
         g_static_mutex_lock(&mutex);
-        printf("opening module...\n");
+        printf("%u ...mutex locked\n", pid);
+        printf("%u opening module...\n", pid);
         m = g_module_open(SWITCH, G_MODULE_BIND_LOCAL);
-        printf("closing module...\n");
+        printf("%u module loaded at %p\n", pid, m);
+        printf("%u closing module...\n", pid);
         g_module_close(m);
-        printf("unlocking mutex...\n");
+        printf("%u unlocking mutex... %p\n", pid, &mutex);
         g_static_mutex_unlock(&mutex);
+        printf("%u ...mutex unlocked\n", pid);
     }
 
     if (MODE_XML_READ_FREE & *mode) {
@@ -164,10 +170,6 @@ void *transaction(void *parm)
                             NULL, 0);
         xmlFreeDoc(doc);
     }
-
-    if (MODE_THREAD_INIT & *mode)
-        if (!g_thread_supported ())
-            g_thread_init(NULL);
 
     if (MODE_XML_INIT_PARSER & *mode) {
         xmlInitParser();

@@ -61,6 +61,7 @@ case0029_SOURCES = case0029.c
 case0030_SOURCES = case0030.c
 case0031_SOURCES = case0031.c
 case0032_SOURCES = case0032.c
+case0032_LDFLAGS = -lpthread
 case0033_SOURCES = case0033.c
 case0034_SOURCES = case0034.c
 case0035_SOURCES = case0035.c
