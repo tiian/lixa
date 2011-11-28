@@ -1,7 +1,5 @@
-A strange error happens in 
-133: ML/0.0 g_module_open/g_module_close             FAILED (memory.at:4)
-(with MySQL, PostgreSQL and Oracle configured... will it happen without
-external resource managers? why?)
+Try what happens if lixax_conf.xml contains a profile without resource 
+managers.
 
 Complete manual
 
@@ -41,9 +39,6 @@ Try this scenario:
 - is it sufficient thread termination to clean-up database(s) state(s)?
 - generally tx_close() can not be executed: some times it may happen, some 
   times it can not work properly
-
-Try what happens if lixax_conf.xml contains a profile without resource 
-managers.
 
 Document a memory leak introduced by libxml2:
 xmlInitParser()
