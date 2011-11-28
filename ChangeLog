@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.5.35
+20111128 - 0.5.35 Intel/AMD 64 bit architecture passed test phase
 
 20111113 - 0.5.34 a switch file for MySQL is now available
                   the package supplies some examples that show how LIXA can
