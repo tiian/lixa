@@ -266,6 +266,9 @@ case0032_LDADD = $(LDADD)
 case0032_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
+case0032_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(case0032_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_case0033_OBJECTS = case0033.$(OBJEXT)
 case0033_OBJECTS = $(am_case0033_OBJECTS)
 case0033_LDADD = $(LDADD)
@@ -562,6 +565,7 @@ case0029_SOURCES = case0029.c
 case0030_SOURCES = case0030.c
 case0031_SOURCES = case0031.c
 case0032_SOURCES = case0032.c
+case0032_LDFLAGS = -lpthread
 case0033_SOURCES = case0033.c
 case0034_SOURCES = case0034.c
 case0035_SOURCES = case0035.c
@@ -739,7 +743,7 @@ case0031$(EXEEXT): $(case0031_OBJECTS) $(case0031_DEPENDENCIES)
 	$(LINK) $(case0031_OBJECTS) $(case0031_LDADD) $(LIBS)
 case0032$(EXEEXT): $(case0032_OBJECTS) $(case0032_DEPENDENCIES) 
 	@rm -f case0032$(EXEEXT)
-	$(LINK) $(case0032_OBJECTS) $(case0032_LDADD) $(LIBS)
+	$(case0032_LINK) $(case0032_OBJECTS) $(case0032_LDADD) $(LIBS)
 case0033$(EXEEXT): $(case0033_OBJECTS) $(case0033_DEPENDENCIES) 
 	@rm -f case0033$(EXEEXT)
 	$(LINK) $(case0033_OBJECTS) $(case0033_LDADD) $(LIBS)

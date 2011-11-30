@@ -1,0 +1,6 @@
+AT_BANNER([LIXA trivial config])
+
+AT_SETUP([Profile without resource managers])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh reset recycle case0000], [0], [ignore], [ignore])
+AT_CLEANUP
+
