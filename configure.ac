@@ -26,7 +26,6 @@ AC_CONFIG_FILES([
   src/client/switch/postgresql/Makefile
   src/client/switch/mysql/Makefile
   src/server/Makefile
-  src/sample/Makefile
   tests/Makefile
   tests/atlocal
   tests/etc/lixac_conf.xml
