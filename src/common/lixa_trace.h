@@ -72,10 +72,10 @@
  */
 #define LIXA_TRACE_MOD_SERVER_STATUS      0x00000010
 
-/**
- * trace module for server messages functions
+/*
+ * this bit is currently unused
+ * #define LIXA_TRACE_MOD_    0x00000020
  */
-#define LIXA_TRACE_MOD_SERVER_MESSAGES    0x00000020
 
 /**
  * trace module for server XA functions
@@ -113,9 +113,9 @@
 #define LIXA_TRACE_MOD_CLIENT_CONFIG      0x00008000
 
 /**
- * trace module for client load functions
+ * trace module for client XA switch files provided by LIXA
  */
-#define LIXA_TRACE_MOD_CLIENT_LOAD        0x00010000
+#define LIXA_TRACE_MOD_CLIENT_XA_SWITCH   0x00010000
 
 /**
  * trace module for client status functions
@@ -126,6 +126,10 @@
  * trace module for client recovery functions
  */
 #define LIXA_TRACE_MOD_CLIENT_RECOVERY    0x00040000
+
+/*
+ * a lot of unused bits ...
+ */
 
 /**
  * trace module for common config functions

@@ -25,6 +25,10 @@
 
 
 
+#include <lixa_trace.h>
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -32,7 +36,7 @@
 #else
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_SERVER_MESSAGES
+#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_SERVER
 
 
 

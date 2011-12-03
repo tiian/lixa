@@ -520,7 +520,6 @@ INPUT                  = src/client \
                          src/client/switch/postgresql \
                          src/client/switch/mysql \
                          src/common \
-                         src/sample \
                          src/server
 
 # This tag can be used to specify the character encoding of the source files 

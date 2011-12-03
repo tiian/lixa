@@ -7,8 +7,176 @@
   <section xml:id="Tracing">
     <title>Tracing</title>
     <para>
-      [...]
+      The LIXA project can produce a lot of traces when the software is 
+      running; the tracing functions are included in the code by default but
+      you can disable them when you configure the software before the build 
+      phase:
+      <screen>
+	./configure --disable-trace
+	make
+	...
+      </screen>
+      <warning><para>
+	  Excluding tracing functions can reduce CPU and memory usage when
+	  the software is running, but you should disable tracing 
+	  <emphasis>only if you are really sure about it:
+	  </emphasis>without tracing you have no instruments
+	  to understand what's happening inside LIXA code when it's running.
+      </para></warning>
+      In the case you didn't disable the tracing feature at build time (see
+      above), you could activate the message production when you need it.
     </para>
+    <section xml:id="Tracing_modules">
+      <title>Tracing modules</title>
+      <para>
+	The trace messages produced by LIXA code are divided by 
+	<emphasis>modules</emphasis>: you can activate the trace messages for
+	one or more modules. There is not a concept of <quote>severity</quote>
+	for the trace messages: if you activate the trace for a module, it
+	will print all the trace messages of that module.
+      </para>
+      <para>
+	The table below shows how the LIXA software is partitioned in modules:
+	<table xml:id="ex.calstable" frame="all">
+	  <title>Tracing module flags</title>
+	  <tgroup cols='4' align='left' colsep='1' rowsep='1'>
+	    <thead>
+	      <row>
+		<entry align="center">Label</entry>
+		<entry align="center">Flag</entry>
+		<entry align="center">Component</entry>
+		<entry align="center">Function</entry>
+	      </row>
+	    </thead>
+	    <tbody>
+	      <row>
+		<entry>LIXA_TRACE_MOD_SERVER</entry>
+		<entry>0x00000001</entry>
+		<entry><command>lixad</command> (state server)</entry>
+		<entry>main program</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_SERVER_CONFIG</entry>
+		<entry>0x00000002</entry>
+		<entry><command>lixad</command> (state server)</entry>
+		<entry>configuration: config file parsing and environment 
+		  variable detection</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_SERVER_LISTENER</entry>
+		<entry>0x00000004</entry>
+		<entry><command>lixad</command> (state server)</entry>
+		<entry>network listener and signal handler</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_SERVER_MANAGER</entry>
+		<entry>0x00000008</entry>
+		<entry><command>lixad</command> (state server)</entry>
+		<entry>session client manager, thread manager, 
+		  network I/O manager</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_SERVER_STATUS</entry>
+		<entry>0x00000010</entry>
+		<entry><command>lixad</command> (state server)</entry>
+		<entry>persistent state</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_SERVER_XA</entry>
+		<entry>0x00000040</entry>
+		<entry><command>lixad</command> (state server)</entry>
+		<entry>XA logic called by client</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_SERVER_REPLY</entry>
+		<entry>0x00000080</entry>
+		<entry><command>lixad</command> (state server)</entry>
+		<entry>replies to client messages</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_SERVER_RECOVERY</entry>
+		<entry>0x00000100</entry>
+		<entry><command>lixad</command> (state server)</entry>
+		<entry>logic necessary to answer the client recovery 
+		  calls</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_CLIENT_TX</entry>
+		<entry>0x00001000</entry>
+		<entry><systemitem class="library">lixac</systemitem>
+		  (client library)</entry>
+		<entry>transaction demarcation (TX) functions:
+		  <function>tx_open()</function>,
+		  <function>tx_begin()</function>, ...</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_CLIENT_XA</entry>
+		<entry>0x00002000</entry>
+		<entry><systemitem class="library">lixac</systemitem>
+		  (client library)</entry>
+		<entry>XA function wrapper:
+		  <function>xa_open()</function>,
+		  <function>xa_start()</function>, 
+		  <function>ax_reg()</function>, ...</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_CLIENT_CONN</entry>
+		<entry>0x00004000</entry>
+		<entry><systemitem class="library">lixac</systemitem>
+		  (client library)</entry>
+		<entry>function necessary to connect to the state server 
+		  (<command>lixad</command>)</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_CLIENT_CONFIG</entry>
+		<entry>0x00008000</entry>
+		<entry><systemitem class="library">lixac</systemitem>
+		  (client library)</entry>
+		<entry>configuration: config file parsing and environment 
+		  variable detection</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_CLIENT_XA_SWITCH</entry>
+		<entry>0x00010000</entry>
+		<entry><systemitem class="library">lixac</systemitem>
+		  (client library)</entry>
+		<entry>XA switch file implementation of the dummy resource
+		managers provided by LIXA and of the XA wrappers for the
+		resource managers without a standard switch file</entry>
+	      </row>
+	      <row>
+		<entry></entry>
+		<entry></entry>
+		<entry><systemitem class="library">lixac</systemitem>
+		  (client library)</entry>
+		<entry></entry>
+	      </row>
+	      <row>
+		<entry></entry>
+		<entry></entry>
+		<entry><systemitem class="library">lixac</systemitem>
+		  (client library)</entry>
+		<entry></entry>
+	      </row>
+	      <row>
+		<entry></entry>
+		<entry></entry>
+		<entry><systemitem class="library">lixac</systemitem>
+		  (client library)</entry>
+		<entry></entry>
+	      </row>
+	      <row>
+		<entry></entry>
+		<entry></entry>
+		<entry><systemitem class="library">lixac</systemitem>
+		  (client library)</entry>
+		<entry></entry>
+	      </row>
+	    </tbody>
+	  </tgroup>
+	</table>
+      </para>
+    </section>
   </section>
   <section>
     <title>Logging</title>
