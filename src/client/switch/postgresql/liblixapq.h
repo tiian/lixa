@@ -31,10 +31,22 @@
 
 
 
+#include <lixa_trace.h>
 /* Utilities for resource manager without standard switch file */
 #include <lixa_sw.h>
 /* PostgreSQL front-end */
 #include <libpq-fe.h>
+
+
+
+/* save old LIXA_TRACE_MODULE and set a new value */
+#ifdef LIXA_TRACE_MODULE
+# define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
+# undef LIXA_TRACE_MODULE
+#else
+# undef LIXA_TRACE_MODULE_SAVE
+#endif /* LIXA_TRACE_MODULE */
+#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_CLIENT_XA_SWITCH
 
 
 
@@ -137,6 +149,15 @@ int lixa_pq_forget(XID *xid, int rmid, long flags);
  * a complete description
  */
 int lixa_pq_complete(int *handle, int *retval, int rmid, long flags);
+
+
+
+/* restore old value of LIXA_TRACE_MODULE */
+#ifdef LIXA_TRACE_MODULE_SAVE
+# undef LIXA_TRACE_MODULE
+# define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
+# undef LIXA_TRACE_MODULE_SAVE
+#endif /* LIXA_TRACE_MODULE_SAVE */
 
 
 
