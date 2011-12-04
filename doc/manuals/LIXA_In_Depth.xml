@@ -4,6 +4,12 @@
     This chapter explains some internal details you can be interested in
     when you are dealing with complex environments.
   </para>
+  <section>
+    <title>Logging</title>
+    <para>
+      [...]
+    </para>
+  </section>
   <section xml:id="Tracing">
     <title>Tracing</title>
     <para>
@@ -42,8 +48,8 @@
 	  <tgroup cols='4' align='left' colsep='1' rowsep='1'>
 	    <thead>
 	      <row>
-		<entry align="center">Label</entry>
-		<entry align="center">Flag</entry>
+		<entry align="center">Module Trace Label</entry>
+		<entry align="center">Hex Flag</entry>
 		<entry align="center">Component</entry>
 		<entry align="center">Function</entry>
 	      </row>
@@ -145,44 +151,124 @@
 		resource managers without a standard switch file</entry>
 	      </row>
 	      <row>
-		<entry></entry>
-		<entry></entry>
+		<entry>LIXA_TRACE_MOD_CLIENT_STATUS</entry>
+		<entry>0x00020000</entry>
 		<entry><systemitem class="library">lixac</systemitem>
 		  (client library)</entry>
-		<entry></entry>
+		<entry>client status management</entry>
 	      </row>
 	      <row>
-		<entry></entry>
-		<entry></entry>
+		<entry>LIXA_TRACE_MOD_CLIENT_RECOVERY</entry>
+		<entry>0x00040000</entry>
 		<entry><systemitem class="library">lixac</systemitem>
 		  (client library)</entry>
-		<entry></entry>
+		<entry>warm and cold recovery of the transaction(s)</entry>
 	      </row>
 	      <row>
-		<entry></entry>
-		<entry></entry>
-		<entry><systemitem class="library">lixac</systemitem>
-		  (client library)</entry>
-		<entry></entry>
+		<entry>LIXA_TRACE_MOD_COMMON_CONFIG</entry>
+		<entry>0x01000000</entry>
+		<entry><systemitem class="library">lixab</systemitem>
+		  (common base library)</entry>
+		<entry>configuration stuff common to all components</entry>
 	      </row>
 	      <row>
-		<entry></entry>
-		<entry></entry>
-		<entry><systemitem class="library">lixac</systemitem>
-		  (client library)</entry>
-		<entry></entry>
+		<entry>LIXA_TRACE_MOD_COMMON_XML_MSG</entry>
+		<entry>0x02000000</entry>
+		<entry><systemitem class="library">lixab</systemitem>
+		  (common base library)</entry>
+		<entry>functions related to XML messages serialization and
+		deserialization</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_COMMON_STATUS</entry>
+		<entry>0x04000000</entry>
+		<entry><systemitem class="library">lixab</systemitem>
+		  (common base library)</entry>
+		<entry>convenience functions used to manage the status on
+		client and server side</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_COMMON_UTILS</entry>
+		<entry>0x08000000</entry>
+		<entry><systemitem class="library">lixab</systemitem>
+		  (common base library)</entry>
+		<entry>utility functions used by all the components</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_COMMON_XID</entry>
+		<entry>0x10000000</entry>
+		<entry><systemitem class="library">lixab</systemitem>
+		  (common base library)</entry>
+		<entry>functions specialized for XID (transaction ID)
+		management</entry>
 	      </row>
 	    </tbody>
 	  </tgroup>
 	</table>
+	You can trace any module combination creating any
+	<emphasis>trace mask</emphasis> ORing the bits; for example:
+	<itemizedlist mark="bullet">
+	  <listitem>
+	    <para>0x00000003 will produce all the messages of
+	    <constant>LIXA_TRACE_MOD_SERVER</constant> and
+	    <constant>LIXA_TRACE_MOD_SERVER_CONFIG</constant></para>
+	  </listitem>
+	  <listitem>
+	    <para>0xffffffff will produce all the messages</para>
+	  </listitem>
+	  <listitem>
+	    <para>0x00000000 will disable all the messages</para>
+	  </listitem>
+	</itemizedlist>
       </para>
     </section>
-  </section>
-  <section>
-    <title>Logging</title>
-    <para>
-      [...]
-    </para>
+    <section>
+      <title>Activating trace</title>
+      <para>
+	The trace can be activated setting the environment variable
+	<varname>LIXA_TRACE_MASK</varname> before starting the execution of
+	the traced program. Try the following example...
+      </para>
+      <para>
+	Check the state server is not active:
+	<screen>
+tiian@ubuntu:~$ ps -ef|grep lixad|grep -v grep
+	</screen>
+	try to execute <command>lixat</command>, the LIXA test program:
+	<screen>
+tiian@ubuntu:~$ /opt/lixa/bin/lixat
+tx_open(): -7
+	</screen>
+	it gives us few information (<constant>TX_FAIL = -7</constant>): from
+	<filename>/opt/lixa/include/tx.h</filename> we can retrieve the
+	meaning: <quote>fatal error</quote>... Not so much...
+	We could try to trace the <quote>CLIENT TX</quote> module:
+	<screen>
+tiian@ubuntu:~$ /opt/lixa/bin/lixat
+2011-12-04 12:19:49.235007 [8899/3073612464] lixa_tx_open
+2011-12-04 12:19:49.241544 [8899/3073612464] lixa_tx_open/TX_*=-7/excp=5/ret_cod=-138/errno=111
+tx_open(): -7
+	</screen>
+	<quote>ret_cod=-138</quote> can be inspected inside
+	<filename>src/common/lixa_errors.h</filename>:
+	<screen>
+[...]
+/**
+ * "connect" function error
+ */
+#define LIXA_RC_CONNECT_ERROR                  -138
+[...]
+	</screen>
+	now we know the errors happens using <function>connect()</function>
+	function; <quote>errno=111</quote> can be inspected inside
+	<filename>/usr/include/asm-generic/errno.h</filename>:
+	<screen>
+[...]
+#define ECONNREFUSED    111     /* Connection refused */
+[...]
+	</screen>
+      </para>
+    </section>
   </section>
   <section>
     <title>Automatic and manual recovery</title>
