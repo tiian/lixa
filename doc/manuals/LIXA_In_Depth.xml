@@ -510,8 +510,16 @@ tiian@ubuntu:~$ ls -la /tmp/lixat.trace
 	</itemizedlist>	
 	the distributed transaction started but it did not initiated the
 	two phase commit protocol: there is no relevant difference with
-	a transaction with a single Resource Manager. The following scenario
-	is slightly different:
+	a transaction with a single Resource Manager. 
+	<figure xml:id="recover1">
+	  <title>The Application Program crashes before <function>xa_prepare()</function></title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="LIXA_Recovery_01.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	The following scenario is slightly different:
 	<itemizedlist mark="bullet">
 	  <listitem>
 	    <para>the Application Program crashes after it has passed the
@@ -532,6 +540,14 @@ tiian@ubuntu:~$ ls -la /tmp/lixat.trace
 	    <para></para>
 	  </listitem>
 	</itemizedlist>	
+	<figure xml:id="recover2">
+	  <title>The Application Program crashes after <function>xa_prepare()</function></title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="LIXA_Recovery_02.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
       </para>
     </section>
   </section>
