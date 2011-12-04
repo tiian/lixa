@@ -7,7 +7,88 @@
   <section>
     <title>Logging</title>
     <para>
-      [...]
+      The LIXA project software uses standard UNIX logging 
+      <function>syslog()</function> function but it does not
+      set a specific <parameter class="function">facility</parameter>
+      using the <function>openlog()</function> function.
+      The final destination of the log messages depends on the configuration
+      of the standard UNIX logging; Ubuntu 8.04, for examples, sends the
+      messages to file <filename>/var/log/daemon.log</filename>. This should
+      be in accordance with the content of the <function>syslog</function>
+      man page <quote>LOG_DAEMON
+        system daemons without separate facility value</quote>.
+    </para>
+    <para>
+      The messages produced by the LIXA project software are documented in
+      the file <filename>src/common/lixa_syslog.h</filename>
+    </para>
+    <para>
+      The messages produced by the LIXA project software use two different
+      prefixes: <quote>LXC</quote> for
+      <systemitem class="library">lixac</systemitem> (client library) and
+      <quote>LXD</quote> for
+      <command>lixad</command> (state server).
+      Try the following example:
+      <screen>
+tiian@ubuntu:~$ ps -ef|grep lixad|grep -v grep
+tiian@ubuntu:~$ /opt/lixa/bin/lixat
+tx_open(): -7	
+      </screen>
+      inspecting the log file <filename>/var/log/daemon.log</filename>
+      you should find out something like this:
+      <screen>
+Dec  4 18:16:10 ubuntu lixat[6538]: LXC000I this process is starting a new LIXA transaction manager (lixa package version is 0.5.36)
+Dec  4 18:16:10 ubuntu lixat[6538]: LXC002E unable to connect to LIXA server at address 127.0.0.1, port 2345
+      </screen>
+      the <command>lixat</command> command is running as expected because
+      the state server is not active.
+      To see the messages produced by the state server you can try the
+      following commands:
+      <screen>
+tiian@ubuntu:~$ sudo su - lixa
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad -d
+lixa@ubuntu:~$ pkill lixad
+lixa@ubuntu:~$ exit
+logout
+      </screen>
+      inspecting the log file <filename>/var/log/daemon.log</filename>
+      you should find out something like this:
+      <screen>
+Dec  4 18:22:46 ubuntu lixad[6694]: LXD000N this process is starting a new LIXA server (lixa package version is 0.5.36)
+Dec  4 18:22:46 ubuntu lixad[6697]: LXD014N LIXA server entered daemon status
+Dec  4 18:22:49 ubuntu lixad[6697]: LXD019N received signal 15, server immediate shutdown in progress...
+Dec  4 18:22:49 ubuntu lixad[6697]: LXD006N server terminated activities
+      </screen>
+      The log messages are differentiated by 
+      <parameter class="function">priority</parameter>; there is a direct
+      link between the letter in the seventh position and the severity of
+      the message:
+      <itemizedlist mark="bullet">
+	<listitem>
+	  <para><emphasis>D</emphasis> : <constant>LOG_DEBUG</constant></para>
+	</listitem>
+	<listitem>
+	  <para><emphasis>I</emphasis> : <constant>LOG_INFO</constant></para>
+	</listitem>
+	<listitem>
+	  <para><emphasis>N</emphasis> : <constant>LOG_NOTICE</constant></para>
+	</listitem>
+	<listitem>
+	  <para><emphasis>W</emphasis> : <constant>LOG_WARNING</constant></para>
+	</listitem>
+	<listitem>
+	  <para><emphasis>E</emphasis> : <constant>LOG_ERR</constant></para>
+	</listitem>
+	<listitem>
+	  <para><emphasis>C</emphasis> : <constant>LOG_CRIT</constant></para>
+	</listitem>
+      </itemizedlist>
+      If LIXA software was logging too much in your production environment
+      you can configure the system log facility
+      (<filename>/etc/syslog.conf</filename>) to filter some messages, but
+      this tuning operation should not be necessary because the LIXA software
+      does not use the system log facility as a debugging tool: look at
+      <xref linkend="Tracing"/> to discover how debug messages are managed.
     </para>
   </section>
   <section xml:id="Tracing">
@@ -223,7 +304,7 @@
       </para>
     </section>
     <section>
-      <title>Activating trace</title>
+      <title>Improve troubleshooting with trace</title>
       <para>
 	The trace can be activated setting the environment variable
 	<varname>LIXA_TRACE_MASK</varname> before starting the execution of
@@ -244,6 +325,7 @@ tx_open(): -7
 	meaning: <quote>fatal error</quote>... Not so much...
 	We could try to trace the <quote>CLIENT TX</quote> module:
 	<screen>
+tiian@ubuntu:~$ export LIXA_TRACE_MASK=0x00001000
 tiian@ubuntu:~$ /opt/lixa/bin/lixat
 2011-12-04 12:19:49.235007 [8899/3073612464] lixa_tx_open
 2011-12-04 12:19:49.241544 [8899/3073612464] lixa_tx_open/TX_*=-7/excp=5/ret_cod=-138/errno=111
@@ -267,14 +349,191 @@ tx_open(): -7
 #define ECONNREFUSED    111     /* Connection refused */
 [...]
 	</screen>
+	The error happens because the LIXA state server 
+	(<command>lixad</command>) is not running, but we can improve our
+	diagnosis with a more detailed tracing adding
+	<quote>CLIENT CONN</quote> module:
+	<screen>
+tiian@ubuntu:~$ export LIXA_TRACE_MASK=0x00005000
+tiian@ubuntu:~$ /opt/lixa/bin/lixat
+2011-12-04 17:00:49.447866 [4514/3074067120] lixa_tx_open
+2011-12-04 17:00:49.452624 [4514/3074067120] client_connect
+2011-12-04 17:00:49.452678 [4514/3074067120] client_connect: connecting socket 4 to server '127.0.0.1' port 2345
+2011-12-04 17:00:49.454033 [4514/3074067120] client_connect/excp=2/ret_cod=-138/errno=111
+2011-12-04 17:00:49.454872 [4514/3074067120] lixa_tx_open/TX_*=-7/excp=5/ret_cod=-138/errno=111
+tx_open(): -7
+	</screen>
+	the client is not able to contact the state server that is configured
+	to listen port <systemitem class="ipaddress">2345</systemitem> 
+	at address 
+	<systemitem class="ipaddress">127.0.0.1</systemitem>
+      </para>
+    </section>
+    <section>
+      <title>Activating trace for <command>lixad</command> in 
+	<emphasis>daemon</emphasis> mode</title>
+      <para>
+	When running the state server (<command>lixad</command>) in
+	<emphasis>daemon</emphasis>
+	mode, you must explicitly ask <command>lixad</command> to use a
+	trace file. Try the following steps...
+	<screen>
+tiian@ubuntu:~$ sudo su - lixa
+lixa@ubuntu:~$ export LIXA_TRACE_MASK=0x00000005
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad -d
+2011-12-04 17:14:46.976067 [4888/3074164464] lixad/daemonize: fork()
+2011-12-04 17:14:46.978399 [4889/3074164464] lixad/daemonize: setsid()
+2011-12-04 17:14:46.979740 [4889/3074164464] lixad/daemonize: signal()
+2011-12-04 17:14:46.980513 [4889/3074164464] lixad/daemonize: fork()
+2011-12-04 17:14:46.982516 [4890/3074164464] lixad/daemonize: chdir()
+2011-12-04 17:14:46.984002 [4890/3074164464] lixad/daemonize: umask()
+	</screen>
+	the process is tracing the initial operations and after the
+	<emphasis>daemonization</emphasis> it does not produce any more
+	messages. By default <filename>stderr</filename> is used as the
+	standard tracing file, but the
+	<emphasis>daemon</emphasis> disconnects from the terminal
+	and closes the <filename>stderr</filename> file.
+	To avoid this issue you can specify a specific trace file name using
+	the <option>-t</option> (<option>--trace-file</option>) dedicated
+	option:
+	<screen>
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad -d -t /tmp/lixad.trace
+lixa@ubuntu:~$ ls -la /tmp/lixad.trace
+-rw-r--r-- 1 lixa lixa 349 2011-12-04 17:29 /tmp/lixad.trace
+lixa@ubuntu:~$ pkill lixad
+	</screen>
+	inspecting the content of <filename>/tmp/lixad.trace</filename>
+	you can now find messages related to the listener module too:
+	<screen>
+2011-12-04 17:29:12.435474 [5187/3074373360] lixad/daemonize: fork()
+2011-12-04 17:29:12.436593 [5188/3074373360] lixad/daemonize: setsid()
+2011-12-04 17:29:12.437187 [5188/3074373360] lixad/daemonize: signal()
+2011-12-04 17:29:12.437245 [5188/3074373360] lixad/daemonize: fork()
+2011-12-04 17:29:12.435474 [5187/3074373360] lixad/daemonize: fork()
+2011-12-04 17:29:12.439878 [5189/3074373360] lixad/daemonize: now daemonized!
+2011-12-04 17:29:12.441874 [5189/3074373360] lixad/main: starting
+2011-12-04 17:29:12.447862 [5189/3074373360] server_listener
+2011-12-04 17:29:12.447940 [5189/3074373360] server_listener: resolving address '127.0.0.1' for listener # 0
+2011-12-04 17:29:12.448001 [5189/3074373360] server_listener: creating socket for listener # 0
+2011-12-04 17:29:12.448033 [5189/3074373360] server_listener: socket for listener 0 is 10
+2011-12-04 17:29:12.448044 [5189/3074373360] server_listener: setting SO_REUSE option for listener # 0
+2011-12-04 17:29:12.448142 [5189/3074373360] server_listener: resolving address '0.0.0.0' for listener # 1
+2011-12-04 17:29:12.448156 [5189/3074373360] server_listener: creating socket for listener # 1
+2011-12-04 17:29:12.448174 [5189/3074373360] server_listener: socket for listener 1 is 11
+2011-12-04 17:29:12.448183 [5189/3074373360] server_listener: setting SO_REUSE option for listener # 1
+2011-12-04 17:29:12.448213 [5189/3074373360] server_listener_signal
+2011-12-04 17:29:12.448262 [5189/3074373360] server_listener_signal/excp=3/ret_cod=0/errno=0
+2011-12-04 17:29:12.448275 [5189/3074373360] server_listener_loop
+2011-12-04 17:29:12.448284 [5189/3074373360] server_listener_loop: entering poll...
+2011-12-04 17:29:23.499666 [5189/3074373360] server_listener_signal_action: signo=15
+2011-12-04 17:29:23.499850 [5189/3074373360] server_listener_signal_action: sending message to thread id 0
+2011-12-04 17:29:23.499877 [5189/3074373360] server_listener_signal_action: sending message to thread id 1
+2011-12-04 17:29:23.499904 [5189/3074373360] server_listener_signal_action: sending message to thread id 2
+2011-12-04 17:29:23.499942 [5189/3074373360] server_listener_signal_action: sending message to thread id 3
+2011-12-04 17:29:23.499991 [5189/3074373360] server_listener_loop: ready file descriptors = 1
+2011-12-04 17:29:23.500003 [5189/3074373360] server_listener_loop: slot=0, fd=2, POLLIN=1, POLLERR=0, POLLHUP=0, POLLNVAL=0
+2011-12-04 17:29:23.500025 [5189/3074373360] server_listener_loop: waiting thread (1) id 3074329488 termination...
+2011-12-04 17:29:23.521138 [5189/3074373360] server_listener_loop: waiting thread (2) id 3065920400 termination...
+2011-12-04 17:29:23.521169 [5189/3074373360] server_listener_loop: waiting thread (3) id 3057511312 termination...
+2011-12-04 17:29:23.521180 [5189/3074373360] server_listener_loop/excp=8/ret_cod=0/errno=4
+2011-12-04 17:29:23.521190 [5189/3074373360] server_listener/excp=8/ret_cod=0/errno=4
+2011-12-04 17:29:23.521558 [5189/3074373360] lixad/main: exiting
+	</screen>
+	<note><para>
+	    The trace file is written using the 
+	    <systemitem class="library">stdio</systemitem>
+	    and the output is not flushed after every message: if you look
+	    at the trace file of a running <command>lixad</command> state
+	    server, you will not be able to read the last messages due to
+	    the buffering of <systemitem class="library">stdio</systemitem>
+	    library. After the
+	    server termination you are sure every trace message is inside the
+	    trace file.
+	</para></note>
+      </para>
+    </section>
+    <section>
+      <title>Redirecting the trace messages</title>
+      <para>
+	In the previous section you discovered how you can send the trace
+	messages of <command>lixad</command>. The
+	<systemitem class="library">lixac</systemitem> library sends the
+	trace messages to the <filename>stderr</filename> file associated to
+	the terminal of the user that's running the process; many times you
+	would send the messages to a specific disk hosted file. You can
+	obtain this behavior using redirection:
+	<screen>
+tiian@ubuntu:~$ export LIXA_TRACE_MASK=0x00005000
+tiian@ubuntu:~$ /opt/lixa/bin/lixat 2&gt;/tmp/lixat.trace
+tx_open(): -7
+tiian@ubuntu:~$ ls -la /tmp/lixat.trace
+-rw-r--r-- 1 tiian tiian 417 2011-12-04 17:43 /tmp/lixat.trace
+	</screen>
+	You can inspect the content of the file
+	<filename>/tmp/lixat.trace</filename>:
+	<screen>
+2011-12-04 17:43:36.078314 [5544/3074013872] lixa_tx_open
+2011-12-04 17:43:36.083822 [5544/3074013872] client_connect
+2011-12-04 17:43:36.083890 [5544/3074013872] client_connect: connecting socket 4 to server '127.0.0.1' port 2345
+2011-12-04 17:43:36.084862 [5544/3074013872] client_connect/excp=2/ret_cod=-138/errno=111
+2011-12-04 17:43:36.084906 [5544/3074013872] lixa_tx_open/TX_*=-7/excp=5/ret_cod=-138/errno=111
+	</screen>
       </para>
     </section>
   </section>
   <section>
     <title>Automatic and manual recovery</title>
     <para>
-      [...]
+      This chapter explains some advanced concepts that the LIXA system
+      administrator should know to solve some complex issues the XA 
+      technology could generate.
     </para>
+    <section>
+      <title>Automatic (smooth) recovery</title>
+      <para>
+	If your environment is configured and runs as designed, when an
+	Application Program fails an automatic recovery operation fix the
+	problem as soon as possible. Below there is a first trivial
+	scenarios:
+	<itemizedlist mark="bullet">
+	  <listitem>
+	    <para>the Application Program crashes before it reaches the
+	    <function>xa_prepare()</function> function
+	    (called by <function>tx_commit()</function>)
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>the Resource Managers autonoumosly roll back the
+	    work in progress and the environment is cleaned up</para>
+	  </listitem>
+	</itemizedlist>	
+	the distributed transaction started but it did not initiated the
+	two phase commit protocol: there is no relevant difference with
+	a transaction with a single Resource Manager. The following scenario
+	is slightly different:
+	<itemizedlist mark="bullet">
+	  <listitem>
+	    <para>the Application Program crashes after it has passed the
+	    <function>xa_prepare()</function> function but before it
+	    reaches the <function>xa_commit()</function> function
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>@@@</para>
+	  </listitem>
+	  <listitem>
+	    <para></para>
+	  </listitem>
+	  <listitem>
+	    <para></para>
+	  </listitem>
+	  <listitem>
+	    <para></para>
+	  </listitem>
+	</itemizedlist>	
+      </para>
+    </section>
   </section>
   <section xml:id="Non_root_installation">
     <title>Non root installation</title>

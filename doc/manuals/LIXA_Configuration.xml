@@ -759,7 +759,7 @@ export LIXA_CONFIG_FILE=/tmp/my_lixac
 	  among all the desired values.
 	</para>
 	<para>
-	  You are interested in tracing what happens inside 
+	  Supposing you are interested in tracing what happens inside 
 	  <emphasis>"server listener"</emphasis>,
 	  <emphasis>"server manager"</emphasis> and
 	  <emphasis>"server status"</emphasis> modules.
@@ -784,6 +784,8 @@ export LIXA_TRACE_MASK=0xffffffff
 	  </para></warning>
 	  Establishing the internal modules that must be traced is a typical
 	  troubleshooting task you can acquire working with LIXA project.
+	  In <xref linkend="Tracing"/> you can discover some useful information
+	  related to the usage of this environment variable.
 	</para>
       </section>
   </section>
