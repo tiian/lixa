@@ -1,6 +1,83 @@
 <chapter xml:id="Recovery">
-  <title>Recovery</title>
+  <title>Recovery</title> 
   <para>
-    [...]
+    This chapter explains some advanced concepts that the LIXA system
+    administrator should know to solve some complex issues the XA 
+    technology could generate.
+    LIXA technology provide two type of recovery:
+    <itemizedlist mark="bullet">
+      <listitem><para>
+	  <emphasis>Automatic Recovery</emphasis>: 
+	  it happens silently and rolls back or commits
+	  the transactions that crashed before a consistent point had been
+	  reached
+      </para></listitem>
+      <listitem><para>
+	  <emphasis>Manual Recovery</emphasis>:
+	  it is invoked by <command>lixar</command> utility
+	  to solve the transactions that cannot be automatically recovered
+      </para></listitem>
+    </itemizedlist>	
   </para>
+  <section>
+    <title>Automatic (smooth) recovery</title>
+    <para>
+      If your environment is configured and runs as designed, when an
+      Application Program fails an automatic recovery operation fix the
+      problem as soon as possible. Below there is a first trivial
+      scenarios:
+      <itemizedlist mark="bullet">
+	<listitem>
+	  <para>the Application Program crashes before it reaches the
+	    <function>xa_prepare()</function> function
+	    (called by <function>tx_commit()</function>)
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>the Resource Managers autonoumosly roll back the
+	    work in progress and the environment is cleaned up</para>
+	</listitem>
+      </itemizedlist>	
+      the distributed transaction started but it did not initiated the
+      two phase commit protocol: there is no relevant difference with
+      a transaction with a single Resource Manager. 
+      <figure xml:id="recover1">
+	<title>The Application Program crashes before <function>xa_prepare()</function></title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_Recovery_01.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      The following scenario is slightly different:
+      <itemizedlist mark="bullet">
+	<listitem>
+	  <para>the Application Program crashes after it has passed the
+	    <function>xa_prepare()</function> function but before it
+	    reaches the <function>xa_commit()</function> function
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>@@@</para>
+	</listitem>
+	<listitem>
+	  <para></para>
+	</listitem>
+	<listitem>
+	  <para></para>
+	</listitem>
+	<listitem>
+	  <para></para>
+	</listitem>
+      </itemizedlist>	
+      <figure xml:id="recover2">
+	<title>The Application Program crashes after <function>xa_prepare()</function></title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_Recovery_02.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+    </para>
+  </section>
 </chapter>
