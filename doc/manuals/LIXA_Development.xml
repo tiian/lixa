@@ -5210,7 +5210,7 @@ tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL11112011.trc
   </section>
   <section xml:id="Development_example11_mys_mys">
     <title>An example with two MySQL servers</title>
-    <figure xml:id="develop10">
+    <figure xml:id="develop11">
       <title>Deploy model of an example showing a distributed transaction with
 	two MySQL servers</title>
       <mediaobject>
