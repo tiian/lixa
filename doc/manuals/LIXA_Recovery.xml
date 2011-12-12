@@ -21,63 +21,100 @@
   </para>
   <section>
     <title>Automatic (smooth) recovery</title>
-    <para>
-      If your environment is configured and runs as designed, when an
-      Application Program fails an automatic recovery operation fix the
-      problem as soon as possible. Below there is a first trivial
-      scenarios:
-      <itemizedlist mark="bullet">
-	<listitem>
-	  <para>the Application Program crashes before it reaches the
-	    <function>xa_prepare()</function> function
-	    (called by <function>tx_commit()</function>)
-	  </para>
-	</listitem>
-	<listitem>
-	  <para>the Resource Managers autonoumosly roll back the
-	    work in progress and the environment is cleaned up</para>
-	</listitem>
-      </itemizedlist>	
-      the distributed transaction started but it did not initiated the
-      two phase commit protocol: there is no relevant difference with
-      a transaction with a single Resource Manager. 
-      <figure xml:id="recover1">
-	<title>The Application Program crashes before <function>xa_prepare()</function></title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="LIXA_Recovery_01.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-      The following scenario is slightly different:
-      <itemizedlist mark="bullet">
-	<listitem>
-	  <para>the Application Program crashes after it has passed the
-	    <function>xa_prepare()</function> function but before it
-	    reaches the <function>xa_commit()</function> function
-	  </para>
-	</listitem>
-	<listitem>
-	  <para>@@@</para>
-	</listitem>
-	<listitem>
-	  <para></para>
-	</listitem>
-	<listitem>
-	  <para></para>
-	</listitem>
-	<listitem>
-	  <para></para>
-	</listitem>
-      </itemizedlist>	
-      <figure xml:id="recover2">
-	<title>The Application Program crashes after <function>xa_prepare()</function></title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="LIXA_Recovery_02.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-    </para>
+    <section>
+      <title>Scenario 1: autonoumos rollback</title>
+      <para>
+	If your environment is configured and runs as designed, when an
+	Application Program fails an automatic recovery operation fix the
+	problem as soon as possible. Below there is a first trivial
+	scenarios:
+	<itemizedlist mark="bullet">
+	  <listitem>
+	    <para>the Application Program crashes before it reaches the
+	      <function>xa_prepare()</function> function
+	      (called by <function>tx_commit()</function>)
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>the Resource Managers 
+	      <emphasis>autonoumosly</emphasis> roll back the
+	      work in progress and the environment is cleaned up</para>
+	  </listitem>
+	</itemizedlist>	
+	the distributed transaction started but it did not initiated the
+	two phase commit protocol: there is no relevant difference between
+	this scenario and a single Resource Manager (one phase commit)
+	scenario. The LIXA Transaction Manager does <emphasis>not</emphasis>
+	manage a recovery phase.
+	<figure xml:id="recover1">
+	  <title>The Application Program crashes before <function>xa_prepare()</function></title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="LIXA_Recovery_01.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+      </para>
+    </section>
+    <section>
+      <title>Scenario 2: a second Application Program triggers the recovery action</title>
+      <para>
+	The following scenario is slightly different:
+	<itemizedlist mark="bullet">
+	  <listitem>
+	    <para>the Application Program crashes after it has passed the
+	      <function>xa_prepare()</function> function but before it
+	      reaches the <function>xa_commit()</function> function
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>the Resource Managers keep the <emphasis>prepared</emphasis>
+	    transaction <quote>in flight</quote> until the Transaction
+	    Manager decides the proper recovery action</para>
+	  </listitem>
+	  <listitem>
+	    <para>an <quote>equivalent</quote> Application Program starts 
+	      and activate
+	      the LIXA Transaction Manager with <function>tx_open()</function>
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>the LIXA Transaction Manager discovers there is a
+	      <emphasis>prepared</emphasis> transaction and establishes that
+	      it must commit the transaction
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>the second Application Program implicitly and inconsciously
+	    started the recovery process of a previously crashed
+	    Application Program</para>
+	  </listitem>
+	</itemizedlist>	
+	<figure xml:id="recover2">
+	  <title>The Application Program crashes after <function>xa_prepare()</function></title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="LIXA_Recovery_02.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	The above pattern is the result of the LIXA design: the Transaction
+	Manager is not an active component, but it's a passive one and
+	is embedded in the Application Program when it links the
+	<systemitem class="library">lixac</systemitem> library 
+	and activates it with the
+	<function>tx_open()</function> function.
+      </para>
+      <note><para>
+	  Depending on the crash time: slightly before the 
+	  <emphasis>prepare phase</emphasis>,
+	  in the middle of the <emphasis>prepare phase</emphasis>,
+	  after the completion of the <emphasis>prepare phase</emphasis>, 
+	  the LIXA Transaction Manager chooses a different recovery 
+	  operation between
+	  <function>xa_commit()</function> and 
+	  <function>xa_rollback()</function>.
+      </para></note>
+    </section>
   </section>
 </chapter>

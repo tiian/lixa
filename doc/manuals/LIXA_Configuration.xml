@@ -98,22 +98,27 @@
       the client and the server (<command>lixad</command>) uses TCP/IP sockets.
     </para>
     <para>
-      The <command>lixac</command> library is embedded in the Application
+      The <systemitem class="library">lixac</systemitem> library is 
+      embedded in the Application
       Programs; the communication between the Application Program and
-      the <command>lixac</command> library uses TX (Transaction Demarcation)
-      API, see <citation>TXspec</citation>. The <command>lixac</command> 
+      the <systemitem class="library">lixac</systemitem> library uses 
+      TX (Transaction Demarcation)
+      API, see <citation>TXspec</citation>. 
+      The <systemitem class="library">lixac</systemitem> 
       library contains all the logic of the LIXA Transaction Manager.
     </para>
     <para>
       The communication between the Application Program and the Resource
       Managers depends on Resource Managers type and configuration: 
       it may be cross memory, TCP/IP, System V IPC, etc...
-      The communication between the <command>lixac</command> library and the
+      The communication between the 
+      <systemitem class="library">lixac</systemitem> library and the
       Resource Manager depends on Resource Manager configuration and must be
       of the same used by the Application Program.
     </para>
     <para>
-      The communication between <command>lixac</command> library and 
+      The communication between 
+      <systemitem class="library">lixac</systemitem> library and 
       <command>lixad</command> is ever istantiated by the client: the
       server never calls the clients.
     </para>
@@ -247,7 +252,8 @@
       </mediaobject>
     </figure>
     <para>
-      The client component (<command>lixac</command>) is configured using the
+      The client component (<systemitem class="library">lixac</systemitem>) 
+      is configured using the
       <filename>etc/lixac_conf.xml</filename> file; the server component
       (<command>lixad</command>) is configured using the
       <filename>etc/lixad_conf.xml</filename> file
