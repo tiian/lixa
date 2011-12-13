@@ -74,7 +74,7 @@
 	  </listitem>
 	  <listitem>
 	    <para>an <quote>equivalent</quote> Application Program starts 
-	      and activate
+	      and activates
 	      the LIXA Transaction Manager with <function>tx_open()</function>
 	    </para>
 	  </listitem>
@@ -116,5 +116,134 @@
 	  <function>xa_rollback()</function>.
       </para></note>
     </section>
+  </section>
+  <section xml:id="Automatic_recovery_concepts">
+    <title>Automatic recovery concepts</title>
+    <para>
+      The above paragraphs explain what's happen when automatic recovery
+      starts and completes (rolls back or commits) the transaction marked
+      as <quote>recovery pending</quote>.
+    </para>
+    <para>
+      <foreignphrase>
+	An <quote>equivalent</quote> Application Program starts and activates
+	the LIXA Transaction Manager with <function>tx_open()</function>.
+	The LIXA Transaction Manager autonoumosly coordinates the transaction
+	completion and the Application Program is not aware of this
+	<emphasis>under the covers</emphasis> operation.
+      </foreignphrase>
+    </para>
+    <section>
+      <title>Application Program equivalence</title>
+      <para>
+	From the LIXA Transaction Manager point of view,
+	two Application Programs are
+	equivalent when they are associated to the same 
+	<emphasis>job</emphasis>.
+      </para>
+      <para>
+	The job associated to an Application Program can be:
+	<itemizedlist mark="bullet">
+	  <listitem>
+	    <para>
+	      the content of the environment variable 
+	      <varname>LIXA_JOB</varname> if it is set
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      a string computed in this way if the environment variable 
+	      <varname>LIXA_JOB</varname> is <emphasis>not</emphasis> set:
+	      <para>
+		<varname>branch qualifier</varname> + 
+		<quote>/</quote> + 
+		<systemitem class="ipaddress">IP address</systemitem>
+	      </para>
+	      where <varname>branch qualifier</varname> is computed as:
+	      <para>
+		<function>MD5</function>(<filename>lixac_conf.xml</filename> + 
+		$(<varname>LIXA_PROFILE</varname>) +
+		<function>gethostid()</function>)
+	      </para>
+	    </para>
+	  </listitem>
+	</itemizedlist>
+	An example of <varname>branch qualifier</varname> is
+	<quote>0fc29445b1d4c3f4ed6be2fea20f918b</quote>, while an example of
+	job automatically associated to an Application Program is
+	<quote>0fc29445b1d4c3f4ed6be2fea20f918b/127.0.0.1</quote>
+      </para>
+      <note><para>
+	  If you don't set the environment variable 
+	  <varname>LIXA_JOB</varname> all the Application Programs that
+	  meet this requirements:
+	  <itemizedlist mark="bullet">
+	    <listitem><para>
+		they use a config file (<filename>lixac_conf.xml</filename>)
+		with the same content
+	    </para></listitem>
+	    <listitem><para>
+		they use a <varname>LIXA_PROFILE</varname> environment variable
+		with the same content
+	    </para></listitem>
+	    <listitem><para>
+		they run in a host that returns the same value to
+		<function>gethostid()</function> function		
+	    </para></listitem>
+	    <listitem><para>
+		they are calling the LIXA state server from the same 
+		IP address	
+	    </para></listitem>
+	  </itemizedlist>
+	  <emphasis>are associated to the same job</emphasis>.
+      </para></note>
+      <para>
+	To pick-up the job associated to an Application Program you can
+	activate the trace using the bit associated to the label
+	<quote>LIXA_TRACE_MOD_CLIENT_CONFIG</quote>. Take a look to
+	<xref linkend="Tracing_modules"/> for more information.
+	This is an excerpt from the trace:
+	<screen>
+[...]	  
+2011-12-03 17:00:59.746036 [6021/1078050640] client_config_job
+2011-12-03 17:00:59.746073 [6021/1078050640] client_config_job: acquiring exclusive mutex
+2011-12-03 17:00:59.746120 [6021/1078050640] client_config_job: 'LIXA_JOB' environment variable not found, computing job string...
+2011-12-03 17:00:59.746175 [6021/1078050640] lixa_job_set_source_ip
+2011-12-03 17:00:59.746275 [6021/1078050640] lixa_job_set_source_ip/excp=1/ret_cod=0/errno=0
+2011-12-03 17:00:59.746339 [6021/1078050640] client_config_job: job value for this process is '0fc29445b1d4c3f4ed6be2fea20f918b/127.0.0.1      '
+2011-12-03 17:00:59.746379 [6021/1078050640] client_config_job: releasing exclusive mutex
+2011-12-03 17:00:59.746514 [6021/1078050640] client_config_job/excp=3/ret_cod=0/errno=0
+[...]
+	</screen>
+	<important><para>
+	    Setting the environment variable <varname>LIXA_JOB</varname>
+	    allows you to associate any Application Program to a custom
+	    user defined job: this may be interesting if you are using a
+	    workload balanced environment, this may be dangerous if you
+	    associate Application Programs using a different set of
+	    Resource Managers to the same job.
+	</para></important>
+      </para>
+      <para>
+	If you don't set <varname>LIXA_JOB</varname> environment variable,
+	the default behavior should be strong enought to avoid issues when
+	LIXA is used under <quote>standard</quote> conditions.
+      </para>
+    </section>
+    <section>
+      <title>Forcing automatic recovery</title>
+      <para>
+	Sometimes you need to force the automatic recovery to happen because
+	the crashed Applicaton Program is a <quote>one shot</quote> program
+	and you can not execute it a second time due to some functional
+	constrain.
+      </para>
+      <para>
+	Any application program meeting the requirements described above can
+	be used, <command>lixat</command> utility command too. Try the
+	example below: @@@
+      </para>
+    </section>
+    @@@ how to programmatically pick-up the branch qualifier?! @@@
   </section>
 </chapter>

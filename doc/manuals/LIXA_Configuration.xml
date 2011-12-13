@@ -736,7 +736,8 @@ export LIXA_CONFIG_FILE=/tmp/my_lixac
 	<para>
 	  Use this environment variable to associate a specific transactional
 	  job identifier instead of the automatically assigned one. 
-	  See <xref linkend="Workload_balanced_environments"/> 
+	  See <xref linkend="Automatic_recovery_concepts"/> and
+	  <xref linkend="Workload_balanced_environments"/> 
 	  for more information.
 	</para>
       </section>
