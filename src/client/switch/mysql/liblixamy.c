@@ -67,7 +67,7 @@
 
 struct xa_switch_t xamyls = {
     "MySQL[LIXA]",
-    TMNOFLAGS,
+    TMNOMIGRATE,
     0,
     lixa_my_open,
     lixa_my_close,

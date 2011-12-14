@@ -124,7 +124,7 @@ Dec  4 18:22:49 ubuntu lixad[6697]: LXD006N server terminated activities
       </para>
       <para>
 	The table below shows how the LIXA software is partitioned in modules:
-	<table xml:id="ex.calstable" frame="all">
+	<table frame="all">
 	  <title>Tracing module flags</title>
 	  <tgroup cols='4' align='left' colsep='1' rowsep='1'>
 	    <thead>

@@ -67,7 +67,7 @@
 
 struct xa_switch_t xapqls = {
     "PostgreSQL[LIXA]",
-    TMNOFLAGS,
+    TMNOMIGRATE,
     0,
     lixa_pq_open,
     lixa_pq_close,
