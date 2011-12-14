@@ -20,7 +20,7 @@
     </itemizedlist>	
   </para>
   <section>
-    <title>Automatic (smooth) recovery</title>
+    <title>Automatic (warm) recovery</title>
     <section>
       <title>Scenario 1: autonoumos rollback</title>
       <para>
@@ -230,7 +230,7 @@
 	LIXA is used under <quote>standard</quote> conditions.
       </para>
     </section>
-    <section>
+    <section xml:id="Forcing_automatic_recovery">
       <title>Forcing automatic recovery</title>
       <para>
 	Sometimes you need to force the automatic recovery to happen because
@@ -240,10 +240,454 @@
       </para>
       <para>
 	Any application program meeting the requirements described above can
-	be used, <command>lixat</command> utility command too. Try the
-	example below: @@@
+	be used, <command>lixat</command> utility command too. The following
+	example will show you how it works using PostgreSQL and Oracle
+	Resource Managers.
+      </para>
+      <para>
+	First of all, you must configure, build and install the LIXA project
+	software enabling PostgreSQL, Oracle and crash simulation features:
+	<screen>
+tiian@ubuntu:~/lixa$ ./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server \
+> --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib \
+> --enable-crash
+	</screen>
+	then you must follow the steps described in 
+	<xref linkend="Development_example6_pql_ora"/>
+	to prepare the scenario environment.
+	Open three different terminal sessions as explained in the above
+	example, and try to insert/delete a row:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+PQL_STA_ORA_DYN
+tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+tiian@ubuntu:~/tmp$ echo $ORACLE_SID
+XE
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
+tiian@ubuntu:~/tmp$ ./example6_pql_ora insert
+Inserting a row in the tables...
+Oracle INSERT statement executed!
+tiian@ubuntu:~/tmp$ ./example6_pql_ora delete
+Deleting a row from the tables...
+Oracle DELETE statement executed!
+	  </screen></td></tr></tbody>
+	</table>
+	To simulate a crash after the <function>xa_prepare()</function>
+	completed successfully, you can set the environment variable
+	<varname>LIXA_CRASH_POINT</varname> to the value
+	<constant>LIXA_CRASH_POINT_PREPARE_2</constant>
+	(see <filename>src/common/lixa_crash.h</filename>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_CRASH_POINT=15
+tiian@ubuntu:~/tmp$ echo $LIXA_CRASH_POINT
+15
+tiian@ubuntu:~/tmp$ ./example6_pql_ora insert
+Inserting a row in the tables...
+Oracle INSERT statement executed!
+Aborted
+	  </screen></td></tr></tbody>
+	</table>
+	You can check there is a prepared (in-doubt) transaction inside Oracle:
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from dba_pending_transactions;
+
+  FORMATID
+----------
+GLOBALID
+--------------------------------------------------------------------------------
+BRANCHID
+--------------------------------------------------------------------------------
+1279875137
+97DD30A150604AFDBFA5FDC94B611FD5
+9BAC7BE1C129EA6EE31F2D71B318120C
+	  </screen></td></tr></tbody>
+	</table>
+	And the same transaction inside PostgreSQL:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from pg_prepared_xacts;
+ transaction |                                    gid                                     |           prepared            | owner | database 
+-------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
+         874 | 4c495841.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c | 2011-12-14 22:02:50.462682+01 | tiian | testdb
+	  </screen></td></tr></tbody>
+	</table>
+	Noting that the decimal value 1279875137 is expressed as 4c495841 
+	in hexadecimal, the information retrieved from the Resource Managers 
+	is consistent.
+	It is suggested to activate the trace related to the 
+	<quote>client recovery</quote>
+	module (see <xref linkend="Tracing_modules"/>)
+	before running <command>lixat</command> program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00040000
+tiian@ubuntu:~/tmp$ /opt/lixa/bin/lixat 
+2011-12-14 22:22:01.740634 [27735/3073944240] client_recovery
+2011-12-14 22:22:01.740771 [27735/3073944240] client_recovery: sending 197 bytes ('000191&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="8"&gt;&lt;client job="9bac7be1c129ea6ee31f2d71b318120c/127.0.0.1      " config_digest="9bac7be1c129ea6ee31f2d71b318120c"/&gt;&lt;/msg&gt;') to the server for step 8
+2011-12-14 22:22:01.759352 [27735/3073944240] client_recovery: receiving 561 bytes from the server |&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="16"&gt;&lt;answer rc="0"/&gt;&lt;client job="9bac7be1c129ea6ee31f2d71b318120c/127.0.0.1      " config_digest="9bac7be1c129ea6ee31f2d71b318120c"&gt;&lt;last_verb_step verb="5" step="16"/&gt;&lt;state finished="0" txstate="3" will_commit="1" will_rollback="0" xid="4c495841.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c"/&gt;&lt;/client&gt;&lt;rsrmgrs&gt;&lt;rsrmgr rmid="0" next_verb="0" r_state="1" s_state="33" td_state="10"/&gt;&lt;rsrmgr rmid="1" next_verb="0" r_state="1" s_state="33" td_state="20"/&gt;&lt;/rsrmgrs&gt;&lt;/msg&gt;|
+2011-12-14 22:22:01.759776 [27735/3073944240] client_recovery_analyze
+2011-12-14 22:22:01.759857 [27735/3073944240] client_recovery_analyze: the TX was committing
+2011-12-14 22:22:01.759873 [27735/3073944240] client_recovery_analyze: rmid=0, r_state=1, s_state=33, td_state=10
+2011-12-14 22:22:01.759884 [27735/3073944240] client_recovery_analyze: rmid=1, r_state=1, s_state=33, td_state=20
+2011-12-14 22:22:01.759902 [27735/3073944240] client_recovery_analyze/excp=1/ret_cod=0/errno=0
+2011-12-14 22:22:01.759921 [27735/3073944240] client_recovery: transaction '4c495841.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c' must be committed
+2011-12-14 22:22:01.759937 [27735/3073944240] client_recovery_commit
+2011-12-14 22:22:01.759971 [27735/3073944240] client_recovery_commit: committing transaction '4c495841.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c'
+2011-12-14 22:22:01.759998 [27735/3073944240] client_recovery_commit: xa_commit for rmid=0, name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]'...
+2011-12-14 22:22:02.143764 [27735/3073944240] client_recovery_commit: rc=0
+2011-12-14 22:22:02.143866 [27735/3073944240] client_recovery_commit: xa_commit for rmid=1, name='OracleXE_dynreg', xa_name='Oracle_XA'...
+2011-12-14 22:22:03.188211 [27735/3073944240] client_recovery_commit: rc=0
+2011-12-14 22:22:03.188272 [27735/3073944240] client_recovery_commit/excp=1/ret_cod=0/errno=0
+2011-12-14 22:22:03.188318 [27735/3073944240] client_recovery: sending 187 bytes ('000181&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="24"&gt;&lt;recovery failed="0" commit="1"/&gt;&lt;rsrmgrs&gt;&lt;rsrmgr rmid="0" rc="0"/&gt;&lt;rsrmgr rmid="1" rc="0"/&gt;&lt;/rsrmgrs&gt;&lt;/msg&gt;') to the server for step 24
+2011-12-14 22:22:03.188496 [27735/3073944240] client_recovery: sending 197 bytes ('000191&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="8"&gt;&lt;client job="9bac7be1c129ea6ee31f2d71b318120c/127.0.0.1      " config_digest="9bac7be1c129ea6ee31f2d71b318120c"/&gt;&lt;/msg&gt;') to the server for step 8
+2011-12-14 22:22:03.228361 [27735/3073944240] client_recovery: receiving 95 bytes from the server |&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="16"&gt;&lt;answer rc="1"/&gt;&lt;/msg&gt;|
+2011-12-14 22:22:03.228544 [27735/3073944240] client_recovery: the server answered LIXA_RC_OBJ_NOT_FOUND; there are no more transactions to recover
+2011-12-14 22:22:03.228589 [27735/3073944240] client_recovery/excp=12/ret_cod=0/errno=0
+tx_open(): 0
+tx_close(): 0
+	  </screen></td></tr></tbody>
+	</table>
+	You can now verify there are no more 
+	<emphasis>prepared/in-doubt</emphasis> transactions inside the
+	Resource Managers:
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from dba_pending_transactions;
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from pg_prepared_xacts;
+ transaction | gid | prepared | owner | database 
+-------------+-----+----------+-------+----------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	<important><para>
+	    The automatic (warm) recovery process completed successfully
+	    because <command>./example6_pql_ora</command> and
+	    <command>/opt/lixa/bin/lixat</command> were associated to 
+	    <emphasis>the same job</emphasis> and the LIXA state server
+	    (<command>lixad</command>) kept the state of the transaction in
+	    the meanwhile.
+	</para></important>
+	In the next paragraphs you can explore what happens if the previous
+	conditions are not satisfied.
       </para>
     </section>
-    @@@ how to programmatically pick-up the branch qualifier?! @@@
   </section>
+  <section>
+    <title>Manual (cold) recovery</title>
+    <para>
+      If, for any reason, the LIXA state server (<command>lixad</command>)
+      forgot the state of a transaction
+      <footnote><para>
+	  This should never happen: it could be a bug in LIXA project
+	  software or it might be the consequence of a 
+	  <quote>cold start</quote> (you removed the state files) of
+	  <command>lixad</command>
+      </para></footnote>
+      or the transaction is in state <quote>recovery failed</quote> because
+      a previous automatic (warm) recovery failed, you have to manually
+      recover the transaction.
+      The procedure to recover a <quote>forgotten</quote> transaction is 
+      the same you use to recover a <quote>recovery failed</quote> one, 
+      but additional server side clean-up is suggested for 
+      <quote>recovery failed</quote> transactions.
+    </para>
+    <section>
+      <title>Recoverying a forgotten transaction</title>
+      <para>
+	This example necessitates of the same environment set-up in
+	<xref linkend="Forcing_automatic_recovery"/>; you must start running
+	the example program after you enabled the 
+	<varname>LIXA_CRASH_POINT</varname> environment variable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_CRASH_POINT=15
+tiian@ubuntu:~/tmp$ echo $LIXA_CRASH_POINT
+15
+tiian@ubuntu:~/tmp$ ./example6_pql_ora insert
+Deleting a row from the tables...
+Oracle DELETE statement executed!
+Aborted
+	  </screen></td></tr></tbody>
+	</table>
+	and check there is a recovery pending transaction inside PostgreSQL
+	and Oracle Resource Managers:
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from dba_pending_transactions;
+
+  FORMATID
+----------
+GLOBALID
+--------------------------------------------------------------------------------
+BRANCHID
+--------------------------------------------------------------------------------
+1279875137
+957747F7F37B439EBCEA4146076AD322
+9BAC7BE1C129EA6EE31F2D71B318120C
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from pg_prepared_xacts;
+ transaction |                                    gid                                     |           prepared            | owner | database 
+-------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
+         877 | 4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c | 2011-12-14 22:55:14.973443+01 | tiian | testdb
+	  </screen></td></tr></tbody>
+	</table>
+	Then you should stop and cold start the <command>lixad</command> 
+	state server:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ sudo su - lixa
+lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
+lixa     24437     1  0 21:19 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ pkill lixad
+lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
+lixa@ubuntu:~$ ls /opt/lixa/var/
+lixad_status1_1  lixad_status2_1  lixad_status3_1  README
+lixad_status1_2  lixad_status2_2  lixad_status3_2
+lixa@ubuntu:~$ rm /opt/lixa/var/lixad_status*
+lixa@ubuntu:~$ ls /opt/lixa/var/
+README
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
+lixa     28594     1  0 23:00 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ ls /opt/lixa/var/
+lixad_status1_1  lixad_status2_1  lixad_status3_1  README
+lixad_status1_2  lixad_status2_2  lixad_status3_2  run.pid
+lixa@ubuntu:~$ exit
+logout
+	  </screen></td></tr></tbody>
+	</table>
+	These are the operations you just performed:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	      changed the user from your own to 
+	      <systemitem class="username">lixa</systemitem> user
+	  </para></listitem>
+	  <listitem><para>
+	      checked the <command>lixad</command> daemon was running
+	  </para></listitem>
+	  <listitem><para>
+	      stopped the <command>lixad</command> daemon
+	  </para></listitem>
+	  <listitem><para>
+	      checked the <command>lixad</command> daemon was not running
+	  </para></listitem>
+	  <listitem><para>
+	      checked the <command>lixad</command>'s state files
+	  </para></listitem>
+	  <listitem><para>
+	      removed the <command>lixad</command>'s state files
+	  </para></listitem>
+	  <listitem><para>
+	      started the <command>lixad</command> daemon
+	  </para></listitem>
+	  <listitem><para>
+	      checked the new <command>lixad</command>'s state files
+	  </para></listitem>
+	</itemizedlist>
+	Running <command>lixat</command> does <emphasis>not</emphasis>
+	automatically recover the transaction:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00040000
+tiian@ubuntu:~/tmp$ /opt/lixa/bin/lixat 
+tx_open(): 0
+tx_close(): 0
+	  </screen></td></tr></tbody>
+	</table>
+	<note><para>
+	    The program does not produce trace because
+	    <quote>client recovery</quote> module is not called (the 
+	    state server does not pass information about recovery 
+	    pending transactions to the LIXA client library).
+	</para></note>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from dba_pending_transactions;
+
+  FORMATID
+----------
+GLOBALID
+--------------------------------------------------------------------------------
+BRANCHID
+--------------------------------------------------------------------------------
+1279875137
+957747F7F37B439EBCEA4146076AD322
+9BAC7BE1C129EA6EE31F2D71B318120C
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from pg_prepared_xacts;
+ transaction |                                    gid                                     |           prepared            | owner | database 
+-------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
+         877 | 4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c | 2011-12-14 22:55:14.973443+01 | tiian | testdb
+	  </screen></td></tr></tbody>
+	</table>
+	The <command>lixar</command> utility program with <option>-p</option>
+	option can be used to list the prepared transactions that can not be
+	automatically recovered:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ /opt/lixa/bin/lixar -p
+Execution options:
+	- print report = yes
+	- transaction(s) will be committed = no
+	- transaction(s) will be rolled back = no
+	- bypass xid branch qualifier check = no
+	- bypass xid format id check = no
+	- use TMENDRSCAN flag for last xa_recover call = no
+
+Recovery environment:
+LIXA_CONFIG_FILE_ENV_VAR = '(null)'
+LIXA_PROFILE_ENV_VAR = 'PQL_STA_ORA_DYN'
+LIXA_JOB_ENV_VAR = '(null)'
+
+Resource manager list:
+rmid=0, lixa_name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]'
+rmid=1, lixa_name='OracleXE_dynreg', xa_name='Oracle_XA'
+
+Prepared and in-doubt transaction list:
+xid='4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c': rmid=0 rmid=1 
+	  </screen></td></tr></tbody>
+	</table>
+	it reports some useful information and at the bottom there is the
+	list of in-doubt transactions. 
+	The transaction is prepared/in-doubt for both Resource Managers;
+	sometimes it may be only for a subset of the Resource Managers
+	defined by <varname>LIXA_PROFILE</varname>.
+	You can manually recover the transaction using
+	the <option>-x</option> and <option>-r</option> (rollback) or
+	<option>-c</option> (commit):
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ /opt/lixa/bin/lixar -p -x 4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c -r
+Execution options:
+	- print report = yes
+	- transaction to commit/rollback = 4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c
+	- transaction(s) will be committed = no
+	- transaction(s) will be rolled back = yes
+	- bypass xid branch qualifier check = no
+	- bypass xid format id check = no
+	- use TMENDRSCAN flag for last xa_recover call = no
+
+Recovery environment:
+LIXA_CONFIG_FILE_ENV_VAR = '(null)'
+LIXA_PROFILE_ENV_VAR = 'PQL_STA_ORA_DYN'
+LIXA_JOB_ENV_VAR = '(null)'
+
+Resource manager list:
+rmid=0, lixa_name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]'
+rmid=1, lixa_name='OracleXE_dynreg', xa_name='Oracle_XA'
+
+Prepared and in-doubt transaction list:
+xid='4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c': rmid=0 rmid=1 
+
+Analizing transaction '4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c':
+xa_rollback --&gt; rmid=0, lixa_name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]', rc=0
+xa_rollback --&gt; rmid=1, lixa_name='OracleXE_dynreg', xa_name='Oracle_XA', rc=0
+	  </screen></td></tr></tbody>
+	</table>
+	You can now verify there are no prepared/in-doubt transactions 
+	inside the Resource Managers:
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from dba_pending_transactions;
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from pg_prepared_xacts;
+ transaction | gid | prepared | owner | database 
+-------------+-----+----------+-------+----------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	We rolled back the deletion so the rows must be in place:
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+COUNTR
+------
+COUNTRY_NAME
+--------------------------------------------------------------------------------
+ REGION_ID
+----------
+RS
+Repubblica San Marino
+	 1
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name 
+----+-----------+------------
+  1 | Foo       | Bar
+	  </screen></td></tr></tbody>
+	</table>
+	You can retrieve some help from <command>lixar</command> with
+	<option>-?</option> option:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ /opt/lixa/bin/lixar -?
+Usage:
+  lixar [OPTION...] - LIXA recovery utility
+
+Help Options:
+  -?, --help                      Show help options
+
+Application Options:
+  -p, --print                     Print a report of all the prepared and in-doubt transactions compatible with current configuration and profile
+  -x, --xid                       Select specified transaction for rollback/commit
+  -X, --xid-file                  Select specified file as a list of transaction to rollback/commit
+  -c, --commit                    Commit prepared &amp; in-doubt transactions
+  -r, --rollback                  Rollback prepared &amp; in-doubt transactions
+  -v, --version                   Print package info and exit
+  -b, --bypass-bqual-check        Bypass xid branch qualifier check
+  -B, --bypass-formatid-check     Bypass xid format id check
+  -e, --use-tmendrscan-flag       Use TMENDRSCAN flag for last xa_recover call
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+  </section>
+  @@@ how to programmatically pick-up the branch qualifier?! @@@
 </chapter>
