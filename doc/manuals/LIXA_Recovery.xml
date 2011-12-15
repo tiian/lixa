@@ -409,8 +409,8 @@ testdb=> select * from pg_prepared_xacts;
       but additional server side clean-up is suggested for 
       <quote>recovery failed</quote> transactions.
     </para>
-    <section>
-      <title>Recoverying a forgotten transaction</title>
+    <section xml:id="Recoverying_forgotten_transactions">
+      <title>Recoverying forgotten transactions</title>
       <para>
 	This example necessitates of the same environment set-up in
 	<xref linkend="Forcing_automatic_recovery"/>; you must start running
@@ -686,6 +686,188 @@ Application Options:
   -e, --use-tmendrscan-flag       Use TMENDRSCAN flag for last xa_recover call
 	  </screen></td></tr></tbody>
 	</table>
+      </para>
+    </section>
+    <section>
+      <title>Recoverying a <quote>recovery failed</quote> transaction</title>
+      <para>
+	This example is quite complex because a 
+	<quote>recovery failed</quote> transaction is unlikely.
+	To create a <quote>recovery failed</quote> transaction we 
+	will use a special
+	Resource Manager, the <quote>LIXA monkey</quote> one: it's a
+	R.M. we can <quote>program</quote> to answer the Transaction Manager
+	as we desire. We will emulate an heuristically completed transaction
+	to force the LIXA Transaction Manager marking it as
+	<quote>recovery failed</quote>.
+      </para>
+      <para>
+	Before we can start, you must set-up the same environment already 
+	explained in <xref linkend="Recoverying_forgotten_transactions"/>.
+	Open three terminal session and start to set-up some environment
+	variables in the first:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
+tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+tiian@ubuntu:~/tmp$ echo $ORACLE_SID
+XE
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=PQL_STA_MON_STA_ORA_DYN
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+PQL_STA_MON_STA_ORA_DYN
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
+	  </screen></td></tr></tbody>
+	</table>
+	Start the LIXA state server if it's not active:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ sudo su - lixa
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
+lixa      7127     1  0 22:13 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ exit
+logout
+	  </screen></td></tr></tbody>
+	</table>
+	Before we can start the program execution, we must create a file
+	named <filename>monkeyrm.conf</filename> in the current directory
+	and put the following content inside it:
+	<table frame="box">
+	  <thead><tr><td>[Content of file monkeyrm.conf]</td></tr></thead>
+	  <tbody><tr><td><screen>
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+	  </screen></td></tr></tbody>
+	</table>
+	Now you can execute the program to verify it's running as expected:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00010000
+tiian@ubuntu:~/tmp$ ./example6_pql_ora insert 2>&amp;1 | grep monkey
+2011-12-15 22:42:20.709697 [22490/3052672768] lixa_monkeyrm_open: xa_info='monkeyrm.conf', rmid=1, flags=0x0
+2011-12-15 22:42:20.710101 [22490/3052672768] lixa_monkeyrm_open: creating new first level hash table...
+2011-12-15 22:42:20.713087 [22490/3052672768] lixa_monkeyrm_open/g_hash_table_new_full/monkey_status: 0x804caa0
+2011-12-15 22:42:20.713361 [22490/3052672768] lixa_monkeyrm_open: creating new second level hash table for tid=3052672768
+2011-12-15 22:42:20.713719 [22490/3052672768] lixa_monkeyrm_open/g_hash_table_new_full/slht: 0x804cac8
+2011-12-15 22:42:20.713994 [22490/3052672768] lixa_monkeyrm_open: creating new status block for tid=3052672768, rmid=1
+2011-12-15 22:42:20.714248 [22490/3052672768] lixa_monkeyrm_open/g_malloc/mss: 0x804e998
+2011-12-15 22:42:20.714521 [22490/3052672768] lixa_monkeyrm_open_init
+2011-12-15 22:42:20.714783 [22490/3052672768] lixa_monkeyrm_open_init/g_array_new/mss->records: 0x804c550 
+2011-12-15 22:42:20.715139 [22490/3052672768] lixa_monkeyrm_open_init: verb='xa_open'
+2011-12-15 22:42:20.715430 [22490/3052672768] lixa_monkeyrm_open_init: appending record verb=1, rc=0
+2011-12-15 22:42:20.715691 [22490/3052672768] lixa_monkeyrm_open_init: verb='xa_start'
+2011-12-15 22:42:20.715946 [22490/3052672768] lixa_monkeyrm_open_init: appending record verb=3, rc=0
+2011-12-15 22:42:20.716340 [22490/3052672768] lixa_monkeyrm_open_init: verb='xa_end'
+2011-12-15 22:42:20.716602 [22490/3052672768] lixa_monkeyrm_open_init: appending record verb=4, rc=0
+2011-12-15 22:42:20.716864 [22490/3052672768] lixa_monkeyrm_open_init: verb='xa_prepare'
+2011-12-15 22:42:20.717123 [22490/3052672768] lixa_monkeyrm_open_init: appending record verb=5, rc=0
+2011-12-15 22:42:20.717377 [22490/3052672768] lixa_monkeyrm_open_init: verb='xa_commit'
+2011-12-15 22:42:20.717671 [22490/3052672768] lixa_monkeyrm_open_init: appending record verb=6, rc=0
+2011-12-15 22:42:20.717937 [22490/3052672768] lixa_monkeyrm_open_init: verb='xa_close'
+2011-12-15 22:42:20.718196 [22490/3052672768] lixa_monkeyrm_open_init: appending record verb=2, rc=0
+2011-12-15 22:42:20.718519 [22490/3052672768] lixa_monkeyrm_open_init/excp=3/ret_cod=0/errno=0
+2011-12-15 22:42:20.718816 [22490/3052672768] lixa_monkeyrm_get_rc
+2011-12-15 22:42:20.726862 [22490/3052672768] lixa_monkeyrm_get_rc: verb is 1, XA return code is 0
+2011-12-15 22:42:20.727177 [22490/3052672768] lixa_monkeyrm_get_rc/excp=2/ret_cod=0/errno=0
+2011-12-15 22:42:20.727429 [22490/3052672768] lixa_monkeyrm_open/excp=4/ret_cod=0/xa_rc=0/errno=0
+2011-12-15 22:42:21.022655 [22490/3052672768] lixa_monkeyrm_start: xid='4c495841.7bdcf6c060e14bdba416302661187411.a100c8728292168b21ba7239bffc137d', rmid=1, flags=0x0
+2011-12-15 22:42:21.022695 [22490/3052672768] lixa_monkeyrm_get_rc
+2011-12-15 22:42:21.022705 [22490/3052672768] lixa_monkeyrm_get_rc: verb is 3, XA return code is 0
+2011-12-15 22:42:21.022712 [22490/3052672768] lixa_monkeyrm_get_rc/excp=2/ret_cod=0/errno=0
+2011-12-15 22:42:21.022719 [22490/3052672768] lixa_monkeyrm_start/excp=4/ret_cod=0/xa_rc=0/errno=0
+2011-12-15 22:42:21.059688 [22490/3052672768] lixa_monkeyrm_end: xid='4c495841.7bdcf6c060e14bdba416302661187411.a100c8728292168b21ba7239bffc137d', rmid=1, flags=0x4000000
+2011-12-15 22:42:21.059701 [22490/3052672768] lixa_monkeyrm_get_rc
+2011-12-15 22:42:21.059709 [22490/3052672768] lixa_monkeyrm_get_rc: verb is 4, XA return code is 0
+2011-12-15 22:42:21.059716 [22490/3052672768] lixa_monkeyrm_get_rc/excp=2/ret_cod=0/errno=0
+2011-12-15 22:42:21.059723 [22490/3052672768] lixa_monkeyrm_end/excp=4/ret_cod=0/xa_rc=0/errno=0
+2011-12-15 22:42:21.076478 [22490/3052672768] lixa_monkeyrm_prepare: xid='4c495841.7bdcf6c060e14bdba416302661187411.a100c8728292168b21ba7239bffc137d', rmid=1, flags=0x0
+2011-12-15 22:42:21.076498 [22490/3052672768] lixa_monkeyrm_get_rc
+2011-12-15 22:42:21.076512 [22490/3052672768] lixa_monkeyrm_get_rc: verb is 5, XA return code is 0
+2011-12-15 22:42:21.076520 [22490/3052672768] lixa_monkeyrm_get_rc/excp=2/ret_cod=0/errno=0
+2011-12-15 22:42:21.076527 [22490/3052672768] lixa_monkeyrm_prepare/excp=4/ret_cod=0/xa_rc=0/errno=0
+2011-12-15 22:42:21.098722 [22490/3052672768] lixa_monkeyrm_commit: xid='4c495841.7bdcf6c060e14bdba416302661187411.a100c8728292168b21ba7239bffc137d', rmid=1, flags=0x0
+2011-12-15 22:42:21.098747 [22490/3052672768] lixa_monkeyrm_get_rc
+2011-12-15 22:42:21.098756 [22490/3052672768] lixa_monkeyrm_get_rc: verb is 6, XA return code is 0
+2011-12-15 22:42:21.098764 [22490/3052672768] lixa_monkeyrm_get_rc/excp=2/ret_cod=0/errno=0
+2011-12-15 22:42:21.098770 [22490/3052672768] lixa_monkeyrm_commit/excp=4/ret_cod=0/xa_rc=0/errno=0
+2011-12-15 22:42:21.102841 [22490/3052672768] lixa_monkeyrm_close: xa_info='', rmid=1, flags=0x0
+2011-12-15 22:42:21.102853 [22490/3052672768] lixa_monkeyrm_get_rc
+2011-12-15 22:42:21.102862 [22490/3052672768] lixa_monkeyrm_get_rc: verb is 2, XA return code is 0
+2011-12-15 22:42:21.102869 [22490/3052672768] lixa_monkeyrm_get_rc/excp=2/ret_cod=0/errno=0
+2011-12-15 22:42:21.102877 [22490/3052672768] lixa_monkeyrm_close/excp=4/ret_cod=0/xa_rc=0/errno=0
+tiian@ubuntu:~/tmp$ unset LIXA_TRACE_MASK
+tiian@ubuntu:~/tmp$ ./example6_pql_ora delete
+Deleting a row from the tables...
+Oracle DELETE statement executed!
+	  </screen></td></tr></tbody>
+	</table>
+	To create a <quote>recovery pending</quote> transaction, we force
+	a crash:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_CRASH_POINT=15
+tiian@ubuntu:~/tmp$ echo $LIXA_CRASH_POINT
+15
+tiian@ubuntu:~/tmp$ ./example6_pql_ora insert
+Inserting a row in the tables...
+Oracle INSERT statement executed!
+Aborted
+	  </screen></td></tr></tbody>
+	</table>
+	Verify there is an in-doubt transaction:
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from dba_pending_transactions;
+
+  FORMATID
+----------
+GLOBALID
+--------------------------------------------------------------------------------
+BRANCHID
+--------------------------------------------------------------------------------
+1279875137
+46D1DF80428D4D6C85E6919B16B4A744
+A100C8728292168B21BA7239BFFC137D
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from pg_prepared_xacts;
+ transaction |                                    gid                                     |           prepared            | owner | database 
+-------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
+         923 | 4c495841.46d1df80428d4d6c85e6919b16b4a744.a100c8728292168b21ba7239bffc137d | 2011-12-15 22:54:20.453454+01 | tiian | testdb
+	  </screen></td></tr></tbody>
+	</table>
+	To move the transaction in <quote>recovery failed</status> we emulate
+	a <quote>heuristically rolled back</quote> in the automatic recovery
+	step editing the file <filename>monkeyrm.conf</filename>:
+	<table frame="box">
+	  <thead><tr><td>[Content of file monkeyrm.conf]</td></tr></thead>
+	  <tbody><tr><td><screen>
+xa_open/0
+xa_commit/6
+xa_close/0
+	  </screen></td></tr></tbody>
+	</table>
+	Start the <command>lixat</command> utility command:
+
+	@@@ this procedure does not work, fix it!!! @@@
+
       </para>
     </section>
   </section>

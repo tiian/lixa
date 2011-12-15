@@ -13,13 +13,7 @@
     <rsrmgr name="MySQL_stareg" switch_file="@EXPANDED_LIBDIR@/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,db=lixa,client_flag=0" xa_close_info="" />
     <rsrmgr name="MySQL2_stareg" switch_file="@EXPANDED_LIBDIR@/switch_mysql_stareg.so" xa_open_info="host=192.168.1.3,user=lixa,passwd=,db=lixa,client_flag=0" xa_close_info="" />
     <rsrmgr name="LIXAdummyRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_dummyrm.so" xa_open_info="dummy open string" xa_close_info="dummy close string" />
-    <rsrmgr name="LIXArandomRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_randomrm.so" xa_open_info="random open string" xa_close_info="random close string" />
-    <rsrmgr name="LIXAmonkey1dynRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_dynreg.so" xa_open_info="/tmp/monkey.conf" xa_close_info="" />
-    <rsrmgr name="LIXAmonkey2dynRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_dynreg.so" xa_open_info="random open string" xa_close_info="" />
-    <rsrmgr name="LIXAmonkey3dynRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_dynreg.so" xa_open_info="random open string" xa_close_info="" />
-    <rsrmgr name="LIXAmonkey1staRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_stareg.so" xa_open_info="random open string" xa_close_info="" />
-    <rsrmgr name="LIXAmonkey2staRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_stareg.so" xa_open_info="random open string" xa_close_info="" />
-    <rsrmgr name="LIXAmonkey3staRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_stareg.so" xa_open_info="random open string" xa_close_info="" />
+    <rsrmgr name="LIXAmonkey1staRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_stareg.so" xa_open_info="monkeyrm.conf" xa_close_info="" />
   </rsrmgrs>
   <profiles>
     <profile name="CF05">
@@ -150,6 +144,16 @@
       <rsrmgrs>
         <rsrmgr>PostgreSQL_stareg</rsrmgr>
         <rsrmgr>IBMDB2_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="PQL_STA_MON_STA_ORA_DYN">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+        <rsrmgr>OracleXE_dynreg</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="MYS_STA">
