@@ -146,13 +146,13 @@
         <rsrmgr>IBMDB2_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
-    <profile name="PQL_STA_MON_STA_ORA_DYN">
+    <profile name="MON_STA_PQL_STA_ORA_DYN">
       <sttsrvs>
         <sttsrv>local_1</sttsrv>
       </sttsrvs>
       <rsrmgrs>
-        <rsrmgr>PostgreSQL_stareg</rsrmgr>
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
         <rsrmgr>OracleXE_dynreg</rsrmgr>
       </rsrmgrs>
     </profile>
