@@ -714,14 +714,51 @@ tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server
 tiian@ubuntu:~/tmp$ echo $ORACLE_SID
 XE
-tiian@ubuntu:~/tmp$ export LIXA_PROFILE=PQL_STA_MON_STA_ORA_DYN
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=MON_STA_PQL_STA_ORA_DYN
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
-PQL_STA_MON_STA_ORA_DYN
+MON_STA_PQL_STA_ORA_DYN
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:
 tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
+tiian@ubuntu:~$ sqlplus "hr/hr"
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Ven Dic 16 16:15:23 2011
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connesso a:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~$ psql testdb
+Welcome to psql 8.3.16, the PostgreSQL interactive terminal.
+
+Type:  \copyright for distribution terms
+       \h for help with SQL commands
+       \? for help with psql commands
+       \g or terminate with semicolon to execute query
+       \q to quit
+
+testdb=> SELECT * FROM authors;
+ id | last_name | first_name 
+----+-----------+------------
+(0 rows)
 	  </screen></td></tr></tbody>
 	</table>
 	Start the LIXA state server if it's not active:
@@ -825,6 +862,9 @@ tiian@ubuntu:~/tmp$ ./example6_pql_ora insert
 Inserting a row in the tables...
 Oracle INSERT statement executed!
 Aborted
+tiian@ubuntu:~/tmp$ unset LIXA_CRASH_POINT
+tiian@ubuntu:~/tmp$ echo $LIXA_CRASH_POINT
+
 	  </screen></td></tr></tbody>
 	</table>
 	Verify there is an in-doubt transaction:
@@ -840,8 +880,8 @@ GLOBALID
 BRANCHID
 --------------------------------------------------------------------------------
 1279875137
-46D1DF80428D4D6C85E6919B16B4A744
-A100C8728292168B21BA7239BFFC137D
+D2F5F0A5C37E485CB44D9FC16E72A33D
+68D0E0CCBC6FC4B7FA616DF9AB122395
 	  </screen></td></tr></tbody>
 	</table>
 	<table frame="box">
@@ -850,11 +890,12 @@ A100C8728292168B21BA7239BFFC137D
 testdb=> select * from pg_prepared_xacts;
  transaction |                                    gid                                     |           prepared            | owner | database 
 -------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
-         923 | 4c495841.46d1df80428d4d6c85e6919b16b4a744.a100c8728292168b21ba7239bffc137d | 2011-12-15 22:54:20.453454+01 | tiian | testdb
+         964 | 4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395 | 2011-12-16 16:38:47.921947+01 | tiian | testdb
 	  </screen></td></tr></tbody>
 	</table>
-	To move the transaction in <quote>recovery failed</status> we emulate
-	a <quote>heuristically rolled back</quote> in the automatic recovery
+	To move the transaction in <quote>recovery failed</quote> status
+	we emulate
+	an <quote>heuristically rolled back</quote> in the automatic recovery
 	step editing the file <filename>monkeyrm.conf</filename>:
 	<table frame="box">
 	  <thead><tr><td>[Content of file monkeyrm.conf]</td></tr></thead>
@@ -864,10 +905,330 @@ xa_commit/6
 xa_close/0
 	  </screen></td></tr></tbody>
 	</table>
-	Start the <command>lixat</command> utility command:
+	Start the <command>lixat</command> utility command tracing the
+	<quote>client recovery</quote> 
+	(see <xref linkend="Tracing_modules"/>) module:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00040000
+tiian@ubuntu:~/tmp$ /opt/lixa/bin/lixat
+2011-12-16 16:44:09.970398 [8385/3073862320] client_recovery
+2011-12-16 16:44:09.970575 [8385/3073862320] client_recovery: sending 197 bytes ('000191&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="8"&gt;&lt;client job="68d0e0ccbc6fc4b7fa616df9ab122395/127.0.0.1      " config_digest="68d0e0ccbc6fc4b7fa616df9ab122395"/&gt;&lt;/msg&gt;') to the server for step 8
+2011-12-16 16:44:10.007703 [8385/3073862320] client_recovery: receiving 632 bytes from the server |&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="16"&gt;&lt;answer rc="0"/&gt;&lt;client job="68d0e0ccbc6fc4b7fa616df9ab122395/127.0.0.1      " config_digest="68d0e0ccbc6fc4b7fa616df9ab122395"&gt;&lt;last_verb_step verb="5" step="16"/&gt;&lt;state finished="0" txstate="3" will_commit="1" will_rollback="0" xid="4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395"/&gt;&lt;/client&gt;&lt;rsrmgrs&gt;&lt;rsrmgr rmid="0" next_verb="0" r_state="1" s_state="33" td_state="10"/&gt;&lt;rsrmgr rmid="1" next_verb="0" r_state="1" s_state="33" td_state="10"/&gt;&lt;rsrmgr rmid="2" next_verb="0" r_state="1" s_state="33" td_state="20"/&gt;&lt;/rsrmgrs&gt;&lt;/msg&gt;|
+2011-12-16 16:44:10.008178 [8385/3073862320] client_recovery_analyze
+2011-12-16 16:44:10.008229 [8385/3073862320] client_recovery_analyze: the TX was committing
+2011-12-16 16:44:10.008242 [8385/3073862320] client_recovery_analyze: rmid=0, r_state=1, s_state=33, td_state=10
+2011-12-16 16:44:10.008261 [8385/3073862320] client_recovery_analyze: rmid=1, r_state=1, s_state=33, td_state=10
+2011-12-16 16:44:10.008278 [8385/3073862320] client_recovery_analyze: rmid=2, r_state=1, s_state=33, td_state=20
+2011-12-16 16:44:10.008303 [8385/3073862320] client_recovery_analyze/excp=1/ret_cod=0/errno=0
+2011-12-16 16:44:10.008327 [8385/3073862320] client_recovery: transaction '4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395' must be committed
+2011-12-16 16:44:10.008353 [8385/3073862320] client_recovery_commit
+2011-12-16 16:44:10.008388 [8385/3073862320] client_recovery_commit: committing transaction '4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395'
+2011-12-16 16:44:10.008412 [8385/3073862320] client_recovery_commit: xa_commit for rmid=0, name='LIXAmonkey1staRM', xa_name='LIXA Monkey RM (static)'...
+2011-12-16 16:44:10.008464 [8385/3073862320] client_recovery_commit: rc=6
+2011-12-16 16:44:10.008613 [8385/3073862320] client_recovery_commit: xa_commit for rmid=1, name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]'...
+2011-12-16 16:44:10.062892 [8385/3073862320] client_recovery_commit: rc=0
+2011-12-16 16:44:10.062962 [8385/3073862320] client_recovery_commit: xa_commit for rmid=2, name='OracleXE_dynreg', xa_name='Oracle_XA'...
+2011-12-16 16:44:10.275061 [8385/3073862320] client_recovery_commit: rc=0
+2011-12-16 16:44:10.275128 [8385/3073862320] client_recovery_commit/excp=1/ret_cod=0/errno=0
+2011-12-16 16:44:10.275286 [8385/3073862320] client_recovery: sending 212 bytes ('000206&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="24"&gt;&lt;recovery failed="1" commit="1"/&gt;&lt;rsrmgrs&gt;&lt;rsrmgr rmid="0" rc="6"/&gt;&lt;rsrmgr rmid="1" rc="0"/&gt;&lt;rsrmgr rmid="2" rc="0"/&gt;&lt;/rsrmgrs&gt;&lt;/msg&gt;') to the server for step 24
+2011-12-16 16:44:10.275483 [8385/3073862320] client_recovery: sending 197 bytes ('000191&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="8"&gt;&lt;client job="68d0e0ccbc6fc4b7fa616df9ab122395/127.0.0.1      " config_digest="68d0e0ccbc6fc4b7fa616df9ab122395"/&gt;&lt;/msg&gt;') to the server for step 8
+2011-12-16 16:44:10.315057 [8385/3073862320] client_recovery: receiving 95 bytes from the server |&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="16"&gt;&lt;answer rc="1"/&gt;&lt;/msg&gt;|
+2011-12-16 16:44:10.315261 [8385/3073862320] client_recovery: the server answered LIXA_RC_OBJ_NOT_FOUND; there are no more transactions to recover
+2011-12-16 16:44:10.315315 [8385/3073862320] client_recovery/excp=12/ret_cod=0/errno=0
+tx_open(): 0
+tx_close(): 0
+	  </screen></td></tr></tbody>
+	</table>
+	The trace gives us a lot of information:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	      <command>lixat</command> fires an automatic (warm) recovery
+	      for transaction XID='4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395'
+	  </para></listitem>
+	  <listitem><para>
+	      the transaction must be committed because the crash followed
+	      a successful <quote>prepare</quote> phase
+	  </para></listitem>
+	  <listitem><para>
+	      first Resource Manager returns 6:
+	      <constant>XA_HEURRB</constant> (<quote>the transaction branch 
+		has been heuristically rolled back</quote>)
+	  </para></listitem>
+	  <listitem><para>
+	      second and third Resource Managers return 0: XA_OK
+	  </para></listitem>
+	  <listitem><para>
+	      the client send a <quote>recovery failed</quote>
+	      message to the state server
+	  </para></listitem>
+	</itemizedlist>
+	You can check the (real) Resource Managers status:
+	<table frame="box">
+	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from dba_pending_transactions;
 
-	@@@ this procedure does not work, fix it!!! @@@
+no rows selected
 
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+COUNTR
+------
+COUNTRY_NAME
+--------------------------------------------------------------------------------
+ REGION_ID
+----------
+RS
+Repubblica San Marino
+	 1
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from pg_prepared_xacts;
+ transaction | gid | prepared | owner | database 
+-------------+-----+----------+-------+----------
+(0 rows)
+
+testdb=> SELECT * FROM authors;
+ id | last_name | first_name 
+----+-----------+------------
+  1 | Foo       | Bar
+	  </screen></td></tr></tbody>
+	</table>
+	Inspecting the system log you can notify there was a problem:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ sudo tail /var/log/daemon.log
+Dec 16 16:44:09 ubuntu lixat[8385]: LXC000I this process is starting a new LIXA transaction manager (lixa package version is 0.5.36)
+Dec 16 16:44:10 ubuntu lixat[8385]: LXC003C resource manager 'LIXAmonkey1staRM' returned an error (6) while committing (xa_commit) during recovery phase for transaction '4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395'
+Dec 16 16:44:10 ubuntu lixat[8385]: LXC005W unable to recover transaction id '4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395'; this transaction must be manually recovered and the correlated record(s) must be manually fixed in lixad server status file
+Dec 16 16:44:10 ubuntu lixad[8157]: LXD012W a client notified recovery failed condition for the transaction registered in status file 3 and block 1
+	  </screen></td></tr></tbody>
+	</table>
+	there is a critical message (LXC003C) and two warning messages
+	(LXC005W, LXD012W). Pay attention the server notifies the problem 
+	(LXD012W) as well as the client (LXC005W).
+	To inspect the content of the <quote>recovery failed</quote>
+	transaction you may dump the state server:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ sudo su - lixa
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --dump=u >/tmp/bar
+	  </screen></td></tr></tbody>
+	</table>
+	and inspect the content of file <filename>/tmp/bar</filename>:
+	<table frame="box">
+	  <thead><tr><td>[Content of file /tmp/bar]</td></tr></thead>
+	  <tbody><tr><td><screen>
+========================================================================
+Second file ('/opt/lixa/var/lixad_status1_2') will be dumped
+Magic number is: 24848 (24848)
+Level is: 1 (1)
+Last sync timestamp: 2011-12-16T16:38:23.482854+0100
+Size: 17 blocks
+Used block chain starts at: 16 
+Free block chain starts at: 0 (empty chain)
+Dumping records following physical order: 0
+Dumping records following free block chain: 0
+Dumping records following used block chain: 1
+------------------------------------------------------------------------
+
+[...] 
+
+------------------------------------------------------------------------
+Block: 9, next block in chain: 8
+Block type: transaction manager record (transaction header)
+	Trnhdr/number of resource managers: 3
+	Trnhdr/resource manager blocks are: 10 11 12 
+	Trnhdr/arrival time: 2011-12-16T16:26:04.790526+0100
+	Trnhdr/local socket address:port is 127.0.0.1:2345
+	Trnhdr/peer socket address:port is 127.0.0.1:52251
+	Trnhdr/config digest is '68d0e0ccbc6fc4b7fa616df9ab122395'
+	Trnhdr/job is '68d0e0ccbc6fc4b7fa616df9ab122395/127.0.0.1      '
+	Trnhdr/last (verb, step) are: [ (9,8) (4,8) (4,16) (5,8) (5,16) ]
+	Trnhdr/state/finished: 0
+	Trnhdr/state/txstate: 3
+	Trnhdr/state/will commit: 1
+	Trnhdr/state/will rollback: 0
+	Trnhdr/state/xid: '4c495841.592cec793be1433d8ffd18574211e0e2.68d0e0ccbc6fc4b7fa616df9ab122395'
+	Trnhdr/recoverying block id: 0
+	Trnhdr/recovery failed: 1
+	Trnhdr/recovery failed time: 2011-12-16T16:29:15.947057+0100
+	Trnhdr/recovery commit: 1
+------------------------------------------------------------------------
+Block: 8, next block in chain: 7
+Block type: resource manager record
+	Rsrmgr/rmid: 2
+	Rsrmgr/state/next_verb: 0
+	Rsrmgr/state/xa_r_state: 1
+	Rsrmgr/state/dynamic: 0
+	Rsrmgr/state/xa_td_state: 10
+	Rsrmgr/state/xa_s_state: 33
+	Rsrmgr/lixac_conf.xml name: 'LIXAmonkey1staRM'
+	Rsrmgr/xa_name: 'LIXA Monkey RM (static)'
+	Rsrmgr/xa_open_info: 'monkeyrm.conf'
+	Rsrmgr/xa_open_flags: 0x0
+	Rsrmgr/xa_open_rc: 0
+	Rsrmgr/xa_start_flags: 0x0
+	Rsrmgr/xa_start_rc: 0
+	Rsrmgr/xa_end_flags: 0x4000000
+	Rsrmgr/xa_end_rc: 0
+	Rsrmgr/xa_prepare_flags: 0x0
+	Rsrmgr/xa_prepare_rc: 0
+	Rsrmgr/xa_commit_flags: 0x0
+	Rsrmgr/xa_commit_rc: 0
+	Rsrmgr/xa_rollback_flags: 0x0
+	Rsrmgr/xa_rollback_rc: 0
+	Rsrmgr/xa_forget_flags: 0x0
+	Rsrmgr/xa_forget_rc: 0
+	Rsrmgr/ax_reg_flags: 0x0
+	Rsrmgr/ax_reg_rc: 0
+	Rsrmgr/ax_unreg_flags: 0x0
+	Rsrmgr/ax_unreg_rc: 0
+	Rsrmgr/recovery_rc: 6
+------------------------------------------------------------------------
+Block: 7, next block in chain: 6
+Block type: resource manager record
+	Rsrmgr/rmid: 1
+	Rsrmgr/state/next_verb: 0
+	Rsrmgr/state/xa_r_state: 1
+	Rsrmgr/state/dynamic: 1
+	Rsrmgr/state/xa_td_state: 20
+	Rsrmgr/state/xa_s_state: 33
+	Rsrmgr/lixac_conf.xml name: 'OracleXE_dynreg'
+	Rsrmgr/xa_name: 'Oracle_XA'
+	Rsrmgr/xa_open_info: 'Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true'
+	Rsrmgr/xa_open_flags: 0x0
+	Rsrmgr/xa_open_rc: 0
+	Rsrmgr/xa_start_flags: 0x0
+	Rsrmgr/xa_start_rc: 0
+	Rsrmgr/xa_end_flags: 0x4000000
+	Rsrmgr/xa_end_rc: 0
+	Rsrmgr/xa_prepare_flags: 0x0
+	Rsrmgr/xa_prepare_rc: 0
+	Rsrmgr/xa_commit_flags: 0x0
+	Rsrmgr/xa_commit_rc: 0
+	Rsrmgr/xa_rollback_flags: 0x0
+	Rsrmgr/xa_rollback_rc: 0
+	Rsrmgr/xa_forget_flags: 0x0
+	Rsrmgr/xa_forget_rc: 0
+	Rsrmgr/ax_reg_flags: 0x0
+	Rsrmgr/ax_reg_rc: 0
+	Rsrmgr/ax_unreg_flags: 0x0
+	Rsrmgr/ax_unreg_rc: 0
+	Rsrmgr/recovery_rc: 0
+------------------------------------------------------------------------
+Block: 6, next block in chain: 5
+Block type: resource manager record
+	Rsrmgr/rmid: 0
+	Rsrmgr/state/next_verb: 0
+	Rsrmgr/state/xa_r_state: 1
+	Rsrmgr/state/dynamic: 0
+	Rsrmgr/state/xa_td_state: 10
+	Rsrmgr/state/xa_s_state: 33
+	Rsrmgr/lixac_conf.xml name: 'PostgreSQL_stareg'
+	Rsrmgr/xa_name: 'PostgreSQL[LIXA]'
+	Rsrmgr/xa_open_info: 'dbname=testdb'
+	Rsrmgr/xa_open_flags: 0x0
+	Rsrmgr/xa_open_rc: 0
+	Rsrmgr/xa_start_flags: 0x0
+	Rsrmgr/xa_start_rc: 0
+	Rsrmgr/xa_end_flags: 0x4000000
+	Rsrmgr/xa_end_rc: 0
+	Rsrmgr/xa_prepare_flags: 0x0
+	Rsrmgr/xa_prepare_rc: 0
+	Rsrmgr/xa_commit_flags: 0x0
+	Rsrmgr/xa_commit_rc: 0
+	Rsrmgr/xa_rollback_flags: 0x0
+	Rsrmgr/xa_rollback_rc: 0
+	Rsrmgr/xa_forget_flags: 0x0
+	Rsrmgr/xa_forget_rc: 0
+	Rsrmgr/ax_reg_flags: 0x0
+	Rsrmgr/ax_reg_rc: 0
+	Rsrmgr/ax_unreg_flags: 0x0
+	Rsrmgr/ax_unreg_rc: 0
+	Rsrmgr/recovery_rc: 0
+------------------------------------------------------------------------
+
+[...]
+
+========================================================================
+First file ('/opt/lixa/var/lixad_status2_1') will be dumped
+Magic number is: 24848 (24848)
+Level is: 1 (1)
+Last sync timestamp: 2011-12-16T16:23:40.512332+0100
+Size: 10 blocks
+Used block chain starts at: 0 (empty chain)
+Free block chain starts at: 1 
+Dumping records following physical order: 0
+Dumping records following free block chain: 0
+Dumping records following used block chain: 1
+========================================================================
+First file ('/opt/lixa/var/lixad_status3_1') will be dumped
+Magic number is: 24848 (24848)
+Level is: 1 (1)
+Last sync timestamp: 2011-12-16T16:38:47.933099+0100
+Size: 10 blocks
+Used block chain starts at: 4 
+Free block chain starts at: 5 
+Dumping records following physical order: 0
+Dumping records following free block chain: 0
+Dumping records following used block chain: 1
+------------------------------------------------------------------------
+
+[...]
+	  </screen></td></tr></tbody>
+	</table>
+	The chain composed of blocks 9 (transaction manager record) and
+	8, 7, 6 (resource manager records) keeps the state of the 
+	<quote>recovery failed</quote> transaction: 
+	<computeroutput>Trnhdr/recovery failed: 1</computeroutput>
+      </para>
+      <para>
+	If <quote>LIXA Monkey RM</quote> Resource Manager was a real
+	Resource Manager, you could manually recovery the transaction
+	used the procedure shown in 
+	<xref linkend="Recoverying_forgotten_transactions"/>.
+	Unfortunately the LIXA Monkey RM is a fake Resource Manager and it
+	does not save the state anywhere: it is not able to correctly
+	answer to <function>xa_recover()</function> and there is no way to
+	show this last step.
+      </para>
+      <para>
+	As a final step, to clean-up the <quote>recovery failed</quote>
+	state from LIXA state server, you have to recycle it using a special
+	option:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ sudo su - lixa
+lixa@ubuntu:~$ pkill lixad
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon --clean-failed
+lixa@ubuntu:~$ exit
+logout
+	  </screen></td></tr></tbody>
+	</table>
+	Dump again the content of the state server:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ sudo su - lixa
+lixa@ubuntu:~$ pkill lixad
+lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --clean-failed --daemon
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --dump=u >/tmp/bar
+	  </screen></td></tr></tbody>
+	</table>
+	and check again the content of the dump file again: the blocks 
+	10, 9, 8, 7 should not be used or, if re-used, they should be
+	related to a different transaction. @@@ wait some time @@@
+	@@@ don't use --clean-failed as a default @@@
       </para>
     </section>
   </section>

@@ -1107,7 +1107,7 @@ void lixa_monkeyrm_call_cleanup(void)
  */
 struct xa_switch_t lixa_monkeyrm_sta_sw = {
     "LIXA Monkey RM (static)",
-    TMNOFLAGS,
+    TMNOMIGRATE,
     0,
     lixa_monkeyrm_open,
     lixa_monkeyrm_close,

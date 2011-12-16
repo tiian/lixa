@@ -202,7 +202,7 @@ int lixa_randomrm_complete(int *handle, int *retval, int rmid, long flags) {
  */
 struct xa_switch_t lixa_randomrm_sw = {
     "lixa_randomrm",
-    TMNOFLAGS,
+    TMNOMIGRATE,
     0,
     lixa_randomrm_open,
     lixa_randomrm_close,
