@@ -704,8 +704,8 @@ Application Options:
       <para>
 	Before we can start, you must set-up the same environment already 
 	explained in <xref linkend="Recoverying_forgotten_transactions"/>.
-	Open three terminal session and start to set-up some environment
-	variables in the first:
+	Open three terminals session and prepare the sessions as shown
+	below:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -724,6 +724,10 @@ tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
 	  </screen></td></tr></tbody>
 	</table>
+	The specified <varname>LIXA_PROFILE</varname> points to a
+	configuration with three Resource Managers: LIXA Monkey (a fake
+	R.M.), PostgreSQL (static registration) and Oracle DBMS (dynamic
+	registration).
 	<table frame="box">
 	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -787,7 +791,10 @@ xa_commit/0
 xa_close/0
 	  </screen></td></tr></tbody>
 	</table>
-	Now you can execute the program to verify it's running as expected:
+	Now you can execute the program to verify it's running as expected;
+	we are tracing the module <quote>client XA switch</quote>
+	(see <xref linkend="Tracing_modules"/>) to verify the 
+	LIXA Monkey Resource Manager is properly configured:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -850,8 +857,13 @@ Deleting a row from the tables...
 Oracle DELETE statement executed!
 	  </screen></td></tr></tbody>
 	</table>
-	To create a <quote>recovery pending</quote> transaction, we force
-	a crash:
+	Don't forget the clean-up step (last command) before performing
+	the next steps.
+      </para>
+      <para>
+	To create a <quote>recovery pending</quote> transaction, we are
+	going to forcea crash after <function>xa_prepare()</function>
+	functions completed successfully:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -867,7 +879,7 @@ tiian@ubuntu:~/tmp$ echo $LIXA_CRASH_POINT
 
 	  </screen></td></tr></tbody>
 	</table>
-	Verify there is an in-doubt transaction:
+	Verify there is a prepared/in-doubt transaction inside Oracle:
 	<table frame="box">
 	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -884,6 +896,7 @@ D2F5F0A5C37E485CB44D9FC16E72A33D
 68D0E0CCBC6FC4B7FA616DF9AB122395
 	  </screen></td></tr></tbody>
 	</table>
+	Verify there is a prepared/in-doubt transaction inside PostgreSQL:
 	<table frame="box">
 	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -896,7 +909,9 @@ testdb=> select * from pg_prepared_xacts;
 	To move the transaction in <quote>recovery failed</quote> status
 	we emulate
 	an <quote>heuristically rolled back</quote> in the automatic recovery
-	step editing the file <filename>monkeyrm.conf</filename>:
+	step.
+	Edit the file <filename>monkeyrm.conf</filename> to code the
+	new behavior of the LIXA Monkey R.M.:
 	<table frame="box">
 	  <thead><tr><td>[Content of file monkeyrm.conf]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -905,9 +920,11 @@ xa_commit/6
 xa_close/0
 	  </screen></td></tr></tbody>
 	</table>
-	Start the <command>lixat</command> utility command tracing the
+	Start the <command>lixat</command> utility command to start an
+	<quote>automatic (warm) recovery</quote>; trace the
 	<quote>client recovery</quote> 
-	(see <xref linkend="Tracing_modules"/>) module:
+	(see <xref linkend="Tracing_modules"/>) module to understand what
+	happens:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -964,6 +981,18 @@ tx_close(): 0
 	      message to the state server
 	  </para></listitem>
 	</itemizedlist>
+	<note><para>
+	    You could think the LIXA Transaction Manager should have not
+	    performed the second and third 
+	    <function>xa_commit</function> after a failure with the
+	    first Resource Manager. It seems a good idea, but unfortunately
+	    it does not add much value because, if applied, it would
+	    introduce a behaviour that depends on the order of the
+	    operations. The LIXA Transaction Manager tryes to apply a
+	    consistent rule: after a successful <function>xa_prepare</function>
+	    all the Resource Managers must receive the same command
+	    (<function>xa_commit</function>/<function>xa_rollback</function>).
+	</para></note>
 	You can check the (real) Resource Managers status:
 	<table frame="box">
 	  <thead><tr><td>[Oracle terminal session]</td></tr></thead>
