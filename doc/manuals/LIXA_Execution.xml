@@ -132,7 +132,7 @@ Mar 31 23:00:48 ubuntu lixad[5926]: LXD019N received signal 15, server immediate
 Mar 31 23:00:48 ubuntu lixad[5926]: LXD006N server terminated activities
       </screen>
     </section>
-    <section>
+    <section xml:id="Maintenance_mode_execution">
       <title>Maintenance mode execution</title>
       <para>
 	The <option>--maintenance</option> option allows you to start
