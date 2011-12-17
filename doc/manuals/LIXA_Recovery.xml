@@ -1048,10 +1048,21 @@ Dec 16 16:44:10 ubuntu lixad[8157]: LXD012W a client notified recovery failed co
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ sudo su - lixa
+lixa@ubuntu:~$ pkill lixad
 lixa@ubuntu:~$ /opt/lixa/sbin/lixad --dump=u >/tmp/bar
+lixa@ubuntu:~$ exit
+logout
 	  </screen></td></tr></tbody>
 	</table>
-	and inspect the content of file <filename>/tmp/bar</filename>:
+	and inspect the content of file <filename>/tmp/bar</filename>
+	<footnote><para>
+	    The state server can be analyzed without stopping it
+	    (<command>pkill lixad</command>), but it may happen you will
+	    not see the current content because it has not yet synchronized
+	    the state file(s). If the LIXA state server is processing many
+	    transactions per second you will probably see an up-to-date
+	    state, but if it's <quote>sleeping</quote> you will not.
+	</para></footnote>:
 	<table frame="box">
 	  <thead><tr><td>[Content of file /tmp/bar]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -1239,6 +1250,10 @@ Dumping records following used block chain: 1
 tiian@ubuntu:~/tmp$ sudo su - lixa
 lixa@ubuntu:~$ pkill lixad
 lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon --clean-failed
+lixa@ubuntu:~$ pkill lixad<footnote><para>
+The LIXA state server is stopped after start-up to guarantee the content
+of the state file(s) on the disk are up-to-date before dumping them.
+</para></footnote>
 lixa@ubuntu:~$ exit
 logout
 	  </screen></td></tr></tbody>
@@ -1248,16 +1263,18 @@ logout
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ sudo su - lixa
-lixa@ubuntu:~$ pkill lixad
-lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
-lixa@ubuntu:~$ /opt/lixa/sbin/lixad --clean-failed --daemon
 lixa@ubuntu:~$ /opt/lixa/sbin/lixad --dump=u >/tmp/bar
+lixa@ubuntu:~$ exit
+logout
 	  </screen></td></tr></tbody>
 	</table>
-	and check again the content of the dump file again: the blocks 
+	and check the content of the dump file again: the blocks 
 	10, 9, 8, 7 should not be used or, if re-used, they should be
-	related to a different transaction. @@@ wait some time @@@
-	@@@ don't use --clean-failed as a default @@@
+	related to a different transaction.
+	<important><para>
+	    <emphasis @@@ don't use --clean-failed as a default @@@></emphasis>
+	</para></important>
+	
       </para>
     </section>
   </section>
