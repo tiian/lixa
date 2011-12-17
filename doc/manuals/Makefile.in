@@ -236,7 +236,7 @@ png_images = LIXA_Configuration_1.png  LIXA_Configuration_4.png \
 	LIXA_Development_10.png LIXA_Development_11.png \
 	LIXA_Recovery_01.png LIXA_Recovery_02.png
 
-doc_DATA = index.html $(png_images)
+doc_DATA = *.html $(png_images)
 EXTRA_DIST = $(doc_DATA) $(manual_sources) $(dia_images) $(png_images)
 all: all-am
 
@@ -426,11 +426,16 @@ uninstall-am: uninstall-docDATA
 	uninstall uninstall-am uninstall-docDATA
 
 
-all: index.html
+all: INDEX.html index.html
 
+@HAVE_XSLTPROC_TRUE@INDEX.html: $(manual_sources) $(png_images)
+@HAVE_XSLTPROC_TRUE@	@echo "Creating HTML manual (single page)..."
+@HAVE_XSLTPROC_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o INDEX.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
 @HAVE_XSLTPROC_TRUE@index.html: $(manual_sources) $(png_images)
-@HAVE_XSLTPROC_TRUE@	@echo "Creating HTML manual..."
-@HAVE_XSLTPROC_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
+@HAVE_XSLTPROC_TRUE@	@echo "Creating HTML manual (multi page)..."
+@HAVE_XSLTPROC_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/xhtml/chunk.xsl LIXA.xml
+@HAVE_XSLTPROC_FALSE@INDEX.html: $(manual_sources) $(png_images)
+@HAVE_XSLTPROC_FALSE@	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
 @HAVE_XSLTPROC_FALSE@index.html: $(manual_sources) $(png_images)
 @HAVE_XSLTPROC_FALSE@	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

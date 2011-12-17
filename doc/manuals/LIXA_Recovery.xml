@@ -1321,12 +1321,181 @@ logout
 	  it's your own responsability. 
       </para></important>
     </section>
-    <section>
+    <section xml:id="Recoverying_transaction_associated_different_job">
       <title>Recoverying a transaction associated to a different job</title>
       <para>
-	
+	As explained in <xref linkend="Automatic_recovery_concepts"/>,
+	the <quote>automatic (warm) recovery</quote> is automatically
+	performed by the LIXA Transaction Manager under the condition of
+	<quote>Application Program equivalence</quote>
+	(see <xref linkend="Application_Program_equivalence"/>).
+      </para>
+      <para>
+	Sometimes you have to perform a <quote>manual (cold) recovery</quote>
+	because <quote>Application Program equivalence</quote> is no more
+	available. This is a typical scenario:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	      an Application Program crashed and its transaction is in
+	      <quote>in-doubt/prepared (recovery pending) status</quote>
+	  </para></listitem>
+	  <listitem><para>
+	      the Application Program didn't specify a custom value for
+	      the environment variable <varname>LIXA_JOB</varname>
+	  </para></listitem>
+	  <listitem><para>
+	      you changed the content of file
+	      <filename>lixac_conf.xml</filename>, for example you added a 
+	      new profile
+	  </para></listitem>
+	  <listitem><para>
+	      the MD5 signature of file <filename>lixac_conf.xml</filename>
+	      changed, the associated <varname>branch qualifier</varname>
+	      changed, new transactions would be associated to a 
+	      different <emphasis>job</emphasis>
+	  </para></listitem>
+	  <listitem><para>
+	      automatic (warm) recovery wouldn't be automatically performed
+	      and the transaction becomes a 
+	      <quote>forgotten</quote> transaction.
+	  </para></listitem>
+	</itemizedlist>
+	Inspecting the list of recovery pending transaction using
+	<command>lixar -p</command> does not return the desired transaction...
+	What's going on?
+      </para>
+      <para>
+	By default, the <command>lixar</command> utility filters the 
+	transactions
+	retrieved by the Resource Managers: it keeps only the transactions
+	with the same <varname>branch qualifier</varname> of the current
+	<command>lixar</command> running instance.
+	If you look at <xref linkend="Application_Program_equivalence"/>,
+	you will realize that <command>lixar</command> 
+	retrieves only the transactions started with 
+	the same <filename>lixac_conf.xml</filename>,
+	the same $(<varname>LIXA_PROFILE</varname>) and
+	the same <function>gethostid()</function>.
+	This behaviour helps the system engineer to see only the 
+	<quote>relevant</quote> subset of the whole
+	<quote>recovery pending</quote> set.
+      </para>
+      <para>
+	If you are looking for <emphasis>all</emphasis> the transactions in
+	<quote>recovery pending</quote> status currently kept by the
+	Resource Managers associated to the current 
+	<varname>LIXA_PROFILE</varname>, you must specify the
+	<option>--bypass-bqual-check</option> (<option>-b</option>) option.
+      </para>
+    </section>
+    <section>
+      <title>Recoverying a transaction managed by a different Transaction Manager</title>
+      <para>
+	The LIXA project technology can help you dealing with a different
+	Transaction Manager 
+	(see <xref linkend="Transaction_Manager_and_Transaction_Monitor"/>) 
+	too: the <command>lixar</command> utility program can be used to
+	inspect (and manually recover) a transaction managed by a different
+	Transaction Manager using two command options together:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	      <option>--bypass-bqual-check</option> (<option>-b</option>):
+	      to bypass branch qualifier based filtering
+	  </para></listitem>
+	  <listitem><para>
+	      <option>--bypass-formatid-check</option> (<option>-B</option>):
+	      to bypass format ID based filtering
+	  </para></listitem>
+	</itemizedlist>
+	If you use the above command options together, 
+	<command>lixar</command> utility program will inspect (and eventually
+	commit/rollback) any XA transaction known by the Resource Managers
+	associated to the current <varname>LIXA_PROFILE</varname>.
+      </para>
+      <note><para>
+	  It's <emphasis>your own</emphasis> responsability to define a
+	  LIXA profile that's compatible with the configuration of the
+	  third party Transaction Manager used when managing the transaction:
+	  it <emphasis>must</emphasis> contain the <emphasis>same</emphasis>
+	  Resource Managers in the <emphasis>same</emphasis> order
+	  with the <emphasis>same</emphasis> options.
+      </para></note>
+      <warning><para>
+	  LIXA software is libre/free/open source software and you use it
+	  <emphasis>exclusively and consciously without any
+	  warranty at your own risk</emphasis>.
+	  Using LIXA software technology will probably put you in an
+	  <emphasis>unsupported</emphasis> state regarding to the
+	  third party Transaction Manager supplier.
+      </para></warning>
+    </section>
+    <section>
+      <title>Picking up the LIXA format id and branch qualifier</title>
+      <para>
+	In the previous sections we have dealt with 
+	<quote>format id</quote> and <quote>branch qualifier</quote>;
+	you could ask 
+	<quote>How can I discover the
+	  <quote>format id</quote> and the <quote>branch qualifier</quote>
+	  branch qualifier associated to my own Application Program?</quote>
+      </para>
+      <para>
+	The easiest way to pick-up them is to use <command>lixat</command>
+	utility program using the <emphasis>same</emphasis>
+	<varname>LIXA_PROFILE</varname> you use when running your
+	Application Program:
+	<screen>
+tiian@ubuntu:~/src/lixa$ sudo su - lixa
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
+lixa      8122     1  0 23:02 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ exit
+logout
+tiian@ubuntu:~/src/lixa$ /opt/lixa/bin/lixat -c
+tx_open(): 0
+tx_begin(): 0
+tx_info(): 1
+	xid/formatID.gtrid.bqual = 4c495841.56af7a66398f4eca82b8826fe10165ad.9e4c11057107c73366c9fc421eaa85ca
+tx_commit(): 0
+tx_close(): 0
+tiian@ubuntu:~/src/lixa$ /opt/lixa/bin/lixat -c
+tx_open(): 0
+tx_begin(): 0
+tx_info(): 1
+	xid/formatID.gtrid.bqual = 4c495841.218f05b733fb4bc1aa3d21eeaf01fbab.9e4c11057107c73366c9fc421eaa85ca
+tx_commit(): 0
+tx_close(): 0	  
+	</screen>
+	From the above terminal output:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	      <quote>formatID</quote> is constant and the LIXA Transaction
+	      Manager uses the exadecimal value 4c495841 (that's the 
+	      ASCII sequence of string <quote>LIXA</quote>)
+	  </para></listitem>
+	  <listitem><para>
+	      <quote>branch qualifier</quote> is computed as explained in
+	      <xref linkend="Application_Program_equivalence"/> and the
+	      value in the above example is
+	      <quote>9e4c11057107c73366c9fc421eaa85ca</quote>
+	  </para></listitem>
+	  <listitem><para>
+	      <quote>global transaction id</quote> must be different for
+	      any transaction and you can see two different values in the
+	      above examples (it's computed using
+	      <function>uuid_generate()</function> function).
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	If you were interested in retrieving them programmatically
+	(from your own C language program) you could use the standard
+	<function>tx_info()</function> function that returns a 
+	<type>TXINFO</type> struct (<citation>TXspec</citation>).
+	Please pay attention the
+	<type>XID</type> struct contains <emphasis>binary data</emphasis>
+	(it does not contain ASCII data).
       </para>
     </section>
   </section>
-  @@@ how to programmatically pick-up the branch qualifier?! @@@
 </chapter>
