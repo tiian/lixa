@@ -34,17 +34,22 @@ png_images = LIXA_Configuration_1.png  LIXA_Configuration_4.png \
 	LIXA_Recovery_01.png LIXA_Recovery_02.png
 
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/html
-doc_DATA = index.html $(png_images)
+doc_DATA = *.html $(png_images)
 
 EXTRA_DIST = $(doc_DATA) $(manual_sources) $(dia_images) $(png_images)
 
-all: index.html
+all: INDEX.html index.html
 
 if HAVE_XSLTPROC
+INDEX.html: $(manual_sources) $(png_images)
+	@echo "Creating HTML manual (single page)..."
+	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o INDEX.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
 index.html: $(manual_sources) $(png_images)
-	@echo "Creating HTML manual..."
-	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
+	@echo "Creating HTML manual (multi page)..."
+	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/xhtml/chunk.xsl LIXA.xml
 else
+INDEX.html: $(manual_sources) $(png_images)
+	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
 index.html: $(manual_sources) $(png_images)
 	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
 endif

@@ -42,7 +42,7 @@
       Resource Managers.
     </para>
   </warning>
-  <section>
+  <section xml:id="Transaction_Manager_and_Transaction_Monitor">
     <title>Transaction Manager and Transaction Monitor</title>
     <para>
       As explained in Appendix A of <citation>RefModel</citation> a 
