@@ -120,6 +120,11 @@
   <section xml:id="Automatic_recovery_concepts">
     <title>Automatic recovery concepts</title>
     <para>
+      Automatic (warm) recovery uses the information stored inside the
+      LIXA state server to decide which transaction must be recovered and
+      how it should be completed (committed or rolled back).
+    </para>
+    <para>
       The above paragraphs explain what's happen when automatic recovery
       starts and completes (rolls back or commits) the transaction marked
       as <quote>recovery pending</quote>.
@@ -130,10 +135,10 @@
 	the LIXA Transaction Manager with <function>tx_open()</function>.
 	The LIXA Transaction Manager autonoumosly coordinates the transaction
 	completion and the Application Program is not aware of this
-	<emphasis>under the covers</emphasis> operation.
+	<quote>under the covers</quote> operation.
       </foreignphrase>
     </para>
-    <section>
+    <section xml:id="Application_Program_equivalence">
       <title>Application Program equivalence</title>
       <para>
 	From the LIXA Transaction Manager point of view,
@@ -392,6 +397,13 @@ testdb=> select * from pg_prepared_xacts;
   </section>
   <section>
     <title>Manual (cold) recovery</title>
+    <para>
+      Manual (cold) recovery uses the information provided by the
+      Resource Managers querying them using 
+      <function>xa_recover()</function>.
+      This type of recovery should be used to resolve some unusual
+      situations.
+    </para>
     <para>
       If, for any reason, the LIXA state server (<command>lixad</command>)
       forgot the state of a transaction
@@ -1058,10 +1070,11 @@ logout
 	<footnote><para>
 	    The state server can be analyzed without stopping it
 	    (<command>pkill lixad</command>), but it may happen you will
-	    not see the current content because it has not yet synchronized
+	    not see the current content because the state server 
+	    has not yet synchronized
 	    the state file(s). If the LIXA state server is processing many
 	    transactions per second you will probably see an up-to-date
-	    state, but if it's <quote>sleeping</quote> you will not.
+	    state, but if it was <quote>sleeping</quote> you wouldn't.
 	</para></footnote>:
 	<table frame="box">
 	  <thead><tr><td>[Content of file /tmp/bar]</td></tr></thead>
@@ -1271,9 +1284,46 @@ logout
 	and check the content of the dump file again: the blocks 
 	10, 9, 8, 7 should not be used or, if re-used, they should be
 	related to a different transaction.
-	<important><para>
-	    <emphasis @@@ don't use --clean-failed as a default @@@></emphasis>
-	</para></important>
+      </para>
+      <important><para>
+	  <emphasis>Don't use 
+	    <option>--clean-failed</option> as a default</emphasis>
+	  when starting LIXA state server (<command>lixad</command>):
+	  this option should be used only after you inspected the content
+	  of the state server and solved any in-doubt transaction.
+      </para></important>
+      <note><para>
+	  Operating this type of recovery can be easier if the LIXA state
+	  server is running in <quote>maintenance mode</quote>
+	  (see <xref linkend="Maintenance_mode_execution"/>): only
+	  <command>lixar</command> can access the online content of the
+	  LIXA state server and ordinary clients (Application Program)
+	  can not perform transactions. It may be useful using the 
+	  state server in <quote>maintenance mode</quote>, but only you
+	  can decide if your business rules allows it.
+      </para></note>
+      <important><para>
+	  The LIXA technology <emphasis>does not</emphasis> ask you to:
+	  <itemizedlist mark="bullet">
+	    <listitem><para>
+		recycle the <command>lixad</command> state server to see
+		the current status when dumping the content of the state
+		server files (<option>--dump</option> option)
+	    </para></listitem>
+	    <listitem><para>
+		start the <command>lixad</command> state server in
+		<quote>maintenance mode</quote> when performing
+		<quote>manual (cold) recovery</quote>
+	    </para></listitem>
+	  </itemizedlist>
+	  The LIXA technology provides you these functions to simplify the
+	  administrative tasks, but deciding which option should be used
+	  it's your own responsability. 
+      </para></important>
+    </section>
+    <section>
+      <title>Recoverying a transaction associated to a different job</title>
+      <para>
 	
       </para>
     </section>
