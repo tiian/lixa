@@ -10,6 +10,57 @@
     software installation (see <xref linkend="Installation"/>).
   </para>
   <section>
+    <title>The TX (Transaction Demarcation) Specification</title>
+    <para>
+      LIXA project adopts the standard described in 
+      <citation>TXspec</citation> as the API you should use when developing
+      an Application Program.
+    </para>
+    <para>
+      The API is very easy, it supplies C functions and can be briefly
+      explained:
+      <programlisting>
+/* include this header: it's the header associated to The TX (Transaction
+   Demarcation) Specification */
+#include &lt;tx.h&gt;
+
+/* your stuff */
+
+int main(int argc, char *argv[])
+{
+        /* use an int variable to pick-up function return code */
+        int rc;
+        
+        /* use tx_open() to open ALL the Resource Managers associated to
+           the current LIXA_PROFILE */
+        if (TX_OK != (rc = tx_open()))
+                /* this is an error, manage it! */
+
+        /* put your stuff here ... */
+
+        /* this function delimits the transaction begin */
+        if (TX_OK != (rc = tx_begin()))
+                /* this is an error, manage it! */
+
+        /* put your commands against the Resource Managers here ... */
+
+        /* this function commits the modification operated by the
+           Resource Managers */
+        if (TX_OK != (rc = tx_commit()))
+                /* this is an error, manage it! */
+        /* you can use tx_rollback() instead of tx_commit() if you decide
+           the work must be rolled back */
+
+        /* put here other transactions if you need them (loops are possible
+           too) */
+
+        /* use tx_close() to close ALL the Resource Managers associated to
+           the current LIXA_PROFILE */
+}
+      </programlisting>
+    </para>
+  </section>
+  <section>
     <title>The first example</title>
     <figure xml:id="develop1">
       <title>Deploy model of an example with two dummy resource managers</title>
