@@ -38,17 +38,17 @@ doc_DATA = *.html $(png_images)
 
 EXTRA_DIST = $(doc_DATA) $(manual_sources) $(dia_images) $(png_images)
 
-all: INDEX.html index.html
+all: index_all_in_one.html index.html
 
 if HAVE_XSLTPROC
-INDEX.html: $(manual_sources) $(png_images)
+index_all_in_one.html: $(manual_sources) $(png_images)
 	@echo "Creating HTML manual (single page)..."
-	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o INDEX.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
+	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index_all_in_one.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
 index.html: $(manual_sources) $(png_images)
 	@echo "Creating HTML manual (multi page)..."
 	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/xhtml/chunk.xsl LIXA.xml
 else
-INDEX.html: $(manual_sources) $(png_images)
+index_all_in_one.html: $(manual_sources) $(png_images)
 	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
 index.html: $(manual_sources) $(png_images)
 	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
