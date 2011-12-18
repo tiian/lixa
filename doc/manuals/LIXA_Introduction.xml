@@ -237,7 +237,7 @@
 	started
 	<footnote><para>The X/Open CAE specification document
 	    <quote>suggests</quote> the mapping and it seems there is some
-	    flesibility in the suggestions. From a LIXA perspective all this
+	    flexibility in the suggestions. From a LIXA perspective all this
 	    stuff is academic because <constant>TMNOWAIT</constant> is not
 	    used by LIXA implementation.</para></footnote>.
       </para>

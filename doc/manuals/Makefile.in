@@ -426,15 +426,15 @@ uninstall-am: uninstall-docDATA
 	uninstall uninstall-am uninstall-docDATA
 
 
-all: INDEX.html index.html
+all: index_all_in_one.html index.html
 
-@HAVE_XSLTPROC_TRUE@INDEX.html: $(manual_sources) $(png_images)
+@HAVE_XSLTPROC_TRUE@index_all_in_one.html: $(manual_sources) $(png_images)
 @HAVE_XSLTPROC_TRUE@	@echo "Creating HTML manual (single page)..."
-@HAVE_XSLTPROC_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o INDEX.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
+@HAVE_XSLTPROC_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index_all_in_one.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
 @HAVE_XSLTPROC_TRUE@index.html: $(manual_sources) $(png_images)
 @HAVE_XSLTPROC_TRUE@	@echo "Creating HTML manual (multi page)..."
 @HAVE_XSLTPROC_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/xhtml/chunk.xsl LIXA.xml
-@HAVE_XSLTPROC_FALSE@INDEX.html: $(manual_sources) $(png_images)
+@HAVE_XSLTPROC_FALSE@index_all_in_one.html: $(manual_sources) $(png_images)
 @HAVE_XSLTPROC_FALSE@	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
 @HAVE_XSLTPROC_FALSE@index.html: $(manual_sources) $(png_images)
 @HAVE_XSLTPROC_FALSE@	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"

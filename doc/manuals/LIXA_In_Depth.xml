@@ -485,13 +485,130 @@ tiian@ubuntu:~$ ls -la /tmp/lixat.trace
   <section xml:id="Non_root_installation">
     <title>Non root installation</title>
     <para>
-      [...]
+      The standard installation procedure explained in
+      <xref linkend="Installation"/> uses 
+      <systemitem class="username">root</systemitem> account.
+      You can install the software in a home directory using a normal user
+      account, for instance <systemitem class="username">lixa</systemitem>.
+      To specify an alternative installation path you have to use
+      <option>--prefix</option> option at configure time.
+    </para>
+    <para>
+      The following steps show how you can install the software in 
+      <systemitem class="username">lixa</systemitem> home directory.
+      <screen>
+lixa@ubuntu:~$ ls -l
+total 1520
+-rw-r--r-- 1 lixa lixa 1550959 2011-12-18 21:25 lixa-0.5.36.tar.gz
+lixa@ubuntu:~$ tar xzf lixa-0.5.36.tar.gz
+lixa@ubuntu:~$ cd lixa-0.5.36
+
+lixa@ubuntu:~/lixa-0.5.36$ ./configure --prefix=/home/lixa/prod
+[...]
+config.status: creating config.h
+config.status: executing depfiles commands
+config.status: executing tests/atconfig commands
+
+lixa@ubuntu:~/lixa-0.5.36$ make install
+[...]
+make[2]: Leaving directory `/home/lixa/lixa-0.5.36'
+make[1]: Leaving directory `/home/lixa/lixa-0.5.36'
+
+lixa@ubuntu:~/lixa-0.5.36$ ls -la /home/lixa/prod/
+total 36
+drwxr-xr-x 9 lixa lixa 4096 2011-12-18 21:30 .
+drwxr-xr-x 5 lixa lixa 4096 2011-12-18 21:28 ..
+drwxr-xr-x 2 lixa lixa 4096 2011-12-18 21:29 bin
+drwxr-xr-x 2 lixa lixa 4096 2011-12-18 21:28 etc
+drwxr-xr-x 2 lixa lixa 4096 2011-12-18 21:29 include
+drwxr-xr-x 2 lixa lixa 4096 2011-12-18 21:29 lib
+drwxr-xr-x 2 lixa lixa 4096 2011-12-18 21:29 sbin
+drwxr-xr-x 3 lixa lixa 4096 2011-12-18 21:30 share
+drwxr-xr-x 2 lixa lixa 4096 2011-12-18 21:29 var
+
+lixa@ubuntu:~/lixa-0.5.36$ export LD_LIBRARY_PATH=/home/lixa/prod/lib
+lixa@ubuntu:~/lixa-0.5.36$ /home/lixa/prod/sbin/lixad --daemon
+lixa@ubuntu:~/lixa-0.5.36$ ps -ef|grep lixad|grep -v grep
+lixa     23493     1  0 21:32 ?        00:00:00 /home/lixa/prod/sbin/lixad --daemon
+
+lixa@ubuntu:~/lixa-0.5.36$ export PATH=$PATH:/home/lixa/prod/bin
+lixa@ubuntu:~/lixa-0.5.36$ lixat
+tx_open(): 0
+tx_close(): 0
+      </screen>
+    </para>
+    <para>
+      Installing LIXA using a non 
+      <systemitem class="username">root</systemitem> 
+      account has some advantages:
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	    there aren't post install steps to change the ownership of
+	    <filename>etc</filename> and <filename>var</filename>
+	    directories
+	</para></listitem>
+	<listitem><para>
+	    you can install the software without
+	    <systemitem class="username">root</systemitem> privileges
+	</para></listitem>
+      </itemizedlist>
+      and some disadvantages:
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	    the software is installed inside a home directory instead of
+	    a system path
+	</para></listitem>
+	<listitem><para>
+	    there is no distinction between the administrative account
+	    that must manage the state (<filename>var</filename>) and
+	    the configuration (<filename>etc</filename>) and the
+	    system account that must manage the software installation.
+	</para></listitem>
+      </itemizedlist>
     </para>
   </section>
   <section xml:id="Workload_balanced_environments">
     <title>Workload balanced environments</title>
     <para>
-      [...]
+      The LIXA client (<systemitem class="library">lixac</systemitem>)
+      uses only one state server at a time, but different profiles can
+      use different state servers and you can statically balance the
+      workload.
+    </para>
+    <para>
+      We can not name it <quote>workload balancing</quote>, but this is
+      an effective way to manage large environments.
+      To configure many LIXA state servers you must put many
+      <quote>sttsrv</quote> tags in <filename>etc/lixac_conf.xml</filename>
+      as in the example below:
+      <screen>
+  &lt;sttsrvs&gt;
+    &lt;sttsrv name="local_1" domain="AF_INET" address="127.0.0.1" port="2345" /&gt;
+    &lt;sttsrv name="local_2" domain="AF_INET" address="127.0.0.1" port="3456" /&gt;
+  &lt;/sttsrvs&gt;
+      </screen>
+      then you must specify different <quote>sttsrv</quote> tags in the
+      profiles as in the example below:
+      <screen>
+    &lt;profile name="ORA_DYN_DB2_DYN"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;OracleXE_dynreg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;IBMDB2_dynreg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+    &lt;profile name="ORA_DYN_DB2_STA"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_2&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;OracleXE_dynreg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;IBMDB2_stareg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+      </screen>
     </para>
   </section>
 </chapter>

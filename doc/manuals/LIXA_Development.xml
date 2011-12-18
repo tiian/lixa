@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
         if (TX_OK != (rc = tx_begin()))
                 /* this is an error, manage it! */
 
-        /* put your commands against the Resource Managers here ... */
+        /* put your commands about the Resource Managers here ... */
 
         /* this function commits the modification operated by the
            Resource Managers */
@@ -58,6 +58,44 @@ int main(int argc, char *argv[])
            the current LIXA_PROFILE */
 }
       </programlisting>
+      These are the available functions (the descriptions come from
+      <citation>TXspec</citation>):
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	    <function>tx_begin</function>: begin a global transaction
+	</para></listitem>
+	<listitem><para>
+	    <function>tx_close</function>: close a set of resource managers
+ 	</para></listitem>
+	<listitem><para>
+	    <function>tx_commit</function>: commit a global transaction
+	</para></listitem>
+	<listitem><para>
+	    <function>tx_info</function>: return global transaction information
+	</para></listitem>
+	<listitem><para>
+	    <function>tx_open</function>: open a set of resource managers
+	</para></listitem>
+	<listitem><para>
+	    <function>tx_rollback</function>: roll back a global transaction
+	</para></listitem>
+	<listitem><para>
+	    <function>tx_set_commit_return</function>: set 
+	    <parameter class="function">commit_return</parameter> 
+	    characteristic
+	</para></listitem>
+	<listitem><para>
+	    <function>tx_set_transaction_control</function>: set
+	    <parameter class="function">transaction_control</parameter> 
+	    characteristic
+	</para></listitem>
+	<listitem><para>
+	    <function>tx_set_transaction_timeout</function>: set
+	    <parameter class="function">transaction_timeout</parameter> 
+	    characteristic
+	</para></listitem>
+      </itemizedlist>
+      Refer to <citation>TXspec</citation> for the complete description.
     </para>
   </section>
   <section>
