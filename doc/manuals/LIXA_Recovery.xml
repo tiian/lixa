@@ -235,6 +235,58 @@
 	LIXA is used under <quote>standard</quote> conditions.
       </para>
     </section>
+    <section>
+      <title>Automatic Recovery in a distributed environment</title>
+      <para>
+	The previous section (see 
+	<xref linkend="Application_Program_equivalence"/>) explains the
+	conditions that must be met to enable automatic recovery.
+	A tipical scenario that needs tuning is a workload balanced
+	Application Server environment as is in the below picture:
+	<figure xml:id="recover3">
+	  <title>Workload balanced Application Server</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="LIXA_Recovery_03.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	The same program (<quote>Application Program 1</quote>) is
+	executed by two different Application Servers: this is a typical
+	configuration used to improve service availability and scalability.
+	If the Application Server 1 is running in a different host than
+	Application Server 2 (this is a de facto standard), by default 
+	LIXA will
+	associate <emphasis>two different jobs.</emphasis>
+      </para>
+      <important><para>
+	  The LIXA default behavior is not the optimal one when you are
+	  using a workload balanced environment.
+	</para>
+	<para>
+	  If the host of Application Server 1 crashed, the Application Program
+	  running inside Application Server 2
+	  could not automatically recover the transactions in 
+	  <quote>prepared/in-doubt/recovery pending</quote> of the
+	  Application Server 1 because they are associated to a different
+	  <emphasis>job</emphasis>.
+	</para>
+	<para>
+	  This is a scenario when setting <varname>LIXA_JOB</varname> is
+	  <emphasis>strongly</emphasis> suggested.
+      </para></important>
+      <warning><para>
+	  When you set the <varname>LIXA_JOB</varname> environment variable
+	  to control LIXA automatic recovery feature you 
+	  <emphasis>must not</emphasis> associate the same job to 
+	  Application Programs that use different sets of Resource Managers
+	  or use the same set of Resource Managers but with different
+	  options for any Resource Manager.
+	  If you broke this rule, you would probably face difficult to 
+	  troubleshoot issues: automatic recovery could fail and you
+	  would have to understand why.
+      </para></warning>
+    </section>
     <section xml:id="Forcing_automatic_recovery">
       <title>Forcing automatic recovery</title>
       <para>
