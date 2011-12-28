@@ -611,4 +611,102 @@ tx_close(): 0
       </screen>
     </para>
   </section>
+  <section>
+    <title>High Availability configuration</title>
+    <para>
+      If you were using LIXA software project in a mission critical
+      environment, you should set-up an high availability configuration.
+      If you take a look to <xref linkend="config1"/> you will notice the
+      <command>lixad</command> daemon is a <emphasis>single point of
+	failure</emphasis>: if the system hosting <command>lixad</command>
+      crashed, the Application Program could not perform distributed
+      transaction processing due to the unavailability of
+      <command>lixad</command> daemon.
+    </para>
+    <para>
+      To avoid the issues related to <quote>single point of failure
+      pathology</quote> the suggested configuration is
+      <quote>Active/passive</quote> as described in 
+      <link xlink:href="http://en.wikipedia.org/wiki/High-availability_cluster#Node_configurations">
+	Wikipedia <quote>High-availability cluster</quote> page</link>.
+      You can use:
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	    any cluster manager, for example
+	    <link xlink:href="http://www.linux-ha.org/wiki/Main_Page">Linux-HA
+	      Heartbeat</link>
+	</para></listitem>
+	<listitem><para>
+	    any shared disk technology like 
+	    <link xlink:href="http://en.wikipedia.org/wiki/Storage_area_network">SAN (Storage Area Network)</link>, 
+	    <link xlink:href="http://en.wikipedia.org/wiki/Network-attached_storage">NAS (Network Attached Storage)</link> or disk replication technology like
+	    <link xlink:href="http://www.drbd.org/">DR:BD</link>
+	</para></listitem>
+      </itemizedlist>
+      <command>lixad</command> requires that the filesystem and the
+      block device support <function>mmap()</function>, 
+      <function>munmap()</function> and <function>msync()</function> functions.
+      The faster the filesystem/block device you are using, the better the
+      <command>lixad</command> performance.
+    </para>
+    <para>
+      The easiest high-availability configuration uses:
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	    a shared/mirrored disk containing the LIXA file tree
+	    (<filename>/opt/lixa</filename> if you are using a default
+	    installation)
+	</para></listitem>
+	<listitem><para>
+	    a service dedicated IP address that must be activated on the
+	    host servicing LIXA
+	</para></listitem>
+      </itemizedlist>
+      The following pictures show an high availability configuration in action:
+      <figure xml:id="high_availability_1">
+	<title>HA, step 1: the active node is on the left, 
+	  the passive one is on the right</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_In_Depth_01.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <figure xml:id="high_availability_2">
+	<title>HA, step 2: the active node fails</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_In_Depth_02.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <figure xml:id="high_availability_3">
+	<title>HA, step 3: the passive node takes over the service</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_In_Depth_03.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+    </para>
+    <note><para>
+	If you put all the LIXA installation files 
+	(<filename>/opt/lixa</filename>) in the shared disk you will not
+	be able to run LIXA utility program from the node that's not owning
+	the shared disk: this should not be an issue if your active/passive
+	cluster hosts only <command>lixad</command>.
+      </para>
+      <para>
+	If you were using a most complicated configuration, it might be
+	preferable to put only <filename>/opt/lixa/var</filename> and
+	<filename>/opt/lixa/etc</filename> in the shared disk. You could
+	implement such a configuration using symbolic links or customizing
+	the configure procedure with 
+	<option>--sysconfdir=DIR</option> and 
+	<option>--localstatedir=DIR</option>
+	options. Use <command>./configure</command> <option>--help</option>
+	for more details.
+      </para>
+    </note>
+  </section>
 </chapter>
