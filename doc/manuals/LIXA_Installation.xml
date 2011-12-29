@@ -633,5 +633,38 @@ make check
       is fine too, all the test <emphasis>must</emphasis> complete without
       errors.
     </para>
+    <section>
+      <title>Valgrind advanced checking (LIXA developers only)</title>
+      <para>
+	If you are interested in checking the internals of LIXA you can
+	activate memory or thread check using 
+	<link xlink:href="http://valgrind.org/">Valgrind</link> (it's
+	assumed you already have installed Valgrind).
+	If you were insterested in memory usage analysis, this is the sequence
+	of commands you would use:
+	<screen>
+export CLIENT_CHECK_TYPE=memory
+export SERVER_CHECK_TYPE=memory
+make check
+	</screen>
+	If you were interested in thread usage analysis, this is the sequence
+	of commands you would use:
+	<screen>
+export CLIENT_CHECK_TYPE=thread
+export SERVER_CHECK_TYPE=thread
+make check
+	</screen>
+	Check type can be set independently: you may check memory behavior of 
+	the client component without checking memory behavior of the server
+	component and vice versa.
+	<note><para>
+	    Valgrind is a very good tool, but can not understand some
+	    optimizations and detects some wrong memory leaks 
+	    (false positives). Nevertheless if you were suspecting there is
+	    a memory leak inside LIXA, this would be a good start point to
+	    discover where the issue is.
+	</para></note>
+      </para>
+    </section>
   </section>
 </chapter>
