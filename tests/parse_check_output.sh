@@ -1,4 +1,6 @@
 #!/bin/sh
+# this is a personal tool to grep some stuff after Valgrind memory analysis
+# Ch.F. 2011-12-29
 
 echo "Checking testsuite.log file produced with last 'make check' command"
 

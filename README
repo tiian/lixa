@@ -1,153 +1,44 @@
-                        LIXA (LIbre XA)
+	LIXA, LIbre XA, a free and open source XA transaction manager
 
-LIXA is a software libre implementation of a transaction manager XA compliant.
+LIXA (LIbre XA) is an open source and free Transaction Manager implementing the
+distributed transaction processing "XA specification" and "TX (transaction
+demarcation) specification" according to the X/Open CAE Specification.
+LIXA is a Transaction Manager but it's not a Transaction Monitor: this is the
+distinguishing feature of the project: it enables every application container,
+like a web server or a shell, to become an XA compliant application server.
+The client/server architecture of LIXA allows many application container to
+point a single LIXA server: this is ideal where horizontal scalability is a
+must and many identical application containers must refer to a single
+transactional environment. 
 
-Point your browser to doc/manuals/index.html to read the LIXA manual.
+ * LIXA is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * LIXA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
 
-LIBXML2 dependency:
-This software needs libxml2 and glib2 to be compiled and executed.
-Just for the sake of "simplicity" LIXA uses pkg-config tool to retrieve
-libxml2 and glib2 configuration.
-If your libxml2 and/or glib2 are not configured with pkg-config, you could try
-to export standard Automake shell variables to supply include and library
-paths.
-libuuid is another requirement
+Documentation is available in these places:
+- local directory doc/manuals/index.html after tarball extraction
+- http://lixa.sourceforge.net/manuals/index.html
 
-This is an example if the libxml2 headers are not in standard include 
-directory and it's not pkg-config configured: use this command
-	export CPPFLAGS=-I/path/to/libxml2
-before configure.
-Example: my libxml2 header files are rooted at /usr/include/libxml2
-	export CPPFLAGS=-I/usr/include/libxml2
-	./configure
-	make
+Some important things you should check in the documentation before going on:
+1. check LIXA dependency looking at "Installation/System requirements"
+2. understand LIXA installation procedure describe at "Installation/Configure,
+   build and install"
+3. if you are interested in the test procedure (after build), take a look to
+   "Installation/Checking"
+4. how to understand what's happening inside LIXA code is explained in
+   "In Depth/Tracing"
+5. examples are described in chapter "Development"
 
-Test cases are executed with autotest tool. If you are interested in testing
-the build before installing it, use:
-	make check
-
-To check memory usage with valgrind, an environment variable must be exported
-before check:
-	export CLIENT_CHECK_TYPE=memory
-	export SERVER_CHECK_TYPE=memory
-	make check
-Script tests/parse_check_output.sh can be used to pick-up relevant info from
-output logs.
-
-To check thread usage with valgrind, an environment variable must be exported
-before check:
-	export CLIENT_CHECK_TYPE=thread
-	export SERVER_CHECK_TYPE=thread
-	make check
-
-Check type can be set independently: you may check memory behavior of the
-client component without checking memory behavior of the server component and
-vice versa.
-
-You must set LIXA_TRACE_MASK environment variable according to values 
-described in file src/common/lixa_trace.h to see debug output messages
-	export LIXA_TRACE_MASK="0xffffffff"
-to enable all trace messages (very verbose)
-
-If you really want to disable trace messages at source code level, use
-	./configure --disable-trace
-this option is not suggested until the software will be very stable and your
-operating environment too :-)
-
-If you want to insert extra debug code at source code level, use
-	./configure --enable-debug
-
-If you want to insert crash simulation code (test case only), use
-	./configure --enable-crash
-
-LIXA tries to install itself in /opt/lixa path; this is not GNU compliant but
-it's suggested by POSIX.
-The standard layout is:
-	/opt/lixa/etc      config files
-	/opt/lixa/bin      programs
-	/opt/lixa/lib      libraries
-	/opt/lixa/var      state files
-you need root privileges to install in /opt; LIXA does NOT need root privileges
-to run, so you can perform something different:
-	1. as root, create a new user (i.e. "lixa")
-	2. as root, create a new directory: /opt/lixa
-	3. as root, change the ownership of /opt/lixa and assign it to user
-	   lixa (chown /opt/lixa lixa)
-	4. as root, switch to lixa user
-	5. compile and install LIXA inside /opt/lixa path
-	6. you just created a LIXA administrator (user in charge of 
-	   configuration and maintenance) and an installation every user
-	   can use on client side
-
-configure script understands "--prefix" and "--exec-prefix" options.
-If you want to install LIXA and discard it, use something like:
-	./configure --prefix=/tmp/lixa
-If you want to use LIXA a few more, use something like:
-	./configure --prefix=$HOME/lixa
-and you will get a layout like this:
-	$HOME/lixa/etc
-	$HOME/lixa/bin
-	$HOME/lixa/lib
-	$HOME/lixa/var
-If you want a "GNU like" installation, you may use something like this:
-	./configure --prefix=/ --exec-prefix=/usr/local
-and you will get a layout like this:
-	/etc
-	/usr/local/bin
-	/usr/local/lib
-	/var
-
-On my Ubuntu systems, to build Oracle XE 10.2.0 related stuff, I use something
-like this:
-	./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
-	make
-
-but to execute the sample too, the path is longer:
-	./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --prefix=/tmp/lixa
-	make
-	make install
-	sudo su - oracle
-	cd /tmp/lixa/bin
-	./lixa_oracle_sample [delete]
-because the application must be executed by "oracle" user or you have to deal
-with Oracle's own permission (this is not a source for Oracle info
-unfortunately, so only very basic set-up is explained)
-
-Don't forget these steps for Oracle XA:
-1. connect as SYSDBA with:
-2. create some extra views located in
-   $ORACLE_HOME/rdbms/admin/xaview.sql
-   cat xaview.sql | sqlplus "sys/oracle as sysdba"
-3. sqlplus "sys/oracle as sysdba"       (if your sys user has password oracle)
-4. grant select on dba_pending_transactions to hr
-                   (if hr is the user you want to use to run your application)
-5. grant select on v$pending_xatrans$ to hr;
-6. grant select on v$xatrans$ to hr;
-
-On my Ubuntu systems, to build IBM DB2 Express-C 9.7 related stuff, I use
-something like this:
-	./configure --with-ibmdb2=/opt/ibm/db2/V9.7
-	make
-
-Manual  
-There is an HTML version manual you can install in your system; if you 
-configured LIXA as below:
-	./configure --prefix=/tmp/lixa
-	make install
-it would install the HTML formatted manual at PATH 
-/tmp/lixa/share/doc/lixa-$(VERSION)/html/
-
-Doxygen documentation.
-There is a minimal configuration for Doxygen inside LIXA.
+Doxygen source code documentation: how to extract from LIXA source code the
+documentation of files, structs and functions (you must install Doxygen
+http://www.stack.nl/~dimitri/doxygen/ before you can use it).
 Please update doxygen.conf.in and change /var/www/lixa to a suitable 
 destination in your system.
 Use "configure" (see above) to produce "doxygen.conf" file.
-Strike:
-doxygen doxygen.conf 
-to publish the project code auto-documentation.
-Have fun!
-
-Pre-requisites: 
-libxml2-0
-libglib2
-libuuid 
+If you installed Graphviz (http://www.graphviz.org/), configure should detect
+it and would produce data and headers dependencies too.
