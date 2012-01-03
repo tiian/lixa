@@ -312,7 +312,7 @@ lixa@ubuntu:~$ ls -la /tmp/lixad.trace
 	<screen>
 lixa@ubuntu:~$ /opt/lixa/sbin/lixad --version
 LIXA: a Libre XA implementation
-Copyright (c) 2009-2011, Christian Ferrari; all rights reserved.
+Copyright (c) 2009-2012, Christian Ferrari; all rights reserved.
 License: GPL (GNU Public License) version 2
 Package name: lixa; package version: 0.5.29
 Access http://sourceforge.net/projects/lixa/ to report bugs and partecipate to the project

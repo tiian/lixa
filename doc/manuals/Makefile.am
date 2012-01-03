@@ -52,6 +52,8 @@ index.html: $(manual_sources) $(png_images)
 else
 index_all_in_one.html: $(manual_sources) $(png_images)
 	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
+	cp index_no_xsltproc.html index_all_in_one.html
 index.html: $(manual_sources) $(png_images)
 	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
+	cp index_no_xsltproc.html index.html
 endif

@@ -436,8 +436,10 @@ all: index_all_in_one.html index.html
 @HAVE_XSLTPROC_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/xhtml/chunk.xsl LIXA.xml
 @HAVE_XSLTPROC_FALSE@index_all_in_one.html: $(manual_sources) $(png_images)
 @HAVE_XSLTPROC_FALSE@	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
+@HAVE_XSLTPROC_FALSE@	cp index_no_xsltproc.html index_all_in_one.html
 @HAVE_XSLTPROC_FALSE@index.html: $(manual_sources) $(png_images)
 @HAVE_XSLTPROC_FALSE@	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
+@HAVE_XSLTPROC_FALSE@	cp index_no_xsltproc.html index.html
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
