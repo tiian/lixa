@@ -1,6 +1,6 @@
 dnl @synopsis AX_LIB_POSTGRESQL
 dnl
-dnl Copyright (c) 2009-2011, Christian Ferrari <tiian@users.sourceforge.net>
+dnl Copyright (c) 2009-2012, Christian Ferrari <tiian@users.sourceforge.net>
 dnl All rights reserved.
 dnl
 dnl This file is part of LIXA.
@@ -188,7 +188,7 @@ return 0;
 
     AC_SUBST([POSTGRESQL_CPPFLAGS])
     AC_SUBST([POSTGRESQL_LDFLAGS])
-    if "$HAVE_POSTGRESQL" == "1"
+    if test "$HAVE_POSTGRESQL" = "1"
     then
 	AC_DEFINE([HAVE_POSTGRESQL], [1], 
     	[Define to 1 if you are using PostgreSQL])

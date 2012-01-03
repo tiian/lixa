@@ -21434,7 +21434,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-    if "$HAVE_POSTGRESQL" == "1"
+    if test "$HAVE_POSTGRESQL" = "1"
     then
 
 cat >>confdefs.h <<\_ACEOF
