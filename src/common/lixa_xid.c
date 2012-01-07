@@ -20,6 +20,15 @@
 
 
 
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#ifdef HAVE_REGEX_H
+# include <regex.h>
+#endif
+
+
+
 #include <lixa_config.h>
 #include <lixa_trace.h>
 #include <lixa_xid.h>
@@ -179,7 +188,9 @@ int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx)
 
 int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
 {
-    enum Exception { SEPARATOR1
+    enum Exception { REGCOMP_ERROR
+                     , REGEXEC_ERROR
+                     , SEPARATOR1
                      , INVALID_CHAR1
                      , SEPARATOR2
                      , INVALID_CHAR2
@@ -194,19 +205,46 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
         char tmp[LIXA_SERIALIZED_LONG_INT+1];
         unsigned long l = 0;
         unsigned int b = 0;
-        
-	/* discover first separator */
-	q = strchr(lsx, LIXA_XID_SEPARATOR);
-	if (NULL == q) {
-	    LIXA_TRACE(("lixa_xid_deserialize: '%s' does "
-	                "not contain the separator '%c'\n", lsx, 
-			LIXA_XID_SEPARATOR));
-	    THROW(SEPARATOR1);
-        }
+        regex_t preg;
+        int reg_error;
+        char reg_errbuf[200];
 
-	i = q-lsx;
-	strncpy(tmp, lsx, i);
-	tmp[i] = '\0';
+        /* check the string is well formed using a regular expression */
+        /* compile regular expression */
+        reg_error = regcomp(
+            &preg, "^([[:xdigit:]]{2})+\\.([[:xdigit:]]{2})+\\.([[:xdigit:]]{2})+$", 
+            REG_EXTENDED|REG_NOSUB|REG_NEWLINE);
+        if (0 != reg_error) {
+            regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
+            LIXA_TRACE(("lixa_xid_deserialize: regcomp returned %d ('%s') "
+                        "instead of 0\n", reg_error, reg_errbuf));
+            THROW(REGCOMP_ERROR);
+        }
+        /* check string against regular expression */
+        reg_error = regexec(&preg, lsx, 0, NULL, 0);
+        if (0 != reg_error) {
+            regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
+            LIXA_TRACE(("lixa_xid_deserialize: regexec returned %d ('%s') "
+                        "instead of 0 for string '%s'\n",
+                        reg_error, reg_errbuf, lsx));
+            regfree(&preg);
+            THROW(REGEXEC_ERROR);
+        }
+        /* free compiled regular expression */
+        regfree(&preg);
+
+        /* discover first separator */
+        q = strchr(lsx, LIXA_XID_SEPARATOR);
+        if (NULL == q) {
+            LIXA_TRACE(("lixa_xid_deserialize: '%s' does "
+                        "not contain the separator '%c'\n", lsx, 
+                        LIXA_XID_SEPARATOR));
+            THROW(SEPARATOR1);
+        }
+        
+        i = q-lsx;
+        strncpy(tmp, lsx, i);
+        tmp[i] = '\0';
         sscanf(tmp, "%lx", &l);
         xid->formatID = l;
         /* prepare cursors */
@@ -268,6 +306,8 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case REGCOMP_ERROR:
+            case REGEXEC_ERROR:
             case SEPARATOR1:
             case INVALID_CHAR1:
             case SEPARATOR2:

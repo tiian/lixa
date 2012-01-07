@@ -11,7 +11,8 @@ int main(int argc, char *argv[])
     XID xid1, xid2;
     lixa_ser_xid_t ser_xid1, ser_xid2;
     int i, j;
-    
+
+    LIXA_TRACE_INIT;
     xid1.formatID = (uint32_t)random();
     for (i=0; i<XIDDATASIZE; ++i) {
         xid1.data[i] = random();
