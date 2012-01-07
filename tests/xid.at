@@ -3,3 +3,7 @@ AT_BANNER([XID])
 AT_SETUP([XID/0.0 serialization/deserialization])
 AT_CHECK([export LIXA_TRACE_MASK=0x10000000 ; lixa_test_exec.sh noreset none case0036], [0], [ignore], [ignore])
 AT_CLEANUP
+
+AT_SETUP([XID/1.0 malformed XIDs deserialization])
+AT_CHECK([export LIXA_TRACE_MASK=0x10000000 ; lixa_test_exec.sh noreset none case0043], [0], [ignore], [ignore])
+AT_CLEANUP

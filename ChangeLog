@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.7.1 fixing bug 3470598
+
 20120103 - 0.7.0 First beta release
 
 20111128 - 0.5.35 Intel/AMD 64 bit architecture passed test phase
