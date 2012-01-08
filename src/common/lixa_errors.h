@@ -204,7 +204,10 @@
  * Client/server recovery configuration do not match 
  */
 #define LIXA_RC_RECOVERY_INFO_MISMATCH         -25
-
+/**
+ * A malformed XID has been discovered
+ */
+#define LIXA_RC_MALFORMED_XID                  -26
 
 
 /**

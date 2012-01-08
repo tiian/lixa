@@ -1461,6 +1461,7 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
                 ret_cod = LIXA_RC_FGETS_ERROR;
                 break;
             case XID_DESERIALIZE_ERROR:
+                ret_cod = LIXA_RC_MALFORMED_XID;
                 break;
             case COLD_COMMIT_ERROR:
             case COLD_ROLLBACK_ERROR:
