@@ -212,7 +212,7 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
         /* check the string is well formed using a regular expression */
         /* compile regular expression */
         reg_error = regcomp(
-            &preg, "^([[:xdigit:]]{2})+\\.([[:xdigit:]]{2})+\\.([[:xdigit:]]{2})+$", 
+            &preg, "^([[:xdigit:]]{2})+\\.([[:xdigit:]]{2})+\\.([[:xdigit:]]{2})+|([f]{8})\\.\\.$",
             REG_EXTENDED|REG_NOSUB|REG_NEWLINE);
         if (0 != reg_error) {
             regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
