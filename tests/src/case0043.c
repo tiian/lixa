@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
         return 1;
     if (!lixa_xid_deserialize(&xid1, "34.b1.03"))
         return 1;
-    if (lixa_xid_deserialize(&xid1, "345.b1.03"))
+    if (!lixa_xid_deserialize(&xid1, "345.b1.03"))
         return 1;
     if (lixa_xid_deserialize(&xid1, "45.b17.03"))
         return 1;
@@ -38,12 +38,12 @@ int main(int argc, char *argv[])
     if (lixa_xid_deserialize(&xid1, "45.17.0g"))
         return 1;
     /* special case: NULL XID */
-    if (!lixa_xid_deserialize(&xid1, "ffffffff.."))
+    if (!lixa_xid_deserialize(&xid1, "-1.."))
         return 1;
     /* LIXA standard XID */
     if (!lixa_xid_deserialize(
             &xid1,
-            "4c495841.b15c6c7b1d714876959d5f552d35706a.b6034fd41d4265ac935a4c525e59548b"))
+            "1279875137.b15c6c7b1d714876959d5f552d35706a.b6034fd41d4265ac935a4c525e59548b"))
         return 1;
     
     return 0;
