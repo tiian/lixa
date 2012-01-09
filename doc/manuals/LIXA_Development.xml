@@ -1693,7 +1693,7 @@ tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
 0x00002000
 tiian@ubuntu:~/tmp$ ./example3_db2 insert dept 2>&amp;1 | grep ax_reg
 2011-04-22 22:08:40.650458 [6654/3039381232] ax_reg: rmid=0, xid=0xbfcd65d0, flags=0x0
-2011-04-22 22:08:40.650858 [6654/3039381232] ax_reg: the application program has started a transaction (TX states S3); this XID '4c495841.9a73b024b7ab4018915b54761d3dcd79.e41205820a9c722218578c0eeec6a27c' will be returned
+2011-04-22 22:08:40.650858 [6654/3039381232] ax_reg: the application program has started a transaction (TX states S3); this XID '1279875137.9a73b024b7ab4018915b54761d3dcd79.e41205820a9c722218578c0eeec6a27c' will be returned
 2011-04-22 22:08:40.651156 [6654/3039381232] ax_reg: sending 153 bytes to the server for step 8
 2011-04-22 22:08:40.651316 [6654/3039381232] ax_reg/excp=7/ret_cod=0/errno=2
 	</screen>
@@ -2279,11 +2279,11 @@ tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
 0x00002000
 tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept rollback 2>&amp;1 | grep ax_reg
 2011-05-04 22:35:07.919522 [8962/3023124208] ax_reg: rmid=1, xid=0xbfe8d1f0, flags=0x0
-2011-05-04 22:35:07.920026 [8962/3023124208] ax_reg: the application program has started a transaction (TX states S3); this XID '4c495841.47b3b61569764774bfc1e5f79ef725ae.818e85f29a0c09e22f0c75f89ca17658' will be returned
+2011-05-04 22:35:07.920026 [8962/3023124208] ax_reg: the application program has started a transaction (TX states S3); this XID '1279875137.47b3b61569764774bfc1e5f79ef725ae.818e85f29a0c09e22f0c75f89ca17658' will be returned
 2011-05-04 22:35:07.920276 [8962/3023124208] ax_reg: sending 153 bytes to the server for step 8
 2011-05-04 22:35:07.920527 [8962/3023124208] ax_reg/excp=7/ret_cod=0/errno=2
 2011-05-04 22:35:07.921592 [8962/3023124208] ax_reg: rmid=0, xid=0xbfe8b09c, flags=0x0
-2011-05-04 22:35:07.921812 [8962/3023124208] ax_reg: the application program has started a transaction (TX states S3); this XID '4c495841.47b3b61569764774bfc1e5f79ef725ae.818e85f29a0c09e22f0c75f89ca17658' will be returned
+2011-05-04 22:35:07.921812 [8962/3023124208] ax_reg: the application program has started a transaction (TX states S3); this XID '1279875137.47b3b61569764774bfc1e5f79ef725ae.818e85f29a0c09e22f0c75f89ca17658' will be returned
 2011-05-04 22:35:07.921979 [8962/3023124208] ax_reg: sending 153 bytes to the server for step 8
 2011-05-04 22:35:07.922128 [8962/3023124208] ax_reg/excp=7/ret_cod=0/errno=2
 	  </screen></td></tr></tbody>
@@ -2314,7 +2314,7 @@ tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 ORA_DYN_DB2_STA
 tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept rollback 2>&amp;1 | grep ax_reg
 2011-05-04 22:47:11.812256 [9122/3022382832] ax_reg: rmid=0, xid=0xbfc0f59c, flags=0x0
-2011-05-04 22:47:11.813114 [9122/3022382832] ax_reg: the application program has started a transaction (TX states S3); this XID '4c495841.a74508954f774509a939ad9580bca2b8.03460325a8fe89a8c8134b6dea4b782e' will be returned
+2011-05-04 22:47:11.813114 [9122/3022382832] ax_reg: the application program has started a transaction (TX states S3); this XID '1279875137.a74508954f774509a939ad9580bca2b8.03460325a8fe89a8c8134b6dea4b782e' will be returned
 2011-05-04 22:47:11.813631 [9122/3022382832] ax_reg: sending 153 bytes to the server for step 8
 2011-05-04 22:47:11.814037 [9122/3022382832] ax_reg/excp=7/ret_cod=0/errno=2
 tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept rollback 2>&amp;1 | grep xa_start
@@ -2345,7 +2345,7 @@ tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 ORA_STA_DB2_DYN
 tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept rollback 2>&amp;1 | grep ax_reg
 2011-05-04 22:57:37.235541 [9346/3023226608] ax_reg: rmid=1, xid=0xbfcf8880, flags=0x0
-2011-05-04 22:57:37.236410 [9346/3023226608] ax_reg: the application program has started a transaction (TX states S3); this XID '4c495841.1bf330d60c0442e4b61539214a413ecb.79fecb55351db58295ebf99c9bf09a70' will be returned
+2011-05-04 22:57:37.236410 [9346/3023226608] ax_reg: the application program has started a transaction (TX states S3); this XID '1279875137.1bf330d60c0442e4b61539214a413ecb.79fecb55351db58295ebf99c9bf09a70' will be returned
 2011-05-04 22:57:37.236859 [9346/3023226608] ax_reg: sending 153 bytes to the server for step 8
 2011-05-04 22:57:37.237581 [9346/3023226608] ax_reg/excp=7/ret_cod=0/errno=2
 tiian@ubuntu:~/tmp$ ./example4_ora_db2 iorg icountries idept rollback 2>&amp;1 | grep xa_start
@@ -3332,7 +3332,7 @@ tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
 0x00002000
 tiian@ubuntu:~/tmp$ ./example6_pql_ora insert 2>&amp;1 | grep ax_reg
 2011-09-20 22:11:01.669440 [6844/3052865280] ax_reg: rmid=1, xid=0xbfe4cdcc, flags=0x0
-2011-09-20 22:11:01.669537 [6844/3052865280] ax_reg: the application program has started a transaction (TX states S3); this XID '4c495841.ce4993340a46495e94f07dbbdd5d0366.6e8ecf5972a778ab648b5950c0f96dd6' will be returned
+2011-09-20 22:11:01.669537 [6844/3052865280] ax_reg: the application program has started a transaction (TX states S3); this XID '1279875137.ce4993340a46495e94f07dbbdd5d0366.6e8ecf5972a778ab648b5950c0f96dd6' will be returned
 2011-09-20 22:11:01.669591 [6844/3052865280] ax_reg: sending 153 bytes to the server for step 8
 2011-09-20 22:11:01.669639 [6844/3052865280] ax_reg/excp=7/ret_cod=0/errno=0
 	  </screen></td></tr></tbody>
@@ -3853,7 +3853,7 @@ tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
 0x00002000
 tiian@ubuntu:~/tmp$ ./example7_pql_db2 delete org 2>&amp;1 | grep ax_reg
 2011-09-25 18:15:38.499702 [13586/3035527472] ax_reg: rmid=1, xid=0xbf9b2630, flags=0x0
-2011-09-25 18:15:38.500405 [13586/3035527472] ax_reg: the application program has started a transaction (TX states S3); this XID '4c495841.0565b518222345ba852b4c4a09a660ae.725d0414e912e62f9ef42209ef693f36' will be returned
+2011-09-25 18:15:38.500405 [13586/3035527472] ax_reg: the application program has started a transaction (TX states S3); this XID '1279875137.0565b518222345ba852b4c4a09a660ae.725d0414e912e62f9ef42209ef693f36' will be returned
 2011-09-25 18:15:38.500970 [13586/3035527472] ax_reg: sending 153 bytes to the server for step 8
 2011-09-25 18:15:38.501415 [13586/3035527472] ax_reg/excp=7/ret_cod=0/errno=0
 	  </screen></td></tr></tbody>
@@ -5238,7 +5238,7 @@ tiian@ubuntu:~/tmp$ echo $LIXA_TRACE_MASK
 0x00002000
 tiian@ubuntu:~/tmp$ ./example10_mys_pql_ora insert 2>&amp;1 | grep ax_reg
 2011-11-11 21:39:40.850356 [23176/3051161344] ax_reg: rmid=2, xid=0xbfecc68c, flags=0x0
-2011-11-11 21:39:40.850451 [23176/3051161344] ax_reg: the application program has started a transaction (TX states S3); this XID '4c495841.0600c467d21b42b38f1c89d912fc125d.8be5bdb35ba638bb997258e6bd8b9d88' will be returned
+2011-11-11 21:39:40.850451 [23176/3051161344] ax_reg: the application program has started a transaction (TX states S3); this XID '1279875137.0600c467d21b42b38f1c89d912fc125d.8be5bdb35ba638bb997258e6bd8b9d88' will be returned
 2011-11-11 21:39:40.850565 [23176/3051161344] ax_reg: sending 153 bytes to the server for step 8
 2011-11-11 21:39:40.850602 [23176/3051161344] ax_reg/excp=7/ret_cod=0/errno=0
 	  </screen></td></tr></tbody>

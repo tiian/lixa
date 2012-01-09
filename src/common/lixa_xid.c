@@ -137,7 +137,7 @@ char *lixa_xid_get_bqual_ascii(const XID *xid)
 void lixa_xid_formatid(lixa_ser_xid_t lsx)
 {
     /* serialize LIXA formatID */
-    sprintf(lsx, "%lx", LIXA_XID_FORMAT_ID); 
+    sprintf(lsx, "%ld", LIXA_XID_FORMAT_ID); 
 }
 
 
@@ -161,7 +161,7 @@ int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx)
         return FALSE;
     }
     /* serialize formatID and put the first separator */
-    sprintf(lsx, "%lx%c", xid->formatID, LIXA_XID_SEPARATOR);
+    sprintf(lsx, "%ld%c", xid->formatID, LIXA_XID_SEPARATOR);
 
     /* serialize gtrid */
     j = strlen(lsx);
@@ -212,7 +212,7 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
         /* check the string is well formed using a regular expression */
         /* compile regular expression */
         reg_error = regcomp(
-            &preg, "^([[:xdigit:]]{2})+\\.([[:xdigit:]]{2})+\\.([[:xdigit:]]{2})+|([f]{8})\\.\\.$",
+            &preg, "^([-]?[[:digit:]])+\\.([[:xdigit:]]{2})*\\.([[:xdigit:]]{2})*$",
             REG_EXTENDED|REG_NOSUB|REG_NEWLINE);
         if (0 != reg_error) {
             regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
@@ -245,7 +245,7 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
         i = q-lsx;
         strncpy(tmp, lsx, i);
         tmp[i] = '\0';
-        sscanf(tmp, "%lx", &l);
+        sscanf(tmp, "%ld", &l);
         xid->formatID = l;
         /* prepare cursors */
         p = q+1;

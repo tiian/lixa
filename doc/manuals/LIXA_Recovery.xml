@@ -374,12 +374,9 @@ BRANCHID
 testdb=> select * from pg_prepared_xacts;
  transaction |                                    gid                                     |           prepared            | owner | database 
 -------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
-         874 | 4c495841.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c | 2011-12-14 22:02:50.462682+01 | tiian | testdb
+         874 | 1279875137.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c | 2011-12-14 22:02:50.462682+01 | tiian | testdb
 	  </screen></td></tr></tbody>
 	</table>
-	Noting that the decimal value 1279875137 is expressed as 4c495841 
-	in hexadecimal, the information retrieved from the Resource Managers 
-	is consistent.
 	It is suggested to activate the trace related to the 
 	<quote>client recovery</quote>
 	module (see <xref linkend="Tracing_modules"/>)
@@ -391,15 +388,15 @@ tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00040000
 tiian@ubuntu:~/tmp$ /opt/lixa/bin/lixat 
 2011-12-14 22:22:01.740634 [27735/3073944240] client_recovery
 2011-12-14 22:22:01.740771 [27735/3073944240] client_recovery: sending 197 bytes ('000191&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="8"&gt;&lt;client job="9bac7be1c129ea6ee31f2d71b318120c/127.0.0.1      " config_digest="9bac7be1c129ea6ee31f2d71b318120c"/&gt;&lt;/msg&gt;') to the server for step 8
-2011-12-14 22:22:01.759352 [27735/3073944240] client_recovery: receiving 561 bytes from the server |&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="16"&gt;&lt;answer rc="0"/&gt;&lt;client job="9bac7be1c129ea6ee31f2d71b318120c/127.0.0.1      " config_digest="9bac7be1c129ea6ee31f2d71b318120c"&gt;&lt;last_verb_step verb="5" step="16"/&gt;&lt;state finished="0" txstate="3" will_commit="1" will_rollback="0" xid="4c495841.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c"/&gt;&lt;/client&gt;&lt;rsrmgrs&gt;&lt;rsrmgr rmid="0" next_verb="0" r_state="1" s_state="33" td_state="10"/&gt;&lt;rsrmgr rmid="1" next_verb="0" r_state="1" s_state="33" td_state="20"/&gt;&lt;/rsrmgrs&gt;&lt;/msg&gt;|
+2011-12-14 22:22:01.759352 [27735/3073944240] client_recovery: receiving 561 bytes from the server |&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="16"&gt;&lt;answer rc="0"/&gt;&lt;client job="9bac7be1c129ea6ee31f2d71b318120c/127.0.0.1      " config_digest="9bac7be1c129ea6ee31f2d71b318120c"&gt;&lt;last_verb_step verb="5" step="16"/&gt;&lt;state finished="0" txstate="3" will_commit="1" will_rollback="0" xid="1279875137.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c"/&gt;&lt;/client&gt;&lt;rsrmgrs&gt;&lt;rsrmgr rmid="0" next_verb="0" r_state="1" s_state="33" td_state="10"/&gt;&lt;rsrmgr rmid="1" next_verb="0" r_state="1" s_state="33" td_state="20"/&gt;&lt;/rsrmgrs&gt;&lt;/msg&gt;|
 2011-12-14 22:22:01.759776 [27735/3073944240] client_recovery_analyze
 2011-12-14 22:22:01.759857 [27735/3073944240] client_recovery_analyze: the TX was committing
 2011-12-14 22:22:01.759873 [27735/3073944240] client_recovery_analyze: rmid=0, r_state=1, s_state=33, td_state=10
 2011-12-14 22:22:01.759884 [27735/3073944240] client_recovery_analyze: rmid=1, r_state=1, s_state=33, td_state=20
 2011-12-14 22:22:01.759902 [27735/3073944240] client_recovery_analyze/excp=1/ret_cod=0/errno=0
-2011-12-14 22:22:01.759921 [27735/3073944240] client_recovery: transaction '4c495841.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c' must be committed
+2011-12-14 22:22:01.759921 [27735/3073944240] client_recovery: transaction '1279875137.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c' must be committed
 2011-12-14 22:22:01.759937 [27735/3073944240] client_recovery_commit
-2011-12-14 22:22:01.759971 [27735/3073944240] client_recovery_commit: committing transaction '4c495841.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c'
+2011-12-14 22:22:01.759971 [27735/3073944240] client_recovery_commit: committing transaction '1279875137.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c'
 2011-12-14 22:22:01.759998 [27735/3073944240] client_recovery_commit: xa_commit for rmid=0, name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]'...
 2011-12-14 22:22:02.143764 [27735/3073944240] client_recovery_commit: rc=0
 2011-12-14 22:22:02.143866 [27735/3073944240] client_recovery_commit: xa_commit for rmid=1, name='OracleXE_dynreg', xa_name='Oracle_XA'...
@@ -516,7 +513,7 @@ BRANCHID
 testdb=> select * from pg_prepared_xacts;
  transaction |                                    gid                                     |           prepared            | owner | database 
 -------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
-         877 | 4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c | 2011-12-14 22:55:14.973443+01 | tiian | testdb
+         877 | 1279875137.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c | 2011-12-14 22:55:14.973443+01 | tiian | testdb
 	  </screen></td></tr></tbody>
 	</table>
 	Then you should stop and cold start the <command>lixad</command> 
@@ -612,7 +609,7 @@ BRANCHID
 testdb=> select * from pg_prepared_xacts;
  transaction |                                    gid                                     |           prepared            | owner | database 
 -------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
-         877 | 4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c | 2011-12-14 22:55:14.973443+01 | tiian | testdb
+         877 | 1279875137.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c | 2011-12-14 22:55:14.973443+01 | tiian | testdb
 	  </screen></td></tr></tbody>
 	</table>
 	The <command>lixar</command> utility program with <option>-p</option>
@@ -640,7 +637,7 @@ rmid=0, lixa_name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]'
 rmid=1, lixa_name='OracleXE_dynreg', xa_name='Oracle_XA'
 
 Prepared and in-doubt transaction list:
-xid='4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c': rmid=0 rmid=1 
+xid='1279875137.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c': rmid=0 rmid=1 
 	  </screen></td></tr></tbody>
 	</table>
 	it reports some useful information and at the bottom there is the
@@ -654,10 +651,10 @@ xid='4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c'
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ /opt/lixa/bin/lixar -p -x 4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c -r
+tiian@ubuntu:~/tmp$ /opt/lixa/bin/lixar -p -x 1279875137.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c -r
 Execution options:
 	- print report = yes
-	- transaction to commit/rollback = 4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c
+	- transaction to commit/rollback = 1279875137.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c
 	- transaction(s) will be committed = no
 	- transaction(s) will be rolled back = yes
 	- bypass xid branch qualifier check = no
@@ -674,9 +671,9 @@ rmid=0, lixa_name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]'
 rmid=1, lixa_name='OracleXE_dynreg', xa_name='Oracle_XA'
 
 Prepared and in-doubt transaction list:
-xid='4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c': rmid=0 rmid=1 
+xid='1279875137.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c': rmid=0 rmid=1 
 
-Analizing transaction '4c495841.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c':
+Analizing transaction '1279875137.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c':
 xa_rollback --&gt; rmid=0, lixa_name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]', rc=0
 xa_rollback --&gt; rmid=1, lixa_name='OracleXE_dynreg', xa_name='Oracle_XA', rc=0
 	  </screen></td></tr></tbody>
@@ -890,22 +887,22 @@ tiian@ubuntu:~/tmp$ ./example6_pql_ora insert 2>&amp;1 | grep monkey
 2011-12-15 22:42:20.726862 [22490/3052672768] lixa_monkeyrm_get_rc: verb is 1, XA return code is 0
 2011-12-15 22:42:20.727177 [22490/3052672768] lixa_monkeyrm_get_rc/excp=2/ret_cod=0/errno=0
 2011-12-15 22:42:20.727429 [22490/3052672768] lixa_monkeyrm_open/excp=4/ret_cod=0/xa_rc=0/errno=0
-2011-12-15 22:42:21.022655 [22490/3052672768] lixa_monkeyrm_start: xid='4c495841.7bdcf6c060e14bdba416302661187411.a100c8728292168b21ba7239bffc137d', rmid=1, flags=0x0
+2011-12-15 22:42:21.022655 [22490/3052672768] lixa_monkeyrm_start: xid='1279875137.7bdcf6c060e14bdba416302661187411.a100c8728292168b21ba7239bffc137d', rmid=1, flags=0x0
 2011-12-15 22:42:21.022695 [22490/3052672768] lixa_monkeyrm_get_rc
 2011-12-15 22:42:21.022705 [22490/3052672768] lixa_monkeyrm_get_rc: verb is 3, XA return code is 0
 2011-12-15 22:42:21.022712 [22490/3052672768] lixa_monkeyrm_get_rc/excp=2/ret_cod=0/errno=0
 2011-12-15 22:42:21.022719 [22490/3052672768] lixa_monkeyrm_start/excp=4/ret_cod=0/xa_rc=0/errno=0
-2011-12-15 22:42:21.059688 [22490/3052672768] lixa_monkeyrm_end: xid='4c495841.7bdcf6c060e14bdba416302661187411.a100c8728292168b21ba7239bffc137d', rmid=1, flags=0x4000000
+2011-12-15 22:42:21.059688 [22490/3052672768] lixa_monkeyrm_end: xid='1279875137.7bdcf6c060e14bdba416302661187411.a100c8728292168b21ba7239bffc137d', rmid=1, flags=0x4000000
 2011-12-15 22:42:21.059701 [22490/3052672768] lixa_monkeyrm_get_rc
 2011-12-15 22:42:21.059709 [22490/3052672768] lixa_monkeyrm_get_rc: verb is 4, XA return code is 0
 2011-12-15 22:42:21.059716 [22490/3052672768] lixa_monkeyrm_get_rc/excp=2/ret_cod=0/errno=0
 2011-12-15 22:42:21.059723 [22490/3052672768] lixa_monkeyrm_end/excp=4/ret_cod=0/xa_rc=0/errno=0
-2011-12-15 22:42:21.076478 [22490/3052672768] lixa_monkeyrm_prepare: xid='4c495841.7bdcf6c060e14bdba416302661187411.a100c8728292168b21ba7239bffc137d', rmid=1, flags=0x0
+2011-12-15 22:42:21.076478 [22490/3052672768] lixa_monkeyrm_prepare: xid='1279875137.7bdcf6c060e14bdba416302661187411.a100c8728292168b21ba7239bffc137d', rmid=1, flags=0x0
 2011-12-15 22:42:21.076498 [22490/3052672768] lixa_monkeyrm_get_rc
 2011-12-15 22:42:21.076512 [22490/3052672768] lixa_monkeyrm_get_rc: verb is 5, XA return code is 0
 2011-12-15 22:42:21.076520 [22490/3052672768] lixa_monkeyrm_get_rc/excp=2/ret_cod=0/errno=0
 2011-12-15 22:42:21.076527 [22490/3052672768] lixa_monkeyrm_prepare/excp=4/ret_cod=0/xa_rc=0/errno=0
-2011-12-15 22:42:21.098722 [22490/3052672768] lixa_monkeyrm_commit: xid='4c495841.7bdcf6c060e14bdba416302661187411.a100c8728292168b21ba7239bffc137d', rmid=1, flags=0x0
+2011-12-15 22:42:21.098722 [22490/3052672768] lixa_monkeyrm_commit: xid='1279875137.7bdcf6c060e14bdba416302661187411.a100c8728292168b21ba7239bffc137d', rmid=1, flags=0x0
 2011-12-15 22:42:21.098747 [22490/3052672768] lixa_monkeyrm_get_rc
 2011-12-15 22:42:21.098756 [22490/3052672768] lixa_monkeyrm_get_rc: verb is 6, XA return code is 0
 2011-12-15 22:42:21.098764 [22490/3052672768] lixa_monkeyrm_get_rc/excp=2/ret_cod=0/errno=0
@@ -967,7 +964,7 @@ D2F5F0A5C37E485CB44D9FC16E72A33D
 testdb=> select * from pg_prepared_xacts;
  transaction |                                    gid                                     |           prepared            | owner | database 
 -------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
-         964 | 4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395 | 2011-12-16 16:38:47.921947+01 | tiian | testdb
+         964 | 1279875137.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395 | 2011-12-16 16:38:47.921947+01 | tiian | testdb
 	  </screen></td></tr></tbody>
 	</table>
 	To move the transaction in <quote>recovery failed</quote> status
@@ -996,16 +993,16 @@ tiian@ubuntu:~/tmp$ export LIXA_TRACE_MASK=0x00040000
 tiian@ubuntu:~/tmp$ /opt/lixa/bin/lixat
 2011-12-16 16:44:09.970398 [8385/3073862320] client_recovery
 2011-12-16 16:44:09.970575 [8385/3073862320] client_recovery: sending 197 bytes ('000191&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="8"&gt;&lt;client job="68d0e0ccbc6fc4b7fa616df9ab122395/127.0.0.1      " config_digest="68d0e0ccbc6fc4b7fa616df9ab122395"/&gt;&lt;/msg&gt;') to the server for step 8
-2011-12-16 16:44:10.007703 [8385/3073862320] client_recovery: receiving 632 bytes from the server |&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="16"&gt;&lt;answer rc="0"/&gt;&lt;client job="68d0e0ccbc6fc4b7fa616df9ab122395/127.0.0.1      " config_digest="68d0e0ccbc6fc4b7fa616df9ab122395"&gt;&lt;last_verb_step verb="5" step="16"/&gt;&lt;state finished="0" txstate="3" will_commit="1" will_rollback="0" xid="4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395"/&gt;&lt;/client&gt;&lt;rsrmgrs&gt;&lt;rsrmgr rmid="0" next_verb="0" r_state="1" s_state="33" td_state="10"/&gt;&lt;rsrmgr rmid="1" next_verb="0" r_state="1" s_state="33" td_state="10"/&gt;&lt;rsrmgr rmid="2" next_verb="0" r_state="1" s_state="33" td_state="20"/&gt;&lt;/rsrmgrs&gt;&lt;/msg&gt;|
+2011-12-16 16:44:10.007703 [8385/3073862320] client_recovery: receiving 632 bytes from the server |&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="8" step="16"&gt;&lt;answer rc="0"/&gt;&lt;client job="68d0e0ccbc6fc4b7fa616df9ab122395/127.0.0.1      " config_digest="68d0e0ccbc6fc4b7fa616df9ab122395"&gt;&lt;last_verb_step verb="5" step="16"/&gt;&lt;state finished="0" txstate="3" will_commit="1" will_rollback="0" xid="1279875137.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395"/&gt;&lt;/client&gt;&lt;rsrmgrs&gt;&lt;rsrmgr rmid="0" next_verb="0" r_state="1" s_state="33" td_state="10"/&gt;&lt;rsrmgr rmid="1" next_verb="0" r_state="1" s_state="33" td_state="10"/&gt;&lt;rsrmgr rmid="2" next_verb="0" r_state="1" s_state="33" td_state="20"/&gt;&lt;/rsrmgrs&gt;&lt;/msg&gt;|
 2011-12-16 16:44:10.008178 [8385/3073862320] client_recovery_analyze
 2011-12-16 16:44:10.008229 [8385/3073862320] client_recovery_analyze: the TX was committing
 2011-12-16 16:44:10.008242 [8385/3073862320] client_recovery_analyze: rmid=0, r_state=1, s_state=33, td_state=10
 2011-12-16 16:44:10.008261 [8385/3073862320] client_recovery_analyze: rmid=1, r_state=1, s_state=33, td_state=10
 2011-12-16 16:44:10.008278 [8385/3073862320] client_recovery_analyze: rmid=2, r_state=1, s_state=33, td_state=20
 2011-12-16 16:44:10.008303 [8385/3073862320] client_recovery_analyze/excp=1/ret_cod=0/errno=0
-2011-12-16 16:44:10.008327 [8385/3073862320] client_recovery: transaction '4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395' must be committed
+2011-12-16 16:44:10.008327 [8385/3073862320] client_recovery: transaction '1279875137.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395' must be committed
 2011-12-16 16:44:10.008353 [8385/3073862320] client_recovery_commit
-2011-12-16 16:44:10.008388 [8385/3073862320] client_recovery_commit: committing transaction '4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395'
+2011-12-16 16:44:10.008388 [8385/3073862320] client_recovery_commit: committing transaction '1279875137.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395'
 2011-12-16 16:44:10.008412 [8385/3073862320] client_recovery_commit: xa_commit for rmid=0, name='LIXAmonkey1staRM', xa_name='LIXA Monkey RM (static)'...
 2011-12-16 16:44:10.008464 [8385/3073862320] client_recovery_commit: rc=6
 2011-12-16 16:44:10.008613 [8385/3073862320] client_recovery_commit: xa_commit for rmid=1, name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]'...
@@ -1026,7 +1023,7 @@ tx_close(): 0
 	<itemizedlist mark="bullet">
 	  <listitem><para>
 	      <command>lixat</command> fires an automatic (warm) recovery
-	      for transaction XID='4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395'
+	      for transaction XID='1279875137.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395'
 	  </para></listitem>
 	  <listitem><para>
 	      the transaction must be committed because the crash followed
@@ -1098,8 +1095,8 @@ testdb=> SELECT * FROM authors;
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ sudo tail /var/log/daemon.log
 Dec 16 16:44:09 ubuntu lixat[8385]: LXC000I this process is starting a new LIXA transaction manager (lixa package version is 0.5.36)
-Dec 16 16:44:10 ubuntu lixat[8385]: LXC003C resource manager 'LIXAmonkey1staRM' returned an error (6) while committing (xa_commit) during recovery phase for transaction '4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395'
-Dec 16 16:44:10 ubuntu lixat[8385]: LXC005W unable to recover transaction id '4c495841.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395'; this transaction must be manually recovered and the correlated record(s) must be manually fixed in lixad server status file
+Dec 16 16:44:10 ubuntu lixat[8385]: LXC003C resource manager 'LIXAmonkey1staRM' returned an error (6) while committing (xa_commit) during recovery phase for transaction '1279875137.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395'
+Dec 16 16:44:10 ubuntu lixat[8385]: LXC005W unable to recover transaction id '1279875137.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395'; this transaction must be manually recovered and the correlated record(s) must be manually fixed in lixad server status file
 Dec 16 16:44:10 ubuntu lixad[8157]: LXD012W a client notified recovery failed condition for the transaction registered in status file 3 and block 1
 	  </screen></td></tr></tbody>
 	</table>
@@ -1161,7 +1158,7 @@ Block type: transaction manager record (transaction header)
 	Trnhdr/state/txstate: 3
 	Trnhdr/state/will commit: 1
 	Trnhdr/state/will rollback: 0
-	Trnhdr/state/xid: '4c495841.592cec793be1433d8ffd18574211e0e2.68d0e0ccbc6fc4b7fa616df9ab122395'
+	Trnhdr/state/xid: '1279875137.592cec793be1433d8ffd18574211e0e2.68d0e0ccbc6fc4b7fa616df9ab122395'
 	Trnhdr/recoverying block id: 0
 	Trnhdr/recovery failed: 1
 	Trnhdr/recovery failed time: 2011-12-16T16:29:15.947057+0100
@@ -1507,14 +1504,14 @@ tiian@ubuntu:~/src/lixa$ /opt/lixa/bin/lixat -c
 tx_open(): 0
 tx_begin(): 0
 tx_info(): 1
-	xid/formatID.gtrid.bqual = 4c495841.56af7a66398f4eca82b8826fe10165ad.9e4c11057107c73366c9fc421eaa85ca
+	xid/formatID.gtrid.bqual = 1279875137.56af7a66398f4eca82b8826fe10165ad.9e4c11057107c73366c9fc421eaa85ca
 tx_commit(): 0
 tx_close(): 0
 tiian@ubuntu:~/src/lixa$ /opt/lixa/bin/lixat -c
 tx_open(): 0
 tx_begin(): 0
 tx_info(): 1
-	xid/formatID.gtrid.bqual = 4c495841.218f05b733fb4bc1aa3d21eeaf01fbab.9e4c11057107c73366c9fc421eaa85ca
+	xid/formatID.gtrid.bqual = 1279875137.218f05b733fb4bc1aa3d21eeaf01fbab.9e4c11057107c73366c9fc421eaa85ca
 tx_commit(): 0
 tx_close(): 0	  
 	</screen>
@@ -1522,7 +1519,7 @@ tx_close(): 0
 	<itemizedlist mark="bullet">
 	  <listitem><para>
 	      <quote>formatID</quote> is constant and the LIXA Transaction
-	      Manager uses the exadecimal value 4c495841 (that's the 
+	      Manager uses the exadecimal value 1279875137 (that's the 
 	      ASCII sequence of string <quote>LIXA</quote>)
 	  </para></listitem>
 	  <listitem><para>

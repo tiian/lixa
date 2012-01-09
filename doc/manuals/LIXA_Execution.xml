@@ -377,7 +377,7 @@ tiian@ubuntu:~$ /opt/lixa/bin/lixat --commit
 tx_open(): 0
 tx_begin(): 0
 tx_info(): 1
-        xid/formatID.gtrid.bqual = 4c495841.080f2b63a3804bfbbdd3347ca7607ba3.ef954655163edff9fee662b12f881c97
+        xid/formatID.gtrid.bqual = 1279875137.080f2b63a3804bfbbdd3347ca7607ba3.ef954655163edff9fee662b12f881c97
 tx_commit(): 0
 tx_close(): 0
     </screen>
@@ -391,7 +391,7 @@ tiian@ubuntu:~$ /opt/lixa/bin/lixat --rollback
 tx_open(): 0
 tx_begin(): 0
 tx_info(): 1
-        xid/formatID.gtrid.bqual = 4c495841.c651f0f2efb249bd92f3f2b5a76741a5.ef954655163edff9fee6-62b12f881c97
+        xid/formatID.gtrid.bqual = 1279875137.c651f0f2efb249bd92f3f2b5a76741a5.ef954655163edff9fee6-62b12f881c97
 tx_rollback(): 0
 tx_close(): 0
     </screen>
