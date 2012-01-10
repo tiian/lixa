@@ -1,10 +1,10 @@
 LOG:
 
-         - 0.7.1 fixing bug 3470598
+20120110 - 0.7.1 fixed bug 3470598
                  Serialization of XID format id changed from hexadecimal
                  (4c495841) to decimal (1279875137) to deal with the negative
                  value (-1) of NULL XID and mixed 32/64 bit environments
-                 (ffffffff is not equal to -1 in a 64 bit architecture)
+                 (ffffffff is not equal to -1 for a x86-64 Linux)
 
 20120103 - 0.7.0 First beta release
 

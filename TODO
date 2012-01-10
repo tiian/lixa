@@ -1,5 +1,3 @@
-Create a case test for bug 3470598 and perform non regression tests
-
 Introduce min frequency and max frequency synchronization (avoid two threads
 are syncing together)
 
