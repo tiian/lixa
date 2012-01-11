@@ -372,8 +372,8 @@ BRANCHID
 	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 testdb=> select * from pg_prepared_xacts;
- transaction |                                    gid                                     |           prepared            | owner | database 
--------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
+ transaction |                                    gid                                       |           prepared            | owner | database 
+-------------+------------------------------------------------------------------------------+-------------------------------+-------+----------
          874 | 1279875137.97dd30a150604afdbfa5fdc94b611fd5.9bac7be1c129ea6ee31f2d71b318120c | 2011-12-14 22:02:50.462682+01 | tiian | testdb
 	  </screen></td></tr></tbody>
 	</table>
@@ -511,8 +511,8 @@ BRANCHID
 	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 testdb=> select * from pg_prepared_xacts;
- transaction |                                    gid                                     |           prepared            | owner | database 
--------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
+ transaction |                                    gid                                       |           prepared            | owner | database 
+-------------+------------------------------------------------------------------------------+-------------------------------+-------+----------
          877 | 1279875137.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c | 2011-12-14 22:55:14.973443+01 | tiian | testdb
 	  </screen></td></tr></tbody>
 	</table>
@@ -607,8 +607,8 @@ BRANCHID
 	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 testdb=> select * from pg_prepared_xacts;
- transaction |                                    gid                                     |           prepared            | owner | database 
--------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
+ transaction |                                    gid                                       |           prepared            | owner | database 
+-------------+------------------------------------------------------------------------------+-------------------------------+-------+----------
          877 | 1279875137.957747f7f37b439ebcea4146076ad322.9bac7be1c129ea6ee31f2d71b318120c | 2011-12-14 22:55:14.973443+01 | tiian | testdb
 	  </screen></td></tr></tbody>
 	</table>
@@ -962,8 +962,8 @@ D2F5F0A5C37E485CB44D9FC16E72A33D
 	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 testdb=> select * from pg_prepared_xacts;
- transaction |                                    gid                                     |           prepared            | owner | database 
--------------+----------------------------------------------------------------------------+-------------------------------+-------+----------
+ transaction |                                    gid                                       |           prepared            | owner | database 
+-------------+------------------------------------------------------------------------------+-------------------------------+-------+----------
          964 | 1279875137.d2f5f0a5c37e485cb44d9fc16e72a33d.68d0e0ccbc6fc4b7fa616df9ab122395 | 2011-12-16 16:38:47.921947+01 | tiian | testdb
 	  </screen></td></tr></tbody>
 	</table>
