@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.7.2
+
 20120110 - 0.7.1 fixed bug 3470598
                  Serialization of XID format id changed from hexadecimal
                  (4c495841) to decimal (1279875137) to deal with the negative
