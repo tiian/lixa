@@ -58,7 +58,7 @@
 
 void lixa_print_version(FILE *stream)
 {
-    fprintf(stream, "LIXA: a Libre XA implementation\n"
+    fprintf(stream, "LIXA: a LIbre XA implementation\n"
             "Copyright (c) 2009-2012, Christian Ferrari; "
             "all rights reserved.\n"
             "License: GPL (GNU Public License) version 2\n"
@@ -191,6 +191,24 @@ void lixa_micro_sleep(long usec) {
     tv.tv_sec = 0;
     tv.tv_usec = usec;
     select(0, NULL, NULL, NULL, &tv);
+}
+
+
+
+void lixa_timer_start(lixa_timer_t *lt) {
+    if (-1 == gettimeofday(&(lt->begin_time), NULL)) {
+        LIXA_TRACE(("lixa_timer_start: gettimeofday returned error "
+                    "%d (%s)\n", errno, strerror(errno)));
+    }
+}
+
+
+
+void lixa_timer_stop(lixa_timer_t *lt) {
+    if (-1 == gettimeofday(&(lt->end_time), NULL)) {
+        LIXA_TRACE(("lixa_timer_stop: gettimeofday returned error "
+                    "%d (%s)\n", errno, strerror(errno)));
+    }
 }
 
 

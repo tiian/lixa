@@ -31,6 +31,12 @@
 #ifdef HAVE_SYS_SELECT_H
 # include <sys/select.h>
 #endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#ifdef HAVE_TIME
+# include <time.h>
+#endif
 
 
 
@@ -55,6 +61,32 @@
  * name, it will retrieve this value
  */
 #define DEFAULT_PROGRAM_NAME "lixac"
+
+
+
+/**
+ * Basic structure for object @ref lixa_timer_t
+ */
+struct lixa_timer_s {
+    /**
+     * Start time
+     */
+    struct timeval begin_time;
+    /**
+     * Stop time
+     */
+    struct timeval end_time;
+};
+
+
+
+/**
+ * A timer object used to time an operation
+ */
+typedef struct lixa_timer_s lixa_timer_t;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -102,6 +134,38 @@ extern "C" {
      * @param usec IN micro seconds
      */
     void lixa_micro_sleep(long usec);
+
+
+
+    /**
+     * Start a timing
+     * @param lt IN/OUT timer object
+     */
+    void lixa_timer_start(lixa_timer_t *lt);
+
+
+    
+    /**
+     * Stop a timing
+     * @param lt IN/OUT timer object
+     */
+    void lixa_timer_stop(lixa_timer_t *lt);
+
+
+
+    /**
+     * Return the number of microseconds between @ref lixa_timer_start and
+     * @ref lixa_timer_stop.
+     * Warning: undefined result are if the timer was not properly started and
+     * stopped
+     * @param lt IN timer object
+     * @return elapsed number of microseconds
+     */
+    static inline long lixa_timer_get_diff(const lixa_timer_t *lt) {
+        return (lt->end_time.tv_sec - lt->begin_time.tv_sec) * 1000000 +
+            lt->end_time.tv_usec - lt->begin_time.tv_usec;
+    }
+    
 
 
     
