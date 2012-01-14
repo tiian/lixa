@@ -19,6 +19,16 @@
 #include <config.h>
 
 
+
+#ifdef HAVE_MATH_H
+# include <math.h>
+#endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+#ifdef HAVE_TIME_H
+# include <time.h>
+#endif
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
@@ -71,19 +81,43 @@ static GOptionEntry entries[] =
  */
 #define NUMBER_OF_SAMPLES 5
 
+/* Maximum number of clients */
+#define MAX_CLIENTS 100
+
+/* Number of cycles executed during warm-up */
+#define WARM_UP_CYCLES  1
+/* Number of cycles executed during benchmark */
+#define BENCH_CYCLES   100
+
+
+
 struct timings_s {
     long min; /* minimum value */
-    long max; /* masimum value */
+    long max; /* maximum value */
     double sum; /* sum of the values until now */
+    double avg; /* average value */
     double sum2; /* sum of the square values until now */
     double std_dev; /* standard deviation of the values until now */
 };
 
-typedef struct timings_s values_s[NUMBER_OF_SAMPLES];
+struct thread_parameters_s {
+    int              client_number;
+    int              cycles; /* number of cycles to perform */
+    struct timings_s timings[NUMBER_OF_SAMPLES];
+};
+
+typedef struct thread_parameters_s thread_parameters_t;
 
 
+
+/* print help and exit */
 void print_info(TXINFO *info);
+/* main function for benchmarking */
 int exec_benchmark(void);
+/* single client benchmark */
+gpointer perform_benchmark(gpointer data);
+/* compute aggregate statistics */
+void compute_statistics(thread_parameters_t *tp);
 
 
 
@@ -116,6 +150,12 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    if (clients > MAX_CLIENTS || clients < 1) {
+        fprintf(stderr, "Number of clients (%d) is out of range [%d, %d]\n",
+                clients, 1, MAX_CLIENTS);
+        exit(1);
+    }
+    
     if (benchmark && (!commit) && (!rollback))
         commit = TRUE;
     
@@ -170,6 +210,10 @@ void print_info(TXINFO *info)
 
 int exec_benchmark(void)
 {
+    thread_parameters_t parameters[MAX_CLIENTS];
+    GThread *threads[MAX_CLIENTS];
+    gint i;
+    
     fprintf(stderr, "Benchmark mode activated; execution parameters are:\n"
             "Number of clients (threads): %d\n"
             "TX completion type: %s\n"
@@ -182,8 +226,248 @@ int exec_benchmark(void)
             medium_delay-delta_delay, medium_delay+delta_delay,
             medium_processing-delta_processing,
             medium_processing+delta_processing);
-    /* @@@ start threads with a dedicated function */
+    srandom((unsigned int)time(NULL));
+    /* initialize multithread environment */
+    g_thread_init(NULL);
+    /* warm up */
+    for (i=0; i<clients; ++i) {
+        parameters[i].client_number = i;
+        parameters[i].cycles = WARM_UP_CYCLES;
+        threads[i] = g_thread_create(
+            perform_benchmark, (gpointer *)&(parameters[i]), TRUE, NULL);
+        if (NULL == threads[i]) {
+            fprintf(stderr, "Error while creating thread number %d\n", i);
+            break;
+        }
+    }
+    /* wait thread termination */
+    for (i=0; i<clients; ++i) {
+        if (NULL != threads[i]) {
+            fprintf(stderr, "Joining client %d\n", i);
+            g_thread_join(threads[i]);
+        }
+    }
 
-    /* @@@ display results */
+    /* @@@ real benchmark after warm up */
+    
+    compute_statistics(parameters);
     return 0;
+}
+
+
+
+gpointer perform_benchmark(gpointer data)
+{
+    thread_parameters_t *tp;
+    int c, s, rc;
+    long diff, sum_diff = 0;
+    lixa_timer_t t2;
+
+    tp = (thread_parameters_t *)data;
+    fprintf(stderr, "Client #%d will perform %d cycles\n",
+            tp->client_number, tp->cycles);
+    /* reset measures */
+    for (s=0; s<NUMBER_OF_SAMPLES; ++s) {
+        tp->timings[s].min = tp->timings[s].max = 0;
+        tp->timings[s].sum = tp->timings[s].avg = tp->timings[s].sum2 =
+            tp->timings[s].std_dev = 0.0;
+    }
+    /* perform cycles */
+    for (c=0; c<tp->cycles; ++c) {
+        /* application program delay */
+        lixa_micro_sleep(
+            (long)(medium_delay + random()%(delta_delay*2) - delta_delay));
+        /* tx_open if necessary */
+        if (c == 0 || open_close) {
+            lixa_timer_start(&t2);
+            rc = tx_open();
+            lixa_timer_stop(&t2);
+            if (TX_OK != rc) {
+                fprintf(stderr, "client %d, tx_open(): %d\n",
+                        tp->client_number, rc);
+                exit(1);
+            }
+            diff = lixa_timer_get_diff(&t2);
+            sum_diff = diff;
+            if (c == 0) {
+                tp->timings[0].min = tp->timings[0].max = diff;
+                tp->timings[0].sum = (double)diff;
+                tp->timings[0].sum2 = (double)diff * (double)diff;
+                tp->timings[0].std_dev = 0;
+            } else {
+                if (diff < tp->timings[0].min)
+                    tp->timings[0].min = diff;
+                if (diff > tp->timings[0].max)
+                    tp->timings[0].max = diff;
+                tp->timings[0].sum += (double)diff;
+                tp->timings[0].sum2 += (double)diff * (double)diff;
+            }
+        }
+        /* application program delay */
+        lixa_micro_sleep(
+            (long)(medium_delay + random()%(delta_delay*2) - delta_delay));
+        lixa_timer_start(&t2);
+        rc = tx_begin();
+        lixa_timer_stop(&t2);
+        if (TX_OK != rc) {
+            fprintf(stderr, "client %d, tx_begin(): %d\n",
+                    tp->client_number, rc);
+            exit(1);
+        }
+        diff = lixa_timer_get_diff(&t2);
+        sum_diff += diff;
+        if (c == 0) {
+            tp->timings[1].min = tp->timings[1].max = diff;
+            tp->timings[1].sum = (double)diff;
+            tp->timings[1].sum2 = (double)diff * (double)diff;
+            tp->timings[1].std_dev = 0;
+        } else {
+            if (diff < tp->timings[1].min)
+                tp->timings[1].min = diff;
+            if (diff > tp->timings[1].max)
+                tp->timings[1].max = diff;
+            tp->timings[1].sum += (double)diff;
+            tp->timings[1].sum2 += (double)diff * (double)diff;
+        }
+
+        /* resource manager delay */
+        lixa_micro_sleep(
+            (long)(medium_processing + random()%(delta_processing*2) -
+                   delta_processing));
+        
+        if (commit) {
+            lixa_timer_start(&t2);
+            rc = tx_commit();
+            lixa_timer_stop(&t2);
+            if (TX_OK != rc) {
+                fprintf(stderr, "client %d, tx_commit(): %d\n",
+                        tp->client_number, rc);
+                exit(1);
+            }
+        } else {
+            lixa_timer_start(&t2);
+            rc = tx_rollback();
+            lixa_timer_stop(&t2);
+            if (TX_OK != rc) {
+                fprintf(stderr, "client %d, tx_rollback(): %d\n",
+                        tp->client_number, rc);
+                exit(1);
+            }        
+        }
+        diff = lixa_timer_get_diff(&t2);
+        sum_diff += diff;
+        if (c == 0) {
+            tp->timings[2].min = tp->timings[2].max = diff;
+            tp->timings[2].sum = (double)diff;
+            tp->timings[2].sum2 = (double)diff * (double)diff;
+            tp->timings[2].std_dev = 0;
+        } else {
+            if (diff < tp->timings[2].min)
+                tp->timings[2].min = diff;
+            if (diff > tp->timings[2].max)
+                tp->timings[2].max = diff;
+            tp->timings[2].sum += (double)diff;
+            tp->timings[2].sum2 += (double)diff * (double)diff;
+        }
+        
+        /* application program delay */
+        lixa_micro_sleep(
+            (long)(medium_delay + random()%(delta_delay*2) - delta_delay));
+        
+        if (c == tp->cycles-1 || open_close) {
+            lixa_timer_start(&t2);
+            rc = tx_close();
+            lixa_timer_stop(&t2);
+            if (TX_OK != rc) {
+                fprintf(stderr, "client %d, tx_close(): %d\n",
+                        tp->client_number, rc);
+                exit(1);        
+            }
+            diff = lixa_timer_get_diff(&t2);
+            sum_diff += diff;
+            if ((open_close && c == 0) || (!open_close && c == tp->cycles-1)) {
+                tp->timings[3].min = tp->timings[3].max = diff;
+                tp->timings[3].sum = (double)diff;
+                tp->timings[3].sum2 = (double)diff * (double)diff;
+                tp->timings[3].std_dev = 0;
+            } else if (open_close) {
+                if (diff < tp->timings[3].min)
+                    tp->timings[3].min = diff;
+                if (diff > tp->timings[3].max)
+                    tp->timings[3].max = diff;
+                tp->timings[3].sum += (double)diff;
+                tp->timings[3].sum2 += (double)diff * (double)diff;
+            }
+        }
+        
+        /* application program delay */
+        lixa_micro_sleep(
+            (long)(medium_delay + random()%(delta_delay*2) - delta_delay));
+
+        if (c == 0) {
+            tp->timings[4].min = tp->timings[4].max = sum_diff;
+            tp->timings[4].sum = (double)sum_diff;
+            tp->timings[4].sum2 = (double)sum_diff * (double)sum_diff;
+            tp->timings[4].std_dev = 0;
+        } else {
+            if (sum_diff < tp->timings[4].min)
+                tp->timings[4].min = sum_diff;
+            if (sum_diff > tp->timings[4].max)
+                tp->timings[4].max = sum_diff;
+            tp->timings[4].sum += (double)sum_diff;
+            tp->timings[4].sum2 += (double)sum_diff * (double)sum_diff;
+        }
+    }
+    /* compute statistics */
+    for (s=0; s<NUMBER_OF_SAMPLES; ++s) {
+        if (!open_close && (s==0 || s==3)) {
+            tp->timings[s].avg = tp->timings[s].sum;
+            tp->timings[s].std_dev = 0.0;
+        }
+        tp->timings[s].avg = tp->timings[s].sum / (double)tp->cycles;
+        tp->timings[s].std_dev = sqrt(
+            (double)tp->cycles*tp->timings[s].sum2 -
+            tp->timings[s].sum*tp->timings[s].sum) / (double)tp->cycles;
+    }
+        
+    return NULL;
+}
+
+
+
+void compute_statistics(thread_parameters_t *tp)
+{
+    int c, s;
+    double sum, sum2, avg, std_dev;
+
+    for (s=0; s<NUMBER_OF_SAMPLES; ++s) {
+        sum = sum2 = avg = std_dev = 0.0;
+        for (c=0; c<clients; ++c) {
+            sum += tp[c].timings[s].sum;
+            sum2 += tp[c].timings[s].sum2;
+        }
+        avg = sum / ((double)clients * (double)tp[c].cycles);
+        std_dev = sqrt((double)tp[c].cycles*sum2 - sum*sum) /
+            (double)tp[c].cycles;
+        switch (s) {
+            case 0: printf("tx_open():\t");
+                break;
+            case 1: printf("tx_begin():\t");
+                break;
+            case 2:
+                if (commit)
+                    printf("tx_commit():\t");
+                else
+                    printf("tx_rollback():\t");
+                break;
+            case 3: printf("tx_close():\t");
+                break;
+            case 4: printf("overall:\t");
+                break;
+            default:
+                fprintf(stderr, "Internal error: s=%d\n", s);
+                exit(1);
+        }
+        printf("avg=%f, std_dev=%f\n", avg, std_dev);
+    }
 }
