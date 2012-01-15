@@ -1,3 +1,5 @@
+lixat: put real measurements cycle after warm-up
+
 Introduce min frequency and max frequency synchronization (avoid two threads
 are syncing together)
 
