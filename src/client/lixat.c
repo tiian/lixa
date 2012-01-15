@@ -85,7 +85,7 @@ static GOptionEntry entries[] =
 #define MAX_CLIENTS 100
 
 /* Number of cycles executed during warm-up */
-#define WARM_UP_CYCLES  1
+#define WARM_UP_CYCLES  10
 /* Number of cycles executed during benchmark */
 #define BENCH_CYCLES   100
 
@@ -248,6 +248,15 @@ int exec_benchmark(void)
         }
     }
 
+    /* @@@
+    for (i=0; i<clients; ++i) {
+        fprintf(stderr, "i=%d, parameters[i].client_number=%d, "
+                "parameters[i].cycles=%d\n", i,
+                parameters[i].client_number,
+                parameters[i].cycles);
+    }
+    */
+    
     /* @@@ real benchmark after warm up */
     
     compute_statistics(parameters);
@@ -302,6 +311,16 @@ gpointer perform_benchmark(gpointer data)
                 tp->timings[0].sum += (double)diff;
                 tp->timings[0].sum2 += (double)diff * (double)diff;
             }
+            /* @@@
+            fprintf(stderr, "tx_open: "
+                    "diff=%ld, min=%ld, max=%ld, sum=%f, sum2=%f, std_dev=%f\n",
+                    diff,
+                    tp->timings[0].min,
+                    tp->timings[0].max,
+                    tp->timings[0].sum,
+                    tp->timings[0].sum2,
+                    tp->timings[0].std_dev);
+            */
         }
         /* application program delay */
         lixa_micro_sleep(
@@ -329,7 +348,16 @@ gpointer perform_benchmark(gpointer data)
             tp->timings[1].sum += (double)diff;
             tp->timings[1].sum2 += (double)diff * (double)diff;
         }
-
+        /* @@@
+            fprintf(stderr, "tx_begin: "
+                    "diff=%ld, min=%ld, max=%ld, sum=%f, sum2=%f, std_dev=%f\n",
+                    diff,
+                    tp->timings[1].min,
+                    tp->timings[1].max,
+                    tp->timings[1].sum,
+                    tp->timings[1].sum2,
+                    tp->timings[1].std_dev);
+        */
         /* resource manager delay */
         lixa_micro_sleep(
             (long)(medium_processing + random()%(delta_processing*2) -
@@ -369,7 +397,16 @@ gpointer perform_benchmark(gpointer data)
             tp->timings[2].sum += (double)diff;
             tp->timings[2].sum2 += (double)diff * (double)diff;
         }
-        
+        /* @@@
+            fprintf(stderr, "tx_commit/rollback: "
+                    "diff=%ld, min=%ld, max=%ld, sum=%f, sum2=%f, std_dev=%f\n",
+                    diff,
+                    tp->timings[2].min,
+                    tp->timings[2].max,
+                    tp->timings[2].sum,
+                    tp->timings[2].sum2,
+                    tp->timings[2].std_dev);
+        */
         /* application program delay */
         lixa_micro_sleep(
             (long)(medium_delay + random()%(delta_delay*2) - delta_delay));
@@ -398,6 +435,16 @@ gpointer perform_benchmark(gpointer data)
                 tp->timings[3].sum += (double)diff;
                 tp->timings[3].sum2 += (double)diff * (double)diff;
             }
+            /* @@@
+            fprintf(stderr, "tx_close: "
+                    "diff=%ld, min=%ld, max=%ld, sum=%f, sum2=%f, std_dev=%f\n",
+                    diff,
+                    tp->timings[3].min,
+                    tp->timings[3].max,
+                    tp->timings[3].sum,
+                    tp->timings[3].sum2,
+                    tp->timings[3].std_dev);
+            */
         }
         
         /* application program delay */
@@ -419,6 +466,7 @@ gpointer perform_benchmark(gpointer data)
         }
     }
     /* compute statistics */
+    /*
     for (s=0; s<NUMBER_OF_SAMPLES; ++s) {
         if (!open_close && (s==0 || s==3)) {
             tp->timings[s].avg = tp->timings[s].sum;
@@ -429,7 +477,7 @@ gpointer perform_benchmark(gpointer data)
             (double)tp->cycles*tp->timings[s].sum2 -
             tp->timings[s].sum*tp->timings[s].sum) / (double)tp->cycles;
     }
-        
+    */  
     return NULL;
 }
 
@@ -438,17 +486,30 @@ gpointer perform_benchmark(gpointer data)
 void compute_statistics(thread_parameters_t *tp)
 {
     int c, s;
-    double sum, sum2, avg, std_dev;
+    double N, sum, sum2, avg, std_dev;
 
     for (s=0; s<NUMBER_OF_SAMPLES; ++s) {
         sum = sum2 = avg = std_dev = 0.0;
         for (c=0; c<clients; ++c) {
+            /* @@@
+            fprintf(stderr, "s=%d, c=%d\n", s, c);
+            fprintf(stderr, "sum=%f, sum2=%f, avg=%f, std_dev=%f\n",
+                    sum, sum2, avg, std_dev);
+            */
             sum += tp[c].timings[s].sum;
             sum2 += tp[c].timings[s].sum2;
+            /* @@@
+            fprintf(stderr, "sum=%f, sum2=%f, avg=%f, std_dev=%f\n",
+                    sum, sum2, avg, std_dev);
+            */
         }
-        avg = sum / ((double)clients * (double)tp[c].cycles);
-        std_dev = sqrt((double)tp[c].cycles*sum2 - sum*sum) /
-            (double)tp[c].cycles;
+        N = (double)clients * (double)tp[0].cycles;
+        /* @@@
+        fprintf(stderr, "clients=%d, tp[0].cycles=%d, N=%f\n",
+                clients, tp[0].cycles, N);
+        */
+        avg = sum / N;
+        std_dev = sqrt(N*sum2 - sum*sum) / N;
         switch (s) {
             case 0: printf("tx_open():\t");
                 break;
