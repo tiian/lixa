@@ -1,4 +1,8 @@
-lixat: put real measurements cycle after warm-up
+lixat: remove useless printf marked with @@@
+
+tiian@ubuntu:~$ ls -la /opt/lixa/var/run.pid
+-rw-rw-rw- 1 lixa lixa 6 2012-01-20 16:48 /opt/lixa/var/run.pid
+fix the permissions to -rw-rw-r--
 
 Introduce min frequency and max frequency synchronization (avoid two threads
 are syncing together)
