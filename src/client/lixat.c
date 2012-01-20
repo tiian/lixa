@@ -77,9 +77,8 @@ static GOptionEntry entries[] =
  * T[1]: tx_begin() timing
  * T[2]: tx_commit()/tx_rollback() timing
  * T[3]: tx_close timing
- * T[4]: global timing
  */
-#define NUMBER_OF_SAMPLES 5
+#define NUMBER_OF_SAMPLES 4
 
 /* Maximum number of clients */
 #define MAX_CLIENTS 100
@@ -87,13 +86,11 @@ static GOptionEntry entries[] =
 /* Number of cycles executed during warm-up */
 #define WARM_UP_CYCLES  10
 /* Number of cycles executed during benchmark */
-#define BENCH_CYCLES   100
+#define BENCH_CYCLES   500
 
 
 
 struct timings_s {
-    long min; /* minimum value */
-    long max; /* maximum value */
     double sum; /* sum of the values until now */
     double avg; /* average value */
     double sum2; /* sum of the square values until now */
@@ -229,7 +226,8 @@ int exec_benchmark(void)
     srandom((unsigned int)time(NULL));
     /* initialize multithread environment */
     g_thread_init(NULL);
-    /* warm up */
+    /* warm up phase */
+    fprintf(stderr, "Warming up ");
     for (i=0; i<clients; ++i) {
         parameters[i].client_number = i;
         parameters[i].cycles = WARM_UP_CYCLES;
@@ -243,11 +241,36 @@ int exec_benchmark(void)
     /* wait thread termination */
     for (i=0; i<clients; ++i) {
         if (NULL != threads[i]) {
+            /* @@@
             fprintf(stderr, "Joining client %d\n", i);
+            */
             g_thread_join(threads[i]);
         }
     }
+    fprintf(stderr, "\n");
 
+    /* measurement phase */
+    fprintf(stderr, "Measuring  ");
+    for (i=0; i<clients; ++i) {
+        parameters[i].client_number = i;
+        parameters[i].cycles = BENCH_CYCLES;
+        threads[i] = g_thread_create(
+            perform_benchmark, (gpointer *)&(parameters[i]), TRUE, NULL);
+        if (NULL == threads[i]) {
+            fprintf(stderr, "Error while creating thread number %d\n", i);
+            break;
+        }
+    }
+    /* wait thread termination */
+    for (i=0; i<clients; ++i) {
+        if (NULL != threads[i]) {
+            /* @@@
+            fprintf(stderr, "Joining client %d\n", i);
+            */
+            g_thread_join(threads[i]);
+        }
+    }
+    fprintf(stderr, "\n");
     /* @@@
     for (i=0; i<clients; ++i) {
         fprintf(stderr, "i=%d, parameters[i].client_number=%d, "
@@ -269,20 +292,23 @@ gpointer perform_benchmark(gpointer data)
 {
     thread_parameters_t *tp;
     int c, s, rc;
-    long diff, sum_diff = 0;
+    long diff = 0;
     lixa_timer_t t2;
 
     tp = (thread_parameters_t *)data;
+    /* @@@
     fprintf(stderr, "Client #%d will perform %d cycles\n",
             tp->client_number, tp->cycles);
+    */
     /* reset measures */
     for (s=0; s<NUMBER_OF_SAMPLES; ++s) {
-        tp->timings[s].min = tp->timings[s].max = 0;
         tp->timings[s].sum = tp->timings[s].avg = tp->timings[s].sum2 =
             tp->timings[s].std_dev = 0.0;
     }
     /* perform cycles */
     for (c=0; c<tp->cycles; ++c) {
+        if (c+1 == tp->cycles*tp->client_number/clients)
+            fprintf(stderr, ".");
         /* application program delay */
         lixa_micro_sleep(
             (long)(medium_delay + random()%(delta_delay*2) - delta_delay));
@@ -297,17 +323,11 @@ gpointer perform_benchmark(gpointer data)
                 exit(1);
             }
             diff = lixa_timer_get_diff(&t2);
-            sum_diff = diff;
             if (c == 0) {
-                tp->timings[0].min = tp->timings[0].max = diff;
                 tp->timings[0].sum = (double)diff;
                 tp->timings[0].sum2 = (double)diff * (double)diff;
                 tp->timings[0].std_dev = 0;
             } else {
-                if (diff < tp->timings[0].min)
-                    tp->timings[0].min = diff;
-                if (diff > tp->timings[0].max)
-                    tp->timings[0].max = diff;
                 tp->timings[0].sum += (double)diff;
                 tp->timings[0].sum2 += (double)diff * (double)diff;
             }
@@ -334,17 +354,11 @@ gpointer perform_benchmark(gpointer data)
             exit(1);
         }
         diff = lixa_timer_get_diff(&t2);
-        sum_diff += diff;
         if (c == 0) {
-            tp->timings[1].min = tp->timings[1].max = diff;
             tp->timings[1].sum = (double)diff;
             tp->timings[1].sum2 = (double)diff * (double)diff;
             tp->timings[1].std_dev = 0;
         } else {
-            if (diff < tp->timings[1].min)
-                tp->timings[1].min = diff;
-            if (diff > tp->timings[1].max)
-                tp->timings[1].max = diff;
             tp->timings[1].sum += (double)diff;
             tp->timings[1].sum2 += (double)diff * (double)diff;
         }
@@ -383,17 +397,11 @@ gpointer perform_benchmark(gpointer data)
             }        
         }
         diff = lixa_timer_get_diff(&t2);
-        sum_diff += diff;
         if (c == 0) {
-            tp->timings[2].min = tp->timings[2].max = diff;
             tp->timings[2].sum = (double)diff;
             tp->timings[2].sum2 = (double)diff * (double)diff;
             tp->timings[2].std_dev = 0;
         } else {
-            if (diff < tp->timings[2].min)
-                tp->timings[2].min = diff;
-            if (diff > tp->timings[2].max)
-                tp->timings[2].max = diff;
             tp->timings[2].sum += (double)diff;
             tp->timings[2].sum2 += (double)diff * (double)diff;
         }
@@ -421,17 +429,11 @@ gpointer perform_benchmark(gpointer data)
                 exit(1);        
             }
             diff = lixa_timer_get_diff(&t2);
-            sum_diff += diff;
             if ((open_close && c == 0) || (!open_close && c == tp->cycles-1)) {
-                tp->timings[3].min = tp->timings[3].max = diff;
                 tp->timings[3].sum = (double)diff;
                 tp->timings[3].sum2 = (double)diff * (double)diff;
                 tp->timings[3].std_dev = 0;
             } else if (open_close) {
-                if (diff < tp->timings[3].min)
-                    tp->timings[3].min = diff;
-                if (diff > tp->timings[3].max)
-                    tp->timings[3].max = diff;
                 tp->timings[3].sum += (double)diff;
                 tp->timings[3].sum2 += (double)diff * (double)diff;
             }
@@ -450,20 +452,6 @@ gpointer perform_benchmark(gpointer data)
         /* application program delay */
         lixa_micro_sleep(
             (long)(medium_delay + random()%(delta_delay*2) - delta_delay));
-
-        if (c == 0) {
-            tp->timings[4].min = tp->timings[4].max = sum_diff;
-            tp->timings[4].sum = (double)sum_diff;
-            tp->timings[4].sum2 = (double)sum_diff * (double)sum_diff;
-            tp->timings[4].std_dev = 0;
-        } else {
-            if (sum_diff < tp->timings[4].min)
-                tp->timings[4].min = sum_diff;
-            if (sum_diff > tp->timings[4].max)
-                tp->timings[4].max = sum_diff;
-            tp->timings[4].sum += (double)sum_diff;
-            tp->timings[4].sum2 += (double)sum_diff * (double)sum_diff;
-        }
     }
     /* compute statistics */
     /*
@@ -503,13 +491,20 @@ void compute_statistics(thread_parameters_t *tp)
                     sum, sum2, avg, std_dev);
             */
         }
-        N = (double)clients * (double)tp[0].cycles;
-        /* @@@
+        if (!open_close && (s==0 || s==3))
+            N = (double)clients;
+        else
+            N = (double)clients * (double)tp[0].cycles;
+        
+            /* @@@
+        fprintf(stderr, "open_close=%d, s=%d, N=%f\n",
+                open_close, s, N);
         fprintf(stderr, "clients=%d, tp[0].cycles=%d, N=%f\n",
                 clients, tp[0].cycles, N);
         */
-        avg = sum / N;
-        std_dev = sqrt(N*sum2 - sum*sum) / N;
+        /* timing stats in ms instead of us */
+        avg = sum / N / 1000;
+        std_dev = sqrt(N*sum2 - sum*sum) / N / 1000;
         switch (s) {
             case 0: printf("tx_open():\t");
                 break;
@@ -523,12 +518,14 @@ void compute_statistics(thread_parameters_t *tp)
                 break;
             case 3: printf("tx_close():\t");
                 break;
-            case 4: printf("overall:\t");
-                break;
             default:
                 fprintf(stderr, "Internal error: s=%d\n", s);
                 exit(1);
         }
-        printf("avg=%f, std_dev=%f\n", avg, std_dev);
+        /* @@@
+        printf("sum=%f,\tsum2=%f,\tavg=%f,\tstd_dev=%f\n",
+               sum, sum2, avg, std_dev);
+        */
+        printf("avg=%7.3f ms,\tstd_dev=%7.3f ms\n", avg, std_dev);
     }
 }
