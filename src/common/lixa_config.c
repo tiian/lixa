@@ -71,6 +71,8 @@ const xmlChar *LIXA_XML_CONFIG_LISTENER = (xmlChar *)"listener";
 const xmlChar *LIXA_XML_CONFIG_CLIENT = (xmlChar *)"client";
 const xmlChar *LIXA_XML_CONFIG_SERVER = (xmlChar *)"server";
 const xmlChar *LIXA_XML_CONFIG_SERVER_PID = (xmlChar *)"pid_file";
+const xmlChar *LIXA_XML_CONFIG_SERVER_MIN_EST = (xmlChar *)"min_elapsed_sync_time";
+const xmlChar *LIXA_XML_CONFIG_SERVER_MAX_EST = (xmlChar *)"max_elapsed_sync_time";
 const xmlChar *LIXA_XML_CONFIG_DOMAIN_PROPERTY = (xmlChar *)"domain";
 const xmlChar *LIXA_XML_CONFIG_ADDRESS_PROPERTY = (xmlChar *)"address";
 const xmlChar *LIXA_XML_CONFIG_PORT_PROPERTY = (xmlChar *)"port";
@@ -177,6 +179,49 @@ int lixa_config_retrieve_port(xmlNode *cur_node, in_port_t *port)
             xmlFree(attr);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_config_retrieve_port/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_config_retrieve_generic_long(xmlNode *cur_node,
+                                      const xmlChar *property,
+                                      long *value)
+{
+    enum Exception { PROPERTY_NOT_FOUND
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    xmlChar *attr = NULL;
+    
+    LIXA_TRACE(("lixa_config_retrieve_generic_long\n"));
+    TRY {
+        if (NULL == (attr = xmlGetProp(cur_node, property))) {
+            THROW(PROPERTY_NOT_FOUND);
+        } else {
+            *value = (long)strtol((char *)attr, NULL, 0);
+            xmlFree(attr);
+            attr = NULL;
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case PROPERTY_NOT_FOUND:
+                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
+                break;                                
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* release useless memory */
+        if (NULL != attr)
+            xmlFree(attr);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_config_retrieve_generic_long/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

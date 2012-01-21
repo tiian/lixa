@@ -43,6 +43,7 @@
 #include <lixa_common_status.h>
 #include <lixa_config.h>
 #include <lixa_xml_msg.h>
+#include <lixa_utils.h>
 #include <xa.h>
 #include <srvr_rcvr_tbl.h>
 
@@ -557,6 +558,30 @@ struct two_status_record_s {
 
 
 /**
+ * The base struct for object @ref status_sync_t
+ */
+struct status_sync_s {
+    /**
+     * Number of sessions have requested state synchronization
+     */
+    int            asked_sync;
+    /**
+     * Timer started at first state synchronization request
+     */
+    lixa_timer_t   sync_delay;
+};
+
+
+
+/**
+ * The object tells how many sessions have asked state synchronization and
+ * the current delay from first synchronization request
+ */
+typedef struct status_sync_s status_sync_t;
+
+
+
+/**
  * It's the struct used as argument to every created thread
  */
 struct thread_status_s {
@@ -596,9 +621,21 @@ struct thread_status_s {
      */
     struct server_client_status_s *client_array;
     /**
-     * One or more sessions asked a file status synchronization
+     * Minimum number of microseconds should elapse between two successive
+     * synchronizations of the state file
+     * (copied from @ref server_config_s)
      */
-    int                            asked_sync;
+    long                           min_elapsed_sync_time;
+    /**
+     * Maximum number of microseconds should not be exceeded between two
+     * successive synchronizations of the state file
+     * (copied from @ref server_config_s)
+     */
+    long                           max_elapsed_sync_time;
+    /**
+     * How much and when state synchronization was asked
+     */
+    status_sync_t                  status_sync;
     /**
      * Filename of the first status file
      */
@@ -917,6 +954,53 @@ extern "C" {
 
 
 
+    /**
+     * Initialize a @ref status_sync_t object
+     * @param ssy OUT the object to initialize
+     */
+    static inline void status_sync_init(status_sync_t *ssy) {
+        ssy->asked_sync = 0;
+    }
+
+
+
+    /**
+     * Ask a synchronization of the state file
+     * @param ssy IN/OUT the object to update
+     */
+    static inline void status_sync_ask_sync(status_sync_t *ssy) {
+        if (ssy->asked_sync == 0)
+            lixa_timer_start(&ssy->sync_delay);
+        ssy->asked_sync++;
+    }
+
+
+
+    /**
+     * Retrieve the number of sessions that asked state synchronization
+     * @param ssy IN the object to query
+     * @return the number of sessions that asked state synchronization
+     */     
+    static inline int status_sync_get_asked(const status_sync_t *ssy) {
+        return ssy->asked_sync;
+    }
+
+
+    
+    /**
+     * Retrieve the current delay between first asked synchronization and now
+     * @param ssy IN/OUT the object to query and update
+     * @return the delay expressed in microseconds
+     */
+    static inline long status_sync_get_sync_delay(status_sync_t *ssy) {
+        if (ssy->asked_sync == 0)
+            return 0;
+        lixa_timer_stop(&ssy->sync_delay);
+        return lixa_timer_get_diff(&ssy->sync_delay);
+    }
+
+
+    
 #ifdef _CRASH
     /**
      * Get a writable reference to crash_count property

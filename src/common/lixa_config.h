@@ -101,6 +101,16 @@ extern const xmlChar *LIXA_XML_CONFIG_SERVER;
 extern const xmlChar *LIXA_XML_CONFIG_SERVER_PID;
 
 /**
+ * Label used to specify "min_elapsed_sync_time" property in "server" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_SERVER_MIN_EST;
+
+/**
+ * Label used to specify "max_elapsed_sync_time" property in "server" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_SERVER_MAX_EST;
+
+/**
  * Label used to specify "domain" property
  */
 extern const xmlChar *LIXA_XML_CONFIG_DOMAIN_PROPERTY;
@@ -246,6 +256,21 @@ extern "C" {
 
 
 
+    /**
+     * Retrieve a generic long value for a specified label from configuration
+     * @param cur_node IN a valid node of the XML tree
+     * @param property IN the label associated to the property that must be
+     *                    retrieved
+     * @param value OUT the value associated to property
+     * @return a standardized return code (@ref LIXA_RC_OBJ_NOT_FOUND) if the
+     *         property is not available in config
+     */
+    int lixa_config_retrieve_generic_long(xmlNode *cur_node,
+                                          const xmlChar *property,
+                                          long *value);
+
+
+    
     /**
      * Compute the digest of the file associated to a passed file descriptor
      * @param fd IN file descriptor

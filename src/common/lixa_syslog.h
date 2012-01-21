@@ -166,6 +166,8 @@
 #define LIXA_SYSLOG_LXD023E "LXD023E the listener got a non recoverable error while polling its own socket (poll revents=0x%hx, errno=%d '%s'); starting premature quiesce shutdown..."
 #define LIXA_SYSLOG_LXD024N "LXD024N the server is not able to remove the file '%s' (errno=%d '%s')"
 #define LIXA_SYSLOG_LXD025E "LXD025E the server is not able to open the file '%s' (errno=%d '%s')"
+#define LIXA_SYSLOG_LXD026I "LXD026I parameter '%s' set to value %ld"
+#define LIXA_SYSLOG_LXD027I "LXD027I parameter '%s' set to value '%s'"
 
 
 

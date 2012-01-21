@@ -1,11 +1,11 @@
+It seems case test CT/1.1/3.0 breaks after delayed synchronization (it failed
+twice times). Check it in depth...
+
 lixat: remove useless printf marked with @@@
 
 tiian@ubuntu:~$ ls -la /opt/lixa/var/run.pid
 -rw-rw-rw- 1 lixa lixa 6 2012-01-20 16:48 /opt/lixa/var/run.pid
 fix the permissions to -rw-rw-r--
-
-Introduce min frequency and max frequency synchronization (avoid two threads
-are syncing together)
 
 Explore high availability features (active/active) with dynamic or static
 workload
