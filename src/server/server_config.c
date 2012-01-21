@@ -242,6 +242,8 @@ int server_parse(struct server_config_s *sc,
                  xmlNode *a_node)
 {
     enum Exception { PID_FILE_ERROR
+                     , RETRIEVE_MIN_EST_ERROR
+                     , RETRIEVE_MAX_EST_ERROR
                      , PARSE_LISTENER_ERROR
                      , PARSE_MANAGER_ERROR
                      , SERVER_PARSE_ERROR
@@ -256,15 +258,46 @@ int server_parse(struct server_config_s *sc,
             if (cur_node->type == XML_ELEMENT_NODE) {
                 LIXA_TRACE(("server_parse: tag %s\n", cur_node->name));
                 if (!xmlStrcmp(cur_node->name, LIXA_XML_CONFIG_SERVER)) {
+                    /* retrieve pid_file name */
                     if (NULL == (sc->pid_file = (char *)xmlGetProp(
                                      cur_node, LIXA_XML_CONFIG_SERVER_PID))) {
                         syslog(LOG_ERR, LIXA_SYSLOG_LXD016E,
                                LIXA_XML_CONFIG_SERVER_PID,
                                LIXA_XML_CONFIG_SERVER);
                         THROW(PID_FILE_ERROR);
-                    } else
+                    } else {
                         LIXA_TRACE(("server_parse: pid file is '%s'\n",
                                     sc->pid_file));
+                        syslog(LOG_INFO, LIXA_SYSLOG_LXD027I,
+                               (const char *)LIXA_XML_CONFIG_SERVER_PID,
+                               sc->pid_file);
+                    }
+                    /* retrieve min_elapsed_sync_time */
+                    if (LIXA_RC_OK == (
+                            ret_cod = lixa_config_retrieve_generic_long(
+                                cur_node, LIXA_XML_CONFIG_SERVER_MIN_EST,
+                                &(sc->min_elapsed_sync_time)))) {
+                        LIXA_TRACE(("server_parse: parameter '%s' is %ld\n",
+                                    (const char *)LIXA_XML_CONFIG_SERVER_MIN_EST,
+                                    sc->min_elapsed_sync_time));
+                        syslog(LOG_INFO, LIXA_SYSLOG_LXD026I,
+                               (const char *)LIXA_XML_CONFIG_SERVER_MIN_EST,
+                               sc->min_elapsed_sync_time);
+                    } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
+                        THROW(RETRIEVE_MIN_EST_ERROR);
+                    /* retrieve max_elapsed_sync_time */
+                    if (LIXA_RC_OK == (
+                            ret_cod = lixa_config_retrieve_generic_long(
+                                cur_node, LIXA_XML_CONFIG_SERVER_MAX_EST,
+                                &(sc->max_elapsed_sync_time)))) {
+                        LIXA_TRACE(("server_parse: parameter '%s' is %ld\n",
+                                    (const char *)LIXA_XML_CONFIG_SERVER_MAX_EST,
+                                    sc->max_elapsed_sync_time));
+                        syslog(LOG_INFO, LIXA_SYSLOG_LXD026I,
+                               (const char *)LIXA_XML_CONFIG_SERVER_MAX_EST,
+                               sc->max_elapsed_sync_time);
+                    } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
+                        THROW(RETRIEVE_MAX_EST_ERROR);
                 } else if (!xmlStrcmp(cur_node->name,
                                       LIXA_XML_CONFIG_LISTENER)) {
                     if (LIXA_RC_OK != (ret_cod = server_parse_listener(
@@ -286,6 +319,8 @@ int server_parse(struct server_config_s *sc,
     } CATCH {
         switch (excp) {
             case PID_FILE_ERROR:
+            case RETRIEVE_MIN_EST_ERROR:
+            case RETRIEVE_MAX_EST_ERROR:
             case PARSE_LISTENER_ERROR:
             case PARSE_MANAGER_ERROR:
             case SERVER_PARSE_ERROR:
@@ -463,6 +498,7 @@ void server_config_init(struct server_config_s *sc,
 {
     LIXA_TRACE(("server_config_init/start\n"));
     sc->pid_file = NULL;
+    sc->min_elapsed_sync_time = sc->max_elapsed_sync_time = 0;
     sc->listeners.n = 0;
     sc->listeners.array = NULL;
     sc->managers.n = 0;

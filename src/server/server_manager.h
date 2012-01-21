@@ -25,6 +25,12 @@
 
 
 
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
+
+
+
 #include <server_config.h>
 #include <server_messages.h>
 #include <server_thread_status.h>
@@ -44,6 +50,15 @@
 
 
 #define READ_BUFFER_SIZE 4096
+
+
+
+/**
+ * This mutex is used to avoid two or more threads try to perform state file
+ * synchronization in parallel: this is to avoid disk enqueing (see the
+ * logic inside @ref server_manager_thread function)
+ */
+extern GStaticMutex state_file_synchronization;
 
 
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<server pid_file="@abs_top_builddir@/tests/var/run.pid">
+<server pid_file="@abs_top_builddir@/tests/var/run.pid"
+  min_elapsed_sync_time="10000" max_elapsed_sync_time="100000">
   <listeners>
     <listener domain="AF_INET" address="127.0.0.1" port="2345"/>
   </listeners>

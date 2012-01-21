@@ -77,7 +77,8 @@ void thread_status_init(struct thread_status_s *ts, int id,
     ts->poll_array = NULL;
     ts->active_clients = 0;
     ts->client_array = NULL;
-    ts->asked_sync = 0;
+    ts->min_elapsed_sync_time = ts->max_elapsed_sync_time = 0;
+    status_sync_init(&ts->status_sync);
     ts->status1_filename = ts->status2_filename = NULL;
     ts->status1 = ts->status2 = NULL;
     ts->curr_status = NULL;

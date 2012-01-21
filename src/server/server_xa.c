@@ -395,14 +395,13 @@ int server_xa_end_8(struct thread_status_s *ts,
         /* store commit/rollback intent */
         status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
-        ts->asked_sync = FALSE;
         if (lmi->body.end_8.conthr.commit) {
             ts->curr_status[block_id].sr.data.pld.ph.state.will_commit = TRUE;
         } else
             ts->curr_status[block_id].sr.data.pld.ph.state.will_rollback =
                 TRUE;
         /* the status file must be synchronized */
-        ts->asked_sync = TRUE;
+        status_sync_ask_sync(&ts->status_sync);
         
         /* store next_verb for all the resource managers */
         for (i=0; i<ts->curr_status[block_id].sr.data.pld.ph.n; ++i) {
@@ -936,7 +935,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
         last_verb_step->step = lmo->header.pvs.step;
 
         /* the status file must be synchronized */
-        ts->asked_sync = TRUE;
+        status_sync_ask_sync(&ts->status_sync);
         
         THROW(NONE);
     } CATCH {
@@ -1178,7 +1177,7 @@ int server_xa_start_8(struct thread_status_s *ts,
         last_verb_step->step = lmo->header.pvs.step;
 
         /* the status file must be synchronized */
-        ts->asked_sync = TRUE;
+        status_sync_ask_sync(&ts->status_sync);
         
         THROW(NONE);
     } CATCH {

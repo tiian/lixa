@@ -55,6 +55,10 @@
 
 
 
+GStaticMutex state_file_synchronization = G_STATIC_MUTEX_INIT;
+
+
+
 int server_manager(struct server_config_s *sc,
                    struct thread_pipe_array_s *tpa,
                    struct thread_status_array_s *tsa,
@@ -93,6 +97,8 @@ int server_manager(struct server_config_s *sc,
          * process, it's IMPLICITLY created */
         for (i = 0; i < tsa->n; ++i) {
             thread_status_init(&(tsa->array[i]), i, tpa, mmode, &crash_count);
+            tsa->array[i].min_elapsed_sync_time = sc->min_elapsed_sync_time;
+            tsa->array[i].max_elapsed_sync_time = sc->max_elapsed_sync_time;
             if (i) {
                 /* load status file for thread != listener */
                 if (LIXA_RC_OK != (
@@ -195,7 +201,8 @@ int server_pipes_init(struct thread_pipe_array_s *tpa)
 void *server_manager_thread(void *void_ts)
 {
     enum Exception { ADD_POLL_ERROR
-                     , THREAD_STATUS_SYNC_FILES_ERROR
+                     , THREAD_STATUS_SYNC_FILES_ERROR1
+                     , THREAD_STATUS_SYNC_FILES_ERROR2
                      , FIX_POLL_ERROR
                      , POLL_ERROR
                      , DROP_CLIENT_ERROR
@@ -219,12 +226,32 @@ void *server_manager_thread(void *void_ts)
                                ts, ts->tpa->array[ts->id].pipefd[0], &place)))
             THROW(ADD_POLL_ERROR);
         while (TRUE) {
-            if (ts->asked_sync > 0) {
+            int timeout;
+            long delay = 0;
+            if (status_sync_get_asked(&ts->status_sync) > 0) {
+                delay = status_sync_get_sync_delay(&ts->status_sync);
                 LIXA_TRACE(("server_manager_thread: %d sessions asked file "
-                            "status synchronization\n", ts->asked_sync));
-                if (LIXA_RC_OK != (ret_cod = thread_status_sync_files(ts)))
-                    THROW(THREAD_STATUS_SYNC_FILES_ERROR);
-                ts->asked_sync = 0;
+                            "status synchronization; current delay is %ld, "
+                            "min_delay=%ld, max_delay=%ld\n",
+                            status_sync_get_asked(&ts->status_sync), delay,
+                            ts->min_elapsed_sync_time,
+                            ts->max_elapsed_sync_time));
+                if (delay > ts->max_elapsed_sync_time) {
+                    /* start synchronization as soon as possible */
+                    if (LIXA_RC_OK != (ret_cod = thread_status_sync_files(ts)))
+                        THROW(THREAD_STATUS_SYNC_FILES_ERROR1);
+                    status_sync_init(&ts->status_sync);
+                } else if (delay > ts->min_elapsed_sync_time) {
+                    /* start synchronization only if there is no another thread
+                       that's synchronizing its own state file */
+                    if (g_static_mutex_trylock(&state_file_synchronization)) {
+                        ret_cod = thread_status_sync_files(ts);
+                        g_static_mutex_unlock(&state_file_synchronization);
+                        if (LIXA_RC_OK != ret_cod)
+                            THROW(THREAD_STATUS_SYNC_FILES_ERROR2);
+                        status_sync_init(&ts->status_sync);
+                    }
+                }
             }
             if (SHUTDOWN_NULL != ts->shutdown_type) {
                 LIXA_TRACE(("server_manager_thread: id=%d, leaving main "
@@ -233,8 +260,14 @@ void *server_manager_thread(void *void_ts)
             }
             if (LIXA_RC_OK != (ret_cod = server_manager_fix_poll(ts)))
                 THROW(FIX_POLL_ERROR);
-            LIXA_TRACE(("server_manager_thread: id=%d, entering poll...\n",
-                        ts->id));
+            if (status_sync_get_asked(&ts->status_sync) > 0)
+                /* limited timeout poll */
+                timeout = (ts->max_elapsed_sync_time - delay) / 1000 + 1;
+            else
+                timeout = -1; /* unlimited timeout poll */
+            LIXA_TRACE(("server_manager_thread: id=%d, entering poll "
+                        "with timeout=%dms\n",
+                        ts->id, timeout));
             if (0 >= (ready_fd = poll(ts->poll_array, ts->poll_size, -1)))
                 THROW(POLL_ERROR);
             LIXA_TRACE(("server_manager_thread: id=%d, ready file "
@@ -282,7 +315,7 @@ void *server_manager_thread(void *void_ts)
                         ret_cod = server_manager_pollin_ctrl(
                             ts, ts->poll_array[i].fd);
                         if (LIXA_RC_ASKED_SHUTDOWN == ret_cod) {
-                            ts->asked_sync = TRUE;
+                            status_sync_ask_sync(&ts->status_sync);
                             if (SHUTDOWN_FORCE == ts->shutdown_type) {
                                 LIXA_TRACE(("server_manager_thread: break "
                                             "current loop to perform force "
@@ -325,7 +358,8 @@ void *server_manager_thread(void *void_ts)
         switch (excp) {
             case ADD_POLL_ERROR:
                 break;
-            case THREAD_STATUS_SYNC_FILES_ERROR:
+            case THREAD_STATUS_SYNC_FILES_ERROR1:
+            case THREAD_STATUS_SYNC_FILES_ERROR2:
             case FIX_POLL_ERROR:
                 break;
             case POLL_ERROR:
