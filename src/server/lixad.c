@@ -88,7 +88,7 @@ void daemonize(void);
 
 
 /* default command line options */
-static gboolean run_as_daemon = FALSE;
+gboolean run_as_daemon = FALSE;
 static gboolean maintenance = FALSE;
 static char *dump_specs = NULL;
 static char *config_file = NULL;
@@ -176,7 +176,8 @@ int main(int argc, char *argv[])
     /* write pid file */
     if (!dump_specs) {
         if (NULL == (pid_file = fopen(sc.pid_file, "w")))
-            syslog(LOG_WARNING, LIXA_SYSLOG_LXD015W, sc.pid_file);
+            syslog(LOG_WARNING, LIXA_SYSLOG_LXD015W, sc.pid_file,
+                   errno, strerror(errno));
         else {
             fprintf(pid_file, PID_T_FORMAT "\n", getpid());
             fclose(pid_file);

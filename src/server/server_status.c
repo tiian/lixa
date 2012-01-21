@@ -26,6 +26,9 @@
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
+#endif
 #ifdef HAVE_SYS_MMAN_H
 # include <sys/mman.h>
 #endif
@@ -52,6 +55,7 @@
 
 #include <lixa_errors.h>
 #include <lixa_trace.h>
+#include <lixa_syslog.h>
 #include <server_status.h>
 #include <server_thread_status.h>
 
@@ -65,6 +69,7 @@
 
 
 
+extern gboolean run_as_daemon;
 struct thread_pipe_array_s tpa;
 
 
@@ -483,6 +488,13 @@ int status_record_load(status_record_t **sr,
                 break;
             case OPEN_ERROR1:
             case OPEN_ERROR2:
+                if (!run_as_daemon)
+                    fprintf(stderr, "Error while opening file '%s' "
+                            "(errno=%d '%s')\n",
+                            status_file, errno, strerror(errno));
+                else
+                    syslog(LOG_ERR, LIXA_SYSLOG_LXD025E, status_file, errno,
+                           strerror(errno));
                 ret_cod = LIXA_RC_OPEN_ERROR;
                 break;
             case GETTIMEOFDAY_ERROR:

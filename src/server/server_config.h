@@ -117,6 +117,16 @@ struct server_config_s {
      */
     char                               *pid_file;
     /**
+     * Minimum number of microseconds should elapse between two successive
+     * synchronizations of the state file
+     */
+    long                                min_elapsed_sync_time;
+    /**
+     * Maximum number of microseconds should not be exceeded between two
+     * successive synchronizations of the state file
+     */
+    long                                max_elapsed_sync_time;
+    /**
      * Listeners' configuration
      */
     struct listener_config_array_s      listeners;

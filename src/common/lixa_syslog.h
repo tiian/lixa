@@ -155,7 +155,7 @@
 #define LIXA_SYSLOG_LXD013W "LXD013W unable to switch client; recovery not " \
     "performed"
 #define LIXA_SYSLOG_LXD014N "LXD014N LIXA server entered daemon status"
-#define LIXA_SYSLOG_LXD015W "LXD015W unable to open pid file '%s'"
+#define LIXA_SYSLOG_LXD015W "LXD015W unable to open pid file '%s' (errno=%d '%s')"
 #define LIXA_SYSLOG_LXD016E "LXD016E config file error: unable to find property '%s' in tag '%s'"
 #define LIXA_SYSLOG_LXD017E "LXD017E intercommunication pipes initialization error"
 #define LIXA_SYSLOG_LXD018C "LXD018C internal thread id=%d raised unexpected expection (server_manager_thread: excp=%d,ret_cod=%d,errno=%d); immediate shutdown will terminate the server"
@@ -165,6 +165,7 @@
 #define LIXA_SYSLOG_LXD022N "LXD022N the server is going to clean all the previous recovery failed transactions"
 #define LIXA_SYSLOG_LXD023E "LXD023E the listener got a non recoverable error while polling its own socket (poll revents=0x%hx, errno=%d '%s'); starting premature quiesce shutdown..."
 #define LIXA_SYSLOG_LXD024N "LXD024N the server is not able to remove the file '%s' (errno=%d '%s')"
+#define LIXA_SYSLOG_LXD025E "LXD025E the server is not able to open the file '%s' (errno=%d '%s')"
 
 
 
