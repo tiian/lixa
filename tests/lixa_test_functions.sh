@@ -38,22 +38,29 @@ start_server() {
 	then
 		REAL_CHECK_TYPE=""
 	fi
+	LIXAD_CONF_XML="lixad_conf.xml"
+	if [ "x$LIXA_SYNC_NODELAY" != "x" ]
+	then
+		LIXAD_CONF_XML="lixad_conf2.xml"
+	fi
+	echo "LIXA_SYNC_NODELAY=$LIXA_SYNC_NODELAY"
+	echo "LIXAD_CONF_XML=$LIXAD_CONF_XML"
 	if [ "x$VALGRIND" != "x" ] 
 	then
 		case "$REAL_CHECK_TYPE" in
 		memory)
 			export G_SLICE=always-malloc
-			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
+			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
 		;;
 		thread)
-			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
+			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
 		;;
 		*)
-			$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
+			$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
 		;;
 		esac
 	else
-		$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/lixad_conf.xml --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
+		$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
 	fi
 	# wait until the server opens the listening socket
 	while test $(netstat -nta | grep LISTEN | grep 127.0.0.1:2345 | wc -l) -le 0

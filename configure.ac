@@ -30,6 +30,7 @@ AC_CONFIG_FILES([
   tests/atlocal
   tests/etc/lixac_conf.xml
   tests/etc/lixad_conf.xml
+  tests/etc/lixad_conf2.xml
   tests/etc/Makefile
   tests/src/Makefile
   var/Makefile

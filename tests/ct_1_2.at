@@ -118,7 +118,7 @@ xa_close/0
 ]])
 # this client forces server crash in server_xa_prepare_8; the client must stop
 # with TX_FAIL
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=32 ; lixa_test_exec.sh noreset start case0035 commit 5 -7], [5], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=32 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh noreset start case0035 commit 5 -7], [5], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([CT/1.2/1.1 server_xa_prepare (step=8)])
@@ -297,7 +297,7 @@ xa_close/0
 # this client forces server crash in server_xa_forget_8; the client ends
 # without errors because the last messages are sent asynchronously, but the
 # server missed xa_commit return codes and xa_close message
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=34 ; lixa_test_exec.sh noreset start case0035 commit 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=34 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh noreset start case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([CT/1.2/3.1 server_xa_forget (step=8)])

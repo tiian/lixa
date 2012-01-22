@@ -33,7 +33,8 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = tests/etc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/lixac_conf.xml.in $(srcdir)/lixad_conf.xml.in
+	$(srcdir)/lixac_conf.xml.in $(srcdir)/lixad_conf.xml.in \
+	$(srcdir)/lixad_conf2.xml.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -45,7 +46,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = lixac_conf.xml lixad_conf.xml
+CONFIG_CLEAN_FILES = lixac_conf.xml lixad_conf.xml lixad_conf2.xml
 SOURCES =
 DIST_SOURCES =
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -191,7 +192,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = lixac_conf.xml.in lixad_conf.xml.in
+EXTRA_DIST = lixac_conf.xml.in lixad_conf.xml.in lixad_conf2.xml.in
 all: all-am
 
 .SUFFIXES:
@@ -227,6 +228,8 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 lixac_conf.xml: $(top_builddir)/config.status $(srcdir)/lixac_conf.xml.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 lixad_conf.xml: $(top_builddir)/config.status $(srcdir)/lixad_conf.xml.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+lixad_conf2.xml: $(top_builddir)/config.status $(srcdir)/lixad_conf2.xml.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
