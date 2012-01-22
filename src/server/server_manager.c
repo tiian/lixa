@@ -229,19 +229,20 @@ void *server_manager_thread(void *void_ts)
             int timeout;
             long delay = 0;
             if (status_sync_get_asked(&ts->status_sync) > 0) {
-                delay = status_sync_get_sync_delay(&ts->status_sync);
-                LIXA_TRACE(("server_manager_thread: %d sessions asked file "
-                            "status synchronization; current delay is %ld, "
-                            "min_delay=%ld, max_delay=%ld\n",
+                delay = status_sync_get_sync_delay(&ts->status_sync) / 1000;
+                LIXA_TRACE(("server_manager_thread: %d session(s) asked file "
+                            "status synchronization; current delay is %ld ms, "
+                            "min_delay=%ld ms, max_delay=%ld ms\n",
                             status_sync_get_asked(&ts->status_sync), delay,
                             ts->min_elapsed_sync_time,
                             ts->max_elapsed_sync_time));
-                if (delay > ts->max_elapsed_sync_time) {
+                if (delay >= ts->max_elapsed_sync_time ||
+                    SHUTDOWN_NULL != ts->shutdown_type) {
                     /* start synchronization as soon as possible */
                     if (LIXA_RC_OK != (ret_cod = thread_status_sync_files(ts)))
                         THROW(THREAD_STATUS_SYNC_FILES_ERROR1);
                     status_sync_init(&ts->status_sync);
-                } else if (delay > ts->min_elapsed_sync_time) {
+                } else if (delay >= ts->min_elapsed_sync_time) {
                     /* start synchronization only if there is no another thread
                        that's synchronizing its own state file */
                     if (g_static_mutex_trylock(&state_file_synchronization)) {
@@ -262,7 +263,7 @@ void *server_manager_thread(void *void_ts)
                 THROW(FIX_POLL_ERROR);
             if (status_sync_get_asked(&ts->status_sync) > 0)
                 /* limited timeout poll */
-                timeout = (ts->max_elapsed_sync_time - delay) / 1000 + 1;
+                timeout = ts->max_elapsed_sync_time - delay;
             else
                 timeout = -1; /* unlimited timeout poll */
             LIXA_TRACE(("server_manager_thread: id=%d, entering poll "
