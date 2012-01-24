@@ -70,7 +70,7 @@ xa_close/0
 ]])
 # this client forces server crash in server_manager_pollout; the client must 
 # stop with TX_FAIL
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=41 ; lixa_test_exec.sh noreset start case0035 rollback 3 -7], [3], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=41 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh noreset start case0035 rollback 3 -7], [3], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([CT/1.11/2.1 crash before 1-st block copy])
@@ -98,7 +98,7 @@ xa_close/0
 ]])
 # this client forces server crash in server_manager_pollout; the client must 
 # stop with TX_FAIL
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=41 ; export LIXA_CRASH_COUNT=2 ; lixa_test_exec.sh noreset start case0035 rollback 5 -7], [5], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=41 ; export LIXA_CRASH_COUNT=2 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh noreset start case0035 rollback 5 -7], [5], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([CT/1.11/3.1 crash before 2-nd block copy])
