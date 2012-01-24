@@ -238,7 +238,14 @@ void *server_manager_thread(void *void_ts)
                             ts->max_elapsed_sync_time));
                 if (delay >= ts->max_elapsed_sync_time ||
                     SHUTDOWN_NULL != ts->shutdown_type) {
-                    /* start synchronization as soon as possible */
+                    /* start synchronization as soon as possible. This
+                       operation does not enqueue on the mutex but will
+                       enqueues on disk I/O; a better algorithm would use
+                       a mutex protected counter, but it will cost twice
+                       mutex synchronizations. This must be considered a
+                       "good enought" approach to reduce disk enqueing, but
+                       not to avoid disk enqueing (the operating system will
+                       manage it without any issue) */
                     if (LIXA_RC_OK != (ret_cod = thread_status_sync_files(ts)))
                         THROW(THREAD_STATUS_SYNC_FILES_ERROR1);
                     status_sync_init(&ts->status_sync);
