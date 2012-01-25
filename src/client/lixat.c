@@ -86,7 +86,7 @@ static GOptionEntry entries[] =
 /* Number of cycles executed during warm-up */
 #define WARM_UP_CYCLES  10
 /* Number of cycles executed during benchmark */
-#define BENCH_CYCLES   500
+#define BENCH_CYCLES   200
 
 
 
@@ -155,6 +155,27 @@ int main(int argc, char *argv[])
     
     if (benchmark && (!commit) && (!rollback))
         commit = TRUE;
+
+    if (medium_delay < 0) {
+        fprintf(stderr, "medium_delay (%d) can not be <0, fixed to 0\n",
+                medium_delay);
+        medium_delay = 0;
+    }
+    if (delta_delay < 1) {
+        fprintf(stderr, "delta_delay (%d) can not be <1, fixed to 1\n",
+                delta_delay);
+        delta_delay = 1;
+    }
+    if (medium_processing < 0) {
+        fprintf(stderr, "medium_processing (%d) can not be <0, fixed to 0\n",
+                medium_processing);
+        medium_processing = 0;
+    }
+    if (delta_processing < 1) {
+        fprintf(stderr, "delta_processing (%d) can not be <1, fixed to 1\n",
+                delta_processing);
+        delta_processing = 1;
+    }
     
     if (!benchmark) {
         /* perform one shot test execution */
