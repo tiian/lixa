@@ -43,7 +43,7 @@
 int main(int argc, char *argv[])
 {
     /* generic variables */
-    int            txrc, ocirc, delete;
+    int            txrc, ocirc;
     /* Oracle variables */
     OCIEnv        *oci_env;
     OCISvcCtx     *oci_svc_ctx;
