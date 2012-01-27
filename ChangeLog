@@ -1,6 +1,9 @@
 LOG:
 
-         - 0.7.2
+         - 0.7.2 Introduced two new parameters in lixad_conf.xml:
+                 min_elapsed_sync_time
+                 max_elapsed_sync_time
+                 please refer to manual for usage description
 
 20120110 - 0.7.1 fixed bug 3470598
                  Serialization of XID format id changed from hexadecimal
