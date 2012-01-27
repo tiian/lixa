@@ -168,6 +168,7 @@
 #define LIXA_SYSLOG_LXD025E "LXD025E the server is not able to open the file '%s' (errno=%d '%s')"
 #define LIXA_SYSLOG_LXD026I "LXD026I parameter '%s' set to value %ld"
 #define LIXA_SYSLOG_LXD027I "LXD027I parameter '%s' set to value '%s'"
+#define LIXA_SYSLOG_LXD028N "LXD026N value %ld is invalid for parameter '%s', fixing it to %ld"
 
 
 

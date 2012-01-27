@@ -278,8 +278,17 @@ int server_parse(struct server_config_s *sc,
                                 cur_node, LIXA_XML_CONFIG_SERVER_MIN_EST,
                                 &(sc->min_elapsed_sync_time)))) {
                         LIXA_TRACE(("server_parse: parameter '%s' is %ld\n",
-                                    (const char *)LIXA_XML_CONFIG_SERVER_MIN_EST,
+                                    (const char *)
+                                    LIXA_XML_CONFIG_SERVER_MIN_EST,
                                     sc->min_elapsed_sync_time));
+                        /* check and fix the parameter if wrong */
+                        if (sc->min_elapsed_sync_time < 0) {
+                            syslog(LOG_NOTICE, LIXA_SYSLOG_LXD028N,
+                                   sc->min_elapsed_sync_time,
+                                   (const char *)LIXA_XML_CONFIG_SERVER_MIN_EST,
+                                   (long)0);
+                            sc->min_elapsed_sync_time = 0;
+                        }
                         syslog(LOG_INFO, LIXA_SYSLOG_LXD026I,
                                (const char *)LIXA_XML_CONFIG_SERVER_MIN_EST,
                                sc->min_elapsed_sync_time);
@@ -291,8 +300,20 @@ int server_parse(struct server_config_s *sc,
                                 cur_node, LIXA_XML_CONFIG_SERVER_MAX_EST,
                                 &(sc->max_elapsed_sync_time)))) {
                         LIXA_TRACE(("server_parse: parameter '%s' is %ld\n",
-                                    (const char *)LIXA_XML_CONFIG_SERVER_MAX_EST,
+                                    (const char *)
+                                    LIXA_XML_CONFIG_SERVER_MAX_EST,
                                     sc->max_elapsed_sync_time));
+                        /* check and fix the parameter if wrong */
+                        if (sc->max_elapsed_sync_time < 0 ||
+                            sc->max_elapsed_sync_time <
+                            sc->min_elapsed_sync_time) {
+                            syslog(LOG_NOTICE, LIXA_SYSLOG_LXD028N,
+                                   sc->max_elapsed_sync_time,
+                                   (const char *)LIXA_XML_CONFIG_SERVER_MIN_EST,
+                                   sc->min_elapsed_sync_time);
+                            sc->max_elapsed_sync_time =
+                                sc->min_elapsed_sync_time;
+                        }
                         syslog(LOG_INFO, LIXA_SYSLOG_LXD026I,
                                (const char *)LIXA_XML_CONFIG_SERVER_MAX_EST,
                                sc->max_elapsed_sync_time);
