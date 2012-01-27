@@ -38,6 +38,9 @@
 #ifdef HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
 #endif
+#ifdef HAVE_NETINET_TCP_H
+# include <netinet/tcp.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -71,6 +74,7 @@ int client_connect(client_status_coll_t *csc,
     enum Exception { GET_STTSRV_ERROR
                      , SOCKET_ERROR
                      , CONNECT_ERROR
+                     , SETSOCKOPT_ERROR
                      , CLIENT_STATUS_COLL_GET_CS_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -81,6 +85,7 @@ int client_connect(client_status_coll_t *csc,
     LIXA_TRACE(("client_connect\n"));
     TRY {
         client_status_t *cs;
+        int sock_opt = 1;
 
         /* search connection parameters */
         if (NULL == (tc = client_config_get_sttsrv(ccc)))
@@ -98,6 +103,10 @@ int client_connect(client_status_coll_t *csc,
             THROW(CONNECT_ERROR);
         }
 
+        if (0 != setsockopt(out_socket, IPPROTO_TCP, TCP_NODELAY,
+                            (void *)(&sock_opt), sizeof(sock_opt)))
+            THROW(SETSOCKOPT_ERROR);
+        
         if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(csc, &cs)))
             THROW(CLIENT_STATUS_COLL_GET_CS_ERROR);
         LIXA_TRACE(("client_connect: cs = %p\n", cs));
@@ -117,6 +126,9 @@ int client_connect(client_status_coll_t *csc,
             case CONNECT_ERROR:
                 ret_cod = LIXA_RC_CONNECT_ERROR;
                 break;
+            case SETSOCKOPT_ERROR:
+                ret_cod = LIXA_RC_SETSOCKOPT_ERROR;
+                break;                
             case CLIENT_STATUS_COLL_GET_CS_ERROR:
                 break;
             case NONE:
