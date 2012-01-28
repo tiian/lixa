@@ -4,6 +4,8 @@ LOG:
                  min_elapsed_sync_time
                  max_elapsed_sync_time
                  please refer to manual for usage description
+                 Introduced TCP_NODELAY socket option to reduce latency in
+                 client/server message passing
 
 20120110 - 0.7.1 fixed bug 3470598
                  Serialization of XID format id changed from hexadecimal

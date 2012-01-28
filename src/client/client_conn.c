@@ -103,6 +103,7 @@ int client_connect(client_status_coll_t *csc,
             THROW(CONNECT_ERROR);
         }
 
+        /* disable Nagle's algorithm to reduce latency */
         if (0 != setsockopt(out_socket, IPPROTO_TCP, TCP_NODELAY,
                             (void *)(&sock_opt), sizeof(sock_opt)))
             THROW(SETSOCKOPT_ERROR);

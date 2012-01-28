@@ -29,6 +29,15 @@
 #ifdef HAVE_SYSLOG_H
 # include <syslog.h>
 #endif
+#ifdef HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_TCP_H
+# include <netinet/tcp.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
 
 
 
@@ -465,6 +474,7 @@ void server_manager_thread_cleanup(struct thread_status_s *ts)
 int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
 {
     enum Exception { READ_ERROR
+                     , SETSOCKOPT_ERROR
                      , ADD_POLL_ERROR
                      , NEW_CLIENT_ERROR
                      , SWITCH_2
@@ -479,11 +489,16 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
     TRY {
         struct srv_msg_s msg;
         nfds_t place = 0;
+        int sock_opt = 1;
         
         if (sizeof(msg) != read(fd, &msg, sizeof(msg)))
             THROW(READ_ERROR);
         switch (msg.type) {
             case SRV_MSG_TYPE_NEW_CLIENT:
+                /* disable Nagle's algorithm to reduce latency */
+                if (0 != setsockopt(msg.body.nc.fd, IPPROTO_TCP, TCP_NODELAY,
+                                    (void *)(&sock_opt), sizeof(sock_opt)))
+                    THROW(SETSOCKOPT_ERROR);
                 if (LIXA_RC_OK != (ret_cod = server_manager_add_poll(
                                        ts, msg.body.nc.fd, &place)))
                     THROW(ADD_POLL_ERROR);
@@ -517,6 +532,9 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
             case READ_ERROR:
                 ret_cod = LIXA_RC_READ_ERROR;
                 break;
+            case SETSOCKOPT_ERROR:
+                ret_cod = LIXA_RC_SETSOCKOPT_ERROR;
+                break;                
             case ADD_POLL_ERROR:
             case NEW_CLIENT_ERROR:
             case SWITCH_2:
