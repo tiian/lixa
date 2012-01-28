@@ -52,6 +52,7 @@ static gboolean rollback = FALSE;
 static gboolean print_version = FALSE;
 static gboolean benchmark = FALSE;
 static gboolean open_close = FALSE;
+static gboolean csv = FALSE;
 static gint clients = 10;
 static gint medium_delay = 1000;
 static gint delta_delay = 500;
@@ -64,6 +65,7 @@ static GOptionEntry entries[] =
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
     { "benchmark", 'b', 0, G_OPTION_ARG_NONE, &benchmark, "Perform benchmark execution", NULL },
     { "open-close", 'o', 0, G_OPTION_ARG_NONE, &open_close, "Execute tx_open & tx_close for every transaction [benchmark only]", NULL },
+    { "csv", 's', 0, G_OPTION_ARG_NONE, &csv, "Send result to stdout using CSV format [benchmark only]", NULL },
     { "clients", 'l', 0, G_OPTION_ARG_INT, &clients, "Number of clients (threads) will stress the state server [benchmark only]", NULL },
     { "medium-delay", 'd', 0, G_OPTION_ARG_INT, &medium_delay, "Medium (random) delay between TX functions [benchmark only]", NULL },
     { "delta-delay", 'D', 0, G_OPTION_ARG_INT, &delta_delay, "Delta (random) delay between TX functions [benchmark only]", NULL },
@@ -86,7 +88,7 @@ static GOptionEntry entries[] =
 /* Number of cycles executed during warm-up */
 #define WARM_UP_CYCLES  10
 /* Number of cycles executed during benchmark */
-#define BENCH_CYCLES   200
+#define BENCH_CYCLES   100
 
 
 
@@ -425,6 +427,17 @@ void compute_statistics(thread_parameters_t *tp)
     int c, s;
     double N, sum, sum2, avg, std_dev;
 
+    if (csv) {
+        printf(" clients,tx_open,,tx_begin,,");
+        if (commit)
+            printf("tx_commit,,");
+        else
+            printf("tx_rollback,,");
+        printf("tx_close\n");
+        printf(" N,avg,std,avg,std,avg,std,avg,std\n");
+        printf("%d,", clients);
+    }
+    
     for (s=0; s<NUMBER_OF_SAMPLES; ++s) {
         sum = sum2 = avg = std_dev = 0.0;
         for (c=0; c<clients; ++c) {
@@ -439,23 +452,28 @@ void compute_statistics(thread_parameters_t *tp)
         /* timing stats in ms instead of us */
         avg = sum / N / 1000;
         std_dev = sqrt(N*sum2 - sum*sum) / N / 1000;
-        switch (s) {
-            case 0: printf("tx_open():\t");
-                break;
-            case 1: printf("tx_begin():\t");
-                break;
-            case 2:
-                if (commit)
-                    printf("tx_commit():\t");
-                else
-                    printf("tx_rollback():\t");
-                break;
-            case 3: printf("tx_close():\t");
-                break;
-            default:
-                fprintf(stderr, "Internal error: s=%d\n", s);
-                exit(1);
-        }
-        printf("avg=%7.3f ms,\tstd_dev=%7.3f ms\n", avg, std_dev);
+        if (!csv) {
+            switch (s) {
+                case 0: printf("tx_open():\t");
+                    break;
+                case 1: printf("tx_begin():\t");
+                    break;
+                case 2:
+                    if (commit)
+                        printf("tx_commit():\t");
+                    else
+                        printf("tx_rollback():\t");
+                    break;
+                case 3: printf("tx_close():\t");
+                    break;
+                default:
+                    fprintf(stderr, "Internal error: s=%d\n", s);
+                    exit(1);
+            }
+            printf("avg=%7.3f ms,\tstd_dev=%7.3f ms\n", avg, std_dev);
+        } else
+            printf("%7.3f,%7.3f,", avg, std_dev);
     }
+    if (csv)
+        printf("\n");
 }
