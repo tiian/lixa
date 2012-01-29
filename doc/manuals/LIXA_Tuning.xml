@@ -1,0 +1,95 @@
+<chapter xml:id="Tuning">
+  <title>Tuning</title>
+  <para>
+    This chapter contains some tricks you may use to optimize the performance
+    of your LIXA installation.
+  </para>
+  <section>
+    <title>Overview</title>
+    <para>
+      There are basically 3 factors you can tune in your LIXA installation:
+      number of server threads, min and max elapsed synchronization time,
+      state file disk assignment.
+    </para>
+    <figure xml:id="tuning_01">
+      <title>XXX</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Tuning_01.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <figure xml:id="tuning_02">
+      <title>XXX</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Tuning_02.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <figure xml:id="tuning_03">
+      <title>XXX</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Tuning_03.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <figure xml:id="tuning_04">
+      <title>XXX</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Tuning_04.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <figure xml:id="tuning_05">
+      <title>XXX</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Tuning_05.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <figure xml:id="tuning_06">
+      <title>XXX</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Tuning_06.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <figure xml:id="tuning_07">
+      <title>XXX</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Tuning_07.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <figure xml:id="tuning_08">
+      <title>XXX</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Tuning_08.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <figure xml:id="tuning_09">
+      <title>XXX</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Tuning_09.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <figure xml:id="tuning_10">
+      <title>XXX</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Tuning_10.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+  </section>
+</chapter>

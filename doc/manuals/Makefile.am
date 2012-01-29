@@ -9,7 +9,8 @@ manual_sources = LIXA.xml \
 	LIXA_Installation.xml \
 	LIXA_Introduction.xml \
 	LIXA_Preface.xml \
-	LIXA_Recovery.xml
+	LIXA_Recovery.xml \
+	LIXA_Tuning.xml
 
 dia_images = LIXA_Configuration_1.dia  LIXA_Configuration_4.dia \
 	LIXA_Configuration_7.dia LIXA_Configuration_2.dia \
@@ -33,7 +34,12 @@ png_images = LIXA_Configuration_1.png  LIXA_Configuration_4.png \
 	LIXA_Development_7.png LIXA_Development_8.png LIXA_Development_9.png \
 	LIXA_Development_10.png LIXA_Development_11.png \
 	LIXA_Recovery_01.png LIXA_Recovery_02.png LIXA_Recovery_03.png \
-	LIXA_In_Depth_01.png LIXA_In_Depth_02.png LIXA_In_Depth_03.png
+	LIXA_In_Depth_01.png LIXA_In_Depth_02.png LIXA_In_Depth_03.png \
+	LIXA_Tuning_01.png LIXA_Tuning_02.png \
+	LIXA_Tuning_03.png LIXA_Tuning_04.png \
+	LIXA_Tuning_05.png LIXA_Tuning_06.png \
+	LIXA_Tuning_07.png LIXA_Tuning_08.png \
+	LIXA_Tuning_09.png LIXA_Tuning_10.png
 
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/html
 doc_DATA = *.html $(png_images)

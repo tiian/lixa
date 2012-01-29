@@ -358,17 +358,9 @@
 	  <listitem><para>
 	      <varname>manager</varname>: any configured 
 	      <emphasis>manager</emphasis> is a server worker and runs as
-	      a dedicated thread. The number of managers that should 
-	      be activated 
-	      depends on the workload; if D is the number of indipendent 
-	      hard disk devices and P is the number of processors/cores, the
-	      suggested values are in the range:
-	      <equation>
-		<title>Suggested range for the number of managers</title>
-		<mathphrase>
-		  [min(D,P) ; D*P]
-		</mathphrase>
-	      </equation>
+	      a dedicated thread. 
+	      Refer to <xref linkend="Tuning"/> for a discussion about
+	      configuration and performance results
 	  </para></listitem>
 	  <listitem><para>
 	      <varname>status_file</varname>: the physical path that 
