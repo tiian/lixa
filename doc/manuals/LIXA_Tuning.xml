@@ -12,7 +12,9 @@
       state file disk assignment.
     </para>
     <figure xml:id="tuning_01">
-      <title>XXX</title>
+      <title>Elapsed time of tx_open() when the Application Program 
+	uses a couple of tx_open()/tx_close() for every 
+	couple of tx_begin()/tx_commit()</title>
       <mediaobject>
 	<imageobject>
 	  <imagedata fileref="LIXA_Tuning_01.png"/>
@@ -20,7 +22,9 @@
       </mediaobject>
     </figure>
     <figure xml:id="tuning_02">
-      <title>XXX</title>
+      <title>Elapsed time of tx_begin() when the Application Program 
+	uses a couple of tx_open()/tx_close() for every 
+	couple of tx_begin()/tx_commit()</title>
       <mediaobject>
 	<imageobject>
 	  <imagedata fileref="LIXA_Tuning_02.png"/>
@@ -28,7 +32,9 @@
       </mediaobject>
     </figure>
     <figure xml:id="tuning_03">
-      <title>XXX</title>
+      <title>Elapsed time of tx_commit() when the Application Program 
+	uses a couple of tx_open()/tx_close() for every 
+	couple of tx_begin()/tx_commit()</title>
       <mediaobject>
 	<imageobject>
 	  <imagedata fileref="LIXA_Tuning_03.png"/>
@@ -36,7 +42,9 @@
       </mediaobject>
     </figure>
     <figure xml:id="tuning_04">
-      <title>XXX</title>
+      <title>Elapsed time of tx_close() when the Application Program 
+	uses a couple of tx_open()/tx_close() for every 
+	couple of tx_begin()/tx_commit()</title>
       <mediaobject>
 	<imageobject>
 	  <imagedata fileref="LIXA_Tuning_04.png"/>
@@ -44,7 +52,9 @@
       </mediaobject>
     </figure>
     <figure xml:id="tuning_05">
-      <title>XXX</title>
+      <title>Overall elapsed time when the Application Program 
+	uses a couple of tx_open()/tx_close() for every 
+	couple of tx_begin()/tx_commit()</title>
       <mediaobject>
 	<imageobject>
 	  <imagedata fileref="LIXA_Tuning_05.png"/>
@@ -52,7 +62,9 @@
       </mediaobject>
     </figure>
     <figure xml:id="tuning_06">
-      <title>XXX</title>
+      <title>Elapsed time of tx_open() when the Application Program 
+	uses a couple of tx_open()/tx_close() for a 
+	batch of tx_begin()/tx_commit()</title>
       <mediaobject>
 	<imageobject>
 	  <imagedata fileref="LIXA_Tuning_06.png"/>
@@ -60,7 +72,9 @@
       </mediaobject>
     </figure>
     <figure xml:id="tuning_07">
-      <title>XXX</title>
+      <title>Elapsed time of tx_begin() when the Application Program 
+	uses a couple of tx_open()/tx_close() for a 
+	batch of tx_begin()/tx_commit()</title>
       <mediaobject>
 	<imageobject>
 	  <imagedata fileref="LIXA_Tuning_07.png"/>
@@ -68,7 +82,9 @@
       </mediaobject>
     </figure>
     <figure xml:id="tuning_08">
-      <title>XXX</title>
+      <title>Elapsed time of tx_commit() when the Application Program 
+	uses a couple of tx_open()/tx_close() for a 
+	batch of tx_begin()/tx_commit()</title>
       <mediaobject>
 	<imageobject>
 	  <imagedata fileref="LIXA_Tuning_08.png"/>
@@ -76,7 +92,9 @@
       </mediaobject>
     </figure>
     <figure xml:id="tuning_09">
-      <title>XXX</title>
+      <title>Elapsed time of tx_close() when the Application Program 
+	uses a couple of tx_open()/tx_close() for a 
+	batch of tx_begin()/tx_commit()</title>
       <mediaobject>
 	<imageobject>
 	  <imagedata fileref="LIXA_Tuning_09.png"/>
@@ -84,7 +102,9 @@
       </mediaobject>
     </figure>
     <figure xml:id="tuning_10">
-      <title>XXX</title>
+      <title>Overall elapsed time when the Application Program 
+	uses a couple of tx_open()/tx_close() for a 
+	batch of tx_begin()/tx_commit()</title>
       <mediaobject>
 	<imageobject>
 	  <imagedata fileref="LIXA_Tuning_10.png"/>
