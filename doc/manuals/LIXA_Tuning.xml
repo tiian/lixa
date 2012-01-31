@@ -7,9 +7,135 @@
   <section>
     <title>Overview</title>
     <para>
-      There are basically 3 factors you can tune in your LIXA installation:
-      number of server threads, min and max elapsed synchronization time,
-      state file disk assignment.
+      On the LIXA state server side, there are basically 3 factors you can 
+      tune in your installation:
+      state file disk assignment, number of server threads, 
+      min and max elapsed synchronization time.
+    </para>
+    <section>
+      <title>State file disk assignment</title>
+      <para>
+	As explained in <xref linkend="Configuring_the_server"/> every
+	manager inside the LIXA state server uses a specific path for
+	its status files. If you specified path associated to independent
+	disks, you should obtain the best I/O performance for the LIXA
+	state server.
+      </para>
+      <para>
+	Following the <quote>just work</quote> concept the default 
+	configuration specifies a path like
+	<filename>/opt/lixa/var/...</filename>
+	but you should change it if your system had indipendent disks.
+      </para>
+    </section>
+    <section>
+      <title>Number of server threads</title>
+      <para>
+	The LIXA state server is a multi-threaded process with one network
+	listener and many <quote>managers</quote>; every manager runs
+	in a dedicated thread. Choosing the optimal number of threads is
+	not an easy task: following the <quote>just work</quote> concept
+	the default configuration specifies 3 threads, but your own 
+	installation could necessitate a quite different value for optimal
+	performances (below you could pick-up some information).
+      </para>
+    </section>
+    <section>
+      <title>Minimum and maximum elapsed synchronization time</title>
+      <para>
+	Starting with version 0.7.2 you can configure two parameters:
+	<parameter>min_elapsed_sync_time</parameter> and 
+	<parameter>max_elapsed_sync_time</parameter>. 
+	In the previous versions these parameters was implicitly set to 0.
+      </para>
+      <para>
+	Setting them to <quote>0</quote> will dramatically reduce the
+	probability a synchronization operation can be shared by two or more
+	client sessions (LIXA transaction managers). Setting them to a high
+	value will increase the likelihood a synchronization operation
+	batches a lot of requests.
+      </para>
+      <important>
+	<para>
+	  The higher the value of these parameters, the higher the chance
+	  you will have to perform manual recovery in the case of a server
+	  crash (manual recovery is explained in 
+	  <xref linkend="Manual_cold_recovery"/>).
+	</para>
+	<para>
+	  <emphasis>Do not use too high values:</emphasis> you will increase
+	  the likelihood of a long and tiring manual recovery phase after
+	  a server crash without extra performance benefits.
+	</para>
+      </important>
+    </section>
+  </section>
+  <section xml:id="Tuning_example">
+    <title>A tuning example</title>
+    <para>
+      This section explains a tuning example you can use as a starting point
+      to develop your own tuning strategy.
+    </para>
+    <para>
+      The utility program <command>lixat</command>, introduced in
+      <xref linkend="Starting_test_utility"/> can be used as a benchmark tool
+      specifying <parameter>-b</parameter> 
+      (<parameter>--benchmark</parameter>) parameter.
+      The available command options can be retrieved as shown below:
+      <screen>
+tiian@ubuntu:~$ /opt/lixa/bin/lixat --help
+Usage:
+  lixat [OPTION...] - LIXA test utility
+
+Help Options:
+  -?, --help                  Show help options
+
+Application Options:
+  -c, --commit                Perform a commit transaction
+  -r, --rollback              Perform a rollback transaction
+  -v, --version               Print package info and exit
+  -b, --benchmark             Perform benchmark execution
+  -o, --open-close            Execute tx_open &amp; tx_close for every transaction [benchmark only]
+  -s, --csv                   Send result to stdout using CSV format [benchmark only]
+  -l, --clients               Number of clients (threads) will stress the state server [benchmark only]
+  -d, --medium-delay          Medium (random) delay between TX functions [benchmark only]
+  -D, --delta-delay           Delta (random) delay between TX functions [benchmark only]
+  -p, --medium-processing     Medium (random) delay introduced by Resource Managers operations between tx_begin and tx_commit/tx_rollback [benchmark only]
+  -P, --delta-processing      Delta (random) delay introduced by Resource Managers operations between tx_begin and tx_commit/tx_rollback [benchmark only]
+      </screen>
+      These are the interesting options in benchmark mode:
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	    commit transactions (<parameter>-c</parameter> or
+	    <parameter>--commit</parameter>)
+	</para></listitem>
+	<listitem><para>
+	    rollback transactions (<parameter>-r</parameter> or
+	    <parameter>--rollback</parameter>)
+	</para></listitem>
+	<listitem><para>
+	    one couple of <function>tx_open()/tx_close()</function> for every
+	    transaction (<parameter>-o</parameter> or
+	    <parameter>--open-close</parameter>); alternatively only one
+	    couple of <function>tx_open()/tx_close()</function> will be used
+	    for all the transactions (<function>tx_open()/tx_begin()/tx_commit()/tx_begin()/tx_commit()/.../tx_close()</function>)
+	</para></listitem>
+	<listitem><para>
+	    number of clients connected to the LIXA state server
+	    (<parameter>-l</parameter> or <parameter>--clients</parameter>)
+	</para></listitem>
+	<listitem><para>
+	    delay introduced by Application Program logic between 
+	    <function>tx_*</function> functions (
+	    <parameter>-d, --medium-delay, -D, --delta-delay</parameter>)
+	</para></listitem>
+	<listitem><para>
+	    delay introduced by Resource Managers logic between
+	    <function>tx_begin</function> and <function>tx_commit</function>
+	    (or <function>tx_rollback</function>) functions (
+	    <parameter>-p, --medium-processing, -P, --delta-processing</parameter>)
+	</para></listitem>
+      </itemizedlist>
     </para>
     <figure xml:id="tuning_01">
       <title>Elapsed time of tx_open() when the Application Program 

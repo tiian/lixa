@@ -325,7 +325,7 @@ Access http://sourceforge.net/projects/lixa/ to report bugs and partecipate to t
       </section>
     </section>
   </section>
-  <section>
+  <section xml:id="Starting_test_utility">
     <title>Starting the test utility</title>
     <para>
       The LIXA project supplies a test utility you can use to 
@@ -341,12 +341,20 @@ Usage:
   lixat [OPTION...] - LIXA test utility
 
 Help Options:
-  -?, --help         Show help options
+  -?, --help                  Show help options
 
 Application Options:
-  -c, --commit       Perform a commit transaction
-  -r, --rollback     Perform a rollback transaction
-  -v, --version      Print package info and exit
+  -c, --commit                Perform a commit transaction
+  -r, --rollback              Perform a rollback transaction
+  -v, --version               Print package info and exit
+  -b, --benchmark             Perform benchmark execution
+  -o, --open-close            Execute tx_open &amp; tx_close for every transaction [benchmark only]
+  -s, --csv                   Send result to stdout using CSV format [benchmark only]
+  -l, --clients               Number of clients (threads) will stress the state server [benchmark only]
+  -d, --medium-delay          Medium (random) delay between TX functions [benchmark only]
+  -D, --delta-delay           Delta (random) delay between TX functions [benchmark only]
+  -p, --medium-processing     Medium (random) delay introduced by Resource Managers operations between tx_begin and tx_commit/tx_rollback [benchmark only]
+  -P, --delta-processing      Delta (random) delay introduced by Resource Managers operations between tx_begin and tx_commit/tx_rollback [benchmark only]
     </screen>
     <important><para>
 	The LIXA test utility is a LIXA client program and it 
@@ -357,7 +365,12 @@ Application Options:
     <para>
       The <command>lixat</command> command does nothing useful except trying 
       to contact the state server and optionally perform a commit and/or 
-      rollback dummy distributed transaction.
+      rollback dummy distributed transaction
+      <footnote><para>
+	  <command>lixat</command> can be used <quote>in benchmark mode</quote>
+	  as well, but that usage is explained in
+	  <xref linkend="Tuning_example"/>
+      </para></footnote>.
       Below there's the output of a trivial execution: the program connects
       to the state server, performs tx_open() against all the configured 
       resource managers and performs tx_close() against all the configured
