@@ -274,7 +274,7 @@
 	  of the files.
       </para></footnote>.
     </para>
-    <section>
+    <section xml:id="Configuring_the_server">
       <title>Configuring the server</title>
       <para>
 	The default configuration file is 
@@ -312,7 +312,9 @@
 	Below there is a sample configuration file:
 	<screen>
 &lt;?xml version="1.0" encoding="UTF-8" ?&gt;
-  &lt;server pid_file="/opt/lixa/var/run.pid"&gt;
+  &lt;server 
+    pid_file="/opt/lixa/var/run.pid"
+    min_elapsed_sync_time="0" max_elapsed_sync_time="0"&gt;
   &lt;listeners&gt;
     &lt;listener domain="AF_INET" address="127.0.0.1" port="3456"/&gt;
     &lt;listener domain="AF_INET" address="0.0.0.0" port="2345"/&gt;
@@ -328,47 +330,66 @@
 	properties of the XML file are described below:
 	<itemizedlist mark='bullet'>
 	  <listitem><para>
-	      <varname>pid_file</varname>: it is the file used by the server 
+	      <parameter>pid_file</parameter>: it is the file used by the 
+	      server 
 	      to store the daemon <acronym>PID</acronym>; the server creates
 	      the file at start-up and destroys it at shutdown
 	  </para></listitem>
 	  <listitem><para>
-	      <varname>listener</varname>: the server can activate one or more
+	      <parameter>min_elapsed_sync_time</parameter>: minimum time
+	      expressed in millisecond interleaving a state file 
+	      synchronization request and the start of the synchronization
+	      operation; every manager (thread) uses its own clock 
+	  </para></listitem>
+	  <listitem><para>
+	      <parameter>max_elapsed_sync_time</parameter>: maximum time
+	      expressed in millisecond interleaving a state file 
+	      synchronization request and the start of the synchronization
+	      operation; every manager (thread) uses its own clock.
+	      <parameter>max_elapsed_sync_time</parameter> can not be less 
+	      than <parameter>min_elapsed_sync_time</parameter>;
+	      see <xref linkend="Tuning"/> for more information about these
+	      parameters.
+	  </para></listitem>
+	  <listitem><para>
+	      <parameter>listener</parameter>: the server can activate one 
+	      or more
 	      listeners; most of the times one listener is sufficient, but if
 	      you want to use only a subset of the IP addresses defined at
 	      the operating system level, you have to configure a dedicated
 	      listener for every desired address
 	  </para></listitem>
 	  <listitem><para>
-	      <varname>domain</varname>: the type of socket must be used to
+	      <parameter>domain</parameter>: the type of socket must be used to
 	      listen for clients. The only allowed type is 
 	      <constant>AF_INET</constant>; this may change in the future
 	  </para></listitem>
 	  <listitem><para>
-	      <varname>address</varname>: the address that must be used 
+	      <parameter>address</parameter>: the address that must be used 
 	      to listen for
 	      clients; the special value "<constant>0.0.0.0</constant>" means
 	      <emphasis>any</emphasis> address
 	  </para></listitem>
 	  <listitem><para>
-	      <varname>port</varname>: the port that must be used to listen for
+	      <parameter>port</parameter>: the port that must be used to 
+	      listen for
 	      clients; it must be a free port (use command 
 	      <command>netstat</command> to find out one)
 	  </para></listitem>
 	  <listitem><para>
-	      <varname>manager</varname>: any configured 
+	      <parameter>manager</parameter>: any configured 
 	      <emphasis>manager</emphasis> is a server worker and runs as
 	      a dedicated thread. 
 	      Refer to <xref linkend="Tuning"/> for a discussion about
 	      configuration and performance results
 	  </para></listitem>
 	  <listitem><para>
-	      <varname>status_file</varname>: the physical path that 
+	      <parameter>status_file</parameter>: the physical path that 
 	      must be used to
 	      create the status files (a couple) for a manager; 
 	      this generally is
 	      a persistent and reliable storage device like a RAID partition.
-	      The string specified by the tag <varname>status_file</varname>
+	      The string specified by the tag <parameter>status_file</parameter>
 	      is used as a prefix: every manager (thread) creates two files
 	      with the same prefix and different suffix.
 	  </para></listitem>

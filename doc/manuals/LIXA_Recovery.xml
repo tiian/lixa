@@ -444,7 +444,7 @@ testdb=> select * from pg_prepared_xacts;
       </para>
     </section>
   </section>
-  <section>
+  <section xml:id="Manual_cold_recovery">
     <title>Manual (cold) recovery</title>
     <para>
       Manual (cold) recovery uses the information provided by the
