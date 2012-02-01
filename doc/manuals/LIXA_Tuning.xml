@@ -7,7 +7,7 @@
   <section>
     <title>Overview</title>
     <para>
-      On the LIXA state server side, there are basically 3 factors you can 
+      On the LIXA state server side, there are basically 3 elements you can 
       tune in your installation:
       state file disk assignment, number of server threads, 
       min and max elapsed synchronization time.
@@ -37,7 +37,8 @@
 	not an easy task: following the <quote>just work</quote> concept
 	the default configuration specifies 3 threads, but your own 
 	installation could necessitate a quite different value for optimal
-	performances (below you could pick-up some information).
+	performances (in the following paragraphs you could pick-up 
+	some information).
       </para>
     </section>
     <section>
@@ -51,8 +52,9 @@
       <para>
 	Setting them to <quote>0</quote> will dramatically reduce the
 	probability a synchronization operation can be shared by two or more
-	client sessions (LIXA transaction managers). Setting them to a high
-	value will increase the likelihood a synchronization operation
+	client sessions (LIXA transaction managers). Setting them to a value
+	greater than zero
+	will increase the likelihood a synchronization operation
 	batches a lot of requests.
       </para>
       <important>
@@ -137,105 +139,353 @@ Application Options:
 	</para></listitem>
       </itemizedlist>
     </para>
-    <figure xml:id="tuning_01">
-      <title>Elapsed time of tx_open() when the Application Program 
-	uses a couple of tx_open()/tx_close() for every 
-	couple of tx_begin()/tx_commit()</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata fileref="LIXA_Tuning_01.png"/>
-	</imageobject>
-      </mediaobject>
-    </figure>
-    <figure xml:id="tuning_02">
-      <title>Elapsed time of tx_begin() when the Application Program 
-	uses a couple of tx_open()/tx_close() for every 
-	couple of tx_begin()/tx_commit()</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata fileref="LIXA_Tuning_02.png"/>
-	</imageobject>
-      </mediaobject>
-    </figure>
-    <figure xml:id="tuning_03">
-      <title>Elapsed time of tx_commit() when the Application Program 
-	uses a couple of tx_open()/tx_close() for every 
-	couple of tx_begin()/tx_commit()</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata fileref="LIXA_Tuning_03.png"/>
-	</imageobject>
-      </mediaobject>
-    </figure>
-    <figure xml:id="tuning_04">
-      <title>Elapsed time of tx_close() when the Application Program 
-	uses a couple of tx_open()/tx_close() for every 
-	couple of tx_begin()/tx_commit()</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata fileref="LIXA_Tuning_04.png"/>
-	</imageobject>
-      </mediaobject>
-    </figure>
-    <figure xml:id="tuning_05">
-      <title>Overall elapsed time when the Application Program 
-	uses a couple of tx_open()/tx_close() for every 
-	couple of tx_begin()/tx_commit()</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata fileref="LIXA_Tuning_05.png"/>
-	</imageobject>
-      </mediaobject>
-    </figure>
-    <figure xml:id="tuning_06">
-      <title>Elapsed time of tx_open() when the Application Program 
-	uses a couple of tx_open()/tx_close() for a 
-	batch of tx_begin()/tx_commit()</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata fileref="LIXA_Tuning_06.png"/>
-	</imageobject>
-      </mediaobject>
-    </figure>
-    <figure xml:id="tuning_07">
-      <title>Elapsed time of tx_begin() when the Application Program 
-	uses a couple of tx_open()/tx_close() for a 
-	batch of tx_begin()/tx_commit()</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata fileref="LIXA_Tuning_07.png"/>
-	</imageobject>
-      </mediaobject>
-    </figure>
-    <figure xml:id="tuning_08">
-      <title>Elapsed time of tx_commit() when the Application Program 
-	uses a couple of tx_open()/tx_close() for a 
-	batch of tx_begin()/tx_commit()</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata fileref="LIXA_Tuning_08.png"/>
-	</imageobject>
-      </mediaobject>
-    </figure>
-    <figure xml:id="tuning_09">
-      <title>Elapsed time of tx_close() when the Application Program 
-	uses a couple of tx_open()/tx_close() for a 
-	batch of tx_begin()/tx_commit()</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata fileref="LIXA_Tuning_09.png"/>
-	</imageobject>
-      </mediaobject>
-    </figure>
-    <figure xml:id="tuning_10">
-      <title>Overall elapsed time when the Application Program 
-	uses a couple of tx_open()/tx_close() for a 
-	batch of tx_begin()/tx_commit()</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata fileref="LIXA_Tuning_10.png"/>
-	</imageobject>
-      </mediaobject>
-    </figure>
+    <section>
+      <title><command>lixat</command> benchmark behavior</title>
+      <para>
+	This is a sketch of <command>lixat</command> algorithm when
+	<parameter>-o</parameter> or <parameter>--open-close</parameter>
+	parameter is specified:
+	<screen>
+loop (1..100)
+    sleep(random[d-D/2, d+D/2])
+    tx_open()
+    sleep(random[d-D/2, d+D/2])
+    tx_begin()
+    sleep(random[p-P/2, p+P/2])
+    tx_commit()
+    sleep(random[d-D/2, d+D/2])
+    tx_close()
+    sleep(random[d-D/2, d+D/2])
+end loop
+	</screen>
+	With default delays the sleeping pauses are the following:
+	<screen>
+sleep(random[d-D/2, d+D/2]) --&gt; [500, 1500] microseconds
+sleep(random[p-P/2, p+P/2]) --&gt;  [50, 150]  milliseconds	  
+	</screen>
+        without <parameter>-o</parameter> or 
+	<parameter>--open-close</parameter> parameter the algorithm does not
+	call <function>tx_open()/tx_close()</function> for every cycle and
+	approximately becomes the following one:
+	<screen>
+tx_open()
+loop (1..100)
+    sleep(random[d-D/2, d+D/2])
+    sleep(random[d-D/2, d+D/2])
+    tx_begin()
+    sleep(random[p-P/2, p+P/2])
+    tx_commit()
+    sleep(random[d-D/2, d+D/2])
+    sleep(random[d-D/2, d+D/2])
+end loop
+tx_close()
+	</screen>
+      </para>
+      <para>
+	Using <parameter>--open-close</parameter> parameter you will simulate 
+	an Application Program that creates and destroy the transactional
+	environment for every transaction.
+      </para>
+      <para>
+	Omitting <parameter>--open-close</parameter> parameter you will 
+	simulate an Application Program that reuses the transactional
+	environment for 100 transactions.
+      </para>
+      <para>
+	Your Application Program could live in the middle, 
+	<command>lixat</command> can help you to figure out two different 
+	theoretical scenarios.
+      </para>
+      <para>
+	A shell command you can use to measure the performance of LIXA for
+	10, 20, 30, ... 100 clients is the following one:
+	<screen>
+for l in 10 20 30 40 50 60 70 80 90 100 ; do /opt/lixa/bin/lixat -b -s -l $l ; done | grep -v '^ ' > /tmp/bench_result.csv
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Tuning example hardware characteristics</title>
+      <para>
+	This is the output of <filename>/proc/cpuinfo</filename> executed
+	in the system hosting <command>lixad</command> state server:
+	<screen>
+	  processor: 0
+	  vendor_id: GenuineIntel
+	  cpu family: 15
+	  model: 2
+	  model name: Intel(R) Celeron(R) CPU 2.40GHz
+	  stepping: 9
+	  cpu MHz: 2405.521
+	  cache size: 128 KB
+	  fdiv_bug: no
+	  hlt_bug: no
+	  f00f_bug: no
+	  coma_bug: no
+	  fpu: yes
+	  fpu_exception: yes
+	  cpuid level: 2
+	  wp: yes
+	  flags: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe up pebs bts cid xtpr
+	  bogomips: 4811.04
+	  clflush size: 64
+	</screen>
+	This is the output of <filename>/proc/cpuinfo</filename> executed
+	in the system hosting <command>lixat</command> benchmark process:
+	<screen>
+	  processor: 0
+	  vendor_id: GenuineIntel
+	  cpu family: 6
+	  model: 23
+	  model name: Genuine Intel(R) CPU           U7300  @ 1.30GHz
+	  stepping: 10
+	  cpu MHz: 800.000
+	  cache size: 3072 KB
+	  physical id: 0
+	  siblings: 2
+	  core id: 0
+	  cpu cores: 2
+	  apicid: 0
+	  initial apicid: 0
+	  fpu: yes
+	  fpu_exception: yes
+	  cpuid level: 13
+	  wp: yes
+	  flags: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx lm constant_tsc arch_perfmon pebs bts rep_good aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm sse4_1 xsave lahf_lm tpr_shadow vnmi flexpriority
+	  bogomips: 2593.73
+	  clflush size: 64
+	  cache_alignment: 64
+	  address sizes: 36 bits physical, 48 bits virtual
+	  power management:
+
+	  processor: 1
+	  vendor_id: GenuineIntel
+	  cpu family: 6
+	  model: 23
+	  model name: Genuine Intel(R) CPU           U7300  @ 1.30GHz
+	  stepping: 10
+	  cpu MHz: 800.000
+	  cache size: 3072 KB
+	  physical id: 0
+	  siblings: 2
+	  core id: 1
+	  cpu cores: 2
+	  apicid: 1
+	  initial apicid: 1
+	  fpu: yes
+	  fpu_exception: yes
+	  cpuid level: 13
+	  wp: yes
+	  flags: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx lm constant_tsc arch_perfmon pebs bts rep_good aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm sse4_1 xsave lahf_lm tpr_shadow vnmi flexpriority
+	  bogomips: 2593.50
+	  clflush size: 64
+	  cache_alignment: 64
+	  address sizes: 36 bits physical, 48 bits virtual
+	  power management:
+	</screen>
+      </para>
+      <para>
+	From the above specs you can guess these are not powerful 
+	<quote>server systems</quote>. The systems are connected with a
+	100 Mbit/s connection with an average latency of 95 microseconds:
+	<screen>
+--- 192.168.10.2 ping statistics ---
+50 packets transmitted, 50 received, 0% packet loss, time 48997ms
+rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Results obtained with <parameter>--open-close</parameter> parameter</title>
+      <note>
+	<para>
+	  All the tests saturated the CPU of the host executing 
+	  <command>lixad</command> state server for the higher values of
+	  connected clients.
+	</para>
+      </note>
+      <para>
+	The first picture shows the elapsed time associated to
+	<function>tx_open()</function> increases quite linearly with the 
+	number of connected clients. A <command>lixad</command> state server 
+	configured with 3 managers
+	(threads), <parameter>min_elapsed_sync_time=20</parameter> and
+	<parameter>max_elapsed_sync_time=100</parameter> exploits the best
+	scalability (purple line); a <command>lixad</command> state server 
+	configured with 3 managers,
+	<parameter>min_elapsed_sync_time=10</parameter> and
+	<parameter>max_elapsed_sync_time=50</parameter> shows a scalability
+	very near to the best (light green line).
+	<emphasis>The second one is a more robust configuration and should
+	  be preferred</emphasis>.
+      </para>
+      <figure xml:id="tuning_01">
+	<title>Elapsed time of tx_open() when the Application Program 
+	  uses a couple of tx_open()/tx_close() for every 
+	  couple of tx_begin()/tx_commit()</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_Tuning_01.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <para>
+	A completely different behavior is shown by
+	<function>tx_begin(), tx_commit(), tx_close()</function> functions:
+	the best scalability is obtained with 1 manager (thread), 
+	<parameter>min_elapsed_sync_time=20</parameter> and
+	<parameter>max_elapsed_sync_time=100</parameter>
+	(yellow line); a quite optimal
+	scalability can be obtained with with 1 manager (thread), 
+	<parameter>min_elapsed_sync_time=10</parameter> and
+	<parameter>max_elapsed_sync_time=50</parameter> (orange line). 
+	The second 
+	configuration should be preferred because it's more robust than the
+	first one. Using more threads does not give any benefit for these
+	three functions.
+      </para>
+      <figure xml:id="tuning_02">
+	<title>Elapsed time of tx_begin() when the Application Program 
+	  uses a couple of tx_open()/tx_close() for every 
+	  couple of tx_begin()/tx_commit()</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_Tuning_02.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <figure xml:id="tuning_03">
+	<title>Elapsed time of tx_commit() when the Application Program 
+	  uses a couple of tx_open()/tx_close() for every 
+	  couple of tx_begin()/tx_commit()</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_Tuning_03.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <figure xml:id="tuning_04">
+	<title>Elapsed time of tx_close() when the Application Program 
+	  uses a couple of tx_open()/tx_close() for every 
+	  couple of tx_begin()/tx_commit()</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_Tuning_04.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <para>
+	In the last chart 
+	it's interesting to see the aggregate values for all the transactions
+	(100 transactions, note the elapsed time is now expressed in seconds):
+	the purple line (best configuration for <function>tx_open()</function>)
+	is the best overall configuration. This time too, there are many
+	scalability equivalent configurations:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	      3 managers (thread), 
+	      <parameter>min_elapsed_sync_time=20</parameter> and
+	      <parameter>max_elapsed_sync_time=100</parameter>
+	      (purple line)
+	  </para></listitem>
+	  <listitem><para>
+	      3 managers (thread), 
+	      <parameter>min_elapsed_sync_time=10</parameter> and
+	      <parameter>max_elapsed_sync_time=50</parameter>	      
+	      (light green line)
+	  </para></listitem>
+	  <listitem><para>
+	      2 managers (thread), 
+	      <parameter>min_elapsed_sync_time=10</parameter> and
+	      <parameter>max_elapsed_sync_time=50</parameter>	      
+	      (red line)
+	  </para></listitem>
+	  <listitem><para>
+	      1 managers (thread), 
+	      <parameter>min_elapsed_sync_time=10</parameter> and
+	      <parameter>max_elapsed_sync_time=50</parameter>	      
+	      (orange line)
+	  </para></listitem>
+	</itemizedlist>
+	The second configuration of the above list (light green) could be 
+	considered the
+	best from an overall scalability point of view and from a safe
+	point of view: the minimum elapsed synchronization time is 
+	10 milliseconds.
+      </para>
+      <figure xml:id="tuning_05">
+	<title>Overall elapsed time when the Application Program 
+	  uses a couple of tx_open()/tx_close() for every 
+	  couple of tx_begin()/tx_commit()</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_Tuning_05.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+    </section>
+    <section>
+      <title>Results obtained without <parameter>--open-close</parameter> parameter</title>
+      <note>
+	<para>
+	  All the tests saturated the CPU of the host executing 
+	  <command>lixad</command> state server for the higher values of
+	  connected clients.
+	</para>
+      </note>
+      <para>
+	@@@
+      </para>
+      <figure xml:id="tuning_06">
+	<title>Elapsed time of tx_open() when the Application Program 
+	  uses a couple of tx_open()/tx_close() for a 
+	  batch of tx_begin()/tx_commit()</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_Tuning_06.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <figure xml:id="tuning_07">
+	<title>Elapsed time of tx_begin() when the Application Program 
+	  uses a couple of tx_open()/tx_close() for a 
+	  batch of tx_begin()/tx_commit()</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_Tuning_07.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <figure xml:id="tuning_08">
+	<title>Elapsed time of tx_commit() when the Application Program 
+	  uses a couple of tx_open()/tx_close() for a 
+	  batch of tx_begin()/tx_commit()</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_Tuning_08.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <figure xml:id="tuning_09">
+	<title>Elapsed time of tx_close() when the Application Program 
+	  uses a couple of tx_open()/tx_close() for a 
+	  batch of tx_begin()/tx_commit()</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_Tuning_09.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <figure xml:id="tuning_10">
+	<title>Overall elapsed time when the Application Program 
+	  uses a couple of tx_open()/tx_close() for a 
+	  batch of tx_begin()/tx_commit()</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="LIXA_Tuning_10.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+    </section>
   </section>
 </chapter>
