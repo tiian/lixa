@@ -1,9 +1,5 @@
 lixat: check memory leaks with and without --open-close
 
-tiian@ubuntu:~$ ls -la /opt/lixa/var/run.pid
--rw-rw-rw- 1 lixa lixa 6 2012-01-20 16:48 /opt/lixa/var/run.pid
-fix the permissions to -rw-rw-r--
-
 Explore high availability features (active/active) with dynamic or static
 workload
 

@@ -44,6 +44,9 @@
 #ifdef HAVE_SYS_STAT_H
 # include <sys/stat.h>
 #endif
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
+#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -121,7 +124,7 @@ int main(int argc, char *argv[])
     GOptionContext *option_context;
     struct ts_dump_spec_s tsds;
     struct ts_recovery_spec_s tsrs;
-    FILE *pid_file = NULL;
+    int pid_fd;
 
     LIXA_TRACE_INIT;
     LIXA_CRASH_INIT;
@@ -175,12 +178,16 @@ int main(int argc, char *argv[])
 
     /* write pid file */
     if (!dump_specs) {
-        if (NULL == (pid_file = fopen(sc.pid_file, "w")))
+        if (-1 == (pid_fd = open(sc.pid_file, O_CREAT | O_WRONLY,
+                                 S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |
+                                 S_IROTH)))
             syslog(LOG_WARNING, LIXA_SYSLOG_LXD015W, sc.pid_file,
                    errno, strerror(errno));
         else {
-            fprintf(pid_file, PID_T_FORMAT "\n", getpid());
-            fclose(pid_file);
+            char array[100];
+            snprintf(array, sizeof(array), PID_T_FORMAT "\n", getpid());
+            write(pid_fd, array, strlen(array));
+            close(pid_fd);
         }
     }
     
