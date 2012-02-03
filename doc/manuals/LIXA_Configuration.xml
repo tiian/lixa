@@ -395,6 +395,42 @@
 	  </para></listitem>
 	</itemizedlist>
       </para>
+      <section xml:id="Delayed_synchronization_effects">
+	<title>Delayed synchronization effects</title>
+	<para>
+	  Parameters
+	  <parameter>min_elapsed_sync_time</parameter> and
+	  <parameter>max_elapsed_sync_time</parameter>
+	  have a great relevance with the performance of the LIXA system
+	  as explained in <xref linkend="Tuning"/> but they have a relevance
+	  with system robustness as well:
+	</para>
+	<para>
+	  <emphasis>
+	    the higher the delay between the time a client ask a disk
+	    synchronization and the time the state server performs it
+	    (<parameter>min_elapsed_sync_time</parameter>), the higher
+	    the chance the disk status files will not contain the correct
+	    state for some transactions if the state file crashes.
+	  </emphasis>
+	</para>
+	<para>
+	  The risk is not related to data corruption: data integrity is
+	  guaranteed by the Resource Managers your Application Programs use.
+	  The risk is some <quote>prepared/recovery pending</quote>
+	  transactions will not automatically recovered
+	  (see <xref linkend="Automatic_recovery_concepts"/>) by LIXA
+	  infrastructure; those transactions will need
+	  manual recovery (see <xref linkend="Manual_cold_recovery"/>).
+	</para>
+	<para>
+	  <emphasis>
+	    During the interval between state server crash and
+	    manual recovery your Resource Managers will keep some locks on
+	    data: this could be the real damage for your application.
+	  </emphasis>
+	</para>
+      </section>
     </section>
     <section>
       <title>Configuring the client</title>

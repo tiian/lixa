@@ -82,8 +82,9 @@
       The utility program <command>lixat</command>, introduced in
       <xref linkend="Starting_test_utility"/> can be used as a benchmark tool
       specifying <parameter>-b</parameter> 
-      (<parameter>--benchmark</parameter>) parameter.
-      The available command options can be retrieved as shown below:
+      (<parameter>--benchmark</parameter>) option.
+      The available command options can be retrieved with
+      <parameter>--help</parameter>:
       <screen>
 tiian@ubuntu:~$ /opt/lixa/bin/lixat --help
 Usage:
@@ -144,7 +145,7 @@ Application Options:
       <para>
 	This is a sketch of <command>lixat</command> algorithm when
 	<parameter>-o</parameter> or <parameter>--open-close</parameter>
-	parameter is specified:
+	option is specified:
 	<screen>
 loop (1..100)
     sleep(random[d-D/2, d+D/2])
@@ -164,9 +165,10 @@ sleep(random[d-D/2, d+D/2]) --&gt; [500, 1500] microseconds
 sleep(random[p-P/2, p+P/2]) --&gt;  [50, 150]  milliseconds	  
 	</screen>
         without <parameter>-o</parameter> or 
-	<parameter>--open-close</parameter> parameter the algorithm does not
+	<parameter>--open-close</parameter> option <command>lixat</command>
+	does not
 	call <function>tx_open()/tx_close()</function> for every cycle and
-	approximately becomes the following one:
+	the algorithm becomes the following one:
 	<screen>
 tx_open()
 loop (1..100)
@@ -376,8 +378,8 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
       </figure>
       <para>
 	In the last chart 
-	it's interesting to see the aggregate values for all the transactions
-	(100 transactions, note the elapsed time is now expressed in seconds):
+	you may note the aggregated values for all the transactions
+	(100 transactions, the elapsed time is now expressed in seconds):
 	the purple line (best configuration for <function>tx_open()</function>)
 	is the best overall configuration. This time too, there are many
 	scalability equivalent configurations:
@@ -409,7 +411,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	</itemizedlist>
 	The second configuration of the above list (light green) could be 
 	considered the
-	best from an overall scalability point of view and from a safe
+	best from an overall scalability point of view and from a safety
 	point of view: the minimum elapsed synchronization time is 
 	10 milliseconds.
       </para>
@@ -434,7 +436,31 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	</para>
       </note>
       <para>
-	@@@
+	Avoiding a lot of <function>tx_open()/tx_close()</function> the
+	behavior of the system is quite different. It's interesting to note
+	the system has two distinct modes:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	      in the range [10,50] clients the scalability is quite linear 
+	      if you adopt a super safe configuration with 
+	      <parameter>min_elapsed_sync_time=0</parameter> and
+	      <parameter>max_elapsed_sync_time=0</parameter>
+	  </para></listitem>
+	  <listitem><para>
+	      in the range [10,50] clients the scalability is
+	      <quote>superlinear</quote> if you adopt an asynchronous
+	      conifiguration with 
+	      <parameter>min_elapsed_sync_time=10</parameter> and
+	      <parameter>max_elapsed_sync_time=50</parameter>
+	      or higher values
+	  </para></listitem>
+	  <listitem><para>
+	      in the range [60,100] clients the system tends to saturate
+	      and the <quote>superlinear</quote> characteristic is vanishing;
+	      neverthless, asynchronous configurations exploit lower
+	      response time than synchronous ones
+	  </para></listitem>
+	</itemizedlist>
       </para>
       <figure xml:id="tuning_06">
 	<title>Elapsed time of tx_open() when the Application Program 
@@ -476,6 +502,23 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  </imageobject>
 	</mediaobject>
       </figure>
+      <para>
+	This last chart display the average elapsed time spent for 
+	<function>tx_*</function> functions by 100 transactions.
+	The best performace is obtained with the less safe configuration:
+	<parameter>min_elapsed_sync_time=20</parameter> and
+	<parameter>max_elapsed_sync_time=100</parameter>
+	(purple, cyan and yellow lines).
+	The intermediate performance is obtained with the intermediate
+	configuration:
+	<parameter>min_elapsed_sync_time=10</parameter> and
+	<parameter>max_elapsed_sync_time=50</parameter>
+	(dark yellow, red and orange lines).
+	The worst performance is obtained with the safest configuration:
+	<parameter>min_elapsed_sync_time=0</parameter> and
+	<parameter>max_elapsed_sync_time=0</parameter>
+	(green, light green and blue lines).
+      </para>
       <figure xml:id="tuning_10">
 	<title>Overall elapsed time when the Application Program 
 	  uses a couple of tx_open()/tx_close() for a 
@@ -486,6 +529,37 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  </imageobject>
 	</mediaobject>
       </figure>
+      <section>
+	<title>Conclusions</title>
+	<para>
+	  The LIXA project gives you some parameters you can change to tune
+	  your installation and get the best performance.
+	  There is not a magic recipe you can adopt, but there are some
+	  rules of thumb:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+		if possible, avoid the usage of 
+		<function>tx_open()/tx_close()</function> for every 
+		transaction: if your business logic could batch more than
+		one transaction inside the same session, your overall
+		response time would be lower
+	    </para></listitem>
+	    <listitem><para>
+		delayed disk synchronization will help you in obtaining
+		better performance with the same hardware, but introducing
+		too high delays will not give you extra performance
+	    </para></listitem>
+	    <listitem><para>
+		delay disk synchronization introduce the risk to perform
+		manual recovery as explained in
+		<xref linkend="Delayed_synchronization_effects"/>.
+	    </para></listitem>
+	  </itemizedlist>
+	  Write your own test program, with real Resource Managers,
+	  and measure it: with a test environment you would be able to
+	  fine tune your own installation.
+	</para>
+      </section>
     </section>
   </section>
 </chapter>
