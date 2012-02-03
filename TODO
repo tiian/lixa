@@ -1,4 +1,4 @@
-for l in 5 10 15 20 25 ; do src/client/lixat -b -s -l $l ; done | grep -v '^ ' > /tmp/foo.csv
+lixat: check memory leaks with and without --open-close
 
 tiian@ubuntu:~$ ls -la /opt/lixa/var/run.pid
 -rw-rw-rw- 1 lixa lixa 6 2012-01-20 16:48 /opt/lixa/var/run.pid
