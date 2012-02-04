@@ -411,7 +411,7 @@
 	    synchronization and the time the state server performs it
 	    (<parameter>min_elapsed_sync_time</parameter>), the higher
 	    the chance the disk status files will not contain the correct
-	    state for some transactions if the state file crashes.
+	    state for some transactions if the state server crashes.
 	  </emphasis>
 	</para>
 	<para>

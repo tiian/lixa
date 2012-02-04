@@ -511,7 +511,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	</mediaobject>
       </figure>
       <para>
-	This last chart display the average elapsed time spent for 
+	The last chart shows the average elapsed time spent for 
 	<function>tx_*</function> functions by 100 transactions.
 	The best performace is obtained with the less safe configuration:
 	<parameter>min_elapsed_sync_time=20</parameter> and
