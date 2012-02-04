@@ -338,7 +338,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	<parameter>min_elapsed_sync_time=20</parameter> and
 	<parameter>max_elapsed_sync_time=100</parameter>
 	(yellow line); a quite optimal
-	scalability can be obtained with with 1 manager (thread), 
+	performance can be obtained with 1 manager (thread), 
 	<parameter>min_elapsed_sync_time=10</parameter> and
 	<parameter>max_elapsed_sync_time=50</parameter> (orange line). 
 	The second 
@@ -382,7 +382,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	(100 transactions, the elapsed time is now expressed in seconds):
 	the purple line (best configuration for <function>tx_open()</function>)
 	is the best overall configuration. This time too, there are many
-	scalability equivalent configurations:
+	performance equivalent configurations:
 	<itemizedlist mark='bullet'>
 	  <listitem><para>
 	      3 managers (thread), 
@@ -411,7 +411,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	</itemizedlist>
 	The second configuration of the above list (light green) could be 
 	considered the
-	best from an overall scalability point of view and from a safety
+	best from an overall performance point of view and from a safety
 	point of view: the minimum elapsed synchronization time is 
 	10 milliseconds.
       </para>
@@ -448,7 +448,15 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  </para></listitem>
 	  <listitem><para>
 	      in the range [10,50] clients the scalability is
-	      <quote>superlinear</quote> if you adopt an asynchronous
+	      <quote>superlinear</quote>
+	      <footnote>
+		<para>
+		  <function>tx_begin(), tx_commit(), tx_close()</function>
+		  response times change very few when the number of clients
+		  rises
+		</para>
+	      </footnote>
+	      if you adopt an asynchronous
 	      conifiguration with 
 	      <parameter>min_elapsed_sync_time=10</parameter> and
 	      <parameter>max_elapsed_sync_time=50</parameter>
