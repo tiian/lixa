@@ -1,4 +1,4 @@
-lixat: check memory leaks with and without --open-close
+lixat: check memory leaks with and without --open-close in lixad
 
 Explore high availability features (active/active) with dynamic or static
 workload

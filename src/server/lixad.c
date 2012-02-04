@@ -179,14 +179,14 @@ int main(int argc, char *argv[])
     /* write pid file */
     if (!dump_specs) {
         if (-1 == (pid_fd = open(sc.pid_file, O_CREAT | O_WRONLY,
-                                 S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |
-                                 S_IROTH)))
+                                 S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)))
             syslog(LOG_WARNING, LIXA_SYSLOG_LXD015W, sc.pid_file,
                    errno, strerror(errno));
         else {
             char array[100];
+            ssize_t res;
             snprintf(array, sizeof(array), PID_T_FORMAT "\n", getpid());
-            write(pid_fd, array, strlen(array));
+            res = write(pid_fd, array, strlen(array));
             close(pid_fd);
         }
     }
