@@ -53,7 +53,7 @@ should remain locked until all the thread completed.
 From a LIXA point of view, xmlInitParser() is called from the first thread
 that calls tx_open() and xmlCleanupParser() is called from the last thread
 that leaves tx_close(). The issue must be discussed with libxml2 development
-team. Unfortunately, tx_open() can no be called from the main program and the
+team. Unfortunately, tx_open() can not be called from the main program and the
 following functions from a different thread because this behavior would violate
 XA standard: to avoid this issue a "proxy thread" should be used for XA
 functions, but the "solution" is worst then the "problem".
@@ -65,7 +65,3 @@ this should avoid the memory leak. Pay attention the tx_open() at main level
 is not inherited at the thread level: every thread must call its own tx_open()
 too; this is only a workaround to force xmlInitParser() and xmlCleanupParser()
 only at main program instead of at first starting thread / last ending thread.
-
-After beta release, after interesting stuff like Python and PHP bindings, the 
-custom containers developed for LIXA could be substituted with glib standard 
-containers.

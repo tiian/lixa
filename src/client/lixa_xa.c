@@ -604,6 +604,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit)
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer)-1, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR1);
+        /* release memory associated to the array */
+        g_array_free(msg.body.end_8.xa_end_execs, TRUE);
         memset(&msg, 0, sizeof(msg));
         
         LIXA_TRACE(("lixa_xa_end: sending " SIZE_T_FORMAT

@@ -8,6 +8,8 @@ LOG:
                  client/server message passing
                  Fixed permissions for file /opt/lixa/var/run.pid (they was
                  rw-rw-rw-; fixed to rw-rw-r--)
+                 Removed a memory leak in lixa_xa_end() function called by
+                 tx_commit()
 
 20120110 - 0.7.1 fixed bug 3470598
                  Serialization of XID format id changed from hexadecimal
