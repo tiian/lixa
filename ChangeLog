@@ -7,7 +7,7 @@ LOG:
                  Introduced TCP_NODELAY socket option to reduce latency in
                  client/server message passing
                  Fixed permissions for file /opt/lixa/var/run.pid (they was
-                 rw-rw-rw-; fixed to rw-rw-r--)
+                 rw-rw-rw-; fixed to rw-r--r--)
                  Removed a memory leak in lixa_xa_end() function called by
                  tx_commit()
 
