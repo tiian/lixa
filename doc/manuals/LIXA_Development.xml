@@ -2589,8 +2589,8 @@ max_prepared_transactions = 10          # zero disables the feature
 #max_stack_depth = 2MB                  # min 100kB
 	  </screen>
 	  and restart the PostgreSQL server with something like
-	  <screen>sudo service postgresql-8.4 restart</screen> or
-	  <screen>sudo /etc/init.d/postgresql-8.4 restart</screen>
+	  <screen>sudo service postgresql-8.4 restart</screen> (Ubuntu 10.04) or
+	  <screen>sudo /etc/init.d/postgresql-8.3 restart</screen> (Ubuntu 8.04)
 	</para>
       </section>
     </section>
