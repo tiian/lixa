@@ -1,6 +1,4 @@
-lixat: check memory leaks with and without --open-close in lixad
-valgrind 3.6.0 (Ubuntu 10.04) signals some possibly lost blocks, valgrind
-x.y.z (Ubuntu 8.04) did not. Try to figure out the issue.
+Understand why old transactions are not recovered with the right user specified job label
 
 Explore high availability features (active/active) with dynamic or static
 workload
