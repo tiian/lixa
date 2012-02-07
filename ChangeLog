@@ -10,6 +10,7 @@ LOG:
                  rw-rw-rw-; fixed to rw-r--r--)
                  Removed a memory leak in lixa_xa_end() function called by
                  tx_commit()
+                 Fixed a bug in lixa_job_reset function (minor defect)
 
 20120110 - 0.7.1 fixed bug 3470598
                  Serialization of XID format id changed from hexadecimal
