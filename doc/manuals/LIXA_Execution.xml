@@ -156,7 +156,7 @@ Mar 31 23:00:48 ubuntu lixad[5926]: LXD006N server terminated activities
 	the LIXA state server again.
       </para>
     </section>
-    <section>
+    <section xml:id="lixad_dump_execution">
       <title>Dump execution</title>
       <para>
 	Use <option>--dump</option> option to get a dump of the content
