@@ -720,9 +720,52 @@ export LIXA_PROFILE=VZ67
 	  </screen>
 	</para>
       </section>
+      <section xml:id="Client_configuration_caution">
+	<title>Client configuration caution</title>
+	<para>
+	  If you change the content of <filename>lixac_conf.xml</filename>
+	  you will change the signature associated to the configuration file
+	  from LIXA Transaction Manager. The signature is very important
+	  because LIXA Transaction Manager will not activate automatic
+	  recovery of <quote>prepared/recovery pending</quote> transactions
+	  if configuration file signatures do not match. In the case of
+	  signature mismatch during automatic recovery, the LIXA system 
+	  reacts with some log messages as below:
+	  <screen>
+Feb  8 21:38:51 ubuntu lixad[2517]: LXD011W a client is performing recovery but config file changed in the meantime for job 'a100c8728292168b21ba7239bffc137d/127.0.0.1      ' and transaction '1279875137.46d1df80428d4d6c85e6919b16b4a744.a100c8728292168b21ba7239bffc137d'
+Feb  8 21:38:51 ubuntu lixat[2532]: LXC001E transaction '1279875137.46d1df80428d4d6c85e6919b16b4a744.a100c8728292168b21ba7239bffc137d' can NOT be recovered because current config digest 'a100c8728292168b21ba7239bffc137d' does NOT match server stored config digest '9e4c11057107c73366c9fc421eaa85ca'
+	  </screen>
+	  LIXA state server issues a warning (LXD011W) while LIXA Transaction
+	  Manager (client) issues an error (LXC001E): this behavior is
+	  necessary to protect the whole system against undesired recovery
+	  operation that could damage your data inside the Resource Managers.
+	</para>
+	<para>
+	  This protection has a cost explained in 
+	  <xref linkend="Recoverying_transaction_associated_different_job"/>.
+	</para>
+	<important>
+	  <para>
+	    Before editing (and saving) <filename>lixac_conf.xml</filename>,
+	    be sure <emphasis>there are no</emphasis>
+	    <quote>prepared/recovery pending</quote> transactions
+	    (you can use <option>--dump</option> as explained in
+	    <xref linkend="lixad_dump_execution"/> and in
+	    <xref linkend="Recoverying_recovery_failed_transaction"/>
+	    to verify the content of the state server).
+	  </para>
+	  <para>
+	    Create a different config file and use 
+	    <varname>LIXA_CONFIG_FILE</varname> environment variable
+	    as explained in
+	    <xref linkend="Environment_variables"/> until you are not sure 
+	    about the changes you are performing.
+	  </para>
+	</important>
+      </section>
     </section>
   </section>
-  <section>
+  <section xml:id="Environment_variables">
     <title>Environment variables</title>
     <para>
       You can use some environment variables to tailor the LIXA configuration

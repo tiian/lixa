@@ -749,7 +749,7 @@ Application Options:
 	</table>
       </para>
     </section>
-    <section>
+    <section xml:id="Recoverying_recovery_failed_transaction">
       <title>Recoverying a <quote>recovery failed</quote> transaction</title>
       <para>
 	This example is quite complex because a 
@@ -1436,6 +1436,65 @@ logout
 	<varname>LIXA_PROFILE</varname>, you must specify the
 	<option>--bypass-bqual-check</option> (<option>-b</option>) option.
       </para>
+      <section>
+	<title>Side effect of <filename>lixac_conf.xml</filename> changes</title>
+	<para>
+	  This paragraph explains a side effect of the behavior explained
+	  above.
+	</para>
+	<para>
+	  Suppose the following scenario happens:
+	  <itemizedlist mark="bullet">
+	    <listitem><para>
+		your LIXA Transaction Manager saved the state of a 
+		<quote>prepared/recovery pending</quote> transaction inside
+		the LIXA state server
+	    </para></listitem>
+	    <listitem><para>
+		you are not aware of the existence of that 
+		<quote>prepared/recovery pending</quote> transaction
+	    </para></listitem>
+	    <listitem><para>
+		you change the content of <filename>lixac_conf.xml</filename>
+		file
+	    </para></listitem>
+	    <listitem><para>
+		lately you discover there is a 
+		<quote>prepared/recovery pending</quote> transaction
+		that can not be automatically recovered by LIXA Transaction
+		Manager and you perform manual recovery
+	    </para></listitem>
+	  </itemizedlist>
+	  unfortunately, LIXA state server will keep some records related
+	  to the manually recovered transaction <quote>forever</quote>.
+	</para>
+	<para>
+	  Manual recovery does query LIXA state server to retrieve the list
+	  of <quote>prepared/recovery pending</quote> transactions because
+	  it is designed to solve the issue <quote>state server does not
+	    have information</quote> related to some transactions.
+	  <note><para>
+	      The <command>lixad</command> option 
+	      <option>--clean-failed</option> explained in 
+	      <xref linkend="Recoverying_recovery_failed_transaction"/>
+	      does not help because the transaction was not in
+	      <quote>recovery failed</quote> state.
+	  </para></note>
+	  <important><para>
+	      At the time of this writing <emphasis>there is not</emphasis>
+	      a specific tool to remove this type of <quote>ghosts</quote>
+	      from LIXA state server, you can clean-up those records
+	      using a cold start as explained in 
+	      <xref linkend="Recoverying_forgotten_transactions"/>.
+	      You must pay attention to avoid <quote>in flight transaction
+		purge</quote>.
+	  </para></important>
+	</para>
+	<para>
+	  In a future release this behavior could be improved if any user
+	  asked for it.
+	</para>
+      </section>
     </section>
     <section>
       <title>Recoverying a transaction managed by a different Transaction Manager</title>
