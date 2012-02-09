@@ -205,6 +205,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 STYLESHEETS_DIR = /usr/share/xml/docbook/stylesheet/nwalsh
+EXTRA_DIST = LIXA.xml.in $(doc_DATA) $(manual_sources) $(dia_images) $(png_images)
 manual_sources = LIXA.xml \
 	LIXA_Bibliography.xml \
 	LIXA_Configuration.xml \
@@ -247,7 +248,6 @@ png_images = LIXA_Configuration_1.png  LIXA_Configuration_4.png \
 	LIXA_Tuning_09.png LIXA_Tuning_10.png
 
 doc_DATA = *.html $(png_images)
-EXTRA_DIST = $(doc_DATA) $(manual_sources) $(dia_images) $(png_images)
 all: all-am
 
 .SUFFIXES:
