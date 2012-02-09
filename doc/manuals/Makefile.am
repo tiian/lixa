@@ -1,4 +1,5 @@
 STYLESHEETS_DIR = /usr/share/xml/docbook/stylesheet/nwalsh
+EXTRA_DIST = LIXA.xml.in
 
 manual_sources = LIXA.xml \
 	LIXA_Bibliography.xml \
