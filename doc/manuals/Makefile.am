@@ -1,5 +1,5 @@
 STYLESHEETS_DIR = /usr/share/xml/docbook/stylesheet/nwalsh
-EXTRA_DIST = LIXA.xml.in
+EXTRA_DIST = LIXA.xml.in $(doc_DATA) $(manual_sources) $(dia_images) $(png_images)
 
 manual_sources = LIXA.xml \
 	LIXA_Bibliography.xml \
@@ -45,7 +45,6 @@ png_images = LIXA_Configuration_1.png  LIXA_Configuration_4.png \
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/html
 doc_DATA = *.html $(png_images)
 
-EXTRA_DIST = $(doc_DATA) $(manual_sources) $(dia_images) $(png_images)
 
 all: index_all_in_one.html index.html
 
