@@ -1,7 +1,6 @@
 AC_INIT([lixa], [0.7.2], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
-LT_INIT
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
 
