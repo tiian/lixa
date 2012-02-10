@@ -1,4 +1,4 @@
-AC_INIT([lixa], [0.7.2], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [0.7.3], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -122,8 +122,10 @@ then
 	AC_MSG_ERROR([it seems glib-2.0 is not configured with pkg-config])
 else
 	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0) $($PKG_CONFIG --cflags gmodule-no-export-2.0)"
+#	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0) $($PKG_CONFIG --cflags gmodule-2.0)"
 	LDFLAGS_GLIB="$($PKG_CONFIG --libs glib-2.0)"
 	LDFLAGS_GMODULE="$($PKG_CONFIG --libs gmodule-no-export-2.0)"
+#	LDFLAGS_GMODULE="$($PKG_CONFIG --libs gmodule-2.0)"
 	LDFLAGS_GTHREAD="$($PKG_CONFIG --libs gthread-2.0)"
 	AC_MSG_RESULT([yes])
 fi

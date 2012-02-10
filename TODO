@@ -1,3 +1,7 @@
+Package for SWIG (Ubuntu 10.04):
+swig
+python2.6-dev
+
 Explore high availability features (active/active) with dynamic or static
 workload
 

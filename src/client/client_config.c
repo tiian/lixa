@@ -538,7 +538,7 @@ int client_config_load_switch(const client_config_coll_t *ccc)
             
             if (NULL == (module = g_module_open(
                              (gchar *)act_rsrmgr->generic->switch_file,
-                             G_MODULE_BIND_LOCAL))) {
+                             G_MODULE_BIND_LOCAL | G_MODULE_BIND_LAZY))) {
                 LIXA_TRACE(("client_config_load_switch: switch_file='%s', "
                             "g_module_error='%s'\n",
                             act_rsrmgr->generic->switch_file,

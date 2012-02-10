@@ -5,7 +5,7 @@ liblixapq_la_SOURCES = liblixapq.c
 switch_postgresql_stareg_la_SOURCES = postgresql_stareg.c
 AM_CPPFLAGS = @POSTGRESQL_CPPFLAGS@ -I../../../common
 AM_CFLAGS = -Wall
-AM_LDFLAGS = @POSTGRESQL_LDFLAGS@ -module
+AM_LDFLAGS = @POSTGRESQL_LDFLAGS@ @LDFLAGS_GLIB@ -module
 switch_postgresql_stareg_la_LIBADD = liblixapq.la
 liblixapq_la_CPPFLAGS = -DLIXA_MULTITHREAD=1 -I$(srcdir)/../../../common @POSTGRESQL_CPPFLAGS@
 liblixapq_la_LIBADD = ../../../common/liblixab.la

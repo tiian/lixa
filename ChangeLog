@@ -1,5 +1,8 @@
 LOG:
 
+         - 0.7.3 Switch files are now loaded using G_MODULE_BIND_LAZY: it might
+                 save any CPU cycles
+
 20120209 - 0.7.2 Introduced two new parameters in lixad_conf.xml:
                  min_elapsed_sync_time
                  max_elapsed_sync_time
