@@ -21,6 +21,11 @@
 
 
 
+/* PostgreSQL front-end */
+#include <libpq-fe.h>
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
