@@ -21,6 +21,11 @@
 
 
 
+/* MySQL front-end */
+#include <mysql.h>
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
