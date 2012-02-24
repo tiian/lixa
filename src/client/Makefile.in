@@ -36,10 +36,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = lixar$(EXEEXT) lixat$(EXEEXT) lixau$(EXEEXT)
+bin_PROGRAMS = lixar$(EXEEXT) lixat$(EXEEXT) lixau$(EXEEXT) \
+	lixa-config$(EXEEXT)
 subdir = src/client
 DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/lixa-config.c.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -51,7 +53,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = lixa-config.c
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -88,6 +90,12 @@ liblixac_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(liblixac_la_LDFLAGS) $(LDFLAGS) -o $@
 PROGRAMS = $(bin_PROGRAMS)
+am_lixa_config_OBJECTS = lixa-config.$(OBJEXT)
+lixa_config_OBJECTS = $(am_lixa_config_OBJECTS)
+lixa_config_LDADD = $(LDADD)
+lixa_config_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(lixa_config_LDFLAGS) $(LDFLAGS) -o $@
 am_lixar_OBJECTS = lixar-lixar.$(OBJEXT)
 lixar_OBJECTS = $(am_lixar_OBJECTS)
 lixar_DEPENDENCIES = ../common/liblixab.la liblixac.la
@@ -110,10 +118,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(liblixac_la_SOURCES) $(lixar_SOURCES) $(lixat_SOURCES) \
-	$(lixau_SOURCES)
-DIST_SOURCES = $(liblixac_la_SOURCES) $(lixar_SOURCES) \
-	$(lixat_SOURCES) $(lixau_SOURCES)
+SOURCES = $(liblixac_la_SOURCES) $(lixa_config_SOURCES) \
+	$(lixar_SOURCES) $(lixat_SOURCES) $(lixau_SOURCES)
+DIST_SOURCES = $(liblixac_la_SOURCES) $(lixa_config_SOURCES) \
+	$(lixar_SOURCES) $(lixat_SOURCES) $(lixau_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -204,6 +212,11 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
+LIXA_CONFIG_INCLUDEDIR = @LIXA_CONFIG_INCLUDEDIR@
+LIXA_CONFIG_LIBDIR = @LIXA_CONFIG_LIBDIR@
+LIXA_CONFIG_LOCALSTATEDIR = @LIXA_CONFIG_LOCALSTATEDIR@
+LIXA_CONFIG_PREFIX = @LIXA_CONFIG_PREFIX@
+LIXA_CONFIG_SYSCONFDIR = @LIXA_CONFIG_SYSCONFDIR@
 LIXA_CRASH = @LIXA_CRASH@
 LN_S = @LN_S@
 LTDLINCL = @LTDLINCL@
@@ -323,6 +336,8 @@ lixat_SOURCES = lixat.c
 lixau_CPPFLAGS = -I$(srcdir)/../common
 lixau_LDADD = ../common/liblixab.la liblixac.la
 lixau_SOURCES = lixau.c
+lixa_config_SOURCES = lixa-config.c
+lixa_config_LDFLAGS = @LDFLAGS_GLIB@
 all: all-recursive
 
 .SUFFIXES:
@@ -357,6 +372,8 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+lixa-config.c: $(top_builddir)/config.status $(srcdir)/lixa-config.c.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
@@ -433,6 +450,9 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+lixa-config$(EXEEXT): $(lixa_config_OBJECTS) $(lixa_config_DEPENDENCIES) 
+	@rm -f lixa-config$(EXEEXT)
+	$(lixa_config_LINK) $(lixa_config_OBJECTS) $(lixa_config_LDADD) $(LIBS)
 lixar$(EXEEXT): $(lixar_OBJECTS) $(lixar_DEPENDENCIES) 
 	@rm -f lixar$(EXEEXT)
 	$(LINK) $(lixar_OBJECTS) $(lixar_LDADD) $(LIBS)
@@ -458,6 +478,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-lixa_tx_rc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-lixa_xa.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-tx.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa-config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixar-lixar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixat-lixat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixau-lixau.Po@am__quote@

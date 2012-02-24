@@ -1,0 +1,131 @@
+/*
+ * Copyright (c) 2009-2012, Christian Ferrari <tiian@users.sourceforge.net>
+ * All rights reserved.
+ *
+ * This file is part of LIXA.
+ *
+ * LIXA is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * LIXA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#include <config.h>
+
+
+
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
+
+
+
+/* this utility program is useful to retrieve LIXA configuration from
+   command line */
+
+
+#define OUTPUT_FORMAT "%s\n"
+#define CFLAGS_STRING "-Wall"
+#define CONFIG_DIR_STRING "@LIXA_CONFIG_SYSCONFDIR@"
+#define CPPFLAGS_STRING ""
+#define INCLUDE_STRING "-I@LIXA_CONFIG_INCLUDEDIR@"
+#define LDFLAGS_STRING "-Wl,-rpath -Wl,@LIXA_CONFIG_LIBDIR@"
+#define LIBS_STRING "-L@LIXA_CONFIG_LIBDIR@ -llixac"
+#define LIBS_POSTGRESQL_STRING "-L@LIXA_CONFIG_LIBDIR@ -llixac -llixapq"
+#define LIBS_MYSQL_STRING "-L@LIXA_CONFIG_LIBDIR@ -llixac -llixamy"
+#define PREFIX_STRING "@LIXA_CONFIG_PREFIX@"
+#define STATE_DIR_STRING "@LIXA_CONFIG_LOCALSTATEDIR@"
+
+
+
+/* default command line options */
+static gboolean cflags = FALSE;
+static gboolean config_dir = FALSE;
+static gboolean cppflags = FALSE;
+static gboolean include = FALSE;
+static gboolean ldflags = FALSE;
+static gboolean libs = FALSE;
+static gboolean libs_postgresql = FALSE;
+static gboolean libs_mysql = FALSE;
+static gboolean prefix = FALSE;
+static gboolean state_dir = FALSE;
+static GOptionEntry entries[] =
+{
+    { "cflags", 'c', 0, G_OPTION_ARG_NONE, &cflags, "[" CFLAGS_STRING "]", NULL },
+    { "config-dir", 'C', 0, G_OPTION_ARG_NONE, &config_dir, "[" CONFIG_DIR_STRING "]", NULL },
+    { "cppflags", 'f', 0, G_OPTION_ARG_NONE, &cppflags, "[" CPPFLAGS_STRING "]", NULL },
+    { "include", 'i', 0, G_OPTION_ARG_NONE, &include, "[" INCLUDE_STRING "]", NULL },
+    { "ldflags", 'L', 0, G_OPTION_ARG_NONE, &ldflags, "[" LDFLAGS_STRING "]", NULL },
+    { "libs", 'l', 0, G_OPTION_ARG_NONE, &libs, "[" LIBS_STRING "]", NULL },
+    { "libs-postgresql", 'p', 0, G_OPTION_ARG_NONE, &libs_postgresql, "[" LIBS_POSTGRESQL_STRING "]", NULL },
+    { "libs-mysql", 'm', 0, G_OPTION_ARG_NONE, &libs_mysql, "[" LIBS_MYSQL_STRING "]", NULL },
+    { "prefix", 'P', 0, G_OPTION_ARG_NONE, &prefix, "[" PREFIX_STRING "]", NULL },
+    { "state-dir", 's', 0, G_OPTION_ARG_NONE, &state_dir, "[" STATE_DIR_STRING "]", NULL },
+    { NULL }
+};
+
+
+
+int main(int argc, char *argv[])
+{
+    GError *error = NULL;
+    GOptionContext *option_context = NULL;
+    
+    option_context = g_option_context_new("- LIXA config utility");
+    g_option_context_add_main_entries(option_context, entries, NULL);
+    
+    if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
+        fprintf(stderr, "option parsing failed: %s\n", error->message);
+        exit(1);
+    }
+
+    g_option_context_free(option_context);
+    
+    if (cflags) {
+        printf(OUTPUT_FORMAT, CFLAGS_STRING);
+    }
+    if (config_dir) {
+        printf(OUTPUT_FORMAT, CONFIG_DIR_STRING);
+    }
+    if (cppflags) {
+        printf(OUTPUT_FORMAT, CPPFLAGS_STRING);
+    }
+    if (include) {
+        printf(OUTPUT_FORMAT, INCLUDE_STRING);
+    }
+    if (ldflags) {
+        printf(OUTPUT_FORMAT, LDFLAGS_STRING);
+    }
+    if (libs) {
+        printf(OUTPUT_FORMAT, LIBS_STRING);
+    }
+    if (libs_postgresql) {
+        printf(OUTPUT_FORMAT, LIBS_POSTGRESQL_STRING);
+    }
+    if (libs_mysql) {
+        printf(OUTPUT_FORMAT, LIBS_MYSQL_STRING);
+    }
+    if (prefix) {
+        printf(OUTPUT_FORMAT, PREFIX_STRING);
+    }
+    if (state_dir) {
+        printf(OUTPUT_FORMAT, STATE_DIR_STRING);
+    }
+
+    return 0;
+}
+
+
+

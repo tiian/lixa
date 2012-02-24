@@ -18,6 +18,7 @@ AC_CONFIG_FILES([
   src/Makefile
   src/common/Makefile
   src/common/lixa_inst_conf.c
+  src/client/lixa-config.c
   src/client/Makefile
   src/client/switch/Makefile
   src/client/switch/lixa/Makefile
@@ -130,6 +131,14 @@ else
 	AC_MSG_RESULT([yes])
 fi
 
+# Vars useful for lixa-config utility program
+eval "LIXA_CONFIG_INCLUDEDIR=$includedir"
+eval "LIXA_CONFIG_LIBDIR=$libdir"
+eval "LIXA_CONFIG_PREFIX=$prefix"
+eval "LIXA_CONFIG_LOCALSTATEDIR=$localstatedir"
+eval "LIXA_CONFIG_SYSCONFDIR=$sysconfdir"
+
+
 # Checking pkg-config is available
 AC_CHECK_PROGS(VALGRIND, [valgrind], [])
 AC_CHECK_PROGS(XSLTPROC, [xsltproc], [])
@@ -205,6 +214,10 @@ AC_SUBST(EXPANDED_LIBDIR)
 AC_SUBST(LIXA_CRASH)
 AC_SUBST(XSLTPROC)
 AC_SUBST(HAVE_DOT)
+AC_SUBST(LIXA_CONFIG_INCLUDEDIR)
+AC_SUBST(LIXA_CONFIG_LIBDIR)
+AC_SUBST(LIXA_CONFIG_PREFIX)
+AC_SUBST(LIXA_CONFIG_LOCALSTATEDIR)
+AC_SUBST(LIXA_CONFIG_SYSCONFDIR)
 
 AC_OUTPUT
-
