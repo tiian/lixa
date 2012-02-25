@@ -41,7 +41,7 @@ AC_DEFUN([AX_LIB_MYSQL],
     HAVE_MYSQL="0"
     AC_ARG_WITH([mysql],
         AC_HELP_STRING([--with-mysql], [use MySQL API]), 
-           [HAVE_MYSQL="X"], [HAVE_MYSQL="1"]
+           [HAVE_MYSQL="X"], [HAVE_MYSQL="0"]
     )
     if test "$HAVE_MYSQL" != "0"
     then
@@ -52,12 +52,14 @@ AC_DEFUN([AX_LIB_MYSQL],
         else
             MYSQL_CPPFLAGS=$($MYSQL_CONFIG --include)
             MYSQL_LDFLAGS=$($MYSQL_CONFIG --libs_r)
+            MYSQL_INCLUDE_DIR=${MYSQL_CPPFLAGS##-I}
             HAVE_MYSQL="1"
         fi
     fi
 
     AC_SUBST([MYSQL_CPPFLAGS])
     AC_SUBST([MYSQL_LDFLAGS])
+    AC_SUBST([MYSQL_INCLUDE_DIR])
     if test "$HAVE_MYSQL" == "1"
     then
 	AC_DEFINE([HAVE_MYSQL], [1], [Define to 1 if you are using MySQL])

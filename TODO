@@ -1,3 +1,7 @@
+LIXA and PHP: tx_open and tx_close may be used as initializer/de-initializer
+and avoid the program to call them explicitly... Is it a good idea?!
+I'm not sure: there might be a lot of pages that does not need 2PC!
+
 Package for SWIG (Ubuntu 10.04):
 swig
 

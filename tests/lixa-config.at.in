@@ -5,32 +5,56 @@ AT_CHECK([test "$($CLIENT_DIR/lixa-config --config-dir)" = "@LIXA_CONFIG_SYSCONF
 AT_CHECK([test "$($CLIENT_DIR/lixa-config -C)" = "@LIXA_CONFIG_SYSCONFDIR@"], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([LC/0.0/0.1 -i --include])
-AT_CHECK([test "$($CLIENT_DIR/lixa-config --include)" = "-I@LIXA_CONFIG_INCLUDEDIR@"], [0], [ignore], [ignore])
-AT_CHECK([test "$($CLIENT_DIR/lixa-config -i)" = "-I@LIXA_CONFIG_INCLUDEDIR@"], [0], [ignore], [ignore])
+AT_SETUP([LC/0.0/1.0 -f --cppflags])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config --cppflags)" = "-I@LIXA_CONFIG_INCLUDEDIR@"], [0], [ignore], [ignore])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config -f)" = "-I@LIXA_CONFIG_INCLUDEDIR@"], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([LC/0.0/0.2 -l --libs])
+AT_SETUP([LC/0.0/2.0 -i --include-dir])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config --include-dir)" = "@LIXA_CONFIG_INCLUDEDIR@"], [0], [ignore], [ignore])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config -i)" = "@LIXA_CONFIG_INCLUDEDIR@"], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([LC/0.0/2.1 -L --lib-dir])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config --lib-dir)" = "@LIXA_CONFIG_LIBDIR@"], [0], [ignore], [ignore])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config -L)" = "@LIXA_CONFIG_LIBDIR@"], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([LC/0.0/3.0 -l --libs])
 AT_CHECK([test "$($CLIENT_DIR/lixa-config --libs)" = "-L@LIXA_CONFIG_LIBDIR@ -llixac"], [0], [ignore], [ignore])
 AT_CHECK([test "$($CLIENT_DIR/lixa-config -l)" = "-L@LIXA_CONFIG_LIBDIR@ -llixac"], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([LC/0.0/0.3 -p --libs-postgresql])
+AT_SETUP([LC/0.0/4.0 -o --include-dir-postgresql])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config --include-dir-postgresql)" = "@POSTGRESQL_INCLUDE_DIR@"], [0], [ignore], [ignore])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config -o)" = "@POSTGRESQL_INCLUDE_DIR@"], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([LC/0.0/4.1 -p --libs-postgresql])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
 AT_CHECK([test "$($CLIENT_DIR/lixa-config --libs-postgresql)" = "-L@LIXA_CONFIG_LIBDIR@ -llixac -llixapq"], [0], [ignore], [ignore])
 AT_CHECK([test "$($CLIENT_DIR/lixa-config -p)" = "-L@LIXA_CONFIG_LIBDIR@ -llixac -llixapq"], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([LC/0.0/0.4 -m --libs-mysql])
+AT_SETUP([LC/0.0/5.0 -y --include-dir-mysql])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config --include-dir-mysql)" = "@MYSQL_INCLUDE_DIR@"], [0], [ignore], [ignore])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config -y)" = "@MYSQL_INCLUDE_DIR@"], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([LC/0.0/5.1 -m --libs-mysql])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
 AT_CHECK([test "$($CLIENT_DIR/lixa-config --libs-mysql)" = "-L@LIXA_CONFIG_LIBDIR@ -llixac -llixamy"], [0], [ignore], [ignore])
 AT_CHECK([test "$($CLIENT_DIR/lixa-config -m)" = "-L@LIXA_CONFIG_LIBDIR@ -llixac -llixamy"], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([LC/0.0/0.5 -P --prefix])
+AT_SETUP([LC/0.0/6.0 -P --prefix])
 AT_CHECK([test $($CLIENT_DIR/lixa-config --prefix) = "@LIXA_CONFIG_PREFIX@"], [0], [ignore], [ignore])
 AT_CHECK([test $($CLIENT_DIR/lixa-config -P) = "@LIXA_CONFIG_PREFIX@"], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([LC/0.0/0.6 -s --state-dir])
+AT_SETUP([LC/0.0/7.0 -s --state-dir])
 AT_CHECK([test "$($CLIENT_DIR/lixa-config --state-dir)" = "@LIXA_CONFIG_LOCALSTATEDIR@"], [0], [ignore], [ignore])
 AT_CHECK([test "$($CLIENT_DIR/lixa-config -s)" = "@LIXA_CONFIG_LOCALSTATEDIR@"], [0], [ignore], [ignore])
 AT_CLEANUP
