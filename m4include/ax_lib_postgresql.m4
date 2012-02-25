@@ -184,10 +184,12 @@ return 0;
 
         CPPFLAGS="$saved_CPPFLAGS"
         LDFLAGS="$saved_LDFLAGS"
+        POSTGRESQL_INCLUDE_DIR="$postgresql_include_dir"
     fi
 
     AC_SUBST([POSTGRESQL_CPPFLAGS])
     AC_SUBST([POSTGRESQL_LDFLAGS])
+    AC_SUBST([POSTGRESQL_INCLUDE_DIR])
     if test "$HAVE_POSTGRESQL" = "1"
     then
 	AC_DEFINE([HAVE_POSTGRESQL], [1], 
