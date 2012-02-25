@@ -29,6 +29,7 @@ AC_CONFIG_FILES([
   src/server/Makefile
   tests/Makefile
   tests/atlocal
+  tests/lixa-config.at
   tests/etc/lixac_conf.xml
   tests/etc/lixad_conf.xml
   tests/etc/lixad_conf2.xml

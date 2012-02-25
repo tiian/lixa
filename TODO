@@ -5,7 +5,6 @@ Document lixa-config utility program; update build instructions for the example 
 Example:
 gcc example8_mys.c -Wall $(/opt/lixa/bin/lixa-config --cflags --include --libs-mysql --ldflags) $(mysql_config --include --libs_r) -o example8_mys
 using -L flag LD_LIBRARY_PATH is useless for LIXA...
-Create a case test for lixa-config with a diff between the output values and the same values calculated by the shell via @@ expansion
 
 Explore high availability features (active/active) with dynamic or static
 workload
