@@ -35,7 +35,7 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/atlocal.in
+	$(srcdir)/atlocal.in $(srcdir)/lixa-config.at.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -47,7 +47,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = atlocal
+CONFIG_CLEAN_FILES = atlocal lixa-config.at
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -266,7 +266,7 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	ct_1_6.at ct_1_7.at ct_1_8.at ct_1_9.at ct_1_10.at ct_1_11.at \
 	ct_1_12.at ct_1_13.at \
 	memory.at oracle.at ibmdb2.at postgresql.at mysql.at xid.at \
-	package.m4 mysql_postgresql.at \
+	package.m4 mysql_postgresql.at lixa-config.at.in \
 	$(TESTSUITE) atlocal.in lixa_test_exec.sh lixa_test_functions.sh
 
 TESTSUITE = $(srcdir)/testsuite
@@ -307,6 +307,8 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 atlocal: $(top_builddir)/config.status $(srcdir)/atlocal.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+lixa-config.at: $(top_builddir)/config.status $(srcdir)/lixa-config.at.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
@@ -687,6 +689,7 @@ $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/ibmdb2.at $(srcdir)/oracle.at \
 		$(srcdir)/mysql.at $(srcdir)/xid.at \
 		$(srcdir)/mysql_postgresql.at \
+		$(srcdir)/lixa-config.at \
 		$(srcdir)/ct.at $(srcdir)/ct_0_0.at \
 		$(srcdir)/ct_0_1.at $(srcdir)/ct_0_2.at \
 		$(srcdir)/ct_0_3.at $(srcdir)/ct_0_4.at \
