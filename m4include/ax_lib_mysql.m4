@@ -30,6 +30,8 @@ dnl This macro calls:
 dnl
 dnl   AC_SUBST(MYSQL_CPPFLAGS)
 dnl   AC_SUBST(MYSQL_LDFLAGS)
+dnl   AC_SUBST(MYSQL_INCLUDE_DIR)
+dnl   AC_SUBST(HAVE_MYSQL)
 dnl
 dnl And sets:
 dnl
@@ -38,12 +40,12 @@ dnl
 
 AC_DEFUN([AX_LIB_MYSQL],
 [
-    HAVE_MYSQL="0"
+    HAVE_MYSQL="no"
     AC_ARG_WITH([mysql],
         AC_HELP_STRING([--with-mysql], [use MySQL API]), 
-           [HAVE_MYSQL="X"], [HAVE_MYSQL="0"]
+           [HAVE_MYSQL="maybe"], [HAVE_MYSQL="no"]
     )
-    if test "$HAVE_MYSQL" != "0"
+    if test "$HAVE_MYSQL" != "no"
     then
         AC_CHECK_PROGS(MYSQL_CONFIG, [mysql_config], [])
         if test -z $MYSQL_CONFIG
@@ -53,15 +55,16 @@ AC_DEFUN([AX_LIB_MYSQL],
             MYSQL_CPPFLAGS=$($MYSQL_CONFIG --include)
             MYSQL_LDFLAGS=$($MYSQL_CONFIG --libs_r)
             MYSQL_INCLUDE_DIR=${MYSQL_CPPFLAGS##-I}
-            HAVE_MYSQL="1"
+            HAVE_MYSQL="yes"
         fi
     fi
 
     AC_SUBST([MYSQL_CPPFLAGS])
     AC_SUBST([MYSQL_LDFLAGS])
     AC_SUBST([MYSQL_INCLUDE_DIR])
-    if test "$HAVE_MYSQL" == "1"
+    AC_SUBST([HAVE_MYSQL])
+    if test "$HAVE_MYSQL" = "yes"
     then
-	AC_DEFINE([HAVE_MYSQL], [1], [Define to 1 if you are using MySQL])
-    fi
+        AC_DEFINE([HAVE_MYSQL], [1], [Define to 1 if you are using MySQL])
+    fi 
 ])
