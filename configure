@@ -777,12 +777,14 @@ COMPILE_MYSQL_POSTGRESQL_STUFF_FALSE
 COMPILE_MYSQL_POSTGRESQL_STUFF_TRUE
 COMPILE_MYSQL_STUFF_FALSE
 COMPILE_MYSQL_STUFF_TRUE
+HAVE_MYSQL
 MYSQL_INCLUDE_DIR
 MYSQL_LDFLAGS
 MYSQL_CPPFLAGS
 MYSQL_CONFIG
 COMPILE_POSTGRESQL_STUFF_FALSE
 COMPILE_POSTGRESQL_STUFF_TRUE
+HAVE_POSTGRESQL
 POSTGRESQL_INCLUDE_DIR
 POSTGRESQL_LDFLAGS
 POSTGRESQL_CPPFLAGS
@@ -4786,13 +4788,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4789: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4791: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4792: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4794: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4795: output\"" >&5)
+  (eval echo "\"\$as_me:4797: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5998,7 +6000,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6001 "configure"' > conftest.$ac_ext
+  echo '#line 6003 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7524,11 +7526,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7527: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7529: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7531: \$? = $ac_status" >&5
+   echo "$as_me:7533: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7863,11 +7865,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7866: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7868: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7870: \$? = $ac_status" >&5
+   echo "$as_me:7872: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7968,11 +7970,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7971: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7973: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7975: \$? = $ac_status" >&5
+   echo "$as_me:7977: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8023,11 +8025,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8026: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8028: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8030: \$? = $ac_status" >&5
+   echo "$as_me:8032: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10407,7 +10409,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10410 "configure"
+#line 10412 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10503,7 +10505,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10506 "configure"
+#line 10508 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11880,11 +11882,11 @@ fi
 
 
 
-    HAVE_POSTGRESQL="0"
+    HAVE_POSTGRESQL="no"
 
 # Check whether --with-postgresql was given.
 if test "${with_postgresql+set}" = set; then :
-  withval=$with_postgresql; postgresql_home_dir="$withval";HAVE_POSTGRESQL="1"
+  withval=$with_postgresql; postgresql_home_dir="$withval";HAVE_POSTGRESQL="yes"
 else
   postgresql_home_dir=""
 
@@ -11894,7 +11896,7 @@ fi
 
 # Check whether --with-postgresql-include was given.
 if test "${with_postgresql_include+set}" = set; then :
-  withval=$with_postgresql_include; postgresql_home_include_dir="$withval";HAVE_POSTGRESQL="1"
+  withval=$with_postgresql_include; postgresql_home_include_dir="$withval";HAVE_POSTGRESQL="yes"
 else
   postgresql_home_include_dir=""
 
@@ -11903,7 +11905,7 @@ fi
 
 # Check whether --with-postgresql-lib was given.
 if test "${with_postgresql_lib+set}" = set; then :
-  withval=$with_postgresql_lib; postgresql_home_lib_dir="$withval";HAVE_POSTGRESQL="1"
+  withval=$with_postgresql_lib; postgresql_home_lib_dir="$withval";HAVE_POSTGRESQL="yes"
 else
   postgresql_home_lib_dir=""
 
@@ -12074,7 +12076,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-    if test "$HAVE_POSTGRESQL" = "1"
+
+    if test "$HAVE_POSTGRESQL" = "yes"
     then
 
 $as_echo "#define HAVE_POSTGRESQL 1" >>confdefs.h
@@ -12094,17 +12097,17 @@ fi
 
 
 
-    HAVE_MYSQL="0"
+    HAVE_MYSQL="no"
 
 # Check whether --with-mysql was given.
 if test "${with_mysql+set}" = set; then :
-  withval=$with_mysql; HAVE_MYSQL="X"
+  withval=$with_mysql; HAVE_MYSQL="maybe"
 else
-  HAVE_MYSQL="0"
+  HAVE_MYSQL="no"
 
 fi
 
-    if test "$HAVE_MYSQL" != "0"
+    if test "$HAVE_MYSQL" != "no"
     then
         for ac_prog in mysql_config
 do
@@ -12155,14 +12158,15 @@ done
             MYSQL_CPPFLAGS=$($MYSQL_CONFIG --include)
             MYSQL_LDFLAGS=$($MYSQL_CONFIG --libs_r)
             MYSQL_INCLUDE_DIR=${MYSQL_CPPFLAGS##-I}
-            HAVE_MYSQL="1"
+            HAVE_MYSQL="yes"
         fi
     fi
 
 
 
 
-    if test "$HAVE_MYSQL" == "1"
+
+    if test "$HAVE_MYSQL" = "yes"
     then
 
 $as_echo "#define HAVE_MYSQL 1" >>confdefs.h

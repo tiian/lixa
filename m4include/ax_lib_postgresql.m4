@@ -34,6 +34,8 @@ dnl This macro calls:
 dnl
 dnl   AC_SUBST(POSTGRESQL_CPPFLAGS)
 dnl   AC_SUBST(POSTGRESQL_LDFLAGS)
+dnl   AC_SUBST([POSTGRESQL_INCLUDE_DIR])
+dnl   AC_SUBST(HAVE_POSTGRESQL)
 dnl
 dnl And sets:
 dnl
@@ -42,12 +44,12 @@ dnl
 
 AC_DEFUN([AX_LIB_POSTGRESQL],
 [
-    HAVE_POSTGRESQL="0"
+    HAVE_POSTGRESQL="no"
     AC_ARG_WITH([postgresql],
         AC_HELP_STRING([--with-postgresql=@<:@DIR@:>@],
             [use PostgreSQL API from given path]
         ),
-        [postgresql_home_dir="$withval";HAVE_POSTGRESQL="1"],
+        [postgresql_home_dir="$withval";HAVE_POSTGRESQL="yes"],
         [postgresql_home_dir=""]
     )
 
@@ -55,14 +57,14 @@ AC_DEFUN([AX_LIB_POSTGRESQL],
         AC_HELP_STRING([--with-postgresql-include=@<:@DIR@:>@],
             [use PostgreSQL API headers from given path]
         ),
-        [postgresql_home_include_dir="$withval";HAVE_POSTGRESQL="1"],
+        [postgresql_home_include_dir="$withval";HAVE_POSTGRESQL="yes"],
         [postgresql_home_include_dir=""]
     )
     AC_ARG_WITH([postgresql-lib],
         AC_HELP_STRING([--with-postgresql-lib=@<:@DIR@:>@],
             [use PostgreSQL API libraries from given path]
         ),
-        [postgresql_home_lib_dir="$withval";HAVE_POSTGRESQL="1"],
+        [postgresql_home_lib_dir="$withval";HAVE_POSTGRESQL="yes"],
         [postgresql_home_lib_dir=""]
     )
 
@@ -190,9 +192,9 @@ return 0;
     AC_SUBST([POSTGRESQL_CPPFLAGS])
     AC_SUBST([POSTGRESQL_LDFLAGS])
     AC_SUBST([POSTGRESQL_INCLUDE_DIR])
-    if test "$HAVE_POSTGRESQL" = "1"
+    AC_SUBST([HAVE_POSTGRESQL])
+    if test "$HAVE_POSTGRESQL" = "yes"
     then
-	AC_DEFINE([HAVE_POSTGRESQL], [1], 
-    	[Define to 1 if you are using PostgreSQL])
+        AC_DEFINE([HAVE_POSTGRESQL], [1], [Define to 1 if you are using PostgreSQL])
     fi
 ])

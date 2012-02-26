@@ -1,6 +1,5 @@
-LIXA and PHP: tx_open and tx_close may be used as initializer/de-initializer
-and avoid the program to call them explicitly... Is it a good idea?!
-I'm not sure: there might be a lot of pages that does not need 2PC!
+
+./configure --enable-crash --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib --with-mysql
 
 Package for SWIG (Ubuntu 10.04):
 swig
