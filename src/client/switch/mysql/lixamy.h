@@ -21,8 +21,13 @@
 
 
 
-/* MySQL front-end */
-#include <mysql.h>
+/* 
+  MySQL front-end: does not include it if included by PHP mysqli extension
+  compiled with Native Driver (ND) feature
+*/
+#ifndef MYSQLI_USE_MYSQLND
+# include <mysql.h>
+#endif
 
 
 
