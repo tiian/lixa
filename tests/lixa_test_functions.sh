@@ -33,7 +33,7 @@ start_server() {
 	echo "Starting LIXA server"
 
 	REAL_CHECK_TYPE="$SERVER_CHECK_TYPE"
-	#using valgrind in crash test simulation is foolish
+	#using gdb/valgrind in crash test simulation is foolish
 	if [ "x$LIXA_CRASH_POINT" != "x" ]
 	then
 		REAL_CHECK_TYPE=""
@@ -43,23 +43,48 @@ start_server() {
 	then
 		LIXAD_CONF_XML="lixad_conf2.xml"
 	fi
-	echo "LIXA_SYNC_NODELAY=$LIXA_SYNC_NODELAY"
-	echo "LIXAD_CONF_XML=$LIXAD_CONF_XML"
-	if [ "x$VALGRIND" != "x" ] 
+	echo "SERVER/REAL_CHECK_TYPE=$REAL_CHECK_TYPE"
+	echo "SERVER/VALGRIND=$VALGRIND"
+	echo "SERVER/GDB=$GDB"
+	echo "SERVER/LIXA_SYNC_NODELAY=$LIXA_SYNC_NODELAY"
+	echo "SERVER/LIXAD_CONF_XML=$LIXAD_CONF_XML"
+	if [ "$REAL_CHECK_TYPE" = "memory" ]
 	then
-		case "$REAL_CHECK_TYPE" in
-		memory)
+		if [ "x$VALGRIND" != "x" ] 
+		then
 			export G_SLICE=always-malloc
+			echo libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace
 			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
-		;;
-		thread)
-			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
-		;;
-		*)
+		else
+			echo $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace
 			$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
-		;;
-		esac
+		fi
+	elif [ "$REAL_CHECK_TYPE" = "thread" ]
+	then
+		if [ "x$VALGRIND" != "x" ] 
+		then
+			echo libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace
+			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
+		else
+			echo $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace
+			$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
+		fi
+	elif [ "$REAL_CHECK_TYPE" = "debug" ]
+	then
+		if [ "x$GDB" != "x" ] 
+		then
+			TMPFILE=/tmp/lixad_$$.gdb
+			echo "run --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace" > $TMPFILE
+			echo "bt" >> $TMPFILE
+			echo libtool --mode=execute $GDB -batch -x $TMPFILE $SERVER_DIR/lixad
+			libtool --mode=execute $GDB -batch -x $TMPFILE $SERVER_DIR/lixad 2>>$PWD/lixad.trace
+			rm $TMPFILE
+		else
+			echo $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace
+			$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
+		fi
 	else
+		echo $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace
 		$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
 	fi
 	# wait until the server opens the listening socket
@@ -93,26 +118,49 @@ exec_test() {
 	PGM=$1
 	shift
 	REAL_CHECK_TYPE="$CLIENT_CHECK_TYPE"
-	#using valgrind in crash test simulation is foolish
+	#using gdb/valgrind in crash test simulation is foolish
 	if [ "x$LIXA_CRASH_POINT" != "x" ]
 	then
 		REAL_CHECK_TYPE=""
 	fi
-	echo "REAL_CHECK_TYPE=$REAL_CHECK_TYPE"
-	if [ "x$VALGRIND" != "x" ] 
+	echo "CLIENT/REAL_CHECK_TYPE=$REAL_CHECK_TYPE"
+	echo "CLIENT/VALGRIND=$VALGRIND"
+	echo "CLIENT/GDB=$GDB"
+	if [ "$REAL_CHECK_TYPE" = "memory" ]
 	then
-		case "$REAL_CHECK_TYPE" in
-		memory)
+		if [ "x$VALGRIND" != "x" ] 
+		then
 			export G_SLICE=always-malloc
+			echo libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixac.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
 			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixac.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
-		;;
-		thread)
-			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=50 --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
-		;;
-		*)
+		else
+			echo $PGM $*
 			$PGM $*
-		;;
-		esac
+		fi
+	elif [ "$REAL_CHECK_TYPE" = "thread" ]
+	then
+		if [ "x$VALGRIND" != "x" ] 
+		then
+			echo libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=50 --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
+			libtool --mode=execute $VALGRIND --tool=helgrind --num-callers=50 --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
+		else
+			echo $PGM $*
+			$PGM $*
+		fi
+	elif [ "$REAL_CHECK_TYPE" = "debug" ]
+	then
+		if [ "x$GDB" != "x" ] 
+		then
+			TMPFILE=/tmp/lixac_$$.gdb
+			echo "run $*" > $TMPFILE
+			echo "bt" >> $TMPFILE
+			echo libtool --mode=execute $GDB -batch -x $TMPFILE $TESTS_SRC_DIR/$PGM
+			libtool --mode=execute $GDB -batch -x $TMPFILE $TESTS_SRC_DIR/$PGM $*
+			rm $TMPFILE
+		else
+			echo $PGM $*
+			$PGM $*
+		fi
 	else
 		$PGM $*
 	fi
