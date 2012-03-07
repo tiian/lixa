@@ -141,6 +141,7 @@ eval "LIXA_CONFIG_SYSCONFDIR=$sysconfdir"
 
 
 # Checking pkg-config is available
+AC_CHECK_PROGS(GDB, [gdb], [])
 AC_CHECK_PROGS(VALGRIND, [valgrind], [])
 AC_CHECK_PROGS(XSLTPROC, [xsltproc], [])
 AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
