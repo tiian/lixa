@@ -43,6 +43,7 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_ibmdb2_cli.m4 \
 	$(top_srcdir)/m4include/ax_lib_postgresql.m4 \
 	$(top_srcdir)/m4include/ax_lib_mysql.m4 \
+	$(top_srcdir)/m4include/ax_docbook.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -175,6 +176,7 @@ SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+STYLESHEETS_DIR = @STYLESHEETS_DIR@
 VALGRIND = @VALGRIND@
 VERSION = @VERSION@
 XSLTPROC = @XSLTPROC@
@@ -230,7 +232,6 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-STYLESHEETS_DIR = /usr/share/xml/docbook/stylesheet/nwalsh
 EXTRA_DIST = LIXA.xml.in $(doc_DATA) $(manual_sources) $(dia_images) $(png_images)
 manual_sources = LIXA.xml \
 	LIXA_Bibliography.xml \
@@ -487,18 +488,18 @@ uninstall-am: uninstall-docDATA
 
 all: index_all_in_one.html index.html
 
-@HAVE_XSLTPROC_TRUE@index_all_in_one.html: $(manual_sources) $(png_images)
-@HAVE_XSLTPROC_TRUE@	@echo "Creating HTML manual (single page)..."
-@HAVE_XSLTPROC_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index_all_in_one.html $(STYLESHEETS_DIR)/xhtml/docbook.xsl LIXA.xml
-@HAVE_XSLTPROC_TRUE@index.html: $(manual_sources) $(png_images)
-@HAVE_XSLTPROC_TRUE@	@echo "Creating HTML manual (multi page)..."
-@HAVE_XSLTPROC_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/xhtml/chunk.xsl LIXA.xml
-@HAVE_XSLTPROC_FALSE@index_all_in_one.html: $(manual_sources) $(png_images)
-@HAVE_XSLTPROC_FALSE@	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
-@HAVE_XSLTPROC_FALSE@	cp index_no_xsltproc.html index_all_in_one.html
-@HAVE_XSLTPROC_FALSE@index.html: $(manual_sources) $(png_images)
-@HAVE_XSLTPROC_FALSE@	@echo "Sorry, you must have xsltproc installed to create HTML manual from XML files"
-@HAVE_XSLTPROC_FALSE@	cp index_no_xsltproc.html index.html
+@COMPILE_DOCBOOK_STUFF_TRUE@index_all_in_one.html: $(manual_sources) $(png_images)
+@COMPILE_DOCBOOK_STUFF_TRUE@	@echo "Creating HTML manual (single page)..."
+@COMPILE_DOCBOOK_STUFF_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index_all_in_one.html $(STYLESHEETS_DIR)/docbook.xsl LIXA.xml
+@COMPILE_DOCBOOK_STUFF_TRUE@index.html: $(manual_sources) $(png_images)
+@COMPILE_DOCBOOK_STUFF_TRUE@	@echo "Creating HTML manual (multi page)..."
+@COMPILE_DOCBOOK_STUFF_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/chunk.xsl LIXA.xml
+@COMPILE_DOCBOOK_STUFF_FALSE@index_all_in_one.html: $(manual_sources) $(png_images)
+@COMPILE_DOCBOOK_STUFF_FALSE@	@echo "Sorry, you must have xsltproc and Docbook stylesheets to create HTML manual from XML files"
+@COMPILE_DOCBOOK_STUFF_FALSE@	cp index_no_xsltproc.html index_all_in_one.html
+@COMPILE_DOCBOOK_STUFF_FALSE@index.html: $(manual_sources) $(png_images)
+@COMPILE_DOCBOOK_STUFF_FALSE@	@echo "Sorry, you must have xsltproc and Docbook stylesheets to create HTML manual from XML files"
+@COMPILE_DOCBOOK_STUFF_FALSE@	cp index_no_xsltproc.html index.html
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
