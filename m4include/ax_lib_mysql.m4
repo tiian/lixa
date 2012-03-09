@@ -42,12 +42,17 @@ AC_DEFUN([AX_LIB_MYSQL],
 [
     HAVE_MYSQL="no"
     AC_ARG_WITH([mysql],
-        AC_HELP_STRING([--with-mysql], [use MySQL API]), 
+        AC_HELP_STRING([--with-mysql@<:@=FILE@:>@], [use MySQL (FILE points to mysql_config)]), 
            [HAVE_MYSQL="maybe"], [HAVE_MYSQL="no"]
     )
     if test "$HAVE_MYSQL" != "no"
     then
-        AC_CHECK_PROGS(MYSQL_CONFIG, [mysql_config], [])
+        if test "$withval" != "yes"
+        then
+            MYSQL_CONFIG=$withval
+        else
+            AC_CHECK_PROGS(MYSQL_CONFIG, [mysql_config], [])
+        fi
         if test -z $MYSQL_CONFIG
         then
             AC_MSG_ERROR([cannot find mysql_config program])

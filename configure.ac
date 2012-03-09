@@ -55,12 +55,16 @@ AM_CONDITIONAL([COMPILE_IBMDB2_STUFF], [test -n "$ibmdb2_home_dir"])
 # Include PostgreSQL test
 m4_include(m4include/ax_lib_postgresql.m4)
 AX_LIB_POSTGRESQL
-AM_CONDITIONAL([COMPILE_POSTGRESQL_STUFF], [test "$HAVE_POSTGRESQL" = "1"])
+AM_CONDITIONAL([COMPILE_POSTGRESQL_STUFF], [test "$HAVE_POSTGRESQL" = "yes"])
 # Include MySQL test
 m4_include(m4include/ax_lib_mysql.m4)
 AX_LIB_MYSQL
-AM_CONDITIONAL([COMPILE_MYSQL_STUFF], [test "$HAVE_MYSQL" = "1"])
-AM_CONDITIONAL([COMPILE_MYSQL_POSTGRESQL_STUFF], [test "$HAVE_MYSQL" = "1" -a "$HAVE_POSTGRESQL" = "1"])
+AM_CONDITIONAL([COMPILE_MYSQL_STUFF], [test "$HAVE_MYSQL" = "yes"])
+AM_CONDITIONAL([COMPILE_MYSQL_POSTGRESQL_STUFF], [test "$HAVE_MYSQL" = "yes" -a "$HAVE_POSTGRESQL" = "yes"])
+# Include Docbook test
+m4_include(m4include/ax_docbook.m4)
+AX_DOCBOOK
+AM_CONDITIONAL([COMPILE_DOCBOOK_STUFF], [test "$HAVE_DOCBOOK" = "yes"])
 
 # LT Version numbers, remember to change them just *before* a release.
 #   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)
@@ -145,7 +149,6 @@ AC_CHECK_PROGS(GDB, [gdb], [])
 AC_CHECK_PROGS(VALGRIND, [valgrind], [])
 AC_CHECK_PROGS(XSLTPROC, [xsltproc], [])
 AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
-AM_CONDITIONAL([HAVE_XSLTPROC], [test -n "$XSLTPROC"])
 
 AC_CHECK_HEADERS(arpa/inet.h assert.h)
 AC_CHECK_HEADERS(errno.h)
