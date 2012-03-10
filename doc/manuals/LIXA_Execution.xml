@@ -509,4 +509,57 @@ Execution options:
 tx_open() returned TX_FAIL: unable to proceed
     </screen>
   </section>
+  <section>
+    <title>Starting the configuration utility</title>
+    <para>
+      LIXA provides a configuration utility named 
+      <command>lixa-config</command>. It can be used to retrieve some
+      useful information necessary for other shell commands.
+      Try it with <option>--help</option> parameter:
+      <screen>
+[tiian@centos lixa]$ /opt/lixa/bin/lixa-config --help
+Usage:
+  lixa-config [OPTION...] - LIXA config utility
+
+Help Options:
+  -h, --help                       Show help options
+
+Application Options:
+  -c, --cflags                     [-Wall]
+  -C, --config-dir                 [/opt/lixa/etc]
+  -f, --cppflags                   [-I/opt/lixa/include]
+  -i, --include-dir                [/opt/lixa/include]
+  -d, --ldflags                    [-Wl,-rpath -Wl,/opt/lixa/lib]
+  -L, --lib-dir                    [/opt/lixa/lib]
+  -l, --libs                       [-L/opt/lixa/lib -llixac]
+  -o, --include-dir-postgresql     [/usr/include]
+  -p, --libs-postgresql            [-L/opt/lixa/lib -llixac -llixapq]
+  -y, --include-dir-mysql          [/usr/include/mysql]
+  -m, --libs-mysql                 [-L/opt/lixa/lib -llixac -llixamy]
+  -P, --prefix                     [/opt/lixa]
+  -s, --state-dir                  [/opt/lixa/var]
+      </screen>
+      If you need to set a variable with the path containing LIXA libraries,
+      simply use something like:
+      <screen>
+[tiian@centos lixa]$ export FOOBAR=$(/opt/lixa/bin/lixa-config --lib-dir)
+[tiian@centos lixa]$ echo $FOOBAR
+/opt/lixa/lib
+      </screen>
+      It may be useful when you installed two different version of LIXA
+      inside the same host: pointing the right 
+      <command>lixa-config</command> is sufficient to retrieve all the
+      correlated info.
+    </para>
+    <warning>
+      <para>
+	The options related to PostgreSQL and MySQL would not appear if you
+	didn't configure them at build time. This give you a simple way to
+	determine if the LIXA is built with PostgreSQL/MySQL support:
+	testing the return code (<command>$?</command>) of
+	<command>/opt/lixa/bin/lixa-config --libs-postgresql</command> will
+	return 0 or 1 (error, LIXA not configured for PostgreSQL).
+      </para>
+    </warning>
+  </section>
 </chapter>

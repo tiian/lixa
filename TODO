@@ -1,10 +1,3 @@
-Document the new check feature:
-export CLIENT_CHECK_TYPE=debug
-export SERVER_CHECK_TYPE=debug
-the processes are executed under the supervision of gdb and a final backtrace
-is returned; program exit codes are completely different (they are the exit
-code of gcc, not of the inspected program) and the usare is reserved for
-specific debugging purposes.
 
 ./configure --enable-crash --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib --with-mysql
 

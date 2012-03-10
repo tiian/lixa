@@ -136,24 +136,10 @@ tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example1.c .
       <table frame="box">
 	<thead><tr><td>[Shell terminal session]</td></tr></thead>
 	<tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ gcc example1.c -Wall -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -o example1
+tiian@ubuntu:~/tmp$ gcc example1.c $(/opt/lixa/bin/lixa-config -c -f -l -d) -o example1
 	</screen></td></tr></tbody>
       </table>
       Check the output of the linker:
-      <table frame="box">
-	<thead><tr><td>[Shell terminal session]</td></tr></thead>
-	<tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ldd example1
-        linux-gate.so.1 =>  (0xb77a9000)
-        liblixac.so.0 => not found
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7653000)
-        /lib/ld-linux.so.2 (0xb77aa000)
-	</screen></td></tr></tbody>
-      </table>
-      <filename>liblixac.so.0</filename> library is not resolved because
-      the LIXA libraries are not in system standard library path. You can
-      bypass the issue exporting <varname>LD_LIBRARY_PATH</varname>
-      variable and checking it again:
       <table frame="box">
 	<thead><tr><td>[Shell terminal session]</td></tr></thead>
 	<tbody><tr><td><screen>
@@ -191,7 +177,7 @@ tx_open(): -7
       Start the state server (see <xref linkend="Background_execution"/>)
       and try again:
       <table frame="box">
-	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<thead><tr><td>[Shell terminal session (Ubuntu)]</td></tr></thead>
 	<tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ sudo su - lixa
 lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
@@ -2470,7 +2456,7 @@ DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
 	    <listitem><para>
 		PostgreSQL database-cluster manager
 	    </para></listitem>
-	  </varlistentry>	  
+	  </varlistentry>
 	</variablelist>
 	This manual does not give you information related
 	to PostgreSQL: it is assumed you already installed and
@@ -2591,6 +2577,8 @@ max_prepared_transactions = 10          # zero disables the feature
 	  and restart the PostgreSQL server with something like
 	  <screen>sudo service postgresql-8.4 restart</screen> (Ubuntu 10.04) or
 	  <screen>sudo /etc/init.d/postgresql-8.3 restart</screen> (Ubuntu 8.04)
+	  <screen>service postgresql restart</screen> (CentOS 6.2) using
+	  <systemitem class="username">root</systemitem> user.
 	</para>
       </section>
     </section>
@@ -2624,64 +2612,12 @@ lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example5_pql.c .
-tiian@ubuntu:~/tmp$ gcc example5_pql.c -Wall \
-> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq \
-> -I /usr/include/postgresql -l pq \
-> -o example5_pql
+
+tiian@ubuntu:~/tmp$ gcc example5_pql.c $(/opt/lixa/bin/lixa-config -c -f -p -d) \
+> -I /usr/include/postgresql -l pq -o example5_pql
 	  </screen></td></tr></tbody>
 	</table>
 	Verify the executable produced by <command>gcc</command>:
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ldd example5_pql
-        linux-gate.so.1 =>  (0xb7701000)
-        liblixac.so.0 => not found
-        liblixapq.so.0 => not found
-        libpq.so.5 => /usr/lib/libpq.so.5 (0xb76d1000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7582000)
-        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb753d000)
-        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb73fb000)
-        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb736e000)
-        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb736b000)
-        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb7341000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb730f000)
-        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb72cf000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb72b7000)
-        /lib/ld-linux.so.2 (0xb7702000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb72b3000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb729d000)
-        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb727a000)
-        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb7272000)
-        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb726f000)
-        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb725c000)
-        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb724e000)
-        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb7237000)
-        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb71c1000)
-        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb71b1000)
-        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb7164000)
-        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb715f000)
-	  </screen></td></tr></tbody>
-	</table>
-      </para>
-    </section>
-    <section>
-      <title>Set-up LIXA environment</title>
-      <para>
-	There are two unresolved references to liblixac.so.0 and 
-	liblixapq.so.0: they can be fixed 
-	setting up the proper environment variable:
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/opt/lixa/lib
-	  </screen></td></tr></tbody>
-	</table>
-	Check again the executable:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -2723,6 +2659,11 @@ tiian@ubuntu:~/tmp$ ldd example5_pql
         libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb6f07000)
 	  </screen></td></tr></tbody>
 	</table>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
 	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
@@ -4004,7 +3945,7 @@ mysql> DESCRIBE authors;
 +------------+---------+------+-----+---------+-------+
 3 rows in set (0.00 sec)
 
-mysql> select * from authors;
+mysql> SELECT * FROM authors;
 Empty set (0.00 sec)
 	    </screen></td></tr></tbody>
 	  </table>
@@ -4047,48 +3988,12 @@ lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example8_mys.c .
-tiian@ubuntu:~/tmp$ gcc example8_mys.c -Wall -I /opt/lixa/include/ \
-> -L /opt/lixa/lib/ -l lixac -l lixamy \
+tiian@ubuntu:~/tmp$ gcc example8_mys.c $(/opt/lixa/bin/lixa-config -c -f -m -d) \
 > $(mysql_config --include --libs_r) -o example8_mys
+
 	  </screen></td></tr></tbody>
 	</table>
 	Verify the executable produced by <command>gcc</command>:
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ldd example8_mys
-        linux-gate.so.1 =>  (0xb7780000)
-        liblixac.so.0 => not found
-        liblixamy.so.0 => not found
-        libmysqlclient.so.15 => /usr/lib/libmysqlclient.so.15 (0xb758f000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7440000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb7428000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb73f6000)
-        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb73de000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb73b8000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb73a3000)
-        /lib/ld-linux.so.2 (0xb7781000)
-	  </screen></td></tr></tbody>
-	</table>
-      </para>
-    </section>
-    <section>
-      <title>Set-up LIXA environment</title>
-      <para>
-	There are two unresolved references to liblixac.so.0 and 
-	liblixamy.so.0: they can be fixed 
-	setting up the proper environment variable:
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/opt/lixa/lib
-	  </screen></td></tr></tbody>
-	</table>
-	Check again the executable:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -4115,6 +4020,11 @@ tiian@ubuntu:~/tmp$ ldd example8_mys
         libuuid.so.1 => /lib/libuuid.so.1 (0xb710f000)
 	  </screen></td></tr></tbody>
 	</table>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
 	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>

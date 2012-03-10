@@ -778,5 +778,30 @@ make check
 	</para></note>
       </para>
     </section>
+    <section>
+      <title>GDB assisted checking (LIXA developers only)</title>
+      <para>
+	Sometimes it may be useful to execute the case tests under the
+	supervision of <command>gdb</command> instead of running it directly
+	from the shell.
+	Both client and server can be executed inside <command>gdb</command>
+	using these commands:
+	<screen>
+export CLIENT_CHECK_TYPE=debug
+export SERVER_CHECK_TYPE=debug
+make check
+	</screen>
+	<note>
+	  <para>
+	    Running a case test inside <command>gdb</command> may change
+	    the exit code checked by <command>automake</command> tests.
+	    You can not use this option as a default test option,
+	    but it may be useful to inspect some strange problems because
+	    <command>gdb</command> produce the stack trace related to the
+	    issue.
+	  </para>
+	</note>
+      </para>
+    </section>
   </section>
 </chapter>
