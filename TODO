@@ -1,28 +1,3 @@
-Packages for CentOS build & Install:
-glib2-devel.i686
-libuuid-devel.i686
-libxml2-devel.i686
-gcc.i686
-libtool.i686
-make.i686
-
-docbook5-style-xsl.noarch
-
-[root@centos ~]# groupadd --system lixa
-[root@centos ~]# useradd --system --no-user-group --gid lixa --home /home/lixa --create-home --shell /bin/bash lixa
-
-
-Document --with-docbook for configure specifying the xsl dir
-
-CentOS: packages for MySQL 
-mysql.i686 mysql-devel.i686 mysql-server.i686
-
-CentOS: packages for PostgreSQL
-yum install postgresql-server.i686 postgresql.i686 postgresql-devel.i686
-
-CentOS: build with PostgreSQL:
-./configure --with-postgresql-include=/usr/include --with-postgresql-lib=/usr/lib
-
 Document the new check feature:
 export CLIENT_CHECK_TYPE=debug
 export SERVER_CHECK_TYPE=debug
@@ -30,11 +5,6 @@ the processes are executed under the supervision of gdb and a final backtrace
 is returned; program exit codes are completely different (they are the exit
 code of gcc, not of the inspected program) and the usare is reserved for
 specific debugging purposes.
-
-On CentOS case tests MT/2.0/0.0 MT/2.0/0.1 could fail with SIGABRT signal;
-it may be an addressing problem that can be solved reducing stack size:
-ulimit -s 4096
-instead of default value (10240)
 
 ./configure --enable-crash --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib --with-mysql
 

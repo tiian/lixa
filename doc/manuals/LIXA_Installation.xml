@@ -51,17 +51,36 @@
 	<command>pkg-config</command> command, while the others must be in
 	standard include <envar>PATH</envar>.
       </para>
-      <para>
-	<application>xsltproc</application>,
-	<application>docbook-xsl</application> and
-	<application>docbook-xsl-doc-html</application> are necessary on
-	Ubuntu systems to produce this manual.
-      </para>
-      <para>
-	<application>automake</application> and 
-	<application>autoconf</application> are 
-	necessary to run the test suite (<command>make check</command>).
-      </para>
+      <section>
+	<title>Packages for Linux Ubuntu (8.04 and 10.04)</title>
+	<para>
+	  <application>xsltproc</application>,
+	  <application>docbook-xsl</application> and
+	  <application>docbook-xsl-doc-html</application> are necessary
+	  to produce this manual.
+	</para>
+	<para>
+	  <application>automake</application> and 
+	  <application>autoconf</application> are 
+	  necessary to run the test suite (<command>make check</command>).
+	</para>
+      </section>
+      <section>
+	<title>Packages for Linux CentOS (6.2)</title>
+	<para>
+	  This packages are necessary to create a build environment:
+ 	  <application>glib2-devel.i686</application>,
+ 	  <application>libuuid-devel.i686</application>,
+ 	  <application>libxml2-devel.i686</application>,
+ 	  <application>gcc.i686</application>,
+ 	  <application>libtool.i686</application> and
+ 	  <application>make.i686</application>.
+	</para>
+	<para>
+	  <application>docbook5-style-xsl.noarch</application> is necessary
+	  to produce this manual.
+	</para>
+      </section>
       <simplesect>
 	<title>Low level pre-requisites</title>
 	<para>
@@ -140,10 +159,13 @@
       <para>
 	You can run the processes with the desired UNIX user you prefer but
 	in this manual specific user and group will be used as a suggestion.
-	Use this commands in an Ubuntu based Linux system to create the
-	<systemitem class="username">lixa</systemitem> user and the
-	<systemitem class="groupname">lixa</systemitem> group:
-	<screen>
+	<section>
+	  <title>Create <systemitem class="username">lixa</systemitem>
+	    user with Ubuntu</title>
+	  Use this commands in an Ubuntu based Linux system to create the
+	  <systemitem class="username">lixa</systemitem> user and the
+	  <systemitem class="groupname">lixa</systemitem> group:
+	  <screen>
 tiian@ubuntu:~$ sudo su -
 root@ubuntu:~# id
 uid=0(root) gid=0(root) groups=0(root)
@@ -158,7 +180,27 @@ root@ubuntu:~# su -c id lixa
 uid=106(lixa) gid=113(lixa) groups=113(lixa)
 root@ubuntu:~# exit
 logout
-	</screen>
+	  </screen>
+	</section>
+	<section>
+	  <title>Create <systemitem class="username">lixa</systemitem>
+	    user with CentOS</title>
+	  Use this commands in an Ubuntu based Linux system to create the
+	  <systemitem class="username">lixa</systemitem> user and the
+	  <systemitem class="groupname">lixa</systemitem> group:
+	  <screen>
+[tiian@centos ~]$ su -
+Password:
+[root@centos ~]# id
+uid=0(root) gid=0(root) groups=0(root),1(bin),2(daemon),3(sys),4(adm),6(disk),10(wheel)
+[root@centos ~]# groupadd --system lixa
+[root@centos ~]# useradd --system --no-user-group --gid lixa --home /home/lixa --create-home --shell /bin/bash lixa
+[root@centos ~]# su -c id lixa
+uid=496(lixa) gid=490(lixa) groups=490(lixa)
+[root@centos ~]# exit
+logout
+	  </screen>
+	</section>
 	Refer to the man page of your Linux distribution if the above
 	commands fail; on some distributions you must use
 	<quote><command>su -</command></quote> instead of 
@@ -211,6 +253,16 @@ logout
 	  <tr><td>Resource Manager:</td><td>MySQL 5.1.41</td></tr>
 	  <tr><td>Resource Manager:</td><td>Oracle XE 11.2</td></tr>
 	  <tr><td>Resource Manager:</td><td>PostgreSQL 8.4</td></tr>
+	</tbody>
+      </table>
+      <table frame="all">
+	<thead>
+	  <tr><td>Operating system:</td><td>CentOS 6.2</td></tr>
+	</thead>
+	<tbody>
+	  <tr><td>Architecture:</td><td>x86 (virtual)</td></tr>
+	  <tr><td>Resource Manager:</td><td>MySQL 5.0.51a</td></tr>
+	  <tr><td>Resource Manager:</td><td>PostgreSQL 8.3</td></tr>
 	</tbody>
       </table>
     </para>
@@ -269,13 +321,15 @@ sudo make install
       <systemitem class="username">root</systemitem> 
       password: 
       <screen>
-su; make install; exit
+su -c "make install"
       </screen>
       If nothing goes wrong, the above commands install the LIXA software
       artifacts in <filename>/opt/lixa</filename> default directory.
       After the installation you should change the authorization
-      assigned to some directories. Use <command>sudo su -c</command> or
-      <command>su -c</command> to gain root privileges and then:
+      assigned to some directories. Use <command>sudo su -c</command> 
+      (Ubuntu) or
+      <command>su -c</command> (CentOS) to gain root privileges and execute
+      <command>chown</command>:
       <screen>
 tiian@ubuntu:~$ sudo su -c "chown -R lixa:lixa /opt/lixa/etc/ /opt/lixa/var/"
 tiian@ubuntu:~$ ls -la /opt/lixa/etc/ /opt/lixa/var/
@@ -344,6 +398,24 @@ $HOME/lixa/var
 	  You can split code and data with something like this:
 	  <screen>
 ./configure --prefix=/ --exec-prefix=/usr/local
+	  </screen>
+	</para>
+      </section>
+      <section>
+	<title>Producing this manual too</title>
+	<para>
+	  To produce LIXA manual in HTML format you need 
+	  <command>xsltproc</command> installed in your current search
+	  path and <filename>chunk.xsl docbook.xsl</filename> stylesheet 
+	  files. Use
+	  <screen>
+./configure --with-docbook
+	  </screen>
+	  to enable manual build and search for stylesheets in a subdir of
+	  <filename>/usr/share</filename>. You may specify a different path
+	  using:
+	  <screen>
+./configure --with-docbook=/path/to/father/of/xhtml/dir
 	  </screen>
 	</para>
       </section>
@@ -491,9 +563,17 @@ make
 	  This step is useful if you want to use PostgreSQL as a Resource
 	  Manager coordinated by LIXA; only versions 8.3 and 8.4 have been
 	  tested, but there should not be relevant differences with a
-	  different version. Use something like this:
+	  different version. Use something like this (Ubuntu):
 	  <screen>
 ./configure --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib
+	  </screen>
+	  or something like this (CentOS)
+	  <footnote><para>
+	      These are the necessary packages on CentOS: 
+	      postgresql-server.i686 postgresql.i686 postgresql-devel.i686
+	  </para></footnote>:
+	  <screen>
+./configure --with-postgresql-include=/usr/include --with-postgresql-lib=/usr/lib
 	  </screen>
 	  to create a loadable module containing the switch structure.
 	</para>
@@ -516,12 +596,21 @@ make
 	  </para></footnote>
 	</title>
 	<para>
-	  This step is useful if you want to use MySQL as a Resource
+	  This step is useful if you want to use MySQL
+	  <footnote><para>
+	      These are the necessary packages on CentOS: 
+	      mysql.i686 mysql-devel.i686 mysql-server.i686
+	  </para></footnote>
+	  as a Resource
 	  Manager coordinated by LIXA; only versions 5.0 and 5.1 have been
 	  tested, but there should not be relevant differences with a
 	  different version. Use something like this:
 	  <screen>
 ./configure --with-mysql
+	  </screen>
+	  or something like this if you need to point a specific installation:
+	  <screen>
+./configure --with-mysql=/path/to/mysql_config
 	  </screen>
 	  to create a loadable module containing the switch structure. It's
 	  not necessary to specify the MySQL installation directory because
@@ -633,6 +722,29 @@ make check
       is fine too, all the test <emphasis>must</emphasis> complete without
       errors.
     </para>
+    <section>
+      <title>Checking notes</title>
+      <para>
+	Some case tests, specifically MT/1.0/* and MT/2.0/*, stress the
+	LIXA software with a massive multithread workload.
+	Sometimes the tests fail due to the configuration of your system
+	and/or your user account. There are two well known issues:
+	<orderedlist enumeration='arabic'>
+	  <listitem><para>
+	      max files: the case tests open approximately 1000 files
+	      (TCP/IP sockets); command 
+	      <command>ulimit -n</command> must return the value 1024 or
+	      more
+	  </para></listitem>
+	  <listitem><para>
+	      stack size: if the stack size is too large, 32 bit platform
+	      can experience addressing limit errors; reduce the default 
+	      stack size to 4096 if necessary with command
+	      <command>ulimit -s 4096</command>
+	  </para></listitem>
+	</orderedlist>
+      </para>
+    </section>
     <section>
       <title>Valgrind advanced checking (LIXA developers only)</title>
       <para>
