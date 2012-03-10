@@ -365,6 +365,15 @@ drwxr-xr-x 9 lixa root 4096 2011-03-30 23:14 ..
 	<xref linkend="Linking_third_party_resource_managers"/>
 	if you are not expert in LIXA configuration to avoid troubles.
       </para>
+      <important>
+	<para>
+	  It is strongly suggested you issue the 
+	  <command>make clean</command> command every time you re-configure
+	  the package. If you didn't clean the previous build, you might
+	  catch some strange undebuggable errors related to not aligned
+	  libraries.
+	</para>
+      </important>
       <section>
 	<title>Choosing a different installation <envar>PATH</envar></title>
 	<note><para>

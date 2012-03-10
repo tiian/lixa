@@ -1,3 +1,5 @@
+Could LD_LIBRARY_PATH avoided for Oracle and DB2 too?
+Remove from manual if not necessary.
 
 ./configure --enable-crash --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib --with-mysql
 
