@@ -157,7 +157,6 @@ tiian@ubuntu:~/tmp$ gcc example1.c $(/opt/lixa/bin/lixa-config -c -f -l -d) -o e
       <table frame="box">
 	<thead><tr><td>[Shell terminal session]</td></tr></thead>
 	<tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
 tiian@ubuntu:~/tmp$ ldd example1
         linux-gate.so.1 =>  (0xb773f000)
         liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7724000)
@@ -199,7 +198,6 @@ lixa@ubuntu:~$ exit
 logout
 tiian@ubuntu:~/tmp$ ps -ef|grep lixad|grep -v grep
 lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
 tiian@ubuntu:~/tmp$ ./example1
 tx_open(): 0
 tx_begin(): 0
@@ -615,9 +613,9 @@ logout
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example2_ora.c .
-tiian@ubuntu:~/tmp$ gcc example2_ora.c -Wall \
-> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac \
-> -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
+tiian@ubuntu:~/tmp$ gcc example2_ora.c $(/opt/lixa/bin/lixa-config -c -f -l -d) \
+> -I/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public \
+> -L/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
 > -o example2_ora
 	</screen>
 	If you are using Oracle XE 11.2 the commands might be something like
@@ -626,20 +624,32 @@ tiian@ubuntu:~/tmp$ gcc example2_ora.c -Wall \
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example2_ora.c .
-tiian@ubuntu:~/tmp$ gcc example2_ora.c -Wall \
-> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac \
-> -I /u01/app/oracle/product/11.2.0/xe/rdbms/public/ -L /u01/app/oracle/product/11.2.0/xe/lib/ -l clntsh -l nnz11 \
+tiian@ubuntu:~/tmp$ gcc example2_ora.c $(/opt/lixa/bin/lixa-config -c -f -l -d) \
+> -I/u01/app/oracle/product/11.2.0/xe/rdbms/public/ \
+> -L/u01/app/oracle/product/11.2.0/xe/lib/ -l clntsh -l nnz11 \
 > -o example2_ora
 	</screen>
 	Verify the executable produced by <command>gcc</command>:
 	<screen>
 tiian@ubuntu:~/tmp$ ldd example2_ora
-        linux-gate.so.1 =>  (0xb776d000)
-        liblixac.so.0 => not found
+        linux-gate.so.1 =>  (0xb7709000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb76ee000)
         libclntsh.so.10.1 => not found
         libnnz10.so => not found
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7616000)
-        /lib/ld-linux.so.2 (0xb776e000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7590000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb758c000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb7588000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb7583000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb7579000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb74c8000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb73a8000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb7393000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb736e000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb7356000)
+        /lib/ld-linux.so.2 (0xb770a000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb732e000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb7319000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb7315000)
 	</screen>
       </para>
     </section>
@@ -651,33 +661,33 @@ tiian@ubuntu:~/tmp$ ldd example2_ora
 	<screen>
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/opt/lixa/lib
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib
 
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/opt/lixa/lib
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib
 	</screen>
 	Check again the executable:
 	<screen>
 tiian@ubuntu:~/tmp$ ldd example2_ora
-        linux-gate.so.1 =>  (0xb7749000)
-        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb772f000)
-        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb697b000)
-        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6775000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb6621000)
-        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb661d000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb6619000)
-        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb6614000)
-        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb660a000)
-        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb6559000)
-        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb6439000)
-        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb6426000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb640e000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb63e9000)
-        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb63d0000)
-        /lib/ld-linux.so.2 (0xb774a000)
-        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb63a9000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb6394000)
-        libuuid.so.1 => /lib/libuuid.so.1 (0xb6390000)
+        linux-gate.so.1 =>  (0xb76f9000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb76de000)
+        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb692a000)
+        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6724000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb65c7000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb65c3000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb65bf000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb65ba000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb65b0000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb64ff000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb63df000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb63ca000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb63a5000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb638d000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb6374000)
+        /lib/ld-linux.so.2 (0xb76fa000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb634d000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb6338000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb6334000)
 	</screen>
 	Set-up the necessary environment variables:
 	<screen>
@@ -1346,50 +1356,10 @@ lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example3_db2.c .
-tiian@ubuntu:~/tmp$ gcc example3_db2.c -Wall \
-> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -I /opt/ibm/db2/V9.7/include/ -L /opt/ibm/db2/V9.7/lib32/ -l db2 \
-> -o example3_db2
+tiian@ubuntu:~/tmp$ gcc example3_db2.c $(/opt/lixa/bin/lixa-config -c -f -l -d) \
+> -I/opt/ibm/db2/V9.7/include -L/opt/ibm/db2/V9.7/lib32/ -ldb2 -o example3_db2
 	</screen>
 	Verify the executable produced by <command>gcc</command>:
-	<screen>
-tiian@ubuntu:~/tmp$ ldd example3_db2
-        linux-gate.so.1 =>  (0xb7711000)
-        liblixac.so.0 => not found
-        libdb2.so.1 => /home/db2inst1/sqllib/lib32/libdb2.so.1 (0xb61cf000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb607f000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb604d000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb6049000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb6030000)
-        libpam.so.0 => /lib/libpam.so.0 (0xb6026000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb6001000)
-        libdb2dascmn.so.1 => /home/db2inst1/sqllib/lib32/libdb2dascmn.so.1 (0xb5fd4000)
-        libdb2g11n.so.1 => /home/db2inst1/sqllib/lib32/libdb2g11n.so.1 (0xb5966000)
-        libdb2genreg.so.1 => /home/db2inst1/sqllib/lib32/libdb2genreg.so.1 (0xb5925000)
-        libdb2install.so.1 => /home/db2inst1/sqllib/lib32/libdb2install.so.1 (0xb591a000)
-        libdb2locale.so.1 => /home/db2inst1/sqllib/lib32/libdb2locale.so.1 (0xb5907000)
-        libdb2osse.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse.so.1 (0xb5602000)
-        libdb2osse_db2.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse_db2.so.1 (0xb5592000)
-        libdb2trcapi.so.1 => /home/db2inst1/sqllib/lib32/libdb2trcapi.so.1 (0xb557e000)
-        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb548b000)
-        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb5480000)
-        /lib/ld-linux.so.2 (0xb7712000)
-        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb5476000)
-	</screen>
-      </para>
-    </section>
-    <section>
-      <title>Set-up LIXA environment</title>
-      <para>
-	There is an unresolved reference to liblixac.so.0: it can be fixed 
-	setting up the proper environment variable:
-	<screen>
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/home/db2inst1/sqllib/lib32
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/home/db2inst1/sqllib/lib32:/opt/lixa/lib
-	</screen>
-	Check again the executable:
 	<screen>
 tiian@ubuntu:~/tmp$ ldd example3_db2
         linux-gate.so.1 =>  (0xb775f000)
@@ -1422,6 +1392,11 @@ tiian@ubuntu:~/tmp$ ldd example3_db2
         libz.so.1 => /usr/lib/libz.so.1 (0xb5282000)
         libuuid.so.1 => /lib/libuuid.so.1 (0xb527d000)
 	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
 	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
 	<screen>
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
@@ -1843,38 +1818,45 @@ tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example4_ora_db2.c .
-tiian@ubuntu:~/tmp$ gcc example4_ora_db2.c -Wall \
-> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac \
-> -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
-> -I /opt/ibm/db2/V9.7/include/ -L /opt/ibm/db2/V9.7/lib32/ -l db2 \
-> -o example4_ora_db2
+tiian@ubuntu:~/tmp$ gcc example4_ora_db2.c $(/opt/lixa/bin/lixa-config -c -f -l -d) \
+> -I/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public \
+> -L/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
+> -I/opt/ibm/db2/V9.7/include -L/opt/ibm/db2/V9.7/lib32/ -ldb2 -o example4_ora_db2
 	</screen>
 	Verify the executable produced by <command>gcc</command>:
 	<screen>
 tiian@ubuntu:~/tmp$ ldd example4_ora_db2
-        linux-gate.so.1 =>  (0xb779c000)
-        liblixac.so.0 => not found
+        linux-gate.so.1 =>  (0xb770e000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb76f3000)
         libclntsh.so.10.1 => not found
         libnnz10.so => not found
-        libdb2.so.1 => /home/db2inst1/sqllib/lib32/libdb2.so.1 (0xb6259000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb610a000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb60d7000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb60d3000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb60bb000)
-        libpam.so.0 => /lib/libpam.so.0 (0xb60b1000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb608c000)
-        libdb2dascmn.so.1 => /home/db2inst1/sqllib/lib32/libdb2dascmn.so.1 (0xb605e000)
-        libdb2g11n.so.1 => /home/db2inst1/sqllib/lib32/libdb2g11n.so.1 (0xb59f0000)
-        libdb2genreg.so.1 => /home/db2inst1/sqllib/lib32/libdb2genreg.so.1 (0xb59b0000)
-        libdb2install.so.1 => /home/db2inst1/sqllib/lib32/libdb2install.so.1 (0xb59a5000)
-        libdb2locale.so.1 => /home/db2inst1/sqllib/lib32/libdb2locale.so.1 (0xb5992000)
-        libdb2osse.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse.so.1 (0xb568d000)
-        libdb2osse_db2.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse_db2.so.1 (0xb561c000)
-        libdb2trcapi.so.1 => /home/db2inst1/sqllib/lib32/libdb2trcapi.so.1 (0xb5609000)
-        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb5516000)
-        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb550b000)
-        /lib/ld-linux.so.2 (0xb779d000)
-        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb5501000)
+        libdb2.so.1 => /usr/lib/libdb2.so.1 (0xb61b2000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb6063000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb605f000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb605b000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb6055000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb604c000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb5f9b000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb5e7b000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb5e66000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb5e41000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb5e28000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb5df6000)
+        libpam.so.0 => /lib/libpam.so.0 (0xb5dec000)
+        libdb2dascmn.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2dascmn.so.1 (0xb5dbe000)
+        libdb2g11n.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2g11n.so.1 (0xb5750000)
+        libdb2genreg.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2genreg.so.1 (0xb5710000)
+        libdb2install.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2install.so.1 (0xb5705000)
+        libdb2locale.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2locale.so.1 (0xb56f2000)
+        libdb2osse.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2osse.so.1 (0xb53ec000)
+        libdb2osse_db2.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2osse_db2.so.1 (0xb537c000)
+        libdb2trcapi.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2trcapi.so.1 (0xb5369000)
+        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb5276000)
+        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb526b000)
+        /lib/ld-linux.so.2 (0xb770f000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb5243000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb522e000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb522a000)
 	</screen>
       </para>
     </section>
@@ -1893,45 +1875,42 @@ tiian@ubuntu:~$ . /home/db2inst1/sqllib/db2profile
 tiian@ubuntu:~$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
 tiian@ubuntu:~$ echo $LD_LIBRARY_PATH
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/home/db2inst1/sqllib/lib32
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:/home/db2inst1/sqllib/lib32:/opt/lixa/lib
 	</screen>
 	Check again the executable:
 	<screen>
 tiian@ubuntu:~/tmp$ ldd example4_ora_db2
-        linux-gate.so.1 =>  (0xb775d000)
-        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7743000)
-        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb698f000)
-        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6789000)
-        libdb2.so.1 => /home/db2inst1/sqllib/lib32/libdb2.so.1 (0xb5257000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb50fa000)
-        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb50f6000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb50f2000)
-        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb50ec000)
-        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb50e3000)
-        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb5032000)
-        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb4f12000)
-        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb4eff000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb4ee7000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb4ec1000)
-        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb4ea9000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb4e76000)
-        libpam.so.0 => /lib/libpam.so.0 (0xb4e6c000)
-        libdb2dascmn.so.1 => /home/db2inst1/sqllib/lib32/libdb2dascmn.so.1 (0xb4e3f000)
-        libdb2g11n.so.1 => /home/db2inst1/sqllib/lib32/libdb2g11n.so.1 (0xb47d1000)
-        libdb2genreg.so.1 => /home/db2inst1/sqllib/lib32/libdb2genreg.so.1 (0xb4791000)
-        libdb2install.so.1 => /home/db2inst1/sqllib/lib32/libdb2install.so.1 (0xb4785000)
-        libdb2locale.so.1 => /home/db2inst1/sqllib/lib32/libdb2locale.so.1 (0xb4772000)
-        libdb2osse.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse.so.1 (0xb446d000)
-        libdb2osse_db2.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse_db2.so.1 (0xb43fd000)
-        libdb2trcapi.so.1 => /home/db2inst1/sqllib/lib32/libdb2trcapi.so.1 (0xb43ea000)
-        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb42f6000)
-        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb42eb000)
-        /lib/ld-linux.so.2 (0xb775e000)
-        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb42c4000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb42af000)
-        libuuid.so.1 => /lib/libuuid.so.1 (0xb42ab000)
+        linux-gate.so.1 =>  (0xb777f000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7764000)
+        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb69b0000)
+        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb67aa000)
+        libdb2.so.1 => /home/db2inst1/sqllib/lib32/libdb2.so.1 (0xb5278000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb511b000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb5117000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb5113000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb510d000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb5104000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb5053000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb4f33000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb4f1e000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb4ef9000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb4ee0000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb4ec8000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb4e95000)
+        libpam.so.0 => /lib/libpam.so.0 (0xb4e8b000)
+        libdb2dascmn.so.1 => /home/db2inst1/sqllib/lib32/libdb2dascmn.so.1 (0xb4e5e000)
+        libdb2g11n.so.1 => /home/db2inst1/sqllib/lib32/libdb2g11n.so.1 (0xb47f0000)
+        libdb2genreg.so.1 => /home/db2inst1/sqllib/lib32/libdb2genreg.so.1 (0xb47b0000)
+        libdb2install.so.1 => /home/db2inst1/sqllib/lib32/libdb2install.so.1 (0xb47a4000)
+        libdb2locale.so.1 => /home/db2inst1/sqllib/lib32/libdb2locale.so.1 (0xb4791000)
+        libdb2osse.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse.so.1 (0xb448c000)
+        libdb2osse_db2.so.1 => /home/db2inst1/sqllib/lib32/libdb2osse_db2.so.1 (0xb441c000)
+        libdb2trcapi.so.1 => /home/db2inst1/sqllib/lib32/libdb2trcapi.so.1 (0xb4409000)
+        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb4315000)
+        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb430a000)
+        /lib/ld-linux.so.2 (0xb7780000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb42e3000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb42ce000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb42ca000)
 	</screen>
 	Set-up the necessary environment variables:
 	<screen>
@@ -2626,7 +2605,6 @@ lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example5_pql.c .
-
 tiian@ubuntu:~/tmp$ gcc example5_pql.c $(/opt/lixa/bin/lixa-config -c -f -p -d) \
 > -I /usr/include/postgresql -l pq -o example5_pql
 	  </screen></td></tr></tbody>
@@ -2927,24 +2905,20 @@ Deleting a row from the table...
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example6_pql_ora.c .
-tiian@ubuntu:~/tmp$ gcc example6_pql_ora.c -Wall \
-> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq \
-> -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public \
-> -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
-> -I /usr/include/postgresql -l pq \
-> -o example6_pql_ora
+tiian@ubuntu:~/tmp$ gcc example6_pql_ora.c $(/opt/lixa/bin/lixa-config -c -f -p -d) \
+> -I/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public \
+> -L/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
+> -I/usr/include/postgresql -lpq -o example6_pql_ora
 	  </screen></td></tr></tbody>
 	</table>
 	or if you are using Oracle 11.2 you will use something like this:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ gcc example6_pql_ora.c -Wall \
-> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq \
-> -I /u01/app/oracle/product/11.2.0/xe/rdbms/public \
-> -L /u01/app/oracle/product/11.2.0/xe/lib -l clntsh -l nnz11 \
-> -I /usr/include/postgresql -l pq \
-> -o example6_pql_ora
+tiian@ubuntu:~/tmp$ gcc example6_pql_ora.c $(/opt/lixa/bin/lixa-config -c -f -p -d) \
+> -I/u01/app/oracle/product/11.2.0/xe/rdbms/public \
+> -L/u01/app/oracle/product/11.2.0/xe/lib -l clntsh -l nnz11 \
+> -I/usr/include/postgresql -lpq -o example6_pql_ora
 	  </screen></td></tr></tbody>
 	</table>
 	Verify the executable produced by <command>gcc</command>:
@@ -2952,34 +2926,43 @@ tiian@ubuntu:~/tmp$ gcc example6_pql_ora.c -Wall \
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ldd example6_pql_ora
-        linux-gate.so.1 =>  (0xb77ba000)
-        liblixac.so.0 => not found
-        liblixapq.so.0 => not found
+        linux-gate.so.1 =>  (0xb7731000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7716000)
+        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb770f000)
         libclntsh.so.10.1 => not found
         libnnz10.so => not found
-        libpq.so.5 => /usr/lib/libpq.so.5 (0xb778a000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb763b000)
-        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb75f6000)
-        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb74b3000)
-        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb7426000)
-        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb7423000)
-        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb73fa000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb73c8000)
-        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb7388000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb736f000)
-        /lib/ld-linux.so.2 (0xb77bb000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb736b000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb7356000)
-        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb7333000)
-        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb732b000)
-        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb7327000)
-        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb7314000)
-        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb7307000)
-        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb72f0000)
-        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb727a000)
-        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb7269000)
-        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb721c000)
-        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb7218000)
+        libpq.so.5 => /usr/lib/libpq.so.5 (0xb76e1000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb7592000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb758e000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb7589000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb7584000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb757b000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb74ca000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb73aa000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb7395000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb736f000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb7357000)
+        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb7311000)
+        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb71cf000)
+        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb7142000)
+        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb713e000)
+        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb7115000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb70e3000)
+        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb70a3000)
+        /lib/ld-linux.so.2 (0xb7732000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb707c000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb7066000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb7062000)
+        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb703f000)
+        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb7037000)
+        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb7034000)
+        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb7020000)
+        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb7013000)
+        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb6ffc000)
+        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb6f86000)
+        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb6f76000)
+        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb6f28000)
+        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb6f24000)
 	  </screen></td></tr></tbody>
 	</table>
       </para>
@@ -2999,9 +2982,6 @@ tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 tiian@ubuntu:~/tmp$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
 	  </screen></td></tr></tbody>
 	</table>
 	Oracle 11.2 <filename>oracle_env.sh</filename> does not set
@@ -3012,54 +2992,53 @@ tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/u01/app/oracle/product/11.2.0/xe/lib:/opt/lixa/lib
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH/u01/app/oracle/product/11.2.0/xe/lib:/opt/lixa/lib
-/u01/app/oracle/product/11.2.0/xe/lib:/opt/lixa/lib
+tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/u01/app/oracle/product/11.2.0/xe/lib
+tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
+/u01/app/oracle/product/11.2.0/xe/lib
 	  </screen></td></tr></tbody>
 	</table>
 	Check again the executable:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ldd example6_pql_ora
-        linux-gate.so.1 =>  (0xb7731000)
-        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7716000)
-        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb770f000)
-        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb695a000)
-        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6755000)
-        libpq.so.5 => /usr/lib/libpq.so.5 (0xb6728000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb65d9000)
-        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb65d5000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb65d0000)
-        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb65cb000)
-        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb65c2000)
-        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb6511000)
-        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb63f1000)
-        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb63dd000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb63c4000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb639f000)
-        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb6387000)
-        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb6342000)
-        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb6200000)
-        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb6172000)
-        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb616f000)
-        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb6146000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb6114000)
-        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb60d4000)
-        /lib/ld-linux.so.2 (0xb7732000)
-        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb60ac000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb6097000)
-        libuuid.so.1 => /lib/libuuid.so.1 (0xb6093000)
-        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb6070000)
-        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb6068000)
-        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb6064000)
-        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb6051000)
-        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb6044000)
-        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb602d000)
-        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb5fb7000)
-        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb5fa6000)
-        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb5f59000)
-        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb5f55000)
+tiian@ubuntu:~/tmp$ ldd example6_pql_ora                                                linux-gate.so.1 =>  (0xb770b000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb76f0000)
+        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb76e9000)
+        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb6934000)
+        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb672f000)
+        libpq.so.5 => /usr/lib/libpq.so.5 (0xb6702000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb65b3000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb65af000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb65aa000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb65a5000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb659c000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb64eb000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb63cb000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb63b6000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb6390000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb6378000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb6360000)
+        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb631a000)
+        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb61d8000)
+        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb614a000)
+        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb6147000)
+        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb611e000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb60ec000)
+        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb60ac000)
+        /lib/ld-linux.so.2 (0xb770c000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb6084000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb606f000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb606b000)
+        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb6048000)
+        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb6040000)
+        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb603c000)
+        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb6029000)
+        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb601c000)
+        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb6005000)
+        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb5f8f000)
+        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb5f7e000)
+        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb5f31000)
+        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb5f2d000)
 	  </screen></td></tr></tbody>
 	</table>
 	Set-up the necessary environment variables:
@@ -3421,10 +3400,9 @@ tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL09202011.trc
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example7_pql_db2.c .
-tiian@ubuntu:~/tmp$ gcc example7_pql_db2.c -Wall \
-> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixapq \
-> -I /usr/include/postgresql -l pq \
-> -I /opt/ibm/db2/V9.7/include/ -L /opt/ibm/db2/V9.7/lib32/ -l db2 \
+tiian@ubuntu:~/tmp$ gcc example7_pql_db2.c $(/opt/lixa/bin/lixa-config -c -f -p -d) \
+> -I/usr/include/postgresql -lpq \
+> -I/opt/ibm/db2/V9.7/include -L/opt/ibm/db2/V9.7/lib32 -ldb2 \
 > -o example7_pql_db2
 	  </screen></td></tr></tbody>
 	</table>
@@ -3433,46 +3411,53 @@ tiian@ubuntu:~/tmp$ gcc example7_pql_db2.c -Wall \
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ldd example7_pql_db2
-        linux-gate.so.1 =>  (0xb772a000)
-        liblixac.so.0 => not found
-        liblixapq.so.0 => not found
-        libpq.so.5 => /usr/lib/libpq.so.5 (0xb76fa000)
-        libdb2.so.1 => /usr/lib/libdb2.so.1 (0xb61c8000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb6079000)
-        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb6034000)
-        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb5ef2000)
-        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb5e65000)
-        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb5e61000)
-        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb5e38000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb5e06000)
-        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb5dc6000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb5dae000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb5da9000)
-        libpam.so.0 => /lib/libpam.so.0 (0xb5d9f000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb5d7a000)
-        libdb2dascmn.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2dascmn.so.1 (0xb5d4c000)
-        libdb2g11n.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2g11n.so.1 (0xb56de000)
-        libdb2genreg.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2genreg.so.1 (0xb569e000)
-        libdb2install.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2install.so.1 (0xb5693000)
-        libdb2locale.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2locale.so.1 (0xb5680000)
-        libdb2osse.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2osse.so.1 (0xb537a000)
-        libdb2osse_db2.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2osse_db2.so.1 (0xb530a000)
-        libdb2trcapi.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2trcapi.so.1 (0xb52f7000)
-        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb5204000)
-        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb51f9000)
-        /lib/ld-linux.so.2 (0xb772b000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb51e3000)
-        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb51c0000)
-        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb51b8000)
-        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb51b5000)
-        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb51a2000)
-        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb5194000)
-        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb517d000)
-        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb5107000)
-        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb50fd000)
-        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb50ed000)
-        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb50a0000)
-        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb509c000)
+        linux-gate.so.1 =>  (0xb7780000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7765000)
+        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb775e000)
+        libpq.so.5 => /usr/lib/libpq.so.5 (0xb7730000)
+        libdb2.so.1 => /usr/lib/libdb2.so.1 (0xb61fe000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb60af000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb60ab000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb60a7000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb60a2000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb6098000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb5fe7000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb5ec7000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb5eb2000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb5e8d000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb5e74000)
+        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb5e2e000)
+        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb5cec000)
+        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb5c5f000)
+        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb5c5c000)
+        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb5c33000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb5c00000)
+        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb5bc0000)
+        libpam.so.0 => /lib/libpam.so.0 (0xb5bb6000)
+        libdb2dascmn.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2dascmn.so.1 (0xb5b88000)
+        libdb2g11n.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2g11n.so.1 (0xb551a000)
+        libdb2genreg.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2genreg.so.1 (0xb54da000)
+        libdb2install.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2install.so.1 (0xb54cf000)
+        libdb2locale.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2locale.so.1 (0xb54bc000)
+        libdb2osse.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2osse.so.1 (0xb51b6000)
+        libdb2osse_db2.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2osse_db2.so.1 (0xb5146000)
+        libdb2trcapi.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2trcapi.so.1 (0xb5133000)
+        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb5040000)
+        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb5035000)
+        /lib/ld-linux.so.2 (0xb7781000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb500d000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb4ff8000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb4ff4000)
+        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb4fd1000)
+        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb4fc9000)
+        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb4fc5000)
+        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb4fb2000)
+        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb4fa5000)
+        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb4f8e000)
+        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb4f18000)
+        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb4f07000)
+        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb4eba000)
+        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb4eb6000)
 	  </screen></td></tr></tbody>
 	</table>
       </para>
@@ -3480,72 +3465,6 @@ tiian@ubuntu:~/tmp$ ldd example7_pql_db2
     <section>
       <title>Set-up LIXA environment</title>
       <para>
-	There are two unresolved references that can be fixed setting up
-	the environment properly:
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/opt/lixa/lib
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/opt/lixa/lib
-	  </screen></td></tr></tbody>
-	</table>
-	Check again the executable:
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ldd example7_pql_db2
-        linux-gate.so.1 =>  (0xb774c000)
-        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7731000)
-        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb772a000)
-        libpq.so.5 => /usr/lib/libpq.so.5 (0xb76fc000)
-        libdb2.so.1 => /usr/lib/libdb2.so.1 (0xb61ca000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb607b000)
-        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb6077000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb6073000)
-        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb606e000)
-        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb6064000)
-        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb5fb3000)
-        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb5e93000)
-        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb5e7f000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb5e67000)
-        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb5e21000)
-        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb5cdf000)
-        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb5c52000)
-        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb5c4f000)
-        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb5c26000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb5bf3000)
-        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb5bb3000)
-        libpam.so.0 => /lib/libpam.so.0 (0xb5ba9000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb5b84000)
-        libdb2dascmn.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2dascmn.so.1 (0xb5b56000)
-        libdb2g11n.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2g11n.so.1 (0xb54e8000)
-        libdb2genreg.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2genreg.so.1 (0xb54a8000)
-        libdb2install.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2install.so.1 (0xb549d000)
-        libdb2locale.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2locale.so.1 (0xb548a000)
-        libdb2osse.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2osse.so.1 (0xb5184000)
-        libdb2osse_db2.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2osse_db2.so.1 (0xb5114000)
-        libdb2trcapi.so.1 => /opt/ibm/db2/V9.7/lib32/libdb2trcapi.so.1 (0xb5101000)
-        libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb500e000)
-        libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb5003000)
-        /lib/ld-linux.so.2 (0xb774d000)
-        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb4fdb000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb4fc6000)
-        libuuid.so.1 => /lib/libuuid.so.1 (0xb4fc2000)
-        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb4f9f000)
-        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb4f97000)
-        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb4f93000)
-        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb4f80000)
-        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb4f73000)
-        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb4f5c000)
-        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb4ee6000)
-        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb4ed5000)
-        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb4e88000)
-        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb4e84000)
-	  </screen></td></tr></tbody>
-	</table>
 	Set-up the necessary environment variables:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
@@ -3560,7 +3479,6 @@ PQL_STA_DB2_DYN
 	It is suggested to set the necessary environment variables in your 
 	profile if you are going to execute the programs many times.
 	This is the list of the suggested variables:
-	<varname>LD_LIBRARY_PATH</varname>,
 	<varname>LIXA_PROFILE</varname>,
 	<varname>PATH</varname>.
       </para>
@@ -4451,11 +4369,9 @@ tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 MYS_STA_PQL_STA
 	  </screen></td></tr></tbody>
 	</table>
-	It is suggested to set the necessary environment variables in your 
+	It is suggested to set the necessary environment variable
+	(<varname>LIXA_PROFILE</varname>) in your 
 	profile if you are going to execute the programs many times.
-	This is the list of the suggested variables:
-	<varname>LD_LIBRARY_PATH</varname>,
-	<varname>LIXA_PROFILE</varname>.
       </para>
     </section>
     <section>
@@ -4733,13 +4649,10 @@ testdb=> select * from AUTHORS;
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example10_mys_pql_ora.c .
-tiian@ubuntu:~/tmp$ gcc example10_mys_pql_ora.c -Wall \
-> -I /opt/lixa/include/ -L /opt/lixa/lib/ -l lixac -l lixamy -l lixapq \
-> $(mysql_config --include --libs_r) \
-> -I /usr/include/postgresql -l pq \
-> -I /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public \
-> -L /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
-> -o example10_mys_pql_ora
+tiian@ubuntu:~/tmp$ gcc example10_mys_pql_ora.c $(/opt/lixa/bin/lixa-config -c -f -m -p -d) \
+> $(mysql_config --include --libs_r) -I/usr/include/postgresql -lpq \
+> -I/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public \
+> -L/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -lclntsh -lnnz10 \  > -o example10_mys_pql_ora
 	  </screen></td></tr></tbody>
 	</table>
 	Verify the executable produced by <command>gcc</command>:
@@ -4747,38 +4660,46 @@ tiian@ubuntu:~/tmp$ gcc example10_mys_pql_ora.c -Wall \
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu:~/tmp$ ldd example10_mys_pql_ora
-        linux-gate.so.1 =>  (0xb7717000)
-        liblixac.so.0 => not found
-        liblixamy.so.0 => not found
-        liblixapq.so.0 => not found
-        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb7524000)
-        libpq.so.5 => /usr/lib/libpq.so.5 (0xb7505000)
+        linux-gate.so.1 =>  (0xb774b000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb7730000)
+        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb7729000)
+        liblixamy.so.0 => /opt/lixa/lib/liblixamy.so.0 (0xb7720000)
+        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb7530000)
+        libpq.so.5 => /usr/lib/libpq.so.5 (0xb7511000)
         libclntsh.so.10.1 => not found
         libnnz10.so => not found
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb73b5000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb739d000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb736b000)
-        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb7353000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb732e000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb7319000)
-        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb72d3000)
-        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb7191000)
-        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb7104000)
-        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb7101000)
-        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb70d8000)
-        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb7097000)
-        /lib/ld-linux.so.2 (0xb7718000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb7093000)
-        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb7070000)
-        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb7068000)
-        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb7065000)
-        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb7051000)
-        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb7044000)
-        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb702d000)
-        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb6fb7000)
-        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb6fa7000)
-        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb6f59000)
-        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb6f55000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb73c1000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb73bd000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb73b9000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb73b4000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb73ab000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb72fa000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb71d9000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb71c4000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb719f000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb7187000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb7155000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb713c000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb7127000)
+        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb70e1000)
+        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb6f9f000)
+        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb6f12000)
+        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb6f0e000)
+        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb6ee5000)
+        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb6ea5000)
+        /lib/ld-linux.so.2 (0xb774c000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb6e7e000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb6e7a000)
+        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb6e56000)
+        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb6e4e000)
+        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb6e4b000)
+        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb6e38000)
+        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb6e2b000)
+        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb6e13000)
+        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb6d9d000)
+        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb6d8d000)
+        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb6d40000)
+        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb6d3c000)
 	  </screen></td></tr></tbody>
 	</table>
       </para>
@@ -4796,56 +4717,52 @@ tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 tiian@ubuntu:~/tmp$ . /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
 	  </screen></td></tr></tbody>
 	</table>
 	Check again the executable:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ ldd example10_mys_pql_ora
-        linux-gate.so.1 =>  (0xb7736000)
-        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb771b000)
-        liblixamy.so.0 => /opt/lixa/lib/liblixamy.so.0 (0xb7713000)
-        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb770b000)
-        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb751b000)
-        libpq.so.5 => /usr/lib/libpq.so.5 (0xb74fc000)
-        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb6748000)
-        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb6543000)
-        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb63f3000)
-        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb63ef000)
-        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb63eb000)
-        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb63e6000)
-        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb63dd000)
-        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb632c000)
-        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb620b000)
-        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb61f6000)
-        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb61de000)
-        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb61ac000)
-        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb6194000)
-        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb616e000)
-        libz.so.1 => /usr/lib/libz.so.1 (0xb6159000)
-        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb6114000)
-        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb5fd2000)
-        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb5f45000)
-        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb5f41000)
-        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb5f18000)
-        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb5ed8000)
-        /lib/ld-linux.so.2 (0xb7737000)
-        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb5eb1000)
-        libuuid.so.1 => /lib/libuuid.so.1 (0xb5ead000)
-        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb5e89000)
-        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb5e81000)
-        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb5e7e000)
-        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb5e6b000)
-        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb5e5e000)
-        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb5e46000)
-        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb5dd0000)
-        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb5dc0000)
-        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb5d73000)
-        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb5d6f000)
+tiian@ubuntu:~/tmp$ ldd example10_mys_pql_ora                                           linux-gate.so.1 =>  (0xb77c3000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb77a8000)
+        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0xb77a1000)
+        liblixamy.so.0 => /opt/lixa/lib/liblixamy.so.0 (0xb7798000)
+        libmysqlclient_r.so.15 => /usr/lib/libmysqlclient_r.so.15 (0xb75a8000)
+        libpq.so.5 => /usr/lib/libpq.so.5 (0xb7589000)
+        libclntsh.so.10.1 => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libclntsh.so.10.1 (0xb67d5000)
+        libnnz10.so => /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib/libnnz10.so (0xb65d0000)
+        libc.so.6 => /lib/tls/i686/cmov/libc.so.6 (0xb6480000)
+        libgmodule-2.0.so.0 => /usr/lib/libgmodule-2.0.so.0 (0xb647c000)
+        libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb6478000)
+        libgthread-2.0.so.0 => /usr/lib/libgthread-2.0.so.0 (0xb6473000)
+        librt.so.1 => /lib/tls/i686/cmov/librt.so.1 (0xb646a000)
+        libglib-2.0.so.0 => /usr/lib/libglib-2.0.so.0 (0xb63b9000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0xb6298000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0xb6283000)
+        libm.so.6 => /lib/tls/i686/cmov/libm.so.6 (0xb625e000)
+        libpthread.so.0 => /lib/tls/i686/cmov/libpthread.so.0 (0xb6246000)
+        libcrypt.so.1 => /lib/tls/i686/cmov/libcrypt.so.1 (0xb6214000)
+        libnsl.so.1 => /lib/tls/i686/cmov/libnsl.so.1 (0xb61fb000)
+        libz.so.1 => /usr/lib/libz.so.1 (0xb61e6000)
+        libssl.so.0.9.8 => /usr/lib/i686/cmov/libssl.so.0.9.8 (0xb61a0000)
+        libcrypto.so.0.9.8 => /usr/lib/i686/cmov/libcrypto.so.0.9.8 (0xb605e000)
+        libkrb5.so.3 => /usr/lib/libkrb5.so.3 (0xb5fd1000)
+        libcom_err.so.2 => /lib/libcom_err.so.2 (0xb5fcd000)
+        libgssapi_krb5.so.2 => /usr/lib/libgssapi_krb5.so.2 (0xb5fa4000)
+        libldap_r-2.4.so.2 => /usr/lib/libldap_r-2.4.so.2 (0xb5f64000)
+        /lib/ld-linux.so.2 (0xb77c4000)
+        libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb5f3d000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0xb5f39000)
+        libk5crypto.so.3 => /usr/lib/libk5crypto.so.3 (0xb5f15000)
+        libkrb5support.so.0 => /usr/lib/libkrb5support.so.0 (0xb5f0d000)
+        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0xb5f0a000)
+        libresolv.so.2 => /lib/tls/i686/cmov/libresolv.so.2 (0xb5ef7000)
+        liblber-2.4.so.2 => /usr/lib/liblber-2.4.so.2 (0xb5eea000)
+        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0xb5ed2000)
+        libgnutls.so.13 => /usr/lib/libgnutls.so.13 (0xb5e5c000)
+        libtasn1.so.3 => /usr/lib/libtasn1.so.3 (0xb5e4c000)
+        libgcrypt.so.11 => /lib/libgcrypt.so.11 (0xb5dff000)
+        libgpg-error.so.0 => /lib/libgpg-error.so.0 (0xb5dfb000)
 	  </screen></td></tr></tbody>
 	</table>
 	Set-up the necessary environment variables:
@@ -5387,11 +5304,9 @@ tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 MYS_STA_MYS_STA
 	  </screen></td></tr></tbody>
 	</table>
-	It is suggested to set the necessary environment variables in your 
+	It is suggested to set the necessary environment variable
+	(<varname>LIXA_PROFILE</varname>) in your 
 	profile if you are going to execute the programs many times.
-	This is the list of the suggested variables:
-	<varname>LD_LIBRARY_PATH</varname>,
-	<varname>LIXA_PROFILE</varname>.
       </para>
     </section>
     <section>
