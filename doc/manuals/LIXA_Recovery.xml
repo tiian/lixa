@@ -324,7 +324,7 @@ tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
 tiian@ubuntu:~/tmp$ echo $ORACLE_SID
 XE
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:
 tiian@ubuntu:~/tmp$ ./example6_pql_ora insert
 Inserting a row in the tables...
 Oracle INSERT statement executed!
@@ -780,9 +780,6 @@ tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 MON_STA_PQL_STA_ORA_DYN
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib:
-tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
-tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib::/opt/lixa/lib
 	  </screen></td></tr></tbody>
 	</table>
 	The specified <varname>LIXA_PROFILE</varname> points to a
