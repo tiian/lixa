@@ -42,6 +42,7 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_ibmdb2_cli.m4 \
 	$(top_srcdir)/m4include/ax_lib_postgresql.m4 \
 	$(top_srcdir)/m4include/ax_lib_mysql.m4 \
+	$(top_srcdir)/m4include/ax_lib_webspheremq.m4 \
 	$(top_srcdir)/m4include/ax_docbook.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -126,6 +127,7 @@ HAVE_IBMDB2 = @HAVE_IBMDB2@
 HAVE_MYSQL = @HAVE_MYSQL@
 HAVE_ORACLE = @HAVE_ORACLE@
 HAVE_POSTGRESQL = @HAVE_POSTGRESQL@
+HAVE_WEBSPHEREMQ = @HAVE_WEBSPHEREMQ@
 IBMDB2_CLI_CPPFLAGS = @IBMDB2_CLI_CPPFLAGS@
 IBMDB2_CLI_LDFLAGS = @IBMDB2_CLI_LDFLAGS@
 INSTALL = @INSTALL@
@@ -195,6 +197,8 @@ STRIP = @STRIP@
 STYLESHEETS_DIR = @STYLESHEETS_DIR@
 VALGRIND = @VALGRIND@
 VERSION = @VERSION@
+WEBSPHEREMQ_CPPFLAGS = @WEBSPHEREMQ_CPPFLAGS@
+WEBSPHEREMQ_LDFLAGS = @WEBSPHEREMQ_LDFLAGS@
 XSLTPROC = @XSLTPROC@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@

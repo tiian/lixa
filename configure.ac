@@ -26,6 +26,7 @@ AC_CONFIG_FILES([
   src/client/switch/oracle/Makefile
   src/client/switch/postgresql/Makefile
   src/client/switch/mysql/Makefile
+  src/client/switch/webspheremq/Makefile
   src/server/Makefile
   tests/Makefile
   tests/atlocal
@@ -61,6 +62,10 @@ m4_include(m4include/ax_lib_mysql.m4)
 AX_LIB_MYSQL
 AM_CONDITIONAL([COMPILE_MYSQL_STUFF], [test "$HAVE_MYSQL" = "yes"])
 AM_CONDITIONAL([COMPILE_MYSQL_POSTGRESQL_STUFF], [test "$HAVE_MYSQL" = "yes" -a "$HAVE_POSTGRESQL" = "yes"])
+# Include WebSphereMQ test
+m4_include(m4include/ax_lib_webspheremq.m4)
+AX_LIB_WEBSPHEREMQ
+AM_CONDITIONAL([COMPILE_WEBSPHEREMQ_STUFF], [test "$HAVE_WEBSPHEREMQ" = "yes"])
 # Include Docbook test
 m4_include(m4include/ax_docbook.m4)
 AX_DOCBOOK
