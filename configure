@@ -818,6 +818,11 @@ COMPILE_DOCBOOK_STUFF_FALSE
 COMPILE_DOCBOOK_STUFF_TRUE
 STYLESHEETS_DIR
 XSLTPROC
+COMPILE_WEBSPHEREMQ_STUFF_FALSE
+COMPILE_WEBSPHEREMQ_STUFF_TRUE
+HAVE_WEBSPHEREMQ
+WEBSPHEREMQ_LDFLAGS
+WEBSPHEREMQ_CPPFLAGS
 COMPILE_MYSQL_POSTGRESQL_STUFF_FALSE
 COMPILE_MYSQL_POSTGRESQL_STUFF_TRUE
 COMPILE_MYSQL_STUFF_FALSE
@@ -970,6 +975,8 @@ with_postgresql
 with_postgresql_include
 with_postgresql_lib
 with_mysql
+with_wsmq
+enable_wsmq
 with_docbook
 enable_debug
 enable_crash
@@ -1621,6 +1628,7 @@ Optional Features:
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --disable-libtool-lock  avoid locking (might break parallel builds)
+  --enable-wsmq[=ETC]     use WebSphereMQ Extended Transactional Client
 
 Optional Features and Packages:
   --disable-option-checking  ignore unrecognized --enable/--with options
@@ -1651,6 +1659,7 @@ Optional Packages:
   --with-postgresql-lib=[DIR]
                           use PostgreSQL API libraries from given path
   --with-mysql[=FILE]     use MySQL (FILE points to mysql_config)
+  --with-wsmq=DIR         use WebSphereMQ from given path
   --with-docbook[=DIR]    use Docbook, DIR contains the stylesheets
   --enable-debug          enable debug code (assert statements)
   --enable-crash          enable crash simulation code
@@ -4460,13 +4469,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4463: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4472: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4466: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4475: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4469: output\"" >&5)
+  (eval echo "\"\$as_me:4478: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5672,7 +5681,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5675 "configure"' > conftest.$ac_ext
+  echo '#line 5684 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7525,11 +7534,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7528: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7537: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7532: \$? = $ac_status" >&5
+   echo "$as_me:7541: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7864,11 +7873,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7867: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7876: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7871: \$? = $ac_status" >&5
+   echo "$as_me:7880: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7969,11 +7978,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7972: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7981: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7976: \$? = $ac_status" >&5
+   echo "$as_me:7985: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8024,11 +8033,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8027: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8036: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8031: \$? = $ac_status" >&5
+   echo "$as_me:8040: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10827,7 +10836,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10830 "configure"
+#line 10839 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10923,7 +10932,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10926 "configure"
+#line 10935 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11964,7 +11973,7 @@ fi
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files Makefile doc/Makefile doc/examples/Makefile doc/manuals/LIXA.xml doc/manuals/Makefile etc/lixac_conf.xml etc/lixad_conf.xml etc/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/lixa-config.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/ibmdb2/Makefile src/client/switch/oracle/Makefile src/client/switch/postgresql/Makefile src/client/switch/mysql/Makefile src/server/Makefile tests/Makefile tests/atlocal tests/lixa-config.at tests/etc/lixac_conf.xml tests/etc/lixad_conf.xml tests/etc/lixad_conf2.xml tests/etc/Makefile tests/src/Makefile var/Makefile doxygen.conf"
+ac_config_files="$ac_config_files Makefile doc/Makefile doc/examples/Makefile doc/manuals/LIXA.xml doc/manuals/Makefile etc/lixac_conf.xml etc/lixad_conf.xml etc/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/lixa-config.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/ibmdb2/Makefile src/client/switch/oracle/Makefile src/client/switch/postgresql/Makefile src/client/switch/mysql/Makefile src/client/switch/webspheremq/Makefile src/server/Makefile tests/Makefile tests/atlocal tests/lixa-config.at tests/etc/lixac_conf.xml tests/etc/lixad_conf.xml tests/etc/lixad_conf2.xml tests/etc/Makefile tests/src/Makefile var/Makefile doxygen.conf"
 
 ac_config_commands="$ac_config_commands tests/atconfig"
 
@@ -12926,6 +12935,584 @@ fi
 else
   COMPILE_MYSQL_POSTGRESQL_STUFF_TRUE='#'
   COMPILE_MYSQL_POSTGRESQL_STUFF_FALSE=
+fi
+
+# Include WebSphereMQ test
+
+
+
+
+    HAVE_WEBSPHEREMQ="no"
+
+# Check whether --with-wsmq was given.
+if test "${with_wsmq+set}" = set; then
+  withval=$with_wsmq; wsmq_path="$withval";HAVE_WEBSPHEREMQ="yes"
+else
+  wsmq_path=""
+
+fi
+
+    # Check whether --enable-wsmq was given.
+if test "${enable_wsmq+set}" = set; then
+  enableval=$enable_wsmq; wsmq_type="$enableval";HAVE_WEBSPHEREMQ="yes"
+else
+  wsmq_type=""
+
+fi
+
+    WEBSPHEREMQ_CPPFLAGS=""
+    WEBSPHEREMQ_LDFLAGS=""
+
+
+    if test "$HAVE_WEBSPHEREMQ" = "yes"
+    then
+        if test -z "$wsmq_path"
+        then
+            { { $as_echo "$as_me:$LINENO: error: WebSphere MQ support is requested but no WebSphere MQ path have been provided. Please locate WebSphere MQ directory using --with-wsmq option." >&5
+$as_echo "$as_me: error: WebSphere MQ support is requested but no WebSphere MQ path have been provided. Please locate WebSphere MQ directory using --with-wsmq option." >&2;}
+   { (exit 1); exit 1; }; }
+        fi
+                                case $host in
+          i?86-*-*-*)
+            WSMQ_LIB_NAME="lib"
+            ;;
+          x86_64-*-*-*)
+            WSMQ_LIB_NAME="lib64"
+            ;;
+          *) { { $as_echo "$as_me:$LINENO: error: LIXA is not yet ported on this architecture for WebSphere MQ" >&5
+$as_echo "$as_me: error: LIXA is not yet ported on this architecture for WebSphere MQ" >&2;}
+   { (exit 1); exit 1; }; }
+            ;;
+        esac
+                                if test "$cross_compiling" = yes; then
+  # Depending upon the size, compute the lo and hi bounds.
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+int
+main ()
+{
+static int test_array [1 - 2 * !((sizeof(long int)) >= 0)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_lo=0 ac_mid=0
+  while :; do
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+int
+main ()
+{
+static int test_array [1 - 2 * !((sizeof(long int)) <= $ac_mid)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_hi=$ac_mid; break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_lo=`expr $ac_mid + 1`
+			if test $ac_lo -le $ac_mid; then
+			  ac_lo= ac_hi=
+			  break
+			fi
+			ac_mid=`expr 2 '*' $ac_mid + 1`
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  done
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+int
+main ()
+{
+static int test_array [1 - 2 * !((sizeof(long int)) < 0)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_hi=-1 ac_mid=-1
+  while :; do
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+int
+main ()
+{
+static int test_array [1 - 2 * !((sizeof(long int)) >= $ac_mid)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_lo=$ac_mid; break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_hi=`expr '(' $ac_mid ')' - 1`
+			if test $ac_mid -le $ac_hi; then
+			  ac_lo= ac_hi=
+			  break
+			fi
+			ac_mid=`expr 2 '*' $ac_mid`
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  done
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_lo= ac_hi=
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+# Binary search between lo and hi bounds.
+while test "x$ac_lo" != "x$ac_hi"; do
+  ac_mid=`expr '(' $ac_hi - $ac_lo ')' / 2 + $ac_lo`
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+int
+main ()
+{
+static int test_array [1 - 2 * !((sizeof(long int)) <= $ac_mid)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_hi=$ac_mid
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_lo=`expr '(' $ac_mid ')' + 1`
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+case $ac_lo in
+?*) long_size=$ac_lo;;
+'')  ;;
+esac
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+static long int longval () { return sizeof(long int); }
+static unsigned long int ulongval () { return sizeof(long int); }
+#include <stdio.h>
+#include <stdlib.h>
+int
+main ()
+{
+
+  FILE *f = fopen ("conftest.val", "w");
+  if (! f)
+    return 1;
+  if ((sizeof(long int)) < 0)
+    {
+      long int i = longval ();
+      if (i != (sizeof(long int)))
+	return 1;
+      fprintf (f, "%ld", i);
+    }
+  else
+    {
+      unsigned long int i = ulongval ();
+      if (i != (sizeof(long int)))
+	return 1;
+      fprintf (f, "%lu", i);
+    }
+  /* Do not output a trailing newline, as this causes \r\n confusion
+     on some platforms.  */
+  return ferror (f) || fclose (f) != 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  long_size=`cat conftest.val`
+else
+  $as_echo "$as_me: program exited with status $ac_status" >&5
+$as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -rf conftest.dSYM
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f conftest.val
+                                wsmq_include_dir=$wsmq_path/inc
+        wsmq_include_dir2=$wsmq_path/samp/xatm
+        wsmq_lib_dir=$wsmq_path/$WSMQ_LIB_NAME
+        if test "$wsmq_type" = "ETC"
+        then
+            if test "$long_size" = "4"
+            then
+                wsmq_lib="mqcxa_r"
+            else
+                wsmq_lib="mqcxa64_r"
+            fi
+        else
+            if test "$long_size" = "4"
+            then
+                wsmq_lib="mqmxa_r"
+            else
+                wsmq_lib="mqmxa64_r"
+            fi
+        fi
+        if test ! -d $wsmq_include_dir
+        then
+            { { $as_echo "$as_me:$LINENO: error: $wsmq_include_dir is not a valid dir" >&5
+$as_echo "$as_me: error: $wsmq_include_dir is not a valid dir" >&2;}
+   { (exit 1); exit 1; }; }
+        fi
+        if test ! -d $wsmq_include_dir2
+        then
+            { { $as_echo "$as_me:$LINENO: error: $wsmq_include_dir2 is not a valid dir" >&5
+$as_echo "$as_me: error: $wsmq_include_dir2 is not a valid dir" >&2;}
+   { (exit 1); exit 1; }; }
+        fi
+        if test ! -d $wsmq_lib_dir
+        then
+            { { $as_echo "$as_me:$LINENO: error: $wsmq_lib_dir is not a valid dir" >&5
+$as_echo "$as_me: error: $wsmq_lib_dir is not a valid dir" >&2;}
+   { (exit 1); exit 1; }; }
+        fi
+                                saved_CPPFLAGS="$CPPFLAGS"
+        CPPFLAGS="$CPPFLAGS -I$wsmq_include_dir -I$wsmq_include_dir2"
+
+        saved_LDFLAGS="$LDFLAGS"
+        wsmq_ldflags="-Wl,-rpath,$wsmq_lib_dir -L$wsmq_lib_dir -l$wsmq_lib"
+        LDFLAGS="$LDFLAGS $wsmq_ldflags"
+
+                                { $as_echo "$as_me:$LINENO: checking for WebSphereMQ headers in $wsmq_include_dir" >&5
+$as_echo_n "checking for WebSphereMQ headers in $wsmq_include_dir... " >&6; }
+
+        ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+        cat >conftest.$ac_ext <<_ACEOF
+
+            /* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <xa.h>
+int
+main ()
+{
+
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+            WEBSPHEREMQ_CPPFLAGS="-I$wsmq_include_dir"
+            wsmq_header_found="yes"
+            { $as_echo "$as_me:$LINENO: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+            wsmq_header_found="no"
+            { $as_echo "$as_me:$LINENO: result: not found" >&5
+$as_echo "not found" >&6; }
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+        ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+                                if test "$wsmq_header_found" = "yes"; then
+
+            { $as_echo "$as_me:$LINENO: checking for WebSphereMQ libraries in $wsmq_lib_dir" >&5
+$as_echo_n "checking for WebSphereMQ libraries in $wsmq_lib_dir... " >&6; }
+
+            ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+            cat >conftest.$ac_ext <<_ACEOF
+
+                /* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#include <xa.h>
+extern struct xa_switch_t MQRMIXASwitchDynamic;
+extern struct xa_switch_t MQRMIXASwitch;
+
+int
+main ()
+{
+
+struct xa_switch_t dyn = MQRMIXASwitchDynamic;
+struct xa_switch_t sta = MQRMIXASwitch;
+
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+
+                WEBSPHEREMQ_LDFLAGS="$wsmq_ldflags"
+                wsmq_lib_found="yes"
+                { $as_echo "$as_me:$LINENO: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+                wsmq_lib_found="no"
+                { $as_echo "$as_me:$LINENO: result: not found" >&5
+$as_echo "not found" >&6; }
+
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+            ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+        fi
+        CPPFLAGS="$saved_CPPFLAGS"
+        LDFLAGS="$saved_LDFLAGS"
+    fi
+
+
+
+
+
+ if test "$HAVE_WEBSPHEREMQ" = "yes"; then
+  COMPILE_WEBSPHEREMQ_STUFF_TRUE=
+  COMPILE_WEBSPHEREMQ_STUFF_FALSE='#'
+else
+  COMPILE_WEBSPHEREMQ_STUFF_TRUE='#'
+  COMPILE_WEBSPHEREMQ_STUFF_FALSE=
 fi
 
 # Include Docbook test
@@ -22147,6 +22734,13 @@ $as_echo "$as_me: error: conditional \"COMPILE_MYSQL_POSTGRESQL_STUFF\" was neve
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${COMPILE_WEBSPHEREMQ_STUFF_TRUE}" && test -z "${COMPILE_WEBSPHEREMQ_STUFF_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"COMPILE_WEBSPHEREMQ_STUFF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"COMPILE_WEBSPHEREMQ_STUFF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${COMPILE_DOCBOOK_STUFF_TRUE}" && test -z "${COMPILE_DOCBOOK_STUFF_FALSE}"; then
   { { $as_echo "$as_me:$LINENO: error: conditional \"COMPILE_DOCBOOK_STUFF\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -22939,6 +23533,7 @@ do
     "src/client/switch/oracle/Makefile") CONFIG_FILES="$CONFIG_FILES src/client/switch/oracle/Makefile" ;;
     "src/client/switch/postgresql/Makefile") CONFIG_FILES="$CONFIG_FILES src/client/switch/postgresql/Makefile" ;;
     "src/client/switch/mysql/Makefile") CONFIG_FILES="$CONFIG_FILES src/client/switch/mysql/Makefile" ;;
+    "src/client/switch/webspheremq/Makefile") CONFIG_FILES="$CONFIG_FILES src/client/switch/webspheremq/Makefile" ;;
     "src/server/Makefile") CONFIG_FILES="$CONFIG_FILES src/server/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tests/atlocal") CONFIG_FILES="$CONFIG_FILES tests/atlocal" ;;

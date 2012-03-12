@@ -41,6 +41,7 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_ibmdb2_cli.m4 \
 	$(top_srcdir)/m4include/ax_lib_postgresql.m4 \
 	$(top_srcdir)/m4include/ax_lib_mysql.m4 \
+	$(top_srcdir)/m4include/ax_lib_webspheremq.m4 \
 	$(top_srcdir)/m4include/ax_docbook.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -65,7 +66,7 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = lixa oracle ibmdb2 postgresql mysql
+DIST_SUBDIRS = lixa oracle ibmdb2 postgresql mysql webspheremq
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -125,6 +126,7 @@ HAVE_IBMDB2 = @HAVE_IBMDB2@
 HAVE_MYSQL = @HAVE_MYSQL@
 HAVE_ORACLE = @HAVE_ORACLE@
 HAVE_POSTGRESQL = @HAVE_POSTGRESQL@
+HAVE_WEBSPHEREMQ = @HAVE_WEBSPHEREMQ@
 IBMDB2_CLI_CPPFLAGS = @IBMDB2_CLI_CPPFLAGS@
 IBMDB2_CLI_LDFLAGS = @IBMDB2_CLI_LDFLAGS@
 INSTALL = @INSTALL@
@@ -194,6 +196,8 @@ STRIP = @STRIP@
 STYLESHEETS_DIR = @STYLESHEETS_DIR@
 VALGRIND = @VALGRIND@
 VERSION = @VERSION@
+WEBSPHEREMQ_CPPFLAGS = @WEBSPHEREMQ_CPPFLAGS@
+WEBSPHEREMQ_LDFLAGS = @WEBSPHEREMQ_LDFLAGS@
 XSLTPROC = @XSLTPROC@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -251,7 +255,8 @@ top_srcdir = @top_srcdir@
 @COMPILE_IBMDB2_STUFF_TRUE@MAYBE_IBMDB2 = ibmdb2
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL = postgresql
 @COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL = mysql
-SUBDIRS = lixa $(MAYBE_ORACLE) $(MAYBE_IBMDB2) $(MAYBE_POSTGRESQL) $(MAYBE_MYSQL)
+@COMPILE_WEBSPHEREMQ_STUFF_TRUE@MAYBE_WEBSPHEREMQ = webspheremq
+SUBDIRS = lixa $(MAYBE_ORACLE) $(MAYBE_IBMDB2) $(MAYBE_POSTGRESQL) $(MAYBE_MYSQL) $(MAYBE_WEBSPHEREMQ)
 all: all-recursive
 
 .SUFFIXES:
