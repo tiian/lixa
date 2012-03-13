@@ -139,7 +139,7 @@ AC_DEFUN([AX_LIB_WEBSPHEREMQ],
         CPPFLAGS="$CPPFLAGS -I$wsmq_include_dir -I$wsmq_include_dir2"
 
         saved_LDFLAGS="$LDFLAGS"
-        wsmq_ldflags="-Wl,-rpath,$wsmq_lib_dir -L$wsmq_lib_dir -l$wsmq_lib"
+        wsmq_ldflags="-Wl,-rpath=$wsmq_lib_dir -L$wsmq_lib_dir -l$wsmq_lib"
         LDFLAGS="$LDFLAGS $wsmq_ldflags"
 
         dnl
