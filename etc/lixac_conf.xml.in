@@ -12,6 +12,10 @@
     <rsrmgr name="PostgreSQL_stareg" switch_file="@EXPANDED_LIBDIR@/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" />
     <rsrmgr name="MySQL_stareg" switch_file="@EXPANDED_LIBDIR@/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,db=lixa,client_flag=0" xa_close_info="" />
     <rsrmgr name="MySQL2_stareg" switch_file="@EXPANDED_LIBDIR@/switch_mysql_stareg.so" xa_open_info="host=192.168.1.3,user=lixa,passwd=,db=lixa,client_flag=0" xa_close_info="" />
+    <rsrmgr name="WSMQ_SRV_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_wsmq_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,qmname=LIXA,tpm=lixa" xa_close_info="" />
+    <rsrmgr name="WSMQ_SRV_stareg" switch_file="@EXPANDED_LIBDIR@/switch_wsmq_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,qmname=LIXA,tpm=lixa" xa_close_info="" />
+    <rsrmgr name="WSMQ_ETC_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_wsmq_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,channel=LIXA.CHANNEL,trptype=tcp,conname=127.0.0.1(1414),qmname=LIXA,tpm=lixa" xa_close_info="" />
+    <rsrmgr name="WSMQ_ETC_stareg" switch_file="@EXPANDED_LIBDIR@/switch_wsmq_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,channel=LIXA.CHANNEL,trptype=tcp,conname=127.0.0.1(1414),qmname=LIXA,tpm=lixa" xa_close_info="" />
     <rsrmgr name="LIXAdummyRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_dummyrm.so" xa_open_info="dummy open string" xa_close_info="dummy close string" />
     <rsrmgr name="LIXAmonkey1staRM" switch_file="@EXPANDED_LIBDIR@/switch_lixa_monkeyrm_stareg.so" xa_open_info="monkeyrm.conf" xa_close_info="" />
   </rsrmgrs>
@@ -200,6 +204,38 @@
       <rsrmgrs>
         <rsrmgr>MySQL_stareg</rsrmgr>
         <rsrmgr>MySQL2_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="MQS_DYN">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>WSMQ_SRV_dynreg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="MQS_STA">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>WSMQ_SRV_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="MQC_DYN">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>WSMQ_ETC_dynreg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="MQC_STA">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>WSMQ_ETC_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
   </profiles>
