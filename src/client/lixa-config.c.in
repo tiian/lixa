@@ -75,6 +75,7 @@ static gboolean libs_mysql = FALSE;
 #endif
 static gboolean prefix = FALSE;
 static gboolean state_dir = FALSE;
+static gboolean switch_files = FALSE;
 static GOptionEntry entries[] =
 {
     { "cflags", 'c', 0, G_OPTION_ARG_NONE, &cflags, "[" CFLAGS_STRING "]", NULL },
@@ -94,6 +95,7 @@ static GOptionEntry entries[] =
 #endif
     { "prefix", 'P', 0, G_OPTION_ARG_NONE, &prefix, "[" PREFIX_STRING "]", NULL },
     { "state-dir", 's', 0, G_OPTION_ARG_NONE, &state_dir, "[" STATE_DIR_STRING "]", NULL },
+    { "rsrc-mngrs", 'r', 0, G_OPTION_ARG_NONE, &switch_files, "list of configured Resource Managers", NULL },
     { NULL }
 };
 
@@ -157,7 +159,14 @@ int main(int argc, char *argv[])
     if (state_dir) {
         printf(OUTPUT_FORMAT, STATE_DIR_STRING);
     }
-
+    if (switch_files) {
+        printf("DB2\t\t@HAVE_IBMDB2@\n");
+        printf("MySQL\t\t@HAVE_MYSQL@\n");
+        printf("Oracle\t\t@HAVE_ORACLE@\n");
+        printf("PostgreSQL\t@HAVE_POSTGRESQL@\n");
+        printf("WebSphereMQ\t@HAVE_WEBSPHEREMQ@\t(@WEBSPHEREMQ_SWITCH_TYPE@)\n"); 
+    }
+    
     return 0;
 }
 

@@ -5568,4 +5568,320 @@ Empty set (0.00 sec)
       </para>
     </section>
   </section>
+  <section xml:id="Development_example12_wmq">
+    <title>An example with WebSphere MQ</title>
+    <section>
+      <title>Introduction</title>
+      <para>
+	WebSphere MQ is a proprietary commercial product supplied by
+	IBM Corporation: the LIXA project tested its behavior when managed
+	by LIXA Transaction Manager using a trial copy. At the time of this
+	writing, the author does not know if a reduced 
+	<quote>express</quote> or <quote>community</quote> edition exists.
+	If you are interested in LIXA and WebSphere MQ you probably already
+	have a valid license to run the software supplied by IBM.
+      </para>
+      <para>
+	WebSphere MQ is a special type of Resource Manager because:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	      it can work as a Transaction Manager as well as a Resource
+	      Manager; LIXA does <emphasis>not</emphasis> use WebSphere MQ
+	      as a Transaction Manager, but only as a Resource Manager.
+	      If you were interested in the Transaction Manager feature of
+	      WebSphere MQ, you should stop this reading and go to the IBM
+	      official documentation
+	  </para></listitem>
+	  <listitem><para>
+	      the WebSphere MQ Resource Manager can be interfaced by a standar
+	      XA Transaction Manager using two different configurations:
+	      <emphasis>server (bind)</emphasis> and
+	      <emphasis>Extended Transactional Client</emphasis>
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <section>
+	<title>WebSphere MQ server/bind (SRV) mode</title>
+	<para>
+	  To use this mode, the WebSphere MQ queue manager used by your
+	  Application Program <emphasis>must reside</emphasis> inside the
+	  same host of your Application Program: the communications between
+	  your Application Program and the queue manager use interprocess
+	  communication (UNIX System V IPC). The interface is really fast,
+	  but you can not cross a network (LAN/MAN/WAN) using it.
+	  If your Application Program and the used queue manager are hosted
+	  by different systems, you will have to use the ETC mode.
+	</para>
+      </section>
+      <section>
+	<title>WebSphere MQ Extended Transactional Client (ETC) mode</title>
+	<para>
+	  You can use this mode every time your Application Program can
+	  reach the desired queue manager using a network: it's usually an
+	  IP network, but WebSphere MQ gives you different choices if you
+	  have to deal with some special non IP based environment like a
+	  SNA network.
+	</para>
+	<para>
+	  You should pay attention the 
+	  <emphasis>Extended Transactional Client (ETC) is not</emphasis>
+	  a basic client: you must install a specific package and you must
+	  pay a specific license to use it. This is not an IBM site, contact
+	  your IBM vendor to pick-up all the necessary information.
+	</para>
+	<para>
+	  The basic/standard WebSphere MQ client can
+	  <emphasis>not</emphasis> be used in conjunction with LIXA because
+	  it does <emphasis>not</emphasis> support the XA protocol. 
+	</para>
+      </section>
+      <important><para>
+	You must not configure and build LIXA to use WebSphere with 
+	server/bind mode and build your Application Program to use
+	WebSphere with ETC mode, or vice versa. If you did it, you would
+	catch unexpected behaviors.
+      </para></important>
+      <para>
+	LIXA project provides <command>lixa-config</command> to retrieve
+	how the LIXA was configured and built:
+	<screen>
+[tiian@centos lixa]$ /opt/lixa/bin/lixa-config --rsrc-mngrs
+DB2             no
+MySQL           yes
+Oracle          no
+PostgreSQL      yes
+WebSphereMQ     yes     (ETC)
+	</screen>
+      </para>
+    </section>
+    @@@ PUT IMAGE HERE @@@
+    <section>
+      <title>Set-up WebSphere MQ environment</title>
+      <para>
+	This esample was developed using WebSphere MQ 7.1 for Linux (32 bit)
+	and CentOS 6.2 (32 bit).
+	<note><para>
+	    If you did not yet installed the software, please refer to IBM
+	    official documentation.
+	    You should need at least these packages for server/bind mode:
+	    <itemizedlist mark="bullet">
+	      <listitem><para>
+		  MQSeriesServer
+	      </para></listitem>
+	      <listitem><para>
+		  MQSeriesSDK
+	      </para></listitem>
+	      <listitem><para>
+		  MQSeriesRuntime
+	      </para></listitem>
+	    </itemizedlist>
+	    You should need at least these packages for ETC mode:
+	    <itemizedlist mark="bullet">
+	      <listitem><para>
+		  MQSeriesTXClient
+	      </para></listitem>
+	      <listitem><para>
+		  MQSeriesSDK
+	      </para></listitem>
+	      <listitem><para>
+		  MQSeriesRuntime
+	      </para></listitem>
+	      <listitem><para>
+		  MQSeriesJava
+	      </para></listitem>
+	    </itemizedlist>
+	</para></note>
+	These are the necessary configuration steps to create the environment
+	necessary to out example (<filename>example12_wmq.c</filename>).
+	First, you must set the correct environment for your shell:
+      </para>
+      <screen>
+[tiian@centos manuals]$ su -
+Password:
+[tiian@centos manuals]$ cd
+[tiian@centos ~]$ su -
+Password:
+[root@centos ~]# su - mqm
+-bash-4.1$ . /opt/mqm71/bin/setmqenv -s
+-bash-4.1$ dspmqver
+Name:        WebSphere MQ
+Version:     7.1.0.0
+Level:       p000-L111024
+BuildType:   IKAP - (Production)
+Platform:    WebSphere MQ for Linux (x86 platform)
+Mode:        32-bit
+O/S:         Linux 2.6.32-220.el6.i686
+InstName:    Installation1
+InstDesc:
+InstPath:    /opt/mqm71
+DataPath:    /var/mqm
+Primary:     No
+MaxCmdLevel: 710
+      </screen>
+      <note><para>
+	  I installed the product in <filename>/opt/mqm71</filename>:
+	  adjust the command to reflect your real installation path.
+      </para></note>
+      Create a queue manager named <quote>LIXA</quote> and start it:
+      <screen>
+-bash-4.1$ crtmqm LIXA
+There are 90 days left in the trial period for this copy of WebSphere MQ.
+WebSphere MQ queue manager created.
+Directory '/var/mqm/qmgrs/LIXA' created.
+The queue manager is associated with installation 'Installation1'.
+Creating or replacing default objects for queue manager 'LIXA'.
+Default objects statistics : 71 created. 0 replaced. 0 failed.
+Completing setup.
+Setup completed.
+
+-bash-4.1$ strmqm LIXA
+There are 90 days left in the trial period for this copy of WebSphere MQ.
+WebSphere MQ queue manager 'LIXA' starting.
+The queue manager is associated with installation 'Installation1'.
+5 log records accessed on queue manager 'LIXA' during the log replay phase.
+Log replay for queue manager 'LIXA' complete.
+Transaction manager state recovered for queue manager 'LIXA'.
+WebSphere MQ queue manager 'LIXA' started using V7.1.0.0.
+      </screen>
+      Create a test queue named <quote>LIXA.QLOCAL</quote> and try to put/get
+      a message into/from it using
+      <systemitem class="username">mqm</systemitem> user:
+      <screen>
+-bash-4.1$ runmqsc LIXA
+5724-H72 (C) Copyright IBM Corp. 1994, 2011.  ALL RIGHTS RESERVED.
+Starting MQSC for queue manager LIXA.
+
+
+DEFINE QLOCAL(LIXA.QLOCAL)
+     1 : DEFINE QLOCAL(LIXA.QLOCAL)
+AMQ8006: WebSphere MQ queue created.
+end
+     2 : end
+One MQSC command read.
+No commands have a syntax error.
+All valid MQSC commands were processed.
+
+-bash-4.1$ cd /opt/mqm71/samp/bin/
+-bash-4.1$ ./amqsput LIXA.QLOCAL LIXA
+Sample AMQSPUT0 start
+target queue is LIXA.QLOCAL
+This is a test message
+
+Sample AMQSPUT0 end
+
+-bash-4.1$ ./amqsget LIXA.QLOCAL LIXA
+Sample AMQSGET0 start
+message &lt;This is a test message&gt;
+
+no more messages
+Sample AMQSGET0 end
+
+      </screen>
+      Please refer to IBM documentation for 
+      <command>runmqsc, amqsput, amqsget</command>.
+      Now you can create the definition necessary for WebSphere MQ client
+      mode. First, authorize your user to connect to the queue manager
+      using a user <emphasis>not</emphasis> connected to
+      <systemitem class="group">mqm</systemitem> group
+      (change <systemitem class="username">tiian</systemitem> with your
+      own user):
+      <screen>
+-bash-4.1$ runmqsc LIXA
+5724-H72 (C) Copyright IBM Corp. 1994, 2011.  ALL RIGHTS RESERVED.
+Starting MQSC for queue manager LIXA.
+
+
+DISPLAY QMGR CHLAUTH
+     1 : DISPLAY QMGR CHLAUTH
+AMQ8408: Display Queue Manager details.
+   QMNAME(LIXA)                            CHLAUTH(ENABLED)
+SET AUTHREC OBJTYPE(QMGR) PRINCIPAL('tiian') AUTHADD(CONNECT)
+     2 : SET AUTHREC OBJTYPE(QMGR) PRINCIPAL('tiian') AUTHADD(CONNECT)
+AMQ8862: WebSphere MQ authority record set.
+SET AUTHREC PROFILE(LIXA.QLOCAL) OBJTYPE(QUEUE) PRINCIPAL('tiian')
+AUTHADD(PUT,GET)
+     3 : SET AUTHREC PROFILE(LIXA.QLOCAL) OBJTYPE(QUEUE) PRINCIPAL('tiian')
+AUTHADD(PUT,GET)
+AMQ8862: WebSphere MQ authority record set.
+end
+     4 : end
+3 MQSC commands read.
+No commands have a syntax error.
+All valid MQSC commands were processed.
+      </screen>
+      Then create a connection channel, authotize it to your user
+      (change <systemitem class="username">tiian</systemitem>) and a listener:
+      <screen>
+-bash-4.1$ runmqsc LIXA
+5724-H72 (C) Copyright IBM Corp. 1994, 2011.  ALL RIGHTS RESERVED.
+Starting MQSC for queue manager LIXA.
+
+
+DEFINE CHANNEL (LIXA.CHANNEL) CHLTYPE (SVRCONN) TRPTYPE (TCP)
+     1 : DEFINE CHANNEL (LIXA.CHANNEL) CHLTYPE (SVRCONN) TRPTYPE (TCP)
+AMQ8014: WebSphere MQ channel created.
+SET CHLAUTH(LIXA.CHANNEL) TYPE(ADDRESSMAP) ADDRESS('127.0.0.1')
+MCAUSER('tiian')
+     2 : SET CHLAUTH(LIXA.CHANNEL) TYPE(ADDRESSMAP) ADDRESS('127.0.0.1')
+MCAUSER('tiian')
+AMQ8877: WebSphere MQ channel authentication record set.
+DEFINE LISTENER (LIXA.LISTENER) TRPTYPE (TCP) CONTROL (QMGR) PORT(1414)
+     3 : DEFINE LISTENER (LIXA.LISTENER) TRPTYPE (TCP) CONTROL (QMGR)
+PORT(1414)
+AMQ8626: WebSphere MQ listener created.
+START LISTENER(LIXA.LISTENER)
+     4 : START LISTENER(LIXA.LISTENER)
+AMQ8021: Request to start WebSphere MQ listener accepted.
+end
+     5 : end
+4 MQSC commands read.
+No commands have a syntax error.
+All valid MQSC commands were processed.
+      </screen>
+      Now you can try the TCP/IP client connection using 
+      <emphasis>your own</emphasis> user instead of
+      <systemitem class="username">mqm</systemitem>:
+      <screen>
+[tiian@centos ~]$ export MQSERVER=LIXA.CHANNEL/TCP/'127.0.0.1(1414)'
+[tiian@centos ~]$ echo $MQSERVER
+LIXA.CHANNEL/TCP/127.0.0.1(1414)
+
+[tiian@centos ~]$ cd /opt/mqm71/samp/bin/
+[tiian@centos bin]$ . /opt/mqm71/bin/setmqenv -s
+[tiian@centos bin]$ ./amqsputc LIXA.QLOCAL LIXA
+Sample AMQSPUT0 start
+target queue is LIXA.QLOCAL
+This is a test message (from client)
+
+Sample AMQSPUT0 end
+[tiian@centos bin]$ ./amqsgetc LIXA.QLOCAL LIXA
+Sample AMQSGET0 start
+message &lt;This is a test message (from client)&gt;
+no more messages
+Sample AMQSGET0 end
+      </screen>
+      Please refer to IBM documentation for 
+      <command>runmqsc, amqsputc, amqsgetc</command>.
+      <section>
+	<title>Build LIXA software</title>
+	<para>
+	  If you want to use WebSphere MQ with server/bind mode, you have to
+	  use something like this when configuring LIXA:
+	  <screen>
+./configure --enable-wsmq --with-wsmq=/opt/mqm71
+	  </screen>
+	  If you want to use WebSphere MQ with Extended Transactional Client
+	  mode, you have to use something like this when configuring LIXA:
+	  <screen>
+./configure --enable-wsmq=ETC --with-wsmq=/opt/mqm71
+	  </screen>
+	  There should be no reason you want both on the same host: if you
+	  could use the server/bind mode, you should use it because it would
+	  give you the best performance.
+	  If you don't have the queue manager inside the host, you 
+	  will have to use the Extended Transactional Client mode (ETC).
+	</para>
+      </section>
+    </section>
+  </section>
 </chapter>

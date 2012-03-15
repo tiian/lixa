@@ -6,7 +6,7 @@ Remove from manual if not necessary.
 Package for SWIG (Ubuntu 10.04):
 swig
 
-Document lixa-config utility program; update build instructions for the example programs
+Document lixa-config utility program; update build instructions for the example programs (Oracle and DB2)
 Example:
 gcc example8_mys.c -Wall $(/opt/lixa/bin/lixa-config --cflags --include --libs-mysql --ldflags) $(mysql_config --include --libs_r) -o example8_mys
 using -L flag LD_LIBRARY_PATH is useless for LIXA...
