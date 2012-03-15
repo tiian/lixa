@@ -538,6 +538,7 @@ Application Options:
   -m, --libs-mysql                 [-L/opt/lixa/lib -llixac -llixamy]
   -P, --prefix                     [/opt/lixa]
   -s, --state-dir                  [/opt/lixa/var]
+  -r, --rsrc-mngrs                 list of configured Resource Managers
       </screen>
       If you need to set a variable with the path containing LIXA libraries,
       simply use something like:

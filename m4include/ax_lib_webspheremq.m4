@@ -48,6 +48,7 @@ dnl This macro calls:
 dnl
 dnl   AC_SUBST(WEBSPHEREMQ_CFLAGS)
 dnl   AC_SUBST(WEBSPHEREMQ_LDFLAGS)
+dnl   AC_SUBST(WEBSPHEREMQ_SWITCH_TYPE)
 dnl
 dnl And sets:
 dnl
@@ -106,6 +107,7 @@ AC_DEFUN([AX_LIB_WEBSPHEREMQ],
         wsmq_lib_dir=$wsmq_path/$WSMQ_LIB_NAME
         if test "$wsmq_type" = "ETC"
         then
+            WEBSPHEREMQ_SWITCH_TYPE="$wsmq_type"
             if test "$long_size" = "4"
             then
                 wsmq_lib="mqcxa_r"
@@ -113,6 +115,7 @@ AC_DEFUN([AX_LIB_WEBSPHEREMQ],
                 wsmq_lib="mqcxa64_r"
             fi
         else
+            WEBSPHEREMQ_SWITCH_TYPE="SRV"
             if test "$long_size" = "4"
             then
                 wsmq_lib="mqmxa_r"
@@ -202,5 +205,6 @@ struct xa_switch_t sta = MQRMIXASwitch;
 
     AC_SUBST([WEBSPHEREMQ_CPPFLAGS])
     AC_SUBST([WEBSPHEREMQ_LDFLAGS])
+    AC_SUBST([WEBSPHEREMQ_SWITCH_TYPE])
     AC_SUBST([HAVE_WEBSPHEREMQ])
 ])
