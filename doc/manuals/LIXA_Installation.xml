@@ -146,6 +146,9 @@
 	  <listitem><para><productname>
 		PostgreSQL 8.3 (32 bit) / PostgreSQL 8.4 (64 bit)
 	  </productname></para></listitem>
+	  <listitem><para><productname>
+		WebSphere MQ 7.1 (32 bit)
+	  </productname></para></listitem>
 	</itemizedlist>
       </para>
     </section>
@@ -523,7 +526,7 @@ make
       </para>
       <section>
 	<title>IBM DB2 Express-C 9.7<footnote><para>
-	      IBM and DB2 are trademark of <trademark>IBM</trademark>
+	      IBM and DB2 are trademarks of <trademark>IBM</trademark>
 	      corporation
 	</para></footnote></title>
 	<para>
@@ -536,65 +539,6 @@ make
 	  </screen>
 	  to create a loadable module containing the switch structure.
 	</para>
-      </section>
-      <section>
-	<title>Oracle XE 10.2/11.2<footnote><para>
-	      Oracle is a trademark of <trademark>Oracle</trademark>
-	      corporation
-	</para></footnote></title>
-	<para>
-	  This step is useful if you want to use Oracle Database as a Resource
-	  Manager coordinated by LIXA; only version XE 10.2 has been
-	  tested, but there should not be relevant differences with a
-	  different version. Use something like this for Oracle 10.2
-	  (32 bit architecture):
-	  <screen>
-./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
-	  </screen>
-	  and something like this for Oracle 11.2 (64 bit architecture):
-	  <screen>
-./configure --with-oracle=/u01/app/oracle/product/11.2.0/xe
-	  </screen>
-	  to create a loadable module containing the switch structure.
-	</para>
-	<para>
-	  Extra configuration is needed in order to use Oracle DBMS; the
-	  necessary steps are documented in the configuration chapter.
-	</para>
-      </section>
-      <section>
-	<title>PostgreSQL 8.3/8.4<footnote><para>
-	      The Trademark Policy of PostgreSQL is available at this link:
-	      <link xlink:href="http://wiki.postgresql.org/wiki/Trademark_Policy">
-		http://wiki.postgresql.org/wiki/Trademark_Policy</link>
-	</para></footnote></title>
-	<para>
-	  This step is useful if you want to use PostgreSQL as a Resource
-	  Manager coordinated by LIXA; only versions 8.3 and 8.4 have been
-	  tested, but there should not be relevant differences with a
-	  different version. Use something like this (Ubuntu):
-	  <screen>
-./configure --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib
-	  </screen>
-	  or something like this (CentOS)
-	  <footnote><para>
-	      These are the necessary packages on CentOS: 
-	      postgresql-server.i686 postgresql.i686 postgresql-devel.i686
-	  </para></footnote>:
-	  <screen>
-./configure --with-postgresql-include=/usr/include --with-postgresql-lib=/usr/lib
-	  </screen>
-	  to create a loadable module containing the switch structure.
-	</para>
-	<note><para>
-	    PostgreSQL does not supply an XA standard switch structure, but
-	    only some SQL non standard statements (
-	    <code>PREPARE TRANSACTION, COMMIT PREPARED, ROLLBACK PREPARED</code>
-	    ) that can be used to implement some XA features.
-	    This is good enought to build a loadable module that can be
-	    used by the LIXA transaction manager, but some XA standard features
-	    - like dynamic registration - can not be implemented.
-	</para></note>
       </section>
       <section>
 	<title>MySQL 5.0/5.1<footnote><para>
@@ -677,6 +621,88 @@ make
 	    + MySQL resource manager + LIXA transaction manager).
 	  </para>
 	</warning>
+      </section>
+      <section>
+	<title>Oracle XE 10.2/11.2<footnote><para>
+	      Oracle is a trademark of <trademark>Oracle</trademark>
+	      corporation
+	</para></footnote></title>
+	<para>
+	  This step is useful if you want to use Oracle Database as a Resource
+	  Manager coordinated by LIXA; only version XE 10.2 has been
+	  tested, but there should not be relevant differences with a
+	  different version. Use something like this for Oracle 10.2
+	  (32 bit architecture):
+	  <screen>
+./configure --with-oracle=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+	  </screen>
+	  and something like this for Oracle 11.2 (64 bit architecture):
+	  <screen>
+./configure --with-oracle=/u01/app/oracle/product/11.2.0/xe
+	  </screen>
+	  to create a loadable module containing the switch structure.
+	</para>
+	<para>
+	  Extra configuration is needed in order to use Oracle DBMS; the
+	  necessary steps are documented in the configuration chapter.
+	</para>
+      </section>
+      <section>
+	<title>PostgreSQL 8.3/8.4<footnote><para>
+	      The Trademark Policy of PostgreSQL is available at this link:
+	      <link xlink:href="http://wiki.postgresql.org/wiki/Trademark_Policy">
+		http://wiki.postgresql.org/wiki/Trademark_Policy</link>
+	</para></footnote></title>
+	<para>
+	  This step is useful if you want to use PostgreSQL as a Resource
+	  Manager coordinated by LIXA; only versions 8.3 and 8.4 have been
+	  tested, but there should not be relevant differences with a
+	  different version. Use something like this (Ubuntu):
+	  <screen>
+./configure --with-postgresql-include=/usr/include/postgresql --with-postgresql-lib=/usr/lib
+	  </screen>
+	  or something like this (CentOS)
+	  <footnote><para>
+	      These are the necessary packages on CentOS: 
+	      postgresql-server.i686 postgresql.i686 postgresql-devel.i686
+	  </para></footnote>:
+	  <screen>
+./configure --with-postgresql-include=/usr/include --with-postgresql-lib=/usr/lib
+	  </screen>
+	  to create a loadable module containing the switch structure.
+	</para>
+	<note><para>
+	    PostgreSQL does not supply an XA standard switch structure, but
+	    only some SQL non standard statements (
+	    <code>PREPARE TRANSACTION, COMMIT PREPARED, ROLLBACK PREPARED</code>
+	    ) that can be used to implement some XA features.
+	    This is good enought to build a loadable module that can be
+	    used by the LIXA transaction manager, but some XA standard features
+	    - like dynamic registration - can not be implemented.
+	</para></note>
+      </section>
+      <section>
+	<title>WebSphere MQ 7.1<footnote><para>
+	      WebSphere and WebSphere MQ are trademarks of 
+	      <trademark>IBM</trademark> corporation
+	</para></footnote></title>
+	<para>
+	  If you want to use WebSphere MQ with server/bind mode, you have to
+	  use something like this when configuring LIXA:
+	  <screen>
+./configure --enable-wsmq --with-wsmq=/opt/mqm71
+	  </screen>
+	  If you want to use WebSphere MQ with Extended Transactional Client
+	  mode, you have to use something like this when configuring LIXA:
+	  <screen>
+./configure --enable-wsmq=ETC --with-wsmq=/opt/mqm71
+	  </screen>
+	  There should be no reason you want both on the same host: if you
+	  could use the server/bind mode, you should use it because it would
+	  give you the best performance.
+	  If you don't have the queue manager inside the host, you 
+	  will have to use the Extended Transactional Client mode (ETC).
+	</para>
       </section>
       <section>
 	<title>Two or more resource managers</title>
