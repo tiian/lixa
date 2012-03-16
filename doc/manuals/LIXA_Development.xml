@@ -5642,8 +5642,8 @@ Empty set (0.00 sec)
 	catch unexpected behaviors.
       </para></important>
       <important><para>
-	The LIXA software must be configured to support the PostgreSQL
-	server resource manager as explained in 
+	The LIXA software must be configured to support the WebSphere MQ
+	Resource Manager as explained in 
 	<xref linkend="Linking_third_party_resource_managers"/>.
       </para></important>
       <para>
@@ -5700,7 +5700,8 @@ WebSphereMQ     yes     (ETC)
 	    </itemizedlist>
 	</para></note>
 	These are the necessary configuration steps to create the environment
-	necessary to out example (<filename>example12_wmq.c</filename>).
+	necessary to run the supplied example 
+	(<filename>example12_wmq.c</filename>).
 	First, you must set the correct environment for your shell:
       </para>
       <para>
@@ -5798,7 +5799,7 @@ Sample AMQSGET0 end
 	  </screen></td></tr></tbody>
 	</table>
 	Please refer to IBM documentation for 
-	<command>runmqsc, amqsput, amqsget</command>.
+	<command>runmqsc, amqsput, amqsget</command> commands.
       </para>
       <para>
 	Now you can create the definition necessary for WebSphere MQ client
@@ -5893,7 +5894,7 @@ Sample AMQSGET0 end
 	  </screen></td></tr></tbody>
 	</table>
 	Please refer to IBM documentation for 
-	<command>runmqsc, amqsputc, amqsgetc</command>.
+	<command>runmqsc, amqsputc, amqsgetc</command> commands.
       </para>
       <para>
 	OK, the <quote>LIXA.QLOCAL</quote> local queue was created and it's
@@ -5925,7 +5926,7 @@ lixa      3589     1  0 12:30 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
       </para>
     </section>
     <section>
-      <title>Build the client program</title>
+      <title>Build the client program (SRV mode)</title>
       <para>
 	Prepare the client (Application Program) using the below commands
 	(gcc command was splitted on several lines using \ to help
@@ -5936,29 +5937,449 @@ lixa      3589     1  0 12:30 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 [tiian@centos ~]$ mkdir tmp
 [tiian@centos ~]$ cd tmp
 [tiian@centos tmp]$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example12_wmq.c .
-	  </screen></td></tr></tbody>
-	</table>
-	If you LIXA environment is configured for WebSphere MQ server/bind
-	mode:
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
 [tiian@centos tmp]$ /opt/lixa/bin/lixa-config -r|grep WebSphereMQ
 WebSphereMQ     yes     (SRV)
-@@@
+[tiian@centos tmp]$ gcc example12_wmq.c $(/opt/lixa/bin/lixa-config -c -f -l -d) \
+> -I/opt/mqm71/inc -L/opt/mqm71/lib -Wl,-rpath=/opt/mqm71/lib \
+> -lmqm_r -o example12_wmq
 	  </screen></td></tr></tbody>
 	</table>
-	If you LIXA environment is configured for WebSphere MQ Extented
-	Transactional Client mode:
+	Verify the executable produced by <command>gcc</command>:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-[tiian@centos tmp]$ /opt/lixa/bin/lixa-config -r|grep WebSphereMQ
-WebSphereMQ     yes     (ETC)
-@@@
+[tiian@centos tmp]$ ldd example12_wmq
+        linux-gate.so.1 =>  (0x00852000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00cfc000)
+        libmqm_r.so => /opt/mqm71/lib/libmqm_r.so (0x00a7f000)
+        libc.so.6 => /lib/libc.so.6 (0x00110000)
+        libgmodule-2.0.so.0 => /lib/libgmodule-2.0.so.0 (0x00da2000)
+        libgthread-2.0.so.0 => /lib/libgthread-2.0.so.0 (0x00da8000)
+        librt.so.1 => /lib/librt.so.1 (0x00bca000)
+        libglib-2.0.so.0 => /lib/libglib-2.0.so.0 (0x00bd5000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0x02d3c000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00daf000)
+        libm.so.6 => /lib/libm.so.6 (0x00b9e000)
+        libpthread.so.0 => /lib/libpthread.so.0 (0x00b81000)
+        libmqe_r.so => /opt/mqm71/lib/libmqe_r.so (0xb6f70000)
+        libdl.so.2 => /lib/libdl.so.2 (0x00b7a000)
+        /lib/ld-linux.so.2 (0x009c2000)
+        libz.so.1 => /lib/libz.so.1 (0x00ce1000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0x0076f000)
 	  </screen></td></tr></tbody>
 	</table>
       </para>
-      </section>
+    </section>
+    <section>
+      <title>Set-up LIXA environment (SRV mode)</title>
+      <para>
+	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=MQS_DYN
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+MQS_DYN
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Some checks before program execution (SRV mode)</title>
+      <para>
+	We set <varname>LIXA_PROFILE</varname> to value
+	<quote>MQS_DYN</quote>, looking at
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename>:
+	<screen>
+    &lt;profile name="MQS_DYN"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;WSMQ_SRV_dynreg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+	</screen>
+	the profile references the Resource Manager named
+	<quote>WSMQ_SRV_dynreg</quote>, looking again at the config file:
+	<screen>
+    &lt;rsrmgr name="WSMQ_SRV_dynreg" switch_file="/opt/lixa/lib/switch_wsmq_dynreg.so" xa_open_info="axlib=/opt/lixa/lib/liblixac.so,qmname=LIXA,tpm=lixa" xa_close_info="" /&gt;
+	</screen>
+	we can discover how the WebSphere MQ Resource Manager is configured 
+	for XA
+	<footnote><para>
+	    The content of <constant>xa_open_info</constant> is passed to
+	    <function>xa_open</function> function: you can refer to 
+	    WebSphere MQ official
+	    documentation to discover what you can pass to this function.
+	    Please pay attention the <varname>xa_open_info</varname> can
+	    contain a maximum of 255 characters: this limitation is
+	    documented in <citation>XAspec</citation>.
+	</para></footnote>.
+      </para>
+    </section>
+    <section>
+      <title>Program execution (SRV mode)</title>
+      <para>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ ls -la
+total 116
+drwxrwxr-x 2 tiian tiian  4096 Mar 16 17:04 .
+drwx------ 8 tiian tiian  4096 Mar 16 13:10 ..
+-rwxrwxr-x 1 tiian tiian  9587 Mar 16 17:04 example12_wmq
+-rw-r--r-- 1 tiian tiian  5342 Mar 16 13:13 example12_wmq.c
+	  </screen></td></tr></tbody>
+	</table>
+	Retrieve all the messages from <quote>LIXA.QLOCAL</quote> queue before
+	program execution:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ . /opt/mqm71/bin/setmqenv -s
+[tiian@centos tmp]$ /opt/mqm71/samp/bin/amqsget LIXA.QLOCAL LIXA
+Sample AMQSGET0 start
+no more messages
+Sample AMQSGET0 end
+	  </screen></td></tr></tbody>
+	</table>
+	Execute the program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ ./example12_wmq insert
+target queue is LIXA.QLOCAL
+Message inserted in queue LIXA.QLOCAL: 'Test message for LIXA'
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of the queue:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ /opt/mqm71/samp/bin/amqsget LIXA.QLOCAL LIXA
+Sample AMQSGET0 start
+message &lt;Test message for LIXA&gt;
+no more messages
+Sample AMQSGET0 end
+	  </screen></td></tr></tbody>
+	</table>
+	Now you can try to remove a message inserted with the standard
+	utility:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ /opt/mqm71/samp/bin/amqsput LIXA.QLOCAL LIXA
+Sample AMQSPUT0 start
+target queue is LIXA.QLOCAL
+This is a sample message from the keyboard!
+
+Sample AMQSPUT0 end
+[tiian@centos tmp]$ ./example12_wmq delete
+target queue is LIXA.QLOCAL
+Message retrieved from queue LIXA.QLOCAL: 'This is a sample message from the keyboard!'
+	  </screen></td></tr></tbody>
+	</table>
+	you can verify in file
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename>
+	that <quote>MQS_DYN</quote> is associated to dynamic registration.
+	Execute the program enabling trace:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ export LIXA_TRACE_MASK=0x00002000
+[tiian@centos tmp]$ echo $LIXA_TRACE_MASK
+0x00002000
+[tiian@centos tmp]$ ./example12_wmq insert 2&gt;&amp;1 | grep ax_reg
+2012-03-16 18:36:23.500382 [14774/3078875408] ax_reg: rmid=0, xid=0xbffaf630, flags=0x0
+2012-03-16 18:36:23.500581 [14774/3078875408] ax_reg: the application program has started a transaction (TX states S3); this XID '1279875137.846a8fdfe2204b11ac85586a13fc0348.9a910775bb747f3c157021d6a03a7b31' will be returned
+2012-03-16 18:36:23.501290 [14774/3078875408] ax_reg: sending 153 bytes to the server for step 8
+2012-03-16 18:36:23.501965 [14774/3078875408] ax_reg/excp=7/ret_cod=0/errno=1
+	  </screen></td></tr></tbody>
+	</table>
+	Changing <varname>LIXA_PROFILE</varname> you can try the static
+	registration as well:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ export LIXA_PROFILE=MQS_STA
+[tiian@centos tmp]$ echo $LIXA_PROFILE
+MQC_STA
+[tiian@centos tmp]$ ./example12_wmq delete 2&gt;&amp;1 | grep xa_start
+2012-03-16 18:38:08.942458 [14784/3078269200] lixa_xa_start
+2012-03-16 18:38:08.942644 [14784/3078269200] lixa_xa_start: sending 213 bytes to the server for step 8
+[...]
+2012-03-16 18:38:08.946569 [14784/3078269200] lixa_xa_start: xa_start_entry(xid, 0, 0x0) = 0
+2012-03-16 18:38:08.947188 [14784/3078269200] lixa_xa_start: sending 210 bytes to the server for step 24
+2012-03-16 18:38:08.947521 [14784/3078269200] lixa_xa_start/excp=10/ret_cod=0/errno=1
+	  </screen></td></tr></tbody>
+	</table>
+	To try <function>tx_rollback()</function> you have to slightly 
+	change the sample program:
+	<table frame="box">
+	  <thead><tr><td>[original example12_wmq.c]</td></tr></thead>
+	  <tbody><tr><td><screen>
+    [...]
+    if (TX_OK != (txrc = tx_commit())) {
+        fprintf(stderr, "tx_commit error: %d\n", txrc);
+        exit(txrc);
+    }
+
+    /*
+    if (TX_OK != (txrc = tx_rollback())) {
+        fprintf(stderr, "tx_rollback error: %d\n", txrc);
+        exit(txrc);
+    }
+    */
+    [...]
+	  </screen></td></tr></tbody>
+	</table>
+	move the comment from <function>tx_rollback()</function> function
+	block to <function>tx_rollback()</function> function block:
+	<table frame="box">
+	  <thead><tr><td>[modified example12_wmq.c]</td></tr></thead>
+	  <tbody><tr><td><screen>
+    [...]
+    /*
+    if (TX_OK != (txrc = tx_commit())) {
+        fprintf(stderr, "tx_commit error: %d\n", txrc);
+        exit(txrc);
+    }
+    */
+
+    if (TX_OK != (txrc = tx_rollback())) {
+        fprintf(stderr, "tx_rollback error: %d\n", txrc);
+        exit(txrc);
+    }
+    [...]
+	  </screen></td></tr></tbody>
+	</table>
+	Compile it again and try the modified example:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ gcc example12_wmq.c $(/opt/lixa/bin/lixa-config -c -f -l -d) \
+> -I/opt/mqm71/inc -L/opt/mqm71/lib -Wl,-rpath=/opt/mqm71/lib \
+> -lmqm_r -o example12_wmq
+	  </screen></td></tr></tbody>
+	</table>
+	Verify the queue is empty, execute the sample program, verify the
+	queue is empty again:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ unset LIXA_TRACE_MASK
+[tiian@centos tmp]$ /opt/mqm71/samp/bin/amqsget LIXA.QLOCAL LIXA
+Sample AMQSGET0 start
+no more messages
+Sample AMQSGET0 end
+[tiian@centos tmp]$ ./example12_wmq insert
+target queue is LIXA.QLOCAL
+Message inserted in queue LIXA.QLOCAL: 'Test message for LIXA'
+[tiian@centos tmp]$ /opt/mqm71/samp/bin/amqsget LIXA.QLOCAL LIXA
+Sample AMQSGET0 start
+no more messages
+Sample AMQSGET0 end
+	  </screen></td></tr></tbody>
+	</table>
+	Restore <filename>example12_wmq.c</filename> to the original state.
+      </para>
+    </section>
+    <section>
+      <title>Build the client program (ETC mode)</title>
+      <para>
+	Prepare the client (Application Program) using the below commands
+	(gcc command was splitted on several lines using \ to help
+	readability, but you may use a single line): 
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos ~]$ mkdir tmp
+[tiian@centos ~]$ cd tmp
+[tiian@centos tmp]$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example12_wmq.c .
+[tiian@centos tmp]$ /opt/lixa/bin/lixa-config -r|grep WebSphereMQ
+WebSphereMQ     yes     (ETC)
+[tiian@centos tmp]$ gcc example12_wmq.c $(/opt/lixa/bin/lixa-config -c -f -l -d) \
+> -I/opt/mqm71/inc -L/opt/mqm71/lib -Wl,-rpath=/opt/mqm71/lib \
+> -lmqic_r -o example12_wmq
+	  </screen></td></tr></tbody>
+	</table>
+	Verify the executable produced by <command>gcc</command>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ ldd example12_wmq
+        linux-gate.so.1 =>  (0x00d50000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00dfd000)
+        libmqic_r.so => /opt/mqm71/lib/libmqic_r.so (0x0021a000)
+        libc.so.6 => /lib/libc.so.6 (0x009e8000)
+        libgmodule-2.0.so.0 => /lib/libgmodule-2.0.so.0 (0x00da2000)
+        libgthread-2.0.so.0 => /lib/libgthread-2.0.so.0 (0x00da8000)
+        librt.so.1 => /lib/librt.so.1 (0x00bca000)
+        libglib-2.0.so.0 => /lib/libglib-2.0.so.0 (0x00bd5000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0x02d3c000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x008f3000)
+        libm.so.6 => /lib/libm.so.6 (0x00b9e000)
+        libpthread.so.0 => /lib/libpthread.so.0 (0x00b81000)
+        libmqe_r.so => /opt/mqm71/lib/libmqe_r.so (0x00e16000)
+        libdl.so.2 => /lib/libdl.so.2 (0x00b7a000)
+        /lib/ld-linux.so.2 (0x009c2000)
+        libz.so.1 => /lib/libz.so.1 (0x00ce1000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0x0076f000)
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment (ETC mode)</title>
+      <para>
+	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ echo $LIXA_PROFILE
+
+[tiian@centos tmp]$ export LIXA_PROFILE=MQC_DYN
+[tiian@centos tmp]$ echo $LIXA_PROFILE
+MQC_DYN
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Some checks before program execution (ETC mode)</title>
+      <para>
+	We set <varname>LIXA_PROFILE</varname> to value
+	<quote>MQC_DYN</quote>, looking at
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename>:
+	<screen>
+    &lt;profile name="MQC_DYN"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;WSMQ_ETC_dynreg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+	</screen>
+	the profile references the Resource Manager named
+	<quote>WSMQ_ETC_dynreg</quote>, looking again at the config file:
+	<screen>
+    &lt;rsrmgr name="WSMQ_ETC_dynreg" switch_file="/opt/lixa/lib/switch_wsmq_dynreg.so" xa_open_info="axlib=/opt/lixa/lib/liblixac.so,channel=LIXA.CHANNEL,trptype=tcp,conname=127.0.0.1(1414),qmname=LIXA,tpm=lixa" xa_close_info="" /&gt;
+	</screen>
+	we can discover how the WebSphere MQ Resource Manager is configured 
+	for XA
+	<footnote><para>
+	    The content of <constant>xa_open_info</constant> is passed to
+	    <function>xa_open</function> function: you can refer to 
+	    WebSphere MQ official
+	    documentation to discover what you can pass to this function.
+	    Please pay attention the <varname>xa_open_info</varname> can
+	    contain a maximum of 255 characters: this limitation is
+	    documented in <citation>XAspec</citation>.
+	</para></footnote>.
+      </para>
+    </section>
+    <section>
+      <title>Program execution (ETC mode)</title>
+      <para>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ ls -la
+total 116
+drwxrwxr-x 2 tiian tiian  4096 Mar 16 17:04 .
+drwx------ 8 tiian tiian  4096 Mar 16 13:10 ..
+-rwxrwxr-x 1 tiian tiian  9587 Mar 16 17:04 example12_wmq
+-rw-r--r-- 1 tiian tiian  5342 Mar 16 13:13 example12_wmq.c
+	  </screen></td></tr></tbody>
+	</table>
+	Retrieve all the messages from <quote>LIXA.QLOCAL</quote> queue before
+	program execution:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ . /opt/mqm71/bin/setmqenv -s
+[tiian@centos tmp]$ export MQSERVER=LIXA.CHANNEL/TCP/'127.0.0.1(1414)'
+[tiian@centos tmp]$ /opt/mqm71/samp/bin/amqsgetc LIXA.QLOCAL LIXA
+Sample AMQSGET0 start
+no more messages
+Sample AMQSGET0 end
+	  </screen></td></tr></tbody>
+	</table>
+	Execute the program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ ./example12_wmq insert
+target queue is LIXA.QLOCAL
+Message inserted in queue LIXA.QLOCAL: 'Test message for LIXA'
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of the queue:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ /opt/mqm71/samp/bin/amqsgetc LIXA.QLOCAL LIXA
+Sample AMQSGET0 start
+message &lt;Test message for LIXA&gt;
+no more messages
+Sample AMQSGET0 end
+	  </screen></td></tr></tbody>
+	</table>
+	Now you can try to remove a message inserted with the standard
+	utility:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ /opt/mqm71/samp/bin/amqsputc LIXA.QLOCAL LIXA
+Sample AMQSPUT0 start
+target queue is LIXA.QLOCAL
+This is a sample message from the keyboard!
+
+Sample AMQSPUT0 end
+[tiian@centos tmp]$ ./example12_wmq delete
+target queue is LIXA.QLOCAL
+Message retrieved from queue LIXA.QLOCAL: 'This is a sample message from the keyboard!'
+	  </screen></td></tr></tbody>
+	</table>
+	you can verify in file
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename>
+	that <quote>MQC_DYN</quote> is associated to dynamic registration.
+	Execute the program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ export LIXA_TRACE_MASK=0x00002000
+[tiian@centos tmp]$ echo $LIXA_TRACE_MASK
+0x00002000
+[tiian@centos tmp]$ ./example12_wmq insert 2&gt;&amp;1 | grep ax_reg
+2012-03-16 18:17:06.108362 [2793/3077654800] ax_reg: rmid=0, xid=0xbfb4d59c, flags=0x0
+2012-03-16 18:17:06.108566 [2793/3077654800] ax_reg: the application program has started a transaction (TX states S3); this XID '1279875137.70797228836149378b6fd6a315481425.80e88a292250da8f8b2ee3a5959e8650' will be returned
+2012-03-16 18:17:06.109221 [2793/3077654800] ax_reg: sending 153 bytes to the server for step 8
+2012-03-16 18:17:06.109926 [2793/3077654800] ax_reg/excp=7/ret_cod=0/errno=2
+	  </screen></td></tr></tbody>
+	</table>
+	Changing <varname>LIXA_PROFILE</varname> you can try the static
+	registration as well:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ export LIXA_PROFILE=MQC_STA
+[tiian@centos tmp]$ echo $LIXA_PROFILE
+MQC_STA
+[tiian@centos tmp]$ ./example12_wmq delete 2&gt;&amp;1 | grep xa_start
+2012-03-16 18:18:59.302555 [2806/3078256912] lixa_xa_start
+2012-03-16 18:18:59.302831 [2806/3078256912] lixa_xa_start: sending 213 bytes to the server for step 8
+[...]
+2012-03-16 18:18:59.307208 [2806/3078256912] lixa_xa_start: xa_start_entry(xid, 0, 0x0) = 0
+2012-03-16 18:18:59.307373 [2806/3078256912] lixa_xa_start: sending 210 bytes to the server for step 24
+2012-03-16 18:18:59.308103 [2806/3078256912] lixa_xa_start/excp=10/ret_cod=0/errno=2
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
   </section>
 </chapter>
