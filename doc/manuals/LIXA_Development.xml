@@ -5662,7 +5662,14 @@ WebSphereMQ     yes     (ETC)
 	</table>
       </para>
     </section>
-    @@@ PUT IMAGE HERE @@@
+    <figure xml:id="develop12">
+      <title>Deploy model of an example with WebSphere MQ</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Development_12.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
     <section>
       <title>Set-up WebSphere MQ environment</title>
       <para>
@@ -6381,5 +6388,16 @@ MQC_STA
 	</table>
       </para>
     </section>
+  </section>
+  <section xml:id="Development_example13_wmq_mys_pql">
+    <title>An example with WebSphere MQ, MySQL and PostgreSQL</title>
+    <figure xml:id="develop13">
+      <title>Deploy model of an example with WebSphere MQ, MySQL and PostgreSQL</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="LIXA_Development_13.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
   </section>
 </chapter>
