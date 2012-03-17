@@ -6399,5 +6399,15 @@ MQC_STA
 	</imageobject>
       </mediaobject>
     </figure>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ gcc example13_wmq_mys_pql.c \
+> $(/opt/lixa/bin/lixa-config -c -f -m -p -d) \
+> $(mysql_config --include --libs_r) -I/usr/include/postgresql -lpq \
+> -I/opt/mqm71/inc -L/opt/mqm71/lib -Wl,-rpath -Wl,/opt/mqm71/lib \
+> -lmqm_r -o example13_wmq_mys_pql
+	  </screen></td></tr></tbody>
+	</table>
   </section>
 </chapter>

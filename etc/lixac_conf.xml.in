@@ -238,5 +238,45 @@
         <rsrmgr>WSMQ_ETC_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="MQS_DYN_MYS_STA_PQL_STA">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>WSMQ_SRV_dynreg</rsrmgr>
+        <rsrmgr>MySQL_stareg</rsrmgr>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="MQS_STA_MYS_STA_PQL_STA">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>WSMQ_SRV_stareg</rsrmgr>
+        <rsrmgr>MySQL_stareg</rsrmgr>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="MQC_DYN_MYS_STA_PQL_STA">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>WSMQ_ETC_dynreg</rsrmgr>
+        <rsrmgr>MySQL_stareg</rsrmgr>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="MQC_STA_MYS_STA_PQL_STA">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>WSMQ_ETC_stareg</rsrmgr>
+        <rsrmgr>MySQL_stareg</rsrmgr>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
   </profiles>
 </client>
