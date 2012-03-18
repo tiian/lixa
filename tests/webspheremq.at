@@ -5,36 +5,32 @@
 #
 AT_BANNER([WebSphere MQ])
 
-# check the database "testdb" is available and the user can connect to it
-AT_SETUP([MQ/0.0/0.0 WebSphere MQ availability])
-AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
-AT_CHECK([$WEBSPHEREMQ_PATH/samp/bin/$AMQSGET LIXA.QLOCAL LIXA], [0], [ignore], [ignore])
-AT_CLEANUP
-
 # check the current user has PUT & GET privilege on table authors
-AT_SETUP([PQ/0.0/0.1 PUT & GET on LIXA.QLOCAL])
+AT_SETUP([PQ/0.0/0.0 PUT & GET on LIXA.QLOCAL])
 AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_CHECK([echo "Case test message" | $WEBSPHEREMQ_PATH/samp/bin/$AMQSPUT LIXA.QLOCAL LIXA], [0], [ignore], [ignore])
 AT_CHECK([$WEBSPHEREMQ_PATH/samp/bin/$AMQSGET LIXA.QLOCAL LIXA >$TESTS_TMP_FILE1 && grep "Case test message" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # try one phase commit (dynamic registration)
-AT_SETUP([PQ/0.1/0.0 One phase commit (dynamic registration)])
+AT_SETUP([MQ/0.1/1.0 One phase commit (dynamic reg.)])
 AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_PROFILE=$LIXA_PROF_DYN ; lixa_test_exec.sh reset start case0044 1 1 0], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=$LIXA_PROF_DYN ; lixa_test_exec.sh noreset none case0044 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF1_DYN ; lixa_test_exec.sh reset start case0044 1 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF1_DYN ; lixa_test_exec.sh noreset none case0044 1 0 0 >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([grep 'Test message for LIXA' $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
+
 # try one phase commit (static registration)
-AT_SETUP([PQ/0.1/0.1 One phase commit (dynamic registration)])
+AT_SETUP([MQ/0.1/1.1 One phase commit (static reg.)])
 AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_PROFILE=$LIXA_PROF_STA ; lixa_test_exec.sh reset start case0044 1 1 0], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=$LIXA_PROF_STA ; lixa_test_exec.sh noreset none case0044 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF1_STA ; lixa_test_exec.sh noreset none case0044 1 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF1_STA ; lixa_test_exec.sh noreset none case0044 1 0 0 >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([grep 'Test message for LIXA' $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
 
-# try two phase commit
-AT_SETUP([PQ/0.1/0.1 Two phase commit])
-AT_CHECK([exit 13])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+# try two phase commit (dynamic registration)
+AT_SETUP([MQ/0.1/2.0 Two phase commit (dynamic reg.)])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -44,7 +40,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; lixa_test_exec.sh noreset none case0044 1 1 0], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -54,12 +50,39 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; lixa_test_exec.sh noreset none case0044 1 0 0 >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([grep 'Test message for LIXA' $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
 
-# try rollback after prepare
-AT_SETUP([PQ/0.1/0.2 Rollback after prepare])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+# try two phase commit (static registration)
+AT_SETUP([MQ/0.1/2.1 Two phase commit (static reg.)])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; lixa_test_exec.sh noreset none case0044 1 1 0], [0], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; lixa_test_exec.sh noreset none case0044 1 0 0 >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([grep 'Test message for LIXA' $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# try rollback after prepare (dynamic registration)
+AT_SETUP([MQ/0.1/3.0 Rollback after prepare (dyn. reg.)])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -69,72 +92,157 @@ xa_prepare/-3
 xa_rollback/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 1 -2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; lixa_test_exec.sh noreset none case0044 1 1 -2], [0], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; lixa_test_exec.sh noreset none case0044 1 0 0 >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([grep 'Test message for LIXA' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([PQ/0.1/1.0 Crash after connect])
+# try rollback after prepare (static registration)
+AT_SETUP([MQ/0.1/3.1 Rollback after prepare (sta. reg.)])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; lixa_test_exec.sh noreset none case0044 1 1 -2], [0], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; lixa_test_exec.sh noreset none case0044 1 0 0 >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([grep 'Test message for LIXA' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MQ/0.2/0.0 Crash after connect (dyn. reg.)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=2 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; export LIXA_CRASH_POINT=2 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([PQ/0.1/1.1 Crash in the middle of xa_open])
+AT_SETUP([MQ/0.2/0.1 Crash after connect (sta. reg.)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=3 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; export LIXA_CRASH_POINT=2 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([PQ/0.1/1.2 Crash in the middle of xa_open (2)])
+AT_SETUP([MQ/0.2/1.0 Crash in the middle of xa_open (dyn)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=4 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; export LIXA_CRASH_POINT=3 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([PQ/0.1/1.3 Crash after xa_open])
+AT_SETUP([MQ/0.2/1.1 Crash in the middle of xa_open (sta)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=5 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; export LIXA_CRASH_POINT=3 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([PQ/0.1/2.0 Crash in the middle of xa_end])
+AT_SETUP([MQ/0.1/1.2 Crash in the middle of xa_open (2,dyn)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHERE" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; export LIXA_CRASH_POINT=4 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([PQ/0.1/2.1 Automatic recovery])
+AT_SETUP([MQ/0.1/1.3 Crash in the middle of xa_open (2,sta)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHERE" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; export LIXA_CRASH_POINT=4 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MQ/0.1/1.4 Crash after xa_open (dyn. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; export LIXA_CRASH_POINT=5 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MQ/0.1/1.5 Crash after xa_open (sta. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; export LIXA_CRASH_POINT=5 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MQ/0.1/2.0 Crash in the middle of xa_end (dyn. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MQ/0.1/2.1 Automatic recovery (dyn. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -145,25 +253,25 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; lixa_test_exec.sh noreset none case0044 1 1 0], [0], [ignore], [ignore])
 AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|tee $TESTS_TMP_FILE1 ; grep 'recovery failed: 1' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([PQ/0.1/2.2 Crash after end])
+AT_SETUP([MQ/0.1/2.2 Crash in the middle of xa_end (sta. reg.)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0037 1 0 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([PQ/0.1/2.3 Automatic recovery])
+AT_SETUP([MQ/0.1/2.3 Automatic recovery (sta. reg.)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -174,14 +282,72 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; lixa_test_exec.sh noreset none case0044 1 1 0], [0], [ignore], [ignore])
 AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|tee $TESTS_TMP_FILE1 ; grep 'recovery failed: 1' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
 AT_CLEANUP
 
-# crash in the middle of prepare
-AT_SETUP([PQ/0.1/3.0 Crash in the middle of prepare])
+AT_SETUP([MQ/0.1/2.4 Crash after end (dyn. reg.)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0044 1 0 0], [134], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MQ/0.1/2.5 Automatic recovery (dyn. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; lixa_test_exec.sh noreset none case0044 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|tee $TESTS_TMP_FILE1 ; grep 'recovery failed: 1' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MQ/0.1/2.6 Crash after end (sta. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0044 1 0 0], [134], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MQ/0.1/2.7 Automatic recovery (sta. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; lixa_test_exec.sh noreset none case0044 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|tee $TESTS_TMP_FILE1 ; grep 'recovery failed: 1' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
+AT_CLEANUP
+
+# crash in the middle of prepare (dynamic registration)
+AT_SETUP([MQ/0.1/3.0 Crash in the middle of prepare (dyn)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -189,12 +355,12 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=14 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; export LIXA_CRASH_POINT=14 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([PQ/0.1/3.1 Automatic recovery])
+AT_SETUP([MQ/0.1/3.1 Automatic recovery (dyn)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -205,13 +371,13 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; lixa_test_exec.sh noreset none case0044 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
-# crash after prepare
-AT_SETUP([PQ/0.1/4.0 Crash after prepare])
+# crash in the middle of prepare (static registration)
+AT_SETUP([MQ/0.1/3.2 Crash in the middle of prepare (sta)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -219,12 +385,12 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset none case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; export LIXA_CRASH_POINT=14 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([PQ/0.1/4.1 Automatic recovery])
+AT_SETUP([MQ/0.1/3.3 Automatic recovery (sta)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -235,13 +401,13 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none case0037 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; lixa_test_exec.sh noreset none case0044 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
-# crash after prepare
-AT_SETUP([PQ/0.1/5.0 Crash after prepare])
+# crash after prepare (dynamic registration)
+AT_SETUP([MQ/0.1/4.0 Crash after prepare (dyn. reg.)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -249,20 +415,108 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset stop case0037 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([PQ/0.1/5.1 Manual recovery])
+AT_SETUP([MQ/0.1/4.1 Automatic recovery (dyn. reg.)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; lixa_test_exec.sh noreset none case0044 1 0 0], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# crash after prepare (static registration)
+AT_SETUP([MQ/0.1/4.2 Crash after prepare (sta. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset none case0044 1 1 0], [134], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MQ/0.1/4.3 Automatic recovery (sta. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; lixa_test_exec.sh noreset none case0044 1 0 0], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# crash after prepare (dynamic registration)
+AT_SETUP([MQ/0.1/5.0 Crash after prepare (dyn. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset stop case0044 1 1 0], [134], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MQ/0.1/5.1 Manual recovery (dyn. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_recover/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh reset start lixar -p >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; lixa_test_exec.sh reset start lixar -p >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CHECK([grep '^xid=' $TESTS_TMP_FILE1 | cut -d "'" -f 2 > $TESTS_TMP_FILE2], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset stop lixar -p -r -X $TESTS_TMP_FILE2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_DYN ; lixa_test_exec.sh noreset none lixar -p -r -X $TESTS_TMP_FILE2], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# crash after prepare (static registration)
+AT_SETUP([MQ/0.1/5.2 Crash after prepare (sta. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset stop case0044 1 1 0], [134], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MQ/0.1/5.3 Manual recovery (sta. reg.)])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_WEBSPHEREMQ" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_recover/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; lixa_test_exec.sh reset start lixar -p >$TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([grep '^xid=' $TESTS_TMP_FILE1 | cut -d "'" -f 2 > $TESTS_TMP_FILE2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=$LIXA_PROF2_STA ; lixa_test_exec.sh noreset stop lixar -p -r -X $TESTS_TMP_FILE2], [0], [ignore], [ignore])
 AT_CLEANUP
 

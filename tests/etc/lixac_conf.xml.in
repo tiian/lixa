@@ -25,10 +25,10 @@
     <rsrmgr name="MySQL_stareg_1" switch_file="@abs_top_builddir@/src/client/switch/mysql/.libs/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,db=lixa,client_flag=0," xa_close_info="" />
     <rsrmgr name="MySQL_stareg_2" switch_file="@abs_top_builddir@/src/client/switch/mysql/.libs/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,,==,db=lixa,client_flag=0" xa_close_info="" />
     <rsrmgr name="MySQL_stareg_3" switch_file="@abs_top_builddir@/src/client/switch/mysql/.libs/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,,	== ,db=lixa,client_flag=0" xa_close_info="" />
-    <rsrmgr name="WSMQ_SRV_dynreg" switch_file="@abs_top_builddir@/src/client/switch/mysql/.libs/switch_wsmq_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/lib/liblixac.so,qmname=LIXA,tpm=lixa" xa_close_info="" />
-    <rsrmgr name="WSMQ_SRV_stareg" switch_file="@abs_top_builddir@/src/client/switch/mysql/.libs/switch_wsmq_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/lib/liblixac.so,qmname=LIXA,tpm=lixa" xa_close_info="" />
-    <rsrmgr name="WSMQ_ETC_dynreg" switch_file="@abs_top_builddir@/src/client/switch/mysql/.libs/switch_wsmq_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/lib/liblixac.so,channel=LIXA.CHANNEL,trptype=tcp,conname=127.0.0.1(1414),qmname=LIXA,tpm=lixa" xa_close_info="" />
-    <rsrmgr name="WSMQ_ETC_stareg" switch_file="@abs_top_builddir@/src/client/switch/mysql/.libs/switch_wsmq_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/lib/liblixac.so,channel=LIXA.CHANNEL,trptype=tcp,conname=127.0.0.1(1414),qmname=LIXA,tpm=lixa" xa_close_info="" />
+    <rsrmgr name="WSMQ_SRV_dynreg" switch_file="@abs_top_builddir@/src/client/switch/webspheremq/.libs/switch_wsmq_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,qmname=LIXA,tpm=lixa" xa_close_info="" />
+    <rsrmgr name="WSMQ_SRV_stareg" switch_file="@abs_top_builddir@/src/client/switch/webspheremq/.libs/switch_wsmq_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,qmname=LIXA,tpm=lixa" xa_close_info="" />
+    <rsrmgr name="WSMQ_ETC_dynreg" switch_file="@abs_top_builddir@/src/client/switch/webspheremq/.libs/switch_wsmq_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,channel=LIXA.CHANNEL,trptype=tcp,conname=127.0.0.1(1414),qmname=LIXA,tpm=lixa" xa_close_info="" />
+    <rsrmgr name="WSMQ_ETC_stareg" switch_file="@abs_top_builddir@/src/client/switch/webspheremq/.libs/switch_wsmq_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,channel=LIXA.CHANNEL,trptype=tcp,conname=127.0.0.1(1414),qmname=LIXA,tpm=lixa" xa_close_info="" />
   </rsrmgrs>
   <profiles>
     <profile name="CASE_PROF_0000">
@@ -324,6 +324,42 @@
       </sttsrvs>
       <rsrmgrs>
         <rsrmgr>WSMQ_ETC_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0032">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>WSMQ_SRV_dynreg</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0033">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>WSMQ_SRV_stareg</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0034">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>WSMQ_ETC_dynreg</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0035">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>WSMQ_ETC_stareg</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
       </rsrmgrs>
     </profile>
   </profiles>
