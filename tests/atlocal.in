@@ -79,6 +79,12 @@ export HAVE_ORACLE
 HAVE_IBMDB2=@HAVE_IBMDB2@
 export HAVE_IBMDB2
 
+HAVE_WEBSPHEREMQ=@HAVE_WEBSPHEREMQ@
+export HAVE_WEBSPHEREMQ
+
+WEBSPHEREMQ_SWITCH_TYPE=@WEBSPHEREMQ_SWITCH_TYPE@
+export WEBSPHEREMQ_SWITCH_TYPE
+
 if test "$HAVE_ORACLE" = "yes"
 then
 . @ORACLE_ENV_SH@
@@ -88,4 +94,28 @@ fi
 if test "$HAVE_IBMDB2" = "yes"
 then
 . /home/db2inst1/sqllib/db2profile
+fi
+
+if test "$HAVE_WEBSPHEREMQ" = "yes"
+then 
+    export WEBSPHEREMQ_PATH=@WEBSPHEREMQ_PATH@
+    if test "$WEBSPHEREMQ_SWITCH_TYPE" = "ETC"
+    then
+        AMQSGET=amqsgetc
+        AMQSPUT=amqsputc
+        MQSERVER=LIXA.CHANNEL/TCP/'127.0.0.1(1414)'
+        LIXA_PROF_DYN=CASE_PROF_0030
+        LIXA_PROF_STA=CASE_PROF_0031
+    else
+        AMQSGET=amqsget
+        AMQSPUT=amqsput
+        MQSERVER=""
+        LIXA_PROF_DYN=CASE_PROF_0028
+        LIXA_PROF_STA=CASE_PROF_0029
+    fi
+    export AMQSGET
+    export AMQSPUT
+    export MQSERVER
+    export LIXA_PROF_DYN
+    export LIXA_PROF_STA
 fi

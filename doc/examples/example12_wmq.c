@@ -42,8 +42,9 @@
 
 int main(int argc, char **argv)
 {
+    /* generic variables */
     int      txrc, delete, mq_no_disc;
-  
+    /* WebSphere MQ variables */
     MQOD     obj_descr = {MQOD_DEFAULT};
     MQMD     msg_descr = {MQMD_DEFAULT};
     MQPMO    put_msg_opt = {MQPMO_DEFAULT};

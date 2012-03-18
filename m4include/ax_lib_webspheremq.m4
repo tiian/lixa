@@ -49,6 +49,8 @@ dnl
 dnl   AC_SUBST(WEBSPHEREMQ_CFLAGS)
 dnl   AC_SUBST(WEBSPHEREMQ_LDFLAGS)
 dnl   AC_SUBST(WEBSPHEREMQ_SWITCH_TYPE)
+dnl   AC_SUBST(WEBSPHEREMQ_PATH)
+dnl   AC_SUBST(WEBSPHEREMQ_PGMLIB)
 dnl
 dnl And sets:
 dnl
@@ -81,6 +83,8 @@ AC_DEFUN([AX_LIB_WEBSPHEREMQ],
         if test -z "$wsmq_path"
         then
             AC_MSG_ERROR([WebSphere MQ support is requested but no WebSphere MQ path have been provided. Please locate WebSphere MQ directory using --with-wsmq option.])
+        else
+            WEBSPHEREMQ_PATH="$wsmq_path"
         fi
         dnl
         dnl host dependent values
@@ -114,6 +118,7 @@ AC_DEFUN([AX_LIB_WEBSPHEREMQ],
             else
                 wsmq_lib="mqcxa64_r"
             fi
+            WEBSPHEREMQ_PGMLIB=mqic_r
         else
             WEBSPHEREMQ_SWITCH_TYPE="SRV"
             if test "$long_size" = "4"
@@ -122,6 +127,7 @@ AC_DEFUN([AX_LIB_WEBSPHEREMQ],
             else
                 wsmq_lib="mqmxa64_r"
             fi
+            WEBSPHEREMQ_PGMLIB=mqm_r
         fi
         if test ! -d $wsmq_include_dir
         then
@@ -206,5 +212,7 @@ struct xa_switch_t sta = MQRMIXASwitch;
     AC_SUBST([WEBSPHEREMQ_CPPFLAGS])
     AC_SUBST([WEBSPHEREMQ_LDFLAGS])
     AC_SUBST([WEBSPHEREMQ_SWITCH_TYPE])
+    AC_SUBST([WEBSPHEREMQ_PATH])
+    AC_SUBST([WEBSPHEREMQ_PGMLIB])
     AC_SUBST([HAVE_WEBSPHEREMQ])
 ])

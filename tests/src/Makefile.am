@@ -21,14 +21,18 @@ endif
 if COMPILE_IBMDB2_STUFF
   MAYBE_IBMDB2 = case0039
 endif
+if COMPILE_WEBSPHEREMQ_STUFF
+  MAYBE_WEBSPHEREMQ = case0044
+endif
 noinst_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0006 case0007 case0008 case0009 case0010 case0011 case0012 \
 	case0013 case0014 case0015 case0016 case0017 case0018 case0019 \
 	case0020 case0021 case0022 case0023 case0024 case0025 case0026 \
 	case0027 case0028 case0029 case0030 case0031 case0032 case0033 \
-	case0034 case0035 case0036 case0043 \
+	case0034 case0035 case0036 case0043 case0044 \
 	$(MAYBE_POSTGRESQL) $(MAYBE_ORACLE) \
-	$(MAYBE_IBMDB2) $(MAYBE_MYSQL) $(MAYBE_MYSQL_POSTGRESQL)
+	$(MAYBE_IBMDB2) $(MAYBE_MYSQL) $(MAYBE_MYSQL_POSTGRESQL) \
+	$(MAYBE_WEBSPHEREMQ)
 case0000_SOURCES = case0000.c
 case0001_SOURCES = case0001.c
 case0002_SOURCES = case0002.c
@@ -97,4 +101,7 @@ case0042_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la \
 	../../src/client/switch/postgresql/liblixapq.la
 case0043_SOURCES = case0043.c
-
+case0044_SOURCES = case0044.c
+case0044_CPPFLAGS = @WEBSPHEREMQ_CPPFLAGS@ -I../../src/client
+case0044_LDFLAGS = @WEBSPHEREMQ_LDFLAGS@
+case0044_LDADD = ../../src/client/liblixac.la
