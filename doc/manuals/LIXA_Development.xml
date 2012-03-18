@@ -5670,7 +5670,7 @@ WebSphereMQ     yes     (ETC)
 	</imageobject>
       </mediaobject>
     </figure>
-    <section>
+    <section xml:id="Development_setup_WebSphereMQ_environment">
       <title>Set-up WebSphere MQ environment</title>
       <para>
 	This esample was developed using WebSphere MQ 7.1 for Linux (32 bit)
@@ -5984,10 +5984,10 @@ WebSphereMQ     yes     (SRV)
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+[tiian@centos tmp]$ echo $LIXA_PROFILE
 
-tiian@ubuntu:~/tmp$ export LIXA_PROFILE=MQS_DYN
-tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+[tiian@centos tmp]$ export LIXA_PROFILE=MQS_DYN
+[tiian@centos tmp]$ echo $LIXA_PROFILE
 MQS_DYN
 	  </screen></td></tr></tbody>
 	</table>
@@ -6391,6 +6391,20 @@ MQC_STA
   </section>
   <section xml:id="Development_example13_wmq_mys_pql">
     <title>An example with WebSphere MQ, MySQL and PostgreSQL</title>
+    <para>
+      The example of this paragraph is quite complex because it involves
+      three distinct
+      Resource Managers: WebSphere MQ that's a message
+      oriented middleware, MySQL and PostgreSQL thar are database servers.
+      The proposed example can be easily adapted for WebSphere MQ and MySQL
+      or WebSphere MQ and PostgreSQL removing useless stuff.
+    </para>
+    <para>
+      It is strongly suggested you have yet tryed the examples described in
+      <xref linkend="Development_example8_mys"/>,
+      in <xref linkend="Development_example5_pql"/> and
+      in <xref linkend="Development_example12_wmq"/>.
+    </para>
     <figure xml:id="develop13">
       <title>Deploy model of an example with WebSphere MQ, MySQL and PostgreSQL</title>
       <mediaobject>
@@ -6399,6 +6413,324 @@ MQC_STA
 	</imageobject>
       </mediaobject>
     </figure>
+    <section>
+      <title>Set-up WebSphere MQ, MySQL, PostgreSQL and LIXA environment</title>
+      <para>
+	Please follow the instructions explained 
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	      in <xref linkend="Development_setup_WebSphereMQ_environment"/>
+	      to set-up a running environment for MySQL server
+	  </para></listitem>
+	  <listitem><para>
+	      in <xref linkend="Development_setup_MySQL_environment"/>
+	      to set-up a running environment for MySQL server
+	  </para></listitem>
+	  <listitem><para>
+	      in <xref linkend="Development_setup_PostgreSQL_environment"/>
+	      to set-up a running environment for PostgreSQL server
+	  </para></listitem>
+	  <listitem><para>
+	      in <xref linkend="Development_start_LIXA_server"/>
+	      to start up the LIXA state server
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+    </section>
+    <section>
+      <title>Build the client program (SRV mode)</title>
+      <para>
+	Prepare the client (Application Program) using the below commands
+	(gcc command was splitted on several lines using \ to help
+	readability, but you may use a single line): 
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos ~]$ mkdir tmp
+[tiian@centos ~]$ cd tmp
+[tiian@centos tmp]$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example13_wmq_mys_pql.c .
+[tiian@centos tmp]$ /opt/lixa/bin/lixa-config -r|grep WebSphereMQ
+WebSphereMQ     yes     (SRV)
+[tiian@centos tmp]$ gcc example13_wmq_mys_pql.c \
+> $(/opt/lixa/bin/lixa-config -c -f -m -p -d) \
+> $(mysql_config --include --libs_r) -I/usr/include/postgresql -lpq \
+> -I/opt/mqm71/inc -L/opt/mqm71/lib -Wl,-rpath -Wl,/opt/mqm71/lib \
+> -lmqm_r -o example13_wmq_mys_pql
+	  </screen></td></tr></tbody>
+	</table>
+	Verify the executable produced by <command>gcc</command>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ ldd example13_wmq_mys_pql
+        linux-gate.so.1 =>  (0x008bc000)
+        liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00fe3000)
+        liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0x00163000)
+        liblixamy.so.0 => /opt/lixa/lib/liblixamy.so.0 (0x00684000)
+        libmysqlclient_r.so.16 => /usr/lib/mysql/libmysqlclient_r.so.16 (0x0016a000)
+        libz.so.1 => /lib/libz.so.1 (0x00ce1000)
+        libpthread.so.0 => /lib/libpthread.so.0 (0x00b81000)
+        libcrypt.so.1 => /lib/libcrypt.so.1 (0x05144000)
+        libnsl.so.1 => /lib/libnsl.so.1 (0x0524e000)
+        libm.so.6 => /lib/libm.so.6 (0x00b9e000)
+        libssl.so.10 => /usr/lib/libssl.so.10 (0x053f2000)
+        libcrypto.so.10 => /usr/lib/libcrypto.so.10 (0x06344000)
+        libpq.so.5 => /usr/lib/libpq.so.5 (0x00110000)
+        libmqm_r.so => /opt/mqm71/lib/libmqm_r.so (0x00559000)
+        libc.so.6 => /lib/libc.so.6 (0x009e8000)
+        libgmodule-2.0.so.0 => /lib/libgmodule-2.0.so.0 (0x00da2000)
+        libgthread-2.0.so.0 => /lib/libgthread-2.0.so.0 (0x00da8000)
+        librt.so.1 => /lib/librt.so.1 (0x00bca000)
+        libglib-2.0.so.0 => /lib/libglib-2.0.so.0 (0x00bd5000)
+        libxml2.so.2 => /usr/lib/libxml2.so.2 (0x02d3c000)
+        liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00137000)
+        /lib/ld-linux.so.2 (0x009c2000)
+        libfreebl3.so => /lib/libfreebl3.so (0x051d0000)
+        libgssapi_krb5.so.2 => /lib/libgssapi_krb5.so.2 (0x00950000)
+        libkrb5.so.3 => /lib/libkrb5.so.3 (0x064d3000)
+        libcom_err.so.2 => /lib/libcom_err.so.2 (0x0090e000)
+        libk5crypto.so.3 => /lib/libk5crypto.so.3 (0x00922000)
+        libresolv.so.2 => /lib/libresolv.so.2 (0x00d86000)
+        libdl.so.2 => /lib/libdl.so.2 (0x00b7a000)
+        libldap_r-2.4.so.2 => /lib/libldap_r-2.4.so.2 (0x002e1000)
+        libmqe_r.so => /opt/mqm71/lib/libmqe_r.so (0xb708f000)
+        libuuid.so.1 => /lib/libuuid.so.1 (0x0076f000)
+        libkrb5support.so.0 => /lib/libkrb5support.so.0 (0x00915000)
+        libkeyutils.so.1 => /lib/libkeyutils.so.1 (0x00991000)
+        liblber-2.4.so.2 => /lib/liblber-2.4.so.2 (0x04e6c000)
+        libssl3.so => /usr/lib/libssl3.so (0x055de000)
+        libsmime3.so => /usr/lib/libsmime3.so (0x05616000)
+        libnss3.so => /usr/lib/libnss3.so (0x05469000)
+        libnssutil3.so => /usr/lib/libnssutil3.so (0x055b6000)
+        libplds4.so => /lib/libplds4.so (0x055aa000)
+        libplc4.so => /lib/libplc4.so (0x053a3000)
+        libnspr4.so => /lib/libnspr4.so (0x053b2000)
+        libsasl2.so.2 => /usr/lib/libsasl2.so.2 (0x057d8000)
+        libselinux.so.1 => /lib/libselinux.so.1 (0x00cc0000)
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment (SRV mode)</title>
+      <para>
+	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ echo $LIXA_PROFILE
+
+[tiian@centos tmp]$ export LIXA_PROFILE=MQS_DYN_MYS_STA_PQL_STA
+[tiian@centos tmp]$ echo $LIXA_PROFILE
+MQS_DYN_MYS_STA_PQL_STA
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Some checks before program execution (SRV mode)</title>
+      <para>
+	We set <varname>LIXA_PROFILE</varname> to value
+	<quote>MQS_DYN_MYS_STA_PQL_STA</quote>, looking at
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename>:
+	<screen>
+    &lt;profile name="MQS_DYN_MYS_STA_PQL_STA"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;WSMQ_SRV_dynreg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;MySQL_stareg&lt;/rsrmgr&gt;
+        &lt;rsrmgr&gt;PostgreSQL_stareg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+	</screen>
+	the profile references the three Resource Managers named
+	<quote>WSMQ_SRV_dynreg</quote>,	<quote>MySQL_stareg</quote> and 
+	<quote>PostgreSQL_stareg</quote>;
+	looking again at the config file:
+	<screen>
+    &lt;rsrmgr name="WSMQ_SRV_dynreg" switch_file="/opt/lixa/lib/switch_wsmq_dynreg.so" xa_open_info="axlib=/opt/lixa/lib/liblixac.so,qmname=LIXA,tpm=lixa" xa_close_info="" /&gt;
+    &lt;rsrmgr name="MySQL_stareg" switch_file="/opt/lixa/lib/switch_mysql_stareg.so" xa_open_info="host=localhost,user=lixa,passwd=,db=lixa,client_flag=0" xa_close_info="" /&gt;
+    &lt;rsrmgr name="PostgreSQL_stareg" switch_file="/opt/lixa/lib/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" /&gt;
+	</screen>
+	we can discover how the Resource Managers are configured 
+	for XA.
+      </para>
+    </section>
+    <section>
+      <title>Program execution (SRV mode)</title>
+      <para>
+	You should open three terminal session: one for the execution shell,
+	one to check MySQL content and the last one to check PostgreSQL
+	content.
+      </para>
+      <para>
+	Check the program is in place, set-up WebSphere MQ environment
+	variable (you have previously set-up LIXA environment) and check
+	the queue is empty:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ ls -la
+total 136
+drwxrwxr-x 2 tiian tiian  4096 Mar 18 07:00 .
+drwx------ 8 tiian tiian  4096 Mar 17 17:58 ..
+-rwxrwxr-x 1 tiian tiian 11879 Mar 18 07:00 example13_wmq_mys_pql
+-rw-rw-r-- 1 tiian tiian  7843 Mar 18 06:59 example13_wmq_mys_pql.c
+[tiian@centos tmp]$ . /opt/mqm71/bin/setmqenv -s
+[tiian@centos tmp]$ /opt/mqm71/samp/bin/amqsget LIXA.QLOCAL LIXA
+Sample AMQSGET0 start
+no more messages
+Sample AMQSGET0 end
+	  </screen></td></tr></tbody>
+	</table>
+	Prepare a terminal session for MySQL, check the table is empty:
+	<table frame="box">
+	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos ~]$ mysql -h localhost -u lixa lixa
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 2
+Server version: 5.1.61 Source distribution
+
+Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> SELECT * FROM authors;
+Empty set (0.00 sec)
+	  </screen></td></tr></tbody>
+	</table>
+	Prepare a terminal session for PostgreSQL, check the table is empty:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos ~]$ psql testdb
+psql (8.4.9)
+Type "help" for help.
+
+testdb=> SELECT * FROM authors;
+ id | last_name | first_name
+----+-----------+------------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	OK, now you are ready to produce one message and insert one row:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ ./example13_wmq_mys_pql insert
+target queue is LIXA.QLOCAL
+Message inserted in queue LIXA.QLOCAL: 'Test message for LIXA'
+Inserting a row in MySQL table...
+Inserting a row in PostgreSQL table...
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of MySQL:
+	<table frame="box">
+	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> SELECT * FROM authors;
++----+-----------+------------+
+| id | last_name | first_name |
++----+-----------+------------+
+|  1 | Foo       | Bar        |
++----+-----------+------------+
+1 row in set (0.00 sec)
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of PostgreSQL:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> SELECT * FROM authors;
+ id | last_name | first_name
+----+-----------+------------
+  1 | Foo       | Bar
+(1 row)
+	  </screen></td></tr></tbody>
+	</table>
+	We leave the message in the queue, and test the extraction:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ ./example13_wmq_mys_pql delete
+target queue is LIXA.QLOCAL
+Message retrieved from queue LIXA.QLOCAL: 'Test message for LIXA'
+Deleting a row from MySQL  table...
+Deleting a row from PostgreSQL table...
+	  </screen></td></tr></tbody>
+	</table>
+	There was a message, and the sample program picked-up it; check the
+	content of MySQL:
+	<table frame="box">
+	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> SELECT * FROM authors;
+Empty set (0.00 sec)
+	  </screen></td></tr></tbody>
+	</table>
+	check the content of PostgreSQL:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> SELECT * FROM authors;
+ id | last_name | first_name
+----+-----------+------------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	It's time to verify what's happen with 
+	<function>tx_rollback()</function> instead of
+	<function>tx_commit()</function>; move the comments in the source
+	code from:
+	<table frame="box">
+	  <thead><tr><td>[example13_wmq_mys_pql.c (before)]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[...]
+    if (TX_OK != (txrc = tx_commit())) {
+        fprintf(stderr, "tx_commit error: %d\n", txrc);
+        exit(txrc);
+    }
+
+    /*
+    if (TX_OK != (txrc = tx_rollback())) {
+        fprintf(stderr, "tx_rollback error: %d\n", txrc);
+        exit(txrc);
+    }
+    */
+[...]
+
+	  </screen></td></tr></tbody>
+	</table>
+	to:
+	<table frame="box">
+	  <thead><tr><td>[example13_wmq_mys_pql.c (after)]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[...]
+    /*
+    if (TX_OK != (txrc = tx_commit())) {
+        fprintf(stderr, "tx_commit error: %d\n", txrc);
+        exit(txrc);
+    }
+    */
+
+    if (TX_OK != (txrc = tx_rollback())) {
+        fprintf(stderr, "tx_rollback error: %d\n", txrc);
+        exit(txrc);
+    }
+[...]
+	  </screen></td></tr></tbody>
+	</table>
+	and re-compile the program:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -6409,5 +6741,84 @@ MQC_STA
 > -lmqm_r -o example13_wmq_mys_pql
 	  </screen></td></tr></tbody>
 	</table>
+	Now you are ready to insert again message and row, but the rollback
+	will discard the operation:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ ./example13_wmq_mys_pql insert
+target queue is LIXA.QLOCAL
+Message inserted in queue LIXA.QLOCAL: 'Test message for LIXA'
+Inserting a row in MySQL table...
+Inserting a row in PostgreSQL table...
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of MySQL:
+	<table frame="box">
+	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> SELECT * FROM authors;
+Empty set (0.00 sec)
+	  </screen></td></tr></tbody>
+	</table>
+	it's empty; check the content of PostgreSQL:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> SELECT * FROM authors;
+ id | last_name | first_name
+----+-----------+------------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	it's empty; check the content of WebSphere MQ:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[tiian@centos tmp]$ /opt/mqm71/samp/bin/amqsget LIXA.QLOCAL LIXA
+Sample AMQSGET0 start
+no more messages
+Sample AMQSGET0 end
+	  </screen></td></tr></tbody>
+	</table>
+	it's empty. Now you can restore the comment around
+	<function>tx_rollback()</function> instead of
+	<function>tx_commit()</function>.
+      </para>
+    </section>
+    <section>
+      <title>Adapting the example for ETC</title>
+      <para>
+	To try this example using Extended Transactional Client (ETC) for
+	WebSphere MQ, you must change these steps in the sequence described
+	above:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	      configure LIXA software using
+	      <option>--with-wsmq=ETC</option> option; clean the previous 
+	      build (<command>make clean</command>) and install the build
+	  </para></listitem>
+	  <listitem><para>
+	      check the output of 
+	      <command>/opt/lixa/bin/lixa-config -r</command>
+	      command
+	  </para></listitem>
+	  <listitem><para>
+	  </para></listitem>
+	  <listitem><para>
+	  </para></listitem>
+	</itemizedlist>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
   </section>
 </chapter>
