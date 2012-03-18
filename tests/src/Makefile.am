@@ -103,5 +103,5 @@ case0042_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 case0043_SOURCES = case0043.c
 case0044_SOURCES = case0044.c
 case0044_CPPFLAGS = @WEBSPHEREMQ_CPPFLAGS@ -I../../src/client
-case0044_LDFLAGS = @WEBSPHEREMQ_LDFLAGS@
+case0044_LDFLAGS = @WEBSPHEREMQ_LDFLAGS@ -l@WEBSPHEREMQ_PGMLIB@
 case0044_LDADD = ../../src/client/liblixac.la
