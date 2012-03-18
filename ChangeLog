@@ -3,6 +3,7 @@ LOG:
          - 0.7.3 Switch files are now loaded using G_MODULE_BIND_LAZY: it might
                  save any CPU cycles
                  New program utility "lixa-config" is supplied
+		 WebSphere MQ 7.1 was tested using CentOS 6.2 and LIXA 0.7.3
 
 20120209 - 0.7.2 Introduced two new parameters in lixad_conf.xml:
                  min_elapsed_sync_time

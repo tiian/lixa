@@ -5605,11 +5605,11 @@ Empty set (0.00 sec)
 	<para>
 	  To use this mode, the WebSphere MQ queue manager used by your
 	  Application Program <emphasis>must reside</emphasis> inside the
-	  same host of your Application Program: the communications between
-	  your Application Program and the queue manager use interprocess
+	  same host of your Application Program: the communication between
+	  your Application Program and the queue manager uses interprocess
 	  communication (UNIX System V IPC). The interface is really fast,
 	  but you can not travel a network (LAN/MAN/WAN) using it.
-	  If your Application Program and the used queue manager are hosted
+	  If your Application Program and the queue manager are hosted
 	  by different systems, you will have to use the ETC mode.
 	</para>
       </section>
@@ -5673,7 +5673,7 @@ WebSphereMQ     yes     (ETC)
     <section xml:id="Development_setup_WebSphereMQ_environment">
       <title>Set-up WebSphere MQ environment</title>
       <para>
-	This esample was developed using WebSphere MQ 7.1 for Linux (32 bit)
+	This example was developed using WebSphere MQ 7.1 for Linux (32 bit)
 	and CentOS 6.2 (32 bit).
 	<note><para>
 	    If you did not yet installed the software, please refer to IBM
@@ -5707,8 +5707,7 @@ WebSphereMQ     yes     (ETC)
 	    </itemizedlist>
 	</para></note>
 	These are the necessary configuration steps to create the environment
-	necessary to run the supplied example 
-	(<filename>example12_wmq.c</filename>).
+	to run the supplied example (<filename>example12_wmq.c</filename>).
 	First, you must set the correct environment for your shell:
       </para>
       <para>
@@ -5842,7 +5841,7 @@ No commands have a syntax error.
 All valid MQSC commands were processed.
 	  </screen></td></tr></tbody>
 	</table>
-	Then create a connection channel, authotize it to your user
+	Then create a connection channel, authorize it to your user
 	(change <systemitem class="username">tiian</systemitem>) and 
 	a listener:
 	<table frame="box">
@@ -5936,7 +5935,8 @@ lixa      3589     1  0 12:30 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
       <title>Build the client program (SRV mode)</title>
       <para>
 	Prepare the client (Application Program) using the below commands
-	(gcc command was splitted on several lines using \ to help
+	(<command>gcc</command> command was splitted on 
+	several lines using \ to help
 	readability, but you may use a single line): 
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
@@ -6198,7 +6198,8 @@ Sample AMQSGET0 end
       <title>Build the client program (ETC mode)</title>
       <para>
 	Prepare the client (Application Program) using the below commands
-	(gcc command was splitted on several lines using \ to help
+	(<command>gcc</command> command was splitted on 
+	several lines using \ to help
 	readability, but you may use a single line): 
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
@@ -6420,7 +6421,7 @@ MQC_STA
 	<itemizedlist mark="bullet">
 	  <listitem><para>
 	      in <xref linkend="Development_setup_WebSphereMQ_environment"/>
-	      to set-up a running environment for MySQL server
+	      to set-up a running environment for WebSphere MQ
 	  </para></listitem>
 	  <listitem><para>
 	      in <xref linkend="Development_setup_MySQL_environment"/>
@@ -6441,7 +6442,8 @@ MQC_STA
       <title>Build the client program (SRV mode)</title>
       <para>
 	Prepare the client (Application Program) using the below commands
-	(gcc command was splitted on several lines using \ to help
+	(<command>gcc</command> command was splitted on 
+	several lines using \ to help
 	readability, but you may use a single line): 
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
@@ -6561,13 +6563,13 @@ MQS_DYN_MYS_STA_PQL_STA
     <section>
       <title>Program execution (SRV mode)</title>
       <para>
-	You should open three terminal session: one for the execution shell,
+	You should open three terminal sessions: one for the execution shell,
 	one to check MySQL content and the last one to check PostgreSQL
 	content.
       </para>
       <para>
 	Check the program is in place, set-up WebSphere MQ environment
-	variable (you have previously set-up LIXA environment) and check
+	variables (you have previously set-up LIXA environment) and check
 	the queue is empty:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
@@ -6585,7 +6587,7 @@ no more messages
 Sample AMQSGET0 end
 	  </screen></td></tr></tbody>
 	</table>
-	Prepare a terminal session for MySQL, check the table is empty:
+	Prepare a terminal session for MySQL and check the table is empty:
 	<table frame="box">
 	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -6609,7 +6611,7 @@ mysql> SELECT * FROM authors;
 Empty set (0.00 sec)
 	  </screen></td></tr></tbody>
 	</table>
-	Prepare a terminal session for PostgreSQL, check the table is empty:
+	Prepare a terminal session for PostgreSQL and check the table is empty:
 	<table frame="box">
 	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -6623,7 +6625,8 @@ testdb=> SELECT * FROM authors;
 (0 rows)
 	  </screen></td></tr></tbody>
 	</table>
-	OK, now you are ready to produce one message and insert one row:
+	OK, now you are ready to produce one message and insert one row in
+	each database:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -6658,7 +6661,7 @@ testdb=> SELECT * FROM authors;
 (1 row)
 	  </screen></td></tr></tbody>
 	</table>
-	We leave the message in the queue, and test the extraction:
+	We are leaving the message in the queue and testing the extraction:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -6669,7 +6672,7 @@ Deleting a row from MySQL  table...
 Deleting a row from PostgreSQL table...
 	  </screen></td></tr></tbody>
 	</table>
-	There was a message, and the sample program picked-up it; check the
+	There was one message and the sample program picked it up; check the
 	content of MySQL:
 	<table frame="box">
 	  <thead><tr><td>[MySQL terminal session]</td></tr></thead>
@@ -6785,18 +6788,36 @@ Sample AMQSGET0 end
 	<function>tx_rollback()</function> instead of
 	<function>tx_commit()</function>.
       </para>
+      <section>
+	<title>Static registration</title>
+	<para>
+	  If you want to use WebSphere MQ with static registration instead of
+	  dynamic registration you will use a different profile:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+[tiian@centos tmp]$ echo $LIXA_PROFILE
+
+[tiian@centos tmp]$ export LIXA_PROFILE=MQS_STA_MYS_STA_PQL_STA
+[tiian@centos tmp]$ echo $LIXA_PROFILE
+MQS_STA_MYS_STA_PQL_STA
+	    </screen></td></tr></tbody>
+	  </table>
+	</para>
+      </section>
     </section>
     <section>
-      <title>Adapting the example for ETC</title>
+      <title>Adapting the example to WebSphere MQ Extended Transactional Client (ETC)</title>
       <para>
 	To try this example using Extended Transactional Client (ETC) for
-	WebSphere MQ, you must change these steps in the sequence described
-	above:
+	WebSphere MQ, you must change these steps in the sequence
+	previously described:
 	<itemizedlist mark="bullet">
 	  <listitem><para>
 	      configure LIXA software using
 	      <option>--with-wsmq=ETC</option> option; clean the previous 
 	      build (<command>make clean</command>) and install the build
+	      (<command>su -c "make install"</command>)
 	  </para></listitem>
 	  <listitem><para>
 	      check the output of 
@@ -6804,20 +6825,25 @@ Sample AMQSGET0 end
 	      command
 	  </para></listitem>
 	  <listitem><para>
+	      link library <filename>mqic_r</filename> instead of
+	      library <filename>mqm_r</filename> to program
+	      <filename>example13_wmq_mys_pql</filename>
 	  </para></listitem>
 	  <listitem><para>
+	      set variable <varname>LIXA_PROFILE</varname> to
+	      <varname>MQC_DYN_MYS_STA_PQL_STA</varname> (dynamic registration)
+	      or to <varname>MQC_STA_MYS_STA_PQL_STA</varname> (static 
+	      registration)
+	  </para></listitem>
+	  <listitem><para>
+	      use utilities <command>amqsgetc, amqsputc</command> instead of
+	      <command>amqsget, amqsput</command>
+	  </para></listitem>
+	  <listitem><para>
+	      set variable <varname>MQSERVER</varname> to
+	      <varname>LIXA.CHANNEL/TCP/'127.0.0.1(1414)'</varname>
 	  </para></listitem>
 	</itemizedlist>
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
-	  </screen></td></tr></tbody>
-	</table>
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>
-	  </screen></td></tr></tbody>
-	</table>
       </para>
     </section>
   </section>
