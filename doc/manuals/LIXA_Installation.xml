@@ -266,6 +266,7 @@ logout
 	  <tr><td>Architecture:</td><td>x86 (virtual)</td></tr>
 	  <tr><td>Resource Manager:</td><td>MySQL 5.0.51a</td></tr>
 	  <tr><td>Resource Manager:</td><td>PostgreSQL 8.3</td></tr>
+	  <tr><td>Resource Manager:</td><td>WebSphere MQ 7.1</td></tr>
 	</tbody>
       </table>
     </para>
