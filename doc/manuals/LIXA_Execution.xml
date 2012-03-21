@@ -12,7 +12,7 @@
     </para></note>
   </para>
   <section>
-    <title>Starting the state server</title>
+    <title>Starting the state server (<command>lixad</command>)</title>
     <para>
       The first step you must perform is starting the
       <emphasis>state server</emphasis>; it's name is 
@@ -326,7 +326,7 @@ Access http://sourceforge.net/projects/lixa/ to report bugs and partecipate to t
     </section>
   </section>
   <section xml:id="Starting_test_utility">
-    <title>Starting the test utility</title>
+    <title>Starting the test utility (<command>lixat</command>)</title>
     <para>
       The LIXA project supplies a test utility you can use to 
       perform basic tests on your LIXA environment. 
@@ -446,7 +446,7 @@ tx_close(): 0
     </para>
   </section>
   <section>
-    <title>Starting the recovery utility</title>
+    <title>Starting the recovery utility (<command>lixar</command>)</title>
     <para>
       The LIXA project supplies a recovery utility you must use to 
       perform some special tasks related to distributed transaction
@@ -510,7 +510,7 @@ tx_open() returned TX_FAIL: unable to proceed
     </screen>
   </section>
   <section>
-    <title>Starting the configuration utility</title>
+    <title>Starting the configuration utility (<command>lixa-config</command>)</title>
     <para>
       LIXA provides a configuration utility named 
       <command>lixa-config</command>. It can be used to retrieve some
