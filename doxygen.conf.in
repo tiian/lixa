@@ -516,9 +516,10 @@ WARN_LOGFILE           =
 INPUT                  = src/client \
                          src/client/switch/lixa \
                          src/client/switch/ibmdb2 \
+                         src/client/switch/mysql \
                          src/client/switch/oracle \
                          src/client/switch/postgresql \
-                         src/client/switch/mysql \
+                         src/client/switch/webspheremq \
                          src/common \
                          src/server
 
