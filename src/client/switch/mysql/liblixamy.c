@@ -1092,7 +1092,7 @@ int lixa_my_rollback(XID *xid, int rmid, long flags)
         }
         LIXA_TRACE(("lixa_my_rollback: rolling back XID %s\n", lmsx));
 
-        if (lpsr->state.S == 3) {
+        if (lpsr->state.S == 3 /* || lpsr->state.S == 2 */) {
             const char ROLLBACK_PREP_FMT[] = "XA ROLLBACK %s";
             char my_cmd_buf[sizeof(ROLLBACK_PREP_FMT) +
                             sizeof(lixa_my_ser_xid_t)];

@@ -99,6 +99,13 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0024 ; lixa_test_exec.sh noreset none case0041 1 1 -2], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([MY/0.1/0.3 Rollback without prepare])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020 ; lixa_test_exec.sh noreset none case0041 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020 ; lixa_test_exec.sh noreset none case0041 0 1 0], [0], [ignore], [ignore])
+AT_CLEANUP
+
+
 AT_SETUP([MY/0.1/1.0 Crash after connect])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
