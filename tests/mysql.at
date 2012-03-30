@@ -99,10 +99,44 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0024 ; lixa_test_exec.sh noreset none case0041 1 1 -2], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([MY/0.1/0.3 Rollback without prepare])
+AT_SETUP([MY/0.1/0.3 Rollback without prepare (one RM)])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020 ; lixa_test_exec.sh noreset none case0041 1 0 0], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020 ; lixa_test_exec.sh noreset none case0041 0 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020 ; lixa_test_exec.sh noreset none case0045], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([MY/0.1/0.4 Rollback without prepare (two RMs)])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0025 ; lixa_test_exec.sh noreset none case0041 1 0 0], [0], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0025 ; lixa_test_exec.sh noreset none case0045], [0], [ignore], [ignore])
 AT_CLEANUP
 
 
