@@ -1,4 +1,4 @@
-AC_INIT([lixa], [0.7.4], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [0.7.5dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -15,6 +15,11 @@ AC_CONFIG_FILES([
   etc/lixac_conf.xml
   etc/lixad_conf.xml
   etc/Makefile
+  ext/Makefile
+  ext/doc/Makefile
+  ext/doc/manuals/LIXA_EXT.xml
+  ext/doc/manuals/Makefile
+  ext/php/Makefile
   src/Makefile
   src/common/Makefile
   src/common/lixa_inst_conf.c

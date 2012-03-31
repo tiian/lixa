@@ -1,0 +1,386 @@
+--- php-5.4.0.orig/ext/mysqli/mysqli_api.c	2012-01-01 14:15:04.000000000 +0100
++++ php-5.4.0/ext/mysqli/mysqli_api.c	2012-03-31 17:41:33.000000000 +0200
+@@ -33,6 +33,10 @@
+ #include "php_mysqli_structs.h"
+ #include "mysqli_priv.h"
+ 
++/* begin: added by LIXA */
++#include "ext/lixa/lixa_php_config.h"
++/* end  : added by LIXA */
++
+ /* {{{ proto mixed mysqli_affected_rows(object link)
+    Get number of affected rows in previous MySQL operation */
+ PHP_FUNCTION(mysqli_affected_rows)
+@@ -586,7 +590,15 @@
+ 	}
+ 
+ 	if (!mysql->persistent) {
+-		mysqli_close(mysql->mysql, close_type);
++/* begin: added by LIXA */
++#if defined(HAVE_LIXA_MYSQL)
++        if (!mysql->use_lixa_conn) {
++#endif
++            mysqli_close(mysql->mysql, close_type);
++#if defined(HAVE_LIXA_MYSQL)
++        }
++#endif
++/* end  : added by LIXA */
+ 	} else {
+ 		zend_rsrc_list_entry *le;
+ 		if (zend_hash_find(&EG(persistent_list), mysql->hash_key, strlen(mysql->hash_key) + 1, (void **)&le) == SUCCESS) {
+--- php-5.4.0.orig/ext/mysqli/mysqli_nonapi.c	2012-01-01 14:15:04.000000000 +0100
++++ php-5.4.0/ext/mysqli/mysqli_nonapi.c	2012-03-31 17:54:06.000000000 +0200
+@@ -32,6 +32,14 @@
+ #include "php_mysqli_structs.h"
+ #include "mysqli_priv.h"
+ 
++/* begin: added by LIXA */
++#include "ext/lixa/lixa_php_config.h"
++#ifdef HAVE_LIXA_MYSQL
++# include <lixamy.h>
++# include <regex.h>
++#endif
++/* end  : added by LIXA */
++
+ #define SAFE_STR(a) ((a)?a:"")
+ 
+ #ifndef zend_parse_parameters_none
+@@ -141,6 +149,58 @@
+ 		hostname = MyG(default_host);
+ 	}
+ 
++/* begin: added by LIXA */
++#if defined(HAVE_LIXA_MYSQL)
++    mysql->use_lixa_conn = FALSE;
++    mysql->use_lixa_rmid = FALSE;
++    mysql->use_lixa_num = 0;
++    /* check database string, is it "lixa/[rmid-pos]{0-1}/n{0-1}" */
++    if (dbname) {
++        regex_t preg;
++        int reg_error;
++        char reg_errbuf[200];
++        regmatch_t pmatch[3];
++        size_t nmatch = sizeof(pmatch)/sizeof(regmatch_t);
++        char match_buf[100];
++        
++        reg_error = regcomp(
++            &preg, "^lixa\\/(rmid|pos)?\\/([[:digit:]]*)$",
++            REG_EXTENDED|REG_ICASE);
++        if (0 != reg_error) {
++            regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
++        }
++        reg_error = regexec(&preg, dbname, nmatch, pmatch, 0);
++        if (0 != reg_error) {
++            regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
++        } else {
++            mysql->use_lixa_conn = TRUE;
++            /* rmid/pos detected? */
++            if (pmatch[1].rm_so > 0 && pmatch[1].rm_eo > 0) {
++                size_t len = pmatch[1].rm_eo - pmatch[1].rm_so;
++                if (0 < len) {
++                    strncpy(match_buf, dbname+pmatch[1].rm_so, len);
++                    match_buf[len] = '\0';
++                    if (0 == strcasecmp("rmid", match_buf))
++                        mysql->use_lixa_rmid = TRUE;
++                }
++            }
++            /* number detected? */
++            if (pmatch[2].rm_so > 0 && pmatch[2].rm_eo > 0) {
++                size_t len = pmatch[2].rm_eo - pmatch[2].rm_so;
++                if (0 < len) {
++                    long num;
++                    strncpy(match_buf, dbname+pmatch[2].rm_so, len);
++                    match_buf[len] = '\0';
++                    num = strtol(match_buf, NULL, 10);
++                    mysql->use_lixa_num = (int)num;
++                }
++            }
++        }
++        regfree(&preg);
++    }
++#endif
++/* end  : added by LIXA */
++    
+ 	if (mysql->mysql && mysqli_resource &&
+ 		(mysqli_resource->status > MYSQLI_STATUS_INITIALIZED))
+ 	{
+@@ -214,7 +274,26 @@
+ 	}
+ 	if (!mysql->mysql) {
+ #if !defined(MYSQLI_USE_MYSQLND)
++# if defined(HAVE_LIXA_MYSQL)
++        if (mysql->use_lixa_conn) {
++            if (mysql->use_lixa_num == 0) {
++                if (!(mysql->mysql = lixa_my_get_conn()))
++                    goto err_lixa;
++            } else {
++                if (mysql->use_lixa_rmid) {
++                    if (!(mysql->mysql = lixa_my_get_conn_by_rmid(
++                              mysql->use_lixa_num)))
++                        goto err_lixa;
++                } else {
++                    if (!(mysql->mysql = lixa_my_get_conn_by_pos(
++                              mysql->use_lixa_num)))
++                        goto err_lixa;
++                }
++            }
++        } else if (!(mysql->mysql = mysql_init(NULL))) {
++# else
+ 		if (!(mysql->mysql = mysql_init(NULL))) {
++# endif
+ #else
+ 		if (!(mysql->mysql = mysqlnd_init(persistent))) {
+ #endif
+@@ -236,16 +315,20 @@
+ 	/* BC for prior to bug fix #53425 */
+ 	flags |= CLIENT_MULTI_RESULTS;
+ 
+-	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, flags) == NULL)
++# if defined(HAVE_LIXA_MYSQL)
++    /* if the connection was retrieved by LIXA, mysql_real_connect would not
++       be called */
++    if (!mysql->use_lixa_conn)
++# endif
++    if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, flags) == NULL)
+ #else
+-	if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
+-						port, socket, flags TSRMLS_CC) == NULL)
++        if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
++                            port, socket, flags TSRMLS_CC) == NULL)
+ #endif
+ 	{
+ 		/* Save error messages - for mysqli_connect_error() & mysqli_connect_errno() */
+ 		php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
+-		php_mysqli_throw_sql_exception((char *)mysql_sqlstate(mysql->mysql), mysql_errno(mysql->mysql) TSRMLS_CC,
+-										"%s", mysql_error(mysql->mysql));
++		php_mysqli_throw_sql_exception((char *)mysql_sqlstate(mysql->mysql), mysql_errno(mysql->mysql) TSRMLS_CC, "%s", mysql_error(mysql->mysql));
+ 		if (!is_real_connect) {
+ 			/* free mysql structure */
+ 			mysqli_close(mysql->mysql, MYSQLI_CLOSE_DISCONNECTED);
+@@ -293,6 +376,18 @@
+ 		RETURN_TRUE;
+ 	}
+ 
++/* begin: added by LIXA */
++#if defined(HAVE_LIXA_MYSQL)
++err_lixa:
++    php_mysqli_set_error(
++        99999,
++        "Unable to retrieve a valid connection from LIXA Transaction Manager"
++        TSRMLS_CC);
++    php_mysqli_throw_sql_exception(
++        (char *) "99999", 99999 TSRMLS_CC, "%s",
++        "Unable to retrieve a valid connection from LIXA Transaction Manager");
++#endif
++/* end: added by LIXA */
+ err:
+ 	if (mysql->hash_key) {
+ 		efree(mysql->hash_key);
+--- php-5.4.0.orig/ext/mysqli/php_mysqli_structs.h	2012-01-01 14:15:04.000000000 +0100
++++ php-5.4.0/ext/mysqli/php_mysqli_structs.h	2012-03-31 17:41:07.000000000 +0200
+@@ -43,6 +43,10 @@
+ #include "mysqli_mysqlnd.h"
+ #else
+ 
++/* begin: added by LIXA */
++#include "ext/lixa/lixa_php_config.h"
++/* end  : added by LIXA */
++
+ /*
+   The libmysql headers (a PITA) also define it and there will be an warning.
+   Undef it and later we might need to define it again.
+@@ -128,6 +132,13 @@
+ #if defined(MYSQLI_USE_MYSQLND)
+ 	int				async_result_fetch_type;
+ #endif
++/* begin: added by LIXA */
++#if defined(HAVE_LIXA_MYSQL)
++    zend_bool           use_lixa_conn;
++    zend_bool           use_lixa_rmid;
++    int                 use_lixa_num;	
++#endif
++/* end  : added by LIXA */
+ } MY_MYSQL;
+ 
+ typedef struct {
+--- php-5.4.0.orig/ext/lixa/config.m4	1970-01-01 01:00:00.000000000 +0100
++++ php-5.4.0/ext/lixa/config.m4	2012-03-31 17:42:08.000000000 +0200
+@@ -0,0 +1,178 @@
++dnl config.m4 for extension lixa
++
++PHP_ARG_WITH(lixa, for LIXA support,
++[  --with-lixa=FILE        Include LIXA support. File is the path to lixa-config program])
++
++if test "$PHP_LIXA" != "no"; then
++	LIXA_CONFIG=$PHP_LIXA
++	dnl --with-lixa -> SWIG is a pre-requisite
++	AC_CHECK_PROGS(SWIG, [swig], [])
++	if test -z $SWIG
++	then
++		AC_MSG_ERROR([cannot find swig program])
++	fi
++	dnl use lixa-config to determine LIXA include dir
++	AC_MSG_CHECKING([for LIXA using $LIXA_CONFIG])
++	LIXA_INCLUDE="$($LIXA_CONFIG --include-dir)"
++	if test -r "$LIXA_INCLUDE/tx.h"
++	then
++		AC_MSG_RESULT(found tx.h in $LIXA_INCLUDE)
++		LIXA_DIR="$($PHP_LIXA --prefix)"
++	fi
++  
++	if test -z "$LIXA_DIR"
++	then
++		AC_MSG_RESULT([not found])
++		AC_MSG_ERROR([Please specify a valid lixa-config utility program or reinstall the LIXA distribution])
++	fi
++
++	dnl # --with-lixa -> add include path
++	PHP_ADD_INCLUDE($($LIXA_CONFIG --include-dir))
++	AC_MSG_CHECKING([if LIXA is compiled with PostgreSQL support])
++	tmp=$($LIXA_CONFIG --include-dir-postgresql 2>/dev/null)
++	if test $? -eq 0
++	then
++		PHP_ADD_INCLUDE($tmp)
++		HAVE_LIXA_POSTGRESQL=1
++		AC_DEFINE([HAVE_LIXA_POSTGRESQL], [1], [Define to 1 if LIXA is compiled with PostgreSQL support])
++		AC_MSG_RESULT([yes])
++	else
++		HAVE_LIXA_POSTGRESQL=0
++		AC_MSG_RESULT([no])
++	fi
++	AC_MSG_CHECKING([if LIXA is compiled with MySQL support])
++	tmp=$($LIXA_CONFIG --include-dir-mysql 2>/dev/null)
++	if test $? -eq 0
++	then
++		PHP_ADD_INCLUDE($tmp)
++		HAVE_LIXA_MYSQL=1
++		AC_DEFINE([HAVE_LIXA_MYSQL], [1], [Define to 1 if LIXA is compiled with MySQL support])
++		AC_MSG_RESULT([yes])
++	else
++		HAVE_LIXA_MYSQL=0
++		AC_MSG_RESULT([no])
++	fi
++
++	PHP_NEW_EXTENSION(lixa, lixa.c, $ext_shared)
++
++	dnl # --with-lixa -> dynamically generate lixa.i interface file for SWIG
++	LIXA_INTERFACE="$ext_srcdir/lixa.i"
++	echo "%module lixa" > $LIXA_INTERFACE
++	echo "%{" >> $LIXA_INTERFACE
++	echo "#include \"tx.h\"" >> $LIXA_INTERFACE
++	if test $HAVE_LIXA_POSTGRESQL -eq 1
++	then
++		echo "#include \"lixapq.h\"" >> $LIXA_INTERFACE
++	fi	
++	if test $HAVE_LIXA_MYSQL -eq 1
++	then
++		echo "#include \"lixamy.h\"" >> $LIXA_INTERFACE
++	fi	
++	echo "%}" >> $LIXA_INTERFACE
++	echo "%include \"tx.h\"" >> $LIXA_INTERFACE
++	if test $HAVE_LIXA_POSTGRESQL -eq 1
++	then
++		echo "%include \"lixapq.h\"" >> $LIXA_INTERFACE
++	fi	
++	if test $HAVE_LIXA_MYSQL -eq 1
++	then
++		echo "%include \"lixamy.h\"" >> $LIXA_INTERFACE
++	fi
++	dnl # --with-lixa -> building LIXA interface using SWIG
++	AC_MSG_CHECKING([if LIXA wrapper can be created with SWIG])
++	$SWIG -php -outdir $ext_srcdir -I$LIXA_INCLUDE -o $ext_srcdir/lixa.c $LIXA_INTERFACE
++	if test $? -eq 0
++	then
++		AC_MSG_RESULT([yes])
++	else
++		AC_MSG_ERROR([unable to create LIXA php wrapper using SWIG])
++	fi 
++	dnl # --with-lixa -> dynamically generate lixa_php.h
++	LIXA_PHP_H="$ext_srcdir/lixa_php_config.h"
++	cat > $LIXA_PHP_H <<EOF
++/*
++ * Copyright (c) 2009-2012, Christian Ferrari <tiian@users.sourceforge.net>
++ * All rights reserved.
++ *
++ * This file is part of LIXA.
++ *
++ * LIXA is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as published
++ * by the Free Software Foundation.
++ *
++ * LIXA is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
++ */
++#ifndef LIXA_PHP_H
++# define LIXA_PHP_H
++EOF
++	if test $HAVE_LIXA_POSTGRESQL -eq 1
++	then
++		echo "/* LIXA was build with PostgreSQL support */" >> $LIXA_PHP_H
++		echo "# define HAVE_LIXA_POSTGRESQL 1" >> $LIXA_PHP_H
++	else
++		echo "/* LIXA was not build with PostgreSQL support */" >> $LIXA_PHP_H
++		echo "# undef HAVE_LIXA_POSTGRESQL" >> $LIXA_PHP_H
++	fi	
++	if test $HAVE_LIXA_MYSQL -eq 1
++	then
++		echo "/* LIXA was build with MySQL support */" >> $LIXA_PHP_H
++		echo "# define HAVE_LIXA_MYSQL 1" >> $LIXA_PHP_H
++	else
++		echo "/* LIXA was not build with MySQL support */" >> $LIXA_PHP_H
++		echo "# undef HAVE_LIXA_MYSQL" >> $LIXA_PHP_H
++	fi	
++	echo "#endif /* LIXA_PHP_H */" >> $LIXA_PHP_H
++	
++	dnl # --with-lixa -> check for lib and symbol presence
++	dnl LIXA client default library
++	LIBNAME=lixac
++	LIBSYMBOL=tx_open
++	PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
++	[
++		PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $($PHP_LIXA --lib-dir), LIXA_SHARED_LIBADD)
++		AC_DEFINE(HAVE_LIXALIB,1,[ ])
++	],[
++		AC_MSG_ERROR([wrong lixac lib version or lib not found])
++	],[
++		$($PHP_LIXA --libs)
++	])
++	if test $HAVE_LIXA_POSTGRESQL -eq 1
++	then
++		dnl LIXA & PostgreSQL specific library
++		LIBNAME=lixapq
++		LIBSYMBOL=lixa_pq_get_conn
++		PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
++		[
++			PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $($PHP_LIXA --lib-dir), LIXA_SHARED_LIBADD)
++			AC_DEFINE(HAVE_LIXALIB,1,[ ])
++		],[
++			AC_MSG_ERROR([wrong lixac lib version or lib not found])
++		],[
++			$($PHP_LIXA --libs-postgresql)
++		])
++	fi	
++	if test $HAVE_LIXA_MYSQL -eq 1
++	then
++		dnl LIXA & MySQL specific library
++		LIBNAME=lixamy
++		LIBSYMBOL=lixa_my_get_conn
++		PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
++		[
++			PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $($PHP_LIXA --lib-dir), LIXA_SHARED_LIBADD)
++			AC_DEFINE(HAVE_LIXALIB,1,[ ])
++		],[
++			AC_MSG_ERROR([wrong lixac lib version or lib not found])
++		],[
++			$($PHP_LIXA --libs-mysql)
++		])
++	fi
++	dnl
++	AC_DEFINE(HAVE_LIXA, 1, [Whether you have LIXA])
++	PHP_SUBST(LIXA_SHARED_LIBADD)
++fi

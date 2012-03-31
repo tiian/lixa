@@ -1,0 +1,274 @@
+<chapter>
+  <title>Introduction</title>
+  <section>
+    <title>Why should I use LIXA project?</title>
+    <para>
+      LIXA project allows you to develop an Application Program that performs
+      two phase commit transactions against two ore more Resource Managers.
+      Two phase commit is a transactional protocol designed to 
+      <quote>guarantee</quote> <acronym>ACID</acronym> (Atomicity, Consistency,
+      Isolation, Durability) transactionality.
+      XA specification is not the only two phase commit protocol implementation
+      but it is probably the best known and widespread. For a detailed
+      explanation please refer to <citation>RefModel</citation>.
+    </para>
+  </section>
+  <warning>
+    <para>
+      The reference model (<citation>RefModel</citation>) technical guide
+      available on the <trademark>Open Group</trademark> web site is more
+      recent than the XA specification (<citation>XAspec</citation>); 
+      after XA, the X/Open Company developed the XA+ specification and the 
+      reference model was improved with the concepts necessary for XA+. 
+      LIXA project does <emphasis>not</emphasis> implement
+      the XA+ specification, but only XA and the following concepts explained 
+      in <citation>RefModel</citation> does not apply to the LIXA project:
+      <itemizedlist mark='bullet'>
+	<listitem><para>3.1: Superior Node</para></listitem>
+	<listitem><para>3.1: Subordinate Node</para></listitem>
+	<listitem><para>3.1: Communication Resource Manager (<acronym>CRM</acronym>)</para></listitem>
+	<listitem><para>3.5: Distributed Communication Facilities</para></listitem>
+	<listitem><para>3.6: Activity between Functional Components Involving Two or More APs</para></listitem>
+	<listitem><para>3.7: CRM Communication Paradigms with APs</para></listitem>
+	<listitem><para>3.8: High-level TP Language</para></listitem>
+      </itemizedlist>
+      XA specification was designed to implement the two phase commit protocol
+      in the case there is only one Application Program running inside a
+      Transaction Monitor and using a Transaction Manager to coordinate any
+      number of Resource Managers. XA+ specification was designed to
+      implement the two phase commit protocol in the case there are two or
+      more Application Programs running inside distinct Transaction Monitors
+      and using distinct Transaction Managers to coordinate any number of
+      Resource Managers.
+    </para>
+  </warning>
+  <section xml:id="Transaction_Manager_and_Transaction_Monitor">
+    <title>Transaction Manager and Transaction Monitor</title>
+    <para>
+      As explained in Appendix A of <citation>RefModel</citation> a 
+      Transaction Manager can be though as a subset of a Transaction Monitor.
+      Most commercial products tend to merge the features
+      in a single bundle; this is good if you need a Transaction Monitor,
+      this may be bad if you only need a Transaction Manager.
+    </para>
+    <para>
+      IBM TXSeries<footnote><para>TXSeries is a registered trademark of 
+	  IBM corporation</para></footnote> is a Transaction Monitor with an
+      integrated Transaction Manager.
+      Oracle (BEA) Tuxedo<footnote><para>Tuxedo is a registered trademark of
+	  Oracle corporation</para></footnote> is a Transaction Monitor with an
+      integrated Transaction Manager.
+      JBOSS<footnote><para>JBOSS is a registered trademark of Red Hat
+	  corporation</para></footnote> is a <acronym>JEE</acronym>
+      (Java Enterprise Edition) application server; it is a Transaction
+      Monitor with an integrated Transaction Manager for bytecode based
+      applications.
+    </para>
+    <para>
+      <link xlink:href="http://www.springsource.com/">
+	<citetitle>Spring JTA Transaction Manager</citetitle>
+      </link>,
+      <link xlink:href="http://jotm.objectweb.org/index.html">
+	<citetitle>JOTM (Java Open Transaction Manager)</citetitle>
+      </link>
+      and
+      <link xlink:href="http://www.bitronix.be/">
+	<citetitle>BTM (Bitronix JTA Transaction Manager)</citetitle>
+      </link> 
+      are Transaction Managers, but they are not Transaction Monitors and they
+      can be used in conjunction with a
+      <acronym>JVM</acronym> (Java Virtual Machine) and 
+      <emphasis>possibly</emphasis> any
+      Transaction Monitor. Unfortunately they are Java based technologies and 
+      not native ones; in the Java arena there are a few stand-alone 
+      Transaction
+      Manager, while in the C language arena it is not easy to find out one.
+    </para>
+    <para>
+      The LIXA project implements a stand-alone Transaction Manager that your 
+      Application Program can use in many different ways:
+      <itemizedlist mark='bullet'>
+	<listitem><para>from a C application launched from shell</para></listitem>
+	<listitem><para>from a C application launched via CGI inside a web server</para></listitem>
+	<listitem><para>from a scripting language application<footnote><para>You must wrap the TX C API to be able to use it from Perl, PHP, Python, Ruby...</para></footnote>.</para></listitem>
+      </itemizedlist>
+      With the aid of the LIXA Transaction Manager potentially any web server 
+      can be converted in an Application Server with two phase commit support.
+    </para>
+  </section>
+  <section>
+    <title>LIXA Architecture</title>
+    <para>
+      From an architectural point of view, the LIXA project adopts an original
+      approach: an Application Program links the LIXA client library and
+      embeds the Transaction Manager logic. Every Application Program instance
+      runs its own Transaction Manager instance and every Transaction
+      Manager instance uses the LIXA server daemon to save and retrieve the
+      state of the managed transactions.
+      LIXA project was designed to allow massive parallelism and embedding at
+      the same time: the parallelism is necessary to support high volume
+      workloads while the embeddable property is necessary to avoid conflicts
+      with the process and thread management feature of any Transaction 
+      Monitors.
+    </para>
+  </section>
+  <section>
+    <title>Project, Projuct, Product</title>
+    <para>
+      LIXA is a <emphasis>project</emphasis>: a software artifact you can pick
+      up to try, use, modify and distribute according to the terms of GPL 
+      license. 
+      The project is hosted on 
+      <link xlink:href="http://sourceforge.net/projects/lixa/">
+	<citetitle>SourceForge</citetitle>
+      </link>
+      collaborative portal and you can use the portal
+      to interact with the author and other users.
+      LIXA is not supported because it is not a product: you can use it AS IS
+      without any guarantee.
+    </para>
+    <para>
+      A projuct is a software artifact that initially was a project financed 
+      by a
+      customer. Then a second customer was interested in the same software
+      artifact and the initial project was selled again. 
+      When the third customer knocked the door,
+      the team that developed the project started a new business with a new
+      <emphasis>product</emphasis>, but it should be called 
+      <emphasis>projuct</emphasis> 
+      because it was designed and modeled using the requirements expressed
+      by the first customer.
+    </para>
+    <para>
+      In my honest opinion a <emphasis>product</emphasis> is a software 
+      artifact with some characteristics:
+      <itemizedlist mark='bullet'>
+	<listitem><para>it is produced by a software factory</para></listitem>
+	<listitem><para>it is sold by a commercial network</para></listitem>
+	<listitem><para>it does have a team of specialists you can 
+	    contact to have support</para></listitem>
+	<listitem><para>it does have a team of specialists that can visit and 
+	    help you with installation, configuration, problem determination, 
+	    etc...</para></listitem>
+	<listitem><para>it is fully documented</para></listitem>
+	<listitem><para>it is certified to run properly on some documented 
+	    hardware and software platforms</para></listitem>
+	<listitem><para>it has a certified compatibility matrix the customer
+	    can use to find out a valid mix of distinct software components
+	    (i.e. different Resource Managers, for an XA Transaction 
+	    Manager)</para></listitem>
+	<listitem><para>it can be installed, updated and removed from a system
+	    using the standard tool of the platform (i.e. dpkg, rpm, pkg,
+	    etc....)</para></listitem>
+	<listitem><para>it can be upgraded to a successive version without
+	    side effects for the product and/or the hosting system
+	</para></listitem>
+      </itemizedlist>
+      <important><para>LIXA project is not a product.</para></important>
+    </para>
+    <para>
+      If you were running a business that is interested in developing a 
+      product based 
+      on the technology implemented by the LIXA project you should
+      contact the author through       
+      <link xlink:href="http://sourceforge.net/projects/lixa/">
+	<citetitle>SourceForge</citetitle>
+      </link>
+      collaborative portal.
+    </para>
+  </section>
+  <section>
+    <title>LIXA and X/OPEN CAE specifications</title> 
+    <para>
+      The LIXA project tries to be as compliant as possible with the X/Open CAE
+      specifications cited in bibliography. Below there are the not implemented
+      and/or not implementable features.
+    </para>
+    <simplesect>
+      <title>The commit_return Characteristic</title>
+      <para>
+	As explained in <citation>TXspec</citation> (3.4, 3.8.1) two values
+	are available:
+	<itemizedlist mark='bullet'>
+	  <listitem><para><constant>TX_COMMIT_COMPLETED
+	    </constant></para></listitem>
+	  <listitem><para><constant>TX_COMMIT_DECISION_LOGGED
+	    </constant></para></listitem>
+	</itemizedlist>
+	LIXA TX API implementation supports only
+	<constant>TX_COMMIT_COMPLETED</constant>
+	this behavior is allowed by the specification.
+      </para>
+    </simplesect>
+    <simplesect>
+      <title>The transaction state element</title>
+      <para>
+	As explained in <citation>TXspec</citation> (4.2, page 16)
+	<function>tx_info()</function> can return three values:
+	<itemizedlist mark='bullet'>
+	  <listitem><para><constant>TX_ACTIVE
+	    </constant></para></listitem>
+	  <listitem><para><constant>TX_TIMEOUT_ROLLBACK_ONLY
+	    </constant></para></listitem>
+	  <listitem><para><constant>TX_ROLLBACK_ONLY
+	    </constant></para></listitem>
+	</itemizedlist>
+      </para>
+      LIXA <function>tx_info()</function> does not return
+      <constant>TX_ROLLBACK_ONLY</constant>. This does not hurt the
+      X/Open CAE specification.
+    </simplesect>
+    <simplesect>
+      <title>XA -> TX return code mappings</title>
+      <para>
+	In <citation>TXspec</citation> (Appendix B.4, page 64) it is suggested
+	to return the value <constant>TX_ERROR</constant> when the Resource
+	Manager returns <constant>XA_RETRY</constant>; this is explained in
+	<quote>note 1</quote>. 
+      </para>
+      <para>
+	The LIXA implementation of 
+	for <function>tx_commit()</function> and
+	<function>tx_rollback()</function> returns 
+	<constant>TX_NO_BEGIN</constant> instead of 
+	<constant>TX_ERROR</constant> because it seems a more useful 
+	information for the Application Program: the transaction has been
+	successfully committed/rolled back, but a new transaction can not be
+	started
+	<footnote><para>The X/Open CAE specification document
+	    <quote>suggests</quote> the mapping and it seems there is some
+	    flexibility in the suggestions. From a LIXA perspective all this
+	    stuff is academic because <constant>TMNOWAIT</constant> is not
+	    used by LIXA implementation.</para></footnote>.
+      </para>
+    </simplesect>
+    <simplesect>
+      <title><function>xa_rollback()</function> and 
+	<constant>XA_RETRY</constant> return code</title>
+      <para>
+	In <citation>TXspec</citation> (Appendix B.5, page 69) it is 
+	explained <constant>XA_RETRY</constant> is a valid return code for
+	function <function>xa_rollback()</function>. Unfortunately
+	<citation>XAspec</citation> does not agree with this point of view: the
+	<constant>XA_RETRY</constant> is not a valid return code for 
+	function <function>xa_rollback()</function>. It may be an error in
+	<citation>TXspec</citation>: the same row could have been copied from 
+	the previous table (page 68).
+      </para>
+      <para>
+	<citation>XA+spec</citation> does not list 
+	<constant>XA_RETRY</constant> as a valid return code for 
+	function <function>xa_rollback()</function>; it lists
+	<constant>XA_RETRY_COMMFAIL</constant> but it does not apply to LIXA
+	implementation because it is related to the 
+	<emphasis>Communication Resource Manager</emphasis> concept that is
+	not supported by LIXA implementation.
+      </para>
+      <para>
+	The LIXA implementation sticks to <citation>XAspec</citation>: if a
+	resource manager returned <constant>XA_RETRY</constant> it would be
+	considered a bug inside the resource manager.
+      </para>
+    </simplesect>
+  </section>
+</chapter>
