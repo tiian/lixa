@@ -1,1 +1,1 @@
-SUBDIRS = etc src var tests doc
+SUBDIRS = etc src var tests doc ext

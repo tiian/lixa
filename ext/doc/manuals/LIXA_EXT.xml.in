@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V5.0/EN" 
+	  "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY intro SYSTEM "LIXA_EXT_Introduction.xml">
+<!ENTITY php SYSTEM "LIXA_EXT_PHP.xml">
+<!ENTITY biblio SYSTEM "LIXA_EXT_Bibliography.xml">
+]>
+<book xmlns="http://docbook.org/ns/docbook">
+  <title>LIXA @PACKAGE_VERSION@ Extensions</title>
+  <subtitle>
+    A libre, free, open source implementation of the XA and the TX 
+    specifications
+  </subtitle>
+  <info>
+    <author>
+      <personname>
+	<firstname>Christian</firstname>
+	<surname>Ferrari</surname>
+      </personname>
+    </author>
+    <copyright>
+      <year>2012</year>
+      <holder>Christian Ferrari</holder>
+    </copyright>
+  </info>
+  &intro;
+  &php;
+  &biblio;
+</book>

@@ -1,5 +1,5 @@
 STYLESHEETS_DIR = @STYLESHEETS_DIR@
-EXTRA_DIST = LIXA.xml.in $(doc_DATA) $(manual_sources) $(dia_images) $(png_images)
+EXTRA_DIST = LIXA.xml.in $(doc_DATA) $(manual_sources) $(dia_images) $(png_images) index_no_xsltproc.html
 
 manual_sources = LIXA.xml \
 	LIXA_Bibliography.xml \

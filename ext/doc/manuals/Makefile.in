@@ -34,8 +34,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = doc/manuals
-DIST_COMMON = README $(srcdir)/LIXA.xml.in $(srcdir)/Makefile.am \
+subdir = ext/doc/manuals
+DIST_COMMON = $(srcdir)/LIXA_EXT.xml.in $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
@@ -50,7 +50,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = LIXA.xml
+CONFIG_CLEAN_FILES = LIXA_EXT.xml
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -240,50 +240,14 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = LIXA.xml.in $(doc_DATA) $(manual_sources) $(dia_images) $(png_images) index_no_xsltproc.html
-manual_sources = LIXA.xml \
-	LIXA_Bibliography.xml \
-	LIXA_Configuration.xml \
-	LIXA_Development.xml \
-	LIXA_Execution.xml \
-	LIXA_In_Depth.xml \
-	LIXA_Installation.xml \
-	LIXA_Introduction.xml \
-	LIXA_Preface.xml \
-	LIXA_Recovery.xml \
-	LIXA_Tuning.xml
+EXTRA_DIST = LIXA_EXT.xml.in $(doc_DATA) $(manual_sources) $(dia_images) $(png_images) index_no_xsltproc.html
+manual_sources = LIXA_EXT.xml \
+	LIXA_EXT_Introduction.xml \
+	LIXA_EXT_PHP.xml \
+	LIXA_EXT_Bibliography.xml
 
-dia_images = LIXA_Configuration_1.dia  LIXA_Configuration_4.dia \
-	LIXA_Configuration_7.dia LIXA_Configuration_2.dia \
-	LIXA_Configuration_5.dia LIXA_Configuration_8.dia \
-	LIXA_Configuration_3.dia LIXA_Configuration_6.dia \
-	LIXA_Configuration_9.dia \
-	LIXA_Development_1.dia LIXA_Development_2.dia LIXA_Development_3.dia \
-	LIXA_Development_4.dia LIXA_Development_5.dia LIXA_Development_6.dia \
-	LIXA_Development_7.dia LIXA_Development_8.dia LIXA_Development_9.dia \
-	LIXA_Development_10.dia LIXA_Development_11.dia \
-	LIXA_Development_12.dia LIXA_Development_13.dia \
-	LIXA_Recovery_01.dia LIXA_Recovery_02.dia LIXA_Recovery_03.dia \
-	LIXA_In_Depth_01.dia LIXA_In_Depth_02.dia LIXA_In_Depth_03.dia
-
-png_images = LIXA_Configuration_1.png  LIXA_Configuration_4.png \
-	LIXA_Configuration_7.png LIXA_Configuration_2.png \
-	LIXA_Configuration_5.png LIXA_Configuration_8.png \
-	LIXA_Configuration_3.png LIXA_Configuration_6.png \
-	LIXA_Configuration_9.png \
-	LIXA_Development_1.png LIXA_Development_2.png LIXA_Development_3.png \
-	LIXA_Development_4.png LIXA_Development_5.png LIXA_Development_6.png \
-	LIXA_Development_7.png LIXA_Development_8.png LIXA_Development_9.png \
-	LIXA_Development_10.png LIXA_Development_11.png \
-	LIXA_Development_12.png LIXA_Development_13.png \
-	LIXA_Recovery_01.png LIXA_Recovery_02.png LIXA_Recovery_03.png \
-	LIXA_In_Depth_01.png LIXA_In_Depth_02.png LIXA_In_Depth_03.png \
-	LIXA_Tuning_01.png LIXA_Tuning_02.png \
-	LIXA_Tuning_03.png LIXA_Tuning_04.png \
-	LIXA_Tuning_05.png LIXA_Tuning_06.png \
-	LIXA_Tuning_07.png LIXA_Tuning_08.png \
-	LIXA_Tuning_09.png LIXA_Tuning_10.png
-
+dia_images = 
+png_images = 
 doc_DATA = *.html $(png_images)
 all: all-am
 
@@ -297,9 +261,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/manuals/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu ext/doc/manuals/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu doc/manuals/Makefile
+	  $(AUTOMAKE) --gnu ext/doc/manuals/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -318,7 +282,7 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-LIXA.xml: $(top_builddir)/config.status $(srcdir)/LIXA.xml.in
+LIXA_EXT.xml: $(top_builddir)/config.status $(srcdir)/LIXA_EXT.xml.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
@@ -496,20 +460,20 @@ uninstall-am: uninstall-docDATA
 	uninstall uninstall-am uninstall-docDATA
 
 
-all: index_all_in_one.html index.html
+all: index_ext_all_in_one.html index_ext.html
 
-@COMPILE_DOCBOOK_STUFF_TRUE@index_all_in_one.html: $(manual_sources) $(png_images)
+@COMPILE_DOCBOOK_STUFF_TRUE@index_ext_all_in_one.html: $(manual_sources) $(png_images)
 @COMPILE_DOCBOOK_STUFF_TRUE@	@echo "Creating HTML manual (single page)..."
-@COMPILE_DOCBOOK_STUFF_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index_all_in_one.html $(STYLESHEETS_DIR)/docbook.xsl LIXA.xml
-@COMPILE_DOCBOOK_STUFF_TRUE@index.html: $(manual_sources) $(png_images)
+@COMPILE_DOCBOOK_STUFF_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index_ext_all_in_one.html $(STYLESHEETS_DIR)/docbook.xsl LIXA_EXT.xml
+@COMPILE_DOCBOOK_STUFF_TRUE@index_ext.html: $(manual_sources) $(png_images)
 @COMPILE_DOCBOOK_STUFF_TRUE@	@echo "Creating HTML manual (multi page)..."
-@COMPILE_DOCBOOK_STUFF_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/chunk.xsl LIXA.xml
-@COMPILE_DOCBOOK_STUFF_FALSE@index_all_in_one.html: $(manual_sources) $(png_images)
+@COMPILE_DOCBOOK_STUFF_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index_ext.html $(STYLESHEETS_DIR)/chunk.xsl LIXA_EXT.xml
+@COMPILE_DOCBOOK_STUFF_FALSE@index_ext_all_in_one.html: $(manual_sources) $(png_images)
 @COMPILE_DOCBOOK_STUFF_FALSE@	@echo "Sorry, you must have xsltproc and Docbook stylesheets to create HTML manual from XML files"
-@COMPILE_DOCBOOK_STUFF_FALSE@	cp index_no_xsltproc.html index_all_in_one.html
-@COMPILE_DOCBOOK_STUFF_FALSE@index.html: $(manual_sources) $(png_images)
+@COMPILE_DOCBOOK_STUFF_FALSE@	cp index_no_xsltproc.html index_ext_all_in_one.html
+@COMPILE_DOCBOOK_STUFF_FALSE@index_ext.html: $(manual_sources) $(png_images)
 @COMPILE_DOCBOOK_STUFF_FALSE@	@echo "Sorry, you must have xsltproc and Docbook stylesheets to create HTML manual from XML files"
-@COMPILE_DOCBOOK_STUFF_FALSE@	cp index_no_xsltproc.html index.html
+@COMPILE_DOCBOOK_STUFF_FALSE@	cp index_no_xsltproc.html index_ext.html
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

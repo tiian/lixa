@@ -1,0 +1,27 @@
+<chapter>
+  <title>Introduction</title>
+  <section>
+    <title>Why should I use LIXA project?</title>
+    <para>
+      LIXA project allows you to develop an Application Program that performs
+      two phase commit transactions against two ore more Resource Managers.
+      Two phase commit is a transactional protocol designed to 
+      <quote>guarantee</quote> <acronym>ACID</acronym> (Atomicity, Consistency,
+      Isolation, Durability) transactionality.
+      XA specification is not the only two phase commit protocol implementation
+      but it is probably the best known and widespread. For a detailed
+      explanation please refer to <citation>RefModel</citation>.
+      <screen>
+tiian@mojan:/tmp$ wget -O php-5.4.0.tar.bz2 http://it2.php.net/get/php-5.4.0.tar.bz2/from/it.php.net/mirror
+tiian@mojan:/tmp$ tar xjf php-5.4.0.tar.bz2
+tiian@mojan:/tmp$ patch --dry-run -p0 < lixa-patch.diff
+tiian@mojan:/tmp$ patch -p0 < lixa-patch.diff
+tiian@mojan:/tmp$ cd php-5.4.0
+tiian@mojan:/tmp$ rm configure
+tiian@mojan:/tmp$ rm autom4te.cache/*
+tiian@mojan:/tmp$ ./buildconf --force
+tiian@mojan:/tmp$ nice ./configure --enable-debug --enable-maintainer-zts --enable-cgi --enable-cli --enable-shared --with-mysqli=/usr/bin/mysql_config --with-pgsql --with-oci8=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --prefix=/opt/php-5.4-lixa --with-lixa=/opt/lixa/bin/lixa-config
+      </screen>
+    </para>
+  </section>
+</chapter>
