@@ -10,7 +10,7 @@ dia_images =
 
 png_images =
 
-docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/html
+docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/ext/html
 doc_DATA = *.html $(png_images)
 
 
