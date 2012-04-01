@@ -1,27 +1,89 @@
 <chapter>
-  <title>Introduction</title>
-  <section>
-    <title>Why should I use LIXA project?</title>
+  <title>PHP</title>
+  <note>
     <para>
-      LIXA project allows you to develop an Application Program that performs
-      two phase commit transactions against two ore more Resource Managers.
-      Two phase commit is a transactional protocol designed to 
-      <quote>guarantee</quote> <acronym>ACID</acronym> (Atomicity, Consistency,
-      Isolation, Durability) transactionality.
-      XA specification is not the only two phase commit protocol implementation
-      but it is probably the best known and widespread. For a detailed
-      explanation please refer to <citation>RefModel</citation>.
+      There is not a porting of LIXA to Microsoft Windows operating system;
+      LIXA PHP extension is not suitable to operate in a Microsoft Windows
+      environment as well as LIXA base technology.
+    </para>
+    <para>
+      Most of the PHP technology is platform independent, but this does not
+      apply to LIXA PHP extension: it has been developed and tested using
+      GNU/Linux operating system.
+    </para>
+  </note>
+  <section>
+    <title>Extension type</title>
+    <para>
+      LIXA PHP extension is a <emphasis>patch</emphasis> for 
+      <link xlink:href="http://www.php.net/">Zend</link>      
+      engine. The patch contains:
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	    a PHP LIXA wrapper dynamically generated using
+	    <link xlink:href="http://www.swig.org/">SWIG</link>      
+	</para></listitem>
+	<listitem><para>
+	    a set of changes to PHP database drivers
+	</para></listitem>
+	<listitem><para>
+	    all the build &amp; deploy stuff needed to produce a Zend 
+	    (LIXA patched) PHP engine
+	</para></listitem>
+      </itemizedlist>
+    </para>
+  </section>
+  <section>
+    <title>Prerequisites</title>
+    <para>
+      LIXA wrapper is dynamically generated using
+      <link xlink:href="http://www.swig.org/">SWIG</link>,
+      so you must install SWIG on your system before you can going on.
+    </para>
+    <para>
+      PHP needs some specific versions of <command>autoconf</command>
+      as explained in 
+      <link xlink:href="http://www.php.net/manual/en/internals2.buildsys.configunix.php">
+	Talking to the UNIX build system: config.m4</link>;
+      you must install the right version of <command>autoconf</command>
+      before going on. Without a valid version of <command>autoconf</command>
+      you will not be able to build a Zend PHP engine.
+    </para>
+    <para>
+      For the sake of easiness, this manual shows how to build a fresh
+      PHP Zend environment patched with LIXA extension.
+      You could patched your previously downloaded PHP environment, but this
+      manual tries to keep it easy and uses a freshly downloaded tarball.
+    </para>
+  </section>
+  <section>
+    <title>Installation</title>
+    <para>
+      Locate the <filename>ext/php</filename> directory inside the LIXA source
+      tree and enter it; you should find an executable shell script named
+      <filename>download_and_patch.sh</filename> inside it:
       <screen>
+tiian@mojan:~/lixa/ext/php$ ls -la download_and_patch.sh
+-rwxr-xr-x 1 tiian tiian 4855 2012-03-31 23:37 download_and_patch.sh
+      </screen>
+      <note>
+	<para>
+	  You need a running Internet connection before command execution
+	  because it will try to download the PHP tarball for you from
+	  <link xlink:href="http://docs.php.net/">http://docs.php.net/</link>
+	</para>
+      </note>
+    </para>
+    <screen>
 tiian@mojan:/tmp$ wget -O php-5.4.0.tar.bz2 http://it2.php.net/get/php-5.4.0.tar.bz2/from/it.php.net/mirror
 tiian@mojan:/tmp$ tar xjf php-5.4.0.tar.bz2
-tiian@mojan:/tmp$ patch --dry-run -p0 < lixa-patch.diff
-tiian@mojan:/tmp$ patch -p0 < lixa-patch.diff
+tiian@mojan:/tmp$ patch --dry-run -p0 &lt; lixa-patch.diff
+tiian@mojan:/tmp$ patch -p0 &lt; lixa-patch.diff
 tiian@mojan:/tmp$ cd php-5.4.0
 tiian@mojan:/tmp$ rm configure
 tiian@mojan:/tmp$ rm autom4te.cache/*
 tiian@mojan:/tmp$ ./buildconf --force
 tiian@mojan:/tmp$ nice ./configure --enable-debug --enable-maintainer-zts --enable-cgi --enable-cli --enable-shared --with-mysqli=/usr/bin/mysql_config --with-pgsql --with-oci8=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --prefix=/opt/php-5.4-lixa --with-lixa=/opt/lixa/bin/lixa-config
-      </screen>
-    </para>
+    </screen>
   </section>
 </chapter>
