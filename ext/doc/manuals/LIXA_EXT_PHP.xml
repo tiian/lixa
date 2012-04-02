@@ -61,7 +61,7 @@
     <para>
       Locate the <filename>ext/php</filename> directory inside the LIXA source
       tree and enter it; you should find an executable shell script named
-      <filename>download_and_patch.sh</filename> inside it:
+      <command>download_and_patch.sh</command> inside it:
       <screen>
 tiian@mojan:~/lixa/ext/php$ ls -la download_and_patch.sh
 -rwxr-xr-x 1 tiian tiian 4855 2012-03-31 23:37 download_and_patch.sh
@@ -73,16 +73,97 @@ tiian@mojan:~/lixa/ext/php$ ls -la download_and_patch.sh
 	  <link xlink:href="http://docs.php.net/">http://docs.php.net/</link>
 	</para>
       </note>
+      Command <command>download_and_patch.sh</command> can do most operation
+      for you, but you can perform the same manually.
+      Try to execute the script from a terminal session:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu:~/lixa/ext/php$ ./download_and_patch.sh
+PHP 5.4.0 will be downloaded...
+Checking if wget command is available... wget is /usr/bin/wget
+Checking if bunzip2 is available... bunzip2 is /bin/bunzip2
+--22:19:05--  http://docs.php.net/get/php-5.4.0.tar.bz2/from/docs.php.net/mirror
+           => `php-5.4.0.tar.bz2'
+Resolving docs.php.net... 213.175.195.123
+Connecting to docs.php.net|213.175.195.123|:80... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: http://docs.php.net/distributions/php-5.4.0.tar.bz2 [following]
+--22:19:05--  http://docs.php.net/distributions/php-5.4.0.tar.bz2
+           => `php-5.4.0.tar.bz2'
+Connecting to docs.php.net|213.175.195.123|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 11,439,508 (11M) [application/octet-stream]
+
+100%[====================================>] 11,439,508   837.51K/s    ETA 00:00
+
+22:19:19 (819.29 KB/s) - `php-5.4.0.tar.bz2' saved [11439508/11439508]
+
+Deflating PHP source code...
+Checking if the downloaded PHP source code can be patched...
+File lixa-php-5.4.0-patch.diff exists, trying patch command...
+patching file php-5.4.0/ext/mysqli/mysqli_api.c
+patching file php-5.4.0/ext/mysqli/mysqli_nonapi.c
+patching file php-5.4.0/ext/mysqli/php_mysqli_structs.h
+patching file php-5.4.0/ext/lixa/config.m4
+Patching PHP source code...
+patching file php-5.4.0/ext/mysqli/mysqli_api.c
+patching file php-5.4.0/ext/mysqli/mysqli_nonapi.c
+patching file php-5.4.0/ext/mysqli/php_mysqli_structs.h
+patching file php-5.4.0/ext/lixa/config.m4
+PHP source code successfully patched!
+Removing php-5.4.0/configure and some stuff...
+Creating new configure script...
+Forcing buildconf
+buildconf: checking installation...
+buildconf: autoconf version 2.61 (ok)
+rebuilding configure
+rebuilding main/php_config.h.in
+Checking configure recognize LIXA extension...
+  --with-lixa=FILE        Include LIXA support. File is the path to lixa-config program
+
+************************************************************************
+  PHP source code in directory php-5.4.0 is ready for build and deploy;
+  use --with-lixa=/opt/lixa/bin/lixa-config (or different path if you
+  not using LIXA default path) to enable LIXA extension for PHP
+************************************************************************
+	</screen></td></tr></tbody>
+      </table>
+      These are the steps performed by the script:
+      <orderedlist numeration='arabic'>
+	<listitem>
+	  <para>
+	    PHP tarball download using <command>wget</command> from
+	    http://docs.php.net/
+	  </para>
+	  <para>
+	    if <command>bunzip2</command> is installed, 
+	    <filename>.tar.bz2</filename> will be downloaded;
+	    if <command>gunzip</command> is installed, 
+	    <filename>.tar.gz</filename> will be downloaded;
+	  </para>
+	</listitem>
+	<listitem><para>
+	    tarball extraction
+	</para></listitem>
+	<listitem><para>
+	    PHP source code patching
+	</para></listitem>
+	<listitem><para>
+	    PHP build environment clean up 
+	    (<command>rm -vf configure autom4te.cache/*</command>)
+	</para></listitem>
+	<listitem><para>
+	    PHP build environment reset
+	    (<command>./buildconf --force</command>)
+	</para></listitem>
+	<listitem><para>
+	    check PHP build is LIXA enabled
+	    (<command>./configure --help | grep lixa</command>)
+	</para></listitem>
+      </orderedlist>
     </para>
     <screen>
-tiian@mojan:/tmp$ wget -O php-5.4.0.tar.bz2 http://it2.php.net/get/php-5.4.0.tar.bz2/from/it.php.net/mirror
-tiian@mojan:/tmp$ tar xjf php-5.4.0.tar.bz2
-tiian@mojan:/tmp$ patch --dry-run -p0 &lt; lixa-patch.diff
-tiian@mojan:/tmp$ patch -p0 &lt; lixa-patch.diff
-tiian@mojan:/tmp$ cd php-5.4.0
-tiian@mojan:/tmp$ rm configure
-tiian@mojan:/tmp$ rm autom4te.cache/*
-tiian@mojan:/tmp$ ./buildconf --force
 tiian@mojan:/tmp$ nice ./configure --enable-debug --enable-maintainer-zts --enable-cgi --enable-cli --enable-shared --with-mysqli=/usr/bin/mysql_config --with-pgsql --with-oci8=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --prefix=/opt/php-5.4-lixa --with-lixa=/opt/lixa/bin/lixa-config
     </screen>
   </section>
