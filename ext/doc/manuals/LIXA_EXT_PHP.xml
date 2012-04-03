@@ -163,8 +163,75 @@ Checking configure recognize LIXA extension...
 	</para></listitem>
       </orderedlist>
     </para>
-    <screen>
-tiian@mojan:/tmp$ nice ./configure --enable-debug --enable-maintainer-zts --enable-cgi --enable-cli --enable-shared --with-mysqli=/usr/bin/mysql_config --with-pgsql --with-oci8=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server --prefix=/opt/php-5.4-lixa --with-lixa=/opt/lixa/bin/lixa-config
-    </screen>
+    <para>
+      You are now ready to run <command>configure</command> specifying all
+      the desired values; you should refer to official Zend documentation
+      <link xlink:href="http://www.php.net/manual/en/install.php">
+	<quote>Installation and Configuration</quote>
+      </link>      
+      and
+      <link xlink:href="http://www.php.net/manual/en/internals2.php">
+	<quote>PHP at the Core: A Hacker's Guide to the Zend Engine</quote>
+      </link>
+      to retrieve all the information necessary to build your own PHP
+      engine starting from the source code.
+    </para>
+    <para>
+      The command shown in the below table is an example for a test 
+      environment; you would probably need something different (HTTP server
+      modules and so on...).
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php$ cd php-5.4.0
+tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
+> --enable-maintainer-zts --enable-cgi --enable-cli --enable-shared \
+> --with-mysqli=/usr/bin/mysql_config --with-pgsql \
+> --with-oci8=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server \
+> --with-lixa=/opt/lixa/bin/lixa-config \
+> --prefix=/opt/php-5.4-lixa
+	</screen></td></tr></tbody>
+      </table>
+    </para>
+    <section>
+      <title>LIXA details</title>
+      <para>
+	If you were building a Zend LIXA patched PHP engine, you should pay
+	attention to some specific issues:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	      it's not mandatory, but it's <emphasis>strongly</emphasis>
+	      suggested you will use a specific verbose installation path
+	      (<option>--prefix=/opt/php-5.4-lixa</option> in the 
+	      above example)
+	  </para></listitem>
+	  <listitem><para>
+	      to enable LIXA support you must specify something like
+	      <option>--with-lixa=/opt/lixa/bin/lixa-config</option>
+	      (if you didn't install LIXA in default path, you would specify
+	      a different path for <filename>lixa-config</filename> utility
+	      program)
+	  </para></listitem>
+	  <listitem>
+	    <para>
+	      <quote>mysqli</quote> extension provided by Zend engine can
+	      be used with LIXA <emphasis>only</emphasis> if standard 
+		  MySQL client library is
+	      wrapped by mysqli (this is not the defaul behavior in the last
+	      releases of Zend PHP)<footnote><para>MySQL 
+		  <quote>Native Driver</quote> can not be used with LIXA
+		  because it should be managed as a distinct Resource Manager,
+		  not as a standard MySQL one</para></footnote>.
+	    </para>
+	    <para>
+	      You can use something like this to force the usage of standard
+	      MySQL client library instead of <quote>Native Driver</quote>
+	      provided by Zend:
+	      <option>--with-mysqli=/usr/bin/mysql_config</option>
+	    </para>
+	  </listitem>
+	</itemizedlist>	
+      </para>
+    </section>
   </section>
 </chapter>
