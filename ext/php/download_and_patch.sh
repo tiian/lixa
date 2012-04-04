@@ -112,6 +112,22 @@ else
 	fi
 fi
 
+# Creating LIXA extension
+echo "Creating LIXA extension directory..."
+LIXA_DIR=$DIR_NAME/ext/lixa
+mkdir -p $LIXA_DIR
+if test $? -ne 0
+then
+	echo "Error while creating directory $LIXA_DIR"
+	exit 1
+fi
+cp -a config.m4 lixa.c php_lixa.h $LIXA_DIR
+if test $? -ne 0
+then
+	echo "Error while copying LIXA sources inside $LIXA_DIR"
+	exit 1
+fi
+
 # Checking PHP source code patches
 echo "Checking if the downloaded PHP source code can be patched..."
 RIGHT_PATCH="lixa-${DIR_NAME}-patch.diff"
@@ -168,7 +184,11 @@ cd ..
 echo
 echo "************************************************************************"
 echo "  PHP source code in directory $DIR_NAME is ready for build and deploy;"
+echo ""
 echo "  use --with-lixa=/opt/lixa/bin/lixa-config (or different path if you"
 echo "  not using LIXA default path) to enable LIXA extension for PHP"
+echo ""
+echo "  use --enable-lixa-swig if you want to generate LIXA PHP wrapper from"
+echo "  scratch using SWIG software (this should not be necessary most times)"
 echo "************************************************************************"
 exit 0

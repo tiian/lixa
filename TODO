@@ -1,3 +1,5 @@
+Remove lixamy.h and lixapq.h from SWIG lixa.i: there's no need to wrap
+the functions related to connection pick-up; update the content of ext/php
 
 Explore high availability features (active/active) with dynamic or static
 workload

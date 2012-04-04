@@ -36,9 +36,11 @@
   <section>
     <title>Prerequisites</title>
     <para>
-      LIXA wrapper is dynamically generated using
+      LIXA wrapper might be dynamically generated using
       <link xlink:href="http://www.swig.org/">SWIG</link>,
-      so you must install SWIG on your system before you can going on.
+      so you should install SWIG on your system before if you desired to
+      build the wrapper from scratch. Most times, the LIXA distributed 
+      wrapper works fine and you don't have to generate a fresh one.
     </para>
     <para>
       PHP needs some specific versions of <command>autoconf</command>
@@ -121,11 +123,16 @@ rebuilding configure
 rebuilding main/php_config.h.in
 Checking configure recognize LIXA extension...
   --with-lixa=FILE        Include LIXA support. File is the path to lixa-config program
+  --enable-lixa-swig      Generate LIXA wrapper using SWIG
 
 ************************************************************************
   PHP source code in directory php-5.4.0 is ready for build and deploy;
+
   use --with-lixa=/opt/lixa/bin/lixa-config (or different path if you
   not using LIXA default path) to enable LIXA extension for PHP
+
+  use --enable-lixa-swig if you want to generate LIXA PHP wrapper from
+  scratch using SWIG software (this should not be necessary most times)
 ************************************************************************
 	</screen></td></tr></tbody>
       </table>
@@ -133,7 +140,7 @@ Checking configure recognize LIXA extension...
       <orderedlist numeration='arabic'>
 	<listitem>
 	  <para>
-	    PHP tarball download using <command>wget</command> from
+	    download PHP tarball using <command>wget</command> from
 	    http://docs.php.net/
 	  </para>
 	  <para>
@@ -144,17 +151,22 @@ Checking configure recognize LIXA extension...
 	  </para>
 	</listitem>
 	<listitem><para>
-	    tarball extraction
+	    extract tarball locally
 	</para></listitem>
 	<listitem><para>
-	    PHP source code patching
+	    create <filename>php-X.Y.Z/ext/lixa</filename> directory and 
+	    populate it with <filename>config.m4 lixa.c lixa.php 
+	      php_lixa.h</filename>
 	</para></listitem>
 	<listitem><para>
-	    PHP build environment clean up 
+	    patch PHP Zend source code
+	</para></listitem>
+	<listitem><para>
+	    clean-up PHP build environment 
 	    (<command>rm -vf configure autom4te.cache/*</command>)
 	</para></listitem>
 	<listitem><para>
-	    PHP build environment reset
+	    reset PHP build environment
 	    (<command>./buildconf --force</command>)
 	</para></listitem>
 	<listitem><para>
@@ -192,6 +204,22 @@ tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
 > --prefix=/opt/php-5.4-lixa
 	</screen></td></tr></tbody>
       </table>
+      In case you might want to generate LIXA PHP wrapper source code
+      using SWIG you
+      should add <option>--enable-lixa-swig</option> to 
+      <command>configure</command> command line.
+      <important>
+	<para>
+	  Most times the wrapper supplied with LIXA distribution works
+	  fine and you <emphasis>don't have to</emphasis> generate a fresh
+	  one. Sometimes, a locally generated wrapper does not work due to
+	  some SWIG issue.
+	</para>
+	<para>
+	  The <option>--enable-lixa-swig</option> option is basically
+	  designed for LIXA maintainers.
+	</para>
+      </important>
     </para>
     <section>
       <title>LIXA details</title>
@@ -217,7 +245,7 @@ tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
 	      <quote>mysqli</quote> extension provided by Zend engine can
 	      be used with LIXA <emphasis>only</emphasis> if standard 
 		  MySQL client library is
-	      wrapped by mysqli (this is not the defaul behavior in the last
+	      wrapped by mysqli (this is not the defaul behavior in the latest
 	      releases of Zend PHP)<footnote><para>MySQL 
 		  <quote>Native Driver</quote> can not be used with LIXA
 		  because it should be managed as a distinct Resource Manager,
