@@ -2,6 +2,8 @@ dnl config.m4 for extension lixa
 
 PHP_ARG_WITH(lixa, for LIXA support,
 [  --with-lixa=FILE        Include LIXA support. File is the path to lixa-config program])
+PHP_ARG_ENABLE(lixa-swig, whether LIXA wrapper should be generated from scratch using SWIG,
+[  --enable-lixa-swig      Generate LIXA wrapper using SWIG], no, no)
 
 if test "$PHP_LIXA" != "no"; then
 	LIXA_CONFIG=$PHP_LIXA
@@ -9,7 +11,10 @@ if test "$PHP_LIXA" != "no"; then
 	AC_CHECK_PROGS(SWIG, [swig], [])
 	if test -z $SWIG
 	then
-		AC_MSG_ERROR([cannot find swig program])
+		if test "$PHP_LIXA_SWIG" != "no"
+		then
+			AC_MSG_ERROR([cannot find swig program, cannot generate LIXA wrapper using SWIG])
+		fi
 	fi
 	dnl use lixa-config to determine LIXA include dir
 	AC_MSG_CHECKING([for LIXA using $LIXA_CONFIG])
@@ -55,38 +60,45 @@ if test "$PHP_LIXA" != "no"; then
 
 	PHP_NEW_EXTENSION(lixa, lixa.c, $ext_shared)
 
-	dnl # --with-lixa -> dynamically generate lixa.i interface file for SWIG
-	LIXA_INTERFACE="$ext_srcdir/lixa.i"
-	echo "%module lixa" > $LIXA_INTERFACE
-	echo "%{" >> $LIXA_INTERFACE
-	echo "#include \"tx.h\"" >> $LIXA_INTERFACE
-	if test $HAVE_LIXA_POSTGRESQL -eq 1
+	dnl # --enable-lixa-swig -> use SWIG to generare the wrapper from 
+	dnl #                       scratch
+	if test "$PHP_LIXA_SWIG" != "no"
 	then
-		echo "#include \"lixapq.h\"" >> $LIXA_INTERFACE
-	fi	
-	if test $HAVE_LIXA_MYSQL -eq 1
-	then
-		echo "#include \"lixamy.h\"" >> $LIXA_INTERFACE
-	fi	
-	echo "%}" >> $LIXA_INTERFACE
-	echo "%include \"tx.h\"" >> $LIXA_INTERFACE
-	if test $HAVE_LIXA_POSTGRESQL -eq 1
-	then
-		echo "%include \"lixapq.h\"" >> $LIXA_INTERFACE
-	fi	
-	if test $HAVE_LIXA_MYSQL -eq 1
-	then
-		echo "%include \"lixamy.h\"" >> $LIXA_INTERFACE
+		dnl # --with-lixa -> dynamically generate lixa.i interface 
+		dnl #                file for SWIG
+		LIXA_INTERFACE="$ext_srcdir/lixa.i"
+		echo "%module lixa" > $LIXA_INTERFACE
+		echo "%{" >> $LIXA_INTERFACE
+		echo "#include \"tx.h\"" >> $LIXA_INTERFACE
+		if test $HAVE_LIXA_POSTGRESQL -eq 1
+		then
+			echo "#include \"lixapq.h\"" >> $LIXA_INTERFACE
+		fi	
+		if test $HAVE_LIXA_MYSQL -eq 1
+		then
+			echo "#include \"lixamy.h\"" >> $LIXA_INTERFACE
+		fi	
+		echo "%}" >> $LIXA_INTERFACE
+		echo "%include \"tx.h\"" >> $LIXA_INTERFACE
+		if test $HAVE_LIXA_POSTGRESQL -eq 1
+		then
+			echo "%include \"lixapq.h\"" >> $LIXA_INTERFACE
+		fi	
+		if test $HAVE_LIXA_MYSQL -eq 1
+		then
+			echo "%include \"lixamy.h\"" >> $LIXA_INTERFACE
+		fi
+		dnl # --with-lixa -> building LIXA interface using SWIG
+		AC_MSG_CHECKING([if LIXA wrapper can be created with SWIG])
+		$SWIG -php -outdir $ext_srcdir -I$LIXA_INCLUDE -o $ext_srcdir/lixa.c $LIXA_INTERFACE
+		if test $? -eq 0
+		then
+			AC_MSG_RESULT([yes])
+		else
+			AC_MSG_ERROR([unable to create LIXA php wrapper using SWIG])
+		fi 
 	fi
-	dnl # --with-lixa -> building LIXA interface using SWIG
-	AC_MSG_CHECKING([if LIXA wrapper can be created with SWIG])
-	$SWIG -php -outdir $ext_srcdir -I$LIXA_INCLUDE -o $ext_srcdir/lixa.c $LIXA_INTERFACE
-	if test $? -eq 0
-	then
-		AC_MSG_RESULT([yes])
-	else
-		AC_MSG_ERROR([unable to create LIXA php wrapper using SWIG])
-	fi 
+
 	dnl # --with-lixa -> dynamically generate lixa_php.h
 	LIXA_PHP_H="$ext_srcdir/lixa_php_config.h"
 	cat > $LIXA_PHP_H <<EOF
