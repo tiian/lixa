@@ -1,5 +1,5 @@
 --- php-5.4.0.orig/ext/mysqli/mysqli_api.c	2012-01-01 14:15:04.000000000 +0100
-+++ php-5.4.0/ext/mysqli/mysqli_api.c	2012-03-31 17:41:33.000000000 +0200
++++ php-5.4.0/ext/mysqli/mysqli_api.c	2012-04-05 21:11:09.000000000 +0200
 @@ -33,6 +33,10 @@
  #include "php_mysqli_structs.h"
  #include "mysqli_priv.h"
@@ -29,7 +29,7 @@
  		zend_rsrc_list_entry *le;
  		if (zend_hash_find(&EG(persistent_list), mysql->hash_key, strlen(mysql->hash_key) + 1, (void **)&le) == SUCCESS) {
 --- php-5.4.0.orig/ext/mysqli/mysqli_nonapi.c	2012-01-01 14:15:04.000000000 +0100
-+++ php-5.4.0/ext/mysqli/mysqli_nonapi.c	2012-03-31 17:54:06.000000000 +0200
++++ php-5.4.0/ext/mysqli/mysqli_nonapi.c	2012-04-05 21:11:09.000000000 +0200
 @@ -32,6 +32,14 @@
  #include "php_mysqli_structs.h"
  #include "mysqli_priv.h"
@@ -177,7 +177,7 @@
  	if (mysql->hash_key) {
  		efree(mysql->hash_key);
 --- php-5.4.0.orig/ext/mysqli/php_mysqli_structs.h	2012-01-01 14:15:04.000000000 +0100
-+++ php-5.4.0/ext/mysqli/php_mysqli_structs.h	2012-03-31 17:41:07.000000000 +0200
++++ php-5.4.0/ext/mysqli/php_mysqli_structs.h	2012-04-05 21:11:09.000000000 +0200
 @@ -43,6 +43,10 @@
  #include "mysqli_mysqlnd.h"
  #else

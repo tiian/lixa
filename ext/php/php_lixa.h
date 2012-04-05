@@ -59,10 +59,4 @@ ZEND_NAMED_FUNCTION(_wrap_tx_rollback);
 ZEND_NAMED_FUNCTION(_wrap_tx_set_commit_return);
 ZEND_NAMED_FUNCTION(_wrap_tx_set_transaction_control);
 ZEND_NAMED_FUNCTION(_wrap_tx_set_transaction_timeout);
-ZEND_NAMED_FUNCTION(_wrap_lixa_pq_get_conn_by_rmid);
-ZEND_NAMED_FUNCTION(_wrap_lixa_pq_get_conn_by_pos);
-ZEND_NAMED_FUNCTION(_wrap_lixa_pq_get_conn);
-ZEND_NAMED_FUNCTION(_wrap_lixa_my_get_conn_by_rmid);
-ZEND_NAMED_FUNCTION(_wrap_lixa_my_get_conn_by_pos);
-ZEND_NAMED_FUNCTION(_wrap_lixa_my_get_conn);
 #endif /* PHP_LIXA_H */

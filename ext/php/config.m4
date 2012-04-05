@@ -70,24 +70,8 @@ if test "$PHP_LIXA" != "no"; then
 		echo "%module lixa" > $LIXA_INTERFACE
 		echo "%{" >> $LIXA_INTERFACE
 		echo "#include \"tx.h\"" >> $LIXA_INTERFACE
-		if test $HAVE_LIXA_POSTGRESQL -eq 1
-		then
-			echo "#include \"lixapq.h\"" >> $LIXA_INTERFACE
-		fi	
-		if test $HAVE_LIXA_MYSQL -eq 1
-		then
-			echo "#include \"lixamy.h\"" >> $LIXA_INTERFACE
-		fi	
 		echo "%}" >> $LIXA_INTERFACE
 		echo "%include \"tx.h\"" >> $LIXA_INTERFACE
-		if test $HAVE_LIXA_POSTGRESQL -eq 1
-		then
-			echo "%include \"lixapq.h\"" >> $LIXA_INTERFACE
-		fi	
-		if test $HAVE_LIXA_MYSQL -eq 1
-		then
-			echo "%include \"lixamy.h\"" >> $LIXA_INTERFACE
-		fi
 		dnl # --with-lixa -> building LIXA interface using SWIG
 		AC_MSG_CHECKING([if LIXA wrapper can be created with SWIG])
 		$SWIG -php -outdir $ext_srcdir -I$LIXA_INCLUDE -o $ext_srcdir/lixa.c $LIXA_INTERFACE

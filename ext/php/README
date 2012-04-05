@@ -1,1 +1,30 @@
 Please refer to official documentation for PHP experimental LIXA extension
+
+Directory content:
+config.m4
+	configuration needed to build LIXA PHP extension
+
+create_diff.sh
+	script necessary to generate LIXA PHP patch (project maintainers usage
+	only)
+
+download_and_patch.sh
+	download PHP Zend distribution and patch it for LIXA extension
+
+examples (dir)
+	LIXA PHP examples
+
+lixa.c
+	LIXA PHP wrapper source code file (produces using SWIG)
+
+lixa.php
+	LIXA PHP include file (if you build LIXA out of PHP core)
+
+lixa-${PHP_VERSION}-patch.diff
+	LIXA PHP patch
+
+Makefile*
+	makefiles for software distribution
+
+php_lixa.h
+	LIXA PHP wrapper header file (produced using SWIG)

@@ -971,14 +971,12 @@ static void SWIG_Php_SetModule(swig_module_info *pointer) {
 /* -------- TYPES TABLE (BEGIN) -------- */
 
 #define SWIGTYPE_int swig_types[0]
-#define SWIGTYPE_p_MYSQL swig_types[1]
-#define SWIGTYPE_p_PGconn swig_types[2]
-#define SWIGTYPE_p_char swig_types[3]
-#define SWIGTYPE_p_long swig_types[4]
-#define SWIGTYPE_p_tx_info_t swig_types[5]
-#define SWIGTYPE_p_xid_t swig_types[6]
-static swig_type_info *swig_types[8];
-static swig_module_info swig_module = {swig_types, 7, 0, 0, 0, 0};
+#define SWIGTYPE_p_char swig_types[1]
+#define SWIGTYPE_p_long swig_types[2]
+#define SWIGTYPE_p_tx_info_t swig_types[3]
+#define SWIGTYPE_p_xid_t swig_types[4]
+static swig_type_info *swig_types[6];
+static swig_module_info swig_module = {swig_types, 5, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -1055,15 +1053,11 @@ extern "C" {
 
 
 #include "tx.h"
-#include "lixapq.h"
-#include "lixamy.h"
 
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
 static swig_type_info _swigt__int = {"_int", "int", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_MYSQL = {"_p_MYSQL", "MYSQL *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_PGconn = {"_p_PGconn", "PGconn *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_long = {"_p_long", "TRANSACTION_STATE *|TRANSACTION_TIMEOUT *|long *|COMMIT_RETURN *|TRANSACTION_CONTROL *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_tx_info_t = {"_p_tx_info_t", "TXINFO *|struct tx_info_t *", 0, 0, (void*)0, 0};
@@ -1071,8 +1065,6 @@ static swig_type_info _swigt__p_xid_t = {"_p_xid_t", "XID *|struct xid_t *", 0, 
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__int,
-  &_swigt__p_MYSQL,
-  &_swigt__p_PGconn,
   &_swigt__p_char,
   &_swigt__p_long,
   &_swigt__p_tx_info_t,
@@ -1080,8 +1072,6 @@ static swig_type_info *swig_type_initial[] = {
 };
 
 static swig_cast_info _swigc__int[] = {  {&_swigt__int, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_MYSQL[] = {  {&_swigt__p_MYSQL, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_PGconn[] = {  {&_swigt__p_PGconn, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_long[] = {  {&_swigt__p_long, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_tx_info_t[] = {  {&_swigt__p_tx_info_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -1089,8 +1079,6 @@ static swig_cast_info _swigc__p_xid_t[] = {  {&_swigt__p_xid_t, 0, 0, 0},{0, 0, 
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__int,
-  _swigc__p_MYSQL,
-  _swigc__p_PGconn,
   _swigc__p_char,
   _swigc__p_long,
   _swigc__p_tx_info_t,
@@ -1104,10 +1092,8 @@ static swig_cast_info *swig_cast_initial[] = {
 /* vdecl subsection */
 static int le_swig__int=0; /* handle for _int */
 static int le_swig__p_char=0; /* handle for _p_char */
-static int le_swig__p_MYSQL=0; /* handle for _p_MYSQL */
 static int le_swig__p_long=0; /* handle for _p_long */
 static int le_swig__p_tx_info_t=0; /* handle for tx_info_t */
-static int le_swig__p_PGconn=0; /* handle for _p_PGconn */
 static int le_swig__p_xid_t=0; /* handle for xid_t */
 /* end vdecl subsection */
 /* wrapper section */
@@ -1888,146 +1874,6 @@ fail:
 }
 
 
-ZEND_NAMED_FUNCTION(_wrap_lixa_pq_get_conn_by_rmid) {
-  int arg1 ;
-  zval **args[1];
-  PGconn *result = 0 ;
-  
-  SWIG_ResetError();
-  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_array_ex(1, args) != SUCCESS) {
-    WRONG_PARAM_COUNT;
-  }
-  
-  
-  /*@SWIG:/usr/share/swig1.3/php/utils.i,7,CONVERT_INT_IN@*/
-  convert_to_long_ex(args[0]);
-  arg1 = (int) Z_LVAL_PP(args[0]);
-  /*@SWIG@*/;
-  
-  result = (PGconn *)lixa_pq_get_conn_by_rmid(arg1);
-  
-  SWIG_SetPointerZval(return_value, (void *)result, SWIGTYPE_p_PGconn, 0);
-  
-  return;
-fail:
-  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
-}
-
-
-ZEND_NAMED_FUNCTION(_wrap_lixa_pq_get_conn_by_pos) {
-  int arg1 ;
-  zval **args[1];
-  PGconn *result = 0 ;
-  
-  SWIG_ResetError();
-  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_array_ex(1, args) != SUCCESS) {
-    WRONG_PARAM_COUNT;
-  }
-  
-  
-  /*@SWIG:/usr/share/swig1.3/php/utils.i,7,CONVERT_INT_IN@*/
-  convert_to_long_ex(args[0]);
-  arg1 = (int) Z_LVAL_PP(args[0]);
-  /*@SWIG@*/;
-  
-  result = (PGconn *)lixa_pq_get_conn_by_pos(arg1);
-  
-  SWIG_SetPointerZval(return_value, (void *)result, SWIGTYPE_p_PGconn, 0);
-  
-  return;
-fail:
-  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
-}
-
-
-ZEND_NAMED_FUNCTION(_wrap_lixa_pq_get_conn) {
-  PGconn *result = 0 ;
-  
-  SWIG_ResetError();
-  if(ZEND_NUM_ARGS() != 0) {
-    WRONG_PARAM_COUNT;
-  }
-  
-  result = (PGconn *)lixa_pq_get_conn();
-  
-  SWIG_SetPointerZval(return_value, (void *)result, SWIGTYPE_p_PGconn, 0);
-  
-  return;
-fail:
-  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
-}
-
-
-ZEND_NAMED_FUNCTION(_wrap_lixa_my_get_conn_by_rmid) {
-  int arg1 ;
-  zval **args[1];
-  MYSQL *result = 0 ;
-  
-  SWIG_ResetError();
-  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_array_ex(1, args) != SUCCESS) {
-    WRONG_PARAM_COUNT;
-  }
-  
-  
-  /*@SWIG:/usr/share/swig1.3/php/utils.i,7,CONVERT_INT_IN@*/
-  convert_to_long_ex(args[0]);
-  arg1 = (int) Z_LVAL_PP(args[0]);
-  /*@SWIG@*/;
-  
-  result = (MYSQL *)lixa_my_get_conn_by_rmid(arg1);
-  
-  SWIG_SetPointerZval(return_value, (void *)result, SWIGTYPE_p_MYSQL, 0);
-  
-  return;
-fail:
-  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
-}
-
-
-ZEND_NAMED_FUNCTION(_wrap_lixa_my_get_conn_by_pos) {
-  int arg1 ;
-  zval **args[1];
-  MYSQL *result = 0 ;
-  
-  SWIG_ResetError();
-  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_array_ex(1, args) != SUCCESS) {
-    WRONG_PARAM_COUNT;
-  }
-  
-  
-  /*@SWIG:/usr/share/swig1.3/php/utils.i,7,CONVERT_INT_IN@*/
-  convert_to_long_ex(args[0]);
-  arg1 = (int) Z_LVAL_PP(args[0]);
-  /*@SWIG@*/;
-  
-  result = (MYSQL *)lixa_my_get_conn_by_pos(arg1);
-  
-  SWIG_SetPointerZval(return_value, (void *)result, SWIGTYPE_p_MYSQL, 0);
-  
-  return;
-fail:
-  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
-}
-
-
-ZEND_NAMED_FUNCTION(_wrap_lixa_my_get_conn) {
-  MYSQL *result = 0 ;
-  
-  SWIG_ResetError();
-  if(ZEND_NUM_ARGS() != 0) {
-    WRONG_PARAM_COUNT;
-  }
-  
-  result = (MYSQL *)lixa_my_get_conn();
-  
-  SWIG_SetPointerZval(return_value, (void *)result, SWIGTYPE_p_MYSQL, 0);
-  
-  return;
-fail:
-  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
-}
-
-
 static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_int) {
   /* No destructor for simple type _int */
   efree(rsrc->ptr);
@@ -2036,20 +1882,12 @@ static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_p_char) {
   /* No destructor for simple type _p_char */
   efree(rsrc->ptr);
 }
-static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_p_MYSQL) {
-  /* No destructor for simple type _p_MYSQL */
-  efree(rsrc->ptr);
-}
 static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_p_long) {
   /* No destructor for simple type _p_long */
   efree(rsrc->ptr);
 }
 static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_p_tx_info_t) {
   __wrap_delete_tx_info_t(rsrc, SWIGTYPE_p_tx_info_t->name TSRMLS_CC);
-}
-static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_p_PGconn) {
-  /* No destructor for simple type _p_PGconn */
-  efree(rsrc->ptr);
 }
 static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_p_xid_t) {
   __wrap_delete_xid_t(rsrc, SWIGTYPE_p_xid_t->name TSRMLS_CC);
@@ -2090,12 +1928,6 @@ static zend_function_entry lixa_functions[] = {
  SWIG_ZEND_NAMED_FE(tx_set_commit_return,_wrap_tx_set_commit_return,NULL)
  SWIG_ZEND_NAMED_FE(tx_set_transaction_control,_wrap_tx_set_transaction_control,NULL)
  SWIG_ZEND_NAMED_FE(tx_set_transaction_timeout,_wrap_tx_set_transaction_timeout,NULL)
- SWIG_ZEND_NAMED_FE(lixa_pq_get_conn_by_rmid,_wrap_lixa_pq_get_conn_by_rmid,NULL)
- SWIG_ZEND_NAMED_FE(lixa_pq_get_conn_by_pos,_wrap_lixa_pq_get_conn_by_pos,NULL)
- SWIG_ZEND_NAMED_FE(lixa_pq_get_conn,_wrap_lixa_pq_get_conn,NULL)
- SWIG_ZEND_NAMED_FE(lixa_my_get_conn_by_rmid,_wrap_lixa_my_get_conn_by_rmid,NULL)
- SWIG_ZEND_NAMED_FE(lixa_my_get_conn_by_pos,_wrap_lixa_my_get_conn_by_pos,NULL)
- SWIG_ZEND_NAMED_FE(lixa_my_get_conn,_wrap_lixa_my_get_conn,NULL)
  SWIG_ZEND_NAMED_FE(swig_lixa_alter_newobject,_wrap_swig_lixa_alter_newobject,NULL)
  SWIG_ZEND_NAMED_FE(swig_lixa_get_newobject,_wrap_swig_lixa_get_newobject,NULL)
 {NULL, NULL, NULL}
@@ -2382,14 +2214,10 @@ le_swig__int=zend_register_list_destructors_ex(_wrap_destroy_int,NULL,(char *)(S
 SWIG_TypeClientData(SWIGTYPE_int,&le_swig__int);
 le_swig__p_char=zend_register_list_destructors_ex(_wrap_destroy_p_char,NULL,(char *)(SWIGTYPE_p_char->name),module_number);
 SWIG_TypeClientData(SWIGTYPE_p_char,&le_swig__p_char);
-le_swig__p_MYSQL=zend_register_list_destructors_ex(_wrap_destroy_p_MYSQL,NULL,(char *)(SWIGTYPE_p_MYSQL->name),module_number);
-SWIG_TypeClientData(SWIGTYPE_p_MYSQL,&le_swig__p_MYSQL);
 le_swig__p_long=zend_register_list_destructors_ex(_wrap_destroy_p_long,NULL,(char *)(SWIGTYPE_p_long->name),module_number);
 SWIG_TypeClientData(SWIGTYPE_p_long,&le_swig__p_long);
 le_swig__p_tx_info_t=zend_register_list_destructors_ex(_wrap_destroy_p_tx_info_t,NULL,(char *)(SWIGTYPE_p_tx_info_t->name),module_number);
 SWIG_TypeClientData(SWIGTYPE_p_tx_info_t,&le_swig__p_tx_info_t);
-le_swig__p_PGconn=zend_register_list_destructors_ex(_wrap_destroy_p_PGconn,NULL,(char *)(SWIGTYPE_p_PGconn->name),module_number);
-SWIG_TypeClientData(SWIGTYPE_p_PGconn,&le_swig__p_PGconn);
 le_swig__p_xid_t=zend_register_list_destructors_ex(_wrap_destroy_p_xid_t,NULL,(char *)(SWIGTYPE_p_xid_t->name),module_number);
 SWIG_TypeClientData(SWIGTYPE_p_xid_t,&le_swig__p_xid_t);
 CG(active_class_entry) = NULL;
