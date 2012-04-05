@@ -20,11 +20,11 @@
       engine. The patch contains:
       <itemizedlist mark='bullet'>
 	<listitem><para>
-	    a PHP LIXA wrapper dynamically generated using
+	    a PHP LIXA wrapper generated using
 	    <link xlink:href="http://www.swig.org/">SWIG</link>      
 	</para></listitem>
 	<listitem><para>
-	    a set of changes to PHP database drivers
+	    a set of changes to some PHP database drivers
 	</para></listitem>
 	<listitem><para>
 	    all the build &amp; deploy stuff needed to produce a Zend 
@@ -58,7 +58,7 @@
       manual tries to keep it easy and uses a freshly downloaded tarball.
     </para>
   </section>
-  <section>
+  <section xml:id="PHP_installation">
     <title>Installation</title>
     <para>
       Locate the <filename>ext/php</filename> directory inside the LIXA source
@@ -221,6 +221,23 @@ tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
 	</para>
       </important>
     </para>
+    <para>
+      After <command>configure</command> you must proceed with
+      <command>make</command> and <command>make install</command>;
+      please refer to
+      <link xlink:href="http://www.php.net/manual/en/install.unix.php">
+	<quote>Installation on Unix systems</quote>
+      </link>
+      for the details related to PHP installation.
+    </para>
+    <section>
+      <title>PHP environment</title>
+      <para>
+	If everything went right you would build a PHP environment patched for
+	LIXA. It should behaves exactly as a standard PHP environment until
+	you start to use LIXA specific features.
+      </para>
+    </section>
     <section>
       <title>LIXA details</title>
       <para>
@@ -259,6 +276,138 @@ tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
 	    </para>
 	  </listitem>
 	</itemizedlist>	
+      </para>
+    </section>
+  </section>
+  <section>
+    <title>Using LIXA extension for PHP</title>
+    <para>
+      LIXA extension is useful to perform Distributed Transaction Processing
+      with an Application Program that uses two or more Resource Managers.
+      It can be used with an Application Program that uses one Resource
+      Manager, but it gives no advantages if compared with the native 
+      transactional support supplied by the Resource Manager itself.
+    </para>
+    <para>
+      Some examples will show you configurations with only one 
+      Resource Manager:
+      they are provided as introducing steps to more complex examples.
+    </para>
+    <section>
+      <title>LIXA PHP Application Programming Interface (API)</title>
+      <para>
+	If you compiled LIXA extension as a core extension, there's no need
+	to specify something like this in your PHP source code:
+	<table frame="box">
+	  <thead><tr><td>[PHP source code]</td></tr></thead>
+	  <tbody><tr><td><screen>
+&lt;?php
+    include("lixa.php")
+    ...
+?&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	where <filename>lixa.php</filename> is the file provided in
+	<filename>ext/php</filename> LIXA source directory.
+	If you compiled LIXA as a stand-alone extension you need to place
+	<filename>lixa.php</filename> file in a suitable directory and
+	configure your <filename>php.ini</filename> to allow LIXA extension
+	shared object loading using something like:
+	<table frame="box">
+	  <thead><tr><td>[php.ini config file]</td></tr></thead>
+	  <tbody><tr><td><screen>
+extension=/path/to/php/extensions/lixa/modules/lixa.so
+	  </screen></td></tr></tbody>
+	</table>
+	This manual will not talk about this scenario because the standard
+	procedure explained in <xref linkend="PHP_installation"/>
+	produces a core extension by default.
+      </para>
+      <para>
+	The easiest example could probably be the following one:
+	<table frame="box">
+	  <thead><tr><td>[PHP source code]</td></tr></thead>
+	  <tbody><tr><td><screen>
+&lt;?php
+        $rc=tx_open();
+        print "tx_open() --&gt; $rc\n";
+        $rc=tx_close();
+        print "tx_close() --&gt; $rc\n";
+?&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	You can copy the above source code in file <filename>foo.php</filename>
+	and execute it using something like:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/tmp$ /opt/php-5.4-lixa/bin/php foo.sh 
+tx_open() --&gt; 0
+tx_close() --&gt; 0
+	  </screen></td></tr></tbody>
+	</table>
+	If your LIXA state server (<command>lixad</command>) was not up and
+	running, you would get something like this:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/tmp$ /opt/php-5.4-lixa/bin/php foo.sh 
+tx_open() --&gt; -7
+tx_close() --&gt; -7
+	  </screen></td></tr></tbody>
+	</table>
+	and you can activate your LIXA state server (and restart the example)
+	with something like this:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/tmp$ sudo su - lixa
+lixa@mojan:~$ /opt/lixa/sbin/lixad --daemon
+lixa@mojan:~$ ps -ef|grep lixad
+lixa      7388     1  0 22:44 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+lixa      7393  7378  0 22:44 pts/3    00:00:00 grep lixad
+lixa@mojan:~$ exit
+logout
+tiian@mojan:~/tmp$ /opt/php-5.4-lixa/bin/php foo.sh 
+tx_open() --&gt; 0
+tx_close() --&gt; 0
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	A second example can show how TX constants are defined; change your
+	<filename>foo.php</filename> source file as below:
+	<table frame="box">
+	  <thead><tr><td>[PHP source code]</td></tr></thead>
+	  <tbody><tr><td><screen>
+&lt;?php
+        $rc=tx_open();
+        print "tx_open() --&gt; $rc\n";
+        $rc=tx_close();
+        print "tx_close() --&gt; $rc\n";
+	$tx_ok=TX_OK;
+	$tx_fail=TX_FAIL;
+	echo "TX_OK=" . $tx_ok . "\tTX_FAIL=" . $tx_fail . "\n";
+?&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	And execute it again:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/tmp$ /opt/php-5.4-lixa/bin/php foo.sh 
+tx_open() --&gt; 0
+tx_close() --&gt; 0
+TX_OK=0	TX_FAIL=-7
+	  </screen></td></tr></tbody>
+	</table>
+	All the stuff defined in <citation>TXspec</citation> and available
+	in C header file <filename>tx.h</filename> is available from PHP as
+	well as from C. File <filename>lixa.php</filename> define the
+	functions and the constants as well.
+      </para>
+      <para>
+	Compliments: your first LIXA PHP program completed!
       </para>
     </section>
   </section>

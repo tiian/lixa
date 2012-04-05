@@ -114,30 +114,6 @@ abstract class lixa {
 	static function tx_set_transaction_timeout($timeout) {
 		return tx_set_transaction_timeout($timeout);
 	}
-
-	static function lixa_pq_get_conn_by_rmid($rmid) {
-		return lixa_pq_get_conn_by_rmid($rmid);
-	}
-
-	static function lixa_pq_get_conn_by_pos($pos) {
-		return lixa_pq_get_conn_by_pos($pos);
-	}
-
-	static function lixa_pq_get_conn() {
-		return lixa_pq_get_conn();
-	}
-
-	static function lixa_my_get_conn_by_rmid($rmid) {
-		return lixa_my_get_conn_by_rmid($rmid);
-	}
-
-	static function lixa_my_get_conn_by_pos($pos) {
-		return lixa_my_get_conn_by_pos($pos);
-	}
-
-	static function lixa_my_get_conn() {
-		return lixa_my_get_conn();
-	}
 }
 
 /* PHP Proxy Classes */
