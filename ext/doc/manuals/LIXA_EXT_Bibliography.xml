@@ -4,6 +4,15 @@
   <bibliodiv><title>Books</title>
 
     <biblioentry>
+      <abbrev>LIXArg</abbrev>
+      <copyright><year>2011</year>
+        <holder>Christian Ferrari</holder></copyright>
+      <title>
+	<link xlink:href="http://lixa.sourceforge.net/manuals/">LIXA reference guide: a libre, free, open source implementation of the XA and the TX specifications</link>
+      </title>
+    </biblioentry>
+
+    <biblioentry>
       <abbrev>RefModel</abbrev>
       <copyright><year>1996</year>
         <holder>X/Open Company Limited</holder></copyright>

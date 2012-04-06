@@ -6,7 +6,7 @@
 <!ENTITY biblio SYSTEM "LIXA_EXT_Bibliography.xml">
 ]>
 <book xmlns="http://docbook.org/ns/docbook">
-  <title>LIXA @PACKAGE_VERSION@ Extensions</title>
+  <title>LIXA Extensions reference guide (version @PACKAGE_VERSION@)</title>
   <subtitle>
     A libre, free, open source implementation of the XA and the TX 
     specifications
