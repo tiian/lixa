@@ -220,6 +220,21 @@ tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
 	  designed for LIXA maintainers.
 	</para>
       </important>
+      <warning>
+	<para>
+	  LIXA software must compiled and installed with all the Resource
+	  Managers you want to use from PHP. If you did not configure and 
+	  install
+	  LIXA for MySQL, you would <emphasis>not</emphasis> be able to use
+	  MySQL from PHP as a Resource Manager coordinated by LIXA Transaction
+	  Manager. The same is true for PostgreSQL, Oracle, and so on...
+	</para>
+	<para>
+	  Use command <command>/opt/lixa/bin/lixa-config -r</command> to
+	  discover which Resource Managers can be used by your installed 
+	  LIXA software.
+	</para>
+      </warning>
     </para>
     <para>
       After <command>configure</command> you must proceed with
@@ -312,7 +327,7 @@ tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
 	If you compiled LIXA as a stand-alone extension you need to place
 	<filename>lixa.php</filename> file in a suitable directory and
 	configure your <filename>php.ini</filename> to allow LIXA extension
-	shared object loading using something like:
+	shared object retrieval using something like:
 	<table frame="box">
 	  <thead><tr><td>[php.ini config file]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -324,7 +339,7 @@ extension=/path/to/php/extensions/lixa/modules/lixa.so
 	produces a core extension by default.
       </para>
       <para>
-	The easiest example could probably be the following one:
+	The easiest LIXA PHP example might probably be the following one:
 	<table frame="box">
 	  <thead><tr><td>[PHP source code]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -401,14 +416,192 @@ tx_close() --&gt; 0
 TX_OK=0	TX_FAIL=-7
 	  </screen></td></tr></tbody>
 	</table>
-	All the stuff defined in <citation>TXspec</citation> and available
-	in C header file <filename>tx.h</filename> is available from PHP as
+	All the stuff defined in <citation>TXspec</citation> (available
+	in C header file <filename>tx.h</filename>) is available from PHP as
 	well as from C. File <filename>lixa.php</filename> define the
 	functions and the constants as well.
       </para>
       <para>
 	Compliments: your first LIXA PHP program completed!
       </para>
+    </section>
+    <section>
+      <title>An example with dummy Resource Managers</title>
+      <para>
+	Please move to directory <filename>ext/php/examples</filename>
+	and take a look to <filename>example01_lixa.php</filename>: it's a
+	simple 4 steps program that tries to:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	      open (connect to) all the Resource Managers
+	  </para></listitem>
+	  <listitem><para>
+	      start a new transaction
+	  </para></listitem>
+	  <listitem><para>
+	      commit the transaction started before
+	  </para></listitem>
+	  <listitem><para>
+	      close (disconnect from) all the Resource Managers
+	  </para></listitem>
+	</itemizedlist>
+	Take a look to the source code:
+	<table frame="box">
+	  <thead><tr><td>[Terminal shell session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ cat example01_lixa.php 
+&lt;?php	
+	print "Trying to open all the Resource Managers with tx_open()...\n";
+	$rc=tx_open();
+	if (TX_OK != $rc) 
+		exit("tx_open returned rc=$rc, can't going on!\n");
+	
+	print "Trying to start a new transaction with tx_begin()...\n";	
+	$rc=tx_begin();
+	if (TX_OK != $rc) 
+		exit("tx_begin returned rc=$rc, can't going on!\n");
+
+	print "Trying to commit the transaction with tx_commit()...\n";	
+	$rc=tx_commit();
+	if (TX_OK != $rc) 
+		exit("tx_commit returned rc=$rc, can't going on!\n");
+
+	print "Trying to close all the Resource Managers with tx_close()...\n";
+	$rc=tx_close();
+	if (TX_OK != $rc) 
+		exit("tx_close returned rc=$rc, can't going on!\n");
+
+	print "Execution completed!\n";
+?&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	It's time to execute this simple program without a specific value for
+	<varname>LIXA_PROFILE</varname> and without an active LIXA state
+	server:
+	<table frame="box">
+	  <thead><tr><td>[Terminal shell session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ echo $LIXA_PROFILE
+
+tiian@mojan:~/lixa/ext/php/examples$ ps -ef|grep lixad|grep -v grep
+tiian@mojan:~/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example01_lixa.php 
+Trying to open all the Resource Managers with tx_open()...
+tx_open returned rc=-7, can't going on!
+	  </screen></td></tr></tbody>
+	</table>
+	<function>tx_open</function> returns the value 
+	<varname>-7 (TX_FAIL)</varname>
+	<footnote>
+	  <para>Refer to file <filename>/opt/lixa/tx.h</filename> for TX
+	    return codes and their meaning.
+	  </para>
+	</footnote>
+	because the LIXA state server is not
+	available.
+      </para>
+      <para>
+	Start the LIXA state server and try it again:
+	<table frame="box">
+	  <thead><tr><td>[Terminal shell session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ sudo su - lixa
+lixa@mojan:~$ /opt/lixa/sbin/lixad --daemon
+lixa@mojan:~$ ps -ef|grep lixad|grep -v grep
+lixa      9050     1  0 17:13 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+lixa@mojan:~$ exit
+logout
+tiian@mojan:~/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example01_lixa.php 
+Trying to open all the Resource Managers with tx_open()...
+Trying to start a new transaction with tx_begin()...
+Trying to commit the transaction with tx_commit()...
+Trying to close all the Resource Managers with tx_close()...
+Execution completed!
+	  </screen></td></tr></tbody>
+	</table>
+	Assuming your LIXA installation was build with MySQL support and
+	MySQL server is not available, you can try what's happen when you
+	try to execute the program using a profile that needs MySQL:
+	<table frame="box">
+	  <thead><tr><td>[Terminal shell session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ /opt/lixa/bin/lixa-config -r|grep MySQL
+MySQL		yes
+tiian@mojan:~/lixa/ext/php/examples$ ps -ef|grep lixad|grep -v grep
+lixa      9176     1  0 17:17 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+tiian@mojan:~/lixa/ext/php/examples$ ps -ef|grep mysql|grep -v grep
+tiian@mojan:~/lixa/ext/php/examples$ export LIXA_PROFILE=MYS_STA
+tiian@mojan:~/lixa/ext/php/examples$ echo $LIXA_PROFILE
+MYS_STA
+tiian@mojan:~/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example01_lixa.php 
+Trying to open all the Resource Managers with tx_open()...
+tx_open returned rc=-6, can't going on!
+	  </screen></td></tr></tbody>
+	</table>
+	<function>tx_open</function> returns the value 
+	<varname>-6 (TX_ERROR)</varname>
+	because one Resource Manager (MySQL) is not available; starting
+	the Resource Manager, this is the new behavior:
+	<table frame="box">
+	  <thead><tr><td>[Terminal shell session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ sudo service mysql start
+mysql start/running, process 9246
+tiian@mojan:~/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example01_lixa.php 
+Trying to open all the Resource Managers with tx_open()...
+Trying to start a new transaction with tx_begin()...
+Trying to commit the transaction with tx_commit()...
+Trying to close all the Resource Managers with tx_close()...
+Execution completed!
+	  </screen></td></tr></tbody>
+	</table>
+	You can activate LIXA tracing for PHP programs as described in
+	<citation>LIXArg</citation>:
+	<table frame="box">
+	  <thead><tr><td>[Terminal shell session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ export LIXA_TRACE_MASK=0x00002000
+tiian@mojan:~/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example01_lixa.php 
+Trying to open all the Resource Managers with tx_open()...
+2012-04-06 17:26:15.866963 [9324/3077965600] lixa_xa_open
+2012-04-06 17:26:15.867094 [9324/3077965600] lixa_xa_open: fd = 4
+2012-04-06 17:26:15.867200 [9324/3077965600] lixa_xa_open: sending 298 bytes ('000292&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="1" step="8"&gt;&lt;client job="ddd45999a1b1c6edd8983fbe5ca89b89/127.0.0.1      " config_digest="ddd45999a1b1c6edd8983fbe5ca89b89" maint="0"/&gt;&lt;rsrmgrs&gt;&lt;rsrmgr rmid="0" dynamic="0" name="MySQL_stareg" xa_name="MySQL[LIXA]"/&gt;&lt;/rsrmgrs&gt;&lt;/msg&gt;') to the server for step 8 (socket fd 4)
+2012-04-06 17:26:15.867753 [9324/3077965600] lixa_xa_open: received 95 bytes from the server |&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="1" step="16"&gt;&lt;answer rc="0"/&gt;&lt;/msg&gt;|
+2012-04-06 17:26:15.881197 [9324/3077965600] lixa_xa_open: xa_open_entry('host=localhost,user=lixa,passwd=,db=lixa,client_flag=0', 0, 0x0) = 0
+2012-04-06 17:26:15.881293 [9324/3077965600] lixa_xa_open: sending 257 bytes to the server for step 24
+2012-04-06 17:26:15.881624 [9324/3077965600] lixa_xa_open/excp=12/ret_cod=0/errno=0
+Trying to start a new transaction with tx_begin()...
+2012-04-06 17:26:15.883409 [9324/3077965600] lixa_xa_start
+2012-04-06 17:26:15.883557 [9324/3077965600] lixa_xa_start: sending 213 bytes to the server for step 8
+2012-04-06 17:26:15.884574 [9324/3077965600] lixa_xa_start: receiving 95 bytes from the server |&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="3" step="16"&gt;&lt;answer rc="0"/&gt;&lt;/msg&gt;|
+2012-04-06 17:26:15.893130 [9324/3077965600] lixa_xa_start: xa_start_entry(xid, 0, 0x0) = 0
+2012-04-06 17:26:15.893228 [9324/3077965600] lixa_xa_start: sending 210 bytes to the server for step 24
+2012-04-06 17:26:15.893552 [9324/3077965600] lixa_xa_start/excp=10/ret_cod=0/errno=0
+Trying to commit the transaction with tx_commit()...
+2012-04-06 17:26:15.893678 [9324/3077965600] lixa_xa_end
+2012-04-06 17:26:15.894033 [9324/3077965600] lixa_xa_end: xa_end_entry(xid, 0, 0x4000000) = 0
+2012-04-06 17:26:15.894125 [9324/3077965600] lixa_xa_end: sending 208 bytes to the server for step 8
+2012-04-06 17:26:15.898574 [9324/3077965600] lixa_xa_end: receiving 95 bytes from the server |&lt;?xml version="1.0" encoding="UTF-8" ?&gt;&lt;msg level="0" verb="4" step="16"&gt;&lt;answer rc="0"/&gt;&lt;/msg&gt;|
+2012-04-06 17:26:15.898876 [9324/3077965600] lixa_xa_end/excp=8/ret_cod=0/errno=0
+2012-04-06 17:26:15.898959 [9324/3077965600] lixa_xa_commit
+2012-04-06 17:26:15.899004 [9324/3077965600] lixa_xa_commit: one_phase_commit=1
+2012-04-06 17:26:15.899403 [9324/3077965600] lixa_xa_commit: xa_commit_entry(xid, 0, 0x40000000) = 0
+2012-04-06 17:26:15.899512 [9324/3077965600] lixa_xa_commit: sending 218 bytes to the server for step 8
+2012-04-06 17:26:15.899632 [9324/3077965600] lixa_xa_commit/excp=7/ret_cod=0/errno=0
+2012-04-06 17:26:15.899687 [9324/3077965600] lixa_xa_forget
+2012-04-06 17:26:15.899747 [9324/3077965600] lixa_xa_forget/excp=3/ret_cod=0/errno=0
+Trying to close all the Resource Managers with tx_close()...
+2012-04-06 17:26:15.899856 [9324/3077965600] lixa_xa_close
+2012-04-06 17:26:15.899975 [9324/3077965600] lixa_xa_close: xa_close_entry('', 0, 0x0) = 0
+2012-04-06 17:26:15.900058 [9324/3077965600] lixa_xa_close: sending 121 bytes to the server for step 8
+2012-04-06 17:26:15.900145 [9324/3077965600] lixa_xa_close/excp=5/ret_cod=0/errno=0
+Execution completed!
+	  </screen></td></tr></tbody>
+	</table>
+	Trace messages go to <filename>stderr</filename>.
+      </para>
+    </section>
+    <section>
+      <title>An example with MySQL (mysqli driver)</title>
     </section>
   </section>
 </chapter>

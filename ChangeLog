@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.7.5 PHP:
+
 20120331 - 0.7.4 Fixed bug # 3512953
 
 20120321 - 0.7.3 Switch files are now loaded using G_MODULE_BIND_LAZY: it might
