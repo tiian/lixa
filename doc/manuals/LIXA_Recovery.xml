@@ -50,7 +50,7 @@
 	  <title>The Application Program crashes before <function>xa_prepare()</function></title>
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="LIXA_Recovery_01.png"/>
+	      <imagedata fileref="../images/LIXA_Recovery_01.png"/>
 	    </imageobject>
 	  </mediaobject>
 	</figure>
@@ -94,7 +94,7 @@
 	  <title>The Application Program crashes after <function>xa_prepare()</function></title>
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="LIXA_Recovery_02.png"/>
+	      <imagedata fileref="../images/LIXA_Recovery_02.png"/>
 	    </imageobject>
 	  </mediaobject>
 	</figure>
@@ -247,7 +247,7 @@
 	  <title>Workload balanced Application Server</title>
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="LIXA_Recovery_03.png"/>
+	      <imagedata fileref="../images/LIXA_Recovery_03.png"/>
 	    </imageobject>
 	  </mediaobject>
 	</figure>

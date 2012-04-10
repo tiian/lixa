@@ -10,7 +10,7 @@
     <title>Typical LIXA topology</title>
     <mediaobject>
       <imageobject>
-	<imagedata fileref="LIXA_Configuration_1.png"/>
+	<imagedata fileref="../images/LIXA_Configuration_1.png"/>
       </imageobject>
     </mediaobject>
   </figure>
@@ -139,7 +139,7 @@
 	<figure xml:id="config2">
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="LIXA_Configuration_2.png"/>
+	      <imagedata fileref="../images/LIXA_Configuration_2.png"/>
 	    </imageobject>
 	  </mediaobject>
 	  <title>Easiest non trivial deployment model</title>
@@ -166,7 +166,7 @@
 	<figure xml:id="config3">
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="LIXA_Configuration_3.png"/>
+	      <imagedata fileref="../images/LIXA_Configuration_3.png"/>
 	    </imageobject>
 	  </mediaobject>
 	  <title>Trivial deployment model</title>
@@ -195,7 +195,7 @@
 	<figure xml:id="config4">
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="LIXA_Configuration_4.png"/>
+	      <imagedata fileref="../images/LIXA_Configuration_4.png"/>
 	    </imageobject>
 	  </mediaobject>
 	  <title>Fully distributed deployment model</title>
@@ -218,7 +218,7 @@
 	<figure xml:id="config5">
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="LIXA_Configuration_5.png"/>
+	      <imagedata fileref="../images/LIXA_Configuration_5.png"/>
 	    </imageobject>
 	  </mediaobject>
 	  <title>Complex distributed deployment model</title>
@@ -247,7 +247,7 @@
       <title>The LIXA components and the necessary configuration files</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Configuration_6.png"/>
+	  <imagedata fileref="../images/LIXA_Configuration_6.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -288,7 +288,7 @@
 	  <title>The structure of lixad_conf.xml</title>
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="LIXA_Configuration_7.png"/>
+	      <imagedata fileref="../images/LIXA_Configuration_7.png"/>
 	    </imageobject>
 	  </mediaobject>
 	</figure>
@@ -446,7 +446,7 @@
 	  <title>The structure of lixac_conf.xml</title>
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="LIXA_Configuration_8.png"/>
+	      <imagedata fileref="../images/LIXA_Configuration_8.png"/>
 	    </imageobject>
 	  </mediaobject>
 	</figure>
@@ -659,7 +659,7 @@
 	    <title>A "real" environment</title>
 	    <mediaobject>
 	      <imageobject>
-		<imagedata fileref="LIXA_Configuration_9.png"/>
+		<imagedata fileref="../images/LIXA_Configuration_9.png"/>
 	      </imageobject>
 	    </mediaobject>
 	  </figure>

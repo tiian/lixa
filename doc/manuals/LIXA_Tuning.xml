@@ -327,7 +327,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  couple of tx_begin()/tx_commit()</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_Tuning_01.png"/>
+	    <imagedata fileref="../images/LIXA_Tuning_01.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
@@ -352,7 +352,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  couple of tx_begin()/tx_commit()</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_Tuning_02.png"/>
+	    <imagedata fileref="../images/LIXA_Tuning_02.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
@@ -362,7 +362,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  couple of tx_begin()/tx_commit()</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_Tuning_03.png"/>
+	    <imagedata fileref="../images/LIXA_Tuning_03.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
@@ -372,7 +372,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  couple of tx_begin()/tx_commit()</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_Tuning_04.png"/>
+	    <imagedata fileref="../images/LIXA_Tuning_04.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
@@ -421,7 +421,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  couple of tx_begin()/tx_commit()</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_Tuning_05.png"/>
+	    <imagedata fileref="../images/LIXA_Tuning_05.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
@@ -476,7 +476,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  batch of tx_begin()/tx_commit()</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_Tuning_06.png"/>
+	    <imagedata fileref="../images/LIXA_Tuning_06.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
@@ -486,7 +486,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  batch of tx_begin()/tx_commit()</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_Tuning_07.png"/>
+	    <imagedata fileref="../images/LIXA_Tuning_07.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
@@ -496,7 +496,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  batch of tx_begin()/tx_commit()</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_Tuning_08.png"/>
+	    <imagedata fileref="../images/LIXA_Tuning_08.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
@@ -506,7 +506,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  batch of tx_begin()/tx_commit()</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_Tuning_09.png"/>
+	    <imagedata fileref="../images/LIXA_Tuning_09.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
@@ -533,7 +533,7 @@ rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
 	  batch of tx_begin()/tx_commit()</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_Tuning_10.png"/>
+	    <imagedata fileref="../images/LIXA_Tuning_10.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
