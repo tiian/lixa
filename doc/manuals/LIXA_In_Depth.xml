@@ -668,7 +668,7 @@ tx_close(): 0
 	  the passive one is on the right</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_In_Depth_01.png"/>
+	    <imagedata fileref="../images/LIXA_In_Depth_01.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
@@ -676,7 +676,7 @@ tx_close(): 0
 	<title>HA, step 2: the active node fails</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_In_Depth_02.png"/>
+	    <imagedata fileref="../images/LIXA_In_Depth_02.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
@@ -684,7 +684,7 @@ tx_close(): 0
 	<title>HA, step 3: the passive node takes over the service</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="LIXA_In_Depth_03.png"/>
+	    <imagedata fileref="../images/LIXA_In_Depth_03.png"/>
 	  </imageobject>
 	</mediaobject>
       </figure>

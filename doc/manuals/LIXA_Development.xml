@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
       <title>Deploy model of an example with two dummy resource managers</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_1.png"/>
+	  <imagedata fileref="../images/LIXA_Development_1.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -310,7 +310,7 @@ tx_close(): 0
       <title>Deploy model of an example with Oracle Database Server</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_2.png"/>
+	  <imagedata fileref="../images/LIXA_Development_2.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -1083,7 +1083,7 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
       <title>Deploy model of an example with IBM DB2 DBMS</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_3.png"/>
+	  <imagedata fileref="../images/LIXA_Development_3.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -1744,7 +1744,7 @@ tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
       <title>Deploy model of an example showing a distributed transaction with Oracle and IBM DB2</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_4.png"/>
+	  <imagedata fileref="../images/LIXA_Development_4.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -2398,7 +2398,7 @@ DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
       <title>Deploy model of an example with PostgreSQL DBMS</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_5.png"/>
+	  <imagedata fileref="../images/LIXA_Development_5.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -2828,7 +2828,7 @@ Deleting a row from the table...
       <title>Deploy model of an example showing a distributed transaction with PostgreSQL and Oracle</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_6.png"/>
+	  <imagedata fileref="../images/LIXA_Development_6.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -3323,7 +3323,7 @@ tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL09202011.trc
       <title>Deploy model of an example showing a distributed transaction with PostgreSQL and IBM DB2</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_7.png"/>
+	  <imagedata fileref="../images/LIXA_Development_7.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -3748,7 +3748,7 @@ tiian@ubuntu:~/tmp$ ./example7_pql_db2 delete org 2>&amp;1 | grep ax_reg
       <title>Deploy model of an example with MySQL DBMS</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_8.png"/>
+	  <imagedata fileref="../images/LIXA_Development_8.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -4221,7 +4221,7 @@ Deleting a row from the table...
 	MySQL and PostgreSQL</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_9.png"/>
+	  <imagedata fileref="../images/LIXA_Development_9.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -4558,7 +4558,7 @@ testdb=> select * from AUTHORS;
 	MySQL, PostgreSQL and Oracle</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_10.png"/>
+	  <imagedata fileref="../images/LIXA_Development_10.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -5099,7 +5099,7 @@ tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL11112011.trc
 	two MySQL servers</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_11.png"/>
+	  <imagedata fileref="../images/LIXA_Development_11.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -5666,7 +5666,7 @@ WebSphereMQ     yes     (ETC)
       <title>Deploy model of an example with WebSphere MQ</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_12.png"/>
+	  <imagedata fileref="../images/LIXA_Development_12.png"/>
 	</imageobject>
       </mediaobject>
     </figure>
@@ -6410,7 +6410,7 @@ MQC_STA
       <title>Deploy model of an example with WebSphere MQ, MySQL and PostgreSQL</title>
       <mediaobject>
 	<imageobject>
-	  <imagedata fileref="LIXA_Development_13.png"/>
+	  <imagedata fileref="../images/LIXA_Development_13.png"/>
 	</imageobject>
       </mediaobject>
     </figure>

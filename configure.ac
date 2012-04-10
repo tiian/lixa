@@ -10,6 +10,7 @@ AC_CONFIG_FILES([
   Makefile
   doc/Makefile
   doc/examples/Makefile
+  doc/images/Makefile
   doc/manuals/LIXA.xml
   doc/manuals/Makefile
   etc/lixac_conf.xml
