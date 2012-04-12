@@ -1,3 +1,6 @@
+remove ext/doc/manuals/NOTE.txt from svn after 2 MySQL documentation
+
+
 Notes for PHP and 2 MySQL:
 IP of LIXA & MySQL: 192.168.10.2
 IP of MySQL:        192.168.10.1
@@ -29,10 +32,11 @@ Query OK, 0 rows affected (0.00 sec)
 
 update etc/lixac_conf.xml for RM MySQL2_stareg, change IP to 192.168.10.1
 
-
-
+see file NOTE.txt in directory ext/doc/manuals for the stuff necessary to
+document the feature
 
 LIXA + PHP crashes on Ubuntu 10.04 64 bit (segmentation fault)... ?!
+Fix bug 3517316
 
 Move code to parse database from mysqli_noapi.c to LIXA base code (lixa_my_) as
 a wrapper to a generic utility or directly as a generic utility
