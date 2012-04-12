@@ -1,0 +1,258 @@
+tiian@mojan:~/src/lixa/ext/php/examples$ export LIXA_PROFILE=MYS_STA_MYS_STA
+tiian@mojan:~/src/lixa/ext/php/examples$ echo $LIXA_PROFILE
+MYS_STA_MYS_STA
+
+
+
+
+tx_open(): 0
+tx_begin(): 0
+DELETE FROM authors;
+DELETE FROM authors; (2)
+Result set:
+Result set (2):
+tx_commit(): 0
+tx_begin(): 0
+Result set:
+Result set (2):
+INSERT INTO authors...
+INSERT INTO authors (2)...
+Result set:
+id=969, last_name=Ferrari, first_name=Christian
+Result set (2):
+id=969, last_name=Ferrari, first_name=Christian
+tx_rollback(): 0
+Result set:
+Result set (2):
+tx_begin(): 0
+INSERT INTO authors...
+INSERT INTO authors (2)...
+Result set:
+id=969, last_name=Ferrari, first_name=Christian
+Result set (2):
+id=969, last_name=Ferrari, first_name=Christian
+tx_commit(): 0
+Result set:
+id=969, last_name=Ferrari, first_name=Christian
+Result set (2):
+id=969, last_name=Ferrari, first_name=Christian
+tx_close(): 0
+
+
+with wrong profile it does not work!!!
+
+tiian@mojan:~/src/lixa/ext/php/examples$ export LIXA_PROFILE=MYS_STA
+tiian@mojan:~/src/lixa/ext/php/examples$ echo $LIXA_PROFILE
+MYS_STA
+
+
+
+tx_open(): 0
+
+Warning: mysqli::mysqli(): (99999/99999): Unable to retrieve a valid connection from LIXA Transaction Manager in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 18
+Failed to connect to MySQL2: (99999) Unable to retrieve a valid connection from LIXA Transaction Manager
+tx_begin(): 0
+DELETE FROM authors;
+DELETE FROM authors; (2)
+
+Warning: mysqli::query(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 31
+
+Warning: main(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 32
+
+Warning: main(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 32
+DELETE (2) failed: () Result set:
+
+Warning: mysqli::real_query(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 40
+
+Warning: mysqli::use_result(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 41
+Result set (2):
+
+Fatal error: Call to a member function fetch_assoc() on a non-object in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 43
+
+
+
+
+     1	<?php	
+     2		/* open all the Resource Managers (MySQL instance in this example) */
+     3		/* export LIXA_PROFILE=MYS_STA_MYS_STA */
+     4		$rc=tx_open();
+     5		print "tx_open(): $rc\n"; 
+       
+     6		/* retrieve MySQL connections from LIXA Transaction Manager instead
+     7		   of MySQL directly: lixa// means:
+     8		   database name=lixa
+     9		   chooser type (pos/rmid)=none
+    10		   id (0, 1, 2, ...)=none
+    11		   and can be read as "retrieve the first available MySQL connection
+    12		   established by the Transaction Manager using the current
+    13		   LIXA profile */
+    14		$mysqli = new mysqli("localhost", "lixa", "", "lixa/pos/0", 3306);
+    15		if ($mysqli->connect_errno)
+    16			echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error . "\n";
+    17		$mysqli2 = new mysqli("localhost", "lixa", "", "lixa/pos/1", 3306);
+    18		if ($mysqli2->connect_errno)
+    19			echo "Failed to connect to MySQL2: (" . $mysqli2->connect_errno . ") " . $mysqli2->connect_error . "\n";
+       
+    20		/* start a new transaction coordinated by LIXA */
+    21		$rc=tx_begin();
+    22		print "tx_begin(): $rc\n"; 
+       
+    23		/* remove all the rows from the tables */
+    24		print "DELETE FROM authors;\n";
+    25		if (!$mysqli->query("DELETE FROM authors;"))
+    26			echo "DELETE failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    27		print "DELETE FROM authors; (2)\n";
+    28		if (!$mysqli2->query("DELETE FROM authors;"))
+    29			echo "DELETE (2) failed: (" . $mysqli2->errno . ") " . $mysqli2->error;
+       
+    30		/* check the content of the tables */	
+    31		$mysqli->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    32		$res = $mysqli->use_result();
+    33		echo "Result set:\n";
+    34		while ($row = $res->fetch_assoc())
+    35			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+    36		$mysqli2->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    37		$res = $mysqli2->use_result();
+    38		echo "Result set (2):\n";
+    39		while ($row = $res->fetch_assoc())
+    40			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+       
+    41		/* commit the transaction (DELETE FROM ...) */
+    42		$rc=tx_commit();
+    43		print "tx_commit(): $rc\n"; 
+       
+    44		/* start a new transaction coordinated by LIXA */
+    45		$rc=tx_begin();
+    46		print "tx_begin(): $rc\n"; 
+       
+    47		/* check the content of the tables */	
+    48		$mysqli->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    49		$res = $mysqli->use_result();
+    50		echo "Result set:\n";
+    51		while ($row = $res->fetch_assoc())
+    52			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+    53		$mysqli2->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    54		$res = $mysqli2->use_result();
+    55		echo "Result set (2):\n";
+    56		while ($row = $res->fetch_assoc())
+    57			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+       
+    58		/* populate the tables */
+    59		print "INSERT INTO authors...\n";
+    60		if (!$mysqli->query("INSERT INTO authors VALUES(969,'Ferrari','Christian');"))
+    61			echo "INSERT failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    62		print "INSERT INTO authors (2)...\n";
+    63		if (!$mysqli2->query("INSERT INTO authors VALUES(969,'Ferrari','Christian');"))
+    64			echo "INSERT (2) failed: (" . $mysqli->errno . ") " . $mysqli->error;
+       
+    65		/* check the content of the tables */
+    66		$mysqli->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    67		$res = $mysqli->use_result();
+    68		echo "Result set:\n";
+    69		while ($row = $res->fetch_assoc())
+    70			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+    71		$mysqli2->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    72		$res = $mysqli2->use_result();
+    73		echo "Result set (2):\n";
+    74		while ($row = $res->fetch_assoc())
+    75			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+       
+    76		/* rollback the transaction (INSERT INTO ...) */
+    77		$rc=tx_rollback();
+    78		print "tx_rollback(): $rc\n"; 
+       
+    79		/* check the content of the tables */
+    80		$mysqli->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    81		$res = $mysqli->use_result();
+    82		echo "Result set:\n";
+    83		while ($row = $res->fetch_assoc())
+    84			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+    85		$mysqli2->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    86		$res = $mysqli2->use_result();
+    87		echo "Result set (2):\n";
+    88		while ($row = $res->fetch_assoc())
+    89			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+       
+    90		/* start a new transaction coordinated by LIXA */
+    91		$rc=tx_begin();
+    92		print "tx_begin(): $rc\n"; 
+       
+    93		/* populate the tables */
+    94		print "INSERT INTO authors...\n";
+    95		if (!$mysqli->query("INSERT INTO authors VALUES(969,'Ferrari','Christian');"))
+    96			echo "INSERT failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    97		print "INSERT INTO authors (2)...\n";
+    98		if (!$mysqli2->query("INSERT INTO authors VALUES(969,'Ferrari','Christian');"))
+    99			echo "INSERT (2) failed: (" . $mysqli->errno . ") " . $mysqli->error;
+   100		
+   101		/* check the content of the tables */
+   102		$mysqli->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+   103		$res = $mysqli->use_result();
+   104		echo "Result set:\n";
+   105		while ($row = $res->fetch_assoc())
+   106			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+   107		$mysqli2->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+   108		$res = $mysqli2->use_result();
+   109		echo "Result set (2):\n";
+   110		while ($row = $res->fetch_assoc())
+   111			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+       
+   112		/* commit the transaction (INSERT INTO ...) */
+   113		$rc=tx_commit();
+   114		print "tx_commit(): $rc\n"; 
+       
+   115		/* check the content of the tables */
+   116		$mysqli->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+   117		$res = $mysqli->use_result();
+   118		echo "Result set:\n";
+   119		while ($row = $res->fetch_assoc())
+   120			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+   121		$mysqli2->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+   122		$res = $mysqli2->use_result();
+   123		echo "Result set (2):\n";
+   124		while ($row = $res->fetch_assoc())
+   125			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+       
+   126		/* close all the Resource Managers */
+   127		$rc=tx_close();
+   128		print "tx_close(): $rc\n"; 
+   129	?>
+      
+
+fix the profile, but change the source (put an error inside it!):
+tiian@mojan:~/src/lixa/ext/php/examples$ export LIXA_PROFILE=MYS_STA_MYS_STA
+tiian@mojan:~/src/lixa/ext/php/examples$ echo $LIXA_PROFILE
+MYS_STA_MYS_STA
+
+change
+        $mysqli = new mysqli("localhost", "lixa", "", "lixa/pos/0", 3306);
+with
+        $mysqli = new mysqli("localhost", "lixa", "", "lixa/pos/2", 3306);
+ at row 14...
+
+
+
+tx_open(): 0
+
+Warning: mysqli::mysqli(): (99999/99999): Unable to retrieve a valid connection from LIXA Transaction Manager in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 15
+Failed to connect to MySQL: (99999) Unable to retrieve a valid connection from LIXA Transaction Manager
+tx_begin(): 0
+DELETE FROM authors;
+
+Warning: mysqli::query(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 28
+
+Warning: main(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 29
+
+Warning: main(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 29
+DELETE failed: () DELETE FROM authors; (2)
+
+Warning: mysqli::real_query(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 35
+
+Warning: mysqli::use_result(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 36
+Result set:
+
+Fatal error: Call to a member function fetch_assoc() on a non-object in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 38
+
+restore row 14 with
+        $mysqli = new mysqli("localhost", "lixa", "", "lixa/pos/0", 3306);
+
