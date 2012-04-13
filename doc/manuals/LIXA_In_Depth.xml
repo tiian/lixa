@@ -246,6 +246,13 @@ Dec  4 18:22:49 ubuntu lixad[6697]: LXD006N server terminated activities
 		<entry>warm and cold recovery of the transaction(s)</entry>
 	      </row>
 	      <row>
+		<entry>LIXA_TRACE_MOD_CLIENT_GENERIC</entry>
+		<entry>0x00080000</entry>
+		<entry><systemitem class="library">lixac</systemitem>
+		  (client library)</entry>
+		<entry>generic client functions</entry>
+	      </row>
+	      <row>
 		<entry>LIXA_TRACE_MOD_COMMON_CONFIG</entry>
 		<entry>0x01000000</entry>
 		<entry><systemitem class="library">lixab</systemitem>

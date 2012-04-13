@@ -127,6 +127,11 @@
  */
 #define LIXA_TRACE_MOD_CLIENT_RECOVERY    0x00040000
 
+/**
+ * trace module for client generic functions
+ */
+#define LIXA_TRACE_MOD_CLIENT_GENERIC     0x00080000
+
 /*
  * a lot of unused bits ...
  */
