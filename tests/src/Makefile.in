@@ -47,8 +47,9 @@ noinst_PROGRAMS = case0000$(EXEEXT) case0001$(EXEEXT) \
 	case0029$(EXEEXT) case0030$(EXEEXT) case0031$(EXEEXT) \
 	case0032$(EXEEXT) case0033$(EXEEXT) case0034$(EXEEXT) \
 	case0035$(EXEEXT) case0036$(EXEEXT) case0043$(EXEEXT) \
-	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
-	$(am__EXEEXT_4) $(am__EXEEXT_5) $(am__EXEEXT_6)
+	case0046$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
+	$(am__EXEEXT_3) $(am__EXEEXT_4) $(am__EXEEXT_5) \
+	$(am__EXEEXT_6)
 subdir = tests/src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -351,6 +352,12 @@ case0045_OBJECTS = $(am_case0045_OBJECTS)
 case0045_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la
+am_case0046_OBJECTS = case0046.$(OBJEXT)
+case0046_OBJECTS = $(am_case0046_OBJECTS)
+case0046_LDADD = $(LDADD)
+case0046_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
+	../../src/client/switch/lixa/liblixamonkey.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -379,7 +386,7 @@ SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) $(case0002_SOURCES) \
 	$(case0036_SOURCES) $(case0037_SOURCES) $(case0038_SOURCES) \
 	$(case0039_SOURCES) $(case0040_SOURCES) $(case0041_SOURCES) \
 	case0042.c $(case0043_SOURCES) $(case0044_SOURCES) \
-	$(case0045_SOURCES)
+	$(case0045_SOURCES) $(case0046_SOURCES)
 DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0002_SOURCES) $(case0003_SOURCES) $(case0004_SOURCES) \
 	$(case0005_SOURCES) $(case0006_SOURCES) $(case0007_SOURCES) \
@@ -395,7 +402,7 @@ DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0035_SOURCES) $(case0036_SOURCES) $(case0037_SOURCES) \
 	$(case0038_SOURCES) $(case0039_SOURCES) $(case0040_SOURCES) \
 	$(case0041_SOURCES) case0042.c $(case0043_SOURCES) \
-	$(case0044_SOURCES) $(case0045_SOURCES)
+	$(case0044_SOURCES) $(case0045_SOURCES) $(case0046_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -664,6 +671,7 @@ case0045_CPPFLAGS = @MYSQL_CPPFLAGS@ \
 case0045_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la
 
+case0046_SOURCES = case0046.c
 all: all-am
 
 .SUFFIXES:
@@ -845,6 +853,9 @@ case0044$(EXEEXT): $(case0044_OBJECTS) $(case0044_DEPENDENCIES)
 case0045$(EXEEXT): $(case0045_OBJECTS) $(case0045_DEPENDENCIES) 
 	@rm -f case0045$(EXEEXT)
 	$(LINK) $(case0045_OBJECTS) $(case0045_LDADD) $(LIBS)
+case0046$(EXEEXT): $(case0046_OBJECTS) $(case0046_DEPENDENCIES) 
+	@rm -f case0046$(EXEEXT)
+	$(LINK) $(case0046_OBJECTS) $(case0046_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -898,6 +909,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0043.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0044-case0044.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0045-case0045.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0046.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

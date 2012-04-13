@@ -29,7 +29,7 @@ noinst_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0013 case0014 case0015 case0016 case0017 case0018 case0019 \
 	case0020 case0021 case0022 case0023 case0024 case0025 case0026 \
 	case0027 case0028 case0029 case0030 case0031 case0032 case0033 \
-	case0034 case0035 case0036 case0043 \
+	case0034 case0035 case0036 case0043 case0046 \
 	$(MAYBE_POSTGRESQL) $(MAYBE_ORACLE) \
 	$(MAYBE_IBMDB2) $(MAYBE_MYSQL) $(MAYBE_MYSQL_POSTGRESQL) \
 	$(MAYBE_WEBSPHEREMQ)
@@ -111,3 +111,6 @@ case0045_CPPFLAGS = @MYSQL_CPPFLAGS@ \
 	-I../../src/client/switch/mysql
 case0045_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la
+case0046_SOURCES = case0046.c
+
+

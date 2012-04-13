@@ -1,0 +1,45 @@
+AT_BANNER([LIXA non API])
+
+AT_SETUP([NAPI/0.0 non LIXA])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "lixa" 0 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "lIxA" 0 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "LiXa" 0 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "LIXA" 0 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "foo" 0 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "bar" 0 0 0], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([NAPI/0.1 LIXA, default])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "lixa//" 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "LIXA//" 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "liXA//" 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "LIxa//" 1 0 0], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([NAPI/0.2 LIXA, //])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "lixa//" 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "lixa//1" 1 0 1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "lixa//2" 1 0 2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "Lixa//" 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "LIxa//1" 1 0 1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "LIXa//2" 1 0 2], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([NAPI/0.3 LIXA, pos])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "lixa/pos/" 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "Lixa/pos/1" 1 0 1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "lIxa/pos/2" 1 0 2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "liXa/pos/" 1 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "lixA/pos/1" 1 0 1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "LIxa/pos/2" 1 0 2], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([NAPI/0.4 LIXA, rmid])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "lIXa/rmid/" 1 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "liXA/rmid/1" 1 1 1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "LixA/rmid/2" 1 1 2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "LIXa/rmid/" 1 1 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "lIXA/rmid/1" 1 1 1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00080000 ; lixa_test_exec.sh noreset none case0046 "LiXA/rmid/2" 1 1 2], [0], [ignore], [ignore])
+AT_CLEANUP
+
