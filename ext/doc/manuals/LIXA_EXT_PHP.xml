@@ -609,7 +609,7 @@ Execution completed!
 	<citation>LIXArg</citation> (see chapter <quote>Development/An example
 	  with MySQL</quote>).
 	You won't be able to execute the following examples without a right
-	MySQL configured database.
+	configured MySQL database.
       </para>
     </important>
     <para>
@@ -666,7 +666,8 @@ id=969, last_name=Ferrari, first_name=Christian
       below there's a picture copied from <citation>LIXArg</citation>
       (take a look to C example before this one).
       <figure xml:id="develop8">
-	<title>Deploy model of an example with MySQL DBMS</title>
+	<title>Deploy model of an example with MySQL DBMS
+	(example8_mys =&gt; example03_lixa_mysqli.php)</title>
 	<mediaobject>
 	  <imageobject>
 	    <imagedata fileref="../../images/LIXA_Development_8.png"/>
@@ -735,7 +736,7 @@ tx_close(): 0
 	   id (0, 1, 2, ...)=none
 	   and can be read as "retrieve the first available MySQL connection
 	   established by the Transaction Manager using the current
-	   LIXA profile */
+	   LIXA profile" */
 	$mysqli = new mysqli("localhost", "lixa", "", "lixa//", 3306);
 	if ($mysqli-&gt;connect_errno)
 		echo "Failed to connect to MySQL: (" . $mysqli-&gt;connect_errno . ") " . $mysqli-&gt;connect_error . "\n";
@@ -886,19 +887,34 @@ mysql&gt; SELECT * FROM authors;
 	<synopsis>lixa/[pos|rmid]/[id]</synopsis>
 	<itemizedlist mark="bullet">
 	  <listitem><para>
-	      lixa: the Resource Manager (database) has been already opened 
-	      by LIXA Transaction
+	      <token>lixa</token><footnote>
+		<para>
+		  Do not confuse <token>lixa</token> token (it means:
+		  <quote>use a connection opened by LIXA 
+		    Transaction Manager</quote>) with <quote>lixa</quote>
+		  MySQL database name used in many examples. 
+		  Incidentally they are the same word,
+		  but when using <token>lixa/[pos|rmid]/[id]</token> the
+		  name of the used databases may be any: foo, bar, mydb,
+		  etc... The real name of the databases opened by LIXA
+		  Transaction Manager is defined in configuration file
+		  <filename>/opt/lixa/ect/lixac_conf.xml</filename>
+		</para>
+	      </footnote>: the Resource Manager (database) 
+	      has been already opened by LIXA Transaction
 	      Manager with <function>tx_open()</function> function
 	  </para></listitem>
 	  <listitem><para>
-	      pos|rmid: specify if the following field (id) must be picked up
+	      <token>pos|rmid</token>: specify if the following field 
+	      (<token>id</token>) must be picked up
 	      counting only the MySQL Resource Managers specified in the 
 	      profile (file <filename>etc/lixac_conf.xml</filename>) or 
 	      counting all the Resource Managers (rmid as specified by
 	      XA specification)
 	  </para></listitem>
 	  <listitem><para>
-	      id: specify the position of the choosen Resource Manager
+	      <token>id</token>: specify the position of the 
+	      choosen Resource Manager
 	  </para></listitem>
 	</itemizedlist>
 	<important><para>
@@ -909,6 +925,18 @@ mysql&gt; SELECT * FROM authors;
 	    connection <emphasis>will not</emphasis>
 	    partecipate to LIXA coordinated transactions.
 	</para></important>
+	<warning><para>
+	    If you mixed LIXA managed Resource Managers with LIXA unmanaged
+	    Resource Managers, you would <emphasis>not</emphasis> obtain
+	    a distributed transaction: only LIXA managed Resource Managers
+	    obey to <function>tx_begin(), tx_commit(), tx_rollback()</function>
+	    functions. You may mix them in your Application Program, but
+	    it will be your job to guarantee data consistency among them.
+	</para></warning>
+	<note><para>
+	    The string is <emphasis>case insensitive</emphasis>, but this
+	    documentation will ever use it using lowercase letters.
+	</para></note>
 	If you had a profile as the following one:
 	<table frame="box">
 	  <thead><tr><td>[mysqli detail]</td></tr></thead>
@@ -974,6 +1002,405 @@ mysql&gt; SELECT * FROM authors;
 	You can use <quote>pos</quote> (default behaviour) or 
 	<quote>rmid</quote>, as you prefer.
       </para>
+    </section>
+    <section>
+      <title>An example with <emphasis>two</emphasis> MySQL servers (mysqli)</title>
+      <important>
+	<para>
+	  The examples shown below need the set up explained in 
+	  <citation>LIXArg</citation> (see chapter <quote>Development/An 
+	    example with two MySQL servers</quote>).
+	  You won't be able to execute the following examples without two right
+	  configured MySQL databases.
+	</para>
+      </important>
+      <para>
+	You need at least: one host with LIXA state server and a first
+	MySQL server, a second host with another MySQL server to try this
+	example.
+	Adapt the example to your own environment, remember it was implemented
+	using these hosts:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	      LIXA state server, MySQL local server, host of the sample 
+	      application server: 192.168.10.2
+	  </para></listitem>
+	  <listitem><para>
+	      MySQL remote server: 192.168.10.1
+	  </para></listitem>
+	</itemizedlist>
+	Follow these step after proper adaptation:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	      edit the configuration of your remote MySQL server
+	      (file <filename>/etc/mysql/my.cnf</filename>, the path
+	      might be slightly different)
+	      because it must accept network connections from 192.168.10.2;
+	      replace row
+	      <screen>
+bind-address            = 127.0.0.1
+	      </screen>
+	      with something like
+	      <screen>
+#bind-address            = 127.0.0.1
+bind-address            = 192.168.10.1
+	      </screen>
+	  </para></listitem>
+	  <listitem><para>
+	      connect locally (from host 192.168.10.2) to the 
+	      <quote>remote</quote> MySQL server as root and grant access
+	      from the other host with something like:
+	      <screen>
+tiian@presanella:~$ mysql -u root -p
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 34
+Server version: 5.1.61-0ubuntu0.10.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> GRANT ALL ON lixa.* TO 'lixa'@'192.168.10.2';
+Query OK, 0 rows affected (0.00 sec)
+	      </screen>
+	  </para></listitem>
+	  <listitem><para>
+	      restart MySQL server using something like
+	      <command>sudo /etc/init.d/mysql restart</command>
+	  </para></listitem>
+	  <listitem><para>
+	      check you can connect remotely (from 192.168.10.2) using
+	      something like
+	      <command>mysql -h 192.168.10.1 -u lixa lixa</command>
+	  </para></listitem>
+	  <listitem><para>
+	      edit config file (host 192.168.10.2)
+	      <filename>/opt/lixa/ect/lixac_conf.xml</filename>,
+	      locate <quote>MySQL2_stareg</quote> Resource Manager
+	      definition and change the default IP address with the IP
+	      address of your remote MySQL server (192.168.10.1)
+	  </para></listitem>
+	</itemizedlist>	
+	What we are performing now is similar to a supplied C language example; 
+	below there's a picture copied from <citation>LIXArg</citation>
+	(take a look to C example before this one).
+	<figure xml:id="develop8">
+	  <title>Deploy model of an example with two MySQL DBMS
+	  (example11_mys_mys =&gt; example04_lixa_mysqli2.php)</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="../../images/LIXA_Development_11.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	Start the LIXA state server (if it was not yet started):
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~$ ps -ef|grep lixad|grep -v grep
+tiian@mojan:~$ sudo su - lixa
+[sudo] password for tiian: 
+lixa@mojan:~$ /opt/lixa/sbin/lixad --daemon
+lixa@mojan:~$ ps -ef|grep lixad|grep -v grep
+lixa      4164     1  0 20:56 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+lixa@mojan:~$ exit
+logout
+	  </screen></td></tr></tbody>
+	</table>
+	Set up <varname>LIXA_PROFILE</varname> environment variable to choose
+	a profile with two MySQL Resource Managers and execute 
+	the PHP source code:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ export LIXA_PROFILE=MYS_STA_MYS_STA
+tiian@mojan:~/lixa/ext/php/examples$ echo $LIXA_PROFILE
+MYS_STA_MYS_STA
+tiian@mojan:~/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example04_lixa_mysqli2.php 
+tx_open(): 0
+tx_begin(): 0
+DELETE FROM authors;
+DELETE FROM authors; (2)
+Result set:
+Result set (2):
+tx_commit(): 0
+tx_begin(): 0
+Result set:
+Result set (2):
+INSERT INTO authors...
+INSERT INTO authors (2)...
+Result set:
+id=969, last_name=Ferrari, first_name=Christian
+Result set (2):
+id=969, last_name=Ferrari, first_name=Christian
+tx_rollback(): 0
+Result set:
+Result set (2):
+tx_begin(): 0
+INSERT INTO authors...
+INSERT INTO authors (2)...
+Result set:
+id=969, last_name=Ferrari, first_name=Christian
+Result set (2):
+id=969, last_name=Ferrari, first_name=Christian
+tx_commit(): 0
+Result set:
+id=969, last_name=Ferrari, first_name=Christian
+Result set (2):
+id=969, last_name=Ferrari, first_name=Christian
+tx_close(): 0
+	  </screen></td></tr></tbody>
+	</table>
+	Now you can try to use a <emphasis>wrong</emphasis>
+	<varname>LIXA_PROFILE</varname> environemnt variable and check 
+	the result...
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ export LIXA_PROFILE=MYS_STA
+tiian@mojan:~/lixa/ext/php/examples$ echo $LIXA_PROFILE
+MYS_STA
+tiian@mojan:~/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example04_lixa_mysqli2.php 
+tx_open(): 0
+
+Warning: mysqli::mysqli(): (99999/99999): Unable to retrieve a valid connection from LIXA Transaction Manager in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 18
+Failed to connect to MySQL2: (99999) Unable to retrieve a valid connection from LIXA Transaction Manager
+tx_begin(): 0
+DELETE FROM authors;
+DELETE FROM authors; (2)
+
+Warning: mysqli::query(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 31
+
+Warning: main(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 32
+
+Warning: main(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 32
+DELETE (2) failed: () Result set:
+
+Warning: mysqli::real_query(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 40
+
+Warning: mysqli::use_result(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 41
+Result set (2):
+
+Fatal error: Call to a member function fetch_assoc() on a non-object in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 43
+	  </screen></td></tr></tbody>
+	</table>
+	you can now inspect the source code to discover where the error
+	happens:
+	<table frame="box">
+	  <thead><tr><td>[example04_lixa_mysqli2.php source code]</td></tr></thead>
+	  <tbody><tr><td><screen>
+     1	&lt;?php	
+     2		/* open all the Resource Managers (MySQL instance in this example) */
+     3		/* export LIXA_PROFILE=MYS_STA_MYS_STA */
+     4		$rc=tx_open();
+     5		print "tx_open(): $rc\n"; 
+     6	
+     7		/* retrieve MySQL connections from LIXA Transaction Manager instead
+     8		   of MySQL directly: lixa// means:
+     9		   database name=lixa
+    10		   chooser type (pos/rmid)=none
+    11		   id (0, 1, 2, ...)=none
+    12		   and can be read as "retrieve the first available MySQL connection
+    13		   established by the Transaction Manager using the current
+    14		   LIXA profile" */
+    15		$mysqli = new mysqli("localhost", "lixa", "", "lixa/pos/0", 3306);
+    16		if ($mysqli-&gt;connect_errno)
+    17			echo "Failed to connect to MySQL: (" . $mysqli-&gt;connect_errno . ") " . $mysqli-&gt;connect_error . "\n";
+    18		$mysqli2 = new mysqli("localhost", "lixa", "", "lixa/pos/1", 3306);
+    19		if ($mysqli2-&gt;connect_errno)
+    20			echo "Failed to connect to MySQL2: (" . $mysqli2-&gt;connect_errno . ") " . $mysqli2-&gt;connect_error . "\n";
+    21	
+    22		/* start a new transaction coordinated by LIXA */
+    23		$rc=tx_begin();
+    24		print "tx_begin(): $rc\n"; 
+    25	
+    26		/* remove all the rows from the tables */
+    27		print "DELETE FROM authors;\n";
+    28		if (!$mysqli-&gt;query("DELETE FROM authors;"))
+    29			echo "DELETE failed: (" . $mysqli-&gt;errno . ") " . $mysqli-&gt;error;
+    30		print "DELETE FROM authors; (2)\n";
+    31		if (!$mysqli2-&gt;query("DELETE FROM authors;"))
+    32			echo "DELETE (2) failed: (" . $mysqli2-&gt;errno . ") " . $mysqli2-&gt;error;
+    33	
+    34		/* check the content of the tables */	
+    35		$mysqli-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    36		$res = $mysqli-&gt;use_result();
+    37		echo "Result set:\n";
+    38		while ($row = $res-&gt;fetch_assoc())
+    39			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+    40		$mysqli2-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    41		$res = $mysqli2-&gt;use_result();
+    42		echo "Result set (2):\n";
+    43		while ($row = $res-&gt;fetch_assoc())
+    44			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+    45	
+    46		/* commit the transaction (DELETE FROM ...) */
+    47		$rc=tx_commit();
+    48		print "tx_commit(): $rc\n"; 
+    49	
+    50		/* start a new transaction coordinated by LIXA */
+    51		$rc=tx_begin();
+    52		print "tx_begin(): $rc\n"; 
+    53	
+    54		/* check the content of the tables */	
+    55		$mysqli-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    56		$res = $mysqli-&gt;use_result();
+    57		echo "Result set:\n";
+    58		while ($row = $res-&gt;fetch_assoc())
+    59			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+    60		$mysqli2-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    61		$res = $mysqli2-&gt;use_result();
+    62		echo "Result set (2):\n";
+    63		while ($row = $res-&gt;fetch_assoc())
+    64			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+    65	
+    66		/* populate the tables */
+    67		print "INSERT INTO authors...\n";
+    68		if (!$mysqli-&gt;query("INSERT INTO authors VALUES(969,'Ferrari','Christian');"))
+    69			echo "INSERT failed: (" . $mysqli-&gt;errno . ") " . $mysqli-&gt;error;
+    70		print "INSERT INTO authors (2)...\n";
+    71		if (!$mysqli2-&gt;query("INSERT INTO authors VALUES(969,'Ferrari','Christian');"))
+    72			echo "INSERT (2) failed: (" . $mysqli-&gt;errno . ") " . $mysqli-&gt;error;
+    73	
+    74		/* check the content of the tables */
+    75		$mysqli-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    76		$res = $mysqli-&gt;use_result();
+    77		echo "Result set:\n";
+    78		while ($row = $res-&gt;fetch_assoc())
+    79			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+    80		$mysqli2-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    81		$res = $mysqli2-&gt;use_result();
+    82		echo "Result set (2):\n";
+    83		while ($row = $res-&gt;fetch_assoc())
+    84			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+    85	
+    86		/* rollback the transaction (INSERT INTO ...) */
+    87		$rc=tx_rollback();
+    88		print "tx_rollback(): $rc\n"; 
+    89	
+    90		/* check the content of the tables */
+    91		$mysqli-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    92		$res = $mysqli-&gt;use_result();
+    93		echo "Result set:\n";
+    94		while ($row = $res-&gt;fetch_assoc())
+    95			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+    96		$mysqli2-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+    97		$res = $mysqli2-&gt;use_result();
+    98		echo "Result set (2):\n";
+    99		while ($row = $res-&gt;fetch_assoc())
+   100			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+   101	
+   102		/* start a new transaction coordinated by LIXA */
+   103		$rc=tx_begin();
+   104		print "tx_begin(): $rc\n"; 
+   105	
+   106		/* populate the tables */
+   107		print "INSERT INTO authors...\n";
+   108		if (!$mysqli-&gt;query("INSERT INTO authors VALUES(969,'Ferrari','Christian');"))
+   109			echo "INSERT failed: (" . $mysqli-&gt;errno . ") " . $mysqli-&gt;error;
+   110		print "INSERT INTO authors (2)...\n";
+   111		if (!$mysqli2-&gt;query("INSERT INTO authors VALUES(969,'Ferrari','Christian');"))
+   112			echo "INSERT (2) failed: (" . $mysqli-&gt;errno . ") " . $mysqli-&gt;error;
+   113		
+   114		/* check the content of the tables */
+   115		$mysqli-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+   116		$res = $mysqli-&gt;use_result();
+   117		echo "Result set:\n";
+   118		while ($row = $res-&gt;fetch_assoc())
+   119			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+   120		$mysqli2-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+   121		$res = $mysqli2-&gt;use_result();
+   122		echo "Result set (2):\n";
+   123		while ($row = $res-&gt;fetch_assoc())
+   124			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+   125	
+   126		/* commit the transaction (INSERT INTO ...) */
+   127		$rc=tx_commit();
+   128		print "tx_commit(): $rc\n"; 
+   129	
+   130		/* check the content of the tables */
+   131		$mysqli-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+   132		$res = $mysqli-&gt;use_result();
+   133		echo "Result set:\n";
+   134		while ($row = $res-&gt;fetch_assoc())
+   135			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+   136		$mysqli2-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+   137		$res = $mysqli2-&gt;use_result();
+   138		echo "Result set (2):\n";
+   139		while ($row = $res-&gt;fetch_assoc())
+   140			echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+   141	
+   142		/* close all the Resource Managers */
+   143		$rc=tx_close();
+   144		print "tx_close(): $rc\n"; 
+   145	?&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	The program fails because the used profile does not have a second
+	MySQL Resource Manager (take a look to file
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename> for profile
+	<quote>MYS_STA</quote>).
+      </para>
+      <para>
+	A different error can be exploited fixing the
+	<varname>LIXA_PROFILE</varname> environment variable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ export LIXA_PROFILE=MYS_STA_MYS_STA
+tiian@mojan:~/lixa/ext/php/examples$ echo $LIXA_PROFILE
+MYS_STA_MYS_STA
+	  </screen></td></tr></tbody>
+	</table>
+	and breaking the source code changing
+	<screen>
+    15		$mysqli = new mysqli("localhost", "lixa", "", "lixa/pos/0", 3306);
+	</screen>
+	into
+	<screen>
+    15		$mysqli = new mysqli("localhost", "lixa", "", "lixa/pos/2", 3306);
+	</screen>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example04_lixa_mysqli2.php 
+tx_open(): 0
+
+Warning: mysqli::mysqli(): (99999/99999): Unable to retrieve a valid connection 
+from LIXA Transaction Manager in /home/tiian/src/lixa/ext/php/examples/example04
+_lixa_mysqli2.php on line 15
+Failed to connect to MySQL: (99999) Unable to retrieve a valid connection from L
+IXA Transaction Manager
+tx_begin(): 0
+DELETE FROM authors;
+
+Warning: mysqli::query(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 28
+
+Warning: main(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 29
+
+Warning: main(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 29
+DELETE failed: () DELETE FROM authors; (2)
+Warning: mysqli::real_query(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 35
+
+Warning: mysqli::use_result(): Couldn't fetch mysqli in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 36
+Result set:
+
+Fatal error: Call to a member function fetch_assoc() on a non-object in /home/tiian/src/lixa/ext/php/examples/example04_lixa_mysqli2.php on line 38
+	  </screen></td></tr></tbody>
+	</table>
+	Now the program fails because there's no a third Resource Manager as
+	required by <synopsis>lixa//2</synopsis> (the first one is 0, the second
+	one is 1 and so on...)
+      </para>
+      <important><para>
+	  Fix example <filename>example04_lixa_mysqli2.php</filename>
+	  restoring <synopsis>lixa//0</synopsis> at row 15!
+      </para></important>
     </section>
   </section>
 </chapter>

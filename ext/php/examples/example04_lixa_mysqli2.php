@@ -11,8 +11,8 @@
 	   id (0, 1, 2, ...)=none
 	   and can be read as "retrieve the first available MySQL connection
 	   established by the Transaction Manager using the current
-	   LIXA profile */
-	$mysqli = new mysqli("localhost", "lixa", "", "lixa/pos/2", 3306);
+	   LIXA profile" */
+	$mysqli = new mysqli("localhost", "lixa", "", "lixa/pos/0", 3306);
 	if ($mysqli->connect_errno)
 		echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error . "\n";
 	$mysqli2 = new mysqli("localhost", "lixa", "", "lixa/pos/1", 3306);
