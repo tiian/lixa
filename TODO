@@ -1,9 +1,6 @@
 LIXA + PHP crashes on Ubuntu 10.04 64 bit (segmentation fault)... ?!
 Fix bug 3517316
 
-Move code to parse database from mysqli_noapi.c to LIXA base code (lixa_my_) as
-a wrapper to a generic utility or directly as a generic utility
-
 Explore high availability features (active/active) with dynamic or static
 workload
 
