@@ -25,8 +25,8 @@
  * The functions declared in this prototypes are NOT intended for
  * Application Program developers, but only for software system integrators
  */
-#ifndef LIXA_NONAPI_H
-# define LIXA_NONAPI_H
+#ifndef LIXANONAPI_H
+# define LIXANONAPI_H
 
 
 
@@ -71,4 +71,4 @@ extern "C" {
 
 
 
-#endif /* LIXA_NONAPI_H */
+#endif /* LIXANONAPI_H */

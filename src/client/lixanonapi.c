@@ -31,7 +31,7 @@
 
 #include <lixa_errors.h>
 #include <lixa_trace.h>
-#include <lixa_nonapi.h>
+#include <lixanonapi.h>
 
 
 

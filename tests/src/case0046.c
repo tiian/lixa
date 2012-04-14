@@ -20,7 +20,8 @@
 #include <stdlib.h>
 
 
-#include <lixa_nonapi.h>
+
+#include <lixanonapi.h>
 
 
 
