@@ -1,6 +1,7 @@
 LOG:
 
-         - 0.7.5 PHP:
+         - 0.9.0 PHP: integration of PHP for MySQL (mysqli driver only)
+                 Fixed bug # 3517316
 
 20120331 - 0.7.4 Fixed bug # 3512953
 
