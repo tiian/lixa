@@ -1,5 +1,5 @@
 --- php-5.4.0.orig/ext/mysqli/mysqli_api.c	2012-01-01 14:15:04.000000000 +0100
-+++ php-5.4.0/ext/mysqli/mysqli_api.c	2012-04-05 21:11:09.000000000 +0200
++++ php-5.4.0/ext/mysqli/mysqli_api.c	2012-04-05 21:57:25.000000000 +0200
 @@ -33,6 +33,10 @@
  #include "php_mysqli_structs.h"
  #include "mysqli_priv.h"
@@ -29,7 +29,7 @@
  		zend_rsrc_list_entry *le;
  		if (zend_hash_find(&EG(persistent_list), mysql->hash_key, strlen(mysql->hash_key) + 1, (void **)&le) == SUCCESS) {
 --- php-5.4.0.orig/ext/mysqli/mysqli_nonapi.c	2012-01-01 14:15:04.000000000 +0100
-+++ php-5.4.0/ext/mysqli/mysqli_nonapi.c	2012-04-05 21:11:09.000000000 +0200
++++ php-5.4.0/ext/mysqli/mysqli_nonapi.c	2012-04-14 21:20:42.000000000 +0200
 @@ -32,6 +32,14 @@
  #include "php_mysqli_structs.h"
  #include "mysqli_priv.h"
@@ -38,73 +38,33 @@
 +#include "ext/lixa/lixa_php_config.h"
 +#ifdef HAVE_LIXA_MYSQL
 +# include <lixamy.h>
-+# include <regex.h>
++# include <lixanonapi.h>
 +#endif
 +/* end  : added by LIXA */
 +
  #define SAFE_STR(a) ((a)?a:"")
  
  #ifndef zend_parse_parameters_none
-@@ -141,6 +149,58 @@
+@@ -141,6 +149,18 @@
  		hostname = MyG(default_host);
  	}
  
 +/* begin: added by LIXA */
 +#if defined(HAVE_LIXA_MYSQL)
-+    mysql->use_lixa_conn = FALSE;
-+    mysql->use_lixa_rmid = FALSE;
-+    mysql->use_lixa_num = 0;
-+    /* check database string, is it "lixa/[rmid-pos]{0-1}/n{0-1}" */
-+    if (dbname) {
-+        regex_t preg;
-+        int reg_error;
-+        char reg_errbuf[200];
-+        regmatch_t pmatch[3];
-+        size_t nmatch = sizeof(pmatch)/sizeof(regmatch_t);
-+        char match_buf[100];
-+        
-+        reg_error = regcomp(
-+            &preg, "^lixa\\/(rmid|pos)?\\/([[:digit:]]*)$",
-+            REG_EXTENDED|REG_ICASE);
-+        if (0 != reg_error) {
-+            regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
-+        }
-+        reg_error = regexec(&preg, dbname, nmatch, pmatch, 0);
-+        if (0 != reg_error) {
-+            regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
-+        } else {
-+            mysql->use_lixa_conn = TRUE;
-+            /* rmid/pos detected? */
-+            if (pmatch[1].rm_so > 0 && pmatch[1].rm_eo > 0) {
-+                size_t len = pmatch[1].rm_eo - pmatch[1].rm_so;
-+                if (0 < len) {
-+                    strncpy(match_buf, dbname+pmatch[1].rm_so, len);
-+                    match_buf[len] = '\0';
-+                    if (0 == strcasecmp("rmid", match_buf))
-+                        mysql->use_lixa_rmid = TRUE;
-+                }
-+            }
-+            /* number detected? */
-+            if (pmatch[2].rm_so > 0 && pmatch[2].rm_eo > 0) {
-+                size_t len = pmatch[2].rm_eo - pmatch[2].rm_so;
-+                if (0 < len) {
-+                    long num;
-+                    strncpy(match_buf, dbname+pmatch[2].rm_so, len);
-+                    match_buf[len] = '\0';
-+                    num = strtol(match_buf, NULL, 10);
-+                    mysql->use_lixa_num = (int)num;
-+                }
-+            }
-+        }
-+        regfree(&preg);
-+    }
++	mysql->use_lixa_conn = FALSE;
++	mysql->use_lixa_rmid = FALSE;
++	mysql->use_lixa_num = 0;
++	/* check database string, is it "lixa/[rmid-pos]{0-1}/n{0-1}" */
++	if (dbname)
++		lixa_nonapi_parse_conn_string(dbname, &mysql->use_lixa_conn,
++			&mysql->use_lixa_rmid, &mysql->use_lixa_num);
 +#endif
 +/* end  : added by LIXA */
 +    
  	if (mysql->mysql && mysqli_resource &&
  		(mysqli_resource->status > MYSQLI_STATUS_INITIALIZED))
  	{
-@@ -214,7 +274,26 @@
+@@ -214,7 +234,26 @@
  	}
  	if (!mysql->mysql) {
  #if !defined(MYSQLI_USE_MYSQLND)
@@ -131,7 +91,7 @@
  #else
  		if (!(mysql->mysql = mysqlnd_init(persistent))) {
  #endif
-@@ -236,16 +315,20 @@
+@@ -236,16 +275,20 @@
  	/* BC for prior to bug fix #53425 */
  	flags |= CLIENT_MULTI_RESULTS;
  
@@ -157,7 +117,7 @@
  		if (!is_real_connect) {
  			/* free mysql structure */
  			mysqli_close(mysql->mysql, MYSQLI_CLOSE_DISCONNECTED);
-@@ -293,6 +376,18 @@
+@@ -293,6 +336,18 @@
  		RETURN_TRUE;
  	}
  
@@ -177,7 +137,7 @@
  	if (mysql->hash_key) {
  		efree(mysql->hash_key);
 --- php-5.4.0.orig/ext/mysqli/php_mysqli_structs.h	2012-01-01 14:15:04.000000000 +0100
-+++ php-5.4.0/ext/mysqli/php_mysqli_structs.h	2012-04-05 21:11:09.000000000 +0200
++++ php-5.4.0/ext/mysqli/php_mysqli_structs.h	2012-04-05 21:57:25.000000000 +0200
 @@ -43,6 +43,10 @@
  #include "mysqli_mysqlnd.h"
  #else
