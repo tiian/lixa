@@ -115,18 +115,27 @@ fi
 # Creating LIXA extension
 echo "Creating LIXA extension directory..."
 LIXA_DIR=$DIR_NAME/ext/lixa
-mkdir -p $LIXA_DIR
+mkdir -pv $LIXA_DIR
 if test $? -ne 0
 then
 	echo "Error while creating directory $LIXA_DIR"
 	exit 1
 fi
-cp -a config.m4 lixa.c php_lixa.h $LIXA_DIR
+cp -av config.m4 lixa.c php_lixa.h $LIXA_DIR
 if test $? -ne 0
 then
 	echo "Error while copying LIXA sources inside $LIXA_DIR"
 	exit 1
 fi
+
+# Create and populate LIXA tests directory
+mkdir -pv $LIXA_DIR/tests
+if test $? -ne 0
+then
+	echo "Error while creating directory $LIXA_DIR/tests"
+	exit 1
+fi
+cp -av tests/* $LIXA_DIR/tests
 
 # Checking PHP source code patches
 echo "Checking if the downloaded PHP source code can be patched..."

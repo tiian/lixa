@@ -1,3 +1,10 @@
+Discover how to pick-up available PHP features and skip unnecessary tests.
+it should be function 
+php_info_print_table_row()
+that can be lately inspected with
+phpinfo()
+An example: mysqli.c, search for PHP_MINFO_FUNCTION
+There's a SWIG way too, google for "swig PHP_MINFO_FUNCTION"
 
 Explore high availability features (active/active) with dynamic or static
 workload
