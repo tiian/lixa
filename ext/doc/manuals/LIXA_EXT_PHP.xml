@@ -244,6 +244,57 @@ tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
 	<quote>Installation on Unix systems</quote>
       </link>
       for the details related to PHP installation.
+      This is what should happen with <command>make</command>:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php$ cd php-5.4.0
+tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice make
+[...]
+Generating phar.php
+Generating phar.phar
+PEAR package PHP_Archive not installed: generated phar will require PHP's phar extension be enabled.
+directorytreeiterator.inc
+directorygraphiterator.inc
+pharcommand.inc
+clicommand.inc
+invertedregexiterator.inc
+phar.inc
+
+Build complete.
+Don't forget to run 'make test'.
+	</screen></td></tr></tbody>
+      </table>
+      and with <command>make install</command>
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu:~/lixa/ext/php/php-5.4.0$ sudo nice make install
+[sudo] password for tiian:
+Installing PHP CLI binary:        /opt/php-5.4-lixa/bin/
+Installing PHP CLI man page:      /opt/php-5.4-lixa/php/man/man1/
+Installing PHP CGI binary:        /opt/php-5.4-lixa/bin/
+Installing build environment:     /opt/php-5.4-lixa/lib/php/build/
+Installing header files:          /opt/php-5.4-lixa/include/php/
+Installing helper programs:       /opt/php-5.4-lixa/bin/
+  program: phpize
+  program: php-config
+Installing man pages:             /opt/php-5.4-lixa/php/man/man1/
+  page: phpize.1
+  page: php-config.1
+Installing PEAR environment:      /opt/php-5.4-lixa/lib/php/
+[PEAR] Archive_Tar    - installed: 1.3.7
+[PEAR] Console_Getopt - installed: 1.3.0
+[PEAR] Structures_Graph- installed: 1.0.4
+[PEAR] XML_Util       - installed: 1.2.1
+[PEAR] PEAR           - installed: 1.9.4
+Wrote PEAR system config file at: /opt/php-5.4-lixa/etc/pear.conf
+You may want to add: /opt/php-5.4-lixa/lib/php to your php.ini include_path
+/home/tiian/lixa/ext/php/php-5.4.0/build/shtool install -c ext/phar/phar.phar /opt/php-5.4-lixa/bin
+ln -s -f /opt/php-5.4-lixa/bin/phar.phar /opt/php-5.4-lixa/bin/phar
+Installing PDO headers:          /opt/php-5.4-lixa/include/php/ext/pdo/
+	</screen></td></tr></tbody>
+      </table>
     </para>
     <section>
       <title>PHP environment</title>
@@ -252,6 +303,68 @@ tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
 	LIXA. It should behaves exactly as a standard PHP environment until
 	you start to use LIXA specific features.
       </para>
+    </section>
+    <section>
+      <title>Testing LIXA PHP integration</title>
+      <para>
+	LIXA PHP integration supplies some basic case tests you can execute
+	to verify the build and install process went right.
+      </para>
+      <para>
+	Move to PHP source root directory and execute the LIXA related tests
+	as shown below:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/lixa/ext/php/php-5.4.0$ TEST_PHP_EXECUTABLE=/opt/php-5.4-lixa/bin/php /opt/php-5.4-lixa/bin/php run-tests.php ext/lixa/tests/
+
+=====================================================================
+PHP         : /opt/php-5.4-lixa/bin/php
+PHP_SAPI    : cli
+PHP_VERSION : 5.4.0
+ZEND_VERSION: 2.4.0
+PHP_OS      : Linux - Linux ubuntu 2.6.24-30-server #1 SMP Mon Jan 2 20:33:32 UTC 2012 i686
+INI actual  : /home/tiian/lixa/ext/php/php-5.4.0
+More .INIs  :
+CWD         : /home/tiian/lixa/ext/php/php-5.4.0
+Extra dirs  :
+VALGRIND    : Not used
+=====================================================================
+Running selected tests.
+PASS LIXA T.M. availability - basic test: the T.M. is up and running [ext/lixa/tests/lixa_001.phpt]
+PASS LIXA T.M. trivial commit - basic test: a trivial commit transaction [ext/lixa/tests/lixa_002.phpt]
+PASS LIXA mysqli availability  - basic test: MySQL is reachable with mysqli [ext/lixa/tests/lixa_003.phpt]
+=====================================================================
+Number of tests :    3                 3
+Tests skipped   :    0 (  0.0%) --------
+Tests warned    :    0 (  0.0%) (  0.0%)
+Tests failed    :    0 (  0.0%) (  0.0%)
+Expected fail   :    0 (  0.0%) (  0.0%)
+Tests passed    :    3 (100.0%) (100.0%)
+---------------------------------------------------------------------
+Time taken      :    0 seconds
+=====================================================================
+	  </screen></td></tr></tbody>
+	</table>
+	Pay attention you must specify the PHP installation path twice in
+	command <command>TEST_PHP_EXECUTABLE=/opt/php-5.4-lixa/bin/php /opt/php-5.4-lixa/bin/php run-tests.php ext/lixa/tests/</command>
+      </para>
+      <note>
+	<para>
+	  If you were interested in executing the whole PHP test suite,
+	  you would use command <command>make test</command>: the PHP
+	  environment would execute all the PHP tests, LIXA supplied too.
+	</para>
+      </note>
+      <warning>
+	<para>
+	  Some case tests need third party Resource Managers configuration
+	  to successfully complete: the same configuration required to run
+	  LIXA PHP examples (see
+	  <xref linkend="Using_LIXA_extension_for_PHP"/>)
+	  is required for the test cases as well.
+	</para>
+      </warning>
     </section>
     <section>
       <title>LIXA details</title>
@@ -294,7 +407,7 @@ tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
       </para>
     </section>
   </section>
-  <section>
+  <section xml:id="Using_LIXA_extension_for_PHP">
     <title>Using LIXA extension for PHP</title>
     <para>
       LIXA extension is useful to perform Distributed Transaction Processing
