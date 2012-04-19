@@ -24,6 +24,9 @@
 /* Define to 1 if you have the <gmodule.h> header file. */
 #undef HAVE_GMODULE_H
 
+/* Define to 1 if you are using IBM DB2 */
+#undef HAVE_IBMDB2
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -68,6 +71,9 @@
 
 /* Define to 1 if the system has the type `off_t'. */
 #undef HAVE_OFF_T
+
+/* Define to 1 if you are using Oracle */
+#undef HAVE_ORACLE
 
 /* Define to 1 if the system has the type `pid_t'. */
 #undef HAVE_PID_T
@@ -152,6 +158,16 @@
 
 /* Define to 1 if you have the `vfprintf' function. */
 #undef HAVE_VFPRINTF
+
+/* Define to 1 if you are using WebSphere MQ */
+#undef HAVE_WEBSPHEREMQ
+
+/* Define to 1 if you are using WebSphere MQ with Extended Transactional
+   Client mode */
+#undef HAVE_WEBSPHEREMQ_ETC
+
+/* Define to 1 if you are using WebSphere MQ with server binding mode */
+#undef HAVE_WEBSPHEREMQ_SRV
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */

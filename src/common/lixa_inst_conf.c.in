@@ -26,6 +26,11 @@
 
 #include <config.h>
 
+#include <lixa_defines.h>
+
+/* some public function are exposed to lixa.h API file */
+#include <lixa.h>
+
 
 
 /* set module trace flag */
@@ -42,3 +47,83 @@ const char *LIXA_SERVER_CONFIG_SYSTEM_FILE = "@EXPANDED_SYSCONFDIR@/lixad_conf.x
 const char *LIXA_PACKAGE_BUGREPORT = "@PACKAGE_BUGREPORT@";
 const char *LIXA_PACKAGE_NAME = "@PACKAGE_NAME@";
 const char *LIXA_PACKAGE_VERSION = "@PACKAGE_VERSION@";
+
+
+
+int lixa_config_have_ibmdb2(void)
+{
+#ifdef HAVE_IBMDB2
+    return TRUE;
+#else
+    return FALSE;
+#endif
+}
+
+
+
+int lixa_config_have_mysql(void)
+{
+#ifdef HAVE_MYSQL
+    return TRUE;
+#else
+    return FALSE;
+#endif
+}
+
+
+
+int lixa_config_have_postgresql(void)
+{
+#ifdef HAVE_POSTGRESQL
+    return TRUE;
+#else
+    return FALSE;
+#endif
+}
+
+
+
+int lixa_config_have_oracle(void)
+{
+#ifdef HAVE_ORACLE
+    return TRUE;
+#else
+    return FALSE;
+#endif
+}
+
+
+
+int lixa_config_have_webspheremq(void)
+{
+#ifdef HAVE_WEBSPHEREMQ
+    return TRUE;
+#else
+    return FALSE;
+#endif
+}
+
+
+
+int lixa_config_have_webspheremq_etc(void)
+{
+#ifdef HAVE_WEBSPHEREMQ_ETC
+    return TRUE;
+#else
+    return FALSE;
+#endif
+}
+
+
+
+int lixa_config_have_webspheremq_srv(void)
+{
+#ifdef HAVE_WEBSPHEREMQ_SRV
+    return TRUE;
+#else
+    return FALSE;
+#endif
+}
+
+
+

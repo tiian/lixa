@@ -1,3 +1,4 @@
-SUBDIRS =
+SUBDIRS = examples tests
 
-EXTRA_DIST = README config.m4  lixa-php-5.4.0-patch.diff lixa.c php_lixa.h
+EXTRA_DIST = config.m4  create_diff.sh download_and_patch.sh \
+	lixa.c lixa.php lixa-php-5.4.0-patch.diff php_lixa.h README

@@ -3,6 +3,7 @@ LIXA mysqli availability  - basic test: MySQL is reachable with mysqli
 --SKIPIF--
 <?php 
 if (!stristr(PHP_OS, "Linux")) die("skip this test is Linux platforms only");
+if (!lixa_config_have_mysql()) die("skip this test requires LIXA configured for MySQL with mysqli driver");
 ?>
 --FILE--
 <?php
