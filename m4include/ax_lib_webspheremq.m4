@@ -215,4 +215,16 @@ struct xa_switch_t sta = MQRMIXASwitch;
     AC_SUBST([WEBSPHEREMQ_PATH])
     AC_SUBST([WEBSPHEREMQ_PGMLIB])
     AC_SUBST([HAVE_WEBSPHEREMQ])
+    if test "$HAVE_WEBSPHEREMQ" = "yes"
+    then
+        AC_DEFINE([HAVE_WEBSPHEREMQ], [1], [Define to 1 if you are using WebSphere MQ])
+	if test "$WEBSPHEREMQ_SWITCH_TYPE" = "SRV"
+	then
+		AC_DEFINE([HAVE_WEBSPHEREMQ_SRV], [1], [Define to 1 if you are using WebSphere MQ with server binding mode])
+	fi
+	if test "$WEBSPHEREMQ_SWITCH_TYPE" = "ETC"
+	then
+		AC_DEFINE([HAVE_WEBSPHEREMQ_ETC], [1], [Define to 1 if you are using WebSphere MQ with Extended Transactional Client mode])
+	fi
+    fi
 ])

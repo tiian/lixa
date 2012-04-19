@@ -69,8 +69,10 @@ if test "$PHP_LIXA" != "no"; then
 		LIXA_INTERFACE="$ext_srcdir/lixa.i"
 		echo "%module lixa" > $LIXA_INTERFACE
 		echo "%{" >> $LIXA_INTERFACE
+		echo "#include \"lixa.h\"" >> $LIXA_INTERFACE
 		echo "#include \"tx.h\"" >> $LIXA_INTERFACE
 		echo "%}" >> $LIXA_INTERFACE
+		echo "%include \"lixa.h\"" >> $LIXA_INTERFACE
 		echo "%include \"tx.h\"" >> $LIXA_INTERFACE
 		dnl # --with-lixa -> building LIXA interface using SWIG
 		AC_MSG_CHECKING([if LIXA wrapper can be created with SWIG])

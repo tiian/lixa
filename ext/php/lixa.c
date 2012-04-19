@@ -1052,6 +1052,7 @@ extern "C" {
 #endif
 
 
+#include "lixa.h"
 #include "tx.h"
 
 
@@ -1097,6 +1098,132 @@ static int le_swig__p_tx_info_t=0; /* handle for tx_info_t */
 static int le_swig__p_xid_t=0; /* handle for xid_t */
 /* end vdecl subsection */
 /* wrapper section */
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_ibmdb2) {
+  int result;
+  
+  SWIG_ResetError();
+  if(ZEND_NUM_ARGS() != 0) {
+    WRONG_PARAM_COUNT;
+  }
+  
+  result = (int)lixa_config_have_ibmdb2();
+  {
+    ZVAL_LONG(return_value,result);
+  }
+  return;
+fail:
+  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
+}
+
+
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_mysql) {
+  int result;
+  
+  SWIG_ResetError();
+  if(ZEND_NUM_ARGS() != 0) {
+    WRONG_PARAM_COUNT;
+  }
+  
+  result = (int)lixa_config_have_mysql();
+  {
+    ZVAL_LONG(return_value,result);
+  }
+  return;
+fail:
+  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
+}
+
+
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_postgresql) {
+  int result;
+  
+  SWIG_ResetError();
+  if(ZEND_NUM_ARGS() != 0) {
+    WRONG_PARAM_COUNT;
+  }
+  
+  result = (int)lixa_config_have_postgresql();
+  {
+    ZVAL_LONG(return_value,result);
+  }
+  return;
+fail:
+  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
+}
+
+
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_oracle) {
+  int result;
+  
+  SWIG_ResetError();
+  if(ZEND_NUM_ARGS() != 0) {
+    WRONG_PARAM_COUNT;
+  }
+  
+  result = (int)lixa_config_have_oracle();
+  {
+    ZVAL_LONG(return_value,result);
+  }
+  return;
+fail:
+  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
+}
+
+
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_webspheremq) {
+  int result;
+  
+  SWIG_ResetError();
+  if(ZEND_NUM_ARGS() != 0) {
+    WRONG_PARAM_COUNT;
+  }
+  
+  result = (int)lixa_config_have_webspheremq();
+  {
+    ZVAL_LONG(return_value,result);
+  }
+  return;
+fail:
+  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
+}
+
+
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_webspheremq_etc) {
+  int result;
+  
+  SWIG_ResetError();
+  if(ZEND_NUM_ARGS() != 0) {
+    WRONG_PARAM_COUNT;
+  }
+  
+  result = (int)lixa_config_have_webspheremq_etc();
+  {
+    ZVAL_LONG(return_value,result);
+  }
+  return;
+fail:
+  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
+}
+
+
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_webspheremq_srv) {
+  int result;
+  
+  SWIG_ResetError();
+  if(ZEND_NUM_ARGS() != 0) {
+    WRONG_PARAM_COUNT;
+  }
+  
+  result = (int)lixa_config_have_webspheremq_srv();
+  {
+    ZVAL_LONG(return_value,result);
+  }
+  return;
+fail:
+  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
+}
+
+
 ZEND_NAMED_FUNCTION(_wrap_xid_t_formatID_set) {
   struct xid_t *arg1 = (struct xid_t *) 0 ;
   long arg2 ;
@@ -1899,6 +2026,13 @@ static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_p_xid_t) {
 /* entry subsection */
 /* Every non-class user visible function must have an entry here */
 static zend_function_entry lixa_functions[] = {
+ SWIG_ZEND_NAMED_FE(lixa_config_have_ibmdb2,_wrap_lixa_config_have_ibmdb2,NULL)
+ SWIG_ZEND_NAMED_FE(lixa_config_have_mysql,_wrap_lixa_config_have_mysql,NULL)
+ SWIG_ZEND_NAMED_FE(lixa_config_have_postgresql,_wrap_lixa_config_have_postgresql,NULL)
+ SWIG_ZEND_NAMED_FE(lixa_config_have_oracle,_wrap_lixa_config_have_oracle,NULL)
+ SWIG_ZEND_NAMED_FE(lixa_config_have_webspheremq,_wrap_lixa_config_have_webspheremq,NULL)
+ SWIG_ZEND_NAMED_FE(lixa_config_have_webspheremq_etc,_wrap_lixa_config_have_webspheremq_etc,NULL)
+ SWIG_ZEND_NAMED_FE(lixa_config_have_webspheremq_srv,_wrap_lixa_config_have_webspheremq_srv,NULL)
  SWIG_ZEND_NAMED_FE(xid_t_formatid_set,_wrap_xid_t_formatID_set,NULL)
  SWIG_ZEND_NAMED_FE(xid_t_formatid_get,_wrap_xid_t_formatID_get,NULL)
  SWIG_ZEND_NAMED_FE(xid_t_gtrid_length_set,_wrap_xid_t_gtrid_length_set,NULL)

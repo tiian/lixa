@@ -22,7 +22,7 @@
 
 
 #include <config.h>
-\
+
 
 
 /* save old LIXA_TRACE_MODULE and set a new value */

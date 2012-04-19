@@ -190,4 +190,8 @@ if (SQL_SUCCESS != cli_rc) return 1; else return 0;
     AC_SUBST([IBMDB2_CLI_CPPFLAGS])
     AC_SUBST([IBMDB2_CLI_LDFLAGS])
     AC_SUBST([HAVE_IBMDB2])
+    if test "$HAVE_IBMDB2" = "yes"
+    then
+        AC_DEFINE([HAVE_IBMDB2], [1], [Define to 1 if you are using IBM DB2])
+    fi
 ])

@@ -232,4 +232,8 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
     AC_SUBST([ORACLE_OCI_NNZ])
     AC_SUBST([ORACLE_ENV_SH])
     AC_SUBST([HAVE_ORACLE])
+    if test "$HAVE_ORACLE" = "yes"
+    then
+        AC_DEFINE([HAVE_ORACLE], [1], [Define to 1 if you are using Oracle])
+    fi
 ])
