@@ -37,8 +37,8 @@
     <title>Prerequisites</title>
     <para>
       LIXA wrapper might be dynamically generated using
-      <link xlink:href="http://www.swig.org/">SWIG</link>,
-      so you should install SWIG on your system before if you desired to
+      <link xlink:href="http://www.swig.org/">SWIG</link>:
+      you should install SWIG on your system in advance if you desired to
       build the wrapper from scratch. Most times, the LIXA distributed 
       wrapper works fine and you don't have to generate a fresh one.
     </para>
@@ -53,9 +53,9 @@
     </para>
     <para>
       For the sake of easiness, this manual shows how to build a fresh
-      PHP Zend environment patched with LIXA extension.
-      You could patched your previously downloaded PHP environment, but this
-      manual tries to keep it easy and uses a freshly downloaded tarball.
+      PHP Zend environment patched with the LIXA provided extension.
+      You could patch your own previously downloaded PHP environment, but this
+      manual tries to keep it simple and uses a freshly downloaded tarball.
     </para>
   </section>
   <section xml:id="PHP_installation">
@@ -136,6 +136,15 @@ Checking configure recognize LIXA extension...
 ************************************************************************
 	</screen></td></tr></tbody>
       </table>
+      <note>
+	<para>
+	  If you wanted a specific PHP version, pass it as the first argument
+	  to <command>download_and_patch.sh</command> command:
+	  <screen>
+	    ./download_and_patch.sh 5.4.3
+	  </screen>
+	</para>
+      </note>
       These are the steps performed by the script:
       <orderedlist numeration='arabic'>
 	<listitem>
@@ -207,7 +216,8 @@ tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
       In case you might want to generate LIXA PHP wrapper source code
       using SWIG you
       should add <option>--enable-lixa-swig</option> to 
-      <command>configure</command> command line.
+      <command>configure</command> command line, but most times this 
+      should not be necessary.
       <important>
 	<para>
 	  Most times the wrapper supplied with LIXA distribution works
@@ -222,12 +232,12 @@ tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
       </important>
       <warning>
 	<para>
-	  LIXA software must compiled and installed with all the Resource
+	  LIXA software must be compiled and installed with all the Resource
 	  Managers you want to use from PHP. If you did not configure and 
-	  install
-	  LIXA for MySQL, you would <emphasis>not</emphasis> be able to use
-	  MySQL from PHP as a Resource Manager coordinated by LIXA Transaction
-	  Manager. The same is true for PostgreSQL, Oracle, and so on...
+	  install LIXA for MySQL, you would <emphasis>not</emphasis> 
+	  be able to use MySQL from PHP as a Resource Manager coordinated 
+	  by LIXA Transaction Manager. The same is true for PostgreSQL, 
+	  Oracle, and so on...
 	</para>
 	<para>
 	  Use command <command>/opt/lixa/bin/lixa-config -r</command> to
@@ -319,30 +329,32 @@ Installing PDO headers:          /opt/php-5.4-lixa/include/php/ext/pdo/
 tiian@ubuntu:~/lixa/ext/php/php-5.4.0$ TEST_PHP_EXECUTABLE=/opt/php-5.4-lixa/bin/php /opt/php-5.4-lixa/bin/php run-tests.php ext/lixa/tests/
 
 =====================================================================
-PHP         : /opt/php-5.4-lixa/bin/php
+PHP         : /tmp/php-5.4-lixa/bin/php 
 PHP_SAPI    : cli
 PHP_VERSION : 5.4.0
 ZEND_VERSION: 2.4.0
-PHP_OS      : Linux - Linux ubuntu 2.6.24-30-server #1 SMP Mon Jan 2 20:33:32 UTC 2012 i686
-INI actual  : /home/tiian/lixa/ext/php/php-5.4.0
-More .INIs  :
-CWD         : /home/tiian/lixa/ext/php/php-5.4.0
-Extra dirs  :
+PHP_OS      : Linux - Linux mojan 2.6.32-40-generic #87-Ubuntu SMP Mon Mar 5 20:26:31 UTC 2012 i686
+INI actual  : /tmp/lixa-0.9.0/ext/php/php-5.4.0
+More .INIs  :  
+CWD         : /tmp/lixa-0.9.0/ext/php/php-5.4.0
+Extra dirs  : 
 VALGRIND    : Not used
 =====================================================================
 Running selected tests.
-PASS LIXA T.M. availability - basic test: the T.M. is up and running [ext/lixa/tests/lixa_001.phpt]
-PASS LIXA T.M. trivial commit - basic test: a trivial commit transaction [ext/lixa/tests/lixa_002.phpt]
-PASS LIXA mysqli availability  - basic test: MySQL is reachable with mysqli [ext/lixa/tests/lixa_003.phpt]
+PASS LIXA T.M. availability - basic test: the T.M. is up and running [ext/lixa/tests/lixa_001.phpt] 
+PASS LIXA T.M. trivial commit - basic test: a trivial commit transaction [ext/lixa/tests/lixa_002.phpt] 
+PASS LIXA mysqli availability - basic test: MySQL is reachable with mysqli [ext/lixa/tests/lixa_003.phpt] 
+PASS LIXA mysqli integration - a simple transaction using LIXA and MySQL (mysqli
+driver) [ext/lixa/tests/lixa_004.phpt] 
 =====================================================================
-Number of tests :    3                 3
+Number of tests :    4                 4
 Tests skipped   :    0 (  0.0%) --------
 Tests warned    :    0 (  0.0%) (  0.0%)
 Tests failed    :    0 (  0.0%) (  0.0%)
 Expected fail   :    0 (  0.0%) (  0.0%)
-Tests passed    :    3 (100.0%) (100.0%)
+Tests passed    :    4 (100.0%) (100.0%)
 ---------------------------------------------------------------------
-Time taken      :    0 seconds
+Time taken      :    1 seconds
 =====================================================================
 	  </screen></td></tr></tbody>
 	</table>
@@ -358,8 +370,8 @@ Time taken      :    0 seconds
       </note>
       <warning>
 	<para>
-	  Some case tests need third party Resource Managers configuration
-	  to successfully complete: the same configuration required to run
+	  Some case tests need specific third party Resource Managers
+	  configuration: the same configuration required to run
 	  LIXA PHP examples (see
 	  <xref linkend="Using_LIXA_extension_for_PHP"/>)
 	  is required for the test cases as well.
@@ -417,9 +429,9 @@ Time taken      :    0 seconds
       transactional support supplied by the Resource Manager itself.
     </para>
     <para>
-      Some examples will show you configurations with only one 
-      Resource Manager:
-      they are provided as introducing steps to more complex examples.
+      Some examples will show you some configurations with only one 
+      Resource Manager: they are provided as an introducing step to 
+      more complex examples.
     </para>
     <section>
       <title>LIXA PHP Application Programming Interface (API)</title>
@@ -534,9 +546,6 @@ TX_OK=0	TX_FAIL=-7
 	well as from C. File <filename>lixa.php</filename> define the
 	functions and the constants provided by LIXA PHP extension.
       </para>
-      <para>
-	<emphasis>Compliments</emphasis>: your first LIXA PHP program completed!
-      </para>
     </section>
     <section>
       <title>An example with dummy Resource Managers</title>
@@ -605,8 +614,8 @@ tx_open returned rc=-7, can't going on!
 	<function>tx_open</function> returns the value 
 	<varname>-7 (TX_FAIL)</varname>
 	<footnote>
-	  <para>Refer to file <filename>/opt/lixa/tx.h</filename> for TX
-	    return codes and their meaning.
+	  <para>Refer to file <filename>/opt/lixa/include/tx.h</filename> 
+	    for TX return codes and their meaning.
 	  </para>
 	</footnote>
 	because the LIXA state server is not
@@ -632,7 +641,7 @@ Execution completed!
 	  </screen></td></tr></tbody>
 	</table>
 	Assuming your LIXA installation was build with MySQL support and
-	MySQL server is not available, you can try what's happen when you
+	MySQL server is not available, you can try what happens when you
 	try to execute the program using a profile that needs MySQL:
 	<table frame="box">
 	  <thead><tr><td>[Terminal shell session]</td></tr></thead>
@@ -652,8 +661,8 @@ tx_open returned rc=-6, can't going on!
 	</table>
 	<function>tx_open</function> returns the value 
 	<varname>-6 (TX_ERROR)</varname>
-	because one Resource Manager (MySQL) is not available; starting
-	the Resource Manager, this will be the new behavior:
+	because one Resource Manager (MySQL) is not available; start the
+	MySQL Resource Manager and this will be the new behavior:
 	<table frame="box">
 	  <thead><tr><td>[Terminal shell session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -828,6 +837,7 @@ Result set:
 id=969, last_name=Ferrari, first_name=Christian
 tx_commit(): 0
 Result set:
+id=969, last_name=Ferrari, first_name=Christian
 tx_close(): 0
 	</screen></td></tr></tbody>
       </table>
@@ -933,6 +943,7 @@ tx_close(): 0
 	$res = $mysqli-&gt;use_result();
 	echo "Result set:\n";
 	while ($row = $res-&gt;fetch_assoc())
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
 
 	/* close all the Resource Managers */
 	$rc=tx_close();
@@ -1142,7 +1153,7 @@ mysql&gt; SELECT * FROM authors;
 	      MySQL remote server: 192.168.10.1
 	  </para></listitem>
 	</itemizedlist>
-	Follow these step after proper adaptation:
+	Follow these steps after proper adaptation:
 	<itemizedlist mark="bullet">
 	  <listitem><para>
 	      edit the configuration of your remote MySQL server

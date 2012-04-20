@@ -37,8 +37,8 @@ extern "C" {
       Processing) and a third uninvited guest, the Trasaction Manager, appears.
     </para>
     <para>
-      LIXA extensions are intended to supply you an alternative programming
-      language for Distributed Transaction Processing.
+      LIXA extensions are intended to supply you alternative programming
+      languages for Distributed Transaction Processing.
     </para>
     <important><para>
 	LIXA extensions are <emphasis>100% experimental code</emphasis> and

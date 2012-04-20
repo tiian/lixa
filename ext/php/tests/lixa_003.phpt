@@ -1,5 +1,5 @@
 --TEST--
-LIXA mysqli availability  - basic test: MySQL is reachable with mysqli
+LIXA mysqli availability - basic test: MySQL is reachable with mysqli
 --SKIPIF--
 <?php 
 if (!stristr(PHP_OS, "Linux")) die("skip this test is Linux platforms only");

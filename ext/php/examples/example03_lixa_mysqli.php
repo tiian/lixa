@@ -94,6 +94,7 @@
 	$res = $mysqli->use_result();
 	echo "Result set:\n";
 	while ($row = $res->fetch_assoc())
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
 
 	/* close all the Resource Managers */
 	$rc=tx_close();
