@@ -27,6 +27,34 @@ if (!extension_loaded('lixa')) {
 
 
 abstract class lixa {
+	static function lixa_config_have_ibmdb2() {
+		return lixa_config_have_ibmdb2();
+	}
+
+	static function lixa_config_have_mysql() {
+		return lixa_config_have_mysql();
+	}
+
+	static function lixa_config_have_postgresql() {
+		return lixa_config_have_postgresql();
+	}
+
+	static function lixa_config_have_oracle() {
+		return lixa_config_have_oracle();
+	}
+
+	static function lixa_config_have_webspheremq() {
+		return lixa_config_have_webspheremq();
+	}
+
+	static function lixa_config_have_webspheremq_etc() {
+		return lixa_config_have_webspheremq_etc();
+	}
+
+	static function lixa_config_have_webspheremq_srv() {
+		return lixa_config_have_webspheremq_srv();
+	}
+
 	const TX_H_VERSION = TX_H_VERSION;
 
 	const XIDDATASIZE = XIDDATASIZE;

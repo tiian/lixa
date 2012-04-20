@@ -106,6 +106,7 @@ if (!lixa_config_have_mysql()) die("skip this test requires LIXA configured for 
 	$res = $mysqli->use_result();
 	echo "Result set:\n";
 	while ($row = $res->fetch_assoc())
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
 
 	/* close all the Resource Managers */
 	$rc=tx_close();
@@ -130,4 +131,5 @@ Result set:
 id=969, last_name=Ferrari, first_name=Christian
 tx_commit(): 0
 Result set:
+id=969, last_name=Ferrari, first_name=Christian
 tx_close(): 0

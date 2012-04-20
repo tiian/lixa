@@ -33,3 +33,4 @@ HOW TO TEST LIXA extension:
 1. move to lixa/ext/php/php-X.Y.Z dir
 2. execute command 
    TEST_PHP_EXECUTABLE=/opt/php-5.4-lixa/bin/php /opt/php-X.Y-lixa/bin/php run-tests.php ext/lixa/tests/
+Please consult official documentation available at http://lixa.sourceforge.net/

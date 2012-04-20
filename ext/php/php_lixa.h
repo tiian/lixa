@@ -30,6 +30,13 @@ PHP_RINIT_FUNCTION(lixa);
 PHP_RSHUTDOWN_FUNCTION(lixa);
 PHP_MINFO_FUNCTION(lixa);
 
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_ibmdb2);
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_mysql);
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_postgresql);
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_oracle);
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_webspheremq);
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_webspheremq_etc);
+ZEND_NAMED_FUNCTION(_wrap_lixa_config_have_webspheremq_srv);
 ZEND_NAMED_FUNCTION(_wrap_xid_t_formatID_set);
 ZEND_NAMED_FUNCTION(_wrap_xid_t_formatID_get);
 ZEND_NAMED_FUNCTION(_wrap_xid_t_gtrid_length_set);

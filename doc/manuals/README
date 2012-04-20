@@ -1,9 +1,12 @@
 This manual is published at this URL too:
 http://lixa.sourceforge.net/manuals/
 
+cd /opt/lixa/share/doc/lixa-X.Y.Z
 sftp tiian@web.sourceforge.net
-cd /home/project-web/lixa/htdocs/manuals/
-put index.html
+cd /home/project-web/lixa/htdocs/lixa-doc
+put html/*.html html
+put images/*.png images
+put ext/html/*.html ext/html
 
 #########################################################################
 
