@@ -47,6 +47,15 @@ then
 	exit 1
 fi
 
+# Checking for patch command
+echo -n "Checking if patch command is available... "
+type patch
+if test $? -ne 0
+then
+	echo "Sorry, this script need patch to patch PHP source code"
+	exit 1
+fi
+
 # Type of archive to download: we are using the correlated tar flag
 DEFLATE_FLAG=""
 
