@@ -22,7 +22,8 @@ transactional environment.
 
 Documentation is available in these places:
 - local directory doc/manuals/index.html after tarball extraction
-- http://lixa.sourceforge.net/manuals/index.html
+- http://lixa.sourceforge.net/lixa-doc/html/
+- http://lixa.sourceforge.net/lixa-doc/ext/html/
 
 Some important things you should check in the documentation before going on:
 1. check LIXA dependency looking at "Installation/System requirements"
