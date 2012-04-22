@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.9.1-dev integration with PHP driver PostgreSQL
+
 20120421 - 0.9.0 PHP: integration of PHP for MySQL (mysqli driver only)
                  Fixed bug # 3517316
 
