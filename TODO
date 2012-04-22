@@ -1,3 +1,7 @@
+Go on with PostgreSQL PHP patched version...
+Remove file ext/php/pgsql.c it's a temporary copy of the same file in
+ext/php/php-5.4.0/ext/pgsql directory.
+
 Expand PHP integration with more resource managers and drivers.
 
 Explore high availability features (active/active) with dynamic or static
