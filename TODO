@@ -1,4 +1,5 @@
 Go on with PostgreSQL PHP patched version...
+
 Remove file ext/php/pgsql.c it's a temporary copy of the same file in
 ext/php/php-5.4.0/ext/pgsql directory.
 

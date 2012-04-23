@@ -126,66 +126,89 @@ typedef struct lixa_sw_status_s lixa_sw_status_t;
 
 
 
-/**
- * Reset the content of an object
- * @param lps IN/OUT object reference
- */
-static inline void lixa_sw_status_init(lixa_sw_status_t *lps) {
-    lps->rm = g_array_new(FALSE, FALSE, sizeof(struct lixa_sw_status_rm_s));
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
+
+    /**
+     * Reset the content of an object
+     * @param lps IN/OUT object reference
+     */
+    static inline void lixa_sw_status_init(lixa_sw_status_t *lps) {
+        lps->rm = g_array_new(FALSE, FALSE, sizeof(struct lixa_sw_status_rm_s));
+    }
+
+
+    /**
+     * Reset the content of an object
+     * @param lpsr IN/OUT object reference
+     */
+    static inline void lixa_sw_status_rm_init(struct lixa_sw_status_rm_s *lpsr)
+    {
+        lpsr->rmid = 0;
+        lpsr->rmid = LIXA_SW_STATUS_RM_TYPE_NULL;
+        lpsr->state.R = lpsr->state.T = lpsr->state.S = 0;
+        memset(&(lpsr->xid), 0, sizeof(XID));
+        lpsr->conn = NULL;
+    }
+
+
+
+    /**
+     * Retrieve a pointer to the status of the resource manager for the current
+     * thread
+     * @param rmid IN Resource Manager ID
+     * @return the pointer to the desired status or NULL
+     */
+    struct lixa_sw_status_rm_s *lixa_sw_status_rm_get(int rmid);
+
+
+
+    /**
+     * Destroy an object of type @ref lixa_sw_status_t
+     * @param data IN reference to the object
+     */
+    void lixa_sw_status_destroy(gpointer data);
+
+
+
+    /**
+     * Retrieve the connection pointer of a generic resource manager
+     * @param rmid IN Resource Manager ID
+     * @param rm_type IN Resource Manager type (it's used to avoid the
+     *                   application program could specify an rmid of
+     *                   a different resource manager type)
+     * @return the pointer to the desired status or NULL
+     */
+    gpointer lixa_sw_get_conn_by_rmid(int rmid, int rm_type);
+
+
+
+    /**
+     * Retrieve the i-th connection pointer of a specified resource manager type
+     * @param pos IN Resource Manager position
+     * @param rm_type IN Resource Manager type
+     * @return the pointer to the desired status or NULL
+     */
+    gpointer lixa_sw_get_conn_by_pos(int pos, int rm_type);
+
+
+
+    /**
+     * Check if a connection is managed by LIXA
+     * @param conn IN pointer to a Resource Manager connection
+     * @param rm_type IN Resource Manager type
+     * @return a boolean value: TRUE / FALSE
+     */
+    int lixa_sw_is_managed_conn(const gpointer conn, int rm_type);
+
+
+
+#ifdef __cplusplus
 }
-
-
-/**
- * Reset the content of an object
- * @param lpsr IN/OUT object reference
- */
-static inline void lixa_sw_status_rm_init(struct lixa_sw_status_rm_s *lpsr) {
-    lpsr->rmid = 0;
-    lpsr->rmid = LIXA_SW_STATUS_RM_TYPE_NULL;
-    lpsr->state.R = lpsr->state.T = lpsr->state.S = 0;
-    memset(&(lpsr->xid), 0, sizeof(XID));
-    lpsr->conn = NULL;
-}
-
-
-
-/**
- * Retrieve a pointer to the status of the resource manager for the current
- * thread
- * @param rmid IN Resource Manager ID
- * @return the pointer to the desired status or NULL
- */
-struct lixa_sw_status_rm_s *lixa_sw_status_rm_get(int rmid);
-
-
-
-/**
- * Destroy an object of type @ref lixa_sw_status_t
- * @param data IN reference to the object
- */
-void lixa_sw_status_destroy(gpointer data);
-
-
-
-/**
- * Retrieve the connection pointer of a generic resource manager
- * @param rmid IN Resource Manager ID
- * @param rm_type IN Resource Manager type (it's used to avoid the application
- *                   program could specify an rmid of a different resource
- *                   manager type)
- * @return the pointer to the desired status or NULL
- */
-gpointer lixa_sw_get_conn_by_rmid(int rmid, int rm_type);
-
-
-
-/**
- * Retrieve the i-th connection pointer of a specified resource manager type
- * @param pos IN Resource Manager position
- * @param rm_type IN Resource Manager type
- * @return the pointer to the desired status or NULL
- */
-gpointer lixa_sw_get_conn_by_pos(int pos, int rm_type);
+#endif /* __cplusplus */
 
 
 

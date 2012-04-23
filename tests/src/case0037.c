@@ -71,6 +71,13 @@ int main(int argc, char *argv[])
         fprintf(stderr, "lixa_pq_get_conn: conn is NULL\n");
         exit(1);
     }
+
+    /* trivial check for lixa_pq_is_managed_conn() function */
+    if (!lixa_pq_is_managed_conn(conn)) {
+        fprintf(stderr, "lixa_pq_is_managed_conn: returned FALSE, this "
+                "should be impossible!\n");
+        exit(1);
+    }
     
     /* start a new transaction */
     if (TX_OK != (txrc = tx_begin())) {

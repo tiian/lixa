@@ -74,6 +74,15 @@ extern "C" {
 
 
 
+    /**
+     * Check if a PostgreSQL connection is managed by LIXA
+     * @param conn IN pointer to a PostgreSQL Resource Manager connection
+     * @return a boolean value: TRUE / FALSE
+     */
+    int lixa_pq_is_managed_conn(const PGconn *conn);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
