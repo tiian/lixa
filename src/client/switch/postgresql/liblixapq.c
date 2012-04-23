@@ -1267,3 +1267,10 @@ PGconn *lixa_pq_get_conn_by_pos(int pos) {
 PGconn *lixa_pq_get_conn(void) {
     return lixa_sw_get_conn_by_pos(0, LIXA_SW_STATUS_RM_TYPE_POSTGRESQL);
 }
+
+
+
+int lixa_pq_is_managed_conn(const PGconn *conn) {
+    return lixa_sw_is_managed_conn((gpointer)conn,
+                                   LIXA_SW_STATUS_RM_TYPE_POSTGRESQL);
+}

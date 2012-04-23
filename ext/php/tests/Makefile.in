@@ -215,7 +215,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = lixa_001.phpt lixa_002.phpt lixa_003.phpt lixa_004.phpt
+EXTRA_DIST = lixa_001.phpt lixa_002.phpt \
+	lixa_011.phpt lixa_012.phpt \
+	lixa_021.phpt
+
 all: all-am
 
 .SUFFIXES:

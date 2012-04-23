@@ -193,3 +193,48 @@ gpointer lixa_sw_get_conn_by_pos(int pos, int rm_type)
 
 
 
+int lixa_sw_is_managed_conn(const gpointer conn, int rm_type)
+{
+    int is_managed = FALSE;
+    
+    /* lock the mutex */
+    g_static_mutex_lock(&lixa_sw_status_mutex);
+
+    if (NULL != lixa_sw_status) {
+        pthread_t key = pthread_self();
+        lixa_sw_status_t *lps = NULL;
+        if (NULL != (lps = (lixa_sw_status_t *)g_hash_table_lookup(
+                         lixa_sw_status, (gconstpointer)key))) {
+            if (0 < lps->rm->len) {
+                guint i;
+                for (i=0; i<lps->rm->len; ++i) {
+                    struct lixa_sw_status_rm_s *lpsr = &g_array_index(
+                        lps->rm, struct lixa_sw_status_rm_s, i);
+                    LIXA_TRACE(("lixa_sw_is_managed_conn: i=%d, rm_type=%d\n",
+                                i, lpsr->rm_type));
+                    if (lpsr->rm_type == rm_type)
+                        if (conn == lpsr->conn) {
+                            is_managed = TRUE;
+                            break;
+                        }
+                }
+            }
+            if (!is_managed) {
+                LIXA_TRACE(("lixa_sw_is_managed_conn: %p conn for resource "
+                            "manager of type %d not found\n", conn, rm_type));
+            }
+        } else {
+            LIXA_TRACE(("lixa_sw_is_managed_conn: thread not registered\n"));
+        }
+    } else {
+        LIXA_TRACE(("lixa_sw_is_managed_conn: status is NULL\n"));
+    }
+    
+    /* unlock the mutex */
+    g_static_mutex_unlock(&lixa_sw_status_mutex);
+
+    return is_managed;
+}
+
+
+

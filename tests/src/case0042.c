@@ -81,6 +81,13 @@ int main(int argc, char *argv[])
         exit(1);
     }
     
+    /* trivial check for lixa_pq_is_managed_conn() function */
+    if (!lixa_pq_is_managed_conn(pq_conn)) {
+        fprintf(stderr, "lixa_pq_is_managed_conn: returned FALSE, this "
+                "should be impossible!\n");
+        exit(1);
+    }
+    
     /* retrieve the connection handler */
     my_conn = lixa_my_get_conn();
     if (NULL == my_conn) {
