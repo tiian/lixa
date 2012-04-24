@@ -233,6 +233,7 @@ int lixa_sw_is_managed_conn(const gpointer conn, int rm_type)
     /* unlock the mutex */
     g_static_mutex_unlock(&lixa_sw_status_mutex);
 
+    LIXA_TRACE(("lixa_sw_is_managed_conn: return value is %d\n", is_managed));
     return is_managed;
 }
 
