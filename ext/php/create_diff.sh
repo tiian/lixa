@@ -63,6 +63,15 @@ do
 done
 
 #
+# NOTE:
+# Add all the changed and new files to the list
+LIST="pgsql.c"
+for FILE in $LIST
+do
+	diff -u -N $OLD/ext/pgsql/$FILE $NEW/ext/pgsql/$FILE >>$DIFF_FILE
+done
+
+#
 # The patch can be applied against the original tree with
 # patch --dry-run -p0 < file.diff
 # patch -p0 < file.diff

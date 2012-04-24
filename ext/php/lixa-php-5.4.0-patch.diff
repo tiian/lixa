@@ -1,5 +1,5 @@
---- php-5.4.0.orig/ext/mysqli/mysqli_api.c	2012-01-01 14:15:04.000000000 +0100
-+++ php-5.4.0/ext/mysqli/mysqli_api.c	2012-04-05 21:57:25.000000000 +0200
+--- php-5.4.0-orig/ext/mysqli/mysqli_api.c	2012-01-01 14:15:04.000000000 +0100
++++ php-5.4.0/ext/mysqli/mysqli_api.c	2012-04-19 21:57:13.000000000 +0200
 @@ -33,6 +33,10 @@
  #include "php_mysqli_structs.h"
  #include "mysqli_priv.h"
@@ -28,8 +28,8 @@
  	} else {
  		zend_rsrc_list_entry *le;
  		if (zend_hash_find(&EG(persistent_list), mysql->hash_key, strlen(mysql->hash_key) + 1, (void **)&le) == SUCCESS) {
---- php-5.4.0.orig/ext/mysqli/mysqli_nonapi.c	2012-01-01 14:15:04.000000000 +0100
-+++ php-5.4.0/ext/mysqli/mysqli_nonapi.c	2012-04-14 21:20:42.000000000 +0200
+--- php-5.4.0-orig/ext/mysqli/mysqli_nonapi.c	2012-01-01 14:15:04.000000000 +0100
++++ php-5.4.0/ext/mysqli/mysqli_nonapi.c	2012-04-19 21:57:13.000000000 +0200
 @@ -32,6 +32,14 @@
  #include "php_mysqli_structs.h"
  #include "mysqli_priv.h"
@@ -136,8 +136,8 @@
  err:
  	if (mysql->hash_key) {
  		efree(mysql->hash_key);
---- php-5.4.0.orig/ext/mysqli/php_mysqli_structs.h	2012-01-01 14:15:04.000000000 +0100
-+++ php-5.4.0/ext/mysqli/php_mysqli_structs.h	2012-04-05 21:57:25.000000000 +0200
+--- php-5.4.0-orig/ext/mysqli/php_mysqli_structs.h	2012-01-01 14:15:04.000000000 +0100
++++ php-5.4.0/ext/mysqli/php_mysqli_structs.h	2012-04-19 21:57:13.000000000 +0200
 @@ -43,6 +43,10 @@
  #include "mysqli_mysqlnd.h"
  #else
@@ -163,3 +163,93 @@
  } MY_MYSQL;
  
  typedef struct {
+--- php-5.4.0-orig/ext/pgsql/pgsql.c	2012-01-01 14:15:04.000000000 +0100
++++ php-5.4.0/ext/pgsql/pgsql.c	2012-04-24 21:16:48.000000000 +0200
+@@ -47,6 +47,14 @@
+ #include "php_globals.h"
+ #include "zend_exceptions.h"
+ 
++/* begin: added by LIXA */
++#include "ext/lixa/lixa_php_config.h"
++#ifdef HAVE_LIXA_POSTGRESQL
++# include <lixapq.h>
++# include <lixanonapi.h>
++#endif
++/* end  : added by LIXA */
++
+ #if HAVE_PGSQL
+ 
+ #ifndef InvalidOid
+@@ -785,7 +793,15 @@
+ 	while ((res = PQgetResult(link))) {
+ 		PQclear(res);
+ 	}
++/* begin: added by LIXA */
++#ifdef HAVE_LIXA_POSTGRESQL
++	/* check if connection was opened by LIXA Transaction Manager */
++	if (!lixa_pq_is_managed_conn(link))
++		PQfinish(link);
++#else
+ 	PQfinish(link);
++#endif
++/* end  : added by LIXA */
+ 	PGG(num_links)--;
+ }
+ /* }}} */
+@@ -1209,7 +1225,15 @@
+ 		ZEND_REGISTER_RESOURCE(return_value, pgsql, le_plink);
+ 	} else { /* Non persistent connection */
+ 		zend_rsrc_list_entry *index_ptr,new_index_ptr;
+-		
++/* begin: added by LIXA */
++#ifdef HAVE_LIXA_POSTGRESQL
++                int use_lixa_conn = 0;
++                int use_lixa_rmid = 0;
++                int use_lixa_num = 0;
++                const char use_lixa_dbname_prefix[] = "dbname=";
++#endif
++/* end  : added by LIXA */
++	
+ 		/* first we check the hash for the hashed_details key.  if it exists,
+ 		 * it should point us to the right offset where the actual pgsql link sits.
+ 		 * if it doesn't, open a new pgsql link, add it to the resource list,
+@@ -1240,6 +1264,39 @@
+ 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create new link. Too many open links (%ld)", PGG(num_links));
+ 			goto err;
+ 		}
++/* begin: added by LIXA */
++#ifdef HAVE_LIXA_POSTGRESQL
++                /* check connstring prefix, it must be "dbname=" */
++                if (connstring && !strncmp(connstring, use_lixa_dbname_prefix,
++                        sizeof(use_lixa_dbname_prefix)-1))
++                        lixa_nonapi_parse_conn_string(connstring +
++                                sizeof(use_lixa_dbname_prefix)-1, 
++                                &use_lixa_conn, &use_lixa_rmid,
++                                &use_lixa_num);
++                /* retrieve connection from LIXA Transaction Manager if
++                   use_lixa_conn flag is TRUE */
++                if (use_lixa_conn) {
++                        if (0 == use_lixa_num)
++                                pgsql = lixa_pq_get_conn();
++                        else {
++                                if (use_lixa_rmid)
++                                        pgsql = lixa_pq_get_conn_by_rmid(
++                                                use_lixa_num);
++                                else
++                                        pgsql = lixa_pq_get_conn_by_pos(
++                                                use_lixa_num);
++                        }
++			/* check PostgreSQL connection */
++			if (NULL == pgsql) {
++				PHP_PQ_ERROR("Unable to connect to PostgreSQL "
++					"server because LIXA Transaction "
++					"Manager returned a NULL pointer!\n", 
++					NULL);
++				goto err;
++			}	
++                } else
++#endif
++/* end  : added by LIXA */
+ 		if (connstring) {
+ 			pgsql = PQconnectdb(connstring);
+ 		} else {
