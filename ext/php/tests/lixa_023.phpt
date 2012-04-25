@@ -1,22 +1,15 @@
-<?php	
-/*
- * Copyright (c) 2009-2012, Christian Ferrari <tiian@users.sourceforge.net>
- * All rights reserved.
- *
- * This file is part of LIXA.
- *
- * LIXA is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as published
- * by the Free Software Foundation.
- *
- * LIXA is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
- */
+--TEST--
+LIXA pgsql mysqli integration - a simple transaction using LIXA, PostgreSQL (pgsql driver) and MySQL (mysqli driver)
+--SKIPIF--
+<?php
+if (!stristr(PHP_OS, "Linux")) die("skip this test is Linux platforms only");
+if (!lixa_config_have_postgresql()) die("skip this test requires LIXA configured for PostgreSQL");
+if (!lixa_config_have_mysql()) die("skip this test requires LIXA configured for MySQL with mysqli driver");
+?>
+--FILE--
+<?php
+	/* set LIXA profile environment variable */
+	putenv("LIXA_PROFILE=MYS_STA_PQL_STA");
 
 	/* open all the Resource Managers (MySQL & PostgreSQL instances 
 	   in this example) */
@@ -49,10 +42,12 @@
 	if (!$mysqli->query("DELETE FROM authors;"))
 		echo "DELETE failed: (" . $mysqli->errno . ") " . 
 			$mysqli->error;
+	print "MYSQL: DELETE FROM authors: OK\n";
 	// remove all the rows from PostgreSQL table 
 	$query = 'DELETE FROM authors';
 	$result = pg_query($query) 
 		or die("DELETE failed: " . pg_last_error() . "\n");
+	print "PostgreSQL: DELETE FROM authors: OK\n";
 
 	// check the table content (MySQL)
 	$mysqli->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
@@ -98,10 +93,12 @@
 	if (!$mysqli->query("INSERT INTO authors VALUES(969,'Ferrari','Christian');"))
 		echo "INSERT failed: (" . $mysqli->errno . ") " . 
 			$mysqli->error;
+	print "MYSQL: INSERT INTO authors: OK\n";
 	// populate the table (PostgreSQL)
 	$query = "INSERT INTO authors VALUES(999, 'Ferrari', 'Christian')";
 	$result = pg_query($query) 
 		or die("Query failed: " . pg_last_error() . "\n");
+	print "PostgreSQL: INSERT INTO authors: OK\n";
 
 	// check the table content (MySQL)
 	$mysqli->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
@@ -148,10 +145,12 @@
 	if (!$mysqli->query("INSERT INTO authors VALUES(969,'Ferrari','Christian');"))
 		echo "INSERT failed: (" . $mysqli->errno . ") " .
 			$mysqli->error;
+	print "MYSQL: INSERT INTO authors: OK\n";
 	// populate the table (PostgreSQL)
 	$query = "INSERT INTO authors VALUES(999, 'Ferrari', 'Christian')";
 	$result = pg_query($query) 
 		or die("Query failed: " . pg_last_error() . "\n");
+	print "PostgreSQL: INSERT INTO authors: OK\n";
 	
 	// check the table content (MySQL)
 	$mysqli->real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
@@ -200,3 +199,40 @@
 	$rc=tx_close();
 	print "tx_close(): $rc\n"; 
 ?>
+--EXPECT--
+tx_open(): 0
+tx_begin(): 0
+DELETE FROM authors;
+MYSQL: DELETE FROM authors: OK
+PostgreSQL: DELETE FROM authors: OK
+Result set (MySQL):
+Result set (PostgreSQL):
+tx_commit(): 0
+tx_begin(): 0
+Result set (MySQL):
+Result set (PostgreSQL):
+INSERT INTO authors...
+MYSQL: INSERT INTO authors: OK
+PostgreSQL: INSERT INTO authors: OK
+Result set (MySQL):
+id=969, last_name=Ferrari, first_name=Christian
+Result set (PostgreSQL):
+id=999, last_name=Ferrari, first_name=Christian
+tx_rollback(): 0
+Result set (MySQL):
+Result set (PostgreSQL):
+tx_begin(): 0
+INSERT INTO authors...
+MYSQL: INSERT INTO authors: OK
+PostgreSQL: INSERT INTO authors: OK
+Result set (MySQL):
+id=969, last_name=Ferrari, first_name=Christian
+Result set (PostgreSQL):
+id=999, last_name=Ferrari, first_name=Christian
+tx_commit(): 0
+Result set (MySQL):
+id=969, last_name=Ferrari, first_name=Christian
+Result set (PostgreSQL):
+id=999, last_name=Ferrari, first_name=Christian
+tx_close(): 0
+
