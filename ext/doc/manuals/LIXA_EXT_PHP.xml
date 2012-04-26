@@ -724,32 +724,31 @@ Execution completed!
     </section>
     <section xml:id="An_example_with_MySQL">
       <title>An example with MySQL (mysqli driver)</title>
-    </section>
-    <important>
+      <important>
+	<para>
+	  The examples shown below need the set up explained in 
+	  <citation>LIXArg</citation> (see chapter <quote>Development/An example
+	    with MySQL</quote>).
+	  You won't be able to execute the following examples without a right
+	  configured MySQL database.
+	</para>
+      </important>
       <para>
-	The examples shown below need the set up explained in 
-	<citation>LIXArg</citation> (see chapter <quote>Development/An example
-	  with MySQL</quote>).
-	You won't be able to execute the following examples without a right
-	configured MySQL database.
-      </para>
-    </important>
-    <para>
-      Before trying LIXA and MySQL together you should try MySQL alone
-      with <filename>example02_mysqli.php</filename> example:
-      <table frame="box">
-	<thead><tr><td>[Terminal shell session]</td></tr></thead>
-	<tbody><tr><td><screen>
+	Before trying LIXA and MySQL together you should try MySQL alone
+	with <filename>example02_mysqli.php</filename> example:
+	<table frame="box">
+	  <thead><tr><td>[Terminal shell session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@mojan:~/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example02_mysqli.php 
 Using mysqli direct API
 Result set:
 id=969, last_name=Ferrari, first_name=Christian
-	</screen></td></tr></tbody>
-      </table>
-      The source code is quite easy to understand:
-      <table frame="box">
-	<thead><tr><td>[example02_mysqli.php source code]</td></tr></thead>
-	<tbody><tr><td><screen>
+	  </screen></td></tr></tbody>
+	</table>
+	The source code is quite easy to understand:
+	<table frame="box">
+	  <thead><tr><td>[example02_mysqli.php source code]</td></tr></thead>
+	  <tbody><tr><td><screen>
 &lt;?php
 	/* retrieve MySQL connection */
 	$mysqli = new mysqli("localhost", "lixa", "", "lixa", 3306);
@@ -771,35 +770,34 @@ id=969, last_name=Ferrari, first_name=Christian
 	while ($row = $res-&gt;fetch_assoc())
 		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
 ?&gt;
-
-	</screen></td></tr></tbody>
-      </table>
-      Special attention must be reserved to this row:
-      <table frame="box">
-	<thead><tr><td>[example02_mysqli.php source code (fragment)]</td></tr></thead>
-	<tbody><tr><td><screen>
-        $mysqli = new mysqli("localhost", "lixa", "", "lixa", 3306);
-	</screen></td></tr></tbody>
-      </table>
-      because it will be changed to use LIXA as a Transaction Manager.
-    </para>
-    <para>
-      What we are performing now is similar to a supplied C language example; 
-      below there's a picture copied from <citation>LIXArg</citation>
-      (take a look to C example before this one).
-      <figure xml:id="develop8">
-	<title>Deploy model of an example with MySQL DBMS
-	(example8_mys =&gt; example03_lixa_mysqli.php)</title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="../../images/LIXA_Development_8.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-      Start the LIXA state server (if it was not yet started):
-      <table frame="box">
-	<thead><tr><td>[Shell terminal session]</td></tr></thead>
-	<tbody><tr><td><screen>
+	  </screen></td></tr></tbody>
+	</table>
+	Special attention must be reserved to this row:
+	<table frame="box">
+	  <thead><tr><td>[example02_mysqli.php source code (fragment)]</td></tr></thead>
+	  <tbody><tr><td><screen>
+$mysqli = new mysqli("localhost", "lixa", "", "lixa", 3306);
+	  </screen></td></tr></tbody>
+	</table>
+	because it will be changed to use LIXA as a Transaction Manager.
+      </para>
+      <para>
+	What we are performing now is similar to a supplied C language example; 
+	below there's a picture copied from <citation>LIXArg</citation>
+	(take a look to C example before this one).
+	<figure xml:id="develop8">
+	  <title>Deploy model of an example with MySQL DBMS
+	    (example8_mys =&gt; example03_lixa_mysqli.php)</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="../../images/LIXA_Development_8.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	Start the LIXA state server (if it was not yet started):
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@mojan:~$ ps -ef|grep lixad|grep -v grep
 tiian@mojan:~$ sudo su - lixa
 [sudo] password for tiian: 
@@ -808,13 +806,14 @@ lixa@mojan:~$ ps -ef|grep lixad|grep -v grep
 lixa      4164     1  0 20:56 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 lixa@mojan:~$ exit
 logout
-	</screen></td></tr></tbody>
-      </table>
-      Set up <varname>LIXA_PROFILE</varname> environment variable to choose
-      a profile with MySQL as Resource Manager and execute the PHP source code:
-      <table frame="box">
-	<thead><tr><td>[Shell terminal session]</td></tr></thead>
-	<tbody><tr><td><screen>
+	  </screen></td></tr></tbody>
+	</table>
+	Set up <varname>LIXA_PROFILE</varname> environment variable to choose
+	a profile with MySQL as Resource Manager and execute the PHP 
+	source code:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@mojan:~/lixa/ext/php/examples$ export LIXA_PROFILE=MYS_STA
 tiian@mojan:~/lixa/ext/php/examples$ echo $LIXA_PROFILE
 MYS_STA
@@ -839,14 +838,14 @@ tx_commit(): 0
 Result set:
 id=969, last_name=Ferrari, first_name=Christian
 tx_close(): 0
-	</screen></td></tr></tbody>
-      </table>
-      read the source code, and the comments, to understand how to develop
-      an Application Program coordinated by LIXA Transaction Manager with
-      MySQL Resource Manager:
-      <table frame="box">
-	<thead><tr><td>[example03_lixa_mysqli.php source code]</td></tr></thead>
-	<tbody><tr><td><screen>
+	  </screen></td></tr></tbody>
+	</table>
+	read the source code, and the comments, to understand how to develop
+	an Application Program coordinated by LIXA Transaction Manager with
+	MySQL Resource Manager:
+	<table frame="box">
+	  <thead><tr><td>[example03_lixa_mysqli.php source code]</td></tr></thead>
+	  <tbody><tr><td><screen>
 &lt;?php	
 	/* open all the Resource Managers (MySQL instance in this example) */
 	$rc=tx_open();
@@ -949,13 +948,13 @@ tx_close(): 0
 	$rc=tx_close();
 	print "tx_close(): $rc\n"; 
 ?&gt;
-	</screen></td></tr></tbody>
-      </table>
-      I suggest you to verify the table is really populated and the debug
-      messages produced by the above program are truthful:
-      <table frame="box">
-	<thead><tr><td>[Shell terminal session]</td></tr></thead>
-	<tbody><tr><td><screen>
+	  </screen></td></tr></tbody>
+	</table>
+	I suggest you to verify the table is really populated and the debug
+	messages produced by the above program are truthful:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
 tiian@mojan:~/lixa/ext/php/examples$ mysql -u lixa lixa
 Reading table information for completion of table and column names
 You can turn off this feature to get a quicker startup with -A
@@ -979,9 +978,10 @@ mysql&gt; SELECT * FROM authors;
 | 969 | Ferrari   | Christian  |
 +-----+-----------+------------+
 1 row in set (0.00 sec)
-	</screen></td></tr></tbody>
-      </table>
-    </para>
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
     <section>
       <title>MySQL (mysqli) connection string syntax</title>
       <para>
@@ -1525,6 +1525,284 @@ Fatal error: Call to a member function fetch_assoc() on a non-object in /home/ti
 	  Fix example <filename>example04_lixa_mysqli2.php</filename>
 	  restoring <synopsis>lixa//0</synopsis> at row 15!
       </para></important>
+    </section>
+    <section xml:id="An_example_with_PostgreSQL">
+      <title>An example with PostgreSQL (pgsql driver)</title>
+      <important>
+	<para>
+	  The examples shown below need the set up explained in 
+	  <citation>LIXArg</citation> (see chapter <quote>Development/An example
+	    with PostgreSQL</quote>).
+	  You won't be able to execute the following examples without a right
+	  configured PostgreSQL database.
+	</para>
+      </important>
+      <para>
+	Before trying LIXA and PostgreSQL together you should try 
+	PostgreSQL alone
+	with <filename>example05_pgsql.php</filename> example:
+	<table frame="box">
+	  <thead><tr><td>[Terminal shell session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/src/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example05_pgsql.php 
+Using pgsql direct API
+Result set:
+  999  Ferrari  Christian
+	  </screen></td></tr></tbody>
+	</table>
+	The source code is quite easy to understand:
+	<table frame="box">
+	  <thead><tr><td>[example05_pgsql.php source code]</td></tr></thead>
+	  <tbody><tr><td><screen>
+&lt;?php
+[...]
+	// Connecting, selecting database
+	$dbconn = pg_connect("dbname=testdb") 
+		or die("Could not connect: " . pg_last_error() . "\n");
+
+	// Performing SQL query
+	$query = 'DELETE FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error() . "\n");
+
+	// Performing SQL query
+	$query = "INSERT INTO authors VALUES(999, 'Ferrari', 'Christian')";
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error() . "\n");
+
+	// Performing SQL query
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+
+	echo "Using pgsql direct API\n";
+	echo "Result set:\n";
+	// Printing results in HTML
+	while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
+    		foreach ($line as $col_value) {
+        		echo "  $col_value";
+    		}
+    		echo "\n";
+	}
+
+	// Free resultset
+	pg_free_result($result);
+
+	// Closing connection
+	pg_close($dbconn);
+?&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	Special attention must be reserved to these rows:
+	<table frame="box">
+	  <thead><tr><td>[example05_pgsql.php source code (fragment)]</td></tr></thead>
+	  <tbody><tr><td><screen>
+        $dbconn = pg_connect("dbname=testdb") 
+                or die("Could not connect: " . pg_last_error() . "\n");
+	  </screen></td></tr></tbody>
+	</table>
+	because it will be changed to use LIXA as a Transaction Manager.
+      </para>
+      <para>
+	What we are performing now is similar to a supplied C language example; 
+	below there's a picture copied from <citation>LIXArg</citation>
+	(take a look to C example before this one).
+	<figure xml:id="develop5">
+	  <title>Deploy model of an example with PostgreSQL DBMS</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="../../images/LIXA_Development_5.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	Start the LIXA state server (if it was not yet started):
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~$ ps -ef|grep lixad|grep -v grep
+tiian@mojan:~$ sudo su - lixa
+[sudo] password for tiian: 
+lixa@mojan:~$ /opt/lixa/sbin/lixad --daemon
+lixa@mojan:~$ ps -ef|grep lixad|grep -v grep
+lixa      4164     1  0 20:56 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+lixa@mojan:~$ exit
+logout
+	  </screen></td></tr></tbody>
+	</table>
+	Set up <varname>LIXA_PROFILE</varname> environment variable to choose
+	a profile with PostgreSQL as Resource Manager and execute the PHP 
+	source code:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/src/lixa/ext/php/examples$ export LIXA_PROFILE=PQL_STAtiian@mojan:~/src/lixa/ext/php/examples$ echo $LIXA_PROFILE
+PQL_STA
+tiian@mojan:~/src/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example06_lixa_pgsql.php 
+tx_open(): 0
+tx_begin(): 0
+Result set:
+tx_commit(): 0
+tx_begin(): 0
+Result set:
+Result set:
+id=999, last_name=Ferrari, first_name=Christian
+tx_rollback(): 0
+Result set:
+tx_begin(): 0
+Result set:
+id=999, last_name=Ferrari, first_name=Christian
+tx_commit(): 0
+Result set:
+id=999, last_name=Ferrari, first_name=Christian
+tx_close(): 0
+	  </screen></td></tr></tbody>
+	</table>
+	read the source code, and the comments, to understand how to develop
+	an Application Program coordinated by LIXA Transaction Manager with
+	PostgreSQL Resource Manager:
+	<table frame="box">
+	  <thead><tr><td>[example06_lixa_pgsql.php source code]</td></tr></thead>
+	  <tbody><tr><td><screen>
+&lt;?php
+[...]
+	// open all the Resource Managers (PostgreSQL instance in this example)
+	$rc = tx_open();
+	print "tx_open(): $rc\n";
+
+	/* retrieve PostgreSQL connection from LIXA Transaction Manager instead
+	   of PostgreSQL directly: lixa// means:
+	   database name=lixa
+	   chooser type (pos/rmid)=none
+	   id (0, 1, 2, ...)=none
+	   and can be read as "retrieve the first available PostgreSQL 
+	   connection established by the Transaction Manager using the current
+	   LIXA profile" */
+	$dbconn = pg_connect("dbname=lixa//") 
+		or die("Could not connect: " . pg_last_error() . "\n");
+
+	// start a new transaction coordinated by LIXA Transaction Manager
+	$rc=tx_begin();
+	print "tx_begin(): $rc\n"; 
+
+	// remove all the rows from the table 
+	$query = 'DELETE FROM authors';
+	$result = pg_query($query) 
+		or die("DELETE failed: " . pg_last_error() . "\n");
+
+	// check the table content
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+	echo "Result set:\n";
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
+
+	// commit the transaction (DELETE FROM...)
+	$rc=tx_commit();
+	print "tx_commit(): $rc\n";
+
+	// start a new transaction coordinated by LIXA Transaction Manager
+	$rc=tx_begin();
+	print "tx_begin(): $rc\n"; 
+
+	// check the table content
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+	echo "Result set:\n";
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
+
+	// populate the table 
+	$query = "INSERT INTO authors VALUES(999, 'Ferrari', 'Christian')";
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error() . "\n");
+
+	// check the table content
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+	echo "Result set:\n";
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
+
+	// rollback the transaction (INSERT INTO...)
+	$rc=tx_rollback();
+	print "tx_rollback(): $rc\n";
+
+	// check the table content
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+	echo "Result set:\n";
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
+
+	// start a new transaction coordinated by LIXA Transaction Manager
+	$rc=tx_begin();
+	print "tx_begin(): $rc\n"; 
+
+	// populate the table 
+	$query = "INSERT INTO authors VALUES(999, 'Ferrari', 'Christian')";
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error() . "\n");
+
+	// check the table content
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+	echo "Result set:\n";
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
+
+	// commit the transaction (DELETE FROM...)
+	$rc=tx_commit();
+	print "tx_commit(): $rc\n";
+
+	// check the table content
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+	echo "Result set:\n";
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
+
+	// release resultset
+	pg_free_result($result);
+
+	/* release PHP handler for dbconn (it does not close database 
+	   connection because it was opened by LIXA Transaction Manager */
+	pg_close($dbconn);
+
+	// close al the Resource Managers
+	$rc = tx_close();
+	print "tx_close(): $rc\n";
+?&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	I suggest you to verify the table is really populated and the debug
+	messages produced by the above program are truthful:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>@@@
+tiian@mojan:~$ psql testdb
+psql (8.4.11)
+Digita "help" per aiuto.
+
+testdb=> SELECT * FROM authors;
+ id  | last_name | first_name 
+-----+-----------+------------
+ 999 | Ferrari   | Christian
+(1 riga)
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
     </section>
   </section>
 </chapter>
