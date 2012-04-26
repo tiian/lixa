@@ -37,6 +37,8 @@
 	$result = pg_query($query) 
 		or die("Query failed: " . pg_last_error(). "\n");
 
+	echo "Using pgsql direct API\n";
+	echo "Result set:\n";
 	// Printing results in HTML
 	while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
     		foreach ($line as $col_value) {
