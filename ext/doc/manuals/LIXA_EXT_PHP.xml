@@ -982,7 +982,7 @@ mysql&gt; SELECT * FROM authors;
 	</table>
       </para>
     </section>
-    <section>
+    <section xml:id="connection_string_syntax">
       <title>MySQL (mysqli) connection string syntax</title>
       <para>
 	As explained in the previous example (see
@@ -1544,10 +1544,10 @@ Fatal error: Call to a member function fetch_assoc() on a non-object in /home/ti
 	<table frame="box">
 	  <thead><tr><td>[Terminal shell session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@mojan:~/src/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example05_pgsql.php 
+tiian@mojan:~/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example05_pgsql.php 
 Using pgsql direct API
 Result set:
-  999  Ferrari  Christian
+id=999, last_name=Ferrari, first_name=Christian
 	  </screen></td></tr></tbody>
 	</table>
 	The source code is quite easy to understand:
@@ -1555,45 +1555,41 @@ Result set:
 	  <thead><tr><td>[example05_pgsql.php source code]</td></tr></thead>
 	  <tbody><tr><td><screen>
 &lt;?php
-[...]
-	// Connecting, selecting database
+	// Connect to database
 	$dbconn = pg_connect("dbname=testdb") 
 		or die("Could not connect: " . pg_last_error() . "\n");
 
-	// Performing SQL query
+	// Clean table
 	$query = 'DELETE FROM authors';
 	$result = pg_query($query) 
 		or die("Query failed: " . pg_last_error() . "\n");
 
-	// Performing SQL query
+	// Insert a row in the table
 	$query = "INSERT INTO authors VALUES(999, 'Ferrari', 'Christian')";
 	$result = pg_query($query) 
 		or die("Query failed: " . pg_last_error() . "\n");
 
-	// Performing SQL query
+	// Perform SQL query
 	$query = 'SELECT * FROM authors';
 	$result = pg_query($query) 
 		or die("Query failed: " . pg_last_error(). "\n");
 
+	// Print query output
 	echo "Using pgsql direct API\n";
 	echo "Result set:\n";
-	// Printing results in HTML
-	while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
-    		foreach ($line as $col_value) {
-        		echo "  $col_value";
-    		}
-    		echo "\n";
-	}
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
 
 	// Free resultset
 	pg_free_result($result);
 
-	// Closing connection
+	// Close connection
 	pg_close($dbconn);
 ?&gt;
 	  </screen></td></tr></tbody>
 	</table>
-	Special attention must be reserved to these rows:
+	Special attention must be reserved to this row:
 	<table frame="box">
 	  <thead><tr><td>[example05_pgsql.php source code (fragment)]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -1608,7 +1604,7 @@ Result set:
 	below there's a picture copied from <citation>LIXArg</citation>
 	(take a look to C example before this one).
 	<figure xml:id="develop5">
-	  <title>Deploy model of an example with PostgreSQL DBMS</title>
+	  <title>Deploy model of an example with PostgreSQL (example5_pql => example06_lixa_pgsql.php)</title>
 	  <mediaobject>
 	    <imageobject>
 	      <imagedata fileref="../../images/LIXA_Development_5.png"/>
@@ -1635,9 +1631,10 @@ logout
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@mojan:~/src/lixa/ext/php/examples$ export LIXA_PROFILE=PQL_STAtiian@mojan:~/src/lixa/ext/php/examples$ echo $LIXA_PROFILE
+tiian@mojan:~/lixa/ext/php/examples$ export LIXA_PROFILE=PQL_STA
+tiian@mojan:~/lixa/ext/php/examples$ echo $LIXA_PROFILE
 PQL_STA
-tiian@mojan:~/src/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example06_lixa_pgsql.php 
+tiian@mojan:~/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example06_lixa_pgsql.php 
 tx_open(): 0
 tx_begin(): 0
 Result set:
@@ -1657,14 +1654,14 @@ id=999, last_name=Ferrari, first_name=Christian
 tx_close(): 0
 	  </screen></td></tr></tbody>
 	</table>
-	read the source code, and the comments, to understand how to develop
+	take a look to the source code, and the comments, 
+	to understand how to develop
 	an Application Program coordinated by LIXA Transaction Manager with
 	PostgreSQL Resource Manager:
 	<table frame="box">
 	  <thead><tr><td>[example06_lixa_pgsql.php source code]</td></tr></thead>
 	  <tbody><tr><td><screen>
 &lt;?php
-[...]
 	// open all the Resource Managers (PostgreSQL instance in this example)
 	$rc = tx_open();
 	print "tx_open(): $rc\n";
@@ -1777,7 +1774,10 @@ tx_close(): 0
 	pg_free_result($result);
 
 	/* release PHP handler for dbconn (it does not close database 
-	   connection because it was opened by LIXA Transaction Manager */
+	   connection because it was opened by LIXA Transaction Manager).
+	   You must call "pg_close(...)" before "tx_close()" to avoid
+	   automatic clean-up at script end (it might fail due to dirty
+	   memory if you didn't perform the correct close sequence */
 	pg_close($dbconn);
 
 	// close al the Resource Managers
@@ -1790,19 +1790,117 @@ tx_close(): 0
 	messages produced by the above program are truthful:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	  <tbody><tr><td><screen>@@@
-tiian@mojan:~$ psql testdb
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ psql testdb
 psql (8.4.11)
-Digita "help" per aiuto.
+Type "help" for help.
 
 testdb=> SELECT * FROM authors;
  id  | last_name | first_name 
 -----+-----------+------------
  999 | Ferrari   | Christian
-(1 riga)
+(1 rows)
 	  </screen></td></tr></tbody>
 	</table>
+	Example <filename>example06_lixa_pgsql.php</filename> should be
+	deeply understood for three main reasons:
+	<orderedlist numeration='arabic'>
+	  <listitem><para>
+	      the syntax of the connection string passed to function
+	      <function>pg_connect</function>
+	  </para></listitem>
+	  <listitem><para>
+	      the absence of parameter 
+	      <parameter class='function'>persistent</parameter> when calling
+	      function <function>pg_connect</function>
+	  </para></listitem>
+	  <listitem><para>
+	      the close sequence with both <function>pg_close(...)</function>
+	      and <function>tx_close()</function> functions
+	  </para></listitem>
+	</orderedlist>
       </para>
+      <section>
+	<title><function>pg_connect</function> connection string syntax</title>
+	<para>
+	  If you want to use a database connection managed by LIXA Transaction
+	  Manager you have to:
+	  <orderedlist numeration='arabic'>
+	    <listitem><para>
+		call function <function>tx_open()</function>: LIXA Transaction
+		Manager will open all the resource managers specified by the
+		current <varname>LIXA_PROFILE</varname> profile
+		(see file <filename>/opt/lixa/etc/lixac_conf.xml</filename>)
+	    </para></listitem>
+	    <listitem><para>
+		call function <function>pg_connect</function> using a 
+		connection string with the syntax explained in
+		<xref linkend="connection_string_syntax"/>; the same rules
+		are true for both MySQL and PostgreSQL because they share the
+		same LIXA provided XA switch file
+	    </para></listitem>
+	    <listitem><para>
+		avoid to use 
+		<parameter class='function'>persistent</parameter> parameter
+		when calling <function>pg_connect(...)</function> function
+		because persistent connections managed by PostgreSQL database
+		driver conflict with LIXA's XA implementation
+	    </para></listitem>
+	  </orderedlist>
+	</para>
+      </section>
+      <section>
+	<title>the <function>pg_close(...)</function>, <function>tx_close()</function> closing sequence</title>
+	<para>
+	  The implementation of PostgreSQL <package>pgsql</package> driver is
+	  different than MySQL <package>mysqli</package> driver and LIXA
+	  patch tries to change as less as possible of the original code.
+	  <package>pgsql</package> driver saves only the handler (pointer)
+	  returned by <function>PQconnectdb</function>, while 
+	  <package>mysqli</package> saves a structure with some additional 
+	  information. In the case of <package>mysqli</package>, LIXA patch
+	  adds a flag to identify the database connections provided by the
+	  LIXA Transaction Manager.
+	  With <package>pgsql</package> the same approach would have refactored
+	  most of the code and a different approach was choosen:
+	  <function>pg_close(...)</function> calls 
+	  <function>lixa_pq_is_managed_conn(...)</function> to understand the
+	  connection type. If it was a LIXA managed connection,
+	  <function>pg_close(...)</function> would avoid 
+	  <function>PQfinish(...)</function>, but it would remove the 
+	  connection from the pool. The program calls 
+	  <function>tx_close()</function> later, and this function will
+	  call <function>PQfinish(...)</function> to close the PostgreSQL
+	  database connection.
+	</para>
+	<warning>
+	  <para>
+	    If you didn't call <function>pg_close(...)</function>, at 
+	    script end the automatic clean-up routine would try to close the
+	    PostgreSQL connection because it is stored in the connection pool, 
+	    but it was already closed by
+	    <function>tx_close()</function> and you could catch unexpected
+	    results like segmentation faults and so on.
+	  </para>
+	</warning>
+	<important>
+	  <para>
+	    Use these sequences to avoid unexpected results:
+	    <itemizedlist mark='bullet'>
+	      <listitem><para>
+		  first <function>tx_open()</function> and then
+		  <function>pg_connect(...)</function> when connecting to
+		  PostgreSQL under the control of LIXA Transaction Manager
+	      </para></listitem>
+	      <listitem><para>
+		  first <function>pg_close(...)</function> and then
+		  <function>tx_close()</function> when disconnecting from
+		  PostgreSQL under the control of LIXA Transaction Manager
+	      </para></listitem>
+	    </itemizedlist>
+	  </para>
+	</important>
+      </section>
     </section>
   </section>
 </chapter>

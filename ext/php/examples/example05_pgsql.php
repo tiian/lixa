@@ -18,39 +18,36 @@
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-	// Connecting, selecting database
+	// Connect to database
 	$dbconn = pg_connect("dbname=testdb") 
 		or die("Could not connect: " . pg_last_error() . "\n");
 
-	// Performing SQL query
+	// Clean table
 	$query = 'DELETE FROM authors';
 	$result = pg_query($query) 
 		or die("Query failed: " . pg_last_error() . "\n");
 
-	// Performing SQL query
+	// Insert a row in the table
 	$query = "INSERT INTO authors VALUES(999, 'Ferrari', 'Christian')";
 	$result = pg_query($query) 
 		or die("Query failed: " . pg_last_error() . "\n");
 
-	// Performing SQL query
+	// Perform SQL query
 	$query = 'SELECT * FROM authors';
 	$result = pg_query($query) 
 		or die("Query failed: " . pg_last_error(). "\n");
 
+	// Print query output
 	echo "Using pgsql direct API\n";
 	echo "Result set:\n";
-	// Printing results in HTML
-	while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
-    		foreach ($line as $col_value) {
-        		echo "  $col_value";
-    		}
-    		echo "\n";
-	}
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
 
 	// Free resultset
 	pg_free_result($result);
 
-	// Closing connection
+	// Close connection
 	pg_close($dbconn);
 ?>
 

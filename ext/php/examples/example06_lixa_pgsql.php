@@ -130,7 +130,10 @@
 	pg_free_result($result);
 
 	/* release PHP handler for dbconn (it does not close database 
-	   connection because it was opened by LIXA Transaction Manager */
+	   connection because it was opened by LIXA Transaction Manager).
+	   You must call "pg_close(...)" before "tx_close()" to avoid
+	   automatic clean-up at script end (it might fail due to dirty
+	   memory if you didn't perform the correct close sequence */
 	pg_close($dbconn);
 
 	// close al the Resource Managers
