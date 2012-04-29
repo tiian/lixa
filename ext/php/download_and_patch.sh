@@ -34,7 +34,7 @@ then
 		exit 1
 	fi
 else
-	PHP_VERSION="5.4.0"
+	PHP_VERSION="5.4.1"
 fi
 echo "PHP $PHP_VERSION will be downloaded..."
 
@@ -176,7 +176,7 @@ fi
 
 # Cleaning build environment
 echo "Removing $DIR_NAME/configure and some stuff..."
-rm -vf configure autom4te.cache/*
+rm -vf $DIR_NAME/configure $DIR_NAME/autom4te.cache/*
 
 # Creating configure again
 echo "Creating new configure script..."
