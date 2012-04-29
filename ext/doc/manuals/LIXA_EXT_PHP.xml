@@ -81,44 +81,63 @@ tiian@mojan:~/lixa/ext/php$ ls -la download_and_patch.sh
       <table frame="box">
 	<thead><tr><td>[Shell terminal session]</td></tr></thead>
 	<tbody><tr><td><screen>
-tiian@ubuntu:~/lixa/ext/php$ ./download_and_patch.sh
-PHP 5.4.0 will be downloaded...
+tiian@mojan:~/lixa/ext/php$ ./download_and_patch.sh 
+PHP 5.4.1 will be downloaded...
 Checking if wget command is available... wget is /usr/bin/wget
+Checking if patch command is available... patch is /usr/bin/patch
 Checking if bunzip2 is available... bunzip2 is /bin/bunzip2
---22:19:05--  http://docs.php.net/get/php-5.4.0.tar.bz2/from/docs.php.net/mirror
-           => `php-5.4.0.tar.bz2'
+--2012-04-29 22:47:03--  http://docs.php.net/get/php-5.4.1.tar.bz2/from/docs.php.net/mirror
 Resolving docs.php.net... 213.175.195.123
 Connecting to docs.php.net|213.175.195.123|:80... connected.
 HTTP request sent, awaiting response... 302 Found
-Location: http://docs.php.net/distributions/php-5.4.0.tar.bz2 [following]
---22:19:05--  http://docs.php.net/distributions/php-5.4.0.tar.bz2
-           => `php-5.4.0.tar.bz2'
+Location: http://docs.php.net/distributions/php-5.4.1.tar.bz2 [following]
+--22:19:05--  http://docs.php.net/distributions/php-5.4.1.tar.bz2
+           =&gt; `php-5.4.1.tar.bz2'
 Connecting to docs.php.net|213.175.195.123|:80... connected.
 HTTP request sent, awaiting response... 200 OK
-Length: 11,439,508 (11M) [application/octet-stream]
+Length: 11145742 (11M) [application/octet-stream]
+Salvataggio in: "php-5.4.1.tar.bz2"
 
-100%[====================================>] 11,439,508   837.51K/s    ETA 00:00
+100%[======================================&gt;] 11.145.742   681K/s   in 15s     
 
-22:19:19 (819.29 KB/s) - `php-5.4.0.tar.bz2' saved [11439508/11439508]
+2012-04-29 22:47:18 (743 KB/s) - "php-5.4.1.tar.bz2" salvato [11145742/11145742]
 
 Deflating PHP source code...
+Creating LIXA extension directory...
+mkdir: directory "php-5.4.1/ext/lixa" created
+"config.m4" -&gt; "php-5.4.1/ext/lixa/config.m4"
+"lixa.c" -&gt; "php-5.4.1/ext/lixa/lixa.c"
+"php_lixa.h" -&gt; "php-5.4.1/ext/lixa/php_lixa.h"
+mkdir: directory "php-5.4.1/ext/lixa/tests" created
+"tests/Makefile" -&gt; "php-5.4.1/ext/lixa/tests/Makefile"
+"tests/Makefile.am" -&gt; "php-5.4.1/ext/lixa/tests/Makefile.am"
+"tests/Makefile.in" -&gt; "php-5.4.1/ext/lixa/tests/Makefile.in"
+"tests/lixa_001.phpt" -&gt; "php-5.4.1/ext/lixa/tests/lixa_001.phpt"
+"tests/lixa_002.phpt" -&gt; "php-5.4.1/ext/lixa/tests/lixa_002.phpt"
+"tests/lixa_011.phpt" -&gt; "php-5.4.1/ext/lixa/tests/lixa_011.phpt"
+"tests/lixa_012.phpt" -&gt; "php-5.4.1/ext/lixa/tests/lixa_012.phpt"
+"tests/lixa_021.phpt" -&gt; "php-5.4.1/ext/lixa/tests/lixa_021.phpt"
+"tests/lixa_022.phpt" -&gt; "php-5.4.1/ext/lixa/tests/lixa_022.phpt"
+"tests/lixa_023.phpt" -&gt; "php-5.4.1/ext/lixa/tests/lixa_023.phpt"
 Checking if the downloaded PHP source code can be patched...
-File lixa-php-5.4.0-patch.diff exists, trying patch command...
-patching file php-5.4.0/ext/mysqli/mysqli_api.c
-patching file php-5.4.0/ext/mysqli/mysqli_nonapi.c
-patching file php-5.4.0/ext/mysqli/php_mysqli_structs.h
-patching file php-5.4.0/ext/lixa/config.m4
+File lixa-php-5.4.1-patch.diff exists, trying patch command...
+patching file php-5.4.1/ext/mysqli/mysqli_api.c
+patching file php-5.4.1/ext/mysqli/mysqli_nonapi.c
+patching file php-5.4.1/ext/mysqli/php_mysqli_structs.h
+patching file php-5.4.1/ext/pgsql/pgsql.c
 Patching PHP source code...
-patching file php-5.4.0/ext/mysqli/mysqli_api.c
-patching file php-5.4.0/ext/mysqli/mysqli_nonapi.c
-patching file php-5.4.0/ext/mysqli/php_mysqli_structs.h
-patching file php-5.4.0/ext/lixa/config.m4
+patching file php-5.4.1/ext/mysqli/mysqli_api.c
+patching file php-5.4.1/ext/mysqli/mysqli_nonapi.c
+patching file php-5.4.1/ext/mysqli/php_mysqli_structs.h
+patching file php-5.4.1/ext/pgsql/pgsql.c
 PHP source code successfully patched!
-Removing php-5.4.0/configure and some stuff...
+Removing php-5.4.1/configure and some stuff...
+"php-5.4.1/configure" removed
 Creating new configure script...
 Forcing buildconf
+Removing configure caches
 buildconf: checking installation...
-buildconf: autoconf version 2.61 (ok)
+buildconf: autoconf version 2.65 (ok)
 rebuilding configure
 rebuilding main/php_config.h.in
 Checking configure recognize LIXA extension...
@@ -126,7 +145,7 @@ Checking configure recognize LIXA extension...
   --enable-lixa-swig      Generate LIXA wrapper using SWIG
 
 ************************************************************************
-  PHP source code in directory php-5.4.0 is ready for build and deploy;
+  PHP source code in directory php-5.4.1 is ready for build and deploy;
 
   use --with-lixa=/opt/lixa/bin/lixa-config (or different path if you
   not using LIXA default path) to enable LIXA extension for PHP
@@ -204,8 +223,8 @@ Checking configure recognize LIXA extension...
       <table frame="box">
 	<thead><tr><td>[Shell terminal session]</td></tr></thead>
 	<tbody><tr><td><screen>
-tiian@mojan:~/lixa/ext/php$ cd php-5.4.0
-tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
+tiian@mojan:~/lixa/ext/php$ cd php-5.4.1
+tiian@mojan:~/lixa/ext/php/php-5.4.1$ nice ./configure --enable-debug \
 > --enable-maintainer-zts --enable-cgi --enable-cli --enable-shared \
 > --with-mysqli=/usr/bin/mysql_config --with-pgsql \
 > --with-oci8=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server \
@@ -258,8 +277,8 @@ tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice ./configure --enable-debug \
       <table frame="box">
 	<thead><tr><td>[Shell terminal session]</td></tr></thead>
 	<tbody><tr><td><screen>
-tiian@mojan:~/lixa/ext/php$ cd php-5.4.0
-tiian@mojan:~/lixa/ext/php/php-5.4.0$ nice make
+tiian@mojan:~/lixa/ext/php$ cd php-5.4.1
+tiian@mojan:~/lixa/ext/php/php-5.4.1$ nice make
 [...]
 Generating phar.php
 Generating phar.phar
@@ -279,7 +298,7 @@ Don't forget to run 'make test'.
       <table frame="box">
 	<thead><tr><td>[Shell terminal session]</td></tr></thead>
 	<tbody><tr><td><screen>
-tiian@ubuntu:~/lixa/ext/php/php-5.4.0$ sudo nice make install
+tiian@ubuntu:~/lixa/ext/php/php-5.4.1$ sudo nice make install
 [sudo] password for tiian:
 Installing PHP CLI binary:        /opt/php-5.4-lixa/bin/
 Installing PHP CLI man page:      /opt/php-5.4-lixa/php/man/man1/
@@ -300,7 +319,7 @@ Installing PEAR environment:      /opt/php-5.4-lixa/lib/php/
 [PEAR] PEAR           - installed: 1.9.4
 Wrote PEAR system config file at: /opt/php-5.4-lixa/etc/pear.conf
 You may want to add: /opt/php-5.4-lixa/lib/php to your php.ini include_path
-/home/tiian/lixa/ext/php/php-5.4.0/build/shtool install -c ext/phar/phar.phar /opt/php-5.4-lixa/bin
+/home/tiian/lixa/ext/php/php-5.4.1/build/shtool install -c ext/phar/phar.phar /opt/php-5.4-lixa/bin
 ln -s -f /opt/php-5.4-lixa/bin/phar.phar /opt/php-5.4-lixa/bin/phar
 Installing PDO headers:          /opt/php-5.4-lixa/include/php/ext/pdo/
 	</screen></td></tr></tbody>
@@ -326,35 +345,38 @@ Installing PDO headers:          /opt/php-5.4-lixa/include/php/ext/pdo/
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu:~/lixa/ext/php/php-5.4.0$ TEST_PHP_EXECUTABLE=/opt/php-5.4-lixa/bin/php /opt/php-5.4-lixa/bin/php run-tests.php ext/lixa/tests/
+tiian@mojan:~/lixa/ext/php/php-5.4.1$ TEST_PHP_EXECUTABLE=/opt/php-5.4-lixa/bin/php /opt/php-5.4-lixa/bin/php run-tests.php ext/lixa/tests/
 
 =====================================================================
-PHP         : /tmp/php-5.4-lixa/bin/php 
+PHP         : /opt/php-5.4-lixa/bin/php 
 PHP_SAPI    : cli
-PHP_VERSION : 5.4.0
+PHP_VERSION : 5.4.1
 ZEND_VERSION: 2.4.0
-PHP_OS      : Linux - Linux mojan 2.6.32-40-generic #87-Ubuntu SMP Mon Mar 5 20:26:31 UTC 2012 i686
-INI actual  : /tmp/lixa-0.9.0/ext/php/php-5.4.0
+PHP_OS      : Linux - Linux mojan 2.6.32-41-generic #88-Ubuntu SMP Thu Mar 29 13:08:43 UTC 2012 i686
+INI actual  : /home/tiian/src/lixa/ext/php/php-5.4.1
 More .INIs  :  
-CWD         : /tmp/lixa-0.9.0/ext/php/php-5.4.0
+CWD         : /home/tiian/src/lixa/ext/php/php-5.4.1
 Extra dirs  : 
 VALGRIND    : Not used
 =====================================================================
 Running selected tests.
 PASS LIXA T.M. availability - basic test: the T.M. is up and running [ext/lixa/tests/lixa_001.phpt] 
 PASS LIXA T.M. trivial commit - basic test: a trivial commit transaction [ext/lixa/tests/lixa_002.phpt] 
-PASS LIXA mysqli availability - basic test: MySQL is reachable with mysqli [ext/lixa/tests/lixa_003.phpt] 
+PASS LIXA mysqli availability - basic test: MySQL is reachable with mysqli [ext/lixa/tests/lixa_011.phpt] 
 PASS LIXA mysqli integration - a simple transaction using LIXA and MySQL (mysqli
-driver) [ext/lixa/tests/lixa_004.phpt] 
+driver) [ext/lixa/tests/lixa_012.phpt] 
+PASS LIXA PostgreSQL availability - basic test: PostgreSQL is reachable [ext/lixa/tests/lixa_021.phpt] 
+PASS LIXA pgsql integration - a simple transaction using LIXA and PostgreSQL (pgsql driver) [ext/lixa/tests/lixa_022.phpt] 
+PASS LIXA pgsql mysqli integration - a simple transaction using LIXA, PostgreSQL (pgsql driver) and MySQL (mysqli driver) [ext/lixa/tests/lixa_023.phpt] 
 =====================================================================
-Number of tests :    4                 4
+Number of tests :    7                 7
 Tests skipped   :    0 (  0.0%) --------
 Tests warned    :    0 (  0.0%) (  0.0%)
 Tests failed    :    0 (  0.0%) (  0.0%)
 Expected fail   :    0 (  0.0%) (  0.0%)
-Tests passed    :    4 (100.0%) (100.0%)
+Tests passed    :    7 (100.0%) (100.0%)
 ---------------------------------------------------------------------
-Time taken      :    1 seconds
+Time taken      :    2 seconds
 =====================================================================
 	  </screen></td></tr></tbody>
 	</table>
@@ -1901,6 +1923,397 @@ testdb=> SELECT * FROM authors;
 	  </para>
 	</important>
       </section>
+    </section>
+    <section xml:id="An_example_with_MySQL_and_PostgreSQL">
+      <title>An example with MySQL (mysqli driver) &amp; PostgreSQL (pgsql driver)</title>
+      <important>
+	<para>
+	  The example shown below need the set up explained in 
+	  <citation>LIXArg</citation> (see chapter <quote>Development/An example
+	    with MySQL &amp; PostgreSQL</quote>).
+	  You won't be able to execute the following example without right
+	  configured MySQL &amp; PostgreSQL databases.
+	</para>
+      </important>
+      <para>
+	Before trying LIXA, MySQL and PostgreSQL together you should try the
+	examples shown in the previous paragraphs: see
+	<xref linkend="An_example_with_MySQL"/> and
+	<xref linkend="An_example_with_PostgreSQL"/>.
+      </para>
+      <para>
+	What we are performing now is similar to a supplied C language example; 
+	below there's a picture copied from <citation>LIXArg</citation>
+	(take a look to C example before this one).
+	<figure xml:id="develop9">
+	  <title>Deploy model of an example with MySQL &amp; PostgreSQL (example9_mys_pql => example07_lixa_mysqli_pgsql.php)</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="../../images/LIXA_Development_9.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	Start the LIXA state server (if it was not yet started):
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~$ ps -ef|grep lixad|grep -v grep
+tiian@mojan:~$ sudo su - lixa
+[sudo] password for tiian: 
+lixa@mojan:~$ /opt/lixa/sbin/lixad --daemon
+lixa@mojan:~$ ps -ef|grep lixad|grep -v grep
+lixa      4164     1  0 20:56 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+lixa@mojan:~$ exit
+logout
+	  </screen></td></tr></tbody>
+	</table>
+	Set up <varname>LIXA_PROFILE</varname> environment variable to choose
+	a profile with MySQL and PostgreSQL as Resource Managers and 
+	execute the PHP source code:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ export LIXA_PROFILE=MYS_STA_PQL_STA
+tiian@mojan:~/lixa/ext/php/examples$ echo $LIXA_PROFILE
+MYS_STA_PQL_STA
+tiian@mojan:~/lixa/ext/php/examples$ /opt/php-5.4-lixa/bin/php example07_lixa_mysqli_pgsql.php 
+tx_open(): 0
+tx_begin(): 0
+DELETE FROM authors;
+Result set (MySQL):
+Result set (PostgreSQL):
+tx_commit(): 0
+tx_begin(): 0
+Result set (MySQL):
+Result set (PostgreSQL):
+INSERT INTO authors...
+Result set (MySQL):
+id=969, last_name=Ferrari, first_name=Christian
+Result set (PostgreSQL):
+id=999, last_name=Ferrari, first_name=Christian
+tx_rollback(): 0
+Result set (MySQL):
+Result set (PostgreSQL):
+tx_begin(): 0
+INSERT INTO authors...
+Result set (MySQL):
+id=969, last_name=Ferrari, first_name=Christian
+Result set (PostgreSQL):
+id=999, last_name=Ferrari, first_name=Christian
+tx_commit(): 0
+Result set (MySQL):
+id=969, last_name=Ferrari, first_name=Christian
+Result set (PostgreSQL):
+id=999, last_name=Ferrari, first_name=Christian
+tx_close(): 0
+	  </screen></td></tr></tbody>
+	</table>
+	take a look to the source code, and the comments, 
+	to understand how to develop
+	an Application Program coordinated by LIXA Transaction Manager with
+	MySQL &amp; PostgreSQL as Resource Managers:
+	<table frame="box">
+	  <thead><tr><td>[example07_lixa_mysqli_pgsql.php source code]</td></tr></thead>
+	  <tbody><tr><td><screen>
+&lt;?php	
+	/* open all the Resource Managers (MySQL &amp; PostgreSQL instances 
+	   in this example) */
+	$rc=tx_open();
+	print "tx_open(): $rc\n"; 
+
+	/* retrieve database connections from LIXA Transaction Manager instead
+	   of MySQL/PostgreSQL directly: lixa// means:
+	   database name=lixa
+	   chooser type (pos/rmid)=none
+	   id (0, 1, 2, ...)=none
+	   and can be read as "retrieve the first available MySQL/PostgreSQL
+	   connection established by the Transaction Manager
+	   using the current LIXA profile" */
+	// retrieve first available MySQL connection
+	$mysqli = new mysqli("localhost", "lixa", "", "lixa//", 3306);
+	if ($mysqli-&gt;connect_errno)
+		echo "Failed to connect to MySQL: (" . $mysqli-&gt;connect_errno .
+			") " . $mysqli-&gt;connect_error . "\n";
+	// retrieve first available PostgreSQL connection
+	$dbconn = pg_connect("dbname=lixa//") 
+		or die("Could not connect: " . pg_last_error() . "\n");
+
+	// start a new transaction coordinated by LIXA
+	$rc=tx_begin();
+	print "tx_begin(): $rc\n"; 
+
+	// remove all the rows from MySQL table
+	print "DELETE FROM authors;\n";
+	if (!$mysqli-&gt;query("DELETE FROM authors;"))
+		echo "DELETE failed: (" . $mysqli-&gt;errno . ") " . 
+			$mysqli-&gt;error;
+	// remove all the rows from PostgreSQL table 
+	$query = 'DELETE FROM authors';
+	$result = pg_query($query) 
+		or die("DELETE failed: " . pg_last_error() . "\n");
+
+	// check the table content (MySQL)
+	$mysqli-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+	$res = $mysqli-&gt;use_result();
+	echo "Result set (MySQL):\n";
+	while ($row = $res-&gt;fetch_assoc())
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] .
+		", first_name=" . $row['first_name'] . "\n";
+	// check the table content (PostgreSQL)
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+	echo "Result set (PostgreSQL):\n";
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
+
+	// commit the transaction (DELETE FROM ...)
+	$rc=tx_commit();
+	print "tx_commit(): $rc\n"; 
+
+	// start a new transaction coordinated by LIXA
+	$rc=tx_begin();
+	print "tx_begin(): $rc\n"; 
+
+	// check the table content (MySQL)
+	$mysqli-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+	$res = $mysqli-&gt;use_result();
+	echo "Result set (MySQL):\n";
+	while ($row = $res-&gt;fetch_assoc())
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . ", first_name=" . $row['first_name'] . "\n";
+	// check the table content (PostgreSQL)
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+	echo "Result set (PostgreSQL):\n";
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
+
+	// populate the table (MySQL)
+	print "INSERT INTO authors...\n";
+	if (!$mysqli-&gt;query("INSERT INTO authors VALUES(969,'Ferrari','Christian');"))
+		echo "INSERT failed: (" . $mysqli-&gt;errno . ") " . 
+			$mysqli-&gt;error;
+	// populate the table (PostgreSQL)
+	$query = "INSERT INTO authors VALUES(999, 'Ferrari', 'Christian')";
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error() . "\n");
+
+	// check the table content (MySQL)
+	$mysqli-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+	$res = $mysqli-&gt;use_result();
+	echo "Result set (MySQL):\n";
+	while ($row = $res-&gt;fetch_assoc())
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] .
+			", first_name=" . $row['first_name'] . "\n";
+	// check the table content (PostgreSQL)
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+	echo "Result set (PostgreSQL):\n";
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
+
+	// rollback the transaction (INSERT INTO ...)
+	$rc=tx_rollback();
+	print "tx_rollback(): $rc\n"; 
+
+	// check the table content (MySQL)
+	$mysqli-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+	$res = $mysqli-&gt;use_result();
+	echo "Result set (MySQL):\n";
+	while ($row = $res-&gt;fetch_assoc())
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] .
+			", first_name=" . $row['first_name'] . "\n";
+	// check the table content (PostgreSQL)
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+	echo "Result set (PostgreSQL):\n";
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
+
+	// start a new transaction coordinated by LIXA
+	$rc=tx_begin();
+	print "tx_begin(): $rc\n"; 
+
+	// populate the table (MySQL)
+	print "INSERT INTO authors...\n";
+	if (!$mysqli-&gt;query("INSERT INTO authors VALUES(969,'Ferrari','Christian');"))
+		echo "INSERT failed: (" . $mysqli-&gt;errno . ") " .
+			$mysqli-&gt;error;
+	// populate the table (PostgreSQL)
+	$query = "INSERT INTO authors VALUES(999, 'Ferrari', 'Christian')";
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error() . "\n");
+	
+	// check the table content (MySQL)
+	$mysqli-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+	$res = $mysqli-&gt;use_result();
+	echo "Result set (MySQL):\n";
+	while ($row = $res-&gt;fetch_assoc())
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] .
+			", first_name=" . $row['first_name'] . "\n";
+	// check the table content (PostgreSQL)
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+	echo "Result set (PostgreSQL):\n";
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
+
+	// commit the transaction (INSERT INTO ...)
+	$rc=tx_commit();
+	print "tx_commit(): $rc\n"; 
+
+	// check the table content (MySQL)
+	$mysqli-&gt;real_query("SELECT id,last_name,first_name FROM authors ORDER BY id DESC;");
+	$res = $mysqli-&gt;use_result();
+	echo "Result set (MySQL):\n";
+	while ($row = $res-&gt;fetch_assoc())
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] .
+			", first_name=" . $row['first_name'] . "\n";
+	// check the table content (PostgreSQL)
+	$query = 'SELECT * FROM authors';
+	$result = pg_query($query) 
+		or die("Query failed: " . pg_last_error(). "\n");
+	echo "Result set (PostgreSQL):\n";
+	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC))
+		echo "id=" . $row['id'] . ", last_name=" . $row['last_name'] . 
+			", first_name=" . $row['first_name'] . "\n";
+
+	// release resultset
+	pg_free_result($result);
+
+	/* release PHP handler for dbconn (it does not close database 
+	   connection because it was opened by LIXA Transaction Manager */
+	pg_close($dbconn);
+
+	// close all the Resource Managers
+	$rc=tx_close();
+	print "tx_close(): $rc\n"; 
+?&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	I suggest you to verify the tables are really populated and the debug
+	messages produced by the above program are truthful.
+      </para>
+      <para>
+	Check MySQL <quote>authors</quote> table:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ mysql -h localhost -u lixa lixa
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 35
+Server version: 5.1.62-0ubuntu0.10.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> SELECT * FROM authors;
++-----+-----------+------------+
+| id  | last_name | first_name |
++-----+-----------+------------+
+| 969 | Ferrari   | Christian  |
++-----+-----------+------------+
+1 row in set (0.00 sec)
+	  </screen></td></tr></tbody>
+	</table>
+	Check PostgreSQL <quote>authors</quote> table:	
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@mojan:~/lixa/ext/php/examples$ psql testdb
+psql (8.4.11)
+Type "help" for help.
+
+testdb=> SELECT * FROM authors;
+ id  | last_name | first_name 
+-----+-----------+------------
+ 999 | Ferrari   | Christian
+(1 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	Example <filename>example07_lixa_mysqli_pgsql.php</filename>
+	does not add specific stuff if compared with the examples previously
+	described:
+	<filename>example03_lixa_mysqli.php</filename> and
+	<filename>example06_lixa_pgsql.php</filename>.
+	It <emphasis>combines two different Resource Managers</emphasis> 
+	and perform a really distributed transaction.
+	If you already analyzed the source code of the previous examples,
+	the only interesting point should be this piece of code:
+	<screen>
+        /* retrieve database connections from LIXA Transaction Manager instead
+           of MySQL/PostgreSQL directly: lixa// means:
+           database name=lixa
+           chooser type (pos/rmid)=none
+           id (0, 1, 2, ...)=none
+           and can be read as "retrieve the first available MySQL/PostgreSQL
+           connection established by the Transaction Manager
+           using the current LIXA profile" */
+        // retrieve first available MySQL connection
+        $mysqli = new mysqli("localhost", "lixa", "", "lixa//", 3306);
+        if ($mysqli-&gt;connect_errno)
+                echo "Failed to connect to MySQL: (" . $mysqli-&gt;connect_errno .
+                        ") " . $mysqli-&gt;connect_error . "\n";
+        // retrieve first available PostgreSQL connection
+        $dbconn = pg_connect("dbname=lixa//") 
+                or die("Could not connect: " . pg_last_error() . "\n");
+	</screen>
+	We are using only one MySQL and only one PostgreSQL, so string
+	<synopsis>lixa//</synopsis> is good enought for both because it means
+	<synopsis>lixa/pos/0</synopsis> and every Resource Manager is in the
+	first position considering there's only one for every type
+	(see <xref linkend="connection_string_syntax"/> for more information).
+      </para>
+      <para>
+	You may change the above code as shown below:
+	<screen>
+        // retrieve MySQL connection (rmid=0)
+        $mysqli = new mysqli("localhost", "lixa", "", "lixa/rmid/0", 3306);
+        if ($mysqli->connect_errno)
+                echo "Failed to connect to MySQL: (" . $mysqli->connect_errno .
+                        ") " . $mysqli->connect_error . "\n";
+        // retrieve PostgreSQL connection (rmid=1)
+        $dbconn = pg_connect("dbname=lixa/rmid/1") 
+                or die("Could not connect: " . pg_last_error() . "\n");
+	</screen>
+	and you will obtain a running program (MySQL is associated to rmid=0
+	and PostgreSQL is associated to rmid=1, take a look to file
+	<filename>/opt/lixa/etc/lixac_conf.xml</filename> for profile
+	<varname>MYS_STA_PQL_STA</varname>).
+      </para>
+      <para>
+	You wouldn't obtain a running program if you changed the source code
+	as shown below:
+	<screen>
+        // retrieve MySQL connection (rmid=1)
+        $mysqli = new mysqli("localhost", "lixa", "", "lixa/rmid/1", 3306);
+        if ($mysqli-&gt;connect_errno)
+                echo "Failed to connect to MySQL: (" . $mysqli-&gt;connect_errno .
+                        ") " . $mysqli-&gt;connect_error . "\n";
+        // retrieve PostgreSQL connection (rmid=0)
+        $dbconn = pg_connect("dbname=lixa/rmid/0") 
+                or die("Could not connect: " . pg_last_error() . "\n");
+	</screen>
+	because there's no correspondence between rmid and the expected
+	Resource Manager type (MySQL/PostgreSQL).
+      </para>
     </section>
   </section>
 </chapter>
