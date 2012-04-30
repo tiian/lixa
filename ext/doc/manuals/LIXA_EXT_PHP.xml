@@ -363,8 +363,7 @@ Running selected tests.
 PASS LIXA T.M. availability - basic test: the T.M. is up and running [ext/lixa/tests/lixa_001.phpt] 
 PASS LIXA T.M. trivial commit - basic test: a trivial commit transaction [ext/lixa/tests/lixa_002.phpt] 
 PASS LIXA mysqli availability - basic test: MySQL is reachable with mysqli [ext/lixa/tests/lixa_011.phpt] 
-PASS LIXA mysqli integration - a simple transaction using LIXA and MySQL (mysqli
-driver) [ext/lixa/tests/lixa_012.phpt] 
+PASS LIXA mysqli integration - a simple transaction using LIXA and MySQL (mysqli driver) [ext/lixa/tests/lixa_012.phpt] 
 PASS LIXA PostgreSQL availability - basic test: PostgreSQL is reachable [ext/lixa/tests/lixa_021.phpt] 
 PASS LIXA pgsql integration - a simple transaction using LIXA and PostgreSQL (pgsql driver) [ext/lixa/tests/lixa_022.phpt] 
 PASS LIXA pgsql mysqli integration - a simple transaction using LIXA, PostgreSQL (pgsql driver) and MySQL (mysqli driver) [ext/lixa/tests/lixa_023.phpt] 
