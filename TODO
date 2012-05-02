@@ -1,3 +1,5 @@
+Try to search for OCISessionGet in oci8.c, but it's not an easy task :(
+
 Expand PHP integration with more resource managers and drivers.
 
 Explore high availability features (active/active) with dynamic or static
