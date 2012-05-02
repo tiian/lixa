@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.9.2-dev
+
 20120430 - 0.9.1 integration with PHP driver PostgreSQL; upgrade of PHP
                  integration from PHP 5.4.0 to PHP 5.4.1
 
