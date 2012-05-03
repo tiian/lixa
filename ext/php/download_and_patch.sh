@@ -34,7 +34,7 @@ then
 		exit 1
 	fi
 else
-	PHP_VERSION="5.4.1"
+	PHP_VERSION="5.4.2"
 fi
 echo "PHP $PHP_VERSION will be downloaded..."
 
