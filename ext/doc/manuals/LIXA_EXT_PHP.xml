@@ -157,8 +157,12 @@ Checking configure recognize LIXA extension...
       </table>
       <note>
 	<para>
-	  If you wanted a specific PHP version, pass it as the first argument
-	  to <command>download_and_patch.sh</command> command:
+	  Script <command>download_and_patch.sh</command> 
+	  is configured with a default PHP version, 
+	  but it may happen you need to download, patch, build
+	  and install a different version. Pass the desired PHP version as 
+	  the first argument to command 
+	  <command>download_and_patch.sh</command>:
 	  <screen>
 	    ./download_and_patch.sh 5.4.3
 	  </screen>

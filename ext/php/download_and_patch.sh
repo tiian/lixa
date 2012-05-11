@@ -34,7 +34,7 @@ then
 		exit 1
 	fi
 else
-	PHP_VERSION="5.4.2"
+	PHP_VERSION="5.4.3"
 fi
 echo "PHP $PHP_VERSION will be downloaded..."
 
@@ -146,26 +146,41 @@ then
 fi
 cp -av tests/* $LIXA_DIR/tests
 
-# Checking PHP source code patches
-echo "Checking if the downloaded PHP source code can be patched..."
-RIGHT_PATCH="lixa-${DIR_NAME}-patch.diff"
-if test -f "$RIGHT_PATCH"
+# Dive into PHP source code
+cd $DIR_NAME
+if test $? -ne 0
 then
-	echo "File $RIGHT_PATCH exists, trying patch command..."
-	patch --dry-run -p0 < $RIGHT_PATCH
-	if test $? -ne 0
+	echo "Error while diving into directory $DIR_NAME"
+	exit 1
+fi
+
+# Checking PHP source code patches
+PATCH_LIST=$(ls -r ../lixa-php-patch-???.diff)
+PATCHABLE="no"
+for PATCH in $PATCH_LIST
+do
+	echo "Trying patch $PATCH"
+	patch --dry-run -p1 < $PATCH
+	if test $? -eq 0
 	then
-		echo "Patch $RIGHT_PATCH can not be applied to source $DIR_NAME ... really strange :("
-		exit 1
+		echo "Patch $PATCH can be applied to $DIR_NAME, going on..."
+		PATCHABLE="yes"
+		break
+	else
+		echo "Patch $PATCH can NOT be applied to $DIR_NAME, trying another one (if available)..."
 	fi
-else
-	echo "Sorry, for $DIR_NAME I need patch $RIGHT_PATCH; you can manually try with a different patch, but this script stops here."
+done
+
+if test "$PATCHABLE" != "yes"
+then
+	echo "Version $DIR_NAME is NOT patchable, please open a case on"
+	echo "http://lixa.sourceforge.net/"
 	exit 1
 fi
 
 # Patching PHP source code
 echo "Patching PHP source code..."
-patch -p0 < $RIGHT_PATCH
+patch -p1 < $PATCH
 if test $? -ne 0
 then
 	echo "The PHP source code in $DIR_NAME can not be patched..."
@@ -173,6 +188,9 @@ then
 else
 	echo "PHP source code successfully patched!"
 fi
+
+# Coming back to parent dir
+cd ..
 
 # Cleaning build environment
 echo "Removing $DIR_NAME/configure and some stuff..."
