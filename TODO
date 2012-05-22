@@ -1,3 +1,10 @@
+There's a big problem: oci8 creates a new environment every time.
+I could try to force use_spool=0 in php_oci_do_connect_ex, but:
+php_oci_old_create_session create a new environment for every connection
+php_oci_create_session calls php_oci_create_spool that calls php_oci_create_env
+and creates a new environment.
+It seems there's no an easy way to patch OCI8 for LIXA :(
+
 Try this approach:
 in php_oci_create_env and php_oci_init_global_handles put xaoenv() alternatively to OCIEnvNlsCreate
 and change this row
