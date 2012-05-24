@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.9.2-dev changed PHP patching technique: there's no more a distinct
+20120524 - 0.9.2 changed PHP patching technique: there's no more a distinct
                  patch for every PHP release, but a list of patches that are
                  tryed starting with the newest one
 
