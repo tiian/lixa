@@ -1,4 +1,4 @@
-AC_INIT([lixa], [0.9.2-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [0.9.2], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
