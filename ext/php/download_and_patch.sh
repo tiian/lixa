@@ -98,7 +98,7 @@ then
 	echo "File $ARCHIVE_NAME already available, bypassing download."
 	echo "NOTE: if you want to download it again, please remove the current tarball ($ARCHIVE_NAME) and restart the script."
 else
-	wget -O $ARCHIVE_NAME http://docs.php.net/get/$ARCHIVE_NAME/from/docs.php.net/mirror
+	wget -O $ARCHIVE_NAME http://it2.php.net/get/$ARCHIVE_NAME/from/it.php.net/mirror
 	if test $? -ne 0
 	then
 		echo "Error while downloading PHP source code"
