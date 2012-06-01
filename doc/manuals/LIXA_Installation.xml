@@ -139,6 +139,10 @@
 	  </productname></para></listitem>
 	  <listitem><para><productname>
 		MySQL 5.0 (32 bit) / MySQL 5.1 (64 bit)
+		<footnote><para>
+		    You must use InnoDB back-end to perform transactions with
+		    MySQL; MyISAM back-end is not supported.
+		</para></footnote>
 	  </productname></para></listitem>
 	  <listitem><para><productname>
 		Oracle XE 10.2 (32 bit) / Oracle XE 11.2 (64 bit)
@@ -270,6 +274,19 @@ logout
 	</tbody>
       </table>
     </para>
+    <note>
+      <para>
+	If you are using MySQL for distributed transaction processing with
+	LIXA you will have to adopt InnoDB back-end for your tables because
+	MyISAM tables do not support transactionality at all.
+      </para>
+      <para>
+	Please note there is a serious bug affecting MySQL and XA:
+	<link xlink:href="http://bugs.mysql.com/bug.php?id=12161">
+	  <citetitle>http://bugs.mysql.com/bug.php?id=12161</citetitle>
+	</link>	
+      </para>
+    </note>
   </section>
   <section>
     <title>Software download</title>
