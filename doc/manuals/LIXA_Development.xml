@@ -97,6 +97,45 @@ int main(int argc, char *argv[])
       </itemizedlist>
       Refer to <citation>TXspec</citation> for the complete description.
     </para>
+    <section>
+      <title>Access to the resource managers</title>
+      <para>
+	A program developed for TX (Transaction Demarcation) Specification
+	<emphasis>must</emphasis> access the resource managers coordinated by
+	the transaction manager using specific functions.
+	Unfortunately, the TX Specification does <emphasis>not</emphasis>
+	specify a standard unified method to access a coordinated resource
+	manager. 
+      </para>
+      <para>
+	Tipically, every resource manager provides its own specific
+	function(s) to retrieve one or more <emphasis>connection 
+	  handler(s)</emphasis>. Once you have got the right connection
+	handler(s), you can use the resource manager as you use without a
+	transaction manager.
+      </para>
+      <para>
+	The supplied examples (see <filename>doc/examcles</filename> directory)
+	show the functions that must be used to
+	retrieve the connection handler(s) necessary to interact with
+	the resource managers.
+      </para>
+      <note><para>
+	  Special attention must be payed to <emphasis>commit</emphasis> and
+	  <emphasis>rollback</emphasis> operations: a well designed program
+	  developed for TX (Transaction Demarcation) Specification must not
+	  specify the resource manager native version of 
+	  <emphasis>commit</emphasis> and <emphasis>rollback</emphasis> 
+	  operations.
+	  If your software violates this rule, your environment will
+	  generate warning conditions related to euristically completed
+	  transaction. If your software forces a resource manager to
+	  <emphasis>commit</emphasis> or <emphasis>rollback</emphasis> 
+	  outside the control of the transaction manager, the transaction
+	  manager will not be able to perform the opposite operation if
+	  asked to do it. These situations tend to generate inconsistencies.
+      </para></note>
+    </section>
   </section>
   <section>
     <title>LIXA library linkage</title>

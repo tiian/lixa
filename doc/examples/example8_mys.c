@@ -69,10 +69,14 @@ int main(int argc, char *argv[])
         exit(txrc);
     }
 
-    /* retrieve MySQL connection */
+    /* 
+     * Retrieve MySQL connection: don't use mysql_real_connect() function
+     * because it would retrieve a connection to the DB that's NOT managed
+     * by LIXA transaction manager
+     */
     conn = lixa_my_get_conn();
     /*
-     * These functions can be used when there are more than one PostgreSQL
+     * These functions can be used when there are more than one MySQL
      * configured as a resource manager
      * conn = lixa_my_get_conn_by_rmid(0);
      * conn = lixa_my_get_conn_by_pos(0);
