@@ -70,7 +70,11 @@ int main(int argc, char *argv[])
         exit(txrc);
     }
 
-    /* retrieve MySQL connections */
+    /* 
+     * retrieve MySQL connections
+     * do NOT use standard functions otherwise you will obtain a transaction
+     * manager indipendent connection
+     */
     conn1 = lixa_my_get_conn_by_pos(0);
     conn2 = lixa_my_get_conn_by_pos(1);
     /*

@@ -93,7 +93,11 @@ int main(int argc, char *argv[])
         exit(txrc);
     }
 
-    /* retrieve MySQL connection */
+    /* 
+     * retrieve MySQL connection
+     * do NOT use standard functions otherwise you will obtain a transaction
+     * manager indipendent connection
+     */
     conn_my = lixa_my_get_conn();
     /*
      * These functions can be used when there are more than one PostgreSQL
@@ -102,7 +106,11 @@ int main(int argc, char *argv[])
      * conn_my = lixa_my_get_conn_by_pos(0);
      */
 
-    /* retrieve PostgreSQL connection */
+    /* 
+     * retrieve PostgreSQL connection
+     * do NOT use standard functions otherwise you will obtain a transaction
+     * manager indipendent connection
+     */
     conn_pq = lixa_pq_get_conn();
     /*
      * These functions can be used when there are more than one PostgreSQL
@@ -111,7 +119,11 @@ int main(int argc, char *argv[])
      * conn_pq = lixa_pq_get_conn_by_pos(0);
      */
 
-    /* retrieve Oracle environment and context */
+    /* 
+     * retrieve Oracle environment and context
+     * do NOT use standard functions otherwise you will obtain a transaction
+     * manager indipendent connection
+     */
     if (NULL == (oci_env = xaoEnv(NULL))) {
         fprintf(stderr, "xaoEnv returned a NULL pointer\n");
         exit_nicely(conn_my, conn_pq);
