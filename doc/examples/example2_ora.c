@@ -64,7 +64,11 @@ int main(int argc, char *argv[])
         exit(txrc);
     }
 
-    /* retrieve environment and context */
+    /* 
+     * retrieve environment and context
+     * do NOT use standard functions otherwise you will obtain a transaction
+     * manager indipendent connection
+     */
     if (NULL == (oci_env = xaoEnv(NULL))) {
         fprintf(stderr, "xaoEnv returned a NULL pointer\n");
         exit(1);
