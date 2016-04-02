@@ -102,12 +102,21 @@ lixa_config_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 am_lixar_OBJECTS = lixar-lixar.$(OBJEXT)
 lixar_OBJECTS = $(am_lixar_OBJECTS)
 lixar_DEPENDENCIES = ../common/liblixab.la liblixac.la
+lixar_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(lixar_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_lixat_OBJECTS = lixat-lixat.$(OBJEXT)
 lixat_OBJECTS = $(am_lixat_OBJECTS)
 lixat_DEPENDENCIES = ../common/liblixab.la liblixac.la
+lixat_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(lixat_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_lixau_OBJECTS = lixau-lixau.$(OBJEXT)
 lixau_OBJECTS = $(am_lixau_OBJECTS)
 lixau_DEPENDENCIES = ../common/liblixab.la liblixac.la
+lixau_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(lixau_LDFLAGS) \
+	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -345,12 +354,15 @@ liblixac_la_LIBADD = ../common/liblixab.la
 liblixac_la_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_GMODULE@ @LDFLAGS_GTHREAD@ @LDFLAGS_XML2@ -version-info @LT_LIXAC_CURRENT@:@LT_LIXAC_REVISION@:@LT_LIXAC_AGE@
 lixar_CPPFLAGS = -I$(srcdir)/../common
 lixar_LDADD = ../common/liblixab.la liblixac.la
+lixar_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_XML2@
 lixar_SOURCES = lixar.c
 lixat_CPPFLAGS = -I$(srcdir)/../common
 lixat_LDADD = ../common/liblixab.la liblixac.la
+lixat_LDFLAGS = @LDFLAGS_GTHREAD@
 lixat_SOURCES = lixat.c
 lixau_CPPFLAGS = -I$(srcdir)/../common
 lixau_LDADD = ../common/liblixab.la liblixac.la
+lixau_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_XML2@
 lixau_SOURCES = lixau.c
 lixa_config_SOURCES = lixa-config.c
 lixa_config_LDFLAGS = @LDFLAGS_GLIB@
@@ -471,13 +483,13 @@ lixa-config$(EXEEXT): $(lixa_config_OBJECTS) $(lixa_config_DEPENDENCIES)
 	$(lixa_config_LINK) $(lixa_config_OBJECTS) $(lixa_config_LDADD) $(LIBS)
 lixar$(EXEEXT): $(lixar_OBJECTS) $(lixar_DEPENDENCIES) 
 	@rm -f lixar$(EXEEXT)
-	$(LINK) $(lixar_OBJECTS) $(lixar_LDADD) $(LIBS)
+	$(lixar_LINK) $(lixar_OBJECTS) $(lixar_LDADD) $(LIBS)
 lixat$(EXEEXT): $(lixat_OBJECTS) $(lixat_DEPENDENCIES) 
 	@rm -f lixat$(EXEEXT)
-	$(LINK) $(lixat_OBJECTS) $(lixat_LDADD) $(LIBS)
+	$(lixat_LINK) $(lixat_OBJECTS) $(lixat_LDADD) $(LIBS)
 lixau$(EXEEXT): $(lixau_OBJECTS) $(lixau_DEPENDENCIES) 
 	@rm -f lixau$(EXEEXT)
-	$(LINK) $(lixau_OBJECTS) $(lixau_LDADD) $(LIBS)
+	$(lixau_LINK) $(lixau_OBJECTS) $(lixau_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

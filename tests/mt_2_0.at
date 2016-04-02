@@ -80,9 +80,8 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-# Decreased from 1000 to 500 due to a "too many open file"
-# condition (i.e. lixad receive a kill signal before the test completed)
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh reset start case0031 commit 0 500 100], [0], [ignore], [ignore])
+# Decreased from 500 to 250 due to an overload issued with CentOS 6.6 (32 bit)
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh reset start case0031 commit 0 250 100], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # a lot of rollbacks
@@ -153,8 +152,7 @@ xa_end/0
 xa_rollback/0
 xa_close/0
 ]])
-# Decreased from 1000 to 500 due to a "too many open file"
-# condition (i.e. lixad receive a kill signal before the test completed)
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh none stop case0031 rollback 0 500 100], [0], [ignore], [ignore])
+# Decreased from 500 to 250 due to an overload issued with CentOS 6.6 (32 bit)
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh none stop case0031 rollback 0 250 100], [0], [ignore], [ignore])
 AT_CLEANUP
 

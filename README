@@ -43,3 +43,12 @@ destination in your system.
 Use "configure" (see above) to produce "doxygen.conf" file.
 If you installed Graphviz (http://www.graphviz.org/), configure should detect
 it and would produce data and headers dependencies too.
+
+Dependencies report:
+O.S.            Feature         Packages
+Ubuntu          Basic           make gcc libglib2.0-dev libxml2-dev uuid-dev pkg-config automake
+CentOS          Basic           gcc glib2-devel libxml2-devel libuuid-devel autoconf 
+
+Enjoy LIXA!
+Ch.F.
+

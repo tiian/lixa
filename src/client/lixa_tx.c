@@ -720,7 +720,6 @@ int lixa_tx_open(int *txrc, int mmode)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int tmp_txrc = TX_FAIL;
 
-    int fd = LIXA_NULL_FD;
     client_status_t *cs = NULL;
     
     *txrc = TX_FAIL;
@@ -764,7 +763,6 @@ int lixa_tx_open(int *txrc, int mmode)
             if (LIXA_RC_OK != (ret_cod =
                                client_connect(&global_csc, &global_ccc)))
                 THROW(CLIENT_CONNECT_ERROR);
-            fd = client_status_get_sockfd(cs);
             if (LIXA_RC_OK != (ret_cod = client_config_job(
                                    &global_ccc, client_status_get_sockfd(cs))))
                 THROW(CLIENT_CONFIG_JOB_ERROR);

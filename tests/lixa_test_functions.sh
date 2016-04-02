@@ -30,6 +30,23 @@ reset_server() {
 
 start_server() {
 	PWD=$(pwd)
+	SERVER_ALREADY_ACTIVE="yes"
+	for i in 1 2 3 4 5
+	do
+ 		echo "Checking LIXA server is not active; count=$i"
+		pgrep lixad
+		if [ $? -eq 1 ]
+		then
+			SERVER_ALREADY_ACTIVE="no"
+			break;
+		fi
+		sleep 1
+	done
+	if [ "$SERVER_ALREADY_ACTIVE" = "yes" ]
+	then
+		echo "LIXA server is already running, unable to start it..."
+		exit 1
+	fi
 	echo "Starting LIXA server"
 
 	REAL_CHECK_TYPE="$SERVER_CHECK_TYPE"

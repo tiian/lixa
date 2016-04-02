@@ -12974,14 +12974,24 @@ fi
 
 
 
-for ac_header in arpa/inet.h assert.h
+for ac_header in arpa/inet.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "arpa/inet.h" "ac_cv_header_arpa_inet_h" "$ac_includes_default"
+if test "x$ac_cv_header_arpa_inet_h" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_ARPA_INET_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in assert.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "assert.h" "ac_cv_header_assert_h" "$ac_includes_default"
+if test "x$ac_cv_header_assert_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ASSERT_H 1
 _ACEOF
 
 fi
@@ -13012,14 +13022,24 @@ fi
 
 done
 
-for ac_header in glib.h gmodule.h
+for ac_header in glib.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "glib.h" "ac_cv_header_glib_h" "$ac_includes_default"
+if test "x$ac_cv_header_glib_h" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_GLIB_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in gmodule.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "gmodule.h" "ac_cv_header_gmodule_h" "$ac_includes_default"
+if test "x$ac_cv_header_gmodule_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GMODULE_H 1
 _ACEOF
 
 fi
@@ -13038,14 +13058,36 @@ fi
 
 done
 
-for ac_header in libxml/xmlversion.h libxml/tree.h libxml/parser.h
+for ac_header in libxml/xmlversion.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "libxml/xmlversion.h" "ac_cv_header_libxml_xmlversion_h" "$ac_includes_default"
+if test "x$ac_cv_header_libxml_xmlversion_h" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_LIBXML_XMLVERSION_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in libxml/tree.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "libxml/tree.h" "ac_cv_header_libxml_tree_h" "$ac_includes_default"
+if test "x$ac_cv_header_libxml_tree_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBXML_TREE_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in libxml/parser.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "libxml/parser.h" "ac_cv_header_libxml_parser_h" "$ac_includes_default"
+if test "x$ac_cv_header_libxml_parser_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBXML_PARSER_H 1
 _ACEOF
 
 fi
@@ -13064,84 +13106,264 @@ fi
 
 done
 
-for ac_header in netdb.h netinet/in.h netinet/tcp.h
+for ac_header in netdb.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "netdb.h" "ac_cv_header_netdb_h" "$ac_includes_default"
+if test "x$ac_cv_header_netdb_h" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_NETDB_H 1
 _ACEOF
 
 fi
 
 done
 
-for ac_header in poll.h pthread.h regex.h
+for ac_header in netinet/in.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "netinet/in.h" "ac_cv_header_netinet_in_h" "$ac_includes_default"
+if test "x$ac_cv_header_netinet_in_h" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_NETINET_IN_H 1
 _ACEOF
 
 fi
 
 done
 
-for ac_header in signal.h stdarg.h stdint.h stdio.h stdlib.h string.h syslog.h
+for ac_header in netinet/tcp.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "netinet/tcp.h" "ac_cv_header_netinet_tcp_h" "$ac_includes_default"
+if test "x$ac_cv_header_netinet_tcp_h" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_NETINET_TCP_H 1
 _ACEOF
 
 fi
 
 done
 
-for ac_header in sys/mman.h sys/select.h sys/socket.h sys/stat.h
+for ac_header in poll.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "poll.h" "ac_cv_header_poll_h" "$ac_includes_default"
+if test "x$ac_cv_header_poll_h" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_POLL_H 1
 _ACEOF
 
 fi
 
 done
 
-for ac_header in sys/time.h sys/types.h time.h
+for ac_header in pthread.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default"
+if test "x$ac_cv_header_pthread_h" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_PTHREAD_H 1
 _ACEOF
 
 fi
 
 done
 
-for ac_header in unistd.h uuid/uuid.h
+for ac_header in regex.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "regex.h" "ac_cv_header_regex_h" "$ac_includes_default"
+if test "x$ac_cv_header_regex_h" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_REGEX_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in signal.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "signal.h" "ac_cv_header_signal_h" "$ac_includes_default"
+if test "x$ac_cv_header_signal_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SIGNAL_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in stdarg.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "stdarg.h" "ac_cv_header_stdarg_h" "$ac_includes_default"
+if test "x$ac_cv_header_stdarg_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STDARG_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in stdint.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "stdint.h" "ac_cv_header_stdint_h" "$ac_includes_default"
+if test "x$ac_cv_header_stdint_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STDINT_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in stdio.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "stdio.h" "ac_cv_header_stdio_h" "$ac_includes_default"
+if test "x$ac_cv_header_stdio_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STDIO_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in stdlib.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "stdlib.h" "ac_cv_header_stdlib_h" "$ac_includes_default"
+if test "x$ac_cv_header_stdlib_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STDLIB_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in string.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "string.h" "ac_cv_header_string_h" "$ac_includes_default"
+if test "x$ac_cv_header_string_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STRING_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in syslog.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "syslog.h" "ac_cv_header_syslog_h" "$ac_includes_default"
+if test "x$ac_cv_header_syslog_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYSLOG_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in sys/mman.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/mman.h" "ac_cv_header_sys_mman_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_mman_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_MMAN_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in sys/select.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/select.h" "ac_cv_header_sys_select_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_select_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_SELECT_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in sys/socket.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/socket.h" "ac_cv_header_sys_socket_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_socket_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_SOCKET_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in sys/stat.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/stat.h" "ac_cv_header_sys_stat_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_stat_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_STAT_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in sys/time.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/time.h" "ac_cv_header_sys_time_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_time_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_TIME_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in sys/types.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/types.h" "ac_cv_header_sys_types_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_types_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_TYPES_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in time.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "time.h" "ac_cv_header_time_h" "$ac_includes_default"
+if test "x$ac_cv_header_time_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_TIME_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in unistd.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "unistd.h" "ac_cv_header_unistd_h" "$ac_includes_default"
+if test "x$ac_cv_header_unistd_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_UNISTD_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in uuid/uuid.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "uuid/uuid.h" "ac_cv_header_uuid_uuid_h" "$ac_includes_default"
+if test "x$ac_cv_header_uuid_uuid_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_UUID_UUID_H 1
 _ACEOF
 
 fi
@@ -13205,6 +13427,20 @@ if test "$ac_res" != no; then :
 
 fi
 
+
+ac_fn_c_check_type "$LINENO" "uuid_t" "ac_cv_type_uuid_t" "#include <uuid/uuid.h>
+"
+if test "x$ac_cv_type_uuid_t" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_UUID_T 1
+_ACEOF
+
+
+else
+  \
+	as_fn_error "cannot go on without uuid_t type" "$LINENO" 5
+fi
 
 ac_fn_c_check_type "$LINENO" "clock_t" "ac_cv_type_clock_t" "#include <time.h>
 "
@@ -13297,21 +13533,6 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-fi
-
-ac_fn_c_check_type "$LINENO" "uuid_t" "ac_cv_type_uuid_t" "\
-	#include <uuid/uuid.h>
-"
-if test "x$ac_cv_type_uuid_t" = x""yes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_UUID_T 1
-_ACEOF
-
-
-else
-  \
-	as_fn_error "cannot go on without uuid_t type" "$LINENO" 5
 fi
 
 ac_fn_c_check_type "$LINENO" "in_addr_t" "ac_cv_type_in_addr_t" "#include <netinet/in.h>

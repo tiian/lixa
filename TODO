@@ -1,3 +1,6 @@
+There are some build issues with Ubuntu 12.04, related to libxml2
+There are some check issues related to Centos 7.1: it seems program case0035 is not started by case test CT/0.0/0.0 xa_open/connect
+
 
 Explore high availability features (active/active) with dynamic or static
 workload
