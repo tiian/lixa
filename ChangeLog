@@ -1,5 +1,8 @@
 LOG:
 
+         - 0.9.3 build procedure has been fixed for some different Linux
+                 systems (take a look to TestLog file)
+
 20120524 - 0.9.2 changed PHP patching technique: there's no more a distinct
                  patch for every PHP release, but a list of patches that are
                  tryed starting with the newest one

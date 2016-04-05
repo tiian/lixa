@@ -70,8 +70,10 @@ case0032_LDFLAGS = -lpthread @LDFLAGS_GLIB@ @LDFLAGS_GMODULE@ @LDFLAGS_XML2@
 case0033_SOURCES = case0033.c
 case0033_LDFLAGS = -lpthread @LDFLAGS_XML2@
 case0034_SOURCES = case0034.c
+case0034_LDADD = @LDFLAGS_GLIB@ ../../src/common/liblixab.la @LDFLAGS_XML2@ ../../src/client/switch/lixa/liblixamonkey.la ../../src/client/liblixac.la
 case0035_SOURCES = case0035.c
 case0036_SOURCES = case0036.c
+case0036_LDADD = ../../src/common/liblixab.la @LDFLAGS_GLIB@ @LDFLAGS_GTHREAD@ @LDFLAGS_XML2@
 case0037_SOURCES = case0037.c
 case0037_CPPFLAGS = @POSTGRESQL_CPPFLAGS@ \
 	-I../../src/client -I../../src/common \
@@ -102,6 +104,7 @@ case0042_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la \
 	../../src/client/switch/postgresql/liblixapq.la
 case0043_SOURCES = case0043.c
+case0043_LDADD = ../../src/common/liblixab.la @LDFLAGS_GLIB@ @LDFLAGS_GTHREAD@ @LDFLAGS_XML2@
 case0044_SOURCES = case0044.c
 case0044_CPPFLAGS = @WEBSPHEREMQ_CPPFLAGS@ -I../../src/client
 case0044_LDFLAGS = @WEBSPHEREMQ_LDFLAGS@ -l@WEBSPHEREMQ_PGMLIB@

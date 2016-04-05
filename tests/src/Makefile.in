@@ -287,10 +287,9 @@ case0033_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 am_case0034_OBJECTS = case0034.$(OBJEXT)
 case0034_OBJECTS = $(am_case0034_OBJECTS)
-case0034_LDADD = $(LDADD)
 case0034_DEPENDENCIES = ../../src/common/liblixab.la \
-	../../src/client/liblixac.la \
-	../../src/client/switch/lixa/liblixamonkey.la
+	../../src/client/switch/lixa/liblixamonkey.la \
+	../../src/client/liblixac.la
 am_case0035_OBJECTS = case0035.$(OBJEXT)
 case0035_OBJECTS = $(am_case0035_OBJECTS)
 case0035_LDADD = $(LDADD)
@@ -299,10 +298,7 @@ case0035_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0036_OBJECTS = case0036.$(OBJEXT)
 case0036_OBJECTS = $(am_case0036_OBJECTS)
-case0036_LDADD = $(LDADD)
-case0036_DEPENDENCIES = ../../src/common/liblixab.la \
-	../../src/client/liblixac.la \
-	../../src/client/switch/lixa/liblixamonkey.la
+case0036_DEPENDENCIES = ../../src/common/liblixab.la
 am_case0037_OBJECTS = case0037-case0037.$(OBJEXT)
 case0037_OBJECTS = $(am_case0037_OBJECTS)
 case0037_DEPENDENCIES = ../../src/common/liblixab.la \
@@ -340,10 +336,7 @@ case0042_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/switch/postgresql/liblixapq.la
 am_case0043_OBJECTS = case0043.$(OBJEXT)
 case0043_OBJECTS = $(am_case0043_OBJECTS)
-case0043_LDADD = $(LDADD)
-case0043_DEPENDENCIES = ../../src/common/liblixab.la \
-	../../src/client/liblixac.la \
-	../../src/client/switch/lixa/liblixamonkey.la
+case0043_DEPENDENCIES = ../../src/common/liblixab.la
 am_case0044_OBJECTS = case0044-case0044.$(OBJEXT)
 case0044_OBJECTS = $(am_case0044_OBJECTS)
 case0044_DEPENDENCIES = ../../src/client/liblixac.la
@@ -625,8 +618,10 @@ case0032_LDFLAGS = -lpthread @LDFLAGS_GLIB@ @LDFLAGS_GMODULE@ @LDFLAGS_XML2@
 case0033_SOURCES = case0033.c
 case0033_LDFLAGS = -lpthread @LDFLAGS_XML2@
 case0034_SOURCES = case0034.c
+case0034_LDADD = @LDFLAGS_GLIB@ ../../src/common/liblixab.la @LDFLAGS_XML2@ ../../src/client/switch/lixa/liblixamonkey.la ../../src/client/liblixac.la
 case0035_SOURCES = case0035.c
 case0036_SOURCES = case0036.c
+case0036_LDADD = ../../src/common/liblixab.la @LDFLAGS_GLIB@ @LDFLAGS_GTHREAD@ @LDFLAGS_XML2@
 case0037_SOURCES = case0037.c
 case0037_CPPFLAGS = @POSTGRESQL_CPPFLAGS@ \
 	-I../../src/client -I../../src/common \
@@ -663,6 +658,7 @@ case0042_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/postgresql/liblixapq.la
 
 case0043_SOURCES = case0043.c
+case0043_LDADD = ../../src/common/liblixab.la @LDFLAGS_GLIB@ @LDFLAGS_GTHREAD@ @LDFLAGS_XML2@
 case0044_SOURCES = case0044.c
 case0044_CPPFLAGS = @WEBSPHEREMQ_CPPFLAGS@ -I../../src/client
 case0044_LDFLAGS = @WEBSPHEREMQ_LDFLAGS@ -l@WEBSPHEREMQ_PGMLIB@

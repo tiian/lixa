@@ -287,7 +287,7 @@ liblixab_la_SOURCES = lixa_common_status.c lixa_config.c lixa_crash.c \
 
 AM_CFLAGS = -Wall
 liblixab_la_CPPFLAGS = -DLIXA_MULTITHREAD=1 -I$(srcdir)/../client
-liblixab_la_LDFLAGS = -lpthread -luuid -version-info @LT_LIXAB_CURRENT@:@LT_LIXAB_REVISION@:@LT_LIXAB_AGE@
+liblixab_la_LDFLAGS = @LDFLAGS_GLIB@ -lpthread -luuid -version-info @LT_LIXAB_CURRENT@:@LT_LIXAB_REVISION@:@LT_LIXAB_AGE@
 all: all-am
 
 .SUFFIXES:
