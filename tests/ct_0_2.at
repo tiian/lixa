@@ -42,6 +42,11 @@ AT_CLEANUP
 
 AT_SETUP([CT/0.2/0.1 xa_end/send (step=8)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+# this delay is necessary on fast multicore systems: the risk is that the new
+# client connects to the state server before the state server completed the
+# synchronization on disk of the state. When this condition happens, instead of
+# a recovery pending transaction, the new client will find a clean state
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0

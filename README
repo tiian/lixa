@@ -47,7 +47,7 @@ it and would produce data and headers dependencies too.
 Dependencies report:
 O.S.            Feature         Packages
 Ubuntu          Basic           make gcc libglib2.0-dev libxml2-dev uuid-dev pkg-config automake
-CentOS          Basic           gcc glib2-devel libxml2-devel libuuid-devel autoconf 
+CentOS          Basic           gcc glib2-devel libxml2-devel libuuid-devel autoconf net-tools
 
 Enjoy LIXA!
 Ch.F.

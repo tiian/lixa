@@ -156,12 +156,15 @@ eval "LIXA_CONFIG_PREFIX=$prefix"
 eval "LIXA_CONFIG_LOCALSTATEDIR=$localstatedir"
 eval "LIXA_CONFIG_SYSCONFDIR=$sysconfdir"
 
-
-# Checking pkg-config is available
 AC_CHECK_PROGS(GDB, [gdb], [])
 AC_CHECK_PROGS(VALGRIND, [valgrind], [])
 AC_CHECK_PROGS(XSLTPROC, [xsltproc], [])
-AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
+AC_CHECK_PROGS(HAVE_DOT, [dot], [NO], [])
+AC_CHECK_PROGS(HAVE_NETSTAT, [netstat], [NO], [])
+if test "$HAVE_NETSTAT" = "NO"
+then
+	AC_MSG_WARN([netstat was not found, make check can not be executed])
+fi
 
 AC_CHECK_HEADERS(arpa/inet.h)
 AC_CHECK_HEADERS(assert.h)

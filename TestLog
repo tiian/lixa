@@ -1,12 +1,10 @@
 Release: 0.9.3
-Date:    
+Date:    2016-04-06
 Configuration: --enable-crash
-Ubuntu 10.04	|x86	|virtual (KVM)
-Ubuntu 10.04	|x86_64	|virtual (KVM)
-Ubuntu 12.04	|x86_64	|virtual (KVM)
-Ubuntu 14.04	|x86_64	|virtual (KVM)
-CentOS 6.6	|x86	|virtual (KVM)
-CentOS 6.6	|x86_64	|virtual (KVM)
-CentOS 7.1	|x86_64	|virtual (KVM) *
-This system does not pass case test "CT/0.0/0.0 xa_open/connect", the test procedure hangs.
-All systems randomly does not pass case test "CT/0.2/0.1 xa_end/send". The issue appears and disappears randomly and it needs further investigation.
+Ubuntu 10.04	|x86	|virtual (KVM)	|2 vCPU
+Ubuntu 10.04	|x86_64	|virtual (KVM)	|2 vCPU
+Ubuntu 12.04	|x86_64	|virtual (KVM)	|2 vCPU
+Ubuntu 14.04	|x86_64	|virtual (KVM)	|2 vCPU
+CentOS 6.6	|x86	|virtual (KVM)	|2 vCPU
+CentOS 6.6	|x86_64	|virtual (KVM)	|2 vCPU
+CentOS 7.1	|x86_64	|virtual (KVM)	|2 vCPU
