@@ -1,5 +1,4 @@
-There is some check issue related to Centos 7.1: it seems program case0035 is not started by test case CT/0.0/0.0 xa_open/connect
-There is some check issue related to any Linux (Ubuntu/CentOS, 32/64 bit) with a failure of test case CT/0.2/0.1 xa_end/send: the issue appears and disappears randomly. The suspect is that is something related to timing in a multiprocessor configuration: maybe the test procedure, maybe the code.
+Update manual with the new tested configurations.
 
 Explore high availability features (active/active) with dynamic or static
 workload

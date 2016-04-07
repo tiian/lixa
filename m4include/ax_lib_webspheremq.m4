@@ -1,6 +1,6 @@
 dnl @synopsis AX_LIB_WEBSPHEREMQ
 dnl
-dnl Copyright (c) 2009-2012, Christian Ferrari <tiian@users.sourceforge.net>
+dnl Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>
 dnl All rights reserved.
 dnl
 dnl This file is part of LIXA.

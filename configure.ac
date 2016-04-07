@@ -43,6 +43,7 @@ AC_CONFIG_FILES([
   tests/etc/lixad_conf.xml
   tests/etc/lixad_conf2.xml
   tests/etc/Makefile
+  tests/scripts/Makefile
   tests/src/Makefile
   var/Makefile
   doxygen.conf

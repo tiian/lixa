@@ -1,0 +1,4 @@
+This directory contains the case tests scripts to check LIXA software.
+
+If you want to test MySQL & LIXA, you have to set-up the environment using
+the script inside scripts dir

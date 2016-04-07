@@ -1,4 +1,4 @@
-SUBDIRS = etc src
+SUBDIRS = etc src scripts
 
 # Interrupt the test at first failure
 TESTSUITEFLAGS = "-e"

@@ -95,6 +95,7 @@ case0041_CPPFLAGS = @MYSQL_CPPFLAGS@ \
 	-I../../src/client/switch/mysql
 case0041_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la
+case0041_LDFLAGS = @MYSQL_LDFLAGS@
 case0042_CPPFLAGS = @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@ \
 	-I../../src/client -I../../src/common \
 	-I../../src/client/switch/mysql \
@@ -115,6 +116,7 @@ case0045_CPPFLAGS = @MYSQL_CPPFLAGS@ \
 	-I../../src/client/switch/mysql
 case0045_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la
+case0045_LDFLAGS = @MYSQL_LDFLAGS@
 case0046_SOURCES = case0046.c
 
 

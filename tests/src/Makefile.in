@@ -327,6 +327,9 @@ case0041_OBJECTS = $(am_case0041_OBJECTS)
 case0041_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la
+case0041_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(case0041_LDFLAGS) \
+	$(LDFLAGS) -o $@
 case0042_SOURCES = case0042.c
 case0042_OBJECTS = case0042-case0042.$(OBJEXT)
 case0042_DEPENDENCIES = ../../src/common/liblixab.la \
@@ -348,6 +351,9 @@ case0045_OBJECTS = $(am_case0045_OBJECTS)
 case0045_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la
+case0045_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(case0045_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_case0046_OBJECTS = case0046.$(OBJEXT)
 case0046_OBJECTS = $(am_case0046_OBJECTS)
 case0046_LDADD = $(LDADD)
@@ -648,6 +654,7 @@ case0041_CPPFLAGS = @MYSQL_CPPFLAGS@ \
 case0041_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la
 
+case0041_LDFLAGS = @MYSQL_LDFLAGS@
 case0042_CPPFLAGS = @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@ \
 	-I../../src/client -I../../src/common \
 	-I../../src/client/switch/mysql \
@@ -672,6 +679,7 @@ case0045_CPPFLAGS = @MYSQL_CPPFLAGS@ \
 case0045_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la
 
+case0045_LDFLAGS = @MYSQL_LDFLAGS@
 case0046_SOURCES = case0046.c
 all: all-am
 
@@ -841,7 +849,7 @@ case0040$(EXEEXT): $(case0040_OBJECTS) $(case0040_DEPENDENCIES)
 	$(LINK) $(case0040_OBJECTS) $(case0040_LDADD) $(LIBS)
 case0041$(EXEEXT): $(case0041_OBJECTS) $(case0041_DEPENDENCIES) 
 	@rm -f case0041$(EXEEXT)
-	$(LINK) $(case0041_OBJECTS) $(case0041_LDADD) $(LIBS)
+	$(case0041_LINK) $(case0041_OBJECTS) $(case0041_LDADD) $(LIBS)
 case0042$(EXEEXT): $(case0042_OBJECTS) $(case0042_DEPENDENCIES) 
 	@rm -f case0042$(EXEEXT)
 	$(LINK) $(case0042_OBJECTS) $(case0042_LDADD) $(LIBS)
@@ -853,7 +861,7 @@ case0044$(EXEEXT): $(case0044_OBJECTS) $(case0044_DEPENDENCIES)
 	$(case0044_LINK) $(case0044_OBJECTS) $(case0044_LDADD) $(LIBS)
 case0045$(EXEEXT): $(case0045_OBJECTS) $(case0045_DEPENDENCIES) 
 	@rm -f case0045$(EXEEXT)
-	$(LINK) $(case0045_OBJECTS) $(case0045_LDADD) $(LIBS)
+	$(case0045_LINK) $(case0045_OBJECTS) $(case0045_LDADD) $(LIBS)
 case0046$(EXEEXT): $(case0046_OBJECTS) $(case0046_DEPENDENCIES) 
 	@rm -f case0046$(EXEEXT)
 	$(LINK) $(case0046_OBJECTS) $(case0046_LDADD) $(LIBS)
