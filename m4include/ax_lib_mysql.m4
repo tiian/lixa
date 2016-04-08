@@ -42,7 +42,7 @@ AC_DEFUN([AX_LIB_MYSQL],
 [
     HAVE_MYSQL="no"
     AC_ARG_WITH([mysql],
-        AC_HELP_STRING([--with-mysql@<:@=FILE@:>@], [use MySQL (FILE points to mysql_config)]), 
+        AC_HELP_STRING([--with-mysql@<:@=FILE@:>@], [use MySQL (FILE points to mysql_config utility program)]), 
            [HAVE_MYSQL="maybe"], [HAVE_MYSQL="no"]
     )
     if test "$HAVE_MYSQL" != "no"
