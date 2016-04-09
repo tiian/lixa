@@ -1372,7 +1372,7 @@ int lixa_my_commit(XID *xid, int rmid, long flags)
             lixa_my_ser_xid_t lmsx2;
             lixa_my_xid_serialize(&(lpsr->xid), lmsx2);
             LIXA_TRACE(("lixa_my_commit: committing XID %s is not the "
-                        "same of started XID '%s'\n", lmsx, lmsx2));
+                        "same of started XID %s\n", lmsx, lmsx2));
             THROW(XID_MISMATCH);
         }
         LIXA_TRACE(("lixa_my_commit: committing XID %s\n", lmsx));

@@ -332,7 +332,13 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
 int lixa_xid_compare(const XID *a, const XID *b)
 {
     int result;
-    
+
+    LIXA_TRACE(("lixa_xid_compare: a->formatID=%ld, b->formatID=%ld, "
+                "a->gtrid_length=%ld, b->gtrid_length=%ld, "
+                "a->bqual_length=%ld, b->bqual_length=%ld\n",
+                a->formatID, b->formatID,
+                a->gtrid_length, b->gtrid_length,
+                a->bqual_length, b->bqual_length));
     if (a->formatID < b->formatID)
         return -1;
     else if (a->formatID > b->formatID)
