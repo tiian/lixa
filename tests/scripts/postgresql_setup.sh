@@ -36,21 +36,18 @@ fi
 type yum
 if test $? -eq 0
 then
-	sudo yum install mysql-server
-	RC1=$?
-	sudo yum install mariadb-server
-	RC2=$?
-	[ $RC1 -eq $RC2 ] && echo "yum install mysql-server/mariadb-server" && exit 1
-	sudo yum install mysql-devel
-	RC1=$?
-	sudo yum install mariadb-devel
-	RC2=$?
-	[ $RC1 -eq $RC2 ] && echo "yum install mysql-devel/mariadb/devel" && exit 1
-	sudo service mysqld start
-	RC1=$?
-	sudo service mariadb start
-	RC2=$?
-	[ $RC1 -eq $RC2 ] && echo "service mysqld/mariadb start" && exit 1
+	sudo yum install postgresql postgresql-server
+	RC=$?
+	[ $RC -ne 0 ] && echo "yum install postgresql postgresql-server" && exit 1
+	sudo yum install postgresql-devel
+	RC=$?
+	[ $RC -ne 0 ] && echo "yum install postgresql-devel" && exit 1
+	sudo service postgresql initdb
+	RC=$?
+	[ $RC -ne 0 ] && echo "service postgresql initdb" && exit 1
+	sudo service postgresql start
+	RC=$?
+	[ $RC -ne 0 ] && echo "service postgresql start" && exit 1
 fi
 
 echo "Creating a role for user $USER"
@@ -75,3 +72,5 @@ EOF
 echo "Change the value of parameter max_prepared_transactions inside file"
 echo "postgresq.conf to a reasonable value, for example 10 and restart the"
 echo "database server"
+echo "Ubuntu location is: /etc/postgresql/{Version.Release}/main/"
+echo "CentOS location is: /var/lib/pgsql/data/postgresql.conf"

@@ -47,7 +47,12 @@ it and would produce data and headers dependencies too.
 Dependencies report:
 O.S.            Feature         Packages
 Ubuntu          Basic           make gcc libglib2.0-dev libxml2-dev uuid-dev pkg-config automake
+Ubuntu		MySQL		mysql-server libmysqlclient15-dev
+Ubuntu		PostgreSQL	postgresql libpq-dev
 CentOS          Basic           gcc glib2-devel libxml2-devel libuuid-devel autoconf net-tools
+CentOS		MySQL		mysql-server/mariadb-server mysql-devel/mariadb-devel
+CentOS		PostgreSQL	postgresql postgresql-server postgresql-devel
+
 
 Enjoy LIXA!
 Ch.F.
