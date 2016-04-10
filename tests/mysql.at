@@ -5,6 +5,12 @@
 #
 AT_BANNER([MySQL])
 
+# testing wrapper functions
+AT_SETUP([MY/Wrapper/0.0 XID serialization and deserialization])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_TRACE_MASK=0x10000000 ; lixa_test_exec.sh noreset none case0047], [0], [ignore], [ignore])
+AT_CLEANUP
+
 # check the database "lixa" is available and the user can connect to it
 AT_SETUP([MY/0.0/0.0 MySQL availability])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])

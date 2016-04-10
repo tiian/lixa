@@ -71,7 +71,8 @@ CONFIG_CLEAN_VPATH_FILES =
 @COMPILE_ORACLE_STUFF_TRUE@am__EXEEXT_2 = case0038$(EXEEXT)
 @COMPILE_IBMDB2_STUFF_TRUE@am__EXEEXT_3 = case0039$(EXEEXT)
 @COMPILE_MYSQL_STUFF_TRUE@am__EXEEXT_4 = case0040$(EXEEXT) \
-@COMPILE_MYSQL_STUFF_TRUE@	case0041$(EXEEXT) case0045$(EXEEXT)
+@COMPILE_MYSQL_STUFF_TRUE@	case0041$(EXEEXT) case0045$(EXEEXT) \
+@COMPILE_MYSQL_STUFF_TRUE@	case0047$(EXEEXT)
 @COMPILE_MYSQL_POSTGRESQL_STUFF_TRUE@am__EXEEXT_5 = case0042$(EXEEXT)
 @COMPILE_WEBSPHEREMQ_STUFF_TRUE@am__EXEEXT_6 = case0044$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
@@ -360,6 +361,14 @@ case0046_LDADD = $(LDADD)
 case0046_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
+am_case0047_OBJECTS = case0047-case0047.$(OBJEXT)
+case0047_OBJECTS = $(am_case0047_OBJECTS)
+case0047_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la \
+	../../src/client/switch/mysql/liblixamy.la
+case0047_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(case0047_LDFLAGS) \
+	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -388,7 +397,7 @@ SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) $(case0002_SOURCES) \
 	$(case0036_SOURCES) $(case0037_SOURCES) $(case0038_SOURCES) \
 	$(case0039_SOURCES) $(case0040_SOURCES) $(case0041_SOURCES) \
 	case0042.c $(case0043_SOURCES) $(case0044_SOURCES) \
-	$(case0045_SOURCES) $(case0046_SOURCES)
+	$(case0045_SOURCES) $(case0046_SOURCES) $(case0047_SOURCES)
 DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0002_SOURCES) $(case0003_SOURCES) $(case0004_SOURCES) \
 	$(case0005_SOURCES) $(case0006_SOURCES) $(case0007_SOURCES) \
@@ -404,7 +413,8 @@ DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0035_SOURCES) $(case0036_SOURCES) $(case0037_SOURCES) \
 	$(case0038_SOURCES) $(case0039_SOURCES) $(case0040_SOURCES) \
 	$(case0041_SOURCES) case0042.c $(case0043_SOURCES) \
-	$(case0044_SOURCES) $(case0045_SOURCES) $(case0046_SOURCES)
+	$(case0044_SOURCES) $(case0045_SOURCES) $(case0046_SOURCES) \
+	$(case0047_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -583,7 +593,7 @@ AM_CFLAGS = -Wall
 LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 
-@COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL = case0040 case0041 case0045
+@COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL = case0040 case0041 case0045 case0047
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL = case0037
 @COMPILE_MYSQL_POSTGRESQL_STUFF_TRUE@MAYBE_MYSQL_POSTGRESQL = case0042
 @COMPILE_ORACLE_STUFF_TRUE@MAYBE_ORACLE = case0038
@@ -682,6 +692,15 @@ case0045_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 
 case0045_LDFLAGS = @MYSQL_LDFLAGS@
 case0046_SOURCES = case0046.c
+case0047_SOURCES = case0047.c
+case0047_CPPFLAGS = @MYSQL_CPPFLAGS@ \
+	-I../../src/client -I../../src/common \
+	-I../../src/client/switch/mysql
+
+case0047_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
+	../../src/client/switch/mysql/liblixamy.la
+
+case0047_LDFLAGS = @LDFLAGS_GLIB@ @MYSQL_LDFLAGS@ @LDFLAGS_XML2@
 all: all-am
 
 .SUFFIXES:
@@ -866,6 +885,9 @@ case0045$(EXEEXT): $(case0045_OBJECTS) $(case0045_DEPENDENCIES)
 case0046$(EXEEXT): $(case0046_OBJECTS) $(case0046_DEPENDENCIES) 
 	@rm -f case0046$(EXEEXT)
 	$(LINK) $(case0046_OBJECTS) $(case0046_LDADD) $(LIBS)
+case0047$(EXEEXT): $(case0047_OBJECTS) $(case0047_DEPENDENCIES) 
+	@rm -f case0047$(EXEEXT)
+	$(case0047_LINK) $(case0047_OBJECTS) $(case0047_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -920,6 +942,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0044-case0044.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0045-case0045.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0046.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0047-case0047.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1039,6 +1062,20 @@ case0045-case0045.obj: case0045.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='case0045.c' object='case0045-case0045.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0045_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o case0045-case0045.obj `if test -f 'case0045.c'; then $(CYGPATH_W) 'case0045.c'; else $(CYGPATH_W) '$(srcdir)/case0045.c'; fi`
+
+case0047-case0047.o: case0047.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0047_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT case0047-case0047.o -MD -MP -MF $(DEPDIR)/case0047-case0047.Tpo -c -o case0047-case0047.o `test -f 'case0047.c' || echo '$(srcdir)/'`case0047.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/case0047-case0047.Tpo $(DEPDIR)/case0047-case0047.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='case0047.c' object='case0047-case0047.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0047_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o case0047-case0047.o `test -f 'case0047.c' || echo '$(srcdir)/'`case0047.c
+
+case0047-case0047.obj: case0047.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0047_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT case0047-case0047.obj -MD -MP -MF $(DEPDIR)/case0047-case0047.Tpo -c -o case0047-case0047.obj `if test -f 'case0047.c'; then $(CYGPATH_W) 'case0047.c'; else $(CYGPATH_W) '$(srcdir)/case0047.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/case0047-case0047.Tpo $(DEPDIR)/case0047-case0047.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='case0047.c' object='case0047-case0047.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0047_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o case0047-case0047.obj `if test -f 'case0047.c'; then $(CYGPATH_W) 'case0047.c'; else $(CYGPATH_W) '$(srcdir)/case0047.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

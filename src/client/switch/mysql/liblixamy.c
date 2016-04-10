@@ -419,7 +419,10 @@ int lixa_my_xid_deserialize(XID *xid, const char *formatID,
     char tmp[3];
     unsigned int b = 0;
     
-    LIXA_TRACE(("lixa_my_xid_deserialize\n"));
+    LIXA_TRACE(("lixa_my_xid_deserialize: formatID='%s', gtrid_length='%s', "
+                "bqual_length='%s', data='%s'\n",
+                formatID, gtrid_length, bqual_length, data));
+    memset(xid, 0, sizeof(XID));
     xid->formatID = strtol(formatID, NULL, 0);
     xid->gtrid_length = strtol(gtrid_length, NULL, 0) / 2;
     xid->bqual_length = strtol(bqual_length, NULL, 0) / 2;
@@ -447,7 +450,7 @@ int lixa_my_xid_deserialize(XID *xid, const char *formatID,
             tmp[0] = *p;
             tmp[1] = *q;
             sscanf(tmp, "%x", &b);
-            xid->data[i++] = b;
+            xid->data[i] = b;
         } else {
             LIXA_TRACE(("lixa_my_xid_deserialize: '%s' invalid "
                         "characters found:\n", p));

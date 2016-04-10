@@ -7,7 +7,7 @@ AM_CFLAGS = -Wall
 LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 if COMPILE_MYSQL_STUFF
-  MAYBE_MYSQL = case0040 case0041 case0045
+  MAYBE_MYSQL = case0040 case0041 case0045 case0047
 endif
 if COMPILE_POSTGRESQL_STUFF
   MAYBE_POSTGRESQL = case0037
@@ -118,5 +118,11 @@ case0045_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la
 case0045_LDFLAGS = @MYSQL_LDFLAGS@
 case0046_SOURCES = case0046.c
-
+case0047_SOURCES = case0047.c
+case0047_CPPFLAGS = @MYSQL_CPPFLAGS@ \
+	-I../../src/client -I../../src/common \
+	-I../../src/client/switch/mysql
+case0047_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
+	../../src/client/switch/mysql/liblixamy.la
+case0047_LDFLAGS = @LDFLAGS_GLIB@ @MYSQL_LDFLAGS@ @LDFLAGS_XML2@
 
