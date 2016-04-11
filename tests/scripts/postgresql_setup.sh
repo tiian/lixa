@@ -31,6 +31,9 @@ then
 	[ $? -ne 0 ] && echo "apt-get install postgresql" && exit 1
 	sudo apt-get install libpq-dev
 	[ $? -ne 0 ] && echo "apt-get install libpq-dev" && exit 1
+	sudo service postgresql start
+	RC=$?
+	[ $RC -ne 0 ] && echo "service postgresql start" && exit 1
 fi
 # checking for yum (Red Hat derivatives)
 type yum

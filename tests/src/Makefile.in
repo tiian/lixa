@@ -305,6 +305,9 @@ case0037_OBJECTS = $(am_case0037_OBJECTS)
 case0037_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la \
 	../../src/client/switch/postgresql/liblixapq.la
+case0037_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(case0037_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_case0038_OBJECTS = case0038-case0038.$(OBJEXT)
 case0038_OBJECTS = $(am_case0038_OBJECTS)
 case0038_DEPENDENCIES = ../../src/client/liblixac.la
@@ -338,6 +341,9 @@ case0042_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la \
 	../../src/client/switch/postgresql/liblixapq.la
+case0042_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(case0042_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_case0043_OBJECTS = case0043.$(OBJEXT)
 case0043_OBJECTS = $(am_case0043_OBJECTS)
 case0043_DEPENDENCIES = ../../src/common/liblixab.la
@@ -648,6 +654,7 @@ case0037_CPPFLAGS = @POSTGRESQL_CPPFLAGS@ \
 case0037_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/postgresql/liblixapq.la
 
+case0037_LDFLAGS = @POSTGRESQL_LDFLAGS@
 case0038_SOURCES = case0038.c
 case0038_CPPFLAGS = @ORACLE_OCI_CFLAGS@ -I../../src/client
 case0038_LDFLAGS = @ORACLE_OCI_LDFLAGS@
@@ -676,6 +683,7 @@ case0042_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la \
 	../../src/client/switch/postgresql/liblixapq.la
 
+case0042_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 case0043_SOURCES = case0043.c
 case0043_LDADD = ../../src/common/liblixab.la @LDFLAGS_GLIB@ @LDFLAGS_GTHREAD@ @LDFLAGS_XML2@
 case0044_SOURCES = case0044.c
@@ -857,7 +865,7 @@ case0036$(EXEEXT): $(case0036_OBJECTS) $(case0036_DEPENDENCIES)
 	$(LINK) $(case0036_OBJECTS) $(case0036_LDADD) $(LIBS)
 case0037$(EXEEXT): $(case0037_OBJECTS) $(case0037_DEPENDENCIES) 
 	@rm -f case0037$(EXEEXT)
-	$(LINK) $(case0037_OBJECTS) $(case0037_LDADD) $(LIBS)
+	$(case0037_LINK) $(case0037_OBJECTS) $(case0037_LDADD) $(LIBS)
 case0038$(EXEEXT): $(case0038_OBJECTS) $(case0038_DEPENDENCIES) 
 	@rm -f case0038$(EXEEXT)
 	$(case0038_LINK) $(case0038_OBJECTS) $(case0038_LDADD) $(LIBS)
@@ -872,7 +880,7 @@ case0041$(EXEEXT): $(case0041_OBJECTS) $(case0041_DEPENDENCIES)
 	$(case0041_LINK) $(case0041_OBJECTS) $(case0041_LDADD) $(LIBS)
 case0042$(EXEEXT): $(case0042_OBJECTS) $(case0042_DEPENDENCIES) 
 	@rm -f case0042$(EXEEXT)
-	$(LINK) $(case0042_OBJECTS) $(case0042_LDADD) $(LIBS)
+	$(case0042_LINK) $(case0042_OBJECTS) $(case0042_LDADD) $(LIBS)
 case0043$(EXEEXT): $(case0043_OBJECTS) $(case0043_DEPENDENCIES) 
 	@rm -f case0043$(EXEEXT)
 	$(LINK) $(case0043_OBJECTS) $(case0043_LDADD) $(LIBS)

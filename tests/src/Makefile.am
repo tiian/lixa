@@ -80,6 +80,7 @@ case0037_CPPFLAGS = @POSTGRESQL_CPPFLAGS@ \
 	-I../../src/client/switch/postgresql
 case0037_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/postgresql/liblixapq.la
+case0037_LDFLAGS = @POSTGRESQL_LDFLAGS@
 case0038_SOURCES = case0038.c
 case0038_CPPFLAGS = @ORACLE_OCI_CFLAGS@ -I../../src/client
 case0038_LDFLAGS = @ORACLE_OCI_LDFLAGS@
@@ -104,6 +105,7 @@ case0042_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la \
 	../../src/client/switch/postgresql/liblixapq.la
+case0042_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 case0043_SOURCES = case0043.c
 case0043_LDADD = ../../src/common/liblixab.la @LDFLAGS_GLIB@ @LDFLAGS_GTHREAD@ @LDFLAGS_XML2@
 case0044_SOURCES = case0044.c
