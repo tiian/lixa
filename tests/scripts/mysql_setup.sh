@@ -42,15 +42,9 @@ then
 	RC2=$?
 	[ $RC1 -eq $RC2 ] && echo "yum install mysql-server/mariadb-server" && exit 1
 	sudo yum install mysql-devel
-	RC1=$?
 	sudo yum install mariadb-devel
-	RC2=$?
-	[ $RC1 -eq $RC2 ] && echo "yum install mysql-devel/mariadb/devel" && exit 1
 	sudo service mysqld start
-	RC1=$?
 	sudo service mariadb start
-	RC2=$?
-	[ $RC1 -eq $RC2 ] && echo "service mysqld/mariadb start" && exit 1
 fi
 
 # creating user and database

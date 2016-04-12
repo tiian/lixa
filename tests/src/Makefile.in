@@ -705,7 +705,8 @@ case0047_CPPFLAGS = @MYSQL_CPPFLAGS@ \
 	-I../../src/client -I../../src/common \
 	-I../../src/client/switch/mysql
 
-case0047_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
+case0047_LDADD = ../../src/common/liblixab.la @LDFLAGS_XML2@ \
+	../../src/client/liblixac.la \
 	../../src/client/switch/mysql/liblixamy.la
 
 case0047_LDFLAGS = @LDFLAGS_GLIB@ @MYSQL_LDFLAGS@ @LDFLAGS_XML2@

@@ -226,7 +226,69 @@ logout
     <para>
       A tested configuration is a configuration that passed all the case
       tests.
-      This is the list of the tested configurations:
+      This is the list of the tested configurations for release 0.9.3
+      (see also <filename>TestLog</filename> file content):
+      <table frame="all">
+	<thead>
+	  <tr><td>Operating system:</td><td>Ubuntu Linux 10.04</td></tr>
+	</thead>
+	<tbody>
+	  <tr><td>Architecture:</td><td>x86, x86-64 (virtual KVM)</td></tr>
+	  <tr><td>Resource Manager:</td><td>MySQL 5.1.73</td></tr>
+	  <tr><td>Resource Manager:</td><td>PostgreSQL 8.4.22</td></tr>
+	</tbody>
+      </table>
+      <table frame="all">
+	<thead>
+	  <tr><td>Operating system:</td><td>Ubuntu Linux 12.04</td></tr>
+	</thead>
+	<tbody>
+	  <tr><td>Architecture:</td><td>x86-64 (virtual KVM)</td></tr>
+	  <tr><td>Resource Manager:</td><td>MySQL 5.5.47</td></tr>
+	  <tr><td>Resource Manager:</td><td>PostgreSQL 9.1.21</td></tr>
+	</tbody>
+      </table>
+      <table frame="all">
+	<thead>
+	  <tr><td>Operating system:</td><td>Ubuntu Linux 14.04</td></tr>
+	</thead>
+	<tbody>
+	  <tr><td>Architecture:</td><td>x86-64 (virtual KVM)</td></tr>
+	  <tr><td>Resource Manager:</td><td>MySQL 5.5.47</td></tr>
+	  <tr><td>Resource Manager:</td><td>PostgreSQL 9.3.12</td></tr>
+	</tbody>
+      </table>
+      <table frame="all">
+	<thead>
+	  <tr><td>Operating system:</td><td>CentOS Linux 6.6</td></tr>
+	</thead>
+	<tbody>
+	  <tr><td>Architecture:</td><td>x86, x86-64 (virtual KVM)</td></tr>
+	  <tr><td>Resource Manager:</td><td>MySQL 5.1.73</td></tr>
+	  <tr><td>Resource Manager:</td><td>PostgreSQL 8.4.20</td></tr>
+	</tbody>
+      </table>
+      <table frame="all">
+	<thead>
+	  <tr><td>Operating system:</td><td>CentOS Linux 7.1</td></tr>
+	</thead>
+	<tbody>
+	  <tr><td>Architecture:</td><td>x86-64 (virtual KVM)</td></tr>
+	  <tr><td>Resource Manager:</td><td>MariaDB 5.5.47</td></tr>
+	  <tr><td>Resource Manager:</td><td>PostgreSQL 9.2.15</td></tr>
+	</tbody>
+      </table>
+      <table frame="all">
+	<thead>
+	  <tr><td>Operating system:</td><td>CentOS Linux 7.2</td></tr>
+	</thead>
+	<tbody>
+	  <tr><td>Architecture:</td><td>x86-64 (virtual KVM)</td></tr>
+	  <tr><td>Resource Manager:</td><td>MariaDB 5.5.47</td></tr>
+	  <tr><td>Resource Manager:</td><td>PostgreSQL 9.2.15</td></tr>
+	</tbody>
+      </table>
+      This is the list of the tested configurations for release 0.9.2:
       <table frame="all">
 	<thead>
 	  <tr><td>Operating system:</td><td>Ubuntu Linux 8.04</td></tr>

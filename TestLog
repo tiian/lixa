@@ -1,15 +1,6 @@
 Release: 0.9.3
-Date:
+Date: 2016-04-12
 Configuration: --enable-crash --with-mysql --with-postgresql
-Ubuntu 10.04	|x86	|virtual (KVM)	|2 vCPU
-Ubuntu 10.04	|x86_64	|virtual (KVM)	|2 vCPU
-CentOS 6.6	|x86	|virtual (KVM)	|2 vCPU
-CentOS 6.6	|x86_64	|virtual (KVM)	|2 vCPU
-CentOS 7.1	|x86_64	|virtual (KVM)	|2 vCPU
-
-Release: 0.9.3
-Date:    2016-04-07
-Configuration: --enable-crash --with-mysql 
 Ubuntu 10.04	|x86	|virtual (KVM)	|2 vCPU
 Ubuntu 10.04	|x86_64	|virtual (KVM)	|2 vCPU
 Ubuntu 12.04	|x86_64	|virtual (KVM)	|2 vCPU
@@ -17,4 +8,5 @@ Ubuntu 14.04	|x86_64	|virtual (KVM)	|2 vCPU
 CentOS 6.6	|x86	|virtual (KVM)	|2 vCPU
 CentOS 6.6	|x86_64	|virtual (KVM)	|2 vCPU
 CentOS 7.1	|x86_64	|virtual (KVM)	|2 vCPU
+CentOS 7.2	|x86_64	|virtual (KVM)	|2 vCPU
 

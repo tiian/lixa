@@ -31,6 +31,10 @@
 
 
 
+/* set module trace flag */
+#ifdef LIXA_TRACE_MODULE
+# undef LIXA_TRACE_MODULE
+#endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE LIXA_TRACE_MOD_COMMON_XID
 
 
@@ -54,7 +58,8 @@ int main(int argc, char *argv[])
         LIXA_TRACE(("lixa_my_xid_deserialized returned FALSE\n"));
         return 1;
     }
-    LIXA_TRACE_HEX_DATA("Deserialized XID is: ", &xid, sizeof(xid));
+    LIXA_TRACE_HEX_DATA("Deserialized XID is: ",
+                        (const byte_t *)&xid, sizeof(xid));
     LIXA_TRACE(("Serializing XID obtained by deserialization\n"));
     if (!lixa_my_xid_serialize(&xid, lmsx2)) {
         LIXA_TRACE(("lixa_my_xid_serialized returned FALSE\n"));
