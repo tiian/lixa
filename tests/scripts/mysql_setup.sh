@@ -30,7 +30,7 @@ then
 	sudo apt-get install mysql-server
 	[ $? -ne 0 ] && echo "apt-get install mysql-server" && exit 1
 	sudo apt-get install libmysqlclient15-dev
-	[ $? -ne 0 ] && echo "apt-get install libmysqlclient15-dev" && exit 1
+	[ $? -ne 0 ] && echo "apt-get install libmysqlclient-dev" && exit 1
 fi
 # checking for yum (Red Hat derivatives)
 type yum
@@ -50,6 +50,7 @@ fi
 # creating user and database
 echo "Creating lixa user and lixa database in MySQL"
 mysql -u root -p <<EOF
+CREATE USER 'lixa'@'localhost';
 GRANT ALL ON lixa.* TO 'lixa'@'localhost';
 CREATE DATABASE lixa;
 quit
