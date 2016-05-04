@@ -1,5 +1,8 @@
 LOG:
 
+20160504 - 0.9.4 fix of an internal bug related to MySQL bug # 12161
+		 http://bugs.mysql.com/bug.php?id=12161
+		 
 20160412 - 0.9.3 build procedure has been fixed for some different Linux
                  systems (take a look to TestLog file)
 		 A severe bug related to MySQL wrapper has been fixed

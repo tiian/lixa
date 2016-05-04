@@ -350,15 +350,3 @@ AT_CHECK([grep '^xid=' $TESTS_TMP_FILE1 | cut -d "'" -f 2 > $TESTS_TMP_FILE2], [
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0024 ; lixa_test_exec.sh noreset stop lixar -p -r -X $TESTS_TMP_FILE2], [0], [ignore], [ignore])
 AT_CHECK([echo "SELECT * FROM authors;" | mysql -h localhost -u lixa lixa], [0], [ignore], [ignore])
 AT_CLEANUP
-#
-# WARNING:
-# this case test certificate there is a bug in MySQL, it does NOT certificate
-# the bug is solved
-# It must be executed after $TESTS_TMP_FILE1 has prepared by the previous step
-#
-AT_SETUP([MY/0.1/5.2 Check MySQL bug n. 12161])
-AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
-AT_CHECK([grep '^xid=' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
-AT_CHECK([echo "SELECT * FROM authors WHERE id = 9;" | mysql -h localhost -u lixa lixa|grep Surname], [1], [ignore], [ignore])
-AT_CLEANUP

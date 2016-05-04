@@ -351,11 +351,23 @@ int lixa_xid_compare(const XID *a, const XID *b)
         return -1;
     else if (a->bqual_length > b->bqual_length)
         return 1;
-    if (0 != (result = memcmp(a->data, b->data, a->gtrid_length)))
+    if (0 != (result = memcmp(a->data, b->data, a->gtrid_length))) {
+        LIXA_TRACE(("lixa_xid_compare: a->data is ",
+                    (const byte_t *)a->data, a->gtrid_length));
+        LIXA_TRACE(("lixa_xid_compare: b->data is ",
+                    (const byte_t *)b->data, a->gtrid_length));
         return result;
+    }
     if (0 != (result = memcmp(a->data + a->gtrid_length,
                               b->data + b->gtrid_length,
-                              a->bqual_length)))
+                              a->bqual_length))) {
+        LIXA_TRACE(("lixa_xid_compare: a->data + a->gtrid_length is ",
+                    (const byte_t *)a->data + a->gtrid_length,
+                    a->bqual_length));
+        LIXA_TRACE(("lixa_xid_compare: b->data + b->gtrid_length is ",
+                    (const byte_t *)b->data + b->gtrid_length,
+                    a->bqual_length));
         return result;
+    }
     return 0;
 }

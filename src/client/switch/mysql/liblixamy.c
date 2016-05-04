@@ -1063,7 +1063,7 @@ int lixa_my_rollback(XID *xid, int rmid, long flags)
                     LIXA_TRACE(("lixa_my_rollback: unable to deserialize the "
                                 "XID retrieved with XA RECOVER\n"));
                 }
-                if (lixa_xid_compare(xid, &xid_r)) {
+                if (!lixa_xid_compare(xid, &xid_r)) {
                     LIXA_TRACE(("lixa_my_rollback: the transaction %s is in "
                                 "prepared state\n", lmsx));
                     lpsr->state.S = 3;
@@ -1354,7 +1354,7 @@ int lixa_my_commit(XID *xid, int rmid, long flags)
                     LIXA_TRACE(("lixa_my_commit: unable to deserialize the "
                                 "XID retrieved with XA RECOVER\n"));
                 }
-                if (lixa_xid_compare(xid, &xid_r)) {
+                if (!lixa_xid_compare(xid, &xid_r)) {
                     LIXA_TRACE(("lixa_my_commit: the transaction %s is in "
                                 "prepared state\n", lmsx));
                     lpsr->state.S = 3;
