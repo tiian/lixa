@@ -15,6 +15,20 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * This file is part of the libraries provided by LIXA.
+ * In addition, as a special exception, the copyright holders of LIXA gives
+ * Globetom Holdings (Pty) Ltd / 92 Regency Drive / Route 21 Corporate Park /
+ * Nellmapius Drive / Centurion / South Africa
+ * the permission to redistribute this file and/or modify it under the terms
+ * of the GNU Lesser General Public License version 2.1 as published
+ * by the Free Software Foundation.
+ * The above special grant is perpetual and restricted to
+ * Globetom Holdings (Pty) Ltd: IN NO WAY it can be automatically transferred
+ * to a different company or to different people. "In no way" contemplates:
+ * merge, acquisition and any other possible form of corportate change.
+ * IN NO WAY, the above special grant can be assimilated to a patent or
+ * any other form of asset.
  */
 #ifndef LIXA_SYSLOG_H
 # define LIXA_SYSLOG_H

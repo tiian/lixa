@@ -1,4 +1,8 @@
-	LIXA, LIbre XA, a free and open source XA transaction manager
+L     I X   X   A
+L     I  X X   A A   LIXA
+L     I   X   A   A   LIbre XA
+L     I  X X  AAAAA   a free and open source XA Transaction Manager
+LLLLL I X   X A   A
 
 LIXA (LIbre XA) is an open source and free Transaction Manager implementing the
 distributed transaction processing "XA specification" and "TX (transaction
@@ -11,6 +15,9 @@ point a single LIXA server: this is ideal where horizontal scalability is a
 must and many identical application containers must refer to a single
 transactional environment. 
 
+********
+LICENSE:
+
  * LIXA is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published
  * by the Free Software Foundation.
@@ -19,6 +26,26 @@ transactional environment.
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+
+******************
+LICENSE EXCEPTION:
+
+A piece of LIXA (liblixab, liblixac) is distributed with a special exception:
+
+ * In addition, as a special exception, the copyright holders of LIXA gives
+ * Globetom Holdings (Pty) Ltd / 92 Regency Drive / Route 21 Corporate Park /
+ * Nellmapius Drive / Centurion / South Africa
+ * the permission to redistribute this file and/or modify it under the terms
+ * of the GNU Lesser General Public License version 2.1 as published
+ * by the Free Software Foundation.
+ * The above special grant is perpetual and restricted to
+ * Globetom Holdings (Pty) Ltd: IN NO WAY it can be automatically transferred
+ * to a different company or to different people. "In no way" contemplates:
+ * merge, acquisition and any other possible form of corportate change.
+ * IN NO WAY, the above special grant can be assimilated to a patent or
+ * any other form of asset.
+
+
 
 Documentation is available in these places:
 - local directory doc/manuals/index.html after tarball extraction

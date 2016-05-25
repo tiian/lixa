@@ -299,7 +299,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = etc src var tests doc ext
-dist_doc_DATA = TestLog
+dist_doc_DATA = TestLog lgpl-2.1.txt
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

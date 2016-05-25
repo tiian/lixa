@@ -1,3 +1,16 @@
+Release: 1.0.0
+Date: 2016-05-26
+Configuration: --enable-crash --with-mysql --with-postgresql
+Ubuntu 10.04	|x86	|virtual (KVM)	|2 vCPU
+Ubuntu 10.04	|x86_64	|virtual (KVM)	|2 vCPU
+Ubuntu 12.04	|x86_64	|virtual (KVM)	|2 vCPU
+Ubuntu 14.04	|x86_64	|virtual (KVM)	|2 vCPU
+Ubuntu 16.04	|x86_64	|virtual (KVM)	|2 vCPU
+CentOS 6.6	|x86	|virtual (KVM)	|2 vCPU
+CentOS 6.6	|x86_64	|virtual (KVM)	|2 vCPU
+CentOS 7.1	|x86_64	|virtual (KVM)	|2 vCPU
+CentOS 7.2	|x86_64	|virtual (KVM)	|2 vCPU
+
 Release: 0.9.4
 Date: 2016-05-04
 Configuration: --enable-crash --with-mysql --with-postgresql

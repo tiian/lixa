@@ -1,4 +1,12 @@
 LOG:
+20160526 - 1.0.0 end of beta program, the software can be considered production
+		 ready; license special exception for:
+			Globetom Holdings (Pty) Ltd
+			92 Regency Drive
+			Route 21 Corporate Park
+			Nellmapius Drive
+			Centurion
+			South Africa
 
 20160504 - 0.9.4 fix of an internal bug related to MySQL bug # 12161
 		 http://bugs.mysql.com/bug.php?id=12161
