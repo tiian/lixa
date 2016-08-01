@@ -29,6 +29,12 @@
  * merge, acquisition and any other possible form of corportate change.
  * IN NO WAY, the above special grant can be assimilated to a patent or
  * any other form of asset.
+ *
+ * August 1st, 2016: Christian Ferrari thanks Globetom Holdings (Pty) Ltd
+ * for its donation to Emergency NGO, an international charity that promotes
+ * a culture of peace, solidarity and respect for human rights providing free,
+ * high quality medical and surgical treatment to the victims of war, landmines
+ * and poverty.
  */
 
 
