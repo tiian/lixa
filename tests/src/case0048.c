@@ -25,6 +25,8 @@
 int main(int argc, char *argv[]) {
     TXINFO info1, info2;
 
+    LIXA_TRACE_INIT;
+
     lixa_xid_create_new(&info1.xid);
 
     char *xid;
