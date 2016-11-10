@@ -31,11 +31,16 @@ int main(int argc, char *argv[]) {
 
     char *xid;
     if (tx_xid_serialize(info1, xid) != TX_OK) {
+        fprintf(stderr, "%s| unable to serialize xid\n", argv[0]);
         return 1;
     }
+
     if (!xid) {
+        fprintf(stderr, "%s| null xid\n", argv[0]);
         return 1;
     }
+
+    printf("%s| serialized xid: %s\n", argv[0], xid);
 
     if (tx_xid_deserialize(&info2, xid) != TX_OK) {
         return 1;
