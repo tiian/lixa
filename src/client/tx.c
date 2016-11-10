@@ -100,10 +100,6 @@ int tx_info(TXINFO *info) {
 int tx_xid_serialize(TXINFO info, char *sxid) {
     int txrc = TX_FAIL;
 
-    if (NULL == sxid) {
-        return txrc;
-    }
-
     lixa_ser_xid_t xid_str = "";
     if (!lixa_xid_serialize(&info.xid, xid_str)) {
         return txrc;
