@@ -97,7 +97,7 @@ int tx_info(TXINFO *info) {
     return txrc;
 }
 
-int tx_xid_serialize(TXINFO info, char *sxid) {
+int tx_xid_serialize(TXINFO info, char **sxid) {
     int txrc = TX_FAIL;
 
     lixa_ser_xid_t xid_str = "";
@@ -105,8 +105,8 @@ int tx_xid_serialize(TXINFO info, char *sxid) {
         return txrc;
     }
 
-    sxid = realloc(sxid, sizeof(lixa_ser_xid_t));
-    memcpy(sxid, xid_str, sizeof(lixa_ser_xid_t));
+    *sxid = realloc(*sxid, sizeof(lixa_ser_xid_t));
+    memcpy(*sxid, xid_str, sizeof(lixa_ser_xid_t));
 
     txrc = TX_OK;
 
