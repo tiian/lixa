@@ -132,4 +132,4 @@ case0048_SOURCES = case0048.c
 case0048_CPPFLAGS = -I../../src/client -I../../src/common
 case0048_LDADD = ../../src/common/liblixab.la @LDFLAGS_XML2@ \
     ../../src/client/liblixac.la
-case0049_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_XML2@
+case0048_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_XML2@
