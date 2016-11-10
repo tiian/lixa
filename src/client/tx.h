@@ -213,7 +213,7 @@ extern int tx_set_transaction_timeout(TRANSACTION_TIMEOUT timeout);
  * @param sxid OUT the XID in readible form (memory will be allocated)
  * @return a standardized TX return code (TX_*)
  */
-extern int tx_xid_serialize(TXINFO info, char *sxid);
+extern int tx_xid_serialize(TXINFO info, char **sxid);
 
 /**
  * De-serialize an XID
