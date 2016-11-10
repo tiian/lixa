@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 
     lixa_xid_create_new(&info1.xid);
 
-    char *xid;
+    char *xid = NULL;
     if (tx_xid_serialize(info1, &xid) != TX_OK) {
         fprintf(stderr, "%s| unable to serialize xid\n", argv[0]);
         return 1;

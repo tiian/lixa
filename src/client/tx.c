@@ -105,7 +105,11 @@ int tx_xid_serialize(TXINFO info, char **sxid) {
         return txrc;
     }
 
-    *sxid = realloc(*sxid, sizeof(lixa_ser_xid_t));
+    if (NULL != *sxid) {
+        free(*sxid);
+    }
+
+    *sxid = calloc(sizeof(lixa_ser_xid_t), sizeof(char));
     memcpy(*sxid, xid_str, sizeof(lixa_ser_xid_t));
 
     txrc = TX_OK;
