@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
     printf("%s| serialized xid: %s\n", argv[0], xid);
 
     if (tx_xid_deserialize(&info2, xid) != TX_OK) {
+        fprintf(stderr, "%s| unable to deserialize xid\n", argv[0]);
         return 1;
     }
     if (lixa_xid_compare(&(info1.xid), &(info2.xid))) {

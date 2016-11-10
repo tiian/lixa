@@ -120,7 +120,11 @@ int tx_xid_serialize(TXINFO info, char **sxid) {
 int tx_xid_deserialize(TXINFO *info, char *sxid) {
     int txrc = TX_FAIL;
 
-    txrc = lixa_xid_deserialize(&(info->xid), sxid);
+    if (!lixa_xid_deserialize(&(info->xid), sxid)) {
+        return txrc;
+    }
+
+    txrc = TX_OK;
 
     return txrc;
 }
