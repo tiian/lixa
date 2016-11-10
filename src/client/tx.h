@@ -223,11 +223,6 @@ extern int tx_xid_serialize(TXINFO info, char **sxid);
  */
 extern int tx_xid_deserialize(TXINFO *info, char *sxid);
 
-/**
- * De-serialize and XID
- * @return the
-
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
