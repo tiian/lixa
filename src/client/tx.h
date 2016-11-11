@@ -9,8 +9,6 @@
  * X/Open Document Number: C504
  */
 
-
-
 /*
  * Start of tx.h header
  *
@@ -20,8 +18,6 @@
 #define TX_H
 #define TX_H_VERSION 0 /* current version of this header file */
 
-
-
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -30,8 +26,6 @@
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_CLIENT_TX
-
-
 
 /*
  * Transaction identifier
@@ -47,8 +41,6 @@ struct xid_t {
 };
 typedef struct xid_t XID;
 #endif /* XID_T_TYPE */
-
-
 
 /*
  * A value of -1 in formatID means that the XID is null.
@@ -89,8 +81,6 @@ struct tx_info_t {
 };
 typedef struct tx_info_t TXINFO;
 
-
-
 /*
  * tx_*() return codes (transaction manager reports to application)
  */
@@ -125,19 +115,13 @@ typedef struct tx_info_t TXINFO;
 /* heuristically committed plus new
    transaction could not be started */
 
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-
-
 /*
  * Declarations of routines by which Applications call TMs:
  */
-
-
 
 /**
  * Begin a global transaction.
@@ -145,6 +129,19 @@ extern "C" {
  */
 extern int tx_begin(void);
 
+/**
+ * Join a global transaction.
+ * @param xid IN the global transaction identifier
+ * @return a standardized TX return code (TX_*)
+ */
+extern int tx_join(XID *xid);
+
+/**
+ * Ends a portion of work on a global transaction. Not to be replaced with @ref tx_commit and @ref tx_rollback.
+ * @param flags IN one of TMSUCCESS | TMFAIL (others not supported)
+ * @return a standardized TX return code (TX_*)
+ */
+extern int tx_end(int flags);
 
 /**
  * Close a set of resource managers.
@@ -154,21 +151,12 @@ extern int tx_begin(void);
  */
 extern int tx_close(void);
 
-
-/**
- * Commit a global transaction.
- * @return a standardized TX return code (TX_*)
- */
-extern int tx_commit(void);
-
-
 /**
  * Return global transaction information.
  * @param info OUT global transaction information returned
  * @return a standardized TX return code (TX_*)
  */
 extern int tx_info(TXINFO *info);
-
 
 /**
  * Open a set of resource managers; this function is the X/Open compliant
@@ -179,6 +167,11 @@ extern int tx_info(TXINFO *info);
  */
 extern int tx_open(void);
 
+/**
+ * Commit a global transaction.
+ * @return a standardized TX return code (TX_*)
+ */
+extern int tx_commit(void);
 
 /**
  * Roll back a global transaction.
@@ -186,20 +179,17 @@ extern int tx_open(void);
  */
 extern int tx_rollback(void);
 
-
 /**
  * Set commit_return characteristic
  * @return a standardized TX return code (TX_*)
  */
 extern int tx_set_commit_return(COMMIT_RETURN when_return);
 
-
 /**
  * Set transaction_control chracteristic
  * @return a standardized TX return code (TX_*)
  */
 extern int tx_set_transaction_control(TRANSACTION_CONTROL control);
-
 
 /**
  * Set transaction_timeout characteristic
@@ -227,8 +217,6 @@ extern int tx_xid_deserialize(TXINFO *info, char *sxid);
 }
 #endif /* __cplusplus */
 
-
-
 /* restore old value of LIXA_TRACE_MODULE */
 #ifdef LIXA_TRACE_MODULE_SAVE
 # undef LIXA_TRACE_MODULE
@@ -236,9 +224,7 @@ extern int tx_xid_deserialize(TXINFO *info, char *sxid);
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE_SAVE */
 
-
 #endif /* ifndef TX_H */
 /*
  * End of tx.h header
  */
-
