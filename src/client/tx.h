@@ -115,6 +115,10 @@ typedef struct tx_info_t TXINFO;
 /* heuristically committed plus new
    transaction could not be started */
 
+// flags to map to XA
+#define TX_TMFAIL       0x20000000L
+#define TX_TMSUCCESS    0x04000000L
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
