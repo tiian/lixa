@@ -150,9 +150,11 @@ int lixa_tx_begin(int *txrc, XID *xid) {
 
         int xa_start_flags = TMNOFLAGS;
         if (xid->formatID == NULLXID) {
-            /* generate the transction id */
+            /* generate the transaction id */
+            LIXA_TRACE(("lixa_tx_begin: generating new XID for transaction\n"));
             lixa_xid_create_new(xid);
         } else {
+            LIXA_TRACE(("lixa_tx_begin: XID specified, joining transaction\n"));
             xa_start_flags = TMJOIN;
         }
         client_status_set_xid(cs, xid);
