@@ -155,7 +155,6 @@ int lixa_tx_begin(int *txrc, XID *xid) {
             lixa_xid_create_new(xid);
         } else {
             LIXA_TRACE(("lixa_tx_begin: xid specified, joining transaction with new branch\n"));
-            // xa_start_flags = TMJOIN;
             lixa_xid_create_new_bqual(xid);
         }
         client_status_set_xid(cs, xid);
@@ -600,7 +599,7 @@ int lixa_tx_commit(int *txrc, int *begin_new) {
                 commit = FALSE;
             else THROW(XA_END_ERROR);
         }
-        /* prepare (skip if we are rollbacking) */
+        /* prepare (skip if we are rolling back) */
         if (commit) {
             /* bypass xa_prepare if one_phase_commit is TRUE */
             if (!one_phase_commit &&

@@ -508,7 +508,6 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags) {
 
         /* loop on all the resource managers and call xa_end function */
         *txrc = TX_OK;
-        xa_end_flags = TMSUCCESS;
         for (i = 0; i < global_ccc.actconf.rsrmgrs->len; ++i) {
             int tmp_txrc = TX_OK;
             lixa_ser_xid_t ser_xid = "";
