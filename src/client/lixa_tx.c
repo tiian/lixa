@@ -155,7 +155,7 @@ int lixa_tx_begin(int *txrc, XID *xid) {
             lixa_xid_create_new(xid);
         } else {
             LIXA_TRACE(("lixa_tx_begin: xid specified, joining transaction with new branch\n"));
-            xa_start_flags = TMJOIN;
+            // xa_start_flags = TMJOIN;
             lixa_xid_create_new_bqual(xid);
         }
         client_status_set_xid(cs, xid);
