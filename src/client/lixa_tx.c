@@ -764,8 +764,7 @@ int lixa_tx_info(int *txrc, TXINFO *info) {
                 if (client_status_is_failed(cs)) THROW(CLIENT_STATUS_FAILED);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
-                /* status not found -> tx_open did not succed -> protocol
-                   error */
+                /* status not found -> tx_open did not succeed -> protocol error */
             THROW(PROTOCOL_ERROR);
             default: THROW(COLL_GET_CS_ERROR);
         }
