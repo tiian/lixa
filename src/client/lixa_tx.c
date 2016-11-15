@@ -594,7 +594,7 @@ int lixa_tx_commit(int *txrc, int *begin_new) {
             one_phase_commit = client_status_could_one_phase(cs);
 
         /* detach the transaction */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, commit, TMNOFLAGS))) {
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, commit, TMSUCCESS))) {
             if (TX_ROLLBACK == *txrc)
                 commit = FALSE;
             else THROW(XA_END_ERROR);
@@ -1016,7 +1016,7 @@ int lixa_tx_rollback(int *txrc, int *begin_new) {
         }
         LIXA_TRACE(("lixa_tx_rollback: txstate = S%d\n", txstate));
 
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, FALSE, TMNOFLAGS))) THROW(XA_END_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, FALSE, TMFAIL))) THROW(XA_END_ERROR);
 
         if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc, FALSE))) THROW(XA_ROLLBACK_ERROR);
         switch (*txrc) {
