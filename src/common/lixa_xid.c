@@ -38,7 +38,6 @@
  */
 #include <config.h>
 
-
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -46,12 +45,9 @@
 # include <regex.h>
 #endif
 
-
 #include <lixa_config.h>
 #include <lixa_trace.h>
 #include <lixa_xid.h>
-
-
 
 /* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
@@ -59,19 +55,16 @@
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_COMMON_XID
 
-
 const long LIXA_XID_FORMAT_ID = 0x4c495841;
 
-
 uuid_t lixa_xid_global_bqual;
-
 
 #if MD5_DIGEST_LENGTH != SIZEOF_UUID_T
 # error MD5 digest and uuid_t differs in length
 #endif
 
-
-void lixa_xid_set_global_bqual(const char *md5_digest_hex) {
+void lixa_xid_set_global_bqual(const char *md5_digest_hex)
+{
     int i;
     unsigned char *p = (unsigned char *) &lixa_xid_global_bqual;
     char tmp[3];
@@ -86,16 +79,16 @@ void lixa_xid_set_global_bqual(const char *md5_digest_hex) {
     }
 }
 
-
-int lixa_xid_bqual_is_global(const XID *xid) {
+int lixa_xid_bqual_is_global(const XID *xid)
+{
     if (xid->bqual_length != MD5_DIGEST_LENGTH)
         return FALSE;
     return !memcmp(xid->data + xid->gtrid_length, &lixa_xid_global_bqual,
                    MD5_DIGEST_LENGTH);
 }
 
-
-void lixa_xid_create_new(XID *xid) {
+void lixa_xid_create_new(XID *xid)
+{
     uuid_t uuid_obj;
 
     xid->formatID = LIXA_XID_FORMAT_ID;
@@ -103,24 +96,57 @@ void lixa_xid_create_new(XID *xid) {
     xid->bqual_length = sizeof(uuid_t);
     memset(xid->data, 0, XIDDATASIZE); /* this is not necessary, but... */
     uuid_generate(uuid_obj);
-    memcpy(xid->data, uuid_obj, sizeof(uuid_t));
-    memcpy(xid->data + sizeof(uuid_t), lixa_xid_global_bqual, sizeof(uuid_t));
+    memcpy(xid->data, uuid_obj, sizeof(uuid_t)); // global transaction identifier
+    uuid_generate(uuid_obj);
+    memcpy(xid->data + sizeof(uuid_t), uuid_obj, sizeof(uuid_t)); // branch qualifier
+
 #ifdef LIXA_DEBUG
     {
-    char *gtrid, *bqual;
-    gtrid = lixa_xid_get_gtrid_ascii(xid);
-    bqual = lixa_xid_get_bqual_ascii(xid);
-    if (NULL != gtrid && NULL != bqual)
-        LIXA_TRACE(("lixa_xid_create_new: gtrid='%s'; bqual='%s'\n",
-                    gtrid, bqual));
-    if (NULL != bqual) free(bqual);
-    if (NULL != gtrid) free(gtrid);
+        char *gtrid, *bqual;
+        gtrid = lixa_xid_get_gtrid_ascii(xid);
+        bqual = lixa_xid_get_bqual_ascii(xid);
+        if (NULL != gtrid && NULL != bqual) {
+            LIXA_TRACE(("lixa_xid_create_new: gtrid='%s'; bqual='%s'\n",
+                gtrid, bqual));
+        }
+        if (NULL != bqual) free(bqual);
+        if (NULL != gtrid) free(gtrid);
     }
 #endif /* LIXA_DEBUG */
 }
 
+void lixa_xid_create_new_bqual(XID *xid)
+{
+    char *gtrid = (char *) malloc(xid->gtrid_length);
+    memset(gtrid, 0, xid->gtrid_length);
+    memcpy(gtrid, xid->data, xid->gtrid_length);
 
-char *lixa_xid_get_gtrid_ascii(const XID *xid) {
+    xid->bqual_length = sizeof(uuid_t);
+    memset(xid->data, 0, XIDDATASIZE);
+
+    uuid_t uuid_obj;
+    uuid_generate(uuid_obj);
+
+    memcpy(xid->data, gtrid, sizeof(uuid_t)); // global transaction identifier
+    memcpy(xid->data + sizeof(uuid_t), uuid_obj, sizeof(uuid_t)); // branch qualifier
+
+#ifdef LIXA_DEBUG
+    {
+        char *gtrid, *bqual;
+        gtrid = lixa_xid_get_gtrid_ascii(xid);
+        bqual = lixa_xid_get_bqual_ascii(xid);
+        if (NULL != gtrid && NULL != bqual) {
+            LIXA_TRACE(("lixa_xid_create_new_bqual: gtrid='%s'; bqual='%s'\n",
+                gtrid, bqual));
+        }
+        if (NULL != bqual) free(bqual);
+        if (NULL != gtrid) free(gtrid);
+    }
+#endif /* LIXA_DEBUG */
+}
+
+char *lixa_xid_get_gtrid_ascii(const XID *xid)
+{
     char *gtrid;
     if (NULL == (gtrid = (char *) malloc(2 * sizeof(uuid_t) + 4 + 1)))
         return NULL;
@@ -128,8 +154,8 @@ char *lixa_xid_get_gtrid_ascii(const XID *xid) {
     return gtrid;
 }
 
-
-char *lixa_xid_get_bqual_ascii(const XID *xid) {
+char *lixa_xid_get_bqual_ascii(const XID *xid)
+{
     char *bqual;
     if (NULL == (bqual = (char *) malloc(2 * sizeof(uuid_t) + 4 + 1)))
         return NULL;
@@ -137,14 +163,14 @@ char *lixa_xid_get_bqual_ascii(const XID *xid) {
     return bqual;
 }
 
-
-void lixa_xid_formatid(lixa_ser_xid_t lsx) {
+void lixa_xid_formatid(lixa_ser_xid_t lsx)
+{
     /* serialize LIXA formatID */
     sprintf(lsx, "%ld", LIXA_XID_FORMAT_ID);
 }
 
-
-int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx) {
+int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx)
+{
     int i = 0, j = 0;
     byte_t *p;
     long len = LIXA_SERIALIZED_LONG_INT /* formatID */ +
@@ -156,10 +182,10 @@ int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx) {
     /* check the XID can be serialized for PostgreSQL by this routine */
     if (len > sizeof(lixa_ser_xid_t)) {
         LIXA_TRACE(("lixa_xid_serialize: xid can not be serialized "
-                "because it would need %ld bytes instead of "
-                           SIZE_T_FORMAT
-                           "\n",
-                                   len, sizeof(lixa_ser_xid_t)));
+            "because it would need %ld bytes instead of "
+                       SIZE_T_FORMAT
+                       "\n",
+                           len, sizeof(lixa_ser_xid_t)));
         return FALSE;
     }
     /* serialize formatID and put the first separator */
@@ -186,9 +212,10 @@ int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx) {
     return TRUE;
 }
 
-
-int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx) {
-    enum Exception {
+int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
+{
+    enum Exception
+    {
         REGCOMP_ERROR, REGEXEC_ERROR, SEPARATOR1, INVALID_CHAR1, SEPARATOR2, INVALID_CHAR2, TERMINATOR, NONE
     } excp;
     int ret_cod = FALSE;
@@ -207,12 +234,12 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx) {
         /* check the string is well formed using a regular expression */
         /* compile regular expression */
         reg_error = regcomp(
-                &preg, "^([-]?[[:digit:]])+\\.([[:xdigit:]]{2})*\\.([[:xdigit:]]{2})*$",
-                REG_EXTENDED | REG_NOSUB | REG_NEWLINE);
+            &preg, "^([-]?[[:digit:]])+\\.([[:xdigit:]]{2})*\\.([[:xdigit:]]{2})*$",
+            REG_EXTENDED | REG_NOSUB | REG_NEWLINE);
         if (0 != reg_error) {
             regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
             LIXA_TRACE(("lixa_xid_deserialize: regcomp returned %d ('%s') "
-                    "instead of 0\n", reg_error, reg_errbuf));
+                "instead of 0\n", reg_error, reg_errbuf));
             THROW(REGCOMP_ERROR);
         }
         /* check string against regular expression */
@@ -220,8 +247,8 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx) {
         if (0 != reg_error) {
             regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
             LIXA_TRACE(("lixa_xid_deserialize: regexec returned %d ('%s') "
-                    "instead of 0 for string '%s'\n",
-                    reg_error, reg_errbuf, lsx));
+                "instead of 0 for string '%s'\n",
+                reg_error, reg_errbuf, lsx));
             regfree(&preg);
             THROW(REGEXEC_ERROR);
         }
@@ -232,8 +259,8 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx) {
         q = strchr(lsx, LIXA_XID_SEPARATOR);
         if (NULL == q) {
             LIXA_TRACE(("lixa_xid_deserialize: '%s' does "
-                    "not contain the separator '%c'\n", lsx,
-                    LIXA_XID_SEPARATOR));
+                "not contain the separator '%c'\n", lsx,
+                LIXA_XID_SEPARATOR));
             THROW(SEPARATOR1);
         }
 
@@ -259,7 +286,7 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx) {
                 break;
             } else {
                 LIXA_TRACE(("lixa_xid_deserialize: '%s' invalid "
-                        "characters found in gtrid part\n", p));
+                    "characters found in gtrid part\n", p));
                 THROW(INVALID_CHAR1);
             }
             p += 2;
@@ -267,7 +294,7 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx) {
         /* check the separator between gtrid and bqual */
         if (*p != LIXA_XID_SEPARATOR) {
             LIXA_TRACE(("lixa_xid_deserialize: '%c' is not the "
-                    "separator\n", *p));
+                "separator\n", *p));
             THROW(SEPARATOR2);
         }
         xid->gtrid_length = i;
@@ -285,7 +312,7 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx) {
                 break;
             } else {
                 LIXA_TRACE(("lixa_xid_deserialize: '%s' invalid "
-                        "characters found in bqual part\n", p));
+                    "characters found in bqual part\n", p));
                 THROW(INVALID_CHAR2);
             }
             p += 2;
@@ -293,7 +320,7 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx) {
         /* check the terminator */
         if (*p != '\0') {
             LIXA_TRACE(("lixa_xid_deserialize: '%c' is not the "
-                    "terminator\n", *p));
+                "terminator\n", *p));
             THROW(TERMINATOR);
         }
         xid->bqual_length = i - xid->gtrid_length;
@@ -320,20 +347,20 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx) {
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xid_deserialize/excp=%d/ret_cod=%d\n",
-            excp, ret_cod));
+        excp, ret_cod));
     return ret_cod;
 }
 
-
-int lixa_xid_compare(const XID *a, const XID *b) {
+int lixa_xid_compare(const XID *a, const XID *b)
+{
     int result;
 
     LIXA_TRACE(("lixa_xid_compare: a->formatID=%ld, b->formatID=%ld, "
-            "a->gtrid_length=%ld, b->gtrid_length=%ld, "
-            "a->bqual_length=%ld, b->bqual_length=%ld\n",
-            a->formatID, b->formatID,
-            a->gtrid_length, b->gtrid_length,
-            a->bqual_length, b->bqual_length));
+        "a->gtrid_length=%ld, b->gtrid_length=%ld, "
+        "a->bqual_length=%ld, b->bqual_length=%ld\n",
+        a->formatID, b->formatID,
+        a->gtrid_length, b->gtrid_length,
+        a->bqual_length, b->bqual_length));
     if (a->formatID < b->formatID)
         return -1;
     else if (a->formatID > b->formatID)
@@ -348,20 +375,20 @@ int lixa_xid_compare(const XID *a, const XID *b) {
         return 1;
     if (0 != (result = memcmp(a->data, b->data, a->gtrid_length))) {
         LIXA_TRACE(("lixa_xid_compare: a->data is ",
-                (const byte_t *) a->data, a->gtrid_length));
+            (const byte_t *) a->data, a->gtrid_length));
         LIXA_TRACE(("lixa_xid_compare: b->data is ",
-                (const byte_t *) b->data, a->gtrid_length));
+            (const byte_t *) b->data, a->gtrid_length));
         return result;
     }
     if (0 != (result = memcmp(a->data + a->gtrid_length,
                               b->data + b->gtrid_length,
                               a->bqual_length))) {
         LIXA_TRACE(("lixa_xid_compare: a->data + a->gtrid_length is ",
-                (const byte_t *) a->data + a->gtrid_length,
-                a->bqual_length));
+            (const byte_t *) a->data + a->gtrid_length,
+            a->bqual_length));
         LIXA_TRACE(("lixa_xid_compare: b->data + b->gtrid_length is ",
-                (const byte_t *) b->data + b->gtrid_length,
-                a->bqual_length));
+            (const byte_t *) b->data + b->gtrid_length,
+            a->bqual_length));
         return result;
     }
     return 0;
