@@ -119,7 +119,9 @@
 
 
 #ifdef HAVE_NFDS_T
-# if SIZEOF_NFDS_T == SIZEOF_LONG_INT
+# if SIZEOF_NFDS_T == SIZEOF_INT
+#  define NFDS_T_FORMAT "%d"
+# elif SIZEOF_NFDS_T == SIZEOF_LONG_INT
 #  define NFDS_T_FORMAT "%lu"
 # else
 #  error Unable to determine sizeof(nfds_t)

@@ -1,5 +1,9 @@
 AC_INIT([lixa], [1.1.0], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
+LT_INIT
+
+AC_CONFIG_MACRO_DIRS([m4])
 
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
