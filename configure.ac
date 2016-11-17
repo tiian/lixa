@@ -1,4 +1,4 @@
-AC_INIT([lixa], [1.0.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [1.1.0], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -86,13 +86,13 @@ AM_CONDITIONAL([COMPILE_DOCBOOK_STUFF], [test "$HAVE_DOCBOOK" = "yes"])
 #   (No interfaces changed:                   REVISION++)
 #
 # liblixac and liblixacmt libraries version
-LT_LIXAC_CURRENT=0
-LT_LIXAC_AGE=0
-LT_LIXAC_REVISION=1
+LT_LIXAC_CURRENT=1
+LT_LIXAC_AGE=1
+LT_LIXAC_REVISION=0
 # liblixab and liblixbcmt libraries version
-LT_LIXAB_CURRENT=0
-LT_LIXAB_AGE=0
-LT_LIXAB_REVISION=1
+LT_LIXAB_CURRENT=1
+LT_LIXAB_AGE=1
+LT_LIXAB_REVISION=0
 
 # Expanded variables can be used in C code and XML files
 EXPANDED_SYSCONFDIR=$(eval echo $sysconfdir)
