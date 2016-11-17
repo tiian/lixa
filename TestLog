@@ -1,3 +1,9 @@
+Release: 1.1.0
+Date: 2016-11-17
+Configuration: --enable-debug --with-oracle
+CentOS 6.3 |x86_64 |virtual (VMWare) |1 vCPU
+RedHat 6.3 |x86_64 |virtual (VMWare) |4 vCPU
+
 Release: 1.0.0
 Date: 2016-05-26
 Configuration: --enable-crash --with-mysql --with-postgresql
