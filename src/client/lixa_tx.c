@@ -439,11 +439,6 @@ int lixa_tx_end(int *txrc, int flags) {
             one_phase_commit = FALSE;
 
         /* detach the transaction */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, FALSE, flags))) {
-            if (TX_ROLLBACK != *txrc) {
-                THROW(XA_END_ERROR);
-            }
-        }
         if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, commit, flags))) {
             if (TX_ROLLBACK == *txrc)
                 commit = FALSE;
