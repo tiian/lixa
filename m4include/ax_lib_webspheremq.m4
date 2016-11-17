@@ -99,6 +99,9 @@ AC_DEFUN([AX_LIB_WEBSPHEREMQ],
           rs6000-ibm-aix)
           	WSMQ_LIB_NAME="lib64"
           	;;
+          *-apple-darwin1?.1.0)
+            WSMQ_LIB_NAME="lib64"
+            ;;
           *) AC_MSG_ERROR([LIXA is not yet ported on this architecture for WebSphere MQ])
             ;;
         esac
