@@ -1513,7 +1513,7 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
             case LIXA_RC_OK: /* nothing to do */
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
-                /* status not found -> tx_open did not succed -> protocol
+                /* status not found -> tx_open did not succeed -> protocol
                    error */
             THROW(PROTOCOL_ERROR);
             default: THROW(COLL_GET_CS_ERROR);
