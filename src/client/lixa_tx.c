@@ -400,7 +400,6 @@ int lixa_tx_end(int *txrc, int flags) {
     LIXA_TRACE(("lixa_tx_end\n"));
     TRY {
         int txstate, next_txstate, commit = TRUE;
-        int one_phase_commit = FALSE, prepare_txrc;
 
         /* retrieve a reference to the thread status */
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
@@ -435,8 +434,7 @@ int lixa_tx_end(int *txrc, int flags) {
                 "TX_TIMEOUT_ROLLBACK_ONLY and cannot be committed, "
                 "rolling back...\n", txstate));
             commit = FALSE;
-        } else
-            one_phase_commit = FALSE;
+        }
 
         /* detach the transaction */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, commit, flags))) {
@@ -444,13 +442,6 @@ int lixa_tx_end(int *txrc, int flags) {
                 commit = FALSE;
             else THROW(XA_END_ERROR);
         }
-        /* prepare (skip if we are rolling back) */
-        if (commit) {
-            /* bypass xa_prepare if one_phase_commit is TRUE */
-            if (!one_phase_commit &&
-                LIXA_RC_OK != (ret_cod = lixa_xa_prepare(cs, txrc, &commit))) THROW(XA_PREPARE_ERROR);
-        }
-        prepare_txrc = *txrc;
         /* commit/rollback */
         if (commit) {
             LIXA_TRACE(("lixa_tx_end: go on with end...\n"));
@@ -480,12 +471,6 @@ int lixa_tx_end(int *txrc, int flags) {
                 default: THROW(INVALID_TXRC2);
             } /* switch */
         } else {
-            if (TX_FAIL == prepare_txrc) {
-                LIXA_TRACE(("lixa_tx_end: txrc=%d, prepare_txrc=%d, "
-                    "returning TX_FAIL to Application Program\n",
-                    *txrc, prepare_txrc));
-                *txrc = TX_FAIL;
-            }
             switch (*txrc) {
                 case TX_OK:
                 case TX_ROLLBACK:
