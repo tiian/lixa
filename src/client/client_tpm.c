@@ -86,16 +86,23 @@ int client_tpm_trans(const client_status_t *cs, GTree *xidt)
         lixa_msg_init(&msg);
 
         /* build the message */
+        struct lixa_msg_body_trans_8_client_s client;
+        client.job = (xmlChar *) lixa_job_get_raw(global_ccc.job);
+        strncpy(client.config_digest,
+                global_ccc.config_digest, sizeof(md5_digest_hex_t));
+        client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
+        client.maint = TRUE;
+
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.pvs.verb = LIXA_MSG_VERB_TRANS;
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
         if (NULL ==
-            (msg.body.scan_8.client.job = xmlStrdup(client->job))) THROW(
+            (msg.body.trans_8.client.job = xmlStrdup(client.job))) THROW(
             XML_STRDUP_ERROR);
-        strncpy(msg.body.scan_8.client.config_digest, client->config_digest,
+        strncpy(msg.body.trans_8.client.config_digest, client.config_digest,
                 sizeof(md5_digest_hex_t));
-        msg.body.scan_8.client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
+        msg.body.trans_8.client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
             &msg, buffer, sizeof(buffer) - 1,
@@ -113,7 +120,7 @@ int client_tpm_trans(const client_status_t *cs, GTree *xidt)
         }
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-            fd, buffer, sizeof(buffer)-1,
+            fd, buffer, sizeof(buffer) - 1,
             &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
@@ -123,8 +130,7 @@ int client_tpm_trans(const client_status_t *cs, GTree *xidt)
             read_bytes, read_bytes, read_bytes, buffer));
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-            buffer, read_bytes, &msg)))
-        THROW(MSG_DESERIALIZE_ERROR);
+            buffer, read_bytes, &msg))) THROW(MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
         lixa_msg_trace(&msg);
 #endif

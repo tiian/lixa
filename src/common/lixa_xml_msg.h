@@ -1163,6 +1163,7 @@ struct lixa_msg_body_trans_8_client_s
 {
     xmlChar *job;
     md5_digest_hex_t config_digest;
+    int maint;
 };
 
 /**
