@@ -181,6 +181,14 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc,
                     const char *xid_file);
 
 /**
+ * @brief Retrives information about all existing transactions
+ * <b>Note:</b> This is a non standard function.
+ * @param[in] report flag intidating if the information should be reported
+ * @return a standarised return code
+ */
+int lixa_tx_tpm(int report);
+
+/**
  * This function is used to clean-up the environment when a function
  * ends with TX_FAIL and the calling program can not call other functions
  * but tx_open. The primary usage is avoiding memory leaks.

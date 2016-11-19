@@ -122,7 +122,7 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
         memset(&srd->pld.ph.last_verb_step, 0,
                sizeof(struct lixa_msg_verb_step_s) * PAYLOAD_HEADER_VERB_STEP);
         common_status_conthr_init(&srd->pld.ph.state);
-        srd->pld.ph.recoverying_block_id = 0;
+        srd->pld.ph.recovering_block_id = 0;
         srd->pld.ph.recovery_failed = FALSE;
         srd->pld.ph.recovery_commit = FALSE;
         memset(&srd->pld.ph.recovery_failed_time, 0, sizeof(struct timeval));

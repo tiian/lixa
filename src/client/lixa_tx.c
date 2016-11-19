@@ -40,13 +40,19 @@
 #include <config.h>
 
 #ifdef HAVE_ASSERT_H
+
 # include <assert.h>
+
 #endif
 #ifdef HAVE_STDIO_H
+
 # include <stdio.h>
+
 #endif
 #ifdef HAVE_STRING_H
+
 # include <string.h>
+
 #endif
 
 #include <lixa_crash.h>
@@ -60,6 +66,7 @@
 #include <client_config.h>
 #include <client_recovery.h>
 #include <client_status.h>
+#include <client_tpm.h>
 
 /* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
@@ -67,8 +74,10 @@
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_TX
 
-int lixa_tx_begin(int *txrc, XID *xid) {
-    enum Exception {
+int lixa_tx_begin(int *txrc, XID *xid)
+{
+    enum Exception
+    {
         CLIENT_STATUS_FAILED,
         STATUS_NOT_FOUND,
         COLL_GET_CS_ERROR,
@@ -131,7 +140,7 @@ int lixa_tx_begin(int *txrc, XID *xid) {
         for (i = 0; i < global_ccc.actconf.rsrmgrs->len; ++i) {
             struct client_status_rsrmgr_s *csr = &g_array_index(
                 cs->rmstatus,
-            struct client_status_rsrmgr_s, i);
+                struct client_status_rsrmgr_s, i);
             if (csr->common.dynamic &&
                 XA_STATE_D3 == csr->common.xa_td_state) {
                 LIXA_TRACE(("lixa_tx_begin: resource manager # %u uses "
@@ -154,7 +163,8 @@ int lixa_tx_begin(int *txrc, XID *xid) {
             LIXA_TRACE(("lixa_tx_begin: generating new xid for transaction\n"));
             lixa_xid_create_new(xid);
         } else {
-            LIXA_TRACE(("lixa_tx_begin: xid specified, joining transaction with new branch\n"));
+            LIXA_TRACE(
+                ("lixa_tx_begin: xid specified, joining transaction with new branch\n"));
             lixa_xid_create_new_bqual(xid);
         }
         client_status_set_xid(cs, xid);
@@ -260,8 +270,10 @@ int lixa_tx_begin(int *txrc, XID *xid) {
     return ret_cod;
 }
 
-int lixa_tx_close(int *txrc) {
-    enum Exception {
+int lixa_tx_close(int *txrc)
+{
+    enum Exception
+    {
         CLIENT_STATUS_FAILED,
         COLL_GET_CS_ERROR,
         CONNECTION_CLOSED,
@@ -315,7 +327,8 @@ int lixa_tx_close(int *txrc) {
            must not be waited; see bug 3006369 */
         client_status_set_txstate(cs, TX_STATE_S0);
 
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_close(cs, &tmp_txrc))) THROW(LIXA_XA_CLOSE_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_close(cs, &tmp_txrc))) THROW(
+            LIXA_XA_CLOSE_ERROR);
 
         THROW(NONE);
     }
@@ -360,7 +373,8 @@ int lixa_tx_close(int *txrc) {
     return ret_cod;
 }
 
-void lixa_tx_close_cleanup(void) {
+void lixa_tx_close_cleanup(void)
+{
     client_status_t *cs;
 
     LIXA_TRACE(("lixa_tx_close_cleanup\n"));
@@ -369,8 +383,10 @@ void lixa_tx_close_cleanup(void) {
     }
 }
 
-int lixa_tx_end(int *txrc, int flags) {
-    enum Exception {
+int lixa_tx_end(int *txrc, int flags)
+{
+    enum Exception
+    {
         CLIENT_STATUS_FAILED,
         STATUS_NOT_FOUND,
         COLL_GET_CS_ERROR,
@@ -560,8 +576,10 @@ int lixa_tx_end(int *txrc, int flags) {
     return ret_cod;
 }
 
-int lixa_tx_commit(int *txrc, int *begin_new) {
-    enum Exception {
+int lixa_tx_commit(int *txrc, int *begin_new)
+{
+    enum Exception
+    {
         CLIENT_STATUS_FAILED,
         STATUS_NOT_FOUND,
         COLL_GET_CS_ERROR,
@@ -630,7 +648,8 @@ int lixa_tx_commit(int *txrc, int *begin_new) {
             one_phase_commit = client_status_could_one_phase(cs);
 
         /* detach the transaction */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, commit, TMSUCCESS))) {
+        if (LIXA_RC_OK !=
+            (ret_cod = lixa_xa_end(cs, txrc, commit, TMSUCCESS))) {
             if (TX_ROLLBACK == *txrc)
                 commit = FALSE;
             else THROW(XA_END_ERROR);
@@ -639,7 +658,9 @@ int lixa_tx_commit(int *txrc, int *begin_new) {
         if (commit) {
             /* bypass xa_prepare if one_phase_commit is TRUE */
             if (!one_phase_commit &&
-                LIXA_RC_OK != (ret_cod = lixa_xa_prepare(cs, txrc, &commit))) THROW(XA_PREPARE_ERROR);
+                LIXA_RC_OK !=
+                (ret_cod = lixa_xa_prepare(cs, txrc, &commit))) THROW(
+                XA_PREPARE_ERROR);
         }
         prepare_txrc = *txrc;
         /* commit/rollback */
@@ -675,7 +696,9 @@ int lixa_tx_commit(int *txrc, int *begin_new) {
             } /* switch */
         } else {
             LIXA_TRACE(("lixa_tx_commit: go on with rollback...\n"));
-            if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc, TRUE))) THROW(XA_ROLLBACK_ERROR);
+            if (LIXA_RC_OK !=
+                (ret_cod = lixa_xa_rollback(cs, txrc, TRUE))) THROW(
+                XA_ROLLBACK_ERROR);
             if (TX_FAIL == prepare_txrc) {
                 LIXA_TRACE(("lixa_tx_commit: txrc=%d, prepare_txrc=%d, "
                     "returning TX_FAIL to Application Program\n",
@@ -711,7 +734,8 @@ int lixa_tx_commit(int *txrc, int *begin_new) {
         } /* else */
 
         /* clean Heurstically Completed states... */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs, finished))) THROW(XA_FORGET_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs, finished))) THROW(
+            XA_FORGET_ERROR);
 
         /* update the TX state, now TX_STATE_S0 */
         client_status_set_txstate(cs, next_txstate);
@@ -778,9 +802,15 @@ int lixa_tx_commit(int *txrc, int *begin_new) {
     return ret_cod;
 }
 
-int lixa_tx_info(int *txrc, TXINFO *info) {
-    enum Exception {
-        CLIENT_STATUS_FAILED, COLL_GET_CS_ERROR, PROTOCOL_ERROR, INVALID_STATUS, NONE
+int lixa_tx_info(int *txrc, TXINFO *info)
+{
+    enum Exception
+    {
+        CLIENT_STATUS_FAILED,
+        COLL_GET_CS_ERROR,
+        PROTOCOL_ERROR,
+        INVALID_STATUS,
+        NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     client_status_t *cs = NULL;
@@ -879,8 +909,10 @@ int lixa_tx_info(int *txrc, TXINFO *info) {
     return ret_cod;
 }
 
-int lixa_tx_open(int *txrc, int mmode) {
-    enum Exception {
+int lixa_tx_open(int *txrc, int mmode)
+{
+    enum Exception
+    {
         CLIENT_STATUS_FAILED,
         CLIENT_STATUS_COLL_REGISTER_ERROR,
         ADDED_AND_NOT_FOUND,
@@ -932,11 +964,15 @@ int lixa_tx_open(int *txrc, int mmode) {
         /* check TX state (see Table 7-1) */
         txstate = client_status_get_txstate(cs);
         if (txstate == TX_STATE_S0) {
-            if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc))) THROW(CLIENT_CONFIG_ERROR);
+            if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc))) THROW(
+                CLIENT_CONFIG_ERROR);
             if (LIXA_RC_OK != (ret_cod =
-                                   client_connect(&global_csc, &global_ccc))) THROW(CLIENT_CONNECT_ERROR);
+                                   client_connect(&global_csc,
+                                                  &global_ccc))) THROW(
+                CLIENT_CONNECT_ERROR);
             if (LIXA_RC_OK != (ret_cod = client_config_job(
-                &global_ccc, client_status_get_sockfd(cs)))) THROW(CLIENT_CONFIG_JOB_ERROR);
+                &global_ccc, client_status_get_sockfd(cs)))) THROW(
+                CLIENT_CONFIG_JOB_ERROR);
 
             next_txstate = TX_STATE_S1;
 
@@ -997,8 +1033,10 @@ int lixa_tx_open(int *txrc, int mmode) {
     return ret_cod;
 }
 
-int lixa_tx_rollback(int *txrc, int *begin_new) {
-    enum Exception {
+int lixa_tx_rollback(int *txrc, int *begin_new)
+{
+    enum Exception
+    {
         CLIENT_STATUS_FAILED,
         STATUS_NOT_FOUND,
         COLL_GET_CS_ERROR,
@@ -1051,9 +1089,12 @@ int lixa_tx_rollback(int *txrc, int *begin_new) {
         }
         LIXA_TRACE(("lixa_tx_rollback: txstate = S%d\n", txstate));
 
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, FALSE, TMFAIL))) THROW(XA_END_ERROR);
+        if (LIXA_RC_OK !=
+            (ret_cod = lixa_xa_end(cs, txrc, FALSE, TMFAIL))) THROW(
+            XA_END_ERROR);
 
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc, FALSE))) THROW(XA_ROLLBACK_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc, FALSE))) THROW(
+            XA_ROLLBACK_ERROR);
         switch (*txrc) {
             case TX_OK:
             case TX_MIXED:
@@ -1082,7 +1123,8 @@ int lixa_tx_rollback(int *txrc, int *begin_new) {
         } /* switch */
 
         /* clean Heurstically Completed states... */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs, finished))) THROW(XA_FORGET_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs, finished))) THROW(
+            XA_FORGET_ERROR);
 
         /* update the TX state, now TX_STATE_S0 */
         client_status_set_txstate(cs, next_txstate);
@@ -1144,8 +1186,10 @@ int lixa_tx_rollback(int *txrc, int *begin_new) {
     return ret_cod;
 }
 
-int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return) {
-    enum Exception {
+int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return)
+{
+    enum Exception
+    {
         CLIENT_STATUS_FAILED,
         COLL_GET_CS_ERROR,
         PROTOCOL_ERROR,
@@ -1247,8 +1291,10 @@ int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return) {
 }
 
 int lixa_tx_set_transaction_control(int *txrc,
-                                    TRANSACTION_CONTROL control) {
-    enum Exception {
+                                    TRANSACTION_CONTROL control)
+{
+    enum Exception
+    {
         CLIENT_STATUS_FAILED,
         COLL_GET_CS_ERROR,
         PROTOCOL_ERROR,
@@ -1377,9 +1423,16 @@ int lixa_tx_set_transaction_control(int *txrc,
 }
 
 int lixa_tx_set_transaction_timeout(int *txrc,
-                                    TRANSACTION_TIMEOUT timeout) {
-    enum Exception {
-        CLIENT_STATUS_FAILED, COLL_GET_CS_ERROR, PROTOCOL_ERROR, INVALID_STATUS, INVALID_OPTION, NONE
+                                    TRANSACTION_TIMEOUT timeout)
+{
+    enum Exception
+    {
+        CLIENT_STATUS_FAILED,
+        COLL_GET_CS_ERROR,
+        PROTOCOL_ERROR,
+        INVALID_STATUS,
+        INVALID_OPTION,
+        NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     client_status_t *cs = NULL;
@@ -1465,8 +1518,10 @@ int lixa_tx_set_transaction_timeout(int *txrc,
 }
 
 int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
-                    int utf, const char *xid, const char *xid_file) {
-    enum Exception {
+                    int utf, const char *xid, const char *xid_file)
+{
+    enum Exception
+    {
         COLL_GET_CS_ERROR,
         CONNECTION_CLOSED,
         PROTOCOL_ERROR,
@@ -1517,10 +1572,12 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
             cs, crt, bbqc, bfic, utf))) THROW(RECOVERY_SCAN_ERROR);
 
         if (report && LIXA_RC_OK != (
-            ret_cod = client_recovery_report(cs, crt))) THROW(RECOVERY_REPORT_ERROR);
+            ret_cod = client_recovery_report(cs, crt))) THROW(
+            RECOVERY_REPORT_ERROR);
 
         /* open file if necessary */
-        if (NULL != xid_file && NULL == (xid_stream = fopen(xid_file, "r"))) THROW(FOPEN_ERROR);
+        if (NULL != xid_file &&
+            NULL == (xid_stream = fopen(xid_file, "r"))) THROW(FOPEN_ERROR);
 
         i = 0;
         while (xid || xid_file) {
@@ -1550,7 +1607,8 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
                 continue;
             }
             printf("Analizing transaction '%s':\n", buffer);
-            if (!lixa_xid_deserialize(&tmp_xid, buffer)) THROW(XID_DESERIALIZE_ERROR);
+            if (!lixa_xid_deserialize(&tmp_xid, buffer)) THROW(
+                XID_DESERIALIZE_ERROR);
 
             /* look for xid */
             if (NULL == (tree_record = g_tree_lookup(crt, &tmp_xid))) {
@@ -1560,11 +1618,13 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
                 if (commit) {
                     if (LIXA_RC_OK != (
                         ret_cod = client_recovery_cold_commit(
-                            cs, &tmp_xid, tree_record))) THROW(COLD_COMMIT_ERROR);
+                            cs, &tmp_xid, tree_record))) THROW(
+                        COLD_COMMIT_ERROR);
                 } else if (rollback) {
                     if (LIXA_RC_OK != (
                         ret_cod = client_recovery_cold_rollback(
-                            cs, &tmp_xid, tree_record))) THROW(COLD_ROLLBACK_ERROR);
+                            cs, &tmp_xid, tree_record))) THROW(
+                        COLD_ROLLBACK_ERROR);
                 } else
                     printf("this transaction exists and could be "
                                "committed/rolled back.\n");
@@ -1614,7 +1674,86 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
     return ret_cod;
 }
 
-void lixa_tx_cleanup(void) {
+int lixa_tx_tpm(int report)
+{
+    enum Exception
+    {
+        COLL_GET_CS_ERROR,
+        CONNECTION_CLOSED,
+        PROTOCOL_ERROR,
+        G_TREE_NEW,
+        TPM_SCAN_ERROR,
+        TPM_REPORT_ERROR,
+        XID_DESERIALIZE_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    GTree *xidt = NULL;
+
+    LIXA_TRACE_INIT;
+    LIXA_CRASH_INIT;
+    LIXA_TRACE(("lixa_tx_tpm\n"));
+    TRY {
+        /* retrieve a reference to the thread status */
+        client_status_t *cs = NULL;
+        ret_cod = client_status_coll_get_cs(&global_csc, &cs);
+        switch (ret_cod) {
+            case LIXA_RC_OK: /* nothing to do */
+                break;
+            case LIXA_RC_OBJ_NOT_FOUND:
+                /* status not found -> tx_open did not succeed -> protocol error */
+            THROW(PROTOCOL_ERROR);
+            default: THROW(COLL_GET_CS_ERROR);
+        }
+
+        /* check the connection to the server is still alive */
+        if (!client_status_is_connected(cs)) THROW(CONNECTION_CLOSED);
+
+        /* create a new tree; node key is a dynamically allocated XID; node data is a dynamic array */
+        if (NULL == (xidt = g_tree_new_full(tpm_xid_compare, NULL, free,
+                                            tpm_array_free))) THROW(G_TREE_NEW);
+
+        if (LIXA_RC_OK != (ret_cod = client_tpm_trans(cs, xidt))) THROW(
+            TPM_SCAN_ERROR);
+
+        if (report && LIXA_RC_OK != (
+            ret_cod = client_tpm_report(cs, xidt))) THROW(
+            TPM_REPORT_ERROR);
+
+        THROW(NONE);
+    }
+    CATCH
+    {
+        switch (excp) {
+            case COLL_GET_CS_ERROR:
+            case CONNECTION_CLOSED:
+                break;
+            case PROTOCOL_ERROR:
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case G_TREE_NEW:
+                ret_cod = LIXA_RC_G_RETURNED_NULL;
+                break;
+                break;
+            case XID_DESERIALIZE_ERROR:
+                ret_cod = LIXA_RC_MALFORMED_XID;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        if (NULL != xidt) g_tree_destroy(xidt);
+    } /* TRY-CATCH */
+    LIXA_TRACE(
+        ("lixa_tx_tpm/excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+void lixa_tx_cleanup(void)
+{
     int ret_cod;
 
     LIXA_TRACE(("lixa_tx_cleanup: emergency socket & memory clean-up\n"));
