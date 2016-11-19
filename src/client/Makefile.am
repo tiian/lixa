@@ -1,11 +1,11 @@
 SUBDIRS = switch
 include_HEADERS = lixa.h lixanonapi.h tx.h
 noinst_HEADERS = client_config.h client_conn.h client_recovery.h \
-	client_status.h lixa_tx.h lixa_tx_rc.h lixa_xa.h
+	client_status.h lixa_tx.h lixa_tx_rc.h lixa_xa.h client_tpm.h
 lib_LTLIBRARIES = liblixac.la
 liblixac_la_SOURCES = client_config.c client_conn.c client_recovery.c \
 	client_status.c lixa_ax.c lixa_tx.c lixa_tx_rc.c lixa_xa.c tx.c \
-	lixanonapi.c
+	lixanonapi.c client_tpm.c
 AM_CFLAGS = -Wall -fno-strict-aliasing
 liblixac_la_CPPFLAGS = -DLIXA_MULTITHREAD=1 -I$(srcdir)/../common
 liblixac_la_LIBADD = ../common/liblixab.la
