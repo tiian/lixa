@@ -1288,11 +1288,20 @@ int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc, int *commit)
 
             record.rmid = i;
             record.flags = TMNOFLAGS;
-            record.rc = csr->prepare_rc = act_rsrmgr->xa_switch->xa_prepare_entry(
-                client_status_get_xid(cs), record.rmid, record.flags);
-            LIXA_TRACE(
-                ("lixa_xa_prepare: xa_prepare_entry(xid, %d, 0x%lx) = "
-                    "%d\n", record.rmid, record.flags, record.rc));
+            /* loop on all XID */
+            for (j = 0; j < xida->len; j++) {
+                char *sxid = g_array_index(xida, char*, j);
+                LIXA_TRACE(("lixa_xa_prepare: preparing sxid='%s'\n", sxid));
+
+                XID xid;
+                if (!lixa_xid_deserialize(&xid, sxid)) THROW(
+                    XID_DESERIALIZE_ERROR);
+                record.rc = csr->prepare_rc = act_rsrmgr->xa_switch->xa_prepare_entry(
+                    &xid, record.rmid, record.flags);
+                LIXA_TRACE(
+                    ("lixa_xa_prepare: xa_prepare_entry(xid, %d, 0x%lx) = "
+                        "%d\n", record.rmid, record.flags, record.rc));
+            } /* for (j=0; ...) */
 
             break_prepare = TRUE;
             switch (record.rc) {
@@ -1576,101 +1585,93 @@ lixa_xa_rollback(client_status_t *cs, GArray *xida, int *txrc, int tx_commit)
             }
 
             record.flags = TMNOFLAGS;
-            for (j = 0; j < xida->len; j++) {
-                char *sxid = g_array_index(xida, char*, j);
-                LIXA_TRACE(("lixa_xa_commit: committing sxid='%s'\n", sxid));
-
-                XID xid;
-                if (!lixa_xid_deserialize(&xid, sxid)) THROW(
-                    XID_DESERIALIZE_ERROR);
+            record.rc = act_rsrmgr->xa_switch->xa_rollback_entry(
+                client_status_get_xid(cs), record.rmid, record.flags);
+            LIXA_TRACE(
+                ("lixa_xa_rollback: xa_rollback_entry(xid, %d, 0x%lx) "
+                    "= %d\n", record.rmid, record.flags, record.rc));
+            if (XA_RETRY == record.rc) {
+                sleep(1); /* this is a critical choice */
+                LIXA_TRACE(("lixa_xa_rollback: XA_RETRY, trying again..."));
                 record.rc = act_rsrmgr->xa_switch->xa_rollback_entry(
-                    &xid, record.rmid, record.flags);
-                LIXA_TRACE(
-                    ("lixa_xa_rollback: xa_rollback_entry(xid, %d, 0x%lx) "
-                        "= %d\n", record.rmid, record.flags, record.rc));
-                if (XA_RETRY == record.rc) {
-                    sleep(1); /* this is a critical choice */
-                    LIXA_TRACE(("lixa_xa_rollback: XA_RETRY, trying again..."));
-                    record.rc = act_rsrmgr->xa_switch->xa_rollback_entry(
-                        &xid, record.rmid, record.flags);
-                    LIXA_TRACE(("lixa_xa_rollback: xa_rollback_entry("
-                        "xid, %d, 0x%lx) = %d\n", record.rmid,
-                        record.flags, record.rc));
-                }
-
-                /* force a different return code if xa_prepare failed; see
-                   TX (Transaction Demarcation) Specification page 68, note 3 */
-                if (tx_commit &&
-                    XA_OK != record.rc && XA_HEURRB != record.rc &&
-                    XAER_RMFAIL != record.rc && XA_HEURCOM != record.rc &&
-                    XA_HEURHAZ != record.rc && XA_HEURMIX != record.rc &&
-                    (XA_RBBASE > record.rc || XA_RBEND < record.rc) &&
-                    (XAER_RMERR == csr->prepare_rc ||
-                     XAER_PROTO == csr->prepare_rc)) {
-                    LIXA_TRACE(("lixa_xa_rollback: tx_commit=%d, record.rc=%d, "
-                        "csr->prepare_rc=%d, forcing LIXA_XAER_HAZARD "
-                        "rollback\n", tx_commit, record.rc,
-                        csr->prepare_rc));
-                    lixa_xid_serialize(&xid, ser_xid);
-                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC016W,
-                           (char *) act_rsrmgr->generic->name, record.rmid,
-                           csr->prepare_rc, record.rc,
-                           NULL != ser_xid ? ser_xid : "");
-                    /* force the return code of xa_rollback() to a different one */
-                    record.rc = LIXA_XAER_HAZARD;
-                }
-
-                if (LIXA_RC_OK !=
-                    (ret_cod = lixa_tx_rc_add(&ltr, record.rc))) THROW(
-                    TX_RC_ADD_ERROR6);
-
-                switch (record.rc) {
-                    case XA_HEURHAZ:
-                    case XA_HEURCOM:
-                    case XA_HEURRB:
-                    case XA_HEURMIX:
-                        csr->common.xa_s_state = XA_STATE_S5;
-                        msg.body.rollback_8.conthr.finished = FALSE;
-                        break;
-                    case XA_OK:
-                        csr->common.xa_s_state = XA_STATE_S0;
-                        break;
-                    case XA_RBROLLBACK:
-                    case XA_RBCOMMFAIL:
-                    case XA_RBDEADLOCK:
-                    case XA_RBINTEGRITY:
-                    case XA_RBOTHER:
-                    case XA_RBPROTO:
-                    case XA_RBTIMEOUT:
-                    case XA_RBTRANSIENT:
-                        csr->common.xa_s_state = XA_STATE_S0;
-                        break;
-                    case XAER_ASYNC: THROW(ASYNC_NOT_IMPLEMENTED);
-                    case LIXA_XAER_HAZARD: /* keeping the same state changed by
-                                          xa_prepare() */
-                        break;
-                    case XAER_RMERR:
-                        csr->common.xa_s_state = XA_STATE_S0;
-                        break;
-                    case XA_RETRY: /* state does not change, this will become a
-                                  recovery pending transaction */
-                        break;
-                    case XAER_RMFAIL:
-                        csr->common.xa_r_state = XA_STATE_R0;
-                        break;
-                    case XAER_NOTA:
-                        csr->common.xa_s_state = XA_STATE_S0;
-                        break;
-                    case XAER_INVAL:
-                    case XAER_PROTO:
-                        csr->common.xa_td_state =
-                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
-                        break;
-                    default: THROW(UNEXPECTED_XA_RC);
-                }
-                record.r_state = csr->common.xa_r_state;
-                record.s_state = csr->common.xa_s_state;
+                    client_status_get_xid(cs), record.rmid, record.flags);
+                LIXA_TRACE(("lixa_xa_rollback: xa_rollback_entry("
+                    "xid, %d, 0x%lx) = %d\n", record.rmid,
+                    record.flags, record.rc));
             }
+
+            /* force a different return code if xa_prepare failed; see
+               TX (Transaction Demarcation) Specification page 68, note 3 */
+            if (tx_commit &&
+                XA_OK != record.rc && XA_HEURRB != record.rc &&
+                XAER_RMFAIL != record.rc && XA_HEURCOM != record.rc &&
+                XA_HEURHAZ != record.rc && XA_HEURMIX != record.rc &&
+                (XA_RBBASE > record.rc || XA_RBEND < record.rc) &&
+                (XAER_RMERR == csr->prepare_rc ||
+                 XAER_PROTO == csr->prepare_rc)) {
+                LIXA_TRACE(("lixa_xa_rollback: tx_commit=%d, record.rc=%d, "
+                    "csr->prepare_rc=%d, forcing LIXA_XAER_HAZARD "
+                    "rollback\n", tx_commit, record.rc,
+                    csr->prepare_rc));
+                lixa_xid_serialize(&xid, ser_xid);
+                syslog(LOG_WARNING, LIXA_SYSLOG_LXC016W,
+                       (char *) act_rsrmgr->generic->name, record.rmid,
+                       csr->prepare_rc, record.rc,
+                       NULL != ser_xid ? ser_xid : "");
+                /* force the return code of xa_rollback() to a different one */
+                record.rc = LIXA_XAER_HAZARD;
+            }
+
+            if (LIXA_RC_OK !=
+                (ret_cod = lixa_tx_rc_add(&ltr, record.rc))) THROW(
+                TX_RC_ADD_ERROR6);
+
+            switch (record.rc) {
+                case XA_HEURHAZ:
+                case XA_HEURCOM:
+                case XA_HEURRB:
+                case XA_HEURMIX:
+                    csr->common.xa_s_state = XA_STATE_S5;
+                    msg.body.rollback_8.conthr.finished = FALSE;
+                    break;
+                case XA_OK:
+                    csr->common.xa_s_state = XA_STATE_S0;
+                    break;
+                case XA_RBROLLBACK:
+                case XA_RBCOMMFAIL:
+                case XA_RBDEADLOCK:
+                case XA_RBINTEGRITY:
+                case XA_RBOTHER:
+                case XA_RBPROTO:
+                case XA_RBTIMEOUT:
+                case XA_RBTRANSIENT:
+                    csr->common.xa_s_state = XA_STATE_S0;
+                    break;
+                case XAER_ASYNC: THROW(ASYNC_NOT_IMPLEMENTED);
+                case LIXA_XAER_HAZARD: /* keeping the same state changed by
+                                          xa_prepare() */
+                    break;
+                case XAER_RMERR:
+                    csr->common.xa_s_state = XA_STATE_S0;
+                    break;
+                case XA_RETRY: /* state does not change, this will become a
+                                  recovery pending transaction */
+                    break;
+                case XAER_RMFAIL:
+                    csr->common.xa_r_state = XA_STATE_R0;
+                    break;
+                case XAER_NOTA:
+                    csr->common.xa_s_state = XA_STATE_S0;
+                    break;
+                case XAER_INVAL:
+                case XAER_PROTO:
+                    csr->common.xa_td_state =
+                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    break;
+                default: THROW(UNEXPECTED_XA_RC);
+            }
+            record.r_state = csr->common.xa_r_state;
+            record.s_state = csr->common.xa_s_state;
             g_array_append_val(msg.body.rollback_8.xa_rollback_execs, record);
         } /* for (i=0; ...) */
 
