@@ -169,7 +169,7 @@ int client_tpm_trans(const client_status_t *cs, GTree *xidt, int maint)
                 /* initialize the array */
                 GArray *sxid = NULL;
                 if (NULL == (sxid = g_array_new(FALSE, FALSE,
-                                                LIXA_XID_SERIALIZE_LENGTH))) THROW(
+                                                sizeof(char *)))) THROW(
                     G_ARRAY_NEW);
 
                 /* insert the node in the tree */
@@ -184,7 +184,7 @@ int client_tpm_trans(const client_status_t *cs, GTree *xidt, int maint)
             }
 
             /* add the serialized xid to the array */
-            lixa_ser_xid_t sxid = {0};
+            char *sxid = malloc(LIXA_XID_SERIALIZE_LENGTH);
             memcpy(sxid, trans->xid, LIXA_XID_SERIALIZE_LENGTH);
             LIXA_TRACE(("client_tpm_trans: adding sxid='%s'\n", sxid));
             g_array_append_val((GArray *) node, sxid);
@@ -307,7 +307,7 @@ gboolean client_tpm_report_foreach(gpointer key, gpointer value, gpointer data)
 
     fprintf(stream, "gtrid='%s':\n", gtrid);
     for (i = 0; i < sxid->len; i++) {
-        char *p = &g_array_index(sxid, char, i);
+        char *p = g_array_index(sxid, char*, i);
         fprintf(stream, "\tsxid='%s'\n", p);
     }
     fprintf(stream, "\n");
@@ -322,7 +322,7 @@ gboolean client_tpm_value_foreach(gpointer key, gpointer value, gpointer data)
     guint i;
 
     for (i = 0; i < sxid->len; i++) {
-        char *p = &g_array_index(sxid, char, i);
+        char *p = g_array_index(sxid, char*, i);
         char *xid = malloc(LIXA_XID_SERIALIZE_LENGTH);
         memcpy(xid, p, LIXA_XID_SERIALIZE_LENGTH);
         g_array_append_val(xida, xid);
