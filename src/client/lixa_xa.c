@@ -318,105 +318,97 @@ int lixa_xa_commit(client_status_t *cs, GArray *xida, int *txrc,
             }
 
             record.flags = one_phase_commit ? TMONEPHASE : TMNOFLAGS;
-            for (j = 0; j < xida->len; j++) {
-                char *sxid = g_array_index(xida, char*, j);
-                LIXA_TRACE(("lixa_xa_commit: committing sxid='%s'\n", sxid));
-
-                XID xid;
-                if (!lixa_xid_deserialize(&xid, sxid)) THROW(
-                    XID_DESERIALIZE_ERROR);
+            record.rc = act_rsrmgr->xa_switch->xa_commit_entry(
+                client_status_get_xid(cs), record.rmid, record.flags);
+            LIXA_TRACE(("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) = "
+                "%d\n", record.rmid, record.flags, record.rc));
+            if (XA_RETRY == record.rc) {
+                /* try a second time */
+                sleep(1); /* this is a critical choice... */
+                LIXA_TRACE(("lixa_xa_commit: XA_RETRY, trying again...\n"));
                 record.rc = act_rsrmgr->xa_switch->xa_commit_entry(
-                    &xid, record.rmid, record.flags);
-                LIXA_TRACE(("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) = "
-                    "%d\n", record.rmid, record.flags, record.rc));
-                if (XA_RETRY == record.rc) {
-                    /* try a second time */
-                    sleep(1); /* this is a critical choice... */
-                    LIXA_TRACE(("lixa_xa_commit: XA_RETRY, trying again...\n"));
-                    record.rc = act_rsrmgr->xa_switch->xa_commit_entry(
-                        &xid, record.rmid, record.flags);
-                    LIXA_TRACE(
-                        ("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) "
-                            "= %d\n", record.rmid, record.flags, record.rc));
-                }
-
-                if (LIXA_RC_OK !=
-                    (ret_cod = lixa_tx_rc_add(&ltr, record.rc))) THROW(
-                    TX_RC_ADD_ERROR2);
-
-                switch (record.rc) {
-                    case XA_HEURHAZ:
-                    case XA_HEURCOM:
-                    case XA_HEURRB:
-                    case XA_HEURMIX:
-                        csr->common.xa_s_state = XA_STATE_S5;
-                        msg.body.commit_8.conthr.finished = FALSE;
-                        break;
-                    case XA_OK:
-                        csr->common.xa_s_state = XA_STATE_S0;
-                        break;
-                    case XA_RBROLLBACK:
-                    case XA_RBCOMMFAIL:
-                    case XA_RBDEADLOCK:
-                    case XA_RBINTEGRITY:
-                    case XA_RBOTHER:
-                    case XA_RBPROTO:
-                    case XA_RBTIMEOUT:
-                    case XA_RBTRANSIENT:
-                        csr->common.xa_s_state = XA_STATE_S0;
-                        if (!(TMONEPHASE & record.flags)) {
-                            lixa_xid_serialize(
-                                client_status_get_xid(cs), ser_xid);
-                            syslog(LOG_WARNING, LIXA_SYSLOG_LXC017W,
-                                   (char *) act_rsrmgr->generic->name,
-                                   record.rmid,
-                                   record.rc, NULL != ser_xid ? ser_xid : "");
-                            LIXA_TRACE(("lixa_xa_commit: xa_commit returned "
-                                "XA_RB* (%d) for rmid=%d,xid='%s' but "
-                                "TMONEPHASE was not used\n",
-                                record.rc, record.rmid,
-                                NULL != ser_xid ? ser_xid : ""));
-                            THROW(INVALID_XA_RC);
-                        }
-                        break;
-                    case XAER_ASYNC: THROW(ASYNC_NOT_IMPLEMENTED);
-                    case XAER_RMERR:
-                        csr->common.xa_s_state = XA_STATE_S0;
-                        break;
-                    case XA_RETRY:
-                        if (TMONEPHASE & record.flags) {
-                            /* transaction consistency is delegated to
-                               Resource Manager behavior */
-                            csr->common.xa_s_state = XA_STATE_S0;
-                            lixa_xid_serialize(
-                                client_status_get_xid(cs), ser_xid);
-                            syslog(LOG_WARNING, LIXA_SYSLOG_LXC026W,
-                                   (char *) act_rsrmgr->generic->name,
-                                   record.rmid,
-                                   record.rc, NULL != ser_xid ? ser_xid : "");
-                            LIXA_TRACE(("lixa_xa_commit: xa_commit returned "
-                                "XA_RETRY (%d) for rmid=%d,xid='%s' and "
-                                "TMONEPHASE was used\n",
-                                record.rc, record.rmid,
-                                NULL != ser_xid ? ser_xid : ""));
-                        }
-                        break;
-                    case XAER_RMFAIL:
-                        csr->common.xa_r_state = XA_STATE_R0;
-                        break;
-                    case XAER_NOTA:
-                        csr->common.xa_s_state = XA_STATE_S0;
-                        break;
-                    case XAER_INVAL:
-                    case XAER_PROTO:
-                        csr->common.xa_td_state =
-                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
-                        break;
-                    default: THROW(UNEXPECTED_XA_RC);
-                }
-                record.r_state = csr->common.xa_r_state;
-                record.s_state = csr->common.xa_s_state;
+                    client_status_get_xid(cs), record.rmid, record.flags);
+                LIXA_TRACE(
+                    ("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) "
+                        "= %d\n", record.rmid, record.flags, record.rc));
             }
+
+            if (LIXA_RC_OK !=
+                (ret_cod = lixa_tx_rc_add(&ltr, record.rc))) THROW(
+                TX_RC_ADD_ERROR2);
+
+            switch (record.rc) {
+                case XA_HEURHAZ:
+                case XA_HEURCOM:
+                case XA_HEURRB:
+                case XA_HEURMIX:
+                    csr->common.xa_s_state = XA_STATE_S5;
+                    msg.body.commit_8.conthr.finished = FALSE;
+                    break;
+                case XA_OK:
+                    csr->common.xa_s_state = XA_STATE_S0;
+                    break;
+                case XA_RBROLLBACK:
+                case XA_RBCOMMFAIL:
+                case XA_RBDEADLOCK:
+                case XA_RBINTEGRITY:
+                case XA_RBOTHER:
+                case XA_RBPROTO:
+                case XA_RBTIMEOUT:
+                case XA_RBTRANSIENT:
+                    csr->common.xa_s_state = XA_STATE_S0;
+                    if (!(TMONEPHASE & record.flags)) {
+                        lixa_xid_serialize(
+                            client_status_get_xid(cs), ser_xid);
+                        syslog(LOG_WARNING, LIXA_SYSLOG_LXC017W,
+                               (char *) act_rsrmgr->generic->name,
+                               record.rmid,
+                               record.rc, NULL != ser_xid ? ser_xid : "");
+                        LIXA_TRACE(("lixa_xa_commit: xa_commit returned "
+                            "XA_RB* (%d) for rmid=%d,xid='%s' but "
+                            "TMONEPHASE was not used\n",
+                            record.rc, record.rmid,
+                            NULL != ser_xid ? ser_xid : ""));
+                        THROW(INVALID_XA_RC);
+                    }
+                    break;
+                case XAER_ASYNC: THROW(ASYNC_NOT_IMPLEMENTED);
+                case XAER_RMERR:
+                    csr->common.xa_s_state = XA_STATE_S0;
+                    break;
+                case XA_RETRY:
+                    if (TMONEPHASE & record.flags) {
+                        /* transaction consistency is delegated to
+                           Resource Manager behavior */
+                        csr->common.xa_s_state = XA_STATE_S0;
+                        lixa_xid_serialize(
+                            client_status_get_xid(cs), ser_xid);
+                        syslog(LOG_WARNING, LIXA_SYSLOG_LXC026W,
+                               (char *) act_rsrmgr->generic->name,
+                               record.rmid,
+                               record.rc, NULL != ser_xid ? ser_xid : "");
+                        LIXA_TRACE(("lixa_xa_commit: xa_commit returned "
+                            "XA_RETRY (%d) for rmid=%d,xid='%s' and "
+                            "TMONEPHASE was used\n",
+                            record.rc, record.rmid,
+                            NULL != ser_xid ? ser_xid : ""));
+                    }
+                    break;
+                case XAER_RMFAIL:
+                    csr->common.xa_r_state = XA_STATE_R0;
+                    break;
+                case XAER_NOTA:
+                    csr->common.xa_s_state = XA_STATE_S0;
+                    break;
+                case XAER_INVAL:
+                case XAER_PROTO:
+                    csr->common.xa_td_state =
+                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    break;
+                default: THROW(UNEXPECTED_XA_RC);
+            }
+            record.r_state = csr->common.xa_r_state;
+            record.s_state = csr->common.xa_s_state;
             g_array_append_val(msg.body.commit_8.xa_commit_execs, record);
         } /* for (i=0; ...) */
 
@@ -1296,21 +1288,11 @@ int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc, int *commit)
 
             record.rmid = i;
             record.flags = TMNOFLAGS;
-
-            /* loop on all XID */
-            for (j = 0; j < xida->len; j++) {
-                char *sxid = g_array_index(xida, char*, j);
-                LIXA_TRACE(("lixa_xa_prepare: preparing sxid='%s'\n", sxid));
-
-                XID xid;
-                if (!lixa_xid_deserialize(&xid, sxid)) THROW(
-                    XID_DESERIALIZE_ERROR);
-                record.rc = csr->prepare_rc = act_rsrmgr->xa_switch->xa_prepare_entry(
-                    &xid, record.rmid, record.flags);
-                LIXA_TRACE(
-                    ("lixa_xa_prepare: xa_prepare_entry(xid, %d, 0x%lx) = "
-                        "%d\n", record.rmid, record.flags, record.rc));
-            } /* for (j=0; ...) */
+            record.rc = csr->prepare_rc = act_rsrmgr->xa_switch->xa_prepare_entry(
+                client_status_get_xid(cs), record.rmid, record.flags);
+            LIXA_TRACE(
+                ("lixa_xa_prepare: xa_prepare_entry(xid, %d, 0x%lx) = "
+                    "%d\n", record.rmid, record.flags, record.rc));
 
             break_prepare = TRUE;
             switch (record.rc) {
