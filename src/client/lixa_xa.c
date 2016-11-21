@@ -326,7 +326,7 @@ int lixa_xa_commit(client_status_t *cs, GArray *xida, int *txrc,
                 if (!lixa_xid_deserialize(&xid, sxid)) THROW(
                     XID_DESERIALIZE_ERROR);
                 record.rc = act_rsrmgr->xa_switch->xa_commit_entry(
-                    client_status_get_xid(cs), record.rmid, record.flags);
+                    &xid, record.rmid, record.flags);
                 LIXA_TRACE(("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) = "
                     "%d\n", record.rmid, record.flags, record.rc));
                 if (XA_RETRY == record.rc) {
