@@ -1301,60 +1301,60 @@ int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc, int *commit)
                 LIXA_TRACE(
                     ("lixa_xa_prepare: xa_prepare_entry(xid, %d, 0x%lx) = "
                         "%d\n", record.rmid, record.flags, record.rc));
-            } /* for (j=0; ...) */
 
-            break_prepare = TRUE;
-            switch (record.rc) {
-                case XA_OK:
-                    csr->common.xa_s_state = XA_STATE_S3;
-                    break_prepare = FALSE;
-                    break;
-                case XA_RDONLY:
-                    csr->common.xa_s_state = XA_STATE_S0;
-                    break_prepare = FALSE;
-                    break;
-                case XA_RBROLLBACK:
-                case XA_RBCOMMFAIL:
-                case XA_RBDEADLOCK:
-                case XA_RBINTEGRITY:
-                case XA_RBOTHER:
-                case XA_RBPROTO:
-                case XA_RBTIMEOUT:
-                case XA_RBTRANSIENT:
-                    csr->common.xa_s_state = XA_STATE_S0;
-                    tmp_txrc = TX_ROLLBACK;
-                    break;
-                case XAER_NOTA:
-                    csr->common.xa_s_state = XA_STATE_S0;
-                    tmp_txrc = TX_ROLLBACK;
-                    break;
-                case XAER_RMERR:
-                    csr->common.xa_s_state = XA_STATE_S2;
-                    tmp_txrc = TX_ROLLBACK;
-                    break;
-                case XAER_RMFAIL:
-                    csr->common.xa_r_state = XA_STATE_R0;
-                    tmp_txrc = TX_FAIL;
-                    break;
-                case XAER_INVAL:
-                    csr->common.xa_td_state =
-                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
-                    tmp_txrc = TX_FAIL;
-                    break;
-                case XAER_PROTO:
-                    csr->common.xa_td_state =
-                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
-                    tmp_txrc = TX_ROLLBACK;
-                    break;
-                case XAER_ASYNC:
-                    *txrc = TX_FAIL;
-                    THROW(ASYNC_NOT_IMPLEMENTED);
-                default:
-                    *txrc = TX_FAIL;
-                    THROW(UNEXPECTED_XA_RC);
-            }
-            record.s_state = csr->common.xa_s_state;
-            record.td_state = csr->common.xa_td_state;
+                break_prepare = TRUE;
+                switch (record.rc) {
+                    case XA_OK:
+                        csr->common.xa_s_state = XA_STATE_S3;
+                        break_prepare = FALSE;
+                        break;
+                    case XA_RDONLY:
+                        csr->common.xa_s_state = XA_STATE_S0;
+                        break_prepare = FALSE;
+                        break;
+                    case XA_RBROLLBACK:
+                    case XA_RBCOMMFAIL:
+                    case XA_RBDEADLOCK:
+                    case XA_RBINTEGRITY:
+                    case XA_RBOTHER:
+                    case XA_RBPROTO:
+                    case XA_RBTIMEOUT:
+                    case XA_RBTRANSIENT:
+                        csr->common.xa_s_state = XA_STATE_S0;
+                        tmp_txrc = TX_ROLLBACK;
+                        break;
+                    case XAER_NOTA:
+                        csr->common.xa_s_state = XA_STATE_S0;
+                        tmp_txrc = TX_ROLLBACK;
+                        break;
+                    case XAER_RMERR:
+                        csr->common.xa_s_state = XA_STATE_S2;
+                        tmp_txrc = TX_ROLLBACK;
+                        break;
+                    case XAER_RMFAIL:
+                        csr->common.xa_r_state = XA_STATE_R0;
+                        tmp_txrc = TX_FAIL;
+                        break;
+                    case XAER_INVAL:
+                        csr->common.xa_td_state =
+                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                        tmp_txrc = TX_FAIL;
+                        break;
+                    case XAER_PROTO:
+                        csr->common.xa_td_state =
+                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                        tmp_txrc = TX_ROLLBACK;
+                        break;
+                    case XAER_ASYNC:
+                        *txrc = TX_FAIL;
+                        THROW(ASYNC_NOT_IMPLEMENTED);
+                    default:
+                        *txrc = TX_FAIL;
+                        THROW(UNEXPECTED_XA_RC);
+                }
+                record.s_state = csr->common.xa_s_state;
+                record.td_state = csr->common.xa_td_state;
+            } /* for (j=0; ...) */
             g_array_append_val(msg.body.prepare_8.xa_prepare_execs, record);
 
             if (lixa_tx_rc_hierarchy(tmp_txrc) <
@@ -1613,7 +1613,7 @@ lixa_xa_rollback(client_status_t *cs, GArray *xida, int *txrc, int tx_commit)
                     "csr->prepare_rc=%d, forcing LIXA_XAER_HAZARD "
                     "rollback\n", tx_commit, record.rc,
                     csr->prepare_rc));
-                lixa_xid_serialize(&xid, ser_xid);
+                lixa_xid_serialize(client_status_get_xid(cs), ser_xid);
                 syslog(LOG_WARNING, LIXA_SYSLOG_LXC016W,
                        (char *) act_rsrmgr->generic->name, record.rmid,
                        csr->prepare_rc, record.rc,
