@@ -318,16 +318,17 @@ int lixa_xa_commit(client_status_t *cs, XID *xid, int *txrc,
             }
 
             record.flags = one_phase_commit ? TMONEPHASE : TMNOFLAGS;
-            record.rc = act_rsrmgr->xa_switch->xa_commit_entry(
-                client_status_get_xid(cs), record.rmid, record.flags);
+            record.rc = act_rsrmgr->xa_switch->xa_commit_entry(xid, record.rmid,
+                                                               record.flags);
             LIXA_TRACE(("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) = "
                 "%d\n", record.rmid, record.flags, record.rc));
             if (XA_RETRY == record.rc) {
                 /* try a second time */
                 sleep(1); /* this is a critical choice... */
                 LIXA_TRACE(("lixa_xa_commit: XA_RETRY, trying again...\n"));
-                record.rc = act_rsrmgr->xa_switch->xa_commit_entry(
-                    client_status_get_xid(cs), record.rmid, record.flags);
+                record.rc = act_rsrmgr->xa_switch->xa_commit_entry(xid,
+                                                                   record.rmid,
+                                                                   record.flags);
                 LIXA_TRACE(
                     ("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) "
                         "= %d\n", record.rmid, record.flags, record.rc));
