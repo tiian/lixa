@@ -63,13 +63,24 @@
 extern "C" {
 #endif /* __cplusplus */
 
-int client_tpm_trans(const client_status_t *cs, GTree *xidt);
+int client_tpm_trans(const client_status_t *cs, GTree *xidt, int maint);
 
 int client_tpm_report(const client_status_t *cs, GTree *xidt);
 
-int tpm_xid_compare(gconstpointer a, gconstpointer b, gpointer foo);
+gboolean client_tpm_report_foreach(gpointer key, gpointer value, gpointer data);
 
-int tpm_array_free(gpointer data);
+/**
+ * @brief Count the number of transactions
+ * @param key
+ * @param value
+ * @param data
+ * @return boolean indicating if traversal should continue
+ */
+gboolean client_tpm_value_foreach(gpointer key, gpointer value, gpointer data);
+
+int tpm_gtrid_compare(gconstpointer a, gconstpointer b, gpointer user_data);
+
+void tpm_gtrid_value_destroy(gpointer data);
 
 #ifdef __cplusplus
 }

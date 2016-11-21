@@ -47,7 +47,7 @@ struct server_trans_tbl_rec_s
 {
     char *gtrid; /** key */
     guint tsid; /** thread status identifier */
-    XID xid; /** the transaction XID */
+    lixa_ser_xid_t xid; /** the transaction XID */
     uint32_t block_id; /** relevant block inside the status file */
 };
 
@@ -79,7 +79,10 @@ int server_trans_tbl_delete(server_trans_tbl_t *stt);
 int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
                                const struct server_trans_tbl_rec_s *sttr,
                                struct server_trans_tbl_rec_s *out,
-                               guint *out_array_size);
+                               guint *out_array_size,
+                               int main);
+
+gboolean server_trans_tbl_traverse(gpointer key, gpointer value, gpointer data);
 
 #ifdef __cplusplus
 }

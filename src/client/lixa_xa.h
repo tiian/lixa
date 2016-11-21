@@ -75,13 +75,14 @@ int lixa_xa_close(client_status_t *cs, int *txrc);
 /**
  * Commit work performed on behalf of the transaction manager
  * @param cs IN reference to the status of the calling client
+ * @param xida[in] array of XID to commit
  * @param txrc OUT return code prepared for tx_commit/tx_rollback call
  * @param one_phase_commit IN boolean value:
  *            TRUE = the T.M. is performing a ONE phase commit
  *            FALSE = the T.M. is performing a standard TWO phase commit
  * @return a reason code
  */
-int lixa_xa_commit(client_status_t *cs, int *txrc, int one_phase_commit);
+int lixa_xa_commit(client_status_t *cs, GArray *xida, int *txrc, int one_phase_commit);
 
 
 /**
@@ -106,7 +107,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags);
  *                    transaction as not finished
  * @return a reason code
  */
-int lixa_xa_forget(client_status_t *cs, int finished);
+int lixa_xa_forget(client_status_t *cs, GArray* xida, int finished);
 
 
 /**
@@ -125,6 +126,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate,
 /**
  * End work performed on behalf of the transaction manager
  * @param cs IN reference to the status of the calling client
+ * @param[in] xida array of XID to prepare
  * @param txrc OUT return code prepared for tx_commit/tx_rollback call
  * @param commit OUT boolean value: <br>
  *                  TRUE = xa_prepare will be followed by xa_commit <br>
@@ -134,7 +136,7 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate,
  *                          out)
  * @return a reason code
  */
-int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit);
+int lixa_xa_prepare(client_status_t *cs, GArray* xida, int *txrc, int *commit);
 
 
 /**
@@ -145,7 +147,7 @@ int lixa_xa_prepare(client_status_t *cs, int *txrc, int *commit);
  *                  from tx_rollback (FALSE)
  * @return a reason code
  */
-int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit);
+int lixa_xa_rollback(client_status_t *cs, GArray *xida, int *txrc, int tx_commit);
 
 
 /**

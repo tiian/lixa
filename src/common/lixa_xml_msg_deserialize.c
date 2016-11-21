@@ -272,6 +272,10 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_trans_8(
                             cur->xmlChildrenNode, msg);
                         break;
+                    case 16:
+                        ret_cod = lixa_msg_deserialize_trans_16(
+                            cur->xmlChildrenNode, msg);
+                        break;
                     default: THROW(INVALID_STEP12);
                 }
                 break;
@@ -1967,7 +1971,11 @@ int lixa_msg_deserialize_trans_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
     enum Exception
     {
-        JOB_NOT_FOUND, CONFIG_DIGEST_NOT_FOUND, XML_UNRECOGNIZED_TAG, NONE
+        JOB_NOT_FOUND,
+        CONFIG_DIGEST_NOT_FOUND,
+        MAINT_NOT_FOUND,
+        XML_UNRECOGNIZED_TAG,
+        NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -1988,6 +1996,11 @@ int lixa_msg_deserialize_trans_8(xmlNodePtr cur, struct lixa_msg_s *msg)
                 msg->body.trans_8.client.config_digest[
                     MD5_DIGEST_LENGTH * 2] = '\0';
                 xmlFree(tmp);
+                if (NULL == (tmp = xmlGetProp(
+                    cur, LIXA_XML_MSG_PROP_MAINT))) THROW(MAINT_NOT_FOUND);
+                msg->body.trans_8.client.maint =
+                    (int) strtol((char *) tmp, NULL, 0);
+                xmlFree(tmp);
             } else THROW(XML_UNRECOGNIZED_TAG);
             cur = cur->next;
         } /* while (NULL != cur) */
@@ -1999,6 +2012,7 @@ int lixa_msg_deserialize_trans_8(xmlNodePtr cur, struct lixa_msg_s *msg)
         switch (excp) {
             case JOB_NOT_FOUND:
             case CONFIG_DIGEST_NOT_FOUND:
+            case MAINT_NOT_FOUND:
                 ret_cod = LIXA_RC_MALFORMED_XML_MSG;
                 break;
             case XML_UNRECOGNIZED_TAG:
@@ -2012,6 +2026,130 @@ int lixa_msg_deserialize_trans_8(xmlNodePtr cur, struct lixa_msg_s *msg)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_trans_8/excp=%d/"
+        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+int lixa_msg_deserialize_trans_16(xmlNodePtr cur, struct lixa_msg_s *msg)
+{
+    enum Exception
+    {
+        RC_NOT_FOUND,
+        JOB_NOT_FOUND,
+        CONFIG_DIGEST_NOT_FOUND,
+        PROP_VERB_NOT_FOUND,
+        PROP_STEP_NOT_FOUND,
+        XID_NOT_FOUND,
+        XID_DESERIALIZE_ERROR,
+        XML_UNRECOGNIZED_TAG1,
+        XML_UNRECOGNIZED_TAG2,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    LIXA_TRACE(("lixa_msg_deserialize_trans_16\n"));
+    TRY {
+        while (NULL != cur) {
+            xmlChar *tmp;
+            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_ANSWER)) {
+                /* retrieve answer result */
+                if (NULL ==
+                    (tmp = (xmlGetProp(cur, LIXA_XML_MSG_PROP_RC)))) THROW(
+                    RC_NOT_FOUND);
+                msg->body.trans_16.answer.rc =
+                    (int) strtol((char *) tmp, NULL, 0);
+                xmlFree(tmp);
+            } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CLIENT)) {
+                xmlNodePtr cur2 = cur->xmlChildrenNode;
+                /* retrieve client properties */
+                if (NULL == (msg->body.trans_16.client.job =
+                                 xmlGetProp(cur, LIXA_XML_MSG_PROP_JOB))) THROW(
+                    JOB_NOT_FOUND);
+                if (NULL == (tmp = xmlGetProp(
+                    cur, LIXA_XML_MSG_PROP_CONFIG_DIGEST))) THROW(
+                    CONFIG_DIGEST_NOT_FOUND);
+                strncpy(msg->body.trans_16.client.config_digest,
+                        (char *) tmp, sizeof(md5_digest_hex_t));
+                msg->body.trans_16.client.config_digest[
+                    MD5_DIGEST_LENGTH * 2] = '\0';
+                xmlFree(tmp);
+
+                while (NULL != cur2) {
+                    if (!xmlStrcmp(
+                        cur2->name, LIXA_XML_MSG_TAG_LAST_VERB_STEP)) {
+                        if (NULL == (tmp = xmlGetProp(
+                            cur2, LIXA_XML_MSG_PROP_VERB))) THROW(
+                            PROP_VERB_NOT_FOUND);
+                        msg->body.trans_16.client.last_verb_step.verb =
+                            (int) strtol((char *) tmp, NULL, 0);
+                        xmlFree(tmp);
+                        if (NULL == (tmp = xmlGetProp(
+                            cur2, LIXA_XML_MSG_PROP_STEP))) THROW(
+                            PROP_STEP_NOT_FOUND);
+                        msg->body.trans_16.client.last_verb_step.step =
+                            (int) strtol((char *) tmp, NULL, 0);
+                        xmlFree(tmp);
+                    } else THROW(XML_UNRECOGNIZED_TAG1);
+                    cur2 = cur2->next;
+                } /* while (NULL != child) */
+            } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_TRANS)) {
+                xmlNodePtr cur2 = cur->xmlChildrenNode;
+                /* initialize array (3 slots may be a good choice for
+                   initial size) */
+                msg->body.trans_16.transactions = g_array_sized_new(
+                    FALSE, FALSE,
+                    sizeof(struct lixa_msg_body_trans_16_transaction_s),
+                    LIXA_MSG_XML_DEFAULT_TRANS);
+                /* retrieve transactions */
+                while (NULL != cur2) {
+                    if (!xmlStrcmp(cur2->name, LIXA_XML_MSG_TAG_TRAN)) {
+                        struct lixa_msg_body_trans_16_transaction_s tran;
+                        /* retrieve xid properties */
+                        if (NULL == (tmp = xmlGetProp(
+                            cur2, LIXA_XML_MSG_PROP_XID))) THROW(XID_NOT_FOUND);
+                        memcpy(tran.xid, tmp, LIXA_XID_SERIALIZE_LENGTH);
+                        xmlFree(tmp);
+                        XID xid;
+                        if (!lixa_xid_deserialize(&xid, tran.xid)) THROW(
+                            XID_DESERIALIZE_ERROR);
+                        g_array_append_val(msg->body.trans_16.transactions,
+                                           tran);
+                    }
+                    cur2 = cur2->next;
+                } /* while (NULL != child) */
+            } else THROW(XML_UNRECOGNIZED_TAG2);
+            cur = cur->next;
+        } /* while (NULL != cur) */
+
+        THROW(NONE);
+    }
+    CATCH
+    {
+        switch (excp) {
+            case RC_NOT_FOUND:
+            case JOB_NOT_FOUND:
+            case CONFIG_DIGEST_NOT_FOUND:
+            case PROP_VERB_NOT_FOUND:
+            case PROP_STEP_NOT_FOUND:
+            case XID_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
+            case XID_DESERIALIZE_ERROR:
+                break;
+            case XML_UNRECOGNIZED_TAG1:
+                ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
+                break;
+            case XML_UNRECOGNIZED_TAG2:
+                ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_msg_deserialize_trans_16/excp=%d/"
         "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

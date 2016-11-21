@@ -411,6 +411,17 @@ int lixa_msg_serialize_unreg_8(const struct lixa_msg_s *msg,
 int lixa_msg_serialize_trans_8(const struct lixa_msg_s *msg, char *buffer,
                                size_t *offset, size_t *free_chars);
 
+/**
+ * @brief Serialize the "trans_16" specific body part of a message
+ * @param msg
+ * @param buffer
+ * @param offset
+ * @param free_chars
+ * @return
+ */
+int lixa_msg_serialize_trans_16(const struct lixa_msg_s *msg, char *buffer,
+                                size_t *offset, size_t *free_chars);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

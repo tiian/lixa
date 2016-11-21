@@ -59,6 +59,7 @@
 
 #include <lixa_config.h>
 #include <xa.h>
+#include "lixa_xid.h"
 
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
@@ -74,12 +75,19 @@
  * deserialization)
  **/
 #define LIXA_MSG_XML_BUFFER_SIZE 4096
+
 /**
  * Initial array size for resource managers related arrays; this is not the
  * max fixed size, only an initial size to avoid reallocation for 1, 2 & 3
  * configured resource managers
  */
 #define LIXA_MSG_XML_DEFAULT_RSRMGRS  3
+
+/**
+ * @brief Initial array size for transactions
+ */
+#define LIXA_MSG_XML_DEFAULT_TRANS 2
+
 /**
  * Number of digits prefix an XML message
  */
@@ -349,6 +357,14 @@ extern const xmlChar *LIXA_XML_MSG_TAG_XA_START_EXEC;
  * Label used to specify "xa_start_execs" tag
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_XA_START_EXECS;
+/**
+ * Label used to specify "transaction" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_TRAN;
+/**
+ * Label used to specify "transactions" tag
+ */
+extern const xmlChar *LIXA_XML_MSG_TAG_TRANS;
 
 /**
  * The communication protocol is discrete and the values are in the set
@@ -1179,7 +1195,7 @@ struct lixa_msg_body_trans_16_transaction_s
     /**
      * Transaction id
      */
-    XID xid;
+    lixa_ser_xid_t xid;
 };
 
 struct lixa_msg_body_trans_16_client_s

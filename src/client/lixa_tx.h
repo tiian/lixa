@@ -42,6 +42,10 @@
 
 #include <config.h>
 
+#ifdef HAVE_GLIB_H
+#include <glib.h>
+#endif
+
 #include <tx.h>
 #include <lixa_trace.h>
 
@@ -183,10 +187,11 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc,
 /**
  * @brief Retrives information about all existing transactions
  * <b>Note:</b> This is a non standard function.
+ * @param[in,out] xidt a tree populated with all the transactions known by the server
  * @param[in] report flag intidating if the information should be reported
  * @return a standarised return code
  */
-int lixa_tx_tpm(int report);
+int lixa_tx_tpm(GArray *xida, int maint, int report);
 
 /**
  * This function is used to clean-up the environment when a function

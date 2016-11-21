@@ -89,6 +89,7 @@ int lixa_tx_begin(int *txrc, XID *xid)
         LIXA_XA_START_ERROR1,
         LIXA_XA_START_ERROR2,
         GETTIMEOFDAY_ERROR,
+        XID_SERIALIZE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -186,8 +187,13 @@ int lixa_tx_begin(int *txrc, XID *xid)
                         "lixa_xa_end (ret_cod=%d, txrc2=%d), going "
                         "on...\n", ret_cod, txrc2));
                 }
+                GArray *xida = g_array_new(FALSE, FALSE, sizeof(char *));
+                char *xid = malloc(LIXA_XID_SERIALIZE_LENGTH);
+                if (!lixa_xid_serialize(client_status_get_xid(cs), xid)) THROW(
+                    XID_SERIALIZE_ERROR);
+                g_array_append_val(xida, xid);
                 if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(
-                    cs, &txrc2, FALSE))) {
+                    cs, xida, &txrc2, FALSE))) {
                     LIXA_TRACE(("lixa_tx_begin: error while calling "
                         "lixa_xa_rollback (ret_cod=%d, txrc2=%d), "
                         "going on...\n", ret_cod, txrc2));
@@ -252,6 +258,9 @@ int lixa_tx_begin(int *txrc, XID *xid)
                 break;
             case GETTIMEOFDAY_ERROR:
                 ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
+                break;
+            case XID_SERIALIZE_ERROR:
+                ret_cod = LIXA_RC_MALFORMED_XID;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -597,10 +606,13 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         INVALID_STATE4,
         INVALID_TXRC2,
         XA_FORGET_ERROR,
+        XA_TPM_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     client_status_t *cs = NULL;
+    guint i;
+    GArray *xida = NULL;
 
     *txrc = TX_FAIL;
 
@@ -654,12 +666,21 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                 commit = FALSE;
             else THROW(XA_END_ERROR);
         }
+        /* check if there are more transactions that forms part of this gtrid */
+        xida = g_array_new(FALSE, FALSE, sizeof(char *));
+        if (LIXA_RC_OBJ_NOT_FOUND ==
+            (ret_cod = lixa_tx_tpm(xida, FALSE, FALSE))) THROW(
+            XA_TPM_ERROR);
+        if (xida->len > 1) {
+            one_phase_commit = FALSE;
+        }
+
         /* prepare (skip if we are rolling back) */
         if (commit) {
             /* bypass xa_prepare if one_phase_commit is TRUE */
             if (!one_phase_commit &&
                 LIXA_RC_OK !=
-                (ret_cod = lixa_xa_prepare(cs, txrc, &commit))) THROW(
+                (ret_cod = lixa_xa_prepare(cs, xida, txrc, &commit))) THROW(
                 XA_PREPARE_ERROR);
         }
         prepare_txrc = *txrc;
@@ -667,7 +688,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         if (commit) {
             LIXA_TRACE(("lixa_tx_commit: go on with commit...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_xa_commit(
-                cs, txrc, one_phase_commit))) THROW(XA_COMMIT_ERROR);
+                cs, xida, txrc, one_phase_commit))) THROW(XA_COMMIT_ERROR);
             switch (*txrc) {
                 case TX_OK:
                 case TX_ROLLBACK:
@@ -697,7 +718,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         } else {
             LIXA_TRACE(("lixa_tx_commit: go on with rollback...\n"));
             if (LIXA_RC_OK !=
-                (ret_cod = lixa_xa_rollback(cs, txrc, TRUE))) THROW(
+                (ret_cod = lixa_xa_rollback(cs, xida, txrc, TRUE))) THROW(
                 XA_ROLLBACK_ERROR);
             if (TX_FAIL == prepare_txrc) {
                 LIXA_TRACE(("lixa_tx_commit: txrc=%d, prepare_txrc=%d, "
@@ -734,7 +755,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         } /* else */
 
         /* clean Heurstically Completed states... */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs, finished))) THROW(
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs, xida, finished))) THROW(
             XA_FORGET_ERROR);
 
         /* update the TX state, now TX_STATE_S0 */
@@ -771,6 +792,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
             case XA_END_ERROR:
             case XA_PREPARE_ERROR:
             case XA_COMMIT_ERROR:
+            case XA_TPM_ERROR:
                 *txrc = TX_FAIL;
                 break;
             case INVALID_STATE1:
@@ -796,6 +818,8 @@ int lixa_tx_commit(int *txrc, int *begin_new)
             client_status_failed(cs);
         if (TX_FAIL == *txrc)
             lixa_tx_cleanup();
+        if (NULL != xida)
+            g_array_free(xida, TRUE);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_commit/TX_*=%d/excp=%d/"
         "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -1049,10 +1073,12 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
         INVALID_STATE2,
         INVALID_TXRC,
         XA_FORGET_ERROR,
+        XA_TPM_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     client_status_t *cs = NULL;
+    GArray *xida = NULL;
 
     *txrc = TX_FAIL;
 
@@ -1093,7 +1119,14 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
             (ret_cod = lixa_xa_end(cs, txrc, FALSE, TMFAIL))) THROW(
             XA_END_ERROR);
 
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(cs, txrc, FALSE))) THROW(
+        /* check if there are more transactions that forms part of this gtrid */
+        xida = g_array_new(FALSE, FALSE, sizeof(char *));
+        if (LIXA_RC_OBJ_NOT_FOUND ==
+            (ret_cod = lixa_tx_tpm(xida, FALSE, FALSE))) THROW(
+            XA_TPM_ERROR);
+
+        if (LIXA_RC_OK !=
+            (ret_cod = lixa_xa_rollback(cs, xida, txrc, FALSE))) THROW(
             XA_ROLLBACK_ERROR);
         switch (*txrc) {
             case TX_OK:
@@ -1122,8 +1155,8 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
             default: THROW(INVALID_TXRC);
         } /* switch */
 
-        /* clean Heurstically Completed states... */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs, finished))) THROW(
+        /* clean Heuristically Completed states... */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(cs, xida, finished))) THROW(
             XA_FORGET_ERROR);
 
         /* update the TX state, now TX_STATE_S0 */
@@ -1168,6 +1201,7 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
                 break;
             case XA_ROLLBACK_ERROR:
             case XA_FORGET_ERROR:
+            case XA_TPM_ERROR:
                 *txrc = TX_FAIL;
                 break;
             case NONE:
@@ -1180,6 +1214,8 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
             client_status_failed(cs);
         if (TX_FAIL == *txrc)
             lixa_tx_cleanup();
+        if (NULL != xida)
+            g_array_free(xida, TRUE);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_rollback/TX_*=%d/excp=%d/"
         "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
@@ -1674,7 +1710,7 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
     return ret_cod;
 }
 
-int lixa_tx_tpm(int report)
+int lixa_tx_tpm(GArray *xida, int maint, int report)
 {
     enum Exception
     {
@@ -1682,13 +1718,13 @@ int lixa_tx_tpm(int report)
         CONNECTION_CLOSED,
         PROTOCOL_ERROR,
         G_TREE_NEW,
-        TPM_SCAN_ERROR,
+        TPM_NO_TRANSACTIONS,
+        TPM_TRAN_ERROR,
         TPM_REPORT_ERROR,
         XID_DESERIALIZE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-
     GTree *xidt = NULL;
 
     LIXA_TRACE_INIT;
@@ -1711,14 +1747,29 @@ int lixa_tx_tpm(int report)
         if (!client_status_is_connected(cs)) THROW(CONNECTION_CLOSED);
 
         /* create a new tree; node key is a dynamically allocated XID; node data is a dynamic array */
-        if (NULL == (xidt = g_tree_new_full(tpm_xid_compare, NULL, free,
-                                            tpm_array_free))) THROW(G_TREE_NEW);
+        if (NULL == (xidt = g_tree_new_full(tpm_gtrid_compare, NULL, free,
+                                            tpm_gtrid_value_destroy))) THROW(
+            G_TREE_NEW);
 
-        if (LIXA_RC_OK != (ret_cod = client_tpm_trans(cs, xidt))) THROW(
-            TPM_SCAN_ERROR);
+        if (LIXA_RC_OK != (ret_cod = client_tpm_trans(cs, xidt, maint))) {
+            if (LIXA_RC_OBJ_NOT_FOUND == ret_cod) {
+                if (report)
+                    printf("\nThere are no transactions.\n");
 
-        if (report && LIXA_RC_OK != (
-            ret_cod = client_tpm_report(cs, xidt))) THROW(
+                THROW(TPM_NO_TRANSACTIONS);
+            } else {
+                THROW(TPM_TRAN_ERROR);
+            }
+        }
+
+        if (g_tree_nnodes(xidt)) {
+            g_tree_foreach(xidt, client_tpm_value_foreach, xida);
+        }
+
+        LIXA_TRACE(("lixa_tx_tpm: xidt_count=%d\n", xida->len));
+
+        if (report &&
+            LIXA_RC_OK != (ret_cod = client_tpm_report(cs, xidt))) THROW(
             TPM_REPORT_ERROR);
 
         THROW(NONE);
@@ -1735,6 +1786,8 @@ int lixa_tx_tpm(int report)
             case G_TREE_NEW:
                 ret_cod = LIXA_RC_G_RETURNED_NULL;
                 break;
+            case TPM_TRAN_ERROR:
+            case TPM_NO_TRANSACTIONS:
                 break;
             case XID_DESERIALIZE_ERROR:
                 ret_cod = LIXA_RC_MALFORMED_XID;
@@ -1745,7 +1798,7 @@ int lixa_tx_tpm(int report)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        if (NULL != xidt) g_tree_destroy(xidt);
+        if (xidt) g_tree_destroy(xidt);
     } /* TRY-CATCH */
     LIXA_TRACE(
         ("lixa_tx_tpm/excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

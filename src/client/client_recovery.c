@@ -726,8 +726,7 @@ int client_recovery_report(const client_status_t *cs, GTree *crt)
 gboolean client_recovery_report_foreach(gpointer key, gpointer value,
                                          gpointer data)
 {
-    /* key points to a xid object, value points to an array of resource manager
-       ids, data points to the output stream */
+    /* key points to a xid object, value points to an array of resource manager ids, data points to the output stream */
     XID *xid = (XID *)key;
     GArray *rsrmgrs = (GArray *)value;
     FILE *stream = (FILE *)data;

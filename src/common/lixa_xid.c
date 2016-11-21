@@ -39,10 +39,14 @@
 #include <config.h>
 
 #ifdef HAVE_SYS_TYPES_H
+
 # include <sys/types.h>
+
 #endif
 #ifdef HAVE_REGEX_H
+
 # include <regex.h>
+
 #endif
 
 #include <lixa_config.h>
@@ -96,9 +100,11 @@ void lixa_xid_create_new(XID *xid)
     xid->bqual_length = sizeof(uuid_t);
     memset(xid->data, 0, XIDDATASIZE); /* this is not necessary, but... */
     uuid_generate(uuid_obj);
-    memcpy(xid->data, uuid_obj, sizeof(uuid_t)); // global transaction identifier
+    memcpy(xid->data, uuid_obj,
+           sizeof(uuid_t)); // global transaction identifier
     uuid_generate(uuid_obj);
-    memcpy(xid->data + sizeof(uuid_t), uuid_obj, sizeof(uuid_t)); // branch qualifier
+    memcpy(xid->data + sizeof(uuid_t), uuid_obj,
+           sizeof(uuid_t)); // branch qualifier
 
 #ifdef LIXA_DEBUG
     {
@@ -128,7 +134,8 @@ void lixa_xid_create_new_bqual(XID *xid)
     uuid_generate(uuid_obj);
 
     memcpy(xid->data, gtrid, sizeof(uuid_t)); // global transaction identifier
-    memcpy(xid->data + sizeof(uuid_t), uuid_obj, sizeof(uuid_t)); // branch qualifier
+    memcpy(xid->data + sizeof(uuid_t), uuid_obj,
+           sizeof(uuid_t)); // branch qualifier
 
 #ifdef LIXA_DEBUG
     {
@@ -148,7 +155,7 @@ void lixa_xid_create_new_bqual(XID *xid)
 char *lixa_xid_get_gtrid_ascii(const XID *xid)
 {
     char *gtrid;
-    if (NULL == (gtrid = (char *) malloc(2 * sizeof(uuid_t) + 4 + 1)))
+    if (NULL == (gtrid = (char *) malloc(LIXA_XID_GTRID_ASCII_LENGTH)))
         return NULL;
     uuid_unparse((unsigned char *) xid->data, gtrid);
     return gtrid;
@@ -157,7 +164,7 @@ char *lixa_xid_get_gtrid_ascii(const XID *xid)
 char *lixa_xid_get_bqual_ascii(const XID *xid)
 {
     char *bqual;
-    if (NULL == (bqual = (char *) malloc(2 * sizeof(uuid_t) + 4 + 1)))
+    if (NULL == (bqual = (char *) malloc(LIXA_XID_BQUAL_ASCII_LENGTH)))
         return NULL;
     uuid_unparse((unsigned char *) xid->data + sizeof(uuid_t), bqual);
     return bqual;
@@ -216,7 +223,14 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
 {
     enum Exception
     {
-        REGCOMP_ERROR, REGEXEC_ERROR, SEPARATOR1, INVALID_CHAR1, SEPARATOR2, INVALID_CHAR2, TERMINATOR, NONE
+        REGCOMP_ERROR,
+        REGEXEC_ERROR,
+        SEPARATOR1,
+        INVALID_CHAR1,
+        SEPARATOR2,
+        INVALID_CHAR2,
+        TERMINATOR,
+        NONE
     } excp;
     int ret_cod = FALSE;
 
@@ -234,7 +248,8 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
         /* check the string is well formed using a regular expression */
         /* compile regular expression */
         reg_error = regcomp(
-            &preg, "^([-]?[[:digit:]])+\\.([[:xdigit:]]{2})*\\.([[:xdigit:]]{2})*$",
+            &preg,
+            "^([-]?[[:digit:]])+\\.([[:xdigit:]]{2})*\\.([[:xdigit:]]{2})*$",
             REG_EXTENDED | REG_NOSUB | REG_NEWLINE);
         if (0 != reg_error) {
             regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));

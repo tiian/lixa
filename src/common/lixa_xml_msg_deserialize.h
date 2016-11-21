@@ -285,6 +285,15 @@ int lixa_msg_deserialize_unreg_8(xmlNodePtr cur, struct lixa_msg_s *msg);
  */
 int lixa_msg_deserialize_trans_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
+/**
+ * @brief Deserialize an XML subtree containing details pertaining to a message
+ * with verb=scan, step=8
+ * @param[in] cur pointer to XML subtree
+ * @param[out] msg the object after deserialization
+ * @return a reason code
+ */
+int lixa_msg_deserialize_trans_16(xmlNodePtr cur, struct lixa_msg_s *msg);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

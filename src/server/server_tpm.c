@@ -89,7 +89,7 @@ int server_trans(struct thread_status_s *ts, size_t slot_id,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_trans/excp=%d/"
         "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return 0;
+    return ret_cod;
 }
 
 int server_trans_8(struct thread_status_s *ts, size_t slot_id,
@@ -114,7 +114,7 @@ int server_trans_8(struct thread_status_s *ts, size_t slot_id,
 
         /* query all transactions matching gtrid */
         struct server_trans_tbl_rec_s query;
-        struct server_trans_tbl_rec_s *result;
+        struct server_trans_tbl_rec_s result[12] = {{0}};
         guint result_array_size = 0;
 
         query.gtrid = lixa_xid_get_gtrid_ascii(
@@ -122,12 +122,13 @@ int server_trans_8(struct thread_status_s *ts, size_t slot_id,
         query.tsid = ts->id;
 
         ret_cod = server_trans_tbl_query_xid(ts->trans_table, &query, result,
-                                             &result_array_size);
+                                             &result_array_size,
+                                             lmi->body.trans_8.client.maint);
 
         switch (ret_cod) {
             case LIXA_RC_OK:
                 if (LIXA_RC_OK != (ret_cod = server_trans_result(
-                    ts, &result, result_array_size, lmi, lmo, block_id))) THROW(
+                    ts, result, result_array_size, lmi, lmo, block_id))) THROW(
                     SERVER_TRANS_RESULT_ERROR);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
@@ -165,7 +166,7 @@ int server_trans_8(struct thread_status_s *ts, size_t slot_id,
     }
     LIXA_TRACE(("server_trans_8/excp=%d/"
         "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return 0;
+    return ret_cod;
 }
 
 int server_trans_result(struct thread_status_s *ts,
@@ -225,7 +226,7 @@ int server_trans_result(struct thread_status_s *ts,
         guint i;
         for (i = 0; i < record_array_size; ++i) {
             struct lixa_msg_body_trans_16_transaction_s trans;
-            trans.xid = record[i].xid;
+            memcpy(trans.xid, record[i].xid, LIXA_XID_SERIALIZE_LENGTH);
             g_array_append_val(lmo->body.trans_16.transactions, trans);
         }
 

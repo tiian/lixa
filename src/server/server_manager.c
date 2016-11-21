@@ -346,7 +346,7 @@ void *server_manager_thread(void *void_ts)
                 }
                 if (ts->poll_array[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL)) {
-                    if ((ts->poll_array[i].revents & POLLERR) &&
+                    if ((ts->poll_array[i].revents & POLLERR) ||
                         (ts->poll_array[i].revents & POLLHUP)) {
                         found_fd++;
                         LIXA_TRACE(("server_manager_thread: hang-up event, "
@@ -1384,7 +1384,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                 break;
             case LIXA_MSG_VERB_TRANS:
                 if (LIXA_RC_OK !=
-                    (ret_cod = server_trans(ts, &lmi, block_id, lmo, block_id,
+                    (ret_cod = server_trans(ts, slot_id, &lmi, lmo, block_id,
                                             &(ts->client_array[slot_id].last_verb_step)))) THROW(
                     SERVER_TRANS_ERROR)
                 break;

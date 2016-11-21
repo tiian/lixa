@@ -1156,6 +1156,7 @@ int server_xa_start_8(struct thread_status_s *ts,
     enum Exception
     {
         TRANS_TABLE_INSERT_ERROR,
+        XID_SERIALIZE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1172,7 +1173,8 @@ int server_xa_start_8(struct thread_status_s *ts,
         /* store XID in the global transaction table */
         struct server_trans_tbl_rec_s sttr;
         sttr.gtrid = lixa_xid_get_gtrid_ascii(&(lmi->body.start_8.conthr.xid));
-        sttr.xid = lmi->body.start_8.conthr.xid;
+        if (!lixa_xid_serialize(&(lmi->body.start_8.conthr.xid),
+                                sttr.xid)) THROW(XID_SERIALIZE_ERROR);
         sttr.tsid = ts->id;
         sttr.block_id = block_id;
         if (LIXA_RC_OK != (ret_cod = server_trans_tbl_insert(
@@ -1216,6 +1218,9 @@ int server_xa_start_8(struct thread_status_s *ts,
     {
         switch (excp) {
             case TRANS_TABLE_INSERT_ERROR:
+                break;
+            case XID_SERIALIZE_ERROR:
+                ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -43,6 +43,7 @@
 #include <lixa_crash.h>
 #include <lixa_errors.h>
 #include <lixa_tx.h>
+#include <lixa_xid.h>
 
 /* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
@@ -105,21 +106,18 @@ int main(int argc, char **argv)
     }
 
     int rc = LIXA_RC_OK;
-    if (LIXA_RC_OK != (rc = lixa_tx_tpm(report))) {
+    int ret_cod = EXIT_SUCCESS;
+    GArray *xida = g_array_new(FALSE, FALSE, sizeof(char *));
+    if (LIXA_RC_OK != (rc = lixa_tx_tpm(xida, TRUE, report))) {
         LIXA_TRACE(("lixatpm/lixa_tx_tpm: rc=%d/%s\n", rc, lixa_strerror(rc)));
 
-        lixa_tx_close(&tx_rc);
-        LIXA_TRACE(("lixatpm/lixa_tx_close: tx_rc=%d\n", tx_rc));
-
-        LIXA_TRACE(("lixatpm/main: exiting"));
-
-        return EXIT_FAILURE;
+        ret_cod = EXIT_FAILURE;
     }
+    g_array_free(xida, TRUE);
 
     lixa_tx_close(&tx_rc);
     LIXA_TRACE(("lixatpm/lixa_tx_close: tx_rc=%d\n", tx_rc));
+    LIXA_TRACE(("lixatpm/main: exiting, ret_code=%s\n", ret_cod));
 
-    LIXA_TRACE(("lixatpm/main: exiting"));
-
-    return EXIT_SUCCESS;
+    return ret_cod;
 }

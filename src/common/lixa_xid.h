@@ -82,6 +82,9 @@ extern const long LIXA_XID_FORMAT_ID;
  */
 #define LIXA_XID_SERIALIZE_LENGTH (LIXA_SERIALIZED_LONG_INT+1+2*XIDDATASIZE+1+1)
 
+#define LIXA_XID_GTRID_ASCII_LENGTH (2 * sizeof(uuid_t) + 4 + 1)
+#define LIXA_XID_BQUAL_ASCII_LENGTH (2 * sizeof(uuid_t) + 4 + 1)
+
 /**
  * A string used to serialize a XID.
  * NOTE: this is not XA standard compliant, but it just works in
