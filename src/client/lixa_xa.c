@@ -218,7 +218,7 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
 }
 
 
-int lixa_xa_commit(client_status_t *cs, GArray *xida, int *txrc,
+int lixa_xa_commit(client_status_t *cs, XID *xid, int *txrc,
                    int one_phase_commit)
 {
     enum Exception
@@ -244,7 +244,7 @@ int lixa_xa_commit(client_status_t *cs, GArray *xida, int *txrc,
     TRY {
         size_t buffer_size = 0;
         int fd;
-        guint i, j;
+        guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         lixa_ser_xid_t ser_xid = "";
 
@@ -1219,7 +1219,8 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate, int mmode)
 }
 
 
-int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc, int *commit)
+int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc, int *commit,
+                    XID *xid)
 {
     enum Exception
     {
@@ -1293,11 +1294,10 @@ int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc, int *commit)
                 char *sxid = g_array_index(xida, char*, j);
                 LIXA_TRACE(("lixa_xa_prepare: preparing sxid='%s'\n", sxid));
 
-                XID xid;
-                if (!lixa_xid_deserialize(&xid, sxid)) THROW(
+                if (!lixa_xid_deserialize(xid, sxid)) THROW(
                     XID_DESERIALIZE_ERROR);
                 record.rc = csr->prepare_rc = act_rsrmgr->xa_switch->xa_prepare_entry(
-                    &xid, record.rmid, record.flags);
+                    xid, record.rmid, record.flags);
                 LIXA_TRACE(
                     ("lixa_xa_prepare: xa_prepare_entry(xid, %d, 0x%lx) = "
                         "%d\n", record.rmid, record.flags, record.rc));
@@ -1452,7 +1452,7 @@ int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc, int *commit)
 
 
 int
-lixa_xa_rollback(client_status_t *cs, GArray *xida, int *txrc, int tx_commit)
+lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
 {
     enum Exception
     {
@@ -1466,7 +1466,6 @@ lixa_xa_rollback(client_status_t *cs, GArray *xida, int *txrc, int tx_commit)
         UNEXPECTED_XA_RC,
         MSG_SERIALIZE_ERROR,
         MSG_SEND_ERROR,
-        XID_DESERIALIZE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1480,7 +1479,7 @@ lixa_xa_rollback(client_status_t *cs, GArray *xida, int *txrc, int tx_commit)
     TRY {
         size_t buffer_size = 0;
         int fd;
-        guint i, j;
+        guint i;
         char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         lixa_ser_xid_t ser_xid = "";
 
@@ -1732,9 +1731,6 @@ lixa_xa_rollback(client_status_t *cs, GArray *xida, int *txrc, int tx_commit)
                 break;
             case MSG_SERIALIZE_ERROR:
             case MSG_SEND_ERROR:
-                break;
-            case XID_DESERIALIZE_ERROR:
-                ret_cod = LIXA_RC_MALFORMED_XID;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

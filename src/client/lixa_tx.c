@@ -187,13 +187,8 @@ int lixa_tx_begin(int *txrc, XID *xid)
                         "lixa_xa_end (ret_cod=%d, txrc2=%d), going "
                         "on...\n", ret_cod, txrc2));
                 }
-                GArray *xida = g_array_new(FALSE, FALSE, sizeof(char *));
-                char *xid = malloc(LIXA_XID_SERIALIZE_LENGTH);
-                if (!lixa_xid_serialize(client_status_get_xid(cs), xid)) THROW(
-                    XID_SERIALIZE_ERROR);
-                g_array_append_val(xida, xid);
-                if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(
-                    cs, xida, &txrc2, FALSE))) {
+                if (LIXA_RC_OK !=
+                    (ret_cod = lixa_xa_rollback(cs, &txrc2, FALSE))) {
                     LIXA_TRACE(("lixa_tx_begin: error while calling "
                         "lixa_xa_rollback (ret_cod=%d, txrc2=%d), "
                         "going on...\n", ret_cod, txrc2));
@@ -611,7 +606,6 @@ int lixa_tx_commit(int *txrc, int *begin_new)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     client_status_t *cs = NULL;
-    guint i;
     GArray *xida = NULL;
 
     *txrc = TX_FAIL;
@@ -676,11 +670,13 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         }
 
         /* prepare (skip if we are rolling back) */
+        XID xid;
         if (commit) {
             /* bypass xa_prepare if one_phase_commit is TRUE */
             if (!one_phase_commit &&
                 LIXA_RC_OK !=
-                (ret_cod = lixa_xa_prepare(cs, xida, txrc, &commit))) THROW(
+                (ret_cod = lixa_xa_prepare(cs, xida, txrc, &commit,
+                                           &xid))) THROW(
                 XA_PREPARE_ERROR);
         }
         prepare_txrc = *txrc;
@@ -688,7 +684,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         if (commit) {
             LIXA_TRACE(("lixa_tx_commit: go on with commit...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_xa_commit(
-                cs, xida, txrc, one_phase_commit))) THROW(XA_COMMIT_ERROR);
+                cs, &xid, txrc, one_phase_commit))) THROW(XA_COMMIT_ERROR);
             switch (*txrc) {
                 case TX_OK:
                 case TX_ROLLBACK:
@@ -718,7 +714,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         } else {
             LIXA_TRACE(("lixa_tx_commit: go on with rollback...\n"));
             if (LIXA_RC_OK !=
-                (ret_cod = lixa_xa_rollback(cs, xida, txrc, TRUE))) THROW(
+                (ret_cod = lixa_xa_rollback(cs, txrc, TRUE))) THROW(
                 XA_ROLLBACK_ERROR);
             if (TX_FAIL == prepare_txrc) {
                 LIXA_TRACE(("lixa_tx_commit: txrc=%d, prepare_txrc=%d, "
@@ -1119,14 +1115,8 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
             (ret_cod = lixa_xa_end(cs, txrc, FALSE, TMFAIL))) THROW(
             XA_END_ERROR);
 
-        /* check if there are more transactions that forms part of this gtrid */
-        xida = g_array_new(FALSE, FALSE, sizeof(char *));
-        if (LIXA_RC_OBJ_NOT_FOUND ==
-            (ret_cod = lixa_tx_tpm(xida, FALSE, FALSE))) THROW(
-            XA_TPM_ERROR);
-
         if (LIXA_RC_OK !=
-            (ret_cod = lixa_xa_rollback(cs, xida, txrc, FALSE))) THROW(
+            (ret_cod = lixa_xa_rollback(cs, txrc, FALSE))) THROW(
             XA_ROLLBACK_ERROR);
         switch (*txrc) {
             case TX_OK:
