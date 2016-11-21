@@ -75,7 +75,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "lixatpm/options: failed=%s\n",
                 error->message);
 
-        LIXA_TRACE(("lixatpm/main: exiting"));
+        LIXA_TRACE(("lixatpm/main: exiting\n"));
 
         return EXIT_FAILURE;
     }
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
         lixa_tx_close(&tx_rc);
         LIXA_TRACE(("lixatpm/lixa_tx_close: tx_rc=%d\n", tx_rc));
 
-        LIXA_TRACE(("lixatpm/main: exiting"));
+        LIXA_TRACE(("lixatpm/main: exiting\n"));
 
         return EXIT_FAILURE;
     }
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 
     lixa_tx_close(&tx_rc);
     LIXA_TRACE(("lixatpm/lixa_tx_close: tx_rc=%d\n", tx_rc));
-    LIXA_TRACE(("lixatpm/main: exiting, ret_code=%s\n", ret_cod));
+    LIXA_TRACE(("lixatpm/main: exiting, ret_code=%d\n", ret_cod));
 
     return ret_cod;
 }
