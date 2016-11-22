@@ -8,8 +8,9 @@
  * ISBN: 1 872630 24 3
  * X/Open Document Number: XO/CAE/91/300
  */
-
-
+/**
+ * @file
+ */
 
 /*
  * Start of xa.h header
@@ -19,8 +20,6 @@
 #ifndef XA_H
 #define XA_H
 
-
-
 /*
  * Transaction branch identification: XID and NULLXID:
  */
@@ -29,7 +28,8 @@
 #define MAXBQUALSIZE 64 /* maximum size in bytes of bqual */
 #ifndef XID_T_TYPE
 # define XID_T_TYPE
-struct xid_t {
+struct xid_t
+{
     long formatID; /* format identifier */
     long gtrid_length; /* value from 1 through 64 */
     long bqual_length; /* value from 1 through 64 */
@@ -52,6 +52,7 @@ typedef struct xid_t XID;
  * Dynamically register a resource manager with a transaction manager
  */
 extern int ax_reg(int rmid, XID *xid, long flags);
+
 /**
  * Dynamically unregister a resource manager with a transaction manager
  */
@@ -66,7 +67,9 @@ extern int ax_unreg(int rmid, long flags);
                        including the null terminator */
 #define MAXINFOSIZE 256 /* maximum size in bytes of xa_info
                            strings, including the null terminator*/
-struct xa_switch_t {
+
+struct xa_switch_t
+{
     char name[RMNAMESZ]; /* name of resource manager */
     long flags; /* options specific to the resource manager */
     long version; /* must be 0 */
@@ -75,19 +78,20 @@ struct xa_switch_t {
     int (*xa_start_entry)(XID *, int, long); /* xa_start function pointer*/
     int (*xa_end_entry)(XID *, int, long); /* xa_end function pointer*/
     int (*xa_rollback_entry)(XID *, int, long);
-                                          /* xa_rollback function pointer*/
+
+    /* xa_rollback function pointer*/
     int (*xa_prepare_entry)(XID *, int, long);/* xa_prepare function pointer*/
     int (*xa_commit_entry)(XID *, int, long); /* xa_commit function pointer*/
     int (*xa_recover_entry)(XID *, long, int, long);
-                                          /* xa_recover function pointer*/
+
+    /* xa_recover function pointer*/
     int (*xa_forget_entry)(XID *, int, long); /* xa_forget function pointer*/
     int (*xa_complete_entry)(int *, int *, int, long);
-                                          /* xa_complete function pointer*/
+    /* xa_complete function pointer*/
 };
 
 
-
-typedef struct xa_switch_t * (* lixa_get_xa_switch_f) (void);
+typedef struct xa_switch_t *(*lixa_get_xa_switch_f)(void);
 
 
 
@@ -188,7 +192,6 @@ typedef struct xa_switch_t * (* lixa_get_xa_switch_f) (void);
 #define XAER_DUPID -8 /* the XID already exists */
 #define XAER_OUTSIDE -9 /* resource manager doing work outside
                            global transaction */
-
 
 
 #endif /* ifndef XA_H */

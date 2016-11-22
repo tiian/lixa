@@ -74,6 +74,9 @@ void server_trans_tbl_value_destroy(gpointer data);
 int server_trans_tbl_insert(server_trans_tbl_t *stt,
                             const struct server_trans_tbl_rec_s *sttr);
 
+int server_trans_tbl_remove(server_trans_tbl_t *stt,
+                            const struct server_trans_tbl_rec_s *sttr);
+
 int server_trans_tbl_delete(server_trans_tbl_t *stt);
 
 int server_trans_tbl_query_xid(server_trans_tbl_t *stt,

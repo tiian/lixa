@@ -8,7 +8,9 @@
  * ISBN: 1-85912-094-6
  * X/Open Document Number: C504
  */
-
+/**
+ * @file
+ */
 /*
  * Start of tx.h header
  *
@@ -33,7 +35,8 @@
 #define XIDDATASIZE 128 /* size in bytes */
 #ifndef XID_T_TYPE
 # define XID_T_TYPE
-struct xid_t {
+struct xid_t
+{
     long formatID; /* format identifier */
     long gtrid_length; /* value from 1 through 64 */
     long bqual_length; /* value from 1 through 64 */
@@ -72,7 +75,8 @@ typedef long TRANSACTION_STATE;
 #define TX_ROLLBACK_ONLY 2
 
 /* structure populated by tx_info() */
-struct tx_info_t {
+struct tx_info_t
+{
     XID xid;
     COMMIT_RETURN when_return;
     TRANSACTION_CONTROL transaction_control;

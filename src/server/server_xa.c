@@ -258,7 +258,11 @@ int server_xa_commit_8(struct thread_status_s *ts,
 {
     enum Exception
     {
-        INVALID_BLOCK_ID, NUMBER_OF_RSRMGRS_MISMATCH, NONE
+        INVALID_BLOCK_ID,
+        NUMBER_OF_RSRMGRS_MISMATCH,
+        XID_SERIALIZE_ERROR,
+        TRANS_TABLE_REMOVE_ERROR,
+        NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -278,6 +282,17 @@ int server_xa_commit_8(struct thread_status_s *ts,
                              ts->updated_records);
         ts->curr_status[block_id].sr.data.pld.ph.state.finished =
             lmi->body.commit_8.conthr.finished;
+        /* store XID in the global transaction table */
+        struct server_trans_tbl_rec_s sttr;
+        sttr.gtrid = lixa_xid_get_gtrid_ascii(
+            &(ts->curr_status[block_id].sr.data.pld.ph.state.xid));
+        if (!lixa_xid_serialize(
+            &(ts->curr_status[block_id].sr.data.pld.ph.state.xid),
+            sttr.xid)) THROW(XID_SERIALIZE_ERROR);
+        sttr.tsid = ts->id;
+        sttr.block_id = block_id;
+        if (LIXA_RC_OK != (ret_cod = server_trans_tbl_remove(
+            ts->trans_table, &sttr))) THROW(TRANS_TABLE_REMOVE_ERROR);
 
         /* store data in the children blocks... */
         for (i = 0; i < lmi->body.commit_8.xa_commit_execs->len; ++i) {
@@ -305,6 +320,11 @@ int server_xa_commit_8(struct thread_status_s *ts,
     CATCH
     {
         switch (excp) {
+            case TRANS_TABLE_REMOVE_ERROR:
+                break;
+            case XID_SERIALIZE_ERROR:
+                ret_cod = LIXA_RC_MALFORMED_XID;
+                break;
             case INVALID_BLOCK_ID:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
@@ -325,7 +345,6 @@ int server_xa_commit_8(struct thread_status_s *ts,
                thread_status_get_crash_count(ts));
     return ret_cod;
 }
-
 
 int server_xa_end(struct thread_status_s *ts,
                   const struct lixa_msg_s *lmi,
@@ -1220,7 +1239,7 @@ int server_xa_start_8(struct thread_status_s *ts,
             case TRANS_TABLE_INSERT_ERROR:
                 break;
             case XID_SERIALIZE_ERROR:
-                ret_cod = LIXA_RC_NULL_OBJECT;
+                ret_cod = LIXA_RC_MALFORMED_XID;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
