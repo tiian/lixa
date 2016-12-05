@@ -51,12 +51,7 @@
 int tx_begin(void) {
     int txrc = TX_FAIL;
     XID xid;
-    /* Tiian: begin of change
-    @Pieter: maybe more uniform and debug friendly 
-    xid.formatID = NULLXID;
-    */
     lixa_xid_reset(&xid);
-    /* Tiian: end of change */
     lixa_tx_begin(&txrc, &xid);
     return txrc;
 }
@@ -86,12 +81,7 @@ int tx_commit(void) {
     lixa_tx_commit(&txrc1, &begin_new);
     if (begin_new) {
         XID xid;
-       /* Tiian: begin of change
-          @Pieter: maybe more uniform and debug friendly 
-          xid.formatID = NULLXID;
-        */
         lixa_xid_reset(&xid);
-        /* Tiian: end of change */
         lixa_tx_begin(&txrc2, &xid);
         if (TX_OK != txrc2) {
             switch (txrc1) {
@@ -136,14 +126,9 @@ int tx_xid_serialize(TXINFO info, char **sxid) {
     }
 
     *sxid = calloc(sizeof(lixa_ser_xid_t), sizeof(char));
-    /* Ch.F.
-     * @Pieter: who's in charge of freeint this XID?
-     */
     memcpy(*sxid, xid_str, sizeof(lixa_ser_xid_t));
 
-    
     txrc = TX_OK;
-
     return txrc;
 }
 
@@ -155,7 +140,6 @@ int tx_xid_deserialize(TXINFO *info, char *sxid) {
     }
 
     txrc = TX_OK;
-
     return txrc;
 }
 
