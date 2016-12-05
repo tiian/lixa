@@ -20,6 +20,8 @@
 #define TX_H
 #define TX_H_VERSION 0 /* current version of this header file */
 
+static char h_tx[] = "tx.h";
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -32,6 +34,7 @@
 /*
  * Transaction identifier
  */
+#ifndef XIDDATASIZE
 #define XIDDATASIZE 128 /* size in bytes */
 #ifndef XID_T_TYPE
 # define XID_T_TYPE
@@ -44,6 +47,7 @@ struct xid_t
 };
 typedef struct xid_t XID;
 #endif /* XID_T_TYPE */
+#endif /* XIDDATASIZE */
 
 /*
  * A value of -1 in formatID means that the XID is null.
