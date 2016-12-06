@@ -678,6 +678,8 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                 (ret_cod = lixa_xa_prepare(cs, xida, txrc, &commit,
                                            &xid))) THROW(
                 XA_PREPARE_ERROR);
+            if (one_phase_commit)
+                xid = *client_status_get_xid(cs);
         }
         prepare_txrc = *txrc;
         /* commit/rollback */
