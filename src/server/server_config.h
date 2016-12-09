@@ -158,9 +158,9 @@ extern "C" {
  *                           default = NULL
  * @return a standardized return code
  */
-int server_config(struct server_config_s *sc,
-                  struct thread_pipe_array_s *tpa,
-                  const char *config_filename);
+    int server_config(struct server_config_s *sc,
+                      struct thread_pipe_array_s *tpa,
+                      const char *config_filename);
 
 
 /**
@@ -173,10 +173,10 @@ int server_config(struct server_config_s *sc,
  * @param srt OUT reference to the recovery table object
  * @return a standardized return code
  */
-int server_cleanup(struct server_config_s *sc,
-                   struct thread_pipe_array_s *tpa,
-                   struct thread_status_array_s *tsa,
-                   srvr_rcvr_tbl_t *srt, server_trans_tbl_t *stt);
+    int server_cleanup(struct server_config_s *sc,
+                       struct thread_pipe_array_s *tpa,
+                       struct thread_status_array_s *tsa,
+                       srvr_rcvr_tbl_t *srt, server_trans_tbl_t *stt);
 
 
 /**
@@ -186,9 +186,9 @@ int server_cleanup(struct server_config_s *sc,
  * @param a_node IN the current subtree must be parsed
  * @return a standardized return code
  */
-int server_parse(struct server_config_s *sc,
-                 struct thread_pipe_array_s *tpa,
-                 xmlNode *a_node);
+    int server_parse(struct server_config_s *sc,
+                     struct thread_pipe_array_s *tpa,
+                     xmlNode *a_node);
 
 
 /**
@@ -197,8 +197,8 @@ int server_parse(struct server_config_s *sc,
  * @param a_node IN listener node
  * @return a standardized return code
  */
-int server_parse_listener(struct server_config_s *sc,
-                          xmlNode *a_node);
+    int server_parse_listener(struct server_config_s *sc,
+                              xmlNode *a_node);
 
 
 /**
@@ -208,9 +208,9 @@ int server_parse_listener(struct server_config_s *sc,
  * @param a_node IN listener node
  * @return a standardized return code
  */
-int server_parse_manager(struct server_config_s *sc,
-                         struct thread_pipe_array_s *tpa,
-                         xmlNode *a_node);
+    int server_parse_manager(struct server_config_s *sc,
+                             struct thread_pipe_array_s *tpa,
+                             xmlNode *a_node);
 
 
 /**
@@ -218,8 +218,8 @@ int server_parse_manager(struct server_config_s *sc,
  * @param sc OUT the object must be initialized
  * @param tpa OUT the array of pipes used for thread communication
  */
-void server_config_init(struct server_config_s *sc,
-                        struct thread_pipe_array_s *tpa);
+    void server_config_init(struct server_config_s *sc,
+                            struct thread_pipe_array_s *tpa);
 
 
 #ifdef __cplusplus

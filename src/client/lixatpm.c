@@ -54,10 +54,10 @@
 /* command line options */
 static gboolean report = FALSE;
 static GOptionEntry entries[] =
-    {
-        {"report", 'r', 0, G_OPTION_ARG_NONE, &report, "Report on all transactions linked to the current configuration and profile"},
-        {NULL}
-    };
+{
+    {"report", 'r', 0, G_OPTION_ARG_NONE, &report, "Report on all transactions linked to the current configuration and profile"},
+    {NULL}
+};
 
 int main(int argc, char **argv)
 {

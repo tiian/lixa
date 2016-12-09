@@ -730,30 +730,30 @@ extern "C" {
  * Initialize a struct of type @ref thread_status_switch_s
  * @param tss IN/OUT reference to the struct must be initialized
  */
-inline static void thread_status_switch_init(
-    struct thread_status_switch_s *tss)
-{
-    tss->id = 0;
-    tss->buffer_size = 0;
-    tss->buffer = NULL;
-}
+    inline static void thread_status_switch_init(
+        struct thread_status_switch_s *tss)
+    {
+        tss->id = 0;
+        tss->buffer_size = 0;
+        tss->buffer = NULL;
+    }
 
 
 /**
  * Initialize a struct of type @ref server_client_status_s
  * @param scs IN/OUT reference to the struct must be initialized
  */
-inline static void server_client_status_init(
-    struct server_client_status_s *scs)
-{
-    scs->output_buffer = NULL;
-    scs->output_buffer_size = 0;
-    scs->last_verb_step.verb = 0;
-    scs->last_verb_step.step = 0;
-    scs->first_message = TRUE;
-    scs->control_only = FALSE;
-    thread_status_switch_init(&scs->switch_thread);
-}
+    inline static void server_client_status_init(
+        struct server_client_status_s *scs)
+    {
+        scs->output_buffer = NULL;
+        scs->output_buffer_size = 0;
+        scs->last_verb_step.verb = 0;
+        scs->last_verb_step.step = 0;
+        scs->first_message = TRUE;
+        scs->control_only = FALSE;
+        thread_status_switch_init(&scs->switch_thread);
+    }
 
 
 /**
@@ -767,7 +767,7 @@ inline static void server_client_status_init(
  *                    status_record_t)
  * @return TRUE (!LIXA_RC_OK) only in an error happens
  */
-gboolean traverse_and_sync(gpointer key, gpointer value, gpointer data);
+    gboolean traverse_and_sync(gpointer key, gpointer value, gpointer data);
 
 
 /**
@@ -782,7 +782,7 @@ gboolean traverse_and_sync(gpointer key, gpointer value, gpointer data);
  *                two memory mapped files
  * @return FALSE
  */
-gboolean traverse_and_copy(gpointer key, gpointer value, gpointer data);
+    gboolean traverse_and_copy(gpointer key, gpointer value, gpointer data);
 
 
 /**
@@ -792,7 +792,7 @@ gboolean traverse_and_copy(gpointer key, gpointer value, gpointer data);
  *              record
  * @return a standardized return code
  */
-int payload_header_init(struct status_record_data_s *srd, int fd);
+    int payload_header_init(struct status_record_data_s *srd, int fd);
 
 
 /**
@@ -803,9 +803,9 @@ int payload_header_init(struct status_record_data_s *srd, int fd);
  * @param vs IN reference to a (verb,step) value
  * @return a standardized return code
  */
-int payload_header_store_verb_step(struct thread_status_s *ts,
-                                   uint32_t block_id,
-                                   const struct lixa_msg_verb_step_s *vs);
+    int payload_header_store_verb_step(struct thread_status_s *ts,
+                                       uint32_t block_id,
+                                       const struct lixa_msg_verb_step_s *vs);
 
 
 /**
@@ -818,7 +818,7 @@ int payload_header_store_verb_step(struct thread_status_s *ts,
  * @param block_id IN id of the block contains the header chain block
  * @return a standardized return code
  */
-int payload_chain_release(struct thread_status_s *ts, uint32_t block_id);
+    int payload_chain_release(struct thread_status_s *ts, uint32_t block_id);
 
 
 /**
@@ -830,8 +830,8 @@ int payload_chain_release(struct thread_status_s *ts, uint32_t block_id);
  * @param size IN number of blocks must be allocated
  * @return a reason code
  */
-int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
-                           int size);
+    int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
+                               int size);
 
 
 /**
@@ -844,10 +844,10 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
  *                    avoid updates to the file
  * @return a standardized return code
  */
-int status_record_load(status_record_t **sr,
-                       const char *status_file,
-                       GTree **updated_records,
-                       int readonly);
+    int status_record_load(status_record_t **sr,
+                           const char *status_file,
+                           GTree **updated_records,
+                           int readonly);
 
 
 /**
@@ -855,14 +855,14 @@ int status_record_load(status_record_t **sr,
  * @param sr IN memory mapped status file
  * @return LIXA_RC_OK if the status file is OK, an error otherwise
  */
-int status_record_check_integrity(status_record_t *sr);
+    int status_record_check_integrity(status_record_t *sr);
 
 
 /**
  * Travel and display the free block chain and used block chain
  * @param sr IN memory mapped status file
  */
-void status_record_display_chains(const status_record_t *sr);
+    void status_record_display_chains(const status_record_t *sr);
 
 
 /**
@@ -873,8 +873,8 @@ void status_record_display_chains(const status_record_t *sr);
  * @param slot OUT the index of the found free slot
  * @return a standardized return code
  */
-int status_record_insert(struct thread_status_s *ts,
-                         uint32_t *slot);
+    int status_record_insert(struct thread_status_s *ts,
+                             uint32_t *slot);
 
 
 /**
@@ -886,8 +886,8 @@ int status_record_insert(struct thread_status_s *ts,
  * @return a standardized return code
  *
  */
-int status_record_delete(struct thread_status_s *ts,
-                         uint32_t slot);
+    int status_record_delete(struct thread_status_s *ts,
+                             uint32_t slot);
 
 
 /**
@@ -897,24 +897,24 @@ int status_record_delete(struct thread_status_s *ts,
  * @param updated_records IN/OUT the tree containing all the modified
  *                               records (blocks) since last synch
  */
-static inline void status_record_update(status_record_t *sr,
-                                        uintptr_t index,
-                                        GTree *updated_records)
-{
-    if (!(sr->counter & 0x1)) {
-        sr->counter++;
-        g_tree_insert(updated_records, (gpointer) index, NULL);
-        LIXA_TRACE(("status_record_update: inserted "
-            "index "
-                       UINTPTR_T_FORMAT
-                       " (counter="
-                       UINT32_T_FORMAT
-                       ", address=%p) in updated records tree "
-                           "(number of nodes now is %d)\n",
-                           index, sr->counter, sr,
-                           g_tree_nnodes(updated_records)));
+    static inline void status_record_update(status_record_t *sr,
+                                            uintptr_t index,
+                                            GTree *updated_records)
+    {
+        if (!(sr->counter & 0x1)) {
+            sr->counter++;
+            g_tree_insert(updated_records, (gpointer) index, NULL);
+            LIXA_TRACE(("status_record_update: inserted "
+                        "index "
+                        UINTPTR_T_FORMAT
+                        " (counter="
+                        UINT32_T_FORMAT
+                        ", address=%p) in updated records tree "
+                        "(number of nodes now is %d)\n",
+                        index, sr->counter, sr,
+                        g_tree_nnodes(updated_records)));
+        }
     }
-}
 
 
 /**
@@ -923,7 +923,7 @@ static inline void status_record_update(status_record_t *sr,
  * @param sr IN/OUT reference to the record must be marked for update
  * @return a reason code
  */
-int status_record_sync(status_record_t *sr);
+    int status_record_sync(status_record_t *sr);
 
 
 /**
@@ -933,8 +933,8 @@ int status_record_sync(status_record_t *sr);
  * @param ts IN reference to thread status
  * @return a reason code
  */
-int status_record_copy(status_record_t *dest, const status_record_t *src,
-                       struct thread_status_s *ts);
+    int status_record_copy(status_record_t *dest, const status_record_t *src,
+                           struct thread_status_s *ts);
 
 
 /**
@@ -944,29 +944,29 @@ int status_record_copy(status_record_t *dest, const status_record_t *src,
  * @param b IN pointer to second arg
  * @return a<b => -1, a>b => +1, a=b =>0
  */
-int size_t_compare_func(gconstpointer a, gconstpointer b);
+    int size_t_compare_func(gconstpointer a, gconstpointer b);
 
 
 /**
  * Initialize a @ref status_sync_t object
  * @param ssy OUT the object to initialize
  */
-static inline void status_sync_init(status_sync_t *ssy)
-{
-    ssy->asked_sync = 0;
-}
+    static inline void status_sync_init(status_sync_t *ssy)
+    {
+        ssy->asked_sync = 0;
+    }
 
 
 /**
  * Ask a synchronization of the state file
  * @param ssy IN/OUT the object to update
  */
-static inline void status_sync_ask_sync(status_sync_t *ssy)
-{
-    if (ssy->asked_sync == 0)
-        lixa_timer_start(&ssy->sync_delay);
-    ssy->asked_sync++;
-}
+    static inline void status_sync_ask_sync(status_sync_t *ssy)
+    {
+        if (ssy->asked_sync == 0)
+            lixa_timer_start(&ssy->sync_delay);
+        ssy->asked_sync++;
+    }
 
 
 /**
@@ -974,10 +974,10 @@ static inline void status_sync_ask_sync(status_sync_t *ssy)
  * @param ssy IN the object to query
  * @return the number of sessions that asked state synchronization
  */
-static inline int status_sync_get_asked(const status_sync_t *ssy)
-{
-    return ssy->asked_sync;
-}
+    static inline int status_sync_get_asked(const status_sync_t *ssy)
+    {
+        return ssy->asked_sync;
+    }
 
 
 /**
@@ -985,13 +985,13 @@ static inline int status_sync_get_asked(const status_sync_t *ssy)
  * @param ssy IN/OUT the object to query and update
  * @return the delay expressed in microseconds
  */
-static inline long status_sync_get_sync_delay(status_sync_t *ssy)
-{
-    if (ssy->asked_sync == 0)
-        return 0;
-    lixa_timer_stop(&ssy->sync_delay);
-    return lixa_timer_get_diff(&ssy->sync_delay);
-}
+    static inline long status_sync_get_sync_delay(status_sync_t *ssy)
+    {
+        if (ssy->asked_sync == 0)
+            return 0;
+        lixa_timer_stop(&ssy->sync_delay);
+        return lixa_timer_get_diff(&ssy->sync_delay);
+    }
 
 
 #ifdef _CRASH
@@ -1001,10 +1001,10 @@ static inline long status_sync_get_sync_delay(status_sync_t *ssy)
  * @return a writable reference to the number of times the crash point
  * was traversed
  */
-static inline long *thread_status_get_crash_count(
-    struct thread_status_s *ts) {
-    return ts->crash_count;
-}
+    static inline long *thread_status_get_crash_count(
+        struct thread_status_s *ts) {
+        return ts->crash_count;
+    }
 #endif /* _CRASH */
 
 

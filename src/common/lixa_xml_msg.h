@@ -1263,10 +1263,10 @@ extern "C" {
  * Initialize an empty message
  * @param msg IN/OUT message must be initialized
  */
-static inline void lixa_msg_init(struct lixa_msg_s *msg)
-{
-    memset(msg, 0, sizeof(struct lixa_msg_s));
-}
+    static inline void lixa_msg_init(struct lixa_msg_s *msg)
+    {
+        memset(msg, 0, sizeof(struct lixa_msg_s));
+    }
 
 
 /**
@@ -1277,9 +1277,9 @@ static inline void lixa_msg_init(struct lixa_msg_s *msg)
  * @param read_bytes OUT number of bytes read, XML message length
  * @return a reason code
  */
-int lixa_msg_retrieve(int fd,
-                      char *buf, size_t buf_size,
-                      ssize_t *read_bytes);
+    int lixa_msg_retrieve(int fd,
+                          char *buf, size_t buf_size,
+                          ssize_t *read_bytes);
 
 
 /**
@@ -1289,7 +1289,7 @@ int lixa_msg_retrieve(int fd,
  * @param buf_size IN size of buf
  * @return a reason code
  */
-int lixa_msg_send(int fd, const char *buf, size_t buf_size);
+    int lixa_msg_send(int fd, const char *buf, size_t buf_size);
 
 
 /**
@@ -1298,7 +1298,7 @@ int lixa_msg_send(int fd, const char *buf, size_t buf_size);
  * @param msg IN/OUT the message must be massaged
  * @return a reason code
  */
-int lixa_msg_free(struct lixa_msg_s *msg);
+    int lixa_msg_free(struct lixa_msg_s *msg);
 
 
 #ifdef __cplusplus

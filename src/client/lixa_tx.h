@@ -68,7 +68,7 @@ extern "C" {
  * @param txrc OUT tx_* return code
  * @return a return code
  */
-int lixa_tx_close(int *txrc);
+    int lixa_tx_close(int *txrc);
 
 /**
  * This function can be used to clean-up memory after a TX_FAIL condition;
@@ -76,7 +76,7 @@ int lixa_tx_close(int *txrc);
  * The normal behavior when a TX_FAIL return code happens is a (small)
  * memory leak to avoid the same thread of control uses the library again.
  */
-void lixa_tx_close_cleanup(void);
+    void lixa_tx_close_cleanup(void);
 
 /**
  * This function implements the real logic underlaying @ref tx_commit
@@ -86,7 +86,7 @@ void lixa_tx_close_cleanup(void);
  *        must be started with @ref lixa_tx_begin
  * @return a return code
  */
-int lixa_tx_commit(int *txrc, int *begin_new);
+    int lixa_tx_commit(int *txrc, int *begin_new);
 
 /**
  * This function implements the real logic underlaying @ref tx_begin
@@ -95,7 +95,7 @@ int lixa_tx_commit(int *txrc, int *begin_new);
  * @param xid IN previously created XID if joining a transaction
  * @return a return code
  */
-int lixa_tx_begin(int *txrc, XID *xid);
+    int lixa_tx_begin(int *txrc, XID *xid);
 
 /**
  * This function implements the real logic underlying @ref tx_end non standard function.
@@ -103,7 +103,7 @@ int lixa_tx_begin(int *txrc, XID *xid);
  * @param flags IN flags that will be passed to @ref lixa_xa_end and @ref xa_end
  * @return
  */
-int lixa_tx_end(int *txrc, int flags);
+    int lixa_tx_end(int *txrc, int flags);
 
 /**
  * This function implements the real logic underlaying @ref tx_info
@@ -112,7 +112,7 @@ int lixa_tx_end(int *txrc, int flags);
  * @param info OUT TXINFO structure
  * @return a return code
  */
-int lixa_tx_info(int *txrc, TXINFO *info);
+    int lixa_tx_info(int *txrc, TXINFO *info);
 
 /**
  * This function implements the real logic underlaying @ref tx_open
@@ -123,7 +123,7 @@ int lixa_tx_info(int *txrc, TXINFO *info);
  *                 Program
  * @return a return code
  */
-int lixa_tx_open(int *txrc, int mmode);
+    int lixa_tx_open(int *txrc, int mmode);
 
 /**
  * This function implements the real logic underlaying @ref tx_rollback
@@ -133,7 +133,7 @@ int lixa_tx_open(int *txrc, int mmode);
  *        must be started with @ref lixa_tx_begin
  * @return a return code
  */
-int lixa_tx_rollback(int *txrc, int *begin_new);
+    int lixa_tx_rollback(int *txrc, int *begin_new);
 
 /**
  * This function implements the real logic underlaying
@@ -142,7 +142,7 @@ int lixa_tx_rollback(int *txrc, int *begin_new);
  * @param when_return IN commit_return characteristic
  * @return a return code
  */
-int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return);
+    int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return);
 
 /**
  * This function implements the real logic underlaying
@@ -151,8 +151,8 @@ int lixa_tx_set_commit_return(int *txrc, COMMIT_RETURN when_return);
  * @param control IN transaction control characteristic
  * @return a return code
  */
-int lixa_tx_set_transaction_control(int *txrc,
-                                    TRANSACTION_CONTROL control);
+    int lixa_tx_set_transaction_control(int *txrc,
+                                        TRANSACTION_CONTROL control);
 
 /**
  * This function implements the real logic underlaying
@@ -161,8 +161,8 @@ int lixa_tx_set_transaction_control(int *txrc,
  * @param timeout IN transaction timeout (seconds)
  * @return a return code
  */
-int lixa_tx_set_transaction_timeout(int *txrc,
-                                    TRANSACTION_TIMEOUT timeout);
+    int lixa_tx_set_transaction_timeout(int *txrc,
+                                        TRANSACTION_TIMEOUT timeout);
 
 /**
  * <b>Note:</b> tx_recover is <b>not</b> a standard function, and this
@@ -180,9 +180,9 @@ int lixa_tx_set_transaction_timeout(int *txrc,
  * @param xid_file IN (file) list of transaction(s) to commit/rollback
  * @return a standardized return code
  */
-int lixa_tx_recover(int report, int commit, int rollback, int bbqc,
-                    int bfic, int utf, const char *xid,
-                    const char *xid_file);
+    int lixa_tx_recover(int report, int commit, int rollback, int bbqc,
+                        int bfic, int utf, const char *xid,
+                        const char *xid_file);
 
 /**
  * @brief Retrives information about all existing transactions
@@ -191,14 +191,14 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc,
  * @param[in] report flag intidating if the information should be reported
  * @return a standarised return code
  */
-int lixa_tx_tpm(GArray *xida, int maint, int report);
+    int lixa_tx_tpm(GArray *xida, int maint, int report);
 
 /**
  * This function is used to clean-up the environment when a function
  * ends with TX_FAIL and the calling program can not call other functions
  * but tx_open. The primary usage is avoiding memory leaks.
  */
-void lixa_tx_cleanup(void);
+    void lixa_tx_cleanup(void);
 
 #ifdef __cplusplus
 }

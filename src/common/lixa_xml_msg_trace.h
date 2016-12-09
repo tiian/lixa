@@ -68,7 +68,7 @@ extern "C" {
  * @param msg IN the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace(const struct lixa_msg_s *msg);
+    int lixa_msg_trace(const struct lixa_msg_s *msg);
 
 
 /**
@@ -77,7 +77,7 @@ int lixa_msg_trace(const struct lixa_msg_s *msg);
  * @param msg IN the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace_close(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_close(const struct lixa_msg_s *msg);
 
 
 /**
@@ -86,7 +86,7 @@ int lixa_msg_trace_close(const struct lixa_msg_s *msg);
  * @param msg IN the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace_commit(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_commit(const struct lixa_msg_s *msg);
 
 
 /**
@@ -95,7 +95,7 @@ int lixa_msg_trace_commit(const struct lixa_msg_s *msg);
  * @param msg IN the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace_end(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_end(const struct lixa_msg_s *msg);
 
 
 /**
@@ -104,7 +104,7 @@ int lixa_msg_trace_end(const struct lixa_msg_s *msg);
  * @param msg IN the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace_forget(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_forget(const struct lixa_msg_s *msg);
 
 
 /**
@@ -113,7 +113,7 @@ int lixa_msg_trace_forget(const struct lixa_msg_s *msg);
  * @param msg IN the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace_open(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_open(const struct lixa_msg_s *msg);
 
 
 /**
@@ -122,7 +122,7 @@ int lixa_msg_trace_open(const struct lixa_msg_s *msg);
  * @param msg IN the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace_prepare(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_prepare(const struct lixa_msg_s *msg);
 
 
 /**
@@ -131,7 +131,7 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg);
  * @param msg IN the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg);
 
 
 /**
@@ -140,7 +140,7 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg);
  * @param msg IN the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace_reg(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_reg(const struct lixa_msg_s *msg);
 
 
 /**
@@ -149,7 +149,7 @@ int lixa_msg_trace_reg(const struct lixa_msg_s *msg);
  * @param msg IN the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace_rollback(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_rollback(const struct lixa_msg_s *msg);
 
 
 /**
@@ -158,7 +158,7 @@ int lixa_msg_trace_rollback(const struct lixa_msg_s *msg);
  * @param msg IN the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace_start(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_start(const struct lixa_msg_s *msg);
 
 
 /**
@@ -167,7 +167,7 @@ int lixa_msg_trace_start(const struct lixa_msg_s *msg);
  * @param msg IN the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace_unreg(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_unreg(const struct lixa_msg_s *msg);
 
 /**
  * @brief Convenience function for @ref lixa_msg_trace : it display the content
@@ -175,7 +175,7 @@ int lixa_msg_trace_unreg(const struct lixa_msg_s *msg);
  * @param[in] msg the message must be massaged
  * @return a reason code
  */
-int lixa_msg_trace_scan(const struct lixa_msg_s *msg);
+    int lixa_msg_trace_scan(const struct lixa_msg_s *msg);
 
 
 #ifdef __cplusplus

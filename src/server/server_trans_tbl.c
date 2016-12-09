@@ -43,31 +43,31 @@ int server_trans_tbl_new(server_trans_tbl_t *stt, guint tsid_array_size)
             OBJ_NOT_INITIALIZED);
         if (NULL == (stt->mutex = g_mutex_new())) THROW(G_MUTEX_NEW_ERROR);
         if (NULL == (stt->records = g_tree_new_full(
-            server_trans_tbl_comp, NULL,
-            free, server_trans_tbl_value_destroy))) THROW(G_TREE_NEW_ERROR);
+                         server_trans_tbl_comp, NULL,
+                         free, server_trans_tbl_value_destroy))) THROW(G_TREE_NEW_ERROR);
         stt->tsid_array_size = tsid_array_size;
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case OBJ_NOT_INITIALIZED:
-                ret_cod = LIXA_RC_OBJ_NOT_INITIALIZED;
-                break;
-            case G_MUTEX_NEW_ERROR:
-            case G_TREE_NEW_ERROR:
-                ret_cod = LIXA_RC_G_RETURNED_NULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case OBJ_NOT_INITIALIZED:
+                    ret_cod = LIXA_RC_OBJ_NOT_INITIALIZED;
+                    break;
+                case G_MUTEX_NEW_ERROR:
+                case G_TREE_NEW_ERROR:
+                    ret_cod = LIXA_RC_G_RETURNED_NULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_tbl_new/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -91,9 +91,9 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
 
         LIXA_TRACE(
             ("server_trans_tbl_insert: gtrid='%s', xid='%s', tsid=%u, block_id="
-            UINT32_T_FORMAT
-            "\n", sttr->gtrid, sttr->xid,
-                sttr->tsid, sttr->block_id));
+             UINT32_T_FORMAT
+             "\n", sttr->gtrid, sttr->xid,
+             sttr->tsid, sttr->block_id));
 
         if (NULL == stt->mutex || NULL == stt->records) THROW(OBJ_CORRUPTED);
 
@@ -112,8 +112,8 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
             char *key = NULL;
 
             if (NULL == (tsid = g_array_sized_new(
-                FALSE, FALSE, sizeof(GQueue),
-                stt->tsid_array_size))) THROW(G_ARRAY_SIZED_NEW_ERROR);
+                             FALSE, FALSE, sizeof(GQueue),
+                             stt->tsid_array_size))) THROW(G_ARRAY_SIZED_NEW_ERROR);
             /* prepare the array: all the elements are initialized with an empty queue object */
             for (i = 0; i < stt->tsid_array_size; ++i) {
                 GQueue q;
@@ -122,7 +122,7 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
             }
             if (NULL ==
                 (key = (char *) malloc(LIXA_XID_GTRID_ASCII_LENGTH))) THROW(
-                MALLOC_ERROR);
+                    MALLOC_ERROR);
             memcpy(key, sttr->gtrid, LIXA_XID_GTRID_ASCII_LENGTH);
             /* insert the new element in the tree */
             g_tree_insert(stt->records, key, tsid);
@@ -140,31 +140,31 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case OBJ_CORRUPTED:
-                ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                break;
-            case OUT_OF_RANGE:
-                ret_cod = LIXA_RC_OUT_OF_RANGE;
-                break;
-            case G_ARRAY_SIZED_NEW_ERROR:
-                ret_cod = LIXA_RC_G_RETURNED_NULL;
-                break;
-            case MALLOC_ERROR:
-                ret_cod = LIXA_RC_MALLOC_ERROR;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        /* unlock mutex */
-        g_mutex_unlock(stt->mutex);
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case OBJ_CORRUPTED:
+                    ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                    break;
+                case OUT_OF_RANGE:
+                    ret_cod = LIXA_RC_OUT_OF_RANGE;
+                    break;
+                case G_ARRAY_SIZED_NEW_ERROR:
+                    ret_cod = LIXA_RC_G_RETURNED_NULL;
+                    break;
+                case MALLOC_ERROR:
+                    ret_cod = LIXA_RC_MALLOC_ERROR;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+            /* unlock mutex */
+            g_mutex_unlock(stt->mutex);
+        } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_tbl_insert/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -215,17 +215,17 @@ int server_trans_tbl_delete(server_trans_tbl_t *stt)
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_tbl_delete/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -261,7 +261,7 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
 
         LIXA_TRACE(
             ("server_trans_tbl_query_xid: query is gtrid='%s', tsid=%u\n",
-                sttr->gtrid, sttr->tsid));
+             sttr->gtrid, sttr->tsid));
 
         if (NULL == stt->mutex || NULL == stt->records) THROW(OBJ_CORRUPTED);
 
@@ -338,38 +338,38 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
         *out_array_size = last;
 
         LIXA_TRACE(("server_trans_tbl_query_xid: result is transactions="
-                       UINT32_T_FORMAT
-                       "\n", *out_array_size));
+                    UINT32_T_FORMAT
+                    "\n", *out_array_size));
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case OBJ_CORRUPTED:
-                ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                break;
-            case OUT_OF_RANGE:
-                ret_cod = LIXA_RC_OUT_OF_RANGE;
-                break;
-            case OBJ_NOT_FOUND1:
-            case OBJ_NOT_FOUND2:
-                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
-                break;
-            case REALLOC_ERROR:
-                ret_cod = LIXA_RC_REALLOC_ERROR;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        /* unlock mutex */
-        g_mutex_unlock(stt->mutex);
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case OBJ_CORRUPTED:
+                    ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                    break;
+                case OUT_OF_RANGE:
+                    ret_cod = LIXA_RC_OUT_OF_RANGE;
+                    break;
+                case OBJ_NOT_FOUND1:
+                case OBJ_NOT_FOUND2:
+                    ret_cod = LIXA_RC_OBJ_NOT_FOUND;
+                    break;
+                case REALLOC_ERROR:
+                    ret_cod = LIXA_RC_REALLOC_ERROR;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+            /* unlock mutex */
+            g_mutex_unlock(stt->mutex);
+        } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_tbl_query_xid/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -392,9 +392,9 @@ int server_trans_tbl_remove(server_trans_tbl_t *stt,
 
         LIXA_TRACE(
             ("server_trans_tbl_remove: gtrid='%s', xid='%s', tsid=%u, block_id="
-            UINT32_T_FORMAT
-            "\n", sttr->gtrid, sttr->xid,
-                sttr->tsid, sttr->block_id));
+             UINT32_T_FORMAT
+             "\n", sttr->gtrid, sttr->xid,
+             sttr->tsid, sttr->block_id));
 
         if (NULL == stt->mutex || NULL == stt->records) THROW(OBJ_CORRUPTED);
 
@@ -411,25 +411,25 @@ int server_trans_tbl_remove(server_trans_tbl_t *stt,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case OBJ_CORRUPTED:
-                ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                break;
-            case OUT_OF_RANGE:
-                ret_cod = LIXA_RC_OUT_OF_RANGE;
-                break;
-            case NOT_FOUND_ERROR:
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        /* unlock mutex */
-        g_mutex_unlock(stt->mutex);
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case OBJ_CORRUPTED:
+                    ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                    break;
+                case OUT_OF_RANGE:
+                    ret_cod = LIXA_RC_OUT_OF_RANGE;
+                    break;
+                case NOT_FOUND_ERROR:
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+            /* unlock mutex */
+            g_mutex_unlock(stt->mutex);
+        } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_tbl_insert/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

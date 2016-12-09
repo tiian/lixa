@@ -70,8 +70,8 @@ extern "C" {
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize(char *buffer, size_t buffer_len,
-                         struct lixa_msg_s *msg);
+    int lixa_msg_deserialize(char *buffer, size_t buffer_len,
+                             struct lixa_msg_s *msg);
 
 
 /**
@@ -81,7 +81,7 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_close_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_close_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -91,7 +91,7 @@ int lixa_msg_deserialize_close_8(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_commit_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_commit_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -100,9 +100,9 @@ int lixa_msg_deserialize_commit_8(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param answer OUT reference to the answer contained in the message
  * @return a reason code
  */
-int lixa_msg_deserialize_default_answer(
-    xmlNodePtr cur,
-    struct lixa_msg_body_answer_s *answer);
+    int lixa_msg_deserialize_default_answer(
+        xmlNodePtr cur,
+        struct lixa_msg_body_answer_s *answer);
 
 
 /**
@@ -112,7 +112,7 @@ int lixa_msg_deserialize_default_answer(
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_end_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_end_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -122,7 +122,7 @@ int lixa_msg_deserialize_end_8(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_end_16(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_end_16(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -132,7 +132,7 @@ int lixa_msg_deserialize_end_16(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_forget_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_forget_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -142,7 +142,7 @@ int lixa_msg_deserialize_forget_8(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -152,7 +152,7 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_open_16(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_open_16(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -162,7 +162,7 @@ int lixa_msg_deserialize_open_16(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -172,7 +172,7 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_prepare_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_prepare_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -182,8 +182,8 @@ int lixa_msg_deserialize_prepare_8(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_prepare_16(xmlNodePtr cur,
-                                    struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_prepare_16(xmlNodePtr cur,
+                                        struct lixa_msg_s *msg);
 
 
 /**
@@ -193,7 +193,7 @@ int lixa_msg_deserialize_prepare_16(xmlNodePtr cur,
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_qrcvr_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_qrcvr_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -203,7 +203,7 @@ int lixa_msg_deserialize_qrcvr_8(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -213,7 +213,7 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_qrcvr_24(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_qrcvr_24(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -223,7 +223,7 @@ int lixa_msg_deserialize_qrcvr_24(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_reg_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_reg_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -233,8 +233,8 @@ int lixa_msg_deserialize_reg_8(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_rollback_8(xmlNodePtr cur,
-                                    struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_rollback_8(xmlNodePtr cur,
+                                        struct lixa_msg_s *msg);
 
 
 /**
@@ -244,7 +244,7 @@ int lixa_msg_deserialize_rollback_8(xmlNodePtr cur,
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_start_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_start_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -254,7 +254,7 @@ int lixa_msg_deserialize_start_8(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_start_16(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_start_16(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -264,7 +264,7 @@ int lixa_msg_deserialize_start_16(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_start_24(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_start_24(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 
 /**
@@ -274,7 +274,7 @@ int lixa_msg_deserialize_start_24(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param msg OUT the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_unreg_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_unreg_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 /**
  * @brief Deserialize an XML subtree containing details pertaining to a message
@@ -283,7 +283,7 @@ int lixa_msg_deserialize_unreg_8(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param[out] msg the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_trans_8(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_trans_8(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 /**
  * @brief Deserialize an XML subtree containing details pertaining to a message
@@ -292,7 +292,7 @@ int lixa_msg_deserialize_trans_8(xmlNodePtr cur, struct lixa_msg_s *msg);
  * @param[out] msg the object after deserialization
  * @return a reason code
  */
-int lixa_msg_deserialize_trans_16(xmlNodePtr cur, struct lixa_msg_s *msg);
+    int lixa_msg_deserialize_trans_16(xmlNodePtr cur, struct lixa_msg_s *msg);
 
 #ifdef __cplusplus
 }

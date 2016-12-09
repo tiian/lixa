@@ -49,9 +49,9 @@ extern "C" {
  *                    client is calling the server
  * @return a reason code
  */
-int server_ax_reg(struct thread_status_s *ts,
-                  const struct lixa_msg_s *lmi,
-                  uint32_t block_id);
+    int server_ax_reg(struct thread_status_s *ts,
+                      const struct lixa_msg_s *lmi,
+                      uint32_t block_id);
 
 
 /**
@@ -62,9 +62,9 @@ int server_ax_reg(struct thread_status_s *ts,
  *                    client is calling the server
  * @return a reason code
  */
-int server_ax_unreg(struct thread_status_s *ts,
-                    const struct lixa_msg_s *lmi,
-                    uint32_t block_id);
+    int server_ax_unreg(struct thread_status_s *ts,
+                        const struct lixa_msg_s *lmi,
+                        uint32_t block_id);
 
 
 /**
@@ -75,9 +75,9 @@ int server_ax_unreg(struct thread_status_s *ts,
  *                    client is calling the server
  * @return a reason code
  */
-int server_xa_close(struct thread_status_s *ts,
-                    const struct lixa_msg_s *lmi,
-                    uint32_t block_id);
+    int server_xa_close(struct thread_status_s *ts,
+                        const struct lixa_msg_s *lmi,
+                        uint32_t block_id);
 
 
 /**
@@ -88,9 +88,9 @@ int server_xa_close(struct thread_status_s *ts,
  *                    client is calling the server
  * @return a reason code
  */
-int server_xa_commit(struct thread_status_s *ts,
-                     const struct lixa_msg_s *lmi,
-                     uint32_t block_id);
+    int server_xa_commit(struct thread_status_s *ts,
+                         const struct lixa_msg_s *lmi,
+                         uint32_t block_id);
 
 
 /**
@@ -101,9 +101,9 @@ int server_xa_commit(struct thread_status_s *ts,
  *                    client is calling the server
  * @return a reason code
  */
-int server_xa_commit_8(struct thread_status_s *ts,
-                       const struct lixa_msg_s *lmi,
-                       uint32_t block_id);
+    int server_xa_commit_8(struct thread_status_s *ts,
+                           const struct lixa_msg_s *lmi,
+                           uint32_t block_id);
 
 
 /**
@@ -117,11 +117,11 @@ int server_xa_commit_8(struct thread_status_s *ts,
  *                       reply function)
  * @return a reason code
  */
-int server_xa_end(struct thread_status_s *ts,
-                  const struct lixa_msg_s *lmi,
-                  struct lixa_msg_s *lmo,
-                  uint32_t block_id,
-                  struct lixa_msg_verb_step_s *last_verb_step);
+    int server_xa_end(struct thread_status_s *ts,
+                      const struct lixa_msg_s *lmi,
+                      struct lixa_msg_s *lmo,
+                      uint32_t block_id,
+                      struct lixa_msg_verb_step_s *last_verb_step);
 
 
 /**
@@ -136,11 +136,11 @@ int server_xa_end(struct thread_status_s *ts,
  *                       reply function)
  * @return a reason code
  */
-int server_xa_end_8(struct thread_status_s *ts,
-                    const struct lixa_msg_s *lmi,
-                    struct lixa_msg_s *lmo,
-                    uint32_t block_id,
-                    struct lixa_msg_verb_step_s *last_verb_step);
+    int server_xa_end_8(struct thread_status_s *ts,
+                        const struct lixa_msg_s *lmi,
+                        struct lixa_msg_s *lmo,
+                        uint32_t block_id,
+                        struct lixa_msg_verb_step_s *last_verb_step);
 
 
 /**
@@ -151,9 +151,9 @@ int server_xa_end_8(struct thread_status_s *ts,
  *                    client is calling the server
  * @return a reason code
  */
-int server_xa_forget(struct thread_status_s *ts,
-                     const struct lixa_msg_s *lmi,
-                     uint32_t block_id);
+    int server_xa_forget(struct thread_status_s *ts,
+                         const struct lixa_msg_s *lmi,
+                         uint32_t block_id);
 
 
 /**
@@ -164,9 +164,9 @@ int server_xa_forget(struct thread_status_s *ts,
  *                    client is calling the server
  * @return a reason code
  */
-int server_xa_forget_8(struct thread_status_s *ts,
-                       const struct lixa_msg_s *lmi,
-                       uint32_t block_id);
+    int server_xa_forget_8(struct thread_status_s *ts,
+                           const struct lixa_msg_s *lmi,
+                           uint32_t block_id);
 
 
 /**
@@ -180,11 +180,11 @@ int server_xa_forget_8(struct thread_status_s *ts,
  *                       reply function)
  * @return a reason code
  */
-int server_xa_open(struct thread_status_s *ts,
-                   const struct lixa_msg_s *lmi,
-                   struct lixa_msg_s *lmo,
-                   uint32_t block_id,
-                   struct lixa_msg_verb_step_s *last_verb_step);
+    int server_xa_open(struct thread_status_s *ts,
+                       const struct lixa_msg_s *lmi,
+                       struct lixa_msg_s *lmo,
+                       uint32_t block_id,
+                       struct lixa_msg_verb_step_s *last_verb_step);
 
 
 /**
@@ -199,11 +199,11 @@ int server_xa_open(struct thread_status_s *ts,
  *                       reply function)
  * @return a reason code
  */
-int server_xa_open_8(struct thread_status_s *ts,
-                     const struct lixa_msg_s *lmi,
-                     struct lixa_msg_s *lmo,
-                     uint32_t block_id,
-                     struct lixa_msg_verb_step_s *last_verb_step);
+    int server_xa_open_8(struct thread_status_s *ts,
+                         const struct lixa_msg_s *lmi,
+                         struct lixa_msg_s *lmo,
+                         uint32_t block_id,
+                         struct lixa_msg_verb_step_s *last_verb_step);
 
 
 /**
@@ -215,9 +215,9 @@ int server_xa_open_8(struct thread_status_s *ts,
  *                    client is calling the server
  * @return a reason code
  */
-int server_xa_open_24(struct thread_status_s *ts,
-                      const struct lixa_msg_s *lmi,
-                      uint32_t block_id);
+    int server_xa_open_24(struct thread_status_s *ts,
+                          const struct lixa_msg_s *lmi,
+                          uint32_t block_id);
 
 
 /**
@@ -231,11 +231,11 @@ int server_xa_open_24(struct thread_status_s *ts,
  *                       reply function)
  * @return a reason code
  */
-int server_xa_prepare(struct thread_status_s *ts,
-                      const struct lixa_msg_s *lmi,
-                      struct lixa_msg_s *lmo,
-                      uint32_t block_id,
-                      struct lixa_msg_verb_step_s *last_verb_step);
+    int server_xa_prepare(struct thread_status_s *ts,
+                          const struct lixa_msg_s *lmi,
+                          struct lixa_msg_s *lmo,
+                          uint32_t block_id,
+                          struct lixa_msg_verb_step_s *last_verb_step);
 
 
 /**
@@ -250,11 +250,11 @@ int server_xa_prepare(struct thread_status_s *ts,
  *                       reply function)
  * @return a reason code
  */
-int server_xa_prepare_8(struct thread_status_s *ts,
-                        const struct lixa_msg_s *lmi,
-                        struct lixa_msg_s *lmo,
-                        uint32_t block_id,
-                        struct lixa_msg_verb_step_s *last_verb_step);
+    int server_xa_prepare_8(struct thread_status_s *ts,
+                            const struct lixa_msg_s *lmi,
+                            struct lixa_msg_s *lmo,
+                            uint32_t block_id,
+                            struct lixa_msg_verb_step_s *last_verb_step);
 
 
 /**
@@ -265,9 +265,9 @@ int server_xa_prepare_8(struct thread_status_s *ts,
  *                    client is calling the server
  * @return a reason code
  */
-int server_xa_rollback(struct thread_status_s *ts,
-                       const struct lixa_msg_s *lmi,
-                       uint32_t block_id);
+    int server_xa_rollback(struct thread_status_s *ts,
+                           const struct lixa_msg_s *lmi,
+                           uint32_t block_id);
 
 
 /**
@@ -278,9 +278,9 @@ int server_xa_rollback(struct thread_status_s *ts,
  *                    client is calling the server
  * @return a reason code
  */
-int server_xa_rollback_8(struct thread_status_s *ts,
-                         const struct lixa_msg_s *lmi,
-                         uint32_t block_id);
+    int server_xa_rollback_8(struct thread_status_s *ts,
+                             const struct lixa_msg_s *lmi,
+                             uint32_t block_id);
 
 
 /**
@@ -294,11 +294,11 @@ int server_xa_rollback_8(struct thread_status_s *ts,
  *                       reply function)
  * @return a reason code
  */
-int server_xa_start(struct thread_status_s *ts,
-                    const struct lixa_msg_s *lmi,
-                    struct lixa_msg_s *lmo,
-                    uint32_t block_id,
-                    struct lixa_msg_verb_step_s *last_verb_step);
+    int server_xa_start(struct thread_status_s *ts,
+                        const struct lixa_msg_s *lmi,
+                        struct lixa_msg_s *lmo,
+                        uint32_t block_id,
+                        struct lixa_msg_verb_step_s *last_verb_step);
 
 
 /**
@@ -313,11 +313,11 @@ int server_xa_start(struct thread_status_s *ts,
  *                       reply function)
  * @return a reason code
  */
-int server_xa_start_8(struct thread_status_s *ts,
-                      const struct lixa_msg_s *lmi,
-                      struct lixa_msg_s *lmo,
-                      uint32_t block_id,
-                      struct lixa_msg_verb_step_s *last_verb_step);
+    int server_xa_start_8(struct thread_status_s *ts,
+                          const struct lixa_msg_s *lmi,
+                          struct lixa_msg_s *lmo,
+                          uint32_t block_id,
+                          struct lixa_msg_verb_step_s *last_verb_step);
 
 
 /**
@@ -329,9 +329,9 @@ int server_xa_start_8(struct thread_status_s *ts,
  *                    client is calling the server
  * @return a reason code
  */
-int server_xa_start_24(struct thread_status_s *ts,
-                       const struct lixa_msg_s *lmi,
-                       uint32_t block_id);
+    int server_xa_start_24(struct thread_status_s *ts,
+                           const struct lixa_msg_s *lmi,
+                           uint32_t block_id);
 
 
 #ifdef __cplusplus

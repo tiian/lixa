@@ -116,16 +116,16 @@ static gboolean clean_failed = FALSE;
 static gboolean print_version = FALSE;
 /* command line options */
 static GOptionEntry entries[] =
-    {
-        {"daemon",       'd', 0, G_OPTION_ARG_NONE,   &run_as_daemon, "Run the process as a daemon",                                                       NULL},
-        {"maintenance",  'm', 0, G_OPTION_ARG_NONE,   &maintenance,   "Start the server in maintenance mode only",                                         NULL},
-        {"dump",         'u', 0, G_OPTION_ARG_STRING, &dump_specs,    "Dump the content of status files using order [ufs] (u=used, f=free, s=sequential)", NULL},
-        {"config-file",  'c', 0, G_OPTION_ARG_STRING, &config_file,   "Specify an alternate configuration file",                                           NULL},
-        {"trace-file",   't', 0, G_OPTION_ARG_STRING, &trace_file,    "Specify trace file name",                                                           NULL},
-        {"clean-failed", 'l', 0, G_OPTION_ARG_NONE,   &clean_failed,  "Clean recovery failed transactions at start-up",                                    NULL},
-        {"version",      'v', 0, G_OPTION_ARG_NONE,   &print_version, "Print package info and exit",                                                       NULL},
-        {NULL}
-    };
+{
+    {"daemon",       'd', 0, G_OPTION_ARG_NONE,   &run_as_daemon, "Run the process as a daemon",                                                       NULL},
+    {"maintenance",  'm', 0, G_OPTION_ARG_NONE,   &maintenance,   "Start the server in maintenance mode only",                                         NULL},
+    {"dump",         'u', 0, G_OPTION_ARG_STRING, &dump_specs,    "Dump the content of status files using order [ufs] (u=used, f=free, s=sequential)", NULL},
+    {"config-file",  'c', 0, G_OPTION_ARG_STRING, &config_file,   "Specify an alternate configuration file",                                           NULL},
+    {"trace-file",   't', 0, G_OPTION_ARG_STRING, &trace_file,    "Specify trace file name",                                                           NULL},
+    {"clean-failed", 'l', 0, G_OPTION_ARG_NONE,   &clean_failed,  "Clean recovery failed transactions at start-up",                                    NULL},
+    {"version",      'v', 0, G_OPTION_ARG_NONE,   &print_version, "Print package info and exit",                                                       NULL},
+    {NULL}
+};
 
 
 int main(int argc, char *argv[])
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
             char array[100];
             ssize_t res;
             snprintf(array, sizeof(array), PID_T_FORMAT
-                "\n", getpid());
+                     "\n", getpid());
             res = write(pid_fd, array, strlen(array));
             close(pid_fd);
         }
@@ -226,8 +226,8 @@ int main(int argc, char *argv[])
         syslog(LOG_NOTICE, LIXA_SYSLOG_LXD022N);
     LIXA_TRACE(("lixad/main: starting\n"));
     if (LIXA_RC_OK != (rc = server_manager(
-        &sc, &tpa, &tsa, &srt, &stt, &tsds, &tsrs,
-        maintenance))) {
+                           &sc, &tpa, &tsa, &srt, &stt, &tsds, &tsrs,
+                           maintenance))) {
         LIXA_TRACE(("main/server_manager: rc=%d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD004E, lixa_strerror(rc));
         return rc;
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
     if (!dump_specs) {
         if (0 != (unlink(sc.pid_file))) {
             LIXA_TRACE(("main/unlink: errno=%d ('%s')\n",
-                errno, strerror(errno)));
+                        errno, strerror(errno)));
             syslog(LOG_NOTICE, LIXA_SYSLOG_LXD024N, sc.pid_file, errno,
                    strerror(errno));
         }

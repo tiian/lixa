@@ -72,13 +72,13 @@ extern "C" {
  * @param mmode IN maintenance mode: only privileged clients can connect
  * @return a standardized return code
  */
-int server_manager(struct server_config_s *sc,
-                   struct thread_pipe_array_s *tpa,
-                   struct thread_status_array_s *tsa,
-                   srvr_rcvr_tbl_t *srt,
-                   server_trans_tbl_t *stt,
-                   const struct ts_dump_spec_s *tsds,
-                   const struct ts_recovery_spec_s *tsrs, int mmode);
+    int server_manager(struct server_config_s *sc,
+                       struct thread_pipe_array_s *tpa,
+                       struct thread_status_array_s *tsa,
+                       srvr_rcvr_tbl_t *srt,
+                       server_trans_tbl_t *stt,
+                       const struct ts_dump_spec_s *tsds,
+                       const struct ts_recovery_spec_s *tsrs, int mmode);
 
 
 /**
@@ -86,14 +86,14 @@ int server_manager(struct server_config_s *sc,
  * @param tpa IN/OUT object reference
  * @return a standardized return code
  */
-int server_pipes_init(struct thread_pipe_array_s *tpa);
+    int server_pipes_init(struct thread_pipe_array_s *tpa);
 
 
 /**
  * This is the initial function of every new manager thread
  * @param void_ts IN status of this thread
  */
-void *server_manager_thread(void *void_ts);
+    void *server_manager_thread(void *void_ts);
 
 
 /**
@@ -104,7 +104,7 @@ void *server_manager_thread(void *void_ts);
  * - send notification message to all the other threads <br>
  * @param ts IN thread status reference
  */
-void server_manager_thread_cleanup(struct thread_status_s *ts);
+    void server_manager_thread_cleanup(struct thread_status_s *ts);
 
 
 /**
@@ -114,7 +114,7 @@ void server_manager_thread_cleanup(struct thread_status_s *ts);
  * @param fd IN file descriptor raised the POLLIN event
  * @return a standardized return code
  */
-int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd);
+    int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd);
 
 
 /**
@@ -125,7 +125,7 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd);
  *                   the poll (POLLIN) event
  * @return a standardized return code
  */
-int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id);
+    int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id);
 
 
 /**
@@ -135,7 +135,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id);
  *                   the poll event
  * @return a standardized return code
  */
-int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id);
+    int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id);
 
 
 /**
@@ -148,8 +148,8 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id);
  *                to the client
  * @return a standardized return code
  */
-int server_manager_switch_1(struct thread_status_s *ts,
-                            size_t slot_id);
+    int server_manager_switch_1(struct thread_status_s *ts,
+                                size_t slot_id);
 
 
 /**
@@ -159,8 +159,8 @@ int server_manager_switch_1(struct thread_status_s *ts,
  * @param msg IN the request message sent by source thread
  * @return a standardized return code
  */
-int server_manager_switch_2(struct thread_status_s *ts,
-                            const struct srv_msg_s *msg);
+    int server_manager_switch_2(struct thread_status_s *ts,
+                                const struct srv_msg_s *msg);
 
 
 /**
@@ -170,8 +170,8 @@ int server_manager_switch_2(struct thread_status_s *ts,
  * @param msg IN the request message sent by source thread
  * @return a standardized return code
  */
-int server_manager_switch_3(struct thread_status_s *ts,
-                            const struct srv_msg_s *msg);
+    int server_manager_switch_3(struct thread_status_s *ts,
+                                const struct srv_msg_s *msg);
 
 
 /**
@@ -180,8 +180,8 @@ int server_manager_switch_3(struct thread_status_s *ts,
  * @param msg IN the shutdown message (sent by the signal handler routine)
  * @return a standardized return code
  */
-int server_manager_shutdown(struct thread_status_s *ts,
-                            const struct srv_msg_s *msg);
+    int server_manager_shutdown(struct thread_status_s *ts,
+                                const struct srv_msg_s *msg);
 
 
 /**
@@ -192,7 +192,7 @@ int server_manager_shutdown(struct thread_status_s *ts,
  *                   the POLLOUT event
  * @return a standardized return code
  */
-int server_manager_pollout(struct thread_status_s *ts, size_t slot_id);
+    int server_manager_pollout(struct thread_status_s *ts, size_t slot_id);
 
 
 /**
@@ -201,7 +201,7 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id);
  * @param slot_id IN id of the slot must be freed
  * @return a standardized return code
  */
-int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id);
+    int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id);
 
 
 /**
@@ -214,8 +214,8 @@ int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id);
  * @param read_bytes IN number of bytes read from socket
  * @return a standardized return code
  */
-int server_manager_msg_proc(struct thread_status_s *ts,
-                            size_t slot_id, char *buf, ssize_t read_bytes);
+    int server_manager_msg_proc(struct thread_status_s *ts,
+                                size_t slot_id, char *buf, ssize_t read_bytes);
 
 
 /**
@@ -228,9 +228,9 @@ int server_manager_msg_proc(struct thread_status_s *ts,
  * @param lmo OUT message should be returned to the client
  * @return a standardized return code
  */
-int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
-                              char *buf, ssize_t read_bytes,
-                              struct lixa_msg_s *lmo);
+    int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
+                                  char *buf, ssize_t read_bytes,
+                                  struct lixa_msg_s *lmo);
 
 
 /**
@@ -243,8 +243,8 @@ int server_manager_inmsg_proc(struct thread_status_s *ts, size_t slot_id,
  *              to the client
  * @return a standardized return code
  */
-int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
-                               struct lixa_msg_s *lmo, int rc);
+    int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
+                                   struct lixa_msg_s *lmo, int rc);
 
 
 /**
@@ -256,9 +256,9 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
  *                         pending transactions
  * @return a reason code
  */
-int server_manager_check_recovery(struct thread_status_s *ts,
-                                  const struct lixa_msg_s *lmi,
-                                  int *recovery_pending);
+    int server_manager_check_recovery(struct thread_status_s *ts,
+                                      const struct lixa_msg_s *lmi,
+                                      int *recovery_pending);
 
 
 /**
@@ -269,8 +269,8 @@ int server_manager_check_recovery(struct thread_status_s *ts,
  *                  to the new session
  * @return a standardized return code
  */
-int server_manager_add_poll(struct thread_status_s *ts,
-                            int new_fd, nfds_t *place);
+    int server_manager_add_poll(struct thread_status_s *ts,
+                                int new_fd, nfds_t *place);
 
 
 /**
@@ -280,7 +280,7 @@ int server_manager_add_poll(struct thread_status_s *ts,
  * @param ts IN/OUT thread status structure
  * @return a standardized return code
  */
-int server_manager_fix_poll(struct thread_status_s *ts);
+    int server_manager_fix_poll(struct thread_status_s *ts);
 
 
 /**
@@ -292,8 +292,8 @@ int server_manager_fix_poll(struct thread_status_s *ts);
  *                 the reference to mapped memory status
  * @return a standardized return code
  */
-int server_manager_new_client(struct thread_status_s *ts, int fd,
-                              nfds_t place);
+    int server_manager_new_client(struct thread_status_s *ts, int fd,
+                                  nfds_t place);
 
 
 #ifdef __cplusplus

@@ -44,13 +44,13 @@ int server_reply_default(struct thread_status_s *ts, size_t slot_id,
     LIXA_TRACE(("server_reply_default\n"));
     TRY {
         if (LIXA_RC_OK != (
-            ret_cod = lixa_msg_serialize(
-                lmo,
-                ts->client_array[slot_id].output_buffer,
-                LIXA_MSG_XML_BUFFER_SIZE,
-                &ts->client_array[slot_id].output_buffer_size))) {
+                ret_cod = lixa_msg_serialize(
+                    lmo,
+                    ts->client_array[slot_id].output_buffer,
+                    LIXA_MSG_XML_BUFFER_SIZE,
+                    &ts->client_array[slot_id].output_buffer_size))) {
             LIXA_TRACE(("server_reply_default: error while "
-                "serializing reply message to client\n"));
+                        "serializing reply message to client\n"));
             /* release the buffer to avoid transmission */
             free(ts->client_array[slot_id].output_buffer);
             ts->client_array[slot_id].output_buffer = NULL;
@@ -58,28 +58,28 @@ int server_reply_default(struct thread_status_s *ts, size_t slot_id,
         }
         if (LIXA_RC_OK == ret_cod) {
             LIXA_TRACE(("server_reply_default: reply message is "
-                "|%*.*s|\n",
-                ts->client_array[slot_id].output_buffer_size,
-                ts->client_array[slot_id].output_buffer_size,
-                ts->client_array[slot_id].output_buffer));
+                        "|%*.*s|\n",
+                        ts->client_array[slot_id].output_buffer_size,
+                        ts->client_array[slot_id].output_buffer_size,
+                        ts->client_array[slot_id].output_buffer));
         }
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case SERIALIZE_ERROR:
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case SERIALIZE_ERROR:
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("server_reply_default/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -98,24 +98,24 @@ int server_reply_end(struct thread_status_s *ts, size_t slot_id,
         lmo->body.end_16.answer.rc = rc;
         if (LIXA_RC_OK !=
             (ret_cod = server_reply_default(ts, slot_id, lmo))) THROW(
-            REPLY_DEFAULT_ERROR);
+                REPLY_DEFAULT_ERROR);
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case REPLY_DEFAULT_ERROR:
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case REPLY_DEFAULT_ERROR:
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("server_reply_end/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -134,24 +134,24 @@ int server_reply_open(struct thread_status_s *ts, size_t slot_id,
         lmo->body.open_16.answer.rc = rc;
         if (LIXA_RC_OK !=
             (ret_cod = server_reply_default(ts, slot_id, lmo))) THROW(
-            REPLY_DEFAULT_ERROR);
+                REPLY_DEFAULT_ERROR);
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case REPLY_DEFAULT_ERROR:
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case REPLY_DEFAULT_ERROR:
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("server_reply_open/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -170,24 +170,24 @@ int server_reply_prepare(struct thread_status_s *ts, size_t slot_id,
         lmo->body.prepare_16.answer.rc = rc;
         if (LIXA_RC_OK !=
             (ret_cod = server_reply_default(ts, slot_id, lmo))) THROW(
-            REPLY_DEFAULT_ERROR);
+                REPLY_DEFAULT_ERROR);
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case REPLY_DEFAULT_ERROR:
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case REPLY_DEFAULT_ERROR:
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("server_reply_prepare/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -204,13 +204,13 @@ int server_reply_qrcvr(struct thread_status_s *ts, size_t slot_id,
     LIXA_TRACE(("server_reply_qrcvr\n"));
     TRY {
         if (LIXA_RC_OK != (
-            ret_cod = lixa_msg_serialize(
-                lmo,
-                ts->client_array[slot_id].output_buffer,
-                LIXA_MSG_XML_BUFFER_SIZE,
-                &ts->client_array[slot_id].output_buffer_size))) {
+                ret_cod = lixa_msg_serialize(
+                    lmo,
+                    ts->client_array[slot_id].output_buffer,
+                    LIXA_MSG_XML_BUFFER_SIZE,
+                    &ts->client_array[slot_id].output_buffer_size))) {
             LIXA_TRACE(("server_reply_qrcvr: error while "
-                "serializing reply message to client\n"));
+                        "serializing reply message to client\n"));
             /* release the buffer to avoid transmission */
             free(ts->client_array[slot_id].output_buffer);
             ts->client_array[slot_id].output_buffer = NULL;
@@ -218,28 +218,28 @@ int server_reply_qrcvr(struct thread_status_s *ts, size_t slot_id,
         }
         if (LIXA_RC_OK == ret_cod) {
             LIXA_TRACE(("server_reply_qrcvr: reply message is "
-                "|%*.*s|\n",
-                ts->client_array[slot_id].output_buffer_size,
-                ts->client_array[slot_id].output_buffer_size,
-                ts->client_array[slot_id].output_buffer));
+                        "|%*.*s|\n",
+                        ts->client_array[slot_id].output_buffer_size,
+                        ts->client_array[slot_id].output_buffer_size,
+                        ts->client_array[slot_id].output_buffer));
         }
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case SERIALIZE_ERROR:
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case SERIALIZE_ERROR:
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("server_reply_qrcvr/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -258,24 +258,24 @@ int server_reply_start(struct thread_status_s *ts, size_t slot_id,
         lmo->body.start_16.answer.rc = rc;
         if (LIXA_RC_OK !=
             (ret_cod = server_reply_default(ts, slot_id, lmo))) THROW(
-            REPLY_DEFAULT_ERROR);
+                REPLY_DEFAULT_ERROR);
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case REPLY_DEFAULT_ERROR:
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case REPLY_DEFAULT_ERROR:
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("server_reply_start/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -291,13 +291,13 @@ int server_reply_trans(struct thread_status_s *ts, size_t slot_id,
     LIXA_TRACE(("server_reply_trans\n"));
     TRY {
         if (LIXA_RC_OK != (
-            ret_cod = lixa_msg_serialize(
-                lmo,
-                ts->client_array[slot_id].output_buffer,
-                LIXA_MSG_XML_BUFFER_SIZE,
-                &ts->client_array[slot_id].output_buffer_size))) {
+                ret_cod = lixa_msg_serialize(
+                    lmo,
+                    ts->client_array[slot_id].output_buffer,
+                    LIXA_MSG_XML_BUFFER_SIZE,
+                    &ts->client_array[slot_id].output_buffer_size))) {
             LIXA_TRACE(("server_reply_trans: error while "
-                "serializing reply message to client\n"));
+                        "serializing reply message to client\n"));
             /* release the buffer to avoid transmission */
             free(ts->client_array[slot_id].output_buffer);
             ts->client_array[slot_id].output_buffer = NULL;
@@ -305,28 +305,28 @@ int server_reply_trans(struct thread_status_s *ts, size_t slot_id,
         }
         if (LIXA_RC_OK == ret_cod) {
             LIXA_TRACE(("server_reply_trans: reply message is "
-                "|%*.*s|\n",
-                ts->client_array[slot_id].output_buffer_size,
-                ts->client_array[slot_id].output_buffer_size,
-                ts->client_array[slot_id].output_buffer));
+                        "|%*.*s|\n",
+                        ts->client_array[slot_id].output_buffer_size,
+                        ts->client_array[slot_id].output_buffer_size,
+                        ts->client_array[slot_id].output_buffer));
         }
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case SERIALIZE_ERROR:
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case SERIALIZE_ERROR:
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("server_reply_trans/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 

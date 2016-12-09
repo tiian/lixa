@@ -877,7 +877,7 @@ int status_record_insert(struct thread_status_s *ts,
                 delta_size = new_size - curr_size;
                 if (delta_size == 0)
                     THROW(CONTAINER_FULL)
-            }
+                        }
             for (i = 0; i < delta_size; ++i) {
                 struct status_record_s tmp_sr;
 

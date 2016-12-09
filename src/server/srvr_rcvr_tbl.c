@@ -45,8 +45,8 @@ int srvr_rcrv_tbl_key1_job_comp(gconstpointer a, gconstpointer b,
     const char *ja = lixa_job_get_raw((const lixa_job_t *) a);
     const char *jb = lixa_job_get_raw((const lixa_job_t *) b);
     LIXA_TRACE(("srvr_rcrv_tbl_key1_job_comp: ja='%*.*s', jb='%*.*s'\n",
-        sizeof(lixa_job_t) - 1, sizeof(lixa_job_t) - 1, ja,
-        sizeof(lixa_job_t) - 1, sizeof(lixa_job_t) - 1, jb));
+                sizeof(lixa_job_t) - 1, sizeof(lixa_job_t) - 1, ja,
+                sizeof(lixa_job_t) - 1, sizeof(lixa_job_t) - 1, jb));
     return strncmp(ja, jb, sizeof(lixa_job_t) - 1);
 }
 
@@ -83,31 +83,31 @@ int srvr_rcvr_tbl_new(srvr_rcvr_tbl_t *srt, guint tsid_array_size)
             OBJ_NOT_INITIALIZED);
         if (NULL == (srt->mutex = g_mutex_new())) THROW(G_MUTEX_NEW_ERROR);
         if (NULL == (srt->lvl1_job = g_tree_new_full(
-            srvr_rcrv_tbl_key1_job_comp, NULL,
-            free, srvr_rcvr_tbl_value1_destroy))) THROW(G_TREE_NEW_ERROR);
+                         srvr_rcrv_tbl_key1_job_comp, NULL,
+                         free, srvr_rcvr_tbl_value1_destroy))) THROW(G_TREE_NEW_ERROR);
         srt->lvl2_tsid_array_size = tsid_array_size;
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case OBJ_NOT_INITIALIZED:
-                ret_cod = LIXA_RC_OBJ_NOT_INITIALIZED;
-                break;
-            case G_MUTEX_NEW_ERROR:
-            case G_TREE_NEW_ERROR:
-                ret_cod = LIXA_RC_G_RETURNED_NULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case OBJ_NOT_INITIALIZED:
+                    ret_cod = LIXA_RC_OBJ_NOT_INITIALIZED;
+                    break;
+                case G_MUTEX_NEW_ERROR:
+                case G_TREE_NEW_ERROR:
+                    ret_cod = LIXA_RC_G_RETURNED_NULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("srvr_rcvr_tbl_new/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -133,17 +133,17 @@ int srvr_rcvr_tbl_delete(srvr_rcvr_tbl_t *srt)
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("srvr_rcvr_tbl_delete/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -153,7 +153,7 @@ gboolean srvr_rcvr_tbl_trace_trav(gpointer key, gpointer value,
 {
     LIXA_TRACE(("srvr_rcvr_tbl_trace_trav: key=%p, value=%p\n", key, value));
     LIXA_TRACE(("srvr_rcvr_tbl_trace_trav: job='%s'\n",
-        lixa_job_get_raw((lixa_job_t *) key)));
+                lixa_job_get_raw((lixa_job_t *) key)));
     return FALSE;
 }
 
@@ -161,8 +161,8 @@ gboolean srvr_rcvr_tbl_trace_trav(gpointer key, gpointer value,
 void srvr_rcvr_tbl_trace(srvr_rcvr_tbl_t *srt)
 {
     LIXA_TRACE(("srvr_rcvr_tbl_trace: srt=%p, srt->mutex=%p, "
-        "srt->lvl1_job=%p, srt->lvl2_tsid_array_size=%u\n",
-        srt, srt->mutex, srt->lvl1_job, srt->lvl2_tsid_array_size));
+                "srt->lvl1_job=%p, srt->lvl2_tsid_array_size=%u\n",
+                srt, srt->mutex, srt->lvl1_job, srt->lvl2_tsid_array_size));
     g_tree_foreach(srt->lvl1_job, srvr_rcvr_tbl_trace_trav, NULL);
 }
 
@@ -182,9 +182,9 @@ int srvr_rcvr_tbl_insert(srvr_rcvr_tbl_t *srt,
         GQueue *queue;
 
         LIXA_TRACE(("srvr_rcvr_tbl_insert: job='%s', tsid=%u, block_id="
-                       UINT32_T_FORMAT
-                       "\n", lixa_job_get_raw(srtr->job),
-                           srtr->tsid, srtr->block_id));
+                    UINT32_T_FORMAT
+                    "\n", lixa_job_get_raw(srtr->job),
+                    srtr->tsid, srtr->block_id));
 
         if (NULL == srt->mutex || NULL == srt->lvl1_job) THROW(OBJ_CORRUPTED);
 
@@ -203,8 +203,8 @@ int srvr_rcvr_tbl_insert(srvr_rcvr_tbl_t *srt,
             lixa_job_t *key = NULL;
 
             if (NULL == (lvl2_tsid = g_array_sized_new(
-                FALSE, FALSE, sizeof(GQueue),
-                srt->lvl2_tsid_array_size))) THROW(G_ARRAY_SIZED_NEW_ERROR);
+                             FALSE, FALSE, sizeof(GQueue),
+                             srt->lvl2_tsid_array_size))) THROW(G_ARRAY_SIZED_NEW_ERROR);
             /* prepare the array: all the elements are initialized with an
                empty queue object */
             for (i = 0; i < srt->lvl2_tsid_array_size; ++i) {
@@ -227,31 +227,31 @@ int srvr_rcvr_tbl_insert(srvr_rcvr_tbl_t *srt,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case OBJ_CORRUPTED:
-                ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                break;
-            case OUT_OF_RANGE:
-                ret_cod = LIXA_RC_OUT_OF_RANGE;
-                break;
-            case G_ARRAY_SIZED_NEW_ERROR:
-                ret_cod = LIXA_RC_G_RETURNED_NULL;
-                break;
-            case MALLOC_ERROR:
-                ret_cod = LIXA_RC_MALLOC_ERROR;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        /* unlock mutex */
-        g_mutex_unlock(srt->mutex);
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case OBJ_CORRUPTED:
+                    ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                    break;
+                case OUT_OF_RANGE:
+                    ret_cod = LIXA_RC_OUT_OF_RANGE;
+                    break;
+                case G_ARRAY_SIZED_NEW_ERROR:
+                    ret_cod = LIXA_RC_G_RETURNED_NULL;
+                    break;
+                case MALLOC_ERROR:
+                    ret_cod = LIXA_RC_MALLOC_ERROR;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+            /* unlock mutex */
+            g_mutex_unlock(srt->mutex);
+        } /* TRY-CATCH */
     LIXA_TRACE(("srvr_rcvr_tbl_insert/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -278,7 +278,7 @@ int srvr_rcvr_tbl_get_block(srvr_rcvr_tbl_t *srt,
         GQueue *queue;
 
         LIXA_TRACE(("srvr_rcvr_tbl_get_block: query is job='%s', tsid=%u\n",
-            lixa_job_get_raw(srtr->job), srtr->tsid));
+                    lixa_job_get_raw(srtr->job), srtr->tsid));
 
         if (NULL == srt->mutex || NULL == srt->lvl1_job) THROW(OBJ_CORRUPTED);
 
@@ -311,8 +311,8 @@ int srvr_rcvr_tbl_get_block(srvr_rcvr_tbl_t *srt,
                     memcpy(out->job, srtr->job, sizeof(lixa_job_t));
                     out->tsid = i;
                     LIXA_TRACE(("srvr_rcvr_tbl_get_block: answer is job='%s', "
-                        "tsid=%u\n",
-                        lixa_job_get_raw(out->job), out->tsid));
+                                "tsid=%u\n",
+                                lixa_job_get_raw(out->job), out->tsid));
                     THROW(BYPASSED_OPERATION);
                 } /* if (!g_queue_is_empty(q)) */
             } /* for i */
@@ -323,44 +323,44 @@ int srvr_rcvr_tbl_get_block(srvr_rcvr_tbl_t *srt,
         memcpy(out->job, srtr->job, sizeof(lixa_job_t));
         out->tsid = srtr->tsid;
         out->block_id = browse ?
-                        GPOINTER_TO_UINT(g_queue_peek_head(queue)) :
-                        GPOINTER_TO_UINT(g_queue_pop_head(queue));
+            GPOINTER_TO_UINT(g_queue_peek_head(queue)) :
+            GPOINTER_TO_UINT(g_queue_pop_head(queue));
         LIXA_TRACE(("srvr_rcvr_tbl_get_block: answer is job='%s', "
-            "tsid=%u, block_id="
-                       UINT32_T_FORMAT
-                       "\n",
-                           lixa_job_get_raw(
-                               out->job), out->tsid, out->block_id));
+                    "tsid=%u, block_id="
+                    UINT32_T_FORMAT
+                    "\n",
+                    lixa_job_get_raw(
+                        out->job), out->tsid, out->block_id));
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case OBJ_CORRUPTED:
-                ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                break;
-            case OUT_OF_RANGE:
-                ret_cod = LIXA_RC_OUT_OF_RANGE;
-                break;
-            case OBJ_NOT_FOUND1:
-            case OBJ_NOT_FOUND2:
-                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
-                break;
-            case BYPASSED_OPERATION:
-                ret_cod = LIXA_RC_BYPASSED_OPERATION;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        /* unlock mutex */
-        g_mutex_unlock(srt->mutex);
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case OBJ_CORRUPTED:
+                    ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                    break;
+                case OUT_OF_RANGE:
+                    ret_cod = LIXA_RC_OUT_OF_RANGE;
+                    break;
+                case OBJ_NOT_FOUND1:
+                case OBJ_NOT_FOUND2:
+                    ret_cod = LIXA_RC_OBJ_NOT_FOUND;
+                    break;
+                case BYPASSED_OPERATION:
+                    ret_cod = LIXA_RC_BYPASSED_OPERATION;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+            /* unlock mutex */
+            g_mutex_unlock(srt->mutex);
+        } /* TRY-CATCH */
     LIXA_TRACE(("srvr_rcvr_tbl_get_block/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 

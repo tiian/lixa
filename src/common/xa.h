@@ -196,5 +196,5 @@ typedef struct xa_switch_t *(*lixa_get_xa_switch_f)(void);
 
 #endif /* ifndef XA_H */
 /*
-* End of xa.h header
-*/
+ * End of xa.h header
+ */

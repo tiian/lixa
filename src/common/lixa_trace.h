@@ -224,7 +224,7 @@ extern unsigned long lixa_trace_mask;
  * trace mask (LIXA_TRACE_MASK) specified as environment variable
  */
 #ifdef _TRACE
-# define LIXA_TRACE(a)    (LIXA_TRACE_MODULE & lixa_trace_mask ? \
+# define LIXA_TRACE(a)    (LIXA_TRACE_MODULE & lixa_trace_mask ?    \
                            lixa_trace a : 0)
 #else
 # define LIXA_TRACE(a)
@@ -254,7 +254,7 @@ extern "C" {
  * This method MUST be called BEFORE first log call to avoid lock
  * contention in multithread environments
  */
-void lixa_trace_init(void);
+    void lixa_trace_init(void);
 
 
 /**
@@ -262,7 +262,7 @@ void lixa_trace_init(void);
  * @param fmt IN record format
  * @param ... IN record data
  */
-void lixa_trace(const char *fmt, ...);
+    void lixa_trace(const char *fmt, ...);
 
 
 /**
@@ -273,8 +273,8 @@ void lixa_trace(const char *fmt, ...);
  * @param size IN number of bytes to dump
  * @param out_stream IN destination standard I/O stream
  */
-void lixa_trace_hex_data(const char *prefix, const byte_t *data,
-                         lixa_word_t size, FILE *out_stream);
+    void lixa_trace_hex_data(const char *prefix, const byte_t *data,
+                             lixa_word_t size, FILE *out_stream);
 
 
 /**
@@ -285,8 +285,8 @@ void lixa_trace_hex_data(const char *prefix, const byte_t *data,
  * @param size IN number of bytes to dump
  * @param out_stream IN destination standard I/O stream
  */
-void lixa_trace_text_data(const char *prefix, const byte_t *data,
-                          lixa_word_t size, FILE *out_stream);
+    void lixa_trace_text_data(const char *prefix, const byte_t *data,
+                              lixa_word_t size, FILE *out_stream);
 
 
 #ifdef __cplusplus

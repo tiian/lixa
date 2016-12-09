@@ -49,7 +49,7 @@
 #include <lixa_errors.h>
 #include <lixa_xid.h>
 /*
-#include <lixa_common_status.h>
+  #include <lixa_common_status.h>
 */
 #include <lixa_xml_msg_deserialize.h>
 #include <lixa_xml_msg_serialize.h>
@@ -473,18 +473,18 @@ int client_recovery_rollback(const client_status_t *cs,
             struct lixa_msg_body_qrcvr_24_rsrmgr_s record;
 
             /*
-            if (XA_STATE_S0 == rsrmgr->s_state &&
-                LIXA_MSG_VERB_END == rsrmgr->next_verb) {
-                LIXA_TRACE(("client_recovery_rollback: resource manager "
-                            "rmid=%d needs recovery (s_state=%d, "
-                            "next_state=%d) because xa_prepare could be "
-                            "previously issued\n",
-                            rsrmgr->rmid, rsrmgr->s_state,
-                            rsrmgr->next_verb));
-                            } else */
+              if (XA_STATE_S0 == rsrmgr->s_state &&
+              LIXA_MSG_VERB_END == rsrmgr->next_verb) {
+              LIXA_TRACE(("client_recovery_rollback: resource manager "
+              "rmid=%d needs recovery (s_state=%d, "
+              "next_state=%d) because xa_prepare could be "
+              "previously issued\n",
+              rsrmgr->rmid, rsrmgr->s_state,
+              rsrmgr->next_verb));
+              } else */
             if (XA_STATE_S2 != rsrmgr->s_state &&
-                       XA_STATE_S3 != rsrmgr->s_state &&
-                       XA_STATE_S4 != rsrmgr->s_state) {
+                XA_STATE_S3 != rsrmgr->s_state &&
+                XA_STATE_S4 != rsrmgr->s_state) {
                 LIXA_TRACE(("client_recovery_rollback: resource manager "
                             "rmid=%d does not need recovery (s_state=%d)\n",
                             rsrmgr->rmid, rsrmgr->s_state));
@@ -724,7 +724,7 @@ int client_recovery_report(const client_status_t *cs, GTree *crt)
 
 
 gboolean client_recovery_report_foreach(gpointer key, gpointer value,
-                                         gpointer data)
+                                        gpointer data)
 {
     /* key points to a xid object, value points to an array of resource manager ids, data points to the output stream */
     XID *xid = (XID *)key;

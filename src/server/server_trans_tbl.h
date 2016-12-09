@@ -64,28 +64,28 @@ typedef struct server_trans_tbl_s server_trans_tbl_t;
 extern "C" {
 #endif /* __cplusplus */
 
-int server_trans_tbl_new(server_trans_tbl_t *stt, guint tsid_array_size);
+    int server_trans_tbl_new(server_trans_tbl_t *stt, guint tsid_array_size);
 
-int server_trans_tbl_comp(gconstpointer a, gconstpointer b,
-                          gpointer user_data);
+    int server_trans_tbl_comp(gconstpointer a, gconstpointer b,
+                              gpointer user_data);
 
-void server_trans_tbl_value_destroy(gpointer data);
+    void server_trans_tbl_value_destroy(gpointer data);
 
-int server_trans_tbl_insert(server_trans_tbl_t *stt,
-                            const struct server_trans_tbl_rec_s *sttr);
+    int server_trans_tbl_insert(server_trans_tbl_t *stt,
+                                const struct server_trans_tbl_rec_s *sttr);
 
-int server_trans_tbl_remove(server_trans_tbl_t *stt,
-                            const struct server_trans_tbl_rec_s *sttr);
+    int server_trans_tbl_remove(server_trans_tbl_t *stt,
+                                const struct server_trans_tbl_rec_s *sttr);
 
-int server_trans_tbl_delete(server_trans_tbl_t *stt);
+    int server_trans_tbl_delete(server_trans_tbl_t *stt);
 
-int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
-                               const struct server_trans_tbl_rec_s *sttr,
-                               struct server_trans_tbl_rec_s *out,
-                               guint *out_array_size,
-                               int main);
+    int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
+                                   const struct server_trans_tbl_rec_s *sttr,
+                                   struct server_trans_tbl_rec_s *out,
+                                   guint *out_array_size,
+                                   int main);
 
-gboolean server_trans_tbl_traverse(gpointer key, gpointer value, gpointer data);
+    gboolean server_trans_tbl_traverse(gpointer key, gpointer value, gpointer data);
 
 #ifdef __cplusplus
 }

@@ -69,7 +69,7 @@ extern "C" {
  * @param txrc OUT return code prepared for tx_close call
  * @return a reason code
  */
-int lixa_xa_close(client_status_t *cs, int *txrc);
+    int lixa_xa_close(client_status_t *cs, int *txrc);
 
 
 /**
@@ -82,8 +82,8 @@ int lixa_xa_close(client_status_t *cs, int *txrc);
  *            FALSE = the T.M. is performing a standard TWO phase commit
  * @return a reason code
  */
-int
-lixa_xa_commit(client_status_t *cs, XID *xid, int *txrc, int one_phase_commit);
+    int
+    lixa_xa_commit(client_status_t *cs, XID *xid, int *txrc, int one_phase_commit);
 
 
 /**
@@ -96,7 +96,7 @@ lixa_xa_commit(client_status_t *cs, XID *xid, int *txrc, int one_phase_commit);
  * @param xa_end_flags IN flags to send to @ref xa_end
  * @return a reason code
  */
-int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags);
+    int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags);
 
 
 /**
@@ -108,7 +108,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags);
  *                    transaction as not finished
  * @return a reason code
  */
-int lixa_xa_forget(client_status_t *cs, GArray *xida, int finished);
+    int lixa_xa_forget(client_status_t *cs, GArray *xida, int finished);
 
 
 /**
@@ -120,8 +120,8 @@ int lixa_xa_forget(client_status_t *cs, GArray *xida, int finished);
  * @param mmode IN the operation is performed inside a maintenance session
  * @return a reason code
  */
-int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate,
-                 int mmode);
+    int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate,
+                     int mmode);
 
 
 /**
@@ -138,8 +138,8 @@ int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate,
  * @param[out] xid the final XID to commit on
  * @return a reason code
  */
-int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc, int *commit,
-                    XID *xid);
+    int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc, int *commit,
+                        XID *xid);
 
 
 /**
@@ -150,7 +150,7 @@ int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc, int *commit,
  *                  from tx_rollback (FALSE)
  * @return a reason code
  */
-int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit);
+    int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit);
 
 
 /**
@@ -167,9 +167,9 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit);
  * @param xa_start_flags IN the flags to send to @ref xa_start
  * @return a reason code
  */
-int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid,
-                  int txstate, int next_txstate, int *dupid_or_proto,
-                  int xa_start_flags);
+    int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid,
+                      int txstate, int next_txstate, int *dupid_or_proto,
+                      int xa_start_flags);
 
 
 #ifdef __cplusplus

@@ -168,25 +168,25 @@ int lixa_msg_retrieve(int fd,
 
         /* read the prefix to determine message size */
         if (0 > (*read_bytes = recv(
-            fd, prefix, LIXA_MSG_XML_PREFIX_DIGITS, 0))) {
+                     fd, prefix, LIXA_MSG_XML_PREFIX_DIGITS, 0))) {
             THROW(RECV_ERROR1);
         } else if (*read_bytes == 0) {
             THROW(CONNECTION_CLOSED);
         } else if (*read_bytes != LIXA_MSG_XML_PREFIX_DIGITS) {
             /* retrieve XML message size */
             LIXA_TRACE(("lixa_msg_retrieve: peer sent "
-                           SSIZE_T_FORMAT
-                           " bytes, expected %d bytes for "
-                               "XML message prefix\n", read_bytes,
-                               LIXA_MSG_XML_PREFIX_DIGITS));
+                        SSIZE_T_FORMAT
+                        " bytes, expected %d bytes for "
+                        "XML message prefix\n", read_bytes,
+                        LIXA_MSG_XML_PREFIX_DIGITS));
             THROW(INVALID_PREFIX_SIZE);
         } else {
             prefix[LIXA_MSG_XML_PREFIX_DIGITS] = '\0';
             to_read = strtol(prefix, NULL, 10);
             LIXA_TRACE(("lixa_msg_retrieve: XML message prefix "
-                "is '%s' ("
-                           SSIZE_T_FORMAT
-                           ")\n", prefix, to_read));
+                        "is '%s' ("
+                        SSIZE_T_FORMAT
+                        ")\n", prefix, to_read));
         }
 
         if (to_read > buf_size) THROW(BUFFER_OVERFLOW);
@@ -194,50 +194,50 @@ int lixa_msg_retrieve(int fd,
         if (0 > (*read_bytes = recv(fd, buf, to_read, 0))) THROW(RECV_ERROR2);
 
         LIXA_TRACE(("lixa_msg_retrieve: fd = %d returned "
-                       SSIZE_T_FORMAT
-                       " bytes\n", fd, *read_bytes));
+                    SSIZE_T_FORMAT
+                    " bytes\n", fd, *read_bytes));
         if (to_read != *read_bytes) {
             LIXA_TRACE(("lixa_msg_retrieve: expected "
-                           SSIZE_T_FORMAT
-                           " bytes, received "
-                           SSIZE_T_FORMAT
-                           " bytes\n",
-                               to_read, *read_bytes));
+                        SSIZE_T_FORMAT
+                        " bytes, received "
+                        SSIZE_T_FORMAT
+                        " bytes\n",
+                        to_read, *read_bytes));
             THROW(INVALID_LENGTH_XML_MSG);
         }
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case RECV_ERROR1:
-                ret_cod = LIXA_RC_RECV_ERROR;
-                break;
-            case CONNECTION_CLOSED:
-                ret_cod = LIXA_RC_CONNECTION_CLOSED;
-                break;
-            case INVALID_PREFIX_SIZE:
-                ret_cod = LIXA_RC_INVALID_PREFIX_SIZE;
-                break;
-            case BUFFER_OVERFLOW:
-                ret_cod = LIXA_RC_BUFFER_OVERFLOW;
-                break;
-            case RECV_ERROR2:
-                ret_cod = LIXA_RC_RECV_ERROR;
-                break;
-            case INVALID_LENGTH_XML_MSG:
-                ret_cod = LIXA_RC_INVALID_LENGTH_XML_MSG;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case RECV_ERROR1:
+                    ret_cod = LIXA_RC_RECV_ERROR;
+                    break;
+                case CONNECTION_CLOSED:
+                    ret_cod = LIXA_RC_CONNECTION_CLOSED;
+                    break;
+                case INVALID_PREFIX_SIZE:
+                    ret_cod = LIXA_RC_INVALID_PREFIX_SIZE;
+                    break;
+                case BUFFER_OVERFLOW:
+                    ret_cod = LIXA_RC_BUFFER_OVERFLOW;
+                    break;
+                case RECV_ERROR2:
+                    ret_cod = LIXA_RC_RECV_ERROR;
+                    break;
+                case INVALID_LENGTH_XML_MSG:
+                    ret_cod = LIXA_RC_INVALID_LENGTH_XML_MSG;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_retrieve/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -259,53 +259,53 @@ int lixa_msg_send(int fd, const char *buf, size_t buf_size)
         if (0 != getsockopt(fd, SOL_SOCKET, SO_ERROR, &optval, &optlen)) THROW(
             GETSOCKOPT_ERROR);
         LIXA_TRACE(("lixa_msg_send: so_error=%d (EPIPE=%d, ECONNRESET=%d)\n",
-            optval, EPIPE, ECONNRESET));
+                    optval, EPIPE, ECONNRESET));
         if (EPIPE == optval || ECONNRESET == optval) {
             int rc = 0;
             syslog(LOG_NOTICE, LIXA_SYSLOG_LXC027N, getpid(), pthread_self());
             rc = shutdown(fd, SHUT_RDWR);
             LIXA_TRACE(("lixa_msg_send: socket with fd=%d was shutdown "
-                "(rc=%d,errno=%d)\n", fd, rc, errno));
+                        "(rc=%d,errno=%d)\n", fd, rc, errno));
             THROW(CONNECTION_CLOSED);
         }
 
         LIXA_TRACE(("lixa_msg_send: sending "
-                       SIZE_T_FORMAT
-                       " bytes to the server (fd=%d)...\n", buf_size, fd));
+                    SIZE_T_FORMAT
+                    " bytes to the server (fd=%d)...\n", buf_size, fd));
         wrote_bytes = send(fd, buf, buf_size, 0);
         if (buf_size != wrote_bytes) {
             LIXA_TRACE(("lixa_msg_send: sent "
-                           SSIZE_T_FORMAT
-                           " bytes instead of "
-                           SIZE_T_FORMAT
-                           " to the server\n",
-                               wrote_bytes, buf_size));
+                        SSIZE_T_FORMAT
+                        " bytes instead of "
+                        SIZE_T_FORMAT
+                        " to the server\n",
+                        wrote_bytes, buf_size));
             THROW(SEND_ERROR);
         }
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case GETSOCKOPT_ERROR:
-                ret_cod = LIXA_RC_GETSOCKOPT_ERROR;
-                break;
-            case CONNECTION_CLOSED:
-                ret_cod = LIXA_RC_CONNECTION_CLOSED;
-                break;
-            case SEND_ERROR:
-                ret_cod = LIXA_RC_SEND_ERROR;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case GETSOCKOPT_ERROR:
+                    ret_cod = LIXA_RC_GETSOCKOPT_ERROR;
+                    break;
+                case CONNECTION_CLOSED:
+                    ret_cod = LIXA_RC_CONNECTION_CLOSED;
+                    break;
+                case SEND_ERROR:
+                    ret_cod = LIXA_RC_SEND_ERROR;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_send/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -373,7 +373,7 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                                     &g_array_index(
                                         msg->body.open_24.xa_open_execs,
                                         struct
-                                            lixa_msg_body_open_24_xa_open_execs_s,
+                                        lixa_msg_body_open_24_xa_open_execs_s,
                                         i);
                                 if (NULL != xa_open_exec->xa_info)
                                     xmlFree(xa_open_exec->xa_info);
@@ -542,33 +542,33 @@ int lixa_msg_free(struct lixa_msg_s *msg)
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case INVALID_STEP1:
-            case INVALID_STEP2:
-            case INVALID_STEP3:
-            case INVALID_STEP4:
-            case INVALID_STEP5:
-            case INVALID_STEP6:
-            case INVALID_STEP7:
-            case INVALID_STEP8:
-            case INVALID_STEP9:
-            case INVALID_STEP10:
-            case INVALID_STEP11:
-            case INVALID_STEP12:
-            case INVALID_VERB:
-                LIXA_TRACE(("lixa_msg_free: verb=%d, step=%d\n",
-                    msg->header.pvs.verb, msg->header.pvs.step));
-                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case INVALID_STEP1:
+                case INVALID_STEP2:
+                case INVALID_STEP3:
+                case INVALID_STEP4:
+                case INVALID_STEP5:
+                case INVALID_STEP6:
+                case INVALID_STEP7:
+                case INVALID_STEP8:
+                case INVALID_STEP9:
+                case INVALID_STEP10:
+                case INVALID_STEP11:
+                case INVALID_STEP12:
+                case INVALID_VERB:
+                    LIXA_TRACE(("lixa_msg_free: verb=%d, step=%d\n",
+                                msg->header.pvs.verb, msg->header.pvs.step));
+                    ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_free/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

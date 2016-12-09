@@ -149,24 +149,24 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 switch (msg->header.pvs.step) {
                     case 8:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_open_8(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_OPEN_8_ERROR);
+                                        SERIALIZE_OPEN_8_ERROR);
                         break;
                     case 16:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_open_16(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_OPEN_16_ERROR);
+                                        SERIALIZE_OPEN_16_ERROR);
                         break;
                     case 24:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_open_24(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_OPEN_24_ERROR);
+                                        SERIALIZE_OPEN_24_ERROR);
                         break;
                     default: THROW(INVALID_OPEN_STEP);
                 }
@@ -175,10 +175,10 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 switch (msg->header.pvs.step) {
                     case 8:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_close_8(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_CLOSE_8_ERROR);
+                                        SERIALIZE_CLOSE_8_ERROR);
                         break;
                     default: THROW(INVALID_CLOSE_STEP);
                 }
@@ -187,24 +187,24 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 switch (msg->header.pvs.step) {
                     case 8:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_start_8(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_START_8_ERROR);
+                                        SERIALIZE_START_8_ERROR);
                         break;
                     case 16:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_start_16(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_START_16_ERROR);
+                                        SERIALIZE_START_16_ERROR);
                         break;
                     case 24:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_start_24(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_START_24_ERROR);
+                                        SERIALIZE_START_24_ERROR);
                         break;
                     default: THROW(INVALID_START_STEP);
                 }
@@ -213,17 +213,17 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 switch (msg->header.pvs.step) {
                     case 8:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_end_8(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_END_8_ERROR);
+                                        SERIALIZE_END_8_ERROR);
                         break;
                     case 16:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_end_16(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_END_16_ERROR);
+                                        SERIALIZE_END_16_ERROR);
                         break;
                     default: THROW(INVALID_END_STEP);
                 }
@@ -232,17 +232,17 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 switch (msg->header.pvs.step) {
                     case 8:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_prepare_8(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_PREPARE_8_ERROR);
+                                        SERIALIZE_PREPARE_8_ERROR);
                         break;
                     case 16:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_prepare_16(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_PREPARE_16_ERROR);
+                                        SERIALIZE_PREPARE_16_ERROR);
                         break;
                     default: THROW(INVALID_PREPARE_STEP);
                 }
@@ -251,10 +251,10 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 switch (msg->header.pvs.step) {
                     case 8:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_commit_8(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_COMMIT_8_ERROR);
+                                        SERIALIZE_COMMIT_8_ERROR);
                         break;
                     default: THROW(INVALID_COMMIT_STEP);
                 }
@@ -263,10 +263,10 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 switch (msg->header.pvs.step) {
                     case 8:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_rollback_8(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_ROLLBACK_8_ERROR);
+                                        SERIALIZE_ROLLBACK_8_ERROR);
                         break;
                     default: THROW(INVALID_ROLLBACK_STEP);
                 }
@@ -275,24 +275,24 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 switch (msg->header.pvs.step) {
                     case 8:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_qrcvr_8(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_QRCVR_8_ERROR);
+                                        SERIALIZE_QRCVR_8_ERROR);
                         break;
                     case 16:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_qrcvr_16(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_QRCVR_16_ERROR);
+                                        SERIALIZE_QRCVR_16_ERROR);
                         break;
                     case 24:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_qrcvr_24(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_QRCVR_24_ERROR);
+                                        SERIALIZE_QRCVR_24_ERROR);
                         break;
                     default: THROW(INVALID_QRCVR_STEP);
                 }
@@ -301,10 +301,10 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 switch (msg->header.pvs.step) {
                     case 8:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_reg_8(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_REG_8_ERROR);
+                                        SERIALIZE_REG_8_ERROR);
                         break;
                     default: THROW(INVALID_REG_STEP);
                 }
@@ -313,10 +313,10 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 switch (msg->header.pvs.step) {
                     case 8:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_unreg_8(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_UNREG_8_ERROR);
+                                        SERIALIZE_UNREG_8_ERROR);
                         break;
                     default: THROW(INVALID_UNREG_STEP);
                 }
@@ -325,10 +325,10 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 switch (msg->header.pvs.step) {
                     case 8:
                         if (LIXA_RC_OK != (
-                            ret_cod =
+                                ret_cod =
                                 lixa_msg_serialize_forget_8(
                                     msg, buffer, &offset, &free_chars))) THROW(
-                            SERIALIZE_FORGET_8_ERROR);
+                                        SERIALIZE_FORGET_8_ERROR);
                         break;
                     default: THROW(INVALID_FORGET_STEP);
                 }
@@ -340,14 +340,14 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                             (ret_cod = lixa_msg_serialize_trans_8(msg, buffer,
                                                                   &offset,
                                                                   &free_chars))) THROW(
-                            SERIALIZE_TRANS_8_ERROR);
+                                                                      SERIALIZE_TRANS_8_ERROR);
                         break;
                     case 16:
                         if (LIXA_RC_OK !=
                             (ret_cod = lixa_msg_serialize_trans_16(msg, buffer,
                                                                    &offset,
                                                                    &free_chars))) THROW(
-                            SERIALIZE_TRANS_16_ERROR);
+                                                                       SERIALIZE_TRANS_16_ERROR);
                         break;
                     default: THROW(INVALID_TRANS_STEP);
                 }
@@ -371,67 +371,67 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
         *msg_len = offset;
 
         LIXA_TRACE(("lixa_msg_serialize: serialized message is |%*.*s|\n",
-            *msg_len, *msg_len, buffer));
+                    *msg_len, *msg_len, buffer));
 
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case SERIALIZE_OPEN_8_ERROR:
-            case SERIALIZE_OPEN_16_ERROR:
-            case SERIALIZE_OPEN_24_ERROR:
-            case SERIALIZE_CLOSE_8_ERROR:
-            case SERIALIZE_START_8_ERROR:
-            case SERIALIZE_START_16_ERROR:
-            case SERIALIZE_START_24_ERROR:
-            case SERIALIZE_END_8_ERROR:
-            case SERIALIZE_END_16_ERROR:
-            case SERIALIZE_END_24_ERROR:
-            case SERIALIZE_PREPARE_8_ERROR:
-            case SERIALIZE_PREPARE_16_ERROR:
-            case SERIALIZE_COMMIT_8_ERROR:
-            case SERIALIZE_ROLLBACK_8_ERROR:
-            case SERIALIZE_QRCVR_8_ERROR:
-            case SERIALIZE_QRCVR_16_ERROR:
-            case SERIALIZE_QRCVR_24_ERROR:
-            case SERIALIZE_REG_8_ERROR:
-            case SERIALIZE_UNREG_8_ERROR:
-            case SERIALIZE_FORGET_8_ERROR:
-            case SERIALIZE_TRANS_8_ERROR:
-            case SERIALIZE_TRANS_16_ERROR:
-                break;
-            case INVALID_OPEN_STEP:
-            case INVALID_CLOSE_STEP:
-            case INVALID_START_STEP:
-            case INVALID_END_STEP:
-            case INVALID_PREPARE_STEP:
-            case INVALID_COMMIT_STEP:
-            case INVALID_ROLLBACK_STEP:
-            case INVALID_QRCVR_STEP:
-            case INVALID_REG_STEP:
-            case INVALID_UNREG_STEP:
-            case INVALID_FORGET_STEP:
-            case INVALID_TRANS_STEP:
-            case INVALID_VERB:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-                break;
-            case BUFFER_TOO_SHORT3:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT1:
+                case BUFFER_TOO_SHORT2:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case SERIALIZE_OPEN_8_ERROR:
+                case SERIALIZE_OPEN_16_ERROR:
+                case SERIALIZE_OPEN_24_ERROR:
+                case SERIALIZE_CLOSE_8_ERROR:
+                case SERIALIZE_START_8_ERROR:
+                case SERIALIZE_START_16_ERROR:
+                case SERIALIZE_START_24_ERROR:
+                case SERIALIZE_END_8_ERROR:
+                case SERIALIZE_END_16_ERROR:
+                case SERIALIZE_END_24_ERROR:
+                case SERIALIZE_PREPARE_8_ERROR:
+                case SERIALIZE_PREPARE_16_ERROR:
+                case SERIALIZE_COMMIT_8_ERROR:
+                case SERIALIZE_ROLLBACK_8_ERROR:
+                case SERIALIZE_QRCVR_8_ERROR:
+                case SERIALIZE_QRCVR_16_ERROR:
+                case SERIALIZE_QRCVR_24_ERROR:
+                case SERIALIZE_REG_8_ERROR:
+                case SERIALIZE_UNREG_8_ERROR:
+                case SERIALIZE_FORGET_8_ERROR:
+                case SERIALIZE_TRANS_8_ERROR:
+                case SERIALIZE_TRANS_16_ERROR:
+                    break;
+                case INVALID_OPEN_STEP:
+                case INVALID_CLOSE_STEP:
+                case INVALID_START_STEP:
+                case INVALID_END_STEP:
+                case INVALID_PREPARE_STEP:
+                case INVALID_COMMIT_STEP:
+                case INVALID_ROLLBACK_STEP:
+                case INVALID_QRCVR_STEP:
+                case INVALID_REG_STEP:
+                case INVALID_UNREG_STEP:
+                case INVALID_FORGET_STEP:
+                case INVALID_TRANS_STEP:
+                case INVALID_VERB:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+                    break;
+                case BUFFER_TOO_SHORT3:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -483,22 +483,22 @@ int lixa_msg_serialize_close_8(const struct lixa_msg_s *msg, char *buffer,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT1:
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_close_8/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -545,7 +545,7 @@ int lixa_msg_serialize_commit_8(const struct lixa_msg_s *msg,
                 struct lixa_msg_body_commit_8_xa_commit_execs_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%d\" %s=\"0x%lx\" "
-                                      "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
+                                  "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_XA_COMMIT_EXEC,
                                   LIXA_XML_MSG_PROP_RMID,
                                   xa_commit_exec->rmid,
@@ -572,23 +572,23 @@ int lixa_msg_serialize_commit_8(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT1:
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                case BUFFER_TOO_SHORT4:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_commit_8/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -637,7 +637,7 @@ int lixa_msg_serialize_end_8(const struct lixa_msg_s *msg,
                 struct lixa_msg_body_end_8_xa_end_execs_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%d\" %s=\"0x%lx\" "
-                                      "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
+                                  "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_XA_END_EXEC,
                                   LIXA_XML_MSG_PROP_RMID,
                                   xa_end_exec->rmid,
@@ -664,23 +664,23 @@ int lixa_msg_serialize_end_8(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT:
+                case BUFFER_TOO_SHORT1:
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_end_8/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -712,20 +712,20 @@ int lixa_msg_serialize_end_16(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_end_16/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -772,7 +772,7 @@ int lixa_msg_serialize_forget_8(const struct lixa_msg_s *msg,
                 struct lixa_msg_body_forget_8_xa_forget_execs_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%d\" %s=\"0x%lx\" "
-                                      "%s=\"%d\" %s=\"%d\"/>",
+                                  "%s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_XA_FORGET_EXEC,
                                   LIXA_XML_MSG_PROP_RMID,
                                   xa_forget_exec->rmid,
@@ -797,23 +797,23 @@ int lixa_msg_serialize_forget_8(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT1:
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                case BUFFER_TOO_SHORT4:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_forget_8/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -864,7 +864,7 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg, char *buffer,
                 struct lixa_msg_body_open_8_rsrmgr_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%d\" %s=\"%d\" %s=\"%s\" "
-                                      "%s=\"%s\"/>",
+                                  "%s=\"%s\"/>",
                                   LIXA_XML_MSG_TAG_RSRMGR,
                                   LIXA_XML_MSG_PROP_RMID,
                                   rsrmgr->rmid,
@@ -889,23 +889,23 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg, char *buffer,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT1:
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                case BUFFER_TOO_SHORT4:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_open_8/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -937,20 +937,20 @@ int lixa_msg_serialize_open_16(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_open_16/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -997,7 +997,7 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
                 struct lixa_msg_body_open_24_xa_open_execs_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%s\" %s=\"%d\" %s=\"0x%lx\" "
-                                      "%s=\"%d\" %s=\"%d\"/>",
+                                  "%s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_XA_OPEN_EXEC,
                                   LIXA_XML_MSG_PROP_XA_INFO,
                                   (char *) xa_open_exec->xa_info,
@@ -1024,23 +1024,23 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT1:
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                case BUFFER_TOO_SHORT4:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_open_24/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1087,7 +1087,7 @@ int lixa_msg_serialize_prepare_8(const struct lixa_msg_s *msg,
                 struct lixa_msg_body_prepare_8_xa_prepare_execs_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%d\" %s=\"0x%lx\" "
-                                      "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
+                                  "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_XA_PREPARE_EXEC,
                                   LIXA_XML_MSG_PROP_RMID,
                                   xa_prepare_exec->rmid,
@@ -1114,23 +1114,23 @@ int lixa_msg_serialize_prepare_8(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT1:
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                case BUFFER_TOO_SHORT4:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_prepare_8/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1162,20 +1162,20 @@ int lixa_msg_serialize_prepare_16(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_prepare_16/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1209,20 +1209,20 @@ int lixa_msg_serialize_qrcvr_8(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_qrcvr_8/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1293,7 +1293,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
         /* <state/> */
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "<%s %s=\"%d\" %s=\"%d\" %s=\"%d\" %s=\"%d\" "
-                                  "%s=\"%s\"/>",
+                              "%s=\"%s\"/>",
                               LIXA_XML_MSG_TAG_STATE,
                               LIXA_XML_MSG_PROP_FINISHED,
                               msg->body.qrcvr_16.client.state.finished,
@@ -1330,7 +1330,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                 struct lixa_msg_body_qrcvr_16_rsrmgr_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%d\" %s=\"%d\" %s=\"%d\" "
-                                      "%s=\"%d\" %s=\"%d\"/>",
+                                  "%s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_RSRMGR,
                                   LIXA_XML_MSG_PROP_RMID,
                                   rsrmgr->rmid,
@@ -1357,34 +1357,34 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case XID_SERIALIZE_ERROR:
-                ret_cod = LIXA_RC_NULL_OBJECT;
-                break;
-            case BUFFER_TOO_SHORT1:
-                break;
-            case BYPASS_CLIENT_RSRMGRS:
-                ret_cod = LIXA_RC_OK;
-                break;
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-            case BUFFER_TOO_SHORT5:
-            case BUFFER_TOO_SHORT6:
-            case BUFFER_TOO_SHORT7:
-            case BUFFER_TOO_SHORT8:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case XID_SERIALIZE_ERROR:
+                    ret_cod = LIXA_RC_NULL_OBJECT;
+                    break;
+                case BUFFER_TOO_SHORT1:
+                    break;
+                case BYPASS_CLIENT_RSRMGRS:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                case BUFFER_TOO_SHORT4:
+                case BUFFER_TOO_SHORT5:
+                case BUFFER_TOO_SHORT6:
+                case BUFFER_TOO_SHORT7:
+                case BUFFER_TOO_SHORT8:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_qrcvr_16/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1454,23 +1454,23 @@ int lixa_msg_serialize_qrcvr_24(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT1:
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                case BUFFER_TOO_SHORT4:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_qrcvr_24/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1492,7 +1492,7 @@ int lixa_msg_serialize_reg_8(const struct lixa_msg_s *msg,
         /* <ax_reg_exec> */
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "<%s %s=\"%d\" %s=\"0x%lx\" "
-                                  "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
+                              "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
                               LIXA_XML_MSG_TAG_AX_REG_EXEC,
                               LIXA_XML_MSG_PROP_RMID,
                               msg->body.reg_8.ax_reg_exec.rmid,
@@ -1511,20 +1511,20 @@ int lixa_msg_serialize_reg_8(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_reg_8/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1572,7 +1572,7 @@ int lixa_msg_serialize_rollback_8(const struct lixa_msg_s *msg,
                 struct lixa_msg_body_rollback_8_xa_rollback_execs_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%d\" %s=\"0x%lx\" "
-                                      "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
+                                  "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_XA_ROLLBACK_EXEC,
                                   LIXA_XML_MSG_PROP_RMID,
                                   xa_rollback_exec->rmid,
@@ -1599,23 +1599,23 @@ int lixa_msg_serialize_rollback_8(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT1:
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                case BUFFER_TOO_SHORT4:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_rollback_8/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1686,26 +1686,26 @@ int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case XID_SERIALIZE_ERROR:
-                ret_cod = LIXA_RC_NULL_OBJECT;
-                break;
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case XID_SERIALIZE_ERROR:
+                    ret_cod = LIXA_RC_NULL_OBJECT;
+                    break;
+                case BUFFER_TOO_SHORT1:
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                case BUFFER_TOO_SHORT4:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_start_8/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1737,20 +1737,20 @@ int lixa_msg_serialize_start_16(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_start_16/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1798,7 +1798,7 @@ int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
                 struct lixa_msg_body_start_24_xa_start_execs_s, i);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%d\" %s=\"0x%lx\" "
-                                      "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
+                                  "%s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_XA_START_EXEC,
                                   LIXA_XML_MSG_PROP_RMID,
                                   xa_start_exec->rmid,
@@ -1825,23 +1825,23 @@ int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT1:
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT1:
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                case BUFFER_TOO_SHORT4:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_start_24/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1863,7 +1863,7 @@ int lixa_msg_serialize_unreg_8(const struct lixa_msg_s *msg,
         /* <ax_unreg_exec> */
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "<%s %s=\"%d\" %s=\"0x%lx\" "
-                                  "%s=\"%d\" %s=\"%d\"/>",
+                              "%s=\"%d\" %s=\"%d\"/>",
                               LIXA_XML_MSG_TAG_AX_UNREG_EXEC,
                               LIXA_XML_MSG_PROP_RMID,
                               msg->body.unreg_8.ax_unreg_exec.rmid,
@@ -1880,20 +1880,20 @@ int lixa_msg_serialize_unreg_8(const struct lixa_msg_s *msg,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_unreg_8/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1927,20 +1927,20 @@ int lixa_msg_serialize_trans_8(const struct lixa_msg_s *msg, char *buffer,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case BUFFER_TOO_SHORT:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_trans_8/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -2040,33 +2040,33 @@ int lixa_msg_serialize_trans_16(const struct lixa_msg_s *msg, char *buffer,
         THROW(NONE);
     }
     CATCH
-    {
-        switch (excp) {
-            case XID_SERIALIZE_ERROR:
-                ret_cod = LIXA_RC_NULL_OBJECT;
-                break;
-            case BUFFER_TOO_SHORT1:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case BYPASS_TRANSACTIONS:
-                ret_cod = LIXA_RC_OK;
-                break;
-            case BUFFER_TOO_SHORT2:
-            case BUFFER_TOO_SHORT3:
-            case BUFFER_TOO_SHORT4:
-            case BUFFER_TOO_SHORT5:
-            case BUFFER_TOO_SHORT6:
-            case BUFFER_TOO_SHORT7:
-                ret_cod = LIXA_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        {
+            switch (excp) {
+                case XID_SERIALIZE_ERROR:
+                    ret_cod = LIXA_RC_NULL_OBJECT;
+                    break;
+                case BUFFER_TOO_SHORT1:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case BYPASS_TRANSACTIONS:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                case BUFFER_TOO_SHORT2:
+                case BUFFER_TOO_SHORT3:
+                case BUFFER_TOO_SHORT4:
+                case BUFFER_TOO_SHORT5:
+                case BUFFER_TOO_SHORT6:
+                case BUFFER_TOO_SHORT7:
+                    ret_cod = LIXA_RC_CONTAINER_FULL;
+                    break;
+                case NONE:
+                    ret_cod = LIXA_RC_OK;
+                    break;
+                default:
+                    ret_cod = LIXA_RC_INTERNAL_ERROR;
+            } /* switch (excp) */
+        } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_trans_16/excp=%d/"
-        "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

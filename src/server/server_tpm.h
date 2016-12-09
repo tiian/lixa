@@ -40,26 +40,26 @@
 extern "C" {
 #endif /* __cplusplus */
 
-int server_trans(struct thread_status_s *ts, size_t slot_id,
-                 const struct lixa_msg_s *lmi, struct lixa_msg_s *lmo,
-                 uint32_t block_id,
-                 struct lixa_msg_verb_step_s *last_verb_step);
+    int server_trans(struct thread_status_s *ts, size_t slot_id,
+                     const struct lixa_msg_s *lmi, struct lixa_msg_s *lmo,
+                     uint32_t block_id,
+                     struct lixa_msg_verb_step_s *last_verb_step);
 
-int server_trans_8(struct thread_status_s *ts, size_t slot_id,
-                   const struct lixa_msg_s *lmi, struct lixa_msg_s *lmo,
-                   uint32_t block_id,
-                   struct lixa_msg_verb_step_s *last_verb_step);
+    int server_trans_8(struct thread_status_s *ts, size_t slot_id,
+                       const struct lixa_msg_s *lmi, struct lixa_msg_s *lmo,
+                       uint32_t block_id,
+                       struct lixa_msg_verb_step_s *last_verb_step);
 
-int server_trans_result(struct thread_status_s *ts,
-                        const struct server_trans_tbl_rec_s *record,
-                        const guint record_array_size,
-                        const struct lixa_msg_s *lmi,
-                        struct lixa_msg_s *lmo,
-                        uint32_t block_id);
+    int server_trans_result(struct thread_status_s *ts,
+                            const struct server_trans_tbl_rec_s *record,
+                            const guint record_array_size,
+                            const struct lixa_msg_s *lmi,
+                            struct lixa_msg_s *lmo,
+                            uint32_t block_id);
 
-int server_trans_empty_result(struct thread_status_s *ts,
-                              const struct lixa_msg_s *lmi,
-                              struct lixa_msg_s *lmo);
+    int server_trans_empty_result(struct thread_status_s *ts,
+                                  const struct lixa_msg_s *lmi,
+                                  struct lixa_msg_s *lmo);
 
 #ifdef __cplusplus
 }

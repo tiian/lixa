@@ -50,8 +50,8 @@ extern "C" {
  * @param lmo IN message will be returned to the client
  * @return a standardized return code
  */
-int server_reply_default(struct thread_status_s *ts, size_t slot_id,
-                         struct lixa_msg_s *lmo);
+    int server_reply_default(struct thread_status_s *ts, size_t slot_id,
+                             struct lixa_msg_s *lmo);
 
 
 /**
@@ -64,8 +64,8 @@ int server_reply_default(struct thread_status_s *ts, size_t slot_id,
  *              to the client
  * @return a standardized return code
  */
-int server_reply_end(struct thread_status_s *ts, size_t slot_id,
-                     struct lixa_msg_s *lmo, int rc);
+    int server_reply_end(struct thread_status_s *ts, size_t slot_id,
+                         struct lixa_msg_s *lmo, int rc);
 
 
 /**
@@ -78,8 +78,8 @@ int server_reply_end(struct thread_status_s *ts, size_t slot_id,
  *              to the client
  * @return a standardized return code
  */
-int server_reply_open(struct thread_status_s *ts, size_t slot_id,
-                      struct lixa_msg_s *lmo, int rc);
+    int server_reply_open(struct thread_status_s *ts, size_t slot_id,
+                          struct lixa_msg_s *lmo, int rc);
 
 
 /**
@@ -92,8 +92,8 @@ int server_reply_open(struct thread_status_s *ts, size_t slot_id,
  *              to the client
  * @return a standardized return code
  */
-int server_reply_prepare(struct thread_status_s *ts, size_t slot_id,
-                         struct lixa_msg_s *lmo, int rc);
+    int server_reply_prepare(struct thread_status_s *ts, size_t slot_id,
+                             struct lixa_msg_s *lmo, int rc);
 
 
 /**
@@ -104,8 +104,8 @@ int server_reply_prepare(struct thread_status_s *ts, size_t slot_id,
  * @param lmo IN message will be returned to the client
  * @return a standardized return code
  */
-int server_reply_qrcvr(struct thread_status_s *ts, size_t slot_id,
-                       struct lixa_msg_s *lmo);
+    int server_reply_qrcvr(struct thread_status_s *ts, size_t slot_id,
+                           struct lixa_msg_s *lmo);
 
 
 /**
@@ -118,8 +118,8 @@ int server_reply_qrcvr(struct thread_status_s *ts, size_t slot_id,
  *              to the client
  * @return a standardized return code
  */
-int server_reply_start(struct thread_status_s *ts, size_t slot_id,
-                       struct lixa_msg_s *lmo, int rc);
+    int server_reply_start(struct thread_status_s *ts, size_t slot_id,
+                           struct lixa_msg_s *lmo, int rc);
 
 /**
  * @brief Send the output message related to the "trans" verb to the client
@@ -128,8 +128,8 @@ int server_reply_start(struct thread_status_s *ts, size_t slot_id,
  * @param lmo
  * @return a standardized return code
  */
-int server_reply_trans(struct thread_status_s *ts, size_t slot_id,
-                       struct lixa_msg_s *lmo);
+    int server_reply_trans(struct thread_status_s *ts, size_t slot_id,
+                           struct lixa_msg_s *lmo);
 
 #ifdef __cplusplus
 }

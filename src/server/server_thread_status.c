@@ -515,11 +515,11 @@ int thread_status_load_files(struct thread_status_s *ts,
                             "time\n"));
                 ts->curr_status = ts->status1;
             } else if ((ts->status1->sr.ctrl.last_sync.tv_sec <
-                 ts->status2->sr.ctrl.last_sync.tv_sec) ||
-                ((ts->status1->sr.ctrl.last_sync.tv_sec ==
-                  ts->status2->sr.ctrl.last_sync.tv_sec) &&
-                 (ts->status1->sr.ctrl.last_sync.tv_usec <
-                  ts->status2->sr.ctrl.last_sync.tv_usec))) {
+                        ts->status2->sr.ctrl.last_sync.tv_sec) ||
+                       ((ts->status1->sr.ctrl.last_sync.tv_sec ==
+                         ts->status2->sr.ctrl.last_sync.tv_sec) &&
+                        (ts->status1->sr.ctrl.last_sync.tv_usec <
+                         ts->status2->sr.ctrl.last_sync.tv_usec))) {
                 /* second file is newer */
                 LIXA_TRACE(("thread_status_load_files: second status file is "
                             "the more recent\n"));

@@ -73,9 +73,9 @@ extern "C" {
  * @param msg_len OUT number of chars used in buffer for serializing msg
  * @return a reason code
  */
-int lixa_msg_serialize(const struct lixa_msg_s *msg,
-                       char *buffer, size_t buffer_len,
-                       size_t *msg_len);
+    int lixa_msg_serialize(const struct lixa_msg_s *msg,
+                           char *buffer, size_t buffer_len,
+                           size_t *msg_len);
 
 
 /**
@@ -90,9 +90,9 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_close_8(const struct lixa_msg_s *msg,
-                               char *buffer,
-                               size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_close_8(const struct lixa_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
 
 
 /**
@@ -107,9 +107,9 @@ int lixa_msg_serialize_close_8(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_commit_8(const struct lixa_msg_s *msg,
-                                char *buffer,
-                                size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_commit_8(const struct lixa_msg_s *msg,
+                                    char *buffer,
+                                    size_t *offset, size_t *free_chars);
 
 
 /**
@@ -124,9 +124,9 @@ int lixa_msg_serialize_commit_8(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_end_8(const struct lixa_msg_s *msg,
-                             char *buffer,
-                             size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_end_8(const struct lixa_msg_s *msg,
+                                 char *buffer,
+                                 size_t *offset, size_t *free_chars);
 
 
 /**
@@ -141,9 +141,9 @@ int lixa_msg_serialize_end_8(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_forget_8(const struct lixa_msg_s *msg,
-                                char *buffer,
-                                size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_forget_8(const struct lixa_msg_s *msg,
+                                    char *buffer,
+                                    size_t *offset, size_t *free_chars);
 
 
 /**
@@ -158,9 +158,9 @@ int lixa_msg_serialize_forget_8(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_end_16(const struct lixa_msg_s *msg,
-                              char *buffer,
-                              size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_end_16(const struct lixa_msg_s *msg,
+                                  char *buffer,
+                                  size_t *offset, size_t *free_chars);
 
 
 /**
@@ -175,9 +175,9 @@ int lixa_msg_serialize_end_16(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg,
-                              char *buffer,
-                              size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg,
+                                  char *buffer,
+                                  size_t *offset, size_t *free_chars);
 
 
 /**
@@ -192,9 +192,9 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_open_16(const struct lixa_msg_s *msg,
-                               char *buffer,
-                               size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_open_16(const struct lixa_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
 
 
 /**
@@ -209,9 +209,9 @@ int lixa_msg_serialize_open_16(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg,
-                               char *buffer,
-                               size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
 
 
 /**
@@ -226,9 +226,9 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_prepare_8(const struct lixa_msg_s *msg,
-                                 char *buffer,
-                                 size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_prepare_8(const struct lixa_msg_s *msg,
+                                     char *buffer,
+                                     size_t *offset, size_t *free_chars);
 
 
 /**
@@ -243,9 +243,9 @@ int lixa_msg_serialize_prepare_8(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_prepare_16(const struct lixa_msg_s *msg,
-                                  char *buffer,
-                                  size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_prepare_16(const struct lixa_msg_s *msg,
+                                      char *buffer,
+                                      size_t *offset, size_t *free_chars);
 
 
 /**
@@ -260,9 +260,9 @@ int lixa_msg_serialize_prepare_16(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_qrcvr_8(const struct lixa_msg_s *msg,
-                               char *buffer,
-                               size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_qrcvr_8(const struct lixa_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
 
 
 /**
@@ -277,9 +277,9 @@ int lixa_msg_serialize_qrcvr_8(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
-                                char *buffer,
-                                size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
+                                    char *buffer,
+                                    size_t *offset, size_t *free_chars);
 
 
 /**
@@ -294,9 +294,9 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_qrcvr_24(const struct lixa_msg_s *msg,
-                                char *buffer,
-                                size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_qrcvr_24(const struct lixa_msg_s *msg,
+                                    char *buffer,
+                                    size_t *offset, size_t *free_chars);
 
 
 /**
@@ -311,9 +311,9 @@ int lixa_msg_serialize_qrcvr_24(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_reg_8(const struct lixa_msg_s *msg,
-                             char *buffer,
-                             size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_reg_8(const struct lixa_msg_s *msg,
+                                 char *buffer,
+                                 size_t *offset, size_t *free_chars);
 
 
 /**
@@ -328,9 +328,9 @@ int lixa_msg_serialize_reg_8(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_rollback_8(const struct lixa_msg_s *msg,
-                                  char *buffer,
-                                  size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_rollback_8(const struct lixa_msg_s *msg,
+                                      char *buffer,
+                                      size_t *offset, size_t *free_chars);
 
 
 /**
@@ -345,9 +345,9 @@ int lixa_msg_serialize_rollback_8(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
-                               char *buffer,
-                               size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
 
 
 /**
@@ -362,9 +362,9 @@ int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_start_16(const struct lixa_msg_s *msg,
-                                char *buffer,
-                                size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_start_16(const struct lixa_msg_s *msg,
+                                    char *buffer,
+                                    size_t *offset, size_t *free_chars);
 
 
 /**
@@ -379,9 +379,9 @@ int lixa_msg_serialize_start_16(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
-                                char *buffer,
-                                size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
+                                    char *buffer,
+                                    size_t *offset, size_t *free_chars);
 
 
 /**
@@ -396,9 +396,9 @@ int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
  * @param free_chars IN/OUT remaing free chars inside the buffer
  * @return a reason code
  */
-int lixa_msg_serialize_unreg_8(const struct lixa_msg_s *msg,
-                               char *buffer,
-                               size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_unreg_8(const struct lixa_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
 
 /**
  * @brief Serialize the "trans_8" specific body part of a message
@@ -408,8 +408,8 @@ int lixa_msg_serialize_unreg_8(const struct lixa_msg_s *msg,
  * @param[in,out] free_chars
  * @return a reason code
  */
-int lixa_msg_serialize_trans_8(const struct lixa_msg_s *msg, char *buffer,
-                               size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_trans_8(const struct lixa_msg_s *msg, char *buffer,
+                                   size_t *offset, size_t *free_chars);
 
 /**
  * @brief Serialize the "trans_16" specific body part of a message
@@ -419,8 +419,8 @@ int lixa_msg_serialize_trans_8(const struct lixa_msg_s *msg, char *buffer,
  * @param free_chars
  * @return
  */
-int lixa_msg_serialize_trans_16(const struct lixa_msg_s *msg, char *buffer,
-                                size_t *offset, size_t *free_chars);
+    int lixa_msg_serialize_trans_16(const struct lixa_msg_s *msg, char *buffer,
+                                    size_t *offset, size_t *free_chars);
 
 #ifdef __cplusplus
 }
