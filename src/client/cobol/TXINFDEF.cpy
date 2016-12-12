@@ -1,3 +1,12 @@
+      * This copybook is NOT original but it's derived from this
+      * official documentation:
+      *
+      * X/Open CAE Specification
+      * Distributed Transaction Processing:
+      * The TX (Transaction Demarcation) Specification
+      * ISBN: 1-85912-094-6
+      * X/Open Document Number: C504
+      *
       * XID record
         05 XID-REC.
            10 FORMAT-ID PIC S9(9) COMP-5.
