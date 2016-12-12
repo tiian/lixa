@@ -1,4 +1,4 @@
-AC_INIT([lixa], [1.0.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [1.1.0-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -10,6 +10,7 @@ AC_CONFIG_FILES([
   Makefile
   doc/Makefile
   doc/examples/Makefile
+  doc/examples/cobol/Makefile
   doc/images/Makefile
   doc/manuals/LIXA.xml
   doc/manuals/Makefile
@@ -28,6 +29,7 @@ AC_CONFIG_FILES([
   src/common/lixa_inst_conf.c
   src/client/lixa-config.c
   src/client/Makefile
+  src/client/cobol/Makefile
   src/client/switch/Makefile
   src/client/switch/lixa/Makefile
   src/client/switch/ibmdb2/Makefile
@@ -149,6 +151,23 @@ else
 	LDFLAGS_GTHREAD="$($PKG_CONFIG --libs gthread-2.0)"
 	AC_MSG_RESULT([yes])
 fi
+
+# Checking cobc (GNU COBOL compiler) is available
+AC_CHECK_PROGS(COBC, [cobc], [true])
+AC_CHECK_PROG(HAVE_COBOL, [cobc], [yes], [no])
+# Build COBOL TX interface?
+AC_ARG_ENABLE([cobol],
+	AS_HELP_STRING([--disable-cobol],
+		[do not create cobol TX library]),
+	[COBOL="no"], [COBOL="yes"])
+# COBOL stuff is conditional
+if test "$HAVE_COBOL" = "yes" -a "$COBOL" = "yes"
+then
+	COBOLAPI="yes"
+else
+	COBOLAPI="no"
+fi
+AM_CONDITIONAL([COND_COBOLAPI], [test "$COBOLAPI" = "yes"])
 
 # Vars useful for lixa-config utility program
 eval "LIXA_CONFIG_INCLUDEDIR=$includedir"

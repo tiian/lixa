@@ -1,0 +1,14 @@
+This examples are intended to be used with GNU COBOL (Open Cobol).
+
+This brief instruction explains how you can compile them.
+
+1. Add LIXA utilities to your PATH, for example:
+   export PATH=$PATH:/opt/lixa/bin
+2. Add LIXA libraries to your LD_LIBRARY_PATH, for example:
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+3. Disable gcc linking "--no-as-needed" optiontpion for COBOL programs:
+   export COB_LDFLAGS=-Wl,--no-as-needed
+4. Compile the interested COBOL <programname> with this command line:
+   cobc -x -I$(lixa-config -i) -L$(lixa-config -L) -llixacobol <programname>
+   Example for EXAMPLE1.cbl
+   cobc -x -I$(lixa-config -i) -L$(lixa-config -L) -llixacobol EXAMPLE1.cbl
