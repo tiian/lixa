@@ -25,7 +25,15 @@
 
 
 
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+
+
+
 #include "tx.h"
+#include "lixa_trace.h"
+#include "lixa_xid.h"
 
 
 
@@ -104,7 +112,7 @@ void TXINFORM(struct TX_INFO_AREA_s *TX_INFO_AREA, int32_t *TX_STATUS) {
     TX_INFO_AREA->XID_REC.FORMAT_ID = (int32_t)info.xid.formatID;
     TX_INFO_AREA->XID_REC.GTRID_LENGTH = (int32_t)info.xid.gtrid_length;
     TX_INFO_AREA->XID_REC.BRANCH_LENGTH = (int32_t)info.xid.bqual_length;
-    memcpy(info.xid.data, TX_INFO_AREA->XID_REC.XID_DATA,
+    memcpy(TX_INFO_AREA->XID_REC.XID_DATA, info.xid.data,
            XIDDATASIZE);
     if (0 == ret_cod || 1 == ret_cod) {
         TX_INFO_AREA->TRANSACTION_MODE = (int32_t)ret_cod;
@@ -174,4 +182,26 @@ void TXSETTRANCTL(const struct TX_INFO_AREA_s *TX_INFO_AREA,
                   int32_t *TX_STATUS) {
     *TX_STATUS = tx_set_transaction_control(
         (TRANSACTION_CONTROL)TX_INFO_AREA->TRANSACTION_CONTROL);
+}
+
+
+
+
+/**
+ * This utility helps to print XID DATA binary part (GTRID)
+ * @param TX_INFO_AREA IN passed information
+ * @param LIXA_XID OUT returned string (it must be at least XIDDATASIZE + 1
+ *                     bytes long)
+ * @param TX_STATUS OUT return code
+ */
+void LIXAXIDSERIALIZE(const struct TX_INFO_AREA_s *TX_INFO_AREA,
+                      lixa_ser_xid_t LIXA_SER_XID, int32_t *TX_STATUS) {
+    int ret_cod = lixa_xid_serialize(TX_INFO_AREA->XID_REC.XID_DATA,
+                                     LIXA_SER_XID);
+    if (!ret_cod) {
+        LIXA_TRACE(("LIXAXIDSERIALIZE: lixa_xid_serialize returned %d\n",
+                    ret_cod));
+        *TX_STATUS = TX_ERROR;
+    } else
+        *TX_STATUS = TX_OK;
 }
