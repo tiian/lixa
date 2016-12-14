@@ -34,6 +34,7 @@
 #include "tx.h"
 #include "lixa_trace.h"
 #include "lixa_xid.h"
+#include "lixa_tx_cobol.h"
 
 
 
@@ -49,63 +50,56 @@
 
 
 
-/**
- * COBOL wrapper for @ref tx_begin
- * @param TX_STATUS OUT return code
- */
 void TXBEGIN(int32_t *TX_STATUS) {
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("TXBEGIN\n"));
     *TX_STATUS = tx_begin();
+    LIXA_TRACE(("TXBEGIN/TX_STATUS=%d\n", *TX_STATUS));    
 }
 
 
 
-/**
- * COBOL wrapper for @ref tx_commit
- * @param TX_STATUS OUT return code
- */
 void TXCOMMIT(int32_t *TX_STATUS) {
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("TXCOMMIT\n"));
     *TX_STATUS = tx_commit();
+    LIXA_TRACE(("TXCOMMIT/TX_STATUS=%d\n", *TX_STATUS));    
 }
 
 
 
-/**
- * COBOL wrapper for @ref tx_close
- * @param TX_STATUS OUT return code
- */
 void TXCLOSE(int32_t *TX_STATUS) {
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("TXCLOSE\n"));
     *TX_STATUS = tx_close();
+    LIXA_TRACE(("TXCLOSE/TX_STATUS=%d\n", *TX_STATUS));    
 }
 
 
 
-/**
- * This data struct is necessary to map TXINFDEF copybook to a C struct
- */
-struct TX_INFO_AREA_s {
-    struct XID_REC_s {
-        int32_t     FORMAT_ID;
-        int32_t     GTRID_LENGTH;
-        int32_t     BRANCH_LENGTH;
-        char        XID_DATA[XIDDATASIZE];
-    } XID_REC;
-    int32_t         TRANSACTION_MODE;
-    int32_t         COMMIT_RETURN;
-    int32_t         TRANSACTION_CONTROL;
-    int32_t         TRANSACTION_TIMEOUT;
-    int32_t         TRANSACTION_STATE;
-};
+void lixa_tx_xid_c_cobol(const XID *xid, struct XID_REC_s *XID_REC) {
+    XID_REC->FORMAT_ID = xid->formatID;
+    XID_REC->GTRID_LENGTH = xid->gtrid_length;
+    XID_REC->BRANCH_LENGTH = xid->bqual_length;
+    memcpy(XID_REC->XID_DATA, xid->data, XIDDATASIZE);
+}
 
 
 
-/**
- * COBOL wrapper for @ref tx_info
- * @param TX_INFO_AREA OUT retrieved information
- * @param TX_STATUS OUT return code
- */
+void lixa_tx_xid_cobol_c(const struct XID_REC_s *XID_REC, XID *xid) {
+    xid->formatID = XID_REC->FORMAT_ID;
+    xid->gtrid_length = XID_REC->GTRID_LENGTH;
+    xid->bqual_length = XID_REC->BRANCH_LENGTH;
+    memcpy(xid->data, XID_REC->XID_DATA, XIDDATASIZE);
+}
+
+
+
 void TXINFORM(struct TX_INFO_AREA_s *TX_INFO_AREA, int32_t *TX_STATUS) {
     TXINFO info;
     int ret_cod;
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("TXINFORM\n"));
     /* call to C function */
     ret_cod = tx_info(&info);
     /* data conversion from C to COBOL */
@@ -123,85 +117,79 @@ void TXINFORM(struct TX_INFO_AREA_s *TX_INFO_AREA, int32_t *TX_STATUS) {
     TX_INFO_AREA->TRANSACTION_TIMEOUT = (int32_t)info.transaction_timeout;
     TX_INFO_AREA->TRANSACTION_STATE = (int32_t)info.transaction_state;
     *TX_STATUS = ret_cod;
+    LIXA_TRACE(("TXINFORM/TX_STATUS=%d\n", *TX_STATUS));    
 }
 
 
 
-/**
- * COBOL wrapper for @ref tx_open
- * @param TX_STATUS OUT return code
- */
 void TXOPEN(int32_t *TX_STATUS) {
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("TXOPEN\n"));
     *TX_STATUS = tx_open();
+    LIXA_TRACE(("TXOPEN/TX_STATUS=%d\n", *TX_STATUS));    
 }
 
 
 
-/**
- * COBOL wrapper for @ref tx_rollback
- * @param TX_STATUS OUT return code
- */
 void TXROLLBACK(int32_t *TX_STATUS) {
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("TXROLLBACK\n"));
     *TX_STATUS = tx_rollback();
+    LIXA_TRACE(("TXROLLBACK/TX_STATUS=%d\n", *TX_STATUS));    
 }
 
 
 
-/**
- * COBOL wrapper for @ref tx_set_commit_return
- * @param TX_INFO_AREA IN passed information
- * @param TX_STATUS OUT return code
- */
 void TXSETCOMMITRET(const struct TX_INFO_AREA_s *TX_INFO_AREA,
                     int32_t *TX_STATUS) {
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("TXSETCOMMITRET\n"));
     *TX_STATUS = tx_set_commit_return(
         (COMMIT_RETURN)TX_INFO_AREA->COMMIT_RETURN);
+    LIXA_TRACE(("TXSETCOMMITRET/TX_STATUS=%d\n", *TX_STATUS));    
 }
 
 
 
-/**
- * COBOL wrapper for @ref tx_set_transaction_timeout
- * @param TX_INFO_AREA IN passed information
- * @param TX_STATUS OUT return code
- */
 void TXSETTIMEOUT(const struct TX_INFO_AREA_s *TX_INFO_AREA,
                   int32_t *TX_STATUS) {
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("TXSETTIMEOUT\n"));
     *TX_STATUS = tx_set_transaction_timeout(
         (TRANSACTION_TIMEOUT)TX_INFO_AREA->TRANSACTION_TIMEOUT);
+    LIXA_TRACE(("TXSETTIMEOUT/TX_STATUS=%d\n", *TX_STATUS));    
 }
 
 
 
-/**
- * COBOL wrapper for @ref tx_set_transaction_control
- * @param TX_INFO_AREA IN passed information
- * @param TX_STATUS OUT return code
- */
 void TXSETTRANCTL(const struct TX_INFO_AREA_s *TX_INFO_AREA,
                   int32_t *TX_STATUS) {
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("TXSETTRANCTL\n"));
     *TX_STATUS = tx_set_transaction_control(
         (TRANSACTION_CONTROL)TX_INFO_AREA->TRANSACTION_CONTROL);
+    LIXA_TRACE(("TXSETTRANCTL/TX_STATUS=%d\n", *TX_STATUS));    
 }
 
 
 
-
-/**
- * This utility helps to print XID DATA binary part (GTRID)
- * @param TX_INFO_AREA IN passed information
- * @param LIXA_XID OUT returned string (it must be at least XIDDATASIZE + 1
- *                     bytes long)
- * @param TX_STATUS OUT return code
- */
 void LIXAXIDSERIALIZE(const struct TX_INFO_AREA_s *TX_INFO_AREA,
                       lixa_ser_xid_t LIXA_SER_XID, int32_t *TX_STATUS) {
-    int ret_cod = lixa_xid_serialize(TX_INFO_AREA->XID_REC.XID_DATA,
-                                     LIXA_SER_XID);
-    if (!ret_cod) {
+    int ret_cod;
+    XID xid;
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("LIXAXIDSERIALIZE\n"));
+    lixa_tx_xid_cobol_c(&TX_INFO_AREA->XID_REC, &xid);
+    memset(LIXA_SER_XID, 0, sizeof(lixa_ser_xid_t));
+    ret_cod = lixa_xid_serialize(&xid, LIXA_SER_XID);
+     if (!ret_cod) {
         LIXA_TRACE(("LIXAXIDSERIALIZE: lixa_xid_serialize returned %d\n",
                     ret_cod));
         *TX_STATUS = TX_ERROR;
     } else
         *TX_STATUS = TX_OK;
+    LIXA_TRACE(("LIXAXIDSERIALIZE/TX_STATUS=%d\n", *TX_STATUS));    
 }
+
+
+

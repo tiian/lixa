@@ -1,5 +1,6 @@
 dist_noinst_DATA = README
 include_HEADERS = TXSTATUS.cpy TXINFDEF.cpy LIXAXID.cpy
+noinst_HEADERS = lixa_tx_cobol.h
 lib_LTLIBRARIES = liblixacobol.la
 liblixacobol_la_SOURCES = lixa_tx_cobol.c
 AM_CFLAGS = -Wall -fno-strict-aliasing

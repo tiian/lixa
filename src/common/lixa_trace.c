@@ -89,6 +89,8 @@ GStaticMutex lixa_trace_mutex = G_STATIC_MUTEX_INIT;
  */
 void lixa_trace_init(void)
 {
+    if (lixa_trace_initialized)
+        return;
     /* initialize thread system if necessary */
     if (!g_thread_supported ()) g_thread_init(NULL);
 

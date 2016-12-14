@@ -82,6 +82,15 @@
                STOP RUN
             END-IF.
             PERFORM INFO-PARA THRU INFO-PARA.
+      * Transaction control must be resetted to avoid error during close
+            MOVE 0 TO TRANSACTION-CONTROL.
+            CALL "TXSETTRANCTL" USING TX-INFO-AREA TX-RETURN-STATUS.
+            DISPLAY 'TXSETTRANCTL returned value ' TX-STATUS.
+            IF NOT TX-OK THEN
+               DISPLAY 'Exiting...'
+               STOP RUN
+            END-IF.
+            PERFORM INFO-PARA THRU INFO-PARA.
       * Calling TXBEGIN (tx_begin)
             CALL "TXBEGIN" USING TX-RETURN-STATUS.
             DISPLAY 'TXBEGIN returned value ' TX-STATUS.
@@ -116,8 +125,7 @@
             DISPLAY '  XID-REC/FORMAT-ID:     ' FORMAT-ID.
             DISPLAY '  XID-REC/GTRID-LENGTH:  ' GTRID-LENGTH.
             DISPLAY '  XID-REC/BRANCH-LENGTH: ' BRANCH-LENGTH.
-            DISPLAY '  XID-REC/XID-DATA :     ' XID-DATA.
-            DISPLAY '  XID-REC/XID-GTRID :    ' LIXA-SER-XID.
+            DISPLAY '  XID-REC/XID (SERIAL.): ' LIXA-SER-XID.
             DISPLAY '  TRANSACTION-MODE :     ' TRANSACTION-MODE.
             IF TX-NOT-IN-TRAN THEN
                DISPLAY '    [TX-NOT-IN-TRAN]'.

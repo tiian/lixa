@@ -38,7 +38,7 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = src/client/cobol
 DIST_COMMON = README $(dist_noinst_DATA) $(include_HEADERS) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
+	$(noinst_HEADERS) $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -105,7 +105,7 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 SOURCES = $(liblixacobol_la_SOURCES)
 DIST_SOURCES = $(liblixacobol_la_SOURCES)
 DATA = $(dist_noinst_DATA)
-HEADERS = $(include_HEADERS)
+HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -279,6 +279,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 dist_noinst_DATA = README
 include_HEADERS = TXSTATUS.cpy TXINFDEF.cpy LIXAXID.cpy
+noinst_HEADERS = lixa_tx_cobol.h
 lib_LTLIBRARIES = liblixacobol.la
 liblixacobol_la_SOURCES = lixa_tx_cobol.c
 AM_CFLAGS = -Wall -fno-strict-aliasing
