@@ -22,9 +22,6 @@
 #ifdef HAVE_STDINT_H
 # include <stdint.h>
 #endif
-
-
-
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
@@ -35,6 +32,9 @@
 #include "lixa_trace.h"
 #include "lixa_xid.h"
 #include "lixa_tx_cobol.h"
+#ifdef HAVE_POSTGRESQL
+# include "lixapq.h"
+#endif
 
 
 
@@ -192,4 +192,12 @@ void LIXAXIDSERIALIZE(const struct TX_INFO_AREA_s *TX_INFO_AREA,
 }
 
 
+
+void LIXAPQGETCONN(PGconn **conn) {
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("LIXAPQGETCONN\n"));
+    *conn = lixa_pq_get_conn();
+    LIXA_TRACE(("LIXAPQGETCONN/PGCONN=%p\n", *conn));
+    return;
+}
 

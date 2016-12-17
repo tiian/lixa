@@ -19,6 +19,13 @@
 #include <config.h>
 
 
+
+#ifdef HAVE_POSTGRESQL
+# include "lixapq.h"
+#endif
+
+
+
 #include "tx.h"
 #include "lixa_trace.h"
 #include "lixa_xid.h"
@@ -163,3 +170,15 @@ void TXSETTRANCTL(const struct TX_INFO_AREA_s *TX_INFO_AREA,
  */
 void LIXAXIDSERIALIZE(const struct TX_INFO_AREA_s *TX_INFO_AREA,
                       lixa_ser_xid_t LIXA_SER_XID, int32_t *TX_STATUS);
+
+
+
+/**
+ * COBOL wrapper for @ref lixa_pq_get_con
+ * @param conn OUT a valid connection handle or NULL if the handle is not
+ *        available
+ */
+void LIXAPQGETCONN(PGconn **conn);
+
+
+
