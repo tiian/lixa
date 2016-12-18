@@ -193,11 +193,12 @@ void LIXAXIDSERIALIZE(const struct TX_INFO_AREA_s *TX_INFO_AREA,
 
 
 
-void LIXAPQGETCONN(PGconn **conn) {
+PGconn *LIXAPQGETCONN() {
+    PGconn *conn;
     LIXA_TRACE_INIT;
     LIXA_TRACE(("LIXAPQGETCONN\n"));
-    *conn = lixa_pq_get_conn();
-    LIXA_TRACE(("LIXAPQGETCONN/PGCONN=%p\n", *conn));
-    return;
+    conn = lixa_pq_get_conn();
+    LIXA_TRACE(("LIXAPQGETCONN/PGCONN=%p\n", conn));
+    return conn;
 }
 
