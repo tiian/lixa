@@ -30,8 +30,13 @@
            COPY LIXAXID.
       * PostgreSQL connection handle
         01 PGCONN USAGE POINTER.
+      * PostgreSQL result
+        01 PGRES USAGE POINTER.
       * Command line argument
         01 ARGV PIC X(100) VALUE SPACES.
+        01 ARGV-BOOL PIC 9(1) VALUE 0.
+        88      IS-DELETE VALUES 1.
+        88      IS-INSERT VALUES 0.
       *
         PROCEDURE DIVISION.
         000-MAIN.
@@ -45,6 +50,7 @@
             IF ARGV IS EQUAL TO 'DELETE' OR
                ARGV IS EQUAL TO 'delete' THEN
                DISPLAY 'Deleting a row from the table...'
+               MOVE 1 TO ARGV-BOOL
             ELSE
                DISPLAY 'Inserting a row from the table...'
             END-IF.
@@ -79,6 +85,12 @@
                STOP RUN RETURNING 1
             END-IF.
       *
+      * Execute DELETE stament
+            CALL "PQexec" USING
+                BY VALUE PGCONN
+                BY REFERENCE "DELETE FROM authors WHERE id=1;" & x"00"
+                RETURNING PGRES
+            END-CALL
             STOP RUN RETURNING 0 
       * Inspect transaction info
             PERFORM INFO-PARA THRU INFO-PARA.
