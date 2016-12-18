@@ -1,5 +1,6 @@
 AC_INIT([lixa], [1.1.0-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
@@ -51,6 +52,7 @@ AC_CONFIG_FILES([
   doxygen.conf
 ])
 AC_CONFIG_TESTDIR([tests])
+
 
 # Installation PATH
 test "x$prefix" = "xNONE" && prefix="/opt/lixa"
