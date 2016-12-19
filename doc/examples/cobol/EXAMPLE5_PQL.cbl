@@ -33,6 +33,9 @@
       * PostgreSQL result
         01 PGRES USAGE POINTER.
         01 RESULT USAGE BINARY-LONG.
+        01 RESULT-POINTER USAGE POINTER.
+        01 RESULT-CHAR PIC X BASED.
+        01 NEXT-CHAR PIC X BASED.
       * PostgreSQL statement
         01 PGSTATMNT PIC X(200) VALUE SPACES.
       * Command line argument
@@ -118,11 +121,27 @@
                  RETURNING PGRES
                END-CALL
             END-IF.
-            DISPLAY 'PQexec return code: ' PGRES.
       *
       * Check connection status
       *
-            CALL "PQstatus" USING BY VALUE PGCONN RETURNING RESULT.
+            CALL "PQresultStatus" USING BY VALUE PGRES RETURNING RESULT.
+            IF RESULT IS NOT EQUAL TO 1 THEN
+               DISPLAY "Error in PQexec statement: "
+               CALL "PQerrorMessage" USING BY VALUE PGCONN
+                    RETURNING RESULT-POINTER
+               SET ADDRESS OF RESULT-CHAR TO RESULT-POINTER
+               PERFORM UNTIL RESULT-CHAR EQUAL x"00"
+                  SET RESULT-POINTER UP BY 1
+                  SET ADDRESS OF NEXT-CHAR TO RESULT-POINTER
+                  IF NEXT-CHAR NOT EQUAL x"00" THEN
+                     DISPLAY RESULT-CHAR WITH NO ADVANCING
+                  ELSE
+                     DISPLAY RESULT-CHAR
+                  END-IF
+                  SET ADDRESS OF RESULT-CHAR TO RESULT-POINTER
+               END-PERFORM
+            END-IF.
+            CALL "PQclear" USING BY VALUE PGRES.
             DISPLAY "Status: " RESULT.
       * Calling TXCOMMIT (tx_commit)
             CALL "TXCOMMIT" USING TX-RETURN-STATUS.
