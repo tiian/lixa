@@ -170,6 +170,11 @@ else
 	COBOLAPI="no"
 fi
 AM_CONDITIONAL([COND_COBOLAPI], [test "$COBOLAPI" = "yes"])
+if test "$COBOLAPI" = "yes"
+then
+        AC_DEFINE([HAVE_GNU_COBOL], [1], [Define to 1 if you are using GNU COBOL])
+fi
+
 
 # Vars useful for lixa-config utility program
 eval "LIXA_CONFIG_INCLUDEDIR=$includedir"

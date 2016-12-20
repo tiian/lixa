@@ -173,11 +173,3 @@ void LIXAXIDSERIALIZE(const struct TX_INFO_AREA_s *TX_INFO_AREA,
 
 
 
-/**
- * COBOL wrapper for @ref lixa_pq_get_con
- * @return a valid connection handle or NULL if the handle is not available
- */
-PGconn *LIXAPQGETCONN();
-
-
-

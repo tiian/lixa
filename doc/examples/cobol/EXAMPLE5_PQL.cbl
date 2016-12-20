@@ -17,6 +17,8 @@
       * GNU General Public License along with LIXA.
       * If not, see <http://www.gnu.org/licenses/>.
       *
+      * Usage: EXAMPLE5_PQL [DELETE]
+      *
         IDENTIFICATION DIVISION.
         PROGRAM-ID. EXAMPLE5-PQL.
         DATA DIVISION.
@@ -36,8 +38,6 @@
         01 RESULT-POINTER USAGE POINTER.
         01 RESULT-CHAR PIC X BASED.
         01 NEXT-CHAR PIC X BASED.
-      * PostgreSQL statement
-        01 PGSTATMNT PIC X(200) VALUE SPACES.
       * Command line argument
         01 ARGV PIC X(100) VALUE SPACES.
         01 ARGV-BOOL PIC 9(1) VALUE 0.
@@ -76,9 +76,26 @@
       * connection
       *
             CALL "LIXAPQGETCONN" RETURNING PGCONN.
+      * Alternatively,
+      * in the event that 2 or more PostgreSQL resource managers are
+      * used by the transaction, the desired one can be specified using
+      * absolute RMID
+      *     MOVE 0 TO LIXA-RES-MNGR-ID.
+      *     CALL "LIXAPQGETCONNBYRMID" USING BY VALUE LIXA-RES-MNGR-ID
+      *                                RETURNING PGCONN.
+      * Alternatively,
+      * in the event that 2 or more PostgreSQL resource managers are
+      * used by the transaction, the desired one can be specified using
+      * relative POS
+      *     MOVE 0 TO LIXA-RES-MNGR-POS.
+      *     CALL "LIXAPQGETCONNBYPOS" USING BY VALUE LIXA-RES-MNGR-POS
+      *                               RETURNING PGCONN.
+      *
+      * Check returned connection
+      *
             IF PGCONN EQUAL NULL THEN
-               DISPLAY 'Error: unable to retrieve a valid PostgreSQL con
-       -nection'
+               DISPLAY 'Error: unable to retrieve a valid PostgreSQL '
+                       'connection'
                STOP RUN RETURNING 1
             END-IF.
       *

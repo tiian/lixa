@@ -11,8 +11,8 @@ This brief instruction explains how you can compile them.
 4. Disable gcc linking "--no-as-needed" option for COBOL programs:
    export COB_LDFLAGS=-Wl,--no-as-needed
 5. Compile the interested COBOL <programname> with this command line:
-   cobc -x -I$(lixa-config -i) -L$(lixa-config -L) -llixacobol <programname>
-   Example for EXAMPLE1.cbl
-   cobc -x -I$(lixa-config -i) -L$(lixa-config -L) -llixacobol EXAMPLE1.cbl
-   Example for EXAMPLE5_PQL.cbl
-   cobc -x $(lixa-config -f -p) -llixacobol EXAMPLE5_PQL.cbl
+     cobc -x $(lixa-config -f -l) -llixacobol <programname>
+   Example for EXAMPLE1.cbl (No third party resource managers)
+     cobc -x $(lixa-config -f -l) -llixacobol EXAMPLE1.cbl
+   Example for EXAMPLE5_PQL.cbl (PostgreSQL resource managers)
+     cobc -x $(lixa-config -f -p) -llixacobol EXAMPLE5_PQL.cbl

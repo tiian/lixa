@@ -19,3 +19,7 @@
       *
       * A printable version of XID-DATA record
         01 LIXA-SER-XID              PIC X(384).
+      * Resource Manager ID position
+        01 LIXA-RES-MNGR-ID          PIC S9(9) COMP-5.
+      * Resource Manager position
+        01 LIXA-RES-MNGR-POS         PIC S9(9) COMP-5.

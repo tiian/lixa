@@ -13936,6 +13936,13 @@ else
   COND_COBOLAPI_FALSE=
 fi
 
+if test "$COBOLAPI" = "yes"
+then
+
+$as_echo "#define HAVE_GNU_COBOL 1" >>confdefs.h
+
+fi
+
 
 # Vars useful for lixa-config utility program
 eval "LIXA_CONFIG_INCLUDEDIR=$includedir"

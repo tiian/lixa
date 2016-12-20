@@ -24,6 +24,9 @@
 /* Define to 1 if you have the <gmodule.h> header file. */
 #undef HAVE_GMODULE_H
 
+/* Define to 1 if you are using GNU COBOL */
+#undef HAVE_GNU_COBOL
+
 /* Define to 1 if you are using IBM DB2 */
 #undef HAVE_IBMDB2
 

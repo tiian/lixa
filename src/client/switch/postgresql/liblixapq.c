@@ -1294,3 +1294,38 @@ int lixa_pq_is_managed_conn(const PGconn *conn) {
     return lixa_sw_is_managed_conn((gpointer)conn,
                                    LIXA_SW_STATUS_RM_TYPE_POSTGRESQL);
 }
+
+
+
+#ifdef HAVE_GNU_COBOL
+PGconn *LIXAPQGETCONN() {
+    PGconn *conn;
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("LIXAPQGETCONN\n"));
+    conn = lixa_pq_get_conn();
+    LIXA_TRACE(("LIXAPQGETCONN/PGCONN=%p\n", conn));
+    return conn;
+}
+
+
+
+PGconn *LIXAPQGETCONNBYRMID(int rmid) {
+    PGconn *conn;
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("LIXAPQGETCONNBYRMID/rmid=%d\n", rmid));
+    conn = lixa_pq_get_conn_by_rmid(rmid);
+    LIXA_TRACE(("LIXAPQGETCONNBYRMID/PGCONN=%p\n", conn));
+    return conn;
+}
+
+
+
+PGconn *LIXAPQGETCONNBYPOS(int pos) {
+    PGconn *conn;
+    LIXA_TRACE_INIT;
+    LIXA_TRACE(("LIXAPQGETCONNBYPOS/pos=%d\n", pos));
+    conn = lixa_pq_get_conn_by_pos(pos);
+    LIXA_TRACE(("LIXAPQGETCONNBYPOS/PGCONN=%p\n", conn));
+    return conn;
+}
+#endif /* HAVE_GNU_COBOL */

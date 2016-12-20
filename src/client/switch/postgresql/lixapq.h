@@ -109,4 +109,36 @@ extern "C" {
 
 
 
+#ifdef HAVE_GNU_COBOL
+/**
+ * COBOL wrapper for @ref lixa_pq_get_conn
+ * @return a valid connection handle or NULL if the handle is not available
+ */
+PGconn *LIXAPQGETCONN();
+
+
+
+/**
+ * COBOL wrapper for @ref lixa_pq_get_conn_by_rmid
+ * @param rmid IN it can be 0, 1, 2, 3, ... in accordance to
+ *                lixac_conf.xml (the position of the interested
+ *                PostgreSQL resource manager inside the resource
+ *                manager list of the current profile)
+ * @return a valid connection handle or NULL if the handle is not available
+ */
+PGconn *LIXAPQGETCONNBYRMID(int rmid);
+
+
+
+/**
+ * COBOL wrapper for @ref lixa_pq_get_conn_by_pos
+ * @param pos IN the position of the interested PostgreSQL resource manager
+ *               inside PostgreSQL only resource manager list
+ * @return a valid connection handle or NULL if the handle is not available
+ */
+PGconn *LIXAPQGETCONNBYPOS(int pos);
+#endif /* HAVE_GNU_COBOL */
+
+
+
 #endif /* LIXAPQ_H */
