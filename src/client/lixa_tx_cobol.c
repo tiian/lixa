@@ -32,9 +32,6 @@
 #include "lixa_trace.h"
 #include "lixa_xid.h"
 #include "lixa_tx_cobol.h"
-#ifdef HAVE_POSTGRESQL
-# include "lixapq.h"
-#endif
 
 
 

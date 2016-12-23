@@ -30,7 +30,6 @@ AC_CONFIG_FILES([
   src/common/lixa_inst_conf.c
   src/client/lixa-config.c
   src/client/Makefile
-  src/client/cobol/Makefile
   src/client/switch/Makefile
   src/client/switch/lixa/Makefile
   src/client/switch/ibmdb2/Makefile

@@ -1,5 +1,10 @@
 This examples are intended to be used with GNU COBOL (Open Cobol).
 
+Note: you must set-up a LIXA state server (lixad) as explained in 
+      "LIXA reference guide" https://sourceforge.net/p/lixa/wiki/Home/
+      before running example programs. If the state server is not active,
+      the client program will not be able to connect to it.
+
 This brief instruction explains how you can compile them.
 
 1. Add LIXA utilities to your PATH, for example:
@@ -16,3 +21,4 @@ This brief instruction explains how you can compile them.
      cobc -x $(lixa-config -f -l) -llixacobol EXAMPLE1.cbl
    Example for EXAMPLE5_PQL.cbl (PostgreSQL resource managers)
      cobc -x $(lixa-config -f -p) -llixacobol EXAMPLE5_PQL.cbl
+

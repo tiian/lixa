@@ -20,12 +20,6 @@
 
 
 
-#ifdef HAVE_POSTGRESQL
-# include "lixapq.h"
-#endif
-
-
-
 #include "tx.h"
 #include "lixa_trace.h"
 #include "lixa_xid.h"
