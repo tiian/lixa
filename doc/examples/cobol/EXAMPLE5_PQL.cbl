@@ -1,4 +1,4 @@
-      * Copyright (c) 2009-2016, Christian Ferrari 
+      * Copyright (c) 2009-2017, Christian Ferrari 
       * <tiian@users.sourceforge.net>
       * All rights reserved.
       *

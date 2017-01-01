@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>
+# Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>
 # All rights reserved.
 #
 # This file is part of LIXA.
