@@ -18,7 +18,7 @@ This brief instruction explains how you can compile them.
 5. Compile the interested COBOL <programname> with this command line:
      cobc -x $(lixa-config -f -l) <programname>
    Example for EXAMPLE1.cbl (No third party resource managers)
-     cobc -x $(lixa-config -f -l) EXAMPLE1.cbl
+     cobc -x $(lixa-config -f -l) EXAMPLE1.cob
    Example for EXAMPLE5_PQL.cbl (PostgreSQL resource managers)
-     cobc -x $(lixa-config -f -p) EXAMPLE5_PQL.cbl
+     cobc -x $(lixa-config -f -p) EXAMPLE5_PQL.cob
 

@@ -47,6 +47,7 @@ AC_CONFIG_FILES([
   tests/etc/Makefile
   tests/scripts/Makefile
   tests/src/Makefile
+  tests/src/cobol/Makefile
   var/Makefile
   doxygen.conf
 ])

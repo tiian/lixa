@@ -1,3 +1,8 @@
+if COND_COBOLAPI
+  MAYBE_COBOLAPI = cobol
+endif
+SUBDIRS = . $(MAYBE_COBOLAPI)
+
 #AM_CPPFLAGS = -DLIXA_MULTITHREAD=0 -I../../src/client -I../../src/common \
 #	-I../../src/client/switch/lixa
 AM_CPPFLAGS = -I../../src/client -I../../src/common \
