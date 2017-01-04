@@ -159,7 +159,7 @@ int lixa_tx_begin(int *txrc, XID *xid)
         }
 
         int xa_start_flags = TMNOFLAGS;
-        if (xid->formatID == NULLXID) {
+        if (lixa_xid_is_reset(xid)) {
             /* generate the transaction id */
             LIXA_TRACE(("lixa_tx_begin: generating new xid for transaction\n"));
             lixa_xid_create_new(xid);

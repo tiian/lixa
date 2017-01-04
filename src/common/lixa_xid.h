@@ -160,6 +160,20 @@ extern "C" {
     }
 
 /**
+ * Check if the XID is in a reset state
+ * @param[in] xid transaction id to be checked
+ * @return TRUE if the transaction id is in a reset state, otherwise FALSE
+ */
+    static inline int lixa_xid_is_reset(XID *xid)
+    {
+        if (NULL == xid || NULLXID == xid->formatID) {
+            return TRUE;
+        }
+
+        return FALSE;
+    }
+
+/**
  * Retrieve the LIXA format ID serialized; it's useful to query PostgreSQL
  * and retrieve all the current prepared transactions (xa_recover function)
  * @param lsx OUT the serialized format ID
