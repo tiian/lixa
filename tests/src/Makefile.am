@@ -29,7 +29,7 @@ endif
 if COMPILE_WEBSPHEREMQ_STUFF
   MAYBE_WEBSPHEREMQ = case0044
 endif
-noinst_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
+check_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0006 case0007 case0008 case0009 case0010 case0011 case0012 \
 	case0013 case0014 case0015 case0016 case0017 case0018 case0019 \
 	case0020 case0021 case0022 case0023 case0024 case0025 case0026 \

@@ -13,7 +13,6 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
-
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -78,22 +77,21 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = case0000$(EXEEXT) case0001$(EXEEXT) \
-	case0002$(EXEEXT) case0003$(EXEEXT) case0004$(EXEEXT) \
-	case0005$(EXEEXT) case0006$(EXEEXT) case0007$(EXEEXT) \
-	case0008$(EXEEXT) case0009$(EXEEXT) case0010$(EXEEXT) \
-	case0011$(EXEEXT) case0012$(EXEEXT) case0013$(EXEEXT) \
-	case0014$(EXEEXT) case0015$(EXEEXT) case0016$(EXEEXT) \
-	case0017$(EXEEXT) case0018$(EXEEXT) case0019$(EXEEXT) \
-	case0020$(EXEEXT) case0021$(EXEEXT) case0022$(EXEEXT) \
-	case0023$(EXEEXT) case0024$(EXEEXT) case0025$(EXEEXT) \
-	case0026$(EXEEXT) case0027$(EXEEXT) case0028$(EXEEXT) \
-	case0029$(EXEEXT) case0030$(EXEEXT) case0031$(EXEEXT) \
-	case0032$(EXEEXT) case0033$(EXEEXT) case0034$(EXEEXT) \
-	case0035$(EXEEXT) case0036$(EXEEXT) case0043$(EXEEXT) \
-	case0046$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
-	$(am__EXEEXT_3) $(am__EXEEXT_4) $(am__EXEEXT_5) \
-	$(am__EXEEXT_6)
+check_PROGRAMS = case0000$(EXEEXT) case0001$(EXEEXT) case0002$(EXEEXT) \
+	case0003$(EXEEXT) case0004$(EXEEXT) case0005$(EXEEXT) \
+	case0006$(EXEEXT) case0007$(EXEEXT) case0008$(EXEEXT) \
+	case0009$(EXEEXT) case0010$(EXEEXT) case0011$(EXEEXT) \
+	case0012$(EXEEXT) case0013$(EXEEXT) case0014$(EXEEXT) \
+	case0015$(EXEEXT) case0016$(EXEEXT) case0017$(EXEEXT) \
+	case0018$(EXEEXT) case0019$(EXEEXT) case0020$(EXEEXT) \
+	case0021$(EXEEXT) case0022$(EXEEXT) case0023$(EXEEXT) \
+	case0024$(EXEEXT) case0025$(EXEEXT) case0026$(EXEEXT) \
+	case0027$(EXEEXT) case0028$(EXEEXT) case0029$(EXEEXT) \
+	case0030$(EXEEXT) case0031$(EXEEXT) case0032$(EXEEXT) \
+	case0033$(EXEEXT) case0034$(EXEEXT) case0035$(EXEEXT) \
+	case0036$(EXEEXT) case0043$(EXEEXT) case0046$(EXEEXT) \
+	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
+	$(am__EXEEXT_4) $(am__EXEEXT_5) $(am__EXEEXT_6)
 subdir = tests/src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -120,7 +118,6 @@ CONFIG_CLEAN_VPATH_FILES =
 @COMPILE_MYSQL_STUFF_TRUE@	case0047$(EXEEXT)
 @COMPILE_MYSQL_POSTGRESQL_STUFF_TRUE@am__EXEEXT_5 = case0042$(EXEEXT)
 @COMPILE_WEBSPHEREMQ_STUFF_TRUE@am__EXEEXT_6 = case0044$(EXEEXT)
-PROGRAMS = $(noinst_PROGRAMS)
 am_case0000_OBJECTS = case0000.$(OBJEXT)
 case0000_OBJECTS = $(am_case0000_OBJECTS)
 case0000_LDADD = $(LDADD)
@@ -886,8 +883,8 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 
-clean-noinstPROGRAMS:
-	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
+clean-checkPROGRAMS:
+	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
 	rm -f $$list || exit $$?; \
 	test -n "$(EXEEXT)" || exit 0; \
@@ -1436,8 +1433,9 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 check: check-recursive
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile
 installdirs: installdirs-recursive
 installdirs-am:
 install: install-recursive
@@ -1472,7 +1470,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-recursive
@@ -1541,22 +1539,21 @@ ps-am:
 
 uninstall-am:
 
-.MAKE: $(am__recursive_targets) install-am install-strip
+.MAKE: $(am__recursive_targets) check-am install-am install-strip
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am check \
-	check-am clean clean-generic clean-libtool \
-	clean-noinstPROGRAMS cscopelist-am ctags ctags-am distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
-	uninstall-am
+	check-am clean clean-checkPROGRAMS clean-generic clean-libtool \
+	cscopelist-am ctags ctags-am distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
