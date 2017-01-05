@@ -582,8 +582,13 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                                 NULL != ser_xid ? ser_xid : ""));
                     break;
                 case XA_OK:
-                    csr->common.xa_td_state =
-                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    if (TMSUSPEND & xa_end_flags) {
+                        csr->common.xa_td_state =
+                            csr->common.dynamic ? XA_STATE_D2 : XA_STATE_T2;
+                    } else {
+                        csr->common.xa_td_state =
+                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    }
                     csr->common.xa_s_state = XA_STATE_S2;
                     break;
                 case XA_RBROLLBACK:
@@ -594,8 +599,13 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                 case XA_RBPROTO:
                 case XA_RBTIMEOUT:
                 case XA_RBTRANSIENT:
-                    csr->common.xa_td_state =
-                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    if (TMSUSPEND & xa_end_flags) {
+                        csr->common.xa_td_state =
+                            csr->common.dynamic ? XA_STATE_D2 : XA_STATE_T2;
+                    } else {
+                        csr->common.xa_td_state =
+                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    }
                     csr->common.xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     read_write_rsrmgr--; /* read only transaction */
@@ -606,8 +616,13 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                     *txrc = TX_FAIL;
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 case XAER_RMERR:
-                    csr->common.xa_td_state =
-                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    if (TMSUSPEND & xa_end_flags) {
+                        csr->common.xa_td_state =
+                            csr->common.dynamic ? XA_STATE_D2 : XA_STATE_T2;
+                    } else {
+                        csr->common.xa_td_state =
+                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    }
                     csr->common.xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     if (commit)
@@ -620,8 +635,13 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                     tmp_txrc = TX_FAIL;
                     break;
                 case XAER_NOTA:
-                    csr->common.xa_td_state =
-                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    if (TMSUSPEND & xa_end_flags) {
+                        csr->common.xa_td_state =
+                            csr->common.dynamic ? XA_STATE_D2 : XA_STATE_T2;
+                    } else {
+                        csr->common.xa_td_state =
+                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    }
                     csr->common.xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     if (commit)
@@ -630,8 +650,13 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                 case XAER_INVAL:
                 case XAER_PROTO:
                     *txrc = TX_FAIL;
-                    csr->common.xa_td_state =
-                        csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    if (TMSUSPEND & xa_end_flags) {
+                        csr->common.xa_td_state =
+                            csr->common.dynamic ? XA_STATE_D2 : XA_STATE_T2;
+                    } else {
+                        csr->common.xa_td_state =
+                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                    }
                     tmp_txrc = TX_FAIL;
                     break;
                 default:

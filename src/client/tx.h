@@ -126,6 +126,7 @@ typedef struct tx_info_t TXINFO;
 // flags to map to XA
 #define TX_TMFAIL       0x20000000L
 #define TX_TMSUCCESS    0x04000000L
+#define TX_TMSUSPEND    0x02000000L
 
 #ifdef __cplusplus
 extern "C" {
@@ -140,6 +141,13 @@ extern "C" {
  * @return a standardized TX return code (TX_*)
  */
     extern int tx_begin(void);
+
+/**
+ * Resumes a previously suspended transaction
+ * @param[in] xid the global transaction identifier to resume
+ * @return a standardized TX return code (TX_*)
+ */
+    extern int tx_resume(XID *xid);
 
 /**
  * Join a global transaction.

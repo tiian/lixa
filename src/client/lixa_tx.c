@@ -165,8 +165,8 @@ int lixa_tx_begin(int *txrc, XID *xid)
             lixa_xid_create_new(xid);
         } else {
             LIXA_TRACE(
-                ("lixa_tx_begin: xid specified, joining transaction with new branch\n"));
-            lixa_xid_create_new_bqual(xid);
+                ("lixa_tx_begin: xid specified, joining transaction\n"));
+            xa_start_flags = TMJOIN;
         }
         client_status_set_xid(cs, xid);
 
@@ -457,6 +457,9 @@ int lixa_tx_end(int *txrc, int flags)
         }
 
         /* detach the transaction */
+        if (TMSUSPEND & flags) {
+            commit = FALSE;
+        }
         if (LIXA_RC_OK != (ret_cod = lixa_xa_end(cs, txrc, commit, flags))) {
             if (TX_ROLLBACK == *txrc)
                 commit = FALSE;
@@ -518,7 +521,7 @@ int lixa_tx_end(int *txrc, int flags)
             } /* switch */
         } /* else */
 
-        /* update the TX state, now TX_STATE_S0 */
+        /* update the TX state */
         client_status_set_txstate(cs, next_txstate);
         /* reset the transaction id */
         lixa_xid_reset(client_status_get_xid(cs));

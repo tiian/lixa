@@ -93,9 +93,10 @@ extern "C" {
  * X/Open function
  * @param txrc OUT tx_* return code
  * @param xid IN previously created XID if joining a transaction
+ * @param[in] flags passed to @ref lixa_xa_start and @ref xa_start
  * @return a return code
  */
-    int lixa_tx_begin(int *txrc, XID *xid);
+    int lixa_tx_begin(int *txrc, XID *xid, int flags);
 
 /**
  * This function implements the real logic underlying @ref tx_end non standard function.

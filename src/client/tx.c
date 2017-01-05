@@ -56,6 +56,12 @@ int tx_begin(void) {
     return txrc;
 }
 
+int tx_resume(XID *xid) {
+    int txrc = TX_FAIL;
+    lixa_tx_begin(&txrc, xid);
+    return txrc;
+}
+
 int tx_join(XID *xid) {
     int txrc = TX_FAIL;
     lixa_tx_begin(&txrc, xid);
