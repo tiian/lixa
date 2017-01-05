@@ -74,7 +74,7 @@
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_TX
 
-int lixa_tx_begin(int *txrc, XID *xid)
+int lixa_tx_begin(int *txrc, XID *xid, int flags)
 {
     enum Exception
     {
@@ -158,22 +158,25 @@ int lixa_tx_begin(int *txrc, XID *xid)
             }
         }
 
-        int xa_start_flags = TMNOFLAGS;
         if (lixa_xid_is_reset(xid)) {
             /* generate the transaction id */
             LIXA_TRACE(("lixa_tx_begin: generating new xid for transaction\n"));
             lixa_xid_create_new(xid);
         } else {
-            LIXA_TRACE(
-                ("lixa_tx_begin: xid specified, joining transaction\n"));
-            xa_start_flags = TMJOIN;
+            if (TMJOIN & flags) {
+                LIXA_TRACE(
+                    ("lixa_tx_begin: xid specified, joining transaction\n"));
+            } else if (TMRESUME & flags) {
+                LIXA_TRACE(
+                    ("lixa_tx_begin: xid specified, resuming transaction\n"));
+            }
         }
         client_status_set_xid(cs, xid);
 
         /* the real logic must be put here */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
                                cs, txrc, xid, txstate, next_txstate,
-                               &dupid_or_proto, xa_start_flags))) {
+                               &dupid_or_proto, flags))) {
             int retry_ok = FALSE;
             if (dupid_or_proto) {
                 int txrc2 = TX_FAIL;

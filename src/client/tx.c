@@ -52,19 +52,19 @@ int tx_begin(void) {
     int txrc = TX_FAIL;
     XID xid;
     lixa_xid_reset(&xid);
-    lixa_tx_begin(&txrc, &xid);
+    lixa_tx_begin(&txrc, &xid, TMNOFLAGS);
     return txrc;
 }
 
 int tx_resume(XID *xid) {
     int txrc = TX_FAIL;
-    lixa_tx_begin(&txrc, xid);
+    lixa_tx_begin(&txrc, xid, TMRESUME);
     return txrc;
 }
 
 int tx_join(XID *xid) {
     int txrc = TX_FAIL;
-    lixa_tx_begin(&txrc, xid);
+    lixa_tx_begin(&txrc, xid, TMJOIN);
     return txrc;
 }
 
@@ -88,7 +88,7 @@ int tx_commit(void) {
     if (begin_new) {
         XID xid;
         lixa_xid_reset(&xid);
-        lixa_tx_begin(&txrc2, &xid);
+        lixa_tx_begin(&txrc2, &xid, TMNOFLAGS);
         if (TX_OK != txrc2) {
             switch (txrc1) {
                 case TX_OK:
@@ -163,7 +163,7 @@ int tx_rollback(void) {
     if (begin_new) {
         XID xid;
         xid.formatID = NULLXID;
-        lixa_tx_begin(&txrc2, &xid);
+        lixa_tx_begin(&txrc2, &xid, TMNOFLAGS);
         if (TX_OK != txrc2) {
             switch (txrc1) {
                 case TX_OK:

@@ -1986,7 +1986,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                 *txrc = tmp_txrc;
         } /* for (i=0; ...) */
 
-        /* txstate will be moved to next state only if xa_start succeded */
+        /* txstate will be moved to next state only if xa_start succeeded */
         if (TX_OK == *txrc)
             msg.body.start_24.conthr.txstate = next_txstate;
         else
