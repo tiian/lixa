@@ -6,6 +6,7 @@ AT_SETUP([check lixad process is NOT active...])
 AT_CHECK([ps -ef | grep lixad | grep -v grep], [1], [ignore], [ignore])
 AT_CLEANUP
 
+m4_include([tx_cobol.at])
 m4_include([nonapi.at])
 m4_include([mysql.at])
 m4_include([postgresql.at])

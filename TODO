@@ -1,4 +1,6 @@
 Remove glib deprecated functions for Ubuntu 14.04
+Fix some timing random errors in the case tests that are related to
+multiprocessor architectures... :(
 
 Explore high availability features (active/active) with dynamic or static
 workload

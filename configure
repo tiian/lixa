@@ -660,6 +660,7 @@ HAVE_NETSTAT
 HAVE_DOT
 VALGRIND
 GDB
+HAVE_COBOLAPI
 COND_COBOLAPI_FALSE
 COND_COBOLAPI_TRUE
 HAVE_COBOL
@@ -1521,7 +1522,7 @@ Optional Packages:
   --enable-debug          enable debug code (assert statements)
   --enable-crash          enable crash simulation code
   --disable-trace         disable trace feature (not suggested)
-  --disable-cobol         do not create cobol TX library
+  --disable-cobol         do not create COBOL TX API
 
 Some influential environment variables:
   CC          C compiler command
@@ -13936,11 +13937,11 @@ fi
 # COBOL stuff is conditional
 if test "$HAVE_COBOL" = "yes" -a "$COBOL" = "yes"
 then
-	COBOLAPI="yes"
+	HAVE_COBOLAPI="yes"
 else
-	COBOLAPI="no"
+	HAVE_COBOLAPI="no"
 fi
- if test "$COBOLAPI" = "yes"; then
+ if test "$HAVE_COBOLAPI" = "yes"; then
   COND_COBOLAPI_TRUE=
   COND_COBOLAPI_FALSE='#'
 else
@@ -13948,12 +13949,13 @@ else
   COND_COBOLAPI_FALSE=
 fi
 
-if test "$COBOLAPI" = "yes"
+if test "$HAVE_COBOLAPI" = "yes"
 then
 
 $as_echo "#define HAVE_GNU_COBOL 1" >>confdefs.h
 
 fi
+
 
 
 # Vars useful for lixa-config utility program

@@ -37,14 +37,14 @@
             DISPLAY 'TXOPEN returned value ' TX-STATUS.
             IF NOT TX-OK THEN
                DISPLAY 'Exiting...'
-               STOP RUN
+               STOP RUN RETURNING 1
             END-IF.
       * Calling TXBEGIN (tx_begin)
             CALL "TXBEGIN" USING TX-RETURN-STATUS.
             DISPLAY 'TXBEGIN returned value ' TX-STATUS.
             IF NOT TX-OK THEN
                DISPLAY 'Exiting...'
-               STOP RUN
+               STOP RUN RETURNING 1
             END-IF.
       * Inspect transaction info
             PERFORM INFO-PARA THRU INFO-PARA.
@@ -53,7 +53,7 @@
             DISPLAY 'TXCOMMIT returned value ' TX-STATUS.
             IF NOT TX-OK THEN
                DISPLAY 'Exiting...'
-               STOP RUN
+               STOP RUN RETURNING 1
             END-IF.
             PERFORM INFO-PARA THRU INFO-PARA.
       * Set non default parameters
@@ -63,7 +63,7 @@
             DISPLAY 'TXSETCOMMITRET returned value ' TX-STATUS.
             IF NOT TX-NOT-SUPPORTED THEN
                DISPLAY 'Exiting...'
-               STOP RUN
+               STOP RUN RETURNING 1
             END-IF.
       * LIXA supports timeout
             MOVE 5 TO TRANSACTION-TIMEOUT.
@@ -71,7 +71,7 @@
             DISPLAY 'TXSETTIMEOUT returned value ' TX-STATUS.
             IF NOT TX-OK THEN
                DISPLAY 'Exiting...'
-               STOP RUN
+               STOP RUN RETURNING 1
             END-IF.
       * LIXA supports transaction control
             MOVE 1 TO TRANSACTION-CONTROL.
@@ -79,7 +79,7 @@
             DISPLAY 'TXSETTRANCTL returned value ' TX-STATUS.
             IF NOT TX-OK THEN
                DISPLAY 'Exiting...'
-               STOP RUN
+               STOP RUN RETURNING 1
             END-IF.
             PERFORM INFO-PARA THRU INFO-PARA.
       * Transaction control must be resetted to avoid error during close
@@ -88,7 +88,7 @@
             DISPLAY 'TXSETTRANCTL returned value ' TX-STATUS.
             IF NOT TX-OK THEN
                DISPLAY 'Exiting...'
-               STOP RUN
+               STOP RUN RETURNING 1
             END-IF.
             PERFORM INFO-PARA THRU INFO-PARA.
       * Calling TXBEGIN (tx_begin)
@@ -96,20 +96,20 @@
             DISPLAY 'TXBEGIN returned value ' TX-STATUS.
             IF NOT TX-OK THEN
                DISPLAY 'Exiting...'
-               STOP RUN
+               STOP RUN RETURNING 1
             END-IF.
       * Calling TXROLLBACK (tx_rollback)
             CALL "TXROLLBACK" USING TX-RETURN-STATUS.
             DISPLAY 'TXROLLBACK returned value ' TX-STATUS.
             IF NOT TX-OK
                DISPLAY 'Exiting...'
-               STOP RUN
+               STOP RUN RETURNING 1
             END-IF.
       * Calling TXCLOSE (tx_close)
             CALL "TXCLOSE" USING TX-RETURN-STATUS.
             DISPLAY 'TXCLOSE returned value ' TX-STATUS.
             IF NOT TX-OK
-               STOP RUN.
+               STOP RUN RETURNING 1
             DISPLAY 'Execution terminated!'.
             STOP RUN.
       * Calling TXINFORM (tx_info)
@@ -118,7 +118,7 @@
             DISPLAY 'TXINFORM returned value ' TX-STATUS.
             IF NOT TX-OK THEN
                DISPLAY 'Exiting...'
-               STOP RUN
+               STOP RUN RETURNING 1
             END-IF.
             CALL "LIXAXIDSERIALIZE" USING TX-INFO-AREA LIXA-SER-XID
                  TX-STATUS.

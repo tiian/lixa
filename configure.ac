@@ -172,20 +172,21 @@ AC_CHECK_PROG(HAVE_COBOL, [cobc], [yes], [no])
 # Build COBOL TX interface?
 AC_ARG_ENABLE([cobol],
 	AS_HELP_STRING([--disable-cobol],
-		[do not create cobol TX library]),
+		[do not create COBOL TX API]),
 	[COBOL="no"], [COBOL="yes"])
 # COBOL stuff is conditional
 if test "$HAVE_COBOL" = "yes" -a "$COBOL" = "yes"
 then
-	COBOLAPI="yes"
+	HAVE_COBOLAPI="yes"
 else
-	COBOLAPI="no"
+	HAVE_COBOLAPI="no"
 fi
-AM_CONDITIONAL([COND_COBOLAPI], [test "$COBOLAPI" = "yes"])
-if test "$COBOLAPI" = "yes"
+AM_CONDITIONAL([COND_COBOLAPI], [test "$HAVE_COBOLAPI" = "yes"])
+if test "$HAVE_COBOLAPI" = "yes"
 then
         AC_DEFINE([HAVE_GNU_COBOL], [1], [Define to 1 if you are using GNU COBOL])
 fi
+AC_SUBST([HAVE_COBOLAPI])
 
 
 # Vars useful for lixa-config utility program
