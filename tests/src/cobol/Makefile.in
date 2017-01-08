@@ -97,8 +97,8 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @COMPILE_POSTGRESQL_STUFF_TRUE@am__EXEEXT_1 = CASE1037$(EXEEXT)
-CASE1000_SOURCES = CASE1000.c
-CASE1000_OBJECTS = CASE1000.$(OBJEXT)
+nodist_CASE1000_OBJECTS = CASE1000.$(OBJEXT)
+CASE1000_OBJECTS = $(nodist_CASE1000_OBJECTS)
 CASE1000_LDADD = $(LDADD)
 CASE1000_DEPENDENCIES = ../../../src/common/liblixab.la \
 	../../../src/client/liblixac.la
@@ -106,8 +106,8 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-CASE1037_SOURCES = CASE1037.c
-CASE1037_OBJECTS = CASE1037.$(OBJEXT)
+nodist_CASE1037_OBJECTS = CASE1037.$(OBJEXT)
+CASE1037_OBJECTS = $(nodist_CASE1037_OBJECTS)
 CASE1037_DEPENDENCIES = ../../../src/common/liblixab.la \
 	../../../src/client/liblixac.la \
 	../../../src/client/switch/postgresql/liblixapq.la
@@ -145,8 +145,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = CASE1000.c CASE1037.c
-DIST_SOURCES = CASE1000.c CASE1037.c
+SOURCES = $(nodist_CASE1000_SOURCES) $(nodist_CASE1037_SOURCES)
+DIST_SOURCES =
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -343,6 +343,12 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL = CASE1037
+# COBOL program are not recognized as sources and are distributed as generic
+# files
+EXTRA_DIST = CASE1000.cob CASE1037.cob
+# This rows are boring but they works around implicit autotools rules
+nodist_CASE1000_SOURCES = CASE1000.c
+nodist_CASE1037_SOURCES = CASE1037.c
 AM_LDFLAGS = -Wl,--no-as-needed -lcob
 COBCOPTS = -I ../../../src/client
 SUFFIXES = .cob

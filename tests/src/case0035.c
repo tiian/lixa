@@ -43,7 +43,7 @@
 
 
 /* this delay is necessary to exploits some bugs related to timing */
-#define DELAY 100000
+#define DELAY 200000
 
 
 int main(int argc, char *argv[])

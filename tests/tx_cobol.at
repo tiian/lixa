@@ -57,3 +57,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none CA
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none CASE1037 INSERT], [0], [ignore], [ignore])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0011 ; lixa_test_exec.sh noreset none CASE1037 DELETE], [0], [ignore], [ignore])
 AT_CLEANUP
+
+AT_SETUP([Stopping lixad process])
+AT_CHECK([if test "$HAVE_COBOLAPI" = "no"; then exit 77; fi])
+AT_CHECK([lixa_test_exec.sh noreset stop CASE1000], [ignore], [ignore], [ignore])
+AT_CLEANUP
+

@@ -315,7 +315,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-doc_DATA = EXAMPLE1.cob EXAMPLE5_PQL.cob
+doc_DATA = README EXAMPLE1.cob EXAMPLE5_PQL.cob
 EXTRA_DIST = $(doc_DATA)
 all: all-am
 
@@ -516,8 +516,9 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-docDATA
-
-.MAKE: install-am install-strip
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
+.MAKE: install-am install-strip uninstall-am
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	cscopelist-am ctags-am distclean distclean-generic \
@@ -530,8 +531,11 @@ uninstall-am: uninstall-docDATA
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am tags-am uninstall \
-	uninstall-am uninstall-docDATA
+	uninstall-am uninstall-docDATA uninstall-hook
 
+
+uninstall-hook:
+	if test -d ${docdir}; then rmdir ${docdir}; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

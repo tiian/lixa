@@ -1,9 +1,9 @@
 LOG:
 
-         - 1.1.0 Support for GNU Cobol:
-                   Ubuntu 14.04
-                   GNU Cobol 1.1
-                   PostgreSQL 9.3
+20170108 - 1.1.0 Initial support for GNU Cobol:
+		Ubuntu 14.04
+		GNU Cobol 1.1 (as supplied by Ubuntu 14.04)
+		PostgreSQL 9.3 (as supplied by Ubuntu 14.04)
 
 20160801 - 1.0.1 license addendum
 
