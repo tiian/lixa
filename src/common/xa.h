@@ -188,6 +188,9 @@ typedef struct xa_switch_t * (* lixa_get_xa_switch_f) (void);
 #define XAER_DUPID -8 /* the XID already exists */
 #define XAER_OUTSIDE -9 /* resource manager doing work outside
                            global transaction */
+#define XAER_AFFINITY -10 /* Oracle proprietary extension to support a specific
+                             RAC feature. This is a nonstandard value.
+                             Please refer to original Oracle documentation */
 
 
 
