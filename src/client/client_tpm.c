@@ -341,7 +341,8 @@ gboolean client_tpm_unique_value_foreach(gpointer key, gpointer value, gpointer 
         char *p = g_array_index(sxid, char*, i);
 
         gboolean add = TRUE;
-        for (guint j = 0; j < xida->len; j++) {
+        guint j;
+        for (j = 0; j < xida->len; j++) {
             char *currxid = g_array_index(xida, char*, j);
             if (strcmp(currxid, p) == 0) {
                 add = FALSE;
