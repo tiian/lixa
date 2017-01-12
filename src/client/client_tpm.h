@@ -78,6 +78,15 @@ extern "C" {
  */
     gboolean client_tpm_value_foreach(gpointer key, gpointer value, gpointer data);
 
+/**
+ * @brief Count the number of unique transactions
+ * @param key
+ * @param value
+ * @param data
+ * @return boolean indicating if traversal should continue
+ */
+    gboolean client_tpm_unique_value_foreach(gpointer key, gpointer value, gpointer data);
+
     int tpm_gtrid_compare(gconstpointer a, gconstpointer b, gpointer user_data);
 
     void tpm_gtrid_value_destroy(gpointer data);

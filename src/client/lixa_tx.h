@@ -189,10 +189,11 @@ extern "C" {
  * @brief Retrives information about all existing transactions
  * <b>Note:</b> This is a non standard function.
  * @param[in,out] xidt a tree populated with all the transactions known by the server
- * @param[in] report flag intidating if the information should be reported
- * @return a standarised return code
+ * @param[in] report flag indicating if the information should be reported
+ * @param[in] unique flag indicating if only unique transactions should be listed
+ * @return a standardised return code
  */
-    int lixa_tx_tpm(GArray *xida, int maint, int report);
+    int lixa_tx_tpm(GArray *xida, int maint, int report, int unique);
 
 /**
  * This function is used to clean-up the environment when a function

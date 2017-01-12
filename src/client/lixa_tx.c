@@ -669,7 +669,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         /* check if there are more transactions that forms part of this gtrid */
         xida = g_array_new(FALSE, FALSE, sizeof(char *));
         if (LIXA_RC_OBJ_NOT_FOUND ==
-            (ret_cod = lixa_tx_tpm(xida, FALSE, FALSE))) THROW(
+            (ret_cod = lixa_tx_tpm(xida, FALSE, FALSE, TRUE))) THROW(
                 XA_TPM_ERROR);
         if (xida->len > 1) {
             one_phase_commit = FALSE;
@@ -1708,7 +1708,7 @@ int lixa_tx_recover(int report, int commit, int rollback, int bbqc, int bfic,
     return ret_cod;
 }
 
-int lixa_tx_tpm(GArray *xida, int maint, int report)
+int lixa_tx_tpm(GArray *xida, int maint, int report, int unique)
 {
     enum Exception
     {
@@ -1761,7 +1761,11 @@ int lixa_tx_tpm(GArray *xida, int maint, int report)
         }
 
         if (g_tree_nnodes(xidt)) {
-            g_tree_foreach(xidt, client_tpm_value_foreach, xida);
+            if (unique) {
+                g_tree_foreach(xidt, client_tpm_unique_value_foreach, xida);
+            } else {
+                g_tree_foreach(xidt, client_tpm_value_foreach, xida);
+            }
         }
 
         LIXA_TRACE(("lixa_tx_tpm: xidt_count=%d\n", xida->len));
