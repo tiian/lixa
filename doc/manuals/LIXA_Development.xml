@@ -1,14 +1,19 @@
 <chapter xml:id="Development">
-  <title>Development</title>
+  <title>Developing C Application Programs</title>
   <para>
-    This chapter explains how you can develop your own application
+    This chapter explains how you can develop your own C application
     using the libraries and the tools supplied by LIXA project.
   </para>
   <para>
-    LIXA project ships some example C programs you can find in directory
+    LIXA project ships some example C programs you can find in 
+    directory
     <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/</filename> after
     software installation (see <xref linkend="Installation"/>).
   </para>
+  <note><para>
+    This chapter is focused on the C programming language. The COBOL 
+    programming language is addressed by another dedicated chapter.
+  </para></note>
   <section>
     <title>The TX (Transaction Demarcation) Specification</title>
     <para>
@@ -17,8 +22,8 @@
       an Application Program.
     </para>
     <para>
-      The API is very easy, it supplies C functions and can be briefly
-      explained:
+      The API is very easy, it supplies C functions and COBOL routines.
+      The following C example can be briefly explained:
       <programlisting>
 /* include this header: it's the header associated to The TX (Transaction
    Demarcation) Specification */
@@ -58,7 +63,7 @@ int main(int argc, char *argv[])
            the current LIXA_PROFILE */
 }
       </programlisting>
-      These are the available functions (the descriptions come from
+      These are the available C functions (the descriptions come from
       <citation>TXspec</citation>):
       <itemizedlist mark="bullet">
 	<listitem><para>
@@ -115,7 +120,7 @@ int main(int argc, char *argv[])
 	transaction manager.
       </para>
       <para>
-	The supplied examples (see <filename>doc/examcles</filename> directory)
+	The supplied examples (see <filename>doc/examples</filename> directory)
 	show the functions that must be used to
 	retrieve the connection handler(s) necessary to interact with
 	the resource managers.
@@ -250,7 +255,7 @@ tx_close(): 0
       two dummy distributed transactions: <emphasis>commit</emphasis> and 
       <emphasis>rollback</emphasis>.
     </para>
-    <section>
+    <section xml:id="first_example_details">
       <title>Some details about the example</title>
       <para>
 	You have not specified a specific profile:
@@ -356,10 +361,20 @@ tx_close(): 0
     <para>
       Using a real Resource Manager, like a DBMS, requires some extra effort
       because you have to set-up the environment needed by the Resource
-      Manager. The example explained in this section was developed using
-      Oracle Database 10g Release 2 (10.2) Express Edition: if you used 
-      a different version, you might need to fix some of the details 
-      showed by this example.
+      Manager. The example explained in this section was developed using two
+      different configurations: 
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	  Oracle Database 10g Release 2 (10.2) Express Edition using a
+	  <emphasis>local</emphasis> connection
+	</para></listitem>
+	<listitem><para>
+	  Oracle Database 12c Release 1 (12.1) Standard Edition using a
+	  <emphasis>remote (SqlNet)</emphasis> connection
+	</para></listitem>
+      </itemizedlist>
+      If you used a different configuration, you might need to fix some of the
+      details shown by these examples.
       <note><para>
 	  If you did not yet installed the software provided by Oracle,
 	  please refer to the official Oracle site to download the
@@ -376,12 +391,16 @@ tx_close(): 0
       </para></important>
     </para>
     <section xml:id="Development_setup_Oracle_environment">
-      <title>Set-up Oracle environment</title>
+      <title>Set-up the Oracle environment (server side)</title>
       <section>
 	<title>Start-up the Oracle server</title>
 	<para>
 	  If the database server was not running, you could start it
-	  with these commands:
+	  with these commands
+	  <footnote><para>
+	    Oracle 12c Standard Edition provides a different startup script,
+	    see official documentation
+	  </para></footnote> :
 	  <screen>
 tiian@ubuntu:~/tmp$ sudo /etc/init.d/oracle-xe enable
 tiian@ubuntu:~/tmp$ sudo /etc/init.d/oracle-xe start
@@ -400,11 +419,6 @@ Starting Oracle Database 11g Express Edition Instance.
       </section>
       <section>
 	<title>Create the XA related views</title>
-	<note><para>
-	    The steps explained below might be not necessary with some
-	    versions of the Oracle software, but they are necessary
-	    with Oracle XE 10.2 and Oracle XE 11.2
-	</para></note>
 	<para>
 	  First of all you must be able to connect as <quote>SYSDBA</quote>
 	  from a terminal session; the commands below show what happens when
@@ -546,6 +560,15 @@ SQL> SQL> SQL> Disconnected from Oracle Database 10g Express Edition Release 10.
 	  </screen>
 	</para>
       </section>
+      <note><para>
+	All the above statements remain valid for Oracle 12c Standard Edition
+	with the exception of the paths. Here's a default path installation
+	example:
+	<screen>
+[oracle@centos7-oracle12 ~]$ ls -la $ORACLE_HOME/rdbms/admin/xaview.sql
+-rw-r--r--. 1 oracle oinstall 1941 Apr 21  2011 /u01/app/oracle/product/12.1.0/dbhome_1/rdbms/admin/xaview.sql
+	</screen>
+      </para></note>
       <section>
 	<title>Authorize the XA related views</title>
 	<para>
@@ -642,6 +665,242 @@ logout
       </para>
     </section>
     <section>
+      <title>Configure Oracle Listener (network config. only)</title>
+      <note><para>
+	If you want to access your database instance from a different system,
+	you have to configure at least a <emphasis>listener</emphasis>.
+      </para></note>
+      <warning><para>
+	Many recent Linux distributions, CentOS 7.x for example, automatically
+	enable an internal firewall to prevent undesired accesses. If your
+	firewall configuration does not allow Oracle traffic, you have no
+	way to reach your database instance from a different system.
+      </para></warning>
+      <para>
+	Here's a very basic example that accepts incoming connection from
+	any network interface (IP address 0.0.0.0):
+	<screen>
+[oracle@centos7-oracle12 ~]$ cat $ORACLE_HOME/network/admin/listener.ora
+
+LISTENER =
+  (DESCRIPTION_LIST =
+    (DESCRIPTION =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC1521))
+    )
+  )
+	</screen>
+	You can check that the listener is accepting connection with this
+	command:
+	<screen>
+[oracle@centos7-oracle12 ~]$ netstat -unta | grep 1521 | grep LISTEN
+tcp        0      0 0.0.0.0:1521            0.0.0.0:*               LISTEN     
+	</screen>
+	and you can check a connection from a different system with something
+	like this (adjust your IP address, port and Global Database Name):
+	<screen>
+tiian@ubuntu1404-64:~$ sqlplus hr/hr@192.168.122.81:1521/orcl.brenta.org
+
+SQL*Plus: Release 12.1.0.2.0 Production on Fri Jan 13 21:50:46 2017
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Fri Jan 13 2017 21:36:05 +01:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> exit
+Disconnected from Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Install and configure Oracle Instant Client (network config. only)
+      </title>
+      <note><para>
+	If you want to execute your Application Program in a system different
+	from the system that hosts the database instance, you have to
+	install and configure Oracle Instant Client.
+      </para></note>
+      <para>
+	Oracle Instant Client must be retrieved from Oracle portal. These are
+	the suggested packages if you want to use LIXA:
+	<screen>
+instantclient-basic-linux.x64-12.1.0.2.0.zip
+instantclient-precomp-linux.x64-12.1.0.2.0.zip
+instantclient-sdk-linux.x64-12.1.0.2.0.zip
+instantclient-sqlplus-linux.x64-12.1.0.2.0.zip
+	</screen>
+	For the Linux operating system you can choose between ".rpm" packages
+	and ".zip" archives: feel free to install the packages as you prefer.
+	Just an example, here's the final layout of a tested configuration
+	for Ubuntu 14.04:
+	<screen>
+tiian@ubuntu1404-64:~/lixa$ find /opt/oracle/ | sort
+/opt/oracle/
+/opt/oracle/instantclient_12_1
+/opt/oracle/instantclient_12_1/adrci
+/opt/oracle/instantclient_12_1/BASIC_README
+/opt/oracle/instantclient_12_1/cobsqlintf.o
+/opt/oracle/instantclient_12_1/genezi
+/opt/oracle/instantclient_12_1/glogin.sql
+/opt/oracle/instantclient_12_1/libclntshcore.so.12.1
+/opt/oracle/instantclient_12_1/libclntsh.so
+/opt/oracle/instantclient_12_1/libclntsh.so.12.1
+/opt/oracle/instantclient_12_1/libipc1.so
+/opt/oracle/instantclient_12_1/libmql1.so
+/opt/oracle/instantclient_12_1/libnnz12.so
+/opt/oracle/instantclient_12_1/libocci.so
+/opt/oracle/instantclient_12_1/libocci.so.12.1
+/opt/oracle/instantclient_12_1/libociei.so
+/opt/oracle/instantclient_12_1/libocijdbc12.so
+/opt/oracle/instantclient_12_1/libons.so
+/opt/oracle/instantclient_12_1/liboramysql12.so
+/opt/oracle/instantclient_12_1/libsqlplusic.so
+/opt/oracle/instantclient_12_1/libsqlplus.so
+/opt/oracle/instantclient_12_1/network
+/opt/oracle/instantclient_12_1/network/admin
+/opt/oracle/instantclient_12_1/network/admin/tnsnames.ora
+/opt/oracle/instantclient_12_1/ojdbc6.jar
+/opt/oracle/instantclient_12_1/ojdbc7.jar
+/opt/oracle/instantclient_12_1/precomp
+/opt/oracle/instantclient_12_1/precomp/admin
+/opt/oracle/instantclient_12_1/precomp/admin/pcbcfg.cfg
+/opt/oracle/instantclient_12_1/precomp/admin/pcscfg.cfg
+/opt/oracle/instantclient_12_1/PRECOMP_README
+/opt/oracle/instantclient_12_1/sdk
+/opt/oracle/instantclient_12_1/sdk/admin
+/opt/oracle/instantclient_12_1/sdk/admin/oraaccess.xsd
+/opt/oracle/instantclient_12_1/sdk/demo
+/opt/oracle/instantclient_12_1/sdk/demo/cdemo81.c
+/opt/oracle/instantclient_12_1/sdk/demo/demo.mk
+/opt/oracle/instantclient_12_1/sdk/demo/demo_proc_ic.mk
+/opt/oracle/instantclient_12_1/sdk/demo/demo_procob_ic.mk
+/opt/oracle/instantclient_12_1/sdk/demo/occidemod.sql
+/opt/oracle/instantclient_12_1/sdk/demo/occidemo.sql
+/opt/oracle/instantclient_12_1/sdk/demo/occidml.cpp
+/opt/oracle/instantclient_12_1/sdk/demo/occiobj.cpp
+/opt/oracle/instantclient_12_1/sdk/demo/occiobj.typ
+/opt/oracle/instantclient_12_1/sdk/demo/oraaccess.xml
+/opt/oracle/instantclient_12_1/sdk/demo/procdemo.pc
+/opt/oracle/instantclient_12_1/sdk/demo/procobdemo.pco
+/opt/oracle/instantclient_12_1/sdk/demo/setuporamysql.sh
+/opt/oracle/instantclient_12_1/sdk/include
+/opt/oracle/instantclient_12_1/sdk/include/ldap.h
+/opt/oracle/instantclient_12_1/sdk/include/nzerror.h
+/opt/oracle/instantclient_12_1/sdk/include/nzt.h
+/opt/oracle/instantclient_12_1/sdk/include/occiAQ.h
+/opt/oracle/instantclient_12_1/sdk/include/occiCommon.h
+/opt/oracle/instantclient_12_1/sdk/include/occiControl.h
+/opt/oracle/instantclient_12_1/sdk/include/occiData.h
+/opt/oracle/instantclient_12_1/sdk/include/occi.h
+/opt/oracle/instantclient_12_1/sdk/include/occiObjects.h
+/opt/oracle/instantclient_12_1/sdk/include/oci1.h
+/opt/oracle/instantclient_12_1/sdk/include/oci8dp.h
+/opt/oracle/instantclient_12_1/sdk/include/ociap.h
+/opt/oracle/instantclient_12_1/sdk/include/ociapr.h
+/opt/oracle/instantclient_12_1/sdk/include/ocidef.h
+/opt/oracle/instantclient_12_1/sdk/include/ocidem.h
+/opt/oracle/instantclient_12_1/sdk/include/ocidfn.h
+/opt/oracle/instantclient_12_1/sdk/include/ociextp.h
+/opt/oracle/instantclient_12_1/sdk/include/oci.h
+/opt/oracle/instantclient_12_1/sdk/include/ocikpr.h
+/opt/oracle/instantclient_12_1/sdk/include/ocixmldb.h
+/opt/oracle/instantclient_12_1/sdk/include/ocixstream.h
+/opt/oracle/instantclient_12_1/sdk/include/odci.h
+/opt/oracle/instantclient_12_1/sdk/include/oraca.h
+/opt/oracle/instantclient_12_1/sdk/include/oratypes.h
+/opt/oracle/instantclient_12_1/sdk/include/orid.h
+/opt/oracle/instantclient_12_1/sdk/include/ori.h
+/opt/oracle/instantclient_12_1/sdk/include/orl.h
+/opt/oracle/instantclient_12_1/sdk/include/oro.h
+/opt/oracle/instantclient_12_1/sdk/include/ort.h
+/opt/oracle/instantclient_12_1/sdk/include/sql2oci.h
+/opt/oracle/instantclient_12_1/sdk/include/sqlapr.h
+/opt/oracle/instantclient_12_1/sdk/include/sqlca.h
+/opt/oracle/instantclient_12_1/sdk/include/sqlcpr.h
+/opt/oracle/instantclient_12_1/sdk/include/sqlda.h
+/opt/oracle/instantclient_12_1/sdk/include/sqlkpr.h
+/opt/oracle/instantclient_12_1/sdk/include/sqlucs2.h
+/opt/oracle/instantclient_12_1/sdk/include/xa.h
+/opt/oracle/instantclient_12_1/sdk/ott
+/opt/oracle/instantclient_12_1/sdk/ottclasses.zip
+/opt/oracle/instantclient_12_1/sdk/proc
+/opt/oracle/instantclient_12_1/sdk/procob
+/opt/oracle/instantclient_12_1/sdk/rtsora
+/opt/oracle/instantclient_12_1/sdk/SDK_README
+/opt/oracle/instantclient_12_1/sqlplus
+/opt/oracle/instantclient_12_1/SQLPLUS_README
+/opt/oracle/instantclient_12_1/uidrvci
+/opt/oracle/instantclient_12_1/xstreams.jar
+	</screen>
+	If your installation layout is different, adjust the following steps
+	as necessary.
+      </para>
+      <para>
+	Some environment variables can be very handy and I suggest you to use
+	at least three. You can create a simple shell script like this one:
+	<screen>
+#!/bin/sh
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1:$LD_LIBRARY_PATH
+export PATH=/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:$PATH
+export ORACLE_HOME=/opt/oracle/instantclient_12_1
+	</screen>
+	and use it when needed with the shell sourcing:
+	<screen>
+tiian@ubuntu1404-64:~$ . ./oracle_env.sh 
+tiian@ubuntu1404-64:~$ echo $LD_LIBRARY_PATH
+/opt/oracle/instantclient_12_1:
+tiian@ubuntu1404-64:~$ echo $PATH
+/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
+tiian@ubuntu1404-64:~$ echo $ORACLE_HOME
+/opt/oracle/instantclient_12_1
+	</screen>
+	A possible option to configure a remote database is based on the 
+	"tnsnames.ora" file. It should be put at path 
+	<screen>
+	$ORACLE_HOME/network/admin/tnsnames.ora
+	</screen>
+	Here's an example:
+	<screen>
+lixa_ora_db=
+  (DESCRIPTION=
+     (ADDRESS=(PROTOCOL=tcp)(HOST=centos7-oracle12.brenta.org)(PORT=1521))
+     (CONNECT_DATA=
+        (SERVICE_NAME=orcl.brenta.org)))
+	</screen>
+	<note><para>
+	  Configuring Oracle networking feature requires a little bit of
+	  experience: be patient and consult official documentation and
+	  user group forums to obtain a right configuration.
+	</para></note>
+      </para>
+      <para>
+	The final step is the configuration check. If everything is OK, you
+	should obtain something like this:
+	<screen>
+tiian@ubuntu1404-64:~$ sqlplus hr/hr@lixa_ora_db
+
+SQL*Plus: Release 12.1.0.2.0 Production on Fri Jan 13 21:36:05 2017
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Fri Jan 13 2017 21:35:16 +01:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+
+SQL> exit
+Disconnected from Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+	</screen>
+      </para>
+    </section>
+    <section>
       <title>Build the client program</title>
       <para>
 	Prepare the client (Application Program) using the below commands
@@ -666,6 +925,15 @@ tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example2_ora.c .
 tiian@ubuntu:~/tmp$ gcc example2_ora.c $(/opt/lixa/bin/lixa-config -c -f -l -d) \
 > -I/u01/app/oracle/product/11.2.0/xe/rdbms/public/ \
 > -L/u01/app/oracle/product/11.2.0/xe/lib/ -l clntsh -l nnz11 \
+> -o example2_ora
+	</screen>
+	If you are using Oracle Instant Client the paths are slightly 
+	different:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example2_ora.c .
+tiian@ubuntu1404-64:/tmp$ gcc example2_ora.c $(/opt/lixa/bin/lixa-config -c -f -l -d) \
+> -I /opt/oracle/instantclient_12_1/sdk/include/ \
+> -L /opt/oracle/instantclient_12_1/ -l clntsh -l nnz12 \
 > -o example2_ora
 	</screen>
 	Verify the executable produced by <command>gcc</command>:
@@ -728,7 +996,9 @@ tiian@ubuntu:~/tmp$ ldd example2_ora
         libz.so.1 => /usr/lib/libz.so.1 (0xb6338000)
         libuuid.so.1 => /lib/libuuid.so.1 (0xb6334000)
 	</screen>
-	Set-up the necessary environment variables:
+	Set-up the necessary environment variables.
+	Here's an example for Oracle XE 10.2 using a local connection and the
+	SID identifier:
 	<screen>
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 
@@ -754,6 +1024,20 @@ tiian@ubuntu:~/tmp$ export ORACLE_SID=XE
 tiian@ubuntu:~/tmp$ echo $ORACLE_SID
 XE
 	</screen>
+	Here's an example for Oracle Instant Client 12.1 using a remote
+	connection and the service name (see above for tnsnames.ora);
+	<screen>
+tiian@ubuntu1404-64:/tmp$ echo $PATH
+/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
+tiian@ubuntu1404-64:/tmp$ echo $LD_LIBRARY_PATH
+/opt/oracle/instantclient_12_1:
+tiian@ubuntu1404-64:/tmp$ echo $ORACLE_HOME
+/opt/oracle/instantclient_12_1
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=ORAOCI_DYN
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+ORAOCI_DYN
+	</screen>
+
 	It is suggested to set the necessary environment variables in your 
 	profile if you are going to execute the programs many times.
 	This is the list of the suggested variables:
@@ -763,8 +1047,9 @@ XE
 	<varname>ORACLE_SID</varname>.
 	<important><para>
 	    the third and fourth variables can be
-	    set sourcing <filename>oracle_env.sh</filename> script (it's
-	    installed in the Oracle's <filename>bin</filename> directory). 
+	    set sourcing <filename>oracle_env.sh</filename> script: it's
+	    installed in the Oracle's <filename>bin</filename> directory or
+	    alternatively you have to edit your own as explained above.
 	</para></important>
       </para>
     </section>
@@ -773,7 +1058,10 @@ XE
       <para>
 	Execute the below commands:
 	<screen>
-tiian@ubuntu:~$ sqlplus "hr/hr"
+tiian@ubuntu:~$ sqlplus "hr/hr"<footnote><para>
+  use <screen>sqlplus hr/hr@lixa_ora_db</screen> in the event that you are 
+  using a remote connection as explained above
+</para></footnote>
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 14 22:04:55 2011
 
@@ -980,13 +1268,23 @@ tiian@ubuntu:~/tmp$ rm /tmp/xa_NULL04102011.trc
     <section>
       <title>Program execution (static registration)</title>
       <para>
-	Switch from dynamic registration to static registration:
+	Switch from dynamic registration to static registration (local
+	connection):
 	<screen>
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 ORA_DYN
 tiian@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_STA
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 ORA_STA
+	</screen>
+	Here's the equivalent for the network connection using Oracle
+	Instant Client:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+ORAOCI_DYN
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=ORAOCI_STA
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+ORAOCI_STA	  
 	</screen>
 	Execute the program again:
 	<screen>
@@ -1111,8 +1409,8 @@ no rows selected
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
 	</screen>
-	You successfully executed a program that uses Oracle Database Server
-	as a Resource Manager.
+	You have successfully executed an Application Program that uses Oracle
+	Database Server as a Resource Manager.
       </para>
     </section>
   </section>
@@ -3114,7 +3412,7 @@ XE
 	<varname>PATH</varname>.
       </para>
     </section>
-    <section>
+    <section xml:id="example5_some_checks">
       <title>Some checks before program execution</title>
       <para>
 	We set <varname>LIXA_PROFILE</varname> to value

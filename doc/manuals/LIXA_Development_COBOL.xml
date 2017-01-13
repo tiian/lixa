@@ -1,0 +1,588 @@
+<chapter xml:id="Development_COBOL">
+  <title>Developing COBOL Application Programs</title>
+  <para>
+    This chapter explains how you can develop your own COBOL application
+    using the libraries and the tools supplied by LIXA project.
+  </para>
+  <para>
+    LIXA project ships some example COBOL programs you can find in 
+    directory
+    <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/cobol/</filename> after
+    software installation (see <xref linkend="Installation"/>).
+  </para>
+  <note><para>
+    This chapter is focused on the COBOL programming language. The C 
+    programming language is addressed by another dedicated chapter.
+  </para></note>
+  <section>
+    <title>Supported COBOL environment</title>
+    <para>
+      LIXA supports only GnuCOBOL (formerly OpenCOBOL).
+      <link xlink:href="https://sourceforge.net/projects/open-cobol/">
+	<citetitle>GnuCOBOL</citetitle>
+	</link> can be retrieved from SourceForge.net or can be installed
+	using the standard packages available for your Linux distribution.
+	The support for GnuCOBOL requires at least version 1.1 that's available
+	inside Ubuntu 14.04 and other distributions.
+    </para>
+    <para>
+      It cannot be excluded that LIXA may run using a different COBOL
+      environment, but at this time the LIXA project does not have a 
+      development and test environment for something else than GnuCOBOL.
+    </para>
+  </section>
+  <section>
+    <title>The TX (Transaction Demarcation) Specification</title>
+    <para>
+      LIXA project adopts the standard described in 
+      <citation>TXspec</citation> as the API you should use when developing
+      an Application Program.
+    </para>
+    <para>
+      The API is very easy, it supplies COBOL routines and C functions.
+      The following COBOL example can be briefly explained:
+      <programlisting>
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. EXAMPLE1.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+      * Include TX definitions using the provided copybook
+        01 TX-RETURN-STATUS.
+           COPY TXSTATUS.
+        01 TX-INFO-AREA.
+           COPY TXINFDEF.
+      * Include LIXA definitions using the provided copybook
+           COPY LIXAXID.
+        PROCEDURE DIVISION.
+        000-MAIN.
+            MOVE ZERO TO TX-RETURN-STATUS.
+      * Calling TXOPEN (tx_open)
+            CALL "TXOPEN" USING TX-RETURN-STATUS.
+            DISPLAY 'TXOPEN returned value ' TX-STATUS.
+            IF NOT TX-OK THEN
+               DISPLAY 'Exiting...'
+               STOP RUN RETURNING 1
+            END-IF.
+      *
+      * Put your code OUTSIDE the transaction boundary here
+      *
+      * Calling TXBEGIN (tx_begin): the transaction starts here
+            CALL "TXBEGIN" USING TX-RETURN-STATUS.
+            DISPLAY 'TXBEGIN returned value ' TX-STATUS.
+            IF NOT TX-OK THEN
+               DISPLAY 'Exiting...'
+               STOP RUN RETURNING 1
+            END-IF.
+      *
+      * Put yout code INSIDE the transaction boundary here
+      *
+      * Calling TXCOMMIT (tx_commit): the transaction ends here with a
+      * commit
+            CALL "TXCOMMIT" USING TX-RETURN-STATUS.
+            DISPLAY 'TXCOMMIT returned value ' TX-STATUS.
+            IF NOT TX-OK THEN
+               DISPLAY 'Exiting...'
+               STOP RUN RETURNING 1
+            END-IF.
+      *
+      * You can use TXROLLBACK instead of TXCOMMIT if you decide that the
+      * work must be rolled back
+      *
+      * Put here other transactions if you need them
+      *
+      * Calling TXCLOSE (tx_close) to close ALL the Resource Managers
+      * associated to the current LIXA_PROFILE
+      *
+            CALL "TXCLOSE" USING TX-RETURN-STATUS.
+            DISPLAY 'TXCLOSE returned value ' TX-STATUS.
+            IF NOT TX-OK
+               STOP RUN RETURNING 1
+            STOP RUN.
+      </programlisting>
+      These are the available COBOL routines (the descriptions come from
+      <citation>TXspec</citation>):
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	    <function>TXBEGIN</function>: begin a global transaction
+	</para></listitem>
+	<listitem><para>
+	    <function>TXCLOSE</function>: close a set of resource managers
+ 	</para></listitem>
+	<listitem><para>
+	    <function>TXCOMMIT</function>: commit a global transaction
+	</para></listitem>
+	<listitem><para>
+	    <function>TXINFORM</function>: return global transaction 
+	    information
+	</para></listitem>
+	<listitem><para>
+	    <function>TXOPEN</function>: open a set of resource managers
+	</para></listitem>
+	<listitem><para>
+	    <function>TXROLLBACK</function>: roll back a global transaction
+	</para></listitem>
+	<listitem><para>
+	    <function>TXSETCOMMITRET</function>: set 
+	    <parameter class="function">commit_return</parameter> 
+	    characteristic
+	</para></listitem>
+	<listitem><para>
+	    <function>TXSETTRANCTL</function>: set
+	    <parameter class="function">transaction_control</parameter> 
+	    characteristic
+	</para></listitem>
+	<listitem><para>
+	    <function>TXSETTIMEOUT</function>: set
+	    <parameter class="function">transaction_timeout</parameter> 
+	    characteristic
+	</para></listitem>
+      </itemizedlist>
+      Refer to <citation>TXspec</citation> for the complete description.
+    </para>
+    <section>
+      <title>Access to the resource managers</title>
+      <para>
+	A program developed for TX (Transaction Demarcation) Specification
+	<emphasis>must</emphasis> access the resource managers coordinated by
+	the transaction manager using specific functions.
+	Unfortunately, the TX Specification does <emphasis>not</emphasis>
+	specify a standard unified method to access a coordinated resource
+	manager. 
+      </para>
+      <para>
+	Tipically, every resource manager provides its own specific
+	function(s) to retrieve one or more <emphasis>connection 
+	  handler(s)</emphasis>. Once you have got the right connection
+	handler(s), you can use the resource manager as you use without a
+	transaction manager.
+      </para>
+      <para>
+	The supplied examples (see <filename>doc/examples/cobol</filename> 
+	directory) show the routines that must be used to
+	retrieve the connection handler(s) necessary to interact with
+	the resource managers.
+      </para>
+      <note><para>
+	  Special attention must be payed to <emphasis>commit</emphasis> and
+	  <emphasis>rollback</emphasis> operations: a well designed program
+	  developed for TX (Transaction Demarcation) Specification must not
+	  specify the resource manager native version of 
+	  <emphasis>commit</emphasis> and <emphasis>rollback</emphasis> 
+	  operations.
+	  If your software violates this rule, your environment will
+	  generate warning conditions related to euristically completed
+	  transaction. If your software forces a resource manager to
+	  <emphasis>commit</emphasis> or <emphasis>rollback</emphasis> 
+	  outside the control of the transaction manager, the transaction
+	  manager will not be able to perform the opposite operation if
+	  asked to do it. These situations tend to generate inconsistencies.
+      </para></note>
+    </section>
+    <section>
+      <title>Chapter organization</title>
+      <para>
+	This chapter focuses on differences between C and COBOL and does not
+	repeat all the configuration steps described in the previous C chapter.
+	Anyway, when necessary, a pointer to the related section that explains
+	how to configure the environment is provided.
+      </para>
+    </section>
+  </section>
+  <section>
+    <title>LIXA library linkage</title>
+    <para>
+      The examples showed in this chapter use these linkage options:
+      <option>-Wl,-rpath -Wl,/opt/lixa/lib</option>
+      dynamically generated by 
+      <command>/opt/lixa/bin/lixa-config -d</command>
+      (<command>/opt/lixa/bin/lixa-config --ldflags</command>).
+      The options are specific to <command>gcc</command> and 
+      <command>ld</command> Linux linker.
+      Alternatively you can avoid these options and set
+      <varname>LD_LIBRARY_PATH</varname> environment variable.
+    </para>
+  </section>
+  <section>
+    <title>The first example</title>
+    <figure xml:id="develop1_cobol">
+      <title>Deploy model of an example with two dummy resource managers</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="../images/LIXA_Development_1.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      Copy file <filename>EXAMPLE1.cob</filename> in your working dir:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/cobol/EXAMPLE1.cob .
+	</screen></td></tr></tbody>
+      </table>
+      Substitute <quote>lixa-X.Y.Z</quote> with the actual version of
+      the software you installed.
+    </para>
+    <para>
+      Set up your shell environment:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ export PATH=$PATH:/opt/lixa/bin
+tiian@ubuntu1404-64:/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+tiian@ubuntu1404-64:/tmp$ export COB_LDFLAGS=-Wl,--no-as-needed
+	</screen></td></tr></tbody>
+      </table>
+    </para>
+    <para>
+      Compile and link the COBOL example program:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ cobc -x $(lixa-config -f -l) EXAMPLE1.cob
+	</screen></td></tr></tbody>
+      </table>
+      Check the output of the linker:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ldd EXAMPLE1
+	linux-vdso.so.1 =>  (0x00007fffbd9fe000)
+	libcob.so.1 => /usr/lib/libcob.so.1 (0x00007fe904068000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fe903d62000)
+	libgmp.so.10 => /usr/lib/x86_64-linux-gnu/libgmp.so.10 (0x00007fe903aed000)
+	libncurses.so.5 => /lib/x86_64-linux-gnu/libncurses.so.5 (0x00007fe9038ca000)
+	libtinfo.so.5 => /lib/x86_64-linux-gnu/libtinfo.so.5 (0x00007fe9036a1000)
+	libdb-5.3.so => /usr/lib/x86_64-linux-gnu/libdb-5.3.so (0x00007fe9032fe000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe9030fa000)
+	liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007fe902edf000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe902b19000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fe9028fb000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007fe9042a6000)
+	libgmodule-2.0.so.0 => /usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0 (0x00007fe9026f6000)
+	libglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007fe9023ee000)
+	libxml2.so.2 => /usr/lib/x86_64-linux-gnu/libxml2.so.2 (0x00007fe902087000)
+	liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007fe901e6d000)
+	libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007fe901c2f000)
+	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007fe901a16000)
+	liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fe9017f3000)
+	libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007fe9015ee000)
+</screen></td></tr></tbody>
+      </table>
+      Now you are ready to start your first application:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE1 
+Executing EXAMPLE1
+TXOPEN returned value -000000007
+Exiting...
+	</screen></td></tr></tbody>
+      </table>
+      The <function>TXOPEN</function> routine returned the value 
+      <quote>-7</quote> (<constant>TX-FAIL</constant>) 
+      because the state server is not running.
+      Start the state server (see <xref linkend="Background_execution"/>)
+      and try again:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session (Ubuntu)]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ sudo su - lixa
+lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu:~$ exit
+logout
+tiian@ubuntu:~/tmp$ ps -ef|grep lixad|grep -v grep
+lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE1 
+Executing EXAMPLE1
+TXOPEN returned value +000000000
+TXBEGIN returned value +000000000
+TXINFORM returned value +000000000
+  XID-REC/FORMAT-ID:     +279875137
+  XID-REC/GTRID-LENGTH:  +000000016
+  XID-REC/BRANCH-LENGTH: +000000016
+  XID-REC/XID (SERIAL.): 1279875137.9ce44ddff2274cd99924ae2721b66789.58f1d23a64e7f668c92c624bc096d075                                                                                                         
+  TRANSACTION-MODE :     +000000001
+    [TX-IN-TRAN]
+  COMMIT-RETURN :        +000000000
+    [TX-COMMIT-COMPLETED]
+  TRANSACTION-CONTROL :  +000000000
+    [TX-UNCHAINED]
+  TRANSACTION-TIMEOUT :  +000000000
+    [NO-TIMEOUT]
+  TRANSACTION-STATE :    +000000000
+    [TX-ACTIVE]
+TXCOMMIT returned value +000000000
+TXINFORM returned value +000000000
+  XID-REC/FORMAT-ID:     -000000001
+  XID-REC/GTRID-LENGTH:  +000000000
+  XID-REC/BRANCH-LENGTH: +000000000
+  XID-REC/XID (SERIAL.): -1..                                                                                                         
+  TRANSACTION-MODE :     +000000000
+    [TX-NOT-IN-TRAN]
+  COMMIT-RETURN :        +000000000
+    [TX-COMMIT-COMPLETED]
+  TRANSACTION-CONTROL :  +000000000
+    [TX-UNCHAINED]
+  TRANSACTION-TIMEOUT :  +000000000
+    [NO-TIMEOUT]
+  TRANSACTION-STATE :    +000000000
+    [TX-ACTIVE]
+TXSETCOMMITRET returned value +000000001
+TXSETTIMEOUT returned value +000000000
+TXSETTRANCTL returned value +000000000
+TXINFORM returned value +000000000
+  XID-REC/FORMAT-ID:     -000000001
+  XID-REC/GTRID-LENGTH:  +000000000
+  XID-REC/BRANCH-LENGTH: +000000000
+  XID-REC/XID (SERIAL.): -1..                                                                                                         
+  TRANSACTION-MODE :     +000000000
+    [TX-NOT-IN-TRAN]
+  COMMIT-RETURN :        +000000000
+    [TX-COMMIT-COMPLETED]
+  TRANSACTION-CONTROL :  +000000001
+    [TX-CHAINED]
+  TRANSACTION-TIMEOUT :  +000000005
+  TRANSACTION-STATE :    +000000000
+    [TX-ACTIVE]
+TXSETTRANCTL returned value +000000000
+TXINFORM returned value +000000000
+  XID-REC/FORMAT-ID:     -000000001
+  XID-REC/GTRID-LENGTH:  +000000000
+  XID-REC/BRANCH-LENGTH: +000000000
+  XID-REC/XID (SERIAL.): -1..                                                                                                         
+  TRANSACTION-MODE :     +000000000
+    [TX-NOT-IN-TRAN]
+  COMMIT-RETURN :        +000000000
+    [TX-COMMIT-COMPLETED]
+  TRANSACTION-CONTROL :  +000000000
+    [TX-UNCHAINED]
+  TRANSACTION-TIMEOUT :  +000000005
+  TRANSACTION-STATE :    +000000000
+    [TX-ACTIVE]
+TXBEGIN returned value +000000000
+TXROLLBACK returned value +000000000
+TXCLOSE returned value +000000000
+	</screen></td></tr></tbody>
+      </table>
+      Your first COBOL Application Program has connected to the state server 
+      and has performed two dummy distributed transactions: 
+      <emphasis>commit</emphasis> and <emphasis>rollback</emphasis>.
+    </para>
+    <para>
+      Refer to <xref linkend="first_example_details"/> to get some further insights.
+    </para>
+  </section>
+  <section>
+    <title>An example with PostgreSQL</title>
+    <figure xml:id="develop5_cobol">
+      <title>Deploy model of an example with PostgreSQL DBMS</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="../images/LIXA_Development_5.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      This example was developed using PostgreSQL 9.3.15 for Linux (Ubuntu).
+      If you were using a different version you would need to adapt some
+      commands to your environment.
+    </para>
+    <para>
+      Prepare the environment following the following steps:
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	  Set-up PostgreSQL environment
+	</para></listitem>
+	<listitem><para>
+	  Start the LIXA state server
+	</para></listitem>
+      </itemizedlist>
+      as explained in <xref linkend="Development_example6_pql_ora"/>.
+    </para>
+    <section>
+      <title>Build the client program</title>
+      <para>
+	Prepare the client (Application Program) using the below commands:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/cobol/EXAMPLE5_PQL.c .
+tiian@ubuntu1404-64:/tmp$ export PATH=$PATH:/opt/lixa/bin
+tiian@ubuntu1404-64:/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+tiian@ubuntu1404-64:/tmp$ export COB_LDFLAGS=-Wl,--no-as-needed
+tiian@ubuntu1404-64:/tmp$ cobc -x $(lixa-config -f -p) EXAMPLE5_PQL.cob
+	  </screen></td></tr></tbody>
+	</table>
+	Verify the executable produced by <command>cobc</command>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ldd EXAMPLE5_PQL
+	  linux-vdso.so.1 =>  (0x00007ffff21fe000)
+	  libcob.so.1 => /usr/lib/libcob.so.1 (0x00007f1a00df4000)
+	  libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f1a00aee000)
+	  libgmp.so.10 => /usr/lib/x86_64-linux-gnu/libgmp.so.10 (0x00007f1a00879000)
+	  libncurses.so.5 => /lib/x86_64-linux-gnu/libncurses.so.5 (0x00007f1a00656000)
+	  libtinfo.so.5 => /lib/x86_64-linux-gnu/libtinfo.so.5 (0x00007f1a0042d000)
+	  libdb-5.3.so => /usr/lib/x86_64-linux-gnu/libdb-5.3.so (0x00007f1a0008a000)
+	  libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f19ffe86000)
+	  liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007f19ffc6b000)
+	  liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0x00007f19ffa63000)
+	  libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f19ff69e000)
+	  libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f19ff480000)
+	  /lib64/ld-linux-x86-64.so.2 (0x00007f1a01032000)
+	  libgmodule-2.0.so.0 => /usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0 (0x00007f19ff27b000)
+	  libglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007f19fef73000)
+	  libxml2.so.2 => /usr/lib/x86_64-linux-gnu/libxml2.so.2 (0x00007f19fec0c000)
+	  liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007f19fe9f2000)
+	  libpq.so.5 => /usr/lib/libpq.so.5 (0x00007f19fe7c3000)
+	  libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007f19fe584000)
+	  libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f19fe36b000)
+	  liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f19fe149000)
+	  libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007f19fdf44000)
+	  libssl.so.1.0.0 => /lib/x86_64-linux-gnu/libssl.so.1.0.0 (0x00007f19fdce4000)
+	  libcrypto.so.1.0.0 => /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 (0x00007f19fd908000)
+	  libkrb5.so.3 => /usr/lib/x86_64-linux-gnu/libkrb5.so.3 (0x00007f19fd63d000)
+	  libcom_err.so.2 => /lib/x86_64-linux-gnu/libcom_err.so.2 (0x00007f19fd438000)
+	  libgssapi_krb5.so.2 => /usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2 (0x00007f19fd1f1000)
+	  libldap_r-2.4.so.2 => /usr/lib/x86_64-linux-gnu/libldap_r-2.4.so.2 (0x00007f19fcfa0000)
+	  libk5crypto.so.3 => /usr/lib/x86_64-linux-gnu/libk5crypto.so.3 (0x00007f19fcd70000)
+	  libkrb5support.so.0 => /usr/lib/x86_64-linux-gnu/libkrb5support.so.0 (0x00007f19fcb65000)
+	  libkeyutils.so.1 => /lib/x86_64-linux-gnu/libkeyutils.so.1 (0x00007f19fc961000)
+	  libresolv.so.2 => /lib/x86_64-linux-gnu/libresolv.so.2 (0x00007f19fc745000)
+	  liblber-2.4.so.2 => /usr/lib/x86_64-linux-gnu/liblber-2.4.so.2 (0x00007f19fc536000)
+	  libsasl2.so.2 => /usr/lib/x86_64-linux-gnu/libsasl2.so.2 (0x00007f19fc31b000)
+	  libgssapi.so.3 => /usr/lib/x86_64-linux-gnu/libgssapi.so.3 (0x00007f19fc0dc000)
+	  libgnutls.so.26 => /usr/lib/x86_64-linux-gnu/libgnutls.so.26 (0x00007f19fbe1e000)
+	  libgcrypt.so.11 => /lib/x86_64-linux-gnu/libgcrypt.so.11 (0x00007f19fbb9e000)
+	  libheimntlm.so.0 => /usr/lib/x86_64-linux-gnu/libheimntlm.so.0 (0x00007f19fb994000)
+	  libkrb5.so.26 => /usr/lib/x86_64-linux-gnu/libkrb5.so.26 (0x00007f19fb70c000)
+	  libasn1.so.8 => /usr/lib/x86_64-linux-gnu/libasn1.so.8 (0x00007f19fb46b000)
+	  libhcrypto.so.4 => /usr/lib/x86_64-linux-gnu/libhcrypto.so.4 (0x00007f19fb237000)
+	  libroken.so.18 => /usr/lib/x86_64-linux-gnu/libroken.so.18 (0x00007f19fb022000)
+	  libtasn1.so.6 => /usr/lib/x86_64-linux-gnu/libtasn1.so.6 (0x00007f19fae0e000)
+	  libp11-kit.so.0 => /usr/lib/x86_64-linux-gnu/libp11-kit.so.0 (0x00007f19fabcb000)
+	  libgpg-error.so.0 => /lib/x86_64-linux-gnu/libgpg-error.so.0 (0x00007f19fa9c6000)
+	  libwind.so.0 => /usr/lib/x86_64-linux-gnu/libwind.so.0 (0x00007f19fa79d000)
+	  libheimbase.so.1 => /usr/lib/x86_64-linux-gnu/libheimbase.so.1 (0x00007f19fa58e000)
+	  libhx509.so.5 => /usr/lib/x86_64-linux-gnu/libhx509.so.5 (0x00007f19fa345000)
+	  libsqlite3.so.0 => /usr/lib/x86_64-linux-gnu/libsqlite3.so.0 (0x00007f19fa08c000)
+	  libcrypt.so.1 => /lib/x86_64-linux-gnu/libcrypt.so.1 (0x00007f19f9e52000)
+	  libffi.so.6 => /usr/lib/x86_64-linux-gnu/libffi.so.6 (0x00007f19f9c4a000)
+</screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
+	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=PQL_STA
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+PQL_STA
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	See <xref linkend="example5_some_checks"/> for additional details on
+	the profile.
+      </para>
+    </section>
+    <section>
+      <title>Program execution</title>
+      <para>
+	It is suggested to open two different terminals: the first one
+	connected to <quote>testdb</quote> PostgreSQL database and the second
+	one pointing to the directory where the compiled program
+	<filename>EXAMPLE5_PQL</filename> lives.
+	First teminal session:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ psql testdb
+psql (9.3.15)
+Type "help" for help.
+
+testdb=> 
+	  </screen></td></tr></tbody>
+	</table>
+	Second teminal session:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ls -la EXAMPLE5_PQL*
+-rwxrwxr-x 1 tiian tiian 20170 gen 13 23:51 EXAMPLE5_PQL
+-rw-r--r-- 1 tiian tiian  6374 gen 13 23:47 EXAMPLE5_PQL.cob
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of <quote>AUTHORS</quote> table before
+	program execution:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name 
+----+-----------+------------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	Execute the program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE5_PQL INSERTExecuting EXAMPLE5_PQL
+Inserting a row in the table...
+Status: +0000000000
+PQexec INSERT
+Status: +0000000001
+TXCOMMIT returned value +000000000
+TXCLOSE returned value +000000000
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of the table again:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name 
+----+-----------+------------
+  1 | Foo       | Bar
+(1 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	The example program inserted the row with id=1. You can not insert
+	the same row twice because there is a unique constraint on this table,
+	but you can remove the row using
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE5_PQL DELETE
+Executing EXAMPLE5_PQL
+Deleting a row from the table...
+Status: +0000000000
+PQexec DELETE
+Status: +0000000001
+TXCOMMIT returned value +000000000
+TXCLOSE returned value +000000000
+	  </screen></td></tr></tbody>
+	</table>
+	Check the table content again:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name 
+----+-----------+------------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+  </section>
+</chapter>

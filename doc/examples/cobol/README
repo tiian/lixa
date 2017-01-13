@@ -11,11 +11,9 @@ This brief instruction explains how you can compile them.
    export PATH=$PATH:/opt/lixa/bin
 2. Add LIXA libraries to your LD_LIBRARY_PATH, for example:
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
-3. Disable gcc compiling strict aliasing warning
-   export COB_CFLAGS="-Wstrict-aliasing=0"
-4. Disable gcc linking "--no-as-needed" option for COBOL programs:
+3. Disable gcc linking "--no-as-needed" option for COBOL programs:
    export COB_LDFLAGS=-Wl,--no-as-needed
-5. Compile the interested COBOL <programname> with this command line:
+4. Compile the interested COBOL <programname> with this command line:
      cobc -x $(lixa-config -f -l) <programname>
    Example for EXAMPLE1.cbl (No third party resource managers)
      cobc -x $(lixa-config -f -l) EXAMPLE1.cob

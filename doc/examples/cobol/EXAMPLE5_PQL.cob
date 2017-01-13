@@ -58,7 +58,7 @@
                DISPLAY 'Deleting a row from the table...'
                MOVE 1 TO ARGV-BOOL
             ELSE
-               DISPLAY 'Inserting a row from the table...'
+               DISPLAY 'Inserting a row in the table...'
             END-IF.
       *
       * Open the resource manager
@@ -157,6 +157,7 @@
                   END-IF
                   SET ADDRESS OF RESULT-CHAR TO RESULT-POINTER
                END-PERFORM
+               STOP RUN RETURNING 1
             END-IF.
             CALL "PQclear" USING BY VALUE PGRES.
             DISPLAY "Status: " RESULT.

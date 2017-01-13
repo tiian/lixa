@@ -10,3 +10,6 @@ put ext/html/*.html ext/html
 
 #########################################################################
 
+Manual can be produces using these packaged (Ubuntu systems):
+xsltproc
+docbook-xsl
