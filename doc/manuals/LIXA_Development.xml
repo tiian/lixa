@@ -734,7 +734,7 @@ instantclient-sqlplus-linux.x64-12.1.0.2.0.zip
 	</screen>
 	For the Linux operating system you can choose between ".rpm" packages
 	and ".zip" archives: feel free to install the packages as you prefer.
-	Just an example, here's the final layout of a tested configuration
+	Just as an example, here's the final layout of a tested configuration
 	for Ubuntu 14.04:
 	<screen>
 tiian@ubuntu1404-64:~/lixa$ find /opt/oracle/ | sort

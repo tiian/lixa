@@ -1,0 +1,78 @@
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. EXAMPLE1.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+      * Include Oracle SQLCA
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+      * Include TX definitions using the provided copybook
+        01 TX-RETURN-STATUS.
+           COPY TXSTATUS.
+        01 TX-INFO-AREA.
+           COPY TXINFDEF.
+      * Include LIXA definitions using the provided copybook
+           COPY LIXAXID.
+        PROCEDURE DIVISION.
+        BEGIN-MAIN.
+           MOVE ZERO TO TX-RETURN-STATUS.
+           EXEC SQL
+               WHENEVER SQLERROR DO PERFORM SQL-ERROR
+           END-EXEC.
+      * Calling TXOPEN (tx_open)
+            CALL "TXOPEN" USING TX-RETURN-STATUS.
+            DISPLAY 'TXOPEN returned value ' TX-STATUS.
+            IF NOT TX-OK THEN
+               DISPLAY 'Exiting...'
+               STOP RUN RETURNING 1
+            END-IF.
+      *
+      * Put your code OUTSIDE the transaction boundary here
+      *
+      * Calling TXBEGIN (tx_begin): the transaction starts here
+            CALL "TXBEGIN" USING TX-RETURN-STATUS.
+            DISPLAY 'TXBEGIN returned value ' TX-STATUS.
+            IF NOT TX-OK THEN
+               DISPLAY 'Exiting...'
+               STOP RUN RETURNING 1
+            END-IF.
+      *
+      * Put yout code INSIDE the transaction boundary here
+
+           EXEC SQL 
+                DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'
+           END-EXEC.
+
+      *
+      * Calling TXCOMMIT (tx_commit): the transaction ends here with a
+      * commit
+            CALL "TXCOMMIT" USING TX-RETURN-STATUS.
+            DISPLAY 'TXCOMMIT returned value ' TX-STATUS.
+            IF NOT TX-OK THEN
+               DISPLAY 'Exiting...'
+               STOP RUN RETURNING 1
+            END-IF.
+      *
+      * You can use TXROLLBACK instead of TXCOMMIT if you decide that the
+      * work must be rolled back
+      *
+      * Put here other transactions if you need them
+      *
+      * Calling TXCLOSE (tx_close) to close ALL the Resource Managers
+      * associated to the current LIXA_PROFILE
+      *
+            CALL "TXCLOSE" USING TX-RETURN-STATUS.
+            DISPLAY 'TXCLOSE returned value ' TX-STATUS.
+            IF NOT TX-OK
+               STOP RUN RETURNING 1
+            STOP RUN.
+      *
+      * SQL error handler
+      *
+        SQL-ERROR.
+           EXEC SQL
+               WHENEVER SQLERROR CONTINUE
+           END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           STOP RUN RETURNING 1.

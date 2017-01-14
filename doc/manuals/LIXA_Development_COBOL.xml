@@ -287,11 +287,11 @@ Exiting...
       <table frame="box">
 	<thead><tr><td>[Shell terminal session (Ubuntu)]</td></tr></thead>
 	<tbody><tr><td><screen>
-tiian@ubuntu:~/tmp$ sudo su - lixa
-lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
-lixa@ubuntu:~$ exit
+tiian@ubuntu1404-64:~/tmp$ sudo su - lixa
+lixa@ubuntu1404-64:~$ /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu1404-64:~$ exit
 logout
-tiian@ubuntu:~/tmp$ ps -ef|grep lixad|grep -v grep
+tiian@ubuntu1404-64:~/tmp$ ps -ef|grep lixad|grep -v grep
 lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 tiian@ubuntu1404-64:/tmp$ ./EXAMPLE1 
 Executing EXAMPLE1
