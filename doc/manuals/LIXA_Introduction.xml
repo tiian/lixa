@@ -22,7 +22,7 @@
       reference model was improved with the concepts necessary for XA+. 
       LIXA project does <emphasis>not</emphasis> implement
       the XA+ specification, but only XA and the following concepts explained 
-      in <citation>RefModel</citation> does not apply to the LIXA project:
+      in <citation>RefModel</citation> do not apply to the LIXA project:
       <itemizedlist mark='bullet'>
 	<listitem><para>3.1: Superior Node</para></listitem>
 	<listitem><para>3.1: Subordinate Node</para></listitem>
@@ -58,21 +58,18 @@
       Oracle (BEA) Tuxedo<footnote><para>Tuxedo is a registered trademark of
 	  Oracle corporation</para></footnote> is a Transaction Monitor with an
       integrated Transaction Manager.
-      JBOSS<footnote><para>JBOSS is a registered trademark of Red Hat
+      JBoss<footnote><para>JBoss is a registered trademark of Red Hat
 	  corporation</para></footnote> is a <acronym>JEE</acronym>
       (Java Enterprise Edition) application server; it is a Transaction
-      Monitor with an integrated Transaction Manager for bytecode based
+      Monitor with an integrated Transaction Manager for Java based
       applications.
     </para>
     <para>
-      <link xlink:href="http://www.springsource.com/">
-	<citetitle>Spring JTA Transaction Manager</citetitle>
-      </link>,
-      <link xlink:href="http://jotm.objectweb.org/index.html">
+      <link xlink:href="http://jotm.ow2.org/xwiki/bin/view/Main/WebHome">
 	<citetitle>JOTM (Java Open Transaction Manager)</citetitle>
       </link>
       and
-      <link xlink:href="http://www.bitronix.be/">
+      <link xlink:href="https://github.com/bitronix/btm">
 	<citetitle>BTM (Bitronix JTA Transaction Manager)</citetitle>
       </link> 
       are Transaction Managers, but they are not Transaction Monitors and they
@@ -118,19 +115,23 @@
       LIXA is a <emphasis>project</emphasis>: a software artifact you can pick
       up to try, use, modify and distribute according to the terms of GPL 
       license. 
-      The project is hosted on 
-      <link xlink:href="http://sourceforge.net/projects/lixa/">
+      The project is hosted both on 
+      <link xlink:href="https://github.com/tiian/lixa">
+	<citetitle>GitHub</citetitle>
+      </link>
+      and
+      <link xlink:href="https://sourceforge.net/projects/lixa/">
 	<citetitle>SourceForge</citetitle>
       </link>
-      collaborative portal and you can use the portal
+      collaborative portals: you can use the portals
       to interact with the author and other users.
-      LIXA is not supported because it is not a product: you can use it AS IS
-      without any guarantee.
+      LIXA is not commercially supported because it is not a product: you can 
+      use it AS IS without any guarantee.
     </para>
     <para>
       A projuct is a software artifact that initially was a project financed 
-      by a
-      customer. Then a second customer was interested in the same software
+      by a customer. 
+      Later a second customer was interested in the same software
       artifact and the initial project was selled again. 
       When the third customer knocked the door,
       the team that developed the project started a new business with a new
@@ -153,10 +154,10 @@
 	<listitem><para>it is fully documented</para></listitem>
 	<listitem><para>it is certified to run properly on some documented 
 	    hardware and software platforms</para></listitem>
-	<listitem><para>it has a certified compatibility matrix the customer
-	    can use to find out a valid mix of distinct software components
-	    (i.e. different Resource Managers, for an XA Transaction 
-	    Manager)</para></listitem>
+	<listitem><para>it provides a certified compatibility matrix that 
+	can be used by the customer to find out a valid mix of distinct 
+	software components (i.e. different Resource Managers, 
+	for an XA Transaction Manager)</para></listitem>
 	<listitem><para>it can be installed, updated and removed from a system
 	    using the standard tool of the platform (i.e. dpkg, rpm, pkg,
 	    etc....)</para></listitem>
@@ -164,7 +165,8 @@
 	    side effects for the product and/or the hosting system
 	</para></listitem>
       </itemizedlist>
-      <important><para>LIXA project is not a product.</para></important>
+      <important><para>LIXA project is <emphasis>not</emphasis> a product.
+      </para></important>
     </para>
     <para>
       If you were running a business that is interested in developing a 
@@ -181,8 +183,9 @@
     <title>LIXA and X/OPEN CAE specifications</title> 
     <para>
       The LIXA project tries to be as compliant as possible with the X/Open CAE
-      specifications cited in bibliography. Below there are the not implemented
-      and/or not implementable features.
+      specifications cited in bibliography. Below there are the features that
+      are <emphasis>not</emphasis> implemented and the features that are
+      <emphasis>not</emphasis> implementable.
     </para>
     <simplesect>
       <title>The commit_return Characteristic</title>

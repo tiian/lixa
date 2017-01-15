@@ -7,18 +7,19 @@
   <section>
     <title>System requirements</title>
     <para>
-      LIXA project is developed on an x86 based 
+      LIXA project is developed on an x86-64 based 
       <link xlink:href="http://www.ubuntu.com/">
-	<citetitle>Ubuntu 8.04 system</citetitle>
-      </link>; it
-      compiles and runs on both <emphasis>server</emphasis> and
-      <emphasis>desktop</emphasis> flavors. 
-      LIXA project is ported on x86_64 architecture using
-      <link xlink:href="http://www.ubuntu.com/">
-	<citetitle>Ubuntu 10.04 system</citetitle>
-      </link>.
-      Installation on a different GNU/Linux
-      distribution should be quite straightforward; installation on a different
+	<citetitle>Ubuntu 14.04 system</citetitle>
+      </link>. 
+      LIXA project is ported on different Linux versions for x86_64: major
+      stable releases are tested using some different configurations, please
+      refer to file 
+      <link xlink:href="https://github.com/tiian/lixa/blob/master/TestLog">
+	<citetitle>TestLog</citetitle>
+      </link>
+      for an update.
+      Installation on a different Linux distribution should be quite 
+      straightforward; installation on a different
       <trademark>UNIX</trademark> like system would probably need some work.
     </para>
     <para>
@@ -30,8 +31,8 @@
       <title>Pre-requisites</title>
       <para>
 	To compile LIXA software the GNU tools are needed: gcc, gmake, libtool.
-	Autoconf and automake are used, but should not be necessary if you want
-	to install the original tarball.
+	Autoconf and automake are used, but they should not be necessary if 
+	you install from the original tarball.
       </para>
       <para>
 	Some <emphasis>libraries (run time and development stuff)</emphasis> 
@@ -52,11 +53,11 @@
 	standard include <envar>PATH</envar>.
       </para>
       <section>
-	<title>Packages for Linux Ubuntu (8.04 and 10.04)</title>
+	<title>Packages for Linux Ubuntu</title>
 	<para>
 	  <application>xsltproc</application>,
 	  <application>docbook-xsl</application> and
-	  <application>docbook-xsl-doc-html</application> are necessary
+	  <application>docbook-xml</application> are necessary
 	  to produce this manual.
 	</para>
 	<para>
@@ -117,15 +118,16 @@
 	of resource managers:
 	<orderedlist numeration="arabic">
 	  <listitem><para>
-	      <emphasis>LIXA:</emphasis> resource managers
-	      provided by the project for testing and as sample implementations
+	      <emphasis>LIXA:</emphasis> Resource Managers
+	      provided by the project that are useful only for testing and as 
+	      sample implementations
 	  </para></listitem>
 	  <listitem><para>
-	      <emphasis>F/OSS:</emphasis> resource managers provided by
-	      Free/Open Source Software projects
+	      <emphasis>F/OSS:</emphasis> Resource Managers provided by
+	      Free/Open Source Software projects like PostgreSQL and MySQL
 	  </para></listitem>
 	  <listitem><para>
-	      <emphasis>Proprietary:</emphasis> resource managers
+	      <emphasis>Proprietary:</emphasis> Resource Managers
 	      provided by business corporations using commercial licensing.
 	  </para></listitem>
 	</orderedlist>
@@ -220,163 +222,62 @@ logout
 	  LIXA client communicates to LIXA server (daemon) throught TCP/IP and
 	  the client processes do not access the status files located in
 	  <filename>/opt/lixa/var/</filename>, only the 
-	  <command>lixad</command> has to access the status files.
+	  <command>lixad</command> has to access the files.
+	  The LIXA client can be considered <emphasis>stateless</emphasis>
+	  because all the state information is persisted by the LIXA server.
       </para></note>
     </section>
   </section>
   <section>
-    <title>Tested configurations</title>
+    <title>Certified and Tested configurations</title>
     <para>
-      A tested configuration is a configuration that passed all the case
-      tests.
-      This is the list of the tested configurations for release 0.9.3
-      (see also <filename>TestLog</filename> file content):
-      <table frame="all">
-	<thead>
-	  <tr><td>Operating system:</td><td>Ubuntu Linux 10.04</td></tr>
-	</thead>
-	<tbody>
-	  <tr><td>Architecture:</td><td>x86, x86-64 (virtual KVM)</td></tr>
-	  <tr><td>Resource Manager:</td><td>MySQL 5.1.73</td></tr>
-	  <tr><td>Resource Manager:</td><td>PostgreSQL 8.4.22</td></tr>
-	</tbody>
-      </table>
-      <table frame="all">
-	<thead>
-	  <tr><td>Operating system:</td><td>Ubuntu Linux 12.04</td></tr>
-	</thead>
-	<tbody>
-	  <tr><td>Architecture:</td><td>x86-64 (virtual KVM)</td></tr>
-	  <tr><td>Resource Manager:</td><td>MySQL 5.5.47</td></tr>
-	  <tr><td>Resource Manager:</td><td>PostgreSQL 9.1.21</td></tr>
-	</tbody>
-      </table>
-      <table frame="all">
-	<thead>
-	  <tr><td>Operating system:</td><td>Ubuntu Linux 14.04</td></tr>
-	</thead>
-	<tbody>
-	  <tr><td>Architecture:</td><td>x86-64 (virtual KVM)</td></tr>
-	  <tr><td>Resource Manager:</td><td>MySQL 5.5.47</td></tr>
-	  <tr><td>Resource Manager:</td><td>PostgreSQL 9.3.12</td></tr>
-	</tbody>
-      </table>
-      <table frame="all">
-	<thead>
-	  <tr><td>Operating system:</td><td>CentOS Linux 6.6</td></tr>
-	</thead>
-	<tbody>
-	  <tr><td>Architecture:</td><td>x86, x86-64 (virtual KVM)</td></tr>
-	  <tr><td>Resource Manager:</td><td>MySQL 5.1.73</td></tr>
-	  <tr><td>Resource Manager:</td><td>PostgreSQL 8.4.20</td></tr>
-	</tbody>
-      </table>
-      <table frame="all">
-	<thead>
-	  <tr><td>Operating system:</td><td>CentOS Linux 7.1</td></tr>
-	</thead>
-	<tbody>
-	  <tr><td>Architecture:</td><td>x86-64 (virtual KVM)</td></tr>
-	  <tr><td>Resource Manager:</td><td>MariaDB 5.5.47</td></tr>
-	  <tr><td>Resource Manager:</td><td>PostgreSQL 9.2.15</td></tr>
-	</tbody>
-      </table>
-      <table frame="all">
-	<thead>
-	  <tr><td>Operating system:</td><td>CentOS Linux 7.2</td></tr>
-	</thead>
-	<tbody>
-	  <tr><td>Architecture:</td><td>x86-64 (virtual KVM)</td></tr>
-	  <tr><td>Resource Manager:</td><td>MariaDB 5.5.47</td></tr>
-	  <tr><td>Resource Manager:</td><td>PostgreSQL 9.2.15</td></tr>
-	</tbody>
-      </table>
-      This is the list of the tested configurations for release 0.9.2:
-      <table frame="all">
-	<thead>
-	  <tr><td>Operating system:</td><td>Ubuntu Linux 8.04</td></tr>
-	</thead>
-	<tbody>
-	  <tr><td>Architecture:</td><td>x86 (physical)</td></tr>
-	  <tr><td>Resource Manager:</td><td>IBM DB2 9.7</td></tr>
-	  <tr><td>Resource Manager:</td><td>MySQL 5.0.51a</td></tr>
-	  <tr><td>Resource Manager:</td><td>Oracle XE 10.2</td></tr>
-	  <tr><td>Resource Manager:</td><td>PostgreSQL 8.3</td></tr>
-	</tbody>
-      </table>
-      <table frame="all">
-	<thead>
-	  <tr><td>Operating system:</td><td>Ubuntu Linux 8.04</td></tr>
-	</thead>
-	<tbody>
-	  <tr><td>Architecture:</td><td>x86 (virtual)</td></tr>
-	  <tr><td>Resource Manager:</td><td>IBM DB2 9.7</td></tr>
-	  <tr><td>Resource Manager:</td><td>MySQL 5.0.51a</td></tr>
-	  <tr><td>Resource Manager:</td><td>Oracle XE 10.2</td></tr>
-	  <tr><td>Resource Manager:</td><td>PostgreSQL 8.3</td></tr>
-	</tbody>
-      </table>
-      <table frame="all">
-	<thead>
-	  <tr><td>Operating system:</td><td>Ubuntu Linux 10.04</td></tr>
-	</thead>
-	<tbody>
-	  <tr><td>Architecture:</td><td>x86_64 (physical)</td></tr>
-	  <tr><td>Resource Manager:</td><td>MySQL 5.1.41</td></tr>
-	  <tr><td>Resource Manager:</td><td>Oracle XE 11.2</td></tr>
-	  <tr><td>Resource Manager:</td><td>PostgreSQL 8.4</td></tr>
-	</tbody>
-      </table>
-      <table frame="all">
-	<thead>
-	  <tr><td>Operating system:</td><td>CentOS 6.2</td></tr>
-	</thead>
-	<tbody>
-	  <tr><td>Architecture:</td><td>x86 (virtual)</td></tr>
-	  <tr><td>Resource Manager:</td><td>MySQL 5.0.51a</td></tr>
-	  <tr><td>Resource Manager:</td><td>PostgreSQL 8.3</td></tr>
-	  <tr><td>Resource Manager:</td><td>WebSphere MQ 7.1</td></tr>
-	</tbody>
-      </table>
+      A certified configuration is a configuration that passed all the 
+      relevant test cases. The list of the certified configurations is
+      described inside the file <filename>TestLog</filename> that's
+      distributed along with LIXA tarball.
+      <note><para>
+	A certified configuration should build and install flawlessly on
+	any system with the same configuration.
+      </para></note>
     </para>
-    <note>
-      <para>
-	If you are using MySQL for distributed transaction processing with
-	LIXA you will have to adopt InnoDB back-end for your tables because
-	MyISAM tables do not support transactionality at all.
-      </para>
-      <para>
-	Please note there is a serious bug affecting MySQL and XA:
-	<link xlink:href="http://bugs.mysql.com/bug.php?id=12161">
-	  <citetitle>http://bugs.mysql.com/bug.php?id=12161</citetitle>
-	</link>	
-      </para>
-    </note>
+    <para>
+      A tested configuration is a configuration that was tested in the past
+      and should reasonably work with similar configurations: tested
+      configurations are proposed in 
+      <xref linkend="Development"/>.
+      They can be used as a starting point for non trivial configurations with
+      one or more commercial Resource Managers.
+    </para>
   </section>
   <section>
     <title>Software download</title>
     <para>
-      The LIXA project is hosted on SourceForge.net portal at this URL:
-      <link xlink:href="http://sourceforge.net/projects/lixa/">
-	<citetitle>http://sourceforge.net/projects/lixa/</citetitle>
+      The LIXA project is hosted both on 
+      <link xlink:href="https://github.com/tiian/lixa">
+	<citetitle>GitHub.com</citetitle>
       </link>
+      and
+      <link xlink:href="http://sourceforge.net/projects/lixa/">
+	<citetitle>SourceForge.net</citetitle>
+      </link>
+      portals. GitHub.com is mainly intended for system software developers
+      that need to access, change and share the source code with the
+      project. SourceForge.net is mainly intended for system engineers that
+      need to download and install the software.
     </para>
-    <para>
-      The software is available only as a <emphasis>source code</emphasis>
-      tarball; no
-      pre-compiled packages are available: you need the C development tools
-      installed to have success in LIXA installation. It is suggested to 
-      download the gzipped tarball from the main page: the latest available
-      release is generally what you need; you could download a previous release
-      if you had a reason to do it.
-    </para>
-    <para>
-      Alternatively you can fetch the source code using a subversion client,
-      but you should pay attention that many commits on the subversion 
-      repository
-      are intermediate works and can give you partial or broken/under
-      construction features.
-    </para>
+    <note><para>
+      The source code that can be fetched using <emphasis>git</emphasis>
+      typically contains the last commit: there's no guarantee
+      that every commit contains stable software, sometimes it can be
+      intermediate work that does not compile. Every release is explicitly
+      tagged.
+    </para></note>
+    <warning><para>
+      The tarball that can be downloaded by SourceForge.net is a release
+      that has passed some sort of test and should compile and run
+      flawlessly. Even releases are associated to stable releases and
+      odd releases are associated to testing releases with new features.
+    </para></warning>
   </section>
   <section>
     <title>Configure, build and install</title>
@@ -432,7 +333,7 @@ drwxr-xr-x 2 lixa lixa 4096 2011-03-30 23:14 .
 drwxr-xr-x 9 lixa root 4096 2011-03-30 23:14 ..
 -rw-r--r-- 1 lixa lixa  178 2011-03-30 23:14 README
       </screen>
-      The succesful execution of the above commands guarantees the
+      The succesful execution of the above commands guarantees that the
       configuration and the state files can be managed using the
       LIXA administrative account (
       user=<systemitem class="username">lixa</systemitem>,
@@ -445,11 +346,11 @@ drwxr-xr-x 9 lixa root 4096 2011-03-30 23:14 ..
     <section>
       <title>Advanced configuration</title>
       <para>
-	There are many options you can pass to <command>configure</command>
+	There are many options you can pass to the <command>configure</command>
 	command to meet your needs (see below). Skip this section and
 	jump directly to
 	<xref linkend="Linking_third_party_resource_managers"/>
-	if you are not expert in LIXA configuration to avoid troubles.
+	if you are not expert in LIXA configuration.
       </para>
       <important>
 	<para>
@@ -468,7 +369,7 @@ drwxr-xr-x 9 lixa root 4096 2011-03-30 23:14 ..
 	    installation path.
 	</para></note>
 	<para>
-	  Performing the very first install <filename>/tmp</filename> 
+	  to perform the very first installation <filename>/tmp</filename> 
 	  could be a good destination:
 	  <screen>
 ./configure --prefix=/tmp/lixa
@@ -624,7 +525,7 @@ make
 	</para>
       </section>
       <section>
-	<title>MySQL 5.0/5.1<footnote><para>
+	<title>MySQL 5.0, 5.1, 5.5<footnote><para>
 	      MySQL is a trademark of <trademark>Oracle</trademark> 
 	      corporation; details are available at this link:
 	      <link xlink:href="http://www.mysql.com/about/legal/">
@@ -638,7 +539,7 @@ make
 	      mysql.i686 mysql-devel.i686 mysql-server.i686
 	  </para></footnote>
 	  as a Resource
-	  Manager coordinated by LIXA; only versions 5.0 and 5.1 have been
+	  Manager coordinated by LIXA; only versions 5.0, 5.1 and 5.5 have been
 	  tested, but there should not be relevant differences with a
 	  different version. Use something like this:
 	  <screen>
@@ -663,7 +564,7 @@ make
 	    - like dynamic registration - can not be implemented.
 	</para></note>
 	<warning><para>
-	    At the time of this writing there is a
+	  Some old versions of the software are affected by a
 	    <link xlink:href="http://bugs.mysql.com/bug.php?id=12161">
 	      seriuos documented bug (# 12161)</link>
 	    related to the XA implementation of MySQL. The symptoms perceived
@@ -753,14 +654,14 @@ make
 	</para>
       </section>
       <section>
-	<title>PostgreSQL 8.3/8.4<footnote><para>
+	<title>PostgreSQL 8.3/8.4/9.3<footnote><para>
 	      The Trademark Policy of PostgreSQL is available at this link:
 	      <link xlink:href="http://wiki.postgresql.org/wiki/Trademark_Policy">
 		http://wiki.postgresql.org/wiki/Trademark_Policy</link>
 	</para></footnote></title>
 	<para>
 	  This step is useful if you want to use PostgreSQL as a Resource
-	  Manager coordinated by LIXA; only versions 8.3 and 8.4 have been
+	  Manager coordinated by LIXA; only versions 8.3, 8.4 and 9.3 have been
 	  tested, but there should not be relevant differences with a
 	  different version. Use something like this (Ubuntu):
 	  <screen>
