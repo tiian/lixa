@@ -4,3 +4,4 @@ switch_oracle_dynreg_la_SOURCES = oracle_dynreg.c
 AM_CPPFLAGS = @ORACLE_OCI_CFLAGS@ -I../../../common
 AM_CFLAGS = -Wall
 AM_LDFLAGS = @ORACLE_OCI_LDFLAGS@ -module
+AM_LIBS = @ORACLE_OCI_LIBS@

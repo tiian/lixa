@@ -17,6 +17,7 @@ dnl This macro calls:
 dnl
 dnl   AC_SUBST(ORACLE_OCI_CFLAGS)
 dnl   AC_SUBST(ORACLE_OCI_LDFLAGS)
+dnl   AC_SUBST(ORACLE_OCI_LIBS)
 dnl   AC_SUBST(ORACLE_OCI_VERSION)
 dnl
 dnl And sets:
@@ -57,6 +58,7 @@ AC_DEFUN([AX_LIB_ORACLE_OCI],
 
     ORACLE_OCI_CFLAGS=""
     ORACLE_OCI_LDFLAGS=""
+    ORACLE_OCI_LIBS=""
     ORACLE_OCI_VERSION=""
     ORACLE_ENV_SH=""
 
@@ -110,9 +112,11 @@ Please, locate Oracle directories using --with-oracle or \
 	tmp2=${tmp1#lib}
 	ORACLE_OCI_NNZ=${tmp2%.*}
         saved_LDFLAGS="$LDFLAGS"
-        dnl oci_ldflags="-L$oracle_lib_dir -lclntsh -lnnz10"
-        oci_ldflags="-L$oracle_lib_dir -lclntsh -l$ORACLE_OCI_NNZ"
+        oci_ldflags="-Wl,-rpath -Wl,$oracle_lib_dir -L$oracle_lib_dir"
         LDFLAGS="$LDFLAGS $oci_ldflags"
+	saved_LIBS="$LIBS"
+        oci_libs="-lclntsh -l$ORACLE_OCI_NNZ"
+	LIBS="$LIBS $oci_libs"
 
         dnl
         dnl Check OCI headers
@@ -160,6 +164,7 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
                 )],
                 [
                 ORACLE_OCI_LDFLAGS="$oci_ldflags"
+		ORACLE_OCI_LIBS="$oci_libs"
                 oci_lib_found="yes"
                 AC_MSG_RESULT([yes])
                 ],
@@ -173,6 +178,7 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
 
         CPPFLAGS="$saved_CPPFLAGS"
         LDFLAGS="$saved_LDFLAGS"
+	LIBS="$saved_LIBS"
     fi
 
     dnl
@@ -229,6 +235,7 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
     AC_SUBST([ORACLE_OCI_VERSION])
     AC_SUBST([ORACLE_OCI_CFLAGS])
     AC_SUBST([ORACLE_OCI_LDFLAGS])
+    AC_SUBST([ORACLE_OCI_LIBS])
     AC_SUBST([ORACLE_OCI_NNZ])
     AC_SUBST([ORACLE_ENV_SH])
     AC_SUBST([HAVE_ORACLE])

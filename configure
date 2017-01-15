@@ -639,6 +639,7 @@ LIXA_CONFIG_SYSCONFDIR
 LIXA_CONFIG_LOCALSTATEDIR
 LIXA_CONFIG_PREFIX
 LIXA_CONFIG_LIBDIR
+LIXA_CONFIG_BINDIR
 LIXA_CONFIG_INCLUDEDIR
 LIXA_CRASH
 EXPANDED_LIBDIR
@@ -704,6 +705,7 @@ COMPILE_ORACLE_STUFF_TRUE
 HAVE_ORACLE
 ORACLE_ENV_SH
 ORACLE_OCI_NNZ
+ORACLE_OCI_LIBS
 ORACLE_OCI_LDFLAGS
 ORACLE_OCI_CFLAGS
 ORACLE_OCI_VERSION
@@ -12743,6 +12745,7 @@ fi
 
     ORACLE_OCI_CFLAGS=""
     ORACLE_OCI_LDFLAGS=""
+    ORACLE_OCI_LIBS=""
     ORACLE_OCI_VERSION=""
     ORACLE_ENV_SH=""
 
@@ -12791,8 +12794,11 @@ Please, locate Oracle directories using --with-oracle or \
 	tmp2=${tmp1#lib}
 	ORACLE_OCI_NNZ=${tmp2%.*}
         saved_LDFLAGS="$LDFLAGS"
-                oci_ldflags="-L$oracle_lib_dir -lclntsh -l$ORACLE_OCI_NNZ"
+        oci_ldflags="-Wl,-rpath -Wl,$oracle_lib_dir -L$oracle_lib_dir"
         LDFLAGS="$LDFLAGS $oci_ldflags"
+	saved_LIBS="$LIBS"
+        oci_libs="-lclntsh -l$ORACLE_OCI_NNZ"
+	LIBS="$LIBS $oci_libs"
 
                                 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Oracle OCI headers in $oracle_include_dir" >&5
 $as_echo_n "checking for Oracle OCI headers in $oracle_include_dir... " >&6; }
@@ -12876,6 +12882,7 @@ _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
 
                 ORACLE_OCI_LDFLAGS="$oci_ldflags"
+		ORACLE_OCI_LIBS="$oci_libs"
                 oci_lib_found="yes"
                 { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -12900,6 +12907,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
         CPPFLAGS="$saved_CPPFLAGS"
         LDFLAGS="$saved_LDFLAGS"
+	LIBS="$saved_LIBS"
     fi
 
 
@@ -12947,6 +12955,7 @@ $as_echo "no" >&6; }
     then
       ORACLE_ENV_SH=$oracle_home_dir/bin/oracle_env.sh
     fi
+
 
 
 
@@ -13960,6 +13969,7 @@ fi
 
 # Vars useful for lixa-config utility program
 eval "LIXA_CONFIG_INCLUDEDIR=$includedir"
+eval "LIXA_CONFIG_BINDIR=$bindir"
 eval "LIXA_CONFIG_LIBDIR=$libdir"
 eval "LIXA_CONFIG_PREFIX=$prefix"
 eval "LIXA_CONFIG_LOCALSTATEDIR=$localstatedir"
@@ -15246,6 +15256,7 @@ _ACEOF
 
 fi
 done
+
 
 
 

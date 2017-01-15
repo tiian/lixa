@@ -2,10 +2,10 @@
 
 #
 # Source this file to set LIXA relevant environment variables:
-# . ./lixa_env.sh
+# . .@LIXA_CONFIG_BINDIR@/lixa_env.sh
 #
 # Path for LIXA utilities
-export PATH=@LIXA_CONFIG_PREFIX@/bin:$PATH
+export PATH=@LIXA_CONFIG_BINDIR@:$PATH
 # Path for LIXA libraries
 export LD_LIBRARY_PATH=@LIXA_CONFIG_LIBDIR@:$LD_LIBRARY_PATH
 # Linker options for LIXA COBOL Application Programs

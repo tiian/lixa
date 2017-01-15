@@ -148,6 +148,9 @@
 		Oracle XE 10.2 (32 bit) / Oracle XE 11.2 (64 bit)
 	  </productname></para></listitem>
 	  <listitem><para><productname>
+		Oracle SE 12.1 (64 bit) Instant Client
+	  </productname></para></listitem>
+	  <listitem><para><productname>
 		PostgreSQL 8.3 (32 bit) / PostgreSQL 8.4 (64 bit)
 	  </productname></para></listitem>
 	  <listitem><para><productname>
@@ -703,13 +706,13 @@ make
 	</warning>
       </section>
       <section>
-	<title>Oracle XE 10.2/11.2<footnote><para>
+	<title>Oracle XE 10.2/11.2 (server)<footnote><para>
 	      Oracle is a trademark of <trademark>Oracle</trademark>
 	      corporation
 	</para></footnote></title>
 	<para>
 	  This step is useful if you want to use Oracle Database as a Resource
-	  Manager coordinated by LIXA; only version XE 10.2 has been
+	  Manager coordinated by LIXA; only version XE 10.2/11.2 has been
 	  tested, but there should not be relevant differences with a
 	  different version. Use something like this for Oracle 10.2
 	  (32 bit architecture):
@@ -719,6 +722,28 @@ make
 	  and something like this for Oracle 11.2 (64 bit architecture):
 	  <screen>
 ./configure --with-oracle=/u01/app/oracle/product/11.2.0/xe
+	  </screen>
+	  to create a loadable module containing the switch structure.
+	</para>
+	<para>
+	  Extra configuration is needed in order to use Oracle DBMS; the
+	  necessary steps are documented in the configuration chapter.
+	</para>
+      </section>
+      <section>
+	<title>Oracle SE 12.1 (Instant Client)<footnote><para>
+	      Oracle is a trademark of <trademark>Oracle</trademark>
+	      corporation
+	</para></footnote></title>
+	<para>
+	  This step is useful if you want to use Oracle Database Instant
+	  Client as a Resource Manager coordinated by LIXA; only version 
+	  Standard Edition 12.1 has been tested, but there should not be 
+	  relevant differences with a different version. Use something like 
+	  this for Oracle 12.1 Instant Client (64 bit architecture):
+	  <screen>
+./configure --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include/ \
+            --with-oracle-lib=/opt/oracle/instantclient_12_1/
 	  </screen>
 	  to create a loadable module containing the switch structure.
 	</para>
