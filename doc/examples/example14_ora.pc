@@ -50,12 +50,12 @@ int main(int argc, char *argv[])
     OCISvcCtx     *oci_svc_ctx;
     OCIStmt       *stmt_hndl;
     OCIError      *err_hndl;
-*/
     text          *stmt_i = (text *) "INSERT INTO COUNTRIES "
         "(COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
         "VALUES ('RS', 'Repubblica San Marino', 1)";
     text          *stmt_d = (text *) "DELETE FROM COUNTRIES WHERE "
         "COUNTRY_ID = 'RS'";
+*/
 
     if (argc > 1 && (!strcmp(argv[1], "delete") || !strcmp(argv[1], "DELETE")))
         delete = 1;
@@ -128,6 +128,7 @@ int main(int argc, char *argv[])
         } else
             fprintf(stderr, "INSERT statement executed!\n");
         */
+        ;
     }
 
     if (delete) {
@@ -150,9 +151,10 @@ int main(int argc, char *argv[])
                     "ocirc = %d\n",
                     ocirc);
             exit(ocirc);
-        */
         } else
             fprintf(stderr, "DELETE statement executed!\n");
+        */
+        ;
     } else
         fprintf(stderr, "First arg is not 'DELETE', bypassing DELETE "
                 "statement...\n");
