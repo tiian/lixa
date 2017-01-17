@@ -21,7 +21,7 @@
 
 /*
  * This is an example that shows as you can use LIXA TX (Transaction
- * Demarcation) API and OCI (Oracle C Interface) API together.
+ * Demarcation) API and Oracle Pro*OCI embedded SQL together.
  * Please refer to LIXA manual for more information about this sample.
  */
 
@@ -32,30 +32,34 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Oracle C Interface API header */
-/* OLD
-#include <oci.h>
-*/
+/* Oracle Pro*C Interface API headers */
+#include <sqlca.h>
+#include <sqlcpr.h>
 
 /* TX (Transaction Demarcation) header */
 #include <tx.h>
 
 
 
+/* Print error and exit */
+void sql_error() 
+{ 
+	char msg[256]; 
+	size_t buffer_len, msg_len; 
+ 
+	buffer_len = sizeof(msg); 
+	sqlglm((unsigned char *)msg, &buffer_len, &msg_len);
+	if (msg_len > buffer_len)
+		msg_len = buffer_len;
+	printf("Error reported by Oracle: %.*s\n\n", (int)msg_len, msg); 
+	exit(1); 
+} 
+
+
+
 int main(int argc, char *argv[])
 {
     int            txrc, ocirc, delete;
-/* OLD
-    OCIEnv        *oci_env;
-    OCISvcCtx     *oci_svc_ctx;
-    OCIStmt       *stmt_hndl;
-    OCIError      *err_hndl;
-    text          *stmt_i = (text *) "INSERT INTO COUNTRIES "
-        "(COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
-        "VALUES ('RS', 'Repubblica San Marino', 1)";
-    text          *stmt_d = (text *) "DELETE FROM COUNTRIES WHERE "
-        "COUNTRY_ID = 'RS'";
-*/
 
     if (argc > 1 && (!strcmp(argv[1], "delete") || !strcmp(argv[1], "DELETE")))
         delete = 1;
@@ -68,93 +72,22 @@ int main(int argc, char *argv[])
         exit(txrc);
     }
 
-    /* 
-     * retrieve environment and context
-     * do NOT use standard functions otherwise you will obtain a transaction
-     * manager indipendent connection
-     */
-    /* OLD
-    if (NULL == (oci_env = xaoEnv(NULL))) {
-        fprintf(stderr, "xaoEnv returned a NULL pointer\n");
-        exit(1);
-    }
-    if (NULL == (oci_svc_ctx = xaoSvcCtx(NULL))) {
-        fprintf(stderr, "xaoSvcCtx returned a NULL pointer\n");
-        exit(1);
-    }
-    */
-
-    /* allocate statement and error handles */
-    /* OLD
-    if (0 != OCIHandleAlloc( (dvoid *)oci_env, (dvoid **)&stmt_hndl,
-                             OCI_HTYPE_STMT, (size_t)0, (dvoid **)0)) {
-        fprintf(stderr, "Unable to allocate statement handle\n");
-        exit(1);
-    }
-    if (0 != OCIHandleAlloc( (dvoid *)oci_env, (dvoid **)&err_hndl,
-                             OCI_HTYPE_ERROR, (size_t)0, (dvoid **)0)) {
-        fprintf(stderr, "Unable to allocate error handle\n");
-        exit(1);
-    }
-    */
-
     if (TX_OK != (txrc = tx_begin())) {
         fprintf(stderr, "tx_begin error: %d\n", txrc);
         exit(txrc);
     }
 
+    EXEC SQL WHENEVER SQLERROR DO sql_error();
+
     if (delete) {
         fprintf(stderr, "First arg is '%s', bypassing INSERT statement...\n",
                 argv[1]);
     } else {
-        /* OLD
-        if (OCI_SUCCESS != OCIStmtPrepare(stmt_hndl, err_hndl, stmt_i,
-                                          (ub4) strlen((char *)stmt_i),
-                                          (ub4) OCI_NTV_SYNTAX,
-                                          (ub4) OCI_DEFAULT)) {
-            fprintf(stderr,
-                    "Unable to prepare INSERT statement for execution\n");
-            exit(1);
-        }
-
-        ocirc = OCIStmtExecute(oci_svc_ctx, stmt_hndl, err_hndl,
-                               (ub4)1, (ub4)0,
-                               (CONST OCISnapshot *)NULL,
-                               (OCISnapshot *)NULL, OCI_DEFAULT);
-        if (OCI_SUCCESS != ocirc && OCI_SUCCESS_WITH_INFO != ocirc) {
-            fprintf(stderr, "Error while executing INSERT statement; "
-                    "ocirc = %d\n", ocirc);
-            exit(ocirc);
-        } else
-            fprintf(stderr, "INSERT statement executed!\n");
-        */
-        ;
+        EXEC SQL INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('RS', 'Repubblica San Marino', 1);
     }
 
     if (delete) {
-        /* OLD
-        if (OCI_SUCCESS != OCIStmtPrepare(stmt_hndl, err_hndl, stmt_d,
-                                          (ub4) strlen((char *)stmt_d),
-                                          (ub4) OCI_NTV_SYNTAX,
-                                          (ub4) OCI_DEFAULT)) {
-            fprintf(stderr, "Unable to prepare DELETE statement for "
-                    "execution\n");
-            exit(1);
-        }
-
-        ocirc = OCIStmtExecute(oci_svc_ctx, stmt_hndl, err_hndl,
-                               (ub4)1, (ub4)0,
-                               (CONST OCISnapshot *)NULL,
-                               (OCISnapshot *)NULL, OCI_DEFAULT);
-        if (OCI_SUCCESS != ocirc && OCI_SUCCESS_WITH_INFO != ocirc) {
-            fprintf(stderr, "Error while executing DELETE statement; "
-                    "ocirc = %d\n",
-                    ocirc);
-            exit(ocirc);
-        } else
-            fprintf(stderr, "DELETE statement executed!\n");
-        */
-        ;
+        EXEC SQL DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS';
     } else
         fprintf(stderr, "First arg is not 'DELETE', bypassing DELETE "
                 "statement...\n");
@@ -169,11 +102,6 @@ int main(int argc, char *argv[])
         fprintf(stderr, "tx_rollback error: %d\n", txrc);
         exit(txrc);
     }
-    */
-    /* free the allocated handles */
-    /* OLD
-    OCIHandleFree((dvoid *)stmt_hndl, (ub4)OCI_HTYPE_STMT);
-    OCIHandleFree((dvoid *)err_hndl, (ub4)OCI_HTYPE_ERROR);
     */
     
     /* close the resource manager(s) */

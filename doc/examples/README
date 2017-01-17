@@ -2,11 +2,13 @@ This examples are intended to be used with GNU C (gcc).
 
 This brief instruction explains how you can compile them.
 
-1. Add LIXA utilities to your PATH, for example:
-   export PATH=$PATH:/opt/lixa/bin
-2. Add LIXA libraries to your LD_LIBRARY_PATH, for example:
-   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
-3. Compile the interested C <programname> with this command line:
+1. Set LIXA environment variables:
+   . /opt/lixa/bin/lixa_env.sh
+2. Compile the interested C <programname> with this command line:
    gcc <programname>.c $(lixa-config -c -f -l -d) -o <programname>
    Example for example1.c
    gcc example1.c $(lixa-config -c -f -l -d) -o example1
+
+NOTE: many examples require other open source or commercial resource managers
+      that requires additional header files and libraries.
+      Please look at LIXA reference guide for additional details.
