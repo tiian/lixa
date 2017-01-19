@@ -536,7 +536,8 @@ testdb=> select * from AUTHORS;
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:/tmp$ ./EXAMPLE5_PQL INSERTExecuting EXAMPLE5_PQL
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE5_PQL INSERT
+Executing EXAMPLE5_PQL
 Inserting a row in the table...
 Status: +0000000000
 PQexec INSERT
@@ -582,6 +583,448 @@ testdb=> select * from AUTHORS;
 (0 rows)
 	  </screen></td></tr></tbody>
 	</table>
+      </para>
+    </section>
+  </section>
+  <section>
+    <title>An example with Oracle Pro*COBOL</title>
+    <figure xml:id="develop5_cobol">
+      <title>Deploy model of an example with Oracle DBMS</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="../images/LIXA_Development_5.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      This example was developed using the following configuration:
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	  Oracle remote configuration with Instant Client 12.1
+	</para></listitem>
+	<listitem><para>
+	  Oracle Pro*COBOL compiler as supplied by Oracle Instant Client 12.1
+	</para></listitem>
+	<listitem><para>
+	  GnuCOBOL compiler and runtime as supplied by Ubuntu 14.04
+	</para></listitem>
+      </itemizedlist>
+      If you were using a different version you would need to adapt some
+      commands to your environment.
+    </para>
+    <para>
+      Prepare the environment following the following steps:
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	  Set-up the Oracle environment as explained in 
+	  <xref linkend="Development_setup_Oracle_environment"/>
+	  and adapt the command to your Oracle Database Server version
+	</para></listitem>
+	<listitem><para>
+	  Start the LIXA state server as explained in
+	  <xref linkend="Development_start_LIXA_server"/>
+	</para></listitem>
+      </itemizedlist>
+    </para>
+    <section>
+      <title>Set environment variables</title>
+      <para>
+	Create a shell script file, for example <filename>oraenv.sh</filename>
+	with some useful environment variables as below:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ cat oracle_env.sh 
+#!/bin/sh
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1:$LD_LIBRARY_PATH
+export PATH=/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:$PATH
+export ORACLE_HOME=/opt/oracle/instantclient_12_1
+	</screen>
+	source it and check the values:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ . oracle_env.sh 
+tiian@ubuntu1404-64:/tmp$ echo $LD_LIBRARY_PATH
+/opt/oracle/instantclient_12_1:
+tiian@ubuntu1404-64:/tmp$ echo $PATH
+/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
+tiian@ubuntu1404-64:/tmp$ echo $ORACLE_HOME
+/opt/oracle/instantclient_12_1
+	</screen>
+	set LIXA environment variables:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ export PATH=$PATH:/opt/lixa/bin
+tiian@ubuntu1404-64:/tmp$ echo $PATH
+/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/opt/lixa/bin
+tiian@ubuntu1404-64:/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+tiian@ubuntu1404-64:/tmp$ echo $LD_LIBRARY_PATH
+/opt/oracle/instantclient_12_1::/opt/lixa/lib
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Build the client program</title>
+      <para>
+	Prepare the client (Application Program) using the below commands:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/cobol/EXAMPLE14_ORA.pco .
+tiian@ubuntu1404-64:/tmp$ procob EXAMPLE14_ORA.pco
+
+Pro*COBOL: Release 12.1.0.2.0 - Production on Thu Jan 19 23:20:07 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+System default option values taken from: /opt/oracle/instantclient_12_1/precomp/admin/pcbcfg.cfg
+
+tiian@ubuntu1404-64:/tmp$ export COB_LDFLAGS=-Wl,--no-as-needed
+tiian@ubuntu1404-64:/tmp$ cobc -x $(lixa-config -f -l) \
+> -L/opt/oracle/instantclient_12_1 -lclntsh -lnnz12 \
+> EXAMPLE14_ORA.cob \
+> /opt/oracle/instantclient_12_1/cobsqlintf.o
+	  </screen></td></tr></tbody>
+	</table>
+	Verify the executable produced by <command>cobc</command>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ldd EXAMPLE14_ORA
+    linux-vdso.so.1 =>  (0x00007fff1bb34000)
+    libcob.so.1 => /usr/lib/libcob.so.1 (0x00007f434aaf8000)
+    libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f434a7f2000)
+    libgmp.so.10 => /usr/lib/x86_64-linux-gnu/libgmp.so.10 (0x00007f434a57d000)
+    libncurses.so.5 => /lib/x86_64-linux-gnu/libncurses.so.5 (0x00007f434a35a000)
+    libtinfo.so.5 => /lib/x86_64-linux-gnu/libtinfo.so.5 (0x00007f434a131000)
+    libdb-5.3.so => /usr/lib/x86_64-linux-gnu/libdb-5.3.so (0x00007f4349d8e000)
+    libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f4349b8a000)
+    liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007f434996f000)
+    libclntsh.so.12.1 => /opt/oracle/instantclient_12_1/libclntsh.so.12.1 (0x00007f43469b1000)
+    libnnz12.so => /opt/oracle/instantclient_12_1/libnnz12.so (0x00007f43462a7000)
+    libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f4345ee2000)
+    libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f4345cc3000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007f434ad36000)
+    libgmodule-2.0.so.0 => /usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0 (0x00007f4345abf000)
+    libglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007f43457b7000)
+    libxml2.so.2 => /usr/lib/x86_64-linux-gnu/libxml2.so.2 (0x00007f434544f000)
+    liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007f4345236000)
+    libmql1.so => /opt/oracle/instantclient_12_1/libmql1.so (0x00007f4344fc0000)
+    libipc1.so => /opt/oracle/instantclient_12_1/libipc1.so (0x00007f4344c41000)
+    libons.so => /opt/oracle/instantclient_12_1/libons.so (0x00007f43449fc000)
+    libnsl.so.1 => /lib/x86_64-linux-gnu/libnsl.so.1 (0x00007f43447e2000)
+    librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f43445d9000)
+    libaio.so.1 => /lib/x86_64-linux-gnu/libaio.so.1 (0x00007f43443d7000)
+    libclntshcore.so.12.1 => /opt/oracle/instantclient_12_1/libclntshcore.so.12.1 (0x00007f4343e65000)
+    libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007f4343c26000)
+    libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f4343a0d000)
+    liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f43437eb000)
+    libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007f43435e5000)
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
+	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=ORAIC_DYN
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+ORAIC_DYN
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	See <xref linkend="example5_some_checks"/> for additional details on
+	the profile.
+      </para>
+    </section>
+    <section>
+      <title>Program execution</title>
+      <para>
+	It is suggested to open two different terminals: the first one
+	connected to Oracle database and the second
+	one pointing to the directory where the compiled program
+	<filename>EXAMPLE14_ORA</filename> lives.
+	First teminal session:
+	<table frame="box">
+	  <thead><tr><td>[Sqlplus terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ sqlplus hr/hr@lixa_ora_db
+
+SQL*Plus: Release 12.1.0.2.0 Production on Thu Jan 19 23:27:34 2017
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Thu Jan 19 2017 23:26:19 +01:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> 
+	  </screen></td></tr></tbody>
+	</table>
+	Second teminal session:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ls -la EXAMPLE14_ORA*
+-rwxrwxr-x 1 tiian tiian 36793 gen 19 23:22 EXAMPLE14_ORA
+-rw-rw-r-- 1 tiian tiian 11504 gen 19 23:20 EXAMPLE14_ORA.cob
+-rw-rw-r-- 1 tiian tiian 12719 gen 19 23:20 EXAMPLE14_ORA.lis
+-rw-rw-r-- 1 tiian tiian  4528 gen 19 23:10 EXAMPLE14_ORA.pco
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of <quote>COUNTRIES</quote> table before
+	program execution:
+	<table frame="box">
+	  <thead><tr><td>[Sqlplus terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	Execute the program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE14_ORA INSERT
+Executing EXAMPLE14_ORA
+Inserting a row in the table...
+Execution terminated!
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of the table again:
+	<table frame="box">
+	  <thead><tr><td>[Sqlplus terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+CO COUNTRY_NAME      REGION_ID
+-- ---------------------------------------- ----------
+RS Repubblica San Marino     1
+	  </screen></td></tr></tbody>
+	</table>
+	The example program inserted the row with REGION_ID=1. You can not 
+	insert the same row twice because there is a unique constraint on 
+	this table, 
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE14_ORA INSERT
+Executing EXAMPLE14_ORA
+Inserting a row in the table...
+Error reported by Oracle: ORA-00001: unique constraint (HR.COUNTRY_C_ID_PK) violated
+	  </screen></td></tr></tbody>
+	</table>
+	but you can remove the row using
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE14_ORA DELETE
+Executing EXAMPLE14_ORA
+Deleting a row from the table...
+Execution terminated!
+	  </screen></td></tr></tbody>
+	</table>
+	Check the table content again:
+	<table frame="box">
+	  <thead><tr><td>[Sqlplus terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	You can check the trace produced by Oracle XA client with 2 completed
+	transaction and an interrupted one (unique constraint error):
+	<screen>
+*** COMPLETED INSERT TRANSACTION ***
+
+ORACLE XA: Version 12.1.0.2.0. RM name = 'Oracle_XA'.
+
+232955.15623.4050298496.0:
+xaoopen: xa_info=ORACLE_XA+Acc=P/hr/**+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=lixa_ora_db+Loose_Coupling=true,rmid=0,flags=0x0
+
+232955.15623.4050298496.0:
+xaolgn_help: version#: 185597952 banner: Oracle Database 11g Release 11.1.0.0.0 - Production
+
+232955.15623.4050298496.0:
+xaolgn: sqlxrc/sqlxss completed
+
+232955.15623.4050298496.0:
+xaolgn2: return XA_OK
+
+232955.15623.4050298496.0:
+xaoopen: xaolgn completed
+
+232955.15623.4050298496.0:
+xaoopen: return 0
+
+232955.15623.4050298496.0:
+ax_reg: xid=0x4c495841-57511f3ca5bd4f70890f31a467c8ff68-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x0
+
+232955.15623.4050298496.0:
+OCITransStart: Attempting
+
+232955.15623.4050298496.0:
+OCITransStart: Succeeded
+
+232955.15623.4050298496.0:
+xaodynpo 2: rmid=0, state=131
+
+232955.15623.4050298496.0:
+xaoend: xid=0x4c495841-57511f3ca5bd4f70890f31a467c8ff68-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x4000000
+
+232955.15623.4050298496.0:
+OCITransDetach: Attempting
+
+232955.15623.4050298496.0:
+OCITransDetach: Succeeded
+
+232955.15623.4050298496.0:
+xaoend: return 0
+
+232955.15623.4050298496.0:
+xaocommit: xid=0x4c495841-57511f3ca5bd4f70890f31a467c8ff68-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x40000000
+
+232955.15623.4050298496.0:
+OCITransCommit: Attempting
+
+232955.15623.4050298496.0:
+xaodynpo 2: rmid=0, state=129
+
+232955.15623.4050298496.0:
+OCITransCommit: Succeeded
+
+232955.15623.4050298496.0:
+xaocommit: rtn 0
+
+232955.15623.4050298496.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+232955.15623.4050298496.0:
+OCIServerDetach: Attempting
+
+232955.15623.4050298496.0:
+OCIServerDetach: Succeeded
+
+232955.15623.4050298496.0:
+xaoclose: rtn 0
+
+
+
+*** INTERRUPTED INSERT TRANSACTION ***
+
+ORACLE XA: Version 12.1.0.2.0. RM name = 'Oracle_XA'.
+
+233203.15629.223495808.0:
+xaoopen: xa_info=ORACLE_XA+Acc=P/hr/**+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=lixa_ora_db+Loose_Coupling=true,rmid=0,flags=0x0
+
+233203.15629.223495808.0:
+xaolgn_help: version#: 185597952 banner: Oracle Database 11g Release 11.1.0.0.0 - Production
+
+233203.15629.223495808.0:
+xaolgn: sqlxrc/sqlxss completed
+
+233203.15629.223495808.0:
+xaolgn2: return XA_OK
+
+233203.15629.223495808.0:
+xaoopen: xaolgn completed
+
+233203.15629.223495808.0:
+xaoopen: return 0
+
+233203.15629.223495808.0:
+ax_reg: xid=0x4c495841-39f318a6af324a4782d5fe9988e7f7dd-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x0
+
+233203.15629.223495808.0:
+OCITransStart: Attempting
+
+233203.15629.223495808.0:
+OCITransStart: Succeeded
+
+233203.15629.223495808.0:
+xaodynpo 2: rmid=0, state=131
+
+
+
+*** COMPLETED DELETE TRANSACTION ***
+
+ORACLE XA: Version 12.1.0.2.0. RM name = 'Oracle_XA'.
+
+233222.15630.4127786624.0:
+xaoopen: xa_info=ORACLE_XA+Acc=P/hr/**+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=lixa_ora_db+Loose_Coupling=true,rmid=0,flags=0x0
+
+233222.15630.4127786624.0:
+xaolgn_help: version#: 185597952 banner: Oracle Database 11g Release 11.1.0.0.0 - Production
+
+233222.15630.4127786624.0:
+xaolgn: sqlxrc/sqlxss completed
+
+233222.15630.4127786624.0:
+xaolgn2: return XA_OK
+
+233222.15630.4127786624.0:
+xaoopen: xaolgn completed
+
+233222.15630.4127786624.0:
+xaoopen: return 0
+
+233222.15630.4127786624.0:
+ax_reg: xid=0x4c495841-3bdca359b8fd4364b425bd6284ec1ceb-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x0
+
+233222.15630.4127786624.0:
+OCITransStart: Attempting
+
+233222.15630.4127786624.0:
+OCITransStart: Succeeded
+
+233222.15630.4127786624.0:
+xaodynpo 2: rmid=0, state=131
+
+233222.15630.4127786624.0:
+xaoend: xid=0x4c495841-3bdca359b8fd4364b425bd6284ec1ceb-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x4000000
+
+233222.15630.4127786624.0:
+OCITransDetach: Attempting
+
+233222.15630.4127786624.0:
+OCITransDetach: Succeeded
+
+233222.15630.4127786624.0:
+xaoend: return 0
+
+233222.15630.4127786624.0:
+xaocommit: xid=0x4c495841-3bdca359b8fd4364b425bd6284ec1ceb-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x40000000
+
+233222.15630.4127786624.0:
+OCITransCommit: Attempting
+
+233222.15630.4127786624.0:
+xaodynpo 2: rmid=0, state=129
+
+233222.15630.4127786624.0:
+OCITransCommit: Succeeded
+
+233222.15630.4127786624.0:
+xaocommit: rtn 0
+
+233222.15630.4127786624.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+233222.15630.4127786624.0:
+OCIServerDetach: Attempting
+
+233222.15630.4127786624.0:
+OCIServerDetach: Succeeded
+
+233222.15630.4127786624.0:
+xaoclose: rtn 0
+         </screen>
       </para>
     </section>
   </section>
