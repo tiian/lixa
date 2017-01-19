@@ -169,6 +169,10 @@ int lixa_tx_begin(int *txrc, XID *xid, int flags)
             } else if (TMRESUME & flags) {
                 LIXA_TRACE(
                     ("lixa_tx_begin: xid specified, resuming transaction\n"));
+            } else {
+                LIXA_TRACE(
+                    ("lixa_tx_begin: xid specified, joining transaction with new branch\n"));
+                lixa_xid_create_new_bqual(xid);
             }
         }
         client_status_set_xid(cs, xid);

@@ -282,7 +282,7 @@ int server_xa_commit_8(struct thread_status_s *ts,
                              ts->updated_records);
         ts->curr_status[block_id].sr.data.pld.ph.state.finished =
             lmi->body.commit_8.conthr.finished;
-        /* store XID in the global transaction table */
+        /* remove XID from the global transaction table */
         struct server_trans_tbl_rec_s sttr;
         sttr.gtrid = lixa_xid_get_gtrid_ascii(
             &(ts->curr_status[block_id].sr.data.pld.ph.state.xid));
@@ -1044,7 +1044,11 @@ int server_xa_rollback_8(struct thread_status_s *ts,
 {
     enum Exception
     {
-        INVALID_BLOCK_ID, NUMBER_OF_RSRMGRS_MISMATCH, NONE
+        INVALID_BLOCK_ID,
+        NUMBER_OF_RSRMGRS_MISMATCH,
+        XID_SERIALIZE_ERROR,
+        TRANS_TABLE_REMOVE_ERROR,
+        NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -1064,6 +1068,17 @@ int server_xa_rollback_8(struct thread_status_s *ts,
                              ts->updated_records);
         ts->curr_status[block_id].sr.data.pld.ph.state.finished =
             lmi->body.rollback_8.conthr.finished;
+        /* remove XID from the global transaction table */
+        struct server_trans_tbl_rec_s sttr;
+        sttr.gtrid = lixa_xid_get_gtrid_ascii(
+            &(ts->curr_status[block_id].sr.data.pld.ph.state.xid));
+        if (!lixa_xid_serialize(
+                &(ts->curr_status[block_id].sr.data.pld.ph.state.xid),
+                sttr.xid)) THROW(XID_SERIALIZE_ERROR);
+        sttr.tsid = ts->id;
+        sttr.block_id = block_id;
+        if (LIXA_RC_OK != (ret_cod = server_trans_tbl_remove(
+                               ts->trans_table, &sttr))) THROW(TRANS_TABLE_REMOVE_ERROR);
 
         /* store data in the children blocks... */
         for (i = 0; i < lmi->body.rollback_8.xa_rollback_execs->len; ++i) {
@@ -1092,6 +1107,11 @@ int server_xa_rollback_8(struct thread_status_s *ts,
     CATCH
         {
             switch (excp) {
+                case TRANS_TABLE_REMOVE_ERROR:
+                    break;
+                case XID_SERIALIZE_ERROR:
+                    ret_cod = LIXA_RC_MALFORMED_XID;
+                    break;
                 case INVALID_BLOCK_ID:
                     ret_cod = LIXA_RC_INVALID_STATUS;
                     break;
