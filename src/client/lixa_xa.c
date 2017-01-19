@@ -672,12 +672,10 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                 *txrc = tmp_txrc;
         } /* for (i=0; ...) */
 
-        if (TMSUSPEND & xa_end_flags) {
+        if (TMSUSPEND & xa_end_flags || TMJOIN & xa_end_flags) {
             /* release memory associated to the array */
             g_array_free(msg.body.end_8.xa_end_execs, TRUE);
             memset(&msg, 0, sizeof(msg));
-
-            LIXA_TRACE(("lixa_xa_end: not sending to server for TMSUSPEND\n"));
         } else {
             if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                    &msg, buffer, sizeof(buffer) - 1, &buffer_size))) THROW(
@@ -1851,8 +1849,6 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
             /* only the GArray needs to be released to avoid memory leaks */
             g_array_free(msg.body.start_8.rsrmgrs, TRUE);
             memset(&msg, 0, sizeof(msg));
-
-            LIXA_TRACE(("lixa_xa_start: not sending to server for TMJOIN|TMRESUME\n"));
         } else {
             if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                    &msg, buffer, sizeof(buffer) - 1, &buffer_size))) THROW(
@@ -2016,8 +2012,6 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                array to avoid memory leaks */
             g_array_free(msg.body.start_24.xa_start_execs, TRUE);
             memset(&msg, 0, sizeof(msg));
-
-            LIXA_TRACE(("lixa_xa_start: not sending to server for TMJOIN|TMRESUME\n"));
         } else {
             if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                    &msg, buffer, sizeof(buffer), &buffer_size))) THROW(

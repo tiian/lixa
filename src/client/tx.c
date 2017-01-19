@@ -70,7 +70,7 @@ int tx_join(XID *xid) {
 
 int tx_end(int flags) {
     int txrc = TX_FAIL;
-    lixa_tx_end(&txrc, flags);
+    lixa_tx_end(&txrc, (flags | TMJOIN));
     return txrc;
 }
 
