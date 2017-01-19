@@ -1852,7 +1852,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
             g_array_free(msg.body.start_8.rsrmgrs, TRUE);
             memset(&msg, 0, sizeof(msg));
 
-            LIXA_TRACE(("lixa_xa_start: not sending to server for TMJOIN|TMRESUME"));
+            LIXA_TRACE(("lixa_xa_start: not sending to server for TMJOIN|TMRESUME\n"));
         } else {
             if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                    &msg, buffer, sizeof(buffer) - 1, &buffer_size))) THROW(
@@ -2017,7 +2017,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
             g_array_free(msg.body.start_24.xa_start_execs, TRUE);
             memset(&msg, 0, sizeof(msg));
 
-            LIXA_TRACE(("lixa_xa_start: not sending to server for TMJOIN|TMRESUME"));
+            LIXA_TRACE(("lixa_xa_start: not sending to server for TMJOIN|TMRESUME\n"));
         } else {
             if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                    &msg, buffer, sizeof(buffer), &buffer_size))) THROW(

@@ -612,6 +612,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         INVALID_TXRC2,
         XA_FORGET_ERROR,
         XA_TPM_ERROR,
+        XID_SERIALIZE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -670,11 +671,21 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                 commit = FALSE;
             else THROW(XA_END_ERROR);
         }
-        /* check if there are more transactions that forms part of this gtrid */
+
+        /* TODO: check if there are more transactions that forms part of this gtrid
+           check this again when branching enabled */
+        lixa_ser_xid_t xid_str = "";
+        if (!lixa_xid_serialize(client_status_get_xid(cs), xid_str)) THROW(XID_SERIALIZE_ERROR);
+        char *sxid = calloc(sizeof(lixa_ser_xid_t), sizeof(char));
+        memcpy(sxid, xid_str, sizeof(lixa_ser_xid_t));
+
         xida = g_array_new(FALSE, FALSE, sizeof(char *));
-        if (LIXA_RC_OBJ_NOT_FOUND ==
-            (ret_cod = lixa_tx_tpm(xida, FALSE, FALSE, TRUE))) THROW(
-                XA_TPM_ERROR);
+        g_array_append_val(xida, sxid);
+        /*
+          if (LIXA_RC_OBJ_NOT_FOUND ==
+          (ret_cod = lixa_tx_tpm(xida, FALSE, FALSE, TRUE))) THROW(
+          XA_TPM_ERROR);
+        */
         if (xida->len > 1) {
             one_phase_commit = FALSE;
         }
