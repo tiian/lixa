@@ -33,6 +33,7 @@ dnl @license AllPermissive
 AC_DEFUN([AX_LIB_ORACLE_OCI],
 [
     HAVE_ORACLE="no"
+    TEST_ORACLE="no"
     AC_ARG_WITH([oracle],
         AC_HELP_STRING([--with-oracle=@<:@DIR@:>@],
             [use Oracle OCI API from given path to Oracle home directory]
@@ -60,7 +61,7 @@ AC_DEFUN([AX_LIB_ORACLE_OCI],
     ORACLE_OCI_LDFLAGS=""
     ORACLE_OCI_LIBS=""
     ORACLE_OCI_VERSION=""
-    ORACLE_ENV_SH=""
+    ORACLE_ENV_SH="/dev/null"
 
     dnl
     dnl Collect include/lib paths
@@ -229,7 +230,31 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
     dnl set oracle_env.sh absolute position
     if test -f $oracle_home_dir/bin/oracle_env.sh
     then
-      ORACLE_ENV_SH=$oracle_home_dir/bin/oracle_env.sh
+	ORACLE_ENV_SH=$oracle_home_dir/bin/oracle_env.sh
+        TEST_ORACLE="yes"
+    fi
+
+    dnl search for Pro*C and Pro*COBOL precompiler in current path
+    if test "$HAVE_ORACLE" = "yes"
+    then
+	dnl Pro*C precompiler
+	AC_CHECK_PROGS(PROC, [proc], [false])
+	if test "$PROC" != "false"
+	then
+	    AC_CHECK_PROG(HAVE_PROC, [$PROC], [yes], [no])
+	else
+            AC_MSG_WARN([Pro*C precompiler [proc] not found, maybe not in PATH or not installed])
+	fi
+	AM_CONDITIONAL([COND_PROC], [test "$HAVE_PROC" = "YES"])
+	dnl Pro*COBOL precompiler
+	AC_CHECK_PROGS(PROCOB, [procob], [false])
+	if test "$PROCOB" != "false"
+	then
+	    AC_CHECK_PROG(HAVE_PROCOB, [$PROCOB], [yes], [no])
+	else
+            AC_MSG_WARN([Pro*COBOL precompiler [procob] not found, maybe not in PATH or not installed])
+	fi
+	AM_CONDITIONAL([COND_PROCOB], [test "$HAVE_PROC" = "YES"])
     fi
 
     AC_SUBST([ORACLE_OCI_VERSION])
@@ -239,6 +264,7 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
     AC_SUBST([ORACLE_OCI_NNZ])
     AC_SUBST([ORACLE_ENV_SH])
     AC_SUBST([HAVE_ORACLE])
+    AC_SUBST([TEST_ORACLE])
     if test "$HAVE_ORACLE" = "yes"
     then
         AC_DEFINE([HAVE_ORACLE], [1], [Define to 1 if you are using Oracle])

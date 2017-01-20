@@ -17,10 +17,8 @@
       * GNU General Public License along with LIXA.
       * If not, see <http://www.gnu.org/licenses/>.
       *
-      * Usage: EXAMPLE5_PQL [DELETE]
-      *
         IDENTIFICATION DIVISION.
-        PROGRAM-ID. EXAMPLE5-PQL.
+        PROGRAM-ID. CASE1037.
         DATA DIVISION.
         WORKING-STORAGE SECTION.
       * Include TX definitions
@@ -46,7 +44,7 @@
       *
         PROCEDURE DIVISION.
         000-MAIN.
-            DISPLAY 'Executing EXAMPLE5_PQL'.
+            DISPLAY 'Executing CASE1037'.
             MOVE ZERO TO TX-RETURN-STATUS.
       *
       * Delete or insert?

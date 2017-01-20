@@ -785,6 +785,35 @@ make check
 	  </para></listitem>
 	</orderedlist>
       </para>
+      <para>
+	Due to practical reasons, for some features there is not automatic
+	testing: tests that requires too many configurations become very
+	difficult to develop and to maintain. Here's a list of features that
+	are not automatically tested and how you can manually test them if
+	necessary:
+	<orderedlist enumeration='arabic'>
+	  <listitem><para>
+	    Oracle Instant Client: it does not provide a
+	    standard <filename>oracle_env.sh</filename> and a SqlNet
+	    configuration should be done in advance. To test it, use sample 
+	    programs provided and follow the reference manual for environment
+	    set-up, program build and test
+	  </para></listitem>
+	  <listitem><para>
+	    Oracle Pro*C: the "sys_include" statement of file
+	    <filename>pcscfg.cfg</filename> requires a lot of hacking for
+	    proper configuration, especially if the user installed the "zip"
+	    package and/or the system is Ubuntu Linux. To test it, use sample 
+	    programs provided and follow the reference manual for environment
+	    set-up, program build and test
+	  </para></listitem>
+	  <listitem><para>
+	    Oracle Pro*COBOL: not yet available.  To test it, use sample 
+	    programs provided and follow the reference manual for environment
+	    set-up, program build and test
+	  </para></listitem>
+	</orderedlist>
+      </para>
     </section>
     <section>
       <title>Valgrind advanced checking (LIXA developers only)</title>

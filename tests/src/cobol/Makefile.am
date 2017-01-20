@@ -21,4 +21,3 @@ LDADD = ../../../src/common/liblixab.la \
 CASE1037_LDADD = ../../../src/common/liblixab.la \
 	../../../src/client/liblixac.la \
 	../../../src/client/switch/postgresql/liblixapq.la
-

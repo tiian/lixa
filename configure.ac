@@ -1,4 +1,4 @@
-AC_INIT([lixa], [1.1.1-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [1.1.1-rc], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
@@ -188,7 +188,6 @@ then
         AC_DEFINE([HAVE_GNU_COBOL], [1], [Define to 1 if you are using GNU COBOL])
 fi
 AC_SUBST([HAVE_COBOLAPI])
-
 
 # Vars useful for lixa-config utility program
 eval "LIXA_CONFIG_INCLUDEDIR=$includedir"
