@@ -2,6 +2,7 @@ AC_INIT([lixa], [1.1.1-rc], [tiian at users dot sourceforge dot net], [], [http:
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
+LT_INIT
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
 

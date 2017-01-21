@@ -243,7 +243,7 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
 	then
 	    AC_CHECK_PROG(HAVE_PROC, [$PROC], [yes], [no])
 	else
-            AC_MSG_WARN([Pro*C precompiler [proc] not found, maybe not in PATH or not installed])
+            AC_MSG_NOTICE([Pro*C precompiler [proc] not found, maybe not in PATH or not installed])
 	fi
 	AM_CONDITIONAL([COND_PROC], [test "$HAVE_PROC" = "YES"])
 	dnl Pro*COBOL precompiler
@@ -252,7 +252,7 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
 	then
 	    AC_CHECK_PROG(HAVE_PROCOB, [$PROCOB], [yes], [no])
 	else
-            AC_MSG_WARN([Pro*COBOL precompiler [procob] not found, maybe not in PATH or not installed])
+            AC_MSG_NOTICE([Pro*COBOL precompiler [procob] not found, maybe not in PATH or not installed])
 	fi
 	AM_CONDITIONAL([COND_PROCOB], [test "$HAVE_PROC" = "YES"])
     fi

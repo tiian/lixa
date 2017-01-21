@@ -1767,7 +1767,7 @@ proc is /opt/oracle/instantclient_12_1/sdk/proc
 [tiian@rhel73 tmp]$ export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1:$LD_LIBRARY_PATH
 [tiian@rhel73 tmp]$ echo $LD_LIBRARY_PATH
 /opt/oracle/instantclient_12_1:
-[tiian@rhel73 tmp]$ cp /home/tiian/lixa/doc/examples/example14_ora.pc .
+[tiian@rhel73 tmp]$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example14_ora.pc .
 [tiian@rhel73 tmp]$ proc code=ANSI_C example14_ora.pc
 [tiian@rhel73 tmp]$ gcc example14_ora.c -Wno-unused-variable \
 > $(/opt/lixa/bin/lixa-config -c -f -l -d) \

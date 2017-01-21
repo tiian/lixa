@@ -1,5 +1,5 @@
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/examples/cobol
-doc_DATA = README EXAMPLE1.cob EXAMPLE5_PQL.cob
+doc_DATA = README EXAMPLE1.cob EXAMPLE5_PQL.cob EXAMPLE14_ORA.pco
 EXTRA_DIST = $(doc_DATA)
 
 uninstall-hook:

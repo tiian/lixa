@@ -46,12 +46,24 @@ void sql_error()
 { 
 	char msg[256]; 
 	size_t buffer_len, msg_len; 
+	int txrc;
  
 	buffer_len = sizeof(msg); 
 	sqlglm((unsigned char *)msg, &buffer_len, &msg_len);
 	if (msg_len > buffer_len)
 		msg_len = buffer_len;
-	printf("Error reported by Oracle: %.*s\n\n", (int)msg_len, msg); 
+	printf("Error reported by Oracle: %.*s\n\n", (int)msg_len, msg);
+
+	printf("Rolling back the transaction...\n");    
+	if (TX_OK != (txrc = tx_rollback())) {
+	        fprintf(stderr, "tx_rollback error: %d\n", txrc);
+	        exit(txrc);
+	}
+	if (TX_OK != (txrc = tx_close())) {
+		fprintf(stderr, "tx_close error: %d\n", txrc);
+		exit(txrc);
+	}
+    
 	exit(1); 
 } 
 
@@ -92,18 +104,12 @@ int main(int argc, char *argv[])
         fprintf(stderr, "First arg is not 'DELETE', bypassing DELETE "
                 "statement...\n");
 
+    printf("Committing the transaction...\n");    
     if (TX_OK != (txrc = tx_commit())) {
         fprintf(stderr, "tx_commit error: %d\n", txrc);
         exit(txrc);
     }
 
-    /*
-    if (TX_OK != (txrc = tx_rollback())) {
-        fprintf(stderr, "tx_rollback error: %d\n", txrc);
-        exit(txrc);
-    }
-    */
-    
     /* close the resource manager(s) */
     if (TX_OK != (txrc = tx_close())) {
         fprintf(stderr, "tx_close error: %d\n", txrc);

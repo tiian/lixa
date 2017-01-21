@@ -86,6 +86,8 @@ Ubuntu          GnuCOBOL	open-cobol
 CentOS          Basic           gcc glib2-devel libxml2-devel libuuid-devel autoconf net-tools
 CentOS		MySQL		mysql-server/mariadb-server mysql-devel/mariadb-devel
 CentOS		PostgreSQL	postgresql postgresql-server postgresql-devel
+RHEL 7.3	Basic		gcc glib2-devel libxml2-devel libuuid-devel
+				autoconf net-tools libtool
 
 
 Enjoy LIXA!
