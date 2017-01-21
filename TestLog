@@ -1,3 +1,15 @@
+Release: 1.1.1 (test of LIXA, Pro*C, Pro*COBOL)
+Date: 2017-01-21
+Configuration: --enable-crash --with-mysql --with-postgresql
+Ubuntu 10.04	|x86	|virtual (KVM)	|2 vCPU
+Ubuntu 10.04	|x86_64	|virtual (KVM)	|2 vCPU
+Ubuntu 12.04	|x86_64	|virtual (KVM)	|2 vCPU
+Ubuntu 14.04	|x86_64	|virtual (KVM)	|2 vCPU
+Ubuntu 16.04	|x86_64	|virtual (KVM)	|2 vCPU
+CentOS 6.6	|x86	|virtual (KVM)	|2 vCPU
+CentOS 6.6	|x86_64	|virtual (KVM)	|2 vCPU
+CentOS 7.2	|x86_64	|virtual (KVM)	|2 vCPU
+
 Release: 1.1.0 (test of LIXA, GnuCOBOL and PostgreSQL)
 Date: 2017-01-08
 Configuration: --enable-crash --with-postgresql

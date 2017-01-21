@@ -373,7 +373,7 @@ TXCLOSE returned value +000000000
       Refer to <xref linkend="first_example_details"/> to get some further insights.
     </para>
   </section>
-  <section>
+  <section xml:id="Development_EXAMPLE5_PQL">
     <title>An example with PostgreSQL</title>
     <figure xml:id="develop5_cobol">
       <title>Deploy model of an example with PostgreSQL DBMS</title>
@@ -398,7 +398,7 @@ TXCLOSE returned value +000000000
 	  Start the LIXA state server
 	</para></listitem>
       </itemizedlist>
-      as explained in <xref linkend="Development_example6_pql_ora"/>.
+      as explained in <xref linkend="Development_example5_pql"/>.
     </para>
     <section>
       <title>Build the client program</title>
@@ -586,7 +586,7 @@ testdb=> select * from AUTHORS;
       </para>
     </section>
   </section>
-  <section>
+  <section xml:id="Development_EXAMPLE2_ORA">
     <title>An example with Oracle Pro*COBOL</title>
     <figure xml:id="develop5_cobol">
       <title>Deploy model of an example with Oracle DBMS</title>
@@ -637,7 +637,8 @@ testdb=> select * from AUTHORS;
     <section>
       <title>Set environment variables</title>
       <para>
-	Create a shell script file, for example <filename>oraenv.sh</filename>
+	Create a shell script file, for example 
+	<filename>oracle_env.sh</filename>
 	with some useful environment variables as below:
 	<screen>
 tiian@ubuntu1404-64:/tmp$ cat oracle_env.sh 
@@ -674,8 +675,8 @@ tiian@ubuntu1404-64:/tmp$ echo $LD_LIBRARY_PATH
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/cobol/EXAMPLE14_ORA.pco .
-tiian@ubuntu1404-64:/tmp$ procob EXAMPLE14_ORA.pco
+tiian@ubuntu1404-64:/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/cobol/EXAMPLE2_ORA.pco .
+tiian@ubuntu1404-64:/tmp$ procob EXAMPLE2_ORA.pco
 
 Pro*COBOL: Release 12.1.0.2.0 - Production on Thu Jan 19 23:20:07 2017
 
@@ -686,7 +687,7 @@ System default option values taken from: /opt/oracle/instantclient_12_1/precomp/
 tiian@ubuntu1404-64:/tmp$ export COB_LDFLAGS=-Wl,--no-as-needed
 tiian@ubuntu1404-64:/tmp$ cobc -x $(lixa-config -f -l) \
 > -L/opt/oracle/instantclient_12_1 -lclntsh -lnnz12 \
-> EXAMPLE14_ORA.cob \
+> EXAMPLE2_ORA.cob \
 > /opt/oracle/instantclient_12_1/cobsqlintf.o
 	  </screen></td></tr></tbody>
 	</table>
@@ -694,7 +695,7 @@ tiian@ubuntu1404-64:/tmp$ cobc -x $(lixa-config -f -l) \
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:/tmp$ ldd EXAMPLE14_ORA
+tiian@ubuntu1404-64:/tmp$ ldd EXAMPLE2_ORA
     linux-vdso.so.1 =>  (0x00007fff1bb34000)
     libcob.so.1 => /usr/lib/libcob.so.1 (0x00007f434aaf8000)
     libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f434a7f2000)
@@ -754,7 +755,7 @@ ORAIC_DYN
 	It is suggested to open two different terminals: the first one
 	connected to Oracle database and the second
 	one pointing to the directory where the compiled program
-	<filename>EXAMPLE14_ORA</filename> lives.
+	<filename>EXAMPLE2_ORA</filename> lives.
 	First teminal session:
 	<table frame="box">
 	  <thead><tr><td>[Sqlplus terminal session]</td></tr></thead>
@@ -777,11 +778,11 @@ SQL>
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:/tmp$ ls -la EXAMPLE14_ORA*
--rwxrwxr-x 1 tiian tiian 36793 gen 19 23:22 EXAMPLE14_ORA
--rw-rw-r-- 1 tiian tiian 11504 gen 19 23:20 EXAMPLE14_ORA.cob
--rw-rw-r-- 1 tiian tiian 12719 gen 19 23:20 EXAMPLE14_ORA.lis
--rw-rw-r-- 1 tiian tiian  4528 gen 19 23:10 EXAMPLE14_ORA.pco
+tiian@ubuntu1404-64:/tmp$ ls -la EXAMPLE2_ORA*
+-rwxrwxr-x 1 tiian tiian 36793 gen 19 23:22 EXAMPLE2_ORA
+-rw-rw-r-- 1 tiian tiian 11504 gen 19 23:20 EXAMPLE2_ORA.cob
+-rw-rw-r-- 1 tiian tiian 12719 gen 19 23:20 EXAMPLE2_ORA.lis
+-rw-rw-r-- 1 tiian tiian  4528 gen 19 23:10 EXAMPLE2_ORA.pco
 	  </screen></td></tr></tbody>
 	</table>
 	Check the content of <quote>COUNTRIES</quote> table before
@@ -798,8 +799,8 @@ no rows selected
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:/tmp$ ./EXAMPLE14_ORA INSERT
-Executing EXAMPLE14_ORA
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE2_ORA INSERT
+Executing EXAMPLE2_ORA
 Inserting a row in the table...
 Execution terminated!
 	  </screen></td></tr></tbody>
@@ -821,8 +822,8 @@ RS Repubblica San Marino     1
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:/tmp$ ./EXAMPLE14_ORA INSERT
-Executing EXAMPLE14_ORA
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE2_ORA INSERT
+Executing EXAMPLE2_ORA
 Inserting a row in the table...
 Error reported by Oracle: ORA-00001: unique constraint (HR.COUNTRY_C_ID_PK) violated
 	  </screen></td></tr></tbody>
@@ -831,8 +832,8 @@ Error reported by Oracle: ORA-00001: unique constraint (HR.COUNTRY_C_ID_PK) viol
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:/tmp$ ./EXAMPLE14_ORA DELETE
-Executing EXAMPLE14_ORA
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE2_ORA DELETE
+Executing EXAMPLE2_ORA
 Deleting a row from the table...
 Execution terminated!
 	  </screen></td></tr></tbody>
@@ -1034,6 +1035,379 @@ OCIServerDetach: Succeeded
 xaoclose: rtn 0
          </screen>
       </para>
+    </section>
+  </section>
+  <section xml:id="Development_EXAMPLE6_PQL_ORA">
+    <title>An example with PostgreSQL &amp; Oracle</title>
+    <figure xml:id="develop6">
+      <title>Deploy model of an example showing a distributed transaction with PostgreSQL and Oracle</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="../images/LIXA_Development_6.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      This example shows as
+      you can implement DTP (Distributed Transaction Processing) with two
+      Resource Managers (PostgreSQL and Oracle Database Server)
+      coordinated by the LIXA Transaction Manager.
+      It's strongly suggested you have played with the
+      examples previously shown in this chapter (see
+      <xref linkend="Development_COBOL"/>) before starting this more 
+      complex one.
+    </para>
+    <para>
+      This example was developed using the following configuration:
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	  PostgreSQL 9.3.15 (client and server)
+	</para></listitem>
+	<listitem><para>
+	  Oracle remote configuration with Instant Client 12.1
+	</para></listitem>
+	<listitem><para>
+	  Oracle Pro*COBOL compiler as supplied by Oracle Instant Client 12.1
+	</para></listitem>
+	<listitem><para>
+	  GnuCOBOL compiler and runtime as supplied by Ubuntu 14.04
+	</para></listitem>
+      </itemizedlist>
+      If you were using a different version you would need to adapt some
+      commands to your environment.
+    </para>
+    <note>
+      <para>
+	If you did not yet installed the software provided by PostgreSQL,
+	please refer to the official PostgreSQL site to download the
+	software and to pick-up the information necessary to install 
+	and configure
+	the database. This manual does not give you information related
+	to PostgreSQL technology: it is assumed you already installed and
+	configured the database.
+      </para>
+      <para>
+	If you did not yet installed the software provided by Oracle,
+	please refer to the official Oracle site to download the
+	software and to pick-up the information necessary to install 
+	and configure
+	the database. This manual does not give you information related
+	to Oracle technology: it is assumed you already installed and
+	configured the database.
+      </para>
+    </note>
+    <important>
+      <para>
+	The LIXA software must be configured to support the PostgreSQL and
+	the Oracle Database Server resource managers as explained in 
+	<xref linkend="Linking_third_party_resource_managers"/>.
+	As a little hint, you should configure LIXA as below:
+	<screen>
+./configure --with-oracle-lib=/opt/oracle/instantclient_12_1 \
+> --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include \
+> --with-postgresql
+	</screen>
+	Please don't forget you must compile and install every time you
+	re-configure.
+      </para>
+    </important>
+    <section>
+      <para>
+	Prepare the environment following the following steps:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	    Set-up PostgreSQL environment
+	    as explained in <xref linkend="Development_example5_pql"/>
+	  </para></listitem>
+	  <listitem><para>
+	    Set-up the Oracle environment as explained in 
+	    <xref linkend="Development_setup_Oracle_environment"/>
+	    and adapt the command to your Oracle Database Server version
+	  </para></listitem>
+	  <listitem><para>
+	    Configure Oracle listener for remote connection as explained in 
+	    <xref linkend="Development_configure_Oracle_listener"/>
+	  </para></listitem>
+	  <listitem><para>
+	    Install and configure Oracle Instant Client as explained in 
+	    <xref linkend="Development_install_Oracle_Instant_Client"/>
+	  </para></listitem>
+	  <listitem><para>
+	    Start the LIXA state server
+	    as explained in <xref linkend="Development_example5_pql"/>
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+    </section>
+    <section>
+      <title>Set environment variables</title>
+      <para>
+	Create a shell script file, for example 
+	<filename>oracle_env.sh</filename>
+	with some useful environment variables as below:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ cat oracle_env.sh 
+#!/bin/sh
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1:$LD_LIBRARY_PATH
+export PATH=/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:$PATH
+export ORACLE_HOME=/opt/oracle/instantclient_12_1
+	</screen>
+	source it and check the values:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ . oracle_env.sh 
+tiian@ubuntu1404-64:/tmp$ echo $LD_LIBRARY_PATH
+/opt/oracle/instantclient_12_1:
+tiian@ubuntu1404-64:/tmp$ echo $PATH
+/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
+tiian@ubuntu1404-64:/tmp$ echo $ORACLE_HOME
+/opt/oracle/instantclient_12_1
+	</screen>
+	set LIXA environment variables:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ export PATH=$PATH:/opt/lixa/bin
+tiian@ubuntu1404-64:/tmp$ echo $PATH
+/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/opt/lixa/bin
+tiian@ubuntu1404-64:/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+tiian@ubuntu1404-64:/tmp$ echo $LD_LIBRARY_PATH
+/opt/oracle/instantclient_12_1::/opt/lixa/lib
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Build the client program</title>
+      <para>
+	Prepare the client (Application Program) using the below commands:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/cobol/EXAMPLE6_PQL_ORA.pco .
+tiian@ubuntu1404-64:/tmp$ procob EXAMPLE6_PQL_ORA.pco 
+Pro*COBOL: Release 12.1.0.2.0 - Production on Sat Jan 21 20:01:52 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+System default option values taken from: /opt/oracle/instantclient_12_1/precomp/admin/pcbcfg.cfg
+
+tiian@ubuntu1404-64:/tmp$ export COB_LDFLAGS=-Wl,--no-as-needed
+tiian@ubuntu1404-64:/tmp$ cobc -x $(lixa-config -f -p) \
+> -L/opt/oracle/instantclient_12_1 -lclntsh -lnnz12 \
+> EXAMPLE6_PQL_ORA.cob /opt/oracle/instantclient_12_1/cobsqlintf.o
+	  </screen></td></tr></tbody>
+	</table>
+	Verify the executable produced by <command>cobc</command>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ldd EXAMPLE6_PQL_ORA
+    linux-vdso.so.1 =>  (0x00007fffdf3fe000)
+    libcob.so.1 => /usr/lib/libcob.so.1 (0x00007eff28bed000)
+    libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007eff288e7000)
+    libgmp.so.10 => /usr/lib/x86_64-linux-gnu/libgmp.so.10 (0x00007eff28672000)
+    libncurses.so.5 => /lib/x86_64-linux-gnu/libncurses.so.5 (0x00007eff2844f000)
+    libtinfo.so.5 => /lib/x86_64-linux-gnu/libtinfo.so.5 (0x00007eff28226000)
+    libdb-5.3.so => /usr/lib/x86_64-linux-gnu/libdb-5.3.so (0x00007eff27e83000)
+    libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007eff27c7f000)
+    liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007eff27a64000)
+    liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0x00007eff2785c000)
+    libclntsh.so.12.1 => /opt/oracle/instantclient_12_1/libclntsh.so.12.1 (0x00007eff2489f000)
+    libnnz12.so => /opt/oracle/instantclient_12_1/libnnz12.so (0x00007eff24195000)
+    libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007eff23dcf000)
+    libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007eff23bb1000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007eff28e2b000)
+    libgmodule-2.0.so.0 => /usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0 (0x00007eff239ac000)
+    libglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007eff236a4000)
+    libxml2.so.2 => /usr/lib/x86_64-linux-gnu/libxml2.so.2 (0x00007eff2333d000)
+    liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007eff23123000)
+    libpq.so.5 => /usr/lib/libpq.so.5 (0x00007eff22ef4000)
+    libmql1.so => /opt/oracle/instantclient_12_1/libmql1.so (0x00007eff22c7e000)
+    libipc1.so => /opt/oracle/instantclient_12_1/libipc1.so (0x00007eff228ff000)
+    libons.so => /opt/oracle/instantclient_12_1/libons.so (0x00007eff226ba000)
+    libnsl.so.1 => /lib/x86_64-linux-gnu/libnsl.so.1 (0x00007eff224a0000)
+    librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007eff22297000)
+    libaio.so.1 => /lib/x86_64-linux-gnu/libaio.so.1 (0x00007eff22095000)
+    libclntshcore.so.12.1 => /opt/oracle/instantclient_12_1/libclntshcore.so.12.1 (0x00007eff21b23000)
+    libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007eff218e4000)
+    libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007eff216cb000)
+    liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007eff214a9000)
+    libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007eff212a3000)
+    libssl.so.1.0.0 => /lib/x86_64-linux-gnu/libssl.so.1.0.0 (0x00007eff21044000)
+    libcrypto.so.1.0.0 => /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 (0x00007eff20c68000)
+    libkrb5.so.3 => /usr/lib/x86_64-linux-gnu/libkrb5.so.3 (0x00007eff2099c000)
+    libcom_err.so.2 => /lib/x86_64-linux-gnu/libcom_err.so.2 (0x00007eff20798000)
+    libgssapi_krb5.so.2 => /usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2 (0x00007eff20551000)
+    libldap_r-2.4.so.2 => /usr/lib/x86_64-linux-gnu/libldap_r-2.4.so.2 (0x00007eff202ff000)
+    libk5crypto.so.3 => /usr/lib/x86_64-linux-gnu/libk5crypto.so.3 (0x00007eff200d0000)
+    libkrb5support.so.0 => /usr/lib/x86_64-linux-gnu/libkrb5support.so.0 (0x00007eff1fec4000)
+    libkeyutils.so.1 => /lib/x86_64-linux-gnu/libkeyutils.so.1 (0x00007eff1fcc0000)
+    libresolv.so.2 => /lib/x86_64-linux-gnu/libresolv.so.2 (0x00007eff1faa5000)
+    liblber-2.4.so.2 => /usr/lib/x86_64-linux-gnu/liblber-2.4.so.2 (0x00007eff1f895000)
+    libsasl2.so.2 => /usr/lib/x86_64-linux-gnu/libsasl2.so.2 (0x00007eff1f67a000)
+    libgssapi.so.3 => /usr/lib/x86_64-linux-gnu/libgssapi.so.3 (0x00007eff1f43c000)
+    libgnutls.so.26 => /usr/lib/x86_64-linux-gnu/libgnutls.so.26 (0x00007eff1f17d000)
+    libgcrypt.so.11 => /lib/x86_64-linux-gnu/libgcrypt.so.11 (0x00007eff1eefd000)
+    libheimntlm.so.0 => /usr/lib/x86_64-linux-gnu/libheimntlm.so.0 (0x00007eff1ecf3000)
+    libkrb5.so.26 => /usr/lib/x86_64-linux-gnu/libkrb5.so.26 (0x00007eff1ea6b000)
+    libasn1.so.8 => /usr/lib/x86_64-linux-gnu/libasn1.so.8 (0x00007eff1e7ca000)
+    libhcrypto.so.4 => /usr/lib/x86_64-linux-gnu/libhcrypto.so.4 (0x00007eff1e596000)
+    libroken.so.18 => /usr/lib/x86_64-linux-gnu/libroken.so.18 (0x00007eff1e381000)
+    libtasn1.so.6 => /usr/lib/x86_64-linux-gnu/libtasn1.so.6 (0x00007eff1e16d000)
+    libp11-kit.so.0 => /usr/lib/x86_64-linux-gnu/libp11-kit.so.0 (0x00007eff1df2a000)
+    libgpg-error.so.0 => /lib/x86_64-linux-gnu/libgpg-error.so.0 (0x00007eff1dd25000)
+    libwind.so.0 => /usr/lib/x86_64-linux-gnu/libwind.so.0 (0x00007eff1dafc000)
+    libheimbase.so.1 => /usr/lib/x86_64-linux-gnu/libheimbase.so.1 (0x00007eff1d8ed000)
+    libhx509.so.5 => /usr/lib/x86_64-linux-gnu/libhx509.so.5 (0x00007eff1d6a4000)
+    libsqlite3.so.0 => /usr/lib/x86_64-linux-gnu/libsqlite3.so.0 (0x00007eff1d3eb000)
+    libcrypt.so.1 => /lib/x86_64-linux-gnu/libcrypt.so.1 (0x00007eff1d1b1000)
+    libffi.so.6 => /usr/lib/x86_64-linux-gnu/libffi.so.6 (0x00007eff1cfa9000)
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
+	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=PQL_STA_ORAIC_STA
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+PQL_STA_ORAIC_STA
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	See <xref linkend="example5_some_checks"/> for additional details on
+	the profile.
+      </para>
+    </section>
+    <section>
+      <title>Program execution</title>
+      <para>
+	This example behaves has the sum of 
+	<filename>EXAMPLE2_ORA</filename> explained in 
+	<xref linkend="Development_EXAMPLE2_ORA"/> and of
+	<filename>EXAMPLE5_PQL</filename> explained in 
+	<xref linkend="Development_EXAMPLE5_PQL"/>:
+	the program tries to insert a row inside the Oracle database and a
+	row inside the PostgreSQL database.
+	The following paragraphs show the type of behavior that you try.
+      </para>
+      <section>
+	<title>Happy path executions</title>
+	<para>
+	  Both databases can insert the row:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE6_PQL_ORA INSERT
+Executing EXAMPLE6_PQL_ORA
+Inserting a row in the table...
+Status: +0000000000
+PQexec INSERT
+Status: +0000000001
+Execution terminated!
+	    </screen></td></tr></tbody>
+	  </table>
+	</para>
+	<para>
+	  Both databases can delete the row:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE6_PQL_ORA DELETE
+Executing EXAMPLE6_PQL_ORA
+Deleting a row from the table...
+Status: +0000000000
+PQexec DELETE
+Status: +0000000001
+Execution terminated!
+	    </screen></td></tr></tbody>
+	  </table>
+	</para>
+      </section>
+      <section>
+	<title>Backed out executions</title>
+	<para>
+	  Oracle database can not insert the row:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE6_PQL_ORA INSERT
+Executing EXAMPLE6_PQL_ORA
+Inserting a row in the table...
+Status: +0000000000
+Error reported by Oracle: ORA-00001: unique constraint (HR.COUNTRY_C_ID_PK) violated
+                                                                                                                                                                                                     
+Rolling back due to SQL errors...
+TXROLLBACK returned value +000000000
+TXCLOSE returned value +000000000
+	    </screen></td></tr></tbody>
+	  </table>
+	  and PostgreSQL has not inserted its row due to TXROLLBACK:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ psql testdb
+psql (9.3.15)
+Type "help" for help.
+
+testdb=> select * from AUTHORS;
+ id | last_name | first_name 
+----+-----------+------------
+(0 rows)
+	    </screen></td></tr></tbody>
+	  </table>
+	</para>
+	<para>
+	  PostgreSQL database can not insert the row:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE6_PQL_ORA INSERT
+Executing EXAMPLE6_PQL_ORA
+Inserting a row in the table...
+Status: +0000000000
+PQexec INSERT
+Error in PQexec statement: 
+ERROR:  duplicate key value violates unique constraint "authors_pkey"
+DETAIL:  Key (id)=(1) already exists.
+
+Rolling back due to SQL errors...
+TXROLLBACK returned value +000000000
+TXCLOSE returned value +000000000
+	    </screen></td></tr></tbody>
+	  </table>
+	  and Oracle has not inserted its row due to TXROLLBACK:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ sqlplus hr/hr@lixa_ora_db
+
+SQL*Plus: Release 12.1.0.2.0 Production on Sat Jan 21 21:44:23 2017
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Sat Jan 21 2017 21:42:12 +01:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	    </screen></td></tr></tbody>
+	  </table>
+	</para>
+      </section>
+      <section>
+	<title>Conclusion</title>
+	<para>
+	  This example shows a real two phase commit transaction using a
+	  COBOL program (GnuCOBOL) that accesses an Oracle database
+	  (Pro*COBOL) and a PostgreSQL database (direct COBOL calls).
+	</para>
+      </section>
     </section>
   </section>
 </chapter>

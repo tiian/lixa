@@ -35,6 +35,11 @@
 	you install from the original tarball.
       </para>
       <para>
+	If you are interested in COBOL, LIXA supports only Gnu COBOL 1.1 or
+	upper; COBOL development and testing is currently performed on
+	Ubuntu 14.04 with default COBOL version: 1.1
+      </para>
+      <para>
 	Some <emphasis>libraries (run time and development stuff)</emphasis> 
 	are necessary too:
 	<itemizedlist mark='bullet'>

@@ -15,13 +15,5 @@ This brief instruction explains how you can compile them.
    export COB_LDFLAGS=-Wl,--no-as-needed
 4. Compile the interested COBOL <programname> with this command line:
      cobc -x $(lixa-config -f -l) <programname>
-   Example for EXAMPLE1.cbl (No third party resource managers)
-     cobc -x $(lixa-config -f -l) EXAMPLE1.cob
-   Example for EXAMPLE5_PQL.cbl (PostgreSQL resource manager)
-     cobc -x $(lixa-config -f -p) EXAMPLE5_PQL.cob
-   Example for EXAMPLE14_ORA.pco (Pro*COBOL, Oracle resource manager)
-     procob EXAMPLE14_ORA.pco
-     cobc -x $(lixa-config -f -l) -L/opt/oracle/instantclient_12_1/ \
-          -lclntsh -lnnz12 X.cob  /opt/oracle/instantclient_12_1/cobsqlintf.o
 
-
+NOTE: look at LIXA Reference Guide for full explanation of program build

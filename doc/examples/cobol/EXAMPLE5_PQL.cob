@@ -64,7 +64,7 @@
       * Open the resource manager
       *
             CALL "TXOPEN" USING TX-RETURN-STATUS.
-      *     DISPLAY 'TXOPEN returned value ' TX-STATUS.
+            DISPLAY 'TXOPEN returned value ' TX-STATUS.
             IF NOT TX-OK THEN
                DISPLAY 'Exiting...'
                STOP RUN RETURNING 1
@@ -107,7 +107,7 @@
       * Start a new transaction
       * 
             CALL "TXBEGIN" USING TX-RETURN-STATUS.
-      *     DISPLAY 'TXBEGIN returned value ' TX-STATUS.
+            DISPLAY 'TXBEGIN returned value ' TX-STATUS.
             IF NOT TX-OK THEN
                DISPLAY 'Exiting...'
                STOP RUN RETURNING 1
@@ -157,7 +157,8 @@
                   END-IF
                   SET ADDRESS OF RESULT-CHAR TO RESULT-POINTER
                END-PERFORM
-               STOP RUN RETURNING 1
+      * Rolling back and exiting
+               GO TO 010-ROLLBACK
             END-IF.
             CALL "PQclear" USING BY VALUE PGRES.
             DISPLAY "Status: " RESULT.
@@ -175,3 +176,23 @@
                STOP RUN RETURNING 1
             DISPLAY 'Execution terminated!'.
             STOP RUN RETURNING 0.
+      *
+      * Rolling back after SQL error
+      *
+        010-ROLLBACK.
+            DISPLAY 'Rolling back due to SQL errors...'
+      * Calling TXROLLBACK (tx_rollback)
+            CALL "TXROLLBACK" USING TX-RETURN-STATUS.
+            DISPLAY 'TXROLLBACK returned value ' TX-STATUS.
+            IF NOT TX-OK THEN
+               DISPLAY 'Exiting...'
+               STOP RUN RETURNING 1
+            END-IF.
+      * Calling TXCLOSE (tx_close)
+            CALL "TXCLOSE" USING TX-RETURN-STATUS.
+            DISPLAY 'TXCLOSE returned value ' TX-STATUS.
+            IF NOT TX-OK
+               STOP RUN RETURNING 1
+            DISPLAY 'Execution terminated!'.
+            STOP RUN RETURNING 1.
+

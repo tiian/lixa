@@ -1,6 +1,6 @@
 LOG:
 
-201701xx - 1.1.1 Support for Oracle Pro*C and Oracle Pro*COBOL
+20170121 - 1.1.1 Support for Oracle Pro*C and Oracle Pro*COBOL
 		Pro*C config:
 			Red Hat Enterprise Linux 7.3
 			Oracle Instant Client 12.1

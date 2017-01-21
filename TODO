@@ -1,5 +1,4 @@
 Remove glib deprecated functions for Ubuntu 14.04
-Fix "make check" when crash is disabled
 
 Explore high availability features (active/active) with dynamic or static
 workload

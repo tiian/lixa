@@ -150,6 +150,15 @@
         <rsrmgr>OracleXE_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="PQL_STA_ORAIC_STA">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
+        <rsrmgr>OracleIC_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
     <profile name="PQL_STA_DB2_DYN">
       <sttsrvs>
         <sttsrv>local_1</sttsrv>
