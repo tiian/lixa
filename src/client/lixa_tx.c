@@ -1139,7 +1139,7 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
         LIXA_TRACE(("lixa_tx_rollback: txstate = S%d\n", txstate));
 
         if (LIXA_RC_OK !=
-            (ret_cod = lixa_xa_end(cs, txrc, FALSE, TMFAIL))) THROW(
+            (ret_cod = lixa_xa_end(cs, txrc, FALSE, TMSUCCESS))) THROW(
                 XA_END_ERROR);
 
         if (LIXA_RC_OK !=
