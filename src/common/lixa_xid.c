@@ -102,8 +102,7 @@ void lixa_xid_create_new(XID *xid)
     uuid_generate(uuid_obj);
     memcpy(xid->data, uuid_obj,
            sizeof(uuid_t)); // global transaction identifier
-    uuid_generate(uuid_obj);
-    memcpy(xid->data + sizeof(uuid_t), uuid_obj,
+    memcpy(xid->data + sizeof(uuid_t), lixa_xid_global_bqual,
            sizeof(uuid_t)); // branch qualifier
 
 #ifdef LIXA_DEBUG
