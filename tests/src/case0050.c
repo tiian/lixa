@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
     if (suspend) {
         printf("%s| tx_end(): %d\n", pgm, rc = tx_end(TX_TMSUSPEND));
-        assert(TX_OK == rc);
+        assert(test_rc == rc);
     }
 
     if (resume) {
