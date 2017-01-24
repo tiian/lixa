@@ -21,7 +21,7 @@
 export LIXA_TRACE_MASK=0xffffffff
 
 
-# This file contains utility functions for test purpouses
+# This file contains utility functions for test purposes
 reset_server() {
 	echo "Resetting LIXA server status"
 	rm -rf $TESTS_VAR_DIR

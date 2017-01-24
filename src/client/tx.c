@@ -56,11 +56,13 @@ int tx_begin(void) {
     return txrc;
 }
 
+
 int tx_resume(XID *xid) {
     int txrc = TX_FAIL;
     lixa_tx_begin(&txrc, xid, TMRESUME);
     return txrc;
 }
+
 
 int tx_join(XID *xid) {
     int txrc = TX_FAIL;
@@ -68,17 +70,20 @@ int tx_join(XID *xid) {
     return txrc;
 }
 
+
 int tx_end(int flags) {
     int txrc = TX_FAIL;
     lixa_tx_end(&txrc, (flags & TMSUSPEND) ? flags : (flags | TMJOIN));
     return txrc;
 }
 
+
 int tx_close(void) {
     int txrc = TX_FAIL;
     lixa_tx_close(&txrc);
     return txrc;
 }
+
 
 int tx_commit(void) {
     int txrc1 = TX_FAIL;
@@ -113,47 +118,20 @@ int tx_commit(void) {
     return txrc2;
 }
 
+
 int tx_info(TXINFO *info) {
     int txrc = TX_FAIL;
     lixa_tx_info(&txrc, info);
     return txrc;
 }
 
-int tx_xid_serialize(TXINFO info, char **sxid) {
-    int txrc = TX_FAIL;
-
-    lixa_ser_xid_t xid_str = "";
-    if (!lixa_xid_serialize(&info.xid, xid_str)) {
-        return txrc;
-    }
-
-    if (NULL != *sxid) {
-        free(*sxid);
-    }
-
-    *sxid = calloc(sizeof(lixa_ser_xid_t), sizeof(char));
-    memcpy(*sxid, xid_str, sizeof(lixa_ser_xid_t));
-
-    txrc = TX_OK;
-    return txrc;
-}
-
-int tx_xid_deserialize(TXINFO *info, char *sxid) {
-    int txrc = TX_FAIL;
-
-    if (!lixa_xid_deserialize(&(info->xid), sxid)) {
-        return txrc;
-    }
-
-    txrc = TX_OK;
-    return txrc;
-}
 
 int tx_open(void) {
     int txrc = TX_FAIL;
     lixa_tx_open(&txrc, FALSE);
     return txrc;
 }
+
 
 int tx_rollback(void) {
     int txrc1 = TX_FAIL;
@@ -206,5 +184,37 @@ int tx_set_transaction_control(TRANSACTION_CONTROL control) {
 int tx_set_transaction_timeout(TRANSACTION_TIMEOUT timeout) {
     int txrc = TX_FAIL;
     lixa_tx_set_transaction_timeout(&txrc, timeout);
+    return txrc;
+}
+
+
+int tx_xid_serialize(TXINFO info, char **sxid) {
+    int txrc = TX_FAIL;
+
+    lixa_ser_xid_t xid_str = "";
+    if (!lixa_xid_serialize(&info.xid, xid_str)) {
+        return txrc;
+    }
+
+    if (NULL != *sxid) {
+        free(*sxid);
+    }
+
+    *sxid = calloc(sizeof(lixa_ser_xid_t), sizeof(char));
+    memcpy(*sxid, xid_str, sizeof(lixa_ser_xid_t));
+
+    txrc = TX_OK;
+    return txrc;
+}
+
+
+int tx_xid_deserialize(TXINFO *info, char *sxid) {
+    int txrc = TX_FAIL;
+
+    if (!lixa_xid_deserialize(&(info->xid), sxid)) {
+        return txrc;
+    }
+
+    txrc = TX_OK;
     return txrc;
 }

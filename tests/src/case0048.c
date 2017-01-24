@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdio.h>
+#include t<stdio.h>
 #include <stdlib.h>
 
 #include <tx.h>
@@ -49,6 +49,8 @@ int main(int argc, char *argv[]) {
     if (lixa_xid_compare(&(info1.xid), &(info2.xid))) {
         return 1;
     }
+
+    free(xid);
 
     return 0;
 }
