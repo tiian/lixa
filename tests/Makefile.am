@@ -28,7 +28,8 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	tx_b_5.at tx_b_5_0.at tx_b_5_1.at tx_b_5_2.at tx_b_5_3.at \
 	tx_b_5_4.at tx_b_5_5.at tx_b_5_6.at tx_b_5_7.at tx_b_5_8.at \
 	tx_b_5_9.at tx_b_5_10.at \
-	xa.at xa_5_26.at xa_5_30.at xa_5_32.at xa_5_37.at xa_5_40.at \
+	xa.at xa_5_26.at xa_5_30.at xa_5_32.at xa_5_37.at xa_5_37_suspended.at \
+	xa_5_40.at \
 	xa_5_42.at xa_5_44.at xa_5_47.at xa_5_49.at xa_5_52.at \
 	xa_6_62.at \
 	mt.at mt_1_0.at mt_2_0.at \

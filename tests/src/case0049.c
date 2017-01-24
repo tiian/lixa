@@ -43,15 +43,17 @@
 int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
-    int rc, commit, test_rc;
+    int rc, commit, suspend, resume, test_rc;
     
-    if (argc < 3) {
-        fprintf(stderr, "%s: at least two options must be specified\n",
+    if (argc < 4) {
+        fprintf(stderr, "%s: at least four options must be specified\n",
                 argv[0]);
         exit (1);
     }
     commit = strtol(argv[1], NULL, 0);
-    test_rc = strtol(argv[2], NULL, 0);
+    suspend = strtol(argv[2], NULL, 0);
+    resume = strtol(argv[3], NULL, 0);
+    test_rc = strtol(argv[4], NULL, 0);
 
     printf("%s| starting...\n", pgm);
 
@@ -60,6 +62,19 @@ int main(int argc, char *argv[])
 
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OK == rc);
+
+    if (suspend) {
+        printf("%s| tx_end(): %d\n", pgm, rc = tx_end(TX_TMSUSPEND));
+        assert(TX_OK == rc);
+    }
+
+    if (resume) {
+        TXINFO txinfo;
+        printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&txinfo));
+        assert(TX_OK == rc);
+        printf("%s| tx_resume(): %d\n", pgm, rc = tx_resume(&txinfo.xid));
+        assert(TX_OK == rc);
+    }
 
     if (commit)
         printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());

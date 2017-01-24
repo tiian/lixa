@@ -43,17 +43,19 @@
 int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
-    int rc, commit, test_rc, chained;
+    int rc, commit, test_rc, chained, suspend, resume;
     int rmid = 1;
     
-    if (argc < 4) {
-        fprintf(stderr, "%s: at least three options must be specified\n",
+    if (argc < 6) {
+        fprintf(stderr, "%s: at least five options must be specified\n",
                 argv[0]);
         exit (1);
     }
     commit = strtol(argv[1], NULL, 0);
     chained = strtol(argv[2], NULL, 0);
-    test_rc = strtol(argv[3], NULL, 0);
+    suspend = strtol(argv[3], NULL, 0);
+    resume = strtol(argv[4], NULL, 0);
+    test_rc = strtol(argv[5], NULL, 0);
 
     printf("%s| starting...\n", pgm);
 
@@ -72,6 +74,19 @@ int main(int argc, char *argv[])
     printf("%s| lixa_monkeyrm_call_ax_reg(%d): %d\n",
            pgm, rmid, rc = lixa_monkeyrm_call_ax_reg(rmid));
     assert(TM_OK == rc);
+
+    if (suspend) {
+        printf("%s| tx_end(): %d\n", pgm, rc = tx_end(TX_TMSUSPEND));
+        assert(TX_OK == rc);
+    }
+
+    if (resume) {
+        TXINFO txinfo;
+        printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&txinfo));
+        assert(TX_OK == rc);
+        printf("%s| tx_resume(): %d\n", pgm, rc = tx_resume(&txinfo.xid));
+        assert(TX_OK == rc);
+    }
 
     if (commit)
         printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
