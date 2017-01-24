@@ -1,7 +1,7 @@
 AT_BANNER([XA: 5.37 xa_end])
 
 # Checks return code result
-AT_SETUP([XA/5.37/0.0 (return values, one phase commit)])
+AT_SETUP([XA/5.37/0.0 (return values, one phase commit, suspended transaction)])
 # XA_NOMIGRATE
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
@@ -166,7 +166,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset stop ca
 AT_CLEANUP
 
 # Checks return code result
-AT_SETUP([XA/5.37/1.0 (return values, two phase commit)])
+AT_SETUP([XA/5.37/1.0 (return values, two phase commit, suspended transaction)])
 # XA_NOMIGRATE
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
