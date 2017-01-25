@@ -7,8 +7,8 @@ AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
 xa_start/0
+xa_end/0
 xa_end/9
-# something must happen here as the transaction is left in recovery pending!!!
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh reset start case0049 1 1 0 -7], [0], [ignore], [ignore])
 # XA_OK
