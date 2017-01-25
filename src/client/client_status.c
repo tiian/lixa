@@ -273,7 +273,7 @@ int client_status_could_one_phase(const client_status_t *cs) {
                     "csr->xa_td_state=%d\n", i, csr->common.dynamic,
                     csr->common.xa_td_state));
         if (csr->common.dynamic) {
-            if (csr->common.xa_td_state == XA_STATE_D1)
+            if (csr->common.xa_td_state == XA_STATE_D1 || csr->common.xa_td_state == XA_STATE_D2)
                 n++;
         } else
             n++;

@@ -507,8 +507,11 @@ int lixa_tx_end(int *txrc, int flags)
 
         /* update the TX state */
         client_status_set_txstate(cs, next_txstate);
-        /* reset the transaction id */
-        lixa_xid_reset(client_status_get_xid(cs));
+
+        if ((TMSUSPEND & flags) == 0) {
+            /* reset the transaction id */
+            lixa_xid_reset(client_status_get_xid(cs));
+        }
 
         THROW(NONE);
     }

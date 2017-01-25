@@ -47,7 +47,7 @@ xa_commit/0
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh reset start case0002 commit 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
-AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2 | wc -l | grep '^4'], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2 | wc -l | sed 's/^ *//' | grep '^4'], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TX/B.2/0.1])
@@ -85,7 +85,7 @@ xa_commit/0
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0002 commit 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
-AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2 | wc -l | grep '^3'], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2 | wc -l | sed 's/^ *//' | grep '^3'], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TX/B.2/0.2])
@@ -122,7 +122,7 @@ xa_prepare/3
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0002 commit 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
-AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2 | wc -l | grep '^2'], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2 | wc -l | sed 's/^ *//' | grep '^2'], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TX/B.2/0.3])
@@ -158,7 +158,7 @@ xa_prepare/3
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset none case0002 commit 0 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
-AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2 | wc -l | grep '^1'], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'xa_commit_entry.* 0x0) = 0' $TESTS_TMP_FILE2 | wc -l | sed 's/^ *//' | grep '^1'], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TX/B.2/0.4])

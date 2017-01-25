@@ -588,8 +588,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                     } else {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                        csr->common.xa_s_state = XA_STATE_S2;
                     }
-                    csr->common.xa_s_state = XA_STATE_S2;
                     break;
                 case XA_RBROLLBACK:
                 case XA_RBCOMMFAIL:
@@ -605,8 +605,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                     } else {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                        csr->common.xa_s_state = XA_STATE_S4;
                     }
-                    csr->common.xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     read_write_rsrmgr--; /* read only transaction */
                     if (commit)
@@ -622,8 +622,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                     } else {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                        csr->common.xa_s_state = XA_STATE_S4;
                     }
-                    csr->common.xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     if (commit)
                         tmp_txrc = TX_ROLLBACK;
@@ -641,8 +641,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                     } else {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                        csr->common.xa_s_state = XA_STATE_S4;
                     }
-                    csr->common.xa_s_state = XA_STATE_S4;
                     xa_end_flags = TMFAIL;
                     if (commit)
                         tmp_txrc = TX_ROLLBACK;
