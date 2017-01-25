@@ -457,7 +457,7 @@ int lixa_tx_end(int *txrc, int flags)
 
         /* check if the there is a timeout */
         if (client_status_is_tx_timeout_time(cs)) {
-            LIXA_TRACE(("lixa_tx_commit: this transaction is in state "
+            LIXA_TRACE(("lixa_tx_end: this transaction is in state "
                         "TX_TIMEOUT_ROLLBACK_ONLY and cannot be committed, "
                         "rolling back...\n", txstate));
             commit = FALSE;
@@ -472,61 +472,38 @@ int lixa_tx_end(int *txrc, int flags)
                 commit = FALSE;
             else THROW(XA_END_ERROR);
         }
-        /* commit/rollback */
-        if (commit) {
-            LIXA_TRACE(("lixa_tx_end: go on with end...\n"));
-            switch (*txrc) {
-                case TX_OK:
-                case TX_ROLLBACK:
-                case TX_MIXED:
-                case TX_HAZARD:
+
+        LIXA_TRACE(("lixa_tx_end: commit status = %d\n", commit));
+
+        switch (*txrc) {
+            case TX_OK:
+            case TX_ROLLBACK:
+            case TX_MIXED:
+            case TX_HAZARD:
+                if (TMSUSPEND & flags) {
                     if (TX_STATE_S3 == txstate)
                         next_txstate = TX_STATE_S1;
                     else if (TX_STATE_S4 == txstate)
                         next_txstate = TX_STATE_S2;
                     else THROW(INVALID_STATE3);
-                    break;
-                case TX_NO_BEGIN:
-                case TX_ROLLBACK_NO_BEGIN:
-                case TX_MIXED_NO_BEGIN:
-                case TX_HAZARD_NO_BEGIN:
-                case TX_COMMITTED_NO_BEGIN:
-                    if (TX_STATE_S4 == txstate)
-                        next_txstate = TX_STATE_S2;
-                    else THROW(INVALID_STATE4);
-                    break;
-                case TX_FAIL:
+                } else {
                     next_txstate = txstate;
-                    break;
-                default: THROW(INVALID_TXRC2);
-            } /* switch */
-        } else {
-            switch (*txrc) {
-                case TX_OK:
-                case TX_ROLLBACK:
-                case TX_MIXED:
-                case TX_HAZARD:
-                    if (TX_STATE_S3 == txstate)
-                        next_txstate = TX_STATE_S1;
-                    else if (TX_STATE_S4 == txstate)
-                        next_txstate = TX_STATE_S2;
-                    else THROW(INVALID_STATE3);
-                    break;
-                case TX_NO_BEGIN:
-                case TX_ROLLBACK_NO_BEGIN:
-                case TX_MIXED_NO_BEGIN:
-                case TX_HAZARD_NO_BEGIN:
-                case TX_COMMITTED_NO_BEGIN:
-                    if (TX_STATE_S4 == txstate)
-                        next_txstate = TX_STATE_S2;
-                    else THROW(INVALID_STATE4);
-                    break;
-                case TX_FAIL:
-                    next_txstate = txstate;
-                    break;
-                default: THROW(INVALID_TXRC2);
-            } /* switch */
-        } /* else */
+                }
+                break;
+            case TX_NO_BEGIN:
+            case TX_ROLLBACK_NO_BEGIN:
+            case TX_MIXED_NO_BEGIN:
+            case TX_HAZARD_NO_BEGIN:
+            case TX_COMMITTED_NO_BEGIN:
+                if (TX_STATE_S4 == txstate)
+                    next_txstate = TX_STATE_S2;
+                else THROW(INVALID_STATE4);
+                break;
+            case TX_FAIL:
+                next_txstate = txstate;
+                break;
+            default: THROW(INVALID_TXRC2);
+        } /* switch */
 
         /* update the TX state */
         client_status_set_txstate(cs, next_txstate);
