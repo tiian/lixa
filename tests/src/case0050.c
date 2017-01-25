@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     if (resume) {
         TXINFO txinfo;
         printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&txinfo));
-        assert(TX_OK == rc);
+        assert(0 == rc || 1 == rc);
         printf("%s| tx_resume(): %d\n", pgm, rc = tx_resume(&txinfo.xid));
         assert(TX_OK == rc);
     }

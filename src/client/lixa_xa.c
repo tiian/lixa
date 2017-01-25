@@ -553,7 +553,8 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
             /* dynamic registered resource managers with unregistered state
                must be bypassed */
             if (csr->common.dynamic &&
-                csr->common.xa_td_state != XA_STATE_D1) {
+                (csr->common.xa_td_state != XA_STATE_D1
+                 && csr->common.xa_td_state != XA_STATE_D2)) {
                 LIXA_TRACE(("lixa_xa_end: resource manager # %u has not "
                             "dynamically registered itself, skipping...\n",
                             i));

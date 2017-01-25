@@ -121,6 +121,8 @@ int lixa_tx_begin(int *txrc, XID *xid, int flags)
         /* check TX state (see Table 7-1) */
         txstate = client_status_get_txstate(cs);
 
+        LIXA_TRACE(("lixa_tx_begin: txstate = S%d\n", txstate));
+
         switch (txstate) {
             case TX_STATE_S1:
                 next_txstate = TX_STATE_S3;
@@ -130,8 +132,15 @@ int lixa_tx_begin(int *txrc, XID *xid, int flags)
                 break;
             case TX_STATE_S0:
             case TX_STATE_S3:
-            case TX_STATE_S4: THROW(PROTOCOL_ERROR1);
-            default: THROW(INVALID_STATUS);
+            case TX_STATE_S4:
+                if ((TMRESUME & flags) == 0) {
+                    THROW(PROTOCOL_ERROR1);
+                }
+
+                next_txstate = txstate;
+                break;
+            default:
+                THROW(INVALID_STATUS);
         }
         LIXA_TRACE(("lixa_tx_begin: txstate = S%d, "
                     "next_txstate = S%d\n", txstate, next_txstate));
@@ -150,7 +159,8 @@ int lixa_tx_begin(int *txrc, XID *xid, int flags)
                             i, csr->common.xa_td_state));
                 THROW(OUTSIDE_ERROR);
             } else if (csr->common.dynamic &&
-                       XA_STATE_D0 != csr->common.xa_td_state) {
+                       (XA_STATE_D0 != csr->common.xa_td_state
+                        && XA_STATE_D2 != csr->common.xa_td_state)) {
                 LIXA_TRACE(("lixa_tx_begin: resource manager # %u uses "
                             "dynamic registration and is in state %d\n",
                             i, csr->common.xa_td_state));
