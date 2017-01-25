@@ -481,13 +481,13 @@ int lixa_tx_end(int *txrc, int flags)
             case TX_MIXED:
             case TX_HAZARD:
                 if (TMSUSPEND & flags) {
+                    next_txstate = txstate;
+                } else {
                     if (TX_STATE_S3 == txstate)
                         next_txstate = TX_STATE_S1;
                     else if (TX_STATE_S4 == txstate)
                         next_txstate = TX_STATE_S2;
                     else THROW(INVALID_STATE3);
-                } else {
-                    next_txstate = txstate;
                 }
                 break;
             case TX_NO_BEGIN:
