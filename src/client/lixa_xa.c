@@ -603,14 +603,15 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                     if (TMSUSPEND & xa_end_flags) {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                        xa_end_flags = TMFAIL | TMSUSPEND;
                     } else {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                        xa_end_flags = TMFAIL;
                         csr->common.xa_s_state = XA_STATE_S4;
                     }
-                    xa_end_flags = TMFAIL;
                     read_write_rsrmgr--; /* read only transaction */
-                    if (commit)
+                    if (commit || TMSUSPEND & xa_end_flags)
                         tmp_txrc = TX_ROLLBACK;
                     break;
                 case XAER_ASYNC:
@@ -620,13 +621,14 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                     if (TMSUSPEND & xa_end_flags) {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                        xa_end_flags = TMFAIL | TMSUSPEND;
                     } else {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                        xa_end_flags = TMFAIL;
                         csr->common.xa_s_state = XA_STATE_S4;
                     }
-                    xa_end_flags = TMFAIL;
-                    if (commit)
+                    if (commit || TMSUSPEND & xa_end_flags)
                         tmp_txrc = TX_ROLLBACK;
                     break;
                 case XAER_RMFAIL:
@@ -639,13 +641,14 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                     if (TMSUSPEND & xa_end_flags) {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                        xa_end_flags = TMFAIL | TMSUSPEND;
                     } else {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
+                        xa_end_flags = TMFAIL;
                         csr->common.xa_s_state = XA_STATE_S4;
                     }
-                    xa_end_flags = TMFAIL;
-                    if (commit)
+                    if (commit || TMSUSPEND & xa_end_flags)
                         tmp_txrc = TX_ROLLBACK;
                     break;
                 case XAER_INVAL:
@@ -1607,14 +1610,22 @@ lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             if (csr->common.dynamic && csr->common.xa_s_state != XA_STATE_S2 &&
                 csr->common.xa_s_state != XA_STATE_S3 &&
                 csr->common.xa_s_state != XA_STATE_S4) {
-                LIXA_TRACE(("lixa_xa_rollback: resource manager # %i "
-                            "(xa_s_state=%d) "
-                            "has not yet dynamically registered and/or "
-                            "statically ended/prepared, skipping...\n",
-                            record.rmid, csr->common.xa_s_state));
-                if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(
-                                       &ltr, csr->prepare_rc))) THROW(TX_RC_ADD_ERROR5);
-                continue;
+                if (csr->common.xa_td_state == XA_STATE_D0 &&
+                    csr->common.xa_s_state == XA_STATE_S1) {
+                    LIXA_TRACE(("lixa_xa_rollback: resource manager # %i "
+                                "(xa_s_state=%d,xa_td_state=%d) "
+                                "has active transaction but is not registered anymore\n",
+                                record.rmid, csr->common.xa_s_state, csr->common.xa_td_state));
+                } else {
+                    LIXA_TRACE(("lixa_xa_rollback: resource manager # %i "
+                        "(xa_s_state=%d) "
+                        "has not yet dynamically registered and/or "
+                        "statically ended/prepared, skipping...\n",
+                        record.rmid, csr->common.xa_s_state));
+                    if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(
+                        &ltr, csr->prepare_rc))) THROW(TX_RC_ADD_ERROR5);
+                    continue;
+                }
             }
 
             record.flags = TMNOFLAGS;

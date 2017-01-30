@@ -61,11 +61,18 @@ int main(int argc, char *argv[])
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
     assert(TX_OK == rc);
 
-    if (commit)
+    printf("%s| tx_end(TMSUSPEND): %d\n", pgm, rc = tx_end(TX_TMSUSPEND));
+    assert(test_rc == rc);
+
+    if (commit && TX_ROLLBACK != test_rc)
         printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
     else
-        printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());        
-    assert(test_rc == rc);
+        printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
+    if (TX_FAIL == test_rc) {
+        assert(TX_FAIL == rc);
+    } else {
+        assert(TX_OK == rc);
+    }
 
     printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
     if (TX_FAIL == test_rc) {
