@@ -59,9 +59,18 @@ int main(int argc, char *argv[])
     assert(TX_OK == rc);
 
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
+    assert(TX_OK == rc);
+
+    printf("%s| tx_end(): %d\n", pgm, rc = tx_end(TX_TMSUSPEND));
+    assert(TX_OK == rc);
+
+    TXINFO txinfo;
+    printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&txinfo));
+    assert(0 == rc || 1 == rc);
+    printf("%s| tx_resume(): %d\n", pgm, rc = tx_resume(&txinfo.xid));
     assert(test_rc == rc);
 
-    if (TX_OK == test_rc) {
+    if (TX_FAIL != test_rc) {
         printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
         assert(TX_OK == rc);
     }

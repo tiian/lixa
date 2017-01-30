@@ -1946,7 +1946,7 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                            (char *) act_rsrmgr->generic->name, record.rmid);
                     tmp_txrc = TX_ERROR;
                     if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags) {
-                        LIXA_TRACE(("lixa_xa_start: no state change required"));
+                        LIXA_TRACE(("lixa_xa_start: no state change required\n"));
                     } else {
                         csr->common.xa_td_state = XA_STATE_T0;
                     }
@@ -1958,7 +1958,11 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                 case XAER_DUPID:
                     *dupid_or_proto = TRUE;
                     tmp_txrc = TX_ERROR;
-                    csr->common.xa_td_state = XA_STATE_T0;
+                    if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags) {
+                        LIXA_TRACE(("lixa_xa_start: no state change required\n"));
+                    } else {
+                        csr->common.xa_td_state = XA_STATE_T0;
+                    }
                     lixa_xid_serialize(xid, ser_xid);
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC009W,
                            (char *) act_rsrmgr->generic->name, record.rmid,
@@ -1973,6 +1977,21 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                 case XAER_INVAL:
                     tmp_txrc = TX_FAIL;
                     csr->common.xa_td_state = XA_STATE_T0;
+                    break;
+                case XAER_NOTA:
+                    if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags) {
+                        tmp_txrc = TX_ERROR;
+                    } else {
+                        lixa_xid_serialize(xid, ser_xid);
+                        syslog(LOG_WARNING, LIXA_SYSLOG_LXC029W,
+                               (char *) act_rsrmgr->generic->name, record.rmid,
+                               NULL != ser_xid ? ser_xid : "");
+                        LIXA_TRACE(("lixa_xa_start: xa_start returned XAER_NOTA "
+                                   "for rmid=%d,xid='%s' and this should NOT "
+                                   "happen!'n", record.rmid, ser_xid));
+                        *txrc = TX_FAIL;
+                        THROW(UNEXPECTED_XA_RC);
+                    }
                     break;
                 case XAER_PROTO:
                     *dupid_or_proto = TRUE;
@@ -1989,6 +2008,22 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                 case XAER_ASYNC:
                     *txrc = TX_FAIL;
                     THROW(ASYNC_NOT_IMPLEMENTED);
+                    break;
+                case XA_RBROLLBACK:
+                case XA_RBCOMMFAIL:
+                case XA_RBDEADLOCK:
+                case XA_RBINTEGRITY:
+                case XA_RBOTHER:
+                case XA_RBPROTO:
+                case XA_RBTIMEOUT:
+                case XA_RBTRANSIENT:
+                    if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags) {
+                        tmp_txrc = TX_ROLLBACK;
+                    } else {
+                        tmp_txrc = TX_FAIL;
+                    }
+                    csr->common.xa_td_state = XA_STATE_T0;
+                    break;
                 default:
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC014W,
                            (char *) act_rsrmgr->generic->name, record.rmid,
