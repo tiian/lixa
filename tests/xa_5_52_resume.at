@@ -41,7 +41,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none ca
 AT_DATA([monkey1s.conf],
 [[# monkey R.M.config
 xa_open/0
-xa_start/101
+xa_start/100
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0030 -7], [0], [ignore], [ignore])
 # XA_RBDEADLOCK

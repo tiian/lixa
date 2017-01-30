@@ -30,7 +30,7 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	tx_b_5_9.at tx_b_5_10.at \
 	xa.at xa_5_26.at xa_5_30.at xa_5_32.at xa_5_37.at xa_5_37_suspended.at \
 	xa_5_37_resumed.at xa_5_40.at \
-	xa_5_42.at xa_5_44.at xa_5_47.at xa_5_49.at xa_5_52.at \
+	xa_5_42.at xa_5_44.at xa_5_47.at xa_5_49.at xa_5_52.at xa_5_52_resume.at \
 	xa_6_62.at \
 	mt.at mt_1_0.at mt_2_0.at \
 	ct.at ct_0_0.at ct_0_1.at ct.at ct_0_2.at ct_0_3.at ct_0_4.at \
@@ -87,7 +87,7 @@ $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/xa_5_37_suspended.at $(srcdir)/xa_5_37_resumed.at \
 		$(srcdir)/xa_5_40.at $(srcdir)/xa_5_42.at \
 		$(srcdir)/xa_5_44.at $(srcdir)/xa_5_47.at \
-		$(srcdir)/xa_5_49.at $(srcdir)/xa_5_52.at \
+		$(srcdir)/xa_5_49.at $(srcdir)/xa_5_52.at $(srcdir)/xa_5_52_resume.at \
 		$(srcdir)/xa_6_62.at \
 		$(srcdir)/mt.at \
 		$(srcdir)/mt_1_0.at $(srcdir)/mt_2_0.at \

@@ -1945,7 +1945,11 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                     syslog(LOG_WARNING, LIXA_SYSLOG_LXC013W,
                            (char *) act_rsrmgr->generic->name, record.rmid);
                     tmp_txrc = TX_ERROR;
-                    csr->common.xa_td_state = XA_STATE_T0;
+                    if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags) {
+                        LIXA_TRACE(("lixa_xa_start: no state change required"));
+                    } else {
+                        csr->common.xa_td_state = XA_STATE_T0;
+                    }
                     break;
                 case XAER_RMERR:
                     tmp_txrc = TX_ERROR;
