@@ -602,7 +602,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                 case XA_RBTRANSIENT:
                     if (TMSUSPEND & xa_end_flags) {
                         csr->common.xa_td_state =
-                            csr->common.dynamic ? XA_STATE_D2 : XA_STATE_T2;
+                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     } else {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
@@ -619,7 +619,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                 case XAER_RMERR:
                     if (TMSUSPEND & xa_end_flags) {
                         csr->common.xa_td_state =
-                            csr->common.dynamic ? XA_STATE_D2 : XA_STATE_T2;
+                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     } else {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
@@ -638,7 +638,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                 case XAER_NOTA:
                     if (TMSUSPEND & xa_end_flags) {
                         csr->common.xa_td_state =
-                            csr->common.dynamic ? XA_STATE_D2 : XA_STATE_T2;
+                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     } else {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
@@ -653,7 +653,7 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
                     *txrc = TX_FAIL;
                     if (TMSUSPEND & xa_end_flags) {
                         csr->common.xa_td_state =
-                            csr->common.dynamic ? XA_STATE_D2 : XA_STATE_T2;
+                            csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
                     } else {
                         csr->common.xa_td_state =
                             csr->common.dynamic ? XA_STATE_D0 : XA_STATE_T0;
