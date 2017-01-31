@@ -142,10 +142,10 @@
 	conjuction with LIXA transaction manager:
 	<itemizedlist mark='bullet'>
 	  <listitem><para><productname>
-		IBM DB2 Express-C 9.7 (32 bit)
+		IBM DB2 Express-C 9.7 (32 bit) / IBS DB2 Express0C 11.1 (64 bit)
 	  </productname></para></listitem>
 	  <listitem><para><productname>
-		MySQL 5.0 (32 bit) / MySQL 5.1 (64 bit)
+		MySQL 5.0 (32 bit) / MySQL 5.1 (64 bit) / MySQL 5.6.34 (64 bit)
 		<footnote><para>
 		    You must use InnoDB back-end to perform transactions with
 		    MySQL; MyISAM back-end is not supported.
@@ -158,7 +158,7 @@
 		Oracle SE 12.1 (64 bit) Instant Client
 	  </productname></para></listitem>
 	  <listitem><para><productname>
-		PostgreSQL 8.3 (32 bit) / PostgreSQL 8.4 (64 bit)
+		PostgreSQL 8.3 (32 bit) / PostgreSQL 8.4 (64 bit) / PostgreSQL 9.2 (64 bit)
 	  </productname></para></listitem>
 	  <listitem><para><productname>
 		WebSphere MQ 7.1 (32 bit)
@@ -296,6 +296,14 @@ cd lixa-X.Y.Z
 ./configure
 make
       </screen>
+      <note><para>
+        If build issues are experienced with a system that has a newer version 
+        of autotools installed, the build files can be regenerated with the following
+        command:
+        <screen>
+          autoreconf -v -f -i
+        </screen>
+      </para></note>
       To install the software you need 
       <systemitem class="username">root</systemitem> 
       access. With some distributions, 
@@ -514,23 +522,26 @@ make
 	put all you need in place or you can perform a manual link.
       </para>
       <section>
-	<title>IBM DB2 Express-C 9.7<footnote><para>
+	<title>IBM DB2 Express-C 9.7, 11.1<footnote><para>
 	      IBM and DB2 are trademarks of <trademark>IBM</trademark>
 	      corporation
 	</para></footnote></title>
 	<para>
 	  This step is useful if you want to use IBM DB2 as a Resource
-	  Manager coordinated by LIXA; only version Express-C 9.7 has been
-	  tested, but there should not be relevant differences with a
+	  Manager coordinated by LIXA; only versions Express-C 9.7 and 11.1 
+      have been tested, but there should not be relevant differences with a
 	  different version. Use something like this:
 	  <screen>
 ./configure --with-ibmdb2=/opt/ibm/db2/V9.7
 	  </screen>
+      Or the following for V11.1
+      <screen>
+        ./configure --with-ibmdb2=/opt/ibm/db2/V11.1
+      </screen>
 	  to create a loadable module containing the switch structure.
 	</para>
       </section>
-      <section>
-	<title>MySQL 5.0, 5.1, 5.5<footnote><para>
+	<title>MySQL 5.0, 5.1, 5.5, 5.6<footnote><para>
 	      MySQL is a trademark of <trademark>Oracle</trademark> 
 	      corporation; details are available at this link:
 	      <link xlink:href="http://www.mysql.com/about/legal/">
@@ -544,7 +555,7 @@ make
 	      mysql.i686 mysql-devel.i686 mysql-server.i686
 	  </para></footnote>
 	  as a Resource
-	  Manager coordinated by LIXA; only versions 5.0, 5.1 and 5.5 have been
+	  Manager coordinated by LIXA; only versions 5.0, 5.1, 5.5 and 5.6 have been
 	  tested, but there should not be relevant differences with a
 	  different version. Use something like this:
 	  <screen>
@@ -564,14 +575,14 @@ make
 	    <code>XA START, XA END, XA PREPARE, XA COMMIT, XA ROLLBACK, 
 	      XA RECOVER</code>
 	    ) that can be used to implement some XA features.
-	    This is good enought to build a loadable module that can be
+	    This is good enough to build a loadable module that can be
 	    used by the LIXA transaction manager, but some XA standard features
 	    - like dynamic registration - can not be implemented.
 	</para></note>
 	<warning><para>
 	  Some old versions of the software are affected by a
 	    <link xlink:href="http://bugs.mysql.com/bug.php?id=12161">
-	      seriuos documented bug (# 12161)</link>
+	      serious documented bug (# 12161)</link>
 	    related to the XA implementation of MySQL. The symptoms perceived
 	    while developing LIXA are described below:
 	    <orderedlist enumeration='arabic'>
@@ -659,7 +670,7 @@ make
 	</para>
       </section>
       <section>
-	<title>PostgreSQL 8.3/8.4/9.3<footnote><para>
+	<title>PostgreSQL 8.3, 8.4, 9.2, 9.3<footnote><para>
 	      The Trademark Policy of PostgreSQL is available at this link:
 	      <link xlink:href="http://wiki.postgresql.org/wiki/Trademark_Policy">
 		http://wiki.postgresql.org/wiki/Trademark_Policy</link>
@@ -687,7 +698,7 @@ make
 	    only some SQL non standard statements (
 	    <code>PREPARE TRANSACTION, COMMIT PREPARED, ROLLBACK PREPARED</code>
 	    ) that can be used to implement some XA features.
-	    This is good enought to build a loadable module that can be
+	    This is good enough to build a loadable module that can be
 	    used by the LIXA transaction manager, but some XA standard features
 	    - like dynamic registration - can not be implemented.
 	</para></note>

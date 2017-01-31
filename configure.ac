@@ -1,4 +1,4 @@
-AC_INIT([lixa], [1.1.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [1.3.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
@@ -105,7 +105,7 @@ AM_CONDITIONAL([COMPILE_DOCBOOK_STUFF], [test "$HAVE_DOCBOOK" = "yes"])
 #
 # liblixac and liblixacmt libraries version
 LT_LIXAC_CURRENT=1
-LT_LIXAC_REVISION=0
+LT_LIXAC_REVISION=3
 LT_LIXAC_AGE=1
 # liblixab and liblixbcmt libraries version
 LT_LIXAB_CURRENT=0
