@@ -36,10 +36,23 @@ int main(int argc, char *argv[])
     
     printf("tx_begin(): %d\n", rc = tx_begin());
     if (TX_OK != rc) exit(1);
+    printf("tx_end(TMSUSPEND): %d\n", rc = tx_end(TX_TMSUSPEND));
+    if (TX_OK != rc) exit(1);
+    TXINFO txinfo;
+    printf("tx_info(): %d\n", rc = tx_info(&txinfo));
+    if(0 != rc && 1 != rc) exit(1);
+    printf("tx_resume(): %d\n", rc = tx_resume(&txinfo.xid));
+    if (TX_OK != rc) exit(1);
     printf("tx_commit(): %d\n", rc = tx_commit());
     if (TX_OK != rc) exit(1);
 
     printf("tx_begin(): %d\n", rc = tx_begin());
+    if (TX_OK != rc) exit(1);
+    printf("tx_end(TMSUSPEND): %d\n", rc = tx_end(TX_TMSUSPEND));
+    if (TX_OK != rc) exit(1);
+    printf("tx_info(): %d\n", rc = tx_info(&txinfo));
+    if(0 != rc && 1 != rc) exit(1);
+    printf("tx_resume(): %d\n", rc = tx_resume(&txinfo.xid));
     if (TX_OK != rc) exit(1);
     printf("tx_rollback(): %d\n", rc = tx_rollback());
     if (TX_OK != rc) exit(1);
