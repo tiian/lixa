@@ -1,0 +1,86 @@
+<chapter xml:id="Development_TC">
+  <title>Developing C Application Programs with the Transaction Coupling (TC) TX extensions</title>
+  <para>
+    This chapter explains how you can develop your own C application using the libraries and tools supplied by the LIXA project.
+  </para>
+  <para>
+    The LIXA project ships with some example C programs that you can find in the <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples</filename> folder after software installation (see <xref linked="Installation"/>)
+  </para>
+  <note><para>
+    This chapter is focused on the C programming language for the non-standard extensions that has been added to the TX specification to expose some of the XA interface capabilities. All the information supplied in <xref linked="Development"/> still applies.
+  </para></note>
+  <section>
+    <title>Non-standard TX (Transaction Demarcation) Specification Extensions</title>
+    <para>
+      The LIXA project provides extensions to the <citation>TXspec</citation>, named Transaction Coupling (TC), which can be used in addition to the standard API when developing distributed Application Programs.
+    </para>
+    <para>
+      The API extensions are easy to use and the following C example briefly explains it:
+      <programlisting>
+        #include &lt;tx.h&gt;
+        
+        /* your includes */
+        
+        int main(int argc, char *argv[])
+        {
+            int rc;
+        
+            if (TX_OK != (rc = tx_open()))
+                /* handle error */
+        
+            if (TX_OK != (rc = tx_begin()))
+                /* handle error */
+        
+            /* do local work against Resource Manager here */
+        
+            /* suspend the transaction so that work can continue elsewhere */
+            if (TX_OK != (rc = tx_end(TX_TMSUSPEND)))
+                /* handle error */
+        
+            /* in another thread or another Application Program work can continue on the same transaction */
+            TXINFO txinfo;
+            if (TX_OK != (rc = tx_info(&amp;txinfo)))
+                /* handle error */
+            if (TX_OK != (rc = tx_join(&amp;txinfo.xid)))
+                /* handle error */
+            if (TX_OK != (rc = tx_end(TX_TMSUCCESS)))
+                /* handle error */
+        
+            /* take up transaction again */
+            if (TX_OK != (rc = tx_resume(&amp;txinfo.xid)))
+                /* handle error */
+        
+            /* commit or roll back transaction */
+            if (TX_OK != (rc = tx_commit()))
+                /* handle errror */
+        
+            /* shut down */
+            tx_close();
+        }
+      </programlisting>
+      These are the available C functions:
+      <itemizedlist mark="bullet">
+        <listitem><para>
+          <function>tx_end</function>: manage the global transaction with <parameter class="function">flags</parameter>:
+          <itemizedlist mark="bullet">
+            <listitem><para>
+              <parameter>TX_TMSUSPEND</parameter>: suspend the transaction
+            </para></listitem>
+            <listitem><para>
+              <parameter>TX_TMSUCCESS</parameter>: mark the portion of work on the global transaction as successful
+            </para></listitem>
+            <listitem><para>
+              <parameter>TX_TMFAIL</parameter>: mark the portion of work on the global transaction as failed
+            </para></listitem>
+          </itemizedlist>
+        </para></listitem>
+        <listitem><para>
+          <function>tx_join</function>: join a suspended global transaction and continue work
+        </para></listitem>
+        <listitem><para>
+          <function>tx_resume</function>: resume a suspended global transaction - <emphasis>only from the thread that suspended the original transaction</emphasis>
+        </para></listitem>
+      </itemizedlist>
+    </para>
+  </section>
+</chapter>
