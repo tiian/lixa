@@ -1,0 +1,1413 @@
+<chapter xml:id="Development_COBOL">
+  <title>Developing COBOL Application Programs</title>
+  <para>
+    This chapter explains how you can develop your own COBOL application
+    using the libraries and the tools supplied by LIXA project.
+  </para>
+  <para>
+    LIXA project ships some example COBOL programs you can find in 
+    directory
+    <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/cobol/</filename> after
+    software installation (see <xref linkend="Installation"/>).
+  </para>
+  <note><para>
+    This chapter is focused on the COBOL programming language. The C 
+    programming language is addressed by another dedicated chapter.
+  </para></note>
+  <section>
+    <title>Supported COBOL environment</title>
+    <para>
+      LIXA supports only GnuCOBOL (formerly OpenCOBOL).
+      <link xlink:href="https://sourceforge.net/projects/open-cobol/">
+	<citetitle>GnuCOBOL</citetitle>
+	</link> can be retrieved from SourceForge.net or can be installed
+	using the standard packages available for your Linux distribution.
+	The support for GnuCOBOL requires at least version 1.1 that's available
+	inside Ubuntu 14.04 and other distributions.
+    </para>
+    <para>
+      It cannot be excluded that LIXA may run using a different COBOL
+      environment, but at this time the LIXA project does not have a 
+      development and test environment for something else than GnuCOBOL.
+    </para>
+  </section>
+  <section>
+    <title>The TX (Transaction Demarcation) Specification</title>
+    <para>
+      LIXA project adopts the standard described in 
+      <citation>TXspec</citation> as the API you should use when developing
+      an Application Program.
+    </para>
+    <para>
+      The API is very easy, it supplies COBOL routines and C functions.
+      The following COBOL example can be briefly explained:
+      <programlisting>
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. EXAMPLE1.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+      * Include TX definitions using the provided copybook
+        01 TX-RETURN-STATUS.
+           COPY TXSTATUS.
+        01 TX-INFO-AREA.
+           COPY TXINFDEF.
+      * Include LIXA definitions using the provided copybook
+           COPY LIXAXID.
+        PROCEDURE DIVISION.
+        000-MAIN.
+            MOVE ZERO TO TX-RETURN-STATUS.
+      * Calling TXOPEN (tx_open)
+            CALL "TXOPEN" USING TX-RETURN-STATUS.
+            DISPLAY 'TXOPEN returned value ' TX-STATUS.
+            IF NOT TX-OK THEN
+               DISPLAY 'Exiting...'
+               STOP RUN RETURNING 1
+            END-IF.
+      *
+      * Put your code OUTSIDE the transaction boundary here
+      *
+      * Calling TXBEGIN (tx_begin): the transaction starts here
+            CALL "TXBEGIN" USING TX-RETURN-STATUS.
+            DISPLAY 'TXBEGIN returned value ' TX-STATUS.
+            IF NOT TX-OK THEN
+               DISPLAY 'Exiting...'
+               STOP RUN RETURNING 1
+            END-IF.
+      *
+      * Put yout code INSIDE the transaction boundary here
+      *
+      * Calling TXCOMMIT (tx_commit): the transaction ends here with a
+      * commit
+            CALL "TXCOMMIT" USING TX-RETURN-STATUS.
+            DISPLAY 'TXCOMMIT returned value ' TX-STATUS.
+            IF NOT TX-OK THEN
+               DISPLAY 'Exiting...'
+               STOP RUN RETURNING 1
+            END-IF.
+      *
+      * You can use TXROLLBACK instead of TXCOMMIT if you decide that the
+      * work must be rolled back
+      *
+      * Put here other transactions if you need them
+      *
+      * Calling TXCLOSE (tx_close) to close ALL the Resource Managers
+      * associated to the current LIXA_PROFILE
+      *
+            CALL "TXCLOSE" USING TX-RETURN-STATUS.
+            DISPLAY 'TXCLOSE returned value ' TX-STATUS.
+            IF NOT TX-OK
+               STOP RUN RETURNING 1
+            STOP RUN.
+      </programlisting>
+      These are the available COBOL routines (the descriptions come from
+      <citation>TXspec</citation>):
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	    <function>TXBEGIN</function>: begin a global transaction
+	</para></listitem>
+	<listitem><para>
+	    <function>TXCLOSE</function>: close a set of resource managers
+ 	</para></listitem>
+	<listitem><para>
+	    <function>TXCOMMIT</function>: commit a global transaction
+	</para></listitem>
+	<listitem><para>
+	    <function>TXINFORM</function>: return global transaction 
+	    information
+	</para></listitem>
+	<listitem><para>
+	    <function>TXOPEN</function>: open a set of resource managers
+	</para></listitem>
+	<listitem><para>
+	    <function>TXROLLBACK</function>: roll back a global transaction
+	</para></listitem>
+	<listitem><para>
+	    <function>TXSETCOMMITRET</function>: set 
+	    <parameter class="function">commit_return</parameter> 
+	    characteristic
+	</para></listitem>
+	<listitem><para>
+	    <function>TXSETTRANCTL</function>: set
+	    <parameter class="function">transaction_control</parameter> 
+	    characteristic
+	</para></listitem>
+	<listitem><para>
+	    <function>TXSETTIMEOUT</function>: set
+	    <parameter class="function">transaction_timeout</parameter> 
+	    characteristic
+	</para></listitem>
+      </itemizedlist>
+      Refer to <citation>TXspec</citation> for the complete description.
+    </para>
+    <section>
+      <title>Access to the resource managers</title>
+      <para>
+	A program developed for TX (Transaction Demarcation) Specification
+	<emphasis>must</emphasis> access the resource managers coordinated by
+	the transaction manager using specific functions.
+	Unfortunately, the TX Specification does <emphasis>not</emphasis>
+	specify a standard unified method to access a coordinated resource
+	manager. 
+      </para>
+      <para>
+	Tipically, every resource manager provides its own specific
+	function(s) to retrieve one or more <emphasis>connection 
+	  handler(s)</emphasis>. Once you have got the right connection
+	handler(s), you can use the resource manager as you use without a
+	transaction manager.
+      </para>
+      <para>
+	The supplied examples (see <filename>doc/examples/cobol</filename> 
+	directory) show the routines that must be used to
+	retrieve the connection handler(s) necessary to interact with
+	the resource managers.
+      </para>
+      <note><para>
+	  Special attention must be payed to <emphasis>commit</emphasis> and
+	  <emphasis>rollback</emphasis> operations: a well designed program
+	  developed for TX (Transaction Demarcation) Specification must not
+	  specify the resource manager native version of 
+	  <emphasis>commit</emphasis> and <emphasis>rollback</emphasis> 
+	  operations.
+	  If your software violates this rule, your environment will
+	  generate warning conditions related to euristically completed
+	  transaction. If your software forces a resource manager to
+	  <emphasis>commit</emphasis> or <emphasis>rollback</emphasis> 
+	  outside the control of the transaction manager, the transaction
+	  manager will not be able to perform the opposite operation if
+	  asked to do it. These situations tend to generate inconsistencies.
+      </para></note>
+    </section>
+    <section>
+      <title>Chapter organization</title>
+      <para>
+	This chapter focuses on differences between C and COBOL and does not
+	repeat all the configuration steps described in the previous C chapter.
+	Anyway, when necessary, a pointer to the related section that explains
+	how to configure the environment is provided.
+      </para>
+    </section>
+  </section>
+  <section>
+    <title>LIXA library linkage</title>
+    <para>
+      The examples showed in this chapter use these linkage options:
+      <option>-Wl,-rpath -Wl,/opt/lixa/lib</option>
+      dynamically generated by 
+      <command>/opt/lixa/bin/lixa-config -d</command>
+      (<command>/opt/lixa/bin/lixa-config --ldflags</command>).
+      The options are specific to <command>gcc</command> and 
+      <command>ld</command> Linux linker.
+      Alternatively you can avoid these options and set
+      <varname>LD_LIBRARY_PATH</varname> environment variable.
+    </para>
+  </section>
+  <section>
+    <title>The first example</title>
+    <figure xml:id="develop1_cobol">
+      <title>Deploy model of an example with two dummy resource managers</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="../images/LIXA_Development_1.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      Copy file <filename>EXAMPLE1.cob</filename> in your working dir:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/cobol/EXAMPLE1.cob .
+	</screen></td></tr></tbody>
+      </table>
+      Substitute <quote>lixa-X.Y.Z</quote> with the actual version of
+      the software you installed.
+    </para>
+    <para>
+      Set up your shell environment:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ export PATH=$PATH:/opt/lixa/bin
+tiian@ubuntu1404-64:/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+tiian@ubuntu1404-64:/tmp$ export COB_LDFLAGS=-Wl,--no-as-needed
+	</screen></td></tr></tbody>
+      </table>
+    </para>
+    <para>
+      Compile and link the COBOL example program:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ cobc -x $(lixa-config -f -l) EXAMPLE1.cob
+	</screen></td></tr></tbody>
+      </table>
+      Check the output of the linker:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ldd EXAMPLE1
+	linux-vdso.so.1 =>  (0x00007fffbd9fe000)
+	libcob.so.1 => /usr/lib/libcob.so.1 (0x00007fe904068000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fe903d62000)
+	libgmp.so.10 => /usr/lib/x86_64-linux-gnu/libgmp.so.10 (0x00007fe903aed000)
+	libncurses.so.5 => /lib/x86_64-linux-gnu/libncurses.so.5 (0x00007fe9038ca000)
+	libtinfo.so.5 => /lib/x86_64-linux-gnu/libtinfo.so.5 (0x00007fe9036a1000)
+	libdb-5.3.so => /usr/lib/x86_64-linux-gnu/libdb-5.3.so (0x00007fe9032fe000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe9030fa000)
+	liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007fe902edf000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe902b19000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fe9028fb000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007fe9042a6000)
+	libgmodule-2.0.so.0 => /usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0 (0x00007fe9026f6000)
+	libglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007fe9023ee000)
+	libxml2.so.2 => /usr/lib/x86_64-linux-gnu/libxml2.so.2 (0x00007fe902087000)
+	liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007fe901e6d000)
+	libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007fe901c2f000)
+	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007fe901a16000)
+	liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fe9017f3000)
+	libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007fe9015ee000)
+</screen></td></tr></tbody>
+      </table>
+      Now you are ready to start your first application:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE1 
+Executing EXAMPLE1
+TXOPEN returned value -000000007
+Exiting...
+	</screen></td></tr></tbody>
+      </table>
+      The <function>TXOPEN</function> routine returned the value 
+      <quote>-7</quote> (<constant>TX-FAIL</constant>) 
+      because the state server is not running.
+      Start the state server (see <xref linkend="Background_execution"/>)
+      and try again:
+      <table frame="box">
+	<thead><tr><td>[Shell terminal session (Ubuntu)]</td></tr></thead>
+	<tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ sudo su - lixa
+lixa@ubuntu1404-64:~$ /opt/lixa/sbin/lixad --daemon
+lixa@ubuntu1404-64:~$ exit
+logout
+tiian@ubuntu1404-64:~/tmp$ ps -ef|grep lixad|grep -v grep
+lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE1 
+Executing EXAMPLE1
+TXOPEN returned value +000000000
+TXBEGIN returned value +000000000
+TXINFORM returned value +000000000
+  XID-REC/FORMAT-ID:     +279875137
+  XID-REC/GTRID-LENGTH:  +000000016
+  XID-REC/BRANCH-LENGTH: +000000016
+  XID-REC/XID (SERIAL.): 1279875137.9ce44ddff2274cd99924ae2721b66789.58f1d23a64e7f668c92c624bc096d075                                                                                                         
+  TRANSACTION-MODE :     +000000001
+    [TX-IN-TRAN]
+  COMMIT-RETURN :        +000000000
+    [TX-COMMIT-COMPLETED]
+  TRANSACTION-CONTROL :  +000000000
+    [TX-UNCHAINED]
+  TRANSACTION-TIMEOUT :  +000000000
+    [NO-TIMEOUT]
+  TRANSACTION-STATE :    +000000000
+    [TX-ACTIVE]
+TXCOMMIT returned value +000000000
+TXINFORM returned value +000000000
+  XID-REC/FORMAT-ID:     -000000001
+  XID-REC/GTRID-LENGTH:  +000000000
+  XID-REC/BRANCH-LENGTH: +000000000
+  XID-REC/XID (SERIAL.): -1..                                                                                                         
+  TRANSACTION-MODE :     +000000000
+    [TX-NOT-IN-TRAN]
+  COMMIT-RETURN :        +000000000
+    [TX-COMMIT-COMPLETED]
+  TRANSACTION-CONTROL :  +000000000
+    [TX-UNCHAINED]
+  TRANSACTION-TIMEOUT :  +000000000
+    [NO-TIMEOUT]
+  TRANSACTION-STATE :    +000000000
+    [TX-ACTIVE]
+TXSETCOMMITRET returned value +000000001
+TXSETTIMEOUT returned value +000000000
+TXSETTRANCTL returned value +000000000
+TXINFORM returned value +000000000
+  XID-REC/FORMAT-ID:     -000000001
+  XID-REC/GTRID-LENGTH:  +000000000
+  XID-REC/BRANCH-LENGTH: +000000000
+  XID-REC/XID (SERIAL.): -1..                                                                                                         
+  TRANSACTION-MODE :     +000000000
+    [TX-NOT-IN-TRAN]
+  COMMIT-RETURN :        +000000000
+    [TX-COMMIT-COMPLETED]
+  TRANSACTION-CONTROL :  +000000001
+    [TX-CHAINED]
+  TRANSACTION-TIMEOUT :  +000000005
+  TRANSACTION-STATE :    +000000000
+    [TX-ACTIVE]
+TXSETTRANCTL returned value +000000000
+TXINFORM returned value +000000000
+  XID-REC/FORMAT-ID:     -000000001
+  XID-REC/GTRID-LENGTH:  +000000000
+  XID-REC/BRANCH-LENGTH: +000000000
+  XID-REC/XID (SERIAL.): -1..                                                                                                         
+  TRANSACTION-MODE :     +000000000
+    [TX-NOT-IN-TRAN]
+  COMMIT-RETURN :        +000000000
+    [TX-COMMIT-COMPLETED]
+  TRANSACTION-CONTROL :  +000000000
+    [TX-UNCHAINED]
+  TRANSACTION-TIMEOUT :  +000000005
+  TRANSACTION-STATE :    +000000000
+    [TX-ACTIVE]
+TXBEGIN returned value +000000000
+TXROLLBACK returned value +000000000
+TXCLOSE returned value +000000000
+	</screen></td></tr></tbody>
+      </table>
+      Your first COBOL Application Program has connected to the state server 
+      and has performed two dummy distributed transactions: 
+      <emphasis>commit</emphasis> and <emphasis>rollback</emphasis>.
+    </para>
+    <para>
+      Refer to <xref linkend="first_example_details"/> to get some further insights.
+    </para>
+  </section>
+  <section xml:id="Development_EXAMPLE5_PQL">
+    <title>An example with PostgreSQL</title>
+    <figure xml:id="develop5_cobol">
+      <title>Deploy model of an example with PostgreSQL DBMS</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="../images/LIXA_Development_5.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      This example was developed using PostgreSQL 9.3.15 for Linux (Ubuntu).
+      If you were using a different version you would need to adapt some
+      commands to your environment.
+    </para>
+    <para>
+      Prepare the environment following the following steps:
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	  Set-up PostgreSQL environment
+	</para></listitem>
+	<listitem><para>
+	  Start the LIXA state server
+	</para></listitem>
+      </itemizedlist>
+      as explained in <xref linkend="Development_example5_pql"/>.
+    </para>
+    <section>
+      <title>Build the client program</title>
+      <para>
+	Prepare the client (Application Program) using the below commands:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/cobol/EXAMPLE5_PQL.c .
+tiian@ubuntu1404-64:/tmp$ export PATH=$PATH:/opt/lixa/bin
+tiian@ubuntu1404-64:/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+tiian@ubuntu1404-64:/tmp$ export COB_LDFLAGS=-Wl,--no-as-needed
+tiian@ubuntu1404-64:/tmp$ cobc -x $(lixa-config -f -p) EXAMPLE5_PQL.cob
+	  </screen></td></tr></tbody>
+	</table>
+	Verify the executable produced by <command>cobc</command>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ldd EXAMPLE5_PQL
+	  linux-vdso.so.1 =>  (0x00007ffff21fe000)
+	  libcob.so.1 => /usr/lib/libcob.so.1 (0x00007f1a00df4000)
+	  libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f1a00aee000)
+	  libgmp.so.10 => /usr/lib/x86_64-linux-gnu/libgmp.so.10 (0x00007f1a00879000)
+	  libncurses.so.5 => /lib/x86_64-linux-gnu/libncurses.so.5 (0x00007f1a00656000)
+	  libtinfo.so.5 => /lib/x86_64-linux-gnu/libtinfo.so.5 (0x00007f1a0042d000)
+	  libdb-5.3.so => /usr/lib/x86_64-linux-gnu/libdb-5.3.so (0x00007f1a0008a000)
+	  libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f19ffe86000)
+	  liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007f19ffc6b000)
+	  liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0x00007f19ffa63000)
+	  libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f19ff69e000)
+	  libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f19ff480000)
+	  /lib64/ld-linux-x86-64.so.2 (0x00007f1a01032000)
+	  libgmodule-2.0.so.0 => /usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0 (0x00007f19ff27b000)
+	  libglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007f19fef73000)
+	  libxml2.so.2 => /usr/lib/x86_64-linux-gnu/libxml2.so.2 (0x00007f19fec0c000)
+	  liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007f19fe9f2000)
+	  libpq.so.5 => /usr/lib/libpq.so.5 (0x00007f19fe7c3000)
+	  libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007f19fe584000)
+	  libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f19fe36b000)
+	  liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f19fe149000)
+	  libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007f19fdf44000)
+	  libssl.so.1.0.0 => /lib/x86_64-linux-gnu/libssl.so.1.0.0 (0x00007f19fdce4000)
+	  libcrypto.so.1.0.0 => /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 (0x00007f19fd908000)
+	  libkrb5.so.3 => /usr/lib/x86_64-linux-gnu/libkrb5.so.3 (0x00007f19fd63d000)
+	  libcom_err.so.2 => /lib/x86_64-linux-gnu/libcom_err.so.2 (0x00007f19fd438000)
+	  libgssapi_krb5.so.2 => /usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2 (0x00007f19fd1f1000)
+	  libldap_r-2.4.so.2 => /usr/lib/x86_64-linux-gnu/libldap_r-2.4.so.2 (0x00007f19fcfa0000)
+	  libk5crypto.so.3 => /usr/lib/x86_64-linux-gnu/libk5crypto.so.3 (0x00007f19fcd70000)
+	  libkrb5support.so.0 => /usr/lib/x86_64-linux-gnu/libkrb5support.so.0 (0x00007f19fcb65000)
+	  libkeyutils.so.1 => /lib/x86_64-linux-gnu/libkeyutils.so.1 (0x00007f19fc961000)
+	  libresolv.so.2 => /lib/x86_64-linux-gnu/libresolv.so.2 (0x00007f19fc745000)
+	  liblber-2.4.so.2 => /usr/lib/x86_64-linux-gnu/liblber-2.4.so.2 (0x00007f19fc536000)
+	  libsasl2.so.2 => /usr/lib/x86_64-linux-gnu/libsasl2.so.2 (0x00007f19fc31b000)
+	  libgssapi.so.3 => /usr/lib/x86_64-linux-gnu/libgssapi.so.3 (0x00007f19fc0dc000)
+	  libgnutls.so.26 => /usr/lib/x86_64-linux-gnu/libgnutls.so.26 (0x00007f19fbe1e000)
+	  libgcrypt.so.11 => /lib/x86_64-linux-gnu/libgcrypt.so.11 (0x00007f19fbb9e000)
+	  libheimntlm.so.0 => /usr/lib/x86_64-linux-gnu/libheimntlm.so.0 (0x00007f19fb994000)
+	  libkrb5.so.26 => /usr/lib/x86_64-linux-gnu/libkrb5.so.26 (0x00007f19fb70c000)
+	  libasn1.so.8 => /usr/lib/x86_64-linux-gnu/libasn1.so.8 (0x00007f19fb46b000)
+	  libhcrypto.so.4 => /usr/lib/x86_64-linux-gnu/libhcrypto.so.4 (0x00007f19fb237000)
+	  libroken.so.18 => /usr/lib/x86_64-linux-gnu/libroken.so.18 (0x00007f19fb022000)
+	  libtasn1.so.6 => /usr/lib/x86_64-linux-gnu/libtasn1.so.6 (0x00007f19fae0e000)
+	  libp11-kit.so.0 => /usr/lib/x86_64-linux-gnu/libp11-kit.so.0 (0x00007f19fabcb000)
+	  libgpg-error.so.0 => /lib/x86_64-linux-gnu/libgpg-error.so.0 (0x00007f19fa9c6000)
+	  libwind.so.0 => /usr/lib/x86_64-linux-gnu/libwind.so.0 (0x00007f19fa79d000)
+	  libheimbase.so.1 => /usr/lib/x86_64-linux-gnu/libheimbase.so.1 (0x00007f19fa58e000)
+	  libhx509.so.5 => /usr/lib/x86_64-linux-gnu/libhx509.so.5 (0x00007f19fa345000)
+	  libsqlite3.so.0 => /usr/lib/x86_64-linux-gnu/libsqlite3.so.0 (0x00007f19fa08c000)
+	  libcrypt.so.1 => /lib/x86_64-linux-gnu/libcrypt.so.1 (0x00007f19f9e52000)
+	  libffi.so.6 => /usr/lib/x86_64-linux-gnu/libffi.so.6 (0x00007f19f9c4a000)
+</screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
+	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=PQL_STA
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+PQL_STA
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	See <xref linkend="example5_some_checks"/> for additional details on
+	the profile.
+      </para>
+    </section>
+    <section>
+      <title>Program execution</title>
+      <para>
+	It is suggested to open two different terminals: the first one
+	connected to <quote>testdb</quote> PostgreSQL database and the second
+	one pointing to the directory where the compiled program
+	<filename>EXAMPLE5_PQL</filename> lives.
+	First teminal session:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ psql testdb
+psql (9.3.15)
+Type "help" for help.
+
+testdb=> 
+	  </screen></td></tr></tbody>
+	</table>
+	Second teminal session:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ls -la EXAMPLE5_PQL*
+-rwxrwxr-x 1 tiian tiian 20170 gen 13 23:51 EXAMPLE5_PQL
+-rw-r--r-- 1 tiian tiian  6374 gen 13 23:47 EXAMPLE5_PQL.cob
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of <quote>AUTHORS</quote> table before
+	program execution:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name 
+----+-----------+------------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	Execute the program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE5_PQL INSERT
+Executing EXAMPLE5_PQL
+Inserting a row in the table...
+Status: +0000000000
+PQexec INSERT
+Status: +0000000001
+TXCOMMIT returned value +000000000
+TXCLOSE returned value +000000000
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of the table again:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name 
+----+-----------+------------
+  1 | Foo       | Bar
+(1 rows)
+	  </screen></td></tr></tbody>
+	</table>
+	The example program inserted the row with id=1. You can not insert
+	the same row twice because there is a unique constraint on this table,
+	but you can remove the row using
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE5_PQL DELETE
+Executing EXAMPLE5_PQL
+Deleting a row from the table...
+Status: +0000000000
+PQexec DELETE
+Status: +0000000001
+TXCOMMIT returned value +000000000
+TXCLOSE returned value +000000000
+	  </screen></td></tr></tbody>
+	</table>
+	Check the table content again:
+	<table frame="box">
+	  <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from AUTHORS;
+ id | last_name | first_name 
+----+-----------+------------
+(0 rows)
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+  </section>
+  <section xml:id="Development_EXAMPLE2_ORA">
+    <title>An example with Oracle Pro*COBOL</title>
+    <figure xml:id="develop5_cobol">
+      <title>Deploy model of an example with Oracle DBMS</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="../images/LIXA_Development_5.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      This example was developed using the following configuration:
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	  Oracle remote configuration with Instant Client 12.1
+	</para></listitem>
+	<listitem><para>
+	  Oracle Pro*COBOL compiler as supplied by Oracle Instant Client 12.1
+	</para></listitem>
+	<listitem><para>
+	  GnuCOBOL compiler and runtime as supplied by Ubuntu 14.04
+	</para></listitem>
+      </itemizedlist>
+      If you were using a different version you would need to adapt some
+      commands to your environment.
+    </para>
+    <para>
+      Prepare the environment following the following steps:
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	  Set-up the Oracle environment as explained in 
+	  <xref linkend="Development_setup_Oracle_environment"/>
+	  and adapt the command to your Oracle Database Server version
+	</para></listitem>
+	<listitem><para>
+	  Configure Oracle listener for remote connection as explained in 
+	  <xref linkend="Development_configure_Oracle_listener"/>
+	</para></listitem>
+	<listitem><para>
+	  Install and configure Oracle Instant Client as explained in 
+	  <xref linkend="Development_install_Oracle_Instant_Client"/>
+	</para></listitem>
+	<listitem><para>
+	  Start the LIXA state server as explained in
+	  <xref linkend="Development_start_LIXA_server"/>
+	</para></listitem>
+      </itemizedlist>
+    </para>
+    <section>
+      <title>Set environment variables</title>
+      <para>
+	Create a shell script file, for example 
+	<filename>oracle_env.sh</filename>
+	with some useful environment variables as below:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ cat oracle_env.sh 
+#!/bin/sh
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1:$LD_LIBRARY_PATH
+export PATH=/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:$PATH
+export ORACLE_HOME=/opt/oracle/instantclient_12_1
+	</screen>
+	source it and check the values:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ . oracle_env.sh 
+tiian@ubuntu1404-64:/tmp$ echo $LD_LIBRARY_PATH
+/opt/oracle/instantclient_12_1:
+tiian@ubuntu1404-64:/tmp$ echo $PATH
+/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
+tiian@ubuntu1404-64:/tmp$ echo $ORACLE_HOME
+/opt/oracle/instantclient_12_1
+	</screen>
+	set LIXA environment variables:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ export PATH=$PATH:/opt/lixa/bin
+tiian@ubuntu1404-64:/tmp$ echo $PATH
+/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/opt/lixa/bin
+tiian@ubuntu1404-64:/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+tiian@ubuntu1404-64:/tmp$ echo $LD_LIBRARY_PATH
+/opt/oracle/instantclient_12_1::/opt/lixa/lib
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Build the client program</title>
+      <para>
+	Prepare the client (Application Program) using the below commands:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/cobol/EXAMPLE2_ORA.pco .
+tiian@ubuntu1404-64:/tmp$ procob EXAMPLE2_ORA.pco
+
+Pro*COBOL: Release 12.1.0.2.0 - Production on Thu Jan 19 23:20:07 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+System default option values taken from: /opt/oracle/instantclient_12_1/precomp/admin/pcbcfg.cfg
+
+tiian@ubuntu1404-64:/tmp$ export COB_LDFLAGS=-Wl,--no-as-needed
+tiian@ubuntu1404-64:/tmp$ cobc -x $(lixa-config -f -l) \
+> -L/opt/oracle/instantclient_12_1 -lclntsh -lnnz12 \
+> EXAMPLE2_ORA.cob \
+> /opt/oracle/instantclient_12_1/cobsqlintf.o
+	  </screen></td></tr></tbody>
+	</table>
+	Verify the executable produced by <command>cobc</command>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ldd EXAMPLE2_ORA
+    linux-vdso.so.1 =>  (0x00007fff1bb34000)
+    libcob.so.1 => /usr/lib/libcob.so.1 (0x00007f434aaf8000)
+    libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f434a7f2000)
+    libgmp.so.10 => /usr/lib/x86_64-linux-gnu/libgmp.so.10 (0x00007f434a57d000)
+    libncurses.so.5 => /lib/x86_64-linux-gnu/libncurses.so.5 (0x00007f434a35a000)
+    libtinfo.so.5 => /lib/x86_64-linux-gnu/libtinfo.so.5 (0x00007f434a131000)
+    libdb-5.3.so => /usr/lib/x86_64-linux-gnu/libdb-5.3.so (0x00007f4349d8e000)
+    libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f4349b8a000)
+    liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007f434996f000)
+    libclntsh.so.12.1 => /opt/oracle/instantclient_12_1/libclntsh.so.12.1 (0x00007f43469b1000)
+    libnnz12.so => /opt/oracle/instantclient_12_1/libnnz12.so (0x00007f43462a7000)
+    libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f4345ee2000)
+    libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f4345cc3000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007f434ad36000)
+    libgmodule-2.0.so.0 => /usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0 (0x00007f4345abf000)
+    libglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007f43457b7000)
+    libxml2.so.2 => /usr/lib/x86_64-linux-gnu/libxml2.so.2 (0x00007f434544f000)
+    liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007f4345236000)
+    libmql1.so => /opt/oracle/instantclient_12_1/libmql1.so (0x00007f4344fc0000)
+    libipc1.so => /opt/oracle/instantclient_12_1/libipc1.so (0x00007f4344c41000)
+    libons.so => /opt/oracle/instantclient_12_1/libons.so (0x00007f43449fc000)
+    libnsl.so.1 => /lib/x86_64-linux-gnu/libnsl.so.1 (0x00007f43447e2000)
+    librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f43445d9000)
+    libaio.so.1 => /lib/x86_64-linux-gnu/libaio.so.1 (0x00007f43443d7000)
+    libclntshcore.so.12.1 => /opt/oracle/instantclient_12_1/libclntshcore.so.12.1 (0x00007f4343e65000)
+    libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007f4343c26000)
+    libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f4343a0d000)
+    liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f43437eb000)
+    libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007f43435e5000)
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
+	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=ORAIC_DYN
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+ORAIC_DYN
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	See <xref linkend="example5_some_checks"/> for additional details on
+	the profile.
+      </para>
+    </section>
+    <section>
+      <title>Program execution</title>
+      <para>
+	It is suggested to open two different terminals: the first one
+	connected to Oracle database and the second
+	one pointing to the directory where the compiled program
+	<filename>EXAMPLE2_ORA</filename> lives.
+	First teminal session:
+	<table frame="box">
+	  <thead><tr><td>[Sqlplus terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ sqlplus hr/hr@lixa_ora_db
+
+SQL*Plus: Release 12.1.0.2.0 Production on Thu Jan 19 23:27:34 2017
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Thu Jan 19 2017 23:26:19 +01:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> 
+	  </screen></td></tr></tbody>
+	</table>
+	Second teminal session:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ls -la EXAMPLE2_ORA*
+-rwxrwxr-x 1 tiian tiian 36793 gen 19 23:22 EXAMPLE2_ORA
+-rw-rw-r-- 1 tiian tiian 11504 gen 19 23:20 EXAMPLE2_ORA.cob
+-rw-rw-r-- 1 tiian tiian 12719 gen 19 23:20 EXAMPLE2_ORA.lis
+-rw-rw-r-- 1 tiian tiian  4528 gen 19 23:10 EXAMPLE2_ORA.pco
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of <quote>COUNTRIES</quote> table before
+	program execution:
+	<table frame="box">
+	  <thead><tr><td>[Sqlplus terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	Execute the program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE2_ORA INSERT
+Executing EXAMPLE2_ORA
+Inserting a row in the table...
+Execution terminated!
+	  </screen></td></tr></tbody>
+	</table>
+	Check the content of the table again:
+	<table frame="box">
+	  <thead><tr><td>[Sqlplus terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+CO COUNTRY_NAME      REGION_ID
+-- ---------------------------------------- ----------
+RS Repubblica San Marino     1
+	  </screen></td></tr></tbody>
+	</table>
+	The example program inserted the row with REGION_ID=1. You can not 
+	insert the same row twice because there is a unique constraint on 
+	this table, 
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE2_ORA INSERT
+Executing EXAMPLE2_ORA
+Inserting a row in the table...
+Error reported by Oracle: ORA-00001: unique constraint (HR.COUNTRY_C_ID_PK) violated
+	  </screen></td></tr></tbody>
+	</table>
+	but you can remove the row using
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE2_ORA DELETE
+Executing EXAMPLE2_ORA
+Deleting a row from the table...
+Execution terminated!
+	  </screen></td></tr></tbody>
+	</table>
+	Check the table content again:
+	<table frame="box">
+	  <thead><tr><td>[Sqlplus terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	You can check the trace produced by Oracle XA client with 2 completed
+	transaction and an interrupted one (unique constraint error):
+	<screen>
+*** COMPLETED INSERT TRANSACTION ***
+
+ORACLE XA: Version 12.1.0.2.0. RM name = 'Oracle_XA'.
+
+232955.15623.4050298496.0:
+xaoopen: xa_info=ORACLE_XA+Acc=P/hr/**+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=lixa_ora_db+Loose_Coupling=true,rmid=0,flags=0x0
+
+232955.15623.4050298496.0:
+xaolgn_help: version#: 185597952 banner: Oracle Database 11g Release 11.1.0.0.0 - Production
+
+232955.15623.4050298496.0:
+xaolgn: sqlxrc/sqlxss completed
+
+232955.15623.4050298496.0:
+xaolgn2: return XA_OK
+
+232955.15623.4050298496.0:
+xaoopen: xaolgn completed
+
+232955.15623.4050298496.0:
+xaoopen: return 0
+
+232955.15623.4050298496.0:
+ax_reg: xid=0x4c495841-57511f3ca5bd4f70890f31a467c8ff68-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x0
+
+232955.15623.4050298496.0:
+OCITransStart: Attempting
+
+232955.15623.4050298496.0:
+OCITransStart: Succeeded
+
+232955.15623.4050298496.0:
+xaodynpo 2: rmid=0, state=131
+
+232955.15623.4050298496.0:
+xaoend: xid=0x4c495841-57511f3ca5bd4f70890f31a467c8ff68-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x4000000
+
+232955.15623.4050298496.0:
+OCITransDetach: Attempting
+
+232955.15623.4050298496.0:
+OCITransDetach: Succeeded
+
+232955.15623.4050298496.0:
+xaoend: return 0
+
+232955.15623.4050298496.0:
+xaocommit: xid=0x4c495841-57511f3ca5bd4f70890f31a467c8ff68-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x40000000
+
+232955.15623.4050298496.0:
+OCITransCommit: Attempting
+
+232955.15623.4050298496.0:
+xaodynpo 2: rmid=0, state=129
+
+232955.15623.4050298496.0:
+OCITransCommit: Succeeded
+
+232955.15623.4050298496.0:
+xaocommit: rtn 0
+
+232955.15623.4050298496.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+232955.15623.4050298496.0:
+OCIServerDetach: Attempting
+
+232955.15623.4050298496.0:
+OCIServerDetach: Succeeded
+
+232955.15623.4050298496.0:
+xaoclose: rtn 0
+
+
+
+*** INTERRUPTED INSERT TRANSACTION ***
+
+ORACLE XA: Version 12.1.0.2.0. RM name = 'Oracle_XA'.
+
+233203.15629.223495808.0:
+xaoopen: xa_info=ORACLE_XA+Acc=P/hr/**+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=lixa_ora_db+Loose_Coupling=true,rmid=0,flags=0x0
+
+233203.15629.223495808.0:
+xaolgn_help: version#: 185597952 banner: Oracle Database 11g Release 11.1.0.0.0 - Production
+
+233203.15629.223495808.0:
+xaolgn: sqlxrc/sqlxss completed
+
+233203.15629.223495808.0:
+xaolgn2: return XA_OK
+
+233203.15629.223495808.0:
+xaoopen: xaolgn completed
+
+233203.15629.223495808.0:
+xaoopen: return 0
+
+233203.15629.223495808.0:
+ax_reg: xid=0x4c495841-39f318a6af324a4782d5fe9988e7f7dd-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x0
+
+233203.15629.223495808.0:
+OCITransStart: Attempting
+
+233203.15629.223495808.0:
+OCITransStart: Succeeded
+
+233203.15629.223495808.0:
+xaodynpo 2: rmid=0, state=131
+
+
+
+*** COMPLETED DELETE TRANSACTION ***
+
+ORACLE XA: Version 12.1.0.2.0. RM name = 'Oracle_XA'.
+
+233222.15630.4127786624.0:
+xaoopen: xa_info=ORACLE_XA+Acc=P/hr/**+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=lixa_ora_db+Loose_Coupling=true,rmid=0,flags=0x0
+
+233222.15630.4127786624.0:
+xaolgn_help: version#: 185597952 banner: Oracle Database 11g Release 11.1.0.0.0 - Production
+
+233222.15630.4127786624.0:
+xaolgn: sqlxrc/sqlxss completed
+
+233222.15630.4127786624.0:
+xaolgn2: return XA_OK
+
+233222.15630.4127786624.0:
+xaoopen: xaolgn completed
+
+233222.15630.4127786624.0:
+xaoopen: return 0
+
+233222.15630.4127786624.0:
+ax_reg: xid=0x4c495841-3bdca359b8fd4364b425bd6284ec1ceb-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x0
+
+233222.15630.4127786624.0:
+OCITransStart: Attempting
+
+233222.15630.4127786624.0:
+OCITransStart: Succeeded
+
+233222.15630.4127786624.0:
+xaodynpo 2: rmid=0, state=131
+
+233222.15630.4127786624.0:
+xaoend: xid=0x4c495841-3bdca359b8fd4364b425bd6284ec1ceb-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x4000000
+
+233222.15630.4127786624.0:
+OCITransDetach: Attempting
+
+233222.15630.4127786624.0:
+OCITransDetach: Succeeded
+
+233222.15630.4127786624.0:
+xaoend: return 0
+
+233222.15630.4127786624.0:
+xaocommit: xid=0x4c495841-3bdca359b8fd4364b425bd6284ec1ceb-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x40000000
+
+233222.15630.4127786624.0:
+OCITransCommit: Attempting
+
+233222.15630.4127786624.0:
+xaodynpo 2: rmid=0, state=129
+
+233222.15630.4127786624.0:
+OCITransCommit: Succeeded
+
+233222.15630.4127786624.0:
+xaocommit: rtn 0
+
+233222.15630.4127786624.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+233222.15630.4127786624.0:
+OCIServerDetach: Attempting
+
+233222.15630.4127786624.0:
+OCIServerDetach: Succeeded
+
+233222.15630.4127786624.0:
+xaoclose: rtn 0
+         </screen>
+      </para>
+    </section>
+  </section>
+  <section xml:id="Development_EXAMPLE6_PQL_ORA">
+    <title>An example with PostgreSQL &amp; Oracle</title>
+    <figure xml:id="develop6">
+      <title>Deploy model of an example showing a distributed transaction with PostgreSQL and Oracle</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="../images/LIXA_Development_6.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      This example shows as
+      you can implement DTP (Distributed Transaction Processing) with two
+      Resource Managers (PostgreSQL and Oracle Database Server)
+      coordinated by the LIXA Transaction Manager.
+      It's strongly suggested you have played with the
+      examples previously shown in this chapter (see
+      <xref linkend="Development_COBOL"/>) before starting this more 
+      complex one.
+    </para>
+    <para>
+      This example was developed using the following configuration:
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	  PostgreSQL 9.3.15 (client and server)
+	</para></listitem>
+	<listitem><para>
+	  Oracle remote configuration with Instant Client 12.1
+	</para></listitem>
+	<listitem><para>
+	  Oracle Pro*COBOL compiler as supplied by Oracle Instant Client 12.1
+	</para></listitem>
+	<listitem><para>
+	  GnuCOBOL compiler and runtime as supplied by Ubuntu 14.04
+	</para></listitem>
+      </itemizedlist>
+      If you were using a different version you would need to adapt some
+      commands to your environment.
+    </para>
+    <note>
+      <para>
+	If you did not yet installed the software provided by PostgreSQL,
+	please refer to the official PostgreSQL site to download the
+	software and to pick-up the information necessary to install 
+	and configure
+	the database. This manual does not give you information related
+	to PostgreSQL technology: it is assumed you already installed and
+	configured the database.
+      </para>
+      <para>
+	If you did not yet installed the software provided by Oracle,
+	please refer to the official Oracle site to download the
+	software and to pick-up the information necessary to install 
+	and configure
+	the database. This manual does not give you information related
+	to Oracle technology: it is assumed you already installed and
+	configured the database.
+      </para>
+    </note>
+    <important>
+      <para>
+	The LIXA software must be configured to support the PostgreSQL and
+	the Oracle Database Server resource managers as explained in 
+	<xref linkend="Linking_third_party_resource_managers"/>.
+	As a little hint, you should configure LIXA as below:
+	<screen>
+./configure --with-oracle-lib=/opt/oracle/instantclient_12_1 \
+> --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include \
+> --with-postgresql
+	</screen>
+	Please don't forget you must compile and install every time you
+	re-configure.
+      </para>
+    </important>
+    <section>
+      <para>
+	Prepare the environment following the following steps:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	    Set-up PostgreSQL environment
+	    as explained in <xref linkend="Development_example5_pql"/>
+	  </para></listitem>
+	  <listitem><para>
+	    Set-up the Oracle environment as explained in 
+	    <xref linkend="Development_setup_Oracle_environment"/>
+	    and adapt the command to your Oracle Database Server version
+	  </para></listitem>
+	  <listitem><para>
+	    Configure Oracle listener for remote connection as explained in 
+	    <xref linkend="Development_configure_Oracle_listener"/>
+	  </para></listitem>
+	  <listitem><para>
+	    Install and configure Oracle Instant Client as explained in 
+	    <xref linkend="Development_install_Oracle_Instant_Client"/>
+	  </para></listitem>
+	  <listitem><para>
+	    Start the LIXA state server
+	    as explained in <xref linkend="Development_example5_pql"/>
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+    </section>
+    <section>
+      <title>Set environment variables</title>
+      <para>
+	Create a shell script file, for example 
+	<filename>oracle_env.sh</filename>
+	with some useful environment variables as below:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ cat oracle_env.sh 
+#!/bin/sh
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1:$LD_LIBRARY_PATH
+export PATH=/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:$PATH
+export ORACLE_HOME=/opt/oracle/instantclient_12_1
+	</screen>
+	source it and check the values:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ . oracle_env.sh 
+tiian@ubuntu1404-64:/tmp$ echo $LD_LIBRARY_PATH
+/opt/oracle/instantclient_12_1:
+tiian@ubuntu1404-64:/tmp$ echo $PATH
+/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
+tiian@ubuntu1404-64:/tmp$ echo $ORACLE_HOME
+/opt/oracle/instantclient_12_1
+	</screen>
+	set LIXA environment variables:
+	<screen>
+tiian@ubuntu1404-64:/tmp$ export PATH=$PATH:/opt/lixa/bin
+tiian@ubuntu1404-64:/tmp$ echo $PATH
+/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/opt/lixa/bin
+tiian@ubuntu1404-64:/tmp$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+tiian@ubuntu1404-64:/tmp$ echo $LD_LIBRARY_PATH
+/opt/oracle/instantclient_12_1::/opt/lixa/lib
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Build the client program</title>
+      <para>
+	Prepare the client (Application Program) using the below commands:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/cobol/EXAMPLE6_PQL_ORA.pco .
+tiian@ubuntu1404-64:/tmp$ procob EXAMPLE6_PQL_ORA.pco 
+Pro*COBOL: Release 12.1.0.2.0 - Production on Sat Jan 21 20:01:52 2017
+
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+
+System default option values taken from: /opt/oracle/instantclient_12_1/precomp/admin/pcbcfg.cfg
+
+tiian@ubuntu1404-64:/tmp$ export COB_LDFLAGS=-Wl,--no-as-needed
+tiian@ubuntu1404-64:/tmp$ cobc -x $(lixa-config -f -p) \
+> -L/opt/oracle/instantclient_12_1 -lclntsh -lnnz12 \
+> EXAMPLE6_PQL_ORA.cob /opt/oracle/instantclient_12_1/cobsqlintf.o
+	  </screen></td></tr></tbody>
+	</table>
+	Verify the executable produced by <command>cobc</command>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ldd EXAMPLE6_PQL_ORA
+    linux-vdso.so.1 =>  (0x00007fffdf3fe000)
+    libcob.so.1 => /usr/lib/libcob.so.1 (0x00007eff28bed000)
+    libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007eff288e7000)
+    libgmp.so.10 => /usr/lib/x86_64-linux-gnu/libgmp.so.10 (0x00007eff28672000)
+    libncurses.so.5 => /lib/x86_64-linux-gnu/libncurses.so.5 (0x00007eff2844f000)
+    libtinfo.so.5 => /lib/x86_64-linux-gnu/libtinfo.so.5 (0x00007eff28226000)
+    libdb-5.3.so => /usr/lib/x86_64-linux-gnu/libdb-5.3.so (0x00007eff27e83000)
+    libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007eff27c7f000)
+    liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007eff27a64000)
+    liblixapq.so.0 => /opt/lixa/lib/liblixapq.so.0 (0x00007eff2785c000)
+    libclntsh.so.12.1 => /opt/oracle/instantclient_12_1/libclntsh.so.12.1 (0x00007eff2489f000)
+    libnnz12.so => /opt/oracle/instantclient_12_1/libnnz12.so (0x00007eff24195000)
+    libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007eff23dcf000)
+    libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007eff23bb1000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007eff28e2b000)
+    libgmodule-2.0.so.0 => /usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0 (0x00007eff239ac000)
+    libglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007eff236a4000)
+    libxml2.so.2 => /usr/lib/x86_64-linux-gnu/libxml2.so.2 (0x00007eff2333d000)
+    liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007eff23123000)
+    libpq.so.5 => /usr/lib/libpq.so.5 (0x00007eff22ef4000)
+    libmql1.so => /opt/oracle/instantclient_12_1/libmql1.so (0x00007eff22c7e000)
+    libipc1.so => /opt/oracle/instantclient_12_1/libipc1.so (0x00007eff228ff000)
+    libons.so => /opt/oracle/instantclient_12_1/libons.so (0x00007eff226ba000)
+    libnsl.so.1 => /lib/x86_64-linux-gnu/libnsl.so.1 (0x00007eff224a0000)
+    librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007eff22297000)
+    libaio.so.1 => /lib/x86_64-linux-gnu/libaio.so.1 (0x00007eff22095000)
+    libclntshcore.so.12.1 => /opt/oracle/instantclient_12_1/libclntshcore.so.12.1 (0x00007eff21b23000)
+    libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007eff218e4000)
+    libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007eff216cb000)
+    liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007eff214a9000)
+    libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007eff212a3000)
+    libssl.so.1.0.0 => /lib/x86_64-linux-gnu/libssl.so.1.0.0 (0x00007eff21044000)
+    libcrypto.so.1.0.0 => /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 (0x00007eff20c68000)
+    libkrb5.so.3 => /usr/lib/x86_64-linux-gnu/libkrb5.so.3 (0x00007eff2099c000)
+    libcom_err.so.2 => /lib/x86_64-linux-gnu/libcom_err.so.2 (0x00007eff20798000)
+    libgssapi_krb5.so.2 => /usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2 (0x00007eff20551000)
+    libldap_r-2.4.so.2 => /usr/lib/x86_64-linux-gnu/libldap_r-2.4.so.2 (0x00007eff202ff000)
+    libk5crypto.so.3 => /usr/lib/x86_64-linux-gnu/libk5crypto.so.3 (0x00007eff200d0000)
+    libkrb5support.so.0 => /usr/lib/x86_64-linux-gnu/libkrb5support.so.0 (0x00007eff1fec4000)
+    libkeyutils.so.1 => /lib/x86_64-linux-gnu/libkeyutils.so.1 (0x00007eff1fcc0000)
+    libresolv.so.2 => /lib/x86_64-linux-gnu/libresolv.so.2 (0x00007eff1faa5000)
+    liblber-2.4.so.2 => /usr/lib/x86_64-linux-gnu/liblber-2.4.so.2 (0x00007eff1f895000)
+    libsasl2.so.2 => /usr/lib/x86_64-linux-gnu/libsasl2.so.2 (0x00007eff1f67a000)
+    libgssapi.so.3 => /usr/lib/x86_64-linux-gnu/libgssapi.so.3 (0x00007eff1f43c000)
+    libgnutls.so.26 => /usr/lib/x86_64-linux-gnu/libgnutls.so.26 (0x00007eff1f17d000)
+    libgcrypt.so.11 => /lib/x86_64-linux-gnu/libgcrypt.so.11 (0x00007eff1eefd000)
+    libheimntlm.so.0 => /usr/lib/x86_64-linux-gnu/libheimntlm.so.0 (0x00007eff1ecf3000)
+    libkrb5.so.26 => /usr/lib/x86_64-linux-gnu/libkrb5.so.26 (0x00007eff1ea6b000)
+    libasn1.so.8 => /usr/lib/x86_64-linux-gnu/libasn1.so.8 (0x00007eff1e7ca000)
+    libhcrypto.so.4 => /usr/lib/x86_64-linux-gnu/libhcrypto.so.4 (0x00007eff1e596000)
+    libroken.so.18 => /usr/lib/x86_64-linux-gnu/libroken.so.18 (0x00007eff1e381000)
+    libtasn1.so.6 => /usr/lib/x86_64-linux-gnu/libtasn1.so.6 (0x00007eff1e16d000)
+    libp11-kit.so.0 => /usr/lib/x86_64-linux-gnu/libp11-kit.so.0 (0x00007eff1df2a000)
+    libgpg-error.so.0 => /lib/x86_64-linux-gnu/libgpg-error.so.0 (0x00007eff1dd25000)
+    libwind.so.0 => /usr/lib/x86_64-linux-gnu/libwind.so.0 (0x00007eff1dafc000)
+    libheimbase.so.1 => /usr/lib/x86_64-linux-gnu/libheimbase.so.1 (0x00007eff1d8ed000)
+    libhx509.so.5 => /usr/lib/x86_64-linux-gnu/libhx509.so.5 (0x00007eff1d6a4000)
+    libsqlite3.so.0 => /usr/lib/x86_64-linux-gnu/libsqlite3.so.0 (0x00007eff1d3eb000)
+    libcrypt.so.1 => /lib/x86_64-linux-gnu/libcrypt.so.1 (0x00007eff1d1b1000)
+    libffi.so.6 => /usr/lib/x86_64-linux-gnu/libffi.so.6 (0x00007eff1cfa9000)
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+    </section>
+    <section>
+      <title>Set-up LIXA environment</title>
+      <para>
+	Set-up the <varname>LIXA_PROFILE</varname> environment variable:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=PQL_STA_ORAIC_STA
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+PQL_STA_ORAIC_STA
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	See <xref linkend="example5_some_checks"/> for additional details on
+	the profile.
+      </para>
+    </section>
+    <section>
+      <title>Program execution</title>
+      <para>
+	This example behaves has the sum of 
+	<filename>EXAMPLE2_ORA</filename> explained in 
+	<xref linkend="Development_EXAMPLE2_ORA"/> and of
+	<filename>EXAMPLE5_PQL</filename> explained in 
+	<xref linkend="Development_EXAMPLE5_PQL"/>:
+	the program tries to insert a row inside the Oracle database and a
+	row inside the PostgreSQL database.
+	The following paragraphs show the type of behavior that you try.
+      </para>
+      <section>
+	<title>Happy path executions</title>
+	<para>
+	  Both databases can insert the row:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE6_PQL_ORA INSERT
+Executing EXAMPLE6_PQL_ORA
+Inserting a row in the table...
+Status: +0000000000
+PQexec INSERT
+Status: +0000000001
+Execution terminated!
+	    </screen></td></tr></tbody>
+	  </table>
+	</para>
+	<para>
+	  Both databases can delete the row:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE6_PQL_ORA DELETE
+Executing EXAMPLE6_PQL_ORA
+Deleting a row from the table...
+Status: +0000000000
+PQexec DELETE
+Status: +0000000001
+Execution terminated!
+	    </screen></td></tr></tbody>
+	  </table>
+	</para>
+      </section>
+      <section>
+	<title>Backed out executions</title>
+	<para>
+	  Oracle database can not insert the row:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE6_PQL_ORA INSERT
+Executing EXAMPLE6_PQL_ORA
+Inserting a row in the table...
+Status: +0000000000
+Error reported by Oracle: ORA-00001: unique constraint (HR.COUNTRY_C_ID_PK) violated
+                                                                                                                                                                                                     
+Rolling back due to SQL errors...
+TXROLLBACK returned value +000000000
+TXCLOSE returned value +000000000
+	    </screen></td></tr></tbody>
+	  </table>
+	  and PostgreSQL has not inserted its row due to TXROLLBACK:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ psql testdb
+psql (9.3.15)
+Type "help" for help.
+
+testdb=> select * from AUTHORS;
+ id | last_name | first_name 
+----+-----------+------------
+(0 rows)
+	    </screen></td></tr></tbody>
+	  </table>
+	</para>
+	<para>
+	  PostgreSQL database can not insert the row:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ./EXAMPLE6_PQL_ORA INSERT
+Executing EXAMPLE6_PQL_ORA
+Inserting a row in the table...
+Status: +0000000000
+PQexec INSERT
+Error in PQexec statement: 
+ERROR:  duplicate key value violates unique constraint "authors_pkey"
+DETAIL:  Key (id)=(1) already exists.
+
+Rolling back due to SQL errors...
+TXROLLBACK returned value +000000000
+TXCLOSE returned value +000000000
+	    </screen></td></tr></tbody>
+	  </table>
+	  and Oracle has not inserted its row due to TXROLLBACK:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ sqlplus hr/hr@lixa_ora_db
+
+SQL*Plus: Release 12.1.0.2.0 Production on Sat Jan 21 21:44:23 2017
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Sat Jan 21 2017 21:42:12 +01:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+	    </screen></td></tr></tbody>
+	  </table>
+	</para>
+      </section>
+      <section>
+	<title>Conclusion</title>
+	<para>
+	  This example shows a real two phase commit transaction using a
+	  COBOL program (GnuCOBOL) that accesses an Oracle database
+	  (Pro*COBOL) and a PostgreSQL database (direct COBOL calls).
+	</para>
+      </section>
+    </section>
+  </section>
+</chapter>

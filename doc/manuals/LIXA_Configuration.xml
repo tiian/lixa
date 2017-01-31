@@ -79,7 +79,7 @@
       </para></listitem>
       <listitem><para>
 	  (XA): is the standard protocol used by the LIXA project to 
-	  communicateand with the resource managers and is described
+	  communicate with the resource managers and is described
 	  in <citation>XAspec</citation>; it's a standard protocol and API
       </para></listitem>
       <listitem><para>
@@ -93,7 +93,7 @@
     <title>Architectural elements</title>
     <para>
       The <command>lixad</command> daemon process can be executed on any
-      system: there is no need it is executed on the same system that's hosting
+      system: there is no need to execute it on the same system that's hosting
       the Application Programs. The communications between 
       the client and the server (<command>lixad</command>) uses TCP/IP sockets.
     </para>
@@ -188,7 +188,7 @@
 	    </para></listitem>
 	    <listitem><para>
 		two Resource Manager dedicated nodes hosting the
-		Reosurce Manager
+		Reosurce Managers
 	    </para></listitem>
 	  </itemizedlist>
 	</para>
@@ -240,7 +240,7 @@
   <section>
     <title>Configuring LIXA components</title>
     <para>
-      The picture below emphasizes the LIXA components must be configured
+      The picture below emphasizes the LIXA components that must be configured
       in a simple scenario:
     </para>
     <figure xml:id="config6">
@@ -391,7 +391,7 @@
 	      a persistent and reliable storage device like a RAID partition.
 	      The string specified by the tag <parameter>status_file</parameter>
 	      is used as a prefix: every manager (thread) creates two files
-	      with the same prefix and different suffix.
+	      with the same prefix and different suffixes.
 	  </para></listitem>
 	</itemizedlist>
       </para>
@@ -478,8 +478,8 @@
 &lt;?xml version="1.0" encoding="UTF-8" ?&gt;
 &lt;client&gt;
   &lt;sttsrvs&gt;
-    &lt;sttsrv name="server1" domain="AF_INET" address="10.23.45.67" port="2345" /&gt;
-    &lt;sttsrv name="server2" domain="AF_INET" address="10.23.46.91" port="3456" /&gt;
+    &lt;sttsrv name="local_1" domain="AF_INET" address="10.23.45.67" port="2345" /&gt;
+    &lt;sttsrv name="local_2" domain="AF_INET" address="10.23.46.91" port="3456" /&gt;
   &lt;/sttsrvs&gt;
   &lt;rsrmgrs&gt;
     &lt;rsrmgr name="OracleXE_dynreg" switch_file="/opt/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
@@ -574,7 +574,7 @@
 	  </para></listitem>
 	  <listitem><para>
 	      <varname>xa_close_info</varname>: it is the string of parameters
-	      that must be passed to the Resource Manager by the xa_open() 
+	      that must be passed to the Resource Manager by the xa_close() 
 	      function call; the content
 	      of the string depends on the Resource Manager, please refer to
 	      the documentation distributed with the resource manager you
@@ -813,8 +813,7 @@ export LIXA_CONFIG_FILE=/tmp/my_lixac
 	  inside the C header file
 	  <filename>src/common/lixa_crash.h</filename>
 	  LIXA project uses 
-	  the <function>abort()</function> function to simulated a soft
-	  crash.
+	  the <function>abort()</function> function to simulate a soft crash.
 	</para>
       </section>
       <section>
@@ -878,7 +877,7 @@ export LIXA_TRACE_MASK=0x00000010
 export LIXA_TRACE_MASK=0xffffffff
 	  </screen>
 	  <warning><para>
-	      Tracing too much is dangerous: it slows down your system and
+	      Too much tracing is dangerous: it slows down your system and
 	      possibly fills-up your filesystems.
 	  </para></warning>
 	  Establishing the internal modules that must be traced is a typical

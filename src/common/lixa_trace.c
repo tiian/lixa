@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of LIXA.
@@ -89,6 +89,8 @@ GStaticMutex lixa_trace_mutex = G_STATIC_MUTEX_INIT;
  */
 void lixa_trace_init(void)
 {
+    if (lixa_trace_initialized)
+        return;
     /* initialize thread system if necessary */
     if (!g_thread_supported ()) g_thread_init(NULL);
 

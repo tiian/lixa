@@ -1,5 +1,5 @@
 AT_INIT
-AT_COPYRIGHT([Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>])
+AT_COPYRIGHT([Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>])
 
 AT_BANNER([LIXA case tests start-up])
 AT_SETUP([check lixad process is NOT active...])
@@ -21,6 +21,7 @@ m4_include([generic.at])
 m4_include([memory.at])
 m4_include([bug.at])
 m4_include([tx.at])
+m4_include([tx_cobol.at])
 m4_include([mt.at])
 
 AT_BANNER([LIXA case tests clean-up])

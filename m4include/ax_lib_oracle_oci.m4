@@ -17,6 +17,7 @@ dnl This macro calls:
 dnl
 dnl   AC_SUBST(ORACLE_OCI_CFLAGS)
 dnl   AC_SUBST(ORACLE_OCI_LDFLAGS)
+dnl   AC_SUBST(ORACLE_OCI_LIBS)
 dnl   AC_SUBST(ORACLE_OCI_VERSION)
 dnl
 dnl And sets:
@@ -32,6 +33,7 @@ dnl @license AllPermissive
 AC_DEFUN([AX_LIB_ORACLE_OCI],
 [
     HAVE_ORACLE="no"
+    TEST_ORACLE="no"
     AC_ARG_WITH([oracle],
         AC_HELP_STRING([--with-oracle=@<:@DIR@:>@],
             [use Oracle OCI API from given path to Oracle home directory]
@@ -57,8 +59,9 @@ AC_DEFUN([AX_LIB_ORACLE_OCI],
 
     ORACLE_OCI_CFLAGS=""
     ORACLE_OCI_LDFLAGS=""
+    ORACLE_OCI_LIBS=""
     ORACLE_OCI_VERSION=""
-    ORACLE_ENV_SH=""
+    ORACLE_ENV_SH="/dev/null"
 
     dnl
     dnl Collect include/lib paths
@@ -110,9 +113,11 @@ Please, locate Oracle directories using --with-oracle or \
 	tmp2=${tmp1#lib}
 	ORACLE_OCI_NNZ=${tmp2%.*}
         saved_LDFLAGS="$LDFLAGS"
-        dnl oci_ldflags="-L$oracle_lib_dir -lclntsh -lnnz10"
-        oci_ldflags="-L$oracle_lib_dir -lclntsh -l$ORACLE_OCI_NNZ"
+        oci_ldflags="-Wl,-rpath -Wl,$oracle_lib_dir -L$oracle_lib_dir"
         LDFLAGS="$LDFLAGS $oci_ldflags"
+	saved_LIBS="$LIBS"
+        oci_libs="-lclntsh -l$ORACLE_OCI_NNZ"
+	LIBS="$LIBS $oci_libs"
 
         dnl
         dnl Check OCI headers
@@ -160,6 +165,7 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
                 )],
                 [
                 ORACLE_OCI_LDFLAGS="$oci_ldflags"
+		ORACLE_OCI_LIBS="$oci_libs"
                 oci_lib_found="yes"
                 AC_MSG_RESULT([yes])
                 ],
@@ -173,6 +179,7 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
 
         CPPFLAGS="$saved_CPPFLAGS"
         LDFLAGS="$saved_LDFLAGS"
+	LIBS="$saved_LIBS"
     fi
 
     dnl
@@ -223,15 +230,41 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
     dnl set oracle_env.sh absolute position
     if test -f $oracle_home_dir/bin/oracle_env.sh
     then
-      ORACLE_ENV_SH=$oracle_home_dir/bin/oracle_env.sh
+	ORACLE_ENV_SH=$oracle_home_dir/bin/oracle_env.sh
+        TEST_ORACLE="yes"
     fi
 
+    dnl search for Pro*C and Pro*COBOL precompiler in current path
+    if test "$HAVE_ORACLE" = "yes"
+    then
+	dnl Pro*C precompiler
+	AC_CHECK_PROGS(PROC, [proc], [false])
+	if test "$PROC" != "false"
+	then
+	    AC_CHECK_PROG(HAVE_PROC, [$PROC], [yes], [no])
+	else
+            AC_MSG_NOTICE([Pro*C precompiler [proc] not found, maybe not in PATH or not installed])
+	fi
+	dnl Pro*COBOL precompiler
+	AC_CHECK_PROGS(PROCOB, [procob], [false])
+	if test "$PROCOB" != "false"
+	then
+	    AC_CHECK_PROG(HAVE_PROCOB, [$PROCOB], [yes], [no])
+	else
+            AC_MSG_NOTICE([Pro*COBOL precompiler [procob] not found, maybe not in PATH or not installed])
+	fi
+    fi
+
+    AM_CONDITIONAL([COND_PROC], [test "$HAVE_PROC" = "YES"])
+    AM_CONDITIONAL([COND_PROCOB], [test "$HAVE_PROC" = "YES"])
     AC_SUBST([ORACLE_OCI_VERSION])
     AC_SUBST([ORACLE_OCI_CFLAGS])
     AC_SUBST([ORACLE_OCI_LDFLAGS])
+    AC_SUBST([ORACLE_OCI_LIBS])
     AC_SUBST([ORACLE_OCI_NNZ])
     AC_SUBST([ORACLE_ENV_SH])
     AC_SUBST([HAVE_ORACLE])
+    AC_SUBST([TEST_ORACLE])
     if test "$HAVE_ORACLE" = "yes"
     then
         AC_DEFINE([HAVE_ORACLE], [1], [Define to 1 if you are using Oracle])
