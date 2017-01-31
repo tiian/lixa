@@ -588,7 +588,7 @@ testdb=> select * from AUTHORS;
   </section>
   <section xml:id="Development_EXAMPLE2_ORA">
     <title>An example with Oracle Pro*COBOL</title>
-    <figure xml:id="develop5_cobol">
+    <figure xml:id="develop6_cobol">
       <title>Deploy model of an example with Oracle DBMS</title>
       <mediaobject>
 	<imageobject>
@@ -1039,7 +1039,7 @@ xaoclose: rtn 0
   </section>
   <section xml:id="Development_EXAMPLE6_PQL_ORA">
     <title>An example with PostgreSQL &amp; Oracle</title>
-    <figure xml:id="develop6">
+    <figure xml:id="develop7_cobol">
       <title>Deploy model of an example showing a distributed transaction with PostgreSQL and Oracle</title>
       <mediaobject>
 	<imageobject>
