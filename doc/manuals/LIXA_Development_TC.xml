@@ -94,5 +94,53 @@ int main(int argc, char *argv[])
   </section>
   <section>
     <title>An example with Oracle</title>
+    <figure>
+      <title>Deployment model of two example applications with Oracle DBMS</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="../images/LIXA_Development_15.png"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      This example shows how two application programs can take part in the same global transaction when using the same Resource Manager coordinated by the LIXA Transaction Manager. Please make sure that you are comfortable with previous sections and examples before setting this up.
+    </para>
+    <para>
+      The following relates to the figure above:
+      <itemizedlist mark="bullet">
+        <listitem><para>
+          <function>Application Program 1</function>: an application developed in C that is able to call functionality exposed by Application Program 2
+        </para></listitem>
+        <listitem><para>
+          <function>Application Program 2</function>: an application developed in C that is able to fulfil service functionality when called by Application Program 1
+        </para></listitem>
+        <listitem><para>
+          <function>A1 and B1</function>: includes Resource Manager specific calls during program execution
+        </para></listitem>
+        <listitem><para>
+          <function>C1</function>: this is any custom protocol developed or used for communication between Application Program 1 and Application Program 2 - <emphasis>it is important to note that to make use of the Transaction Coupling extensions, one would have to share the XID between the programs.</emphasis>
+        </para></listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      This example was developed using the following configuration:
+    </para>
+    <important>
+      <para>
+        LIXA must be configured to support the Oracle Resource Manager as explained in <xref linkend="Linking_third_party_resource_managers"/>.
+      </para>
+    </important>
+    <section>
+      <title>Set the environment variables</title>
+    </section>
+    <section>
+      <title>Build the client programs</title>
+    </section>
+    <section>
+      <title>Configure the LIXA environment</title>
+    </section>
+    <section>
+      <title>Test program execution</title>
+    </section>
   </section>
 </chapter>
