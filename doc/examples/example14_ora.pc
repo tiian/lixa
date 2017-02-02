@@ -1,0 +1,120 @@
+/*
+ * Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>
+ * All rights reserved.
+ *
+ * This file is part of LIXA.
+ *
+ * LIXA is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * LIXA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+
+/*
+ * This is an example that shows as you can use LIXA TX (Transaction
+ * Demarcation) API and Oracle Pro*OCI embedded SQL together.
+ * Please refer to LIXA manual for more information about this sample.
+ */
+
+
+
+/* standard UNIX headers */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/* Oracle Pro*C Interface API headers */
+#include <sqlca.h>
+#include <sqlcpr.h>
+
+/* TX (Transaction Demarcation) header */
+#include <tx.h>
+
+
+
+/* Print error and exit */
+void sql_error() 
+{ 
+	char msg[256]; 
+	size_t buffer_len, msg_len; 
+	int txrc;
+ 
+	buffer_len = sizeof(msg); 
+	sqlglm((unsigned char *)msg, &buffer_len, &msg_len);
+	if (msg_len > buffer_len)
+		msg_len = buffer_len;
+	printf("Error reported by Oracle: %.*s\n\n", (int)msg_len, msg);
+
+	printf("Rolling back the transaction...\n");    
+	if (TX_OK != (txrc = tx_rollback())) {
+	        fprintf(stderr, "tx_rollback error: %d\n", txrc);
+	        exit(txrc);
+	}
+	if (TX_OK != (txrc = tx_close())) {
+		fprintf(stderr, "tx_close error: %d\n", txrc);
+		exit(txrc);
+	}
+    
+	exit(1); 
+} 
+
+
+
+int main(int argc, char *argv[])
+{
+    int            txrc, ocirc, delete;
+
+    if (argc > 1 && (!strcmp(argv[1], "delete") || !strcmp(argv[1], "DELETE")))
+        delete = 1;
+    else
+        delete = 0;
+    
+    /* open the resource manager(s) */
+    if (TX_OK != (txrc = tx_open())) {
+        fprintf(stderr, "tx_open error: %d\n", txrc);
+        exit(txrc);
+    }
+
+    if (TX_OK != (txrc = tx_begin())) {
+        fprintf(stderr, "tx_begin error: %d\n", txrc);
+        exit(txrc);
+    }
+
+    EXEC SQL WHENEVER SQLERROR DO sql_error();
+
+    if (delete) {
+        fprintf(stderr, "First arg is '%s', bypassing INSERT statement...\n",
+                argv[1]);
+    } else {
+        EXEC SQL INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('RS', 'Repubblica San Marino', 1);
+    }
+
+    if (delete) {
+        EXEC SQL DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS';
+    } else
+        fprintf(stderr, "First arg is not 'DELETE', bypassing DELETE "
+                "statement...\n");
+
+    printf("Committing the transaction...\n");    
+    if (TX_OK != (txrc = tx_commit())) {
+        fprintf(stderr, "tx_commit error: %d\n", txrc);
+        exit(txrc);
+    }
+
+    /* close the resource manager(s) */
+    if (TX_OK != (txrc = tx_close())) {
+        fprintf(stderr, "tx_close error: %d\n", txrc);
+        exit(txrc);
+    }
+    
+    return 0;
+}

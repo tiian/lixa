@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of LIXA.
@@ -82,6 +82,9 @@ extern const long LIXA_XID_FORMAT_ID;
  */
 #define LIXA_XID_SERIALIZE_LENGTH (LIXA_SERIALIZED_LONG_INT+1+2*XIDDATASIZE+1+1)
 
+#define LIXA_XID_GTRID_ASCII_LENGTH (2 * sizeof(uuid_t) + 4 + 1)
+#define LIXA_XID_BQUAL_ASCII_LENGTH (2 * sizeof(uuid_t) + 4 + 1)
+
 /**
  * A string used to serialize a XID.
  * NOTE: this is not XA standard compliant, but it just works in
@@ -106,7 +109,7 @@ extern "C" {
  * @param md5_digest_hex IN pointer to a string of
  * @ref MD5_DIGEST_LENGTH * 2 characters
  */
-void lixa_xid_set_global_bqual(const char *md5_digest_hex);
+    void lixa_xid_set_global_bqual(const char *md5_digest_hex);
 
 /**
  * Check if the branch qualifier of the transaction matched the global
@@ -114,19 +117,19 @@ void lixa_xid_set_global_bqual(const char *md5_digest_hex);
  * @param xid IN transaction id to inspect
  * @return a boolean value
  */
-int lixa_xid_bqual_is_global(const XID *xid);
+    int lixa_xid_bqual_is_global(const XID *xid);
 
 /**
  * Create a new XID
  * @param xid OUT the generated unique transaction id
  */
-void lixa_xid_create_new(XID *xid);
+    void lixa_xid_create_new(XID *xid);
 
 /**
  * Generate a new branch qualifier and update the XID
  * @param xid INOUT the updated XID
  */
-void lixa_xid_create_new_bqual(XID *xid);
+    void lixa_xid_create_new_bqual(XID *xid);
 
 /**
  * Retrieve an ASCII string with the human readable version of the gtrid
@@ -135,7 +138,7 @@ void lixa_xid_create_new_bqual(XID *xid);
  * @return a string MUST be freed by the caller using "free" function or
  *         NULL if an error happens
  */
-char *lixa_xid_get_gtrid_ascii(const XID *xid);
+    char *lixa_xid_get_gtrid_ascii(const XID *xid);
 
 /**
  * Retrieve an ASCII string with the human readable version of the bqual
@@ -144,24 +147,38 @@ char *lixa_xid_get_gtrid_ascii(const XID *xid);
  * @return a string MUST be freed by the caller using "free" function or
  *         NULL if an error happens
  */
-char *lixa_xid_get_bqual_ascii(const XID *xid);
+    char *lixa_xid_get_bqual_ascii(const XID *xid);
 
 /**
  * Reset a xid structure
  * @param xid IN/OUT transaction id to be resetted
  */
-static inline void lixa_xid_reset(XID *xid)
-{
-    memset(xid, 0, sizeof(XID));
-    xid->formatID = NULLXID;
-}
+    static inline void lixa_xid_reset(XID *xid)
+    {
+        memset(xid, 0, sizeof(XID));
+        xid->formatID = NULLXID;
+    }
+
+/**
+ * Check if the XID is in a reset state
+ * @param[in] xid transaction id to be checked
+ * @return TRUE if the transaction id is in a reset state, otherwise FALSE
+ */
+    static inline int lixa_xid_is_reset(XID *xid)
+    {
+        if (NULL == xid || NULLXID == xid->formatID) {
+            return TRUE;
+        }
+
+        return FALSE;
+    }
 
 /**
  * Retrieve the LIXA format ID serialized; it's useful to query PostgreSQL
  * and retrieve all the current prepared transactions (xa_recover function)
  * @param lsx OUT the serialized format ID
  */
-void lixa_xid_formatid(lixa_ser_xid_t lsx);
+    void lixa_xid_formatid(lixa_ser_xid_t lsx);
 
 /**
  * Serialize XID to a string
@@ -169,7 +186,7 @@ void lixa_xid_formatid(lixa_ser_xid_t lsx);
  * @param lsx OUT the serialized XID
  * @return TRUE if serialization was completed, FALSE if there was an error
  */
-int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx);
+    int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx);
 
 /**
  * Deserialize a string compatible with PostgreSQL to a XID
@@ -178,7 +195,7 @@ int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx);
  * @return TRUE if deserialization was completed,
  *         FALSE if there was an error
  */
-int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx);
+    int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx);
 
 /**
  * Compare two xids
@@ -188,7 +205,7 @@ int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx);
  *         if (a<b) --> -1 <br>
  *         if (a>b) --> +1
  */
-int lixa_xid_compare(const XID *a, const XID *b);
+    int lixa_xid_compare(const XID *a, const XID *b);
 
 #ifdef __cplusplus
 }

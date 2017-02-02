@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of LIXA.
@@ -144,6 +144,8 @@
     PTHREAD_T_FORMAT "); sending data would generate SIGPIPE signal"
 #define LIXA_SYSLOG_LXC028N "LXC028N the server closed the connection " \
     "after a query recovery (step=8) message: it might be crashed"
+#define LIXA_SYSLOG_LXC029W "LXC029W resource manager '%s' (rmid=%d) " \
+    "returned XAER_NOTA during xa_start(TMJOIN|TMRESUME) for xid='%s' and this should NOT happen"
 
 
 

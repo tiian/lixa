@@ -1,0 +1,19 @@
+This examples are intended to be used with GNU COBOL (Open Cobol).
+
+Note: you must set-up a LIXA state server (lixad) as explained in 
+      "LIXA reference guide" https://sourceforge.net/p/lixa/wiki/Home/
+      before running example programs. If the state server is not active,
+      the client program will not be able to connect to it.
+
+This brief instruction explains how you can compile them.
+
+1. Add LIXA utilities to your PATH, for example:
+   export PATH=$PATH:/opt/lixa/bin
+2. Add LIXA libraries to your LD_LIBRARY_PATH, for example:
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lixa/lib
+3. Disable gcc linking "--no-as-needed" option for COBOL programs:
+   export COB_LDFLAGS=-Wl,--no-as-needed
+4. Compile the interested COBOL <programname> with this command line:
+     cobc -x $(lixa-config -f -l) <programname>
+
+NOTE: look at LIXA Reference Guide for full explanation of program build

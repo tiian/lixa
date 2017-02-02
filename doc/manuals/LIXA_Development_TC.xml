@@ -1,0 +1,308 @@
+<chapter xml:id="Development_TC">
+  <title>Developing C Application Programs with the Transaction Coupling (TC) TX extensions</title>
+  <para>
+    This chapter explains how you can develop your own C application using the libraries and tools supplied by the LIXA project.
+  </para>
+  <para>
+    The LIXA project ships with some example C programs that you can find in the <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples</filename> folder after software installation (see <xref linkend="Installation"/>).
+  </para>
+  <note><para>
+    This chapter is focused on the C programming language for the non-standard extensions that has been added to the TX specification to expose some of the XA interface capabilities. All the information supplied in <xref linkend="Development"/> still applies.
+  </para></note>
+  <section>
+    <title>Non-standard TX (Transaction Demarcation) Specification Extensions</title>
+    <para>
+      The LIXA project provides extensions to the <citation>TXspec</citation>, named Transaction Coupling (TC), which can be used in addition to the standard API when developing distributed Application Programs.
+    </para>
+    <para>
+      The API extensions are easy to use and the following C example briefly explains it:
+      <programlisting>
+#include &lt;tx.h&gt;
+        
+/* your includes */
+        
+int main(int argc, char *argv[])
+{
+    int rc;
+        
+    if (TX_OK != (rc = tx_open()))
+        /* handle error */
+        
+    if (TX_OK != (rc = tx_begin()))
+        /* handle error */
+        
+    /* do local work against Resource Manager here */
+        
+    /* suspend the transaction so that work can continue elsewhere */
+    if (TX_OK != (rc = tx_end(TX_TMSUSPEND)))
+        /* handle error */
+        
+    /* in another thread or another Application Program work can continue on the same transaction */
+    TXINFO txinfo;
+    if (TX_OK != (rc = tx_info(&amp;txinfo)))
+        /* handle error */
+    if (TX_OK != (rc = tx_join(&amp;txinfo.xid)))
+        /* handle error */
+    if (TX_OK != (rc = tx_end(TX_TMSUCCESS)))
+        /* handle error */
+        
+    /* take up transaction again */
+    if (TX_OK != (rc = tx_resume(&amp;txinfo.xid)))
+        /* handle error */
+        
+    /* commit or roll back transaction */
+    if (TX_OK != (rc = tx_commit()))
+        /* handle errror */
+        
+    /* shut down */
+    tx_close();
+}
+      </programlisting>
+      These are the available C functions:
+      <itemizedlist mark="bullet">
+        <listitem><para>
+          <function>tx_end</function>: manage the global transaction with <parameter class="function">flags</parameter>:
+          <itemizedlist mark="bullet">
+            <listitem><para>
+              <parameter>TX_TMSUSPEND</parameter>: suspend the transaction
+            </para></listitem>
+            <listitem><para>
+              <parameter>TX_TMSUCCESS</parameter>: mark the portion of work on the global transaction as successful
+            </para></listitem>
+            <listitem><para>
+              <parameter>TX_TMFAIL</parameter>: mark the portion of work on the global transaction as failed
+            </para></listitem>
+          </itemizedlist>
+        </para></listitem>
+        <listitem><para>
+          <function>tx_join</function>: join a suspended global transaction and continue work
+        </para></listitem>
+        <listitem><para>
+          <function>tx_resume</function>: resume a suspended global transaction - <emphasis>only from the thread that suspended the original transaction</emphasis>
+        </para></listitem>
+      </itemizedlist>
+    </para>
+  </section>
+  <section>
+    <title>LIXA library linkage</title>
+    <para>
+      See <xref linkend="linkage"/>.
+    </para>
+  </section>
+  <section>
+    <title>The first example</title>
+  </section>
+  <section>
+    <title>An example with Oracle</title>
+    <figure>
+      <title>Deployment model of two example applications with Oracle DBMS</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="../images/LIXA_Development_15.png"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      This example shows how two application programs can take part in the same global transaction when using the same Resource Manager coordinated by the LIXA Transaction Manager. Please make sure that you are comfortable with previous sections and examples before setting this up.
+    </para>
+    <para>
+      The following relates to the figure above:
+      <itemizedlist mark="bullet">
+        <listitem><para>
+          <function>Application Program 1</function>: an application developed in C that is able to call functionality exposed by Application Program 2
+        </para></listitem>
+        <listitem><para>
+          <function>Application Program 2</function>: an application developed in C that is able to fulfil service functionality when called by Application Program 1
+        </para></listitem>
+        <listitem><para>
+          <function>A1 and B1</function>: includes Resource Manager specific calls during program execution
+        </para></listitem>
+        <listitem><para>
+          <function>C1</function>: this is any custom protocol developed or used for communication between Application Program 1 and Application Program 2 - <emphasis>it is important to note that to make use of the Transaction Coupling extensions, one would have to share the XID between the programs.</emphasis>
+        </para></listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      This example was developed using the following configuration:
+      <itemizedlist mark="bullet">
+        <listitem><para>
+          Oracle client and server with Oracle XE 11.2
+        </para></listitem>
+        <listitem><para>
+          GNU C compiler supplied with CentOS 7.3.1611:
+          <screen>
+[pieter.jvrensburg@centos-linux tmp]$ cc --version
+cc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-11)
+          </screen>
+        </para></listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      The environment should be prepared following these steps:
+      <itemizedlist mark="bullet">
+        <listitem><para>
+          The Oracle environment as explained in <xref linkend="Development_setup_Oracle_environment"/>. Please adapt to your version of Oracle installed.
+        </para></listitem>
+        <listitem><para>
+          Configuration of the Oracle listener for remote connections as explained in <xref linkend="Development_configure_Oracle_listener"/>.
+        </para></listitem>
+        <listitem><para>
+          Installation and configuration of the Oracle Instance Client (if required) as explained in <xref linkend="Development_install_Oracle_Instant_Client"/>.
+        </para></listitem>
+      </itemizedlist>
+    </para>
+    <important>
+      <para>
+        LIXA must be configured to support the Oracle Resource Manager as explained in <xref linkend="Linking_third_party_resource_managers"/>.
+      </para>
+    </important>
+    <section>
+      <title>Set the environment variables</title>
+      <para>
+        Set up the required environment variables:
+        <table frame="box">
+          <thead>
+            <tr><td>[Shell terminal session]</td></tr>
+          </thead>
+          <tbody>
+            <tr><td>
+              <screen>
+[pieter.jvrensburg@centos-linux ~]$ export ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe
+[pieter.jvrensburg@centos-linux ~]$ export ORACLE_SID=XE
+[pieter.jvrensburg@centos-linux ~]$ export NLS_LANG=`$ORACLE_HOME/bin/nls_lang.sh`
+[pieter.jvrensburg@centos-linux ~]$ export PATH=$ORACLE_HOME/bin:$PATH
+[pieter.jvrensburg@centos-linux ~]$ export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
+              </screen>
+              And for LIXA:
+              <screen>
+[pieter.jvrensburg@centos-linux ~]$ export PATH=/opt/lixa/bin:/opt/lixa/sbin:$PATH
+[pieter.jvrensburg@centos-linux ~]$ export LD_LIBRARY_PATH=/opt/lixa/lib:$LD_LIBRARY_PATH
+              </screen>
+            </td></tr>
+          </tbody>
+        </table>
+      </para>
+    </section>
+    <section>
+      <title>Build the client programs</title>
+      <para>
+        Prepare the client (Application Program) using the below commands:
+        <table frame="box">
+          <thead>
+            <tr><td>[Shell terminal session]</td></tr>
+          </thead>
+          <tbody>
+            <tr><td>
+              <screen>
+[pieter.jvrensburg@centos-linux tmp]$ cp /opt/lixa/share/doc/lixa/X.Y.Z/examples/example15_transaction_coupling.c .
+[pieter.jvrensburg@centos-linux tmp]$ cc $(lixa-config -c -f -l) -L$ORACLE_HOME/lib -lclntsh -lnnz11 example15_transaction_coupling.c
+              </screen>
+            </td></tr>
+          </tbody>
+        </table>
+        Next, verify the executable produced by <command>cc</command>:
+        <table frame="box">
+          <thead>
+            <tr><td>[Shell terminal session]</td></tr>
+          </thead>
+          <tbody>
+            <tr><td>
+              <screen>
+[pieter.jvrensburg@centos-linux tmp]$ ldd a.out 
+	linux-vdso.so.1 =>  (0x00007ffce4b13000)
+	liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007f39938f6000)
+	libclntsh.so.11.1 => /u01/app/oracle/product/11.2.0/xe/lib/libclntsh.so.11.1 (0x00007f39910aa000)
+	libnnz11.so => /u01/app/oracle/product/11.2.0/xe/lib/libnnz11.so (0x00007f3990ce2000)
+	libc.so.6 => /lib64/libc.so.6 (0x00007f3990919000)
+	libgmodule-2.0.so.0 => /lib64/libgmodule-2.0.so.0 (0x00007f3990714000)
+	libgthread-2.0.so.0 => /lib64/libgthread-2.0.so.0 (0x00007f3990512000)
+	libxml2.so.2 => /lib64/libxml2.so.2 (0x00007f39901a8000)
+	liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007f398ff8a000)
+	libglib-2.0.so.0 => /lib64/libglib-2.0.so.0 (0x00007f398fc53000)
+	libpthread.so.0 => /lib64/libpthread.so.0 (0x00007f398fa37000)
+	libuuid.so.1 => /lib64/libuuid.so.1 (0x00007f398f831000)
+	libm.so.6 => /lib64/libm.so.6 (0x00007f398f52f000)
+	libdl.so.2 => /lib64/libdl.so.2 (0x00007f398f32b000)
+	libnsl.so.1 => /lib64/libnsl.so.1 (0x00007f398f111000)
+	libaio.so.1 => /lib64/libaio.so.1 (0x00007f398ef0f000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f3993b17000)
+	libz.so.1 => /lib64/libz.so.1 (0x00007f398ecf9000)
+	liblzma.so.5 => /lib64/liblzma.so.5 (0x00007f398ead2000)
+              </screen>
+            </td></tr>
+          </tbody>
+        </table>
+      </para>
+    </section>
+    <section>
+      <title>Configure the LIXA environment</title>
+      <para>
+        Set up the <varname>LIXA_PROFILE</varname> environment variable:
+        <table frame="box">
+          <thead>
+            <tr><td>[Shell terminal session]</td></tr>
+          </thead>
+          <tbody>
+            <tr><td>
+              <screen>
+[pieter.jvrensburg@centos-linux ~]$ export LIXA_PROFILE=ORA_STA
+[pieter.jvrensburg@centos-linux ~]$ echo $LIXA_PROFILE 
+ORA_STA
+              </screen>
+            </td></tr>
+          </tbody>
+        </table>
+      </para>
+      <para>
+        See <xref linkend="example5_some_checks"/> for additional information on creating the profile configuration file.
+      </para>
+    </section>
+    <section>
+      <title>Test program execution</title>
+      <para>
+        This shows how a transaction was suspended and resumed within the same thread of control. The example in <filename>example15_transaction_coupling.c</filename> does not interact with the actual Oracle database, but loads the switch file.
+      </para>
+      <important>
+        <para>
+          Make sure that the LIXA Transaction Manager server is running before executing the example application, as explained in <xref linkend="Development_start_LIXA_server"/>.
+        </para>
+      </important>
+      <section>
+        <title>Successful execution</title>
+        <para>
+          The transaction is suspended, resumed and then rolled back:
+          <table frame="box">
+          <thead>
+            <tr><td>[Shell terminal session]</td></tr>
+          </thead>
+          <tbody>
+            <tr><td>
+              <screen>
+[pieter.jvrensburg@centos-linux tmp]$ LIXA_CONFIG_FILE=./lixac_conf.xml LIXA_PROFILE=ORA_STA ./a.out 
+tx_open(): 0
+tx_begin(): 0
+tx_end(TMSUSPEND): 0
+tx_info(): 1
+tx_resume(): 0
+tx_commit(): 0
+tx_begin(): 0
+tx_end(TMSUSPEND): 0
+tx_info(): 1
+tx_resume(): 0
+tx_rollback(): 0
+tx_close(): 0
+              </screen>
+            </td></tr>
+          </tbody>
+        </table>
+        </para>
+      </section>
+      <section>
+        <title>Conclusion</title>
+        <para>
+          This example shows a basic usage of the extended TX interface API calls. A more elaborate use case will include developing two application programs that communicate with each other and share the XID obtained from <function>tx_info</function> so that the second application program can join the existing transaction.
+        </para>
+      </section>
+    </section>
+  </section>
+</chapter>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of LIXA.
@@ -122,7 +122,7 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
         memset(&srd->pld.ph.last_verb_step, 0,
                sizeof(struct lixa_msg_verb_step_s) * PAYLOAD_HEADER_VERB_STEP);
         common_status_conthr_init(&srd->pld.ph.state);
-        srd->pld.ph.recoverying_block_id = 0;
+        srd->pld.ph.recovering_block_id = 0;
         srd->pld.ph.recovery_failed = FALSE;
         srd->pld.ph.recovery_commit = FALSE;
         memset(&srd->pld.ph.recovery_failed_time, 0, sizeof(struct timeval));
@@ -877,7 +877,7 @@ int status_record_insert(struct thread_status_s *ts,
                 delta_size = new_size - curr_size;
                 if (delta_size == 0)
                     THROW(CONTAINER_FULL)
-            }
+                        }
             for (i = 0; i < delta_size; ++i) {
                 struct status_record_s tmp_sr;
 

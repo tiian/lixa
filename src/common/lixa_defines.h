@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of LIXA.
@@ -119,7 +119,9 @@
 
 
 #ifdef HAVE_NFDS_T
-# if SIZEOF_NFDS_T == SIZEOF_LONG_INT
+# if SIZEOF_NFDS_T == SIZEOF_INT
+#  define NFDS_T_FORMAT "%d"
+# elif SIZEOF_NFDS_T == SIZEOF_LONG_INT
 #  define NFDS_T_FORMAT "%lu"
 # else
 #  error Unable to determine sizeof(nfds_t)
@@ -244,13 +246,13 @@ extern "C" {
 
 
 #ifndef HAVE_UINT8_T
-      /** 8 bit unsigned int */
-      typedef unsigned char uint8_t;
+    /** 8 bit unsigned int */
+    typedef unsigned char uint8_t;
 #endif /* HAVE_UINT8_T */
 #ifndef HAVE_UINT32_T
 # if (SIZEOF_INT == 4)
-      /** 32 bit unsigned int */
-      typedef unsigned int uint32_t;
+    /** 32 bit unsigned int */
+    typedef unsigned int uint32_t;
 # else
 #  error "Please specify a 32 bit wide unsigned int type"
 # endif /* if (SIZEOF_INT == 4) */

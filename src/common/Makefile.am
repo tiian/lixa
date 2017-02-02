@@ -1,9 +1,10 @@
+include_HEADERS = xa.h
 noinst_HEADERS = lixa_common_status.h lixa_config.h lixa_crash.h \
 		lixa_defines.h \
 		lixa_errors.h lixa_inst_conf.h lixa_syslog.h lixa_sw.h \
 		lixa_trace.h lixa_utils.h lixa_xid.h lixa_xml_msg.h \
 		lixa_xml_msg_deserialize.h lixa_xml_msg_serialize.h \
-		lixa_xml_msg_trace.h xa.h
+		lixa_xml_msg_trace.h
 lib_LTLIBRARIES = liblixab.la
 liblixab_la_SOURCES = lixa_common_status.c lixa_config.c lixa_crash.c \
 		lixa_errors.c \

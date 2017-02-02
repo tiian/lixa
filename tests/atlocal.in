@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>
+# Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>
 # All rights reserved.
 #
 # This file is part of LIXA.
@@ -17,7 +17,7 @@
 # along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-PATH=@abs_top_builddir@/tests/src/:@abs_top_builddir@/src/server:@abs_top_builddir@/src/client:$PATH
+PATH=@abs_top_builddir@/tests/src/:@abs_top_builddir@/tests/src/cobol/:@abs_top_builddir@/src/server:@abs_top_builddir@/src/client:$PATH
 export PATH
 
 CLIENT_DIR=@abs_top_builddir@/src/client
@@ -67,6 +67,9 @@ export VALGRIND
 GDB=@GDB@
 export GDB
 
+HAVE_COBOLAPI=@HAVE_COBOLAPI@
+export HAVE_COBOLAPI
+
 HAVE_MYSQL=@HAVE_MYSQL@
 export HAVE_MYSQL
 
@@ -75,6 +78,9 @@ export HAVE_POSTGRESQL
 
 HAVE_ORACLE=@HAVE_ORACLE@
 export HAVE_ORACLE
+
+TEST_ORACLE=@TEST_ORACLE@
+export TEST_ORACLE
 
 HAVE_IBMDB2=@HAVE_IBMDB2@
 export HAVE_IBMDB2

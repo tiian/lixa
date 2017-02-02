@@ -7,6 +7,8 @@
 <!ENTITY config SYSTEM "LIXA_Configuration.xml">
 <!ENTITY execut SYSTEM "LIXA_Execution.xml">
 <!ENTITY develop SYSTEM "LIXA_Development.xml">
+<!ENTITY develop_cobol SYSTEM "LIXA_Development_COBOL.xml">
+<!ENTITY develop_tc SYSTEM "LIXA_Development_TC.xml">
 <!ENTITY recovery SYSTEM "LIXA_Recovery.xml">
 <!ENTITY indepth SYSTEM "LIXA_In_Depth.xml">
 <!ENTITY tuning SYSTEM "LIXA_Tuning.xml">
@@ -26,7 +28,7 @@
       </personname>
     </author>
     <copyright>
-      <year>2011</year>
+      <year>2017</year>
       <holder>Christian Ferrari</holder>
     </copyright>
   </info>
@@ -36,6 +38,8 @@
   &config;
   &execut;
   &develop;
+  &develop_cobol;
+  &develop_tc;
   &recovery;
   &indepth;
   &tuning;

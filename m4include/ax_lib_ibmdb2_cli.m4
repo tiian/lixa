@@ -1,6 +1,6 @@
 dnl @synopsis AX_LIB_IBMDB2_CLI
 dnl
-dnl Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>
+dnl Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>
 dnl All rights reserved.
 dnl
 dnl This file is part of LIXA.
@@ -80,6 +80,9 @@ AC_DEFUN([AX_LIB_IBMDB2_CLI],
         IBMDB2_LIB_NAME="lib64"
 	;;
 	  rs6000-ibm-aix)
+	    IBMDB2_LIB_NAME="lib64"
+	;;
+	  *-apple-darwin1?.1.0)
 	    IBMDB2_LIB_NAME="lib64"
 	;;
       *) AC_MSG_ERROR([LIXA is not yet ported on this architecture for IBM DB2])

@@ -1,3 +1,8 @@
+if COND_COBOLAPI
+  MAYBE_COBOLAPI = cobol
+endif
+SUBDIRS = . $(MAYBE_COBOLAPI)
+
 #AM_CPPFLAGS = -DLIXA_MULTITHREAD=0 -I../../src/client -I../../src/common \
 #	-I../../src/client/switch/lixa
 AM_CPPFLAGS = -I../../src/client -I../../src/common \
@@ -24,12 +29,13 @@ endif
 if COMPILE_WEBSPHEREMQ_STUFF
   MAYBE_WEBSPHEREMQ = case0044
 endif
-noinst_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
+check_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0006 case0007 case0008 case0009 case0010 case0011 case0012 \
 	case0013 case0014 case0015 case0016 case0017 case0018 case0019 \
 	case0020 case0021 case0022 case0023 case0024 case0025 case0026 \
 	case0027 case0028 case0029 case0030 case0031 case0032 case0033 \
-	case0034 case0035 case0036 case0043 case0046 case0048 \
+	case0034 case0035 case0036 case0043 case0046 case0048 case0049 \
+	case0050 case0051 case0052 case0053 \
 	$(MAYBE_POSTGRESQL) $(MAYBE_ORACLE) \
 	$(MAYBE_IBMDB2) $(MAYBE_MYSQL) $(MAYBE_MYSQL_POSTGRESQL) \
 	$(MAYBE_WEBSPHEREMQ)
@@ -84,7 +90,7 @@ case0037_LDFLAGS = @POSTGRESQL_LDFLAGS@
 case0038_SOURCES = case0038.c
 case0038_CPPFLAGS = @ORACLE_OCI_CFLAGS@ -I../../src/client
 case0038_LDFLAGS = @ORACLE_OCI_LDFLAGS@
-case0038_LDADD = ../../src/client/liblixac.la
+case0038_LDADD = ../../src/client/liblixac.la -lclntsh
 case0039_SOURCES = case0039.c
 case0039_CPPFLAGS = @IBMDB2_CLI_CPPFLAGS@ -I../../src/client
 case0039_LDFLAGS = @IBMDB2_CLI_LDFLAGS@
@@ -133,3 +139,8 @@ case0048_CPPFLAGS = -I../../src/client -I../../src/common
 case0048_LDADD = ../../src/common/liblixab.la @LDFLAGS_XML2@ \
     ../../src/client/liblixac.la
 case0048_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_XML2@
+case0049_SOURCES = case0049.c
+case0050_SOURCES = case0050.c
+case0051_SOURCES = case0051.c
+case0052_SOURCES = case0052.c
+case0053_SOURCES = case0053.c

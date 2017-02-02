@@ -1,6 +1,8 @@
-AC_INIT([lixa], [1.1.0], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [1.3.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
+LT_INIT
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
 
@@ -10,6 +12,7 @@ AC_CONFIG_FILES([
   Makefile
   doc/Makefile
   doc/examples/Makefile
+  doc/examples/cobol/Makefile
   doc/images/Makefile
   doc/manuals/LIXA.xml
   doc/manuals/Makefile
@@ -45,10 +48,13 @@ AC_CONFIG_FILES([
   tests/etc/Makefile
   tests/scripts/Makefile
   tests/src/Makefile
+  tests/src/cobol/Makefile
+  utils/Makefile
   var/Makefile
   doxygen.conf
 ])
 AC_CONFIG_TESTDIR([tests])
+
 
 # Installation PATH
 test "x$prefix" = "xNONE" && prefix="/opt/lixa"
@@ -80,19 +86,31 @@ m4_include(m4include/ax_docbook.m4)
 AX_DOCBOOK
 AM_CONDITIONAL([COMPILE_DOCBOOK_STUFF], [test "$HAVE_DOCBOOK" = "yes"])
 
-# LT Version numbers, remember to change them just *before* a release.
-#   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)
-#   (Interfaces added:      CURRENT++, AGE++, REVISION=0)
-#   (No interfaces changed:                   REVISION++)
+#
+# From libtool manual:
+#
+# Here are a set of rules to help you update your library version information:
+# 1. Start with version information of ‘0:0:0’ for each libtool library.
+# 2. Update the version information only immediately before a public release 
+#    of your software. More frequent updates are unnecessary, and only 
+#    guarantee that the current interface number gets larger faster.
+# 3. If the library source code has changed at all since the last update, then
+#    increment revision (‘c :r :a ’ becomes ‘c :r + 1:a ’).
+# 4. If any interfaces have been added, removed, or changed since the last
+#    update, increment current, and set revision to 0.
+# 5. If any interfaces have been added since the last public release, then
+#    increment age.
+# 6. If any interfaces have been removed since the last public release, then
+#    set age to 0.
 #
 # liblixac and liblixacmt libraries version
 LT_LIXAC_CURRENT=1
+LT_LIXAC_REVISION=3
 LT_LIXAC_AGE=1
-LT_LIXAC_REVISION=0
 # liblixab and liblixbcmt libraries version
-LT_LIXAB_CURRENT=1
-LT_LIXAB_AGE=1
-LT_LIXAB_REVISION=0
+LT_LIXAB_CURRENT=0
+LT_LIXAB_REVISION=1
+LT_LIXAB_AGE=0
 
 # Expanded variables can be used in C code and XML files
 EXPANDED_SYSCONFDIR=$(eval echo $sysconfdir)
@@ -150,8 +168,31 @@ else
 	AC_MSG_RESULT([yes])
 fi
 
+# Checking cobc (GNU COBOL compiler) is available
+AC_CHECK_PROGS(COBC, [cobc], [true])
+AC_CHECK_PROG(HAVE_COBOL, [cobc], [yes], [no])
+# Build COBOL TX interface?
+AC_ARG_ENABLE([cobol],
+	AS_HELP_STRING([--disable-cobol],
+		[do not create COBOL TX API]),
+	[COBOL="no"], [COBOL="yes"])
+# COBOL stuff is conditional
+if test "$HAVE_COBOL" = "yes" -a "$COBOL" = "yes"
+then
+	HAVE_COBOLAPI="yes"
+else
+	HAVE_COBOLAPI="no"
+fi
+AM_CONDITIONAL([COND_COBOLAPI], [test "$HAVE_COBOLAPI" = "yes"])
+if test "$HAVE_COBOLAPI" = "yes"
+then
+        AC_DEFINE([HAVE_GNU_COBOL], [1], [Define to 1 if you are using GNU COBOL])
+fi
+AC_SUBST([HAVE_COBOLAPI])
+
 # Vars useful for lixa-config utility program
 eval "LIXA_CONFIG_INCLUDEDIR=$includedir"
+eval "LIXA_CONFIG_BINDIR=$bindir"
 eval "LIXA_CONFIG_LIBDIR=$libdir"
 eval "LIXA_CONFIG_PREFIX=$prefix"
 eval "LIXA_CONFIG_LOCALSTATEDIR=$localstatedir"
@@ -257,6 +298,7 @@ AC_SUBST(LIXA_CRASH)
 AC_SUBST(XSLTPROC)
 AC_SUBST(HAVE_DOT)
 AC_SUBST(LIXA_CONFIG_INCLUDEDIR)
+AC_SUBST(LIXA_CONFIG_BINDIR)
 AC_SUBST(LIXA_CONFIG_LIBDIR)
 AC_SUBST(LIXA_CONFIG_PREFIX)
 AC_SUBST(LIXA_CONFIG_LOCALSTATEDIR)

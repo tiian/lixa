@@ -1,14 +1,19 @@
 <chapter xml:id="Development">
-  <title>Development</title>
+  <title>Developing C Application Programs</title>
   <para>
-    This chapter explains how you can develop your own application
+    This chapter explains how you can develop your own C application
     using the libraries and the tools supplied by LIXA project.
   </para>
   <para>
-    LIXA project ships some example C programs you can find in directory
+    LIXA project ships some example C programs you can find in 
+    directory
     <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/</filename> after
     software installation (see <xref linkend="Installation"/>).
   </para>
+  <note><para>
+    This chapter is focused on the C programming language. The COBOL 
+    programming language is addressed by another dedicated chapter.
+  </para></note>
   <section>
     <title>The TX (Transaction Demarcation) Specification</title>
     <para>
@@ -17,8 +22,8 @@
       an Application Program.
     </para>
     <para>
-      The API is very easy, it supplies C functions and can be briefly
-      explained:
+      The API is very easy, it supplies C functions and COBOL routines.
+      The following C example can be briefly explained:
       <programlisting>
 /* include this header: it's the header associated to The TX (Transaction
    Demarcation) Specification */
@@ -58,7 +63,7 @@ int main(int argc, char *argv[])
            the current LIXA_PROFILE */
 }
       </programlisting>
-      These are the available functions (the descriptions come from
+      These are the available C functions (the descriptions come from
       <citation>TXspec</citation>):
       <itemizedlist mark="bullet">
 	<listitem><para>
@@ -115,7 +120,7 @@ int main(int argc, char *argv[])
 	transaction manager.
       </para>
       <para>
-	The supplied examples (see <filename>doc/examcles</filename> directory)
+	The supplied examples (see <filename>doc/examples</filename> directory)
 	show the functions that must be used to
 	retrieve the connection handler(s) necessary to interact with
 	the resource managers.
@@ -137,7 +142,7 @@ int main(int argc, char *argv[])
       </para></note>
     </section>
   </section>
-  <section>
+  <section xml:id="linkage">
     <title>LIXA library linkage</title>
     <para>
       The examples showed in this chapter use these linkage options:
@@ -250,7 +255,7 @@ tx_close(): 0
       two dummy distributed transactions: <emphasis>commit</emphasis> and 
       <emphasis>rollback</emphasis>.
     </para>
-    <section>
+    <section xml:id="first_example_details">
       <title>Some details about the example</title>
       <para>
 	You have not specified a specific profile:
@@ -344,7 +349,27 @@ tx_close(): 0
     </section>
   </section>
   <section xml:id="Development_example2_ora">
-    <title>An example with Oracle Database Server</title>
+    <title>Examples with Oracle Database Server</title>
+    <para>
+      This section contains many examples related to different configurations:
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	  the Application Program can be executed inside the same system that
+	  hosts the Resource Manager (Oracle Database) or in a different
+	  system. The first configuration is named "local" and necessitates
+	  only the Oracle Database Server software. The second configuration
+	  is named "remote" or "network" and necessitates both the Oracle
+	  Database Server and the Oracle Instant Client software
+	</para></listitem>
+	<listitem><para>
+	  the C Application Program can be developed using Oracle Call 
+	  Interface (OCI) or using embedded SQL that must precompiled using
+	  the Oracle Pro*C precompiler. OCI, Pro*C and XA are not compatible.
+	</para></listitem>
+      </itemizedlist>
+      The following picture shows the overall architecture from the logical
+      point of view, but it's not a deploy model.
+    </para>
     <figure xml:id="develop2">
       <title>Deploy model of an example with Oracle Database Server</title>
       <mediaobject>
@@ -356,62 +381,74 @@ tx_close(): 0
     <para>
       Using a real Resource Manager, like a DBMS, requires some extra effort
       because you have to set-up the environment needed by the Resource
-      Manager. The example explained in this section was developed using
-      Oracle Database 10g Release 2 (10.2) Express Edition: if you used 
-      a different version, you might need to fix some of the details 
-      showed by this example.
+      Manager. The examples explained in this section was developed using
+      different configurations: 
+      <itemizedlist mark="bullet">
+	<listitem><para>
+	  Oracle Database 10g Release 2 and 11g Release 2 Express Edition 
+	  using a <emphasis>local</emphasis> connection
+	</para></listitem>
+	<listitem><para>
+	  Oracle Database 12c Release 1 (12.1) Standard Edition using a
+	  <emphasis>remote (SqlNet)</emphasis> connection
+	</para></listitem>
+      </itemizedlist>
+      If you use a different configuration, you will need to fix some of the
+      details shown by these examples.
       <note><para>
 	  If you did not yet installed the software provided by Oracle,
 	  please refer to the official Oracle site to download the
 	  software and to pick-up the information necessary to install 
 	  and configure
 	  the database. This manual does not give you information related
-	  to Oracle technology: it is assumed you already installed and
-	  configured the database.
+	  to Oracle technology: it is assumed that you have already installed 
+	  and configured the database.
       </para></note>
       <important><para>
-      The LIXA software must be configured to support the Oracle Database
-      Server resource manager as explained in 
+      The LIXA software must be configured, compiled and installed to support 
+      the Oracle Database Server resource manager as explained in 
       <xref linkend="Linking_third_party_resource_managers"/>.
       </para></important>
     </para>
-    <section xml:id="Development_setup_Oracle_environment">
-      <title>Set-up Oracle environment</title>
-      <section>
-	<title>Start-up the Oracle server</title>
+    <section>
+      <title>Local configuration (Server) and OCI</title>
+      <section xml:id="Development_setup_Oracle_environment">
+	<title>Set-up the Oracle environment (server side)</title>
 	<para>
-	  If the database server was not running, you could start it
-	  with these commands:
-	  <screen>
+	  The following example is based on Oracle XE 10.2 and 11.2, but
+	  there shouldn't be too much differences with other Oracle
+	  versions.
+	</para>
+	<section>
+	  <title>Start-up the Oracle server</title>
+	  <para>
+	    If the database server was not running, you can start it
+	    with these commands
+	    <screen>
 tiian@ubuntu:~/tmp$ sudo /etc/init.d/oracle-xe enable
 tiian@ubuntu:~/tmp$ sudo /etc/init.d/oracle-xe start
 Starting Oracle Net Listener.
 Starting Oracle Database 10g Express Edition Instance.
-	  </screen>
-	  on some systems, like Ubuntu 10.04, you would use somethig like
-	  this:
-	  <screen>
+	    </screen>
+	    on some systems, like Ubuntu 10.04, you use somethig like
+	    this:
+	    <screen>
 tiian@ubuntu:~/tmp$ sudo service oracle-xe enable
 tiian@ubuntu:~/tmp$ sudo service oracle-xe start
 Starting Oracle Net Listener.
 Starting Oracle Database 11g Express Edition Instance.
-	  </screen>
-	</para>
-      </section>
-      <section>
-	<title>Create the XA related views</title>
-	<note><para>
-	    The steps explained below might be not necessary with some
-	    versions of the Oracle software, but they are necessary
-	    with Oracle XE 10.2 and Oracle XE 11.2
-	</para></note>
-	<para>
-	  First of all you must be able to connect as <quote>SYSDBA</quote>
-	  from a terminal session; the commands below show what happens when
-	  I connect to the Oracle server using the user 
-	  <systemitem class="username">sys</systemitem> with password
-	  <quote>oracle</quote>
-	  <footnote><para>
+	    </screen>
+	  </para>
+	</section>
+	<section>
+	  <title>Create the XA related views</title>
+	  <para>
+	    First of all you must be able to connect as <quote>SYSDBA</quote>
+	    from a terminal session; the commands below show what happens when
+	    I connect to the Oracle server using the user 
+	    <systemitem class="username">sys</systemitem> with password
+	    <quote>oracle</quote>
+	    <footnote><para>
 	      I put this line (Oracle 10.2 32 bit)
 	      <computeroutput>. /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/oracle_env.sh</computeroutput>
 	      or this line (Oracle 11.2 64 bit)
@@ -421,8 +458,8 @@ Starting Oracle Database 11g Express Edition Instance.
 	      the default administration environment; it complains about
 	      two shell errors, but for the sake of our example it's
 	      safe.
-	  </para></footnote>
-	  <footnote><para>
+	    </para></footnote>
+	    <footnote><para>
 	      If you got some errors like these:
 	      <screen>
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin/nls_lang.sh: 114: [[: not found
@@ -433,8 +470,8 @@ Starting Oracle Database 11g Express Edition Instance.
 	      <computeroutput>#!/bin/bash</computeroutput> in the first row as explained 
 	      here:
 	      <link xlink:href="http://forums.oracle.com/forums/thread.jspa?messageID=1542334">http://forums.oracle.com/forums/thread.jspa?messageID=1542334</link>
-	  </para></footnote>:
-	  <screen>
+	      </para></footnote>:
+	      <screen>
 tiian@ubuntu:~$ sudo su - oracle
 oracle@ubuntu:~$ echo $ORACLE_HOME
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server
@@ -450,17 +487,17 @@ Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	  </screen>
-	  You must check the file <filename>xaview.sql</filename>:
-	  <screen>
+	      </screen>
+	      You must check the file <filename>xaview.sql</filename>:
+	      <screen>
 oracle@ubuntu:~$ ls -la $ORACLE_HOME/rdbms/admin/xaview.sql
 -rw-r--r-- 1 oracle dba 1754 2006-02-24 06:18 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/admin/xaview.sql
-	  </screen>
-	  It contains the SQL instructions necessary to create two specific
-	  system views that could be not defined in your database; the
-	  following commands are related to a database that contains
-	  the desired views:
-	  <screen>
+	      </screen>
+	      It contains the SQL instructions necessary to create two specific
+	      system views that could be not defined in your database; the
+	      following commands are related to a database that contains
+	      the desired views:
+	      <screen>
 oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:32:45 2011
@@ -481,10 +518,10 @@ no rows selected
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	  </screen>
-	  If the command failed the views would be not defined and you
-	  would get something like this:
-	  <screen>
+	      </screen>
+	      If the command failed the views would be not defined and you
+	      would get something like this:
+	      <screen>
 oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Fri Apr 29 22:20:01 2011
@@ -511,9 +548,9 @@ ORA-00942: table or view does not exist
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	  </screen>
-	  you can create them with a command like this:
-	  <screen>
+	      </screen>
+	      you can create them with a command like this:
+	      <screen>
 oracle@ubuntu:~$ cat $ORACLE_HOME/rdbms/admin/xaview.sql | sqlplus "sys/oracle as sysdba"
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Fri Apr 29 22:25:48 2011
@@ -543,21 +580,21 @@ SQL> SQL> SQL> SQL>   2    3    4    5    6    7    8    9   10   11
 View created.
 
 SQL> SQL> SQL> Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	  </screen>
-	</para>
-      </section>
-      <section>
-	<title>Authorize the XA related views</title>
-	<para>
-	  The example programs supplied by the LIXA project are designed
-	  to use the 
-	  <systemitem class="username">hr</systemitem> user; you 
-	  <emphasis>must</emphasis> grant
-	  the necessary privileges to all the users you want to use for
-	  your Application Programs. The below commands show how to grant
-	  the necessary privileges to
-	  <systemitem class="username">hr</systemitem>:
-	  <screen>
+	      </screen>
+	    </para>
+	  </section>
+	  <section>
+	    <title>Authorize the XA related views</title>
+	    <para>
+	      The example programs supplied by the LIXA project are designed
+	      to use the 
+	      <systemitem class="username">hr</systemitem> user; you 
+	      <emphasis>must</emphasis> grant
+	      the necessary privileges to all the users you want to use for
+	      your Application Programs. The below commands show how to grant
+	      the necessary privileges to
+	      <systemitem class="username">hr</systemitem>:
+	      <screen>
 oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:44:44 2011
@@ -582,25 +619,25 @@ Grant succeeded.
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	  </screen>
-	</para>
-	<note><para>
-	    If the user
-	    <systemitem class="username">hr</systemitem> did not exist and
-	    the above commands failed,
-	    you should read Oracle documentation and pick-up the necessary
-	    information to create it.
-	</para></note>
-      </section>
-      <section>
-	<title>Unlock <quote><systemitem class="username">hr</systemitem></quote> Oracle user</title>
-	<para>
-	  The example programs supplied by the LIXA project are designed
-	  to use the 
-	  <systemitem class="username">hr</systemitem> user; it might be 
-	  <emphasis>locked</emphasis> after Oracle software installation.
-	  The below commands show how to unlock it:
-	  <screen>
+	      </screen>
+	    </para>
+	    <note><para>
+	      If the user
+	      <systemitem class="username">hr</systemitem> did not exist and
+	      the above commands failed,
+	      you should read Oracle documentation and pick-up the necessary
+	      information to create it.
+	    </para></note>
+	  </section>
+	  <section>
+	    <title>Unlock <quote><systemitem class="username">hr</systemitem></quote> Oracle user</title>
+	    <para>
+	      The example programs supplied by the LIXA project are designed
+	      to use the 
+	      <systemitem class="username">hr</systemitem> user; it might be 
+	      <emphasis>locked</emphasis> after Oracle software installation.
+	      The below commands show how to unlock it:
+	      <screen>
 oracle@ubuntu:~$ sqlplus "sys/oracle as sysdba"
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 7 22:44:44 2011
@@ -621,34 +658,38 @@ User altered.
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	  </screen>
-	  You may perform the same operation using the graphical (web based)
-	  interface.
-	</para>
-      </section>
-    </section>
-    <section xml:id="Development_start_LIXA_server">
-      <title>Start the LIXA state server</title>
-      <para>
-	Start the state server as shown below:
-	<screen>
+	      </screen>
+	      You may perform the same operation using the graphical (web 
+	      based) interface.
+	    </para>
+	  </section>
+	</section>
+	<section xml:id="Development_start_LIXA_server">
+	  <title>Start the LIXA state server</title>
+	  <para>
+	    Start the state server as shown below:
+	    <screen>
 tiian@ubuntu:~$ sudo su - lixa
 lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
 lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
 lixa      6787     1  0 17:36 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 lixa@ubuntu:~$ exit
 logout
-	</screen>
-      </para>
-    </section>
-    <section>
-      <title>Build the client program</title>
-      <para>
-	Prepare the client (Application Program) using the below commands
-	(<command>gcc</command> command was splitted on several lines 
-	using <command>\</command> to help readability, but you may use
-	a single line):
-	<screen>
+	    </screen>
+	  </para>
+	</section>
+	<section>
+	  <title>Build the client program</title>
+	  <para>
+	    Prepare the client (Application Program) using the below commands
+	    (<command>gcc</command> command was splitted on several lines 
+	    using <command>\</command> to help readability, but you may use
+	    a single line):
+	    <table frame="box">
+	      <thead><tr><td>System configuration details:</td></tr></thead>
+	      <tbody><tr><td>
+		Local connection, Ubuntu 8.04, Oracle XE 10.2 Database Server
+		<screen>
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example2_ora.c .
@@ -656,10 +697,14 @@ tiian@ubuntu:~/tmp$ gcc example2_ora.c $(/opt/lixa/bin/lixa-config -c -f -l -d) 
 > -I/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/rdbms/public \
 > -L/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib -l clntsh -l nnz10 \
 > -o example2_ora
-	</screen>
-	If you are using Oracle XE 11.2 the commands might be something like
-	these:
-	<screen>
+		</screen>
+	      </td></tr></tbody>
+	    </table>
+	    <table frame="box">
+	      <thead><tr><td>System configuration details:</td></tr></thead>
+	      <tbody><tr><td>
+		Local connection, Ubuntu 10.04, Oracle XE 11.2 Database Server
+		<screen>
 tiian@ubuntu:~$ mkdir tmp
 tiian@ubuntu:~$ cd tmp
 tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example2_ora.c .
@@ -667,9 +712,11 @@ tiian@ubuntu:~/tmp$ gcc example2_ora.c $(/opt/lixa/bin/lixa-config -c -f -l -d) 
 > -I/u01/app/oracle/product/11.2.0/xe/rdbms/public/ \
 > -L/u01/app/oracle/product/11.2.0/xe/lib/ -l clntsh -l nnz11 \
 > -o example2_ora
-	</screen>
-	Verify the executable produced by <command>gcc</command>:
-	<screen>
+		</screen>
+	      </td></tr></tbody>
+	    </table>
+	    Verify the executable produced by <command>gcc</command>:
+	    <screen>
 tiian@ubuntu:~/tmp$ ldd example2_ora
         linux-gate.so.1 =>  (0xb7709000)
         liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb76ee000)
@@ -689,24 +736,24 @@ tiian@ubuntu:~/tmp$ ldd example2_ora
         libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb732e000)
         libz.so.1 => /usr/lib/libz.so.1 (0xb7319000)
         libuuid.so.1 => /lib/libuuid.so.1 (0xb7315000)
-	</screen>
-      </para>
-    </section>
-    <section>
-      <title>Set-up LIXA environment</title>
-      <para>
-	There are three unresolved references that can be fixed setting up
-	the environment properly:
-	<screen>
+	    </screen>
+	  </para>
+	</section>
+	<section>
+	  <title>Set-up LIXA environment</title>
+	  <para>
+	    There are three unresolved references that can be fixed setting up
+	    the environment properly:
+	    <screen>
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 
 tiian@ubuntu:~/tmp$ export LD_LIBRARY_PATH=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib
 
 tiian@ubuntu:~/tmp$ echo $LD_LIBRARY_PATH
 /usr/lib/oracle/xe/app/oracle/product/10.2.0/server/lib
-	</screen>
-	Check again the executable:
-	<screen>
+	    </screen>
+	    Check again the executable:
+	    <screen>
 tiian@ubuntu:~/tmp$ ldd example2_ora
         linux-gate.so.1 =>  (0xb76f9000)
         liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0xb76de000)
@@ -727,53 +774,54 @@ tiian@ubuntu:~/tmp$ ldd example2_ora
         libpcre.so.3 => /usr/lib/libpcre.so.3 (0xb634d000)
         libz.so.1 => /usr/lib/libz.so.1 (0xb6338000)
         libuuid.so.1 => /lib/libuuid.so.1 (0xb6334000)
-	</screen>
-	Set-up the necessary environment variables:
-	<screen>
-tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
-
-tiian@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_DYN
-tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
-ORA_DYN
-
-tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
-
-tiian@ubuntu:~/tmp$ export ORACLE_HOME=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
-tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
-/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
-
-tiian@ubuntu:~/tmp$ echo $PATH
-/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+	    </screen>
+	    Set-up the necessary environment variables.
+	    Here's an example for Oracle XE 10.2 using a local connection and 
+	    the SID identifier:
+	    <table frame="box">
+	      <thead><tr><td>System configuration details:</td></tr></thead>
+	      <tbody><tr><td>
+		Local connection, Ubuntu 8.04, Oracle XE 10.2 Database Server
+		<screen>
 tiian@ubuntu:~/tmp$ export PATH=$PATH:$ORACLE_HOME/bin
 tiian@ubuntu:~/tmp$ echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin
-
-tiian@ubuntu:~/tmp$ echo $ORACLE_SID
-
+tiian@ubuntu:~/tmp$ export ORACLE_HOME=/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
+tiian@ubuntu:~/tmp$ echo $ORACLE_HOME
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/server
 tiian@ubuntu:~/tmp$ export ORACLE_SID=XE
 tiian@ubuntu:~/tmp$ echo $ORACLE_SID
 XE
-	</screen>
-	It is suggested to set the necessary environment variables in your 
-	profile if you are going to execute the programs many times.
-	This is the list of the suggested variables:
-	<varname>LD_LIBRARY_PATH</varname>,
-	<varname>LIXA_PROFILE</varname>,
-	<varname>ORACLE_HOME</varname>,
-	<varname>ORACLE_SID</varname>.
-	<important><para>
-	    the third and fourth variables can be
-	    set sourcing <filename>oracle_env.sh</filename> script (it's
-	    installed in the Oracle's <filename>bin</filename> directory). 
-	</para></important>
-      </para>
-    </section>
-    <section>
-      <title>Check the data table before execution</title>
-      <para>
-	Execute the below commands:
-	<screen>
-tiian@ubuntu:~$ sqlplus "hr/hr"
+tiian@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_DYN
+tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
+ORA_DYN
+		</screen>
+	      </td></tr></tbody>
+	    </table>
+	    It is suggested to set the necessary environment variables in your 
+	    profile if you are going to execute the programs many times.
+	    This is the list of the suggested variables:
+	    <varname>LD_LIBRARY_PATH</varname>,
+	    <varname>LIXA_PROFILE</varname>,
+	    <varname>ORACLE_HOME</varname>,
+	    <varname>ORACLE_SID</varname>.
+	    <important><para>
+	      the third and fourth variables can be
+	      set sourcing <filename>oracle_env.sh</filename> script: it's
+	      installed in the Oracle's <filename>bin</filename> directory or
+	      alternatively you have to edit your own as explained above.
+	    </para></important>
+	  </para>
+	</section>
+	<section>
+	  <title>Check the data table before execution</title>
+	  <para>
+	    Execute the below commands:
+	    <screen>
+tiian@ubuntu:~$ sqlplus "hr/hr"<footnote><para>
+  use <screen>sqlplus hr/hr@lixa_ora_db</screen> in the event that you are 
+  using a remote connection as explained above
+</para></footnote>
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Thu Apr 14 22:04:55 2011
 
@@ -789,18 +837,18 @@ no rows selected
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	</screen>
-	That's OK because the table does not contain the row we 
-	are going to insert.
-      </para>
-    </section>
-    <section>
-      <title>Some checks before program execution</title>
-      <para>
-	We set <varname>LIXA_PROFILE</varname> to value
-	<quote>ORA_DYN</quote>, looking at
-	<filename>/opt/lixa/etc/lixac_conf.xml</filename>:
-	<screen>
+	    </screen>
+	    That's OK because the table does not contain the row we 
+	    are going to insert.
+	  </para>
+	</section>
+	<section>
+	  <title>Some checks before program execution</title>
+	  <para>
+	    We set <varname>LIXA_PROFILE</varname> to value
+	    <quote>ORA_DYN</quote>, looking at
+	    <filename>/opt/lixa/etc/lixac_conf.xml</filename>:
+	    <screen>
     &lt;profile name="ORA_DYN"&gt;
       &lt;sttsrvs&gt;
         &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
@@ -809,40 +857,40 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
         &lt;rsrmgr&gt;OracleXE_dynreg&lt;/rsrmgr&gt;
       &lt;/rsrmgrs&gt;
     &lt;/profile&gt;
-	</screen>
-	the profile references the Resource Manager named
-	<quote>OracleXE_dynreg</quote>, looking again at the config file:
-	<screen>
+	    </screen>
+	    the profile references the Resource Manager named
+	    <quote>OracleXE_dynreg</quote>, looking again at the config file:
+	    <screen>
     &lt;rsrmgr name="OracleXE_dynreg" switch_file="/opt/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" /&gt;
-	</screen>
-	we can discover that our application will access the Oracle
-	database using <systemitem class="username">hr</systemitem>
-	user and writing the trace file to directory <filename>/tmp</filename>
-	(see <constant>LogDir</constant>)
-	<footnote><para>
-	    The content of <constant>xa_open_info</constant> string is
-	    described in chapter 15 "Developing Applications with Oracle XA"
-	    of the "Oracle Database Application Developer's Guide"
-	    manual; please refer to the documentation published by
-	    Oracle Corporation for further details.
-	</para></footnote>. Verify no trace file exists:
-	<screen>
+	    </screen>
+	    we can discover that our application will access the Oracle
+	    database using <systemitem class="username">hr</systemitem>
+	    user and writing the trace file to directory 
+	    <filename>/tmp</filename> (see <constant>LogDir</constant>)
+	    <footnote><para>
+	      The content of <constant>xa_open_info</constant> string is
+	      described in chapter 15 "Developing Applications with Oracle XA"
+	      of the "Oracle Database Application Developer's Guide"
+	      manual; please refer to the documentation published by
+	      Oracle Corporation for further details.
+	      </para></footnote>. Verify no trace file exists:
+	      <screen>
 tiian@ubuntu:~/tmp$ ls -la /tmp/xa*
 ls: cannot access /tmp/xa*: No such file or directory
-	</screen>
-      </para>
-    </section>
-    <section>
-      <title>Program execution (dynamic registration)</title>
-      <para>
-	Execute the client program as shown below:
-	<screen>
+	      </screen>
+	  </para>
+	</section>
+	<section>
+	  <title>Program execution (dynamic registration)</title>
+	  <para>
+	    Execute the client program as shown below:
+	    <screen>
 tiian@ubuntu:~/tmp$ ./example2_ora
 INSERT statement executed!
 First arg is not 'DELETE', bypassing DELETE statement...
-	</screen>
-	Check the table after program execution:
-	<screen>
+	    </screen>
+	    Check the table after program execution:
+	    <screen>
 tiian@ubuntu:~/tmp$ sqlplus "hr/hr"
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Sun Apr 10 10:34:23 2011
@@ -861,11 +909,11 @@ RS Repubblica San Marino                             1
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	</screen>
-	The example program <filename>example2_ora</filename> inserted a
-	row in table <constant>COUNTRIES</constant>. Take a look to the
-	trace produced by the Oracle client library:
-	<screen>
+	    </screen>
+	    The example program <filename>example2_ora</filename> inserted a
+	    row in table <constant>COUNTRIES</constant>. Take a look to the
+	    trace produced by the Oracle client library:
+	    <screen>
 tiian@ubuntu:~/tmp$ ls -la /tmp/xa*
 -rw-r--r-- 1 tiian tiian 1723 2011-04-10 10:33 /tmp/xa_NULL04102011.trc
 tiian@ubuntu:~/tmp$ cat /tmp/xa_NULL04102011.trc
@@ -940,19 +988,19 @@ OCIServerDetach: Succeeded
 
 103352.5300.3057182448.0:
 xaoclose: rtn 0
-	</screen>
-	The <function>ax_reg</function> function was called because the
-	dynamic registration configuration was used 
-	(<constant>LIXA_PROFILE=ORA_DYN</constant>). 
-	Now you can remove
-	the inserted record using the same program:
-	<screen>
+	    </screen>
+	    The <function>ax_reg</function> function was called because the
+	    dynamic registration configuration was used 
+	    (<constant>LIXA_PROFILE=ORA_DYN</constant>). 
+	    Now you can remove
+	    the inserted record using the same program:
+	    <screen>
 tiian@ubuntu:~/tmp$ ./example2_ora delete
 First arg is 'delete', bypassing INSERT statement...
 DELETE statement executed!
-	</screen>
-	Check the content of the table again:
-	<screen>
+	    </screen>
+	    Check the content of the table again:
+	    <screen>
 tiian@ubuntu:~/tmp$ sqlplus "hr/hr"
 
 SQL*Plus: Release 10.2.0.1.0 - Production on Sun Apr 10 10:40:25 2011
@@ -969,27 +1017,37 @@ no rows selected
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	</screen>
-	The row was deleted. Please remove the trace file before a new
-	execution:
-	<screen>
+	    </screen>
+	    The row was deleted. Please remove the trace file before a new
+	    execution:
+	    <screen>
 tiian@ubuntu:~/tmp$ rm /tmp/xa_NULL04102011.trc
-	</screen>
-      </para>
-    </section>
-    <section>
-      <title>Program execution (static registration)</title>
-      <para>
-	Switch from dynamic registration to static registration:
-	<screen>
+	    </screen>
+	  </para>
+	</section>
+	<section>
+	  <title>Program execution (static registration)</title>
+	  <para>
+	    Switch from dynamic registration to static registration (local
+	    connection):
+	    <screen>
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 ORA_DYN
 tiian@ubuntu:~/tmp$ export LIXA_PROFILE=ORA_STA
 tiian@ubuntu:~/tmp$ echo $LIXA_PROFILE
 ORA_STA
-	</screen>
-	Execute the program again:
-	<screen>
+	    </screen>
+	    Here's the equivalent for the network connection using Oracle
+	    Instant Client:
+	    <screen>
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+ORAOCI_DYN
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=ORAOCI_STA
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+ORAOCI_STA	  
+	    </screen>
+	    Execute the program again:
+	    <screen>
 tiian@ubuntu:~/tmp$ ./example2_ora
 INSERT statement executed!
 First arg is not 'DELETE', bypassing DELETE statement...
@@ -1011,9 +1069,9 @@ RS Repubblica San Marino                             1
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	</screen>
-	Inspect the produced trace file:
-	<screen>
+	    </screen>
+	    Inspect the produced trace file:
+	    <screen>
 tiian@ubuntu:~/tmp$ ls -la /tmp/xa_*
 -rw-r--r-- 1 tiian tiian 1661 2011-04-10 10:52 /tmp/xa_NULL04102011.trc
 tiian@ubuntu:~/tmp$ cat /tmp/xa_NULL04102011.trc
@@ -1085,12 +1143,12 @@ OCIServerDetach: Succeeded
 
 105236.5392.3057456880.0:
 xaoclose: rtn 0
-	</screen>
-	The <function>xa_start (xaostart)</function> function was called 
-	because the static registration configuration was used 
-	(<constant>LIXA_PROFILE=ORA_STA</constant>). 
-	Remove the inserted row again:
-	<screen>
+	    </screen>
+	    The <function>xa_start (xaostart)</function> function was called 
+	    because the static registration configuration was used 
+	    (<constant>LIXA_PROFILE=ORA_STA</constant>). 
+	    Remove the inserted row again:
+	    <screen>
 tiian@ubuntu:~/tmp$ ./example2_ora delete
 First arg is 'delete', bypassing INSERT statement...
 DELETE statement executed!
@@ -1110,17 +1168,788 @@ no rows selected
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
-	</screen>
-	You successfully executed a program that uses Oracle Database Server
-	as a Resource Manager.
-      </para>
+	    </screen>
+	    You have successfully executed an Application Program that uses
+	    Oracle Database Server as a Resource Manager.
+	  </para>
+	</section>
+      </section>
+      <section>
+	<title>Remote configuration (Instant Client) and OCI</title>
+	<note><para>
+	  This example has been tested using Ubuntu Server LTS 14.04
+	  and Oracle Instant Client 12.1
+	</para></note>
+	<para>
+	  Using a remote configuration instead of a local configuration
+	  introduces two differences:
+	  <itemizedlist mark="bullet">
+	    <listitem><para>
+	      the Oracle Database Server must be configured to be accessible
+	      from another system: a <emphasis>listener</emphasis> must be
+	      configured
+	    </para></listitem>
+	    <listitem><para>
+	      the Oracle Instant Client software must be installed and 
+	      configured in the system that will connect to the database
+	    </para></listitem>
+	  </itemizedlist>
+	</para>
+	<section>
+	  <title>Set-up the Oracle environment (server side)</title>
+	  <para>
+	    The first part of the Oracle Database Server is pretty the same
+	    described in 
+	    <xref linkend="Development_setup_Oracle_environment"/>.
+	    All the statements remain valid for Oracle 12c Standard 
+	    Edition with the exception of the paths. Here's a default path 
+	    installation example:
+	    <screen>
+[oracle@centos7-oracle12 ~]$ ls -la $ORACLE_HOME/rdbms/admin/xaview.sql
+-rw-r--r--. 1 oracle oinstall 1941 Apr 21  2011 /u01/app/oracle/product/12.1.0/dbhome_1/rdbms/admin/xaview.sql
+	    </screen>	    
+	  </para>
+	</section>
+	<section xml:id="Development_configure_Oracle_listener">
+	  <title>Configure Oracle Listener</title>
+	  <warning><para>
+	    Many recent Linux distributions, CentOS 7.x for example, 
+	    automatically enable an internal firewall to prevent undesired 
+	    accesses. If your firewall configuration does not allow Oracle 
+	    traffic, you have no way to reach your database instance from 
+	    a different system.
+	  </para></warning>
+	  <para>
+	    Here's a very basic example that accepts incoming connection from
+	    any network interface (IP address 0.0.0.0):
+	    <screen>
+[oracle@centos7-oracle12 ~]$ cat $ORACLE_HOME/network/admin/listener.ora
+
+LISTENER =
+  (DESCRIPTION_LIST =
+    (DESCRIPTION =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC1521))
+    )
+  )
+	    </screen>
+	    You can check that the listener is accepting connection with this
+	    command:
+	    <screen>
+[oracle@centos7-oracle12 ~]$ netstat -unta | grep 1521 | grep LISTEN
+tcp        0      0 0.0.0.0:1521            0.0.0.0:*               LISTEN     
+	    </screen>
+	    and you can check a connection from a different system with 
+	    something	like this (adjust your IP address, port and Global 
+	    Database Name):
+	    <screen>
+tiian@ubuntu1404-64:~$ sqlplus hr/hr@192.168.122.81:1521/orcl.brenta.org
+
+SQL*Plus: Release 12.1.0.2.0 Production on Fri Jan 13 21:50:46 2017
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Fri Jan 13 2017 21:36:05 +01:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> exit
+Disconnected from Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+	    </screen>
+	  </para>
+	</section>
+	<section xml:id="Development_install_Oracle_Instant_Client">
+	  <title>Install and configure Oracle Instant Client</title>
+	  <para>
+	    Oracle Instant Client must be retrieved from Oracle portal. 
+	    These are the suggested packages for version 12.1 if you want 
+	    to use LIXA:
+	    <screen>
+instantclient-basic-linux.x64-12.1.0.2.0.zip
+instantclient-precomp-linux.x64-12.1.0.2.0.zip
+instantclient-sdk-linux.x64-12.1.0.2.0.zip
+instantclient-sqlplus-linux.x64-12.1.0.2.0.zip
+	    </screen>
+	    For the Linux operating system you can choose between ".rpm" 
+	    packages and ".zip" archives: feel free to install the packages 
+	    that you prefer.
+	    Just as an example, here's the final layout of a tested 
+	    configuration using <filename>/opt/oracle</filename> as a prefix:
+	    <screen>
+tiian@ubuntu1404-64:~/lixa$ find /opt/oracle/ | sort
+/opt/oracle/
+/opt/oracle/instantclient_12_1
+/opt/oracle/instantclient_12_1/adrci
+/opt/oracle/instantclient_12_1/BASIC_README
+/opt/oracle/instantclient_12_1/cobsqlintf.o
+/opt/oracle/instantclient_12_1/genezi
+/opt/oracle/instantclient_12_1/glogin.sql
+/opt/oracle/instantclient_12_1/libclntshcore.so.12.1
+/opt/oracle/instantclient_12_1/libclntsh.so
+/opt/oracle/instantclient_12_1/libclntsh.so.12.1
+/opt/oracle/instantclient_12_1/libipc1.so
+/opt/oracle/instantclient_12_1/libmql1.so
+/opt/oracle/instantclient_12_1/libnnz12.so
+/opt/oracle/instantclient_12_1/libocci.so
+/opt/oracle/instantclient_12_1/libocci.so.12.1
+/opt/oracle/instantclient_12_1/libociei.so
+/opt/oracle/instantclient_12_1/libocijdbc12.so
+/opt/oracle/instantclient_12_1/libons.so
+/opt/oracle/instantclient_12_1/liboramysql12.so
+/opt/oracle/instantclient_12_1/libsqlplusic.so
+/opt/oracle/instantclient_12_1/libsqlplus.so
+/opt/oracle/instantclient_12_1/network
+/opt/oracle/instantclient_12_1/network/admin
+/opt/oracle/instantclient_12_1/network/admin/tnsnames.ora
+/opt/oracle/instantclient_12_1/ojdbc6.jar
+/opt/oracle/instantclient_12_1/ojdbc7.jar
+/opt/oracle/instantclient_12_1/precomp
+/opt/oracle/instantclient_12_1/precomp/admin
+/opt/oracle/instantclient_12_1/precomp/admin/pcbcfg.cfg
+/opt/oracle/instantclient_12_1/precomp/admin/pcscfg.cfg
+/opt/oracle/instantclient_12_1/PRECOMP_README
+/opt/oracle/instantclient_12_1/sdk
+/opt/oracle/instantclient_12_1/sdk/admin
+/opt/oracle/instantclient_12_1/sdk/admin/oraaccess.xsd
+/opt/oracle/instantclient_12_1/sdk/demo
+/opt/oracle/instantclient_12_1/sdk/demo/cdemo81.c
+/opt/oracle/instantclient_12_1/sdk/demo/demo.mk
+/opt/oracle/instantclient_12_1/sdk/demo/demo_proc_ic.mk
+/opt/oracle/instantclient_12_1/sdk/demo/demo_procob_ic.mk
+/opt/oracle/instantclient_12_1/sdk/demo/occidemod.sql
+/opt/oracle/instantclient_12_1/sdk/demo/occidemo.sql
+/opt/oracle/instantclient_12_1/sdk/demo/occidml.cpp
+/opt/oracle/instantclient_12_1/sdk/demo/occiobj.cpp
+/opt/oracle/instantclient_12_1/sdk/demo/occiobj.typ
+/opt/oracle/instantclient_12_1/sdk/demo/oraaccess.xml
+/opt/oracle/instantclient_12_1/sdk/demo/procdemo.pc
+/opt/oracle/instantclient_12_1/sdk/demo/procobdemo.pco
+/opt/oracle/instantclient_12_1/sdk/demo/setuporamysql.sh
+/opt/oracle/instantclient_12_1/sdk/include
+/opt/oracle/instantclient_12_1/sdk/include/ldap.h
+/opt/oracle/instantclient_12_1/sdk/include/nzerror.h
+/opt/oracle/instantclient_12_1/sdk/include/nzt.h
+/opt/oracle/instantclient_12_1/sdk/include/occiAQ.h
+/opt/oracle/instantclient_12_1/sdk/include/occiCommon.h
+/opt/oracle/instantclient_12_1/sdk/include/occiControl.h
+/opt/oracle/instantclient_12_1/sdk/include/occiData.h
+/opt/oracle/instantclient_12_1/sdk/include/occi.h
+/opt/oracle/instantclient_12_1/sdk/include/occiObjects.h
+/opt/oracle/instantclient_12_1/sdk/include/oci1.h
+/opt/oracle/instantclient_12_1/sdk/include/oci8dp.h
+/opt/oracle/instantclient_12_1/sdk/include/ociap.h
+/opt/oracle/instantclient_12_1/sdk/include/ociapr.h
+/opt/oracle/instantclient_12_1/sdk/include/ocidef.h
+/opt/oracle/instantclient_12_1/sdk/include/ocidem.h
+/opt/oracle/instantclient_12_1/sdk/include/ocidfn.h
+/opt/oracle/instantclient_12_1/sdk/include/ociextp.h
+/opt/oracle/instantclient_12_1/sdk/include/oci.h
+/opt/oracle/instantclient_12_1/sdk/include/ocikpr.h
+/opt/oracle/instantclient_12_1/sdk/include/ocixmldb.h
+/opt/oracle/instantclient_12_1/sdk/include/ocixstream.h
+/opt/oracle/instantclient_12_1/sdk/include/odci.h
+/opt/oracle/instantclient_12_1/sdk/include/oraca.h
+/opt/oracle/instantclient_12_1/sdk/include/oratypes.h
+/opt/oracle/instantclient_12_1/sdk/include/orid.h
+/opt/oracle/instantclient_12_1/sdk/include/ori.h
+/opt/oracle/instantclient_12_1/sdk/include/orl.h
+/opt/oracle/instantclient_12_1/sdk/include/oro.h
+/opt/oracle/instantclient_12_1/sdk/include/ort.h
+/opt/oracle/instantclient_12_1/sdk/include/sql2oci.h
+/opt/oracle/instantclient_12_1/sdk/include/sqlapr.h
+/opt/oracle/instantclient_12_1/sdk/include/sqlca.h
+/opt/oracle/instantclient_12_1/sdk/include/sqlcpr.h
+/opt/oracle/instantclient_12_1/sdk/include/sqlda.h
+/opt/oracle/instantclient_12_1/sdk/include/sqlkpr.h
+/opt/oracle/instantclient_12_1/sdk/include/sqlucs2.h
+/opt/oracle/instantclient_12_1/sdk/include/xa.h
+/opt/oracle/instantclient_12_1/sdk/ott
+/opt/oracle/instantclient_12_1/sdk/ottclasses.zip
+/opt/oracle/instantclient_12_1/sdk/proc
+/opt/oracle/instantclient_12_1/sdk/procob
+/opt/oracle/instantclient_12_1/sdk/rtsora
+/opt/oracle/instantclient_12_1/sdk/SDK_README
+/opt/oracle/instantclient_12_1/sqlplus
+/opt/oracle/instantclient_12_1/SQLPLUS_README
+/opt/oracle/instantclient_12_1/uidrvci
+/opt/oracle/instantclient_12_1/xstreams.jar
+            </screen>
+	    If your installation layout is different, adjust the following 
+	    steps as necessary.
+	  </para>
+	  <para>
+	    Some environment variables can be very handy and I suggest you 
+	    to use at least three. You can create a simple shell script like 
+	    this one:
+	    <screen>
+#!/bin/sh
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1:$LD_LIBRARY_PATH
+export PATH=/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:$PATH
+export ORACLE_HOME=/opt/oracle/instantclient_12_1
+	    </screen>
+	    and use it when needed using shell sourcing:
+	    <screen>
+tiian@ubuntu1404-64:~$ . ./oracle_env.sh 
+tiian@ubuntu1404-64:~$ echo $LD_LIBRARY_PATH
+/opt/oracle/instantclient_12_1:
+tiian@ubuntu1404-64:~$ echo $PATH
+/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
+tiian@ubuntu1404-64:~$ echo $ORACLE_HOME
+/opt/oracle/instantclient_12_1
+	    </screen>
+	    A possible option to configure a remote database is based on the 
+	    "tnsnames.ora" file. It should be put at path 
+	    <filename>$ORACLE_HOME/network/admin/tnsnames.ora</filename>
+	    Here's an example:
+	    <screen>
+lixa_ora_db=
+  (DESCRIPTION=
+     (ADDRESS=(PROTOCOL=tcp)(HOST=centos7-oracle12.brenta.org)(PORT=1521))
+     (CONNECT_DATA=
+        (SERVICE_NAME=orcl.brenta.org)))
+	    </screen>
+	    <note><para>
+	      Configuring Oracle networking feature requires a little bit of
+	      experience: be patient and consult official documentation and
+	      user group forums to obtain a working configuration.
+	    </para></note>
+	    <important><para>
+	      This example configuration uses <filename>lixa_ora_db</filename>
+	      as the name understood by the Instant Client to reach the
+	      database server.
+	    </para></important>
+	  </para>
+	  <para>
+	    The final step is the configuration check. If everything is OK, you
+	    should obtain something like this:
+	    <screen>
+tiian@ubuntu1404-64:~$ sqlplus hr/hr@lixa_ora_db
+
+SQL*Plus: Release 12.1.0.2.0 Production on Fri Jan 13 21:36:05 2017
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Fri Jan 13 2017 21:35:16 +01:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+
+SQL> exit
+Disconnected from Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+	    </screen>
+	  </para>
+	</section>
+	<section>
+	  <title>Start the LIXA state server</title>
+	  <para>
+	    The LIXA state server (daemon) must be started as explained in
+	    <xref linkend="Development_start_LIXA_server"/>.
+	  </para>
+	</section>
+	<section>
+	  <title>Build the client program</title>
+	  <para>
+	    Prepare the client (Application Program) using the below commands
+	    (<command>gcc</command> command was splitted on several lines 
+	    using <command>\</command> to help readability, but you may use
+	    a single line):
+	    <table frame="box">
+	      <thead><tr><td>System configuration details:</td></tr></thead>
+	      <tbody><tr><td>
+		Remote connection, Ubuntu 14.04, Oracle 12.1 Instant Client
+		<screen>
+tiian@ubuntu1404-64:/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example2_ora.c .
+tiian@ubuntu1404-64:/tmp$ gcc example2_ora.c \
+> $(/opt/lixa/bin/lixa-config -c -f -l -d) \
+> -I/opt/oracle/instantclient_12_1/sdk/include \
+> -L/opt/oracle/instantclient_12_1 \
+> -Wl,-rpath -Wl,/opt/oracle/instantclient_12_1 \
+> -l clntsh -l nnz12 -o example2_ora
+		</screen>
+	      </td></tr></tbody>
+	    </table>
+	    Verify the executable produced by <command>gcc</command>:
+	    <screen>
+tiian@ubuntu1404-64:/tmp$ ldd example2_ora
+linux-vdso.so.1 =>  (0x00007fff7649c000)
+liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007f32ec40f000)
+libclntsh.so.12.1 => /opt/oracle/instantclient_12_1/libclntsh.so.12.1 (0x00007f32e9452000)
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f32e9082000)
+libgmodule-2.0.so.0 => /usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0 (0x00007f32e8e7e000)
+libglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007f32e8b76000)
+libxml2.so.2 => /usr/lib/x86_64-linux-gnu/libxml2.so.2 (0x00007f32e880e000)
+liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007f32e85f5000)
+libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f32e83d7000)
+libmql1.so => /opt/oracle/instantclient_12_1/libmql1.so (0x00007f32e8160000)
+libipc1.so => /opt/oracle/instantclient_12_1/libipc1.so (0x00007f32e7de2000)
+libnnz12.so => /opt/oracle/instantclient_12_1/libnnz12.so (0x00007f32e76d8000)
+libons.so => /opt/oracle/instantclient_12_1/libons.so (0x00007f32e7492000)
+libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f32e728e000)
+libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f32e6f88000)
+libnsl.so.1 => /lib/x86_64-linux-gnu/libnsl.so.1 (0x00007f32e6d6d000)
+librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f32e6b65000)
+/lib64/ld-linux-x86-64.so.2 (0x00007f32ec62c000)
+libaio.so.1 => /lib/x86_64-linux-gnu/libaio.so.1 (0x00007f32e6963000)
+libclntshcore.so.12.1 => /opt/oracle/instantclient_12_1/libclntshcore.so.12.1 (0x00007f32e63f0000)
+libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007f32e61b2000)
+libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f32e5f98000)
+liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f32e5d76000)
+libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007f32e5b71000)
+	    </screen>
+	  </para>
+	</section>
+	<section>
+	  <title>Set-up LIXA environment</title>
+	  <para>
+	    Set-up the necessary environment variable:
+	    <screen>
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=ORAIC_DYN
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+ORAIC_DYN
+	    </screen>
+	  </para>
+	</section>
+	<section>
+	  <title>Some checks before program execution</title>
+	  <para>
+	    We set <varname>LIXA_PROFILE</varname> to value
+	    <quote>ORAIC_DYN</quote>, looking at
+	    <filename>/opt/lixa/etc/lixac_conf.xml</filename>:
+	    <screen>
+    &lt;profile name="ORAIC_DYN"&gt;
+      &lt;sttsrvs&gt;
+        &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
+      &lt;/sttsrvs&gt;
+      &lt;rsrmgrs&gt;
+        &lt;rsrmgr&gt;OracleIC_dynreg&lt;/rsrmgr&gt;
+      &lt;/rsrmgrs&gt;
+    &lt;/profile&gt;
+	    </screen>
+	    the profile references the Resource Manager named
+	    <quote>OracleIC_dynreg</quote>, looking again at the config file:
+	    <screen>
+    &lt;rsrmgr name="OracleIC_dynreg" switch_file="/opt/lixa/lib/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=lixa_ora_db+Loose_Coupling=true" xa_close_info="" /&gt;
+	    </screen>
+	    we can discover that our application will access the Oracle
+	    database using <systemitem class="username">hr</systemitem>
+	    user and writing the trace file to directory 
+	    <filename>/tmp</filename> (see <constant>LogDir</constant>)
+	    <footnote><para>
+	      The content of <constant>xa_open_info</constant> string is
+	      described in chapter "Developing Applications with Oracle XA"
+	      of the "Oracle Database Application Developer's Guide"
+	      manual; please refer to the documentation published by
+	      Oracle Corporation for further details.
+	    </para></footnote>. 
+	  </para>
+	</section>
+	<section>
+	  <title>Program execution (dynamic registration)</title>
+	  <para>
+	    Execute the client program and check how the content table changes:
+	    <screen>
+tiian@ubuntu1404-64:/tmp$ ./example2_ora
+INSERT statement executed!
+First arg is not 'DELETE', bypassing DELETE statement...
+tiian@ubuntu1404-64:/tmp$ sqlplus hr/hr@lixa_ora_db
+
+SQL*Plus: Release 12.1.0.2.0 Production on Wed Jan 18 23:41:11 2017
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Wed Jan 18 2017 23:40:54 +01:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+	    CO COUNTRY_NAME      REGION_ID
+-- ---------------------------------------- ----------
+	    RS Repubblica San Marino     1
+
+SQL> exit
+Disconnected from Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+tiian@ubuntu1404-64:/tmp$ ./example2_ora DELETE
+First arg is 'DELETE', bypassing INSERT statement...
+DELETE statement executed!
+tiian@ubuntu1404-64:/tmp$ sqlplus hr/hr@lixa_ora_db
+
+SQL*Plus: Release 12.1.0.2.0 Production on Wed Jan 18 23:41:40 2017
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Wed Jan 18 2017 23:41:35 +01:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+
+SQL> exit
+Disconnected from Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+	    </screen>
+	    The example program <filename>example2_ora</filename> inserted a
+	    row in table <constant>COUNTRIES</constant>. Take a look to the
+	    trace produced by the Oracle client library for the first 
+	    execution ("insert"):
+	    <screen>
+ORACLE XA: Version 12.1.0.2.0. RM name = 'Oracle_XA'.
+
+234322.16513.1350203008.0:
+xaoopen: xa_info=ORACLE_XA+Acc=P/hr/**+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=lixa_ora_db+Loose_Coupling=true,rmid=0,flags=0x0
+
+234322.16513.1350203008.0:
+xaolgn_help: version#: 185597952 banner: Oracle Database 11g Release 11.1.0.0.0 - Production
+
+234322.16513.1350203008.0:
+xaolgn: sqlxrc/sqlxss completed
+
+234322.16513.1350203008.0:
+xaolgn2: return XA_OK
+
+234322.16513.1350203008.0:
+xaoopen: xaolgn completed
+
+234322.16513.1350203008.0:
+xaoopen: return 0
+
+234322.16513.1350203008.0:
+ax_reg: xid=0x4c495841-d3c276e84a95421d95eb86c0563c5fa8-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x0
+
+234322.16513.1350203008.0:
+OCITransStart: Attempting
+
+234322.16513.1350203008.0:
+OCITransStart: Succeeded
+
+234322.16513.1350203008.0:
+xaodynpo 2: rmid=0, state=131
+
+234322.16513.1350203008.0:
+xaoend: xid=0x4c495841-d3c276e84a95421d95eb86c0563c5fa8-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x4000000
+
+234322.16513.1350203008.0:
+OCITransDetach: Attempting
+
+234322.16513.1350203008.0:
+OCITransDetach: Succeeded
+
+234322.16513.1350203008.0:
+xaoend: return 0
+
+234322.16513.1350203008.0:
+xaocommit: xid=0x4c495841-d3c276e84a95421d95eb86c0563c5fa8-54bfbba0e21ccc50c05577130f0b2f6f, rmid=0, flags=0x40000000
+
+234322.16513.1350203008.0:
+OCITransCommit: Attempting
+
+234322.16513.1350203008.0:
+xaodynpo 2: rmid=0, state=129
+
+234322.16513.1350203008.0:
+OCITransCommit: Succeeded
+
+234322.16513.1350203008.0:
+xaocommit: rtn 0
+
+234322.16513.1350203008.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+234322.16513.1350203008.0:
+OCIServerDetach: Attempting
+
+234322.16513.1350203008.0:
+OCIServerDetach: Succeeded
+
+234322.16513.1350203008.0:
+xaoclose: rtn 0
+	    </screen>
+	  </para>
+	</section>
+      </section>
+      <section>
+	<title>Remote configuration (Instant Client) and Pro*C</title>
+	<note><para>
+	  This example has been tested using Red Hat Enterprise Linux 7.3
+	  and Oracle Instant Client 12.1
+	</para></note>
+	<para>
+	  Using a remote configuration instead of a local configuration
+	  introduces two differences:
+	  <itemizedlist mark="bullet">
+	    <listitem><para>
+	      the Oracle Database Server must be configured to be accessible
+	      from another system: a <emphasis>listener</emphasis> must be
+	      configured
+	    </para></listitem>
+	    <listitem><para>
+	      the Oracle Instant Client software must be installed and 
+	      configured in the system that will connect to the database
+	    </para></listitem>
+	  </itemizedlist>
+	</para>
+	<section>
+	  <title>Set-up the Oracle environment (server side)</title>
+	  <para>
+	    The first part of the Oracle Database Server is pretty the same
+	    described in 
+	    <xref linkend="Development_setup_Oracle_environment"/>.
+	    All the statements remain valid for Oracle 12c Standard 
+	    Edition with the exception of the paths. Here's a default path 
+	    installation example:
+	    <screen>
+[oracle@centos7-oracle12 ~]$ ls -la $ORACLE_HOME/rdbms/admin/xaview.sql
+-rw-r--r--. 1 oracle oinstall 1941 Apr 21  2011 /u01/app/oracle/product/12.1.0/dbhome_1/rdbms/admin/xaview.sql
+	    </screen>	    
+	  </para>
+	</section>
+	<section>
+	  <title>Configure Oracle Listener</title>
+	  <para>
+	    Configure at least one Oracle listener as explained in
+	    <xref linkend="Development_configure_Oracle_listener"/>.
+	  </para>
+	</section>
+	<section>
+	  <title>Install and configure Oracle Instant Client</title>
+	  <para>
+	    Install and configure Oracle Instant Client as explained in
+	    <xref linkend="Development_install_Oracle_Instant_Client"/>.
+	  </para>
+	</section>
+	<section>
+	  <title>Configure Oracle Pro*C precompiler</title>
+	  <para>
+	    If you don't like to use a lot of options on the command line,
+	    you will have to configure the content of 
+	    <filename>pcscfg.cfg</filename>.
+	    Here's an example for Red Hat Enterprise Linux 7.3:
+	    <screen>
+[tiian@rhel73 admin]$ cat /opt/oracle/instantclient_12_1/precomp/admin/pcscfg.cfg 
+sys_include=(/usr/include,/usr/lib/gcc/x86_64-redhat-linux/4.8.5/include,/usr/lib/gcc/x86_64-redhat-linux/4.8.2/include)
+include=($ORACLE_HOME/sdk/include,/opt/lixa/include)
+ltype=short
+define=__x86_64__
+	    </screen>
+	    Especially "sys_include" and "include" need your attention.
+	  </para>
+	</section>
+	<section>
+	  <title>Start the LIXA state server</title>
+	  <para>
+	    The LIXA state server (daemon) must be started as explained in
+	    <xref linkend="Development_start_LIXA_server"/>.
+	  </para>
+	</section>
+	<section>
+	  <title>Build the client program</title>
+	  <para>
+	    Prepare the client (Application Program) using the below commands
+	    (<command>gcc</command> command was splitted on several lines 
+	    using <command>\</command> to help readability, but you may use
+	    a single line):
+	    <table frame="box">
+	      <thead><tr><td>System configuration details:</td></tr></thead>
+	      <tbody><tr><td>
+		Remote connection, RHEL 7.3, Oracle 12.1 Instant Client
+		<screen>
+[tiian@rhel73 ~]$ export PATH=/opt/oracle/instantclient_12_1/sdk:/opt/oracle/instantclient_12_1:$PATH
+[tiian@rhel73 ~]$ type proc
+proc is /opt/oracle/instantclient_12_1/sdk/proc
+[tiian@rhel73 tmp]$ export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1:$LD_LIBRARY_PATH
+[tiian@rhel73 tmp]$ echo $LD_LIBRARY_PATH
+/opt/oracle/instantclient_12_1:
+[tiian@rhel73 tmp]$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/example14_ora.pc .
+[tiian@rhel73 tmp]$ proc code=ANSI_C example14_ora.pc
+[tiian@rhel73 tmp]$ gcc example14_ora.c -Wno-unused-variable \
+> $(/opt/lixa/bin/lixa-config -c -f -l -d) \
+> -I/opt/oracle/instantclient_12_1/sdk/include \
+> -L/opt/oracle/instantclient_12_1 \
+> -Wl,-rpath -Wl,/opt/oracle/instantclient_12_1 \
+> -l clntsh -l nnz12 -o example14_ora
+		</screen>
+	      </td></tr></tbody>
+	    </table>
+	    Verify the executable produced by <command>gcc</command>:
+	    <screen>
+[tiian@rhel73 tmp]$ ldd example14_ora
+    linux-vdso.so.1 =>  (0x00007ffc78dc6000)
+    liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007f115d077000)
+    libclntsh.so.12.1 => /opt/oracle/instantclient_12_1/libclntsh.so.12.1 (0x00007f115a0b9000)
+    libnnz12.so => /opt/oracle/instantclient_12_1/libnnz12.so (0x00007f11599af000)
+    libc.so.6 => /lib64/libc.so.6 (0x00007f11595e7000)
+    libgmodule-2.0.so.0 => /lib64/libgmodule-2.0.so.0 (0x00007f11593e2000)
+    libgthread-2.0.so.0 => /lib64/libgthread-2.0.so.0 (0x00007f11591e0000)
+    libglib-2.0.so.0 => /lib64/libglib-2.0.so.0 (0x00007f1158ea9000)
+    libxml2.so.2 => /lib64/libxml2.so.2 (0x00007f1158b3e000)
+    liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007f1158926000)
+    libm.so.6 => /lib64/libm.so.6 (0x00007f1158624000)
+    libpthread.so.0 => /lib64/libpthread.so.0 (0x00007f1158407000)
+    libmql1.so => /opt/oracle/instantclient_12_1/libmql1.so (0x00007f1158191000)
+    libipc1.so => /opt/oracle/instantclient_12_1/libipc1.so (0x00007f1157e13000)
+    libons.so => /opt/oracle/instantclient_12_1/libons.so (0x00007f1157bcd000)
+    libdl.so.2 => /lib64/libdl.so.2 (0x00007f11579c9000)
+    libnsl.so.1 => /lib64/libnsl.so.1 (0x00007f11577b0000)
+    librt.so.1 => /lib64/librt.so.1 (0x00007f11575a7000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007f115d292000)
+    libaio.so.1 => /lib64/libaio.so.1 (0x00007f11573a5000)
+    libclntshcore.so.12.1 => /opt/oracle/instantclient_12_1/libclntshcore.so.12.1 (0x00007f1156e33000)
+    libz.so.1 => /lib64/libz.so.1 (0x00007f1156c1c000)
+    liblzma.so.5 => /lib64/liblzma.so.5 (0x00007f11569f6000)
+    libuuid.so.1 => /lib64/libuuid.so.1 (0x00007f11567f1000)
+	    </screen>
+	  </para>
+	</section>
+	<section>
+	  <title>Set-up LIXA environment</title>
+	  <para>
+	    Set-up the necessary environment variable:
+	    <screen>
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=ORAIC_STA
+tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
+ORAIC_STA
+	    </screen>
+	    In the previous example we used the dynamic XA registration, this
+	    time we are using the static one, but both can be used for 
+	    OCI and Pro*C.
+	  </para>
+	</section>
+	<section>
+	  <title>Program execution (static registration)</title>
+	  <para>
+	    Execute the client program and check how the content table changes:
+	    <screen>
+[tiian@rhel73 tmp]$ ./example14_ora 
+First arg is not 'DELETE', bypassing DELETE statement...
+[tiian@rhel73 tmp]$ sqlplus hr/hr@lixa_ora_db
+
+SQL*Plus: Release 12.1.0.2.0 Production on Thu Jan 19 00:30:27 2017
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Thu Jan 19 2017 00:30:11 +01:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+CO COUNTRY_NAME      REGION_ID
+-- ---------------------------------------- ----------
+RS Repubblica San Marino     1
+
+SQL> exit
+Disconnected from Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+[tiian@rhel73 tmp]$ ./example14_ora DELETE
+First arg is 'DELETE', bypassing INSERT statement...
+[tiian@rhel73 tmp]$ sqlplus hr/hr@lixa_ora_db
+
+SQL*Plus: Release 12.1.0.2.0 Production on Thu Jan 19 00:30:46 2017
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Thu Jan 19 2017 00:30:45 +01:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
+
+no rows selected
+
+SQL> exit
+Disconnected from Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+	    </screen>
+	    The example program <filename>example14_ora</filename> inserted a
+	    row in table <constant>COUNTRIES</constant>. Take a look to the
+	    trace produced by the Oracle client library for the second
+	    execution ("delete"):
+	    <screen>
+ORACLE XA: Version 12.1.0.2.0. RM name = 'Oracle_XA'.
+
+003044.3009.2262976064.0:
+xaoopen: xa_info=ORACLE_XA+Acc=P/hr/**+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=lixa_ora_db+Loose_Coupling=true,rmid=0,flags=0x0
+
+003044.3009.2262976064.0:
+xaolgn_help: version#: 185597952 banner: Oracle Database 11g Release 11.1.0.0.0 - Production
+
+003044.3009.2262976064.0:
+xaolgn: sqlxrc/sqlxss completed
+
+003044.3009.2262976064.0:
+xaolgn: return XA_OK
+
+003044.3009.2262976064.0:
+xaoopen: xaolgn completed
+
+003044.3009.2262976064.0:
+xaoopen: return 0
+
+003044.3009.2262976064.0:
+xaostart: xid=0x4c495841-a593cf11a3a24fcb945f6502b6f2210d-c220ba3a3bd0699d93a333c82bbac597, rmid=0, flags=0x0
+
+003044.3009.2262976064.0:
+OCITransStart: Attempting
+
+003044.3009.2262976064.0:
+OCITransStart: Succeeded
+
+003044.3009.2262976064.0:
+xaostart: return XA_OK
+
+003044.3009.2262976064.0:
+xaoend: xid=0x4c495841-a593cf11a3a24fcb945f6502b6f2210d-c220ba3a3bd0699d93a333c82bbac597, rmid=0, flags=0x4000000
+
+003044.3009.2262976064.0:
+OCITransDetach: Attempting
+
+003044.3009.2262976064.0:
+OCITransDetach: Succeeded
+
+003044.3009.2262976064.0:
+xaoend: return 0
+
+003044.3009.2262976064.0:
+xaocommit: xid=0x4c495841-a593cf11a3a24fcb945f6502b6f2210d-c220ba3a3bd0699d93a333c82bbac597, rmid=0, flags=0x40000000
+
+003044.3009.2262976064.0:
+OCITransCommit: Attempting
+
+003044.3009.2262976064.0:
+OCITransCommit: Succeeded
+
+003044.3009.2262976064.0:
+xaocommit: rtn 0
+
+003044.3009.2262976064.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+003044.3009.2262976064.0:
+OCIServerDetach: Attempting
+
+003044.3009.2262976064.0:
+OCIServerDetach: Succeeded
+
+003044.3009.2262976064.0:
+xaoclose: rtn 0
+	    </screen>
+	  </para>
+	</section>
+      </section>
     </section>
-  </section>
-  <section xml:id="Development_example3_db2">
-    <title>An example with IBM DB2 DBMS</title>
-    <figure xml:id="develop3">
-      <title>Deploy model of an example with IBM DB2 DBMS</title>
-      <mediaobject>
+    <section xml:id="Development_example3_db2">
+      <title>An example with IBM DB2 DBMS</title>
+      <figure xml:id="develop3">
+	<title>Deploy model of an example with IBM DB2 DBMS</title>
+	<mediaobject>
 	<imageobject>
 	  <imagedata fileref="../images/LIXA_Development_3.png"/>
 	</imageobject>
@@ -3114,7 +3943,7 @@ XE
 	<varname>PATH</varname>.
       </para>
     </section>
-    <section>
+    <section xml:id="example5_some_checks">
       <title>Some checks before program execution</title>
       <para>
 	We set <varname>LIXA_PROFILE</varname> to value

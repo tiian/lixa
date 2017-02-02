@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of LIXA.
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
                             report, commit, rollback, bypass_bqual_check,
                             bypass_formatid_check, use_tmendrscan_flag,
                             xid, xid_file)))) {
-        printf("There was an error while recoverying transactions: "
+        printf("There was an error while recovering transactions: "
                "%d ('%s'); look at system log to collect additional "
                "information or activate the trace to debug the problem\n",
                rc, lixa_strerror(rc));
