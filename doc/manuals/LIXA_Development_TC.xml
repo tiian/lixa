@@ -124,6 +124,32 @@ int main(int argc, char *argv[])
     </para>
     <para>
       This example was developed using the following configuration:
+      <itemizedlist mark="bullet">
+        <listitem><para>
+          Oracle client and server with Oracle XE 11.2
+        </para></listitem>
+        <listitem><para>
+          GNU C compiler supplied with CentOS 7.3.1611:
+          <screen>
+[pieter.jvrensburg@centos-linux tmp]$ cc --version
+cc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-11)
+          </screen>
+        </para></listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      The environment should be prepared following these steps:
+      <itemizedlist mark="bullet">
+        <listitem><para>
+          The Oracle environment as explained in <xref linkend="Development_setup_Oracle_environment"/>. Please adapt to your version of Oracle installed.
+        </para></listitem>
+        <listitem><para>
+          Configuration of the Oracle listener for remote connections as explained in <xref linkend="Development_configure_Oracle_listener"/>.
+        </para></listitem>
+        <listitem><para>
+          Installation and configuration of the Oracle Instance Client (if required) as explained in <xref linkend="Development_install_Oracle_Instant_Client"/>.
+        </para></listitem>
+      </itemizedlist>
     </para>
     <important>
       <para>
@@ -238,7 +264,7 @@ ORA_STA
       </para>
       <important>
         <para>
-          Make sure that the LIXA Transaction Manager server is running before executing the example application.
+          Make sure that the LIXA Transaction Manager server is running before executing the example application, as explained in <xref linkend="Development_start_LIXA_server"/>.
         </para>
       </important>
       <section>
