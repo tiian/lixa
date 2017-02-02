@@ -1,3 +1,8 @@
+Release: 1.3.1 (test of LIXA)
+Date: 2017-01-24
+Configuration: --with-oracle=/u01/app/oracle/product/11.2.0/xe/ --with-postgresql --with-ibmdb2=/opt/ibm/db2/V11.1/ --enable-debug --enable-crash
+CentOS 7.3 | x86_64 | virtual (VMWare) | 2 vCPU | 4GB Memory
+
 Release: 1.1.1 (test of LIXA, Pro*C, Pro*COBOL)
 Date: 2017-01-21
 Configuration: --enable-crash --with-mysql --with-postgresql
