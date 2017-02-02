@@ -132,15 +132,141 @@ int main(int argc, char *argv[])
     </important>
     <section>
       <title>Set the environment variables</title>
+      <para>
+        Set up the required environment variables:
+        <table frame="box">
+          <thead>
+            <tr><td>[Shell terminal session]</td></tr>
+          </thead>
+          <tbody>
+            <tr><td>
+              <screen>
+[pieter.jvrensburg@centos-linux ~]$ export ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe
+[pieter.jvrensburg@centos-linux ~]$ export ORACLE_SID=XE
+[pieter.jvrensburg@centos-linux ~]$ export NLS_LANG=`$ORACLE_HOME/bin/nls_lang.sh`
+[pieter.jvrensburg@centos-linux ~]$ export PATH=$ORACLE_HOME/bin:$PATH
+[pieter.jvrensburg@centos-linux ~]$ export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
+              </screen>
+              And for LIXA:
+              <screen>
+[pieter.jvrensburg@centos-linux ~]$ export PATH=/opt/lixa/bin:/opt/lixa/sbin:$PATH
+[pieter.jvrensburg@centos-linux ~]$ export LD_LIBRARY_PATH=/opt/lixa/lib:$LD_LIBRARY_PATH
+              </screen>
+            </td></tr>
+          </tbody>
+        </table>
+      </para>
     </section>
     <section>
       <title>Build the client programs</title>
+      <para>
+        Prepare the client (Application Program) using the below commands:
+        <table frame="box">
+          <thead>
+            <tr><td>[Shell terminal session]</td></tr>
+          </thead>
+          <tbody>
+            <tr><td>
+              <screen>
+[pieter.jvrensburg@centos-linux tmp]$ cp /opt/lixa/share/doc/lixa/X.Y.Z/examples/example15_transaction_coupling.c .
+[pieter.jvrensburg@centos-linux tmp]$ cc $(lixa-config -c -f -l) example15_transaction_coupling.c
+              </screen>
+            </td></tr>
+          </tbody>
+        </table>
+        Next, verify the executable produced by <command>cc</command>:
+        <table frame="box">
+          <thead>
+            <tr><td>[Shell terminal session]</td></tr>
+          </thead>
+          <tbody>
+            <tr><td>
+              <screen>
+[pieter.jvrensburg@centos-linux tmp]$ ldd a.out 
+	linux-vdso.so.1 =>  (0x00007fffef958000)
+	liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007fea53bab000)
+	libc.so.6 => /lib64/libc.so.6 (0x00007fea537e1000)
+	libgmodule-2.0.so.0 => /lib64/libgmodule-2.0.so.0 (0x00007fea535dd000)
+	libgthread-2.0.so.0 => /lib64/libgthread-2.0.so.0 (0x00007fea533db000)
+	libxml2.so.2 => /lib64/libxml2.so.2 (0x00007fea53070000)
+	liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007fea52e53000)
+	libglib-2.0.so.0 => /lib64/libglib-2.0.so.0 (0x00007fea52b1c000)
+	libpthread.so.0 => /lib64/libpthread.so.0 (0x00007fea528ff000)
+	libuuid.so.1 => /lib64/libuuid.so.1 (0x00007fea526fa000)
+	libm.so.6 => /lib64/libm.so.6 (0x00007fea523f8000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007fea53dcc000)
+	libdl.so.2 => /lib64/libdl.so.2 (0x00007fea521f3000)
+	libz.so.1 => /lib64/libz.so.1 (0x00007fea51fdd000)
+	liblzma.so.5 => /lib64/liblzma.so.5 (0x00007fea51db7000)
+              </screen>
+            </td></tr>
+          </tbody>
+        </table>
+      </para>
     </section>
     <section>
       <title>Configure the LIXA environment</title>
+      <para>
+        Set up the <varname>LIXA_PROFILE</varname> environment variable:
+        <table frame="box">
+          <thead>
+            <tr><td>[Shell terminal session]</td></tr>
+          </thead>
+          <tbody>
+            <tr><td>
+              <screen>
+[pieter.jvrensburg@centos-linux ~]$ export LIXA_PROFILE=ORA_STA
+[pieter.jvrensburg@centos-linux ~]$ echo $LIXA_PROFILE 
+ORA_STA
+              </screen>
+            </td></tr>
+          </tbody>
+        </table>
+      </para>
+      <para>
+        See <xref linkend="example5_some_checks"/> for additional information on creating the profile configuration file.
+      </para>
     </section>
     <section>
       <title>Test program execution</title>
+      <para>
+        This shows how a transaction was suspended and resumed within the same thread of control. The example in <filename>example15_transaction_coupling.c</filename> does not interact with the actual Oracle database, but loads the switch file.
+      </para>
+      <important>
+        <para>
+          Make sure that the LIXA Transaction Manager server is running before executing the example application.
+        </para>
+      </important>
+      <section>
+        <title>Successful execution</title>
+        <para>
+          The transaction is suspended, resumed and then rolled back:
+          <table frame="box">
+          <thead>
+            <tr><td>[Shell terminal session]</td></tr>
+          </thead>
+          <tbody>
+            <tr><td>
+              <screen>
+[pieter.jvrensburg@centos-linux tmp]$ LIXA_CONFIG_FILE=./lixac_conf.xml LIXA_PROFILE=ORA_STA ./a.out 
+tx_open(): 0
+tx_begin(): 0
+tx_end(TMSUSPEND): 0
+tx_info(): 1
+tx_resume(): 0
+tx_commit(): 0
+tx_begin(): 0
+tx_end(TMSUSPEND): 0
+tx_info(): 1
+tx_resume(): 0
+tx_rollback(): 0
+tx_close(): 0
+              </screen>
+            </td></tr>
+          </tbody>
+        </table>
+        </para>
+      </section>
     </section>
   </section>
 </chapter>
