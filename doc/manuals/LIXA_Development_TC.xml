@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
             <tr><td>
               <screen>
 [pieter.jvrensburg@centos-linux tmp]$ cp /opt/lixa/share/doc/lixa/X.Y.Z/examples/example15_transaction_coupling.c .
-[pieter.jvrensburg@centos-linux tmp]$ cc $(lixa-config -c -f -l) example15_transaction_coupling.c
+[pieter.jvrensburg@centos-linux tmp]$ cc $(lixa-config -c -f -l) -L$ORACLE_HOME/lib -lclntsh -lnnz11 example15_transaction_coupling.c
               </screen>
             </td></tr>
           </tbody>
@@ -183,21 +183,25 @@ int main(int argc, char *argv[])
             <tr><td>
               <screen>
 [pieter.jvrensburg@centos-linux tmp]$ ldd a.out 
-	linux-vdso.so.1 =>  (0x00007fffef958000)
-	liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007fea53bab000)
-	libc.so.6 => /lib64/libc.so.6 (0x00007fea537e1000)
-	libgmodule-2.0.so.0 => /lib64/libgmodule-2.0.so.0 (0x00007fea535dd000)
-	libgthread-2.0.so.0 => /lib64/libgthread-2.0.so.0 (0x00007fea533db000)
-	libxml2.so.2 => /lib64/libxml2.so.2 (0x00007fea53070000)
-	liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007fea52e53000)
-	libglib-2.0.so.0 => /lib64/libglib-2.0.so.0 (0x00007fea52b1c000)
-	libpthread.so.0 => /lib64/libpthread.so.0 (0x00007fea528ff000)
-	libuuid.so.1 => /lib64/libuuid.so.1 (0x00007fea526fa000)
-	libm.so.6 => /lib64/libm.so.6 (0x00007fea523f8000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007fea53dcc000)
-	libdl.so.2 => /lib64/libdl.so.2 (0x00007fea521f3000)
-	libz.so.1 => /lib64/libz.so.1 (0x00007fea51fdd000)
-	liblzma.so.5 => /lib64/liblzma.so.5 (0x00007fea51db7000)
+	linux-vdso.so.1 =>  (0x00007ffce4b13000)
+	liblixac.so.0 => /opt/lixa/lib/liblixac.so.0 (0x00007f39938f6000)
+	libclntsh.so.11.1 => /u01/app/oracle/product/11.2.0/xe/lib/libclntsh.so.11.1 (0x00007f39910aa000)
+	libnnz11.so => /u01/app/oracle/product/11.2.0/xe/lib/libnnz11.so (0x00007f3990ce2000)
+	libc.so.6 => /lib64/libc.so.6 (0x00007f3990919000)
+	libgmodule-2.0.so.0 => /lib64/libgmodule-2.0.so.0 (0x00007f3990714000)
+	libgthread-2.0.so.0 => /lib64/libgthread-2.0.so.0 (0x00007f3990512000)
+	libxml2.so.2 => /lib64/libxml2.so.2 (0x00007f39901a8000)
+	liblixab.so.0 => /opt/lixa/lib/liblixab.so.0 (0x00007f398ff8a000)
+	libglib-2.0.so.0 => /lib64/libglib-2.0.so.0 (0x00007f398fc53000)
+	libpthread.so.0 => /lib64/libpthread.so.0 (0x00007f398fa37000)
+	libuuid.so.1 => /lib64/libuuid.so.1 (0x00007f398f831000)
+	libm.so.6 => /lib64/libm.so.6 (0x00007f398f52f000)
+	libdl.so.2 => /lib64/libdl.so.2 (0x00007f398f32b000)
+	libnsl.so.1 => /lib64/libnsl.so.1 (0x00007f398f111000)
+	libaio.so.1 => /lib64/libaio.so.1 (0x00007f398ef0f000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f3993b17000)
+	libz.so.1 => /lib64/libz.so.1 (0x00007f398ecf9000)
+	liblzma.so.5 => /lib64/liblzma.so.5 (0x00007f398ead2000)
               </screen>
             </td></tr>
           </tbody>
@@ -265,6 +269,12 @@ tx_close(): 0
             </td></tr>
           </tbody>
         </table>
+        </para>
+      </section>
+      <section>
+        <title>Conclusion</title>
+        <para>
+          This example shows a basic usage of the extended TX interface API calls. A more elaborate use case will include developing two application programs that communicate with each other and share the XID obtained from <function>tx_info</function> so that the second application program can join the existing transaction.
         </para>
       </section>
     </section>
