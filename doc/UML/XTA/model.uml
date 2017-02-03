@@ -1,9 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_xkTDYOmLEeasa8OwCd1CnQ" name="Root">
   <packagedElement xmi:type="uml:Package" xmi:id="_0RUqUOmLEeasa8OwCd1CnQ" name="JTA">
-    <packagedElement xmi:type="uml:Interface" xmi:id="_rhL4IOmQEeaG7IpaWA6EpQ" name="Status"/>
-    <packagedElement xmi:type="uml:Interface" xmi:id="_odyYkOmQEeaG7IpaWA6EpQ" name="Synchronization"/>
-    <packagedElement xmi:type="uml:Interface" xmi:id="_x4viAOmOEeacKam9FJIH_w" name="Transaction"/>
+    <packagedElement xmi:type="uml:Interface" xmi:id="_rhL4IOmQEeaG7IpaWA6EpQ" name="Status">
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_8p6zQOpXEeafHfXX0TDuHw" name="STATUS_ACTIVE" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_GoYAcOpYEeafHfXX0TDuHw" name="STATUS_COMMITTED" visibility="public" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_S_7L8OpYEeafHfXX0TDuHw" name="STATUS_COMMITTING" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_XAzncOpYEeafHfXX0TDuHw" name="STATUS_MARKED_ROLLBACK" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_bd1zcOpYEeafHfXX0TDuHw" name="STATUS_NO_TRANSACTION" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_fL9rAOpYEeafHfXX0TDuHw" name="STATUS_PREPARED" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_iMuGQOpYEeafHfXX0TDuHw" name="STATUS_PREPARING" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_lrsHgOpYEeafHfXX0TDuHw" name="STATUS_ROLLEDBACK" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_r9VrwOpYEeafHfXX0TDuHw" name="STATUS_ROLLING_BACK" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_vmC30OpYEeafHfXX0TDuHw" name="STATUS_UNKNOWN" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Interface" xmi:id="_odyYkOmQEeaG7IpaWA6EpQ" name="Synchronization">
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_CojxYOpXEeafHfXX0TDuHw" name="afterCompletion">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_Fo1EcOpXEeafHfXX0TDuHw" name="status" type="_-aNT8OmNEeacKam9FJIH_w"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_KaYH4OpXEeafHfXX0TDuHw" name="beforeCompletion"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Interface" xmi:id="_x4viAOmOEeacKam9FJIH_w" name="Transaction">
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_B7yAYOpWEeafHfXX0TDuHw" name="commit"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_PCJZsOpWEeafHfXX0TDuHw" name="delistResource">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_Tr0TgOpWEeafHfXX0TDuHw" name="xaRes" type="_H6KAMOmOEeacKam9FJIH_w"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_WvVH0OpWEeafHfXX0TDuHw" name="flag" type="_-aNT8OmNEeacKam9FJIH_w"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_cySv0OpWEeafHfXX0TDuHw" name="enlistResource">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_gV9D0OpWEeafHfXX0TDuHw" name="xaRes" type="_H6KAMOmOEeacKam9FJIH_w"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_kVRZEOpWEeafHfXX0TDuHw" type="_OrkpoOmOEeacKam9FJIH_w" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_oWlSYOpWEeafHfXX0TDuHw" name="getStatus">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_qSoIUOpWEeafHfXX0TDuHw" type="_-aNT8OmNEeacKam9FJIH_w" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_xhp60OpWEeafHfXX0TDuHw" name="registerSynchronization">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_19XRIOpWEeafHfXX0TDuHw" name="sync" type="_odyYkOmQEeaG7IpaWA6EpQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_4hIOYOpWEeafHfXX0TDuHw" name="rollback"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_9RZfcOpWEeafHfXX0TDuHw" name="setRollbackOnly"/>
+    </packagedElement>
     <packagedElement xmi:type="uml:Interface" xmi:id="_A-QP8OmMEeasa8OwCd1CnQ" name="TransactionManager">
       <ownedOperation xmi:type="uml:Operation" xmi:id="_dm4AwOmNEeacKam9FJIH_w" name="begin"/>
       <ownedOperation xmi:type="uml:Operation" xmi:id="_DugXwOmREeaG7IpaWA6EpQ" name="commit"/>
@@ -25,9 +59,86 @@
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_-ocncOmREeaG7IpaWA6EpQ" type="_x4viAOmOEeacKam9FJIH_w" direction="return"/>
       </ownedOperation>
     </packagedElement>
-    <packagedElement xmi:type="uml:Interface" xmi:id="_pLGccOmOEeacKam9FJIH_w" name="UserTransaction"/>
-    <packagedElement xmi:type="uml:Interface" xmi:id="_H6KAMOmOEeacKam9FJIH_w" name="XAResouce"/>
+    <packagedElement xmi:type="uml:Interface" xmi:id="_pLGccOmOEeacKam9FJIH_w" name="UserTransaction">
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_YLSTAOpXEeafHfXX0TDuHw" name="begin"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_d5DHEOpXEeafHfXX0TDuHw" name="commit"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_hHpKAOpXEeafHfXX0TDuHw" name="getStatus">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_jDgZwOpXEeafHfXX0TDuHw" type="_-aNT8OmNEeacKam9FJIH_w" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_rBinUOpXEeafHfXX0TDuHw" name="rollback"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_tCr_sOpXEeafHfXX0TDuHw" name="setRollbackOnly"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_vK-h4OpXEeafHfXX0TDuHw" name="setTransactionTimeout">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_xD5yYOpXEeafHfXX0TDuHw" name="seconds" type="_-aNT8OmNEeacKam9FJIH_w"/>
+      </ownedOperation>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Interface" xmi:id="_H6KAMOmOEeacKam9FJIH_w" name="XAResouce">
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_2Wai8OpZEeafHfXX0TDuHw" name="TMENDRSCAN" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_8oHKgOpZEeafHfXX0TDuHw" name="TMFAIL" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="__tu3oOpZEeafHfXX0TDuHw" name="TMJOIN" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_EFzEEOpaEeafHfXX0TDuHw" name="TMNOFLAGS" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_HhmckOpaEeafHfXX0TDuHw" name="TMONEPHASE" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_KkPuMOpaEeafHfXX0TDuHw" name="TMRESUME" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_N9_4QOpaEeafHfXX0TDuHw" name="TMSTARTRSCAN" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_RZtxMOpaEeafHfXX0TDuHw" name="TMSUCCESS" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_UZD3MOpaEeafHfXX0TDuHw" name="TMSUSPEND" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_YgltQOpaEeafHfXX0TDuHw" name="XA_OK" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_bjVFgOpaEeafHfXX0TDuHw" name="XA_RDONLY" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_kZq-oOpbEeaR7KNlOKNODg" name="commit">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_tYcQcOpbEeaR7KNlOKNODg" name="xid" type="_6ZqggOpaEeaR7KNlOKNODg"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_Qk_BQOpdEeaR7KNlOKNODg" name="onePhase" type="_OrkpoOmOEeacKam9FJIH_w"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_S7080OpdEeaR7KNlOKNODg" name="end">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_Wh-kIOpdEeaR7KNlOKNODg" name="xid" type="_6ZqggOpaEeaR7KNlOKNODg"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_ZvtEYOpdEeaR7KNlOKNODg" name="flags" type="_-aNT8OmNEeacKam9FJIH_w"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_cnUKsOpdEeaR7KNlOKNODg" name="forget">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_eoQuwOpdEeaR7KNlOKNODg" name="xid" type="_6ZqggOpaEeaR7KNlOKNODg"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_hPSbYOpdEeaR7KNlOKNODg" name="getTransactionTimeout">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_jJ8xQOpdEeaR7KNlOKNODg" type="_-aNT8OmNEeacKam9FJIH_w" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_miCucOpdEeaR7KNlOKNODg" name="isSameRM">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_ppaIAOpdEeaR7KNlOKNODg" name="xaRes" type="_H6KAMOmOEeacKam9FJIH_w"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_sEitsOpdEeaR7KNlOKNODg" type="_OrkpoOmOEeacKam9FJIH_w" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_v_sUoOpdEeaR7KNlOKNODg" name="prepare">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_yJbBQOpdEeaR7KNlOKNODg" name="xid" type="_6ZqggOpaEeaR7KNlOKNODg"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_57R0AOpdEeaR7KNlOKNODg" type="_-aNT8OmNEeacKam9FJIH_w" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_72lqIOpdEeaR7KNlOKNODg" name="recover">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_OsagoOpeEeaR7KNlOKNODg" type="_G7jMYOpeEeaR7KNlOKNODg" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_SeK7AOpeEeaR7KNlOKNODg" name="rollback">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_UiRgwOpeEeaR7KNlOKNODg" name="xid" type="_6ZqggOpaEeaR7KNlOKNODg"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_ZD9jQOpeEeaR7KNlOKNODg" name="setTransactionTimeout">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_djXGwOpeEeaR7KNlOKNODg" name="seconds" type="_-aNT8OmNEeacKam9FJIH_w"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_gfVIoOpeEeaR7KNlOKNODg" type="_OrkpoOmOEeacKam9FJIH_w" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_ks-00OpeEeaR7KNlOKNODg" name="start">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_nx7MgOpeEeaR7KNlOKNODg" name="xid" type="_6ZqggOpaEeaR7KNlOKNODg"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_pg5PwOpeEeaR7KNlOKNODg" name="flags" type="_-aNT8OmNEeacKam9FJIH_w"/>
+      </ownedOperation>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Interface" xmi:id="_6ZqggOpaEeaR7KNlOKNODg" name="Xid">
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_CgsSAOpbEeaR7KNlOKNODg" name="MAXBQUALSIZE" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_G6JlkOpbEeaR7KNlOKNODg" name="MAXGTRIDSIZE" isStatic="true" type="_-aNT8OmNEeacKam9FJIH_w" isReadOnly="true"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_KXU3EOpbEeaR7KNlOKNODg" name="getBranchQualifier">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_QUcVwOpbEeaR7KNlOKNODg" type="_6q3NAOmQEeaG7IpaWA6EpQ" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_Tj_a8OpbEeaR7KNlOKNODg" name="getFormatId">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_VkAx8OpbEeaR7KNlOKNODg" type="_-aNT8OmNEeacKam9FJIH_w" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_XZshMOpbEeaR7KNlOKNODg" name="getGlobalTransactionId">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_akwH8OpbEeaR7KNlOKNODg" type="_6q3NAOmQEeaG7IpaWA6EpQ" direction="return"/>
+      </ownedOperation>
+    </packagedElement>
     <packagedElement xmi:type="uml:Dependency" xmi:id="_CwrBEOmSEeaG7IpaWA6EpQ" client="_A-QP8OmMEeasa8OwCd1CnQ" supplier="_x4viAOmOEeacKam9FJIH_w"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_RBwEgOpXEeafHfXX0TDuHw" client="_x4viAOmOEeacKam9FJIH_w" supplier="_odyYkOmQEeaG7IpaWA6EpQ"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_z9M6wOpXEeafHfXX0TDuHw" client="_pLGccOmOEeacKam9FJIH_w" supplier="_rhL4IOmQEeaG7IpaWA6EpQ"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_1RKnkOpYEeafHfXX0TDuHw" client="_x4viAOmOEeacKam9FJIH_w" supplier="_rhL4IOmQEeaG7IpaWA6EpQ"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_1mgI8OpZEeafHfXX0TDuHw" client="_x4viAOmOEeacKam9FJIH_w" supplier="_H6KAMOmOEeacKam9FJIH_w"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_e3a3AOpbEeaR7KNlOKNODg" client="_H6KAMOmOEeacKam9FJIH_w" supplier="_6ZqggOpaEeaR7KNlOKNODg"/>
   </packagedElement>
   <packagedElement xmi:type="uml:Package" xmi:id="_33Da4OmLEeasa8OwCd1CnQ" name="XTA">
     <packagedElement xmi:type="uml:Class" xmi:id="_zDpg0OmMEeasa8OwCd1CnQ" name="XTransactionManager">
@@ -40,5 +151,7 @@
     <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_OrkpoOmOEeacKam9FJIH_w" name="boolean"/>
     <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_-aNT8OmNEeacKam9FJIH_w" name="int"/>
     <packagedElement xmi:type="uml:DataType" xmi:id="_6q3NAOmQEeaG7IpaWA6EpQ" name="byte[]"/>
+    <packagedElement xmi:type="uml:DataType" xmi:id="_G7jMYOpeEeaR7KNlOKNODg" name="Xid[]"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_J_cbMOpeEeaR7KNlOKNODg" client="_G7jMYOpeEeaR7KNlOKNODg" supplier="_6ZqggOpaEeaR7KNlOKNODg"/>
   </packagedElement>
 </uml:Model>
