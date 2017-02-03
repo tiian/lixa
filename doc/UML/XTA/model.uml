@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_xkTDYOmLEeasa8OwCd1CnQ" name="Root">
+  <packagedElement xmi:type="uml:Package" xmi:id="_0RUqUOmLEeasa8OwCd1CnQ" name="JTA">
+    <packagedElement xmi:type="uml:Interface" xmi:id="_rhL4IOmQEeaG7IpaWA6EpQ" name="Status"/>
+    <packagedElement xmi:type="uml:Interface" xmi:id="_odyYkOmQEeaG7IpaWA6EpQ" name="Synchronization"/>
+    <packagedElement xmi:type="uml:Interface" xmi:id="_x4viAOmOEeacKam9FJIH_w" name="Transaction"/>
+    <packagedElement xmi:type="uml:Interface" xmi:id="_A-QP8OmMEeasa8OwCd1CnQ" name="TransactionManager">
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_dm4AwOmNEeacKam9FJIH_w" name="begin"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_DugXwOmREeaG7IpaWA6EpQ" name="commit"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_ItfaQOmREeaG7IpaWA6EpQ" name="getStatus">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_a43lkOmREeaG7IpaWA6EpQ" type="_-aNT8OmNEeacKam9FJIH_w" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_jpqs0OmREeaG7IpaWA6EpQ" name="getTransaction">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_m5oowOmREeaG7IpaWA6EpQ" type="_x4viAOmOEeacKam9FJIH_w" direction="return"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_qcNXoOmREeaG7IpaWA6EpQ" name="resume">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_su9dYOmREeaG7IpaWA6EpQ" name="tobj" type="_x4viAOmOEeacKam9FJIH_w"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_w0bd8OmREeaG7IpaWA6EpQ" name="rollback"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_zNdx4OmREeaG7IpaWA6EpQ" name="setRollbackOnly"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_2FzQ8OmREeaG7IpaWA6EpQ" name="setTransactionTimeout">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_5STpMOmREeaG7IpaWA6EpQ" name="seconds" type="_-aNT8OmNEeacKam9FJIH_w"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_74uR0OmREeaG7IpaWA6EpQ" name="suspend">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_-ocncOmREeaG7IpaWA6EpQ" type="_x4viAOmOEeacKam9FJIH_w" direction="return"/>
+      </ownedOperation>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Interface" xmi:id="_pLGccOmOEeacKam9FJIH_w" name="UserTransaction"/>
+    <packagedElement xmi:type="uml:Interface" xmi:id="_H6KAMOmOEeacKam9FJIH_w" name="XAResouce"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_CwrBEOmSEeaG7IpaWA6EpQ" client="_A-QP8OmMEeasa8OwCd1CnQ" supplier="_x4viAOmOEeacKam9FJIH_w"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Package" xmi:id="_33Da4OmLEeasa8OwCd1CnQ" name="XTA">
+    <packagedElement xmi:type="uml:Class" xmi:id="_zDpg0OmMEeasa8OwCd1CnQ" name="XTransactionManager">
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_7La5MOmMEeasa8OwCd1CnQ" name="context"/>
+      <interfaceRealization xmi:type="uml:InterfaceRealization" xmi:id="_28HnMOmMEeasa8OwCd1CnQ" client="_zDpg0OmMEeasa8OwCd1CnQ" supplier="_A-QP8OmMEeasa8OwCd1CnQ" contract="_A-QP8OmMEeasa8OwCd1CnQ"/>
+    </packagedElement>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Package" xmi:id="_7IxqUOmLEeasa8OwCd1CnQ" name="Diagrams"/>
+  <packagedElement xmi:type="uml:Package" xmi:id="_5Y7LYOmNEeacKam9FJIH_w" name="Types">
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_OrkpoOmOEeacKam9FJIH_w" name="boolean"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_-aNT8OmNEeacKam9FJIH_w" name="int"/>
+    <packagedElement xmi:type="uml:DataType" xmi:id="_6q3NAOmQEeaG7IpaWA6EpQ" name="byte[]"/>
+  </packagedElement>
+</uml:Model>
