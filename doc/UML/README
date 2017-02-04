@@ -1,0 +1,5 @@
+This directory is intended to be used with Eclipse Papyrus.
+
+XTA (XA Transaction API) is intended to provide a JTA like (an more)
+API for the native (C/C++) environment.
+
