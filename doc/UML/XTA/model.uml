@@ -198,27 +198,10 @@
     <packagedElement xmi:type="uml:DataType" xmi:id="_G7jMYOpeEeaR7KNlOKNODg" name="Xid[]"/>
     <packagedElement xmi:type="uml:Dependency" xmi:id="_J_cbMOpeEeaR7KNlOKNODg" client="_G7jMYOpeEeaR7KNlOKNODg" supplier="_6ZqggOpaEeaR7KNlOKNODg"/>
   </packagedElement>
-  <packagedElement xmi:type="uml:Package" xmi:id="_RwM3wOrMEeaVeNZh1YFZ1g" name="Components">
-    <packagedElement xmi:type="uml:Component" xmi:id="_Ut-3gOrMEeaVeNZh1YFZ1g" name="AP1" isActive="true" isIndirectlyInstantiated="false">
-      <interfaceRealization xmi:type="uml:InterfaceRealization" xmi:id="_mBw1AOrjEeaOyqvQQiL3Zw" client="_Ut-3gOrMEeaVeNZh1YFZ1g" supplier="_OkYG4OrKEeaVeNZh1YFZ1g" contract="_OkYG4OrKEeaVeNZh1YFZ1g"/>
-    </packagedElement>
-    <packagedElement xmi:type="uml:Component" xmi:id="_i7EoUOrMEeaVeNZh1YFZ1g" name="AP2" isActive="true" isIndirectlyInstantiated="false">
-      <interfaceRealization xmi:type="uml:InterfaceRealization" xmi:id="_qDeOYOrMEeaVeNZh1YFZ1g" client="_i7EoUOrMEeaVeNZh1YFZ1g" supplier="_OkYG4OrKEeaVeNZh1YFZ1g" contract="_OkYG4OrKEeaVeNZh1YFZ1g"/>
-    </packagedElement>
-    <packagedElement xmi:type="uml:Component" xmi:id="_tlFR8OriEeaOyqvQQiL3Zw" name="TM1">
-      <generalization xmi:type="uml:Generalization" xmi:id="_DUemoOvgEeaPYbqn0E2qqQ" general="_zDpg0OmMEeasa8OwCd1CnQ"/>
-    </packagedElement>
-    <packagedElement xmi:type="uml:Component" xmi:id="_87xE4OreEeaOyqvQQiL3Zw" name="TM2">
-      <generalization xmi:type="uml:Generalization" xmi:id="__pLZkOvfEeaPYbqn0E2qqQ" general="_zDpg0OmMEeasa8OwCd1CnQ"/>
-    </packagedElement>
-    <packagedElement xmi:type="uml:Component" xmi:id="_HFWHgOrgEeaOyqvQQiL3Zw" name="XAR1">
-      <interfaceRealization xmi:type="uml:InterfaceRealization" xmi:id="_RdzJEOrgEeaOyqvQQiL3Zw" client="_HFWHgOrgEeaOyqvQQiL3Zw" supplier="_H6KAMOmOEeacKam9FJIH_w" contract="_H6KAMOmOEeacKam9FJIH_w"/>
-    </packagedElement>
-    <packagedElement xmi:type="uml:Component" xmi:id="_L6zakOrgEeaOyqvQQiL3Zw" name="XAR2">
-      <interfaceRealization xmi:type="uml:InterfaceRealization" xmi:id="_ST31cOrgEeaOyqvQQiL3Zw" client="_L6zakOrgEeaOyqvQQiL3Zw" supplier="_H6KAMOmOEeacKam9FJIH_w" contract="_H6KAMOmOEeacKam9FJIH_w"/>
-    </packagedElement>
-  </packagedElement>
   <packagedElement xmi:type="uml:Package" xmi:id="_7IxqUOmLEeasa8OwCd1CnQ" name="Diagrams">
+    <ownedComment xmi:type="uml:Comment" xmi:id="_hvJmEOvwEeak7OxeJ13hOw" annotatedElement="_H6KAMOmOEeacKam9FJIH_w">
+      <body>&quot;doSomethindWithRM&quot; is a facade method that does not exist (just for sequence diagram purpose)</body>
+    </ownedComment>
     <packagedElement xmi:type="uml:Association" xmi:id="_zfWJgOupEea8-5hDW2GVCQ" memberEnd="_zfdeQOupEea8-5hDW2GVCQ _zfdeQeupEea8-5hDW2GVCQ" navigableOwnedEnd="_zfdeQeupEea8-5hDW2GVCQ">
       <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_zfbpEOupEea8-5hDW2GVCQ" source="org.eclipse.papyrus">
         <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_zfcQIOupEea8-5hDW2GVCQ" key="nature" value="UML_Nature"/>
