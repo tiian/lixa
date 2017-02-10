@@ -664,5 +664,32 @@ XA protocol can be extended with feedback related to &quot;other branches must d
       <message xmi:type="uml:Message" xmi:id="_GbSAkO2CEeaaGr6VD20__A" name="commit" receiveEvent="_GbTOse2CEeaaGr6VD20__A" sendEvent="_GbTOsO2CEeaaGr6VD20__A" signature="_kZq-oOpbEeaR7KNlOKNODg"/>
       <message xmi:type="uml:Message" xmi:id="_JwXtEO2CEeaaGr6VD20__A" name="commit" receiveEvent="_JwY7Me2CEeaaGr6VD20__A" sendEvent="_JwY7MO2CEeaaGr6VD20__A" signature="_kZq-oOpbEeaR7KNlOKNODg"/>
     </packagedElement>
+    <packagedElement xmi:type="uml:StateMachine" xmi:id="_Hw88YO_aEea19tixDadsQw" name="Thread/Branch Association">
+      <region xmi:type="uml:Region" xmi:id="_Jn0-cO_aEea19tixDadsQw" name="Region1">
+        <ownedComment xmi:type="uml:Comment" xmi:id="_pd0_UO_dEea19tixDadsQw">
+          <body>See chapter &quot;6.3 Transaction States&quot; of &quot;DTP: The XA Specification&quot;</body>
+        </ownedComment>
+        <ownedComment xmi:type="uml:Comment" xmi:id="_yxgKIO_dEea19tixDadsQw">
+          <body>This diagram represent the association between one thread of control and one branch.
+Things become much more complicated with 2 or more threads of control and 2 or more branches.</body>
+        </ownedComment>
+        <transition xmi:type="uml:Transition" xmi:id="_hfbswO_aEea19tixDadsQw" source="_L9nKEO_aEea19tixDadsQw" target="_ekatIO_aEea19tixDadsQw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_kVU70O_aEea19tixDadsQw" name="xa_start()" source="_ekatIO_aEea19tixDadsQw" target="_M3lfAO_aEea19tixDadsQw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_lo74wO_aEea19tixDadsQw" name="xa_end(TMSUSPEND)" source="_M3lfAO_aEea19tixDadsQw" target="_QBoZIO_aEea19tixDadsQw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_mkwn0O_aEea19tixDadsQw" name="xa_start(TMRESUME|TMMIGRATE)" source="_M3lfAO_aEea19tixDadsQw" target="_YzJ5IO_aEea19tixDadsQw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_nJS4QO_aEea19tixDadsQw" source="_QBoZIO_aEea19tixDadsQw" target="_YzJ5IO_aEea19tixDadsQw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_-bfMYO_aEea19tixDadsQw" name="xa_start(TMRESUME)" source="_QBoZIO_aEea19tixDadsQw" target="_M3lfAO_aEea19tixDadsQw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_1vkvsO_bEea19tixDadsQw" name="xa_end(TMSUCCESS) | xa_end(TMFAIL)" source="_M3lfAO_aEea19tixDadsQw" target="_ekatIO_aEea19tixDadsQw"/>
+        <transition xmi:type="uml:Transition" xmi:id="__e4GkO_bEea19tixDadsQw" source="_ekatIO_aEea19tixDadsQw" target="_-oLIEO_bEea19tixDadsQw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_w0KwMO_cEea19tixDadsQw" name="xa_end(TMSUCCESS)" source="_QBoZIO_aEea19tixDadsQw" target="_ekatIO_aEea19tixDadsQw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_U11noO_dEea19tixDadsQw" name="xa_start(TMRESUME) " source="_YzJ5IO_aEea19tixDadsQw" target="_M3lfAO_aEea19tixDadsQw"/>
+        <subvertex xmi:type="uml:Pseudostate" xmi:id="_L9nKEO_aEea19tixDadsQw" name="Initial1"/>
+        <subvertex xmi:type="uml:State" xmi:id="_M3lfAO_aEea19tixDadsQw" name="Associated"/>
+        <subvertex xmi:type="uml:State" xmi:id="_QBoZIO_aEea19tixDadsQw" name="Association Suspended"/>
+        <subvertex xmi:type="uml:State" xmi:id="_YzJ5IO_aEea19tixDadsQw" name="Association Suspended and Migratable"/>
+        <subvertex xmi:type="uml:State" xmi:id="_ekatIO_aEea19tixDadsQw" name="Not Associated"/>
+        <subvertex xmi:type="uml:FinalState" xmi:id="_-oLIEO_bEea19tixDadsQw" name="FinalState1"/>
+      </region>
+    </packagedElement>
   </packagedElement>
 </uml:Model>
