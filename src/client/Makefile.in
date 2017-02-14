@@ -81,7 +81,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = lixar$(EXEEXT) lixat$(EXEEXT) lixau$(EXEEXT) \
-	lixa-config$(EXEEXT)
+	lixavsr$(EXEEXT) lixa-config$(EXEEXT)
 subdir = src/client
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/lixa-config.c.in $(top_srcdir)/depcomp \
@@ -175,6 +175,12 @@ lixau_DEPENDENCIES = ../common/liblixab.la liblixac.la
 lixau_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(lixau_LDFLAGS) $(LDFLAGS) -o $@
+am_lixavsr_OBJECTS = lixavsr-lixavsr.$(OBJEXT)
+lixavsr_OBJECTS = $(am_lixavsr_OBJECTS)
+lixavsr_DEPENDENCIES = ../common/liblixab.la liblixac.la
+lixavsr_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(lixavsr_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -210,9 +216,11 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(liblixac_la_SOURCES) $(lixa_config_SOURCES) \
-	$(lixar_SOURCES) $(lixat_SOURCES) $(lixau_SOURCES)
+	$(lixar_SOURCES) $(lixat_SOURCES) $(lixau_SOURCES) \
+	$(lixavsr_SOURCES)
 DIST_SOURCES = $(am__liblixac_la_SOURCES_DIST) $(lixa_config_SOURCES) \
-	$(lixar_SOURCES) $(lixat_SOURCES) $(lixau_SOURCES)
+	$(lixar_SOURCES) $(lixat_SOURCES) $(lixau_SOURCES) \
+	$(lixavsr_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -493,6 +501,10 @@ lixau_CPPFLAGS = -I$(srcdir)/../common
 lixau_LDADD = ../common/liblixab.la @LDFLAGS_XML2@ liblixac.la
 lixau_LDFLAGS = @LDFLAGS_GLIB@
 lixau_SOURCES = lixau.c
+lixavsr_CPPFLAGS = -I$(srcdir)/../common
+lixavsr_LDADD = ../common/liblixab.la @LDFLAGS_XML2@ liblixac.la
+lixavsr_LDFLAGS = @LDFLAGS_GLIB@
+lixavsr_SOURCES = lixavsr.c
 lixa_config_SOURCES = lixa-config.c
 lixa_config_LDFLAGS = @LDFLAGS_GLIB@
 all: all-recursive
@@ -635,6 +647,10 @@ lixau$(EXEEXT): $(lixau_OBJECTS) $(lixau_DEPENDENCIES) $(EXTRA_lixau_DEPENDENCIE
 	@rm -f lixau$(EXEEXT)
 	$(AM_V_CCLD)$(lixau_LINK) $(lixau_OBJECTS) $(lixau_LDADD) $(LIBS)
 
+lixavsr$(EXEEXT): $(lixavsr_OBJECTS) $(lixavsr_DEPENDENCIES) $(EXTRA_lixavsr_DEPENDENCIES) 
+	@rm -f lixavsr$(EXEEXT)
+	$(AM_V_CCLD)$(lixavsr_LINK) $(lixavsr_OBJECTS) $(lixavsr_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -656,6 +672,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixar-lixar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixat-lixat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixau-lixau.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixavsr-lixavsr.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -796,6 +813,20 @@ lixau-lixau.obj: lixau.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lixau.c' object='lixau-lixau.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixau_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lixau-lixau.obj `if test -f 'lixau.c'; then $(CYGPATH_W) 'lixau.c'; else $(CYGPATH_W) '$(srcdir)/lixau.c'; fi`
+
+lixavsr-lixavsr.o: lixavsr.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixavsr_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lixavsr-lixavsr.o -MD -MP -MF $(DEPDIR)/lixavsr-lixavsr.Tpo -c -o lixavsr-lixavsr.o `test -f 'lixavsr.c' || echo '$(srcdir)/'`lixavsr.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/lixavsr-lixavsr.Tpo $(DEPDIR)/lixavsr-lixavsr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lixavsr.c' object='lixavsr-lixavsr.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixavsr_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lixavsr-lixavsr.o `test -f 'lixavsr.c' || echo '$(srcdir)/'`lixavsr.c
+
+lixavsr-lixavsr.obj: lixavsr.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixavsr_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lixavsr-lixavsr.obj -MD -MP -MF $(DEPDIR)/lixavsr-lixavsr.Tpo -c -o lixavsr-lixavsr.obj `if test -f 'lixavsr.c'; then $(CYGPATH_W) 'lixavsr.c'; else $(CYGPATH_W) '$(srcdir)/lixavsr.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/lixavsr-lixavsr.Tpo $(DEPDIR)/lixavsr-lixavsr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lixavsr.c' object='lixavsr-lixavsr.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixavsr_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lixavsr-lixavsr.obj `if test -f 'lixavsr.c'; then $(CYGPATH_W) 'lixavsr.c'; else $(CYGPATH_W) '$(srcdir)/lixavsr.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
