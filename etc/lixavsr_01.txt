@@ -1,0 +1,20 @@
+# LIXA Very Stupid Robot 
+# This file is intended to be used by lixavsr utility
+# File format:
+# thread of control (integer)/XA function with parameters/expecter return code
+# Functions expect these parameters:
+#   xa_close(rmid,flags)
+#   xa_commit(xid,rmid,flags)
+#   xa_end(xid,rmid,flags)
+#   xa_forget(xid,rmid,flags)
+#   xa_open(rmid,flags)
+#   xa_prepare(rmid,flags)
+#   xa_recover(rmid,flags)
+#   xa_rollback(rmid,flags)
+#   xa_start(rmid,flags)
+# Parameters can be:
+#   rmid: integer starting from 0 (first resource manager in LIXA profile)
+#   flags: integer as described by XA specification
+#   xid: can be xid11 (global1, branch1), xid12 (global1, branch2), xid21, xid22
+0/xa_open()/0
+0/xa_start()/0

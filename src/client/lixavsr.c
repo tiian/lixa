@@ -75,11 +75,178 @@ static GOptionEntry entries[] =
 
 
 
+/* parsable XA functions: strings */
+static const char *PARSABLE_FUNCTIONS[] = {
+    "xa_close", "xa_commit", "xa_end", "xa_forget", "xa_open", "xa_prepare",
+    "xa_recover", "xa_rollback", "xa_start"
+};
+/* accepted XA functions: internal */
+typedef enum {
+    XA_CLOSE
+    , XA_COMMIT
+    , XA_END
+    , XA_FORGET
+    , XA_OPEN
+    , XA_PREPARE
+    , XA_RECOVER
+    , XA_ROLLBACK
+    , XA_START
+} accepted_functions_t;
+
+
+
+/* parsable XIDs: strings */
+static const char *PARSABLE_XIDS[] = {
+    "xid11", "xid12", "xid21", "xid22"
+};
+/* accepted XIDs: internal */
+typedef enum {
+    XID11
+    , XID12
+    , XID21
+    , XID22
+} accepted_xids_t;
+
+
+
+/* parsed function internal representation */
+typedef struct {
+    accepted_functions_t     function;
+    accepted_xids_t          xid;
+    int                      rmid;
+    long                     flags;
+} parsed_function_t;
+
+
+
+int lixavsr_parse_two_args(const char *token, parsed_function_t *pf)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixavsr_parse_two_args\n"));
+    TRY {
+        /* @@@ */        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixavsr_parse_two_args/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixavsr_parse_three_args(const char *token, parsed_function_t *pf)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixavsr_parse_three_args\n"));
+    TRY {
+        /* @@@ */
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixavsr_parse_three_args/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixavsr_parse_function(const char *token, parsed_function_t *pf)
+{
+    enum Exception { INVALID_OPTION
+                     , INTERNAL_ERROR
+                     , PARSE_TWO_ARGS
+                     , PARSE_THREE_ARGS
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixavsr_parse_function\n"));
+    TRY {
+        int i;
+        int function = -1;
+        for (i=0; i<sizeof(PARSABLE_FUNCTIONS)/sizeof(char *); ++i) {
+            if (token == strstr(token, PARSABLE_FUNCTIONS[i])) {
+                function = i;
+                LIXA_TRACE(("lixavsr_parse_function: parsed function '%s' "
+                            "(%d)\n", PARSABLE_FUNCTIONS[function], function));
+                break;
+            }
+        } /* for (i=0;  */
+        if (0 > function)
+            THROW(INVALID_OPTION);
+        pf->function = function;
+        switch(pf->function) {
+            case XA_CLOSE:
+            case XA_OPEN:
+                if (LIXA_RC_OK != (ret_cod = lixavsr_parse_two_args(
+                                       token, pf)))
+                    THROW(PARSE_TWO_ARGS);
+                break;
+            case XA_COMMIT:
+            case XA_END:
+            case XA_FORGET:
+            case XA_PREPARE:
+            case XA_RECOVER:
+            case XA_ROLLBACK:
+            case XA_START:
+                if (LIXA_RC_OK != (ret_cod = lixavsr_parse_three_args(
+                                       token, pf)))
+                    THROW(PARSE_THREE_ARGS);
+                break;
+            default:
+                THROW(INTERNAL_ERROR);
+        } /* switch(pf->function) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_OPTION:
+                ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case PARSE_TWO_ARGS:
+            case PARSE_THREE_ARGS:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixavsr_parse_function/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixavsr_parse_record(const char *record)
 {
     enum Exception { NULL_OBJECT
                      , NO_TOC
                      , NO_FUNC
+                     , PARSE_FUNCTION
                      , NO_RETCOD
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -91,6 +258,8 @@ int lixavsr_parse_record(const char *record)
         char *token;
         const char token_separator[] = "/";
         long thread_of_control;
+        parsed_function_t parsed_function;
+        long return_code;
         
         if (NULL == record)
             THROW(NULL_OBJECT);
@@ -112,7 +281,11 @@ int lixavsr_parse_record(const char *record)
             LIXA_TRACE(("lixavsr_parse_record: function not found\n"));
             THROW(NO_FUNC);
         }
+        memset(&parsed_function, 0, sizeof(parsed_function));
         LIXA_TRACE(("lixavsr_parse_record: function is '%s'\n", token));
+        if (LIXA_RC_OK != (ret_cod = lixavsr_parse_function(
+                               token, &parsed_function)))
+            THROW(PARSE_FUNCTION);
         /* @@@ lixavsr_parse_function */
         /* extracting return code */
         token = strtok(NULL, token_separator);
@@ -120,7 +293,9 @@ int lixavsr_parse_record(const char *record)
             LIXA_TRACE(("lixavsr_parse_record: return code not found\n"));
             THROW(NO_RETCOD);
         }
-        LIXA_TRACE(("lixavsr_parse_record: return code is '%s'\n", token));
+        return_code = strtol(token, NULL, 0);
+        LIXA_TRACE(("lixavsr_parse_record: return code is %ld\n",
+                    return_code));
         
         THROW(NONE);
     } CATCH {
@@ -132,6 +307,8 @@ int lixavsr_parse_record(const char *record)
             case NO_FUNC:
             case NO_RETCOD:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case PARSE_FUNCTION:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -169,6 +346,12 @@ int lixavsr_parse_file(const char *filename)
                 break;
             /* removing trailing newline */
             buffer[strcspn(buffer, "\r\n")] = '\0';
+            /* skipping comment lines */
+            if ('#' == buffer[0]) {
+                LIXA_TRACE(("lixavsr_parse_file: skipping comment line '%s'\n",
+                            buffer));
+                continue;
+            }
             if (LIXA_RC_OK != (ret_cod = lixavsr_parse_record(buffer)))
                 THROW(PARSE_RECORD);
         } /* while (!feof(file)) */
