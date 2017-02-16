@@ -4,9 +4,10 @@ L     I   X   A   A   LIbre XA
 L     I  X X  AAAAA   a free and open source XA Transaction Manager
 LLLLL I X   X A   A
 
-LIXA (LIbre XA) is an open source and free Transaction Manager implementing the
-distributed transaction processing "XA specification" and "TX (transaction
-demarcation) specification" according to the X/Open CAE Specification.
+LIXA (LIbre XA) is an open source and free software Transaction Manager
+that implements the distributed transaction processing "XA specification" and
+"TX (transaction demarcation) specification" according to the
+X/Open CAE Specification.
 LIXA is a Transaction Manager but it's not a Transaction Monitor: this is the
 distinguishing feature of the project: it enables every application container,
 like a web server or a shell, to become an XA compliant application server.
