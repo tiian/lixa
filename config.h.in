@@ -162,6 +162,9 @@
 /* Define to 1 if you have the `vfprintf' function. */
 #undef HAVE_VFPRINTF
 
+/* Define to 1 if you have the `vsnprintf' function. */
+#undef HAVE_VSNPRINTF
+
 /* Define to 1 if you are using WebSphere MQ */
 #undef HAVE_WEBSPHEREMQ
 

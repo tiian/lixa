@@ -256,6 +256,14 @@
  */
 #define LIXA_RC_STRDUP_ERROR                  -102
 /**
+ * "fork" function error
+ */
+#define LIXA_RC_FORK_ERROR                    -103
+/**
+ * "kill" function error
+ */
+#define LIXA_RC_KILL_ERROR                    -104
+/**
  * "poll" function error
  */
 #define LIXA_RC_POLL_ERROR                   -108
@@ -493,6 +501,10 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * "g_checksum_get_string" function error
  */
 #define LIXA_RC_G_CHECKSUM_GET_STRING_ERROR    -305
+/**
+ * "g_thread_create" function error
+ */
+#define LIXA_RC_G_THREAD_CREATE_ERROR          -306
 
 
 
