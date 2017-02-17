@@ -61,15 +61,19 @@
 
 
 
-#define RECORD_SIZE 1000
+#define RECORD_SIZE 500
+#define MAX_THREADS_OF_CONTROL 10
+
 
 
 /* default command line options */
 static char *filename = NULL;
+static gboolean threads = FALSE;
 static gboolean print_version = FALSE;
 static GOptionEntry entries[] =
 {
     { "filename", 'f', 0, G_OPTION_ARG_STRING, &filename, "Name of the file with the actions that must be executed", NULL },
+    { "threads", 't', 0, G_OPTION_ARG_NONE, &threads, "Use threads instead of processes", NULL },
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
     { NULL }
 };
@@ -150,6 +154,22 @@ typedef struct {
     parsed_function_t        function;
     int                      expected_rc;
 } parsed_statement_t;
+
+
+
+/* context for XA statement processing */
+typedef struct {
+    int                      pipefd[MAX_THREADS_OF_CONTROL][2];
+} xa_context_t;
+
+
+
+void xa_context_reset(xa_context_t *xa_context)
+{
+    int i;
+    for (i=0; i<MAX_THREADS_OF_CONTROL; ++i)
+        xa_context->pipefd[i][0] = xa_context->pipefd[i][1] = LIXA_NULL_FD;
+}
 
 
 
@@ -469,7 +489,8 @@ int lixavsr_parse_function(const char *token, parsed_function_t *pf)
 
 
 
-int lixavsr_parse_record(const char *record)
+int lixavsr_parse_record(const char *record,
+                         parsed_statement_t *parsed_statement)
 {
     enum Exception { NULL_OBJECT
                      , NO_TOC
@@ -486,7 +507,6 @@ int lixavsr_parse_record(const char *record)
         char *token;
         char *saveptr;
         const char token_separator[] = "/";
-        parsed_statement_t parsed_statement;
         
         if (NULL == record)
             THROW(NULL_OBJECT);
@@ -499,19 +519,18 @@ int lixavsr_parse_record(const char *record)
                         "found\n"));
             THROW(NO_TOC);
         }
-        parsed_statement.thread_of_control = strtol(token, NULL, 0);
+        parsed_statement->thread_of_control = strtol(token, NULL, 0);
         LIXA_TRACE(("lixavsr_parse_record: thread of control is %ld\n",
-                    parsed_statement.thread_of_control));
+                    parsed_statement->thread_of_control));
         /* extracting function */
         token = strtok_r(NULL, token_separator, &saveptr);
         if (NULL == token) {
             LIXA_TRACE(("lixavsr_parse_record: function not found\n"));
             THROW(NO_FUNC);
         }
-        memset(&parsed_statement, 0, sizeof(parsed_statement));
         LIXA_TRACE(("lixavsr_parse_record: function is '%s'\n", token));
         if (LIXA_RC_OK != (ret_cod = lixavsr_parse_function(
-                               token, &parsed_statement.function)))
+                               token, &parsed_statement->function)))
             THROW(PARSE_FUNCTION);
         /* extracting return code */
         token = strtok_r(NULL, token_separator, &saveptr);
@@ -520,9 +539,9 @@ int lixavsr_parse_record(const char *record)
                         "found\n"));
             THROW(NO_RETCOD);
         }
-        parsed_statement.expected_rc = (int)strtol(token, NULL, 0);
+        parsed_statement->expected_rc = (int)strtol(token, NULL, 0);
         LIXA_TRACE(("lixavsr_parse_record: expected return code is %d\n",
-                    parsed_statement.expected_rc));
+                    parsed_statement->expected_rc));
         
         THROW(NONE);
     } CATCH {
@@ -551,11 +570,58 @@ int lixavsr_parse_record(const char *record)
 
 
 
+int lixavsr_execute_record(xa_context_t *xa_context,
+                           parsed_statement_t *parsed_statement)
+{
+    enum Exception { OUT_OF_RANGE
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixavsr_execute_record\n"));
+    TRY {
+        /* is thread of control valid? */
+        if (MAX_THREADS_OF_CONTROL <= parsed_statement->thread_of_control) {
+            LIXA_TRACE(("lixavsr_execute_record: thread of control is "
+                        "too high (%d/%d)\n",
+                        parsed_statement->thread_of_control,
+                        MAX_THREADS_OF_CONTROL));
+            THROW(OUT_OF_RANGE);
+        }
+        /* new thread of control? */
+        if (LIXA_NULL_FD == xa_context->pipefd[
+                parsed_statement->thread_of_control][0]) {
+            LIXA_TRACE(("lixavsr_execute_record: %d is a new thread of "
+                        "control that must be activated...\n",
+                        parsed_statement->thread_of_control));
+            /* @@@ */
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OUT_OF_RANGE:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixavsr_execute_record/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+    
 int lixavsr_parse_file(const char *filename)
 {
     enum Exception { NULL_OBJECT
                      , FOPEN_ERROR
                      , PARSE_RECORD
+                     , EXECUTE_RECORD
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     FILE *file = NULL;
@@ -563,6 +629,10 @@ int lixavsr_parse_file(const char *filename)
 
     LIXA_TRACE(("lixavsr_parse_file\n"));
     TRY {
+        parsed_statement_t parsed_statement;
+        xa_context_t xa_context;
+
+        xa_context_reset(&xa_context);
         if (NULL == filename)
             THROW(NULL_OBJECT);
         LIXA_TRACE(("lixavsr_parse_file: parsing file '%s'\n", filename));
@@ -579,8 +649,13 @@ int lixavsr_parse_file(const char *filename)
                             buffer));
                 continue;
             }
-            if (LIXA_RC_OK != (ret_cod = lixavsr_parse_record(buffer)))
+            memset(&parsed_statement, 0, sizeof(parsed_statement));
+            if (LIXA_RC_OK != (ret_cod = lixavsr_parse_record(
+                                   buffer, &parsed_statement)))
                 THROW(PARSE_RECORD);
+            if (LIXA_RC_OK != (ret_cod = lixavsr_execute_record(
+                                   &xa_context, &parsed_statement)))
+                THROW(EXECUTE_RECORD);
         } /* while (!feof(file)) */
         
         THROW(NONE);
@@ -593,6 +668,7 @@ int lixavsr_parse_file(const char *filename)
                 ret_cod = LIXA_RC_FOPEN_ERROR;
                 break;
             case PARSE_RECORD:
+            case EXECUTE_RECORD:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -639,5 +715,5 @@ int main(int argc, char *argv[])
     }
     
     LIXA_TRACE(("%s: ending\n", argv[0]));
-    return 0;
+    return LIXA_RC_OK == ret_cod ? 0 : 1;
 }
