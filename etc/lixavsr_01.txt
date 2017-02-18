@@ -15,5 +15,9 @@
 #   rmid: integer starting from 0 (first resource manager in LIXA profile)
 #   flags: labels as described by XA specification (xa.h file)
 #   xid: can be xid11 (global1, branch1), xid12 (global1, branch2), xid21, xid22
+# Last row must be:
+#   thread of control (integer)/vsr_quit()/0
+#   LIXA Very Stupid Robot is very stupid and needs a termination row
 0/xa_open("foo bar",0,TMNOFLAGS|TMRESUME|TMFAIL)/0
 0/xa_start(xid21,0,TMNOFLAGS)/0
+0/vsr_quit()/0
