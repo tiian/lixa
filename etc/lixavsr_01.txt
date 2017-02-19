@@ -18,6 +18,6 @@
 # Last row must be:
 #   thread of control (integer)/vsr_quit()/0
 #   LIXA Very Stupid Robot is very stupid and needs a termination row
-0/xa_open("foo bar",0,TMNOFLAGS|TMRESUME|TMFAIL)/0
+0/xa_open("",0,TMNOFLAGS|TMRESUME|TMFAIL)/0
 0/xa_start(xid21,0,TMNOFLAGS)/0
 0/vsr_quit()/0

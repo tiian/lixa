@@ -201,7 +201,7 @@ eval "LIXA_CONFIG_SYSCONFDIR=$sysconfdir"
 AC_CHECK_PROGS(GDB, [gdb], [])
 AC_CHECK_PROGS(VALGRIND, [valgrind], [])
 AC_CHECK_PROGS(XSLTPROC, [xsltproc], [])
-AC_CHECK_PROGS(HAVE_DOT, [dot], [NO], [])
+AC_CHECK_PROGS(HAVE_DOT, [dot], [NO], [YES])
 AC_CHECK_PROGS(HAVE_NETSTAT, [netstat], [NO], [])
 if test "$HAVE_NETSTAT" = "NO"
 then

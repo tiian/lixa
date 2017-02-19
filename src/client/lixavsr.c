@@ -45,6 +45,8 @@
 #include "lixa_trace.h"
 #include "lixa_utils.h"
 #include "xa.h"
+#include "client_config.h"
+#include "client_status.h"
 
 
 
@@ -239,6 +241,19 @@ int lixavsr_parse_flag(const char *token, long *flag)
 
 
 
+/* check if rmid is allowable comparing it with the profile */
+int lixavsr_check_rmid(const int rmid)
+{
+    if (global_ccc.actconf.rsrmgrs->len <= rmid) {
+        LIXA_TRACE(("lixavsr_check_rmid: rmid is out of range %d/%d\n",
+                    rmid, global_ccc.actconf.rsrmgrs->len));
+        return FALSE;
+    }
+    return TRUE;
+}
+
+
+
 int lixavsr_parse_flags(const char *token, long *flags)
 {
     enum Exception { PARSE_FLAG1
@@ -302,7 +317,8 @@ int lixavsr_parse_flags(const char *token, long *flags)
 
 int lixavsr_parse_info_rmid_flags(const char *token, parsed_function_t *pf)
 {
-    enum Exception { PARSE_FLAGS
+    enum Exception { OUT_OF_RANGE
+                     , PARSE_FLAGS
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -314,15 +330,22 @@ int lixavsr_parse_info_rmid_flags(const char *token, parsed_function_t *pf)
         strncpy(statement, token, sizeof(statement));
 
         /* extracting function */
-        tk = strtok_r(statement, "(\"", &saveptr);
+        tk = strtok_r(statement, "(", &saveptr);
         LIXA_TRACE(("lixavsr_parse_info_rmid_flags: function='%s'\n", tk));
         /* extracting info */
-        tk = strtok_r(NULL, "\",", &saveptr);
+        tk = strtok_r(NULL, ",", &saveptr);
+        /* removing quotes */
+        if (tk[strlen(tk)-1] == '"')
+            tk[strlen(tk)-1] = '\0';
+        if (tk[0] == '"')
+            tk++;
         strncpy(pf->info, tk, RECORD_SIZE);
         LIXA_TRACE(("lixavsr_parse_info_rmid_flags: info='%s'\n", pf->info));
         /* extracting rmid */
         tk = strtok_r(NULL, ",", &saveptr);
         pf->rmid = (int)strtol(tk, NULL, 0);
+        if (!lixavsr_check_rmid(pf->rmid))
+            THROW(OUT_OF_RANGE);
         LIXA_TRACE(("lixavsr_parse_info_rmid_flags: rmid=%d\n", pf->rmid));
         /* extracting flags */
         tk = strtok_r(NULL, ")", &saveptr);
@@ -333,6 +356,9 @@ int lixavsr_parse_info_rmid_flags(const char *token, parsed_function_t *pf)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OUT_OF_RANGE:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
             case PARSE_FLAGS:
                 break;
             case NONE:
@@ -393,6 +419,7 @@ int lixavsr_parse_xid(const char *token, accepted_xids_t *xid)
 int lixavsr_parse_xid_rmid_flags(const char *token, parsed_function_t *pf)
 {
     enum Exception { PARSE_XID
+                     , OUT_OF_RANGE
                      , PARSE_FLAGS
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -415,6 +442,8 @@ int lixavsr_parse_xid_rmid_flags(const char *token, parsed_function_t *pf)
         /* extracting rmid */
         tk = strtok_r(NULL, ",", &saveptr);
         pf->rmid = (int)strtol(tk, NULL, 0);
+        if (!lixavsr_check_rmid(pf->rmid))
+            THROW(OUT_OF_RANGE);
         LIXA_TRACE(("lixavsr_parse_xid_rmid_flags: rmid=%d\n", pf->rmid));
         /* extracting flags */
         tk = strtok_r(NULL, ")", &saveptr);
@@ -425,6 +454,9 @@ int lixavsr_parse_xid_rmid_flags(const char *token, parsed_function_t *pf)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OUT_OF_RANGE:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
             case PARSE_XID:
             case PARSE_FLAGS:
                 break;
@@ -600,20 +632,68 @@ int lixavsr_parse_record(const char *record,
 int lixavsr_execute_xa_function(parsed_function_t *parsed_function,
                                 int *xa_rc)
 {
-    enum Exception { NONE } excp;
+    enum Exception { OUT_OF_RANGE
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixavsr_execute_xa_function\n"));
     TRY {
+        struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
+            global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s,
+            parsed_function->rmid);
+        char *info = NULL;
         LIXA_TRACE(("lixavsr_execute_xa_function: fid=%d, rmid=%d, "
                     "flags=0x%8.8x\n",
                     parsed_function->fid, parsed_function->rmid,
                     parsed_function->flags));
         *xa_rc = XA_OK;
         /* @@@ execute real XA functions here... */
+        switch (parsed_function->fid) {
+            case XA_OPEN:
+                /* use generic info or passed by the robot file? */
+                if (strlen(parsed_function->info) == 0)
+                    info = (char *)act_rsrmgr->generic->xa_open_info;
+                else
+                    info = parsed_function->info;
+                LIXA_TRACE(("lixavsr_execute_xa_function: executing "
+                            "%s(\"%s\",%d,0x%8.8x)\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            info, parsed_function->rmid,
+                            parsed_function->flags));
+                *xa_rc = act_rsrmgr->xa_switch->xa_open_entry(
+                    info, parsed_function->rmid, parsed_function->flags);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executed "
+                            "%s(\"%s\",%d,0x%8.8x)=%d\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            info, parsed_function->rmid,
+                            parsed_function->flags, *xa_rc));                
+                break;
+            case XA_START:
+                LIXA_TRACE(("lixavsr_execute_xa_function: executing "
+                            "%s(%s,%d,0x%8.8x)\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            PARSABLE_XIDS[parsed_function->xid],
+                            parsed_function->rmid,
+                            parsed_function->flags));
+                *xa_rc = act_rsrmgr->xa_switch->xa_start_entry(
+                    &XID_VALUES[parsed_function->xid], parsed_function->rmid,
+                    parsed_function->flags);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executed "
+                            "%s(%s,%d,0x%8.8x)=%d\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            PARSABLE_XIDS[parsed_function->xid],
+                            parsed_function->rmid,
+                            parsed_function->flags, *xa_rc));
+                break;
+            default:
+                THROW(OUT_OF_RANGE);
+        } /* switch (parsed_function->fid) */
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OUT_OF_RANGE:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -635,12 +715,12 @@ void lixavsr_threadofcontrol(pipes_t *pipes)
                      , WRITE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    pipes_t my_pipes = *pipes; /* make a local copy */
     
     LIXA_TRACE(("lixavsr_threadofcontrol\n"));
     TRY {
         parsed_function_t parsed_function;
         ssize_t bytes;
-        pipes_t my_pipes = *pipes; /* make a local copy */
         
         LIXA_TRACE(("lixavsr_threadofcontrol: my_pipes->read=%d, "
                     "my_pipes->write=%d\n", my_pipes.read, my_pipes.write));
@@ -673,10 +753,10 @@ void lixavsr_threadofcontrol(pipes_t *pipes)
             case READ_ERROR:
                 ret_cod = LIXA_RC_READ_ERROR;
                 break;
+            case EXECUTE_XA_FUNCTION:
+                break;
             case WRITE_ERROR:
                 ret_cod = LIXA_RC_WRITE_ERROR;
-                break;
-            case EXECUTE_XA_FUNCTION:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -687,6 +767,9 @@ void lixavsr_threadofcontrol(pipes_t *pipes)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixavsr_threadofcontrol/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    /* closing pipes before exiting */
+    close(my_pipes.read);
+    close(my_pipes.write);
     if (!threads)
         exit (LIXA_RC_OK == ret_cod ? 0 : 1);
 }
@@ -1014,11 +1097,19 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
+    /* configure a client standard environment */
+    if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc))) {
+        LIXA_TRACE(("%s/client_config: ret_cod=%d ('%s')\n", argv[0],
+                    ret_cod, lixa_strerror(ret_cod)));
+        exit(1);
+    }
+    
+    /* parse file and execute command */
     if (LIXA_RC_OK != (ret_cod = lixavsr_parse_file(filename))) {
         LIXA_TRACE(("%s/lixavsr_parse_file: ret_cod=%d ('%s')\n", argv[0],
                     ret_cod, lixa_strerror(ret_cod)));
     }
     
     LIXA_TRACE(("%s: ending\n", argv[0]));
-    return LIXA_RC_OK == ret_cod ? 0 : 1;
+    exit (LIXA_RC_OK == ret_cod ? 0 : 1);
 }
