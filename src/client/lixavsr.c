@@ -44,6 +44,7 @@
 #include "lixa_errors.h"
 #include "lixa_trace.h"
 #include "lixa_utils.h"
+#include "lixa_xid.h"
 #include "xa.h"
 #include "client_config.h"
 #include "client_status.h"
@@ -108,20 +109,6 @@ typedef enum {
 
 
 
-/* parsable XIDs: strings */
-static const char *PARSABLE_XIDS[] = {
-    "xid11", "xid12", "xid21", "xid22"
-};
-/* accepted XIDs: internal */
-typedef enum {
-    XID11
-    , XID12
-    , XID21
-    , XID22
-} accepted_xids_t;
-
-
-
 /* parsable flags: strings */
 static const char *PARSABLE_FLAGS[] = {
     "TMNOFLAGS", "TMASYNC", "TMONEPHASE", "TMFAIL", "TMNOWAIT", "TMRESUME"
@@ -136,21 +123,11 @@ static const long FLAG_VALUES[] = {
 
 
 
-/* pre-defined XID values */
-static const XID XID_VALUES[] = {
-    { 0x6e416967, 4, 4, "00001111" } ,
-    { 0x6e416967, 4, 4, "00002222" } ,
-    { 0x6e416967, 4, 4, "33334444" } ,
-    { 0x6e416967, 4, 4, "33335555" }
-};
-
-
-
 /* parsed function internal representation */
 typedef struct {
     function_id_t            fid;
     char                     info[RECORD_SIZE];
-    accepted_xids_t          xid;
+    XID                      xid;
     int                      rmid;
     long                     flags;
 } parsed_function_t;
@@ -375,32 +352,21 @@ int lixavsr_parse_info_rmid_flags(const char *token, parsed_function_t *pf)
 
 
 
-int lixavsr_parse_xid(const char *token, accepted_xids_t *xid)
+int lixavsr_parse_xid(lixa_ser_xid_t lsx, XID *xid)
 {
-    enum Exception { INVALID_OPTION
+    enum Exception { XID_DESERIALIZED
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixavsr_parse_xid\n"));
     TRY {
-        int i;
-        int tmp_xid = -1;
-        for (i=0; i<sizeof(PARSABLE_XIDS)/sizeof(char *); ++i) {
-            if (0 == strcmp(token, PARSABLE_XIDS[i])) {
-                tmp_xid = i;
-                LIXA_TRACE(("lixavsr_parse_xid: parsed xid '%s' (%d)\n",
-                            PARSABLE_XIDS[tmp_xid], tmp_xid));
-                break;
-            }
-        } /* for (i=0;  */
-        if (0 > tmp_xid)
-            THROW(INVALID_OPTION);
-        *xid = tmp_xid;
+        if (!lixa_xid_deserialize(xid, lsx))
+            THROW(XID_DESERIALIZED);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case INVALID_OPTION:
-                ret_cod = LIXA_RC_INVALID_OPTION;
+            case XID_DESERIALIZED:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -429,16 +395,24 @@ int lixavsr_parse_xid_rmid_flags(const char *token, parsed_function_t *pf)
         char statement[RECORD_SIZE];
         char *tk;
         char *saveptr;
+        char serialized_xid[RECORD_SIZE];
         strncpy(statement, token, sizeof(statement));
 
         /* extracting function */
         tk = strtok_r(statement, "(\"", &saveptr);
         LIXA_TRACE(("lixavsr_parse_xid_rmid_flags: function='%s'\n", tk));
         /* extracting xid */
-        tk = strtok_r(NULL, "\",", &saveptr);
+        tk = strtok_r(NULL, ",", &saveptr);
+        /* removing quotes */
+        if (tk[strlen(tk)-1] == '"')
+            tk[strlen(tk)-1] = '\0';
+        if (tk[0] == '"')
+            tk++;
+        strncpy(serialized_xid, tk, RECORD_SIZE);
+        LIXA_TRACE(("lixavsr_parse_xid_rmid_flags: xid='%s'\n",
+                    serialized_xid));
         if (LIXA_RC_OK != (ret_cod = lixavsr_parse_xid(tk, &pf->xid)))
             THROW(PARSE_XID);
-        LIXA_TRACE(("lixavsr_parse_xid_rmid_flags: xid=%d\n", pf->xid));
         /* extracting rmid */
         tk = strtok_r(NULL, ",", &saveptr);
         pf->rmid = (int)strtol(tk, NULL, 0);
@@ -642,13 +616,80 @@ int lixavsr_execute_xa_function(parsed_function_t *parsed_function,
             global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s,
             parsed_function->rmid);
         char *info = NULL;
+        lixa_ser_xid_t lsx;
         LIXA_TRACE(("lixavsr_execute_xa_function: fid=%d, rmid=%d, "
                     "flags=0x%8.8x\n",
                     parsed_function->fid, parsed_function->rmid,
                     parsed_function->flags));
         *xa_rc = XA_OK;
-        /* @@@ execute real XA functions here... */
         switch (parsed_function->fid) {
+            case XA_CLOSE:
+                /* use generic info or passed by the robot file? */
+                if (strlen(parsed_function->info) == 0)
+                    info = (char *)act_rsrmgr->generic->xa_close_info;
+                else
+                    info = parsed_function->info;
+                LIXA_TRACE(("lixavsr_execute_xa_function: executing "
+                            "%s(\"%s\",%d,0x%8.8x)\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            info, parsed_function->rmid,
+                            parsed_function->flags));
+                *xa_rc = act_rsrmgr->xa_switch->xa_close_entry(
+                    info, parsed_function->rmid, parsed_function->flags);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executed "
+                            "%s(\"%s\",%d,0x%8.8x)=%d\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            info, parsed_function->rmid,
+                            parsed_function->flags, *xa_rc));                
+                break;
+            case XA_COMMIT:
+                lixa_xid_serialize(&parsed_function->xid, lsx);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executing "
+                            "%s(\"%s\",%d,0x%8.8x)\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            lsx, parsed_function->rmid,
+                            parsed_function->flags));
+                *xa_rc = act_rsrmgr->xa_switch->xa_commit_entry(
+                    &parsed_function->xid, parsed_function->rmid,
+                    parsed_function->flags);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executed "
+                            "%s(\"%s\",%d,0x%8.8x)=%d\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            lsx, parsed_function->rmid,
+                            parsed_function->flags, *xa_rc));
+                break;
+            case XA_END:
+                lixa_xid_serialize(&parsed_function->xid, lsx);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executing "
+                            "%s(\"%s\",%d,0x%8.8x)\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            lsx, parsed_function->rmid,
+                            parsed_function->flags));
+                *xa_rc = act_rsrmgr->xa_switch->xa_end_entry(
+                    &parsed_function->xid, parsed_function->rmid,
+                    parsed_function->flags);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executed "
+                            "%s(\"%s\",%d,0x%8.8x)=%d\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            lsx, parsed_function->rmid,
+                            parsed_function->flags, *xa_rc));
+                break;
+            case XA_FORGET:
+                lixa_xid_serialize(&parsed_function->xid, lsx);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executing "
+                            "%s(\"%s\",%d,0x%8.8x)\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            lsx, parsed_function->rmid,
+                            parsed_function->flags));
+                *xa_rc = act_rsrmgr->xa_switch->xa_forget_entry(
+                    &parsed_function->xid, parsed_function->rmid,
+                    parsed_function->flags);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executed "
+                            "%s(\"%s\",%d,0x%8.8x)=%d\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            lsx, parsed_function->rmid,
+                            parsed_function->flags, *xa_rc));
+                break;
             case XA_OPEN:
                 /* use generic info or passed by the robot file? */
                 if (strlen(parsed_function->info) == 0)
@@ -668,21 +709,52 @@ int lixavsr_execute_xa_function(parsed_function_t *parsed_function,
                             info, parsed_function->rmid,
                             parsed_function->flags, *xa_rc));                
                 break;
-            case XA_START:
+            case XA_PREPARE:
+                lixa_xid_serialize(&parsed_function->xid, lsx);
                 LIXA_TRACE(("lixavsr_execute_xa_function: executing "
-                            "%s(%s,%d,0x%8.8x)\n",
+                            "%s(\"%s\",%d,0x%8.8x)\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],
-                            PARSABLE_XIDS[parsed_function->xid],
-                            parsed_function->rmid,
+                            lsx, parsed_function->rmid,
                             parsed_function->flags));
-                *xa_rc = act_rsrmgr->xa_switch->xa_start_entry(
-                    &XID_VALUES[parsed_function->xid], parsed_function->rmid,
+                *xa_rc = act_rsrmgr->xa_switch->xa_prepare_entry(
+                    &parsed_function->xid, parsed_function->rmid,
                     parsed_function->flags);
                 LIXA_TRACE(("lixavsr_execute_xa_function: executed "
-                            "%s(%s,%d,0x%8.8x)=%d\n",
+                            "%s(\"%s\",%d,0x%8.8x)=%d\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],
-                            PARSABLE_XIDS[parsed_function->xid],
-                            parsed_function->rmid,
+                            lsx, parsed_function->rmid,
+                            parsed_function->flags, *xa_rc));
+                break;
+            case XA_ROLLBACK:
+                lixa_xid_serialize(&parsed_function->xid, lsx);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executing "
+                            "%s(\"%s\",%d,0x%8.8x)\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            lsx, parsed_function->rmid,
+                            parsed_function->flags));
+                *xa_rc = act_rsrmgr->xa_switch->xa_rollback_entry(
+                    &parsed_function->xid, parsed_function->rmid,
+                    parsed_function->flags);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executed "
+                            "%s(\"%s\",%d,0x%8.8x)=%d\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            lsx, parsed_function->rmid,
+                            parsed_function->flags, *xa_rc));
+                break;
+            case XA_START:
+                lixa_xid_serialize(&parsed_function->xid, lsx);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executing "
+                            "%s(\"%s\",%d,0x%8.8x)\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            lsx, parsed_function->rmid,
+                            parsed_function->flags));
+                *xa_rc = act_rsrmgr->xa_switch->xa_start_entry(
+                    &parsed_function->xid, parsed_function->rmid,
+                    parsed_function->flags);
+                LIXA_TRACE(("lixavsr_execute_xa_function: executed "
+                            "%s(\"%s\",%d,0x%8.8x)=%d\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            lsx, parsed_function->rmid,
                             parsed_function->flags, *xa_rc));
                 break;
             default:
