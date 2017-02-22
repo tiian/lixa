@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
       </para></note>
     </section>
   </section>
-  <section>
+  <section xml:id="linkage">
     <title>LIXA library linkage</title>
     <para>
       The examples showed in this chapter use these linkage options:

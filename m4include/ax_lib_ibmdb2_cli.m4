@@ -79,7 +79,13 @@ AC_DEFUN([AX_LIB_IBMDB2_CLI],
       x86_64-*-*-*)
         IBMDB2_LIB_NAME="lib64"
 	;;
-      *) AC_MSG_WARN([LIXA is not yet ported on this architecture for IBM DB2])
+	  rs6000-ibm-aix)
+	    IBMDB2_LIB_NAME="lib64"
+	;;
+	  *-apple-darwin1?.1.0)
+	    IBMDB2_LIB_NAME="lib64"
+	;;
+      *) AC_MSG_ERROR([LIXA is not yet ported on this architecture for IBM DB2])
         ;;
     esac
 

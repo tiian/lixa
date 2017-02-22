@@ -114,8 +114,8 @@ void lixa_xid_create_new(XID *xid)
     xid->bqual_length = sizeof(uuid_t);
     memset(xid->data, 0, XIDDATASIZE); /* this is not necessary, but... */
     uuid_generate(uuid_obj);
-    memcpy(xid->data, uuid_obj, sizeof(uuid_t));
-    memcpy(xid->data + sizeof(uuid_t), lixa_xid_global_bqual, sizeof(uuid_t));
+    memcpy(xid->data, uuid_obj, sizeof(uuid_t)); /* global transaction identifier */
+    memcpy(xid->data + sizeof(uuid_t), lixa_xid_global_bqual, sizeof(uuid_t)); /* branch qualifier */
 #ifdef LIXA_DEBUG
     {
     char *gtrid, *bqual;
@@ -130,12 +130,41 @@ void lixa_xid_create_new(XID *xid)
 #endif /* LIXA_DEBUG */
 }
 
+void lixa_xid_create_new_bqual(XID *xid)
+{
+    char *gtrid = (char *) malloc(xid->gtrid_length);
+    memset(gtrid, 0, xid->gtrid_length);
+    memcpy(gtrid, xid->data, xid->gtrid_length);
 
+    xid->bqual_length = sizeof(uuid_t);
+    memset(xid->data, 0, XIDDATASIZE);
+
+    uuid_t uuid_obj;
+    uuid_generate(uuid_obj);
+
+    memcpy(xid->data, gtrid, sizeof(uuid_t)); // global transaction identifier
+    memcpy(xid->data + sizeof(uuid_t), uuid_obj,
+           sizeof(uuid_t)); // branch qualifier
+
+#ifdef LIXA_DEBUG
+{
+    char *gtrid, *bqual;
+    gtrid = lixa_xid_get_gtrid_ascii(xid);
+    bqual = lixa_xid_get_bqual_ascii(xid);
+    if (NULL != gtrid && NULL != bqual) {
+        LIXA_TRACE(("lixa_xid_create_new_bqual: gtrid='%s'; bqual='%s'\n",
+                    gtrid, bqual));
+    }
+    if (NULL != bqual) free(bqual);
+    if (NULL != gtrid) free(gtrid);
+}
+#endif /* LIXA_DEBUG */
+}
 
 char *lixa_xid_get_gtrid_ascii(const XID *xid)
 {
     char *gtrid;
-    if (NULL == (gtrid = (char *)malloc(2*sizeof(uuid_t)+4+1)))
+    if (NULL == (gtrid = (char *)malloc(LIXA_XID_GTRID_ASCII_LENGTH)))
         return NULL;
     uuid_unparse((unsigned char *)xid->data, gtrid);
     return gtrid;
@@ -146,7 +175,7 @@ char *lixa_xid_get_gtrid_ascii(const XID *xid)
 char *lixa_xid_get_bqual_ascii(const XID *xid)
 {
     char *bqual;
-    if (NULL == (bqual = (char *)malloc(2*sizeof(uuid_t)+4+1)))
+    if (NULL == (bqual = (char *)malloc(LIXA_XID_BQUAL_ASCII_LENGTH)))
         return NULL;
     uuid_unparse((unsigned char *)xid->data + sizeof(uuid_t), bqual);
     return bqual;
@@ -210,14 +239,17 @@ int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx)
 
 int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
 {
-    enum Exception { REGCOMP_ERROR
-                     , REGEXEC_ERROR
-                     , SEPARATOR1
-                     , INVALID_CHAR1
-                     , SEPARATOR2
-                     , INVALID_CHAR2
-                     , TERMINATOR
-                     , NONE } excp;
+    enum Exception
+    {
+        REGCOMP_ERROR,
+        REGEXEC_ERROR,
+        SEPARATOR1,
+        INVALID_CHAR1,
+        SEPARATOR2,
+        INVALID_CHAR2,
+        TERMINATOR,
+        NONE
+    } excp;
     int ret_cod = FALSE;
     
     LIXA_TRACE(("lixa_xid_deserialize\n"));

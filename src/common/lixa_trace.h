@@ -40,15 +40,14 @@
 # define LIXA_TRACE_H
 
 
-
 #include <config.h>
 
 
-
 #ifdef HAVE_STDIO_H
-# include <stdio.h>
-#endif /* HAVE_STDIO_H */
 
+# include <stdio.h>
+
+#endif /* HAVE_STDIO_H */
 
 
 #include <lixa_defines.h>
@@ -152,6 +151,16 @@
  */
 #define LIXA_TRACE_MOD_CLIENT_GENERIC     0x00080000
 
+/**
+ * trace module for client tpm functions
+ */
+#define LIXA_TRACE_MOD_CLIENT_TPM         0x00100000
+
+/**
+ * trace module for server tpm functions
+ */
+#define LIXA_TRACE_MOD_SERVER_TPM         0x00200000
+
 /*
  * a lot of unused bits ...
  */
@@ -182,12 +191,10 @@
 #define LIXA_TRACE_MOD_COMMON_XID         0x10000000
 
 
-
 /**
  * Status of the trace: TRUE = initialized, FALSE = uninitialized
  */
 extern int lixa_trace_initialized;
-
 
 
 /**
@@ -217,7 +224,7 @@ extern unsigned long lixa_trace_mask;
  * trace mask (LIXA_TRACE_MASK) specified as environment variable
  */
 #ifdef _TRACE
-# define LIXA_TRACE(a)    (LIXA_TRACE_MODULE & lixa_trace_mask ? \
+# define LIXA_TRACE(a)    (LIXA_TRACE_MODULE & lixa_trace_mask ?    \
                            lixa_trace a : 0)
 #else
 # define LIXA_TRACE(a)
@@ -235,62 +242,56 @@ extern unsigned long lixa_trace_mask;
 # define LIXA_TRACE_HEX_DATA(a,b,c) (LIXA_TRACE_MODULE & lixa_trace_mask ? \
                                      lixa_trace_hex_data(a,b,c,stderr) : 0)
 #else
-# define LIXA_TRACE_HEX_DATA(a,b,c)
+# define LIXA_TRACE_HEX_DATA(a, b, c)
 #endif /* _TRACE */
-
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-    /**
-     * This method MUST be called BEFORE first log call to avoid lock
-     * contention in multithread environments
-     */
+/**
+ * This method MUST be called BEFORE first log call to avoid lock
+ * contention in multithread environments
+ */
     void lixa_trace_init(void);
-    
 
-    
-    /**
-     * Send trace record to stderr
-     * @param fmt IN record format
-     * @param ... IN record data
-     */
+
+/**
+ * Send trace record to stderr
+ * @param fmt IN record format
+ * @param ... IN record data
+ */
     void lixa_trace(const char *fmt, ...);
 
-        
 
-    /**
-     * Dump the content of a piece of memory to a stream (hex format)
-     * @param prefix IN trace prefix to print before dump (it is a fixed
-     *               prefix, not a format with values)
-     * @param data IN pointer to base memory
-     * @param size IN number of bytes to dump
-     * @param out_stream IN destination standard I/O stream
-     */
+/**
+ * Dump the content of a piece of memory to a stream (hex format)
+ * @param prefix IN trace prefix to print before dump (it is a fixed
+ *               prefix, not a format with values)
+ * @param data IN pointer to base memory
+ * @param size IN number of bytes to dump
+ * @param out_stream IN destination standard I/O stream
+ */
     void lixa_trace_hex_data(const char *prefix, const byte_t *data,
                              lixa_word_t size, FILE *out_stream);
 
 
-      
-    /**
-     * Dump the content of a piece of memory to a stream (text format)
-     * @param prefix IN trace prefix to print before dump (it is a fixed
-     *               prefix, not a format with values)
-     * @param data IN pointer to base memory
-     * @param size IN number of bytes to dump
-     * @param out_stream IN destination standard I/O stream
-     */
+/**
+ * Dump the content of a piece of memory to a stream (text format)
+ * @param prefix IN trace prefix to print before dump (it is a fixed
+ *               prefix, not a format with values)
+ * @param data IN pointer to base memory
+ * @param size IN number of bytes to dump
+ * @param out_stream IN destination standard I/O stream
+ */
     void lixa_trace_text_data(const char *prefix, const byte_t *data,
                               lixa_word_t size, FILE *out_stream);
-
 
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 
 #endif /* LIXA_TRACE_H */

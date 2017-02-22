@@ -21,7 +21,7 @@
 export LIXA_TRACE_MASK=0xffffffff
 
 
-# This file contains utility functions for test purpouses
+# This file contains utility functions for test purposes
 reset_server() {
 	echo "Resetting LIXA server status"
 	rm -rf $TESTS_VAR_DIR
@@ -105,7 +105,7 @@ start_server() {
 		$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
 	fi
 	# wait until the server opens the listening socket
-	while test $(netstat -nta | grep LISTEN | grep 127.0.0.1:2345 | wc -l) -le 0
+	while test $(netstat -nta | grep LISTEN | grep 127.0.0.1 | grep 2345 | wc -l) -le 0
 	do
 		echo "Waiting server socket listening..."
 		sleep 1

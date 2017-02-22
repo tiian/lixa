@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
                             report, commit, rollback, bypass_bqual_check,
                             bypass_formatid_check, use_tmendrscan_flag,
                             xid, xid_file)))) {
-        printf("There was an error while recoverying transactions: "
+        printf("There was an error while recovering transactions: "
                "%d ('%s'); look at system log to collect additional "
                "information or activate the trace to debug the problem\n",
                rc, lixa_strerror(rc));

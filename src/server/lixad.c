@@ -19,44 +19,66 @@
 #include <config.h>
 
 
-
 #ifdef HAVE_GLIB_H
+
 # include <glib.h>
+
 #endif
 #ifdef HAVE_ERRNO_H
+
 # include <errno.h>
+
 #endif
 #ifdef HAVE_STDIO_H
+
 # include <stdio.h>
+
 #endif
 #ifdef HAVE_SIGNAL_H
+
 # include <signal.h>
+
 #endif
 #ifdef HAVE_STDLIB_H
+
 # include <stdlib.h>
+
 #endif
 #ifdef HAVE_SYSLOG_H
+
 # include <syslog.h>
+
 #endif
 #ifdef HAVE_SYS_TYPES_H
+
 # include <sys/types.h>
+
 #endif
 #ifdef HAVE_SYS_STAT_H
+
 # include <sys/stat.h>
+
 #endif
 #ifdef HAVE_FCNTL_H
+
 # include <fcntl.h>
+
 #endif
 #ifdef HAVE_UNISTD_H
+
 # include <unistd.h>
+
 #endif
 #ifdef HAVE_LIBXML_XMLVERSION_H
+
 # include <libxml/xmlversion.h>
+
 #endif
 #ifdef HAVE_LIBXML_PARSER_H
-# include <libxml/parser.h>
-#endif
 
+# include <libxml/parser.h>
+
+#endif
 
 
 #include <lixa_crash.h>
@@ -70,15 +92,11 @@
 #include <server_recovery.h>
 #include <server_status.h>
 
-
-
 /* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
 # undef LIXA_TRACE_MODULE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_SERVER
-
-
 
 /**
  * Transform the current process in a daemon, detaching terminals and
@@ -87,8 +105,6 @@
  * UNIX network programming book
  */
 void daemonize(void);
-
-
 
 /* default command line options */
 gboolean run_as_daemon = FALSE;
@@ -101,16 +117,15 @@ static gboolean print_version = FALSE;
 /* command line options */
 static GOptionEntry entries[] =
 {
-    { "daemon", 'd', 0, G_OPTION_ARG_NONE, &run_as_daemon, "Run the process as a daemon", NULL },
-    { "maintenance", 'm', 0, G_OPTION_ARG_NONE, &maintenance, "Start the server in maintenance mode only", NULL },
-    { "dump", 'u', 0, G_OPTION_ARG_STRING, &dump_specs, "Dump the content of status files using order [ufs] (u=used, f=free, s=sequential)", NULL },
-    { "config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Specify an alternate configuration file", NULL },
-    { "trace-file", 't', 0, G_OPTION_ARG_STRING, &trace_file, "Specify trace file name", NULL },
-    { "clean-failed", 'l', 0, G_OPTION_ARG_NONE, &clean_failed, "Clean recovery failed transactions at start-up", NULL },
-    { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
-    { NULL }
+    {"daemon",       'd', 0, G_OPTION_ARG_NONE,   &run_as_daemon, "Run the process as a daemon",                                                       NULL},
+    {"maintenance",  'm', 0, G_OPTION_ARG_NONE,   &maintenance,   "Start the server in maintenance mode only",                                         NULL},
+    {"dump",         'u', 0, G_OPTION_ARG_STRING, &dump_specs,    "Dump the content of status files using order [ufs] (u=used, f=free, s=sequential)", NULL},
+    {"config-file",  'c', 0, G_OPTION_ARG_STRING, &config_file,   "Specify an alternate configuration file",                                           NULL},
+    {"trace-file",   't', 0, G_OPTION_ARG_STRING, &trace_file,    "Specify trace file name",                                                           NULL},
+    {"clean-failed", 'l', 0, G_OPTION_ARG_NONE,   &clean_failed,  "Clean recovery failed transactions at start-up",                                    NULL},
+    {"version",      'v', 0, G_OPTION_ARG_NONE,   &print_version, "Print package info and exit",                                                       NULL},
+    {NULL}
 };
-
 
 
 int main(int argc, char *argv[])
@@ -120,6 +135,7 @@ int main(int argc, char *argv[])
     struct listener_status_array_s lsa;
     struct thread_status_array_s tsa;
     srvr_rcvr_tbl_t srt = SRVR_RCVR_TBL_INIT;
+    server_trans_tbl_t stt = SERVER_TRANS_TBL_INIT;
     GError *error = NULL;
     GOptionContext *option_context;
     struct ts_dump_spec_s tsds;
@@ -141,12 +157,12 @@ int main(int argc, char *argv[])
         exit(1);
     }
     g_option_context_free(option_context);
-    
+
     if (NULL != trace_file) {
         FILE *dummy;
         dummy = freopen(trace_file, "w", stderr);
     }
-    
+
     if (print_version) {
         lixa_print_version(stdout);
         exit(0);
@@ -160,7 +176,7 @@ int main(int argc, char *argv[])
 
     if (maintenance)
         syslog(LOG_WARNING, LIXA_SYSLOG_LXD020N);
-    
+
     /* daemonize the server process */
     if (run_as_daemon)
         daemonize();
@@ -185,18 +201,19 @@ int main(int argc, char *argv[])
         else {
             char array[100];
             ssize_t res;
-            snprintf(array, sizeof(array), PID_T_FORMAT "\n", getpid());
+            snprintf(array, sizeof(array), PID_T_FORMAT
+                     "\n", getpid());
             res = write(pid_fd, array, strlen(array));
             close(pid_fd);
         }
     }
-    
+
     if (LIXA_RC_OK != (rc = server_pipes_init(&tpa))) {
         LIXA_TRACE(("main/server_pipes_init: rc=%d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD017E);
         return rc;
     }
-    
+
     /* start configured manager(s) */
     tsds.dump = NULL != dump_specs;
     if (tsds.dump) {
@@ -207,9 +224,9 @@ int main(int argc, char *argv[])
     tsrs.clean_failed = clean_failed;
     if (tsrs.clean_failed)
         syslog(LOG_NOTICE, LIXA_SYSLOG_LXD022N);
-    LIXA_TRACE(("lixad/main: starting\n"));    
+    LIXA_TRACE(("lixad/main: starting\n"));
     if (LIXA_RC_OK != (rc = server_manager(
-                           &sc, &tpa, &tsa, &srt, &tsds, &tsrs,
+                           &sc, &tpa, &tsa, &srt, &stt, &tsds, &tsrs,
                            maintenance))) {
         LIXA_TRACE(("main/server_manager: rc=%d\n", rc));
         syslog(LOG_ERR, LIXA_SYSLOG_LXD004E, lixa_strerror(rc));
@@ -233,17 +250,16 @@ int main(int argc, char *argv[])
                    strerror(errno));
         }
     }
-    
+
     /* clean-up memory to enhance memory leak detection */
-    server_cleanup(&sc, &tpa, &tsa, &srt);
-    
+    server_cleanup(&sc, &tpa, &tsa, &srt, &stt);
+
     /* it's time to exit */
     syslog(LOG_NOTICE, LIXA_SYSLOG_LXD006N);
 
-    LIXA_TRACE(("lixad/main: exiting\n"));    
+    LIXA_TRACE(("lixad/main: exiting\n"));
     return 0;
 }
-
 
 
 /**
@@ -254,38 +270,38 @@ void daemonize(void)
     pid_t pid;
     int i;
     FILE *dummy;
-    
+
     LIXA_TRACE(("lixad/daemonize: fork()\n"));
     if (0 != (pid = fork()))
         exit(0);
-    
+
     LIXA_TRACE(("lixad/daemonize: setsid()\n"));
     setsid();
-    
+
     LIXA_TRACE(("lixad/daemonize: signal()\n"));
     signal(SIGHUP, SIG_IGN);
-    
+
     LIXA_TRACE(("lixad/daemonize: fork()\n"));
     if (0 != (pid = fork()))
         exit(0);
-    
+
     LIXA_TRACE(("lixad/daemonize: chdir()\n"));
     i = chdir("/");
-    
+
     LIXA_TRACE(("lixad/daemonize: umask()\n"));
     umask(0);
 
     for (i = 0; i < 64; ++i)
         close(i);
-    
+
     if (NULL != trace_file)
         dummy = freopen(trace_file, "a", stderr);
     else
         dummy = freopen("/dev/null", "a", stderr);
-    
+
     syslog(LOG_NOTICE, LIXA_SYSLOG_LXD014N);
-    
+
     LIXA_TRACE(("lixad/daemonize: now daemonized!\n"));
-    
+
     return;
 }

@@ -87,6 +87,7 @@ void thread_status_init(struct thread_status_s *ts, int id,
     else /* listener does not need this structure */
         ts->updated_records = NULL;
     ts->recovery_table = NULL;
+    ts->trans_table = NULL;
     ts->mmode = mmode;
     ts->excp = ts->ret_cod = ts->last_errno = 0;
     if (id == 0)
@@ -360,7 +361,7 @@ int thread_status_dump_header(const struct payload_header_s *ph)
                "\tTrnhdr/recovery failed: %d\n"
                "\tTrnhdr/recovery failed time: %s\n"               
                "\tTrnhdr/recovery commit: %d\n",
-               ph->recoverying_block_id, ph->recovery_failed,
+               ph->recovering_block_id, ph->recovery_failed,
                tmp_str_time, ph->recovery_commit);
 
         THROW(NONE);
@@ -514,11 +515,11 @@ int thread_status_load_files(struct thread_status_s *ts,
                             "time\n"));
                 ts->curr_status = ts->status1;
             } else if ((ts->status1->sr.ctrl.last_sync.tv_sec <
-                 ts->status2->sr.ctrl.last_sync.tv_sec) ||
-                ((ts->status1->sr.ctrl.last_sync.tv_sec ==
-                  ts->status2->sr.ctrl.last_sync.tv_sec) &&
-                 (ts->status1->sr.ctrl.last_sync.tv_usec <
-                  ts->status2->sr.ctrl.last_sync.tv_usec))) {
+                        ts->status2->sr.ctrl.last_sync.tv_sec) ||
+                       ((ts->status1->sr.ctrl.last_sync.tv_sec ==
+                         ts->status2->sr.ctrl.last_sync.tv_sec) &&
+                        (ts->status1->sr.ctrl.last_sync.tv_usec <
+                         ts->status2->sr.ctrl.last_sync.tv_usec))) {
                 /* second file is newer */
                 LIXA_TRACE(("thread_status_load_files: second status file is "
                             "the more recent\n"));
@@ -830,6 +831,9 @@ int thread_status_check_recovery_pending(
             case LIXA_MSG_VERB_QRCVR:
                 /* this is a crash after a crash: returning TRUE and keep the
                    status */
+                break;
+            case LIXA_MSG_VERB_TRANS:
+                /* nothing to do, only a query */
                 break;
             default:
                 THROW(INVALID_VERB);
