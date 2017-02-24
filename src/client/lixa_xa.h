@@ -74,16 +74,17 @@ extern "C" {
 
 /**
  * Commit work performed on behalf of the transaction manager
- * @param cs IN reference to the status of the calling client
- * @param xida[in] array of XID to commit
- * @param txrc OUT return code prepared for tx_commit/tx_rollback call
- * @param one_phase_commit IN boolean value:
+ * @param[in] cs reference to the status of the calling client
+ * @param[in] xid array of XID to commit
+ * @param[out] txrc return code prepared for tx_commit/tx_rollback call
+ * @param[in] one_phase_commit boolean value:
  *            TRUE = the T.M. is performing a ONE phase commit
  *            FALSE = the T.M. is performing a standard TWO phase commit
  * @return a reason code
  */
     int
-    lixa_xa_commit(client_status_t *cs, XID *xid, int *txrc, int one_phase_commit);
+    lixa_xa_commit(client_status_t *cs, XID *xid, int *txrc,
+                   int one_phase_commit);
 
 
 /**
@@ -93,17 +94,19 @@ extern "C" {
  * @param commit IN boolean value:
  *                  TRUE = xa_end will be followed by xa_commit
  *                  FALSE = xa_end will be followed by xa_rollback
- * @param xa_end_flags IN flags to send to @ref xa_end
+ * @param xa_end_flags IN flags to send to xa_end
  * @return a reason code
  */
-    int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags);
+    int lixa_xa_end(client_status_t *cs, int *txrc, int commit,
+                    int xa_end_flags);
 
 
 /**
  * This function is not directly called by the TX layer, but it's an
  * helper function for @ref lixa_xa_commit and @ref lixa_xa_rollback
- * @param cs IN reference to the status of the calling client
- * @param finished IN boolean value: TRUE, the transaction can be
+ * @param[in] cs reference to the status of the calling client
+ * @param xida
+ * @param[in] finished boolean value: TRUE, the transaction can be
  *                    finished; FALSE, a blocking error marked the
  *                    transaction as not finished
  * @return a reason code
@@ -156,15 +159,15 @@ extern "C" {
 /**
  * Send xa_start to all the resource manager does not support dynamic
  * registration
- * @param cs IN reference to the status of the calling client
- * @param txrc OUT return code prepared for tx_open call
- * @param xid IN transaction id of the new transaction
- * @param txstate IN the current txstate of the control thread
- * @param next_txstate IN the txstate will be reached by the control thread
+ * @param[in] cs reference to the status of the calling client
+ * @param[out] txrc return code prepared for tx_open call
+ * @param[in] xid transaction id of the new transaction
+ * @param[in] txstate the current txstate of the control thread
+ * @param[in] next_txstate the txstate will be reached by the control thread
  *                        after executing this function without errors
- * @param dupid_or_proto OUT boolean flag: TRUE if one or more resource
+ * @param[out] dupid_or_proto boolean flag: TRUE if one or more resource
  *                       managers returned XAER_DUPID or XAER_PROTO
- * @param xa_start_flags IN the flags to send to @ref xa_start
+ * @param[in] xa_start_flags the flags to send to xa_start
  * @return a reason code
  */
     int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid,

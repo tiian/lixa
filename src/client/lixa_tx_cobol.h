@@ -79,7 +79,7 @@ struct TX_INFO_AREA_s {
 
 /**
  * COBOL wrapper for @ref tx_begin
- * @param TX_STATUS OUT return code
+ * @param[out] TX_STATUS return code
  */
 void TXBEGIN(int32_t *TX_STATUS);
 
@@ -87,7 +87,7 @@ void TXBEGIN(int32_t *TX_STATUS);
 
 /**
  * COBOL wrapper for @ref tx_commit
- * @param TX_STATUS OUT return code
+ * @param[out] TX_STATUS return code
  */
 void TXCOMMIT(int32_t *TX_STATUS);
 
@@ -95,7 +95,7 @@ void TXCOMMIT(int32_t *TX_STATUS);
 
 /**
  * COBOL wrapper for @ref tx_close
- * @param TX_STATUS OUT return code
+ * @param[out] TX_STATUS return code
  */
 void TXCLOSE(int32_t *TX_STATUS);
 
@@ -103,8 +103,8 @@ void TXCLOSE(int32_t *TX_STATUS);
 
 /**
  * Transform a C XID struct in the equivalent COBOL friendly XID_REC_s
- * @param xid IN source C xid
- * @param XID_REC OUT target COBOL friendly XID_REC_s
+ * @param[in] xid source C xid
+ * @param[out] XID_REC target COBOL friendly XID_REC_s
  */
 void lixa_tx_xid_c_cobol(const XID *xid, struct XID_REC_s *XID_REC);
 
@@ -112,8 +112,8 @@ void lixa_tx_xid_c_cobol(const XID *xid, struct XID_REC_s *XID_REC);
 
 /**
  * Transform a COBOL friendly XID_REC_s in the equivalent C XID struct  
- * @param XID_REC IN source COBOL friendly XID_REC_s
- * @param xid OUT target C xid
+ * @param[in] XID_REC source COBOL friendly XID_REC_s
+ * @param[out] xid target C xid
  */
 void lixa_tx_xid_cobol_c(const struct XID_REC_s *XID_REC, XID *xid);
 
@@ -121,8 +121,8 @@ void lixa_tx_xid_cobol_c(const struct XID_REC_s *XID_REC, XID *xid);
 
 /**
  * COBOL wrapper for @ref tx_info
- * @param TX_INFO_AREA OUT retrieved information
- * @param TX_STATUS OUT return code
+ * @param[out] TX_INFO_AREA retrieved information
+ * @param[out] TX_STATUS return code
  */
 void TXINFORM(struct TX_INFO_AREA_s *TX_INFO_AREA, int32_t *TX_STATUS);
 
@@ -130,7 +130,7 @@ void TXINFORM(struct TX_INFO_AREA_s *TX_INFO_AREA, int32_t *TX_STATUS);
 
 /**
  * COBOL wrapper for @ref tx_open
- * @param TX_STATUS OUT return code
+ * @param[out] TX_STATUS eturn code
  */
 void TXOPEN(int32_t *TX_STATUS);
 
@@ -138,7 +138,7 @@ void TXOPEN(int32_t *TX_STATUS);
 
 /**
  * COBOL wrapper for @ref tx_rollback
- * @param TX_STATUS OUT return code
+ * @param[out] TX_STATUS return code
  */
 void TXROLLBACK(int32_t *TX_STATUS);
 
@@ -146,8 +146,8 @@ void TXROLLBACK(int32_t *TX_STATUS);
 
 /**
  * COBOL wrapper for @ref tx_set_commit_return
- * @param TX_INFO_AREA IN passed information
- * @param TX_STATUS OUT return code
+ * @param[in] TX_INFO_AREA passed information
+ * @param[out] TX_STATUS return code
  */
 void TXSETCOMMITRET(const struct TX_INFO_AREA_s *TX_INFO_AREA,
                     int32_t *TX_STATUS);
@@ -156,8 +156,8 @@ void TXSETCOMMITRET(const struct TX_INFO_AREA_s *TX_INFO_AREA,
 
 /**
  * COBOL wrapper for @ref tx_set_transaction_timeout
- * @param TX_INFO_AREA IN passed information
- * @param TX_STATUS OUT return code
+ * @param[in] TX_INFO_AREA passed information
+ * @param[out] TX_STATUS return code
  */
 void TXSETTIMEOUT(const struct TX_INFO_AREA_s *TX_INFO_AREA,
                   int32_t *TX_STATUS);
@@ -166,7 +166,7 @@ void TXSETTIMEOUT(const struct TX_INFO_AREA_s *TX_INFO_AREA,
 
 /**
  * COBOL wrapper for @ref tx_set_transaction_control
- * @param TX_INFO_AREA IN passed information
+ * @param[in] TX_INFO_AREA passed information
  * @param TX_STATUS OUT return code
  */
 void TXSETTRANCTL(const struct TX_INFO_AREA_s *TX_INFO_AREA,
@@ -177,9 +177,9 @@ void TXSETTRANCTL(const struct TX_INFO_AREA_s *TX_INFO_AREA,
 
 /**
  * This utility helps to print XID DATA binary part (GTRID)
- * @param TX_INFO_AREA IN passed information
- * @param LIXA_XID OUT returned string (it must be at least XIDDATASIZE + 1
- *                     bytes long)
+ * @param[in] TX_INFO_AREA passed information
+ * @param[out] LIXA_SER_XID returned string (it must be at least
+ *             XIDDATASIZE+1 bytes long)
  * @param TX_STATUS OUT return code
  */
 void LIXAXIDSERIALIZE(const struct TX_INFO_AREA_s *TX_INFO_AREA,

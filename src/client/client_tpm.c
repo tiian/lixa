@@ -54,7 +54,7 @@
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE LIXA_TRACE_MOD_CLIENT_TPM
 
-int client_tpm_trans(const client_status_t *cs, GTree *xidt, int maint)
+int client_tpm_trans(client_status_t *cs, GTree *xidt, int maint)
 {
     enum Exception
     {

@@ -370,7 +370,7 @@ int lixa_job_set_source_ip(lixa_job_t *job, int fd)
     TRY {
         struct sockaddr_in local_sock_addr;
         socklen_t serv_addr_len;
-        static GStaticMutex mutex = G_STATIC_MUTEX_INIT;
+        static GMutex mutex;
         char *tmp_source_ip;
         size_t source_ip_len = 0;
         
@@ -380,13 +380,13 @@ int lixa_job_set_source_ip(lixa_job_t *job, int fd)
             THROW(GETSOCKNAME_ERROR);        
 
         memset(job->fields.source_ip, ' ', LIXA_JOB_SOURCE_IP_LEN);
-        g_static_mutex_lock(&mutex);
+        g_mutex_lock(&mutex);
         tmp_source_ip = inet_ntoa(local_sock_addr.sin_addr);
         source_ip_len = strlen(tmp_source_ip);
         if (source_ip_len > LIXA_JOB_SOURCE_IP_LEN)
             source_ip_len = LIXA_JOB_SOURCE_IP_LEN;
         strncpy(job->fields.source_ip, tmp_source_ip, source_ip_len);
-        g_static_mutex_unlock(&mutex);
+        g_mutex_unlock(&mutex);
         job->fields.separator = LIXA_PATH_SEPARATOR;
         job->fields.terminator = '\0';
         

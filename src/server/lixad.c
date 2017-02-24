@@ -200,10 +200,10 @@ int main(int argc, char *argv[])
                    errno, strerror(errno));
         else {
             char array[100];
-            ssize_t res;
+            ssize_t written_bytes;
             snprintf(array, sizeof(array), PID_T_FORMAT
                      "\n", getpid());
-            res = write(pid_fd, array, strlen(array));
+            written_bytes = write(pid_fd, array, strlen(array));
             close(pid_fd);
         }
     }

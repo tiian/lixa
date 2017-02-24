@@ -167,10 +167,11 @@ extern "C" {
  * Unconfig the server; the primary use of this function is to clean-up
  * memory and to avoid false memory leak notification when inspecting the
  * run time behavior
- * @param sc OUT the object containing the server configuration
- * @param tpa OUT threads communication pipes
- * @param tsa OUT status of all threads
- * @param srt OUT reference to the recovery table object
+ * @param[out] sc the object containing the server configuration
+ * @param[out] tpa threads communication pipes
+ * @param[out] tsa status of all threads
+ * @param[out] srt reference to the recovery table object
+ * @param stt reference to the server transaction table
  * @return a standardized return code
  */
     int server_cleanup(struct server_config_s *sc,

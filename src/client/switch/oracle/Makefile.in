@@ -125,7 +125,7 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-switch_oracle_dynreg_la_LIBADD =
+switch_oracle_dynreg_la_DEPENDENCIES =
 am_switch_oracle_dynreg_la_OBJECTS = oracle_dynreg.lo
 switch_oracle_dynreg_la_OBJECTS =  \
 	$(am_switch_oracle_dynreg_la_OBJECTS)
@@ -133,7 +133,7 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-switch_oracle_stareg_la_LIBADD =
+switch_oracle_stareg_la_DEPENDENCIES =
 am_switch_oracle_stareg_la_OBJECTS = oracle_stareg.lo
 switch_oracle_stareg_la_OBJECTS =  \
 	$(am_switch_oracle_stareg_la_OBJECTS)
@@ -384,6 +384,8 @@ AM_CPPFLAGS = @ORACLE_OCI_CFLAGS@ -I../../../common
 AM_CFLAGS = -Wall
 AM_LDFLAGS = @ORACLE_OCI_LDFLAGS@ -module
 AM_LIBS = @ORACLE_OCI_LIBS@
+switch_oracle_stareg_la_LIBADD = @ORACLE_OCI_LDFLAGS@ @ORACLE_OCI_LIBS@
+switch_oracle_dynreg_la_LIBADD = @ORACLE_OCI_LDFLAGS@ @ORACLE_OCI_LIBS@
 all: all-am
 
 .SUFFIXES:

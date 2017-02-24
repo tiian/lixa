@@ -163,7 +163,7 @@ struct client_status_coll_s {
     /**
      * This lock is used to serialize accesses to thehash table
      */
-    GStaticMutex                  mutex;
+    GMutex                        mutex;
     /**
      * The hash table contains the pointer to the client status objects; the
      * hash table is indexed using thread ids

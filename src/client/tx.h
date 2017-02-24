@@ -20,7 +20,13 @@
 #define TX_H
 #define TX_H_VERSION 0 /* current version of this header file */
 
+
+
+/* @@@ remove me
 static char h_tx[] = "tx.h";
+*/
+
+
 
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE

@@ -169,6 +169,7 @@ extern "C" {
  */
     int lixa_msg_trace_unreg(const struct lixa_msg_s *msg);
 
+    
 /**
  * @brief Convenience function for @ref lixa_msg_trace : it display the content
  * of an "scan" message
@@ -177,7 +178,14 @@ extern "C" {
  */
     int lixa_msg_trace_scan(const struct lixa_msg_s *msg);
 
+    
+/**
+ * @param msg IN the message must be massaged
+ * @return a reason code
+ */
+    int lixa_msg_trace_trans(const struct lixa_msg_s *msg);
 
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

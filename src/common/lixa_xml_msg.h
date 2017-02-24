@@ -1173,7 +1173,7 @@ struct lixa_msg_body_forget_8_s
 };
 
 /**
- * Convenience struct for @ref lixa_msg_body_scan_8_s
+ * Convenience struct for @ref lixa_msg_body_trans_8_s
  */
 struct lixa_msg_body_trans_8_client_s
 {

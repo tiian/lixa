@@ -72,7 +72,7 @@
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_SERVER_MANAGER
 
-GStaticMutex state_file_synchronization = G_STATIC_MUTEX_INIT;
+GMutex state_file_synchronization;
 
 int server_manager(struct server_config_s *sc,
                    struct thread_pipe_array_s *tpa,
@@ -295,9 +295,9 @@ void *server_manager_thread(void *void_ts)
                 } else if (delay >= ts->min_elapsed_sync_time) {
                     /* start synchronization only if there is no another thread
                        that's synchronizing its own state file */
-                    if (g_static_mutex_trylock(&state_file_synchronization)) {
+                    if (g_mutex_trylock(&state_file_synchronization)) {
                         ret_cod = thread_status_sync_files(ts);
-                        g_static_mutex_unlock(&state_file_synchronization);
+                        g_mutex_unlock(&state_file_synchronization);
                         if (LIXA_RC_OK != ret_cod) THROW(
                             THREAD_STATUS_SYNC_FILES_ERROR2);
                         status_sync_init(&ts->status_sync);

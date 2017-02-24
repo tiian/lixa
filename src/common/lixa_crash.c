@@ -80,7 +80,7 @@ int lixa_crash_initialized = FALSE;
 /**
  * Mutex used to sequentialize the access to some properties/methods
  */
-GStaticMutex lixa_crash_mutex = G_STATIC_MUTEX_INIT;
+static GMutex lixa_crash_mutex;
 /**
  * Simulated crash point
  */
@@ -99,7 +99,7 @@ void lixa_crash_init(void)
     if (lixa_crash_initialized)
         return;
 
-    g_static_mutex_lock(&lixa_crash_mutex);
+    g_mutex_lock(&lixa_crash_mutex);
     tmp_str = getenv(LIXA_CRASH_POINT_ENV_VAR);
     if (NULL != tmp_str) {
         lixa_crash_point = strtoul(tmp_str, NULL, 0);
@@ -113,7 +113,7 @@ void lixa_crash_init(void)
         }
     }
     lixa_crash_initialized = TRUE;
-    g_static_mutex_unlock(&lixa_crash_mutex);
+    g_mutex_unlock(&lixa_crash_mutex);
     return;
 }
 
@@ -122,7 +122,7 @@ void lixa_crash_init(void)
 void lixa_crash(lixa_word_t crash_point, long *count)
 {
     if (crash_point == lixa_crash_point) {
-        g_static_mutex_lock(&lixa_crash_mutex);
+        g_mutex_lock(&lixa_crash_mutex);
         *count = *count + 1;
         if (*count >= lixa_crash_count_threshold) {
             LIXA_TRACE(("lixa_crash: crash threshold reached (%d) for crash "
@@ -130,7 +130,7 @@ void lixa_crash(lixa_word_t crash_point, long *count)
                         *count, crash_point));
             abort();
         }
-        g_static_mutex_unlock(&lixa_crash_mutex);
+        g_mutex_unlock(&lixa_crash_mutex);
     }
     return;
 }

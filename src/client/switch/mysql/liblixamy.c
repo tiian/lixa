@@ -115,7 +115,7 @@ void g_module_unload(GModule *module)
 {
     LIXA_TRACE(("lixa_my/g_module_unload: releasing local storage\n"));
     /* lock the status mutex */
-    g_static_mutex_lock(&lixa_sw_status_mutex);
+    g_mutex_lock(&lixa_sw_status_mutex);
 
     if (NULL != lixa_sw_status) {
         g_hash_table_destroy(lixa_sw_status);
@@ -123,7 +123,7 @@ void g_module_unload(GModule *module)
     }
     
     /* unlock the status mutex */
-    g_static_mutex_unlock(&lixa_sw_status_mutex);
+    g_mutex_unlock(&lixa_sw_status_mutex);
 }
 
 
@@ -509,7 +509,7 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
         int insert_in_lixa_sw_status = FALSE;
         
         /* lock the status mutex */
-        g_static_mutex_lock(&lixa_sw_status_mutex);
+        g_mutex_lock(&lixa_sw_status_mutex);
 
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_open: invalid flag in 0x%x\n", flags));
@@ -627,7 +627,7 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
         if (NONE != excp && NULL != lps)
             free(lps);
         /* unlock the status mutex */
-        g_static_mutex_unlock(&lixa_sw_status_mutex);
+        g_mutex_unlock(&lixa_sw_status_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_open/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
@@ -654,7 +654,7 @@ int lixa_my_close(char *xa_info, int rmid, long flags)
         const long valid_flags = TMASYNC|TMNOFLAGS;
         
         /* lock the status mutex */
-        g_static_mutex_lock(&lixa_sw_status_mutex);
+        g_mutex_lock(&lixa_sw_status_mutex);
 
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_open: invalid flag in 0x%x\n", flags));
@@ -727,7 +727,7 @@ int lixa_my_close(char *xa_info, int rmid, long flags)
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
         /* unlock the status mutex */
-        g_static_mutex_unlock(&lixa_sw_status_mutex);
+        g_mutex_unlock(&lixa_sw_status_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_close/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
@@ -758,7 +758,7 @@ int lixa_my_start(XID *xid, int rmid, long flags)
         lixa_my_ser_xid_t lmsx;
         
         /* lock the status mutex */
-        g_static_mutex_lock(&lixa_sw_status_mutex);
+        g_mutex_lock(&lixa_sw_status_mutex);
 
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_end: invalid flag in 0x%x\n", flags));
@@ -838,7 +838,7 @@ int lixa_my_start(XID *xid, int rmid, long flags)
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
         /* unlock the status mutex */
-        g_static_mutex_unlock(&lixa_sw_status_mutex);
+        g_mutex_unlock(&lixa_sw_status_mutex);
         if (NULL != stmt)
             free(stmt);
     } /* TRY-CATCH */
@@ -874,7 +874,7 @@ int lixa_my_end(XID *xid, int rmid, long flags)
         lixa_my_ser_xid_t lmsx;
 
         /* lock the status mutex */
-        g_static_mutex_lock(&lixa_sw_status_mutex);
+        g_mutex_lock(&lixa_sw_status_mutex);
 
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_end: invalid flag in 0x%x\n", flags));
@@ -990,7 +990,7 @@ int lixa_my_end(XID *xid, int rmid, long flags)
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
         /* unlock the status mutex */
-        g_static_mutex_unlock(&lixa_sw_status_mutex);
+        g_mutex_unlock(&lixa_sw_status_mutex);
         if (NULL != stmt)
             free(stmt);
     } /* TRY-CATCH */
@@ -1023,7 +1023,7 @@ int lixa_my_rollback(XID *xid, int rmid, long flags)
         lixa_my_ser_xid_t lmsx;
 
         /* lock the status mutex */
-        g_static_mutex_lock(&lixa_sw_status_mutex);
+        g_mutex_lock(&lixa_sw_status_mutex);
 
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_rollback: invalid flag in 0x%x\n", flags));
@@ -1165,7 +1165,7 @@ int lixa_my_rollback(XID *xid, int rmid, long flags)
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
         /* unlock the status mutex */
-        g_static_mutex_unlock(&lixa_sw_status_mutex);
+        g_mutex_unlock(&lixa_sw_status_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_rollback/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
@@ -1195,7 +1195,7 @@ int lixa_my_prepare(XID *xid, int rmid, long flags)
         char my_cmd_buf[sizeof(PREPARE_TRANS_FMT) + sizeof(lixa_my_ser_xid_t)];
         
         /* lock the status mutex */
-        g_static_mutex_lock(&lixa_sw_status_mutex);
+        g_mutex_lock(&lixa_sw_status_mutex);
 
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_prepare: invalid flag in 0x%x\n", flags));
@@ -1282,7 +1282,7 @@ int lixa_my_prepare(XID *xid, int rmid, long flags)
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
         /* unlock the status mutex */
-        g_static_mutex_unlock(&lixa_sw_status_mutex);
+        g_mutex_unlock(&lixa_sw_status_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_prepare/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
@@ -1314,7 +1314,7 @@ int lixa_my_commit(XID *xid, int rmid, long flags)
         int one_phase = flags & TMONEPHASE;
 
         /* lock the status mutex */
-        g_static_mutex_lock(&lixa_sw_status_mutex);
+        g_mutex_lock(&lixa_sw_status_mutex);
 
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_commit: invalid flag in 0x%x\n", flags));
@@ -1458,7 +1458,7 @@ int lixa_my_commit(XID *xid, int rmid, long flags)
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
         /* unlock the status mutex */
-        g_static_mutex_unlock(&lixa_sw_status_mutex);
+        g_mutex_unlock(&lixa_sw_status_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_commit/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
@@ -1485,7 +1485,7 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
         const long valid_flags = TMSTARTRSCAN|TMENDRSCAN|TMNOFLAGS;
 
         /* lock the status mutex */
-        g_static_mutex_lock(&lixa_sw_status_mutex);
+        g_mutex_lock(&lixa_sw_status_mutex);
 
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_recover: invalid flag in 0x%x\n", flags));
@@ -1577,7 +1577,7 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
         /* unlock the status mutex */
-        g_static_mutex_unlock(&lixa_sw_status_mutex);
+        g_mutex_unlock(&lixa_sw_status_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_my_recover/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;

@@ -947,8 +947,6 @@ int lixa_msg_trace_trans(const struct lixa_msg_s *msg)
 
     LIXA_TRACE(("lixa_msg_trace_trans\n"));
     TRY {
-        guint i;
-
         switch (msg->header.pvs.step) {
             case 8:
                 LIXA_TRACE(("lixa_msg_trace_trans: body[client[job="

@@ -63,7 +63,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-    int client_tpm_trans(const client_status_t *cs, GTree *xidt, int maint);
+    int client_tpm_trans(client_status_t *cs, GTree *xidt, int maint);
 
     int client_tpm_report(const client_status_t *cs, GTree *xidt);
 

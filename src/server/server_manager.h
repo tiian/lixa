@@ -53,7 +53,7 @@
  * synchronization in parallel: this is to avoid disk enqueing (see the
  * logic inside @ref server_manager_thread function)
  */
-extern GStaticMutex state_file_synchronization;
+extern GMutex state_file_synchronization;
 
 
 #ifdef __cplusplus
@@ -63,13 +63,14 @@ extern "C" {
 
 /**
  * Start the managers configured for this server
- * @param sc IN server configuration structure
- * @param tpa IN threads' communication pipes
- * @param tsa OUT status of all threads
- * @param srt IN/OUT server recovery table
- * @param tsds IN dump specifications
- * @param tsrs IN recovery specifications
- * @param mmode IN maintenance mode: only privileged clients can connect
+ * @param[in] sc server configuration structure
+ * @param[in] tpa threads' communication pipes
+ * @param[out] tsa status of all threads
+ * @param[in,out] srt server recovery table
+ * @param stt server transaction table
+ * @param[in] tsds dump specifications
+ * @param[in] tsrs recovery specifications
+ * @param[in] mmode maintenance mode: only privileged clients can connect
  * @return a standardized return code
  */
     int server_manager(struct server_config_s *sc,

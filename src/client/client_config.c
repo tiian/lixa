@@ -134,7 +134,7 @@ int client_config(client_config_coll_t *ccc)
 
         /* lock mutex to start configuration activity */
         LIXA_TRACE(("client_config: acquiring exclusive mutex\n"));
-        g_static_mutex_lock(&ccc->mutex);
+        g_mutex_lock(&ccc->mutex);
 
         /* is the process already configured? */
         if (NULL == ccc->config_threads) {
@@ -323,7 +323,7 @@ int client_config(client_config_coll_t *ccc)
                 freeaddrinfo(res);
             /* unlock mutex (locked for configuration activity) */
             LIXA_TRACE(("client_config: releasing exclusive mutex\n"));
-            g_static_mutex_unlock(&ccc->mutex);
+            g_mutex_unlock(&ccc->mutex);
         } /* TRY-CATCH */
     LIXA_TRACE(("client_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -347,7 +347,7 @@ int client_config_job(client_config_coll_t *ccc, int fd)
 
         /* lock mutex to start configuration activity */
         LIXA_TRACE(("client_config_job: acquiring exclusive mutex\n"));
-        g_static_mutex_lock(&ccc->mutex);
+        g_mutex_lock(&ccc->mutex);
 
         if (NULL != ccc->job) {
             LIXA_TRACE(("client_config_job: already configured, "
@@ -407,7 +407,7 @@ int client_config_job(client_config_coll_t *ccc, int fd)
                 free(tmp_job);
             /* unlock mutex (locked for configuration activity) */
             LIXA_TRACE(("client_config_job: releasing exclusive mutex\n"));
-            g_static_mutex_unlock(&ccc->mutex);
+            g_mutex_unlock(&ccc->mutex);
         } /* TRY-CATCH */
     LIXA_TRACE(("client_config_job/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -660,7 +660,7 @@ int client_unconfig(client_config_coll_t *ccc)
 
         /* lock mutex to start deconfiguration activity */
         LIXA_TRACE(("client_unconfig: acquiring exclusive mutex\n"));
-        g_static_mutex_lock(&ccc->mutex);
+        g_mutex_lock(&ccc->mutex);
 
         if (NULL != ccc->config_threads) {
             g_hash_table_remove(ccc->config_threads, (gconstpointer) tid);
@@ -765,7 +765,7 @@ int client_unconfig(client_config_coll_t *ccc)
             } /* switch (excp) */
             /* unlock mutex (locked for deconfiguration activity) */
             LIXA_TRACE(("client_unconfig: releasing exclusive mutex\n"));
-            g_static_mutex_unlock(&ccc->mutex);
+            g_mutex_unlock(&ccc->mutex);
         } /* TRY-CATCH */
     LIXA_TRACE(("client_unconfig/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

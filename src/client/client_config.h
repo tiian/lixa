@@ -235,7 +235,7 @@ struct client_config_coll_s {
      * configuration for all the following threads. It must be statically
      * initialized because this code is a library fetched by something else.
      */
-    GStaticMutex                 mutex;
+    GMutex                       mutex;
     /**
      * Set of thread are "opened" and "configured"
      */

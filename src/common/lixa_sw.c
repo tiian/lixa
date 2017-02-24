@@ -65,7 +65,7 @@
 
 
 
-GStaticMutex lixa_sw_status_mutex = G_STATIC_MUTEX_INIT;
+GMutex lixa_sw_status_mutex;
 GHashTable  *lixa_sw_status = NULL;
 
 
@@ -120,7 +120,7 @@ gpointer lixa_sw_get_conn_by_rmid(int rmid, int rm_type)
     gpointer conn = NULL;
     
     /* lock the mutex */
-    g_static_mutex_lock(&lixa_sw_status_mutex);
+    g_mutex_lock(&lixa_sw_status_mutex);
 
     if (NULL != lixa_sw_status) {
         pthread_t key = pthread_self();
@@ -158,7 +158,7 @@ gpointer lixa_sw_get_conn_by_rmid(int rmid, int rm_type)
     }
     
     /* unlock the mutex */
-    g_static_mutex_unlock(&lixa_sw_status_mutex);
+    g_mutex_unlock(&lixa_sw_status_mutex);
 
     return conn;
 }
@@ -170,7 +170,7 @@ gpointer lixa_sw_get_conn_by_pos(int pos, int rm_type)
     gpointer conn = NULL;
     
     /* lock the mutex */
-    g_static_mutex_lock(&lixa_sw_status_mutex);
+    g_mutex_lock(&lixa_sw_status_mutex);
 
     if (NULL != lixa_sw_status) {
         pthread_t key = pthread_self();
@@ -206,7 +206,7 @@ gpointer lixa_sw_get_conn_by_pos(int pos, int rm_type)
     }
     
     /* unlock the mutex */
-    g_static_mutex_unlock(&lixa_sw_status_mutex);
+    g_mutex_unlock(&lixa_sw_status_mutex);
 
     return conn;
 }
@@ -218,7 +218,7 @@ int lixa_sw_is_managed_conn(const gpointer conn, int rm_type)
     int is_managed = FALSE;
     
     /* lock the mutex */
-    g_static_mutex_lock(&lixa_sw_status_mutex);
+    g_mutex_lock(&lixa_sw_status_mutex);
 
     if (NULL != lixa_sw_status) {
         pthread_t key = pthread_self();
@@ -251,7 +251,7 @@ int lixa_sw_is_managed_conn(const gpointer conn, int rm_type)
     }
     
     /* unlock the mutex */
-    g_static_mutex_unlock(&lixa_sw_status_mutex);
+    g_mutex_unlock(&lixa_sw_status_mutex);
 
     LIXA_TRACE(("lixa_sw_is_managed_conn: return value is %d\n", is_managed));
     return is_managed;

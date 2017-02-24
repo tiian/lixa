@@ -71,20 +71,23 @@ void srvr_rcvr_tbl_value1_destroy(gpointer data)
 
 int srvr_rcvr_tbl_new(srvr_rcvr_tbl_t *srt, guint tsid_array_size)
 {
-    enum Exception
-    {
-        OBJ_NOT_INITIALIZED, G_MUTEX_NEW_ERROR, G_TREE_NEW_ERROR, NONE
+    enum Exception {
+        OBJ_NOT_INITIALIZED
+        , G_MUTEX_NEW_ERROR
+        , G_TREE_NEW_ERROR, NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("srvr_rcvr_tbl_new\n"));
     TRY {
-        if (NULL != srt->mutex || NULL != srt->lvl1_job) THROW(
-            OBJ_NOT_INITIALIZED);
-        if (NULL == (srt->mutex = g_mutex_new())) THROW(G_MUTEX_NEW_ERROR);
+        if (NULL != srt->mutex || NULL != srt->lvl1_job)
+            THROW(OBJ_NOT_INITIALIZED);
+        if (NULL == (srt->mutex = g_mutex_new()))
+            THROW(G_MUTEX_NEW_ERROR);
         if (NULL == (srt->lvl1_job = g_tree_new_full(
                          srvr_rcrv_tbl_key1_job_comp, NULL,
-                         free, srvr_rcvr_tbl_value1_destroy))) THROW(G_TREE_NEW_ERROR);
+                         free, srvr_rcvr_tbl_value1_destroy)))
+            THROW(G_TREE_NEW_ERROR);
         srt->lvl2_tsid_array_size = tsid_array_size;
 
         THROW(NONE);

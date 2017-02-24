@@ -1,4 +1,4 @@
-AC_INIT([lixa], [1.3.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [1.3.2], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
@@ -159,14 +159,22 @@ if test $? -ne 0
 then
 	AC_MSG_ERROR([it seems glib-2.0 is not configured with pkg-config])
 else
-	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0) $($PKG_CONFIG --cflags gmodule-no-export-2.0)"
-#	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0) $($PKG_CONFIG --cflags gmodule-2.0)"
-	LDFLAGS_GLIB="$($PKG_CONFIG --libs glib-2.0)"
-	LDFLAGS_GMODULE="$($PKG_CONFIG --libs gmodule-no-export-2.0)"
-#	LDFLAGS_GMODULE="$($PKG_CONFIG --libs gmodule-2.0)"
-	LDFLAGS_GTHREAD="$($PKG_CONFIG --libs gthread-2.0)"
 	AC_MSG_RESULT([yes])
 fi
+# Checking glib2 is 2.32 or above
+AC_MSG_CHECKING([checking glib2 is at  version 2.32 or upper])
+$PKG_CONFIG --atleast-version=2.32 glib-2.0
+if test $? -ne 0
+then
+	AC_MSG_ERROR([installed version of glib2 is too old, use an older version of LIXA (1.0.x or 1.1.x)])
+else
+	AC_MSG_RESULT([yes])
+fi
+CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0) $($PKG_CONFIG --cflags gmodule-no-export-2.0)"
+LDFLAGS_GLIB="$($PKG_CONFIG --libs glib-2.0)"
+LDFLAGS_GMODULE="$($PKG_CONFIG --libs gmodule-no-export-2.0)"
+LDFLAGS_GTHREAD="$($PKG_CONFIG --libs gthread-2.0)"
+AC_MSG_RESULT([yes])
 
 # Checking cobc (GNU COBOL compiler) is available
 AC_CHECK_PROGS(COBC, [cobc], [true])
@@ -201,7 +209,7 @@ eval "LIXA_CONFIG_SYSCONFDIR=$sysconfdir"
 AC_CHECK_PROGS(GDB, [gdb], [])
 AC_CHECK_PROGS(VALGRIND, [valgrind], [])
 AC_CHECK_PROGS(XSLTPROC, [xsltproc], [])
-AC_CHECK_PROGS(HAVE_DOT, [dot], [NO], [])
+AC_CHECK_PROGS(HAVE_DOT, [dot], [YES], [NO])
 AC_CHECK_PROGS(HAVE_NETSTAT, [netstat], [NO], [])
 if test "$HAVE_NETSTAT" = "NO"
 then

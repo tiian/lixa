@@ -77,7 +77,7 @@ GHashTable *monkey_status = NULL;
  * This mutex is necessary to protect the access to @ref monkey_status
  * hash table
  */
-GStaticMutex monkey_mutex = G_STATIC_MUTEX_INIT;
+static GMutex monkey_mutex;
 
 
 
@@ -189,7 +189,7 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
         struct monkey_status_s *mss;
         
         /* lock mutex */
-        g_static_mutex_lock(&monkey_mutex);
+        g_mutex_lock(&monkey_mutex);
 
         /* first call ? */
         if (NULL == monkey_status) {
@@ -260,7 +260,7 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
                 xa_rc = XAER_RMERR;
         } /* switch (excp) */
         /* unlock mutex */
-        g_static_mutex_unlock(&monkey_mutex);
+        g_mutex_unlock(&monkey_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_open/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
@@ -390,7 +390,7 @@ int lixa_monkeyrm_close(char *xa_info, int rmid, long flags)
         struct monkey_status_s *mss;
 
         /* lock mutex */
-        g_static_mutex_lock(&monkey_mutex);
+        g_mutex_lock(&monkey_mutex);
         
         /* first call ? */
         if (NULL == monkey_status)
@@ -433,9 +433,9 @@ int lixa_monkeyrm_close(char *xa_info, int rmid, long flags)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* unlock mutex */
-        g_static_mutex_unlock(&monkey_mutex);
+        g_mutex_unlock(&monkey_mutex);
         /* free memory if requested */
-        if (!strncmp(FM_STRING, xa_info, sizeof(FM_STRING)))
+        if (!strncmp(FM_STRING, xa_info, strlen(FM_STRING)))
             lixa_monkeyrm_call_cleanup();
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_close/excp=%d/"
@@ -469,7 +469,7 @@ int lixa_monkeyrm_start(XID *xid, int rmid, long flags)
         struct monkey_status_s *mss;
 
         /* lock mutex */
-        g_static_mutex_lock(&monkey_mutex);
+        g_mutex_lock(&monkey_mutex);
         
         /* first call ? */
         if (NULL == monkey_status)
@@ -512,7 +512,7 @@ int lixa_monkeyrm_start(XID *xid, int rmid, long flags)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* unlock mutex */
-        g_static_mutex_unlock(&monkey_mutex);
+        g_mutex_unlock(&monkey_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_start/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
@@ -545,7 +545,7 @@ int lixa_monkeyrm_end(XID *xid, int rmid, long flags)
         struct monkey_status_s *mss;
 
         /* lock mutex */
-        g_static_mutex_lock(&monkey_mutex);
+        g_mutex_lock(&monkey_mutex);
         
         /* first call ? */
         if (NULL == monkey_status)
@@ -588,7 +588,7 @@ int lixa_monkeyrm_end(XID *xid, int rmid, long flags)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* unlock mutex */
-        g_static_mutex_unlock(&monkey_mutex);
+        g_mutex_unlock(&monkey_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_end/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
@@ -621,7 +621,7 @@ int lixa_monkeyrm_rollback(XID *xid, int rmid, long flags)
         struct monkey_status_s *mss;
 
         /* lock mutex */
-        g_static_mutex_lock(&monkey_mutex);
+        g_mutex_lock(&monkey_mutex);
         
         /* first call ? */
         if (NULL == monkey_status)
@@ -664,7 +664,7 @@ int lixa_monkeyrm_rollback(XID *xid, int rmid, long flags)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* unlock mutex */
-        g_static_mutex_unlock(&monkey_mutex);
+        g_mutex_unlock(&monkey_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_rollback/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
@@ -697,7 +697,7 @@ int lixa_monkeyrm_prepare(XID *xid, int rmid, long flags)
         struct monkey_status_s *mss;
 
         /* lock mutex */
-        g_static_mutex_lock(&monkey_mutex);
+        g_mutex_lock(&monkey_mutex);
         
         /* first call ? */
         if (NULL == monkey_status)
@@ -740,7 +740,7 @@ int lixa_monkeyrm_prepare(XID *xid, int rmid, long flags)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* unlock mutex */
-        g_static_mutex_unlock(&monkey_mutex);
+        g_mutex_unlock(&monkey_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_prepare/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
@@ -773,7 +773,7 @@ int lixa_monkeyrm_commit(XID *xid, int rmid, long flags)
         struct monkey_status_s *mss;
 
         /* lock mutex */
-        g_static_mutex_lock(&monkey_mutex);
+        g_mutex_lock(&monkey_mutex);
         
         /* first call ? */
         if (NULL == monkey_status)
@@ -816,7 +816,7 @@ int lixa_monkeyrm_commit(XID *xid, int rmid, long flags)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* unlock mutex */
-        g_static_mutex_unlock(&monkey_mutex);
+        g_mutex_unlock(&monkey_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_commit/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
@@ -846,7 +846,7 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
         struct monkey_status_s *mss;
 
         /* lock mutex */
-        g_static_mutex_lock(&monkey_mutex);
+        g_mutex_lock(&monkey_mutex);
         
         /* first call ? */
         if (NULL == monkey_status)
@@ -908,7 +908,7 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* unlock mutex */
-        g_static_mutex_unlock(&monkey_mutex);
+        g_mutex_unlock(&monkey_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_recover/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
@@ -941,7 +941,7 @@ int lixa_monkeyrm_forget(XID *xid, int rmid, long flags)
         struct monkey_status_s *mss;
 
         /* lock mutex */
-        g_static_mutex_lock(&monkey_mutex);
+        g_mutex_lock(&monkey_mutex);
         
         /* first call ? */
         if (NULL == monkey_status)
@@ -984,7 +984,7 @@ int lixa_monkeyrm_forget(XID *xid, int rmid, long flags)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* unlock mutex */
-        g_static_mutex_unlock(&monkey_mutex);
+        g_mutex_unlock(&monkey_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_forget/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
@@ -1013,7 +1013,7 @@ int lixa_monkeyrm_complete(int *handle, int *retval, int rmid, long flags)
         struct monkey_status_s *mss;
 
         /* lock mutex */
-        g_static_mutex_lock(&monkey_mutex);
+        g_mutex_lock(&monkey_mutex);
         
         /* first call ? */
         if (NULL == monkey_status)
@@ -1056,7 +1056,7 @@ int lixa_monkeyrm_complete(int *handle, int *retval, int rmid, long flags)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* unlock mutex */
-        g_static_mutex_unlock(&monkey_mutex);
+        g_mutex_unlock(&monkey_mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_complete/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
@@ -1108,14 +1108,14 @@ int lixa_monkeyrm_call_ax_unreg(int rmid)
 void lixa_monkeyrm_call_cleanup(void)
 {
     LIXA_TRACE(("lixa_monkeyrm_call_cleanup\n"));
-    g_static_mutex_lock(&monkey_mutex);
+    g_mutex_lock(&monkey_mutex);
     if (NULL != monkey_status) {
         LIXA_TRACE(("lixa_monkeyrm_call_cleanup/g_hash_table_destroy(%p)\n",
                     monkey_status));
         g_hash_table_destroy(monkey_status);
         monkey_status = NULL;
     }
-    g_static_mutex_unlock(&monkey_mutex);
+    g_mutex_unlock(&monkey_mutex);
     LIXA_TRACE(("lixa_monkeyrm_call_cleanup: terminated\n"));
 }
 

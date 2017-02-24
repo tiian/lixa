@@ -80,7 +80,7 @@ unsigned long lixa_trace_mask = 0;
 /**
  * This mutex is used to avoid contention (bad output) on trace file
  */
-GStaticMutex lixa_trace_mutex = G_STATIC_MUTEX_INIT;
+GMutex lixa_trace_mutex;
 
 
 
@@ -91,10 +91,7 @@ void lixa_trace_init(void)
 {
     if (lixa_trace_initialized)
         return;
-    /* initialize thread system if necessary */
-    if (!g_thread_supported ()) g_thread_init(NULL);
-
-    g_static_mutex_lock(&lixa_trace_mutex);
+    g_mutex_lock(&lixa_trace_mutex);
     if (!lixa_trace_initialized) {
         /* retrieve environemnt variable */
         if (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL)
@@ -105,7 +102,7 @@ void lixa_trace_init(void)
         lixa_trace_initialized = TRUE;
     }
     /* remove the lock from mutex */
-    g_static_mutex_unlock(&lixa_trace_mutex);
+    g_mutex_unlock(&lixa_trace_mutex);
 }
 
 
@@ -121,7 +118,7 @@ void lixa_trace(const char *fmt, ...)
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
 
-    g_static_mutex_lock(&lixa_trace_mutex);
+    g_mutex_lock(&lixa_trace_mutex);
     /* default header */
     fprintf(stderr,
             "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [" PID_T_FORMAT "/"
@@ -136,7 +133,7 @@ void lixa_trace(const char *fmt, ...)
     fflush(stderr);
 #endif
     /* remove the lock from mutex */
-    g_static_mutex_unlock(&lixa_trace_mutex);
+    g_mutex_unlock(&lixa_trace_mutex);
 #else
 # error "vfprintf is necessary for lixa_trace function!"
 #endif
@@ -156,7 +153,7 @@ void lixa_trace_hex_data(const char *prefix, const byte_t *data,
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
 
-    g_static_mutex_lock(&lixa_trace_mutex);
+    g_mutex_lock(&lixa_trace_mutex);
     /* default header */
     fprintf(out_stream,
             "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [" PID_T_FORMAT "/"
@@ -175,7 +172,7 @@ void lixa_trace_hex_data(const char *prefix, const byte_t *data,
     fflush(out_stream);
 #endif
     /* remove the lock from mutex */
-    g_static_mutex_unlock(&lixa_trace_mutex);
+    g_mutex_unlock(&lixa_trace_mutex);
 #else
 # error "vfprintf is necessary for lixa_trace_hex_data function!"
 #endif
@@ -194,7 +191,7 @@ void lixa_trace_text_data(const char *prefix, const byte_t *data,
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
 
-    g_static_mutex_lock(&lixa_trace_mutex);
+    g_mutex_lock(&lixa_trace_mutex);
     /* default header */
     fprintf(out_stream,
             "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [%d/"
@@ -216,7 +213,7 @@ void lixa_trace_text_data(const char *prefix, const byte_t *data,
     fflush(out_stream);
 #endif
     /* remove the lock from mutex */
-    g_static_mutex_unlock(&lixa_trace_mutex);
+    g_mutex_unlock(&lixa_trace_mutex);
 #else
 # error "vfprintf is necessary for lixa_trace_hex_data function!"
 #endif

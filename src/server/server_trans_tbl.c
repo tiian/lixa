@@ -387,9 +387,6 @@ int server_trans_tbl_remove(server_trans_tbl_t *stt,
 
     LIXA_TRACE(("server_trans_tbl_remove\n"));
     TRY {
-        gpointer *node;
-        GQueue *queue;
-
         LIXA_TRACE(
             ("server_trans_tbl_remove: gtrid='%s', xid='%s', tsid=%u, block_id="
              UINT32_T_FORMAT

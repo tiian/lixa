@@ -81,7 +81,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = lixar$(EXEEXT) lixat$(EXEEXT) lixau$(EXEEXT) \
-	lixa-config$(EXEEXT)
+	lixa-config$(EXEEXT) lixatpm$(EXEEXT)
 subdir = src/client
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/lixa-config.c.in $(top_srcdir)/depcomp \
@@ -134,14 +134,16 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixac_la_DEPENDENCIES = ../common/liblixab.la
 am__liblixac_la_SOURCES_DIST = client_config.c client_conn.c \
 	client_recovery.c client_status.c lixa_ax.c lixa_tx.c \
-	lixa_tx_rc.c lixa_xa.c tx.c lixanonapi.c lixa_tx_cobol.c
+	lixa_tx_rc.c lixa_xa.c tx.c lixanonapi.c client_tpm.c \
+	lixa_tx_cobol.c
 @COND_COBOLAPI_TRUE@am__objects_1 = liblixac_la-lixa_tx_cobol.lo
 am_liblixac_la_OBJECTS = liblixac_la-client_config.lo \
 	liblixac_la-client_conn.lo liblixac_la-client_recovery.lo \
 	liblixac_la-client_status.lo liblixac_la-lixa_ax.lo \
 	liblixac_la-lixa_tx.lo liblixac_la-lixa_tx_rc.lo \
 	liblixac_la-lixa_xa.lo liblixac_la-tx.lo \
-	liblixac_la-lixanonapi.lo $(am__objects_1)
+	liblixac_la-lixanonapi.lo liblixac_la-client_tpm.lo \
+	$(am__objects_1)
 liblixac_la_OBJECTS = $(am_liblixac_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -169,6 +171,12 @@ lixat_DEPENDENCIES = ../common/liblixab.la liblixac.la
 lixat_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(lixat_LDFLAGS) $(LDFLAGS) -o $@
+am_lixatpm_OBJECTS = lixatpm-lixatpm.$(OBJEXT)
+lixatpm_OBJECTS = $(am_lixatpm_OBJECTS)
+lixatpm_DEPENDENCIES = ../common/liblixab.la liblixac.la
+lixatpm_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(lixatpm_LDFLAGS) $(LDFLAGS) -o $@
 am_lixau_OBJECTS = lixau-lixau.$(OBJEXT)
 lixau_OBJECTS = $(am_lixau_OBJECTS)
 lixau_DEPENDENCIES = ../common/liblixab.la liblixac.la
@@ -210,9 +218,11 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(liblixac_la_SOURCES) $(lixa_config_SOURCES) \
-	$(lixar_SOURCES) $(lixat_SOURCES) $(lixau_SOURCES)
+	$(lixar_SOURCES) $(lixat_SOURCES) $(lixatpm_SOURCES) \
+	$(lixau_SOURCES)
 DIST_SOURCES = $(am__liblixac_la_SOURCES_DIST) $(lixa_config_SOURCES) \
-	$(lixar_SOURCES) $(lixat_SOURCES) $(lixau_SOURCES)
+	$(lixar_SOURCES) $(lixat_SOURCES) $(lixatpm_SOURCES) \
+	$(lixau_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -230,7 +240,7 @@ am__include_HEADERS_DIST = lixa.h lixanonapi.h tx.h TXSTATUS.cpy \
 	TXINFDEF.cpy LIXAXID.cpy
 am__noinst_HEADERS_DIST = client_config.h client_conn.h \
 	client_recovery.h client_status.h lixa_tx.h lixa_tx_rc.h \
-	lixa_xa.h lixa_tx_cobol.h
+	lixa_xa.h client_tpm.h lixa_tx_cobol.h
 HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
@@ -469,13 +479,13 @@ top_srcdir = @top_srcdir@
 SUBDIRS = . switch
 include_HEADERS = lixa.h lixanonapi.h tx.h $(COBOL_COPYBOOKS)
 noinst_HEADERS = client_config.h client_conn.h client_recovery.h \
-	client_status.h lixa_tx.h lixa_tx_rc.h lixa_xa.h \
+	client_status.h lixa_tx.h lixa_tx_rc.h lixa_xa.h client_tpm.h \
 	$(COBOL_INCLUDE)
 
 lib_LTLIBRARIES = liblixac.la
 liblixac_la_SOURCES = client_config.c client_conn.c client_recovery.c \
 	client_status.c lixa_ax.c lixa_tx.c lixa_tx_rc.c lixa_xa.c tx.c \
-	lixanonapi.c $(COBOL_SOURCE)
+	lixanonapi.c client_tpm.c $(COBOL_SOURCE)
 
 AM_CFLAGS = -Wall -fno-strict-aliasing
 liblixac_la_CPPFLAGS = -DLIXA_MULTITHREAD=1 -I$(srcdir)/../common
@@ -495,6 +505,10 @@ lixau_LDFLAGS = @LDFLAGS_GLIB@
 lixau_SOURCES = lixau.c
 lixa_config_SOURCES = lixa-config.c
 lixa_config_LDFLAGS = @LDFLAGS_GLIB@
+lixatpm_CPPFLAGS = -I$(srcdir)/../common
+lixatpm_LDADD = ../common/liblixab.la liblixac.la
+lixatpm_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_XML2@
+lixatpm_SOURCES = lixatpm.c
 all: all-recursive
 
 .SUFFIXES:
@@ -631,6 +645,10 @@ lixat$(EXEEXT): $(lixat_OBJECTS) $(lixat_DEPENDENCIES) $(EXTRA_lixat_DEPENDENCIE
 	@rm -f lixat$(EXEEXT)
 	$(AM_V_CCLD)$(lixat_LINK) $(lixat_OBJECTS) $(lixat_LDADD) $(LIBS)
 
+lixatpm$(EXEEXT): $(lixatpm_OBJECTS) $(lixatpm_DEPENDENCIES) $(EXTRA_lixatpm_DEPENDENCIES) 
+	@rm -f lixatpm$(EXEEXT)
+	$(AM_V_CCLD)$(lixatpm_LINK) $(lixatpm_OBJECTS) $(lixatpm_LDADD) $(LIBS)
+
 lixau$(EXEEXT): $(lixau_OBJECTS) $(lixau_DEPENDENCIES) $(EXTRA_lixau_DEPENDENCIES) 
 	@rm -f lixau$(EXEEXT)
 	$(AM_V_CCLD)$(lixau_LINK) $(lixau_OBJECTS) $(lixau_LDADD) $(LIBS)
@@ -645,6 +663,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-client_conn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-client_recovery.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-client_status.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-client_tpm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-lixa_ax.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-lixa_tx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-lixa_tx_cobol.Plo@am__quote@
@@ -655,6 +674,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixa-config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixar-lixar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixat-lixat.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixatpm-lixatpm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixau-lixau.Po@am__quote@
 
 .c.o:
@@ -748,6 +768,13 @@ liblixac_la-lixanonapi.lo: lixanonapi.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixac_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixac_la-lixanonapi.lo `test -f 'lixanonapi.c' || echo '$(srcdir)/'`lixanonapi.c
 
+liblixac_la-client_tpm.lo: client_tpm.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixac_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixac_la-client_tpm.lo -MD -MP -MF $(DEPDIR)/liblixac_la-client_tpm.Tpo -c -o liblixac_la-client_tpm.lo `test -f 'client_tpm.c' || echo '$(srcdir)/'`client_tpm.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixac_la-client_tpm.Tpo $(DEPDIR)/liblixac_la-client_tpm.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='client_tpm.c' object='liblixac_la-client_tpm.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixac_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixac_la-client_tpm.lo `test -f 'client_tpm.c' || echo '$(srcdir)/'`client_tpm.c
+
 liblixac_la-lixa_tx_cobol.lo: lixa_tx_cobol.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixac_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixac_la-lixa_tx_cobol.lo -MD -MP -MF $(DEPDIR)/liblixac_la-lixa_tx_cobol.Tpo -c -o liblixac_la-lixa_tx_cobol.lo `test -f 'lixa_tx_cobol.c' || echo '$(srcdir)/'`lixa_tx_cobol.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixac_la-lixa_tx_cobol.Tpo $(DEPDIR)/liblixac_la-lixa_tx_cobol.Plo
@@ -782,6 +809,20 @@ lixat-lixat.obj: lixat.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lixat.c' object='lixat-lixat.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lixat-lixat.obj `if test -f 'lixat.c'; then $(CYGPATH_W) 'lixat.c'; else $(CYGPATH_W) '$(srcdir)/lixat.c'; fi`
+
+lixatpm-lixatpm.o: lixatpm.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixatpm_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lixatpm-lixatpm.o -MD -MP -MF $(DEPDIR)/lixatpm-lixatpm.Tpo -c -o lixatpm-lixatpm.o `test -f 'lixatpm.c' || echo '$(srcdir)/'`lixatpm.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/lixatpm-lixatpm.Tpo $(DEPDIR)/lixatpm-lixatpm.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lixatpm.c' object='lixatpm-lixatpm.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixatpm_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lixatpm-lixatpm.o `test -f 'lixatpm.c' || echo '$(srcdir)/'`lixatpm.c
+
+lixatpm-lixatpm.obj: lixatpm.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixatpm_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lixatpm-lixatpm.obj -MD -MP -MF $(DEPDIR)/lixatpm-lixatpm.Tpo -c -o lixatpm-lixatpm.obj `if test -f 'lixatpm.c'; then $(CYGPATH_W) 'lixatpm.c'; else $(CYGPATH_W) '$(srcdir)/lixatpm.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/lixatpm-lixatpm.Tpo $(DEPDIR)/lixatpm-lixatpm.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lixatpm.c' object='lixatpm-lixatpm.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixatpm_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lixatpm-lixatpm.obj `if test -f 'lixatpm.c'; then $(CYGPATH_W) 'lixatpm.c'; else $(CYGPATH_W) '$(srcdir)/lixatpm.c'; fi`
 
 lixau-lixau.o: lixau.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lixau_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lixau-lixau.o -MD -MP -MF $(DEPDIR)/lixau-lixau.Tpo -c -o lixau-lixau.o `test -f 'lixau.c' || echo '$(srcdir)/'`lixau.c

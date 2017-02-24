@@ -93,7 +93,7 @@ extern "C" {
  * X/Open function
  * @param txrc OUT tx_* return code
  * @param xid IN previously created XID if joining a transaction
- * @param[in] flags passed to @ref lixa_xa_start and @ref xa_start
+ * @param[in] flags passed to @ref lixa_xa_start and xa_start
  * @return a return code
  */
     int lixa_tx_begin(int *txrc, XID *xid, int flags);
@@ -101,7 +101,7 @@ extern "C" {
 /**
  * This function implements the real logic underlying @ref tx_end non standard function.
  * @param txrc OUT tx_* return code
- * @param flags IN flags that will be passed to @ref lixa_xa_end and @ref xa_end
+ * @param flags IN flags that will be passed to @ref lixa_xa_end and xa_end
  * @return
  */
     int lixa_tx_end(int *txrc, int flags);
@@ -188,9 +188,12 @@ extern "C" {
 /**
  * @brief Retrives information about all existing transactions
  * <b>Note:</b> This is a non standard function.
- * @param[in,out] xidt a tree populated with all the transactions known by the server
+ * @param[in,out] xida a tree populated with all the transactions known by
+ *                the server
+ * @param[in] maint
  * @param[in] report flag indicating if the information should be reported
- * @param[in] unique flag indicating if only unique transactions should be listed
+ * @param[in] unique flag indicating if only unique transactions should be
+ *            listed
  * @return a standardised return code
  */
     int lixa_tx_tpm(GArray *xida, int maint, int report, int unique);

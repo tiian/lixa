@@ -69,7 +69,7 @@
  * This mutex is used to protect the status structure when the library is
  * used in a multithread environment
  */
-extern GStaticMutex lixa_sw_status_mutex;
+extern GMutex lixa_sw_status_mutex;
 /**
  * The status is saved in a hash table: there is an element for every
  * thread

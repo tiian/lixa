@@ -247,15 +247,13 @@ int exec_benchmark(void)
             medium_processing-delta_processing,
             medium_processing+delta_processing);
     srandom((unsigned int)time(NULL));
-    /* initialize multithread environment */
-    g_thread_init(NULL);
     /* warm up phase */
     fprintf(stderr, "Warming up ");
     for (i=0; i<clients; ++i) {
         parameters[i].client_number = i;
         parameters[i].cycles = WARM_UP_CYCLES;
-        threads[i] = g_thread_create(
-            perform_benchmark, (gpointer *)&(parameters[i]), TRUE, NULL);
+        threads[i] = g_thread_new(
+            "", perform_benchmark, (gpointer *)&(parameters[i]));
         if (NULL == threads[i]) {
             fprintf(stderr, "Error while creating thread number %d\n", i);
             break;
@@ -274,8 +272,8 @@ int exec_benchmark(void)
     for (i=0; i<clients; ++i) {
         parameters[i].client_number = i;
         parameters[i].cycles = BENCH_CYCLES;
-        threads[i] = g_thread_create(
-            perform_benchmark, (gpointer *)&(parameters[i]), TRUE, NULL);
+        threads[i] = g_thread_new(
+            "", perform_benchmark, (gpointer *)&(parameters[i]));
         if (NULL == threads[i]) {
             fprintf(stderr, "Error while creating thread number %d\n", i);
             break;
