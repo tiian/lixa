@@ -41,7 +41,7 @@
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE LIXA_TRACE_MOD_SERVER_TPM
 
-#define SERVER_TRANS_TBL_INIT {NULL, NULL, 0}
+
 
 struct server_trans_tbl_rec_s
 {
@@ -53,9 +53,9 @@ struct server_trans_tbl_rec_s
 
 struct server_trans_tbl_s
 {
-    GMutex *mutex;
-    GTree *records; /** multidimentional tree with gtrid as key */
-    guint tsid_array_size; /** size of thread status identifier array */
+    GMutex    mutex;
+    GTree    *records; /** multidimentional tree with gtrid as key */
+    guint     tsid_array_size; /** size of thread status identifier array */
 };
 
 typedef struct server_trans_tbl_s server_trans_tbl_t;
@@ -64,7 +64,7 @@ typedef struct server_trans_tbl_s server_trans_tbl_t;
 extern "C" {
 #endif /* __cplusplus */
 
-    int server_trans_tbl_new(server_trans_tbl_t *stt, guint tsid_array_size);
+    int server_trans_tbl_init(server_trans_tbl_t *stt, guint tsid_array_size);
 
     int server_trans_tbl_comp(gconstpointer a, gconstpointer b,
                               gpointer user_data);
@@ -77,7 +77,7 @@ extern "C" {
     int server_trans_tbl_remove(server_trans_tbl_t *stt,
                                 const struct server_trans_tbl_rec_s *sttr);
 
-    int server_trans_tbl_delete(server_trans_tbl_t *stt);
+    int server_trans_tbl_clear(server_trans_tbl_t *stt);
 
     int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
                                    const struct server_trans_tbl_rec_s *sttr,

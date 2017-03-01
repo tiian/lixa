@@ -232,11 +232,11 @@ int server_cleanup(struct server_config_s *sc,
             tsa->n = 0;
         }
 
-        /* release server recovery table mutex */
-        srvr_rcvr_tbl_delete(srt);
+        /* clear server recovery table */
+        srvr_rcvr_tbl_clear(srt);
 
         /* release server transaction table mutex */
-        server_trans_tbl_delete(stt);
+        server_trans_tbl_clear(stt);
 
         /* release libxml2 stuff */
         LIXA_TRACE(("server_cleanup/xmlCleanupParser\n"));

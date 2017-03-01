@@ -105,15 +105,16 @@ int server_manager(struct server_config_s *sc,
         LIXA_TRACE(("server_manager: number of managers to activate = %d\n",
                     sc->managers.n));
 
-        if (LIXA_RC_OK != (ret_cod = srvr_rcvr_tbl_new(srt, tpa->n))) THROW(
-            SRVR_RCVR_TBL_NEW_ERROR);
+        if (LIXA_RC_OK != (ret_cod = srvr_rcvr_tbl_init(srt, tpa->n)))
+            THROW(SRVR_RCVR_TBL_NEW_ERROR);
 
-        if (LIXA_RC_OK != (ret_cod = server_trans_tbl_new(stt, tpa->n))) THROW(
-            SERVER_TRANS_TBL_NEW_ERROR);
+        if (LIXA_RC_OK != (ret_cod = server_trans_tbl_init(stt, tpa->n)))
+            THROW(SERVER_TRANS_TBL_NEW_ERROR);
 
         /* prepare thread status array structure */
         if (NULL == (tsa->array = malloc(
-                         tpa->n * sizeof(struct thread_status_s)))) THROW(MALLOC_ERROR);
+                         tpa->n * sizeof(struct thread_status_s))))
+            THROW(MALLOC_ERROR);
         tsa->n = tpa->n;
 
         /* first thread slot is for listener: it's the main thread of the

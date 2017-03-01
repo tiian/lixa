@@ -1,7 +1,8 @@
-Remove glib deprecated functions for Ubuntu 14.04
+Explore XA real implementations with lixa-vsr (LIXA Very Stupid Robot)
+Implement XTA for C/C++ if the feedback from the previous step is positive
 
 Explore high availability features (active/active) with dynamic or static
-workload
+workload. Avoid disk persistence, prefer distributed memory semi persistence.
 
 Resource Managers suggested:
 RabbitMQ (Jim Doyle)

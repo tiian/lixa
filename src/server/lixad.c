@@ -134,8 +134,8 @@ int main(int argc, char *argv[])
     struct server_config_s sc;
     struct listener_status_array_s lsa;
     struct thread_status_array_s tsa;
-    srvr_rcvr_tbl_t srt = SRVR_RCVR_TBL_INIT;
-    server_trans_tbl_t stt = SERVER_TRANS_TBL_INIT;
+    srvr_rcvr_tbl_t srt;
+    server_trans_tbl_t stt;
     GError *error = NULL;
     GOptionContext *option_context;
     struct ts_dump_spec_s tsds;

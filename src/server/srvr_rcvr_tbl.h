@@ -48,13 +48,6 @@
 
 
 /**
- * It should be used to initialize a static @ref srvr_rcvr_tbl_t object
- */
-#define SRVR_RCVR_TBL_INIT    { NULL, NULL, 0 }
-
-
-
-/**
  * This struct is used as the base record of the more complex
  * @ref srvr_rcvr_tbl_s data structure; the first three fields are the key
  * fields and are used "by reference" because this structure should not be
@@ -86,7 +79,7 @@ struct srvr_rcvr_tbl_s {
     /**
      * Mutex used to serialize accesses
      */
-    GMutex          *mutex;
+    GMutex           mutex;
     /**
      * First level of the multimensional structure: it's a tree and the key
      * is the "job" string
@@ -135,24 +128,25 @@ extern "C" {
 
     
     /**
-     * Create a new object: initialization must be performed only ONCE
-     * @param srt OUT reference to the recovery table object
-     * @param tsid_array_size IN size of the array will store thread id
+     * Initialize a server recovery table: initialization must be performed
+     * only ONCE
+     * @param[out] srt reference to the recovery table object
+     * @param[in] tsid_array_size size of the array will store thread id
      *        status
      * @return a standardized return code
      */
-    int srvr_rcvr_tbl_new(srvr_rcvr_tbl_t *srt, guint tsid_array_size);
+    int srvr_rcvr_tbl_init(srvr_rcvr_tbl_t *srt, guint tsid_array_size);
 
 
 
     /**
-     * Delete an existing object <br>
+     * Clear a server recovery table<br>
      * NOTE: this function is usefull only to avoid memory leak detection at
      * server shutdown (the recovery table would not need to be deallocated)
-     * @param srt IN/OUT reference to the recovery table object
+     * @param[in,out] srt reference to the recovery table object
      * @return a standardized return code
      */
-    int srvr_rcvr_tbl_delete(srvr_rcvr_tbl_t *srt);
+    int srvr_rcvr_tbl_clear(srvr_rcvr_tbl_t *srt);
 
 
     
