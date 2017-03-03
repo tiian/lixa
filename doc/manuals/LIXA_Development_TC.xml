@@ -12,7 +12,16 @@
   <section>
     <title>Non-standard TX (Transaction Demarcation) Specification Extensions</title>
     <para>
-      The LIXA project provides extensions to the <citation>TXspec</citation>, named Transaction Coupling (TC), which can be used in addition to the standard API when developing distributed Application Programs.
+      The LIXA project provides extensions to the <citation>TXspec</citation>,
+      named Transaction Coupling (TC)
+      <footnote>
+	<para>
+	  This extension to the TX specification was designed and has been
+	  provided to the LIXA project by 
+	  <ulink url="http://www.globetom.com/">Globetom</ulink>
+	</para>
+      </footnote>, which can be used in addition to the 
+      standard API when developing distributed Application Programs.
     </para>
     <para>
       The API extensions are easy to use and the following C example briefly explains it:
@@ -82,18 +91,15 @@ int main(int argc, char *argv[])
         </para></listitem>
       </itemizedlist>
     </para>
+    <section>
+      <title>LIXA library linkage</title>
+      <para>
+	See <xref linkend="linkage"/>.
+      </para>
+    </section>
   </section>
   <section>
-    <title>LIXA library linkage</title>
-    <para>
-      See <xref linkend="linkage"/>.
-    </para>
-  </section>
-  <section>
-    <title>The first example</title>
-  </section>
-  <section>
-    <title>An example with Oracle</title>
+    <title>A TC TX usage example with Oracle</title>
     <figure>
       <title>Deployment model of two example applications with Oracle DBMS</title>
       <mediaobject>
@@ -264,7 +270,9 @@ ORA_STA
       </para>
       <important>
         <para>
-          Make sure that the LIXA Transaction Manager server is running before executing the example application, as explained in <xref linkend="Development_start_LIXA_server"/>.
+          Make sure that the LIXA state server (<filename>lixad</filename>) is 
+	  running before executing the example application, as explained in 
+	  <xref linkend="Development_start_LIXA_server"/>.
         </para>
       </important>
       <section>

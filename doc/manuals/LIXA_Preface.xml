@@ -99,11 +99,25 @@
       </itemizedlist>
     </para>
   </note>
+  <note><title>Acknowledgements</title>
+  <para>
+    Supporting every author is an understanding family, or nothing would ever
+    get produced! I am grateful to my family, Sara and Carola for their
+    understanding everytime I am spending some time on this open source and
+    free software project.
+  </para>
+  <para>
+    Numerous individuals provided me useful feedback, but one person deserves
+    a special thank for his help: Pieter Janse van Rensburg. Pieter has
+    added to the project an interesting extension and he continues to provide
+    me interesting ideas for further improvements.
+  </para>
+  </note>
   <note><title>Language</title>
     <para>
       Unfortunately English is not my mother tongue. This manual may contain
       a lot of language mistakes. If you sent me a revisioned versions of the
-      Docbook sources (XML), I would accept it promptly .
+      Docbook sources (XML), I would accept your fixes promptly.
     </para>
   </note>
 </preface>

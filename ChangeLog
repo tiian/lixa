@@ -1,20 +1,26 @@
 LOG:
 
-         - 1.3.2 Merge of code provided by Globetom in the master tree; 
+20160303 - 1.3.2 Merge of code provided by Globetom in the master tree; 
 		support for Transaction Coupling TX feature.
-		Dropped support for old glib2 versions: minimum version is now
-		2.32 (don't upgrade to this LIXA version if you are running a
-	 	glib2 version that's older than 2.32). These versions are no
-		more tested: Ubuntu 10.04, CentOS 6.x because they provide a
-		default too old version for glib2.
+		*** Dropped support for old glib2 versions: ***
+		minimum version is now 2.32 (don't upgrade to this LIXA version
+		if you are running a glib2 version that's older than 2.32).
+		Alternatively, you can install your own copy of glib2 from
+		sources.
+		These Linux versions are no more tested:
+		- Ubuntu 10.04
+		- CentOS 6.x
+		because they provide a default version for glib2 that's below
+		2.32
 
 20170124 - 1.3.1 added more non-standard tx_ interfaces for suspending and
                  resuming global transactions
 
-20161117 - 1.3.0 made interface changes to allow clients to join an existing global transaction
-                 exposed internal lixa_tx methods to work with XID on the tx_ interface
-                 implemented test cases XID/2.0
-                 * still to write tests for the changes to join transactions, but is tested in external program
+20161117 - 1.3.0 made interface changes to allow clients to join an existing
+		global transaction exposed internal lixa_tx methods to work
+		with XID on the tx_ interface implemented test cases XID/2.0
+		Still to write tests for the changes to join transactions,
+		but is tested in external program
 
 20170121 - 1.1.1 Support for Oracle Pro*C and Oracle Pro*COBOL
 		Pro*C config:
