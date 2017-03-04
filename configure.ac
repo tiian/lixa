@@ -19,6 +19,7 @@ AC_CONFIG_FILES([
   etc/lixac_conf.xml
   etc/lixad_conf.xml
   etc/Makefile
+  etc/lixavsr/Makefile
   ext/Makefile
   ext/doc/Makefile
   ext/doc/manuals/LIXA_EXT.xml

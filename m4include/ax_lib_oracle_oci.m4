@@ -113,7 +113,7 @@ Please, locate Oracle directories using --with-oracle or \
 	tmp2=${tmp1#lib}
 	ORACLE_OCI_NNZ=${tmp2%.*}
         saved_LDFLAGS="$LDFLAGS"
-        oci_ldflags="-Wl,-rpath -Wl,$oracle_lib_dir -L$oracle_lib_dir"
+        oci_ldflags="-Wl,--no-as-needed -Wl,-rpath -Wl,$oracle_lib_dir -L$oracle_lib_dir"
         LDFLAGS="$LDFLAGS $oci_ldflags"
 	saved_LIBS="$LIBS"
         oci_libs="-lclntsh -l$ORACLE_OCI_NNZ"

@@ -12708,7 +12708,7 @@ fi
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files Makefile doc/Makefile doc/examples/Makefile doc/examples/cobol/Makefile doc/images/Makefile doc/manuals/LIXA.xml doc/manuals/Makefile etc/lixac_conf.xml etc/lixad_conf.xml etc/Makefile ext/Makefile ext/doc/Makefile ext/doc/manuals/LIXA_EXT.xml ext/doc/manuals/Makefile ext/php/Makefile ext/php/examples/Makefile ext/php/tests/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/lixa-config.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/ibmdb2/Makefile src/client/switch/oracle/Makefile src/client/switch/postgresql/Makefile src/client/switch/mysql/Makefile src/client/switch/webspheremq/Makefile src/server/Makefile tests/Makefile tests/atlocal tests/lixa-config.at tests/etc/lixac_conf.xml tests/etc/lixad_conf.xml tests/etc/lixad_conf2.xml tests/etc/Makefile tests/scripts/Makefile tests/src/Makefile tests/src/cobol/Makefile utils/Makefile var/Makefile doxygen.conf"
+ac_config_files="$ac_config_files Makefile doc/Makefile doc/examples/Makefile doc/examples/cobol/Makefile doc/images/Makefile doc/manuals/LIXA.xml doc/manuals/Makefile etc/lixac_conf.xml etc/lixad_conf.xml etc/Makefile etc/lixavsr/Makefile ext/Makefile ext/doc/Makefile ext/doc/manuals/LIXA_EXT.xml ext/doc/manuals/Makefile ext/php/Makefile ext/php/examples/Makefile ext/php/tests/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/lixa-config.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/ibmdb2/Makefile src/client/switch/oracle/Makefile src/client/switch/postgresql/Makefile src/client/switch/mysql/Makefile src/client/switch/webspheremq/Makefile src/server/Makefile tests/Makefile tests/atlocal tests/lixa-config.at tests/etc/lixac_conf.xml tests/etc/lixad_conf.xml tests/etc/lixad_conf2.xml tests/etc/Makefile tests/scripts/Makefile tests/src/Makefile tests/src/cobol/Makefile utils/Makefile var/Makefile doxygen.conf"
 
 ac_config_commands="$ac_config_commands tests/atconfig"
 
@@ -12805,7 +12805,7 @@ Please, locate Oracle directories using --with-oracle or \
 	tmp2=${tmp1#lib}
 	ORACLE_OCI_NNZ=${tmp2%.*}
         saved_LDFLAGS="$LDFLAGS"
-        oci_ldflags="-Wl,-rpath -Wl,$oracle_lib_dir -L$oracle_lib_dir"
+        oci_ldflags="-Wl,--no-as-needed -Wl,-rpath -Wl,$oracle_lib_dir -L$oracle_lib_dir"
         LDFLAGS="$LDFLAGS $oci_ldflags"
 	saved_LIBS="$LIBS"
         oci_libs="-lclntsh -l$ORACLE_OCI_NNZ"
@@ -16587,6 +16587,7 @@ do
     "etc/lixac_conf.xml") CONFIG_FILES="$CONFIG_FILES etc/lixac_conf.xml" ;;
     "etc/lixad_conf.xml") CONFIG_FILES="$CONFIG_FILES etc/lixad_conf.xml" ;;
     "etc/Makefile") CONFIG_FILES="$CONFIG_FILES etc/Makefile" ;;
+    "etc/lixavsr/Makefile") CONFIG_FILES="$CONFIG_FILES etc/lixavsr/Makefile" ;;
     "ext/Makefile") CONFIG_FILES="$CONFIG_FILES ext/Makefile" ;;
     "ext/doc/Makefile") CONFIG_FILES="$CONFIG_FILES ext/doc/Makefile" ;;
     "ext/doc/manuals/LIXA_EXT.xml") CONFIG_FILES="$CONFIG_FILES ext/doc/manuals/LIXA_EXT.xml" ;;

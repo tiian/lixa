@@ -1101,10 +1101,8 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
         const long valid_flags = TMSTARTRSCAN|TMENDRSCAN|TMNOFLAGS;
         const char *CLOSE_CURSOR = "CLOSE lixa_pq_recover_cursor;";
         const char OPEN_CURSOR_FMT[] = "DECLARE lixa_pq_recover_cursor CURSOR "
-            "FOR SELECT gid FROM pg_prepared_xacts WHERE gid LIKE '%s%%' "
-            "ORDER BY prepared;";
-        lixa_ser_xid_t lsx;
-        char open_cursor[sizeof(OPEN_CURSOR_FMT) + sizeof(lsx)];
+            "FOR SELECT gid FROM pg_prepared_xacts ORDER BY prepared;";
+        char open_cursor[sizeof(OPEN_CURSOR_FMT)];
         const char *BEGIN = "BEGIN;";
         const char *END = "END;";
         const char FETCH_COUNT_FMT[] = "FETCH %ld FROM "
@@ -1157,8 +1155,7 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
             }
             PQclear(res);
             res = NULL;
-            lixa_xid_formatid(lsx);
-            snprintf(open_cursor, sizeof(open_cursor), OPEN_CURSOR_FMT, lsx);
+            snprintf(open_cursor, sizeof(open_cursor), OPEN_CURSOR_FMT);
             LIXA_TRACE(("lixa_pq_recover: '%s'\n", open_cursor));
             res = PQexec(lpsr->conn, open_cursor);
             if (PGRES_COMMAND_OK != PQresultStatus(res)) {
