@@ -1,0 +1,57 @@
+LIXA Very Stupid Robot language documentation.
+Please pay attention that it's a very stupid robot and additional characters
+like blanks or tabs are not accepted.
+
+The robot accepts only 3 types of rows:
+1. <comment>
+2. <command>
+3. <quit>
+<quit> is a special type of <command> and shutdown the robot. Every sequence
+	of commands must be terminated by <quit> to guarantee the proper
+	clean-up
+
+<comment> ::= <hash> <freetext>
+<hash> ::= #
+<freetext> ::= any valid ASCII sequence terminated by newline
+
+Examples:
+# This is a comment
+#### This is another comment
+ # This is NOT a valid comment
+
+<command> ::= <thread> <separator> <function> <separator> <expectedrc>
+<thread> ::= 0|1|2|3|... a non negative integer with the meaning of "thread of
+		control". Use a sequence starting from 0 for the first one,
+		1 for the second one and so on.
+<separator> ::= /
+<function> ::= <openclose> | <transfunct> | <quit>
+<openclose> ::= xa_open|xa_close <leftpar> <opencloseargs> <rightpar>
+<leftpar> ::= (
+<rightpar> ::= )
+<opencloseargs> ::= <info> <comma> <rmid> <comma> <flags>
+<info> ::= a string surrounded by quotes like "open string"
+<comma> ::= ,
+<rmid> ::= 0|1|2|3|... a non negative integer with the meaning of "resource
+		manager id". Use a sequence starting from 0 for the first
+		Resource Manager described by the active LIXA profile (see
+		LIXA_PROFILE environment variable and lixac_conf.xml file)
+<flags> ::= a list of flags as specified in file xa.h
+<transfunct> ::= xa_commit|xa_end|xa_forget|xa_prepare|xa_rollback|xa_start
+		<leftpar> <transfunctargs> <rightpar>
+<transfunctargs> ::= <xid> <comma> <rmid> <comma> <flags>
+<xid> ::= <quote> <formatID> <dot> <global> <dot> <branch> <quote>
+<quote> ::= "
+<formatID> ::= a non negative long integer with the meaning of XA Format ID
+		Use any value you like: 231, 1849780583, etc...
+<dot> ::= .
+<global> ::= exadecimal representation of the global prefix of the transaction
+		like A256CF41
+<branch> ::= exadecimal representation of the branch qualifier og the
+		transaction like FF45A3
+<quit> ::= vsr_quit <leftpar> <rightpar>
+
+Examples:
+0/xa_open("",0,TMNOFLAGS|TMRESUME|TMFAIL)/0
+0/xa_open("TABLE=XXY",0,TMNOFLAGS|TMRESUME|TMFAIL)/0
+0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
+0/vsr_quit()/0

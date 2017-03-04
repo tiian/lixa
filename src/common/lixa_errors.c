@@ -155,6 +155,10 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: 'realloc' function returned an error condition";
         case LIXA_RC_STRDUP_ERROR:
             return "ERROR: 'strdup' function returned an error condition";
+        case LIXA_RC_FORK_ERROR:
+            return "ERROR: 'fork' function returned an error condition";
+        case LIXA_RC_KILL_ERROR:
+            return "ERROR: 'kill' function returned an error condition";
         case LIXA_RC_POLL_ERROR:
             return "ERROR: 'poll' function returned an error condition";
         case LIXA_RC_PIPE_ERROR:
@@ -300,8 +304,8 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_G_CHECKSUM_NEW_ERROR:
             return "ERROR: 'g_checksum_new' function returned an "
                 "error condition";
-        case LIXA_RC_G_CHECKSUM_GET_STRING_ERROR:
-            return "ERROR: 'g_checksum_get_string' function returned an "
+        case LIXA_RC_G_THREAD_CREATE_ERROR:
+            return "ERROR: 'g_thread_create' function returned an "
                 "error condition";
         default:
             return "ERROR: unknown error";

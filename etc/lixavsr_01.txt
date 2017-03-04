@@ -1,0 +1,25 @@
+# LIXA Very Stupid Robot 
+# This file is intended to be used by lixavsr utility
+# File format: see doc/lixavsr.txt for a formal grammar expressed using BNF.
+# Here is just a brief hint for the lazy user.
+#
+# thread of control (integer)/XA function with parameters/expecter return code
+# Functions expect these parameters:
+#   xa_close(info,rmid,flags)
+#   xa_commit(xid,rmid,flags)
+#   xa_end(xid,rmid,flags)
+#   xa_forget(xid,rmid,flags)
+#   xa_open(info,rmid,flags)
+#   xa_prepare(xid,rmid,flags)
+#   xa_rollback(xid,rmid,flags)
+#   xa_start(xid,rmid,flags)
+# Parameters can be:
+#   rmid: integer starting from 0 (first resource manager in LIXA profile)
+#   flags: labels as described by XA specification (xa.h file)
+#   xid: can be xid11 (global1, branch1), xid12 (global1, branch2), xid21, xid22
+# Last row must be:
+#   thread of control (integer)/vsr_quit()/0
+#   LIXA Very Stupid Robot is very stupid and needs a termination row
+0/xa_open("TABLE=XXY",0,TMNOFLAGS|TMRESUME|TMFAIL)/0
+0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
+0/vsr_quit()/0
