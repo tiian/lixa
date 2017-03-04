@@ -606,7 +606,8 @@ int lixavsr_parse_record(const char *record,
 int lixavsr_execute_xa_function(parsed_function_t *parsed_function,
                                 int *xa_rc)
 {
-    enum Exception { OUT_OF_RANGE
+    enum Exception { OUT_OF_RANGE1
+                     , OUT_OF_RANGE2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -758,12 +759,38 @@ int lixavsr_execute_xa_function(parsed_function_t *parsed_function,
                             parsed_function->flags, *xa_rc));
                 break;
             default:
-                THROW(OUT_OF_RANGE);
+                THROW(OUT_OF_RANGE1);
         } /* switch (parsed_function->fid) */
+        /* stdout reporting */
+        switch (parsed_function->fid) {
+            case XA_CLOSE:
+            case XA_OPEN:
+                printf("%s(\"%s\",%d,0x%8.8x)=%d\n",
+                       PARSABLE_FUNCTIONS[parsed_function->fid],
+                       info, parsed_function->rmid,
+                       (unsigned int)parsed_function->flags, *xa_rc);
+                break;
+            case XA_COMMIT:
+            case XA_END:
+            case XA_FORGET:
+            case XA_PREPARE:
+            case XA_ROLLBACK:
+            case XA_START:
+                printf("%s(\"%s\",%d,0x%8.8x)=%d\n",
+                       PARSABLE_FUNCTIONS[parsed_function->fid],
+                       lsx, parsed_function->rmid,
+                       (unsigned int)parsed_function->flags, *xa_rc);
+                break;
+            default:
+                THROW(OUT_OF_RANGE1);                
+        } /* switch (parsed_function->fid) */
+        fflush(stdout);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case OUT_OF_RANGE:
+            case OUT_OF_RANGE1:
+            case OUT_OF_RANGE2:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
                 break;
             case NONE:
@@ -806,8 +833,13 @@ void lixavsr_threadofcontrol(pipes_t *pipes)
             /* execute XA function */
             if (VSR_QUIT != parsed_function.fid &&
                 LIXA_RC_OK != (ret_cod = lixavsr_execute_xa_function(
-                                   &parsed_function, &xa_rc)))
+                                   &parsed_function, &xa_rc))) {
                 THROW(EXECUTE_XA_FUNCTION);
+            } else {
+                /* reporting thread of control exit */
+                printf("exiting...\n");
+                fflush(stdout);
+            }
             /* write the return code */
             bytes = write(my_pipes.write, &xa_rc, sizeof(xa_rc));
             if (bytes != sizeof(xa_rc))
@@ -976,6 +1008,9 @@ int lixavsr_execute_record(xa_context_t *xa_context,
                                    &tmp_pipes)))
                 THROW(ACTIVATE_THREADOFCONTROL);
         }
+        /* write the thread of control */
+        printf("toc=%d\t", parsed_statement->thread_of_control);
+        fflush(stdout);
         /* write command to the child */
         bytes = write(xa_context->down_pipefd[
                           parsed_statement->thread_of_control][1],
@@ -993,6 +1028,10 @@ int lixavsr_execute_record(xa_context_t *xa_context,
             LIXA_TRACE(("lixavsr_execute_record: XA function expected "
                         "return code is %d, retrieved return code is %d\n",
                         parsed_statement->expected_rc, xa_rc));
+            printf("XA function expected "
+                   "return code is %d, retrieved return code is %d\n",
+                   parsed_statement->expected_rc, xa_rc);
+            fflush(stdout);
             THROW(XA_ERROR);
         }
         

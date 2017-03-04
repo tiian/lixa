@@ -739,6 +739,7 @@ int lixa_my_start(XID *xid, int rmid, long flags)
 {
     enum Exception { INVALID_FLAGS1
                      , INVALID_FLAGS2
+                     , INVALID_FLAGS3
                      , PROTOCOL_ERROR1
                      , PROTOCOL_ERROR2
                      , NULL_CONN
@@ -753,7 +754,10 @@ int lixa_my_start(XID *xid, int rmid, long flags)
     TRY {
         struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMJOIN|TMRESUME|TMNOWAIT|TMASYNC|TMNOFLAGS;
+        const long supp_flags = TMJOIN|TMRESUME|TMNOFLAGS;
         const char stmt_fmt[] = "XA START %s";
+        const char stmt_join[] = " JOIN";
+        const char stmt_resume[] = " RESUME";
         size_t stmt_size;
         lixa_my_ser_xid_t lmsx;
         
@@ -765,15 +769,22 @@ int lixa_my_start(XID *xid, int rmid, long flags)
             THROW(INVALID_FLAGS1);
         }
         
-        if (TMNOFLAGS != flags) {
+        if ((flags|supp_flags) != supp_flags) {
             LIXA_TRACE(("lixa_my_start: flags 0x%x are not supported\n",
                         flags));
             THROW(INVALID_FLAGS2);
         }
-        
+
+        if (flags&TMJOIN && flags&TMRESUME) {
+            LIXA_TRACE(("lixa_my_start: flags 0x%x are invalid (TMJOIN and "
+                        "TMRESUME can not be used together\n", flags));
+            THROW(INVALID_FLAGS3);
+            
+        }
         if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
             THROW(PROTOCOL_ERROR1);
-        
+
+        /* this step does not check for TMJOIN/TMRESUME: it might be bugged */
         if (lpsr->state.R != 1 || lpsr->state.T != 0 ||
             (lpsr->state.S != 0 && lpsr->state.S != 2)) {
             LIXA_TRACE(("lixa_my_start: rmid %d state(R,S,T)={%d,%d,%d}\n",
@@ -797,10 +808,15 @@ int lixa_my_start(XID *xid, int rmid, long flags)
         /* saving xid */
         lpsr->xid = *xid;
         /* preparing statement */
-        stmt_size = strlen(lmsx) + sizeof(stmt_fmt);
+        stmt_size = strlen(lmsx) + sizeof(stmt_fmt) + sizeof(stmt_join) +
+            sizeof(stmt_resume);
         if (NULL == (stmt = malloc(stmt_size)))
             THROW(MALLOC_ERROR);
         snprintf(stmt, stmt_size, stmt_fmt, lmsx);
+        if (TMJOIN & flags)
+            strncat(stmt, stmt_join, stmt_size);
+        if (TMRESUME & flags)
+            strncat(stmt, stmt_resume, stmt_size);
         /* starting transaction */
         if (mysql_query(lpsr->conn, stmt)) {
             LIXA_TRACE(("lixa_my_start: MySQL error while executing "
@@ -815,6 +831,7 @@ int lixa_my_start(XID *xid, int rmid, long flags)
         switch (excp) {
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
+            case INVALID_FLAGS3:
                 xa_rc = XAER_INVAL;
                 break;
             case PROTOCOL_ERROR1:
@@ -869,7 +886,10 @@ int lixa_my_end(XID *xid, int rmid, long flags)
     TRY {
         struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMSUSPEND|TMMIGRATE|TMSUCCESS|TMFAIL|TMASYNC;
+        const long supp_flags = TMSUSPEND|TMMIGRATE|TMSUCCESS;
         const char stmt_fmt[] = "XA END %s";
+        const char stmt_suspend[] = " SUSPEND";
+        const char stmt_migrate[] = " FOR MIGRATE";
         size_t stmt_size;
         lixa_my_ser_xid_t lmsx;
 
@@ -881,7 +901,7 @@ int lixa_my_end(XID *xid, int rmid, long flags)
             THROW(INVALID_FLAGS1);
         }
         
-        if ((TMSUSPEND|TMMIGRATE|TMASYNC) & flags) {
+        if ((flags|supp_flags) != supp_flags) {
             LIXA_TRACE(("lixa_my_end: flags 0x%x are not supported\n",
                         flags));
             THROW(INVALID_FLAGS2);
@@ -928,10 +948,15 @@ int lixa_my_end(XID *xid, int rmid, long flags)
         /* saving xid */
         lpsr->xid = *xid;
         /* preparing statement */
-        stmt_size = strlen(lmsx) + sizeof(stmt_fmt);
+        stmt_size = strlen(lmsx) + sizeof(stmt_fmt) + sizeof(stmt_suspend) +
+            sizeof(stmt_migrate);
         if (NULL == (stmt = malloc(stmt_size)))
             THROW(MALLOC_ERROR);
         snprintf(stmt, stmt_size, stmt_fmt, lmsx);
+        if (TMSUSPEND&flags)
+            strncat(stmt, stmt_suspend, stmt_size);
+        if (TMMIGRATE&flags)
+            strncat(stmt, stmt_migrate, stmt_size);
         /* starting transaction */
         if (mysql_query(lpsr->conn, stmt)) {
             LIXA_TRACE(("lixa_my_end: MySQL error while executing "

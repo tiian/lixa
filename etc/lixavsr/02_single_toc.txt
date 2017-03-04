@@ -5,14 +5,13 @@
 #
 # These commands should work with these Resource Managers for a single thread of
 # control:
-# - PostgreSQL
-# - MySQL/MariaDB
+# - Oracle Database 12.1
 #
 0/xa_open("",0,TMNOFLAGS)/0
 0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
 0/xa_end("231.a256cf41.ff45a3",0,TMSUCCESS)/0
-0/xa_prepare("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
-0/xa_commit("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
+0/xa_prepare("231.a256cf41.ff45a3",0,TMNOFLAGS)/3
+# Starting the same transaction again to verify it has been completed
 0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
 0/xa_end("231.a256cf41.ff45a3",0,TMSUCCESS)/0
 0/xa_commit("231.a256cf41.ff45a3",0,TMONEPHASE)/0

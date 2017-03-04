@@ -1,0 +1,29 @@
+# LIXA Very Stupid Robot 
+# This file is intended to be used by lixavsr utility
+# File format: see doc/lixavsr.txt for a formal grammar expressed using BNF.
+# Here is just a brief hint for the lazy user.
+#
+# Two thread of controls that works on completely different transactions
+# These commands should work with these Resource Managers for a double thread of
+# control:
+# - Oracle Database 12.1
+#
+0/xa_open("",0,TMNOFLAGS)/0
+1/xa_open("",0,TMNOFLAGS)/0
+0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
+1/xa_start("231.a256cf42.ff45a4",0,TMNOFLAGS)/0
+0/xa_end("231.a256cf41.ff45a3",0,TMSUCCESS)/0
+1/xa_end("231.a256cf42.ff45a4",0,TMSUCCESS)/0
+0/xa_prepare("231.a256cf41.ff45a3",0,TMNOFLAGS)/3
+1/xa_prepare("231.a256cf42.ff45a4",0,TMNOFLAGS)/3
+# Starting the same transaction again to verify it has been completed
+0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
+1/xa_start("231.a256cf42.ff45a4",0,TMNOFLAGS)/0
+0/xa_end("231.a256cf41.ff45a3",0,TMSUCCESS)/0
+1/xa_end("231.a256cf42.ff45a4",0,TMSUCCESS)/0
+0/xa_commit("231.a256cf41.ff45a3",0,TMONEPHASE)/0
+1/xa_commit("231.a256cf42.ff45a4",0,TMONEPHASE)/0
+0/xa_close("",0,TMNOFLAGS)/0
+1/xa_close("",0,TMNOFLAGS)/0
+0/vsr_quit()/0
+1/vsr_quit()/0
