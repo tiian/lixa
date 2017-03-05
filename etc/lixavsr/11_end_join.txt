@@ -4,22 +4,21 @@
 # Here is just a brief hint for the lazy user.
 #
 # Suspend from the first thread of control and join into second
-# thread of control
-#
-# @@@ Work in progress
+# thread of control; after completion of second thread of control, first one
+# take the control, resumes, ends and prepares the transaction
 #
 # These commands should work with these Resource Managers:
 # - Oracle 12.1
 #
 0/xa_open("",0,TMNOFLAGS)/0
-0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
-0/xa_end("231.a256cf41.ff45a3",0,TMSUSPEND)/0
+0/xa_start("231.a256cf44.ff45a3",0,TMNOFLAGS)/0
+0/xa_end("231.a256cf44.ff45a3",0,TMSUSPEND)/0
 1/xa_open("",0,TMNOFLAGS)/0
-1/xa_start("231.a256cf41.ff45a3",0,TMJOIN)/0
-1/xa_end("231.a256cf41.ff45a3",0,TMSUSPEND)/0
-0/xa_start("231.a256cf41.ff45a3",0,TMJOIN)/0
-0/xa_end("231.a256cf41.ff45a3",0,TMSUCCESS)/0
-0/xa_prepare("231.a256cf41.ff45a3",0,TMNOFLAGS)/3
+1/xa_start("231.a256cf44.ff45a3",0,TMJOIN)/0
+1/xa_end("231.a256cf44.ff45a3",0,TMSUCCESS)/0
+0/xa_start("231.a256cf44.ff45a3",0,TMRESUME)/0
+0/xa_end("231.a256cf44.ff45a3",0,TMSUCCESS)/0
+0/xa_prepare("231.a256cf44.ff45a3",0,TMNOFLAGS)/3
 0/xa_close("",0,TMNOFLAGS)/0
 1/xa_close("",0,TMNOFLAGS)/0
 0/vsr_quit()/0

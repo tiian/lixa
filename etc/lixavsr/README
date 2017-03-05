@@ -1,2 +1,5 @@
 This directory contains files that can be used with lixavsr (LIXA Very Stupid
 Robot) to test specific configurations.
+These files are not installed with make install because the main intent is to
+provide a development tool; interested users can copy them in the desired
+destination.

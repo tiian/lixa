@@ -4,17 +4,22 @@
 # Here is just a brief hint for the lazy user.
 #
 # Suspend & migrate from the first thread of control and resume into second
-# thread of control
+# thread of control; suspend from the second and resume into the third;
+# finally commit from third one.
+# Note: TMMIGRATE is mandatory for resuming in another thread of control
 # These commands should work with these Resource Managers:
 # - Oracle 12.1
 #
 0/xa_open("",0,TMNOFLAGS)/0
+1/xa_open("",0,TMNOFLAGS)/0
+2/xa_open("",0,TMNOFLAGS)/0
 0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
 0/xa_end("231.a256cf41.ff45a3",0,TMSUSPEND|TMMIGRATE)/0
-1/xa_open("",0,TMNOFLAGS)/0
 1/xa_start("231.a256cf41.ff45a3",0,TMRESUME)/0
-1/xa_end("231.a256cf41.ff45a3",0,TMSUCCESS)/0
-1/xa_prepare("231.a256cf41.ff45a3",0,TMNOFLAGS)/3
+1/xa_end("231.a256cf41.ff45a3",0,TMSUSPEND|TMMIGRATE)/0
+2/xa_start("231.a256cf41.ff45a3",0,TMRESUME)/0
+2/xa_end("231.a256cf41.ff45a3",0,TMSUCCESS)/0
+2/xa_prepare("231.a256cf41.ff45a3",0,TMNOFLAGS)/3
 # The same as above, but with single phase commit
 0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
 0/xa_end("231.a256cf41.ff45a3",0,TMSUSPEND|TMMIGRATE)/0
@@ -23,5 +28,7 @@
 1/xa_commit("231.a256cf41.ff45a3",0,TMONEPHASE)/0
 0/xa_close("",0,TMNOFLAGS)/0
 1/xa_close("",0,TMNOFLAGS)/0
+2/xa_close("",0,TMNOFLAGS)/0
 0/vsr_quit()/0
 1/vsr_quit()/0
+2/vsr_quit()/0
