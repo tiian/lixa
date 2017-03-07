@@ -216,10 +216,10 @@
     <packagedElement xmi:type="uml:Interaction" xmi:id="_HQ3uQOvhEeak7OxeJ13hOw" name="Suspend Resume">
       <ownedComment xmi:type="uml:Comment" xmi:id="_EsPF8OvvEeak7OxeJ13hOw" annotatedElement="_3yYbcOvqEeak7OxeJ13hOw _7ncogOvqEeak7OxeJ13hOw">
         <body>Resource Managers support TMMIGRATE (optional feature)
-flag= TMSUSPEND|TMMIGRATE</body>
+flags=TMSUSPEND|TMMIGRATE</body>
       </ownedComment>
       <ownedComment xmi:type="uml:Comment" xmi:id="_SabUQOvvEeak7OxeJ13hOw" annotatedElement="_y-LasOvsEeak7OxeJ13hOw _6XULcOvsEeak7OxeJ13hOw">
-        <body> TMRESUME</body>
+        <body>flags=TMRESUME</body>
       </ownedComment>
       <ownedComment xmi:type="uml:Comment" xmi:id="_ZM2qUOvvEeak7OxeJ13hOw">
         <body>xa_open is not depicted but it happens somewhere</body>
@@ -237,6 +237,12 @@ RM2</body>
       </ownedComment>
       <ownedComment xmi:type="uml:Comment" xmi:id="_WizM0O15EeaaGr6VD20__A">
         <body>Resource Managers typically implements a &quot;tight coupling&quot; policy for internal synchronization</body>
+      </ownedComment>
+      <ownedComment xmi:type="uml:Comment" xmi:id="_8xML4AHwEeePj8DTfscBdQ" annotatedElement="_t0AmcOvtEeak7OxeJ13hOw _ggXJoOvuEeak7OxeJ13hOw">
+        <body> flags=TMSUCCESS</body>
+      </ownedComment>
+      <ownedComment xmi:type="uml:Comment" xmi:id="_GOelsAHxEeePj8DTfscBdQ">
+        <body> A similar sequence has been tested with a single Resource Manager (Oracle Database 12.1) using lixavsr (etc/lixavsr/10_suspend_resume.txt)</body>
       </ownedComment>
       <ownedAttribute xmi:type="uml:Property" xmi:id="_XTaS4OvjEeak7OxeJ13hOw" name="" type="_zDpg0OmMEeasa8OwCd1CnQ"/>
       <ownedAttribute xmi:type="uml:Property" xmi:id="_dy10cOvjEeak7OxeJ13hOw" name="TM1" type="_A-QP8OmMEeasa8OwCd1CnQ"/>
@@ -368,10 +374,10 @@ RM2</body>
       </ownedComment>
       <ownedComment xmi:type="uml:Comment" xmi:id="_0K-PwO1yEeaaGr6VD20__A" annotatedElement="_iNZP4O1yEeaaGr6VD20__A _fszicO1yEeaaGr6VD20__A">
         <body>Resource Managers do not support TMMIGRATE
-flag=TMNOFLAGS</body>
+flags=TMSUCCESS</body>
       </ownedComment>
       <ownedComment xmi:type="uml:Comment" xmi:id="_HIiQgO10EeaaGr6VD20__A" annotatedElement="_FYXTYO10EeaaGr6VD20__A _CmqAwO10EeaaGr6VD20__A">
-        <body> flag=TMJOIN</body>
+        <body> flags=TMJOIN</body>
       </ownedComment>
       <ownedComment xmi:type="uml:Comment" xmi:id="_Fg8LIO11EeaaGr6VD20__A">
         <body>xa_close is not depicted but it happens somewhere</body>
@@ -385,6 +391,12 @@ flag=TMNOFLAGS</body>
       </ownedComment>
       <ownedComment xmi:type="uml:Comment" xmi:id="_yOqFUO14EeaaGr6VD20__A">
         <body>xa_open is not depicted but it happens somewhere</body>
+      </ownedComment>
+      <ownedComment xmi:type="uml:Comment" xmi:id="_e4TQkAHwEeePj8DTfscBdQ" annotatedElement="_iMp-IO10EeaaGr6VD20__A _knfB0O10EeaaGr6VD20__A">
+        <body> flags=TMSUCCESS</body>
+      </ownedComment>
+      <ownedComment xmi:type="uml:Comment" xmi:id="_oHCRAAHwEeePj8DTfscBdQ">
+        <body> A similar sequence has been tested with a single Resource Manager (Oracle Database 12.1) using lixavsr (etc/lixavsr/12_end_join.txt)</body>
       </ownedComment>
       <ownedAttribute xmi:type="uml:Property" xmi:id="_BpyFoO1wEeaaGr6VD20__A" name="AP1" type="_OkYG4OrKEeaVeNZh1YFZ1g"/>
       <ownedAttribute xmi:type="uml:Property" xmi:id="_QFycMO1wEeaaGr6VD20__A" name="TM1" type="_A-QP8OmMEeasa8OwCd1CnQ"/>
