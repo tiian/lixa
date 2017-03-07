@@ -230,6 +230,11 @@
 #define LIXA_RC_MALFORMED_XID                  -26
 
 
+
+/**
+ * Generic error for a Resource Manager operation
+ */
+#define LIXA_RC_RM_ERROR                       -96
 /**
  * The client status is unknown due to a previous TX_FAIL
  */

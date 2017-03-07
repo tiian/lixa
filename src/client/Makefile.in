@@ -509,8 +509,10 @@ lixau_CPPFLAGS = -I$(srcdir)/../common
 lixau_LDADD = ../common/liblixab.la @LDFLAGS_XML2@ liblixac.la
 lixau_LDFLAGS = @LDFLAGS_GLIB@
 lixau_SOURCES = lixau.c
-lixavsr_CPPFLAGS = -I$(srcdir)/../common
-lixavsr_LDADD = ../common/liblixab.la @LDFLAGS_XML2@ liblixac.la
+lixavsr_CPPFLAGS = -I$(srcdir)/../common @ORACLE_OCI_CFLAGS@
+lixavsr_LDADD = ../common/liblixab.la @LDFLAGS_XML2@ liblixac.la \
+	@ORACLE_OCI_LDFLAGS@ @ORACLE_OCI_LIBS@
+
 lixavsr_LDFLAGS = @LDFLAGS_GLIB@
 lixavsr_SOURCES = lixavsr.c
 lixa_config_SOURCES = lixa-config.c

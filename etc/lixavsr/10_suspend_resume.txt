@@ -13,19 +13,31 @@
 0/xa_open("",0,TMNOFLAGS)/0
 1/xa_open("",0,TMNOFLAGS)/0
 2/xa_open("",0,TMNOFLAGS)/0
-0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
-0/xa_end("231.a256cf41.ff45a3",0,TMSUSPEND|TMMIGRATE)/0
-1/xa_start("231.a256cf41.ff45a3",0,TMRESUME)/0
-1/xa_end("231.a256cf41.ff45a3",0,TMSUSPEND|TMMIGRATE)/0
-2/xa_start("231.a256cf41.ff45a3",0,TMRESUME)/0
-2/xa_end("231.a256cf41.ff45a3",0,TMSUCCESS)/0
-2/xa_prepare("231.a256cf41.ff45a3",0,TMNOFLAGS)/3
+0/xa_start("231.a256cf42.ff45a3",0,TMNOFLAGS)/0
+# performing real Resource Manager commands
+0/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('RS', 'Repubblica San Marino', 1)")/0
+0/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'")/0
+0/xa_end("231.a256cf42.ff45a3",0,TMSUSPEND|TMMIGRATE)/0
+1/xa_start("231.a256cf42.ff45a3",0,TMRESUME)/0
+1/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('ZA', 'South Africa', 1)")/0
+1/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'")/0
+1/xa_end("231.a256cf42.ff45a3",0,TMSUSPEND|TMMIGRATE)/0
+2/xa_start("231.a256cf42.ff45a3",0,TMRESUME)/0
+2/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('IC', 'Iceland', 1)")/0
+2/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'IC'")/0
+2/xa_end("231.a256cf42.ff45a3",0,TMSUCCESS)/0
+2/xa_prepare("231.a256cf42.ff45a3",0,TMNOFLAGS)/0
+2/xa_commit("231.a256cf42.ff45a3",0,TMNOFLAGS)/0
 # The same as above, but with single phase commit
-0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
-0/xa_end("231.a256cf41.ff45a3",0,TMSUSPEND|TMMIGRATE)/0
-1/xa_start("231.a256cf41.ff45a3",0,TMRESUME)/0
-1/xa_end("231.a256cf41.ff45a3",0,TMSUCCESS)/0
-1/xa_commit("231.a256cf41.ff45a3",0,TMONEPHASE)/0
+0/xa_start("231.a256cf43.ff45a3",0,TMNOFLAGS)/0
+0/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('RS', 'Repubblica San Marino', 1)")/0
+0/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'")/0
+0/xa_end("231.a256cf43.ff45a3",0,TMSUSPEND|TMMIGRATE)/0
+1/xa_start("231.a256cf43.ff45a3",0,TMRESUME)/0
+1/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('ZA', 'South Africa', 1)")/0
+1/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'")/0
+1/xa_end("231.a256cf43.ff45a3",0,TMSUCCESS)/0
+1/xa_commit("231.a256cf43.ff45a3",0,TMONEPHASE)/0
 0/xa_close("",0,TMNOFLAGS)/0
 1/xa_close("",0,TMNOFLAGS)/0
 2/xa_close("",0,TMNOFLAGS)/0
