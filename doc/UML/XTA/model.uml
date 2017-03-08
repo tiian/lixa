@@ -539,6 +539,9 @@ XA protocol can be extended with feedback related to &quot;other branches must d
       <ownedComment xmi:type="uml:Comment" xmi:id="_HMry4O2DEeaaGr6VD20__A" annotatedElement="_m3NnwO1_EeaaGr6VD20__A">
         <body>A new branch (qualifier) inside the same (global) transaction is generated</body>
       </ownedComment>
+      <ownedComment xmi:type="uml:Comment" xmi:id="_MumiQARLEeeUsftcQcMQaw">
+        <body>  A similar sequence has been tested with a single Resource Manager (Oracle Database 12.1) using lixavsr (etc/lixavsr/14_branch.txt)</body>
+      </ownedComment>
       <ownedAttribute xmi:type="uml:Property" xmi:id="_AHscQe16EeaaGr6VD20__A" name="AP1" type="_OkYG4OrKEeaVeNZh1YFZ1g"/>
       <ownedAttribute xmi:type="uml:Property" xmi:id="_GEhAAO16EeaaGr6VD20__A" name="TM1" type="_A-QP8OmMEeasa8OwCd1CnQ"/>
       <ownedAttribute xmi:type="uml:Property" xmi:id="_SHUqkO16EeaaGr6VD20__A" name="TX1" type="_x4viAOmOEeacKam9FJIH_w"/>
