@@ -3,20 +3,28 @@
 # File format: see doc/lixavsr.txt for a formal grammar expressed using BNF.
 # Here is just a brief hint for the lazy user.
 #
-# The following example uses 3 distinct thread of controls: the transaction
+# The following example uses 3 distinct threads of control: the transaction
 # is created by the first one, then reused by the second one and finally
 # reused and terminated by the third one. The execution is pure sequential.
+# The commands show a possible (managed) protocol error.
 #
 # These commands should work with these Resource Managers:
 # - Oracle 12.1
 #
+# Every thread of control opens the Resource Manager (Oracle DBMS)
+#
 0/xa_open("",0,TMNOFLAGS)/0
 1/xa_open("",0,TMNOFLAGS)/0
 2/xa_open("",0,TMNOFLAGS)/0
+#
+# First thread of control starts the transaction
+#
 0/xa_start("231.a256cf44.ff45a3",0,TMNOFLAGS)/0
+#
 # This command does not succeed because the same branch can't be shared by two
 # concurrent thread of controls.
 # Note: the following command will take a while because a timeout must expire.
+#
 1/xa_start("231.a256cf44.ff45a3",0,TMJOIN)/4
 0/xa_end("231.a256cf44.ff45a3",0,TMSUCCESS)/0
 # Now it works because the first thread of control released the branch

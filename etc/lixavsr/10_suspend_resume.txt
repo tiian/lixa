@@ -10,25 +10,58 @@
 # These commands should work with these Resource Managers:
 # - Oracle 12.1
 #
+# Every thread of control opens the Resource Manager (Oracle DBMS)
+#
 0/xa_open("",0,TMNOFLAGS)/0
 1/xa_open("",0,TMNOFLAGS)/0
 2/xa_open("",0,TMNOFLAGS)/0
+#
+# First thread of control starts the transaction
+#
 0/xa_start("231.a256cf42.ff45a3",0,TMNOFLAGS)/0
-# performing real Resource Manager commands
+#
+# First thread performs real SQL command
+#
 0/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('RS', 'Repubblica San Marino', 1)")/0
-0/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'")/0
+#
+# First thread of control suspends for migration the transaction
+#
 0/xa_end("231.a256cf42.ff45a3",0,TMSUSPEND|TMMIGRATE)/0
+#
+# Second thread of control resumes the transaction
+#
 1/xa_start("231.a256cf42.ff45a3",0,TMRESUME)/0
+#
+# Second thread uses the same branch of the first one and can see the data
+# changed by it
+#
+1/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'")/0
 1/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('ZA', 'South Africa', 1)")/0
-1/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'")/0
+#
+# Second thread of control suspends for migration the transaction
+#
 1/xa_end("231.a256cf42.ff45a3",0,TMSUSPEND|TMMIGRATE)/0
+#
+# Third thread of control resumes the transaction
+#
 2/xa_start("231.a256cf42.ff45a3",0,TMRESUME)/0
-2/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('IC', 'Iceland', 1)")/0
-2/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'IC'")/0
+#
+# Third thread uses the same branch of the second one and can see the data
+# changed by it
+#
+2/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'")/0
+#
+# Third thread starts transaction termination
+#
 2/xa_end("231.a256cf42.ff45a3",0,TMSUCCESS)/0
+#
+# Third thread prepares and commit the transaction
+#
 2/xa_prepare("231.a256cf42.ff45a3",0,TMNOFLAGS)/0
 2/xa_commit("231.a256cf42.ff45a3",0,TMNOFLAGS)/0
-# The same as above, but with single phase commit
+#
+# The same as above, but with single phase commit instead of two phase commit
+#
 0/xa_start("231.a256cf43.ff45a3",0,TMNOFLAGS)/0
 0/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('RS', 'Repubblica San Marino', 1)")/0
 0/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'")/0
@@ -37,6 +70,9 @@
 1/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('ZA', 'South Africa', 1)")/0
 1/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'")/0
 1/xa_end("231.a256cf43.ff45a3",0,TMSUCCESS)/0
+#
+# Single phase commit without prepare
+#
 1/xa_commit("231.a256cf43.ff45a3",0,TMONEPHASE)/0
 0/xa_close("",0,TMNOFLAGS)/0
 1/xa_close("",0,TMNOFLAGS)/0

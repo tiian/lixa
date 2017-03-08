@@ -10,15 +10,67 @@
 # These commands should work with these Resource Managers:
 # - Oracle 12.1
 #
+# Every thread of control opens the Resource Manager (Oracle DBMS)
+#
 0/xa_open("",0,TMNOFLAGS)/0
-0/xa_start("231.a256cf44.ff45a3",0,TMNOFLAGS)/0
-0/xa_end("231.a256cf44.ff45a3",0,TMSUSPEND)/0
 1/xa_open("",0,TMNOFLAGS)/0
+#
+# First thread of control starts the transaction
+#
+0/xa_start("231.a256cf44.ff45a3",0,TMNOFLAGS)/0
+#
+# First thread performs real SQL command
+#
+0/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('RS', 'Repubblica San Marino', 1)")/0
+#
+# First thread of control suspends the transaction
+#
+0/xa_end("231.a256cf44.ff45a3",0,TMSUSPEND)/0
+#
+# Second thread of control joins the transaction
+#
 1/xa_start("231.a256cf44.ff45a3",0,TMJOIN)/0
+#
+# Second thread uses the same branch of the first one and can see the data
+# changed by it
+#
+1/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'")/0
+1/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('ZA', 'South Africa', 1)")/0
+#
+# Second thread leaves the transaction
+#
 1/xa_end("231.a256cf44.ff45a3",0,TMSUCCESS)/0
+#
+# First thread resumes the transaction
 0/xa_start("231.a256cf44.ff45a3",0,TMRESUME)/0
+#
+# First thread uses the same branch of the second one and can see the data
+# changed by it
+#
+0/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'")/0
+#
+# First thread starts transaction termination
+#
 0/xa_end("231.a256cf44.ff45a3",0,TMSUCCESS)/0
-0/xa_prepare("231.a256cf44.ff45a3",0,TMNOFLAGS)/3
+#
+# First thread prepares and commit the transaction
+#
+0/xa_prepare("231.a256cf44.ff45a3",0,TMNOFLAGS)/0
+0/xa_commit("231.a256cf44.ff45a3",0,TMNOFLAGS)/0
+#
+# The same as above, but with single phase commit instead of two phase commit
+#
+0/xa_start("231.a256cf45.ff45a3",0,TMNOFLAGS)/0
+0/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('RS', 'Repubblica San Marino', 1)")/0
+0/xa_end("231.a256cf45.ff45a3",0,TMSUSPEND)/0
+1/xa_start("231.a256cf45.ff45a3",0,TMJOIN)/0
+1/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'")/0
+1/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('ZA', 'South Africa', 1)")/0
+1/xa_end("231.a256cf45.ff45a3",0,TMSUCCESS)/0
+0/xa_start("231.a256cf45.ff45a3",0,TMRESUME)/0
+0/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'")/0
+0/xa_end("231.a256cf45.ff45a3",0,TMSUCCESS)/0
+0/xa_commit("231.a256cf45.ff45a3",0,TMONEPHASE)/0
 0/xa_close("",0,TMNOFLAGS)/0
 1/xa_close("",0,TMNOFLAGS)/0
 0/vsr_quit()/0

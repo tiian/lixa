@@ -1281,16 +1281,16 @@ int lixavsr_parse_file(const char *filename)
                      , FOPEN_ERROR
                      , PARSE_RECORD
                      , EXECUTE_RECORD
-                     , TERMINATE_CHILDREN
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     FILE *file = NULL;
     char buffer[RECORD_SIZE];
-
+    xa_context_t xa_context;
+    int rc_term;
+        
     LIXA_TRACE(("lixavsr_parse_file\n"));
     TRY {
         parsed_statement_t parsed_statement;
-        xa_context_t xa_context;
 
         xa_context_reset(&xa_context);
         if (NULL == filename)
@@ -1317,10 +1317,6 @@ int lixavsr_parse_file(const char *filename)
                                    &xa_context, &parsed_statement)))
                 THROW(EXECUTE_RECORD);
         } /* while (!feof(file)) */
-        /* terminate children */
-        if (LIXA_RC_OK != (ret_cod = lixavsr_terminate_children(
-                               &xa_context)))
-            THROW(TERMINATE_CHILDREN);
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -1333,8 +1329,6 @@ int lixavsr_parse_file(const char *filename)
             case PARSE_RECORD:
             case EXECUTE_RECORD:
                 break;
-            case TERMINATE_CHILDREN:
-                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -1344,6 +1338,12 @@ int lixavsr_parse_file(const char *filename)
     } /* TRY-CATCH */
     if (NULL != file)
         fclose(file);
+        /* terminate children */
+    if (LIXA_RC_OK != (rc_term = lixavsr_terminate_children(
+                           &xa_context))) {
+        LIXA_TRACE(("lixavsr_parse_file/lixavsr_terminate_children: "
+                    "rc_term=%d ('%s')\n", rc_term, lixa_strerror(rc_term)));
+    }
     LIXA_TRACE(("lixavsr_parse_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
