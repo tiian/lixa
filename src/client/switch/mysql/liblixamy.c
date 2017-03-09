@@ -754,7 +754,8 @@ int lixa_my_start(XID *xid, int rmid, long flags)
     TRY {
         struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMJOIN|TMRESUME|TMNOWAIT|TMASYNC|TMNOFLAGS;
-        const long supp_flags = TMJOIN|TMRESUME|TMNOFLAGS;
+        /* 2017-03-09: TMJOIN and TMRESUME are still not supported by MySQL */
+        const long supp_flags = /*TMJOIN|TMRESUME|*/TMNOFLAGS;
         const char stmt_fmt[] = "XA START %s";
         const char stmt_join[] = " JOIN";
         const char stmt_resume[] = " RESUME";
@@ -778,8 +779,7 @@ int lixa_my_start(XID *xid, int rmid, long flags)
         if (flags&TMJOIN && flags&TMRESUME) {
             LIXA_TRACE(("lixa_my_start: flags 0x%x are invalid (TMJOIN and "
                         "TMRESUME can not be used together\n", flags));
-            THROW(INVALID_FLAGS3);
-            
+            THROW(INVALID_FLAGS3);            
         }
         if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
             THROW(PROTOCOL_ERROR1);
@@ -886,7 +886,9 @@ int lixa_my_end(XID *xid, int rmid, long flags)
     TRY {
         struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMSUSPEND|TMMIGRATE|TMSUCCESS|TMFAIL|TMASYNC;
-        const long supp_flags = TMSUSPEND|TMMIGRATE|TMSUCCESS;
+        /* 2017-03-09: TMSUSPEND and TMMIGRATE are still not supported by
+           MySQL */
+        const long supp_flags = /*TMSUSPEND|TMMIGRATE|*/TMSUCCESS;
         const char stmt_fmt[] = "XA END %s";
         const char stmt_suspend[] = " SUSPEND";
         const char stmt_migrate[] = " FOR MIGRATE";

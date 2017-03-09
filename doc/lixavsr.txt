@@ -24,7 +24,7 @@ Examples:
 		control". Use a sequence starting from 0 for the first one,
 		1 for the second one and so on.
 <separator> ::= /
-<function> ::= <openclose> | <transfunct> | <quit>
+<function> ::= <openclose> | <transfunct> | <rmfunct> | <quit>
 <openclose> ::= xa_open|xa_close <leftpar> <opencloseargs> <rightpar>
 <leftpar> ::= (
 <rightpar> ::= )
@@ -48,10 +48,13 @@ Examples:
 		like A256CF41
 <branch> ::= exadecimal representation of the branch qualifier og the
 		transaction like FF45A3
+<rmfunct> ::= rm_ora_exec1 <leftpar> <sqlstatement> <rightpar>
+<sqlstatement> ::= a SQL statement surrounded by quotes ("")
 <quit> ::= vsr_quit <leftpar> <rightpar>
 
 Examples:
 0/xa_open("",0,TMNOFLAGS|TMRESUME|TMFAIL)/0
 0/xa_open("TABLE=XXY",0,TMNOFLAGS|TMRESUME|TMFAIL)/0
 0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0
+0/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'")/0
 0/vsr_quit()/0
