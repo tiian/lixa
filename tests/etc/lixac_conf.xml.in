@@ -18,6 +18,8 @@
      xa_close_info="1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456" />
     <rsrmgr name="OracleXE_dynreg" switch_file="@abs_top_builddir@/src/client/switch/oracle/.libs/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
     <rsrmgr name="OracleXE_stareg" switch_file="@abs_top_builddir@/src/client/switch/oracle/.libs/switch_oracle_stareg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
+    <rsrmgr name="OracleIC_dynreg" switch_file="@abs_top_builddir@/src/client/switch/oracle/.libs/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=@ORACLE_SQL_NET@+Loose_Coupling=true" xa_close_info="" />
+    <rsrmgr name="OracleIC_stareg" switch_file="@abs_top_builddir@/src/client/switch/oracle/.libs/switch_oracle_stareg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=@ORACLE_SQL_NET@+Loose_Coupling=true" xa_close_info="" />
     <rsrmgr name="IBMDB2_dynreg" switch_file="@abs_top_builddir@/src/client/switch/ibmdb2/.libs/switch_ibmdb2_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" />
     <rsrmgr name="IBMDB2_stareg" switch_file="@abs_top_builddir@/src/client/switch/ibmdb2/.libs/switch_ibmdb2_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixacmt.so,db=sample,tpm=lixa" xa_close_info="" />
     <rsrmgr name="PostgreSQL_stareg" switch_file="@abs_top_builddir@/src/client/switch/postgresql/.libs/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" />
@@ -163,7 +165,7 @@
         <sttsrv>TestTM</sttsrv>
       </sttsrvs>
       <rsrmgrs>
-        <rsrmgr>OracleXE_stareg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0013">
@@ -171,7 +173,7 @@
         <sttsrv>TestTM</sttsrv>
       </sttsrvs>
       <rsrmgrs>
-        <rsrmgr>OracleXE_stareg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_stareg</rsrmgr>
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
       </rsrmgrs>
     </profile>
@@ -180,7 +182,7 @@
         <sttsrv>TestTM</sttsrv>
       </sttsrvs>
       <rsrmgrs>
-        <rsrmgr>OracleXE_dynreg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_dynreg</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="CASE_PROF_0015">
@@ -188,7 +190,7 @@
         <sttsrv>TestTM</sttsrv>
       </sttsrvs>
       <rsrmgrs>
-        <rsrmgr>OracleXE_dynreg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_dynreg</rsrmgr>
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
       </rsrmgrs>
     </profile>

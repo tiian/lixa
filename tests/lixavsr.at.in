@@ -1,0 +1,7 @@
+AT_BANNER([lixavsr (Very Stupid Robot) development utility])
+
+AT_SETUP([VSR/00 Trivial test])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/00_trivial.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+

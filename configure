@@ -704,6 +704,8 @@ COMPILE_ORACLE_STUFF_FALSE
 COMPILE_ORACLE_STUFF_TRUE
 TEST_ORACLE
 HAVE_ORACLE
+ORACLE_RM_TYPE
+ORACLE_SQL_NET
 ORACLE_ENV_SH
 ORACLE_OCI_NNZ
 ORACLE_OCI_LIBS
@@ -12750,7 +12752,6 @@ if test "${with_oracle_lib+set}" = set; then :
   withval=$with_oracle_lib; oracle_home_lib_dir="$withval";HAVE_ORACLE="yes"
 else
   oracle_home_lib_dir=""
-
 fi
 
 
@@ -12966,6 +12967,14 @@ $as_echo "no" >&6; }
     then
 	ORACLE_ENV_SH=$oracle_home_dir/bin/oracle_env.sh
         TEST_ORACLE="yes"
+	ORACLE_SQL_NET=""
+		ORACLE_RM_TYPE="XE"
+    elif test -f $oracle_lib_dir/oracle_env.sh
+            then
+	ORACLE_ENV_SH=$oracle_lib_dir/oracle_env.sh
+        TEST_ORACLE="yes"
+			ORACLE_SQL_NET="lixa_ora_db"
+		ORACLE_RM_TYPE="IC"
     fi
 
         if test "$HAVE_ORACLE" = "yes"
@@ -13161,6 +13170,8 @@ else
   COND_PROCOB_TRUE='#'
   COND_PROCOB_FALSE=
 fi
+
+
 
 
 

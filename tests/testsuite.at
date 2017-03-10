@@ -8,6 +8,7 @@ AT_CLEANUP
 
 m4_include([nonapi.at])
 m4_include([lixa-config.at])
+m4_include([lixavsr.at])
 m4_include([mysql.at])
 m4_include([postgresql.at])
 m4_include([mysql_postgresql.at])

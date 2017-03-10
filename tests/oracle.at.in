@@ -8,21 +8,21 @@ AT_BANNER([Oracle])
 # check the schema "hr" is available and the user can connect to it
 AT_SETUP([ORA/0.0/0.0 Oracle availability])
 AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
-AT_CHECK([echo "quit" | sqlplus "hr/hr" >$TESTS_TMP_FILE1 && grep "Connected to" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([echo "quit" | sqlplus "hr/hr@ORACLE_SQL_NET@" >$TESTS_TMP_FILE1 && grep "Connected to" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # check the current user has SELECT privilege on table authors
 AT_SETUP([ORA/0.0/0.1 countries table exists])
 AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
-AT_CHECK([echo "SELECT * FROM countries;" | sqlplus "hr/hr" >$TESTS_TMP_FILE1 && grep "rows selected" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([echo "SELECT * FROM countries;" | sqlplus "hr/hr@ORACLE_SQL_NET@" >$TESTS_TMP_FILE1 && grep "rows selected" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # check the current user has DELETE & INSERT privilege on table authors
 AT_SETUP([ORA/0.0/0.2 DELETE & INSERT INTO countries])
 AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
-AT_CHECK([echo "DELETE FROM countries WHERE COUNTRY_ID = 'IS';" | sqlplus "hr/hr" >$TESTS_TMP_FILE1 && grep "rows* deleted" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
-AT_CHECK([echo "INSERT INTO countries VALUES('IS','Iceland',1);" | sqlplus "hr/hr" >$TESTS_TMP_FILE1 && grep "row created" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
-AT_CHECK([echo "DELETE FROM countries WHERE COUNTRY_ID = 'IS';" | sqlplus "hr/hr" >$TESTS_TMP_FILE1 && grep "row deleted" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([echo "DELETE FROM countries WHERE COUNTRY_ID = 'IS';" | sqlplus "hr/hr@ORACLE_SQL_NET@" >$TESTS_TMP_FILE1 && grep "rows* deleted" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([echo "INSERT INTO countries VALUES('IS','Iceland',1);" | sqlplus "hr/hr@ORACLE_SQL_NET@" >$TESTS_TMP_FILE1 && grep "row created" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
+AT_CHECK([echo "DELETE FROM countries WHERE COUNTRY_ID = 'IS';" | sqlplus "hr/hr@ORACLE_SQL_NET@" >$TESTS_TMP_FILE1 && grep "row deleted" $TESTS_TMP_FILE1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # try one phase commit

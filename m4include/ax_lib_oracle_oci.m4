@@ -54,7 +54,7 @@ AC_DEFUN([AX_LIB_ORACLE_OCI],
             [use Oracle OCI API libraries from given path]
         ),
         [oracle_home_lib_dir="$withval";HAVE_ORACLE="yes"],
-        [oracle_home_lib_dir=""]
+        [oracle_home_lib_dir=""],
     )
 
     ORACLE_OCI_CFLAGS=""
@@ -232,6 +232,20 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
     then
 	ORACLE_ENV_SH=$oracle_home_dir/bin/oracle_env.sh
         TEST_ORACLE="yes"
+	ORACLE_SQL_NET=""
+	dnl server connection (XE or similar)
+	ORACLE_RM_TYPE="XE"
+    elif test -f $oracle_lib_dir/oracle_env.sh
+    dnl in the event of Instant Client, oracle_env.sh can be put in the same
+    dnl directory of the libraries
+    then
+	ORACLE_ENV_SH=$oracle_lib_dir/oracle_env.sh
+        TEST_ORACLE="yes"
+	dnl for Instant Client connection, a name is necessary for the remote
+	dnl connection
+	ORACLE_SQL_NET="lixa_ora_db"
+	dnl client connection (Instant Client or similar)
+	ORACLE_RM_TYPE="IC"
     fi
 
     dnl search for Pro*C and Pro*COBOL precompiler in current path
@@ -263,6 +277,8 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
     AC_SUBST([ORACLE_OCI_LIBS])
     AC_SUBST([ORACLE_OCI_NNZ])
     AC_SUBST([ORACLE_ENV_SH])
+    AC_SUBST([ORACLE_SQL_NET])
+    AC_SUBST([ORACLE_RM_TYPE])
     AC_SUBST([HAVE_ORACLE])
     AC_SUBST([TEST_ORACLE])
     if test "$HAVE_ORACLE" = "yes"
