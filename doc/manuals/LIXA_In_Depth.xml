@@ -716,4 +716,16 @@ tx_close(): 0
       </para>
     </note>
   </section>
+  <section>
+    <title>LIXA Very Stupid Robot (lixavsr)</title>
+    <para>
+      <command>lixavsr</command> is a command line utility provided by LIXA
+      project and dedicated to people interested in experimenting with the
+      XA Specification.
+    </para>
+    <para>
+      The utility is a <emphasis>very stupid</emphasis> robot that can be
+      "programmed" to execute a sequence of XA instructions.
+    </para>
+  </section>
 </chapter>

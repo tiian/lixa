@@ -1,7 +1,99 @@
 AT_BANNER([lixavsr (Very Stupid Robot) development utility])
 
-AT_SETUP([VSR/00 Trivial test])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/00_trivial.txt], [0], [ignore], [ignore])
+AT_SETUP([VSR/00 Trivial test (processes)])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0009; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/00_trivial.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/00 Trivial test (threads)])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0009; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/00_trivial.txt], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([VSR/01 MySQL Single ToC (processes)])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/01_single_toc.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/01 MySQL Single ToC (threads)])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/01_single_toc.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/01 PostgreSQL Single ToC (processes)])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0010; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/01_single_toc.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/01 PostgreSQL Single ToC (threads)])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0010; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/01_single_toc.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/02 OracleDB Single ToC (processes)])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/02_single_toc.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/02 OracleDB Single ToC (threads)])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/02_single_toc.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/03 MySQL Double ToC (processes)])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/03_double_toc.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/03 MySQL Double ToC (threads)])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/03_double_toc.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/03 PostgreSQL Double ToC (processes)])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0010; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/03_double_toc.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/03 PostgreSQL Double ToC (threads)])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0010; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/03_double_toc.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/04 OracleDB Double ToC (processes)])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/04_double_toc.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/04 OracleDB Double ToC (threads)])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/04_double_toc.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/10 OracleDB Suspend-Resume (processes)])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/10_suspend_resume.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/10 OracleDB Suspend-Resume (threads)])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/10_suspend_resume.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/11 OracleDB End-Join (processes)])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/11_end_join.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/11 OracleDB End-Join (threads)])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/11_end_join.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/12 OracleDB End-Join (processes)])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/12_end_join.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/12 OracleDB End-Join (threads)])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/12_end_join.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/14 OracleDB End-Join (processes)])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/14_branch.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/14 OracleDB End-Join (threads)])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/14_branch.txt], [0], [ignore], [ignore])
+AT_CLEANUP
 
