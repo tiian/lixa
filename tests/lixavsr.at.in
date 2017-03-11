@@ -88,11 +88,11 @@ AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/12_end_join.txt], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([VSR/14 OracleDB End-Join (processes)])
+AT_SETUP([VSR/14 OracleDB Branch (processes)])
 AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/14_branch.txt], [0], [ignore], [ignore])
 AT_CLEANUP
-AT_SETUP([VSR/14 OracleDB End-Join (threads)])
+AT_SETUP([VSR/14 OracleDB Branch (threads)])
 AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/14_branch.txt], [0], [ignore], [ignore])
 AT_CLEANUP

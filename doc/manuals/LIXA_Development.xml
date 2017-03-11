@@ -1379,18 +1379,28 @@ tiian@ubuntu1404-64:~/lixa$ find /opt/oracle/ | sort
 	    steps as necessary.
 	  </para>
 	  <para>
-	    Some environment variables can be very handy and I suggest you 
-	    to use at least three. You can create a simple shell script like 
-	    this one:
+	    Oracle Instant Client does not provide 
+	    <filename>oracle_env.sh</filename>, but some
+	    environment variables can be very handy and it is suggested you to
+	    create your own <filename>oracle_env.sh</filename> as below:
 	    <screen>
 #!/bin/sh
 export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1:$LD_LIBRARY_PATH
 export PATH=/opt/oracle/instantclient_12_1:/opt/oracle/instantclient_12_1/sdk:$PATH
 export ORACLE_HOME=/opt/oracle/instantclient_12_1
 	    </screen>
-	    and use it when needed using shell sourcing:
+	    and to put it inside Oracle Instant Client base directory
+	    <footnote><para>
+	      LIXA test suite, based on <command>autotest</command> looks for
+	      it: if it's not available, Oracle's tests are skipped.
+	    </para></footnote>:
 	    <screen>
-tiian@ubuntu1404-64:~$ . ./oracle_env.sh 
+tiian@ubuntu1404-64:~/lixa$ ls -la /opt/oracle/instantclient_12_1/oracle_env.sh
+-rwxr-xr-- 1 root root 216 mar 10 21:57 /opt/oracle/instantclient_12_1/oracle_env.sh
+	    </screen>
+	    Use it when it's needed with shell sourcing:
+	    <screen>
+tiian@ubuntu1404-64:~$ . /opt/oracle/instantclient_12_1/oracle_env.sh 
 tiian@ubuntu1404-64:~$ echo $LD_LIBRARY_PATH
 /opt/oracle/instantclient_12_1:
 tiian@ubuntu1404-64:~$ echo $PATH

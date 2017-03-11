@@ -1001,7 +1001,8 @@ void lixavsr_threadofcontrol(pipes_t *pipes)
                 LIXA_RC_OK != (ret_cod = lixavsr_execute_function(
                                    &parsed_function, &xa_rc))) {
                 THROW(EXECUTE_XA_FUNCTION);
-            } else {
+            }
+            if (VSR_QUIT == parsed_function.fid) {
                 /* reporting thread of control exit */
                 printf("exiting...\n");
                 fflush(stdout);
