@@ -384,6 +384,7 @@ MKDIR_P = @MKDIR_P@
 MYSQL_CONFIG = @MYSQL_CONFIG@
 MYSQL_CPPFLAGS = @MYSQL_CPPFLAGS@
 MYSQL_INCLUDE_DIR = @MYSQL_INCLUDE_DIR@
+MYSQL_LDADD = @MYSQL_LDADD@
 MYSQL_LDFLAGS = @MYSQL_LDFLAGS@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -511,11 +512,13 @@ lixau_CPPFLAGS = -I$(srcdir)/../common
 lixau_LDADD = ../common/liblixab.la @LDFLAGS_XML2@ liblixac.la
 lixau_LDFLAGS = @LDFLAGS_GLIB@
 lixau_SOURCES = lixau.c
-lixavsr_CPPFLAGS = -I$(srcdir)/../common @ORACLE_OCI_CFLAGS@
-lixavsr_LDADD = ../common/liblixab.la @LDFLAGS_XML2@ liblixac.la \
-	@ORACLE_OCI_LDFLAGS@ @ORACLE_OCI_LIBS@
+lixavsr_CPPFLAGS = -I$(srcdir)/../common @ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ \
+	-Iswitch/mysql
 
-lixavsr_LDFLAGS = @LDFLAGS_GLIB@
+lixavsr_LDADD = ../common/liblixab.la @LDFLAGS_XML2@ liblixac.la \
+	@ORACLE_OCI_LIBS@ @MYSQL_LDADD@
+
+lixavsr_LDFLAGS = @LDFLAGS_GLIB@ @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@
 lixavsr_SOURCES = lixavsr.c
 lixa_config_SOURCES = lixa-config.c
 lixa_config_LDFLAGS = @LDFLAGS_GLIB@

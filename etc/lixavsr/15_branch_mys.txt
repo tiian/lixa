@@ -1,0 +1,210 @@
+# LIXA Very Stupid Robot 
+# This file is intended to be used by lixavsr utility
+# File format: see doc/lixavsr.txt for a formal grammar expressed using BNF.
+# Here is just a brief hint for the lazy user.
+#
+# The following example uses 2 distinct threads of control that use two
+# distinct branches for possible parallel execution (the robot can't simulate
+# real parallelism but command sequences show that distinct branches can be
+# concurrently used by distinct threads of control.
+#
+# These commands should work with these Resource Managers:
+# - Oracle 12.1
+#
+# Every thread of control opens the Resource Manager (Oracle DBMS)
+#
+0/xa_open("",0,TMNOFLAGS)/0
+1/xa_open("",0,TMNOFLAGS)/0
+#
+# First thread of control creates first branch
+#
+0/xa_start("231.a256cf44.ff45a3",0,TMNOFLAGS)/0
+#
+# First thread performs real SQL command
+#
+0/rm_mys_exec1("INSERT INTO authors VALUES(1, 'Hemingway', 'Ernest')")/0
+#
+# Second thread of control creates second branch
+#
+1/xa_start("231.a256cf44.ff45a4",0,TMNOFLAGS)/0
+#
+# This thread of control can't see the data changed by first thread of control
+# due to "transaction loose coupling" ("tight coupling" is not suggested for
+# scalability reasons)
+#
+1/rm_mys_exec1("INSERT INTO authors VALUES(2, 'Saviane', 'Giorgio')")/0
+#
+# First thread of control works again using its branch
+#
+0/rm_mys_exec1("DELETE FROM authors WHERE id = 1")/0
+#
+# Second thread of control works again using its branch
+#
+1/rm_mys_exec1("DELETE FROM authors WHERE id = 2")/0
+#
+# Second thread of control starts termination
+#
+1/xa_end("231.a256cf44.ff45a4",0,TMSUCCESS)/0
+#
+# First thread of control starts termination
+#
+0/xa_end("231.a256cf44.ff45a3",0,TMSUCCESS)/0
+#
+# Preparing both threads of control for commit
+#
+0/xa_prepare("231.a256cf44.ff45a3",0,TMNOFLAGS)/0
+1/xa_prepare("231.a256cf44.ff45a4",0,TMNOFLAGS)/0
+#
+# Committing both threads of control
+#
+0/xa_commit("231.a256cf44.ff45a3",0,TMNOFLAGS)/0
+1/xa_commit("231.a256cf44.ff45a4",0,TMNOFLAGS)/0
+#
+# The same as above, but with different commit order
+#
+# First thread of control creates first branch
+#
+0/xa_start("231.a256cf45.ff45a3",0,TMNOFLAGS)/0
+#
+# First thread performs real SQL command
+#
+0/rm_mys_exec1("INSERT INTO authors VALUES(1, 'Hemingway', 'Ernest')")/0
+#
+# Second thread of control creates second branch
+#
+1/xa_start("231.a256cf45.ff45a4",0,TMNOFLAGS)/0
+#
+# This thread of control can't see the data chaged by first thread of control
+# due to "transaction loose coupling" ("tight coupling" is not suggested for
+# scalability reasons)
+#
+1/rm_mys_exec1("INSERT INTO authors VALUES(2, 'Saviane', 'Giorgio')")/0
+#
+# First thread of control works again using its branch
+#
+0/rm_mys_exec1("DELETE FROM authors WHERE id = 1")/0
+#
+# Second thread of control works again using its branch
+#
+1/rm_mys_exec1("DELETE FROM authors WHERE id = 2")/0
+#
+# Second thread of control starts termination
+#
+1/xa_end("231.a256cf45.ff45a4",0,TMSUCCESS)/0
+#
+# First thread of control starts termination
+#
+0/xa_end("231.a256cf45.ff45a3",0,TMSUCCESS)/0
+#
+# Preparing both threads of control for commit
+#
+1/xa_prepare("231.a256cf45.ff45a4",0,TMNOFLAGS)/0
+0/xa_prepare("231.a256cf45.ff45a3",0,TMNOFLAGS)/0
+#
+# Committing both threads of control
+#
+0/xa_commit("231.a256cf45.ff45a3",0,TMNOFLAGS)/0
+1/xa_commit("231.a256cf45.ff45a4",0,TMNOFLAGS)/0
+#
+# The same as above, but with different termination order
+#
+# First thread of control creates first branch
+#
+0/xa_start("231.a256cf46.ff45a3",0,TMNOFLAGS)/0
+#
+# First thread performs real SQL command
+#
+0/rm_mys_exec1("INSERT INTO authors VALUES(1, 'Hemingway', 'Ernest')")/0
+#
+# Second thread of control creates second branch
+#
+1/xa_start("231.a256cf46.ff45a4",0,TMNOFLAGS)/0
+#
+# This thread of control can't see the data chaged by first thread of control
+# due to "transaction loose coupling" ("tight coupling" is not suggested for
+# scalability reasons)
+#
+1/rm_mys_exec1("INSERT INTO authors VALUES(2, 'Saviane', 'Giorgio')")/0
+#
+# First thread of control works again using its branch
+#
+0/rm_mys_exec1("DELETE FROM authors WHERE id = 1")/0
+#
+# Second thread of control works again using its branch
+#
+1/rm_mys_exec1("DELETE FROM authors WHERE id = 2")/0
+#
+# First thread of control starts termination
+#
+0/xa_end("231.a256cf46.ff45a3",0,TMSUCCESS)/0
+#
+# Second thread of control starts termination
+#
+1/xa_end("231.a256cf46.ff45a4",0,TMSUCCESS)/0
+#
+# Preparing both threads of control for commit
+#
+0/xa_prepare("231.a256cf46.ff45a3",0,TMNOFLAGS)/0
+1/xa_prepare("231.a256cf46.ff45a4",0,TMNOFLAGS)/0
+#
+# Committing both threads of control
+#
+0/xa_commit("231.a256cf46.ff45a3",0,TMNOFLAGS)/0
+1/xa_commit("231.a256cf46.ff45a4",0,TMNOFLAGS)/0
+#
+# The same as above, but with rollback
+#
+# First thread of control creates first branch
+#
+0/xa_start("231.a256cf47.ff45a3",0,TMNOFLAGS)/0
+#
+# First thread performs real SQL command
+#
+0/rm_mys_exec1("INSERT INTO authors VALUES(1, 'Hemingway', 'Ernest')")/0
+#
+# Second thread of control creates second branch
+#
+1/xa_start("231.a256cf47.ff45a4",0,TMNOFLAGS)/0
+#
+# This thread of control can't see the data chaged by first thread of control
+# due to "transaction loose coupling" ("tight coupling" is not suggested for
+# scalability reasons)
+#
+1/rm_mys_exec1("INSERT INTO authors VALUES(2, 'Saviane', 'Giorgio')")/0
+#
+# First thread of control works again using its branch
+#
+0/rm_mys_exec1("DELETE FROM authors WHERE id = 1")/0
+#
+# Second thread of control works again using its branch
+#
+1/rm_mys_exec1("DELETE FROM authors WHERE id = 2")/0
+#
+# Second thread of control starts termination
+#
+1/xa_end("231.a256cf47.ff45a4",0,TMSUCCESS)/0
+#
+# First thread of control starts termination
+#
+0/xa_end("231.a256cf47.ff45a3",0,TMSUCCESS)/0
+#
+# Preparing both threads of control for commit
+#
+0/xa_prepare("231.a256cf47.ff45a3",0,TMNOFLAGS)/0
+1/xa_prepare("231.a256cf47.ff45a4",0,TMNOFLAGS)/0
+#
+# *** SUPPOSING *** something was not fine during xa_prepare, we use the
+# two phase commit protocol to rollback both threads of control
+#
+0/xa_rollback("231.a256cf47.ff45a3",0,TMNOFLAGS)/0
+1/xa_rollback("231.a256cf47.ff45a4",0,TMNOFLAGS)/0
+#
+# Every thread of control closes the Resource Manager (Oracle DBMS)
+#
+0/xa_close("",0,TMNOFLAGS)/0
+1/xa_close("",0,TMNOFLAGS)/0
+#
+# End of robot commands for both thread of controls
+#
+0/vsr_quit()/0
+1/vsr_quit()/0

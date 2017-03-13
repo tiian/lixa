@@ -46,6 +46,11 @@
 # include <oci.h>
 #endif
 
+#ifdef HAVE_MYSQL
+# include <mysql.h>
+# include <lixamy.h>
+#endif
+
 
 
 #include "lixa_errors.h"
@@ -99,7 +104,7 @@ static GOptionEntry entries[] =
 /* parsable XA functions: strings */
 static const char *PARSABLE_FUNCTIONS[] = {
     "xa_close", "xa_commit", "xa_end", "xa_forget", "xa_open", "xa_prepare",
-    "xa_rollback", "xa_start", "rm_ora_exec1", "vsr_quit"
+    "xa_rollback", "xa_start", "rm_ora_exec1", "rm_mys_exec1", "vsr_quit"
 };
 /* accepted functions: internal */
 typedef enum {
@@ -112,6 +117,7 @@ typedef enum {
     , XA_ROLLBACK
     , XA_START
     , RM_ORA_EXEC1
+    , RM_MYS_EXEC1
     , VSR_QUIT
 } function_id_t;
 
@@ -535,6 +541,7 @@ int lixavsr_parse_function(const char *token, parsed_function_t *pf)
                     THROW(PARSE_THREE_ARGS);
                 break;
             case RM_ORA_EXEC1:
+            case RM_MYS_EXEC1:
                 if (LIXA_RC_OK != (ret_cod = lixavsr_parse_rm_exec1_args(
                                        token, pf)))
                     THROW(PARSE_RM_EXEC1_ARGS);
@@ -654,6 +661,59 @@ int lixavsr_parse_record(const char *record,
 
 
 
+int rm_mys_exec1(const char *sql_statement)
+{
+    enum Exception { NULL_OBJECT
+                     , MYSQL_QUERY
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+#ifdef HAVE_MYSQL
+    /* MySQL connection */
+    MYSQL *conn = NULL;
+    LIXA_TRACE(("rm_mys_exec1\n"));
+    TRY {
+        /* get connection */
+        if (NULL == (conn = lixa_my_get_conn()))
+            THROW(NULL_OBJECT);
+        /* execute the passed statement */
+        if (mysql_query(conn, sql_statement)) {
+            THROW(MYSQL_QUERY);
+        } else {
+            LIXA_TRACE(("rm_ora_exec1: SQL statement executed!\n"));
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case MYSQL_QUERY:
+                ret_cod = LIXA_RC_RM_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    if (NULL != conn) {
+        mysql_close(conn);
+        LIXA_TRACE(("rm_mys_exec1/mysql_close\n"));
+    }
+    LIXA_TRACE(("rm_mys_exec1/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+#else
+    LIXA_TRACE(("rm_mys_exec1: not configured for MySQL Database!\n"));
+    return LIXA_RC_BYPASSED_OPERATION;
+#endif
+}
+
+
+
 int rm_ora_exec1(const char *sql_statement)
 {
     enum Exception { XAO_ENV_ERROR
@@ -718,7 +778,7 @@ int rm_ora_exec1(const char *sql_statement)
                         "statement; ocirc = %d\n", ocirc));
             THROW(OCI_STMT_EXECUTE);
         } else {
-            LIXA_TRACE(("rm_ora_exec1: INSERT SQL statement executed!\n"));
+            LIXA_TRACE(("rm_ora_exec1: SQL statement executed!\n"));
         }
         /* free the allocated handles */
         OCIHandleFree((dvoid *)stmt_hndl, (ub4)OCI_HTYPE_STMT);
@@ -919,6 +979,17 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                             PARSABLE_FUNCTIONS[parsed_function->fid],
                             parsed_function->info, *rc));
                 break;
+            case RM_MYS_EXEC1:
+                LIXA_TRACE(("lixavsr_execute_function: executing "
+                            "%s(\"%s\")\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            parsed_function->info));
+                *rc = rm_mys_exec1(parsed_function->info);
+                LIXA_TRACE(("lixavsr_execute_function: executed "
+                            "%s(\"%s\")=%d\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            parsed_function->info, *rc));
+                break;
             default:
                 THROW(OUT_OF_RANGE1);
         } /* switch (parsed_function->fid) */
@@ -943,6 +1014,7 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                        (unsigned int)parsed_function->flags, *rc);
                 break;
             case RM_ORA_EXEC1:
+            case RM_MYS_EXEC1:
                 printf("%s(\"%s\")=%d\n",
                        PARSABLE_FUNCTIONS[parsed_function->fid],
                        parsed_function->info, *rc);

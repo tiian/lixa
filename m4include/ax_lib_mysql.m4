@@ -30,6 +30,7 @@ dnl This macro calls:
 dnl
 dnl   AC_SUBST(MYSQL_CPPFLAGS)
 dnl   AC_SUBST(MYSQL_LDFLAGS)
+dnl   AC_SUBST(MYSQL_LDADD)
 dnl   AC_SUBST(MYSQL_INCLUDE_DIR)
 dnl   AC_SUBST(HAVE_MYSQL)
 dnl
@@ -59,6 +60,7 @@ AC_DEFUN([AX_LIB_MYSQL],
         else
             MYSQL_CPPFLAGS=$($MYSQL_CONFIG --include)
             MYSQL_LDFLAGS=$($MYSQL_CONFIG --libs_r)
+            MYSQL_LDADD=$(pwd)/src/client/switch/mysql/liblixamy.la
             MYSQL_INCLUDE_DIR=${MYSQL_CPPFLAGS##-I}
             HAVE_MYSQL="yes"
         fi
@@ -66,6 +68,7 @@ AC_DEFUN([AX_LIB_MYSQL],
 
     AC_SUBST([MYSQL_CPPFLAGS])
     AC_SUBST([MYSQL_LDFLAGS])
+    AC_SUBST([MYSQL_LDADD])
     AC_SUBST([MYSQL_INCLUDE_DIR])
     AC_SUBST([HAVE_MYSQL])
     if test "$HAVE_MYSQL" = "yes"

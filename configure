@@ -685,6 +685,7 @@ COMPILE_MYSQL_STUFF_FALSE
 COMPILE_MYSQL_STUFF_TRUE
 HAVE_MYSQL
 MYSQL_INCLUDE_DIR
+MYSQL_LDADD
 MYSQL_LDFLAGS
 MYSQL_CPPFLAGS
 MYSQL_CONFIG
@@ -13580,10 +13581,12 @@ done
         else
             MYSQL_CPPFLAGS=$($MYSQL_CONFIG --include)
             MYSQL_LDFLAGS=$($MYSQL_CONFIG --libs_r)
+            MYSQL_LDADD=$(pwd)/src/client/switch/mysql/liblixamy.la
             MYSQL_INCLUDE_DIR=${MYSQL_CPPFLAGS##-I}
             HAVE_MYSQL="yes"
         fi
     fi
+
 
 
 
