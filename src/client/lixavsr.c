@@ -676,8 +676,12 @@ int rm_mys_exec1(const char *sql_statement)
         /* get connection */
         if (NULL == (conn = lixa_my_get_conn()))
             THROW(NULL_OBJECT);
+        LIXA_TRACE(("rm_mys_exec1: executing SQL statement \"%s\"\n",
+                    sql_statement));
         /* execute the passed statement */
         if (mysql_query(conn, sql_statement)) {
+            LIXA_TRACE(("rm_ora_exec1: SQL error %u/%s\n",
+                        mysql_errno(conn), mysql_error(conn)));
             THROW(MYSQL_QUERY);
         } else {
             LIXA_TRACE(("rm_ora_exec1: SQL statement executed!\n"));
@@ -699,10 +703,6 @@ int rm_mys_exec1(const char *sql_statement)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    if (NULL != conn) {
-        mysql_close(conn);
-        LIXA_TRACE(("rm_mys_exec1/mysql_close\n"));
-    }
     LIXA_TRACE(("rm_mys_exec1/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
