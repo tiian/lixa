@@ -9,7 +9,7 @@
 # The commands show a possible (managed) protocol error.
 #
 # These commands should work with these Resource Managers:
-# - Oracle 12.1
+# - Oracle 12.1    (LIXA_PROFILE=ORA_STA)
 #
 # Every thread of control opens the Resource Manager (Oracle DBMS)
 #

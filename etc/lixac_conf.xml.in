@@ -7,8 +7,8 @@
   <rsrmgrs>
     <rsrmgr name="OracleXE_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_oracle_dynreg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
     <rsrmgr name="OracleXE_stareg" switch_file="@EXPANDED_LIBDIR@/switch_oracle_stareg.so" xa_open_info="Oracle_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+Loose_Coupling=true" xa_close_info="" />
-    <rsrmgr name="OracleIC_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_oracle_dynreg.so" xa_open_info="ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=lixa_ora_db+Loose_Coupling=true" xa_close_info="" />
-    <rsrmgr name="OracleIC_stareg" switch_file="@EXPANDED_LIBDIR@/switch_oracle_stareg.so" xa_open_info="ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=lixa_ora_db+Loose_Coupling=true" xa_close_info="" />
+    <rsrmgr name="OracleIC_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_oracle_dynreg.so" xa_open_info="ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=@ORACLE_SQL_NET@+Loose_Coupling=true" xa_close_info="" />
+    <rsrmgr name="OracleIC_stareg" switch_file="@EXPANDED_LIBDIR@/switch_oracle_stareg.so" xa_open_info="ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=@ORACLE_SQL_NET@+Loose_Coupling=true" xa_close_info="" />
     <rsrmgr name="IBMDB2_dynreg" switch_file="@EXPANDED_LIBDIR@/switch_ibmdb2_dynreg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,db=sample,tpm=lixa" xa_close_info="" />
     <rsrmgr name="IBMDB2_stareg" switch_file="@EXPANDED_LIBDIR@/switch_ibmdb2_stareg.so" xa_open_info="axlib=@EXPANDED_LIBDIR@/liblixac.so,db=sample,tpm=lixa" xa_close_info="" />
     <rsrmgr name="PostgreSQL_stareg" switch_file="@EXPANDED_LIBDIR@/switch_postgresql_stareg.so" xa_open_info="dbname=testdb" xa_close_info="" />
@@ -36,7 +36,7 @@
         <sttsrv>local_1</sttsrv>
       </sttsrvs>
       <rsrmgrs>
-        <rsrmgr>OracleXE_dynreg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_dynreg</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="ORA_STA">
@@ -44,23 +44,7 @@
         <sttsrv>local_1</sttsrv>
       </sttsrvs>
       <rsrmgrs>
-        <rsrmgr>OracleXE_stareg</rsrmgr>
-      </rsrmgrs>
-    </profile>
-    <profile name="ORAIC_DYN">
-      <sttsrvs>
-        <sttsrv>local_1</sttsrv>
-      </sttsrvs>
-      <rsrmgrs>
-        <rsrmgr>OracleIC_dynreg</rsrmgr>
-      </rsrmgrs>
-    </profile>
-    <profile name="ORAIC_STA">
-      <sttsrvs>
-        <sttsrv>local_1</sttsrv>
-      </sttsrvs>
-      <rsrmgrs>
-        <rsrmgr>OracleIC_stareg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="DB2_DYN">
@@ -84,7 +68,7 @@
         <sttsrv>local_1</sttsrv>
       </sttsrvs>
       <rsrmgrs>
-        <rsrmgr>OracleXE_dynreg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_dynreg</rsrmgr>
         <rsrmgr>IBMDB2_dynreg</rsrmgr>
       </rsrmgrs>
     </profile>
@@ -93,7 +77,7 @@
         <sttsrv>local_1</sttsrv>
       </sttsrvs>
       <rsrmgrs>
-        <rsrmgr>OracleXE_dynreg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_dynreg</rsrmgr>
         <rsrmgr>IBMDB2_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
@@ -102,7 +86,7 @@
         <sttsrv>local_1</sttsrv>
       </sttsrvs>
       <rsrmgrs>
-        <rsrmgr>OracleXE_stareg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_stareg</rsrmgr>
         <rsrmgr>IBMDB2_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
@@ -111,7 +95,7 @@
         <sttsrv>local_1</sttsrv>
       </sttsrvs>
       <rsrmgrs>
-        <rsrmgr>OracleXE_stareg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_stareg</rsrmgr>
         <rsrmgr>IBMDB2_dynreg</rsrmgr>
       </rsrmgrs>
     </profile>
@@ -138,7 +122,7 @@
       </sttsrvs>
       <rsrmgrs>
         <rsrmgr>PostgreSQL_stareg</rsrmgr>
-        <rsrmgr>OracleXE_dynreg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_dynreg</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="PQL_STA_ORA_STA">
@@ -147,16 +131,7 @@
       </sttsrvs>
       <rsrmgrs>
         <rsrmgr>PostgreSQL_stareg</rsrmgr>
-        <rsrmgr>OracleXE_stareg</rsrmgr>
-      </rsrmgrs>
-    </profile>
-    <profile name="PQL_STA_ORAIC_STA">
-      <sttsrvs>
-        <sttsrv>local_1</sttsrv>
-      </sttsrvs>
-      <rsrmgrs>
-        <rsrmgr>PostgreSQL_stareg</rsrmgr>
-        <rsrmgr>OracleIC_stareg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="PQL_STA_DB2_DYN">
@@ -184,7 +159,7 @@
       <rsrmgrs>
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
         <rsrmgr>PostgreSQL_stareg</rsrmgr>
-        <rsrmgr>OracleXE_dynreg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_dynreg</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="MYS_STA">
@@ -211,7 +186,7 @@
       <rsrmgrs>
         <rsrmgr>MySQL_stareg</rsrmgr>
         <rsrmgr>PostgreSQL_stareg</rsrmgr>
-        <rsrmgr>OracleXE_dynreg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_dynreg</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="MYS_STA_PQL_STA_ORA_STA">
@@ -221,7 +196,16 @@
       <rsrmgrs>
         <rsrmgr>MySQL_stareg</rsrmgr>
         <rsrmgr>PostgreSQL_stareg</rsrmgr>
-        <rsrmgr>OracleXE_stareg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="MYS_STA_ORA_STA">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>MySQL_stareg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
     <profile name="MYS_STA_MYS_STA">

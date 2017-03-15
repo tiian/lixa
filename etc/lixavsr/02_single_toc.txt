@@ -5,7 +5,7 @@
 #
 # These commands should work with these Resource Managers for a single thread of
 # control:
-# - Oracle Database 12.1
+# - Oracle Database 12.1   (LIXA_PROFILE=ORA_STA)
 #
 0/xa_open("",0,TMNOFLAGS)/0
 0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0

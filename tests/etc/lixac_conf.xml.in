@@ -364,5 +364,23 @@
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="CASE_PROF_0036">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_dynreg</rsrmgr>
+        <rsrmgr>PostgreSQL_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
+    <profile name="CASE_PROF_0037">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>MySQL_stareg</rsrmgr>
+        <rsrmgr>Oracle@ORACLE_RM_TYPE@_stareg</rsrmgr>
+      </rsrmgrs>
+    </profile>
   </profiles>
 </client>

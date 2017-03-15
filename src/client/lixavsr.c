@@ -48,7 +48,12 @@
 
 #ifdef HAVE_MYSQL
 # include <mysql.h>
-# include <lixamy.h>
+# include "lixamy.h"
+#endif
+
+#ifdef HAVE_POSTGRESQL
+# include <libpq-fe.h>
+# include "lixapq.h"
 #endif
 
 
@@ -91,11 +96,13 @@
 static char *filename = NULL;
 static gboolean threads = FALSE;
 static gboolean print_version = FALSE;
+static gboolean sleep_before_kill = FALSE;
 static GOptionEntry entries[] =
 {
     { "filename", 'f', 0, G_OPTION_ARG_STRING, &filename, "Name of the file with the actions that must be executed", NULL },
     { "threads", 't', 0, G_OPTION_ARG_NONE, &threads, "Use threads instead of processes", NULL },
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
+    { "sleep", 's', 0, G_OPTION_ARG_NONE, &sleep_before_kill, "Sleep 1 second before killing children at exit", NULL },
     { NULL }
 };
 
@@ -104,7 +111,8 @@ static GOptionEntry entries[] =
 /* parsable XA functions: strings */
 static const char *PARSABLE_FUNCTIONS[] = {
     "xa_close", "xa_commit", "xa_end", "xa_forget", "xa_open", "xa_prepare",
-    "xa_rollback", "xa_start", "rm_ora_exec1", "rm_mys_exec1", "vsr_quit"
+    "xa_rollback", "xa_start", "rm_ora_exec1", "rm_mys_exec1", "rm_pql_exec1",
+    "vsr_quit"
 };
 /* accepted functions: internal */
 typedef enum {
@@ -118,6 +126,7 @@ typedef enum {
     , XA_START
     , RM_ORA_EXEC1
     , RM_MYS_EXEC1
+    , RM_PQL_EXEC1
     , VSR_QUIT
 } function_id_t;
 
@@ -542,6 +551,7 @@ int lixavsr_parse_function(const char *token, parsed_function_t *pf)
                 break;
             case RM_ORA_EXEC1:
             case RM_MYS_EXEC1:
+            case RM_PQL_EXEC1:
                 if (LIXA_RC_OK != (ret_cod = lixavsr_parse_rm_exec1_args(
                                        token, pf)))
                     THROW(PARSE_RM_EXEC1_ARGS);
@@ -661,6 +671,63 @@ int lixavsr_parse_record(const char *record,
 
 
 
+int rm_pql_exec1(const char *sql_statement)
+{
+    enum Exception { NULL_OBJECT
+                     , PQL_QUERY
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+#ifdef HAVE_POSTGRESQL
+    /* MySQL connection */
+    PGconn     *conn = NULL;
+    PGresult   *res = NULL;
+    LIXA_TRACE(("rm_pql_exec1\n"));
+    TRY {
+        /* get connection */
+        if (NULL == (conn = lixa_pq_get_conn()))
+            THROW(NULL_OBJECT);
+        LIXA_TRACE(("rm_pql_exec1: executing SQL statement \"%s\"\n",
+                    sql_statement));
+        /* execute the passed statement */
+        res = PQexec(conn, sql_statement);
+        if (PGRES_COMMAND_OK != PQresultStatus(res)) {
+            LIXA_TRACE(("rm_pql_exec1: SQL error %u/%s\n",
+                        PQerrorMessage(conn)));
+            PQclear(res);
+            THROW(PQL_QUERY);
+        } else {
+            LIXA_TRACE(("rm_pql_exec1: SQL statement executed!\n"));
+            PQclear(res);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case PQL_QUERY:
+                ret_cod = LIXA_RC_RM_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("rm_pql_exec1/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+#else
+    LIXA_TRACE(("rm_pql_exec1: not configured for PostgreSQL Database!\n"));
+    return LIXA_RC_BYPASSED_OPERATION;
+#endif
+}
+
+
+
 int rm_mys_exec1(const char *sql_statement)
 {
     enum Exception { NULL_OBJECT
@@ -680,11 +747,11 @@ int rm_mys_exec1(const char *sql_statement)
                     sql_statement));
         /* execute the passed statement */
         if (mysql_query(conn, sql_statement)) {
-            LIXA_TRACE(("rm_ora_exec1: SQL error %u/%s\n",
+            LIXA_TRACE(("rm_mys_exec1: SQL error %u/%s\n",
                         mysql_errno(conn), mysql_error(conn)));
             THROW(MYSQL_QUERY);
         } else {
-            LIXA_TRACE(("rm_ora_exec1: SQL statement executed!\n"));
+            LIXA_TRACE(("rm_mys_exec1: SQL statement executed!\n"));
         }
         
         THROW(NONE);
@@ -990,6 +1057,17 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                             PARSABLE_FUNCTIONS[parsed_function->fid],
                             parsed_function->info, *rc));
                 break;
+            case RM_PQL_EXEC1:
+                LIXA_TRACE(("lixavsr_execute_function: executing "
+                            "%s(\"%s\")\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            parsed_function->info));
+                *rc = rm_pql_exec1(parsed_function->info);
+                LIXA_TRACE(("lixavsr_execute_function: executed "
+                            "%s(\"%s\")=%d\n",
+                            PARSABLE_FUNCTIONS[parsed_function->fid],
+                            parsed_function->info, *rc));
+                break;
             default:
                 THROW(OUT_OF_RANGE1);
         } /* switch (parsed_function->fid) */
@@ -1015,6 +1093,7 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                 break;
             case RM_ORA_EXEC1:
             case RM_MYS_EXEC1:
+            case RM_PQL_EXEC1:
                 printf("%s(\"%s\")=%d\n",
                        PARSABLE_FUNCTIONS[parsed_function->fid],
                        parsed_function->info, *rc);
@@ -1314,7 +1393,8 @@ int lixavsr_terminate_children(xa_context_t *xa_context)
     LIXA_TRACE(("lixavsr_terminate_children\n"));
     TRY {
         int i;
-        sleep(1);
+        if (sleep_before_kill)
+            sleep(1);
         if (!threads) {
             for (i=0; i<MAX_THREADS_OF_CONTROL; ++i) {
                 if (xa_context->child_process[i] > 0) {

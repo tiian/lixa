@@ -8,7 +8,7 @@
 # finally commit from third one.
 # Note: TMMIGRATE is mandatory for resuming in another thread of control
 # These commands should work with these Resource Managers:
-# - Oracle 12.1
+# - Oracle 12.1    (LIXA_PROFILE=ORA_STA)
 #
 # Every thread of control opens the Resource Manager (Oracle DBMS)
 #

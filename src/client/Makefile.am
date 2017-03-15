@@ -29,11 +29,14 @@ lixau_CPPFLAGS = -I$(srcdir)/../common
 lixau_LDADD = ../common/liblixab.la @LDFLAGS_XML2@ liblixac.la
 lixau_LDFLAGS = @LDFLAGS_GLIB@
 lixau_SOURCES = lixau.c
-lixavsr_CPPFLAGS = -I$(srcdir)/../common @ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ \
-	-Iswitch/mysql
+lixavsr_CPPFLAGS = -I$(srcdir)/../common \
+	@ORACLE_OCI_CFLAGS@ \
+	@MYSQL_CPPFLAGS@ -Iswitch/mysql \
+	@POSTGRESQL_CPPFLAGS@ -Iswitch/postgresql
 lixavsr_LDADD = ../common/liblixab.la @LDFLAGS_XML2@ liblixac.la \
-	@ORACLE_OCI_LIBS@ @MYSQL_LDADD@
-lixavsr_LDFLAGS = @LDFLAGS_GLIB@ @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@
+	@ORACLE_OCI_LIBS@ @MYSQL_LDADD@ @POSTGRESQL_LDADD@
+lixavsr_LDFLAGS = @LDFLAGS_GLIB@ @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ \
+	@POSTGRESQL_LDFLAGS@
 lixavsr_SOURCES = lixavsr.c
 lixa_config_SOURCES = lixa-config.c
 lixa_config_LDFLAGS = @LDFLAGS_GLIB@

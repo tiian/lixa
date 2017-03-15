@@ -6,7 +6,7 @@
 # Two thread of controls that works on completely different transactions
 # These commands should work with these Resource Managers for a double thread of
 # control:
-# - Oracle Database 12.1
+# - Oracle Database 12.1    (LIXA_PROFILE=ORA_STA)
 #
 0/xa_open("",0,TMNOFLAGS)/0
 1/xa_open("",0,TMNOFLAGS)/0

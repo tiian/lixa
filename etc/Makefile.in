@@ -80,8 +80,7 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = etc
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(srcdir)/lixac_conf.xml.in $(srcdir)/lixad_conf.xml.in \
-	$(dist_etc_DATA)
+	$(srcdir)/lixad_conf.xml.in $(dist_etc_DATA)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -95,7 +94,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = lixac_conf.xml lixad_conf.xml
+CONFIG_CLEAN_FILES = lixad_conf.xml
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -317,6 +316,7 @@ PKG_CONFIG = @PKG_CONFIG@
 POSTGRESQL_CONFIG = @POSTGRESQL_CONFIG@
 POSTGRESQL_CPPFLAGS = @POSTGRESQL_CPPFLAGS@
 POSTGRESQL_INCLUDE_DIR = @POSTGRESQL_INCLUDE_DIR@
+POSTGRESQL_LDADD = @POSTGRESQL_LDADD@
 POSTGRESQL_LDFLAGS = @POSTGRESQL_LDFLAGS@
 PROC = @PROC@
 PROCOB = @PROCOB@
@@ -424,8 +424,6 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-lixac_conf.xml: $(top_builddir)/config.status $(srcdir)/lixac_conf.xml.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 lixad_conf.xml: $(top_builddir)/config.status $(srcdir)/lixad_conf.xml.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
@@ -730,6 +728,13 @@ uninstall-am: uninstall-dist_etcDATA
 	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
 	uninstall-am uninstall-dist_etcDATA
 
+
+lixac_conf.xml:	lixac_conf.xml.in
+	sed \
+	-e 's|@EXPANDED_LIBDIR[@]|$(EXPANDED_LIBDIR)|g' \
+	-e 's|@ORACLE_SQL_NET[@]|$(ORACLE_SQL_NET)|g' \
+	-e 's|@ORACLE_RM_TYPE[@]|$(ORACLE_RM_TYPE)|g' \
+	$< >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -3,3 +3,9 @@ etcdir = $(sysconfdir)
 dist_etc_DATA = lixac_conf.xml lixad_conf.xml
 noinst_DATA = lixac_conf.xml.in lixad_conf.xml.in
 
+lixac_conf.xml:	lixac_conf.xml.in
+	sed \
+	-e 's|@EXPANDED_LIBDIR[@]|$(EXPANDED_LIBDIR)|g' \
+	-e 's|@ORACLE_SQL_NET[@]|$(ORACLE_SQL_NET)|g' \
+	-e 's|@ORACLE_RM_TYPE[@]|$(ORACLE_RM_TYPE)|g' \
+	$< >$@

@@ -6,8 +6,8 @@
 # Two thread of controls that works on completely different transactions
 # These commands should work with these Resource Managers for a single thread of
 # control:
-# - PostgreSQL 9.3.16
-# - MySQL 5.5.54
+# - PostgreSQL 9.3.16    (LIXA_PROFILE=PQL_STA)
+# - MySQL 5.5.54         (LIXA_PROFILE=MYS_STA)
 #
 0/xa_open("",0,TMNOFLAGS)/0
 1/xa_open("",0,TMNOFLAGS)/0

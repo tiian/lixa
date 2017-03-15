@@ -16,7 +16,6 @@ AC_CONFIG_FILES([
   doc/images/Makefile
   doc/manuals/LIXA.xml
   doc/manuals/Makefile
-  etc/lixac_conf.xml
   etc/lixad_conf.xml
   etc/Makefile
   etc/lixavsr/Makefile

@@ -5,8 +5,8 @@
 #
 # These commands should work with these Resource Managers for a single thread of
 # control:
-# - PostgreSQL 9.3.16
-# - MySQL 5.5.54
+# - PostgreSQL 9.3.16 (LIXA_PROFILE=PQL_STA)
+# - MySQL 5.5.54      (LIXA_PROFILE=MYS_STA)
 #
 0/xa_open("",0,TMNOFLAGS)/0
 0/xa_start("231.a256cf41.ff45a3",0,TMNOFLAGS)/0

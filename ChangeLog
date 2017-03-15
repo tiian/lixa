@@ -2,6 +2,9 @@ LOG:
 
          - 1.3.4 LIXA Very Stupid Robot (lixavsr) additional use cases:
 		- branch for MySQL database
+		- branch for PostgreSQL database
+		- branch for MySQL & PostgreSQL, MySQL & Oracle DB,
+		  PostgreSQL & Oracle DB
 
 20170311 - 1.3.3 LIXA Very Stupid Robot (lixavsr) utility release
 

@@ -8,201 +8,197 @@
 # real parallelism but command sequences show that distinct branches can be
 # concurrently used by distinct threads of control.
 #
-# These commands should work with these Resource Managers:
-# - Oracle 12.1    (LIXA_PROFILE=ORA_STA)
+# These commands should work with these Resource Managers (together):
+# - PostgreSQL 9.3.16 & Oracle 12.1    (LIXA_PROFILE=PQL_STA_ORA_STA)
 #
-# Every thread of control opens the Resource Manager (Oracle DBMS)
+# Every thread of control opens the Resource Manager:
+# first Resource Manager is PostgreSQL
+# second Resource Manager is Oracle DB
 #
 0/xa_open("",0,TMNOFLAGS)/0
 1/xa_open("",0,TMNOFLAGS)/0
+0/xa_open("",1,TMNOFLAGS)/0
+1/xa_open("",1,TMNOFLAGS)/0
 #
 # First thread of control creates first branch
 #
 0/xa_start("231.a256cf44.ff45a3",0,TMNOFLAGS)/0
+0/xa_start("231.a256cf44.ff45a3",1,TMNOFLAGS)/0
 #
 # First thread performs real SQL command
 #
+0/rm_pql_exec1("INSERT INTO authors VALUES(1, 'Hemingway', 'Ernest')")/0
 0/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('RS', 'Repubblica San Marino', 1)")/0
 #
 # Second thread of control creates second branch
 #
 1/xa_start("231.a256cf44.ff45a4",0,TMNOFLAGS)/0
+1/xa_start("231.a256cf44.ff45a4",1,TMNOFLAGS)/0
 #
 # This thread of control can't see the data changed by first thread of control
 # due to "transaction loose coupling" ("tight coupling" is not suggested for
 # scalability reasons)
 #
+1/rm_pql_exec1("INSERT INTO authors VALUES(2, 'Saviane', 'Giorgio')")/0
 1/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('ZA', 'South Africa', 1)")/0
 #
 # First thread of control works again using its branch
 #
+0/rm_pql_exec1("DELETE FROM authors WHERE id = 1")/0
 0/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'")/0
 #
 # Second thread of control works again using its branch
 #
+1/rm_pql_exec1("DELETE FROM authors WHERE id = 2")/0
 1/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'")/0
 #
 # Second thread of control starts termination
 #
 1/xa_end("231.a256cf44.ff45a4",0,TMSUCCESS)/0
+1/xa_end("231.a256cf44.ff45a4",1,TMSUCCESS)/0
 #
 # First thread of control starts termination
 #
 0/xa_end("231.a256cf44.ff45a3",0,TMSUCCESS)/0
+0/xa_end("231.a256cf44.ff45a3",1,TMSUCCESS)/0
 #
 # Preparing both threads of control for commit
 #
 0/xa_prepare("231.a256cf44.ff45a3",0,TMNOFLAGS)/0
+0/xa_prepare("231.a256cf44.ff45a3",1,TMNOFLAGS)/0
 1/xa_prepare("231.a256cf44.ff45a4",0,TMNOFLAGS)/0
+1/xa_prepare("231.a256cf44.ff45a4",1,TMNOFLAGS)/0
 #
 # Committing both threads of control
 #
 0/xa_commit("231.a256cf44.ff45a3",0,TMNOFLAGS)/0
+0/xa_commit("231.a256cf44.ff45a3",1,TMNOFLAGS)/0
 1/xa_commit("231.a256cf44.ff45a4",0,TMNOFLAGS)/0
+1/xa_commit("231.a256cf44.ff45a4",1,TMNOFLAGS)/0
 #
 # The same as above, but with different commit order
 #
 # First thread of control creates first branch
 #
 0/xa_start("231.a256cf45.ff45a3",0,TMNOFLAGS)/0
+0/xa_start("231.a256cf45.ff45a3",1,TMNOFLAGS)/0
 #
 # First thread performs real SQL command
 #
+0/rm_pql_exec1("INSERT INTO authors VALUES(1, 'Hemingway', 'Ernest')")/0
 0/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('RS', 'Repubblica San Marino', 1)")/0
 #
 # Second thread of control creates second branch
 #
 1/xa_start("231.a256cf45.ff45a4",0,TMNOFLAGS)/0
+1/xa_start("231.a256cf45.ff45a4",1,TMNOFLAGS)/0
 #
 # This thread of control can't see the data chaged by first thread of control
 # due to "transaction loose coupling" ("tight coupling" is not suggested for
 # scalability reasons)
 #
+1/rm_pql_exec1("INSERT INTO authors VALUES(2, 'Saviane', 'Giorgio')")/0
 1/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('ZA', 'South Africa', 1)")/0
 #
 # First thread of control works again using its branch
 #
+0/rm_pql_exec1("DELETE FROM authors WHERE id = 1")/0
 0/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'")/0
 #
 # Second thread of control works again using its branch
 #
+1/rm_pql_exec1("DELETE FROM authors WHERE id = 2")/0
 1/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'")/0
 #
 # Second thread of control starts termination
 #
 1/xa_end("231.a256cf45.ff45a4",0,TMSUCCESS)/0
+1/xa_end("231.a256cf45.ff45a4",1,TMSUCCESS)/0
 #
 # First thread of control starts termination
 #
 0/xa_end("231.a256cf45.ff45a3",0,TMSUCCESS)/0
+0/xa_end("231.a256cf45.ff45a3",1,TMSUCCESS)/0
 #
 # Preparing both threads of control for commit
 #
 1/xa_prepare("231.a256cf45.ff45a4",0,TMNOFLAGS)/0
+1/xa_prepare("231.a256cf45.ff45a4",1,TMNOFLAGS)/0
 0/xa_prepare("231.a256cf45.ff45a3",0,TMNOFLAGS)/0
+0/xa_prepare("231.a256cf45.ff45a3",1,TMNOFLAGS)/0
 #
 # Committing both threads of control
 #
 0/xa_commit("231.a256cf45.ff45a3",0,TMNOFLAGS)/0
+0/xa_commit("231.a256cf45.ff45a3",1,TMNOFLAGS)/0
 1/xa_commit("231.a256cf45.ff45a4",0,TMNOFLAGS)/0
-#
-# The same as above, but with different termination order
-#
-# First thread of control creates first branch
-#
-0/xa_start("231.a256cf46.ff45a3",0,TMNOFLAGS)/0
-#
-# First thread performs real SQL command
-#
-0/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('RS', 'Repubblica San Marino', 1)")/0
-#
-# Second thread of control creates second branch
-#
-1/xa_start("231.a256cf46.ff45a4",0,TMNOFLAGS)/0
-#
-# This thread of control can't see the data chaged by first thread of control
-# due to "transaction loose coupling" ("tight coupling" is not suggested for
-# scalability reasons)
-#
-1/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('ZA', 'South Africa', 1)")/0
-#
-# First thread of control works again using its branch
-#
-0/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'")/0
-#
-# Second thread of control works again using its branch
-#
-1/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'")/0
-#
-# First thread of control starts termination
-#
-0/xa_end("231.a256cf46.ff45a3",0,TMSUCCESS)/0
-#
-# Second thread of control starts termination
-#
-1/xa_end("231.a256cf46.ff45a4",0,TMSUCCESS)/0
-#
-# Preparing both threads of control for commit
-#
-0/xa_prepare("231.a256cf46.ff45a3",0,TMNOFLAGS)/0
-1/xa_prepare("231.a256cf46.ff45a4",0,TMNOFLAGS)/0
-#
-# Committing both threads of control
-#
-0/xa_commit("231.a256cf46.ff45a3",0,TMNOFLAGS)/0
-1/xa_commit("231.a256cf46.ff45a4",0,TMNOFLAGS)/0
+1/xa_commit("231.a256cf45.ff45a4",1,TMNOFLAGS)/0
 #
 # The same as above, but with rollback
 #
 # First thread of control creates first branch
 #
 0/xa_start("231.a256cf47.ff45a3",0,TMNOFLAGS)/0
+0/xa_start("231.a256cf47.ff45a3",1,TMNOFLAGS)/0
 #
 # First thread performs real SQL command
 #
+0/rm_pql_exec1("INSERT INTO authors VALUES(1, 'Hemingway', 'Ernest')")/0
 0/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('RS', 'Repubblica San Marino', 1)")/0
 #
 # Second thread of control creates second branch
 #
 1/xa_start("231.a256cf47.ff45a4",0,TMNOFLAGS)/0
+1/xa_start("231.a256cf47.ff45a4",1,TMNOFLAGS)/0
 #
 # This thread of control can't see the data chaged by first thread of control
 # due to "transaction loose coupling" ("tight coupling" is not suggested for
 # scalability reasons)
 #
+1/rm_pql_exec1("INSERT INTO authors VALUES(2, 'Saviane', 'Giorgio')")/0
 1/rm_ora_exec1("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) VALUES ('ZA', 'South Africa', 1)")/0
 #
 # First thread of control works again using its branch
 #
+0/rm_pql_exec1("DELETE FROM authors WHERE id = 1")/0
 0/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'RS'")/0
 #
 # Second thread of control works again using its branch
 #
+1/rm_pql_exec1("DELETE FROM authors WHERE id = 2")/0
 1/rm_ora_exec1("DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'")/0
 #
 # Second thread of control starts termination
 #
 1/xa_end("231.a256cf47.ff45a4",0,TMSUCCESS)/0
+1/xa_end("231.a256cf47.ff45a4",1,TMSUCCESS)/0
 #
 # First thread of control starts termination
 #
 0/xa_end("231.a256cf47.ff45a3",0,TMSUCCESS)/0
+0/xa_end("231.a256cf47.ff45a3",1,TMSUCCESS)/0
 #
 # Preparing both threads of control for commit
 #
 0/xa_prepare("231.a256cf47.ff45a3",0,TMNOFLAGS)/0
+0/xa_prepare("231.a256cf47.ff45a3",1,TMNOFLAGS)/0
 1/xa_prepare("231.a256cf47.ff45a4",0,TMNOFLAGS)/0
+1/xa_prepare("231.a256cf47.ff45a4",1,TMNOFLAGS)/0
 #
 # *** SUPPOSING *** something was not fine during xa_prepare, we use the
 # two phase commit protocol to rollback both threads of control
 #
 0/xa_rollback("231.a256cf47.ff45a3",0,TMNOFLAGS)/0
+0/xa_rollback("231.a256cf47.ff45a3",1,TMNOFLAGS)/0
 1/xa_rollback("231.a256cf47.ff45a4",0,TMNOFLAGS)/0
+1/xa_rollback("231.a256cf47.ff45a4",1,TMNOFLAGS)/0
 #
-# Every thread of control closes the Resource Manager (Oracle DBMS)
+# Every thread of control closes the Resource Managers
 #
 0/xa_close("",0,TMNOFLAGS)/0
 1/xa_close("",0,TMNOFLAGS)/0
+0/xa_close("",1,TMNOFLAGS)/0
+1/xa_close("",1,TMNOFLAGS)/0
 #
 # End of robot commands for both thread of controls
 #

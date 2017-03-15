@@ -97,3 +97,54 @@ AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0012; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/14_branch_ora.txt], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([VSR/15 MySQL Branch (processes)])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/15_branch_mys.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/15 MySQL Branch (threads)])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0020; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/15_branch_mys.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/16 PostgreSQL Branch (processes)])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0010; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/16_branch_pql.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/16 PostgreSQL Branch (threads)])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0010; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/16_branch_pql.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/17 PostgreSQL-Oracle Branch (processes)])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0036; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/17_branch_pql_ora.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/17 PostgreSQL-Oracle Branch (threads)])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0036; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/17_branch_pql_ora.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/18 MySQL-PostgreSQL Branch (processes)])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0026; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/18_branch_mys_pql.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/18 MySQL-PostgreSQL Branch (threads)])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0026; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/18_branch_mys_pql.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([VSR/19 MySQL-Oracle Branch (processes)])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0037; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -f @abs_top_srcdir@/etc/lixavsr/19_branch_mys_ora.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([VSR/19 MySQL-Oracle Branch (threads)])
+AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([if test "$TEST_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0037; export LIXA_TRACE_MASK=0x90000; lixa_test_exec.sh noreset none lixavsr -t -f @abs_top_srcdir@/etc/lixavsr/19_branch_mys_ora.txt], [0], [ignore], [ignore])
+AT_CLEANUP
+

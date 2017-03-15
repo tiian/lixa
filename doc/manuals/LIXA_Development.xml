@@ -1518,7 +1518,7 @@ libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007f32e5b71000)
 	  <para>
 	    Set-up the necessary environment variable:
 	    <screen>
-tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=ORAIC_DYN
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=ORA_DYN
 tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
 ORAIC_DYN
 	    </screen>
@@ -1528,10 +1528,10 @@ ORAIC_DYN
 	  <title>Some checks before program execution</title>
 	  <para>
 	    We set <varname>LIXA_PROFILE</varname> to value
-	    <quote>ORAIC_DYN</quote>, looking at
+	    <quote>ORA_DYN</quote>, looking at
 	    <filename>/opt/lixa/etc/lixac_conf.xml</filename>:
 	    <screen>
-    &lt;profile name="ORAIC_DYN"&gt;
+    &lt;profile name="ORA_DYN"&gt;
       &lt;sttsrvs&gt;
         &lt;sttsrv&gt;local_1&lt;/sttsrv&gt;
       &lt;/sttsrvs&gt;
@@ -1823,9 +1823,9 @@ proc is /opt/oracle/instantclient_12_1/sdk/proc
 	  <para>
 	    Set-up the necessary environment variable:
 	    <screen>
-tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=ORAIC_STA
+tiian@ubuntu1404-64:/tmp$ export LIXA_PROFILE=ORA_STA
 tiian@ubuntu1404-64:/tmp$ echo $LIXA_PROFILE
-ORAIC_STA
+ORA_STA
 	    </screen>
 	    In the previous example we used the dynamic XA registration, this
 	    time we are using the static one, but both can be used for 
