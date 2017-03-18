@@ -1,4 +1,4 @@
-Implement XTA for C/C++ if the feedback from the previous step is positive
+Implement XTA for C/C++
 
 Explore high availability features (active/active) with dynamic or static
 workload. Avoid disk persistence, prefer distributed memory semi persistence.

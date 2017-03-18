@@ -80,7 +80,8 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = etc
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(srcdir)/lixad_conf.xml.in $(dist_etc_DATA)
+	$(srcdir)/lixad_conf.xml.in $(dist_etc_DATA) \
+	$(dist_noinst_DATA)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -151,7 +152,7 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 am__installdirs = "$(DESTDIR)$(etcdir)"
-DATA = $(dist_etc_DATA) $(noinst_DATA)
+DATA = $(dist_etc_DATA) $(dist_noinst_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -390,7 +391,7 @@ top_srcdir = @top_srcdir@
 SUBDIRS = lixavsr
 etcdir = $(sysconfdir)
 dist_etc_DATA = lixac_conf.xml lixad_conf.xml
-noinst_DATA = lixac_conf.xml.in lixad_conf.xml.in
+dist_noinst_DATA = lixac_conf.xml.in lixad_conf.xml.in
 all: all-recursive
 
 .SUFFIXES:

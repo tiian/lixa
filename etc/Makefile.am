@@ -1,7 +1,7 @@
 SUBDIRS = lixavsr
 etcdir = $(sysconfdir)
 dist_etc_DATA = lixac_conf.xml lixad_conf.xml
-noinst_DATA = lixac_conf.xml.in lixad_conf.xml.in
+dist_noinst_DATA = lixac_conf.xml.in lixad_conf.xml.in
 
 lixac_conf.xml:	lixac_conf.xml.in
 	sed \

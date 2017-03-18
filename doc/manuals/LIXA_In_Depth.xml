@@ -761,7 +761,7 @@ tx_close(): 0
       can be retrieved with option 
       <parameter class='command'>--help</parameter>:
       <screen>
-tiian@ubuntu1404-64:~$ /opt/lixa/bin/lixavsr --help
+tiian@ubuntu1404-64:~/lixa$ /opt/lixa/bin/lixavsr --help
 Usage:
   lixavsr [OPTION...] - LIXA test utility
 
@@ -772,6 +772,7 @@ Application Options:
   -f, --filename     Name of the file with the actions that must be executed
   -t, --threads      Use threads instead of processes
   -v, --version      Print package info and exit
+  -s, --sleep        Sleep 1 second before killing children at exit
       </screen>
     </para>
     <note><para>
@@ -792,24 +793,29 @@ Application Options:
       Some examples are provided inside directory 
       <filename>etc/lixavsr</filename> as shown below:
       <screen>
-[tiian@rhel73 lixa-1.3.3-rc]$ ls -la etc/lixavsr/
-total 88
-drwxrwxr-x. 2 tiian tiian  4096 11 mar 22.01 .
-drwxrwxr-x. 3 tiian tiian   169 11 mar 22.01 ..
--rw-rw-r--. 1 tiian tiian  1051  4 mar 17.29 00_trivial.txt
--rw-rw-r--. 1 tiian tiian   748  4 mar 21.15 01_single_toc.txt
--rw-rw-r--. 1 tiian tiian   755  4 mar 21.14 02_single_toc.txt
--rw-rw-r--. 1 tiian tiian  1230  4 mar 21.48 03_double_toc.txt
--rw-rw-r--. 1 tiian tiian  1188  4 mar 21.42 04_double_toc.txt
--rw-rw-r--. 1 tiian tiian  2967  8 mar 22.51 10_suspend_resume.txt
--rw-rw-r--. 1 tiian tiian  2808  8 mar 22.56 11_end_join.txt
--rw-rw-r--. 1 tiian tiian  2895  8 mar 22.59 12_end_join.txt
--rw-rw-r--. 1 tiian tiian  1542  8 mar 22.59 13_end_join.txt
--rw-rw-r--. 1 tiian tiian  6741  8 mar 22.59 14_branch_ora.txt
--rw-rw-r--. 1 tiian tiian 14294 11 mar 22.01 Makefile
--rw-rw-r--. 1 tiian tiian   215  9 mar 19.20 Makefile.am
--rw-rw-r--. 1 tiian tiian 14344 10 mar 23.06 Makefile.in
--rw-rw-r--. 1 tiian tiian   283  5 mar 22.02 README	
+tiian@ubuntu1404-64:~/lixa$ ls -la etc/lixavsr/
+total 132
+drwxrwxr-x 2 tiian tiian  4096 mar 18 18:45 .
+drwxr-xr-x 3 tiian tiian  4096 mar 18 18:39 ..
+-rw-rw-r-- 1 tiian tiian  1051 mar  4 17:29 00_trivial.txt
+-rw-rw-r-- 1 tiian tiian   799 mar 15 22:39 01_single_toc.txt
+-rw-rw-r-- 1 tiian tiian   780 mar 15 22:08 02_single_toc.txt
+-rw-rw-r-- 1 tiian tiian  1287 mar 15 22:09 03_double_toc.txt
+-rw-rw-r-- 1 tiian tiian  1214 mar 15 22:13 04_double_toc.txt
+-rw-rw-r-- 1 tiian tiian  2993 mar 15 22:14 10_suspend_resume.txt
+-rw-rw-r-- 1 tiian tiian  2834 mar 15 22:14 11_end_join.txt
+-rw-rw-r-- 1 tiian tiian  2921 mar 15 22:14 12_end_join.txt
+-rw-rw-r-- 1 tiian tiian  1568 mar 15 22:15 13_end_join.txt
+-rw-rw-r-- 1 tiian tiian  6767 mar 15 22:16 14_branch_ora.txt
+-rw-rw-r-- 1 tiian tiian  6276 mar 15 23:34 15_branch_mys.txt
+-rw-rw-r-- 1 tiian tiian  6280 mar 15 23:33 16_branch_pql.txt
+-rw-rw-r-- 1 tiian tiian  7433 mar 15 23:33 17_branch_pql_ora.txt
+-rw-rw-r-- 1 tiian tiian  5026 mar 15 23:32 18_branch_mys_pql.txt
+-rw-rw-r-- 1 tiian tiian  5254 mar 15 23:32 19_branch_mys_ora.txt
+-rw-rw-r-- 1 tiian tiian 14609 mar 18 18:45 Makefile
+-rw-rw-r-- 1 tiian tiian   324 mar 18 18:45 Makefile.am
+-rw-rw-r-- 1 tiian tiian 14519 mar 18 18:45 Makefile.in
+-rw-rw-r-- 1 tiian tiian   283 mar  5 22:02 README
       </screen>
       These files are not installed because they are a development tool, not
       a production tool: they are available only in the source tree.
@@ -817,28 +823,28 @@ drwxrwxr-x. 3 tiian tiian   169 11 mar 22.01 ..
     <para>
       Just as an example, here is a sample execution:
       <screen>
-[tiian@rhel73 lixa-1.3.3-rc]$ export LIXA_PROFILE=PQL_STA
-[tiian@rhel73 lixa-1.3.3-rc]$ /opt/lixa/bin/lixavsr -f etc/lixavsr/03_double_toc.txt 
-toc=0   xa_open("dbname=testdb",0,0x00000000)=0
-toc=1   xa_open("dbname=testdb",0,0x00000000)=0
-toc=0   xa_start("231.a256cf41.ff45a3",0,0x00000000)=0
-toc=1   xa_start("231.a256cf42.ff45a4",0,0x00000000)=0
-toc=0   xa_end("231.a256cf41.ff45a3",0,0x04000000)=0
-toc=1   xa_end("231.a256cf42.ff45a4",0,0x04000000)=0
-toc=0   xa_prepare("231.a256cf41.ff45a3",0,0x00000000)=0
-toc=1   xa_prepare("231.a256cf42.ff45a4",0,0x00000000)=0
-toc=0   xa_commit("231.a256cf41.ff45a3",0,0x00000000)=0
-toc=1   xa_commit("231.a256cf42.ff45a4",0,0x00000000)=0
-toc=0   xa_start("231.a256cf41.ff45a3",0,0x00000000)=0
-toc=1   xa_start("231.a256cf42.ff45a4",0,0x00000000)=0
-toc=0   xa_end("231.a256cf41.ff45a3",0,0x04000000)=0
-toc=1   xa_end("231.a256cf42.ff45a4",0,0x04000000)=0
-toc=0   xa_commit("231.a256cf41.ff45a3",0,0x40000000)=0
-toc=1   xa_commit("231.a256cf42.ff45a4",0,0x40000000)=0
-toc=0   xa_close("",0,0x00000000)=0
-toc=1   xa_close("",0,0x00000000)=0
-toc=0   exiting...
-toc=1   exiting...
+tiian@ubuntu1404-64:~/lixa$ export LIXA_PROFILE=PQL_STA
+tiian@ubuntu1404-64:~/lixa$ /opt/lixa/bin/lixavsr -f etc/lixavsr/03_double_toc.txt 
+toc=0  xa_open("dbname=testdb",0,0x00000000)=0
+toc=1  xa_open("dbname=testdb",0,0x00000000)=0
+toc=0  xa_start("231.a256cf41.ff45a3",0,0x00000000)=0
+toc=1  xa_start("231.a256cf42.ff45a4",0,0x00000000)=0
+toc=0  xa_end("231.a256cf41.ff45a3",0,0x04000000)=0
+toc=1  xa_end("231.a256cf42.ff45a4",0,0x04000000)=0
+toc=0  xa_prepare("231.a256cf41.ff45a3",0,0x00000000)=0
+toc=1  xa_prepare("231.a256cf42.ff45a4",0,0x00000000)=0
+toc=0  xa_commit("231.a256cf41.ff45a3",0,0x00000000)=0
+toc=1  xa_commit("231.a256cf42.ff45a4",0,0x00000000)=0
+toc=0  xa_start("231.a256cf41.ff45a3",0,0x00000000)=0
+toc=1  xa_start("231.a256cf42.ff45a4",0,0x00000000)=0
+toc=0  xa_end("231.a256cf41.ff45a3",0,0x04000000)=0
+toc=1  xa_end("231.a256cf42.ff45a4",0,0x04000000)=0
+toc=0  xa_commit("231.a256cf41.ff45a3",0,0x40000000)=0
+toc=1  xa_commit("231.a256cf42.ff45a4",0,0x40000000)=0
+toc=0  xa_close("",0,0x00000000)=0
+toc=1  xa_close("",0,0x00000000)=0
+toc=0  exiting...
+toc=1  exiting...
       </screen>
     </para>
   </section>
