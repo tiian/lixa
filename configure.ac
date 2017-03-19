@@ -1,4 +1,4 @@
-AC_INIT([lixa], [1.3.4], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [1.9.0-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
@@ -11,6 +11,7 @@ AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
   doc/Makefile
+  doc/api/Makefile
   doc/examples/Makefile
   doc/examples/cobol/Makefile
   doc/images/Makefile
@@ -39,6 +40,7 @@ AC_CONFIG_FILES([
   src/client/switch/mysql/Makefile
   src/client/switch/webspheremq/Makefile
   src/server/Makefile
+  src/xta/Makefile
   tests/Makefile
   tests/atlocal
   tests/lixa-config.at
@@ -51,7 +53,6 @@ AC_CONFIG_FILES([
   tests/src/cobol/Makefile
   utils/Makefile
   var/Makefile
-  doxygen.conf
 ])
 AC_CONFIG_TESTDIR([tests])
 
@@ -103,14 +104,18 @@ AM_CONDITIONAL([COMPILE_DOCBOOK_STUFF], [test "$HAVE_DOCBOOK" = "yes"])
 # 6. If any interfaces have been removed since the last public release, then
 #    set age to 0.
 #
-# liblixac and liblixacmt libraries version
+# liblixac library version
 LT_LIXAC_CURRENT=1
 LT_LIXAC_REVISION=3
 LT_LIXAC_AGE=1
-# liblixab and liblixbcmt libraries version
+# liblixab library version
 LT_LIXAB_CURRENT=0
 LT_LIXAB_REVISION=1
 LT_LIXAB_AGE=0
+# liblixta library version
+LT_LIXTA_CURRENT=0
+LT_LIXTA_REVISION=0
+LT_LIXTA_AGE=0
 
 # Expanded variables can be used in C code and XML files
 EXPANDED_SYSCONFDIR=$(eval echo $sysconfdir)
@@ -118,6 +123,12 @@ EXPANDED_LOCALSTATEDIR=$(eval echo $localstatedir)
 EXPANDED_LIBDIR=$(eval echo $libdir)
 
 AC_PRESERVE_HELP_ORDER
+AC_ARG_ENABLE([xta],
+	AS_HELP_STRING([--enable-xta],
+		[enable XTA (XA Transaction API) support]),
+	[LIXA_XTA="yes" ],
+	[LIXA_XTA="no" ])
+AM_CONDITIONAL([COMPILE_XTA], [test "$LIXA_XTA" = "yes"])
 AC_ARG_ENABLE([debug],
         AS_HELP_STRING([--enable-debug],
                 [enable debug code (assert statements)]),
@@ -209,6 +220,8 @@ eval "LIXA_CONFIG_SYSCONFDIR=$sysconfdir"
 AC_CHECK_PROGS(GDB, [gdb], [])
 AC_CHECK_PROGS(VALGRIND, [valgrind], [])
 AC_CHECK_PROGS(XSLTPROC, [xsltproc], [])
+AC_CHECK_PROGS(HAVE_DOXYGEN, [doxygen], [YES], [NO])
+AM_CONDITIONAL([COND_DOXYGEN], [test "$HAVE_DOXYGEN" = "YES"])
 AC_CHECK_PROGS(HAVE_DOT, [dot], [YES], [NO])
 AC_CHECK_PROGS(HAVE_NETSTAT, [netstat], [NO], [])
 if test "$HAVE_NETSTAT" = "NO"
@@ -294,6 +307,9 @@ AC_SUBST(LT_LIXAC_AGE)
 AC_SUBST(LT_LIXAB_CURRENT)
 AC_SUBST(LT_LIXAB_REVISION)
 AC_SUBST(LT_LIXAB_AGE)
+AC_SUBST(LT_LIXTA_CURRENT)
+AC_SUBST(LT_LIXTA_REVISION)
+AC_SUBST(LT_LIXTA_AGE)
 AC_SUBST(LDFLAGS_GLIB)
 AC_SUBST(LDFLAGS_GMODULE)
 AC_SUBST(LDFLAGS_GTHREAD)

@@ -148,7 +148,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
+DIST_SUBDIRS = common client server xta
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -209,6 +209,7 @@ GREP = @GREP@
 HAVE_COBOL = @HAVE_COBOL@
 HAVE_COBOLAPI = @HAVE_COBOLAPI@
 HAVE_DOT = @HAVE_DOT@
+HAVE_DOXYGEN = @HAVE_DOXYGEN@
 HAVE_IBMDB2 = @HAVE_IBMDB2@
 HAVE_MYSQL = @HAVE_MYSQL@
 HAVE_NETSTAT = @HAVE_NETSTAT@
@@ -251,6 +252,9 @@ LT_LIXAB_REVISION = @LT_LIXAB_REVISION@
 LT_LIXAC_AGE = @LT_LIXAC_AGE@
 LT_LIXAC_CURRENT = @LT_LIXAC_CURRENT@
 LT_LIXAC_REVISION = @LT_LIXAC_REVISION@
+LT_LIXTA_AGE = @LT_LIXTA_AGE@
+LT_LIXTA_CURRENT = @LT_LIXTA_CURRENT@
+LT_LIXTA_REVISION = @LT_LIXTA_REVISION@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
@@ -356,7 +360,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = common client server
+@COMPILE_XTA_TRUE@MAYBE_XTA = xta
+SUBDIRS = common client server $(MAYBE_XTA)
 all: all-recursive
 
 .SUFFIXES:

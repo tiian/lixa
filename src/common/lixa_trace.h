@@ -91,10 +91,10 @@
  */
 #define LIXA_TRACE_MOD_SERVER_STATUS      0x00000010
 
-/*
- * this bit is currently unused
- * #define LIXA_TRACE_MOD_    0x00000020
+/**
+ * trace module for XA Transaction API (XTA) functions
  */
+#define LIXA_TRACE_MOD_XTA                0x00000020
 
 /**
  * trace module for server XA functions

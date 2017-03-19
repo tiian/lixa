@@ -78,9 +78,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = ext/doc/manuals
+subdir = doc/api
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(srcdir)/LIXA_EXT.xml.in
+	$(dist_noinst_DATA)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -94,7 +94,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = LIXA_EXT.xml
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -115,35 +115,7 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
-am__installdirs = "$(DESTDIR)$(docdir)"
-DATA = $(doc_DATA)
+DATA = $(dist_noinst_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -300,7 +272,7 @@ build_vendor = @build_vendor@
 builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
-docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/ext/html
+docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
@@ -331,15 +303,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = LIXA_EXT.xml.in $(doc_DATA) $(manual_sources) $(dia_images) $(png_images) index_no_xsltproc.html
-manual_sources = LIXA_EXT.xml \
-	LIXA_EXT_Introduction.xml \
-	LIXA_EXT_PHP.xml \
-	LIXA_EXT_Bibliography.xml
-
-dia_images = 
-png_images = 
-doc_DATA = *.html $(png_images)
+@COND_DOXYGEN_TRUE@MAYBE_API = xta/html/index.html lixa/html/index.html
+EXTRA_DIST = $(MAYBE_API)
+dist_noinst_DATA = doxygen.xta.in doxygen.lixa.in
 all: all-am
 
 .SUFFIXES:
@@ -352,9 +318,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu ext/doc/manuals/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/api/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu ext/doc/manuals/Makefile
+	  $(AUTOMAKE) --gnu doc/api/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -373,35 +339,12 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-LIXA_EXT.xml: $(top_builddir)/config.status $(srcdir)/LIXA_EXT.xml.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-docDATA: $(doc_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(doc_DATA)'; test -n "$(docdir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(docdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(docdir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(docdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(docdir)" || exit $$?; \
-	done
-
-uninstall-docDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(doc_DATA)'; test -n "$(docdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(docdir)'; $(am__uninstall_files_from_dir)
 tags TAGS:
 
 ctags CTAGS:
@@ -443,9 +386,6 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(docdir)"; do \
-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -496,7 +436,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-docDATA
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -540,38 +480,43 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-docDATA
+uninstall-am:
 
 .MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	cscopelist-am ctags-am distclean distclean-generic \
 	distclean-libtool distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am \
-	install-docDATA install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags-am uninstall \
-	uninstall-am uninstall-docDATA
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags-am uninstall uninstall-am
 
 
-all: index_all_in_one.html index.html
+doxygen.xta:   doxygen.xta.in
+	sed \
+        -e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+        -e 's|@HAVE_DOT[@]|$(HAVE_DOT)|g' \
+        $< >$@
 
-@COMPILE_DOCBOOK_STUFF_TRUE@index_all_in_one.html: $(manual_sources)
-@COMPILE_DOCBOOK_STUFF_TRUE@	@echo "Creating HTML manual (single page)..."
-@COMPILE_DOCBOOK_STUFF_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index_all_in_one.html $(STYLESHEETS_DIR)/docbook.xsl LIXA_EXT.xml
-@COMPILE_DOCBOOK_STUFF_TRUE@index.html: $(manual_sources)
-@COMPILE_DOCBOOK_STUFF_TRUE@	@echo "Creating HTML manual (multi page)..."
-@COMPILE_DOCBOOK_STUFF_TRUE@	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/chunk.xsl LIXA_EXT.xml
-@COMPILE_DOCBOOK_STUFF_FALSE@index_all_in_one.html: $(manual_sources)
-@COMPILE_DOCBOOK_STUFF_FALSE@	@echo "Sorry, you must have xsltproc and Docbook stylesheets to create HTML manual from XML files"
-@COMPILE_DOCBOOK_STUFF_FALSE@	cp index_no_xsltproc.html index_all_in_one.html
-@COMPILE_DOCBOOK_STUFF_FALSE@index.html: $(manual_sources)
-@COMPILE_DOCBOOK_STUFF_FALSE@	@echo "Sorry, you must have xsltproc and Docbook stylesheets to create HTML manual from XML files"
-@COMPILE_DOCBOOK_STUFF_FALSE@	cp index_no_xsltproc.html index.html
+doxygen.lixa:   doxygen.lixa.in
+	sed \
+        -e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+        -e 's|@HAVE_DOT[@]|$(HAVE_DOT)|g' \
+        $< >$@
+
+all:	$(MAYBE_API)
+
+xta/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h
+	doxygen doxygen.xta
+
+lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
+	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h
+	doxygen doxygen.lixa
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

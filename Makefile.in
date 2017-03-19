@@ -82,9 +82,9 @@ subdir = .
 DIST_COMMON = INSTALL NEWS README AUTHORS ChangeLog \
 	$(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
-	$(srcdir)/config.h.in $(srcdir)/doxygen.conf.in \
-	$(dist_doc_DATA) COPYING TODO ar-lib compile config.guess \
-	config.sub depcomp install-sh missing ltmain.sh
+	$(srcdir)/config.h.in $(dist_doc_DATA) COPYING TODO ar-lib \
+	compile config.guess config.sub depcomp install-sh missing \
+	ltmain.sh
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -100,7 +100,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = doxygen.conf
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -264,6 +264,7 @@ GREP = @GREP@
 HAVE_COBOL = @HAVE_COBOL@
 HAVE_COBOLAPI = @HAVE_COBOLAPI@
 HAVE_DOT = @HAVE_DOT@
+HAVE_DOXYGEN = @HAVE_DOXYGEN@
 HAVE_IBMDB2 = @HAVE_IBMDB2@
 HAVE_MYSQL = @HAVE_MYSQL@
 HAVE_NETSTAT = @HAVE_NETSTAT@
@@ -306,6 +307,9 @@ LT_LIXAB_REVISION = @LT_LIXAB_REVISION@
 LT_LIXAC_AGE = @LT_LIXAC_AGE@
 LT_LIXAC_CURRENT = @LT_LIXAC_CURRENT@
 LT_LIXAC_REVISION = @LT_LIXAC_REVISION@
+LT_LIXTA_AGE = @LT_LIXTA_AGE@
+LT_LIXTA_CURRENT = @LT_LIXTA_CURRENT@
+LT_LIXTA_REVISION = @LT_LIXTA_REVISION@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
@@ -466,8 +470,6 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
-doxygen.conf: $(top_builddir)/config.status $(srcdir)/doxygen.conf.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo
