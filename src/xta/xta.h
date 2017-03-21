@@ -24,6 +24,7 @@
 /*
  * This include file is only a tool to include all necessary XTA header files
  */
+#include "xta_transaction.h"
 #include "xta_transaction_manager.h"
 
 

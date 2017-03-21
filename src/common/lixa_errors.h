@@ -510,6 +510,10 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * "g_thread_create" function error
  */
 #define LIXA_RC_G_THREAD_CREATE_ERROR          -306
+/**
+ * "g_try_malloc"/"g_try_malloc0" function error
+ */
+#define LIXA_RC_G_TRY_MALLOC_ERROR             -307
 
 
 

@@ -1,7 +1,7 @@
 includedir = $(prefix)/include/xta
-include_HEADERS = xta.h xta_transaction_manager.h
+include_HEADERS = xta.h xta_transaction.h xta_transaction_manager.h
 lib_LTLIBRARIES = liblixta.la
-liblixta_la_SOURCES = xta_transaction_manager.c
+liblixta_la_SOURCES = xta_transaction.c xta_transaction_manager.c
 AM_CFLAGS = -Wall -fno-strict-aliasing
 liblixta_la_CPPFLAGS = -I$(top_srcdir)/src/common
 liblixta_la_LIBADD =

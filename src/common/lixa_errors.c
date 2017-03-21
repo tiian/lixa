@@ -309,6 +309,9 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_G_THREAD_CREATE_ERROR:
             return "ERROR: 'g_thread_create' function returned an "
                 "error condition";
+        case LIXA_RC_G_TRY_MALLOC_ERROR:
+            return "ERROR: 'g_try_malloc'/'g_try_malloc0' function returned "
+                "an error condition";
         default:
             return "ERROR: unknown error";
     } /* switch (ret_cod) */
