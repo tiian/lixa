@@ -28,7 +28,7 @@
 #include "lixa_errors.h"
 #include "lixa_trace.h"
 /* XTA includes */
-#include "xta_transaction_manager.h"
+#include "xta_resource.h"
 
 
 
@@ -40,18 +40,18 @@
 
 
 
-xta_transaction_manager_t *xta_transaction_manager_new(void)
+xta_resource_t *xta_resource_new(void)
 {
     enum Exception { G_TRY_MALLOC_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    xta_transaction_manager_t *tm = NULL;
+    xta_resource_t *r = NULL;
     
-    LIXA_TRACE(("xta_transaction_manager_t\n"));
+    LIXA_TRACE(("xta_resource_t\n"));
     TRY {
         /* allocate the object */
-        if (NULL == (tm = (xta_transaction_manager_t *)
-                     g_try_malloc0(sizeof(xta_transaction_manager_t))))
+        if (NULL == (r = (xta_resource_t *)
+                     g_try_malloc0(sizeof(xta_resource_t))))
             THROW(G_TRY_MALLOC_ERROR);
         /* @@@ initialize the object */
         THROW(NONE);
@@ -67,24 +67,24 @@ xta_transaction_manager_t *xta_transaction_manager_new(void)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_transaction_manager_t/excp=%d/"
+    LIXA_TRACE(("xta_resource_t/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    XTA_LAST_OPERATION_SET(tm, excp, ret_cod);
-    return tm;
+    XTA_LAST_OPERATION_SET(r, excp, ret_cod);
+    return r;
 }
 
 
 
-void xta_transaction_manager_delete(xta_transaction_manager_t *tm)
+void xta_resource_delete(xta_resource_t *r)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("xta_transaction_manager_delete\n"));
+    LIXA_TRACE(("xta_resource_delete\n"));
     TRY {
         /* @@@ destroy the object content if necessary */
 
-        g_free(tm);
+        g_free(r);
         
         THROW(NONE);
     } CATCH {
@@ -96,56 +96,21 @@ void xta_transaction_manager_delete(xta_transaction_manager_t *tm)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_transaction_manager_delete/excp=%d/"
+    LIXA_TRACE(("xta_resource_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return;
 }
 
 
 
-xta_transaction_t *
-xta_transaction_manager_get_transaction(xta_transaction_manager_t *tm)
-{
-    enum Exception { NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    xta_transaction_t *t = NULL;
-    
-    LIXA_TRACE(("xta_transaction_manager_get_transaction\n"));
-    TRY {
-        /* @@@ implement me */
-
-        /* @@@ remove me, just an example */
-        LIXA_TRACE(("xta_transaction_manager_get_transaction: %s, %d, %d, %d\n",
-                    XTA_LAST_OPERATION_GET_METHOD(tm),
-                    XTA_LAST_OPERATION_GET_RET_COD(tm),
-                    XTA_LAST_OPERATION_GET_EXCP(tm),
-                    XTA_LAST_OPERATION_GET_ERROR(tm)));
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("xta_transaction_manager_get_transaction/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    XTA_LAST_OPERATION_SET(tm, excp, ret_cod);
-    return t;
-}
-
-
-
-int xta_transaction_manager_begin(
-    xta_transaction_manager_t *transaction_manager)
+int xta_resource_start(xta_resource_t *resource,
+                       xta_xid_t *xid,
+                       long flag)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("xta_transaction_manager_begin\n"));
+    LIXA_TRACE(("xta_resource_start\n"));
     TRY {
         /* @@@ implement me */
         
@@ -159,7 +124,7 @@ int xta_transaction_manager_begin(
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_transaction_manager_begin/excp=%d/"
+    LIXA_TRACE(("xta_resource_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

@@ -21,11 +21,42 @@
 
 
 
-/*
- * This include file is only a tool to include all necessary XTA header files
- */
+#include "xta_errors.h"
+#include "xta_resource.h"
 #include "xta_transaction.h"
 #include "xta_transaction_manager.h"
+#include "xta_xid.h"
+
+
+
+/*
+ * Constants inherited from XA specification
+ */
+
+/**
+ * No resource manager features selected
+ */
+#define TMNOFLAGS 0x00000000L
+/**
+ * Dissociates caller and marks transaction branch rollback-only
+ */
+#define TMFAIL 0x20000000L
+/**
+ * Caller is resuming association with suspended transaction branch
+ */
+#define TMRESUME 0x08000000L
+/**
+ * Dissociate caller from transaction branch
+ */
+#define TMSUCCESS 0x04000000L
+/**
+ * Caller is suspending, not ending, association
+ */
+#define TMSUSPEND 0x02000000L
+/**
+ * Caller is joining existing transaction branch
+ */
+#define TMJOIN 0x00200000L
 
 
 

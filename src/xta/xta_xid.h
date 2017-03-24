@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef XTA_TRANSACTION_MANAGER_H
-# define XTA_TRANSACTION_MANAGER_H
+#ifndef XTA_XID_H
+# define XTA_XID_H
 
 
 
@@ -25,7 +25,6 @@
 #include "lixa_trace.h"
 /* XTA includes */
 #include "xta_last_operation.h"
-#include "xta_transaction.h"
 
 
 
@@ -41,12 +40,12 @@
 
 
 /**
- * XTA Transaction Manager data type
+ * XTA Transaction data type
  */
 typedef struct {
     XTA_LAST_OPERATION_PROPERTIES;
     int dummy;
-} xta_transaction_manager_t;
+} xta_xid_t;
 
 
 
@@ -57,46 +56,22 @@ extern "C" {
 
 
     /**
-     * Create a new Transaction Manager object
-     * @return a new transaction manager object or NULL in the event of an
+     * Create a new Transaction Identifier object
+     * @return a new transaction identifier object or NULL in the event of an
      *         error occurred
      */
-    xta_transaction_manager_t *xta_transaction_manager_new(void);
+    xta_xid_t *xta_xid_new(void);
 
 
 
     /**
-     * Delete a Transaction Manager object
-     * @param[in] transaction_manager to delete
+     * Delete a Transaction Identifier object
+     * @param[in] xid object to delete
      */
-    void xta_transaction_manager_delete(
-        xta_transaction_manager_t *transaction_manager);
+    void xta_xid_delete(xta_xid_t *xid);
 
 
 
-    /**
-     * Get the XTA Transaction object that represents the transaction context
-     * of the calling thread
-     * @param[in,out] transaction_manager object
-     * @return the pointer to an XTA Transaction object
-     */
-    xta_transaction_t *
-    xta_transaction_manager_get_transaction(
-        xta_transaction_manager_t *transaction_manager);
-
-    
-
-    /**
-     * Create a new transaction and associate it with the current
-     * process/thread
-     * @param[in,out] transaction_manager object
-     * @return a reason code
-     */
-    int xta_transaction_manager_begin(
-        xta_transaction_manager_t *transaction_manager);
-
-
-    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
@@ -112,4 +87,4 @@ extern "C" {
 
 
 
-#endif /* XTA_TRANSACTION_MANAGER_H */
+#endif /* XTA_XID_H */

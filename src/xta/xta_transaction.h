@@ -24,6 +24,7 @@
 /* LIXA includes */
 #include "lixa_trace.h"
 /* XTA includes */
+#include "xta_resource.h"
 #include "xta_last_operation.h"
 
 
@@ -57,7 +58,7 @@ extern "C" {
 
     /**
      * Create a new Transaction object
-     * @return the pointer of the new object or NULL in the event of an error
+     * @return a new transaction object or NULL in the event of an error
      *         occurred
      */
     xta_transaction_t *xta_transaction_new(void);
@@ -66,11 +67,38 @@ extern "C" {
 
     /**
      * Delete a Transaction object
-     * @param[in] tm Transaction object to delete
+     * @param[in] transaction object to delete
      */
-    void xta_transaction_delete(xta_transaction_t *tm);
+    void xta_transaction_delete(xta_transaction_t *transaction);
 
 
+
+    /**
+     * Disassociate the Resource specified from the Transaction associated
+     * with the Transaction object
+     * @param[in,out] transaction object
+     * @param[in] resource to disassociate from the transaction
+     * @param[in] flag One of the values of @ref TMSUCCESS, @ref TMSUSPEND,
+     *            or @ref TMFAIL
+     * @return a reason code
+     */
+    int xta_transaction_delist_resource(xta_transaction_t *transaction,
+                                        const xta_resource_t *resource,
+                                        long flag);
+
+    
+    
+    /**
+     * Enlist the resource specified with the Transaction associated with the
+     * Transaction object
+     * @param[in,out] transaction object
+     * @param[in] resource to associate
+     * @return a reason code
+     */
+    int xta_transaction_enlist_resource(xta_transaction_t *transaction,
+                                        const xta_resource_t *resource);
+
+    
     
 #ifdef __cplusplus
 }

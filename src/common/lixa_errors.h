@@ -526,7 +526,7 @@ extern "C" {
       /**
        * <B>PUBLIC METHOD</B><BR>
        * Retrieve the description associated to a return/reason code
-       * @param ret_cod IN return/reason code of the desired description
+       * @param[in] ret_cod return/reason code of the desired description
        * @return a const string containing a description of reason code
        */
       const char *lixa_strerror(int ret_cod);

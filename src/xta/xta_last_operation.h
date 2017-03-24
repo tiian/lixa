@@ -32,6 +32,13 @@
 
 
 
+/*
+ * @@@
+ * 2017-03-24: a little bit pedantic, maybe useless, remove at the end
+ */
+
+   
+
 /**
  * Type injected in every XTA object to catch the return code of the last
  * result; especially useful for methods that do not return a ret_cod
