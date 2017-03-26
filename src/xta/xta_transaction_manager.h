@@ -96,6 +96,19 @@ extern "C" {
         xta_transaction_manager_t *transaction_manager);
 
 
+
+    /**
+     * Create a new transaction branch inside an existing global transaction
+     * and associate it with the current process/thread
+     * @param[in,out] transaction_manager object
+     * @param[in] xid transaction identifier object
+     * @return a reason code
+     */
+    int xta_transaction_manager_branch(
+        xta_transaction_manager_t *transaction_manager,
+        const xta_xid_t *xid);
+
+
     
 #ifdef __cplusplus
 }

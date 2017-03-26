@@ -156,3 +156,30 @@ int xta_transaction_enlist_resource(xta_transaction_t *transaction,
     return ret_cod;
 }
 
+
+
+const xta_xid_t *xta_transaction_get_xid(const xta_transaction_t *t)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    xta_xid_t *xid = NULL;
+    
+    LIXA_TRACE(("xta_transaction_get_xid\n"));
+    TRY {
+        /* @@@ */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_get_xid/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return xid;
+}
+

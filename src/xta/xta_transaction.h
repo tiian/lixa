@@ -99,6 +99,16 @@ extern "C" {
                                         const xta_resource_t *resource);
 
     
+
+    /**
+     * Get the Xid associated with the Transaction object
+     * @param[in] transaction object
+     * @return a reference to the Transaction Identifier
+     */
+    const xta_xid_t *xta_transaction_get_xid(
+        const xta_transaction_t *transaction);
+
+    
     
 #ifdef __cplusplus
 }

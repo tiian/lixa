@@ -164,3 +164,31 @@ int xta_transaction_manager_begin(
     return ret_cod;
 }
 
+
+
+int xta_transaction_manager_branch(
+    xta_transaction_manager_t *transaction_manager,
+    const xta_xid_t *xid)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_transaction_manager_branch\n"));
+    TRY {
+        /* @@@ implement me */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_manager_branch/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
