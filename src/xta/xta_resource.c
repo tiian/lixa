@@ -104,7 +104,7 @@ void xta_resource_delete(xta_resource_t *r)
 
 
 int xta_resource_start(xta_resource_t *resource,
-                       xta_xid_t *xid,
+                       const xta_xid_t *xid,
                        long flag)
 {
     enum Exception { NONE } excp;
@@ -125,6 +125,89 @@ int xta_resource_start(xta_resource_t *resource,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_resource_start/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_resource_end(xta_resource_t *resource,
+                     const xta_xid_t *xid,
+                     long flag)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_resource_end\n"));
+    TRY {
+        /* @@@ implement me */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_resource_end/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_resource_prepare(xta_resource_t *resource,
+                         const xta_xid_t *xid)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_resource_prepare\n"));
+    TRY {
+        /* @@@ implement me */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_resource_prepare/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_resource_commit(xta_resource_t *resource,
+                        const xta_xid_t *xid,
+                        int one_phase)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_resource_commit\n"));
+    TRY {
+        /* @@@ implement me */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_resource_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

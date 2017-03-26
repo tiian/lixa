@@ -74,7 +74,7 @@ extern "C" {
 
     /**
      * Starts work on behalf of a transaction branch specified in xid. If
-     * TMJOIN is specified, the start applies to joining a transaction
+     * @ref TMJOIN is specified, the start applies to joining a transaction
      * previously seen by the resource manager. If @ref TMRESUME is specified,
      * the start applies to resuming a suspended transaction specified in the
      * parameter xid. If neither @ref TMJOIN nor @ref TMRESUME is specified and
@@ -82,16 +82,66 @@ extern "C" {
      * resource manager, the resource manager returns @ref XTA_RC_XAER_DUPID
      * error code.
      * @param[in,out] resource object
-     * @param[in] xid a transaction identifier object
+     * @param[in] xid : transaction identifier object
      * @param[in] flag : one of @ref TMNOFLAGS, @ref TMJOIN, or @ref TMRESUME
      * @return a reason code
      */
     int xta_resource_start(xta_resource_t *resource,
-                           xta_xid_t *xid,
+                           const xta_xid_t *xid,
                            long flag);
     
 
-                           
+
+    /**
+     * Ends the work performed on behalf of a transaction branch. The resource
+     * manager disassociates the XA resource from the transaction branch
+     * specified and lets the transaction complete.
+     * If @ref TMSUSPEND is specified in the flags, the transaction branch is
+     * temporarily suspended in an incomplete state. The transaction context
+     * is in a suspended state and must be resumed via the start method with
+     * @ref TMRESUME specified.
+     * If @ref TMFAIL is specified, the portion of work has failed. The
+     * resource manager may mark the transaction as rollback-only.
+     * If @ref TMSUCCESS is specified, the portion of work has completed
+     * successfully.
+     * @param[in,out] resource object
+     * @param[in] xid : transaction identifier object
+     * @param[in] flag : one of @ref TMSUCCESS, @ref TMFAIL, or @ref TMSUSPEND
+     * @return a reason code
+     */
+    int xta_resource_end(xta_resource_t *resource,
+                         const xta_xid_t *xid,
+                         long flag);
+
+    
+
+    /**
+     * Ask the resource manager to prepare for a transaction commit of the
+     * transaction specified in xid.
+     * @param[in,out] resource object
+     * @param[in] xid : transaction identifier object
+     * @return a reason code
+     */
+    int xta_resource_prepare(xta_resource_t *resource,
+        const xta_xid_t *xid);
+
+    
+    
+    /**
+     * Commits the global transaction specified by xid.
+     * @param[in,out] resource object
+     * @param[in] xid : transaction identifier object
+     * @param[in] one_phase : if true, the resource manager should use a
+     *                        one-phase commit protocol to commit the work
+     *                        done on behalf of xid
+     * @return a reason code
+     */
+    int xta_resource_commit(xta_resource_t *resource,
+        const xta_xid_t *xid,
+        int one_phase);
+
+    
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
