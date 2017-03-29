@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_xqIl0BMxEeeEBJD-o5WPWg" name="RootElement">
+  <ownedComment xmi:type="uml:Comment" xmi:id="_gQh78BTBEeebgf8_LMBiHA" annotatedElement="_4EBbwBTAEeebgf8_LMBiHA">
+    <body>NativeXAResource class is used for all the XAResources that can be created using a standard XA switch load file</body>
+  </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_vKeywBTBEeebgf8_LMBiHA" annotatedElement="_YABeUBTBEeebgf8_LMBiHA _N3wN0BTBEeebgf8_LMBiHA">
+    <body>Non native XAResource classes are used for all the XAResources that need specific code to be created and for the implementation of the standard interface methods.
+This choice will:
+- incorporate the code previously provided as a specific library for XA switch load file
+- allow to create a resource passing them an already existent connection (this item is tremendously useful for wrapping database drivers of many languages like PHP, Python and so on)</body>
+  </ownedComment>
   <packagedElement xmi:type="uml:Package" xmi:id="_aH7rQBPrEeeDbpR_R0y-uQ" name="Classes">
     <packagedElement xmi:type="uml:Class" xmi:id="_nfsWkBPrEeeDbpR_R0y-uQ" name="Transaction">
       <ownedOperation xmi:type="uml:Operation" xmi:id="_ShGVYBPuEeeDbpR_R0y-uQ" name="commit"/>
@@ -37,47 +46,148 @@
       </ownedOperation>
     </packagedElement>
     <packagedElement xmi:type="uml:Class" xmi:id="_unDa0BPrEeeDbpR_R0y-uQ" name="Xid"/>
-    <packagedElement xmi:type="uml:Class" xmi:id="_7KY_kBPrEeeDbpR_R0y-uQ" name="XAResource">
-      <ownedOperation xmi:type="uml:Operation" xmi:id="_xefskBPsEeeDbpR_R0y-uQ" name="start">
+    <packagedElement xmi:type="uml:Class" xmi:id="_7KY_kBPrEeeDbpR_R0y-uQ" name="XAResource" isAbstract="true">
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_xefskBPsEeeDbpR_R0y-uQ" name="start" isAbstract="true">
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_LxYxkBPtEeeDbpR_R0y-uQ" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_hmNIwBPtEeeDbpR_R0y-uQ" name="flags" type="_ZI7acBPtEeeDbpR_R0y-uQ"/>
       </ownedOperation>
-      <ownedOperation xmi:type="uml:Operation" xmi:id="_0J1RcBPsEeeDbpR_R0y-uQ" name="end">
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_0J1RcBPsEeeDbpR_R0y-uQ" name="end" isAbstract="true">
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_oplE4BPtEeeDbpR_R0y-uQ" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_qX19gBPtEeeDbpR_R0y-uQ" name="flags" type="_ZI7acBPtEeeDbpR_R0y-uQ"/>
       </ownedOperation>
-      <ownedOperation xmi:type="uml:Operation" xmi:id="_1fy-0BPsEeeDbpR_R0y-uQ" name="prepare">
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_1fy-0BPsEeeDbpR_R0y-uQ" name="prepare" isAbstract="true">
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_tZkCEBPtEeeDbpR_R0y-uQ" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
       </ownedOperation>
-      <ownedOperation xmi:type="uml:Operation" xmi:id="_3cxo4BPsEeeDbpR_R0y-uQ" name="commit">
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_3cxo4BPsEeeDbpR_R0y-uQ" name="commit" isAbstract="true">
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_ztWUUBPtEeeDbpR_R0y-uQ" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_2mfrsBPtEeeDbpR_R0y-uQ" name="onePhase" type="_wRHeABPtEeeDbpR_R0y-uQ"/>
       </ownedOperation>
-      <ownedOperation xmi:type="uml:Operation" xmi:id="_4rdCgBPsEeeDbpR_R0y-uQ" name="rollback">
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_4rdCgBPsEeeDbpR_R0y-uQ" name="rollback" isAbstract="true">
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_5ikbQBPtEeeDbpR_R0y-uQ" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
       </ownedOperation>
-      <ownedOperation xmi:type="uml:Operation" xmi:id="_ZokDIBP1EeeDbpR_R0y-uQ" name="doSomethingWithRM"/>
-      <ownedOperation xmi:type="uml:Operation" xmi:id="_9Mgf8BP5EeeDbpR_R0y-uQ" name="open"/>
-      <ownedOperation xmi:type="uml:Operation" xmi:id="_-8lWcBP5EeeDbpR_R0y-uQ" name="close"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_ZokDIBP1EeeDbpR_R0y-uQ" name="doSomethingWithRM" isAbstract="true"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_9Mgf8BP5EeeDbpR_R0y-uQ" name="open" isAbstract="true"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_-8lWcBP5EeeDbpR_R0y-uQ" name="close" isAbstract="true"/>
     </packagedElement>
     <packagedElement xmi:type="uml:Class" xmi:id="_-4PxYBPrEeeDbpR_R0y-uQ" name="ApplicationProgram">
       <ownedOperation xmi:type="uml:Operation" xmi:id="_2k9lMBPuEeeDbpR_R0y-uQ" name="setXid">
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_5JglkBPuEeeDbpR_R0y-uQ" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
       </ownedOperation>
     </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="_4EBbwBTAEeebgf8_LMBiHA" name="NativeXAResource">
+      <generalization xmi:type="uml:Generalization" xmi:id="_JKktABTBEeebgf8_LMBiHA" general="_7KY_kBPrEeeDbpR_R0y-uQ"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_4EBbwRTAEeebgf8_LMBiHA" name="start">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_4EBbwhTAEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_4EBbwxTAEeebgf8_LMBiHA" name="flags" type="_ZI7acBPtEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_4EBbxBTAEeebgf8_LMBiHA" name="end">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_4EBbxRTAEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_4EBbxhTAEeebgf8_LMBiHA" name="flags" type="_ZI7acBPtEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_4EBbxxTAEeebgf8_LMBiHA" name="prepare">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_4EBbyBTAEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_4EBbyRTAEeebgf8_LMBiHA" name="commit">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_4EBbyhTAEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_4EBbyxTAEeebgf8_LMBiHA" name="onePhase" type="_wRHeABPtEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_4EBbzBTAEeebgf8_LMBiHA" name="rollback">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_4EBbzRTAEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_4EBbzhTAEeebgf8_LMBiHA" name="doSomethingWithRM"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_4EBbzxTAEeebgf8_LMBiHA" name="open"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_4EBb0BTAEeebgf8_LMBiHA" name="close"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="_N3wN0BTBEeebgf8_LMBiHA" name="MySQLXAResource">
+      <generalization xmi:type="uml:Generalization" xmi:id="_N3wN0RTBEeebgf8_LMBiHA" general="_7KY_kBPrEeeDbpR_R0y-uQ"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_N3wN0hTBEeebgf8_LMBiHA" name="start">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_N3wN0xTBEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_N3wN1BTBEeebgf8_LMBiHA" name="flags" type="_ZI7acBPtEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_N3wN1RTBEeebgf8_LMBiHA" name="end">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_N3wN1hTBEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_N3wN1xTBEeebgf8_LMBiHA" name="flags" type="_ZI7acBPtEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_N3wN2BTBEeebgf8_LMBiHA" name="prepare">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_N3wN2RTBEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_N3wN2hTBEeebgf8_LMBiHA" name="commit">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_N3wN2xTBEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_N3wN3BTBEeebgf8_LMBiHA" name="onePhase" type="_wRHeABPtEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_N3wN3RTBEeebgf8_LMBiHA" name="rollback">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_N3wN3hTBEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_N3wN3xTBEeebgf8_LMBiHA" name="doSomethingWithRM"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_N3wN4BTBEeebgf8_LMBiHA" name="open"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_N3wN4RTBEeebgf8_LMBiHA" name="close"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="_YABeUBTBEeebgf8_LMBiHA" name="PostgreSQLXAResource">
+      <generalization xmi:type="uml:Generalization" xmi:id="_YABeURTBEeebgf8_LMBiHA" general="_7KY_kBPrEeeDbpR_R0y-uQ"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_YABeUhTBEeebgf8_LMBiHA" name="start">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_YABeUxTBEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_YABeVBTBEeebgf8_LMBiHA" name="flags" type="_ZI7acBPtEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_YABeVRTBEeebgf8_LMBiHA" name="end">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_YABeVhTBEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_YABeVxTBEeebgf8_LMBiHA" name="flags" type="_ZI7acBPtEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_YABeWBTBEeebgf8_LMBiHA" name="prepare">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_YABeWRTBEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_YABeWhTBEeebgf8_LMBiHA" name="commit">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_YABeWxTBEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_YABeXBTBEeebgf8_LMBiHA" name="onePhase" type="_wRHeABPtEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_YABeXRTBEeebgf8_LMBiHA" name="rollback">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_YABeXhTBEeebgf8_LMBiHA" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_YABeXxTBEeebgf8_LMBiHA" name="doSomethingWithRM"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_YABeYBTBEeebgf8_LMBiHA" name="open"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_YABeYRTBEeebgf8_LMBiHA" name="close"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="_6Zl6EBTCEeebgf8_LMBiHA" name="XAResourceFactory" isAbstract="true">
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_CvIosBTDEeebgf8_LMBiHA" name="makeXAResource" isAbstract="true"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="_PonAEBTEEeebgf8_LMBiHA" name="NativeXAResourceFactory">
+      <generalization xmi:type="uml:Generalization" xmi:id="_VVzzcBTEEeebgf8_LMBiHA" general="_6Zl6EBTCEeebgf8_LMBiHA"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_lC5XYBTEEeebgf8_LMBiHA" name="NativeXAResourceFactory">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_35GoYBTEEeebgf8_LMBiHA" name="rmid" type="_zG754BTEEeebgf8_LMBiHA"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_PonAERTEEeebgf8_LMBiHA" name="makeXAResource">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_CTgKsBTFEeebgf8_LMBiHA" type="_7KY_kBPrEeeDbpR_R0y-uQ" direction="return"/>
+      </ownedOperation>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="_GG3HkBTFEeebgf8_LMBiHA" name="MySQLXAResourceFactory">
+      <generalization xmi:type="uml:Generalization" xmi:id="_GG3HkRTFEeebgf8_LMBiHA" general="_6Zl6EBTCEeebgf8_LMBiHA"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_GG3HkhTFEeebgf8_LMBiHA" name="NativeXAResourceFactory">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_jhD7wBTFEeebgf8_LMBiHA" name="connection" type="_YTIqwBTFEeebgf8_LMBiHA"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_GG3HlBTFEeebgf8_LMBiHA" name="makeXAResource">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_GG3HlRTFEeebgf8_LMBiHA" type="_7KY_kBPrEeeDbpR_R0y-uQ" direction="return"/>
+      </ownedOperation>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="_rIeZEBTFEeebgf8_LMBiHA" name="PostgreSQLXAResourceFactory">
+      <generalization xmi:type="uml:Generalization" xmi:id="_rIeZERTFEeebgf8_LMBiHA" general="_6Zl6EBTCEeebgf8_LMBiHA"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_rIeZEhTFEeebgf8_LMBiHA" name="NativeXAResourceFactory">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_7XEHkBTFEeebgf8_LMBiHA" name="connection" type="_2SpygBTFEeebgf8_LMBiHA"/>
+      </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_rIeZFBTFEeebgf8_LMBiHA" name="makeXAResource">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_rIeZFRTFEeebgf8_LMBiHA" type="_7KY_kBPrEeeDbpR_R0y-uQ" direction="return"/>
+      </ownedOperation>
+    </packagedElement>
     <packagedElement xmi:type="uml:Signal" xmi:id="_nHYK8BPwEeeDbpR_R0y-uQ" name="new_TM1"/>
     <packagedElement xmi:type="uml:Signal" xmi:id="__AKlABPwEeeDbpR_R0y-uQ" name="new_TX1"/>
     <packagedElement xmi:type="uml:Signal" xmi:id="_1WT5YBPxEeeDbpR_R0y-uQ" name="new_TM2"/>
     <packagedElement xmi:type="uml:Signal" xmi:id="_eXmTMBP3EeeDbpR_R0y-uQ" name="new_TX2"/>
-    <packagedElement xmi:type="uml:Class" xmi:id="_JbIOYBP5EeeDbpR_R0y-uQ" name="XAResourceStore">
-      <ownedOperation xmi:type="uml:Operation" xmi:id="_YA6zEBP5EeeDbpR_R0y-uQ" name="getNumber">
-        <ownedParameter xmi:type="uml:Parameter" xmi:id="_doNLsBP5EeeDbpR_R0y-uQ" type="_ZI7acBPtEeeDbpR_R0y-uQ" direction="return"/>
-      </ownedOperation>
-      <ownedOperation xmi:type="uml:Operation" xmi:id="_fGZA8BP5EeeDbpR_R0y-uQ" name="getResource">
-        <ownedParameter xmi:type="uml:Parameter" xmi:id="_j3DTkBP5EeeDbpR_R0y-uQ" name="id" type="_ZI7acBPtEeeDbpR_R0y-uQ"/>
-        <ownedParameter xmi:type="uml:Parameter" xmi:id="_m8n9YBP5EeeDbpR_R0y-uQ" type="_7KY_kBPrEeeDbpR_R0y-uQ" direction="return"/>
-      </ownedOperation>
-    </packagedElement>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_NQWdUBTGEeebgf8_LMBiHA" client="_rIeZEBTFEeebgf8_LMBiHA" supplier="_YABeUBTBEeebgf8_LMBiHA"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_P2CGIBTGEeebgf8_LMBiHA" client="_GG3HkBTFEeebgf8_LMBiHA" supplier="_N3wN0BTBEeebgf8_LMBiHA"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_RuGbABTGEeebgf8_LMBiHA" client="_PonAEBTEEeebgf8_LMBiHA" supplier="_4EBbwBTAEeebgf8_LMBiHA"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_mdYGcBTGEeebgf8_LMBiHA" client="_ri7igBPrEeeDbpR_R0y-uQ" supplier="_unDa0BPrEeeDbpR_R0y-uQ"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_nD9lUBTGEeebgf8_LMBiHA" client="_nfsWkBPrEeeDbpR_R0y-uQ" supplier="_unDa0BPrEeeDbpR_R0y-uQ"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_oPlq8BTGEeebgf8_LMBiHA" client="_ri7igBPrEeeDbpR_R0y-uQ" supplier="_nfsWkBPrEeeDbpR_R0y-uQ"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_puEbIBTGEeebgf8_LMBiHA" client="_-4PxYBPrEeeDbpR_R0y-uQ" supplier="_unDa0BPrEeeDbpR_R0y-uQ"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_0-TZQBTGEeebgf8_LMBiHA" client="_nfsWkBPrEeeDbpR_R0y-uQ" supplier="_7KY_kBPrEeeDbpR_R0y-uQ"/>
   </packagedElement>
   <packagedElement xmi:type="uml:Package" xmi:id="_cxiKwBPrEeeDbpR_R0y-uQ" name="Diagrams">
     <packagedElement xmi:type="uml:Interaction" xmi:id="_FlFc0BPsEeeDbpR_R0y-uQ" name="Suspend Resume">
@@ -115,7 +225,7 @@ This is a &quot;suspend for migrate&quot; because all the Resource Managers supp
       <ownedAttribute xmi:type="uml:Property" xmi:id="_8psncRPxEeeDbpR_R0y-uQ" name="" type="_7KY_kBPrEeeDbpR_R0y-uQ"/>
       <ownedAttribute xmi:type="uml:Property" xmi:id="_9g3gABPxEeeDbpR_R0y-uQ" name="RM1" type="_7KY_kBPrEeeDbpR_R0y-uQ"/>
       <ownedAttribute xmi:type="uml:Property" xmi:id="_-g6AsBPxEeeDbpR_R0y-uQ" name="RM2" type="_7KY_kBPrEeeDbpR_R0y-uQ"/>
-      <ownedAttribute xmi:type="uml:Property" xmi:id="_s5FUwBP5EeeDbpR_R0y-uQ" name="RS" type="_JbIOYBP5EeeDbpR_R0y-uQ"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_s5FUwBP5EeeDbpR_R0y-uQ" name="RS"/>
       <lifeline xmi:type="uml:Lifeline" xmi:id="_J0MaMBPvEeeDbpR_R0y-uQ" name="AP1" represents="_J0NBQBPvEeeDbpR_R0y-uQ" coveredBy="_nHs7ERPwEeeDbpR_R0y-uQ _zV-OwRPwEeeDbpR_R0y-uQ _G_9tIBPxEeeDbpR_R0y-uQ _0umHMBPzEeeDbpR_R0y-uQ _PKTUgBP1EeeDbpR_R0y-uQ _eUwsgBP1EeeDbpR_R0y-uQ _hf1hYBP1EeeDbpR_R0y-uQ _L_oS0BP2EeeDbpR_R0y-uQ _HifjsBP3EeeDbpR_R0y-uQ _3sel4BP5EeeDbpR_R0y-uQ _UTTcYBP6EeeDbpR_R0y-uQ _jT5GsBP6EeeDbpR_R0y-uQ _YzEPcBP-EeeDbpR_R0y-uQ"/>
       <lifeline xmi:type="uml:Lifeline" xmi:id="_WFpIQBPwEeeDbpR_R0y-uQ" name="TM1" represents="_WFpvUBPwEeeDbpR_R0y-uQ" coveredBy="_nHs7EhPwEeeDbpR_R0y-uQ _zV-10BPwEeeDbpR_R0y-uQ __Af8MBPwEeeDbpR_R0y-uQ _G_9tIRPxEeeDbpR_R0y-uQ _74unEBP9EeeDbpR_R0y-uQ _YzEPcRP-EeeDbpR_R0y-uQ"/>
       <lifeline xmi:type="uml:Lifeline" xmi:id="_3ai3cBPwEeeDbpR_R0y-uQ" name="TX1" represents="_3ajegBPwEeeDbpR_R0y-uQ" coveredBy="__Af8MRPwEeeDbpR_R0y-uQ _0umuQBPzEeeDbpR_R0y-uQ _HhB2ABP1EeeDbpR_R0y-uQ _PKT7kBP1EeeDbpR_R0y-uQ _TI0YgBP1EeeDbpR_R0y-uQ _L_o54BP2EeeDbpR_R0y-uQ _ywCocBP2EeeDbpR_R0y-uQ _1380kBP2EeeDbpR_R0y-uQ _bzKDsBP7EeeDbpR_R0y-uQ _espZUBP7EeeDbpR_R0y-uQ _74vOIBP9EeeDbpR_R0y-uQ _-vcVgBP9EeeDbpR_R0y-uQ _A_N_wBP-EeeDbpR_R0y-uQ"/>
@@ -249,11 +359,11 @@ This is a &quot;suspend for migrate&quot; because all the Resource Managers supp
       <message xmi:type="uml:Message" xmi:id="_uSAE8BP4EeeDbpR_R0y-uQ" name="prepare" receiveEvent="_uSBTEBP4EeeDbpR_R0y-uQ" sendEvent="_uSAsABP4EeeDbpR_R0y-uQ" signature="_1fy-0BPsEeeDbpR_R0y-uQ"/>
       <message xmi:type="uml:Message" xmi:id="_wp8zwBP4EeeDbpR_R0y-uQ" name="commit" receiveEvent="_wp-B4BP4EeeDbpR_R0y-uQ" sendEvent="_wp9a0BP4EeeDbpR_R0y-uQ" signature="_3cxo4BPsEeeDbpR_R0y-uQ"/>
       <message xmi:type="uml:Message" xmi:id="_y0f_wBP4EeeDbpR_R0y-uQ" name="commit" receiveEvent="_y0hN4BP4EeeDbpR_R0y-uQ" sendEvent="_y0gm0BP4EeeDbpR_R0y-uQ" signature="_3cxo4BPsEeeDbpR_R0y-uQ"/>
-      <message xmi:type="uml:Message" xmi:id="_3sd-0BP5EeeDbpR_R0y-uQ" name="getResource" receiveEvent="_3sfM8BP5EeeDbpR_R0y-uQ" sendEvent="_3sel4BP5EeeDbpR_R0y-uQ" signature="_fGZA8BP5EeeDbpR_R0y-uQ"/>
+      <message xmi:type="uml:Message" xmi:id="_3sd-0BP5EeeDbpR_R0y-uQ" name="getResource" receiveEvent="_3sfM8BP5EeeDbpR_R0y-uQ" sendEvent="_3sel4BP5EeeDbpR_R0y-uQ"/>
       <message xmi:type="uml:Message" xmi:id="_Pn3A8BP6EeeDbpR_R0y-uQ" name="open" receiveEvent="_Pn42IBP6EeeDbpR_R0y-uQ" sendEvent="_Pn4PEBP6EeeDbpR_R0y-uQ" signature="_9Mgf8BP5EeeDbpR_R0y-uQ"/>
-      <message xmi:type="uml:Message" xmi:id="_UTSOQBP6EeeDbpR_R0y-uQ" name="getResource" receiveEvent="_UTTcYRP6EeeDbpR_R0y-uQ" sendEvent="_UTTcYBP6EeeDbpR_R0y-uQ" signature="_fGZA8BP5EeeDbpR_R0y-uQ"/>
+      <message xmi:type="uml:Message" xmi:id="_UTSOQBP6EeeDbpR_R0y-uQ" name="getResource" receiveEvent="_UTTcYRP6EeeDbpR_R0y-uQ" sendEvent="_UTTcYBP6EeeDbpR_R0y-uQ"/>
       <message xmi:type="uml:Message" xmi:id="_byOFABP6EeeDbpR_R0y-uQ" name="open" receiveEvent="_byOsERP6EeeDbpR_R0y-uQ" sendEvent="_byOsEBP6EeeDbpR_R0y-uQ" signature="_9Mgf8BP5EeeDbpR_R0y-uQ"/>
-      <message xmi:type="uml:Message" xmi:id="_jT4foBP6EeeDbpR_R0y-uQ" name="getNumber" receiveEvent="_jT5GsRP6EeeDbpR_R0y-uQ" sendEvent="_jT5GsBP6EeeDbpR_R0y-uQ" signature="_YA6zEBP5EeeDbpR_R0y-uQ"/>
+      <message xmi:type="uml:Message" xmi:id="_jT4foBP6EeeDbpR_R0y-uQ" name="getNumber" receiveEvent="_jT5GsRP6EeeDbpR_R0y-uQ" sendEvent="_jT5GsBP6EeeDbpR_R0y-uQ"/>
       <message xmi:type="uml:Message" xmi:id="_bzI1kBP7EeeDbpR_R0y-uQ" name="open" receiveEvent="_bzNHABP7EeeDbpR_R0y-uQ" sendEvent="_bzKDsBP7EeeDbpR_R0y-uQ" signature="_9Mgf8BP5EeeDbpR_R0y-uQ"/>
       <message xmi:type="uml:Message" xmi:id="_esoyQBP7EeeDbpR_R0y-uQ" name="open" receiveEvent="_esqAYBP7EeeDbpR_R0y-uQ" sendEvent="_espZUBP7EeeDbpR_R0y-uQ" signature="_9Mgf8BP5EeeDbpR_R0y-uQ"/>
       <message xmi:type="uml:Message" xmi:id="_nRr8gBP7EeeDbpR_R0y-uQ" name="open" receiveEvent="_nRtKoBP7EeeDbpR_R0y-uQ" sendEvent="_nRsjkBP7EeeDbpR_R0y-uQ" signature="_9Mgf8BP5EeeDbpR_R0y-uQ"/>
@@ -273,5 +383,8 @@ This is a &quot;suspend for migrate&quot; because all the Resource Managers supp
   <packagedElement xmi:type="uml:Package" xmi:id="_UUQxkBPtEeeDbpR_R0y-uQ" name="Types">
     <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_ZI7acBPtEeeDbpR_R0y-uQ" name="long"/>
     <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_wRHeABPtEeeDbpR_R0y-uQ" name="boolean"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_zG754BTEEeebgf8_LMBiHA" name="int"/>
+    <packagedElement xmi:type="uml:DataType" xmi:id="_YTIqwBTFEeebgf8_LMBiHA" name="MYSQL *"/>
+    <packagedElement xmi:type="uml:DataType" xmi:id="_2SpygBTFEeebgf8_LMBiHA" name="PGconn *"/>
   </packagedElement>
 </uml:Model>
