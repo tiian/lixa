@@ -74,17 +74,20 @@ extern "C" {
 
 
     /**
-     * Disassociate the Resource specified from the Transaction associated
-     * with the Transaction object
+     * Commit the transaction represented by this transaction object
      * @param[in,out] transaction object
-     * @param[in] resource to disassociate from the transaction
-     * @param[in] flag One of the values of @ref TMSUCCESS, @ref TMSUSPEND,
-     *            or @ref TMFAIL
      * @return a reason code
      */
-    int xta_transaction_delist_resource(xta_transaction_t *transaction,
-                                        const xta_resource_t *resource,
-                                        long flag);
+    int xta_transaction_commit(xta_transaction_t *transaction);
+
+    
+    
+    /**
+     * Rollback the transaction represented by this transaction object
+     * @param[in,out] transaction object
+     * @return a reason code
+     */
+    int xta_transaction_rollback(xta_transaction_t *transaction);
 
     
     
@@ -97,9 +100,49 @@ extern "C" {
      */
     int xta_transaction_enlist_resource(xta_transaction_t *transaction,
                                         const xta_resource_t *resource);
-
     
 
+    
+    /**
+     * Suspend the transaction represented by this transaction object; the
+     * transaction can be resumed with @ref xta_transaction_resume at a later
+     * time
+     * @param[in,out] transaction object
+     * @param[in] flags can be @ref TMMIGRATE if the Resource Manager supports
+     *            transaction migration and @ref TMNOFLAGS otherwise
+     * @return a reason code
+     */
+    int xta_transaction_suspend(xta_transaction_t *transaction,
+                                long flags);
+    
+
+    
+    /**
+     * Resume the transaction represented by xid in this transaction object;
+     * the transaction has been previously suspended with
+     * @ref xta_transaction_suspend
+     * @param[in,out] transaction object
+     * @param[in] xid identifier of the transaction that must be resumed
+     * @return a reason code
+     */
+    int xta_transaction_resume(xta_transaction_t *transaction,
+                               const xta_xid_t *xid);
+    
+
+    
+    /**
+     * Create a new branch of the transaction represented by xid in this
+     * transaction object; the global transaction has been previously started
+     * @param[in,out] transaction object
+     * @param[in] xid identifier of the global transaction that must be
+     *            branched
+     * @return a reason code
+     */
+    int xta_transaction_branch(xta_transaction_t *transaction,
+                               const xta_xid_t *xid);
+    
+
+    
     /**
      * Get the Xid associated with the Transaction object
      * @param[in] transaction object

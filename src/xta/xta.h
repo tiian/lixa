@@ -57,6 +57,10 @@
  * Caller is joining existing transaction branch
  */
 #define TMJOIN 0x00200000L
+/**
+ * Caller intends to perform migration
+ */
+#define TMMIGRATE 0x00100000L
 
 
 

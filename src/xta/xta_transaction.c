@@ -103,14 +103,12 @@ void xta_transaction_delete(xta_transaction_t *t)
 
 
 
-int xta_transaction_delist_resource(xta_transaction_t *transaction,
-                                    const xta_resource_t *resource,
-                                    long flag)
+int xta_transaction_commit(xta_transaction_t *transaction)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("xta_transaction_delist_resource\n"));
+    LIXA_TRACE(("xta_transaction_commit\n"));
     TRY {
         /* @@@ */
         
@@ -124,7 +122,33 @@ int xta_transaction_delist_resource(xta_transaction_t *transaction,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_transaction_delist_resource/excp=%d/"
+    LIXA_TRACE(("xta_transaction_commit/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_transaction_rollback(xta_transaction_t *transaction)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_transaction_rollback\n"));
+    TRY {
+        /* @@@ */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -152,6 +176,85 @@ int xta_transaction_enlist_resource(xta_transaction_t *transaction,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_enlist_resource/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_transaction_suspend(xta_transaction_t *transaction,
+                                   long flags)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_transaction_suspend\n"));
+    TRY {
+        /* @@@ */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_suspend/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_transaction_resume(xta_transaction_t *transaction,
+                           const xta_xid_t *xid)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_transaction_resume\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_resume/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_transaction_branch(xta_transaction_t *transaction,
+                           const xta_xid_t *xid)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_transaction_branch\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_branch/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
