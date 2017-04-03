@@ -129,7 +129,8 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixta_la_DEPENDENCIES =
 am_liblixta_la_OBJECTS = liblixta_la-xta_errors.lo \
 	liblixta_la-xta_resource.lo liblixta_la-xta_transaction.lo \
-	liblixta_la-xta_transaction_manager.lo liblixta_la-xta_xid.lo
+	liblixta_la-xta_transaction_manager.lo liblixta_la-xta_xid.lo \
+	liblixta_la-xta_native_xa_resource.lo
 liblixta_la_OBJECTS = $(am_liblixta_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -386,11 +387,13 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 include_HEADERS = xta.h xta_errors.h xta_resource.h xta_transaction.h \
-	xta_transaction_manager.h xta_xid.h
+	xta_transaction_manager.h xta_xid.h \
+	xta_native_xa_resource.h
 
 lib_LTLIBRARIES = liblixta.la
 liblixta_la_SOURCES = xta_errors.c xta_resource.c xta_transaction.c \
-	xta_transaction_manager.c xta_xid.c
+	xta_transaction_manager.c xta_xid.c \
+	xta_native_xa_resource.c
 
 AM_CFLAGS = -Wall -fno-strict-aliasing
 liblixta_la_CPPFLAGS = -I$(top_srcdir)/src/common
@@ -476,6 +479,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_errors.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_native_xa_resource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_resource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_transaction_manager.Plo@am__quote@
@@ -536,6 +540,13 @@ liblixta_la-xta_xid.lo: xta_xid.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xta_xid.c' object='liblixta_la-xta_xid.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_la-xta_xid.lo `test -f 'xta_xid.c' || echo '$(srcdir)/'`xta_xid.c
+
+liblixta_la-xta_native_xa_resource.lo: xta_native_xa_resource.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixta_la-xta_native_xa_resource.lo -MD -MP -MF $(DEPDIR)/liblixta_la-xta_native_xa_resource.Tpo -c -o liblixta_la-xta_native_xa_resource.lo `test -f 'xta_native_xa_resource.c' || echo '$(srcdir)/'`xta_native_xa_resource.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixta_la-xta_native_xa_resource.Tpo $(DEPDIR)/liblixta_la-xta_native_xa_resource.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xta_native_xa_resource.c' object='liblixta_la-xta_native_xa_resource.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_la-xta_native_xa_resource.lo `test -f 'xta_native_xa_resource.c' || echo '$(srcdir)/'`xta_native_xa_resource.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

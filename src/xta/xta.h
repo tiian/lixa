@@ -26,6 +26,8 @@
 #include "xta_transaction.h"
 #include "xta_transaction_manager.h"
 #include "xta_xid.h"
+/* include the basic structures and macros from xa.h header */
+#include "xa.h"
 
 
 

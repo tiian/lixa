@@ -26,6 +26,8 @@
 /* XTA includes */
 #include "xta_xid.h"
 #include "xta_last_operation.h"
+/* XA include */
+#include "xa.h"
 
 
 
