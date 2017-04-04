@@ -16,14 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef NATIVE_XA_RESOURCE_H
-# define NATIVE_XA_RESOURCE_H
+#ifndef XTA_ACQUIRED_XA_RESOURCE_H
+# define XTA_ACQUIRED_XA_RESOURCE_H
 
 
 
-#include <config.h>
+/* LIXA includes */
+#include "lixa_trace.h"
 /* XTA includes */
-#include "xta_xa_resource.h"
+#include "xta_last_operation.h"
+/* XA include */
+#include "xa.h"
 
 
 
@@ -39,13 +42,12 @@
 
 
 /**
- * XTA Native XA Resource data type
+ * XTA Transaction data type
  */
 typedef struct {
-    union {
-        xta_xa_resource_t  xa_resource;
-    };
-} xta_native_xa_resource_t;
+    XTA_LAST_OPERATION_PROPERTIES;
+    int dummy;
+} xta_acquired_xa_resource_t;
 
 
 
@@ -54,27 +56,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-
-    /**
-     * Create a new object to represent a native XA resource
-     * @param[in] rmid Resource Manager unique identifier within the thread of
-     *                 control
-     * @param[in] open_info : a null-terminated character string that may
-     *                        contain instance-specific information for the
-     *                        resource manager when xa_open must be called
-     *                        (use NULL if you want to use the
-     *                        value passed by standard config)
-     * @param[in] close_info : a null-terminated character string that may
-     *                         contain instance-specific information for the
-     *                         resource manager when xa_close must be called
-     *                         (use NULL if you want to use
-     *                         the value passed by standard config
-     * @return a new object or NULL in the event of error
-     */
-    xta_native_xa_resource_t *xta_native_xa_resource_new(
-        int rmid, const char *open_info, const char *close_info);
-
-    
 
 #ifdef __cplusplus
 }
@@ -91,4 +72,4 @@ extern "C" {
 
 
 
-#endif /* NATIVE_XA_RESOURCE_H */
+#endif /* XTA_RESOURCE_H */

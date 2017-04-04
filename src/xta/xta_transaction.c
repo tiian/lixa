@@ -156,7 +156,7 @@ int xta_transaction_rollback(xta_transaction_t *transaction)
 
 
 int xta_transaction_enlist_resource(xta_transaction_t *transaction,
-                                    const xta_resource_t *resource)
+                                    const xta_xa_resource_t *resource)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;

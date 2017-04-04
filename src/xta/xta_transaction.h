@@ -24,7 +24,7 @@
 /* LIXA includes */
 #include "lixa_trace.h"
 /* XTA includes */
-#include "xta_resource.h"
+#include "xta_xa_resource.h"
 #include "xta_last_operation.h"
 
 
@@ -99,7 +99,7 @@ extern "C" {
      * @return a reason code
      */
     int xta_transaction_enlist_resource(xta_transaction_t *transaction,
-                                        const xta_resource_t *resource);
+                                        const xta_xa_resource_t *resource);
     
 
     

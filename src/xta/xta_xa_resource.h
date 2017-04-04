@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef XTA_RESOURCE_H
-# define XTA_RESOURCE_H
+#ifndef XTA_XA_RESOURCE_H
+# define XTA_XA_RESOURCE_H
 
 
 
-/* LIXA includes */
-#include "lixa_trace.h"
+#include <config.h>
+
+
+
 /* XTA includes */
 #include "xta_xid.h"
-#include "xta_last_operation.h"
 /* XA include */
 #include "xa.h"
 
@@ -43,12 +44,21 @@
 
 
 /**
- * XTA Transaction data type
+ * The base "class" xta_xa_resource is just a redefinition of the standard
+ * xa_switch_t structure as defined by X/Open
+ *
+ * Inheritance is emulated using the schema proposed by Martin in this post:
+ * http://stackoverflow.com/questions/1114349/struct-inheritance-in-c . <br>
+ * Using -fms-extensions the result would be better, but less portable. <br>
+ * Using -std=c11 the result does not improve because a "tag" (like a struct
+ * is not allowed as explained here:
+ * https://gcc.gnu.org/onlinedocs/gcc/Unnamed-Fields.html )
  */
 typedef struct {
-    XTA_LAST_OPERATION_PROPERTIES;
-    int dummy;
-} xta_resource_t;
+    union {
+        struct xa_switch_t  xa_switch;
+    };
+} xta_xa_resource_t;
 
 
 
@@ -59,18 +69,19 @@ extern "C" {
 
 
     /**
-     * Create a new Resource object
-     * @return a new resource object or NULL in the event of an error occurred
+     * Create a new XA Resource object
+     * @return a new XA resource object or NULL in the event of an error
+     *         occurred
      */
-    xta_resource_t *xta_resource_new(void);
+    xta_xa_resource_t *xta_xa_resource_new(void);
 
 
 
     /**
-     * Delete a Resource object
+     * Delete an XA Resource object
      * @param[in] resource object to delete
      */
-    void xta_resource_delete(xta_resource_t *resource);
+    void xta_xa_resource_delete(xta_xa_resource_t *resource);
 
 
 
@@ -88,9 +99,9 @@ extern "C" {
      * @param[in] flag : one of @ref TMNOFLAGS, @ref TMJOIN, or @ref TMRESUME
      * @return a reason code
      */
-    int xta_resource_start(xta_resource_t *resource,
-                           const xta_xid_t *xid,
-                           long flag);
+    int xta_xa_resource_start(xta_xa_resource_t *resource,
+                              const xta_xid_t *xid,
+                              long flag);
     
 
 
@@ -111,9 +122,9 @@ extern "C" {
      * @param[in] flag : one of @ref TMSUCCESS, @ref TMFAIL, or @ref TMSUSPEND
      * @return a reason code
      */
-    int xta_resource_end(xta_resource_t *resource,
-                         const xta_xid_t *xid,
-                         long flag);
+    int xta_xa_resource_end(xta_xa_resource_t *resource,
+                            const xta_xid_t *xid,
+                            long flag);
 
     
 
@@ -124,8 +135,8 @@ extern "C" {
      * @param[in] xid : transaction identifier object
      * @return a reason code
      */
-    int xta_resource_prepare(xta_resource_t *resource,
-        const xta_xid_t *xid);
+    int xta_xa_resource_prepare(xta_xa_resource_t *resource,
+                                const xta_xid_t *xid);
 
     
     
@@ -138,10 +149,10 @@ extern "C" {
      *                        done on behalf of xid
      * @return a reason code
      */
-    int xta_resource_commit(xta_resource_t *resource,
-        const xta_xid_t *xid,
-        int one_phase);
-
+    int xta_xa_resource_commit(xta_xa_resource_t *resource,
+                               const xta_xid_t *xid,
+                               int one_phase);
+    
     
     
 #ifdef __cplusplus
@@ -159,4 +170,4 @@ extern "C" {
 
 
 
-#endif /* XTA_RESOURCE_H */
+#endif /* XTA_XA_RESOURCE_H */

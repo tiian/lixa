@@ -24,7 +24,7 @@
 #include "lixa_errors.h"
 #include "lixa_trace.h"
 /* XTA includes */
-#include "xta_native_xa_resource.h"
+#include "xta_acquired_xa_resource.h"
 
 
 
@@ -35,29 +35,4 @@
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_XTA
 
 
-
-xta_native_xa_resource_t *xta_native_xa_resource_new(
-    int rmid, const char *open_info, const char *close_info)
-{
-    enum Exception { NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    xta_native_xa_resource_t *xa_res = NULL;
-    
-    LIXA_TRACE(("xta_native_xa_resource_new\n"));
-    TRY {
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("xta_native_xa_resource_new/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return xa_res;
-}
 
