@@ -517,6 +517,14 @@ define LIXA_RC_UNLINK_ERROR                  -129
 
 
 
+/*
+ * NOTE:
+ * Range [-1000,-1999] is reserved for XTA specific error codes and must NOT
+ * be used for LIXA generic codes
+ */
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef MYSQL_XA_RESOURCE_H
-# define MYSQL_XA_RESOURCE_H
+#ifndef POSTGRESQL_XA_RESOURCE_H
+# define POSTGRESQL_XA_RESOURCE_H
 
 
 
 #include <config.h>
 
 
-/* MySQL front-end */
-#include <mysql.h>
+/* PostgreSQL front-end */
+#include <libpq-fe.h>
 /* XTA includes */
 #include "xta_xa_resource.h"
 
@@ -43,13 +43,13 @@
 
 
 /**
- * XTA MySQL XA Resource data type
+ * XTA PostgreSQL XA Resource data type
  */
 typedef struct {
     union {
         xta_xa_resource_t  xa_resource;
     };
-} xta_mysql_xa_resource_t;
+} xta_postgresql_xa_resource_t;
 
 
 
@@ -60,21 +60,22 @@ extern "C" {
 
 
     /**
-     * Create a new object to represent a MySQL XA resource
-     * @param[in] connection to MySQL already opened by the application
+     * Create a new object to represent a PostgreSQL XA resource
+     * @param[in] connection to PostgreSQL already opened by the application
      *            program
      * @return a new object or NULL in the event of error
      */
-    xta_mysql_xa_resource_t *xta_mysql_xa_resource_new(MYSQL *connection);
+    xta_postgresql_xa_resource_t *xta_postgresql_xa_resource_new(
+        PGconn *connection);
 
     
 
     /**
-     * Delete an object that represent a MySQL XA Resource
-     * @param[in] xa_res : MySQL XA Resource
+     * Delete an object that represent a PostgreSQL XA Resource
+     * @param[in] xa_res : PostgreSQL XA Resource
      */
-    void xta_mysql_xa_resource_delete(
-        xta_mysql_xa_resource_t *xa_res);
+    void xta_postgresql_xa_resource_delete(
+        xta_postgresql_xa_resource_t *xa_res);
     
     
 
@@ -93,4 +94,4 @@ extern "C" {
 
 
 
-#endif /* MYSQL_XA_RESOURCE_H */
+#endif /* POSTGRESQL_XA_RESOURCE_H */

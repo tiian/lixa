@@ -74,6 +74,15 @@ extern "C" {
     xta_native_xa_resource_t *xta_native_xa_resource_new(
         int rmid, const char *open_info, const char *close_info);
 
+
+
+    /**
+     * Delete an object that represent a native XA Resource
+     * @param[in] xa_res : native XA Resource
+     */
+    void xta_native_xa_resource_delete(
+        xta_native_xa_resource_t *xa_res);
+    
     
 
 #ifdef __cplusplus

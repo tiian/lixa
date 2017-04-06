@@ -40,68 +40,6 @@
 
 
 
-xta_xa_resource_t *xta_xa_resource_new(void)
-{
-    enum Exception { G_TRY_MALLOC_ERROR
-                     , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    xta_xa_resource_t *r = NULL;
-    
-    LIXA_TRACE(("xta_xa_resource_t\n"));
-    TRY {
-        /* allocate the object */
-        if (NULL == (r = (xta_xa_resource_t *)
-                     g_try_malloc0(sizeof(xta_xa_resource_t))))
-            THROW(G_TRY_MALLOC_ERROR);
-        /* @@@ initialize the object */
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case G_TRY_MALLOC_ERROR:
-                ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("xta_xa_resource_t/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return r;
-}
-
-
-
-void xta_xa_resource_delete(xta_xa_resource_t *r)
-{
-    enum Exception { NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("xta_xa_resource_delete\n"));
-    TRY {
-        /* @@@ destroy the object content if necessary */
-
-        g_free(r);
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("xta_xa_resource_delete/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return;
-}
-
-
-
 int xta_xa_resource_start(xta_xa_resource_t *resource,
                        const xta_xid_t *xid,
                        long flag)

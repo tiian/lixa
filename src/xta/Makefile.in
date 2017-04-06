@@ -130,14 +130,16 @@ liblixta_la_DEPENDENCIES =
 am__liblixta_la_SOURCES_DIST = xta_errors.c xta_transaction.c \
 	xta_transaction_manager.c xta_xid.c xta_xa_resource.c \
 	xta_native_xa_resource.c xta_acquired_xa_resource.c \
-	xta_mysql_xa_resource.c
+	xta_mysql_xa_resource.c xta_postgresql_xa_resource.c
 @COMPILE_MYSQL_STUFF_TRUE@am__objects_1 = liblixta_la-xta_mysql_xa_resource.lo
+@COMPILE_POSTGRESQL_STUFF_TRUE@am__objects_2 = liblixta_la-xta_postgresql_xa_resource.lo
 am_liblixta_la_OBJECTS = liblixta_la-xta_errors.lo \
 	liblixta_la-xta_transaction.lo \
 	liblixta_la-xta_transaction_manager.lo liblixta_la-xta_xid.lo \
 	liblixta_la-xta_xa_resource.lo \
 	liblixta_la-xta_native_xa_resource.lo \
-	liblixta_la-xta_acquired_xa_resource.lo $(am__objects_1)
+	liblixta_la-xta_acquired_xa_resource.lo $(am__objects_1) \
+	$(am__objects_2)
 liblixta_la_OBJECTS = $(am_liblixta_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -395,6 +397,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL_SOURCES = xta_mysql_xa_resource.c
 @COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL_CPPFLAGS = @MYSQL_CPPFLAGS@
+@COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL_SOURCES = xta_postgresql_xa_resource.c
+@COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL_CPPFLAGS = @POSTGRESQL_CPPFLAGS@
 include_HEADERS = xta.h xta_errors.h xta_transaction.h \
 	xta_transaction_manager.h xta_xid.h \
 	xta_xa_resource.h xta_native_xa_resource.h xta_acquired_xa_resource.h \
@@ -404,10 +408,12 @@ lib_LTLIBRARIES = liblixta.la
 liblixta_la_SOURCES = xta_errors.c xta_transaction.c \
 	xta_transaction_manager.c xta_xid.c \
 	xta_xa_resource.c xta_native_xa_resource.c xta_acquired_xa_resource.c \
-	$(MAYBE_MYSQL_SOURCES)
+	$(MAYBE_MYSQL_SOURCES) $(MAYBE_POSTGRESQL_SOURCES)
 
 AM_CFLAGS = -Wall -fno-strict-aliasing
-liblixta_la_CPPFLAGS = -I$(top_srcdir)/src/common $(MAYBE_MYSQL_CPPFLAGS)
+liblixta_la_CPPFLAGS = -I$(top_srcdir)/src/common \
+	$(MAYBE_MYSQL_CPPFLAGS) $(MAYBE_POSTGRESQL_CPPFLAGS)
+
 liblixta_la_LIBADD = 
 liblixta_la_LDFLAGS = -version-info @LT_LIXTA_CURRENT@:@LT_LIXTA_REVISION@:@LT_LIXTA_AGE@
 all: all-am
@@ -493,6 +499,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_errors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_mysql_xa_resource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_native_xa_resource.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_postgresql_xa_resource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_transaction_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_xa_resource.Plo@am__quote@
@@ -574,6 +581,13 @@ liblixta_la-xta_mysql_xa_resource.lo: xta_mysql_xa_resource.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xta_mysql_xa_resource.c' object='liblixta_la-xta_mysql_xa_resource.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_la-xta_mysql_xa_resource.lo `test -f 'xta_mysql_xa_resource.c' || echo '$(srcdir)/'`xta_mysql_xa_resource.c
+
+liblixta_la-xta_postgresql_xa_resource.lo: xta_postgresql_xa_resource.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixta_la-xta_postgresql_xa_resource.lo -MD -MP -MF $(DEPDIR)/liblixta_la-xta_postgresql_xa_resource.Tpo -c -o liblixta_la-xta_postgresql_xa_resource.lo `test -f 'xta_postgresql_xa_resource.c' || echo '$(srcdir)/'`xta_postgresql_xa_resource.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixta_la-xta_postgresql_xa_resource.Tpo $(DEPDIR)/liblixta_la-xta_postgresql_xa_resource.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xta_postgresql_xa_resource.c' object='liblixta_la-xta_postgresql_xa_resource.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_la-xta_postgresql_xa_resource.lo `test -f 'xta_postgresql_xa_resource.c' || echo '$(srcdir)/'`xta_postgresql_xa_resource.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

@@ -28,7 +28,7 @@
 #include "lixa_errors.h"
 #include "lixa_trace.h"
 /* XTA includes */
-#include "xta_native_xa_resource.h"
+#include "xta_postgresql_xa_resource.h"
 
 
 
@@ -40,19 +40,19 @@
 
 
 
-xta_native_xa_resource_t *xta_native_xa_resource_new(
-    int rmid, const char *open_info, const char *close_info)
+xta_postgresql_xa_resource_t *xta_postgresql_xa_resource_new(
+    PGconn *connection)
 {
     enum Exception { G_TRY_MALLOC_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    xta_native_xa_resource_t *xa_res = NULL;
+    xta_postgresql_xa_resource_t *xa_res = NULL;
     
-    LIXA_TRACE(("xta_native_xa_resource_new\n"));
+    LIXA_TRACE(("xta_postgresql_xa_resource_new\n"));
     TRY {
         /* allocate sufficient memory for the object */
-        if (NULL == (xa_res = (xta_native_xa_resource_t *)g_try_malloc0(
-                         sizeof(xta_native_xa_resource_t))))
+        if (NULL == (xa_res = (xta_postgresql_xa_resource_t *)g_try_malloc0(
+                         sizeof(xta_postgresql_xa_resource_t))))
             THROW(G_TRY_MALLOC_ERROR);
         
         THROW(NONE);
@@ -68,19 +68,19 @@ xta_native_xa_resource_t *xta_native_xa_resource_new(
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_native_xa_resource_new/excp=%d/"
+    LIXA_TRACE(("xta_postgresql_xa_resource_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return xa_res;
 }
 
 
 
-void xta_native_xa_resource_delete(xta_native_xa_resource_t *xa_res)
+void xta_postgresql_xa_resource_delete(xta_postgresql_xa_resource_t *xa_res)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("xta_native_xa_resource_delete\n"));
+    LIXA_TRACE(("xta_postgresql_xa_resource_delete\n"));
     TRY {
         /* release memory allocated for the object */
         g_free(xa_res);
@@ -95,8 +95,9 @@ void xta_native_xa_resource_delete(xta_native_xa_resource_t *xa_res)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_native_xa_resource_delete/excp=%d/"
+    LIXA_TRACE(("xta_postgresql_xa_resource_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return;
 }
+
 

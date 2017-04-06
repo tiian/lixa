@@ -69,23 +69,6 @@ extern "C" {
 
 
     /**
-     * Create a new XA Resource object
-     * @return a new XA resource object or NULL in the event of an error
-     *         occurred
-     */
-    xta_xa_resource_t *xta_xa_resource_new(void);
-
-
-
-    /**
-     * Delete an XA Resource object
-     * @param[in] resource object to delete
-     */
-    void xta_xa_resource_delete(xta_xa_resource_t *resource);
-
-
-
-    /**
      * Starts work on behalf of a transaction branch specified in xid. If
      * @ref TMJOIN is specified, the start applies to joining a transaction
      * previously seen by the resource manager. If @ref TMRESUME is specified,

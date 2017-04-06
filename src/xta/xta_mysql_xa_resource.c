@@ -20,6 +20,10 @@
 
 
 
+/* system includes */
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 /* LIXA includes */
 #include "lixa_errors.h"
 #include "lixa_trace.h"
@@ -38,16 +42,24 @@
 
 xta_mysql_xa_resource_t *xta_mysql_xa_resource_new(MYSQL *connection)
 {
-    enum Exception { NONE } excp;
+    enum Exception { G_TRY_MALLOC_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     xta_mysql_xa_resource_t *xa_res = NULL;
     
     LIXA_TRACE(("xta_mysql_xa_resource_new\n"));
     TRY {
+        /* allocate sufficient memory for the object */
+        if (NULL == (xa_res = (xta_mysql_xa_resource_t *)g_try_malloc0(
+                         sizeof(xta_mysql_xa_resource_t))))
+            THROW(G_TRY_MALLOC_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -59,4 +71,32 @@ xta_mysql_xa_resource_t *xta_mysql_xa_resource_new(MYSQL *connection)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return xa_res;
 }
+
+
+
+void xta_mysql_xa_resource_delete(xta_mysql_xa_resource_t *xa_res)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_mysql_xa_resource_delete\n"));
+    TRY {
+        /* release memory allocated for the object */
+        g_free(xa_res);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_mysql_xa_resource_delete/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return;
+}
+
 
