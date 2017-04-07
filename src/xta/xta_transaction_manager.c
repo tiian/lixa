@@ -47,13 +47,15 @@ xta_transaction_manager_t *xta_transaction_manager_new(void)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     xta_transaction_manager_t *tm = NULL;
     
-    LIXA_TRACE(("xta_transaction_manager_t\n"));
+    LIXA_TRACE(("xta_transaction_manager_new\n"));
     TRY {
         /* allocate the object */
         if (NULL == (tm = (xta_transaction_manager_t *)
                      g_try_malloc0(sizeof(xta_transaction_manager_t))))
             THROW(G_TRY_MALLOC_ERROR);
-        /* @@@ initialize the object */
+        /* @@@ initialize the object
+           create a client_status object for this process/thread
+         */
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -67,7 +69,7 @@ xta_transaction_manager_t *xta_transaction_manager_new(void)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_transaction_manager_t/excp=%d/"
+    LIXA_TRACE(("xta_transaction_manager_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     XTA_LAST_OPERATION_SET(tm, excp, ret_cod);
     return tm;

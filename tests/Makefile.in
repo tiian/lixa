@@ -378,7 +378,7 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	tx_cobol.at \
 	xa.at xa_5_26.at xa_5_30.at xa_5_32.at xa_5_37.at xa_5_40.at \
 	xa_5_42.at xa_5_44.at xa_5_47.at xa_5_49.at xa_5_52.at \
-    xa_5_37_suspend.at xa_5_37_suspended.at xa_5_37_resumed.at \
+	xa_5_37_suspend.at xa_5_37_suspended.at xa_5_37_resumed.at \
 	xa_6_62.at xa_5_52_resume.at \
 	mt.at mt_1_0.at mt_2_0.at \
 	ct.at ct_0_0.at ct_0_1.at ct.at ct_0_2.at ct_0_3.at ct_0_4.at \
@@ -389,6 +389,7 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	memory.at oracle.at.in ibmdb2.at postgresql.at mysql.at xid.at \
 	package.m4 mysql_postgresql.at webspheremq.at lixa-config.at.in \
 	lixavsr.at.in \
+	xta.at xta_1.at \
 	$(TESTSUITE) atlocal.in lixa_test_exec.sh lixa_test_functions.sh
 
 TESTSUITE = $(srcdir)/testsuite
@@ -803,6 +804,7 @@ $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/ct_1_8.at $(srcdir)/ct_1_9.at \
 		$(srcdir)/ct_1_10.at $(srcdir)/ct_1_11.at \
 		$(srcdir)/ct_1_12.at $(srcdir)/ct_1_13.at \
+		$(srcdir)/xta.at $(srcdir)/xta_1.at \
 		$(srcdir)/package.m4
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@

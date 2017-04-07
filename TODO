@@ -1,3 +1,5 @@
+Restart from xta_transaction_manager_new
+
 Implement XTA for C/C++
 
 Explore high availability features (active/active) with dynamic or static

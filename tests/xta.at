@@ -1,0 +1,3 @@
+# XTA (XA Transaction API) case tests
+
+m4_include([xta_1.at])

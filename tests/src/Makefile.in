@@ -92,8 +92,9 @@ check_PROGRAMS = case0000$(EXEEXT) case0001$(EXEEXT) case0002$(EXEEXT) \
 	case0036$(EXEEXT) case0043$(EXEEXT) case0046$(EXEEXT) \
 	case0048$(EXEEXT) case0049$(EXEEXT) case0050$(EXEEXT) \
 	case0051$(EXEEXT) case0052$(EXEEXT) case0053$(EXEEXT) \
-	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
-	$(am__EXEEXT_4) $(am__EXEEXT_5) $(am__EXEEXT_6)
+	case0100$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
+	$(am__EXEEXT_3) $(am__EXEEXT_4) $(am__EXEEXT_5) \
+	$(am__EXEEXT_6)
 subdir = tests/src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -460,6 +461,10 @@ case0053_LDADD = $(LDADD)
 case0053_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la \
 	../../src/client/switch/lixa/liblixamonkey.la
+am_case0100_OBJECTS = case0100-case0100.$(OBJEXT)
+case0100_OBJECTS = $(am_case0100_OBJECTS)
+case0100_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la ../../src/xta/liblixta.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -511,7 +516,8 @@ SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) $(case0002_SOURCES) \
 	case0042.c $(case0043_SOURCES) $(case0044_SOURCES) \
 	$(case0045_SOURCES) $(case0046_SOURCES) $(case0047_SOURCES) \
 	$(case0048_SOURCES) $(case0049_SOURCES) $(case0050_SOURCES) \
-	$(case0051_SOURCES) $(case0052_SOURCES) $(case0053_SOURCES)
+	$(case0051_SOURCES) $(case0052_SOURCES) $(case0053_SOURCES) \
+	$(case0100_SOURCES)
 DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0002_SOURCES) $(case0003_SOURCES) $(case0004_SOURCES) \
 	$(case0005_SOURCES) $(case0006_SOURCES) $(case0007_SOURCES) \
@@ -530,7 +536,7 @@ DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0044_SOURCES) $(case0045_SOURCES) $(case0046_SOURCES) \
 	$(case0047_SOURCES) $(case0048_SOURCES) $(case0049_SOURCES) \
 	$(case0050_SOURCES) $(case0051_SOURCES) $(case0052_SOURCES) \
-	$(case0053_SOURCES)
+	$(case0053_SOURCES) $(case0100_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -918,6 +924,13 @@ case0050_SOURCES = case0050.c
 case0051_SOURCES = case0051.c
 case0052_SOURCES = case0052.c
 case0053_SOURCES = case0053.c
+case0100_CPPFLAGS = -I../../src/client -I../../src/common \
+	-I../../src/xta
+
+case0100_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
+	../../src/xta/liblixta.la
+
+case0100_SOURCES = case0100.c
 all: all-recursive
 
 .SUFFIXES:
@@ -1178,6 +1191,10 @@ case0053$(EXEEXT): $(case0053_OBJECTS) $(case0053_DEPENDENCIES) $(EXTRA_case0053
 	@rm -f case0053$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(case0053_OBJECTS) $(case0053_LDADD) $(LIBS)
 
+case0100$(EXEEXT): $(case0100_OBJECTS) $(case0100_DEPENDENCIES) $(EXTRA_case0100_DEPENDENCIES) 
+	@rm -f case0100$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(case0100_OBJECTS) $(case0100_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -1238,6 +1255,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0051.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0052.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0053.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0100-case0100.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1385,6 +1403,20 @@ case0048-case0048.obj: case0048.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='case0048.c' object='case0048-case0048.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0048_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o case0048-case0048.obj `if test -f 'case0048.c'; then $(CYGPATH_W) 'case0048.c'; else $(CYGPATH_W) '$(srcdir)/case0048.c'; fi`
+
+case0100-case0100.o: case0100.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0100_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT case0100-case0100.o -MD -MP -MF $(DEPDIR)/case0100-case0100.Tpo -c -o case0100-case0100.o `test -f 'case0100.c' || echo '$(srcdir)/'`case0100.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case0100-case0100.Tpo $(DEPDIR)/case0100-case0100.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='case0100.c' object='case0100-case0100.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0100_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o case0100-case0100.o `test -f 'case0100.c' || echo '$(srcdir)/'`case0100.c
+
+case0100-case0100.obj: case0100.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0100_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT case0100-case0100.obj -MD -MP -MF $(DEPDIR)/case0100-case0100.Tpo -c -o case0100-case0100.obj `if test -f 'case0100.c'; then $(CYGPATH_W) 'case0100.c'; else $(CYGPATH_W) '$(srcdir)/case0100.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case0100-case0100.Tpo $(DEPDIR)/case0100-case0100.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='case0100.c' object='case0100-case0100.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0100_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o case0100-case0100.obj `if test -f 'case0100.c'; then $(CYGPATH_W) 'case0100.c'; else $(CYGPATH_W) '$(srcdir)/case0100.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

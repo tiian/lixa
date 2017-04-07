@@ -245,7 +245,43 @@ lixa     12866     1  0 21:35 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
 tiian@ubuntu:~/tmp$ ./example1
 tx_open(): 0
 tx_begin(): 0
+tx_info(): 1
+xid.formatID: 1279875137
+xid.gtrid_length: 16
+xid.bqual_length: 16
+when_return: 0 (TX_COMMIT_COMPLETED)
+transaction_control: 0 (TX_UNCHAINED)
+transaction_timeout: 0 s
+transaction_state: 0 (TX_ACTIVE)
 tx_commit(): 0
+tx_info(): 0
+xid.formatID: -1
+xid.gtrid_length: 0
+xid.bqual_length: 0
+when_return: 0 (TX_COMMIT_COMPLETED)
+transaction_control: 0 (TX_UNCHAINED)
+transaction_timeout: 0 s
+transaction_state: 0 (TX_ACTIVE)
+tx_set_commit_return(): 1
+tx_set_transaction_timeout(): 0
+tx_set_transaction_control(): 0
+tx_info(): 0
+xid.formatID: -1
+xid.gtrid_length: 0
+xid.bqual_length: 0
+when_return: 0 (TX_COMMIT_COMPLETED)
+transaction_control: 1 (TX_CHAINED)
+transaction_timeout: 5 s
+transaction_state: 0 (TX_ACTIVE)
+tx_set_transaction_control(): 0
+tx_info(): 0
+xid.formatID: -1
+xid.gtrid_length: 0
+xid.bqual_length: 0
+when_return: 0 (TX_COMMIT_COMPLETED)
+transaction_control: 0 (TX_UNCHAINED)
+transaction_timeout: 5 s
+transaction_state: 0 (TX_ACTIVE)
 tx_begin(): 0
 tx_rollback(): 0
 tx_close(): 0
