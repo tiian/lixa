@@ -1000,21 +1000,21 @@ int lixa_tx_open(int *txrc, int mmode)
         /* check TX state (see Table 7-1) */
         txstate = client_status_get_txstate(cs);
         if (txstate == TX_STATE_S0) {
-            if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc))) THROW(
-                CLIENT_CONFIG_ERROR);
-            if (LIXA_RC_OK != (ret_cod =
-                               client_connect(&global_csc,
-                                              &global_ccc))) THROW(
-                                                  CLIENT_CONNECT_ERROR);
+            if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc)))
+                THROW(CLIENT_CONFIG_ERROR);
+            if (LIXA_RC_OK != (ret_cod = client_connect(cs, &global_ccc)))
+                THROW(CLIENT_CONNECT_ERROR);
             if (LIXA_RC_OK != (ret_cod = client_config_job(
-                                   &global_ccc, client_status_get_sockfd(cs)))) THROW(
-                                       CLIENT_CONFIG_JOB_ERROR);
+                                   &global_ccc,
+                                   client_status_get_sockfd(cs))))
+                THROW(CLIENT_CONFIG_JOB_ERROR);
 
             next_txstate = TX_STATE_S1;
 
             /* the real logic is inside this function */
             if (LIXA_RC_OK != (ret_cod = lixa_xa_open(
-                                   cs, &tmp_txrc, next_txstate, mmode))) THROW(LIXA_XA_OPEN_ERROR);
+                                   cs, &tmp_txrc, next_txstate, mmode)))
+                THROW(LIXA_XA_OPEN_ERROR);
 
             /* set new state after RMs are open... */
             client_status_set_txstate(cs, next_txstate);
@@ -1025,9 +1025,7 @@ int lixa_tx_open(int *txrc, int mmode)
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
+    } CATCH {
             switch (excp) {
                 case CLIENT_STATUS_FAILED:
                     *txrc = TX_FAIL;

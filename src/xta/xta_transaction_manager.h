@@ -23,6 +23,7 @@
 
 /* LIXA includes */
 #include "lixa_trace.h"
+#include "client_status.h"
 /* XTA includes */
 #include "xta_last_operation.h"
 #include "xta_transaction.h"
@@ -44,6 +45,11 @@
  * XTA Transaction Manager data type
  */
 typedef struct {
+    /**
+     * LIXA client status
+     */
+    client_status_t      client_status;
+    
     XTA_LAST_OPERATION_PROPERTIES;
     int dummy;
 } xta_transaction_manager_t;

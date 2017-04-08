@@ -49,9 +49,6 @@ int main(int argc, char *argv[])
     xta_transaction_manager_t *tm;
     xta_native_xa_resource_t *xa_res;
 
-    /* activate tracing */
-    LIXA_TRACE_INIT;
-    
     printf("%s| starting...\n", pgm);
     /*
      * creating a Transaction Manager object

@@ -68,11 +68,11 @@ extern "C" {
 
     /**
      * Connect this client to the transaction manager
-     * @param csc OUT object containing the status of this client
+     * @param cs OUT object containing the status of this client
      * @param ccc OUT object containing the configuration of this client
      * @return a standardized return code
      */
-    int client_connect(client_status_coll_t *csc,
+    int client_connect(client_status_t *cs,
                        client_config_coll_t *ccc);
 
     

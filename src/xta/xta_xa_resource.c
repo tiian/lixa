@@ -40,9 +40,9 @@
 
 
 
-int xta_xa_resource_start(xta_xa_resource_t *resource,
-                       const xta_xid_t *xid,
-                       long flag)
+int xta_xa_resource_start(xta_xa_resource_t *this,
+                          const xta_xid_t *xid,
+                          long flag)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -68,9 +68,9 @@ int xta_xa_resource_start(xta_xa_resource_t *resource,
 
 
 
-int xta_xa_resource_end(xta_xa_resource_t *resource,
-                     const xta_xid_t *xid,
-                     long flag)
+int xta_xa_resource_end(xta_xa_resource_t *this,
+                        const xta_xid_t *xid,
+                        long flag)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -96,7 +96,7 @@ int xta_xa_resource_end(xta_xa_resource_t *resource,
 
 
 
-int xta_xa_resource_prepare(xta_xa_resource_t *resource,
+int xta_xa_resource_prepare(xta_xa_resource_t *this,
                          const xta_xid_t *xid)
 {
     enum Exception { NONE } excp;
@@ -123,7 +123,7 @@ int xta_xa_resource_prepare(xta_xa_resource_t *resource,
 
 
 
-int xta_xa_resource_commit(xta_xa_resource_t *resource,
+int xta_xa_resource_commit(xta_xa_resource_t *this,
                         const xta_xid_t *xid,
                         int one_phase)
 {

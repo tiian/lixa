@@ -45,12 +45,12 @@ xta_xid_t *xta_xid_new(void)
     enum Exception { G_TRY_MALLOC_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    xta_xid_t *xid = NULL;
+    xta_xid_t *this = NULL;
     
     LIXA_TRACE(("xta_xid_t\n"));
     TRY {
         /* allocate the object */
-        if (NULL == (xid = (xta_xid_t *)
+        if (NULL == (this = (xta_xid_t *)
                      g_try_malloc0(sizeof(xta_xid_t))))
             THROW(G_TRY_MALLOC_ERROR);
         /* @@@ initialize the object */
@@ -69,13 +69,13 @@ xta_xid_t *xta_xid_new(void)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xid_t/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    XTA_LAST_OPERATION_SET(xid, excp, ret_cod);
-    return xid;
+    XTA_LAST_OPERATION_SET(this, excp, ret_cod);
+    return this;
 }
 
 
 
-void xta_xid_delete(xta_xid_t *xid)
+void xta_xid_delete(xta_xid_t *this)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -84,7 +84,7 @@ void xta_xid_delete(xta_xid_t *xid)
     TRY {
         /* @@@ destroy the object content if necessary */
 
-        g_free(xid);
+        g_free(this);
         
         THROW(NONE);
     } CATCH {

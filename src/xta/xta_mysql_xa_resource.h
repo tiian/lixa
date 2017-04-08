@@ -71,10 +71,10 @@ extern "C" {
 
     /**
      * Delete an object that represent a MySQL XA Resource
-     * @param[in] xa_res : MySQL XA Resource
+     * @param[in] this : MySQL XA Resource
      */
     void xta_mysql_xa_resource_delete(
-        xta_mysql_xa_resource_t *xa_res);
+        xta_mysql_xa_resource_t *this);
     
     
 

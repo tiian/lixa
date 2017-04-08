@@ -69,12 +69,12 @@
  */
 #define TX_STATE_S0    0
 /**
- * The thread haso opened its RMs but is not in a transaction. Its transaction
+ * The thread has opened its RMs but is not in a transaction. Its transaction
  * control characteristics is TX_UNCHAINED
  */
 #define TX_STATE_S1    1
 /**
- * The thread haso opened its RMs but is not in a transaction. Its transaction
+ * The thread has opened its RMs but is not in a transaction. Its transaction
  * control characteristics is TX_CHAINED
  */
 #define TX_STATE_S2    2

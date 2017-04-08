@@ -78,10 +78,10 @@ extern "C" {
 
     /**
      * Delete an object that represent a native XA Resource
-     * @param[in] xa_res : native XA Resource
+     * @param[in] this : native XA Resource
      */
     void xta_native_xa_resource_delete(
-        xta_native_xa_resource_t *xa_res);
+        xta_native_xa_resource_t *this);
     
     
 

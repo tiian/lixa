@@ -45,12 +45,12 @@ xta_transaction_t *xta_transaction_new(void)
     enum Exception { G_TRY_MALLOC_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    xta_transaction_t *t = NULL;
+    xta_transaction_t *this = NULL;
     
     LIXA_TRACE(("xta_transaction_t\n"));
     TRY {
         /* allocate the object */
-        if (NULL == (t = (xta_transaction_t *)
+        if (NULL == (this = (xta_transaction_t *)
                      g_try_malloc0(sizeof(xta_transaction_t))))
             THROW(G_TRY_MALLOC_ERROR);
         /* @@@ initialize the object */
@@ -69,13 +69,13 @@ xta_transaction_t *xta_transaction_new(void)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_t/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    XTA_LAST_OPERATION_SET(t, excp, ret_cod);
-    return t;
+    XTA_LAST_OPERATION_SET(this, excp, ret_cod);
+    return this;
 }
 
 
 
-void xta_transaction_delete(xta_transaction_t *t)
+void xta_transaction_delete(xta_transaction_t *this)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -84,7 +84,7 @@ void xta_transaction_delete(xta_transaction_t *t)
     TRY {
         /* @@@ destroy the object content if necessary */
 
-        g_free(t);
+        g_free(this);
         
         THROW(NONE);
     } CATCH {

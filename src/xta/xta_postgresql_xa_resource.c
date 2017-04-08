@@ -46,12 +46,12 @@ xta_postgresql_xa_resource_t *xta_postgresql_xa_resource_new(
     enum Exception { G_TRY_MALLOC_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    xta_postgresql_xa_resource_t *xa_res = NULL;
+    xta_postgresql_xa_resource_t *this = NULL;
     
     LIXA_TRACE(("xta_postgresql_xa_resource_new\n"));
     TRY {
         /* allocate sufficient memory for the object */
-        if (NULL == (xa_res = (xta_postgresql_xa_resource_t *)g_try_malloc0(
+        if (NULL == (this = (xta_postgresql_xa_resource_t *)g_try_malloc0(
                          sizeof(xta_postgresql_xa_resource_t))))
             THROW(G_TRY_MALLOC_ERROR);
         
@@ -70,12 +70,12 @@ xta_postgresql_xa_resource_t *xta_postgresql_xa_resource_new(
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_postgresql_xa_resource_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return xa_res;
+    return this;
 }
 
 
 
-void xta_postgresql_xa_resource_delete(xta_postgresql_xa_resource_t *xa_res)
+void xta_postgresql_xa_resource_delete(xta_postgresql_xa_resource_t *this)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -83,7 +83,7 @@ void xta_postgresql_xa_resource_delete(xta_postgresql_xa_resource_t *xa_res)
     LIXA_TRACE(("xta_postgresql_xa_resource_delete\n"));
     TRY {
         /* release memory allocated for the object */
-        g_free(xa_res);
+        g_free(this);
         
         THROW(NONE);
     } CATCH {

@@ -88,14 +88,13 @@
 
 
 
-int client_connect(client_status_coll_t *csc,
+int client_connect(client_status_t *cs,
                    client_config_coll_t *ccc)
 {
     enum Exception { GET_STTSRV_ERROR
                      , SOCKET_ERROR
                      , CONNECT_ERROR
                      , SETSOCKOPT_ERROR
-                     , CLIENT_STATUS_COLL_GET_CS_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -104,7 +103,6 @@ int client_connect(client_status_coll_t *csc,
     
     LIXA_TRACE(("client_connect\n"));
     TRY {
-        client_status_t *cs;
         int sock_opt = 1;
 
         /* search connection parameters */
@@ -128,8 +126,6 @@ int client_connect(client_status_coll_t *csc,
                             (void *)(&sock_opt), sizeof(sock_opt)))
             THROW(SETSOCKOPT_ERROR);
         
-        if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(csc, &cs)))
-            THROW(CLIENT_STATUS_COLL_GET_CS_ERROR);
         LIXA_TRACE(("client_connect: cs = %p\n", cs));
         LIXA_CRASH(LIXA_CRASH_POINT_CLIENT_CONNECT_1,
                    client_status_get_crash_count(cs));
@@ -150,8 +146,6 @@ int client_connect(client_status_coll_t *csc,
             case SETSOCKOPT_ERROR:
                 ret_cod = LIXA_RC_SETSOCKOPT_ERROR;
                 break;                
-            case CLIENT_STATUS_COLL_GET_CS_ERROR:
-                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

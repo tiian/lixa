@@ -67,38 +67,38 @@ extern "C" {
 
     /**
      * Delete a Transaction object
-     * @param[in] transaction object to delete
+     * @param[in] this : transaction object to delete
      */
-    void xta_transaction_delete(xta_transaction_t *transaction);
+    void xta_transaction_delete(xta_transaction_t *this);
 
 
 
     /**
      * Commit the transaction represented by this transaction object
-     * @param[in,out] transaction object
+     * @param[in,out] this : transaction object
      * @return a reason code
      */
-    int xta_transaction_commit(xta_transaction_t *transaction);
+    int xta_transaction_commit(xta_transaction_t *this);
 
     
     
     /**
      * Rollback the transaction represented by this transaction object
-     * @param[in,out] transaction object
+     * @param[in,out] this : transaction object
      * @return a reason code
      */
-    int xta_transaction_rollback(xta_transaction_t *transaction);
+    int xta_transaction_rollback(xta_transaction_t *this);
 
     
     
     /**
      * Enlist the resource specified with the Transaction associated with the
      * Transaction object
-     * @param[in,out] transaction object
+     * @param[in,out] this :transaction object
      * @param[in] resource to associate
      * @return a reason code
      */
-    int xta_transaction_enlist_resource(xta_transaction_t *transaction,
+    int xta_transaction_enlist_resource(xta_transaction_t *this,
                                         const xta_xa_resource_t *resource);
     
 
@@ -107,12 +107,12 @@ extern "C" {
      * Suspend the transaction represented by this transaction object; the
      * transaction can be resumed with @ref xta_transaction_resume at a later
      * time
-     * @param[in,out] transaction object
+     * @param[in,out] this : transaction object
      * @param[in] flags can be @ref TMMIGRATE if the Resource Manager supports
      *            transaction migration and @ref TMNOFLAGS otherwise
      * @return a reason code
      */
-    int xta_transaction_suspend(xta_transaction_t *transaction,
+    int xta_transaction_suspend(xta_transaction_t *this,
                                 long flags);
     
 
@@ -121,11 +121,11 @@ extern "C" {
      * Resume the transaction represented by xid in this transaction object;
      * the transaction has been previously suspended with
      * @ref xta_transaction_suspend
-     * @param[in,out] transaction object
+     * @param[in,out] this : transaction object
      * @param[in] xid identifier of the transaction that must be resumed
      * @return a reason code
      */
-    int xta_transaction_resume(xta_transaction_t *transaction,
+    int xta_transaction_resume(xta_transaction_t *this,
                                const xta_xid_t *xid);
     
 
@@ -133,23 +133,22 @@ extern "C" {
     /**
      * Create a new branch of the transaction represented by xid in this
      * transaction object; the global transaction has been previously started
-     * @param[in,out] transaction object
+     * @param[in,out] this : transaction object
      * @param[in] xid identifier of the global transaction that must be
      *            branched
      * @return a reason code
      */
-    int xta_transaction_branch(xta_transaction_t *transaction,
+    int xta_transaction_branch(xta_transaction_t *this,
                                const xta_xid_t *xid);
     
 
     
     /**
      * Get the Xid associated with the Transaction object
-     * @param[in] transaction object
+     * @param[in] this : transaction object
      * @return a reference to the Transaction Identifier
      */
-    const xta_xid_t *xta_transaction_get_xid(
-        const xta_transaction_t *transaction);
+    const xta_xid_t *xta_transaction_get_xid(const xta_transaction_t *this);
 
     
     

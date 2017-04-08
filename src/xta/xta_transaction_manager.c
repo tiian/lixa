@@ -27,6 +27,7 @@
 /* LIXA includes */
 #include "lixa_errors.h"
 #include "lixa_trace.h"
+#include "client_conn.h"
 /* XTA includes */
 #include "xta_transaction_manager.h"
 
@@ -43,24 +44,48 @@
 xta_transaction_manager_t *xta_transaction_manager_new(void)
 {
     enum Exception { G_TRY_MALLOC_ERROR
+                     , CLIENT_CONFIG_ERROR
+                     , CLIENT_CONNECT_ERROR
+                     , CLIENT_CONFIG_JOB_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    xta_transaction_manager_t *tm = NULL;
+    xta_transaction_manager_t *this = NULL;
+    
+    /* activate tracing */
+    LIXA_TRACE_INIT;
     
     LIXA_TRACE(("xta_transaction_manager_new\n"));
     TRY {
         /* allocate the object */
-        if (NULL == (tm = (xta_transaction_manager_t *)
+        if (NULL == (this = (xta_transaction_manager_t *)
                      g_try_malloc0(sizeof(xta_transaction_manager_t))))
             THROW(G_TRY_MALLOC_ERROR);
-        /* @@@ initialize the object
-           create a client_status object for this process/thread
-         */
+        /* initialize the LIXA client status */
+        client_status_init(&this->client_status);
+        client_status_active(&this->client_status);
+        /* configure the LIXA client (if necessary) */
+        if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc)))
+            THROW(CLIENT_CONFIG_ERROR);
+        /* connect to LIXA state server */
+        if (LIXA_RC_OK != (ret_cod = client_connect(
+                               &this->client_status, &global_ccc)))
+            THROW(CLIENT_CONNECT_ERROR);
+        /* configure the LIXA (transactional) job (if necessary) */
+        if (LIXA_RC_OK != (ret_cod = client_config_job(
+                               &global_ccc,
+                               client_status_get_sockfd(
+                                   &this->client_status))))
+            THROW(CLIENT_CONFIG_JOB_ERROR);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case G_TRY_MALLOC_ERROR:
                 ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case CLIENT_CONFIG_ERROR:
+            case CLIENT_CONNECT_ERROR:
+            case CLIENT_CONFIG_JOB_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -71,8 +96,15 @@ xta_transaction_manager_t *xta_transaction_manager_new(void)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_manager_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    XTA_LAST_OPERATION_SET(tm, excp, ret_cod);
-    return tm;
+    /* if something went wrong, destroy the object and return NULL */
+    if (excp > G_TRY_MALLOC_ERROR && excp < NONE) {
+        LIXA_TRACE(("xta_transaction_manager_new: an internal error "
+                    "occurred, destroying object and returning NULL\n"));
+        g_free(this);
+        this = NULL;
+    }
+    XTA_LAST_OPERATION_SET(this, excp, ret_cod);
+    return this;
 }
 
 

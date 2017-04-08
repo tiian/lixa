@@ -77,12 +77,12 @@ extern "C" {
      * the transaction specified by xid has previously been seen by the
      * resource manager, the resource manager returns @ref XTA_RC_XAER_DUPID
      * error code.
-     * @param[in,out] resource object
+     * @param[in,out] this : resource object
      * @param[in] xid : transaction identifier object
      * @param[in] flag : one of @ref TMNOFLAGS, @ref TMJOIN, or @ref TMRESUME
      * @return a reason code
      */
-    int xta_xa_resource_start(xta_xa_resource_t *resource,
+    int xta_xa_resource_start(xta_xa_resource_t *this,
                               const xta_xid_t *xid,
                               long flag);
     
@@ -100,12 +100,12 @@ extern "C" {
      * resource manager may mark the transaction as rollback-only.
      * If @ref TMSUCCESS is specified, the portion of work has completed
      * successfully.
-     * @param[in,out] resource object
+     * @param[in,out] this : resource object
      * @param[in] xid : transaction identifier object
      * @param[in] flag : one of @ref TMSUCCESS, @ref TMFAIL, or @ref TMSUSPEND
      * @return a reason code
      */
-    int xta_xa_resource_end(xta_xa_resource_t *resource,
+    int xta_xa_resource_end(xta_xa_resource_t *this,
                             const xta_xid_t *xid,
                             long flag);
 
@@ -114,25 +114,25 @@ extern "C" {
     /**
      * Ask the resource manager to prepare for a transaction commit of the
      * transaction specified in xid.
-     * @param[in,out] resource object
+     * @param[in,out] this : resource object
      * @param[in] xid : transaction identifier object
      * @return a reason code
      */
-    int xta_xa_resource_prepare(xta_xa_resource_t *resource,
+    int xta_xa_resource_prepare(xta_xa_resource_t *this,
                                 const xta_xid_t *xid);
 
     
     
     /**
      * Commits the global transaction specified by xid.
-     * @param[in,out] resource object
+     * @param[in,out] this : resource object
      * @param[in] xid : transaction identifier object
      * @param[in] one_phase : if true, the resource manager should use a
      *                        one-phase commit protocol to commit the work
      *                        done on behalf of xid
      * @return a reason code
      */
-    int xta_xa_resource_commit(xta_xa_resource_t *resource,
+    int xta_xa_resource_commit(xta_xa_resource_t *this,
                                const xta_xid_t *xid,
                                int one_phase);
     

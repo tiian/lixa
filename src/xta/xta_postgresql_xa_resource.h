@@ -72,10 +72,10 @@ extern "C" {
 
     /**
      * Delete an object that represent a PostgreSQL XA Resource
-     * @param[in] xa_res : PostgreSQL XA Resource
+     * @param[in] this : PostgreSQL XA Resource
      */
     void xta_postgresql_xa_resource_delete(
-        xta_postgresql_xa_resource_t *xa_res);
+        xta_postgresql_xa_resource_t *this);
     
     
 

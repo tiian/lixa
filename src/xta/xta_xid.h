@@ -66,9 +66,9 @@ extern "C" {
 
     /**
      * Delete a Transaction Identifier object
-     * @param[in] xid object to delete
+     * @param[in] this : xid object to delete
      */
-    void xta_xid_delete(xta_xid_t *xid);
+    void xta_xid_delete(xta_xid_t *this);
 
 
 
