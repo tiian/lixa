@@ -1,4 +1,11 @@
-Restart from xta_transaction_manager_new
+Restart from xta_acquired_xa_resource_init
+
+Open Point: automatic recovery. 
+Automatic recovery must be managed in a different way in comparison with
+TX API because some resources enlist dynamically and they are not described
+in the static configuration.
+Job id must be computed using a different approach: instead of signing the
+XML config file, the memory real Resource Manager set must signed.
 
 Implement XTA for C/C++
 

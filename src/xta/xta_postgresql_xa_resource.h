@@ -27,7 +27,7 @@
 /* PostgreSQL front-end */
 #include <libpq-fe.h>
 /* XTA includes */
-#include "xta_xa_resource.h"
+#include "xta_acquired_xa_resource.h"
 
 
 
@@ -47,7 +47,8 @@
  */
 typedef struct {
     union {
-        xta_xa_resource_t  xa_resource;
+        xta_xa_resource_t                    xa_resource;
+        xta_acquired_xa_resource_t  acquired_xa_resource;
     };
 } xta_postgresql_xa_resource_t;
 

@@ -36,3 +36,32 @@
 
 
 
+int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
+                                  const char *name,
+                                  const char *open_info)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_acquired_xa_resource_init\n"));
+    TRY {
+        /* check the object has not already initialized */
+        /* @@@
+        if (NULL != this->name)
+        */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_acquired_xa_resource_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

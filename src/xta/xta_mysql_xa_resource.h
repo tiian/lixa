@@ -27,7 +27,7 @@
 /* MySQL front-end */
 #include <mysql.h>
 /* XTA includes */
-#include "xta_xa_resource.h"
+#include "xta_acquired_xa_resource.h"
 
 
 
@@ -47,7 +47,8 @@
  */
 typedef struct {
     union {
-        xta_xa_resource_t  xa_resource;
+        xta_xa_resource_t           xa_resource;
+        xta_acquired_xa_resource_t  acquired_xa_resource;
     };
 } xta_mysql_xa_resource_t;
 

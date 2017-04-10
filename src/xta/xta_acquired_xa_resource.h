@@ -24,6 +24,7 @@
 /* LIXA includes */
 #include "lixa_trace.h"
 /* XTA includes */
+#include "xta_xa_resource.h"
 #include "xta_last_operation.h"
 /* XA include */
 #include "xa.h"
@@ -45,8 +46,11 @@
  * XTA Transaction data type
  */
 typedef struct {
-    XTA_LAST_OPERATION_PROPERTIES;
-    int dummy;
+    union {
+        xta_xa_resource_t           xa_resource;
+    };
+    char       *name;
+    char        open_info[MAXINFOSIZE];
 } xta_acquired_xa_resource_t;
 
 
@@ -56,6 +60,22 @@ extern "C" {
 #endif /* __cplusplus */
 
 
+
+    /**
+     * Initialize the common properties of Acquired XA Resources
+     * @param[in,out] this : Acquired XA Resource object
+     * @param[in] name : unique identifier of the resource
+     * @param[in] open_info : unique description of the connection properties
+     *                        like network name/IP address, port, user/schema,
+     *                        etc. Only the first @ref MAXINFOSIZE characters
+     *                        will be kept.
+     * @return a reason code
+     */
+    int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
+                                      const char *name,
+                                      const char *open_info);
+    
+    
 
 #ifdef __cplusplus
 }
