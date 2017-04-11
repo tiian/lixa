@@ -25,7 +25,9 @@
 
 
 /* PostgreSQL front-end */
-#include <libpq-fe.h>
+#ifdef HAVE_POSTGRESQL
+# include <libpq-fe.h>
+#endif
 /* XTA includes */
 #include "xta_acquired_xa_resource.h"
 
@@ -64,10 +66,15 @@ extern "C" {
      * Create a new object to represent a PostgreSQL XA resource
      * @param[in] connection to PostgreSQL already opened by the application
      *            program
+     * @param[in] name : unique identifier of the resource
+     * @param[in] open_info : unique description of the connection properties
+     *                        like network name/IP address, port, user/schema,
+     *                        etc. Only the first @ref MAXINFOSIZE characters
+     *                        will be kept.
      * @return a new object or NULL in the event of error
      */
     xta_postgresql_xa_resource_t *xta_postgresql_xa_resource_new(
-        PGconn *connection);
+        PGconn *connection, const char *name, const char *open_info);
 
     
 
@@ -75,8 +82,7 @@ extern "C" {
      * Delete an object that represent a PostgreSQL XA Resource
      * @param[in] this : PostgreSQL XA Resource
      */
-    void xta_postgresql_xa_resource_delete(
-        xta_postgresql_xa_resource_t *this);
+    void xta_postgresql_xa_resource_delete(xta_postgresql_xa_resource_t *this);
     
     
 

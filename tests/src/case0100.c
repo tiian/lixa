@@ -32,7 +32,7 @@
 
 
 
-#include "xta.h"
+#include "xta/xta.h"
 
 
 
@@ -47,31 +47,74 @@ int main(int argc, char *argv[])
     char *pgm = argv[0];
     int rc;
     xta_transaction_manager_t *tm;
-    xta_native_xa_resource_t *xa_res;
+    xta_native_xa_resource_t *native_xa_res;
+#ifdef HAVE_MYSQL
+    MYSQL *mysql_conn = NULL;
+    xta_mysql_xa_resource_t *mysql_xa_res;
+#endif
+#ifdef HAVE_POSTGRESQL
+    PGconn *postgres_conn = NULL;
+    xta_postgresql_xa_resource_t *postgresql_xa_res;
+#endif
 
     printf("%s| starting...\n", pgm);
     /*
-     * creating a Transaction Manager object
+     * create a Transaction Manager object
      */
     if (NULL == (tm = xta_transaction_manager_new())) {
-        printf("%s| xta_transaction_manager_new: returned NULL\n");
+        printf("%s| xta_transaction_manager_new: returned NULL\n", pgm);
         return 1;
     }
     /*
-     * creating an XA native resource object linked to the first Resouce
+     * create an XA native resource object linked to the first Resouce
      * Manager configured in LIXA profile
      */
-    if (NULL == (xa_res = xta_native_xa_resource_new(0, NULL, NULL))) {
-        printf("%s| xta_native_xa_resource_new: returned NULL\n");
+    if (NULL == (native_xa_res = xta_native_xa_resource_new(0, NULL, NULL))) {
+        printf("%s| xta_native_xa_resource_new: returned NULL\n", pgm);
         return 1;
     }
-
+#ifdef HAVE_MYSQL
     /*
-     * deleting XA Resource object
+     * create a MySQL XA resource object
      */
-    xta_native_xa_resource_delete(xa_res);
+    if (NULL == (mysql_xa_res = xta_mysql_xa_resource_new(
+                     mysql_conn, "MySQL", "ip,port,user,password"))) {
+        printf("%s| xta_mysql_xa_resource_new: returned NULL\n", pgm);
+        return 1;
+    }
+#endif
+#ifdef HAVE_POSTGRESQL
     /*
-     * deleting Transaction Manager object
+     * create a PostgreSQL XA resource object
+     */
+    if (NULL == (postgresql_xa_res = xta_postgresql_xa_resource_new(
+                     postgres_conn, "PostgreSQL",
+                     "ip,port,user,password"))) {
+        printf("%s| xta_postgresql_xa_resource_new: returned NULL\n", pgm);
+        return 1;
+    }
+#endif
+    /*
+     * some code here ... @@@
+     */
+#ifdef HAVE_POSTGRESQL
+    /*
+     * delete the PostgreSQL XA resource object
+     */
+    xta_postgresql_xa_resource_delete(postgresql_xa_res);
+#endif
+#ifdef HAVE_MYSQL
+    /*
+     * delete the MySQL XA resource object
+     */
+    xta_mysql_xa_resource_delete(mysql_xa_res);
+#endif    
+    /*
+     * delete native XA Resource object
+     */
+    xta_native_xa_resource_delete(native_xa_res);
+    /*
+     * delete Transaction Manager object
      */
     xta_transaction_manager_delete(tm);
     

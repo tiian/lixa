@@ -8,6 +8,7 @@ AM_PROG_LIBTOOL
 
 AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADER([src/xta/xta.h])
 AC_CONFIG_FILES([
   Makefile
   doc/Makefile

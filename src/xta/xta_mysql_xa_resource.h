@@ -64,9 +64,16 @@ extern "C" {
      * Create a new object to represent a MySQL XA resource
      * @param[in] connection to MySQL already opened by the application
      *            program
+     * @param[in] name : unique identifier of the resource
+     * @param[in] open_info : unique description of the connection properties
+     *                        like network name/IP address, port, user/schema,
+     *                        etc. Only the first @ref MAXINFOSIZE characters
+     *                        will be kept.
      * @return a new object or NULL in the event of error
      */
-    xta_mysql_xa_resource_t *xta_mysql_xa_resource_new(MYSQL *connection);
+    xta_mysql_xa_resource_t *xta_mysql_xa_resource_new(MYSQL *connection,
+                                                       const char *name,
+                                                       const char *open_info);
 
     
 
@@ -74,8 +81,7 @@ extern "C" {
      * Delete an object that represent a MySQL XA Resource
      * @param[in] this : MySQL XA Resource
      */
-    void xta_mysql_xa_resource_delete(
-        xta_mysql_xa_resource_t *this);
+    void xta_mysql_xa_resource_delete(xta_mysql_xa_resource_t *this);
     
     
 

@@ -294,18 +294,23 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR:  a glib function returned a NULL pointer; the "
                 "function is not documented as returnig NULL. This is "
                 "an internal error";
-        case LIXA_RC_G_MODULE_OPEN_ERROR:
-            return "ERROR: 'g_module_open' function returned an "
-                "error condition";
-        case LIXA_RC_G_MODULE_CLOSE_ERROR:
-            return "ERROR: 'g_module_close' function returned an "
-                "error condition";
-        case LIXA_RC_G_MODULE_SYMBOL_ERROR:
-            return "ERROR: 'g_module_symbol' function returned an "
+        case LIXA_RC_G_CHECKSUM_GET_STRING_ERROR:
+            return "ERROR: 'g_checksum_get_string' function returned an "
                 "error condition";
         case LIXA_RC_G_CHECKSUM_NEW_ERROR:
             return "ERROR: 'g_checksum_new' function returned an "
                 "error condition";
+        case LIXA_RC_G_MODULE_CLOSE_ERROR:
+            return "ERROR: 'g_module_close' function returned an "
+                "error condition";
+        case LIXA_RC_G_MODULE_OPEN_ERROR:
+            return "ERROR: 'g_module_open' function returned an "
+                "error condition";
+        case LIXA_RC_G_MODULE_SYMBOL_ERROR:
+            return "ERROR: 'g_module_symbol' function returned an "
+                "error condition";
+        case LIXA_RC_G_STRDUP_ERROR:
+            return "ERROR: 'g_strdup' function returned an error condition";
         case LIXA_RC_G_THREAD_CREATE_ERROR:
             return "ERROR: 'g_thread_create' function returned an "
                 "error condition";

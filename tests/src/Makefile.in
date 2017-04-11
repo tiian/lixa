@@ -110,7 +110,7 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_HEADER = $(top_builddir)/config.h $(top_builddir)/src/xta/xta.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @COMPILE_POSTGRESQL_STUFF_TRUE@am__EXEEXT_1 = case0037$(EXEEXT)
@@ -477,7 +477,7 @@ AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir) -I$(top_builddir)/src/xta
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -924,8 +924,8 @@ case0050_SOURCES = case0050.c
 case0051_SOURCES = case0051.c
 case0052_SOURCES = case0052.c
 case0053_SOURCES = case0053.c
-case0100_CPPFLAGS = -I../../src/client -I../../src/common \
-	-I../../src/xta
+case0100_CPPFLAGS = @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@ \
+	-I../../src/client -I../../src/common -I../../src
 
 case0100_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/xta/liblixta.la

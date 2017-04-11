@@ -21,6 +21,14 @@
 
 
 
+#include <config.h>
+
+
+
+/* system includes */
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 /* LIXA includes */
 #include "lixa_trace.h"
 /* XTA includes */
@@ -49,7 +57,7 @@ typedef struct {
     union {
         xta_xa_resource_t           xa_resource;
     };
-    char       *name;
+    gchar      *name;
     char        open_info[MAXINFOSIZE];
 } xta_acquired_xa_resource_t;
 
@@ -77,6 +85,16 @@ extern "C" {
     
     
 
+    /**
+     * Clean the common properties of Acquired XA Resources; this function
+     * must be called after @ref xta_acquired_xa_resource_init during
+     * object deletion to avoid memory leaks
+     * @param[in,out] this : Acquired XA Resource object
+     */
+    void xta_acquired_xa_resource_clean(xta_acquired_xa_resource_t *this);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

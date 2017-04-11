@@ -12722,6 +12722,8 @@ fi
 
 ac_config_headers="$ac_config_headers config.h"
 
+ac_config_headers="$ac_config_headers src/xta/xta.h"
+
 ac_config_files="$ac_config_files Makefile doc/Makefile doc/api/Makefile doc/examples/Makefile doc/examples/cobol/Makefile doc/images/Makefile doc/manuals/LIXA.xml doc/manuals/Makefile etc/lixad_conf.xml etc/Makefile etc/lixavsr/Makefile ext/Makefile ext/doc/Makefile ext/doc/manuals/LIXA_EXT.xml ext/doc/manuals/Makefile ext/php/Makefile ext/php/examples/Makefile ext/php/tests/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/lixa-config.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/ibmdb2/Makefile src/client/switch/oracle/Makefile src/client/switch/postgresql/Makefile src/client/switch/mysql/Makefile src/client/switch/webspheremq/Makefile src/server/Makefile src/xta/Makefile tests/Makefile tests/atlocal tests/lixa-config.at tests/etc/lixac_conf.xml tests/etc/lixad_conf.xml tests/etc/lixad_conf2.xml tests/etc/Makefile tests/scripts/Makefile tests/src/Makefile tests/src/cobol/Makefile utils/Makefile var/Makefile"
 
 ac_config_commands="$ac_config_commands tests/atconfig"
@@ -16685,6 +16687,7 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
+    "src/xta/xta.h") CONFIG_HEADERS="$CONFIG_HEADERS src/xta/xta.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "doc/api/Makefile") CONFIG_FILES="$CONFIG_FILES doc/api/Makefile" ;;
