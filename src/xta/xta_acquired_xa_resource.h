@@ -33,7 +33,6 @@
 #include "lixa_trace.h"
 /* XTA includes */
 #include "xta_xa_resource.h"
-#include "xta_last_operation.h"
 /* XA include */
 #include "xa.h"
 

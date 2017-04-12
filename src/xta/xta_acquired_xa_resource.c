@@ -75,7 +75,7 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
         if (NULL == (this->name = g_strdup(name)))
             THROW(G_STRDUP_ERROR);
         strncpy(this->open_info, open_info, MAXINFOSIZE);
-        this->open_info[MAXINFOSIZE] = '\0';
+        this->open_info[MAXINFOSIZE-1] = '\0';
             
         THROW(NONE);
     } CATCH {

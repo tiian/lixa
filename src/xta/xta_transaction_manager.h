@@ -25,7 +25,6 @@
 #include "lixa_trace.h"
 #include "client_status.h"
 /* XTA includes */
-#include "xta_last_operation.h"
 #include "xta_transaction.h"
 
 
@@ -49,9 +48,6 @@ typedef struct {
      * LIXA client status
      */
     client_status_t      client_status;
-    
-    XTA_LAST_OPERATION_PROPERTIES;
-    int dummy;
 } xta_transaction_manager_t;
 
 
@@ -73,46 +69,42 @@ extern "C" {
 
     /**
      * Delete a Transaction Manager object
-     * @param[in] transaction_manager to delete
+     * @param[in] this : transaction manager to delete
      */
-    void xta_transaction_manager_delete(
-        xta_transaction_manager_t *transaction_manager);
+    void xta_transaction_manager_delete(xta_transaction_manager_t *this);
 
 
 
     /**
      * Get the XTA Transaction object that represents the transaction context
      * of the calling thread
-     * @param[in,out] transaction_manager object
+     * @param[in,out] this : transaction manager object
      * @return the pointer to an XTA Transaction object
      */
     xta_transaction_t *
-    xta_transaction_manager_get_transaction(
-        xta_transaction_manager_t *transaction_manager);
+    xta_transaction_manager_get_transaction(xta_transaction_manager_t *this);
 
     
 
     /**
      * Create a new transaction and associate it with the current
      * process/thread
-     * @param[in,out] transaction_manager object
+     * @param[in,out] this : transaction manager object
      * @return a reason code
      */
-    int xta_transaction_manager_begin(
-        xta_transaction_manager_t *transaction_manager);
+    int xta_transaction_manager_begin(xta_transaction_manager_t *this);
 
 
 
     /**
      * Create a new transaction branch inside an existing global transaction
      * and associate it with the current process/thread
-     * @param[in,out] transaction_manager object
+     * @param[in,out] this : transaction manager object
      * @param[in] xid transaction identifier object
      * @return a reason code
      */
-    int xta_transaction_manager_branch(
-        xta_transaction_manager_t *transaction_manager,
-        const xta_xid_t *xid);
+    int xta_transaction_manager_branch(xta_transaction_manager_t *this,
+                                       const xta_xid_t *xid);
 
 
     

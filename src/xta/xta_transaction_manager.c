@@ -103,22 +103,22 @@ xta_transaction_manager_t *xta_transaction_manager_new(void)
         g_free(this);
         this = NULL;
     }
-    XTA_LAST_OPERATION_SET(this, excp, ret_cod);
     return this;
 }
 
 
 
-void xta_transaction_manager_delete(xta_transaction_manager_t *tm)
+void xta_transaction_manager_delete(xta_transaction_manager_t *this)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_manager_delete\n"));
     TRY {
-        /* @@@ destroy the object content if necessary */
-
-        g_free(tm);
+        /* free the memory associated to client status */
+        client_status_free(&this->client_status);
+        /* destroy the object itself */
+        g_free(this);
         
         THROW(NONE);
     } CATCH {
@@ -138,7 +138,7 @@ void xta_transaction_manager_delete(xta_transaction_manager_t *tm)
 
 
 xta_transaction_t *
-xta_transaction_manager_get_transaction(xta_transaction_manager_t *tm)
+xta_transaction_manager_get_transaction(xta_transaction_manager_t *this)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -147,13 +147,6 @@ xta_transaction_manager_get_transaction(xta_transaction_manager_t *tm)
     LIXA_TRACE(("xta_transaction_manager_get_transaction\n"));
     TRY {
         /* @@@ implement me */
-
-        /* @@@ remove me, just an example */
-        LIXA_TRACE(("xta_transaction_manager_get_transaction: %s, %d, %d, %d\n",
-                    XTA_LAST_OPERATION_GET_METHOD(tm),
-                    XTA_LAST_OPERATION_GET_RET_COD(tm),
-                    XTA_LAST_OPERATION_GET_EXCP(tm),
-                    XTA_LAST_OPERATION_GET_ERROR(tm)));
         
         THROW(NONE);
     } CATCH {
@@ -167,14 +160,12 @@ xta_transaction_manager_get_transaction(xta_transaction_manager_t *tm)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_manager_get_transaction/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    XTA_LAST_OPERATION_SET(tm, excp, ret_cod);
     return t;
 }
 
 
 
-int xta_transaction_manager_begin(
-    xta_transaction_manager_t *transaction_manager)
+int xta_transaction_manager_begin(xta_transaction_manager_t *this)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;

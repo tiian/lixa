@@ -69,7 +69,6 @@ xta_transaction_t *xta_transaction_new(void)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_t/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    XTA_LAST_OPERATION_SET(this, excp, ret_cod);
     return this;
 }
 

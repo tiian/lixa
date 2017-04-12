@@ -23,8 +23,6 @@
 
 /* LIXA includes */
 #include "lixa_trace.h"
-/* XTA includes */
-#include "xta_last_operation.h"
 
 
 
@@ -43,7 +41,6 @@
  * XTA Transaction data type
  */
 typedef struct {
-    XTA_LAST_OPERATION_PROPERTIES;
     int dummy;
 } xta_xid_t;
 
