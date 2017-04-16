@@ -48,6 +48,7 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
                      , OBJ_CORRUPTED
                      , INVALID_OPTION1
                      , INVALID_OPTION2
+                     , XTA_XA_RESOURCE_INIT_ERROR
                      , G_STRDUP_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -56,7 +57,7 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT);
-        /* check the object has not already initialized */
+        /* check the object has not already been initialized */
         if (NULL != this->name)
             THROW(OBJ_CORRUPTED);
         /* name can't be NULL or empty */
@@ -71,6 +72,14 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
                         "exceeds MAXINFOSIZE %d\n", strlen(open_info),
                         MAXINFOSIZE));
         }
+        /*
+         * call father initializator
+         * Acquired XA Resources don't generally need explicit
+         * xa_open, xa_close
+         */
+        if (LIXA_RC_OK != (ret_cod = xta_xa_resource_init(
+                               (xta_xa_resource_t *)this, FALSE)))
+            THROW(XTA_XA_RESOURCE_INIT_ERROR);
         /* set object properties */
         if (NULL == (this->name = g_strdup(name)))
             THROW(G_STRDUP_ERROR);
@@ -89,6 +98,8 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
             case INVALID_OPTION1:
             case INVALID_OPTION2:
                 ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case XTA_XA_RESOURCE_INIT_ERROR:
                 break;
             case G_STRDUP_ERROR:
                 ret_cod = LIXA_RC_G_STRDUP_ERROR;

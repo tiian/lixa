@@ -75,7 +75,16 @@ extern "C" {
         int rmid, const char *open_info, const char *close_info);
 
 
-
+    
+    /**
+     * Initialize the common properties of Native XA Resources
+     * @param[in,out] this : Native XA Resource object
+     * @return a reason code
+     */
+    int xta_native_xa_resource_init(xta_native_xa_resource_t *this);
+    
+    
+    
     /**
      * Delete an object that represent a native XA Resource
      * @param[in] this : native XA Resource

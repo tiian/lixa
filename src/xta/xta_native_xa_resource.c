@@ -44,6 +44,7 @@ xta_native_xa_resource_t *xta_native_xa_resource_new(
     int rmid, const char *open_info, const char *close_info)
 {
     enum Exception { G_TRY_MALLOC_ERROR
+                     , XTA_NATIVE_XA_RESOURCE_INIT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     xta_native_xa_resource_t *this = NULL;
@@ -54,12 +55,17 @@ xta_native_xa_resource_t *xta_native_xa_resource_new(
         if (NULL == (this = (xta_native_xa_resource_t *)g_try_malloc0(
                          sizeof(xta_native_xa_resource_t))))
             THROW(G_TRY_MALLOC_ERROR);
+        /* initialize the object */
+        if (LIXA_RC_OK != (ret_cod = xta_native_xa_resource_init(this)))
+            THROW(XTA_NATIVE_XA_RESOURCE_INIT_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case G_TRY_MALLOC_ERROR:
                 ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case XTA_NATIVE_XA_RESOURCE_INIT_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -98,5 +104,44 @@ void xta_native_xa_resource_delete(xta_native_xa_resource_t *this)
     LIXA_TRACE(("xta_native_xa_resource_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return;
+}
+
+
+
+int xta_native_xa_resource_init(xta_native_xa_resource_t *this)
+{
+    enum Exception { NULL_OBJECT
+                     , XA_RESOURCE_INIT_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_native_xa_resource_init\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* call father initializator */
+        if (LIXA_RC_OK != (ret_cod = xta_xa_resource_init(
+                               (xta_xa_resource_t *)this, TRUE)))
+            THROW(XA_RESOURCE_INIT_ERROR);
+        /* nothing else to initialize here... @@@ */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case XA_RESOURCE_INIT_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_native_xa_resource_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 

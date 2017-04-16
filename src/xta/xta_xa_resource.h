@@ -58,6 +58,12 @@ typedef struct {
     union {
         struct xa_switch_t  xa_switch;
     };
+    /**
+     * The XA resource needs an explicit xa_open call to be opened and
+     * xa_close call to be closed. This is the typical behavior or native
+     * XA Resource Managers
+     */
+    int        must_be_opened;
 } xta_xa_resource_t;
 
 
@@ -68,6 +74,19 @@ extern "C" {
 
 
 
+    /**
+     * Initialize the common properties of XA Resources
+     * @param[in,out] this : XA Resource object
+     * @param[in] must_be_opened : the XA Resource needs an explicit call to
+     *                             xa_open before usage and xa_close after
+     *                             usage end
+     * @return a reason code
+     */
+    int xta_xa_resource_init(xta_xa_resource_t *this,
+                             int must_be_opened);
+    
+
+    
     /**
      * Starts work on behalf of a transaction branch specified in xid. If
      * @ref TMJOIN is specified, the start applies to joining a transaction

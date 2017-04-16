@@ -40,6 +40,40 @@
 
 
 
+int xta_xa_resource_init(xta_xa_resource_t *this,
+                         int must_be_opened)
+{
+    enum Exception { NULL_OBJECT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_xa_resource_init\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* set object properties */
+        this->must_be_opened = must_be_opened;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_xa_resource_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int xta_xa_resource_start(xta_xa_resource_t *this,
                           const xta_xid_t *xid,
                           long flag)
