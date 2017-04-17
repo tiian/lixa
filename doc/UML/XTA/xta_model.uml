@@ -21,6 +21,12 @@ Oracle is just an example: I don't know if a standard connection can be migrated
 &quot;openInfo&quot; must contain unique description from a connection point of view like &quot;ip:port:user:...&quot;
 &quot;name&quot; &amp; &quot;openInfo&quot; the properties are not used to create a real connection, but to distinguish among different connections for recovery purpose</body>
   </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_VfK3ICLjEeeREJcBlfZgIw" annotatedElement="_7KY_kBPrEeeDbpR_R0y-uQ">
+    <body>if (mustBeOpened == TRUE) {
+	Explicit &quot;xa_open&quot; must be called before resource usage.
+	Explicit &quot;xa_close&quot; must be called after resource usage.
+}</body>
+  </ownedComment>
   <packagedElement xmi:type="uml:Package" xmi:id="_aH7rQBPrEeeDbpR_R0y-uQ" name="Classes">
     <packagedElement xmi:type="uml:Class" xmi:id="_-4PxYBPrEeeDbpR_R0y-uQ" name="ApplicationProgram">
       <ownedOperation xmi:type="uml:Operation" xmi:id="_2k9lMBPuEeeDbpR_R0y-uQ" name="setXid">
@@ -59,6 +65,7 @@ Oracle is just an example: I don't know if a standard connection can be migrated
     </packagedElement>
     <packagedElement xmi:type="uml:Class" xmi:id="_unDa0BPrEeeDbpR_R0y-uQ" name="Xid"/>
     <packagedElement xmi:type="uml:Class" xmi:id="_7KY_kBPrEeeDbpR_R0y-uQ" name="XAResource" isAbstract="true">
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_YH5CUCLiEeeREJcBlfZgIw" name="mustBeOpened" visibility="protected" type="_wRHeABPtEeeDbpR_R0y-uQ"/>
       <ownedOperation xmi:type="uml:Operation" xmi:id="_xefskBPsEeeDbpR_R0y-uQ" name="start" isAbstract="true">
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_LxYxkBPtEeeDbpR_R0y-uQ" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_hmNIwBPtEeeDbpR_R0y-uQ" name="flags" type="_ZI7acBPtEeeDbpR_R0y-uQ"/>
