@@ -26,6 +26,7 @@
 #include "client_status.h"
 /* XTA includes */
 #include "xta_transaction.h"
+#include "xta_acquired_xa_resource.h"
 
 
 
@@ -83,6 +84,20 @@ extern "C" {
      */
     xta_transaction_t *
     xta_transaction_manager_get_transaction(xta_transaction_manager_t *this);
+
+
+
+    /**
+     * Dynamically register an XA Resource. After registration, the XA Resource
+     * can be used inside a transaction. Native XA Resources can be statically
+     * configured while acquired XA Resources must be dynamically registered.
+     * @param[in,out] this : transaction manager object
+     * @param[in] resource : an acquired XA resource
+     * @return a reason code
+     */
+    int xta_transaction_manager_register(
+        xta_transaction_manager_t *this,
+        const xta_xa_resource_t *resource);
 
     
 

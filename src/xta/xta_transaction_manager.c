@@ -28,6 +28,7 @@
 #include "lixa_errors.h"
 #include "lixa_trace.h"
 #include "client_conn.h"
+#include "client_config.h"
 /* XTA includes */
 #include "xta_transaction_manager.h"
 
@@ -161,6 +162,53 @@ xta_transaction_manager_get_transaction(xta_transaction_manager_t *this)
     LIXA_TRACE(("xta_transaction_manager_get_transaction/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return t;
+}
+
+
+
+int xta_transaction_manager_register(xta_transaction_manager_t *this,
+                                     const xta_xa_resource_t *resource)
+{
+    enum Exception { NULL_OBJECT1
+                     , NULL_OBJECT2
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_transaction_manager_register\n"));
+    TRY {
+        /* actual resource managers are described by this struct */
+        struct act_rsrmgr_config_s record;
+        /* check the transaction manager object is not NULL */
+        if (NULL == this)
+            THROW(NULL_OBJECT1);
+        /* check the XA Resource object is not NULL */
+        if (NULL == resource)
+            THROW(NULL_OBJECT2);
+
+        /* @@@ popolate record with values */
+
+
+        /* append the resource manager to the list of actual configured
+           resource managers */
+        client_config_append_rsrmgr(&global_ccc, &record);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT1:
+            case NULL_OBJECT2:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_manager_register/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 

@@ -1,4 +1,9 @@
-Restart from xta_acquired_xa_resource_init
+Restart from xta_transaction_manager_register: populate record content from
+xta_xa_resource (a lot of work!)
+
+UML: add "register" method to TransactionManager class 
+UML: add necessary properties to XAResource and derivatives to support 
+     TransactionManager.register()
 
 Open Point: automatic recovery. 
 Automatic recovery must be managed in a different way in comparison with

@@ -446,7 +446,7 @@ int client_config_validate(client_config_coll_t *ccc)
                     LIXA_TRACE(("client_config_validate: profile set to "
                                 "default value ('%s')\n", ccc->profile));
                 }
-
+                
                 LIXA_TRACE(("client_config_validate: profile '%s' "
                             "matches with profile # %u ('%s')\n",
                             ccc->profile, i, profile->name));
@@ -501,8 +501,11 @@ int client_config_validate(client_config_coll_t *ccc)
                             record.generic = conf_rsrmgr;
                             record.module = NULL;
                             record.xa_switch = NULL;
+                            /* @@@ remove me 
                             g_array_append_val(ccc->actconf.rsrmgrs,
                                                record);
+                            */
+                            client_config_append_rsrmgr(ccc, &record);
                             LIXA_TRACE(("client_config_validate: resource "
                                         "manager '%s' found at pos %u in "
                                         "global list\n",
@@ -529,30 +532,39 @@ int client_config_validate(client_config_coll_t *ccc)
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case STRDUP_ERROR:
-                    ret_cod = LIXA_RC_STRDUP_ERROR;
-                    break;
-                case STTSRV_NOT_DEFINED:
-                case STTSRV_NOT_FOUND:
-                case RSRMGR_NOT_FOUND:
-                case PROFILE_NOT_FOUND:
-                    ret_cod = LIXA_RC_CONFIG_ERROR;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case STRDUP_ERROR:
+                ret_cod = LIXA_RC_STRDUP_ERROR;
+                break;
+            case STTSRV_NOT_DEFINED:
+            case STTSRV_NOT_FOUND:
+            case RSRMGR_NOT_FOUND:
+            case PROFILE_NOT_FOUND:
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("client_config_validate/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+void client_config_append_rsrmgr(client_config_coll_t *ccc,
+                                 const struct act_rsrmgr_config_s *record)
+{
+    LIXA_TRACE(("client_config_append_rsrmgr\n"));
+    g_array_append_val(ccc->actconf.rsrmgrs, *record);
+    return;
+}
+
 
 
 int client_config_load_switch(const client_config_coll_t *ccc)

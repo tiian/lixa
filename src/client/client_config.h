@@ -348,6 +348,17 @@ extern "C" {
     
 
     /**
+     * Append a resource manager to the list of actual resource managers
+     * @param[in,out] ccc : client config collection object
+     * @param[in] record : that describes the resource manager that must be
+     *                     appended
+     */
+    void client_config_append_rsrmgr(client_config_coll_t *ccc,
+                                     const struct act_rsrmgr_config_s *record);
+    
+
+    
+    /**
      * Load the configured switch file
      * @param ccc IN configuration object reference
      * @return a standardized return code
