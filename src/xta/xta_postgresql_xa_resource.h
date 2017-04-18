@@ -86,6 +86,34 @@ extern "C" {
     
     
 
+    /**
+     * Initialize the propeties of a PostgreSQL XA resource
+     * @param[in,out] this : PostgreSQL XA Resource object
+     * @param[in] connection : to PostgreSQL already opened by the application
+     *            program
+     * @param[in] name : unique identifier of the resource
+     * @param[in] open_info : unique description of the connection properties
+     *                        like network name/IP address, port, user/schema,
+     *                        etc. Only the first @ref MAXINFOSIZE characters
+     *                        will be kept.
+     * @return a new object or NULL in the event of error
+     */
+    int xta_postgresql_xa_resource_init(
+        xta_postgresql_xa_resource_t *this,
+        PGconn *connection, const char *name, const char *open_info);
+
+    
+
+    /**
+     * Clean the properties of a PostgreSQL XA Resource; this function
+     * must be called after @ref xta_postgresql_xa_resource_init during
+     * object deletion to avoid memory leaks
+     * @param[in,out] this : PostgreSQL XA Resource object
+     */
+    void xta_postgresql_xa_resource_clean(xta_postgresql_xa_resource_t *this);
+
+    
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

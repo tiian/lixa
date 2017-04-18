@@ -69,7 +69,8 @@ int main(int argc, char *argv[])
      * create an XA native resource object linked to the first Resouce
      * Manager configured in LIXA profile
      */
-    if (NULL == (native_xa_res = xta_native_xa_resource_new(0, NULL, NULL))) {
+    if (NULL == (native_xa_res = xta_native_xa_resource_new(
+                     0, NULL, NULL, NULL, NULL))) {
         printf("%s| xta_native_xa_resource_new: returned NULL\n", pgm);
         return 1;
     }

@@ -85,6 +85,34 @@ extern "C" {
     
     
 
+    /**
+     * Initialize the propeties of a MySQL XA resource
+     * @param[in,out] this : MySQL XA Resource object
+     * @param[in] connection : to MySQL already opened by the application
+     *            program
+     * @param[in] name : unique identifier of the resource
+     * @param[in] open_info : unique description of the connection properties
+     *                        like network name/IP address, port, user/schema,
+     *                        etc. Only the first @ref MAXINFOSIZE characters
+     *                        will be kept.
+     * @return a reason code
+     */
+    int xta_mysql_xa_resource_init(xta_mysql_xa_resource_t *this,
+                                   MYSQL *connection,
+                                   const char *name, const char *open_info);
+
+
+
+    /**
+     * Clean the properties of a MySQL XA Resource; this function
+     * must be called after @ref xta_mysql_xa_resource_init during
+     * object deletion to avoid memory leaks
+     * @param[in,out] this : MySQL XA Resource object
+     */
+    void xta_mysql_xa_resource_clean(xta_mysql_xa_resource_t *this);
+
+    
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

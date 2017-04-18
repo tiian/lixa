@@ -92,12 +92,12 @@ extern "C" {
      * can be used inside a transaction. Native XA Resources can be statically
      * configured while acquired XA Resources must be dynamically registered.
      * @param[in,out] this : transaction manager object
-     * @param[in] resource : an acquired XA resource
+     * @param[in] xa_res : XA resource that must be registered
      * @return a reason code
      */
     int xta_transaction_manager_register(
         xta_transaction_manager_t *this,
-        const xta_xa_resource_t *resource);
+        const xta_xa_resource_t *xa_res);
 
     
 

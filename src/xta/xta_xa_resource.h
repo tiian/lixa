@@ -25,10 +25,12 @@
 
 
 
-/* XTA includes */
-#include "xta_xid.h"
+/* LIXA includes */
+#include "client_config.h"
 /* XA include */
 #include "xa.h"
+/* XTA includes */
+#include "xta_xid.h"
 
 
 
@@ -55,9 +57,16 @@
  * https://gcc.gnu.org/onlinedocs/gcc/Unnamed-Fields.html )
  */
 typedef struct {
-    union {
-        struct xa_switch_t  xa_switch;
-    };
+    /**
+     * Partial description of the XA Resource Manager using legacy LIXA data
+     * structures
+     */
+    struct rsrmgr_config_s     rsrmgr_config;
+    /**
+     * Complete description of the XA Resource Manager using legacy LIXA data
+     * structures
+     */
+    struct act_rsrmgr_config_s act_rsrmgr_config;
     /**
      * The XA resource needs an explicit xa_open call to be opened and
      * xa_close call to be closed. This is the typical behavior or native

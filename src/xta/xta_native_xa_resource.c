@@ -41,7 +41,8 @@
 
 
 xta_native_xa_resource_t *xta_native_xa_resource_new(
-    int rmid, const char *open_info, const char *close_info)
+    int rmid, const char *name, const char *switch_file,
+    const char *open_info, const char *close_info)
 {
     enum Exception { G_TRY_MALLOC_ERROR
                      , XTA_NATIVE_XA_RESOURCE_INIT_ERROR

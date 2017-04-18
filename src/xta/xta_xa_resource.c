@@ -51,7 +51,16 @@ int xta_xa_resource_init(xta_xa_resource_t *this,
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT);
-        /* set object properties */
+        /* set resource description (first part) */
+        this->rsrmgr_config.name = NULL;
+        this->rsrmgr_config.switch_file = NULL;
+        this->rsrmgr_config.xa_open_info[0] = '\0';
+        this->rsrmgr_config.xa_close_info[0] = '\0';
+        /* set resource description (second part) */
+        this->act_rsrmgr_config.generic = &this->rsrmgr_config;
+        this->act_rsrmgr_config.module = NULL;
+        this->act_rsrmgr_config.xa_switch = NULL;
+        /* set other object properties */
         this->must_be_opened = must_be_opened;
         
         THROW(NONE);

@@ -1,7 +1,9 @@
+Go on with initialization of MySQL and PostgreSQL resources with parameters necessary for
+xta_transaction_manager_register.
+
 Restart from xta_transaction_manager_register: populate record content from
 xta_xa_resource (a lot of work!)
 
-UML: add "register" method to TransactionManager class 
 UML: add necessary properties to XAResource and derivatives to support 
      TransactionManager.register()
 

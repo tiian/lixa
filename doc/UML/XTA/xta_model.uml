@@ -62,6 +62,9 @@ Oracle is just an example: I don't know if a standard connection can be migrated
       <ownedOperation xmi:type="uml:Operation" xmi:id="_kRWRoBPzEeeDbpR_R0y-uQ" name="branch">
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_m_NmEBPzEeeDbpR_R0y-uQ" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
       </ownedOperation>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_SC_40CRwEeewZZuGSQhggg" name="register">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_YjmfECRwEeewZZuGSQhggg" name="xa_res" type="_7KY_kBPrEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
     </packagedElement>
     <packagedElement xmi:type="uml:Class" xmi:id="_unDa0BPrEeeDbpR_R0y-uQ" name="Xid"/>
     <packagedElement xmi:type="uml:Class" xmi:id="_7KY_kBPrEeeDbpR_R0y-uQ" name="XAResource" isAbstract="true">

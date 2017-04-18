@@ -167,7 +167,7 @@ xta_transaction_manager_get_transaction(xta_transaction_manager_t *this)
 
 
 int xta_transaction_manager_register(xta_transaction_manager_t *this,
-                                     const xta_xa_resource_t *resource)
+                                     const xta_xa_resource_t *xa_res)
 {
     enum Exception { NULL_OBJECT1
                      , NULL_OBJECT2
@@ -182,11 +182,11 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
         if (NULL == this)
             THROW(NULL_OBJECT1);
         /* check the XA Resource object is not NULL */
-        if (NULL == resource)
+        if (NULL == xa_res)
             THROW(NULL_OBJECT2);
 
         /* @@@ popolate record with values */
-
+        
 
         /* append the resource manager to the list of actual configured
            resource managers */

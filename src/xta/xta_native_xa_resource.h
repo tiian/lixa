@@ -57,8 +57,23 @@ extern "C" {
 
     /**
      * Create a new object to represent a native XA resource
-     * @param[in] rmid Resource Manager unique identifier within the thread of
-     *                 control
+     * @param[in] rmid : Resource Manager unique identifier within the thread
+     *                   of control. This identifier is even used to
+     *                   control the behavior of the constructor: <BR>
+     *                   if (rmid >= 0) : all the values that describe the
+     *                   Resource Manager must be extracted from configuration
+     *                   file (lixac.flom) and the following options will be
+     *                   ignored (use NULL value for convenience) <BR>
+     *                   if (rmid < 0) : create a new Resource Manager
+     *                   description that's not specified in configuration file
+     *                   (lixac.flom) and the following options can't be
+     *                   NULL. This behavior is useful to generate
+     *                   Native XA Resource dynamically at run time.
+     * @param[in] name : the name assigned to the Resource Manager just for
+     *                   debugging purposes
+     * @param[in] switch_file : absolute path of the XA switch file that
+     *                          points to xa_ functions for the resource
+     *                          manager
      * @param[in] open_info : a null-terminated character string that may
      *                        contain instance-specific information for the
      *                        resource manager when xa_open must be called
@@ -72,7 +87,8 @@ extern "C" {
      * @return a new object or NULL in the event of error
      */
     xta_native_xa_resource_t *xta_native_xa_resource_new(
-        int rmid, const char *open_info, const char *close_info);
+        int rmid, const char *name, const char *switch_file,
+        const char *open_info, const char *close_info);
 
 
     

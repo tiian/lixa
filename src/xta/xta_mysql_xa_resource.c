@@ -45,7 +45,7 @@ xta_mysql_xa_resource_t *xta_mysql_xa_resource_new(MYSQL *connection,
                                                    const char *open_info)
 {
     enum Exception { G_TRY_MALLOC_ERROR
-                     , XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR
+                     , XTA_MYSQL_XA_RESOURCE_INIT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     xta_mysql_xa_resource_t *this = NULL;
@@ -56,11 +56,10 @@ xta_mysql_xa_resource_t *xta_mysql_xa_resource_new(MYSQL *connection,
         if (NULL == (this = (xta_mysql_xa_resource_t *)g_try_malloc0(
                          sizeof(xta_mysql_xa_resource_t))))
             THROW(G_TRY_MALLOC_ERROR);
-        /* initialize "base class" (xta_acquired_xa_resource_t) properties */
-        if (LIXA_RC_OK != (ret_cod = xta_acquired_xa_resource_init(
-                               (xta_acquired_xa_resource_t *)this,
-                               name, open_info)))
-            THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
+        /* initialize "class" properties */
+        if (LIXA_RC_OK != (ret_cod = xta_mysql_xa_resource_init(
+                               this, connection, name, open_info)))
+            THROW(XTA_MYSQL_XA_RESOURCE_INIT_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -68,7 +67,7 @@ xta_mysql_xa_resource_t *xta_mysql_xa_resource_new(MYSQL *connection,
             case G_TRY_MALLOC_ERROR:
                 ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
                 break;
-            case XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR:
+            case XTA_MYSQL_XA_RESOURCE_INIT_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -91,9 +90,8 @@ void xta_mysql_xa_resource_delete(xta_mysql_xa_resource_t *this)
     
     LIXA_TRACE(("xta_mysql_xa_resource_delete\n"));
     TRY {
-        /* initialize "base class" (xta_acquired_xa_resource_t) properties */
-        xta_acquired_xa_resource_clean(
-            (xta_acquired_xa_resource_t *)this);
+        /* clean the object before releasing */
+        xta_mysql_xa_resource_clean(this);
         /* release memory allocated for the object */
         g_free(this);
         
@@ -113,4 +111,65 @@ void xta_mysql_xa_resource_delete(xta_mysql_xa_resource_t *this)
 }
 
 
+
+int xta_mysql_xa_resource_init(xta_mysql_xa_resource_t *this,
+                               MYSQL *connection,
+                               const char *name, const char *open_info)
+{
+    enum Exception { XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_mysql_xa_resource_init\n"));
+    TRY {
+        /* initialize "base class" (xta_acquired_xa_resource_t) properties */
+        if (LIXA_RC_OK != (ret_cod = xta_acquired_xa_resource_init(
+                               (xta_acquired_xa_resource_t *)this,
+                               name, open_info)))
+            THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_mysql_xa_resource_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+void xta_mysql_xa_resource_clean(xta_mysql_xa_resource_t *this)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_mysql_xa_resource_clean\n"));
+    TRY {
+        /* clean "base class" (xta_acquired_xa_resource_t) properties */
+        xta_acquired_xa_resource_clean(
+            (xta_acquired_xa_resource_t *)this);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_mysql_xa_resource_clean/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return;
+}
 
