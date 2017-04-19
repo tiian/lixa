@@ -83,6 +83,57 @@ int xta_xa_resource_init(xta_xa_resource_t *this,
 
 
 
+void xta_xa_resource_clean(xta_xa_resource_t *this)
+{
+    enum Exception { NULL_OBJECT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_xa_resource_clean\n"));
+    TRY {
+        /* check the object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* clean resource name */
+        if (NULL != this->rsrmgr_config.name) {
+            g_free(this->rsrmgr_config.name);
+            this->rsrmgr_config.name = NULL;
+        }
+        /* clean switch_file */
+        if (NULL != this->rsrmgr_config.switch_file) {
+            g_free(this->rsrmgr_config.switch_file);
+            this->rsrmgr_config.switch_file = NULL;
+        }
+        /* clean xa_open_info and xa_close_info */
+        this->rsrmgr_config.xa_open_info[0] = '\0';
+        this->rsrmgr_config.xa_close_info[0] = '\0';
+        /* clean pointer from complete to partial structure */
+        this->act_rsrmgr_config.generic = NULL;
+        /* unload module @@@ */
+        /* ... put some code here ... */
+        this->act_rsrmgr_config.module = NULL;
+        this->act_rsrmgr_config.xa_switch = NULL;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_xa_resource_clean/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return;
+}
+
+
+
 int xta_xa_resource_start(xta_xa_resource_t *this,
                           const xta_xid_t *xid,
                           long flag)

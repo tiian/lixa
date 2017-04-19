@@ -97,6 +97,16 @@ extern "C" {
 
     
     /**
+     * Clean the properties of a XA Resource; this function must be
+     * called after @ref xta_xa_resource_init during object disposition
+     * to avoid memory leaks
+     * @param[in,out] this : XA Resource object
+     */    
+    void xta_xa_resource_clean(xta_xa_resource_t *this);
+
+    
+    
+    /**
      * Starts work on behalf of a transaction branch specified in xid. If
      * @ref TMJOIN is specified, the start applies to joining a transaction
      * previously seen by the resource manager. If @ref TMRESUME is specified,

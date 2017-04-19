@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
     int rc;
     xta_transaction_manager_t *tm;
     xta_native_xa_resource_t *native_xa_res;
+    xta_native_xa_resource_t *dynamic_native_xa_res;
 #ifdef HAVE_MYSQL
     MYSQL *mysql_conn = NULL;
     xta_mysql_xa_resource_t *mysql_xa_res;
@@ -70,10 +71,20 @@ int main(int argc, char *argv[])
      * Manager configured in LIXA profile
      */
     if (NULL == (native_xa_res = xta_native_xa_resource_new(
-                     0, NULL, NULL, NULL, NULL))) {
+    0, NULL, NULL, NULL, NULL))) {
         printf("%s| xta_native_xa_resource_new: returned NULL\n", pgm);
         return 1;
     }
+    /*
+     * dynamically create an XA native resource object
+     */
+    if (NULL == (dynamic_native_xa_res = xta_native_xa_resource_new(
+    -1, "OracleIC_stareg", "/opt/lixa/lib/switch_oracle_stareg.so",
+        "ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+threads=true+DbgFl=7+SqlNet=lixa_ora_db+Loose_Coupling=true", ""))) {
+        printf("%s| xta_native_xa_resource_new: returned NULL for "
+        "dynamically creted resource\n", pgm);
+        return 1;
+}
 #ifdef HAVE_MYSQL
     /*
      * create a MySQL XA resource object
@@ -110,6 +121,10 @@ int main(int argc, char *argv[])
      */
     xta_mysql_xa_resource_delete(mysql_xa_res);
 #endif    
+    /*
+     * delete dynamically created native XA Resource object
+     */
+    xta_native_xa_resource_delete(dynamic_native_xa_res);
     /*
      * delete native XA Resource object
      */
