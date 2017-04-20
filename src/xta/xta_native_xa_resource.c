@@ -27,6 +27,7 @@
 /* LIXA includes */
 #include "lixa_errors.h"
 #include "lixa_trace.h"
+#include "client_conn.h"
 /* XTA includes */
 #include "xta_native_xa_resource.h"
 
@@ -120,10 +121,11 @@ int xta_native_xa_resource_init(
 {
     enum Exception { NULL_OBJECT
                      , XA_RESOURCE_INIT_ERROR
-                     , INVALID_OPTION1
-                     , INVALID_OPTION2
+                     , INVALID_OPTION
                      , G_STRDUP_ERROR1
                      , G_STRDUP_ERROR2
+                     , CLIENT_CONFIG_LOAD_SWITCH_FILE_ERROR
+                     , OUT_OF_RANGE
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -137,11 +139,10 @@ int xta_native_xa_resource_init(
             THROW(XA_RESOURCE_INIT_ERROR);
         if (rmid < 0) {
             /* rmid < 0: this is a dynamic definition */
+            this->dynamic = TRUE;
             if (NULL == name || NULL == switch_file || NULL == open_info ||
                 NULL == close_info)
-                THROW(INVALID_OPTION1);
-            if (0 == strlen(open_info) || 0 == strlen(close_info))
-                THROW(INVALID_OPTION2);
+                THROW(INVALID_OPTION);
             if (strlen(open_info) >= MAXINFOSIZE) {
                 LIXA_TRACE(("xta_native_xa_resource_init: option open_info "
                             "(" SIZE_T_FORMAT ")"
@@ -172,9 +173,25 @@ int xta_native_xa_resource_init(
                     MAXINFOSIZE);
             this->xa_resource.rsrmgr_config.xa_close_info[MAXINFOSIZE-1] =
                 '\0';
-            /* restart from here @@@ */
+            /* load the switch file for the resource manager */
+            if (LIXA_RC_OK != (ret_cod = client_config_load_switch_file(
+                                   &this->xa_resource.act_rsrmgr_config)))
+                THROW(CLIENT_CONFIG_LOAD_SWITCH_FILE_ERROR);
         } else {
-            /* rmid >= 0: get the properties from global configuration */
+            struct act_rsrmgr_config_s *act_rsrmgr;
+            /* rmid >= 0: get the properties from global configuration that
+             * has been loaded by xta_transaction_manager_new() */
+            this->dynamic = FALSE;
+            if (rmid >= global_ccc.actconf.rsrmgrs->len) {
+                LIXA_TRACE(("xta_native_xa_resource_init: rmid=%d is out of "
+                            "range [0,%u]\n",
+                            global_ccc.actconf.rsrmgrs->len-1));
+                THROW(OUT_OF_RANGE);
+            }
+            act_rsrmgr = &g_array_index(global_ccc.actconf.rsrmgrs,
+                                        struct act_rsrmgr_config_s, rmid);
+            /* copy it locally to the resource object */
+            this->xa_resource.act_rsrmgr_config = *act_rsrmgr;
         }
         /* nothing else to initialize here... @@@ */
         
@@ -186,13 +203,17 @@ int xta_native_xa_resource_init(
                 break;
             case XA_RESOURCE_INIT_ERROR:
                 break;
-            case INVALID_OPTION1:
-            case INVALID_OPTION2:
+            case INVALID_OPTION:
                 ret_cod = LIXA_RC_INVALID_OPTION;
                 break;
             case G_STRDUP_ERROR1:
             case G_STRDUP_ERROR2:
                 ret_cod = LIXA_RC_G_STRDUP_ERROR;
+                break;
+            case CLIENT_CONFIG_LOAD_SWITCH_FILE_ERROR:
+                break;
+            case OUT_OF_RANGE:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -210,18 +231,44 @@ int xta_native_xa_resource_init(
 
 void xta_native_xa_resource_clean(xta_native_xa_resource_t *this)
 {
-    enum Exception { NONE } excp;
+    enum Exception { CLIENT_CONFIG_UNLOAD_SWITCH_FILE_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_native_xa_resource_clean\n"));
     TRY {
+        /* clean properties only for dynamically created resources */
+        if (this->dynamic) {
+            /* clean resource name */
+            if (NULL != this->xa_resource.rsrmgr_config.name) {
+                g_free(this->xa_resource.rsrmgr_config.name);
+                this->xa_resource.rsrmgr_config.name = NULL;
+            }
+            /* clean switch_file */
+            if (NULL != this->xa_resource.rsrmgr_config.switch_file) {
+                g_free(this->xa_resource.rsrmgr_config.switch_file);
+                this->xa_resource.rsrmgr_config.switch_file = NULL;
+            }
+            /* clean xa_open_info and xa_close_info */
+            this->xa_resource.rsrmgr_config.xa_open_info[0] = '\0';
+            this->xa_resource.rsrmgr_config.xa_close_info[0] = '\0';
+            /* clean pointer from complete to partial structure */
+            this->xa_resource.act_rsrmgr_config.generic = NULL;
+            /* unload module */
+            if (NULL != this->xa_resource.act_rsrmgr_config.module) {
+                if (LIXA_RC_OK != (ret_cod = client_config_unload_switch_file(
+                                       &this->xa_resource.act_rsrmgr_config)))
+                    THROW(CLIENT_CONFIG_UNLOAD_SWITCH_FILE_ERROR);
+            }
+        } /* if (this->dynamic) */
         /* clean "base class" (xta_xa_resource_t) properties */
-        xta_xa_resource_clean(
-            (xta_xa_resource_t *)this);
+        xta_xa_resource_clean((xta_xa_resource_t *)this);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_CONFIG_UNLOAD_SWITCH_FILE_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

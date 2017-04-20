@@ -94,25 +94,6 @@ void xta_xa_resource_clean(xta_xa_resource_t *this)
         /* check the object is not null */
         if (NULL == this)
             THROW(NULL_OBJECT);
-        /* clean resource name */
-        if (NULL != this->rsrmgr_config.name) {
-            g_free(this->rsrmgr_config.name);
-            this->rsrmgr_config.name = NULL;
-        }
-        /* clean switch_file */
-        if (NULL != this->rsrmgr_config.switch_file) {
-            g_free(this->rsrmgr_config.switch_file);
-            this->rsrmgr_config.switch_file = NULL;
-        }
-        /* clean xa_open_info and xa_close_info */
-        this->rsrmgr_config.xa_open_info[0] = '\0';
-        this->rsrmgr_config.xa_close_info[0] = '\0';
-        /* clean pointer from complete to partial structure */
-        this->act_rsrmgr_config.generic = NULL;
-        /* unload module @@@ */
-        /* ... put some code here ... */
-        this->act_rsrmgr_config.module = NULL;
-        this->act_rsrmgr_config.xa_switch = NULL;
         
         THROW(NONE);
     } CATCH {

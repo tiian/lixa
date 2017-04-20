@@ -359,11 +359,20 @@ extern "C" {
 
     
     /**
-     * Load the configured switch file
-     * @param ccc IN configuration object reference
+     * Load all the configured switch files
+     * @param[in,out] ccc : configuration object reference
      * @return a standardized return code
      */
-    int client_config_load_switch(const client_config_coll_t *ccc);
+    int client_config_load_all_switch_files(client_config_coll_t *ccc);
+
+
+
+    /**
+     * Load the switch file related to a Resource Manager
+     * @param[in,out] act_rsrmgr : properties of a resource manager
+     * @return a reason code
+     */
+    int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr);
 
 
 
@@ -377,14 +386,24 @@ extern "C" {
     
 
     /**
-     * Unload the configured switch file
-     * @param ccc IN configuration object reference
+     * Unload the configured switch file for all the resource managers
+     * @param[in,out] ccc : configuration object reference
      * @return a standardized return code
      */
-    int client_config_unload_switch(const client_config_coll_t *ccc);
+    int client_config_unload_all_switch_files(client_config_coll_t *ccc);
 
 
     
+    /**
+     * Unload the switch file related to a Resource Manager
+     * @param[in,out] act_rsrmgr : properties of a resource manager
+     * @return a reason code
+     */
+    int client_config_unload_switch_file(
+        struct act_rsrmgr_config_s *act_rsrmgr);
+
+
+
     /**
      * Display configuration read from XML config file
      * @param ccc IN the object will contain the client configuration

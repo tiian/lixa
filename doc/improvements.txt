@@ -1,0 +1,23 @@
+This file contains links to technologies that could improve LIXA.
+It's just a place to avoid human memory leak.
+
+
+
+*** Serialization: ***
+
+protobuf / protobuf-c
+https://github.com/google/protobuf
+https://github.com/protobuf-c/protobuf-c
+
+Cap'n Proto
+https://capnproto.org/index.html
+
+
+
+*** Networking: ***
+
+ZeroMQ
+http://zeromq.org/
+
+The C10K problem
+http://www.kegel.com/c10k.html

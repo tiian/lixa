@@ -139,7 +139,8 @@ int client_config(client_config_coll_t *ccc)
         /* is the process already configured? */
         if (NULL == ccc->config_threads) {
             if (NULL == (ccc->config_threads = g_hash_table_new(
-                             g_direct_hash, g_direct_equal))) THROW(G_HASH_TABLE_NEW_ERROR);
+                             g_direct_hash, g_direct_equal)))
+                THROW(G_HASH_TABLE_NEW_ERROR);
         } else
             configured = TRUE;
 
@@ -263,68 +264,66 @@ int client_config(client_config_coll_t *ccc)
         ccc->serv_addr.sin_port = htons(ccc->actconf.sttsrv->port);
 
         if (LIXA_RC_OK !=
-            (ret_cod = client_config_load_switch(&global_ccc))) THROW(
-                CLIENT_CONFIG_LOAD_SWITCH_ERROR);
+            (ret_cod = client_config_load_all_switch_files(&global_ccc)))
+            THROW(CLIENT_CONFIG_LOAD_SWITCH_ERROR);
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case G_HASH_TABLE_NEW_ERROR:
-                    ret_cod = LIXA_RC_G_RETURNED_NULL;
-                    break;
-                case STRDUP_ERROR:
-                    ret_cod = LIXA_RC_STRDUP_ERROR;
-                    break;
-                case OPEN_CONFIG_ERROR:
-                    ret_cod = LIXA_RC_OPEN_ERROR;
-                    break;
-                case XML_READ_FILE_ERROR:
-                    ret_cod = LIXA_RC_XML_READ_FILE_ERROR;
-                    break;
-                case XML_DOC_GET_ROOT_ELEMENT_ERROR:
-                    ret_cod = LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR;
-                    break;
-                case PARSE_CONFIG_ERROR:
-                case CLIENT_CONFIG_DISPLAY_ERROR:
-                case CLIENT_CONFIG_VALIDATE_ERROR:
-                    break;
-                case LIXA_CONFIG_DIGEST_ERROR:
-                    break;
-                case CLOSE_ERROR:
-                    ret_cod = LIXA_RC_CLOSE_ERROR;
-                    break;
-                case GETADDRINFO_ERROR:
-                    ret_cod = LIXA_RC_GETADDRINFO_ERROR;
-                    break;
-                case CLIENT_CONFIG_LOAD_SWITCH_ERROR:
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-            if (NONE != excp)
-                LIXA_TRACE(("client_config: values before recovery "
-                            "actions excp=%d/ret_cod=%d/errno=%d\n",
-                            excp, ret_cod, errno));
-            if (LIXA_NULL_FD != fd)
-                close(fd);
-            if (excp < NONE && ccc->lixac_conf != NULL) {
-                /* free parsed document */
-                LIXA_TRACE(("client_config/xmlFreeDoc\n"));
-                xmlFreeDoc(ccc->lixac_conf);
-                ccc->lixac_conf = NULL;
-            }
-            /* free memory allocated by getadrinfo function */
-            if (NULL != res)
-                freeaddrinfo(res);
-            /* unlock mutex (locked for configuration activity) */
-            LIXA_TRACE(("client_config: releasing exclusive mutex\n"));
-            g_mutex_unlock(&ccc->mutex);
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case G_HASH_TABLE_NEW_ERROR:
+                ret_cod = LIXA_RC_G_RETURNED_NULL;
+                break;
+            case STRDUP_ERROR:
+                ret_cod = LIXA_RC_STRDUP_ERROR;
+                break;
+            case OPEN_CONFIG_ERROR:
+                ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case XML_READ_FILE_ERROR:
+                ret_cod = LIXA_RC_XML_READ_FILE_ERROR;
+                break;
+            case XML_DOC_GET_ROOT_ELEMENT_ERROR:
+                ret_cod = LIXA_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR;
+                break;
+            case PARSE_CONFIG_ERROR:
+            case CLIENT_CONFIG_DISPLAY_ERROR:
+            case CLIENT_CONFIG_VALIDATE_ERROR:
+                break;
+            case LIXA_CONFIG_DIGEST_ERROR:
+                break;
+            case CLOSE_ERROR:
+                ret_cod = LIXA_RC_CLOSE_ERROR;
+                break;
+            case GETADDRINFO_ERROR:
+                ret_cod = LIXA_RC_GETADDRINFO_ERROR;
+                break;
+            case CLIENT_CONFIG_LOAD_SWITCH_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        if (NONE != excp)
+            LIXA_TRACE(("client_config: values before recovery "
+                        "actions excp=%d/ret_cod=%d/errno=%d\n",
+                        excp, ret_cod, errno));
+        if (LIXA_NULL_FD != fd)
+            close(fd);
+        if (excp < NONE && ccc->lixac_conf != NULL) {
+            /* free parsed document */
+            LIXA_TRACE(("client_config/xmlFreeDoc\n"));
+            xmlFreeDoc(ccc->lixac_conf);
+            ccc->lixac_conf = NULL;
+        }
+        /* free memory allocated by getadrinfo function */
+        if (NULL != res)
+            freeaddrinfo(res);
+        /* unlock mutex (locked for configuration activity) */
+        LIXA_TRACE(("client_config: releasing exclusive mutex\n"));
+        g_mutex_unlock(&ccc->mutex);
+    } /* TRY-CATCH */
     LIXA_TRACE(("client_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -567,18 +566,14 @@ void client_config_append_rsrmgr(client_config_coll_t *ccc,
 
 
 
-int client_config_load_switch(const client_config_coll_t *ccc)
+int client_config_load_all_switch_files(client_config_coll_t *ccc)
 {
-    enum Exception
-    {
-        G_MODULE_OPEN_ERROR, G_MODULE_SYMBOL_ERROR, NONE
-    } excp;
+    enum Exception { LOAD_SWITCH_FILE_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    LIXA_TRACE(("client_config_load_switch\n"));
+    LIXA_TRACE(("client_config_load_all_switch_files\n"));
     TRY {
-        GModule *module;
-        lixa_get_xa_switch_f xa_switch;
         guint i;
 
         /* scan all the resource manager of the actual config */
@@ -586,75 +581,112 @@ int client_config_load_switch(const client_config_coll_t *ccc)
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 ccc->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
 
-            LIXA_TRACE(("client_config_load_switch: resource manager # %u, "
+            LIXA_TRACE(("client_config_load_all_switch_files: "
+                        "resource manager # %u, "
                         "name='%s', switch_file='%s'\n", i,
                         act_rsrmgr->generic->name,
                         act_rsrmgr->generic->switch_file));
-
-            if (NULL == (module = g_module_open(
-                             (gchar *) act_rsrmgr->generic->switch_file,
-                             G_MODULE_BIND_LOCAL | G_MODULE_BIND_LAZY))) {
-                LIXA_TRACE(("client_config_load_switch: switch_file='%s', "
-                            "g_module_error='%s'\n",
-                            act_rsrmgr->generic->switch_file,
-                            g_module_error()));
-                THROW(G_MODULE_OPEN_ERROR);
-            }
-            if (!g_module_symbol(module, "lixa_get_xa_switch",
-                                 (gpointer *) &xa_switch)) {
-                LIXA_TRACE(("client_config_load_switch: symbol='%s', "
-                            "g_module_error='%s'\n", "lixa_get_xa_switch",
-                            g_module_error()));
-                THROW(G_MODULE_SYMBOL_ERROR);
-            } else {
-                LIXA_TRACE(("client_config_load_switch: module address %p, "
-                            "function lixa_get_xa_switch found at "
-                            "address %p\n",
-                            module, xa_switch));
-                LIXA_TRACE(("client_config_load_switch: "
-                            "lixa_getxa_switch()->name = '%s', "
-                            "lixa_get_xa_switch()->flags = %ld\n",
-                            xa_switch()->name,
-                            xa_switch()->flags));
-                LIXA_TRACE(("client_config_load_switch: resource manager "
-                            "dynamically registers: %s\n",
-                            xa_switch()->flags & TMREGISTER ?
-                            "true" : "false"));
-                LIXA_TRACE(("client_config_load_switch: resource manager "
-                            "does not support association migration: %s\n",
-                            xa_switch()->flags & TMNOMIGRATE ?
-                            "true" : "false"));
-                LIXA_TRACE(("client_config_load_switch: resource manager "
-                            "supports asynchronous operations: %s\n",
-                            xa_switch()->flags & TMUSEASYNC ?
-                            "true" : "false"));
-                act_rsrmgr->module = module;
-                act_rsrmgr->xa_switch = xa_switch();
-            }
+            if (LIXA_RC_OK != (ret_cod = client_config_load_switch_file(
+                                   act_rsrmgr)))
+                THROW(LOAD_SWITCH_FILE_ERROR);
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case G_MODULE_OPEN_ERROR:
-                    ret_cod = LIXA_RC_G_MODULE_OPEN_ERROR;
-                    break;
-                case G_MODULE_SYMBOL_ERROR:
-                    ret_cod = LIXA_RC_G_MODULE_SYMBOL_ERROR;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
-    LIXA_TRACE(("client_config_load_switch/excp=%d/"
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_config_load_all_switch_files/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr)
+{
+    enum Exception { G_MODULE_OPEN_ERROR
+                     , G_MODULE_SYMBOL_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("client_config_load_switch_file\n"));
+    TRY {
+        lixa_get_xa_switch_f xa_switch;
+        GModule *module;
+        
+        if (NULL == (module = g_module_open(
+                         (gchar *) act_rsrmgr->generic->switch_file,
+                         G_MODULE_BIND_LOCAL | G_MODULE_BIND_LAZY))) {
+            LIXA_TRACE(("client_config_load_switch_file: "
+                        "switch_file='%s', g_module_error='%s'\n",
+                        act_rsrmgr->generic->switch_file,
+                        g_module_error()));
+            THROW(G_MODULE_OPEN_ERROR);
+        }
+        if (!g_module_symbol(module, "lixa_get_xa_switch",
+                             (gpointer *) &xa_switch)) {
+            LIXA_TRACE(("client_config_load_switch_file: "
+                        "symbol='%s', "
+                        "g_module_error='%s'\n", "lixa_get_xa_switch",
+                        g_module_error()));
+            THROW(G_MODULE_SYMBOL_ERROR);
+        } else {
+            LIXA_TRACE(("client_config_load_switch_file: "
+                        "module address %p, "
+                        "function lixa_get_xa_switch found at "
+                        "address %p\n",
+                        module, xa_switch));
+            LIXA_TRACE(("client_config_load_switch_file: "
+                        "lixa_getxa_switch()->name = '%s', "
+                        "lixa_get_xa_switch()->flags = %ld\n",
+                        xa_switch()->name,
+                        xa_switch()->flags));
+            LIXA_TRACE(("client_config_load_switch_file: "
+                        "resource manager "
+                        "dynamically registers: %s\n",
+                        xa_switch()->flags & TMREGISTER ?
+                        "true" : "false"));
+            LIXA_TRACE(("client_config_load_switch_file: "
+                        "resource manager "
+                        "does not support association migration: %s\n",
+                        xa_switch()->flags & TMNOMIGRATE ?
+                        "true" : "false"));
+            LIXA_TRACE(("client_config_load_switch_file: "
+                        "resource manager "
+                        "supports asynchronous operations: %s\n",
+                        xa_switch()->flags & TMUSEASYNC ?
+                        "true" : "false"));
+            act_rsrmgr->module = module;
+            act_rsrmgr->xa_switch = xa_switch();
+        }
+            
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_MODULE_OPEN_ERROR:
+                ret_cod = LIXA_RC_G_MODULE_OPEN_ERROR;
+                break;
+            case G_MODULE_SYMBOL_ERROR:
+                ret_cod = LIXA_RC_G_MODULE_SYMBOL_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_config_load_switch_file/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
 
 
 int client_unconfig(client_config_coll_t *ccc)
@@ -692,8 +724,8 @@ int client_unconfig(client_config_coll_t *ccc)
         }
 
         if (LIXA_RC_OK !=
-            (ret_cod = client_config_unload_switch(&global_ccc))) THROW(
-                CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
+            (ret_cod = client_config_unload_all_switch_files(&global_ccc)))
+            THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
 
         if (NULL != ccc->job) {
             free(ccc->job);
@@ -785,56 +817,87 @@ int client_unconfig(client_config_coll_t *ccc)
 }
 
 
-int client_config_unload_switch(const client_config_coll_t *ccc)
+int client_config_unload_all_switch_files(client_config_coll_t *ccc)
 {
-    enum Exception
-    {
-        G_MODULE_CLOSE_ERROR, NONE
-    } excp;
+    enum Exception { UNLOAD_SWITCH_FILE_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    LIXA_TRACE(("client_config_unload_switch\n"));
+    LIXA_TRACE(("client_config_unload_all_switch_files\n"));
     TRY {
         guint i;
 
         for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 ccc->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            LIXA_TRACE(("client_config_unload_switch: resource manager # %u, "
+            LIXA_TRACE(("client_config_unload_all_switch_files: "
+                        "resource manager # %u, "
                         "defined in config as '%s', module address %p, "
                         "xa_switch->name='%s', xa_switch->flags=%ld\n", i,
                         act_rsrmgr->generic->name,
                         act_rsrmgr->module,
-                        act_rsrmgr->xa_switch ? act_rsrmgr->xa_switch->name : "",
-                        act_rsrmgr->xa_switch ? act_rsrmgr->xa_switch->flags : 0));
-            if (!g_module_close(act_rsrmgr->module)) {
-                LIXA_TRACE(("client_config_unload_switch: "
-                            "g_module_error='%s'\n",
-                            g_module_error()));
-                THROW(G_MODULE_CLOSE_ERROR);
-            }
-            act_rsrmgr->module = NULL;
+                        act_rsrmgr->xa_switch ?
+                        act_rsrmgr->xa_switch->name : "",
+                        act_rsrmgr->xa_switch ?
+                        act_rsrmgr->xa_switch->flags : 0));
+            if (LIXA_RC_OK != (ret_cod = client_config_unload_switch_file(
+                                   act_rsrmgr)))
+                THROW(UNLOAD_SWITCH_FILE_ERROR);
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case G_MODULE_CLOSE_ERROR:
-                    ret_cod = LIXA_RC_G_MODULE_CLOSE_ERROR;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
-    LIXA_TRACE(("client_config_unload_switch/excp=%d/"
+    } CATCH {
+        switch (excp) {
+            case UNLOAD_SWITCH_FILE_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_config_unload_all_switch_files/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int client_config_unload_switch_file(struct act_rsrmgr_config_s *act_rsrmgr)
+{
+    enum Exception { G_MODULE_CLOSE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("client_config_unload_switch_file\n"));
+    TRY {
+        if (!g_module_close(act_rsrmgr->module)) {
+            LIXA_TRACE(("client_config_unload_switch_file: "
+                        "g_module_error='%s'\n", g_module_error()));
+            THROW(G_MODULE_CLOSE_ERROR);
+        }
+        act_rsrmgr->module = NULL;
+        act_rsrmgr->xa_switch = NULL;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_MODULE_CLOSE_ERROR:
+                ret_cod = LIXA_RC_G_MODULE_CLOSE_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_config_unload_switch_file/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
 
 
 int client_config_display(client_config_coll_t *ccc)
