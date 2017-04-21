@@ -1,14 +1,13 @@
-Restart from xta_native_xa_resource_init, search for @@@
-
-Go on with initialization of MySQL and PostgreSQL resources with parameters necessary for
-xta_transaction_manager_register.
-
 Put in TransactionManager a local copy of clientconfigcollection; wrap legacy
 LIXA code to make a reentrant version of the functions that will not access
 global_ccc
 
 Restart from xta_transaction_manager_register: populate record content from
 xta_xa_resource (a lot of work!)
+
+Compute job before "begin", after all resources registered, directly from
+local copy of clientconfigcollection in TransactionManager and not from 
+lixac.conf
 
 UML: add necessary properties to XAResource and derivatives to support 
      TransactionManager.register()

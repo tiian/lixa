@@ -1,10 +1,14 @@
 if COMPILE_MYSQL_STUFF
   MAYBE_MYSQL_SOURCES = xta_mysql_xa_resource.c
-  MAYBE_MYSQL_CPPFLAGS = @MYSQL_CPPFLAGS@
+  MAYBE_MYSQL_CPPFLAGS = @MYSQL_CPPFLAGS@ \
+	-I$(top_srcdir)/src/client/switch/mysql
+  MAYBE_MYSQL_LIBADD = $(top_srcdir)/src/client/switch/mysql/liblixamy.la
 endif
 if COMPILE_POSTGRESQL_STUFF
   MAYBE_POSTGRESQL_SOURCES = xta_postgresql_xa_resource.c
-  MAYBE_POSTGRESQL_CPPFLAGS = @POSTGRESQL_CPPFLAGS@
+  MAYBE_POSTGRESQL_CPPFLAGS = @POSTGRESQL_CPPFLAGS@ \
+	-I$(top_srcdir)/src/client/switch/postgresql
+  MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
 endif
 includedir = $(prefix)/include/xta
 include_HEADERS = xta.h xta_errors.h xta_transaction.h \
@@ -20,6 +24,8 @@ liblixta_la_SOURCES = xta_errors.c xta_transaction.c \
 AM_CFLAGS = -Wall -fno-strict-aliasing
 liblixta_la_CPPFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/src/client \
 	$(MAYBE_MYSQL_CPPFLAGS) $(MAYBE_POSTGRESQL_CPPFLAGS)
-liblixta_la_LIBADD = ../common/liblixab.la ../client/liblixac.la \
+liblixta_la_LIBADD = $(top_srcdir)/src/common/liblixab.la \
+	$(top_srcdir)/src/client/liblixac.la \
+	$(MAYBE_MYSQL_LIBADD) $(MAYBE_POSTGRESQL_LIBADD) \
 	@LDFLAGS_GLIB@ @LDFLAGS_XML2@
 liblixta_la_LDFLAGS = -version-info @LT_LIXTA_CURRENT@:@LT_LIXTA_REVISION@:@LT_LIXTA_AGE@

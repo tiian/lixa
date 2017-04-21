@@ -27,6 +27,7 @@
 /* LIXA includes */
 #include "lixa_errors.h"
 #include "lixa_trace.h"
+#include "liblixamy.h"   /* LIXA wrapper for MySQL */
 /* XTA includes */
 #include "xta_mysql_xa_resource.h"
 
@@ -127,6 +128,8 @@ int xta_mysql_xa_resource_init(xta_mysql_xa_resource_t *this,
                                (xta_acquired_xa_resource_t *)this,
                                name, open_info)))
             THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
+        /* initialize MySQL XA function pointers */
+        this->xa_resource.act_rsrmgr_config.xa_switch = &xamyls;
         
         THROW(NONE);
     } CATCH {
@@ -154,6 +157,8 @@ void xta_mysql_xa_resource_clean(xta_mysql_xa_resource_t *this)
     
     LIXA_TRACE(("xta_mysql_xa_resource_clean\n"));
     TRY {
+        /* clean MySQL XA function pointers */
+        this->xa_resource.act_rsrmgr_config.xa_switch = NULL;
         /* clean "base class" (xta_acquired_xa_resource_t) properties */
         xta_acquired_xa_resource_clean(
             (xta_acquired_xa_resource_t *)this);

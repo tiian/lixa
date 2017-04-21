@@ -27,6 +27,7 @@
 /* LIXA includes */
 #include "lixa_errors.h"
 #include "lixa_trace.h"
+#include "liblixapq.h"   /* LIXA wrapper for PostgreSQL */
 /* XTA includes */
 #include "xta_postgresql_xa_resource.h"
 
@@ -126,6 +127,8 @@ int xta_postgresql_xa_resource_init(
                                (xta_acquired_xa_resource_t *)this,
                                name, open_info)))
             THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
+        /* initialize PostgreSQL XA function pointers */
+        this->xa_resource.act_rsrmgr_config.xa_switch = &xapqls;
         
         THROW(NONE);
     } CATCH {
@@ -153,6 +156,8 @@ void xta_postgresql_xa_resource_clean(xta_postgresql_xa_resource_t *this)
     
     LIXA_TRACE(("xta_postgresql_xa_resource_clean\n"));
     TRY {
+        /* clean PostgreSQL XA function pointers */
+        this->xa_resource.act_rsrmgr_config.xa_switch = NULL;
         /* clean "base class" (xta_acquired_xa_resource_t) properties */
         xta_acquired_xa_resource_clean(
             (xta_acquired_xa_resource_t *)this);

@@ -58,7 +58,7 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check the object has not already been initialized */
-        if (NULL != this->name)
+        if (NULL != this->xa_resource.rsrmgr_config.name)
             THROW(OBJ_CORRUPTED);
         /* name can't be NULL or empty */
         if (NULL == name || 0 == strlen(name))
@@ -81,10 +81,12 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
                                (xta_xa_resource_t *)this, FALSE)))
             THROW(XTA_XA_RESOURCE_INIT_ERROR);
         /* set object properties */
-        if (NULL == (this->name = g_strdup(name)))
+        if (NULL == (this->xa_resource.rsrmgr_config.name =
+                     (xmlChar *)g_strdup(name)))
             THROW(G_STRDUP_ERROR);
-        strncpy(this->open_info, open_info, MAXINFOSIZE);
-        this->open_info[MAXINFOSIZE-1] = '\0';
+        strncpy(this->xa_resource.rsrmgr_config.xa_open_info,
+                open_info, MAXINFOSIZE);
+        this->xa_resource.rsrmgr_config.xa_open_info[MAXINFOSIZE-1] = '\0';
             
         THROW(NONE);
     } CATCH {
@@ -128,11 +130,11 @@ void xta_acquired_xa_resource_clean(xta_acquired_xa_resource_t *this)
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT);
-        if (NULL != this->name) {
-            g_free(this->name);
-            this->name = NULL;
+        if (NULL != this->xa_resource.rsrmgr_config.name) {
+            g_free(this->xa_resource.rsrmgr_config.name);
+            this->xa_resource.rsrmgr_config.name = NULL;
         }
-        this->open_info[0] = '\0';
+        this->xa_resource.rsrmgr_config.xa_open_info[0] = '\0';
         
         THROW(NONE);
     } CATCH {

@@ -56,8 +56,6 @@ typedef struct {
     union {
         xta_xa_resource_t           xa_resource;
     };
-    gchar      *name;
-    char        open_info[MAXINFOSIZE];
 } xta_acquired_xa_resource_t;
 
 
