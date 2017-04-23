@@ -237,6 +237,10 @@ struct client_config_coll_s {
      */
     GMutex                       mutex;
     /**
+     * The mutex has been already cleared and should not cleared again
+     */
+    int                          mutex_cleared;
+    /**
      * Set of thread are "opened" and "configured"
      */
     GHashTable                  *config_threads;

@@ -132,6 +132,10 @@ int client_config(client_config_coll_t *ccc)
         pthread_t tid;
         int configured = FALSE;
 
+        /* initialize the mutex */
+        LIXA_TRACE(("client_config: initializing the mutex\n"));
+        g_mutex_init(&ccc->mutex);
+        ccc->mutex_cleared = FALSE;
         /* lock mutex to start configuration activity */
         LIXA_TRACE(("client_config: acquiring exclusive mutex\n"));
         g_mutex_lock(&ccc->mutex);
@@ -264,7 +268,7 @@ int client_config(client_config_coll_t *ccc)
         ccc->serv_addr.sin_port = htons(ccc->actconf.sttsrv->port);
 
         if (LIXA_RC_OK !=
-            (ret_cod = client_config_load_all_switch_files(&global_ccc)))
+            (ret_cod = client_config_load_all_switch_files(ccc)))
             THROW(CLIENT_CONFIG_LOAD_SWITCH_ERROR);
 
         THROW(NONE);
@@ -691,10 +695,10 @@ int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr)
 
 int client_unconfig(client_config_coll_t *ccc)
 {
-    enum Exception
-    {
-        OUT_OF_RANGE, CLIENT_CONFIG_UNLOAD_SWITCH_ERROR, NONE
-    } excp;
+    enum Exception { MUTEX_ALREADY_CLEARED
+                     , OUT_OF_RANGE
+                     , CLIENT_CONFIG_UNLOAD_SWITCH_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("client_unconfig\n"));
@@ -702,6 +706,12 @@ int client_unconfig(client_config_coll_t *ccc)
         guint i, j;
         pthread_t tid = pthread_self();
 
+        if (ccc->mutex_cleared) {
+            LIXA_TRACE(("client_unconfig: mutex already cleared, "
+                        "leaving...\n"));
+            THROW(MUTEX_ALREADY_CLEARED);
+        }
+        
         /* lock mutex to start deconfiguration activity */
         LIXA_TRACE(("client_unconfig: acquiring exclusive mutex\n"));
         g_mutex_lock(&ccc->mutex);
@@ -724,7 +734,7 @@ int client_unconfig(client_config_coll_t *ccc)
         }
 
         if (LIXA_RC_OK !=
-            (ret_cod = client_config_unload_all_switch_files(&global_ccc)))
+            (ret_cod = client_config_unload_all_switch_files(ccc)))
             THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
 
         if (NULL != ccc->job) {
@@ -792,25 +802,32 @@ int client_unconfig(client_config_coll_t *ccc)
         xmlCleanupParser();
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case OUT_OF_RANGE:
-                    ret_cod = LIXA_RC_OUT_OF_RANGE;
-                    break;
-                case CLIENT_CONFIG_UNLOAD_SWITCH_ERROR:
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
+    } CATCH {
+        switch (excp) {
+            case MUTEX_ALREADY_CLEARED:
+                ret_cod = LIXA_RC_OK;
+                break;
+            case OUT_OF_RANGE:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case CLIENT_CONFIG_UNLOAD_SWITCH_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        if (MUTEX_ALREADY_CLEARED != excp) {
             /* unlock mutex (locked for deconfiguration activity) */
             LIXA_TRACE(("client_unconfig: releasing exclusive mutex\n"));
             g_mutex_unlock(&ccc->mutex);
-        } /* TRY-CATCH */
+            /* initialize the mutex */
+            LIXA_TRACE(("client_unconfig: clearing the mutex\n"));
+            g_mutex_clear(&ccc->mutex);
+            ccc->mutex_cleared = TRUE;
+        } /* if (MUTEX_ALREADY_CLEARED != excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("client_unconfig/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

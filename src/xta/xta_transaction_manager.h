@@ -42,13 +42,28 @@
 
 
 /**
+ * This type is just a redefinition of the legacy LIXA type
+ * "client_config_coll_t" to avoid a type with a "strange name" in the API
+ */
+typedef client_config_coll_t xta_transaction_manager_config_t;
+
+
+
+/**
  * XTA Transaction Manager data type
  */
 typedef struct {
     /**
      * LIXA client status
      */
-    client_status_t      client_status;
+    client_status_t                  client_status;
+    /**
+     * LIXA client configuration (it's a collection). The name of the property
+     * contains the previx "local" to strongly distinguish it from the
+     * "global" instance that's used by legacy LIXA due to TX specification
+     * limitation
+     */
+    xta_transaction_manager_config_t local_ccc;
 } xta_transaction_manager_t;
 
 
@@ -77,6 +92,17 @@ extern "C" {
 
 
     /**
+     * Get the legacy LIXA object that contains the configurations for all the
+     * define Resource Managers
+     * @param[in] this : transaction manager object
+     * @return the pointer to the Transaction Manager configuration object
+     */
+    xta_transaction_manager_config_t *xta_transaction_manager_get_config(
+        xta_transaction_manager_t *this);
+    
+    
+
+    /**
      * Get the XTA Transaction object that represents the transaction context
      * of the calling thread
      * @param[in,out] this : transaction manager object
@@ -96,8 +122,7 @@ extern "C" {
      * @return a reason code
      */
     int xta_transaction_manager_register(
-        xta_transaction_manager_t *this,
-        const xta_xa_resource_t *xa_res);
+        xta_transaction_manager_t *this, const xta_xa_resource_t *xa_res);
 
     
 

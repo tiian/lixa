@@ -42,7 +42,7 @@
 
 
 xta_native_xa_resource_t *xta_native_xa_resource_new(
-    int rmid, const char *name, const char *switch_file,
+    const char *name, const char *switch_file,
     const char *open_info, const char *close_info)
 {
     enum Exception { G_TRY_MALLOC_ERROR
@@ -59,7 +59,7 @@ xta_native_xa_resource_t *xta_native_xa_resource_new(
             THROW(G_TRY_MALLOC_ERROR);
         /* initialize the object */
         if (LIXA_RC_OK != (ret_cod = xta_native_xa_resource_init(
-                               this, rmid, name, switch_file,
+                               this, -1, NULL, name, switch_file,
                                open_info, close_info)))
             THROW(XTA_NATIVE_XA_RESOURCE_INIT_ERROR);
         
@@ -79,6 +79,48 @@ xta_native_xa_resource_t *xta_native_xa_resource_new(
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_native_xa_resource_new/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return this;
+}
+
+
+
+xta_native_xa_resource_t *xta_native_xa_resource_new_by_rmid(
+    int rmid, const client_config_coll_t *config)
+{
+    enum Exception { G_TRY_MALLOC_ERROR
+                     , XTA_NATIVE_XA_RESOURCE_INIT_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    xta_native_xa_resource_t *this = NULL;
+    
+    LIXA_TRACE(("xta_native_xa_resource_new_by_rmid\n"));
+    TRY {
+        /* allocate sufficient memory for the object */
+        if (NULL == (this = (xta_native_xa_resource_t *)g_try_malloc0(
+                         sizeof(xta_native_xa_resource_t))))
+            THROW(G_TRY_MALLOC_ERROR);
+        /* initialize the object */
+        if (LIXA_RC_OK != (ret_cod = xta_native_xa_resource_init(
+                               this, rmid, config, NULL, NULL, NULL, NULL)))
+            THROW(XTA_NATIVE_XA_RESOURCE_INIT_ERROR);
+                
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case XTA_NATIVE_XA_RESOURCE_INIT_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_native_xa_resource_new_by_rmid/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return this;
 }
@@ -116,8 +158,8 @@ void xta_native_xa_resource_delete(xta_native_xa_resource_t *this)
 
 int xta_native_xa_resource_init(
     xta_native_xa_resource_t *this,
-    int rmid, const char *name, const char *switch_file,
-    const char *open_info, const char *close_info)
+    int rmid, const client_config_coll_t *config, const char *name,
+    const char *switch_file, const char *open_info, const char *close_info)
 {
     enum Exception { NULL_OBJECT
                      , XA_RESOURCE_INIT_ERROR
@@ -182,13 +224,13 @@ int xta_native_xa_resource_init(
             /* rmid >= 0: get the properties from global configuration that
              * has been loaded by xta_transaction_manager_new() */
             this->dynamic = FALSE;
-            if (rmid >= global_ccc.actconf.rsrmgrs->len) {
+            if (rmid >= config->actconf.rsrmgrs->len) {
                 LIXA_TRACE(("xta_native_xa_resource_init: rmid=%d is out of "
                             "range [0,%u]\n",
-                            global_ccc.actconf.rsrmgrs->len-1));
+                            config->actconf.rsrmgrs->len-1));
                 THROW(OUT_OF_RANGE);
             }
-            act_rsrmgr = &g_array_index(global_ccc.actconf.rsrmgrs,
+            act_rsrmgr = &g_array_index(config->actconf.rsrmgrs,
                                         struct act_rsrmgr_config_s, rmid);
             /* copy it locally to the resource object */
             this->xa_resource.act_rsrmgr_config = *act_rsrmgr;

@@ -65,15 +65,15 @@ xta_transaction_manager_t *xta_transaction_manager_new(void)
         client_status_init(&this->client_status);
         client_status_active(&this->client_status);
         /* configure the LIXA client (if necessary) */
-        if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc)))
+        if (LIXA_RC_OK != (ret_cod = client_config(&this->local_ccc)))
             THROW(CLIENT_CONFIG_ERROR);
         /* connect to LIXA state server */
         if (LIXA_RC_OK != (ret_cod = client_connect(
-                               &this->client_status, &global_ccc)))
+                               &this->client_status, &this->local_ccc)))
             THROW(CLIENT_CONNECT_ERROR);
         /* configure the LIXA (transactional) job (if necessary) */
         if (LIXA_RC_OK != (ret_cod = client_config_job(
-                               &global_ccc,
+                               &this->local_ccc,
                                client_status_get_sockfd(
                                    &this->client_status))))
             THROW(CLIENT_CONFIG_JOB_ERROR);
@@ -111,11 +111,16 @@ xta_transaction_manager_t *xta_transaction_manager_new(void)
 
 void xta_transaction_manager_delete(xta_transaction_manager_t *this)
 {
-    enum Exception { NONE } excp;
+    enum Exception { CLIENT_UNCONFIG_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_manager_delete\n"));
     TRY {
+        /* unconfigure and release the memory related to client configuration
+           collection */
+        if (LIXA_RC_OK != (ret_cod = client_unconfig(&this->local_ccc)))
+            THROW(CLIENT_UNCONFIG_ERROR);
         /* free the memory associated to client status */
         client_status_free(&this->client_status);
         /* destroy the object itself */
@@ -124,6 +129,8 @@ void xta_transaction_manager_delete(xta_transaction_manager_t *this)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_UNCONFIG_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -134,6 +141,40 @@ void xta_transaction_manager_delete(xta_transaction_manager_t *this)
     LIXA_TRACE(("xta_transaction_manager_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return;
+}
+
+
+
+xta_transaction_manager_config_t *
+xta_transaction_manager_get_config(xta_transaction_manager_t *this)
+{
+    enum Exception { NULL_OBJECT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    client_config_coll_t *ccc = NULL;
+    
+    LIXA_TRACE(("xta_transaction_manager_get_config\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        ccc = &this->local_ccc;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_manager_get_config/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ccc;
 }
 
 
@@ -190,7 +231,7 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
 
         /* append the resource manager to the list of actual configured
            resource managers */
-        client_config_append_rsrmgr(&global_ccc, &record);
+        client_config_append_rsrmgr(&this->local_ccc, &record);
         
         THROW(NONE);
     } CATCH {

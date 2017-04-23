@@ -70,8 +70,8 @@ int main(int argc, char *argv[])
      * create an XA native resource object linked to the first Resouce
      * Manager configured in LIXA profile
      */
-    if (NULL == (native_xa_res = xta_native_xa_resource_new(
-    0, NULL, NULL, NULL, NULL))) {
+    if (NULL == (native_xa_res = xta_native_xa_resource_new_by_rmid(
+                     0, xta_transaction_manager_get_config(tm)))) {
         printf("%s| xta_native_xa_resource_new: returned NULL\n", pgm);
         return 1;
     }
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
      * dynamically create an XA native resource object
      */
     if (NULL == (dynamic_native_xa_res = xta_native_xa_resource_new(
-                     -1, "OracleIC_stareg",
+                     "OracleIC_stareg",
                      "/opt/lixa/lib/switch_oracle_stareg.so",
                      "ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+"
                      "threads=true+DbgFl=7+SqlNet=lixa_ora_db+"
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
      * dynamically create an XA native resource object
      */
     if (NULL == (dynamic_native_xa_res = xta_native_xa_resource_new(
-                     -1, "OracleIC_stareg",
+                     "OracleIC_stareg",
                      "/opt/lixa/lib/switch_oracle_stareg.so",
                      "ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+"
                      "threads=true+DbgFl=7+SqlNet=lixa_ora_db+"

@@ -67,6 +67,7 @@
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_STATUS
 
 
+
 /* this static structure is used by all the threads of the program
  * linking the library; the structure i protected by a mutex to avoid
  * concurrency issues */

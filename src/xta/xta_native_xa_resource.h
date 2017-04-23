@@ -63,18 +63,6 @@ extern "C" {
 
     /**
      * Create a new object to represent a native XA resource
-     * @param[in] rmid : Resource Manager unique identifier within the thread
-     *                   of control. This identifier is even used to
-     *                   control the behavior of the constructor: <BR>
-     *                   if (rmid >= 0) : all the values that describe the
-     *                   Resource Manager must be extracted from configuration
-     *                   file (lixac.flom) and the following options will be
-     *                   ignored (use NULL value for convenience) <BR>
-     *                   if (rmid < 0) : create a new Resource Manager
-     *                   description that's not specified in configuration file
-     *                   (lixac.flom) and the following options can't be
-     *                   NULL. This behavior is useful to generate
-     *                   Native XA Resource dynamically at run time.
      * @param[in] name : the name assigned to the Resource Manager just for
      *                   debugging purposes
      * @param[in] switch_file : absolute path of the XA switch file that
@@ -93,10 +81,26 @@ extern "C" {
      * @return a new object or NULL in the event of error
      */
     xta_native_xa_resource_t *xta_native_xa_resource_new(
-        int rmid, const char *name, const char *switch_file,
+        const char *name, const char *switch_file,
         const char *open_info, const char *close_info);
 
+    
 
+    /**
+     * Create a new object to represent a native XA resource described inside
+     * LIXA legacy configuration file "lixac.conf"
+     * @param[in] rmid : Resource Manager unique identifier within the thread
+     *                   of control. All the values that describe the
+     *                   Resource Manager must be extracted from configuration
+     *                   file (lixac.flom).
+     * @param[in] config : legacy LIXA structure that contains all the
+     *                     Resource Managers' configurations
+     * @return a new object or NULL in the event of error
+     */
+    xta_native_xa_resource_t *xta_native_xa_resource_new_by_rmid(
+        int rmid, const client_config_coll_t *config);
+
+    
     
     /**
      * Initialize the common properties of Native XA Resources
@@ -113,6 +117,8 @@ extern "C" {
      *                   (lixac.flom) and the following options can't be
      *                   NULL. This behavior is useful to generate
      *                   Native XA Resource dynamically at run time.
+     * @param[in] config : legacy LIXA structure that contains all the
+     *                     Resource Managers' configurations
      * @param[in] name : the name assigned to the Resource Manager just for
      *                   debugging purposes
      * @param[in] switch_file : absolute path of the XA switch file that
@@ -132,7 +138,8 @@ extern "C" {
      */
     int xta_native_xa_resource_init(
         xta_native_xa_resource_t *this,
-        int rmid, const char *name, const char *switch_file,
+        int rmid, const client_config_coll_t *config,
+        const char *name, const char *switch_file,
         const char *open_info, const char *close_info);
     
     
