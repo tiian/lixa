@@ -1000,7 +1000,7 @@ int lixa_tx_open(int *txrc, int mmode)
         /* check TX state (see Table 7-1) */
         txstate = client_status_get_txstate(cs);
         if (txstate == TX_STATE_S0) {
-            if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc)))
+            if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc, TRUE)))
                 THROW(CLIENT_CONFIG_ERROR);
             if (LIXA_RC_OK != (ret_cod = client_connect(cs, &global_ccc)))
                 THROW(CLIENT_CONNECT_ERROR);
@@ -1838,6 +1838,6 @@ void lixa_tx_cleanup(void)
     LIXA_TRACE(("lixa_tx_cleanup: emergency socket & memory clean-up\n"));
     ret_cod = client_disconnect(&global_csc);
     LIXA_TRACE(("lixa_tx_cleanup/client_disconnect/ret_cod=%d\n", ret_cod));
-    ret_cod = client_unconfig(&global_ccc);
+    ret_cod = client_unconfig(&global_ccc, TRUE);
     LIXA_TRACE(("lixa_tx_cleanup/client_unconfig/ret_cod=%d\n", ret_cod));
 }

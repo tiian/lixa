@@ -153,7 +153,6 @@ int main(int argc, char *argv[])
      * delete Transaction Manager object
      */
     xta_transaction_manager_delete(tm);
-    
     /*
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     if (TX_ERROR == rc) {

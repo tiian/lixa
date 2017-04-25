@@ -100,7 +100,7 @@
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_CONFIG
 
 
-int client_config(client_config_coll_t *ccc)
+int client_config(client_config_coll_t *ccc, int global_config)
 {
     enum Exception
     {
@@ -133,12 +133,16 @@ int client_config(client_config_coll_t *ccc)
         int configured = FALSE;
 
         /* initialize the mutex */
-        LIXA_TRACE(("client_config: initializing the mutex\n"));
-        g_mutex_init(&ccc->mutex);
-        ccc->mutex_cleared = FALSE;
+        if (!global_config) {
+            LIXA_TRACE(("client_config: initializing the mutex...\n"));
+            g_mutex_init(&ccc->mutex);
+            ccc->mutex_cleared = FALSE;
+            LIXA_TRACE(("client_config: ...mutex initialized!\n"));
+        }
         /* lock mutex to start configuration activity */
-        LIXA_TRACE(("client_config: acquiring exclusive mutex\n"));
+        LIXA_TRACE(("client_config: acquiring exclusive mutex...\n"));
         g_mutex_lock(&ccc->mutex);
+        LIXA_TRACE(("client_config: ...exclusive mutex acquired!\n"));
 
         /* is the process already configured? */
         if (NULL == ccc->config_threads) {
@@ -325,8 +329,9 @@ int client_config(client_config_coll_t *ccc)
         if (NULL != res)
             freeaddrinfo(res);
         /* unlock mutex (locked for configuration activity) */
-        LIXA_TRACE(("client_config: releasing exclusive mutex\n"));
+        LIXA_TRACE(("client_config: releasing exclusive mutex...\n"));
         g_mutex_unlock(&ccc->mutex);
+        LIXA_TRACE(("client_config: ...exclusive mutex released!\n"));
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -389,29 +394,27 @@ int client_config_job(client_config_coll_t *ccc, int fd)
         tmp_job = NULL;
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case MALLOC_ERROR:
-                    ret_cod = LIXA_RC_MALLOC_ERROR;
-                    break;
-                case JOB_SET_SOURCE_IP:
-                case JOB_SET_RAW:
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-            /* release resources */
-            if (NULL != tmp_job)
-                free(tmp_job);
-            /* unlock mutex (locked for configuration activity) */
-            LIXA_TRACE(("client_config_job: releasing exclusive mutex\n"));
-            g_mutex_unlock(&ccc->mutex);
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case JOB_SET_SOURCE_IP:
+            case JOB_SET_RAW:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* release resources */
+        if (NULL != tmp_job)
+            free(tmp_job);
+        /* unlock mutex (locked for configuration activity) */
+        LIXA_TRACE(("client_config_job: releasing exclusive mutex\n"));
+        g_mutex_unlock(&ccc->mutex);
+    } /* TRY-CATCH */
     LIXA_TRACE(("client_config_job/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -441,11 +444,12 @@ int client_config_validate(client_config_coll_t *ccc)
                 ccc->profiles, struct profile_config_s, i);
             xmlChar *prof_sttsrv;
             if (NULL == ccc->profile ||
-                0 == xmlStrcmp(profile->name, (const xmlChar *) ccc->profile)) {
+                0 == xmlStrcmp(profile->name,
+                               (const xmlChar *) ccc->profile)) {
                 if (NULL == ccc->profile) {
                     if (NULL ==
-                        (ccc->profile = strdup((char *) profile->name))) THROW(
-                            STRDUP_ERROR);
+                        (ccc->profile = strdup((char *) profile->name)))
+                        THROW(STRDUP_ERROR);
                     LIXA_TRACE(("client_config_validate: profile set to "
                                 "default value ('%s')\n", ccc->profile));
                 }
@@ -693,7 +697,7 @@ int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr)
 
 
 
-int client_unconfig(client_config_coll_t *ccc)
+int client_unconfig(client_config_coll_t *ccc, int global_config)
 {
     enum Exception { MUTEX_ALREADY_CLEARED
                      , OUT_OF_RANGE
@@ -706,15 +710,16 @@ int client_unconfig(client_config_coll_t *ccc)
         guint i, j;
         pthread_t tid = pthread_self();
 
-        if (ccc->mutex_cleared) {
+        if (!global_config && ccc->mutex_cleared) {
             LIXA_TRACE(("client_unconfig: mutex already cleared, "
                         "leaving...\n"));
             THROW(MUTEX_ALREADY_CLEARED);
         }
         
         /* lock mutex to start deconfiguration activity */
-        LIXA_TRACE(("client_unconfig: acquiring exclusive mutex\n"));
+        LIXA_TRACE(("client_unconfig: acquiring exclusive mutex...\n"));
         g_mutex_lock(&ccc->mutex);
+        LIXA_TRACE(("client_unconfig: ...exclusive mutex acquired!\n"));
 
         if (NULL != ccc->config_threads) {
             g_hash_table_remove(ccc->config_threads, (gconstpointer) tid);
@@ -820,12 +825,16 @@ int client_unconfig(client_config_coll_t *ccc)
         } /* switch (excp) */
         if (MUTEX_ALREADY_CLEARED != excp) {
             /* unlock mutex (locked for deconfiguration activity) */
-            LIXA_TRACE(("client_unconfig: releasing exclusive mutex\n"));
+            LIXA_TRACE(("client_unconfig: releasing exclusive mutex...\n"));
             g_mutex_unlock(&ccc->mutex);
-            /* initialize the mutex */
-            LIXA_TRACE(("client_unconfig: clearing the mutex\n"));
-            g_mutex_clear(&ccc->mutex);
-            ccc->mutex_cleared = TRUE;
+            LIXA_TRACE(("client_unconfig: ...exclusive mutex released!\n"));
+            /* clear the mutex */
+            if (!global_config && !ccc->mutex_cleared) {
+                LIXA_TRACE(("client_unconfig: clearing the mutex...\n"));
+                g_mutex_clear(&ccc->mutex);
+                ccc->mutex_cleared = TRUE;
+                LIXA_TRACE(("client_unconfig: ...mutex cleared!\n"));
+            } /* clear the mutex */
         } /* if (MUTEX_ALREADY_CLEARED != excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("client_unconfig/excp=%d/"
@@ -1256,15 +1265,12 @@ int client_parse_rsrmgrs(struct client_config_coll_s *ccc,
 int client_parse_rsrmgr(struct client_config_coll_s *ccc,
                         xmlNode *a_node)
 {
-    enum Exception
-    {
-        NAME_NOT_AVAILABLE_ERROR,
-        PORT_NOT_AVAILABLE_ERROR,
-        SWITCH_FILE_NOT_AVAILABLE_ERROR,
-        XA_OPEN_INFO_NOT_AVAILABLE_ERROR,
-        XA_CLOSE_INFO_NOT_AVAILABLE_ERROR,
-        NONE
-    } excp;
+    enum Exception { NAME_NOT_AVAILABLE_ERROR
+                     , PORT_NOT_AVAILABLE_ERROR
+                     , SWITCH_FILE_NOT_AVAILABLE_ERROR
+                     , XA_OPEN_INFO_NOT_AVAILABLE_ERROR
+                     , XA_CLOSE_INFO_NOT_AVAILABLE_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("client_parse_rsrmgr/%p\n", a_node));
@@ -1280,23 +1286,23 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
 
         /* retrieve resource manager name */
         if (NULL == (record.name = xmlGetProp(
-                         a_node, LIXA_XML_CONFIG_NAME_PROPERTY))) THROW(
-                             NAME_NOT_AVAILABLE_ERROR);
+                         a_node, LIXA_XML_CONFIG_NAME_PROPERTY)))
+            THROW(NAME_NOT_AVAILABLE_ERROR);
         /* retrieve switch_file */
         if (NULL == (record.switch_file = xmlGetProp(
-                         a_node, LIXA_XML_CONFIG_SWITCH_FILE_PROPERTY))) THROW(
-                             SWITCH_FILE_NOT_AVAILABLE_ERROR);
+                         a_node, LIXA_XML_CONFIG_SWITCH_FILE_PROPERTY)))
+            THROW(SWITCH_FILE_NOT_AVAILABLE_ERROR);
         /* retrieve xa_open_info */
         if (NULL == (tmp = xmlGetProp(
-                         a_node, LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY))) THROW(
-                             XA_OPEN_INFO_NOT_AVAILABLE_ERROR);
+                         a_node, LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY)))
+            THROW(XA_OPEN_INFO_NOT_AVAILABLE_ERROR);
         strncpy(record.xa_open_info, (char *) tmp, MAXINFOSIZE);
         record.xa_open_info[MAXINFOSIZE - 1] = '\0';
         xmlFree(tmp);
         /* retrieve xa_close_info */
         if (NULL == (tmp = xmlGetProp(
-                         a_node, LIXA_XML_CONFIG_XA_CLOSE_INFO_PROPERTY))) THROW(
-                             XA_CLOSE_INFO_NOT_AVAILABLE_ERROR);
+                         a_node, LIXA_XML_CONFIG_XA_CLOSE_INFO_PROPERTY)))
+            THROW(XA_CLOSE_INFO_NOT_AVAILABLE_ERROR);
         strncpy(record.xa_close_info, (char *) tmp, MAXINFOSIZE);
         record.xa_close_info[MAXINFOSIZE - 1] = '\0';
         xmlFree(tmp);
@@ -1317,54 +1323,51 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
                     record.xa_close_info));
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case NAME_NOT_AVAILABLE_ERROR:
-                    LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrmgr "
-                                "property '%s' for current  resource manager\n",
-                                LIXA_XML_CONFIG_NAME_PROPERTY));
-                    ret_cod = LIXA_RC_CONFIG_ERROR;
-                    break;
-                case SWITCH_FILE_NOT_AVAILABLE_ERROR:
-                    LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrngr "
-                                "property '%s' for current resource manager\n",
-                                LIXA_XML_CONFIG_SWITCH_FILE_PROPERTY));
-                    ret_cod = LIXA_RC_CONFIG_ERROR;
-                    break;
-                case XA_OPEN_INFO_NOT_AVAILABLE_ERROR:
-                    LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrmgr "
-                                "property '%s' for current resource manager\n",
-                                LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY));
-                    ret_cod = LIXA_RC_CONFIG_ERROR;
-                    break;
-                case XA_CLOSE_INFO_NOT_AVAILABLE_ERROR:
-                    LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrmgr "
-                                "property '%s' for current resource manager\n",
-                                LIXA_XML_CONFIG_XA_CLOSE_INFO_PROPERTY));
-                    ret_cod = LIXA_RC_CONFIG_ERROR;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case NAME_NOT_AVAILABLE_ERROR:
+                LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrmgr "
+                            "property '%s' for current  resource manager\n",
+                            LIXA_XML_CONFIG_NAME_PROPERTY));
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;
+            case SWITCH_FILE_NOT_AVAILABLE_ERROR:
+                LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrngr "
+                            "property '%s' for current resource manager\n",
+                            LIXA_XML_CONFIG_SWITCH_FILE_PROPERTY));
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;
+            case XA_OPEN_INFO_NOT_AVAILABLE_ERROR:
+                LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrmgr "
+                            "property '%s' for current resource manager\n",
+                            LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY));
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;
+            case XA_CLOSE_INFO_NOT_AVAILABLE_ERROR:
+                LIXA_TRACE(("client_parse_rsrmgr: unable to find rsrmgr "
+                            "property '%s' for current resource manager\n",
+                            LIXA_XML_CONFIG_XA_CLOSE_INFO_PROPERTY));
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("client_parse_rsrmgr/%p/excp=%d/"
                 "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
     return ret_cod;
 }
 
 
+
 int client_parse_profiles(struct client_config_coll_s *ccc,
                           xmlNode *a_node)
 {
-    enum Exception
-    {
-        PARSE_PROFILE_ERROR, NONE
-    } excp;
+    enum Exception { PARSE_PROFILE_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     xmlNode *cur_node = NULL;
@@ -1377,25 +1380,24 @@ int client_parse_profiles(struct client_config_coll_s *ccc,
                             a_node, cur_node->name));
                 if (!xmlStrcmp(cur_node->name, LIXA_XML_CONFIG_PROFILE)) {
                     if (LIXA_RC_OK != (ret_cod = client_parse_profile(
-                                           ccc, cur_node))) THROW(PARSE_PROFILE_ERROR);
+                                           ccc, cur_node)))
+                        THROW(PARSE_PROFILE_ERROR);
                 }
             }
         }
-
+        
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case PARSE_PROFILE_ERROR:
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case PARSE_PROFILE_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("client_parse_profiles/%p/excp=%d/"
                 "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
     return ret_cod;
@@ -1449,39 +1451,40 @@ int client_parse_profile(struct client_config_coll_s *ccc,
                                LIXA_XML_CONFIG_STTSRVS)) {
                     if (LIXA_RC_OK != (ret_cod = client_parse_profile_sttsrvs(
                                            ccc, cur_node->children,
-                                           record.sttsrvs))) THROW(PARSE_PROFILE_STTSRVS_ERROR);
+                                           record.sttsrvs)))
+                        THROW(PARSE_PROFILE_STTSRVS_ERROR);
                 } else if (!xmlStrcmp(cur_node->name,
                                       LIXA_XML_CONFIG_RSRMGRS)) {
                     if (LIXA_RC_OK != (ret_cod = client_parse_profile_rsrmgrs(
                                            ccc, cur_node->children,
-                                           record.rsrmgrs))) THROW(PARSE_PROFILE_RSRMGRS_ERROR);
-                } else THROW(UNRECOGNIZED_TAG);
+                                           record.rsrmgrs)))
+                        THROW(PARSE_PROFILE_RSRMGRS_ERROR);
+                } else
+                    THROW(UNRECOGNIZED_TAG);
             }
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case NAME_NOT_AVAILABLE_ERROR:
-                    LIXA_TRACE(("client_parse_profile: unable to find profile "
-                                "name for profile %d\n", i));
-                    ret_cod = LIXA_RC_CONFIG_ERROR;
-                    break;
-                case PARSE_PROFILE_STTSRVS_ERROR:
-                case PARSE_PROFILE_RSRMGRS_ERROR:
-                    break;
-                case UNRECOGNIZED_TAG:
-                    ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case NAME_NOT_AVAILABLE_ERROR:
+                LIXA_TRACE(("client_parse_profile: unable to find profile "
+                            "name for profile %d\n", i));
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;
+            case PARSE_PROFILE_STTSRVS_ERROR:
+            case PARSE_PROFILE_RSRMGRS_ERROR:
+                break;
+            case UNRECOGNIZED_TAG:
+                ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("client_parse_profile/%p/excp=%d/"
                 "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
     return ret_cod;

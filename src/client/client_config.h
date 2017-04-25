@@ -323,10 +323,17 @@ extern "C" {
     
     /**
      * Load configuration from environment vars and XML files
-     * @param ccc OUT the object will contain the client configuration
-     * @return a standardized return code
+     * @param[out] ccc : the object that will contain the client configuration
+     * @param[in] global_config : TRUE if "ccc" is a global static object
+     *                            (just one for all the threads of the process)
+     *                            , FALSE if "ccc" is a local dynamic object
+     *                            (every thread has its own). TX API uses a
+     *                            global static config shared by all the
+     *                            threads, XTA API uses a local dynamic
+     *                            object for every thread.
+     * @return a reason code
      */
-    int client_config(client_config_coll_t *ccc);
+    int client_config(client_config_coll_t *ccc, int global_config);
 
     
 
@@ -382,10 +389,17 @@ extern "C" {
 
     /**
      * Unload configuration and release memory
-     * @param ccc OUT the object that contains the client configuration
-     * @return a standardized return code
+     * @param[out] ccc : the object that contains the client configuration
+     * @param[in] global_config : TRUE if "ccc" is a global static object
+     *                            (just one for all the threads of the process)
+     *                            , FALSE if "ccc" is a local dynamic object
+     *                            (every thread has its own). TX API uses a
+     *                            global static config shared by all the
+     *                            threads, XTA API uses a local dynamic
+     *                            object for every thread.
+     * @return a reason code
      */
-    int client_unconfig(client_config_coll_t *ccc);
+    int client_unconfig(client_config_coll_t *ccc, int global_config);
 
     
 
