@@ -236,8 +236,6 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
     
     LIXA_TRACE(("xta_transaction_manager_register\n"));
     TRY {
-        /* actual resource managers are described by this struct */
-        struct act_rsrmgr_config_s record;
         /* check the transaction manager object is not NULL */
         if (NULL == this)
             THROW(NULL_OBJECT1);
@@ -245,13 +243,10 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
         if (NULL == xa_res)
             THROW(NULL_OBJECT2);
 
-        /* @@@ popolate record with values: map dependency between tm and
-          resource */
-
-
         /* append the resource manager to the list of actual configured
            resource managers */
-        client_config_append_rsrmgr(&this->local_ccc, &record);
+        client_config_append_rsrmgr(&this->local_ccc,
+                                    xta_xa_resource_get_config(xa_res));
         
         THROW(NONE);
     } CATCH {

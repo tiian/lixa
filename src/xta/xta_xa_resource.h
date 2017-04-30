@@ -46,6 +46,14 @@
 
 
 /**
+ * This type is just a redefinition of the legacy LIXA struct
+ * "act_rsrmgr_config_s" to avoid a type with a "strange name" in the API
+ */
+typedef struct act_rsrmgr_config_s xta_xa_resource_config_t;
+
+
+
+/**
  * The base "class" xta_xa_resource is just a redefinition of the standard
  * xa_switch_t structure as defined by X/Open
  *
@@ -72,7 +80,7 @@ typedef struct {
      * xa_close call to be closed. This is the typical behavior or native
      * XA Resource Managers
      */
-    int        must_be_opened;
+    int                        must_be_opened;
 } xta_xa_resource_t;
 
 
@@ -104,6 +112,17 @@ extern "C" {
      */    
     void xta_xa_resource_clean(xta_xa_resource_t *this);
 
+
+
+    /**
+     * Return a reference (a pointer) to the configuration parameters of the
+     * resource.
+     * @param[in] this: XA Resource object
+     * @return a pointer to the resource configuration record
+     */
+    const xta_xa_resource_config_t *xta_xa_resource_get_config(
+        const xta_xa_resource_t *this);
+    
     
     
     /**

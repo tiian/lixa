@@ -83,6 +83,42 @@ int xta_xa_resource_init(xta_xa_resource_t *this,
 
 
 
+const xta_xa_resource_config_t *xta_xa_resource_get_config(
+    const xta_xa_resource_t *this)
+{
+    enum Exception { NULL_OBJECT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    const xta_xa_resource_config_t *config = NULL;
+    
+    LIXA_TRACE(("xta_xa_resource_get_config\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* pass a reference: is it better to create a new object and return
+         * it??? @@@*/
+        config = &this->act_rsrmgr_config;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_xa_resource_get_config/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return config;
+}
+
+
+
 void xta_xa_resource_clean(xta_xa_resource_t *this)
 {
     enum Exception { NULL_OBJECT
