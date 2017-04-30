@@ -164,8 +164,8 @@ int xta_native_xa_resource_init(
     enum Exception { NULL_OBJECT
                      , XA_RESOURCE_INIT_ERROR
                      , INVALID_OPTION
-                     , G_STRDUP_ERROR1
-                     , G_STRDUP_ERROR2
+                     , XML_STRDUP_ERROR1
+                     , XML_STRDUP_ERROR2
                      , CLIENT_CONFIG_LOAD_SWITCH_FILE_ERROR
                      , OUT_OF_RANGE
                      , NONE } excp;
@@ -199,12 +199,12 @@ int xta_native_xa_resource_init(
             } /* if (strlen(close_info) >= MAXINFOSIZE) */
             /* duplicate resource name */
             if (NULL == (this->xa_resource.rsrmgr_config.name =
-                         (xmlChar *)g_strdup(name)))
-                THROW(G_STRDUP_ERROR1);
+                         xmlCharStrdup(name)))
+                THROW(XML_STRDUP_ERROR1);
             /* duplicate resource switch_file (path) */
             if (NULL == (this->xa_resource.rsrmgr_config.switch_file =
-                         (xmlChar *)g_strdup(switch_file)))
-                THROW(G_STRDUP_ERROR2);
+                         xmlCharStrdup(switch_file)))
+                THROW(XML_STRDUP_ERROR2);
             /* copy open_info */
             strncpy(this->xa_resource.rsrmgr_config.xa_open_info, open_info,
                     MAXINFOSIZE);
@@ -248,9 +248,9 @@ int xta_native_xa_resource_init(
             case INVALID_OPTION:
                 ret_cod = LIXA_RC_INVALID_OPTION;
                 break;
-            case G_STRDUP_ERROR1:
-            case G_STRDUP_ERROR2:
-                ret_cod = LIXA_RC_G_STRDUP_ERROR;
+            case XML_STRDUP_ERROR1:
+            case XML_STRDUP_ERROR2:
+                ret_cod = LIXA_RC_XML_STRDUP_ERROR;
                 break;
             case CLIENT_CONFIG_LOAD_SWITCH_FILE_ERROR:
                 break;

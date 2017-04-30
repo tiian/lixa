@@ -49,7 +49,7 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
                      , INVALID_OPTION1
                      , INVALID_OPTION2
                      , XTA_XA_RESOURCE_INIT_ERROR
-                     , G_STRDUP_ERROR
+                     , XML_STRDUP_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -82,8 +82,8 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
             THROW(XTA_XA_RESOURCE_INIT_ERROR);
         /* set object properties */
         if (NULL == (this->xa_resource.rsrmgr_config.name =
-                     (xmlChar *)g_strdup(name)))
-            THROW(G_STRDUP_ERROR);
+                     xmlCharStrdup(name)))
+            THROW(XML_STRDUP_ERROR);
         strncpy(this->xa_resource.rsrmgr_config.xa_open_info,
                 open_info, MAXINFOSIZE);
         this->xa_resource.rsrmgr_config.xa_open_info[MAXINFOSIZE-1] = '\0';
@@ -103,8 +103,8 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
                 break;
             case XTA_XA_RESOURCE_INIT_ERROR:
                 break;
-            case G_STRDUP_ERROR:
-                ret_cod = LIXA_RC_G_STRDUP_ERROR;
+            case XML_STRDUP_ERROR:
+                ret_cod = LIXA_RC_XML_STRDUP_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
