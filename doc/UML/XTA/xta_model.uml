@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_xqIl0BMxEeeEBJD-o5WPWg" name="RootElement">
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_xqIl0BMxEeeEBJD-o5WPWg" name="RootElement">
   <ownedComment xmi:type="uml:Comment" xmi:id="_gQh78BTBEeebgf8_LMBiHA" annotatedElement="_4EBbwBTAEeebgf8_LMBiHA">
     <body>NativeXAResource class can be used for all the XAResources that can be created using a standard XA switch load file.
 xa_open is natively called inside object constructor and xa_close is natively called inside object destructor.
@@ -69,6 +69,8 @@ Oracle is just an example: I don't know if a standard connection can be migrated
     <packagedElement xmi:type="uml:Class" xmi:id="_unDa0BPrEeeDbpR_R0y-uQ" name="Xid"/>
     <packagedElement xmi:type="uml:Class" xmi:id="_7KY_kBPrEeeDbpR_R0y-uQ" name="XAResource" isAbstract="true">
       <ownedAttribute xmi:type="uml:Property" xmi:id="_YH5CUCLiEeeREJcBlfZgIw" name="mustBeOpened" visibility="protected" type="_wRHeABPtEeeDbpR_R0y-uQ"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_BjY9QC6sEeeCPvts7Lg2Jg" name="registeredTm" visibility="protected" type="_ri7igBPrEeeDbpR_R0y-uQ"/>
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_NGP8ci6sEeeCPvts7Lg2Jg" name="transactionmanager" type="_ri7igBPrEeeDbpR_R0y-uQ" association="_NGPVYC6sEeeCPvts7Lg2Jg"/>
       <ownedOperation xmi:type="uml:Operation" xmi:id="_xefskBPsEeeDbpR_R0y-uQ" name="start" isAbstract="true">
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_LxYxkBPtEeeDbpR_R0y-uQ" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_hmNIwBPtEeeDbpR_R0y-uQ" name="flags" type="_ZI7acBPtEeeDbpR_R0y-uQ"/>
@@ -88,6 +90,9 @@ Oracle is just an example: I don't know if a standard connection can be migrated
         <ownedParameter xmi:type="uml:Parameter" xmi:id="_5ikbQBPtEeeDbpR_R0y-uQ" name="xid" type="_unDa0BPrEeeDbpR_R0y-uQ"/>
       </ownedOperation>
       <ownedOperation xmi:type="uml:Operation" xmi:id="_ZokDIBP1EeeDbpR_R0y-uQ" name="doSomethingWithRM" isAbstract="true"/>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_0AtbYC6rEeeCPvts7Lg2Jg" name="registered">
+        <ownedParameter xmi:type="uml:Parameter" xmi:id="_8f4AEC6rEeeCPvts7Lg2Jg" name="tm" type="_ri7igBPrEeeDbpR_R0y-uQ"/>
+      </ownedOperation>
     </packagedElement>
     <packagedElement xmi:type="uml:Class" xmi:id="_4EBbwBTAEeebgf8_LMBiHA" name="NativeXAResource">
       <generalization xmi:type="uml:Generalization" xmi:id="_JKktABTBEeebgf8_LMBiHA" general="_7KY_kBPrEeeDbpR_R0y-uQ"/>
@@ -800,5 +805,11 @@ XA protocol can be extended with feedback related to &quot;other branches must d
     <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_yvICUBV-EeeX1NFuSyi0wQ" name="string"/>
     <packagedElement xmi:type="uml:DataType" xmi:id="_YTIqwBTFEeebgf8_LMBiHA" name="MYSQL *"/>
     <packagedElement xmi:type="uml:DataType" xmi:id="_2SpygBTFEeebgf8_LMBiHA" name="PGconn *"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_NGPVYC6sEeeCPvts7Lg2Jg" memberEnd="_NGP8ci6sEeeCPvts7Lg2Jg _NGP8cy6sEeeCPvts7Lg2Jg">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_NGP8cC6sEeeCPvts7Lg2Jg" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_NGP8cS6sEeeCPvts7Lg2Jg" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_NGP8cy6sEeeCPvts7Lg2Jg" name="xaresource" type="_7KY_kBPrEeeDbpR_R0y-uQ" association="_NGPVYC6sEeeCPvts7Lg2Jg"/>
   </packagedElement>
 </uml:Model>
