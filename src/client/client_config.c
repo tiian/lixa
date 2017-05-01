@@ -506,7 +506,7 @@ int client_config_validate(client_config_coll_t *ccc)
                             record.generic = conf_rsrmgr;
                             record.module = NULL;
                             record.xa_switch = NULL;
-                            client_config_append_rsrmgr(ccc, &record);
+                            client_config_append_rsrmgr(ccc, NULL, &record);
                             LIXA_TRACE(("client_config_validate: resource "
                                         "manager '%s' found at pos %u in "
                                         "global list\n",
@@ -559,10 +559,21 @@ int client_config_validate(client_config_coll_t *ccc)
 
 
 void client_config_append_rsrmgr(client_config_coll_t *ccc,
-                                 const struct act_rsrmgr_config_s *record)
+                                 const struct rsrmgr_config_s     *rsrmgr,
+                                 const struct act_rsrmgr_config_s *act_rsrmgr)
 {
     LIXA_TRACE(("client_config_append_rsrmgr\n"));
-    g_array_append_val(ccc->actconf.rsrmgrs, *record);
+    if (NULL != rsrmgr) {
+        g_array_append_val(ccc->rsrmgrs, *rsrmgr);
+    } else {
+        LIXA_TRACE(("client_config_append_rsrmgr: rsrmgr=NULL; skipping\n"));
+    }
+    if (NULL != act_rsrmgr) {
+        g_array_append_val(ccc->actconf.rsrmgrs, *act_rsrmgr);
+    } else {
+        LIXA_TRACE(("client_config_append_rsrmgr: act_rsrmgr=NULL; "
+                    "skipping\n"));
+    }
     return;
 }
 
@@ -923,10 +934,7 @@ int client_config_unload_switch_file(struct act_rsrmgr_config_s *act_rsrmgr)
 
 int client_config_display(client_config_coll_t *ccc)
 {
-    enum Exception
-    {
-        NONE
-    } excp;
+    enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("client_config_display\n"));
@@ -982,21 +990,84 @@ int client_config_display(client_config_coll_t *ccc)
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("client_config_display/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int client_config_dup(const struct act_rsrmgr_config_s *arc,
+                      struct rsrmgr_config_s     *rsrmgr,
+                      struct act_rsrmgr_config_s *act_rsrmgr)
+{
+    enum Exception { NULL_OBJECT
+                     , XML_STRDUP_ERROR1
+                     , XML_STRDUP_ERROR2
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("client_config_dup\n"));
+    TRY {
+        if (NULL == arc)
+            THROW(NULL_OBJECT);
+        if (NULL != rsrmgr) {
+            *rsrmgr = *arc->generic;
+            rsrmgr->name = NULL;
+            rsrmgr->switch_file = NULL;
+            if (NULL == (rsrmgr->name = xmlStrdup(arc->generic->name)))
+                THROW(XML_STRDUP_ERROR1);
+            if (NULL == (rsrmgr->switch_file = xmlStrdup(
+                             arc->generic->switch_file)))
+                THROW(XML_STRDUP_ERROR2);
+        } else {
+            LIXA_TRACE(("client_config_dup: rsrmgr=NULL, skipping\n"));
+        } /* if (NULL != rsrmgr) */
+
+        if (NULL != act_rsrmgr) {
+            *act_rsrmgr = *arc;
+        } else {
+            LIXA_TRACE(("client_config_dup: act_rsrmgr=NULL, skipping\n"));
+        } /* if (NULL != act_rsrmgr) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case XML_STRDUP_ERROR1:
+            case XML_STRDUP_ERROR2:
+                ret_cod = LIXA_RC_XML_STRDUP_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* recover memory in the event of an error */
+        if (NONE > excp) {
+            if (NULL != rsrmgr->name)
+                xmlFree(rsrmgr->name);
+            if (NULL != rsrmgr->switch_file)
+                xmlFree(rsrmgr->switch_file);
+        } /* if (NONE > excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_config_dup/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
 
 
 int client_parse(struct client_config_coll_s *ccc,

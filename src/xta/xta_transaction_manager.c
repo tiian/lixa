@@ -227,12 +227,19 @@ xta_transaction_manager_get_transaction(xta_transaction_manager_t *this)
 
 
 int xta_transaction_manager_register(xta_transaction_manager_t *this,
-                                     const xta_xa_resource_t *xa_res)
+                                     xta_xa_resource_t *xa_res)
 {
     enum Exception { NULL_OBJECT1
                      , NULL_OBJECT2
+                     , NULL_OBJECT3
+                     , XA_RESOURCE_REGISTERED
+                     , CLIENT_CONFIG_DUP_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    const xta_xa_resource_config_t *config = NULL;
+    struct rsrmgr_config_s rsrmgr;
+    struct act_rsrmgr_config_s act_rsrmgr;
     
     LIXA_TRACE(("xta_transaction_manager_register\n"));
     TRY {
@@ -242,18 +249,35 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
         /* check the XA Resource object is not NULL */
         if (NULL == xa_res)
             THROW(NULL_OBJECT2);
-
+        /* retrieve the configuration related to the XA resource that's
+         * registering to this transaction manager */
+        if (NULL == (config = xta_xa_resource_get_config(xa_res)))
+            THROW(NULL_OBJECT3);
+        /* send a registration message to the XA Resource */
+        if (LIXA_RC_OK != (ret_cod = xta_xa_resource_registered(
+                               xa_res, this)))
+            THROW(XA_RESOURCE_REGISTERED);
+        /* duplicate the configuration structs to avoid dependency from the
+         * resource object (it's necessary to preserve compatibility with the
+         * LIXA legacy non object oriented legacy functions */
+        if (LIXA_RC_OK != (ret_cod = client_config_dup(
+                               config, &rsrmgr, &act_rsrmgr)))
+            THROW(CLIENT_CONFIG_DUP_ERROR);
         /* append the resource manager to the list of actual configured
            resource managers */
-        client_config_append_rsrmgr(&this->local_ccc,
-                                    xta_xa_resource_get_config(xa_res));
+        client_config_append_rsrmgr(&this->local_ccc, &rsrmgr, &act_rsrmgr);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NULL_OBJECT1:
             case NULL_OBJECT2:
+            case NULL_OBJECT3:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case XA_RESOURCE_REGISTERED:
+                break;
+            case CLIENT_CONFIG_DUP_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

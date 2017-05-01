@@ -77,6 +77,13 @@ xta_native_xa_resource_t *xta_native_xa_resource_new(
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* recovery step in the event of error */
+        if (NONE > excp) {
+            if (NULL != this) {
+                g_free(this);
+                this = NULL;
+            }
+        } /* if (NONE > excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_native_xa_resource_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -296,8 +303,10 @@ void xta_native_xa_resource_clean(xta_native_xa_resource_t *this)
             this->xa_resource.rsrmgr_config.xa_close_info[0] = '\0';
             /* clean pointer from complete to partial structure */
             this->xa_resource.act_rsrmgr_config.generic = NULL;
-            /* unload module */
-            if (NULL != this->xa_resource.act_rsrmgr_config.module) {
+            /* unload module if the resource has not been registered by
+             * a Transaction Manager */
+            if (NULL == this->xa_resource.registered_tm &&
+                NULL != this->xa_resource.act_rsrmgr_config.module) {
                 if (LIXA_RC_OK != (ret_cod = client_config_unload_switch_file(
                                        &this->xa_resource.act_rsrmgr_config)))
                     THROW(CLIENT_CONFIG_UNLOAD_SWITCH_FILE_ERROR);

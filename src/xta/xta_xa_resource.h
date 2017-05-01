@@ -46,6 +46,15 @@
 
 
 /**
+ * This type is a declaration only statement: the real type is defined inside
+ * Transaction Manager header file. Here we just need to store a pointer to
+ * a Transaction Manager inside an XA Resource.
+ */
+typedef struct xta_transaction_manager_s xta_transaction_manager_t;
+
+
+
+/**
  * This type is just a redefinition of the legacy LIXA struct
  * "act_rsrmgr_config_s" to avoid a type with a "strange name" in the API
  */
@@ -69,18 +78,23 @@ typedef struct {
      * Partial description of the XA Resource Manager using legacy LIXA data
      * structures
      */
-    struct rsrmgr_config_s     rsrmgr_config;
+    struct rsrmgr_config_s           rsrmgr_config;
     /**
      * Complete description of the XA Resource Manager using legacy LIXA data
      * structures
      */
-    struct act_rsrmgr_config_s act_rsrmgr_config;
+    struct act_rsrmgr_config_s       act_rsrmgr_config;
     /**
      * The XA resource needs an explicit xa_open call to be opened and
      * xa_close call to be closed. This is the typical behavior or native
      * XA Resource Managers
      */
-    int                        must_be_opened;
+    int                              must_be_opened;
+    /**
+     * The reference to the Transaction Manager that registered this resource
+     * or NULL
+     */
+    const xta_transaction_manager_t *registered_tm;
 } xta_xa_resource_t;
 
 
@@ -117,13 +131,26 @@ extern "C" {
     /**
      * Return a reference (a pointer) to the configuration parameters of the
      * resource.
-     * @param[in] this: XA Resource object
+     * @param[in] this : XA Resource object
      * @return a pointer to the resource configuration record
      */
     const xta_xa_resource_config_t *xta_xa_resource_get_config(
         const xta_xa_resource_t *this);
     
-    
+
+
+    /**
+     * This call back method is invoked by a Transaction Manager when an
+     * Application Program registers an XA Resource to a Transaction Manager.
+     * The TM calls back the XA Resource to notify it has been registered.
+     * @param[in,out] this : XA Resource object
+     * @param[in] tm : Transaction Manager
+     * @return a reason code
+     */
+    int xta_xa_resource_registered(xta_xa_resource_t *this,
+                                   const xta_transaction_manager_t *tm);
+
+
     
     /**
      * Starts work on behalf of a transaction branch specified in xid. If

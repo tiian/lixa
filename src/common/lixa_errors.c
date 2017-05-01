@@ -317,6 +317,9 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_G_TRY_MALLOC_ERROR:
             return "ERROR: 'g_try_malloc'/'g_try_malloc0' function returned "
                 "an error condition";
+        case LIXA_RC_RESOURCE_ALREADY_REGISTERED:
+            return "ERROR: the XA Resource has been already registered to a "
+                "different Transaction Manager";
         default:
             return "ERROR: unknown error";
     } /* switch (ret_cod) */

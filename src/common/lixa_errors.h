@@ -523,9 +523,14 @@ define LIXA_RC_UNLINK_ERROR                  -129
 
 /*
  * NOTE:
- * Range [-1000,-1999] is reserved for XTA specific error codes and must NOT
+ * Range [-500,-599] is reserved for XTA specific error codes and must NOT
  * be used for LIXA generic codes
  */
+/**
+ * The XA Resource has been already registered to a different Transaction
+ * Manager
+ */
+#define LIXA_RC_RESOURCE_ALREADY_REGISTERED    -500
 
 
 

@@ -361,11 +361,15 @@ extern "C" {
     /**
      * Append a resource manager to the list of actual resource managers
      * @param[in,out] ccc : client config collection object
-     * @param[in] record : that describes the resource manager that must be
-     *                     appended
+     * @param[in] rsrmgr : describes the resource manager that must be
+     *                     appended (it can be NULL)
+     * @param[in] act_rsrmgr : that describes the actual resource manager that
+     *                         must be appended (it can be NULL)
      */
-    void client_config_append_rsrmgr(client_config_coll_t *ccc,
-                                     const struct act_rsrmgr_config_s *record);
+    void client_config_append_rsrmgr(
+        client_config_coll_t *ccc,
+        const struct rsrmgr_config_s     *rsrmgr,
+        const struct act_rsrmgr_config_s *act_rsrmgr);
     
 
     
@@ -429,8 +433,29 @@ extern "C" {
      */
     int client_config_display(client_config_coll_t *ccc);
 
-    
 
+
+    /**
+     * Duplicate all the allocated objects connected to an
+     * ACTual ReSouRceManaGeR config struct
+     * @param[in] arc : the object that must be duplicated
+     * @param[out] rsrmgr : the pointer to a pre-allocated space that will be
+     *                      used to store the duplicate of the resource manager
+     *                      config referenced by the first argument (arc). Use
+     *                      NULL if it should not be duplicated
+     * @param[out] act_rsrmgr : the pointer to a pre-allocated space that will
+     *                          be used to store the duplicate of the actual
+     *                          resource manager config referenced by the first
+     *                          argument (arc). Use NULL if it should not be
+     *                          duplicated
+     * @return a reason code
+     */
+    int client_config_dup(const struct act_rsrmgr_config_s *arc,
+                          struct rsrmgr_config_s     *rsrmgr,
+                          struct act_rsrmgr_config_s *act_rsrmgr);
+
+
+   
     /**
      * Parse the configuration tree
      * @param ccc OUT server configuration structure

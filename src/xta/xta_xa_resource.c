@@ -62,6 +62,8 @@ int xta_xa_resource_init(xta_xa_resource_t *this,
         this->act_rsrmgr_config.xa_switch = NULL;
         /* set other object properties */
         this->must_be_opened = must_be_opened;
+        /* set no Transaction Manager as an initial state */
+        this->registered_tm = NULL;
         
         THROW(NONE);
     } CATCH {
@@ -95,8 +97,9 @@ const xta_xa_resource_config_t *xta_xa_resource_get_config(
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT);
-        /* pass a reference: is it better to create a new object and return
-         * it??? @@@*/
+        /* duplicate the config structs */
+        
+        /* return the copy of the config structs */
         config = &this->act_rsrmgr_config;
         
         THROW(NONE);
@@ -115,6 +118,63 @@ const xta_xa_resource_config_t *xta_xa_resource_get_config(
     LIXA_TRACE(("xta_xa_resource_get_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return config;
+}
+
+
+
+int xta_xa_resource_registered(xta_xa_resource_t *this,
+                               const xta_transaction_manager_t *tm)
+{
+    enum Exception { NULL_OBJECT1
+                     , NULL_OBJECT2
+                     , RESOURCE_ALREADY_REGISTERED
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_xa_resource_registered\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT1);
+        if (NULL == tm)
+            THROW(NULL_OBJECT2);
+        if (NULL != this->registered_tm) {
+            /* already registered resource, checking the Transaction Manager */
+            if (tm != this->registered_tm) {
+                LIXA_TRACE(("xta_xa_resource_registered: this resource has "
+                            "been already registered by another TM: %p\n",
+                            this->registered_tm));
+                THROW(RESOURCE_ALREADY_REGISTERED);
+            } else {
+                LIXA_TRACE(("xta_xa_resource_registered: this resource has "
+                            "been already registered by this TM, "
+                            "skipping...\n"));
+            } /* if (tm != this->registered_tm) */
+        } else {
+            this->registered_tm = tm;
+            LIXA_TRACE(("xta_xa_resource_registered: this resource is now "
+                        "registered by TM: %p\n", this->registered_tm));
+        } /* if (NULL != this->registered_tm) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT1:
+            case NULL_OBJECT2:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case RESOURCE_ALREADY_REGISTERED:
+                ret_cod = LIXA_RC_RESOURCE_ALREADY_REGISTERED;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_xa_resource_registered/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 
