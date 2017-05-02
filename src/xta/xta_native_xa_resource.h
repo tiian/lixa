@@ -45,12 +45,6 @@ typedef struct {
     union {
         xta_xa_resource_t  xa_resource;
     };
-    /**
-     * The object refers to a Native XA Resource that has been created
-     * dynamically: it has not been loaded statically at startup (it's not
-     * described inside lixac.conf file
-     */
-    int                    dynamic;
 } xta_native_xa_resource_t;
 
 

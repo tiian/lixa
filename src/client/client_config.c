@@ -506,6 +506,7 @@ int client_config_validate(client_config_coll_t *ccc)
                             record.generic = conf_rsrmgr;
                             record.module = NULL;
                             record.xa_switch = NULL;
+                            record.dynamically_defined = FALSE;
                             client_config_append_rsrmgr(ccc, NULL, &record);
                             LIXA_TRACE(("client_config_validate: resource "
                                         "manager '%s' found at pos %u in "
@@ -569,6 +570,7 @@ void client_config_append_rsrmgr(client_config_coll_t *ccc,
         LIXA_TRACE(("client_config_append_rsrmgr: rsrmgr=NULL; skipping\n"));
     }
     if (NULL != act_rsrmgr) {
+        client_config_display_rsrmgr(act_rsrmgr);
         g_array_append_val(ccc->actconf.rsrmgrs, *act_rsrmgr);
     } else {
         LIXA_TRACE(("client_config_append_rsrmgr: act_rsrmgr=NULL; "
@@ -600,7 +602,7 @@ int client_config_load_all_switch_files(client_config_coll_t *ccc)
                         act_rsrmgr->generic->name,
                         act_rsrmgr->generic->switch_file));
             if (LIXA_RC_OK != (ret_cod = client_config_load_switch_file(
-                                   act_rsrmgr)))
+                                   act_rsrmgr, FALSE)))
                 THROW(LOAD_SWITCH_FILE_ERROR);
         }
 
@@ -621,7 +623,8 @@ int client_config_load_all_switch_files(client_config_coll_t *ccc)
 
 
 
-int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr)
+int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr,
+                                   int dynamically_defined)
 {
     enum Exception { G_MODULE_OPEN_ERROR
                      , G_MODULE_SYMBOL_ERROR
@@ -677,6 +680,7 @@ int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr)
                         "true" : "false"));
             act_rsrmgr->module = module;
             act_rsrmgr->xa_switch = xa_switch();
+            act_rsrmgr->dynamically_defined = dynamically_defined;
         }
             
         THROW(NONE);
@@ -859,23 +863,32 @@ int client_config_unload_all_switch_files(client_config_coll_t *ccc)
     TRY {
         guint i;
 
+        LIXA_TRACE(("client_config_unload_all_switch_files: total configured "
+                    "resource managers: %u\n", ccc->actconf.rsrmgrs->len));
         for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 ccc->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            LIXA_TRACE(("client_config_unload_all_switch_files: "
-                        "resource manager # %u, "
-                        "defined in config as '%s', module address %p, "
-                        "xa_switch->name='%s', xa_switch->flags=%ld\n", i,
-                        act_rsrmgr->generic->name,
-                        act_rsrmgr->module,
-                        act_rsrmgr->xa_switch ?
-                        act_rsrmgr->xa_switch->name : "",
-                        act_rsrmgr->xa_switch ?
-                        act_rsrmgr->xa_switch->flags : 0));
-            if (LIXA_RC_OK != (ret_cod = client_config_unload_switch_file(
-                                   act_rsrmgr)))
-                THROW(UNLOAD_SWITCH_FILE_ERROR);
-        }
+            client_config_display_rsrmgr(act_rsrmgr);
+            if (!act_rsrmgr->dynamically_defined) {
+                LIXA_TRACE(("client_config_unload_all_switch_files: "
+                            "resource manager # %u, "
+                            "defined in config as '%s', module address %p, "
+                            "xa_switch->name='%s', xa_switch->flags=%ld\n", i,
+                            act_rsrmgr->generic->name,
+                            act_rsrmgr->module,
+                            act_rsrmgr->xa_switch ?
+                            act_rsrmgr->xa_switch->name : "",
+                            act_rsrmgr->xa_switch ?
+                            act_rsrmgr->xa_switch->flags : 0));
+                if (LIXA_RC_OK != (ret_cod = client_config_unload_switch_file(
+                                       act_rsrmgr)))
+                    THROW(UNLOAD_SWITCH_FILE_ERROR);
+            } else {
+                LIXA_TRACE(("client_config_unload_all_switch_files: "
+                            "resource manager # %u has been dynamically "
+                            "defined, skipping it...\n", i));
+            } /* if (act_rsrmgr->dynamically_defined) */
+        } /* for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) */
 
         THROW(NONE);
     } CATCH {
@@ -1002,6 +1015,25 @@ int client_config_display(client_config_coll_t *ccc)
     LIXA_TRACE(("client_config_display/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+void client_config_display_rsrmgr(const struct act_rsrmgr_config_s *arc)
+{
+    LIXA_TRACE(("client_config_display_rsrmgr: generic->name = '%s'\n",
+                arc->generic->name));
+    LIXA_TRACE(("client_config_display_rsrmgr: generic->switch_file = '%s'\n",
+                arc->generic->switch_file));
+    LIXA_TRACE(("client_config_display_rsrmgr: generic->xa_open_info = '%s'\n",
+                arc->generic->xa_open_info));
+    LIXA_TRACE(("client_config_display_rsrmgr: generic->xa_close_info ="
+                " '%s'\n", arc->generic->xa_close_info));
+    LIXA_TRACE(("client_config_display_rsrmgr: module = %p\n", arc->module));
+    LIXA_TRACE(("client_config_display_rsrmgr: xa_switch = %p\n",
+                arc->xa_switch));
+    LIXA_TRACE(("client_config_display_rsrmgr: dynamically_defined = %d\n",
+                arc->dynamically_defined));
 }
 
 

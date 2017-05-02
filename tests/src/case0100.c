@@ -109,16 +109,30 @@ int main(int argc, char *argv[])
         return 1;
     }
 #endif
-    /* register the resources to the transaction manager */
+    /* register the dynamic native XA Resource to the transaction manager */
     if (LIXA_RC_OK != (rc = xta_transaction_manager_register(
                            tm, dynamic_native_xa_res))) {
         printf("%s| xta_transaction_manager_register/dynamic_native_xa_res: "
                "returned %d\n", rc);
         return 1;
     }
+    /* register the native XA Resource to the transaction manager: this step
+     * is useless but it's not dangerous */
+    /*
+    if (LIXA_RC_OK != (rc = xta_transaction_manager_register(
+                           tm, native_xa_res))) {
+        printf("%s| xta_transaction_manager_register/native_xa_res: "
+               "returned %d\n", rc);
+        return 1;
+    }
+    */
     /*
      * some code here ... @@@
      */
+    /*
+     * delete Transaction Manager object
+     */
+    xta_transaction_manager_delete(tm);
 #ifdef HAVE_POSTGRESQL
     /*
      * delete the PostgreSQL XA resource object
@@ -139,10 +153,6 @@ int main(int argc, char *argv[])
      * delete native XA Resource object
      */
     xta_native_xa_resource_delete(native_xa_res);
-    /*
-     * delete Transaction Manager object
-     */
-    xta_transaction_manager_delete(tm);
     /*
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     if (TX_ERROR == rc) {

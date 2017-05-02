@@ -188,7 +188,7 @@ int xta_native_xa_resource_init(
             THROW(XA_RESOURCE_INIT_ERROR);
         if (rmid < 0) {
             /* rmid < 0: this is a dynamic definition */
-            this->dynamic = TRUE;
+            this->xa_resource.dynamic = TRUE;
             if (NULL == name || NULL == switch_file || NULL == open_info ||
                 NULL == close_info)
                 THROW(INVALID_OPTION);
@@ -224,13 +224,21 @@ int xta_native_xa_resource_init(
                 '\0';
             /* load the switch file for the resource manager */
             if (LIXA_RC_OK != (ret_cod = client_config_load_switch_file(
-                                   &this->xa_resource.act_rsrmgr_config)))
+                                   &this->xa_resource.act_rsrmgr_config,
+                                   TRUE)))
                 THROW(CLIENT_CONFIG_LOAD_SWITCH_FILE_ERROR);
+            LIXA_TRACE(("xta_native_xa_resource_init: initialized resource "
+                        "name='%s', switch_file='%s', xa_open_info='%s', "
+                        "xa_close_info='%s'\n",
+                        this->xa_resource.rsrmgr_config.name,
+                        this->xa_resource.rsrmgr_config.switch_file,
+                        this->xa_resource.rsrmgr_config.xa_open_info,
+                        this->xa_resource.rsrmgr_config.xa_close_info));
         } else {
             struct act_rsrmgr_config_s *act_rsrmgr;
             /* rmid >= 0: get the properties from global configuration that
              * has been loaded by xta_transaction_manager_new() */
-            this->dynamic = FALSE;
+            this->xa_resource.dynamic = FALSE;
             if (rmid >= config->actconf.rsrmgrs->len) {
                 LIXA_TRACE(("xta_native_xa_resource_init: rmid=%d is out of "
                             "range [0,%u]\n",
@@ -287,7 +295,7 @@ void xta_native_xa_resource_clean(xta_native_xa_resource_t *this)
     LIXA_TRACE(("xta_native_xa_resource_clean\n"));
     TRY {
         /* clean properties only for dynamically created resources */
-        if (this->dynamic) {
+        if (this->xa_resource.dynamic) {
             /* clean resource name */
             if (NULL != this->xa_resource.rsrmgr_config.name) {
                 g_free(this->xa_resource.rsrmgr_config.name);
@@ -303,10 +311,8 @@ void xta_native_xa_resource_clean(xta_native_xa_resource_t *this)
             this->xa_resource.rsrmgr_config.xa_close_info[0] = '\0';
             /* clean pointer from complete to partial structure */
             this->xa_resource.act_rsrmgr_config.generic = NULL;
-            /* unload module if the resource has not been registered by
-             * a Transaction Manager */
-            if (NULL == this->xa_resource.registered_tm &&
-                NULL != this->xa_resource.act_rsrmgr_config.module) {
+            /* unload module */
+            if (NULL != this->xa_resource.act_rsrmgr_config.module) {
                 if (LIXA_RC_OK != (ret_cod = client_config_unload_switch_file(
                                        &this->xa_resource.act_rsrmgr_config)))
                     THROW(CLIENT_CONFIG_UNLOAD_SWITCH_FILE_ERROR);

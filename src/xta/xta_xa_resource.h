@@ -85,8 +85,14 @@ typedef struct {
      */
     struct act_rsrmgr_config_s       act_rsrmgr_config;
     /**
+     * The object refers to an XA Resource that has been created
+     * dynamically: it has not been loaded statically at startup (it's not
+     * described inside lixac.conf file
+     */
+    int                              dynamic;
+    /**
      * The XA resource needs an explicit xa_open call to be opened and
-     * xa_close call to be closed. This is the typical behavior or native
+     * xa_close call to be closed. This is the typical behavior of native
      * XA Resource Managers
      */
     int                              must_be_opened;
@@ -138,6 +144,17 @@ extern "C" {
         const xta_xa_resource_t *this);
     
 
+
+    /**
+     * Check if the XA Resource has been created dynamically or not
+     * @param[in] this : XA Resource object
+     * @return a boolean value
+     */
+    static inline int xta_xa_resource_is_dynamic(
+        const xta_xa_resource_t *this) {
+        return this->dynamic; }
+
+    
 
     /**
      * This call back method is invoked by a Transaction Manager when an

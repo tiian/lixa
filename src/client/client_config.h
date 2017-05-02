@@ -180,6 +180,12 @@ struct act_rsrmgr_config_s {
      * manager
      */
     struct xa_switch_t     *xa_switch;
+    /**
+     * TRUE if the configuration has been dynamically defined by the
+     * Application Program using XTA interface; FALSE if the configuration has
+     * been statically defined inside the lixac.conf file
+     */
+    int                     dynamically_defined;
 };
 
 
@@ -385,9 +391,15 @@ extern "C" {
     /**
      * Load the switch file related to a Resource Manager
      * @param[in,out] act_rsrmgr : properties of a resource manager
+     * @param[in] dynamically_defined : TRUE if the configuration has been
+     *                                  dynamically defined by the Application
+     *                                  Program using XTA interface; FALSE if
+     *                                  the configuration has been statically
+     *                                  defined inside the lixac.conf file
      * @return a reason code
      */
-    int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr);
+    int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr,
+                                       int dynamically_defined);
 
 
 
@@ -434,6 +446,15 @@ extern "C" {
     int client_config_display(client_config_coll_t *ccc);
 
 
+
+    /**
+     * Display the configuration of an actual resource manager
+     * (debugging purpose only)
+     * @param[in] arc : actual resource manager config
+     */
+    void client_config_display_rsrmgr(const struct act_rsrmgr_config_s *arc);
+
+    
 
     /**
      * Duplicate all the allocated objects connected to an

@@ -64,6 +64,8 @@ int xta_xa_resource_init(xta_xa_resource_t *this,
         this->must_be_opened = must_be_opened;
         /* set no Transaction Manager as an initial state */
         this->registered_tm = NULL;
+        /* set dynamic to TRUE: XTA is typically dynamic with few exceptions */
+        this->dynamic = TRUE;
         
         THROW(NONE);
     } CATCH {
