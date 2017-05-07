@@ -563,15 +563,39 @@ void client_config_append_rsrmgr(client_config_coll_t *ccc,
                                  const struct rsrmgr_config_s     *rsrmgr,
                                  const struct act_rsrmgr_config_s *act_rsrmgr)
 {
+    guint i; /* @@@ remove me */
+    
     LIXA_TRACE(("client_config_append_rsrmgr\n"));
+        
+    /* @@@ remove me begin */
+    LIXA_TRACE(("client_config_append_rsrmgr: "
+                "ccc->actconf.rsrmgrs->len=%u\n",
+                ccc->actconf.rsrmgrs->len));
+    for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
+        struct act_rsrmgr_config_s *act_rsrmgr1 = &g_array_index(
+            ccc->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
+        client_config_display_rsrmgr(act_rsrmgr1);
+    }
+    /* @@@ remove me end */
+        
     if (NULL != rsrmgr) {
         g_array_append_val(ccc->rsrmgrs, *rsrmgr);
     } else {
         LIXA_TRACE(("client_config_append_rsrmgr: rsrmgr=NULL; skipping\n"));
     }
     if (NULL != act_rsrmgr) {
-        client_config_display_rsrmgr(act_rsrmgr);
         g_array_append_val(ccc->actconf.rsrmgrs, *act_rsrmgr);
+
+        /* @@@ remove me begin */
+        LIXA_TRACE(("client_config_append_rsrmgr: "
+                    "ccc->actconf.rsrmgrs->len=%u\n",
+                    ccc->actconf.rsrmgrs->len));
+        for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
+            struct act_rsrmgr_config_s *act_rsrmgr2 = &g_array_index(
+                ccc->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
+            client_config_display_rsrmgr(act_rsrmgr2);
+        }
+        /* @@@ remove me end */
     } else {
         LIXA_TRACE(("client_config_append_rsrmgr: act_rsrmgr=NULL; "
                     "skipping\n"));

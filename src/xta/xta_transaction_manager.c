@@ -266,6 +266,9 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
                resource managers */
             client_config_append_rsrmgr(&this->local_ccc, &rsrmgr,
                                         &act_rsrmgr);
+        } else {
+            LIXA_TRACE(("xta_transaction_manager_register: this is a static "
+                        "resource, skipping config dup...\n"));
         } /* if (!xta_xa_resource_is_dynamic(xa_res)) */
         /* send a registration message to the XA Resource */
         if (LIXA_RC_OK != (ret_cod = xta_xa_resource_registered(

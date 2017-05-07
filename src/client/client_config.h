@@ -219,7 +219,7 @@ struct profile_config_s {
  */
 struct actual_config_s {
     /**
-     * Current transaction manager
+     * Current state server
      */
     struct sttsrv_config_s *sttsrv;
     /**
@@ -277,7 +277,7 @@ struct client_config_coll_s {
      */
     struct actual_config_s       actconf;
     /**
-     * Transaction managers' configuration
+     * State servers' configuration
      */
     GArray                      *sttsrvs;
     /**
