@@ -1,7 +1,3 @@
-Understand the issue reported by Valgrind in case0100: the GArray of Resource
-Managers must be replaced with GPtrArray because with XTA Resource Managers
-are added dynamically and GArray realloc the structure and breaks the pointers.
-
 Restart from xta_transaction_manager_register: populate record content from
 xta_xa_resource (a lot of work!) : search for @@@
 

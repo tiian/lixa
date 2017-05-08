@@ -232,13 +232,14 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
     enum Exception { NULL_OBJECT1
                      , NULL_OBJECT2
                      , NULL_OBJECT3
+                     , G_TRY_MALLOC_ERROR
                      , CLIENT_CONFIG_DUP_ERROR
                      , XA_RESOURCE_REGISTERED
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     const xta_xa_resource_config_t *config = NULL;
-    struct rsrmgr_config_s rsrmgr;
+    struct rsrmgr_config_s *rsrmgr = NULL;
     struct act_rsrmgr_config_s act_rsrmgr;
     
     LIXA_TRACE(("xta_transaction_manager_register\n"));
@@ -256,16 +257,22 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
              * registering to this transaction manager */
             if (NULL == (config = xta_xa_resource_get_config(xa_res)))
                 THROW(NULL_OBJECT3);
+            /* allocate a new record for the Resource Manager description */
+            if (NULL == (rsrmgr = g_try_malloc(
+                             sizeof(struct rsrmgr_config_s))))
+                THROW(G_TRY_MALLOC_ERROR);
             /* duplicate the configuration structs to avoid dependency from the
              * resource object (it's necessary to preserve compatibility with
              * the LIXA legacy non object oriented legacy functions */
             if (LIXA_RC_OK != (ret_cod = client_config_dup(
-                                   config, &rsrmgr, &act_rsrmgr)))
+                                   config, rsrmgr, &act_rsrmgr)))
                 THROW(CLIENT_CONFIG_DUP_ERROR);
             /* append the resource manager to the list of actual configured
                resource managers */
-            client_config_append_rsrmgr(&this->local_ccc, &rsrmgr,
+            client_config_append_rsrmgr(&this->local_ccc, rsrmgr,
                                         &act_rsrmgr);
+            /* reset the record pointer */
+            rsrmgr = NULL;
         } else {
             LIXA_TRACE(("xta_transaction_manager_register: this is a static "
                         "resource, skipping config dup...\n"));
@@ -283,6 +290,9 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
             case NULL_OBJECT3:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
+                break;
             case XA_RESOURCE_REGISTERED:
                 break;
             case CLIENT_CONFIG_DUP_ERROR:
@@ -293,6 +303,12 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* recovery memory if necessary */
+        if (NULL != rsrmgr) {
+            LIXA_TRACE(("xta_transaction_manager_register: recoverying "
+                        "record memory\n"));
+            g_free(rsrmgr);
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_manager_register/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

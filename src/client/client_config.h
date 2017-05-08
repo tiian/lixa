@@ -281,9 +281,10 @@ struct client_config_coll_s {
      */
     GArray                      *sttsrvs;
     /**
-     * Resource managers' configuration
+     * Resource managers' configuration. It must be an array of pointers
+     * because the item are referenced by "actconf"
      */
-    GArray                      *rsrmgrs;
+    GPtrArray                   *rsrmgrs;
     /**
      * Profiles' configuration
      */
