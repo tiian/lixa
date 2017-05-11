@@ -87,6 +87,8 @@
 
 
 
+const char *LIXA_NULL_STRING = "{null}";
+
 const xmlChar *LIXA_XML_CONFIG_LISTENER = (xmlChar *)"listener";
 const xmlChar *LIXA_XML_CONFIG_CLIENT = (xmlChar *)"client";
 const xmlChar *LIXA_XML_CONFIG_SERVER = (xmlChar *)"server";

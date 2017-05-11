@@ -101,6 +101,11 @@
 
 
 /**
+ * NULL string for output messages
+ */
+extern const char *LIXA_NULL_STRING;
+
+/**
  * Label used to specify "listener" tag
  */
 extern const xmlChar *LIXA_XML_CONFIG_LISTENER;

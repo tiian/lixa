@@ -95,6 +95,28 @@
 
 
 
+#ifndef STRORNULL
+/**
+ * STRing OR NULL:
+ * it can be used to print C strings even if they could be NULL; if passed
+ * string pointer is NULL, it returns a pointer to @ref LIXA_NULL_STRING
+ */
+# define STRORNULL(a)   (NULL != a ? (const char *)a : LIXA_NULL_STRING)
+#endif
+
+
+
+#ifndef STROREMPTY
+/**
+ * STRing OR EMPTY:
+ * it can be used to print C strings even if they could be NULL; if passed
+ * string pointer is NULL, it returns ""
+ */
+# define STROREMPTY(a)   (NULL != a ? (const char *)a : "")
+#endif
+
+
+
 /**
  * This value is the null file descriptor convention
  */

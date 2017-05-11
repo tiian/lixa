@@ -359,7 +359,8 @@ case0037_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(case0037_LDFLAGS) $(LDFLAGS) -o $@
 am_case0038_OBJECTS = case0038-case0038.$(OBJEXT)
 case0038_OBJECTS = $(am_case0038_OBJECTS)
-case0038_DEPENDENCIES = ../../src/client/liblixac.la
+case0038_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la
 case0038_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(case0038_LDFLAGS) $(LDFLAGS) -o $@
@@ -861,7 +862,9 @@ case0037_LDFLAGS = @POSTGRESQL_LDFLAGS@
 case0038_SOURCES = case0038.c
 case0038_CPPFLAGS = @ORACLE_OCI_CFLAGS@ -I../../src/client
 case0038_LDFLAGS = @ORACLE_OCI_LDFLAGS@
-case0038_LDADD = ../../src/client/liblixac.la -lclntsh
+case0038_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
+	-lclntsh
+
 case0039_SOURCES = case0039.c
 case0039_CPPFLAGS = @IBMDB2_CLI_CPPFLAGS@ -I../../src/client
 case0039_LDFLAGS = @IBMDB2_CLI_LDFLAGS@

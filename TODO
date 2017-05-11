@@ -1,6 +1,3 @@
-Restart from xta_transaction_manager_register: populate record content from
-xta_xa_resource (a lot of work!) : search for @@@
-
 Compute job before "begin", after all resources registered, directly from
 local copy of clientconfigcollection in TransactionManager and not from 
 lixac.conf

@@ -943,7 +943,10 @@ int client_config_unload_switch_file(struct act_rsrmgr_config_s *act_rsrmgr)
     
     LIXA_TRACE(("client_config_unload_switch_file\n"));
     TRY {
-        if (!g_module_close(act_rsrmgr->module)) {
+        if (NULL == act_rsrmgr->module) {
+            LIXA_TRACE(("client_config_unload_switch_file: module is NULL, "
+                        "skipping...\n"));
+        } else if (!g_module_close(act_rsrmgr->module)) {
             LIXA_TRACE(("client_config_unload_switch_file: "
                         "g_module_error='%s'\n", g_module_error()));
             THROW(G_MODULE_CLOSE_ERROR);
@@ -1048,9 +1051,9 @@ int client_config_display(client_config_coll_t *ccc)
 void client_config_display_rsrmgr(const struct act_rsrmgr_config_s *arc)
 {
     LIXA_TRACE(("client_config_display_rsrmgr: generic->name = '%s'\n",
-                arc->generic->name));
+                STRORNULL(arc->generic->name)));
     LIXA_TRACE(("client_config_display_rsrmgr: generic->switch_file = '%s'\n",
-                arc->generic->switch_file));
+                STRORNULL(arc->generic->switch_file)));
     LIXA_TRACE(("client_config_display_rsrmgr: generic->xa_open_info = '%s'\n",
                 arc->generic->xa_open_info));
     LIXA_TRACE(("client_config_display_rsrmgr: generic->xa_close_info ="
@@ -1082,9 +1085,11 @@ int client_config_dup(const struct act_rsrmgr_config_s *arc,
             *rsrmgr = *arc->generic;
             rsrmgr->name = NULL;
             rsrmgr->switch_file = NULL;
-            if (NULL == (rsrmgr->name = xmlStrdup(arc->generic->name)))
+            if (NULL != arc->generic->name &&
+                NULL == (rsrmgr->name = xmlStrdup(arc->generic->name)))
                 THROW(XML_STRDUP_ERROR1);
-            if (NULL == (rsrmgr->switch_file = xmlStrdup(
+            if (NULL != arc->generic->switch_file &&
+                NULL == (rsrmgr->switch_file = xmlStrdup(
                              arc->generic->switch_file)))
                 THROW(XML_STRDUP_ERROR2);
         } else {
