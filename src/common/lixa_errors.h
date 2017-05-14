@@ -495,29 +495,33 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_G_CHECKSUM_NEW_ERROR           -302
 /**
+ * "g_hash_table_new" function error
+ */
+#define LIXA_RC_G_HASH_TABLE_NEW_ERROR         -303
+/**
  * "g_module_close" function error
  */
-#define LIXA_RC_G_MODULE_CLOSE_ERROR           -303
+#define LIXA_RC_G_MODULE_CLOSE_ERROR           -304
 /**
  * "g_module_open" function error
  */
-#define LIXA_RC_G_MODULE_OPEN_ERROR            -304
+#define LIXA_RC_G_MODULE_OPEN_ERROR            -305
 /**
  * "g_module_symbol" function error
  */
-#define LIXA_RC_G_MODULE_SYMBOL_ERROR          -305
+#define LIXA_RC_G_MODULE_SYMBOL_ERROR          -306
 /**
  * "g_strdup" function error
  */
-#define LIXA_RC_G_STRDUP_ERROR                 -306
+#define LIXA_RC_G_STRDUP_ERROR                 -307
 /**
  * "g_thread_create" function error
  */
-#define LIXA_RC_G_THREAD_CREATE_ERROR          -307
+#define LIXA_RC_G_THREAD_CREATE_ERROR          -308
 /**
  * "g_try_malloc"/"g_try_malloc0" function error
  */
-#define LIXA_RC_G_TRY_MALLOC_ERROR             -308
+#define LIXA_RC_G_TRY_MALLOC_ERROR             -309
 
 
 

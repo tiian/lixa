@@ -300,6 +300,9 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_G_CHECKSUM_NEW_ERROR:
             return "ERROR: 'g_checksum_new' function returned an "
                 "error condition";
+        case LIXA_RC_G_HASH_TABLE_NEW_ERROR:
+            return "ERROR: 'g_hash_table_new' function returned an "
+                "error condition";
         case LIXA_RC_G_MODULE_CLOSE_ERROR:
             return "ERROR: 'g_module_close' function returned an "
                 "error condition";

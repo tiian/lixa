@@ -1,3 +1,5 @@
+restart from xta_transaction_manager_begin
+
 Compute job before "begin", after all resources registered, directly from
 local copy of clientconfigcollection in TransactionManager and not from 
 lixac.conf

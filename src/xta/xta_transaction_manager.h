@@ -64,6 +64,11 @@ typedef struct xta_transaction_manager_s {
      * limitation
      */
     xta_transaction_manager_config_t local_ccc;
+    /**
+     * Currently managed Transaction objects,
+     * @see xta_transaction_manager_begin
+     */
+    GHashTable                      *transactions;
 } xta_transaction_manager_t;
 
 

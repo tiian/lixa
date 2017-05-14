@@ -319,16 +319,29 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
 
 int xta_transaction_manager_begin(xta_transaction_manager_t *this)
 {
-    enum Exception { NONE } excp;
+    enum Exception { G_HASH_TABLE_NEW_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_manager_begin\n"));
     TRY {
+        GThread *self = NULL;
+        
+        /* check if the hast table as been already created */
+        if (NULL == this->transactions) {
+            if (NULL == (this->transactions = g_hash_table_new(NULL, NULL)))
+                THROW(G_HASH_TABLE_NEW_ERROR);
+        } /* if (NULL == this->transactions) */
+        /* check if the current thread has already started a transaction */
+        
         /* @@@ implement me */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case G_HASH_TABLE_NEW_ERROR:
+                ret_cod = LIXA_RC_G_HASH_TABLE_NEW_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
