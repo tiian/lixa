@@ -112,6 +112,10 @@
  * Only maintenance mode is allowed
  */
 #define LIXA_RC_MAINTENANCE_MODE               +10
+/**
+ * The current thread has already started a transaction and it's still active
+ */
+#define LIXA_RC_TX_ALREADY_STARTED             +11
 
 
 
@@ -139,8 +143,8 @@
  */
 #define LIXA_RC_NETWORK_EVENT_ERROR             -4
 /**
- * A passed object/option/arg is NULL and it can NOT be inferred from a default
- * value
+ * A passed or returned object/option/arg is NULL and it can NOT be inferred
+ * from a default value
  */
 #define LIXA_RC_NULL_OBJECT                     -5
 /**

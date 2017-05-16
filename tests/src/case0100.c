@@ -137,11 +137,22 @@ int main(int argc, char *argv[])
     /* register the PostgreSQL XA Resource to the transaction manager */
     if (LIXA_RC_OK != (rc = xta_transaction_manager_register(
     tm, postgresql_xa_res))) {
-    printf("%s| xta_transaction_manager_register/postgresql_xa_res: "
-        "returned %d\n", pgm, rc);
+        printf("%s| xta_transaction_manager_register/postgresql_xa_res: "
+               "returned %d\n", pgm, rc);
         return 1;
     }
 #endif
+    /* start a new transaction for this thread */
+    if (LIXA_RC_OK != (rc = xta_transaction_manager_begin(tm))) {
+        printf("%s| xta_transaction_manager_begin: returned %d\n", pgm, rc);
+        return 1;
+    }   
+    /* start a new transaction for this thread: it can't be done */
+    if (LIXA_RC_TX_ALREADY_STARTED != (
+            rc = xta_transaction_manager_begin(tm))) {
+        printf("%s| xta_transaction_manager_begin: returned %d\n", pgm, rc);
+        return 1;
+    }   
     
     /*
      * some code here ... @@@

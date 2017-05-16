@@ -79,10 +79,11 @@ void xta_transaction_delete(xta_transaction_t *this)
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("xta_transaction_delete\n"));
+    LIXA_TRACE(("xta_transaction_delete: destroying %p...\n", this));
     TRY {
         /* @@@ destroy the object content if necessary */
 
+        /* release the memory of this object */
         g_free(this);
         
         THROW(NONE);

@@ -53,6 +53,9 @@ const char *lixa_strerror(int ret_cod)
         ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
     
     switch (ret_cod) {
+        case LIXA_RC_TX_ALREADY_STARTED:
+            return "WARNING: the current thread has already started a "
+                "transaction and it's still active";
         case LIXA_RC_MAINTENANCE_MODE:
             return "WARNING: maintenance mode execution only";
         case LIXA_RC_ASKED_SHUTDOWN:
@@ -89,7 +92,8 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_NETWORK_EVENT_ERROR:
             return "ERROR: an unespected network event raised";
         case LIXA_RC_NULL_OBJECT:
-            return "ERROR: an argument is null";
+            return "ERROR: a passed or returned object/option/argument "
+                "is NULL";
         case LIXA_RC_CONTAINER_FULL:
             return "ERROR: the container is full and cannot store more "
                 "elements";

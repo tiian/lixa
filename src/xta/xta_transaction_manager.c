@@ -136,12 +136,20 @@ void xta_transaction_manager_delete(xta_transaction_manager_t *this)
     
     LIXA_TRACE(("xta_transaction_manager_delete\n"));
     TRY {
+        /* destroy transaction objects if any */
+        if (NULL != this->transactions) {
+            g_hash_table_destroy(this->transactions);
+            this->transactions = NULL;
+        } /* if (NULL != this->transactions) */
+        
         /* unconfigure and release the memory related to client configuration
            collection */
         if (LIXA_RC_OK != (ret_cod = client_unconfig(&this->local_ccc, FALSE)))
             THROW(CLIENT_UNCONFIG_ERROR);
+        
         /* free the memory associated to client status */
         client_status_free(&this->client_status);
+        
         /* destroy the object itself */
         g_free(this);
         
@@ -320,21 +328,47 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
 int xta_transaction_manager_begin(xta_transaction_manager_t *this)
 {
     enum Exception { G_HASH_TABLE_NEW_ERROR
+                     , TX_ALREADY_STARTED
+                     , NULL_OBJECT
+                     , INTERNAL_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    xta_transaction_t *tx = NULL;
     
     LIXA_TRACE(("xta_transaction_manager_begin\n"));
     TRY {
-        GThread *self = NULL;
+        GThread *self = g_thread_self();
+        GThread *lookup = NULL;
         
-        /* check if the hast table as been already created */
+        /* check if the hash table as been already created */
         if (NULL == this->transactions) {
-            if (NULL == (this->transactions = g_hash_table_new(NULL, NULL)))
+            if (NULL == (this->transactions = g_hash_table_new_full(
+                             NULL, NULL, NULL,
+                             (GDestroyNotify)xta_transaction_delete)))
                 THROW(G_HASH_TABLE_NEW_ERROR);
         } /* if (NULL == this->transactions) */
-        /* check if the current thread has already started a transaction */
         
-        /* @@@ implement me */
+        /* check if the current thread has already started a transaction */
+        if (NULL != (lookup = g_hash_table_lookup(this->transactions, self))) {
+            LIXA_TRACE(("xta_transaction_manager_begin: this thread has "
+                        "already started a transaction and a second one "
+                        "cannot be started, skipping...\n"));
+            THROW(TX_ALREADY_STARTED);
+        }
+
+        /* allocate a new transaction object */
+        if (NULL == (tx = xta_transaction_new()))
+            THROW(NULL_OBJECT);
+
+        /* insert the transaction object in the hash map */
+        if (!g_hash_table_insert(this->transactions, self, tx)) {
+            THROW(INTERNAL_ERROR);
+        }
+        
+        /* @@@ implement some code related to XID... */
+
+        /* avoid memory recovery for this object that's OK */
+        tx = NULL;
         
         THROW(NONE);
     } CATCH {
@@ -342,12 +376,24 @@ int xta_transaction_manager_begin(xta_transaction_manager_t *this)
             case G_HASH_TABLE_NEW_ERROR:
                 ret_cod = LIXA_RC_G_HASH_TABLE_NEW_ERROR;
                 break;
+            case TX_ALREADY_STARTED:
+                ret_cod = LIXA_RC_TX_ALREADY_STARTED;
+                break;
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* memory recovery */
+        if (NULL != tx)
+            xta_transaction_delete(tx);
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_manager_begin/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
