@@ -54,6 +54,11 @@ typedef client_config_coll_t xta_transaction_manager_config_t;
  */
 typedef struct xta_transaction_manager_s {
     /**
+     * A mutex that's necessary to synchronize some operations in a
+     * multithreaded environment
+     */
+    GMutex                           mutex;
+    /**
      * LIXA client status
      */
     client_status_t                  client_status;
@@ -128,6 +133,19 @@ extern "C" {
      */
     int xta_transaction_manager_register(
         xta_transaction_manager_t *this, xta_xa_resource_t *xa_res);
+
+
+
+    /**
+     * When a resource registers dynamically the digest must be updated because
+     * the configuration has been altered. This must be considered a PRIVATE
+     * method and should not be used by the Application Program.
+     * @param[in,out] this : transaction manager object
+     * @param[in] xrc : XA resource configuration (LIXA legacy structure)
+     * @return a reason code
+     */
+    int xta_transaction_manager_redigest(xta_transaction_manager_t *this,
+                                         const xta_xa_resource_config_t *xrc);
 
     
 

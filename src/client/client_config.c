@@ -1067,6 +1067,52 @@ void client_config_display_rsrmgr(const struct act_rsrmgr_config_s *arc)
 
 
 
+gchar *client_config_tostring_rsrmgr(const struct act_rsrmgr_config_s *arc)
+{
+    enum Exception { NULL_OBJECT
+                     , G_STRCONCAT_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    gchar *tostring = NULL;
+    
+    LIXA_TRACE(("client_config_tostring_rsrmgr\n"));
+    TRY {
+        if (NULL == arc)
+            THROW(NULL_OBJECT);
+        tostring = g_strconcat(
+            STRORNULL(arc->generic->name), "|",
+            STRORNULL(arc->generic->switch_file), "|",
+            STRORNULL(arc->generic->xa_open_info), "|",
+            STRORNULL(arc->generic->xa_close_info), "|",
+            NULL);
+        if (NULL == tostring)
+            THROW(G_STRCONCAT_ERROR);
+        LIXA_TRACE(("client_config_tostring_rsrmgr: tostring is '%s'\n",
+                    tostring));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case G_STRCONCAT_ERROR:
+                ret_cod = LIXA_RC_G_STRCONCAT_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_config_tostring_rsrmgr/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return tostring;
+}
+
+
+
 int client_config_dup(const struct act_rsrmgr_config_s *arc,
                       struct rsrmgr_config_s     *rsrmgr,
                       struct act_rsrmgr_config_s *act_rsrmgr)

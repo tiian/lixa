@@ -61,6 +61,8 @@ xta_transaction_manager_t *xta_transaction_manager_new(void)
         if (NULL == (this = (xta_transaction_manager_t *)
                      g_try_malloc0(sizeof(xta_transaction_manager_t))))
             THROW(G_TRY_MALLOC_ERROR);
+        /* initialize the mutex */
+        g_mutex_init(&this->mutex);
         /* initialize the LIXA client status */
         client_status_init(&this->client_status);
         client_status_active(&this->client_status);
@@ -149,6 +151,9 @@ void xta_transaction_manager_delete(xta_transaction_manager_t *this)
         
         /* free the memory associated to client status */
         client_status_free(&this->client_status);
+
+        /* clear the synchronization mutex */
+        g_mutex_clear(&this->mutex);
         
         /* destroy the object itself */
         g_free(this);
@@ -209,23 +214,62 @@ xta_transaction_manager_get_config(xta_transaction_manager_t *this)
 xta_transaction_t *
 xta_transaction_manager_get_transaction(xta_transaction_manager_t *this)
 {
-    enum Exception { NONE } excp;
+    enum Exception { NULL_OBJECT
+                     , OBJ_NOT_FOUND1
+                     , OBJ_NOT_FOUND2
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     xta_transaction_t *t = NULL;
     
     LIXA_TRACE(("xta_transaction_manager_get_transaction\n"));
     TRY {
-        /* @@@ implement me */
+        GThread *self = g_thread_self();
+        
+        /* check object reference */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        
+        LIXA_TRACE(("xta_transaction_manager_get_transaction: "
+                    "locking mutex...\n"));
+        g_mutex_lock(&this->mutex);
+
+        /* check hash table is allocated */
+        if (NULL == this->transactions) {
+            LIXA_TRACE(("xta_transaction_manager_get_transaction: there are "
+                        "no started transactions\n"));
+            THROW(OBJ_NOT_FOUND1);
+        }
+
+        /* look for transaction in hash table */
+        if (NULL == (t = g_hash_table_lookup(this->transactions, self))) {
+            LIXA_TRACE(("xta_transaction_manager_get_transaction: there is "
+                        "not a started transactions for this thread\n"));
+            THROW(OBJ_NOT_FOUND2);
+        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case OBJ_NOT_FOUND1:
+            case OBJ_NOT_FOUND2:
+                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* clear mutex */
+        if (NULL_OBJECT < excp) {
+            g_mutex_unlock(&this->mutex);
+            LIXA_TRACE(("xta_transaction_manager_get_transaction: "
+                        "mutex unlocked\n"));
+        }
+            
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_manager_get_transaction/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -242,6 +286,7 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
                      , NULL_OBJECT3
                      , G_TRY_MALLOC_ERROR
                      , CLIENT_CONFIG_DUP_ERROR
+                     , REDIGEST_ERROR
                      , XA_RESOURCE_REGISTERED
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -279,6 +324,11 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
                resource managers */
             client_config_append_rsrmgr(&this->local_ccc, rsrmgr,
                                         &act_rsrmgr);
+            /* compute again the configuration digest (fingerprint) because
+               a new resource has been added */
+            if (LIXA_RC_OK != (ret_cod = xta_transaction_manager_redigest(
+                                   this, config)))
+                THROW(REDIGEST_ERROR);
             /* reset the record pointer */
             rsrmgr = NULL;
         } else {
@@ -301,9 +351,11 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
             case G_TRY_MALLOC_ERROR:
                 ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
                 break;
-            case XA_RESOURCE_REGISTERED:
+            case REDIGEST_ERROR:
                 break;
             case CLIENT_CONFIG_DUP_ERROR:
+                break;
+            case XA_RESOURCE_REGISTERED:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -325,11 +377,64 @@ int xta_transaction_manager_register(xta_transaction_manager_t *this,
 
 
 
+int xta_transaction_manager_redigest(xta_transaction_manager_t *this,
+                                     const xta_xa_resource_config_t *xrc)
+{
+    enum Exception { NULL_OBJECT1
+                     , NULL_OBJECT2
+                     , NULL_OBJECT3
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    gchar *config_tostring = NULL;
+    
+    LIXA_TRACE(("xta_transaction_manager_redigest\n"));
+    TRY {
+        /* check the transaction manager is not NULL */
+        if (NULL == this)
+            THROW(NULL_OBJECT1);
+        /* check the configuration is not NULL */
+        if (NULL == xrc)
+            THROW(NULL_OBJECT2);
+        /* retrieve the serialized version of the configuration */
+        if (NULL == (config_tostring = client_config_tostring_rsrmgr(xrc)))
+            THROW(NULL_OBJECT3);
+        /* @@@ implement something similar to lixa_config_digest with the
+         * following steps:
+         * 1: start with current digest
+         * 2: append config_tostring
+         * set the config digest again */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT1:
+            case NULL_OBJECT2:
+            case NULL_OBJECT3:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* recover dynamically allocated memory */
+        if (NULL != config_tostring)
+            g_free(config_tostring);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_manager_redigest/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int xta_transaction_manager_begin(xta_transaction_manager_t *this)
 {
-    enum Exception { G_HASH_TABLE_NEW_ERROR
+    enum Exception { NULL_OBJECT1
+                     , G_HASH_TABLE_NEW_ERROR
                      , TX_ALREADY_STARTED
-                     , NULL_OBJECT
+                     , NULL_OBJECT2
                      , INTERNAL_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -339,6 +444,13 @@ int xta_transaction_manager_begin(xta_transaction_manager_t *this)
     TRY {
         GThread *self = g_thread_self();
         GThread *lookup = NULL;
+
+        /* check object reference */
+        if (NULL == this)
+            THROW(NULL_OBJECT1);
+
+        LIXA_TRACE(("xta_transaction_manager_begin: locking mutex...\n"));
+        g_mutex_lock(&this->mutex);
         
         /* check if the hash table as been already created */
         if (NULL == this->transactions) {
@@ -358,7 +470,7 @@ int xta_transaction_manager_begin(xta_transaction_manager_t *this)
 
         /* allocate a new transaction object */
         if (NULL == (tx = xta_transaction_new()))
-            THROW(NULL_OBJECT);
+            THROW(NULL_OBJECT2);
 
         /* insert the transaction object in the hash map */
         if (!g_hash_table_insert(this->transactions, self, tx)) {
@@ -373,13 +485,16 @@ int xta_transaction_manager_begin(xta_transaction_manager_t *this)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT1:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case G_HASH_TABLE_NEW_ERROR:
                 ret_cod = LIXA_RC_G_HASH_TABLE_NEW_ERROR;
                 break;
             case TX_ALREADY_STARTED:
                 ret_cod = LIXA_RC_TX_ALREADY_STARTED;
                 break;
-            case NULL_OBJECT:
+            case NULL_OBJECT2:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case INTERNAL_ERROR:
@@ -394,6 +509,11 @@ int xta_transaction_manager_begin(xta_transaction_manager_t *this)
         /* memory recovery */
         if (NULL != tx)
             xta_transaction_delete(tx);
+        /* mutex unlock */
+        if (NULL_OBJECT1 < excp) {
+            g_mutex_unlock(&this->mutex);
+            LIXA_TRACE(("xta_transaction_manager_begin: mutex unlocked\n"));
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_manager_begin/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

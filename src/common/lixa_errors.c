@@ -316,6 +316,8 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_G_MODULE_SYMBOL_ERROR:
             return "ERROR: 'g_module_symbol' function returned an "
                 "error condition";
+        case LIXA_RC_G_STRCONCAT_ERROR:
+            return "ERROR: 'g_strconcat' function returned an error condition";
         case LIXA_RC_G_STRDUP_ERROR:
             return "ERROR: 'g_strdup' function returned an error condition";
         case LIXA_RC_G_THREAD_CREATE_ERROR:

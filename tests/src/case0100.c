@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
     char *pgm = argv[0];
     int rc;
     xta_transaction_manager_t *tm;
+    xta_transaction_t *t;
     xta_native_xa_resource_t *native_xa_res;
     xta_native_xa_resource_t *dynamic_native_xa_res;
 #ifdef HAVE_MYSQL
@@ -153,6 +154,30 @@ int main(int argc, char *argv[])
         printf("%s| xta_transaction_manager_begin: returned %d\n", pgm, rc);
         return 1;
     }   
+    /* get a reference to the transaction object */
+    if (NULL == (t = xta_transaction_manager_get_transaction(tm))) {
+        printf("%s| xta_transaction_manager_get_transaction: returned NULL\n",
+               pgm);
+        return 1;
+    } else {
+        printf("%s| xta_transaction_manager_get_transaction: transaction "
+               "reference is %p\n", pgm, t);
+    }
+    /* start a new transaction for this thread: it can't be done */
+    if (LIXA_RC_TX_ALREADY_STARTED != (
+            rc = xta_transaction_manager_begin(tm))) {
+        printf("%s| xta_transaction_manager_begin: returned %d\n", pgm, rc);
+        return 1;
+    }   
+    /* get a reference to the transaction object */
+    if (NULL == (t = xta_transaction_manager_get_transaction(tm))) {
+        printf("%s| xta_transaction_manager_get_transaction: returned NULL\n",
+               pgm);
+        return 1;
+    } else {
+        printf("%s| xta_transaction_manager_get_transaction: transaction "
+               "reference is %p\n", pgm, t);
+    }
     
     /*
      * some code here ... @@@

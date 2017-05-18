@@ -1,4 +1,4 @@
-restart from xta_transaction_manager_begin
+restart from xta_transaction_manager_redigest
 
 Compute job before "begin", after all resources registered, directly from
 local copy of clientconfigcollection in TransactionManager and not from 

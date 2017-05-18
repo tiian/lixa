@@ -441,7 +441,7 @@ extern "C" {
 
     /**
      * Display configuration read from XML config file
-     * @param ccc IN the object will contain the client configuration
+     * @param[in] ccc : the object that will contain the client configuration
      * @return a standardized return code
      */
     int client_config_display(client_config_coll_t *ccc);
@@ -457,6 +457,16 @@ extern "C" {
 
     
 
+    /**
+     * Serialize the configuration of an actual resource manager to a string
+     * @param[in] arc : actual resource manager config
+     * @return a string that must be freed with g_free() after usage
+     */
+    gchar *client_config_tostring_rsrmgr(
+        const struct act_rsrmgr_config_s *arc);
+
+
+    
     /**
      * Duplicate all the allocated objects connected to an
      * ACTual ReSouRceManaGeR config struct
