@@ -59,17 +59,6 @@ typedef struct xta_transaction_manager_s {
      */
     GMutex                           mutex;
     /**
-     * LIXA client status
-     */
-    client_status_t                  client_status;
-    /**
-     * LIXA client configuration (it's a collection). The name of the property
-     * contains the previx "local" to strongly distinguish it from the
-     * "global" instance that's used by legacy LIXA due to TX specification
-     * limitation
-     */
-    xta_transaction_manager_config_t local_ccc;
-    /**
      * Currently managed Transaction objects,
      * @see xta_transaction_manager_begin
      */
@@ -102,13 +91,17 @@ extern "C" {
 
 
     /**
-     * Get the legacy LIXA object that contains the configurations for all the
-     * define Resource Managers
-     * @param[in] this : transaction manager object
+     * Get the legacy LIXA object that contains the static global
+     * configurations for all the statically defined Resource Managers.
+     * This method must be intended as STATIC because it does not access the
+     * object state.
      * @return the pointer to the Transaction Manager configuration object
      */
-    xta_transaction_manager_config_t *xta_transaction_manager_get_config(
-        xta_transaction_manager_t *this);
+    static inline
+    xta_transaction_manager_config_t *
+    xta_transaction_manager_get_config(void) {
+        return &global_ccc;
+    }
     
     
 
@@ -122,32 +115,6 @@ extern "C" {
     xta_transaction_manager_get_transaction(xta_transaction_manager_t *this);
 
 
-
-    /**
-     * Dynamically register an XA Resource. After registration, the XA Resource
-     * can be used inside a transaction. Native XA Resources can be statically
-     * configured while acquired XA Resources must be dynamically registered.
-     * @param[in,out] this : transaction manager object
-     * @param[in,out] xa_res : XA resource that must be registered
-     * @return a reason code
-     */
-    int xta_transaction_manager_register(
-        xta_transaction_manager_t *this, xta_xa_resource_t *xa_res);
-
-
-
-    /**
-     * When a resource registers dynamically the digest must be updated because
-     * the configuration has been altered. This must be considered a PRIVATE
-     * method and should not be used by the Application Program.
-     * @param[in,out] this : transaction manager object
-     * @param[in] xrc : XA resource configuration (LIXA legacy structure)
-     * @return a reason code
-     */
-    int xta_transaction_manager_redigest(xta_transaction_manager_t *this,
-                                         const xta_xa_resource_config_t *xrc);
-
-    
 
     /**
      * Create a new transaction and associate it with the current

@@ -342,6 +342,18 @@ extern "C" {
      */
     int client_config(client_config_coll_t *ccc, int global_config);
 
+
+
+    /**
+     * Duplicate a client configuration collection. The target object must be
+     * cleared with @ref client_unconfig when it's no more necessary.
+     * @param[in] source configuration object
+     * @param[out] target configuration object
+     * @return a reason code
+     */
+    int client_config_dup(const client_config_coll_t *source,
+                          client_config_coll_t *target);
+
     
 
     /**
@@ -482,9 +494,9 @@ extern "C" {
      *                          duplicated
      * @return a reason code
      */
-    int client_config_dup(const struct act_rsrmgr_config_s *arc,
-                          struct rsrmgr_config_s     *rsrmgr,
-                          struct act_rsrmgr_config_s *act_rsrmgr);
+    int client_config_rsrmgr_dup(const struct act_rsrmgr_config_s *arc,
+                                 struct rsrmgr_config_s     *rsrmgr,
+                                 struct act_rsrmgr_config_s *act_rsrmgr);
 
 
    

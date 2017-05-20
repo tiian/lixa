@@ -47,10 +47,10 @@
 
 /**
  * This type is a declaration only statement: the real type is defined inside
- * Transaction Manager header file. Here we just need to store a pointer to
- * a Transaction Manager inside an XA Resource.
+ * Transaction header file. Here we just need to store a pointer to
+ * a Transaction inside an XA Resource.
  */
-typedef struct xta_transaction_manager_s xta_transaction_manager_t;
+typedef struct xta_transaction_s xta_transaction_t;
 
 
 
@@ -73,7 +73,7 @@ typedef struct act_rsrmgr_config_s xta_xa_resource_config_t;
  * is not allowed as explained here:
  * https://gcc.gnu.org/onlinedocs/gcc/Unnamed-Fields.html )
  */
-typedef struct {
+typedef struct xta_xa_resource_s {
     /**
      * Partial description of the XA Resource Manager using legacy LIXA data
      * structures
@@ -97,10 +97,10 @@ typedef struct {
      */
     int                              must_be_opened;
     /**
-     * The reference to the Transaction Manager that registered this resource
+     * The reference to the Transaction that registered this resource
      * or NULL
      */
-    const xta_transaction_manager_t *registered_tm;
+    const xta_transaction_t         *registered_tx;
 } xta_xa_resource_t;
 
 
@@ -154,18 +154,18 @@ extern "C" {
         const xta_xa_resource_t *this) {
         return this->dynamic; }
 
-    
+
 
     /**
      * This call back method is invoked by a Transaction Manager when an
      * Application Program registers an XA Resource to a Transaction Manager.
      * The TM calls back the XA Resource to notify it has been registered.
      * @param[in,out] this : XA Resource object
-     * @param[in] tm : Transaction Manager
+     * @param[in] tx : XA Transaction
      * @return a reason code
-     */
+     */    
     int xta_xa_resource_registered(xta_xa_resource_t *this,
-                                   const xta_transaction_manager_t *tm);
+                                   const xta_transaction_t *tx);
 
 
     

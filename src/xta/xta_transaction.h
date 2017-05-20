@@ -23,6 +23,7 @@
 
 /* LIXA includes */
 #include "lixa_trace.h"
+#include "client_status.h"
 /* XTA includes */
 #include "xta_xa_resource.h"
 
@@ -40,10 +41,37 @@
 
 
 /**
+ * This type is just a redefinition of the legacy LIXA type
+ * "client_config_coll_t" to avoid a type with a "strange name" in the API
+ */
+typedef client_config_coll_t xta_transaction_config_t;
+
+
+
+/**
+ * This type is a declaration only statement: the real type is defined inside
+ * XA Resource header file. Here we just need to store a pointer to
+ * a XA Resource inside an XA Transaction.
+ */
+typedef struct xta_xa_resource_s xta_xa_resource_t;
+
+
+
+/**
  * XTA Transaction data type
  */
-typedef struct {
-    int dummy;
+typedef struct xta_transaction_s {
+    /**
+     * LIXA client status
+     */
+    client_status_t                  client_status;
+    /**
+     * LIXA client configuration (it's a collection). The name of the property
+     * contains the previx "local" to strongly distinguish it from the
+     * "global" instance that's used by legacy LIXA due to TX specification
+     * limitation
+     */
+    xta_transaction_config_t         local_ccc;
 } xta_transaction_t;
 
 
@@ -72,6 +100,17 @@ extern "C" {
 
 
     /**
+     * Get the legacy LIXA object that contains the configurations for all the
+     * define Resource Managers
+     * @param[in] this : Transaction object
+     * @return the pointer to the Transaction configuration object
+     */
+    xta_transaction_config_t *xta_transaction_get_config(
+        xta_transaction_t *this);
+    
+    
+
+    /**
      * Commit the transaction represented by this transaction object
      * @param[in,out] this : transaction object
      * @return a reason code
@@ -92,15 +131,28 @@ extern "C" {
     /**
      * Enlist the resource specified with the Transaction associated with the
      * Transaction object
-     * @param[in,out] this :transaction object
-     * @param[in] resource to associate
+     * @param[in,out] this : transaction object
+     * @param[in] xa_res : resource to associate
      * @return a reason code
      */
     int xta_transaction_enlist_resource(xta_transaction_t *this,
-                                        const xta_xa_resource_t *resource);
+                                        xta_xa_resource_t *xa_res);
     
 
     
+    /**
+     * When a resource registers dynamically the digest must be updated because
+     * the configuration has been altered. This must be considered a PRIVATE
+     * method and should not be used by the Application Program.
+     * @param[in,out] this : transaction object
+     * @param[in] xrc : XA resource configuration (LIXA legacy structure)
+     * @return a reason code
+     */
+    int xta_transaction_redigest(xta_transaction_t *this,
+                                 const xta_xa_resource_config_t *xrc);
+
+    
+
     /**
      * Suspend the transaction represented by this transaction object; the
      * transaction can be resumed with @ref xta_transaction_resume at a later

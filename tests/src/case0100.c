@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     char *pgm = argv[0];
     int rc;
     xta_transaction_manager_t *tm;
-    xta_transaction_t *t;
+    xta_transaction_t *tx;
     xta_native_xa_resource_t *native_xa_res;
     xta_native_xa_resource_t *dynamic_native_xa_res;
 #ifdef HAVE_MYSQL
@@ -59,7 +59,23 @@ int main(int argc, char *argv[])
     xta_postgresql_xa_resource_t *postgresql_xa_res;
 #endif
 
+    /* turn ON LIXA trace for debugging purpose */
+    LIXA_TRACE_INIT;
+    
     printf("%s| starting...\n", pgm);
+    /*
+     * dynamically create an XA native resource object
+     */
+    if (NULL == (dynamic_native_xa_res = xta_native_xa_resource_new(
+                     "OracleIC_stareg",
+                     "/opt/lixa/lib/switch_oracle_stareg.so",
+                     "ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+"
+                     "threads=true+DbgFl=7+SqlNet=lixa_ora_db+"
+                     "Loose_Coupling=true", ""))) {
+        printf("%s| xta_native_xa_resource_new: returned NULL for "
+               "dynamically creted resource\n", pgm);
+        return 1;
+    }
     /*
      * create a Transaction Manager object
      */
@@ -72,21 +88,8 @@ int main(int argc, char *argv[])
      * Manager configured in LIXA profile
      */
     if (NULL == (native_xa_res = xta_native_xa_resource_new_by_rmid(
-                     0, xta_transaction_manager_get_config(tm)))) {
+                     0, xta_transaction_manager_get_config()))) {
         printf("%s| xta_native_xa_resource_new: returned NULL\n", pgm);
-        return 1;
-    }
-    /*
-     * dynamically create an XA native resource object
-     */
-    if (NULL == (dynamic_native_xa_res = xta_native_xa_resource_new(
-                     "OracleIC_stareg",
-                     "/opt/lixa/lib/switch_oracle_stareg.so",
-                     "ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+"
-                     "threads=true+DbgFl=7+SqlNet=lixa_ora_db+"
-                     "Loose_Coupling=true", ""))) {
-        printf("%s| xta_native_xa_resource_new: returned NULL for "
-               "dynamically creted resource\n", pgm);
         return 1;
     }
 #ifdef HAVE_MYSQL
@@ -110,39 +113,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 #endif
-    /* register the dynamic native XA Resource to the transaction manager */
-    if (LIXA_RC_OK != (rc = xta_transaction_manager_register(
-                           tm, dynamic_native_xa_res))) {
-        printf("%s| xta_transaction_manager_register/dynamic_native_xa_res: "
-               "returned %d\n", pgm, rc);
-        return 1;
-    }
-    /* register the native XA Resource to the transaction manager: this step
-     * is useless but it's not dangerous */
-    if (LIXA_RC_OK != (rc = xta_transaction_manager_register(
-                           tm, native_xa_res))) {
-        printf("%s| xta_transaction_manager_register/native_xa_res: "
-               "returned %d\n", pgm, rc);
-        return 1;
-    }
-#ifdef HAVE_MYSQL
-    /* register the MySQL XA Resource to the transaction manager */
-    if (LIXA_RC_OK != (rc = xta_transaction_manager_register(
-                           tm, mysql_xa_res))) {
-        printf("%s| xta_transaction_manager_register/mysql_xa_res: "
-               "returned %d\n", pgm, rc);
-        return 1;
-    }
-#endif
-#ifdef HAVE_POSTGRESQL
-    /* register the PostgreSQL XA Resource to the transaction manager */
-    if (LIXA_RC_OK != (rc = xta_transaction_manager_register(
-    tm, postgresql_xa_res))) {
-        printf("%s| xta_transaction_manager_register/postgresql_xa_res: "
-               "returned %d\n", pgm, rc);
-        return 1;
-    }
-#endif
     /* start a new transaction for this thread */
     if (LIXA_RC_OK != (rc = xta_transaction_manager_begin(tm))) {
         printf("%s| xta_transaction_manager_begin: returned %d\n", pgm, rc);
@@ -155,13 +125,13 @@ int main(int argc, char *argv[])
         return 1;
     }   
     /* get a reference to the transaction object */
-    if (NULL == (t = xta_transaction_manager_get_transaction(tm))) {
+    if (NULL == (tx = xta_transaction_manager_get_transaction(tm))) {
         printf("%s| xta_transaction_manager_get_transaction: returned NULL\n",
                pgm);
         return 1;
     } else {
         printf("%s| xta_transaction_manager_get_transaction: transaction "
-               "reference is %p\n", pgm, t);
+               "reference is %p\n", pgm, tx);
     }
     /* start a new transaction for this thread: it can't be done */
     if (LIXA_RC_TX_ALREADY_STARTED != (
@@ -170,14 +140,47 @@ int main(int argc, char *argv[])
         return 1;
     }   
     /* get a reference to the transaction object */
-    if (NULL == (t = xta_transaction_manager_get_transaction(tm))) {
+    if (NULL == (tx = xta_transaction_manager_get_transaction(tm))) {
         printf("%s| xta_transaction_manager_get_transaction: returned NULL\n",
                pgm);
         return 1;
     } else {
         printf("%s| xta_transaction_manager_get_transaction: transaction "
-               "reference is %p\n", pgm, t);
+               "reference is %p\n", pgm, tx);
     }
+    /* register the dynamic native XA Resource to the transaction manager */
+    if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
+                           tx, (xta_xa_resource_t *)dynamic_native_xa_res))) {
+        printf("%s| xta_transaction_manager_register/dynamic_native_xa_res: "
+               "returned %d\n", pgm, rc);
+        return 1;
+    }
+    /* register the native XA Resource to the transaction manager: this step
+     * is useless but it's not dangerous */
+    if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
+                           tx, (xta_xa_resource_t *)native_xa_res))) {
+        printf("%s| xta_transaction_manager_register/native_xa_res: "
+               "returned %d\n", pgm, rc);
+        return 1;
+    }
+#ifdef HAVE_MYSQL
+    /* register the MySQL XA Resource to the transaction manager */
+    if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
+                           tx, (xta_xa_resource_t *)mysql_xa_res))) {
+        printf("%s| xta_transaction_manager_register/mysql_xa_res: "
+               "returned %d\n", pgm, rc);
+        return 1;
+    }
+#endif
+#ifdef HAVE_POSTGRESQL
+    /* register the PostgreSQL XA Resource to the transaction manager */
+    if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
+                           tx, (xta_xa_resource_t *)postgresql_xa_res))) {
+        printf("%s| xta_transaction_manager_register/postgresql_xa_res: "
+               "returned %d\n", pgm, rc);
+        return 1;
+    }
+#endif
     
     /*
      * some code here ... @@@

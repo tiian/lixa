@@ -40,45 +40,30 @@
 
 
 #ifdef HAVE_NETDB_H
-
 # include <netdb.h>
-
 #endif
 #ifdef HAVE_PTHREAD_H
-
 # include <pthread.h>
-
 #endif
 #ifdef HAVE_UNISTD_H
-
 # include <unistd.h>
-
 #endif
 #ifdef HAVE_STRING_H
-
 # include <string.h>
-
 #endif
 #ifdef HAVE_SYSLOG_H
-
 # include <syslog.h>
-
 #endif
 #ifdef HAVE_SYS_TYPES_H
-
 # include <sys/types.h>
-
 #endif
 #ifdef HAVE_SYS_STAT_H
-
 # include <sys/stat.h>
-
 #endif
 #ifdef HAVE_FCNTL_H
-
 # include <fcntl.h>
-
 #endif
+
 
 
 #include <lixa_config.h>
@@ -104,7 +89,7 @@
 int client_config(client_config_coll_t *ccc, int global_config)
 {
     enum Exception { G_HASH_TABLE_NEW_ERROR
-                     , STRDUP_ERROR
+                     , G_STRDUP_ERROR
                      , OPEN_CONFIG_ERROR
                      , XML_READ_FILE_ERROR
                      , XML_DOC_GET_ROOT_ELEMENT_ERROR
@@ -201,7 +186,8 @@ int client_config(client_config_coll_t *ccc, int global_config)
         } else {
             LIXA_TRACE(("client_config: using transactional profile '%s' for "
                         "subsequent operations\n", tmp_str));
-            if (NULL == (ccc->profile = strdup(tmp_str))) THROW(STRDUP_ERROR);
+            if (NULL == (ccc->profile = g_strdup(tmp_str)))
+                THROW(G_STRDUP_ERROR);
         }
 
         /* checking if available the custom config file */
@@ -263,7 +249,8 @@ int client_config(client_config_coll_t *ccc, int global_config)
         hints.ai_protocol = IPPROTO_TCP;
 
         if (0 != getaddrinfo((char *) ccc->actconf.sttsrv->address, NULL,
-                             &hints, &res)) THROW(GETADDRINFO_ERROR);
+                             &hints, &res))
+            THROW(GETADDRINFO_ERROR);
         /* set port */
         memcpy(&ccc->serv_addr, (struct sockaddr_in *) res->ai_addr,
                sizeof(struct sockaddr_in));
@@ -279,8 +266,8 @@ int client_config(client_config_coll_t *ccc, int global_config)
             case G_HASH_TABLE_NEW_ERROR:
                 ret_cod = LIXA_RC_G_RETURNED_NULL;
                 break;
-            case STRDUP_ERROR:
-                ret_cod = LIXA_RC_STRDUP_ERROR;
+            case G_STRDUP_ERROR:
+                ret_cod = LIXA_RC_G_STRDUP_ERROR;
                 break;
             case OPEN_CONFIG_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
@@ -338,12 +325,133 @@ int client_config(client_config_coll_t *ccc, int global_config)
 
 
 
+int client_config_dup(const client_config_coll_t *source,
+                      client_config_coll_t *target)
+{
+    enum Exception { G_HASH_TABLE_NEW_ERROR
+                     , G_TRY_MALLOC_ERROR
+                     , XML_STRDUP_ERROR1
+                     , XML_STRDUP_ERROR2
+                     , LOAD_SWITCH_FILE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("client_config_dup\n"));
+    TRY {
+        GHashTableIter iter;
+        gpointer key, value;
+        guint i;
+
+        /* reset the memory area */
+        memset(target, 0, sizeof(client_config_coll_t));
+        /* create config_threads hash table */
+        if (NULL == (target->config_threads = g_hash_table_new(
+                         g_direct_hash, g_direct_equal)))
+            THROW(G_HASH_TABLE_NEW_ERROR);
+        /* copy config_threads hash table content */
+        g_hash_table_iter_init (&iter, source->config_threads);
+        while (g_hash_table_iter_next (&iter, &key, &value)) {
+            g_hash_table_insert(target->config_threads, key, value);
+        } /* while (g_hash_table_iter_next (&iter, &key, &value)) */
+        /* copy IP config */
+        memcpy(&target->serv_addr, &source->serv_addr,
+               sizeof(struct sockaddr_in));
+        /* create config arrays */
+        target->actconf.rsrmgrs = g_array_new(
+            FALSE, FALSE, sizeof(struct act_rsrmgr_config_s));
+        target->sttsrvs = g_array_new(FALSE, FALSE, sizeof(
+                                          struct sttsrv_config_s));
+        target->rsrmgrs = g_ptr_array_new();
+        target->profiles = g_array_new(FALSE, FALSE, sizeof(
+                                           struct profile_config_s));
+        /* duplicate profile name */
+        target->profile = g_strdup(source->profile);
+
+        /* duplicate job */
+        target->job = (lixa_job_t *)g_memdup(source->job, sizeof(lixa_job_t));
+        
+        /* copy config file name reference */
+        target->lixac_conf_filename = source->lixac_conf_filename;
+
+        /* copy digest */
+        memcpy(&target->config_digest, &source->config_digest,
+               sizeof(md5_digest_hex_t));
+
+        /* copy the state server configuration: it does not need to be
+         * duplicated because it does not change (XML content) */
+        target->actconf.sttsrv = source->actconf.sttsrv;
+        
+        /* copy array actual_config_s : act_rsrmgr_config_s[] */
+        for (i=0; i<source->actconf.rsrmgrs->len; ++i) {
+            struct act_rsrmgr_config_s *source_arc = &g_array_index(
+                source->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
+            struct act_rsrmgr_config_s target_arc;
+            struct rsrmgr_config_s *target_rc = NULL;
+            /* duplicate the source record to build the target one */
+            if (NULL == (target_rc = g_try_malloc0(
+                             sizeof(struct rsrmgr_config_s))))
+                THROW(G_TRY_MALLOC_ERROR);
+            /* duplicate the dynamically allocated strings */
+            if (NULL == (target_rc->name = xmlStrdup(
+                             source_arc->generic->name)))
+                THROW(XML_STRDUP_ERROR1);
+            if (NULL == (target_rc->switch_file = xmlStrdup(
+                             source_arc->generic->switch_file)))
+                THROW(XML_STRDUP_ERROR2);
+            /* copy static strings */
+            memcpy(target_rc->xa_open_info, source_arc->generic->xa_open_info,
+                   MAXINFOSIZE);
+            memcpy(target_rc->xa_close_info,
+                   source_arc->generic->xa_close_info, MAXINFOSIZE);
+            /* link the records */
+            /* DDD
+            target_arc = *source_arc;
+            */
+            target_arc.generic = target_rc;
+            if (LIXA_RC_OK != (ret_cod = client_config_load_switch_file(
+                                   &target_arc,
+                                   source_arc->dynamically_defined)))
+                THROW(LOAD_SWITCH_FILE_ERROR);
+            /* add the records to the arrays */
+            g_array_append_val(target->actconf.rsrmgrs, target_arc);
+            g_ptr_array_add(target->rsrmgrs, target_rc);
+        } /* for (i=0; i<source->actconf.rsrmgrs->len; ++i) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_HASH_TABLE_NEW_ERROR:
+                ret_cod = LIXA_RC_G_HASH_TABLE_NEW_ERROR;
+                break;
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case XML_STRDUP_ERROR1:
+            case XML_STRDUP_ERROR2:
+                ret_cod = LIXA_RC_XML_STRDUP_ERROR;
+                break;
+            case LOAD_SWITCH_FILE_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_config_dup/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int client_config_job(client_config_coll_t *ccc, int fd)
 {
-    enum Exception
-    {
-        MALLOC_ERROR, JOB_SET_SOURCE_IP, JOB_SET_RAW, NONE
-    } excp;
+    enum Exception { G_TRY_MALLOC_ERROR
+                     , JOB_SET_SOURCE_IP
+                     , JOB_SET_RAW
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     lixa_job_t *tmp_job = NULL;
@@ -364,8 +472,8 @@ int client_config_job(client_config_coll_t *ccc, int fd)
 
         /* create the memory necessary to store the object */
         if (NULL ==
-            (tmp_job = (lixa_job_t *) malloc(sizeof(lixa_job_t)))) THROW(
-                MALLOC_ERROR);
+            (tmp_job = (lixa_job_t *)g_try_malloc(sizeof(lixa_job_t))))
+            THROW(G_TRY_MALLOC_ERROR);
         /* checking if available the job environment variable */
         if (NULL == (tmp_str = getenv(LIXA_JOB_ENV_VAR))) {
             LIXA_TRACE(("client_config_job: '%s' environment variable not "
@@ -385,7 +493,8 @@ int client_config_job(client_config_coll_t *ccc, int fd)
                             "too long; job was truncated\n"));
                 rc = LIXA_RC_OK;
             }
-            if (LIXA_RC_OK != rc) THROW(JOB_SET_RAW);
+            if (LIXA_RC_OK != rc)
+                THROW(JOB_SET_RAW);
         }
         ccc->job = tmp_job;
         LIXA_TRACE(("client_config_job: job value for this process is '%s'\n",
@@ -395,8 +504,8 @@ int client_config_job(client_config_coll_t *ccc, int fd)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case MALLOC_ERROR:
-                ret_cod = LIXA_RC_MALLOC_ERROR;
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
                 break;
             case JOB_SET_SOURCE_IP:
             case JOB_SET_RAW:
@@ -409,7 +518,7 @@ int client_config_job(client_config_coll_t *ccc, int fd)
         } /* switch (excp) */
         /* release resources */
         if (NULL != tmp_job)
-            free(tmp_job);
+            g_free(tmp_job);
         /* unlock mutex (locked for configuration activity) */
         LIXA_TRACE(("client_config_job: releasing exclusive mutex\n"));
         g_mutex_unlock(&ccc->mutex);
@@ -423,7 +532,7 @@ int client_config_job(client_config_coll_t *ccc, int fd)
 
 int client_config_validate(client_config_coll_t *ccc)
 {
-    enum Exception { STRDUP_ERROR
+    enum Exception { G_STRDUP_ERROR
                      , STTSRV_NOT_DEFINED
                      , STTSRV_NOT_FOUND
                      , RSRMGR_NOT_FOUND
@@ -445,8 +554,8 @@ int client_config_validate(client_config_coll_t *ccc)
                                (const xmlChar *) ccc->profile)) {
                 if (NULL == ccc->profile) {
                     if (NULL ==
-                        (ccc->profile = strdup((char *) profile->name)))
-                        THROW(STRDUP_ERROR);
+                        (ccc->profile = g_strdup((char *) profile->name)))
+                        THROW(G_STRDUP_ERROR);
                     LIXA_TRACE(("client_config_validate: profile set to "
                                 "default value ('%s')\n", ccc->profile));
                 }
@@ -536,7 +645,7 @@ int client_config_validate(client_config_coll_t *ccc)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case STRDUP_ERROR:
+            case G_STRDUP_ERROR:
                 ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
             case STTSRV_NOT_DEFINED:
@@ -563,20 +672,7 @@ void client_config_append_rsrmgr(client_config_coll_t *ccc,
                                  const struct rsrmgr_config_s     *rsrmgr,
                                  const struct act_rsrmgr_config_s *act_rsrmgr)
 {
-    guint i; /* @@@ remove me */
-    
     LIXA_TRACE(("client_config_append_rsrmgr\n"));
-        
-    /* @@@ remove me begin */
-    LIXA_TRACE(("client_config_append_rsrmgr: "
-                "ccc->actconf.rsrmgrs->len=%u\n",
-                ccc->actconf.rsrmgrs->len));
-    for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
-        struct act_rsrmgr_config_s *act_rsrmgr1 = &g_array_index(
-            ccc->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-        client_config_display_rsrmgr(act_rsrmgr1);
-    }
-    /* @@@ remove me end */
         
     if (NULL != rsrmgr) {
         g_ptr_array_add(ccc->rsrmgrs, (gpointer)rsrmgr);
@@ -585,17 +681,6 @@ void client_config_append_rsrmgr(client_config_coll_t *ccc,
     }
     if (NULL != act_rsrmgr) {
         g_array_append_val(ccc->actconf.rsrmgrs, *act_rsrmgr);
-
-        /* @@@ remove me begin */
-        LIXA_TRACE(("client_config_append_rsrmgr: "
-                    "ccc->actconf.rsrmgrs->len=%u\n",
-                    ccc->actconf.rsrmgrs->len));
-        for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
-            struct act_rsrmgr_config_s *act_rsrmgr2 = &g_array_index(
-                ccc->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-            client_config_display_rsrmgr(act_rsrmgr2);
-        }
-        /* @@@ remove me end */
     } else {
         LIXA_TRACE(("client_config_append_rsrmgr: act_rsrmgr=NULL; "
                     "skipping\n"));
@@ -775,16 +860,12 @@ int client_unconfig(client_config_coll_t *ccc, int global_config)
             (ret_cod = client_config_unload_all_switch_files(ccc)))
             THROW(CLIENT_CONFIG_UNLOAD_SWITCH_ERROR);
 
-        if (NULL != ccc->job) {
-            free(ccc->job);
-            ccc->job = NULL;
-        }
+        g_free(ccc->job);
+        ccc->job = NULL;
 
         ccc->lixac_conf_filename = NULL;
-        if (NULL != ccc->profile) {
-            free(ccc->profile);
-            ccc->profile = NULL;
-        }
+        g_free(ccc->profile);
+        ccc->profile = NULL;
 
         if (NULL != ccc->actconf.rsrmgrs) {
             g_array_free(ccc->actconf.rsrmgrs, TRUE);
@@ -1113,9 +1194,9 @@ gchar *client_config_tostring_rsrmgr(const struct act_rsrmgr_config_s *arc)
 
 
 
-int client_config_dup(const struct act_rsrmgr_config_s *arc,
-                      struct rsrmgr_config_s     *rsrmgr,
-                      struct act_rsrmgr_config_s *act_rsrmgr)
+int client_config_rsrmgr_dup(const struct act_rsrmgr_config_s *arc,
+                             struct rsrmgr_config_s     *rsrmgr,
+                             struct act_rsrmgr_config_s *act_rsrmgr)
 {
     enum Exception { NULL_OBJECT
                      , XML_STRDUP_ERROR1
@@ -1123,7 +1204,7 @@ int client_config_dup(const struct act_rsrmgr_config_s *arc,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("client_config_dup\n"));
+    LIXA_TRACE(("client_config_rsrmgr_dup\n"));
     TRY {
         if (NULL == arc)
             THROW(NULL_OBJECT);
@@ -1139,13 +1220,14 @@ int client_config_dup(const struct act_rsrmgr_config_s *arc,
                              arc->generic->switch_file)))
                 THROW(XML_STRDUP_ERROR2);
         } else {
-            LIXA_TRACE(("client_config_dup: rsrmgr=NULL, skipping\n"));
+            LIXA_TRACE(("client_config_rsrmgr_dup: rsrmgr=NULL, skipping\n"));
         } /* if (NULL != rsrmgr) */
 
         if (NULL != act_rsrmgr) {
             *act_rsrmgr = *arc;
         } else {
-            LIXA_TRACE(("client_config_dup: act_rsrmgr=NULL, skipping\n"));
+            LIXA_TRACE(("client_config_rsrmgr_dup: act_rsrmgr=NULL, "
+                        "skipping\n"));
         } /* if (NULL != act_rsrmgr) */
         
         THROW(NONE);
@@ -1172,7 +1254,7 @@ int client_config_dup(const struct act_rsrmgr_config_s *arc,
                 xmlFree(rsrmgr->switch_file);
         } /* if (NONE > excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("client_config_dup/excp=%d/"
+    LIXA_TRACE(("client_config_rsrmgr_dup/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

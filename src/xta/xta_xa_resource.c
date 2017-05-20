@@ -62,8 +62,6 @@ int xta_xa_resource_init(xta_xa_resource_t *this,
         this->act_rsrmgr_config.xa_switch = NULL;
         /* set other object properties */
         this->must_be_opened = must_be_opened;
-        /* set no Transaction Manager as an initial state */
-        this->registered_tm = NULL;
         /* set dynamic to TRUE: XTA is typically dynamic with few exceptions */
         this->dynamic = TRUE;
         
@@ -125,7 +123,7 @@ const xta_xa_resource_config_t *xta_xa_resource_get_config(
 
 
 int xta_xa_resource_registered(xta_xa_resource_t *this,
-                               const xta_transaction_manager_t *tm)
+                               const xta_transaction_t *tx)
 {
     enum Exception { NULL_OBJECT1
                      , NULL_OBJECT2
@@ -137,25 +135,25 @@ int xta_xa_resource_registered(xta_xa_resource_t *this,
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT1);
-        if (NULL == tm)
+        if (NULL == tx)
             THROW(NULL_OBJECT2);
-        if (NULL != this->registered_tm) {
+        if (NULL != this->registered_tx) {
             /* already registered resource, checking the Transaction Manager */
-            if (tm != this->registered_tm) {
+            if (tx != this->registered_tx) {
                 LIXA_TRACE(("xta_xa_resource_registered: this resource has "
-                            "been already registered by another TM: %p\n",
-                            this->registered_tm));
+                            "been already registered by another TX: %p\n",
+                            this->registered_tx));
                 THROW(RESOURCE_ALREADY_REGISTERED);
             } else {
                 LIXA_TRACE(("xta_xa_resource_registered: this resource has "
-                            "been already registered by this TM, "
+                            "been already registered by this TX, "
                             "skipping...\n"));
-            } /* if (tm != this->registered_tm) */
+            } /* if (tm != this->registered_tx) */
         } else {
-            this->registered_tm = tm;
+            this->registered_tx = tx;
             LIXA_TRACE(("xta_xa_resource_registered: this resource is now "
-                        "registered by TM: %p\n", this->registered_tm));
-        } /* if (NULL != this->registered_tm) */
+                        "registered by TX: %p\n", this->registered_tx));
+        } /* if (NULL != this->registered_tx) */
         
         THROW(NONE);
     } CATCH {
