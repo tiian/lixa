@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
     xta_postgresql_xa_resource_t *postgresql_xa_res;
 #endif
 
-    /* turn ON LIXA trace for debugging purpose */
-    LIXA_TRACE_INIT;
+    /* turn ON trace for debugging purpose */
+    xta_init();
     
     printf("%s| starting...\n", pgm);
     /*

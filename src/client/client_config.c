@@ -480,9 +480,8 @@ int client_config_job(client_config_coll_t *ccc, int fd)
                         "found, computing job string...\n", LIXA_JOB_ENV_VAR));
             lixa_job_reset(tmp_job);
             lixa_job_set_config_digest(tmp_job, ccc->config_digest);
-            if (LIXA_RC_OK !=
-                (ret_cod = lixa_job_set_source_ip(tmp_job, fd))) THROW(
-                    JOB_SET_SOURCE_IP);
+            if (LIXA_RC_OK != (ret_cod = lixa_job_set_source_ip(tmp_job, fd)))
+                THROW(JOB_SET_SOURCE_IP);
         } else {
             int rc;
             LIXA_TRACE(("client_config_job: '%s' environment variable value "
@@ -495,7 +494,7 @@ int client_config_job(client_config_coll_t *ccc, int fd)
             }
             if (LIXA_RC_OK != rc)
                 THROW(JOB_SET_RAW);
-        }
+        } /* if (NULL == (tmp_str = getenv(LIXA_JOB_ENV_VAR))) */
         ccc->job = tmp_job;
         LIXA_TRACE(("client_config_job: job value for this process is '%s'\n",
                     lixa_job_get_raw(ccc->job)));

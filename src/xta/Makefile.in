@@ -130,14 +130,15 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixta_la_DEPENDENCIES = $(top_srcdir)/src/common/liblixab.la \
 	$(top_srcdir)/src/client/liblixac.la $(MAYBE_MYSQL_LIBADD) \
 	$(MAYBE_POSTGRESQL_LIBADD)
-am__liblixta_la_SOURCES_DIST = xta_errors.c xta_transaction.c \
-	xta_transaction_manager.c xta_xid.c xta_xa_resource.c \
-	xta_native_xa_resource.c xta_acquired_xa_resource.c \
-	xta_mysql_xa_resource.c xta_postgresql_xa_resource.c
+am__liblixta_la_SOURCES_DIST = xta_errors.c xta_init.c \
+	xta_transaction.c xta_transaction_manager.c xta_xid.c \
+	xta_xa_resource.c xta_native_xa_resource.c \
+	xta_acquired_xa_resource.c xta_mysql_xa_resource.c \
+	xta_postgresql_xa_resource.c
 @COMPILE_MYSQL_STUFF_TRUE@am__objects_1 = liblixta_la-xta_mysql_xa_resource.lo
 @COMPILE_POSTGRESQL_STUFF_TRUE@am__objects_2 = liblixta_la-xta_postgresql_xa_resource.lo
 am_liblixta_la_OBJECTS = liblixta_la-xta_errors.lo \
-	liblixta_la-xta_transaction.lo \
+	liblixta_la-xta_init.lo liblixta_la-xta_transaction.lo \
 	liblixta_la-xta_transaction_manager.lo liblixta_la-xta_xid.lo \
 	liblixta_la-xta_xa_resource.lo \
 	liblixta_la-xta_native_xa_resource.lo \
@@ -408,14 +409,14 @@ top_srcdir = @top_srcdir@
 @COMPILE_POSTGRESQL_STUFF_TRUE@	-I$(top_srcdir)/src/client/switch/postgresql
 
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
-include_HEADERS = xta.h xta_errors.h xta_transaction.h \
+include_HEADERS = xta.h xta_errors.h xta_init.h xta_transaction.h \
 	xta_transaction_manager.h xta_xid.h \
 	xta_xa_resource.h xta_native_xa_resource.h xta_acquired_xa_resource.h \
 	xta_mysql_xa_resource.h
 
 noinst_HEADERS = xta.h.in
 lib_LTLIBRARIES = liblixta.la
-liblixta_la_SOURCES = xta_errors.c xta_transaction.c \
+liblixta_la_SOURCES = xta_errors.c xta_init.c xta_transaction.c \
 	xta_transaction_manager.c xta_xid.c \
 	xta_xa_resource.c xta_native_xa_resource.c xta_acquired_xa_resource.c \
 	$(MAYBE_MYSQL_SOURCES) $(MAYBE_POSTGRESQL_SOURCES)
@@ -523,6 +524,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_acquired_xa_resource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_errors.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_init.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_mysql_xa_resource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_native_xa_resource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_la-xta_postgresql_xa_resource.Plo@am__quote@
@@ -558,6 +560,13 @@ liblixta_la-xta_errors.lo: xta_errors.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xta_errors.c' object='liblixta_la-xta_errors.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_la-xta_errors.lo `test -f 'xta_errors.c' || echo '$(srcdir)/'`xta_errors.c
+
+liblixta_la-xta_init.lo: xta_init.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixta_la-xta_init.lo -MD -MP -MF $(DEPDIR)/liblixta_la-xta_init.Tpo -c -o liblixta_la-xta_init.lo `test -f 'xta_init.c' || echo '$(srcdir)/'`xta_init.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixta_la-xta_init.Tpo $(DEPDIR)/liblixta_la-xta_init.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xta_init.c' object='liblixta_la-xta_init.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_la-xta_init.lo `test -f 'xta_init.c' || echo '$(srcdir)/'`xta_init.c
 
 liblixta_la-xta_transaction.lo: xta_transaction.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixta_la-xta_transaction.lo -MD -MP -MF $(DEPDIR)/liblixta_la-xta_transaction.Tpo -c -o liblixta_la-xta_transaction.lo `test -f 'xta_transaction.c' || echo '$(srcdir)/'`xta_transaction.c

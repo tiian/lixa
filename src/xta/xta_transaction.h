@@ -42,7 +42,7 @@
 
 /**
  * This type is just a redefinition of the legacy LIXA type
- * "client_config_coll_t" to avoid a type with a "strange name" in the API
+ * @ref client_config_coll_t to avoid a type with a "strange name" in the API
  */
 typedef client_config_coll_t xta_transaction_config_t;
 

@@ -362,12 +362,18 @@ int xta_transaction_redigest(xta_transaction_t *this,
     enum Exception { NULL_OBJECT1
                      , NULL_OBJECT2
                      , NULL_OBJECT3
+                     , G_CHECKSUM_NEW_ERROR
+                     , G_CHECKSUM_GET_STRING_ERROR
+                     , JOB_SET_SOURCE_IP_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     gchar *config_tostring = NULL;
+    GChecksum *checksum = NULL;
     
     LIXA_TRACE(("xta_transaction_redigest\n"));
     TRY {
+        const gchar *checksum_string = NULL;
+        
         /* check the transaction is not NULL */
         if (NULL == this)
             THROW(NULL_OBJECT1);
@@ -377,11 +383,42 @@ int xta_transaction_redigest(xta_transaction_t *this,
         /* retrieve the serialized version of the configuration */
         if (NULL == (config_tostring = client_config_tostring_rsrmgr(xrc)))
             THROW(NULL_OBJECT3);
-        /* @@@ implement something similar to lixa_config_digest with the
-         * following steps:
-         * 1: start with current digest
-         * 2: append config_tostring
-         * set the config digest again */
+        /* trace old values */
+        LIXA_TRACE(("xta_transaction_redigest: old digest is '%s'\n",
+                    this->local_ccc.config_digest));
+        LIXA_TRACE(("xta_transaction_redigest: old job id for this "
+                    "transaction is '%s'\n",
+                    lixa_job_get_raw(this->local_ccc.job)));
+        /* create a new checksum */
+        if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))
+            THROW(G_CHECKSUM_NEW_ERROR);
+        /* use current digest as the initial content */
+        g_checksum_update(checksum, (guchar *)this->local_ccc.config_digest,
+                          sizeof(md5_digest_hex_t));
+        /* append the config of the current resource */
+        g_checksum_update(checksum, (guchar *)config_tostring,
+                          strlen(config_tostring));
+        if (NULL == (checksum_string = g_checksum_get_string(checksum)))
+            THROW(G_CHECKSUM_GET_STRING_ERROR);
+        /* copy back the new digest */
+        strncpy(this->local_ccc.config_digest, (const char *)checksum_string,
+                MD5_DIGEST_LENGTH * 2);
+        this->local_ccc.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
+        /* re compute LIXA job id for this transaction */
+        lixa_job_reset(this->local_ccc.job);
+        lixa_job_set_config_digest(this->local_ccc.job,
+                                   this->local_ccc.config_digest);
+        if (LIXA_RC_OK != (ret_cod = lixa_job_set_source_ip(
+                               this->local_ccc.job,
+                               client_status_get_sockfd(
+                                   &this->client_status))))
+            THROW(JOB_SET_SOURCE_IP_ERROR);
+        /* trace new values */
+        LIXA_TRACE(("xta_transaction_redigest: new digest is '%s'\n",
+                    this->local_ccc.config_digest));
+        LIXA_TRACE(("xta_transaction_redigest: new job id for this "
+                    "transaction is '%s'\n",
+                    lixa_job_get_raw(this->local_ccc.job)));
         
         THROW(NONE);
     } CATCH {
@@ -390,6 +427,14 @@ int xta_transaction_redigest(xta_transaction_t *this,
             case NULL_OBJECT2:
             case NULL_OBJECT3:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case G_CHECKSUM_NEW_ERROR:
+                ret_cod = LIXA_RC_G_CHECKSUM_NEW_ERROR;
+                break;
+            case G_CHECKSUM_GET_STRING_ERROR:
+                ret_cod = LIXA_RC_G_CHECKSUM_GET_STRING_ERROR;
+                break;
+            case JOB_SET_SOURCE_IP_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -400,6 +445,8 @@ int xta_transaction_redigest(xta_transaction_t *this,
         /* recover dynamically allocated memory */
         if (NULL != config_tostring)
             g_free(config_tostring);
+        if (NULL != checksum)
+            g_checksum_free(checksum);
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_redigest/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

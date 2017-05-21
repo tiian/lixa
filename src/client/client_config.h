@@ -235,7 +235,7 @@ struct actual_config_s {
  * if (profile == NULL) the configuration must be loaded
  * else the configuration has already been loaded
  */
-struct client_config_coll_s {
+typedef struct client_config_coll_s {
     /**
      * This mutex is used to assure only the first thread load the
      * configuration for all the following threads. It must be statically
@@ -303,11 +303,7 @@ struct client_config_coll_s {
      * strange.
      */
     struct sockaddr_in           serv_addr;
-};
-
-
-
-typedef struct client_config_coll_s client_config_coll_t;
+} client_config_coll_t;
 
 
 

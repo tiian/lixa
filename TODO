@@ -1,8 +1,3 @@
-restart from xta_transaction_redigest
-
-Compute job before "begin", after all resources registered, directly from
-local copy of clientconfigcollection in TransactionManager and not from 
-lixac.conf
 
 Open Point: automatic recovery. 
 Automatic recovery must be managed in a different way in comparison with
