@@ -106,23 +106,15 @@ extern "C" {
     
 
     /**
-     * Get the XTA Transaction object that represents the transaction context
-     * of the calling thread
+     * Create a new XA Transaction object, associate it with the current
+     * process/thread and returns it to the caller. In the
+     * event that the caller thread has already created an XA Transaction, the
+     * previously created XA Transaction object is returned
      * @param[in,out] this : transaction manager object
      * @return the pointer to an XTA Transaction object
      */
-    xta_transaction_t *
-    xta_transaction_manager_get_transaction(xta_transaction_manager_t *this);
-
-
-
-    /**
-     * Create a new transaction and associate it with the current
-     * process/thread
-     * @param[in,out] this : transaction manager object
-     * @return a reason code
-     */
-    int xta_transaction_manager_begin(xta_transaction_manager_t *this);
+    xta_transaction_t *xta_transaction_manager_create_transaction(
+        xta_transaction_manager_t *this);
 
 
 

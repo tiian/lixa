@@ -118,95 +118,28 @@ void xta_transaction_manager_delete(xta_transaction_manager_t *this)
 
 
 xta_transaction_t *
-xta_transaction_manager_get_transaction(xta_transaction_manager_t *this)
-{
-    enum Exception { NULL_OBJECT
-                     , OBJ_NOT_FOUND1
-                     , OBJ_NOT_FOUND2
-                     , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    xta_transaction_t *t = NULL;
-    
-    LIXA_TRACE(("xta_transaction_manager_get_transaction\n"));
-    TRY {
-        GThread *self = g_thread_self();
-        
-        /* check object reference */
-        if (NULL == this)
-            THROW(NULL_OBJECT);
-        
-        LIXA_TRACE(("xta_transaction_manager_get_transaction: "
-                    "locking mutex...\n"));
-        g_mutex_lock(&this->mutex);
-
-        /* check hash table is allocated */
-        if (NULL == this->transactions) {
-            LIXA_TRACE(("xta_transaction_manager_get_transaction: there are "
-                        "no started transactions\n"));
-            THROW(OBJ_NOT_FOUND1);
-        }
-
-        /* look for transaction in hash table */
-        if (NULL == (t = g_hash_table_lookup(this->transactions, self))) {
-            LIXA_TRACE(("xta_transaction_manager_get_transaction: there is "
-                        "not a started transactions for this thread\n"));
-            THROW(OBJ_NOT_FOUND2);
-        }
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NULL_OBJECT:
-                ret_cod = LIXA_RC_NULL_OBJECT;
-                break;
-            case OBJ_NOT_FOUND1:
-            case OBJ_NOT_FOUND2:
-                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        /* clear mutex */
-        if (NULL_OBJECT < excp) {
-            g_mutex_unlock(&this->mutex);
-            LIXA_TRACE(("xta_transaction_manager_get_transaction: "
-                        "mutex unlocked\n"));
-        }
-            
-    } /* TRY-CATCH */
-    LIXA_TRACE(("xta_transaction_manager_get_transaction/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return t;
-}
-
-
-
-int xta_transaction_manager_begin(xta_transaction_manager_t *this)
+xta_transaction_manager_create_transaction(xta_transaction_manager_t *this)
 {
     enum Exception { NULL_OBJECT1
                      , G_HASH_TABLE_NEW_ERROR
-                     , TX_ALREADY_STARTED
                      , NULL_OBJECT2
                      , INTERNAL_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     xta_transaction_t *tx = NULL;
     
-    LIXA_TRACE(("xta_transaction_manager_begin\n"));
+    LIXA_TRACE(("xta_transaction_manager_create_transaction\n"));
     TRY {
         GThread *self = g_thread_self();
-        GThread *lookup = NULL;
-
+        
         /* check object reference */
         if (NULL == this)
             THROW(NULL_OBJECT1);
-
-        LIXA_TRACE(("xta_transaction_manager_begin: locking mutex...\n"));
-        g_mutex_lock(&this->mutex);
         
+        LIXA_TRACE(("xta_transaction_manager_create_transaction: "
+                    "locking mutex...\n"));
+        g_mutex_lock(&this->mutex);
+
         /* check if the hash table as been already created */
         if (NULL == this->transactions) {
             if (NULL == (this->transactions = g_hash_table_new_full(
@@ -215,27 +148,21 @@ int xta_transaction_manager_begin(xta_transaction_manager_t *this)
                 THROW(G_HASH_TABLE_NEW_ERROR);
         } /* if (NULL == this->transactions) */
         
-        /* check if the current thread has already started a transaction */
-        if (NULL != (lookup = g_hash_table_lookup(this->transactions, self))) {
-            LIXA_TRACE(("xta_transaction_manager_begin: this thread has "
-                        "already started a transaction and a second one "
-                        "cannot be started, skipping...\n"));
-            THROW(TX_ALREADY_STARTED);
+        /* look for transaction in hash table */
+        if (NULL == (tx = g_hash_table_lookup(this->transactions, self))) {
+            LIXA_TRACE(("xta_transaction_manager_create_transaction: there is "
+                        "not a started transactions for this thread, "
+                        "starting a new one...\n"));
+            /* allocate a new transaction object */
+            if (NULL == (tx = xta_transaction_new()))
+                THROW(NULL_OBJECT2);
+            
+            /* insert the transaction object in the hash map */
+            if (!g_hash_table_insert(this->transactions, self, tx)) {
+                THROW(INTERNAL_ERROR);
+            }
+            /* @@@ implement some code related to XID... */
         }
-
-        /* allocate a new transaction object */
-        if (NULL == (tx = xta_transaction_new()))
-            THROW(NULL_OBJECT2);
-
-        /* insert the transaction object in the hash map */
-        if (!g_hash_table_insert(this->transactions, self, tx)) {
-            THROW(INTERNAL_ERROR);
-        }
-        
-        /* @@@ implement some code related to XID... */
-
-        /* avoid memory recovery for this object that's OK */
-        tx = NULL;
         
         THROW(NONE);
     } CATCH {
@@ -245,9 +172,6 @@ int xta_transaction_manager_begin(xta_transaction_manager_t *this)
                 break;
             case G_HASH_TABLE_NEW_ERROR:
                 ret_cod = LIXA_RC_G_HASH_TABLE_NEW_ERROR;
-                break;
-            case TX_ALREADY_STARTED:
-                ret_cod = LIXA_RC_TX_ALREADY_STARTED;
                 break;
             case NULL_OBJECT2:
                 ret_cod = LIXA_RC_NULL_OBJECT;
@@ -261,18 +185,19 @@ int xta_transaction_manager_begin(xta_transaction_manager_t *this)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        /* memory recovery */
-        if (NULL != tx)
+        /* recoverying memory in the event of error */
+        if (NULL_OBJECT2 < excp && NONE > excp)
             xta_transaction_delete(tx);
-        /* mutex unlock */
+        /* clear mutex */
         if (NULL_OBJECT1 < excp) {
             g_mutex_unlock(&this->mutex);
-            LIXA_TRACE(("xta_transaction_manager_begin: mutex unlocked\n"));
+            LIXA_TRACE(("xta_transaction_manager_create_transaction: "
+                        "mutex unlocked\n"));
         }
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_transaction_manager_begin/excp=%d/"
+    LIXA_TRACE(("xta_transaction_manager_create_transaction/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
+    return tx;
 }
 
 

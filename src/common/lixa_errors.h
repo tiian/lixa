@@ -115,7 +115,6 @@
 /**
  * The current thread has already started a transaction and it's still active
  */
-#define LIXA_RC_TX_ALREADY_STARTED             +11
 
 
 

@@ -1013,7 +1013,8 @@ int lixa_tx_open(int *txrc, int mmode)
 
             /* the real logic is inside this function */
             if (LIXA_RC_OK != (ret_cod = lixa_xa_open(
-                                   cs, &tmp_txrc, next_txstate, mmode)))
+                                   &global_ccc, cs, &tmp_txrc, next_txstate,
+                                   mmode)))
                 THROW(LIXA_XA_OPEN_ERROR);
 
             /* set new state after RMs are open... */

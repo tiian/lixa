@@ -113,36 +113,17 @@ int main(int argc, char *argv[])
         return 1;
     }
 #endif
-    /* start a new transaction for this thread */
-    if (LIXA_RC_OK != (rc = xta_transaction_manager_begin(tm))) {
-        printf("%s| xta_transaction_manager_begin: returned %d\n", pgm, rc);
-        return 1;
-    }   
-    /* start a new transaction for this thread: it can't be done */
-    if (LIXA_RC_TX_ALREADY_STARTED != (
-            rc = xta_transaction_manager_begin(tm))) {
-        printf("%s| xta_transaction_manager_begin: returned %d\n", pgm, rc);
-        return 1;
-    }   
-    /* get a reference to the transaction object */
-    if (NULL == (tx = xta_transaction_manager_get_transaction(tm))) {
-        printf("%s| xta_transaction_manager_get_transaction: returned NULL\n",
-               pgm);
+    /* create a new transaction for this thread */
+    if (NULL == (tx = xta_transaction_manager_create_transaction(tm))) {
+        printf("%s| xta_transaction_manager_begin: returned NULL\n", pgm);
         return 1;
     } else {
         printf("%s| xta_transaction_manager_get_transaction: transaction "
                "reference is %p\n", pgm, tx);
     }
-    /* start a new transaction for this thread: it can't be done */
-    if (LIXA_RC_TX_ALREADY_STARTED != (
-            rc = xta_transaction_manager_begin(tm))) {
-        printf("%s| xta_transaction_manager_begin: returned %d\n", pgm, rc);
-        return 1;
-    }   
-    /* get a reference to the transaction object */
-    if (NULL == (tx = xta_transaction_manager_get_transaction(tm))) {
-        printf("%s| xta_transaction_manager_get_transaction: returned NULL\n",
-               pgm);
+    /* (try to) create again a new transaction for this thread */
+    if (NULL == (tx = xta_transaction_manager_create_transaction(tm))) {
+        printf("%s| xta_transaction_manager_begin: returned NULL\n", pgm);
         return 1;
     } else {
         printf("%s| xta_transaction_manager_get_transaction: transaction "

@@ -63,113 +63,114 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-/**
- * Close all the resource managers necessary for the transaction
- * @param cs IN reference to the status of the calling client
- * @param txrc OUT return code prepared for tx_close call
- * @return a reason code
- */
+    /**
+     * Close all the resource managers necessary for the transaction
+     * @param[in] cs : reference to the status of the calling client
+     * @param[out] txrc : return code prepared for tx_close call
+     * @return a reason code
+     */
     int lixa_xa_close(client_status_t *cs, int *txrc);
 
 
-/**
- * Commit work performed on behalf of the transaction manager
- * @param[in] cs reference to the status of the calling client
- * @param[in] xid array of XID to commit
- * @param[out] txrc return code prepared for tx_commit/tx_rollback call
- * @param[in] one_phase_commit boolean value:
- *            TRUE = the T.M. is performing a ONE phase commit
- *            FALSE = the T.M. is performing a standard TWO phase commit
- * @return a reason code
- */
-    int
-    lixa_xa_commit(client_status_t *cs, XID *xid, int *txrc,
-                   int one_phase_commit);
+    /**
+     * Commit work performed on behalf of the transaction manager
+     * @param[in] cs reference to the status of the calling client
+     * @param[in] xid array of XID to commit
+     * @param[out] txrc return code prepared for tx_commit/tx_rollback call
+     * @param[in] one_phase_commit boolean value:
+     *            TRUE = the T.M. is performing a ONE phase commit
+     *            FALSE = the T.M. is performing a standard TWO phase commit
+     * @return a reason code
+     */
+    int lixa_xa_commit(client_status_t *cs, XID *xid, int *txrc,
+                       int one_phase_commit);
 
 
-/**
- * End work performed on behalf of the transaction manager
- * @param cs IN reference to the status of the calling client
- * @param txrc OUT return code prepared for tx_commit/tx_rollback call
- * @param commit IN boolean value:
- *                  TRUE = xa_end will be followed by xa_commit
- *                  FALSE = xa_end will be followed by xa_rollback
- * @param xa_end_flags IN flags to send to xa_end
- * @return a reason code
- */
+    /**
+     * End work performed on behalf of the transaction manager
+     * @param[in] cs : reference to the status of the calling client
+     * @param[out] txrc : return code prepared for tx_commit/tx_rollback call
+     * @param[in] commit : boolean value: <BR>
+     *                  TRUE = xa_end will be followed by xa_commit <BR>
+     *                  FALSE = xa_end will be followed by xa_rollback
+     * @param[in] xa_end_flags : flags to send to xa_end
+     * @return a reason code
+     */
     int lixa_xa_end(client_status_t *cs, int *txrc, int commit,
                     int xa_end_flags);
 
 
-/**
- * This function is not directly called by the TX layer, but it's an
- * helper function for @ref lixa_xa_commit and @ref lixa_xa_rollback
- * @param[in] cs reference to the status of the calling client
- * @param xida
- * @param[in] finished boolean value: TRUE, the transaction can be
- *                    finished; FALSE, a blocking error marked the
- *                    transaction as not finished
- * @return a reason code
- */
+    /**
+     * This function is not directly called by the TX layer, but it's an
+     * helper function for @ref lixa_xa_commit and @ref lixa_xa_rollback
+     * @param[in] cs reference to the status of the calling client
+     * @param xida
+     * @param[in] finished boolean value: TRUE, the transaction can be
+     *                    finished; FALSE, a blocking error marked the
+     *                    transaction as not finished
+     * @return a reason code
+     */
     int lixa_xa_forget(client_status_t *cs, GArray *xida, int finished);
 
 
-/**
- * Open all the resource managers necessary for the transaction
- * @param cs IN reference to the status of the calling client
- * @param txrc OUT return code prepared for tx_open call
- * @param next_txstate IN the txstate will be reached by the control thread
- *                        after executing this function
- * @param mmode IN the operation is performed inside a maintenance session
- * @return a reason code
- */
-    int lixa_xa_open(client_status_t *cs, int *txrc, int next_txstate,
-                     int mmode);
+    /**
+     * Open all the resource managers necessary for the transaction
+     * @param[in] ccc : client config collection
+     * @param[in] cs : reference to the status of the calling client
+     * @param[out] txrc : return code prepared for tx_open call
+     * @param[in] next_txstate : the txstate will be reached by the control
+     *                           thread after executing this function
+     * @param[in] mmode : the operation is performed inside a maintenance
+     *                    session
+     * @return a reason code
+     */
+    int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
+                     int *txrc, int next_txstate, int mmode);
 
 
-/**
- * End work performed on behalf of the transaction manager
- * @param cs IN reference to the status of the calling client
- * @param[in] xida array of XID to prepare
- * @param txrc OUT return code prepared for tx_commit/tx_rollback call
- * @param commit OUT boolean value: <br>
- *                  TRUE = xa_prepare will be followed by xa_commit <br>
- *                  FALSE = xa_prepare will be followed by xa_rollback
- *                          (one resource manager is not able to prepare
- *                          for commit and the transaction must be backed
- *                          out)
- * @param[out] xid the final XID to commit on
- * @return a reason code
- */
-    int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc, int *commit,
-                        XID *xid);
+    /**
+     * End work performed on behalf of the transaction manager
+     * @param[in] cs : reference to the status of the calling client
+     * @param[in] xida array of XID to prepare
+     * @param[out] txrc : return code prepared for tx_commit/tx_rollback call
+     * @param[out] commit : boolean value: <br>
+     *                  TRUE = xa_prepare will be followed by xa_commit <br>
+     *                  FALSE = xa_prepare will be followed by xa_rollback
+     *                          (one resource manager is not able to prepare
+     *                          for commit and the transaction must be backed
+     *                          out)
+     * @param[out] xid the final XID to commit on
+     * @return a reason code
+     */
+    int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc,
+                        int *commit, XID *xid);
 
 
-/**
- * Roll back work performed on behalf of the transaction manager
- * @param cs IN reference to the status of the calling client
- * @param txrc OUT return code prepared for tx_commit/tx_rollback call
- * @param tx_commit IN the function is called from tx_commit (TRUE) or
- *                  from tx_rollback (FALSE)
- * @return a reason code
- */
+    /**
+     * Roll back work performed on behalf of the transaction manager
+     * @param[in] cs : reference to the status of the calling client
+     * @param[out] txrc : return code prepared for tx_commit/tx_rollback call
+     * @param[in] tx_commit : the function is called from tx_commit (TRUE) or
+     *                  from tx_rollback (FALSE)
+     * @return a reason code
+     */
     int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit);
 
 
-/**
- * Send xa_start to all the resource manager does not support dynamic
- * registration
- * @param[in] cs reference to the status of the calling client
- * @param[out] txrc return code prepared for tx_open call
- * @param[in] xid transaction id of the new transaction
- * @param[in] txstate the current txstate of the control thread
- * @param[in] next_txstate the txstate will be reached by the control thread
- *                        after executing this function without errors
- * @param[out] dupid_or_proto boolean flag: TRUE if one or more resource
- *                       managers returned XAER_DUPID or XAER_PROTO
- * @param[in] xa_start_flags the flags to send to xa_start
- * @return a reason code
- */
+    /**
+     * Send xa_start to all the resource manager does not support dynamic
+     * registration
+     * @param[in] cs reference to the status of the calling client
+     * @param[out] txrc return code prepared for tx_open call
+     * @param[in] xid transaction id of the new transaction
+     * @param[in] txstate the current txstate of the control thread
+     * @param[in] next_txstate the txstate will be reached by the control
+     *            thread after executing this function without errors
+     * @param[out] dupid_or_proto boolean flag: TRUE if one or more resource
+     *                       managers returned XAER_DUPID or XAER_PROTO
+     * @param[in] xa_start_flags the flags to send to xa_start
+     * @return a reason code
+     */
     int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid,
                       int txstate, int next_txstate, int *dupid_or_proto,
                       int xa_start_flags);
