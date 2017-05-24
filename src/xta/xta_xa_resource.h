@@ -91,11 +91,12 @@ typedef struct xta_xa_resource_s {
      */
     int                              dynamic;
     /**
-     * The XA resource needs an explicit xa_open call to be opened and
-     * xa_close call to be closed. This is the typical behavior of native
-     * XA Resource Managers
+     * TRUE if the XA Resource Manager has been defined dynamically using XTA
+     * and it has been opened by the Application Program <br>
+     * FALSE if the XA Resource Manager must be opened by the Transaction
+     * Manager by mean of xa_open (XA standard)
      */
-    int                              must_be_opened;
+    int                              skip_xa_open;
     /**
      * The reference to the Transaction that registered this resource
      * or NULL
@@ -114,13 +115,15 @@ extern "C" {
     /**
      * Initialize the common properties of XA Resources
      * @param[in,out] this : XA Resource object
-     * @param[in] must_be_opened : the XA Resource needs an explicit call to
-     *                             xa_open before usage and xa_close after
-     *                             usage end
+     * @param[in] skip_xa_open FALSE : the XA Resource needs an explicit call
+     *                         to xa_open before usage and xa_close after
+     *                         usage end <br>
+     *                         TRUE : the XA Resource has been opened and will
+     *                         be closed by the Application Program
      * @return a reason code
      */
     int xta_xa_resource_init(xta_xa_resource_t *this,
-                             int must_be_opened);
+                             int skip_xa_open);
     
 
     

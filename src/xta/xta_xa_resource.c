@@ -41,7 +41,7 @@
 
 
 int xta_xa_resource_init(xta_xa_resource_t *this,
-                         int must_be_opened)
+                         int skip_xa_open)
 {
     enum Exception { NULL_OBJECT
                      , NONE } excp;
@@ -60,8 +60,7 @@ int xta_xa_resource_init(xta_xa_resource_t *this,
         this->act_rsrmgr_config.generic = &this->rsrmgr_config;
         this->act_rsrmgr_config.module = NULL;
         this->act_rsrmgr_config.xa_switch = NULL;
-        /* set other object properties */
-        this->must_be_opened = must_be_opened;
+        this->act_rsrmgr_config.skip_xa_open = skip_xa_open;
         /* set dynamic to TRUE: XTA is typically dynamic with few exceptions */
         this->dynamic = TRUE;
         

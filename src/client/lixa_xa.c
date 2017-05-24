@@ -1090,7 +1090,8 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
                    client_status_get_crash_count(cs));
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                               buffer, read_bytes, &msg))) THROW(MSG_DESERIALIZE_ERROR);
+                               buffer, read_bytes, &msg)))
+            THROW(MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
         lixa_msg_trace(&msg);
 #endif
@@ -1128,11 +1129,22 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
             record.xa_info = (xmlChar *) act_rsrmgr->generic->xa_open_info;
             record.rmid = i;
             record.flags = xa_open_flags;
-            record.rc = act_rsrmgr->xa_switch->xa_open_entry(
-                (char *) record.xa_info, record.rmid, record.flags);
-            LIXA_TRACE(("lixa_xa_open: xa_open_entry('%s', %d, 0x%lx) = %d\n",
-                        (char *) record.xa_info, record.rmid, record.flags,
-                        record.rc));
+
+            /* must xa_open be skipped? (XTA Acquired Resources) */
+            if (act_rsrmgr->skip_xa_open) {
+                LIXA_TRACE(("lixa_xa_open: skipping xa_open('%s', %d, 0x%lx) "
+                            "for this resource manager...\n",
+                            (char *) record.xa_info, record.rmid,
+                            record.flags));
+                record.rc = XA_OK;
+            } else {
+                record.rc = act_rsrmgr->xa_switch->xa_open_entry(
+                    (char *) record.xa_info, record.rmid, record.flags);
+                LIXA_TRACE(("lixa_xa_open: xa_open_entry('%s', %d, 0x%lx) = "
+                            "%d\n",
+                            (char *) record.xa_info, record.rmid, record.flags,
+                            record.rc));
+            } /* if (act_rsrmgr->skip_xa_open) */
 
             /* compute TX_*; the implemented behaviour is the most restrictive;
                see RFNF 2907143 https://sourceforge.net/tracker/?func=detail&aid=2907143&group_id=257602&atid=1231748 */

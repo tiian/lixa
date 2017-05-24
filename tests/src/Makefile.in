@@ -466,6 +466,9 @@ am_case0100_OBJECTS = case0100-case0100.$(OBJEXT)
 case0100_OBJECTS = $(am_case0100_OBJECTS)
 case0100_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la ../../src/xta/liblixta.la
+case0100_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(case0100_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -934,6 +937,7 @@ case0100_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/xta/liblixta.la
 
 case0100_SOURCES = case0100.c
+case0100_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 all: all-recursive
 
 .SUFFIXES:
@@ -1196,7 +1200,7 @@ case0053$(EXEEXT): $(case0053_OBJECTS) $(case0053_DEPENDENCIES) $(EXTRA_case0053
 
 case0100$(EXEEXT): $(case0100_OBJECTS) $(case0100_DEPENDENCIES) $(EXTRA_case0100_DEPENDENCIES) 
 	@rm -f case0100$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(case0100_OBJECTS) $(case0100_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(case0100_LINK) $(case0100_OBJECTS) $(case0100_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

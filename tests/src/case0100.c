@@ -94,21 +94,44 @@ int main(int argc, char *argv[])
     }
 #ifdef HAVE_MYSQL
     /*
+     * create a MySQL native connection
+     */
+    if (NULL == (mysql_conn = mysql_init(NULL))) {
+        printf("%s| mysql_init: returned NULL\n", pgm);
+        return 1;
+    }
+    if (NULL == mysql_real_connect(mysql_conn, "localhost", "lixa", "",
+                                   "lixa", 0, NULL, 0)) {
+        printf("%s| mysql_real_connect: returned error: %u, %s\n",
+               pgm, mysql_errno(mysql_conn), mysql_error(mysql_conn));
+        return 1;
+    }
+    /*
      * create a MySQL XA resource object
      */
     if (NULL == (mysql_xa_res = xta_mysql_xa_resource_new(
-                     mysql_conn, "MySQL", "ip,port,user,password"))) {
+                     mysql_conn, "MySQL", "localhost,0,lixa,,lixa"))) {
         printf("%s| xta_mysql_xa_resource_new: returned NULL\n", pgm);
         return 1;
     }
 #endif
 #ifdef HAVE_POSTGRESQL
     /*
+     * create a PostgreSQL native connection
+     */
+    postgres_conn = PQconnectdb("dbname=testdb");
+    if (CONNECTION_OK != PQstatus(postgres_conn)) {
+        printf("%s| PQconnectdb: returned error %s\n",
+               pgm, PQerrorMessage(postgres_conn));
+        PQfinish(postgres_conn);
+        return 1;
+    }
+    /*
      * create a PostgreSQL XA resource object
      */
     if (NULL == (postgresql_xa_res = xta_postgresql_xa_resource_new(
                      postgres_conn, "PostgreSQL",
-                     "ip,port,user,password"))) {
+                     "dbname=testdb"))) {
         printf("%s| xta_postgresql_xa_resource_new: returned NULL\n", pgm);
         return 1;
     }
@@ -129,18 +152,18 @@ int main(int argc, char *argv[])
         printf("%s| xta_transaction_manager_get_transaction: transaction "
                "reference is %p\n", pgm, tx);
     }
-    /* register the dynamic native XA Resource to the transaction manager */
-    if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
-                           tx, (xta_xa_resource_t *)dynamic_native_xa_res))) {
-        printf("%s| xta_transaction_manager_register/dynamic_native_xa_res: "
-               "returned %d\n", pgm, rc);
-        return 1;
-    }
     /* register the native XA Resource to the transaction manager: this step
      * is useless but it's not dangerous */
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                            tx, (xta_xa_resource_t *)native_xa_res))) {
-        printf("%s| xta_transaction_manager_register/native_xa_res: "
+        printf("%s| xta_transaction_enlist_resource/native_xa_res: "
+               "returned %d\n", pgm, rc);
+        return 1;
+    }
+    /* register the dynamic native XA Resource to the transaction manager */
+    if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
+                           tx, (xta_xa_resource_t *)dynamic_native_xa_res))) {
+        printf("%s| xta_transaction_enlist_resource/dynamic_native_xa_res: "
                "returned %d\n", pgm, rc);
         return 1;
     }
@@ -148,7 +171,7 @@ int main(int argc, char *argv[])
     /* register the MySQL XA Resource to the transaction manager */
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                            tx, (xta_xa_resource_t *)mysql_xa_res))) {
-        printf("%s| xta_transaction_manager_register/mysql_xa_res: "
+        printf("%s| xta_transaction_enlist_resource/mysql_xa_res: "
                "returned %d\n", pgm, rc);
         return 1;
     }
@@ -157,15 +180,23 @@ int main(int argc, char *argv[])
     /* register the PostgreSQL XA Resource to the transaction manager */
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                            tx, (xta_xa_resource_t *)postgresql_xa_res))) {
-        printf("%s| xta_transaction_manager_register/postgresql_xa_res: "
+        printf("%s| xta_transaction_enlist_resource/postgresql_xa_res: "
                "returned %d\n", pgm, rc);
         return 1;
     }
 #endif
+
+    /* begin a new Distributed Transaction */
+    if (LIXA_RC_OK != (rc = xta_transaction_begin(tx))) {
+        printf("%s| xta_transaction_manager_begin: "
+               "returned %d\n", pgm, rc);
+        return 1;
+    }
     
     /*
-     * some code here ... @@@
+     * some code here ...
      */
+    
     /*
      * delete Transaction Manager object
      */
@@ -175,12 +206,20 @@ int main(int argc, char *argv[])
      * delete the PostgreSQL XA resource object
      */
     xta_postgresql_xa_resource_delete(postgresql_xa_res);
+    /*
+     * close PostgreSQL database connection
+     */
+    PQfinish(postgres_conn);
 #endif
 #ifdef HAVE_MYSQL
     /*
      * delete the MySQL XA resource object
      */
     xta_mysql_xa_resource_delete(mysql_xa_res);
+    /*
+     * close MySQL database connection
+     */
+    mysql_close(mysql_conn);
 #endif    
     /*
      * delete dynamically created native XA Resource object
@@ -191,22 +230,8 @@ int main(int argc, char *argv[])
      */
     xta_native_xa_resource_delete(native_xa_res);
     /*
-    printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
-    if (TX_ERROR == rc) {
-        printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-        lixa_monkeyrm_call_cleanup();
-    }
-    assert(TX_OK == rc);
-    printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());
-    assert(TX_OK == rc);
-    printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info));
-    assert(1 == rc);
-    printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
-    assert(TX_OK == rc);
-    printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
-    assert(TX_OK == rc);
-    lixa_monkeyrm_call_cleanup();
-    */
+     * end of XTA API calls
+     */
     printf("%s| ...finished\n", pgm);
     return 0;
 }

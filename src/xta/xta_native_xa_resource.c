@@ -182,9 +182,9 @@ int xta_native_xa_resource_init(
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT);
-        /* call father initializator */
+        /* call parent initializator */
         if (LIXA_RC_OK != (ret_cod = xta_xa_resource_init(
-                               (xta_xa_resource_t *)this, TRUE)))
+                               (xta_xa_resource_t *)this, FALSE)))
             THROW(XA_RESOURCE_INIT_ERROR);
         if (rmid < 0) {
             /* rmid < 0: this is a dynamic definition */

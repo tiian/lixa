@@ -151,3 +151,4 @@ case0100_CPPFLAGS = @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@ \
 case0100_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/xta/liblixta.la
 case0100_SOURCES = case0100.c
+case0100_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@

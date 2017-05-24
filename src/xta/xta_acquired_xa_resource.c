@@ -73,12 +73,12 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
                         MAXINFOSIZE));
         }
         /*
-         * call father initializator
+         * call parent initializator
          * Acquired XA Resources don't generally need explicit
          * xa_open, xa_close
          */
         if (LIXA_RC_OK != (ret_cod = xta_xa_resource_init(
-                               (xta_xa_resource_t *)this, FALSE)))
+                               (xta_xa_resource_t *)this, TRUE)))
             THROW(XTA_XA_RESOURCE_INIT_ERROR);
         /* set object properties */
         if (NULL == (this->xa_resource.rsrmgr_config.name =

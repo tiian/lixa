@@ -111,6 +111,30 @@ extern "C" {
     
 
     /**
+     * Enlist the resource specified with the Transaction associated with the
+     * Transaction object
+     * @param[in,out] this : transaction object
+     * @param[in] xa_res : resource to associate
+     * @return a reason code
+     */
+    int xta_transaction_enlist_resource(xta_transaction_t *this,
+                                        xta_xa_resource_t *xa_res);
+    
+
+    
+    /**
+     * Prepare the XA Resource Managers and the XA Transaction Manager for a
+     * new transactional Unit of Work. From the XA specification point of view,
+     * it calls xa_open (for the statically defined XA Resource Managers)
+     * and xa_start
+     * @param[in,out] this : transaction object
+     * @return a reason code
+     */
+    int xta_transaction_begin(xta_transaction_t *this);
+
+    
+    
+    /**
      * Commit the transaction represented by this transaction object
      * @param[in,out] this : transaction object
      * @return a reason code
@@ -127,18 +151,6 @@ extern "C" {
     int xta_transaction_rollback(xta_transaction_t *this);
 
     
-    
-    /**
-     * Enlist the resource specified with the Transaction associated with the
-     * Transaction object
-     * @param[in,out] this : transaction object
-     * @param[in] xa_res : resource to associate
-     * @return a reason code
-     */
-    int xta_transaction_enlist_resource(xta_transaction_t *this,
-                                        xta_xa_resource_t *xa_res);
-    
-
     
     /**
      * When a resource registers dynamically the digest must be updated because

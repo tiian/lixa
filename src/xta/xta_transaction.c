@@ -29,6 +29,7 @@
 #include "lixa_trace.h"
 #include "client_conn.h"
 #include "client_config.h"
+#include "lixa_xa.h"
 /* XTA includes */
 #include "xta_transaction.h"
 
@@ -205,63 +206,12 @@ xta_transaction_config_t *xta_transaction_get_config(xta_transaction_t *this)
 
 
 
-int xta_transaction_commit(xta_transaction_t *transaction)
-{
-    enum Exception { NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("xta_transaction_commit\n"));
-    TRY {
-        /* @@@ */
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("xta_transaction_commit/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-int xta_transaction_rollback(xta_transaction_t *transaction)
-{
-    enum Exception { NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("xta_transaction_rollback\n"));
-    TRY {
-        /* @@@ */
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("xta_transaction_rollback/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
 int xta_transaction_enlist_resource(xta_transaction_t *this,
                                     xta_xa_resource_t *xa_res)
 {
     enum Exception { NULL_OBJECT1
                      , NULL_OBJECT2
+                     , INVALID_STATUS
                      , NULL_OBJECT3
                      , G_TRY_MALLOC_ERROR
                      , CLIENT_CONFIG_DUP_ERROR
@@ -282,6 +232,13 @@ int xta_transaction_enlist_resource(xta_transaction_t *this,
         /* check the XA Resource object is not NULL */
         if (NULL == xa_res)
             THROW(NULL_OBJECT2);
+        /* check transaction state before going on */
+        if (TX_STATE_S0 != client_status_get_txstate(&this->client_status)) {
+            LIXA_TRACE(("xta_transaction_enlist_resource: expected client "
+                        "status %d, current client status %d\n", TX_STATE_S0,
+                        client_status_get_txstate(&this->client_status)));
+            THROW(INVALID_STATUS);
+        }
         /* if the XA Resource is not dynamic, the following steps are not
          * necessary */
         if (xta_xa_resource_is_dynamic(xa_res)) {
@@ -326,6 +283,9 @@ int xta_transaction_enlist_resource(xta_transaction_t *this,
             case NULL_OBJECT2:
             case NULL_OBJECT3:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case G_TRY_MALLOC_ERROR:
                 ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
@@ -453,6 +413,116 @@ int xta_transaction_redigest(xta_transaction_t *this,
     return ret_cod;
 }
     
+
+
+int xta_transaction_begin(xta_transaction_t *this)
+{
+    enum Exception { NULL_OBJECT
+                     , INVALID_STATUS
+                     , LIXA_XA_OPEN_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_transaction_begin\n"));
+    TRY {
+        int next_txstate, txrc;
+        
+        /* check object */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* check transaction state before going on */
+        if (TX_STATE_S0 != client_status_get_txstate(&this->client_status)) {
+            LIXA_TRACE(("xta_transaction_begin: expected client status %d, "
+                        "current client status %d\n", TX_STATE_S0,
+                        client_status_get_txstate(&this->client_status)));
+            THROW(INVALID_STATUS);
+        }
+        next_txstate = TX_STATE_S1;
+        /* open statically defined XA Resource Managers */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_open(
+                               &this->local_ccc, &this->client_status,
+                               &txrc, next_txstate, FALSE)))
+            THROW(LIXA_XA_OPEN_ERROR);
+        /* set new state after RMs are open... */
+        client_status_set_txstate(&this->client_status, next_txstate);
+
+        /* @@@ grab logic from lixa_tx_begin */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case LIXA_XA_OPEN_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_begin/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_transaction_commit(xta_transaction_t *transaction)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_transaction_commit\n"));
+    TRY {
+        /* @@@ */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_commit/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_transaction_rollback(xta_transaction_t *transaction)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_transaction_rollback\n"));
+    TRY {
+        /* @@@ */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_rollback/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
 
 
 int xta_transaction_suspend(xta_transaction_t *transaction,

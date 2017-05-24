@@ -404,9 +404,6 @@ int client_config_dup(const client_config_coll_t *source,
             memcpy(target_rc->xa_close_info,
                    source_arc->generic->xa_close_info, MAXINFOSIZE);
             /* link the records */
-            /* DDD
-            target_arc = *source_arc;
-            */
             target_arc.generic = target_rc;
             if (LIXA_RC_OK != (ret_cod = client_config_load_switch_file(
                                    &target_arc,
@@ -615,6 +612,7 @@ int client_config_validate(client_config_coll_t *ccc)
                             record.module = NULL;
                             record.xa_switch = NULL;
                             record.dynamically_defined = FALSE;
+                            record.skip_xa_open = FALSE;
                             client_config_append_rsrmgr(ccc, NULL, &record);
                             LIXA_TRACE(("client_config_validate: resource "
                                         "manager '%s' found at pos %u in "
@@ -789,6 +787,7 @@ int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr,
             act_rsrmgr->module = module;
             act_rsrmgr->xa_switch = xa_switch();
             act_rsrmgr->dynamically_defined = dynamically_defined;
+            act_rsrmgr->skip_xa_open = FALSE;
         }
             
         THROW(NONE);
@@ -1143,6 +1142,8 @@ void client_config_display_rsrmgr(const struct act_rsrmgr_config_s *arc)
                 arc->xa_switch));
     LIXA_TRACE(("client_config_display_rsrmgr: dynamically_defined = %d\n",
                 arc->dynamically_defined));
+    LIXA_TRACE(("client_config_display_rsrmgr: skip_xa_open = %d\n",
+                arc->skip_xa_open));
 }
 
 

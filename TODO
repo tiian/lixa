@@ -1,5 +1,3 @@
-Now lixa_xa_open does not use global configuration anymore and it's ready to
-be called by xta_transaction.
 Port some logic from lixa_tx_open to xta_transaction_open (tx state) and then
 call lixa_xa_open...
 

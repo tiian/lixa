@@ -186,6 +186,13 @@ struct act_rsrmgr_config_s {
      * been statically defined inside the lixac.conf file
      */
     int                     dynamically_defined;
+    /**
+     * TRUE if the XA Resource Manager has been defined dynamically using XTA
+     * and it has been opened by the Application Program <br>
+     * FALSE if the XA Resource Manager must be opened by the Transaction
+     * Manager by mean of xa_open (XA standard)
+     */
+    int                     skip_xa_open;
 };
 
 
