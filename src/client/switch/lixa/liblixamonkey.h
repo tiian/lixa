@@ -197,7 +197,7 @@ extern "C" {
     /**
      * LIXA Monkey RM implementation of xa_start function
      */
-    int lixa_monkeyrm_start(XID *xid, int rmid, long flags);
+    int lixa_monkeyrm_start(const XID *xid, int rmid, long flags);
 
 
 

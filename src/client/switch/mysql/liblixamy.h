@@ -210,7 +210,7 @@ int lixa_my_close(char *xa_info, int rmid, long flags);
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description
  */
-int lixa_my_start(XID *xid, int rmid, long flags);
+int lixa_my_start(const XID *xid, int rmid, long flags);
 
 
     

@@ -362,7 +362,7 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
 
 
 
-int lixa_pq_start(XID *xid, int rmid, long flags)
+int lixa_pq_start(const XID *xid, int rmid, long flags)
 {
     enum Exception { INVALID_FLAGS1
                      , INVALID_FLAGS2

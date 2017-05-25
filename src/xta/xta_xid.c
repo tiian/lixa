@@ -27,6 +27,7 @@
 /* LIXA includes */
 #include "lixa_errors.h"
 #include "lixa_trace.h"
+#include "lixa_xid.h"
 /* XTA includes */
 #include "xta_xid.h"
 
@@ -53,7 +54,9 @@ xta_xid_t *xta_xid_new(void)
         if (NULL == (this = (xta_xid_t *)
                      g_try_malloc0(sizeof(xta_xid_t))))
             THROW(G_TRY_MALLOC_ERROR);
-        /* @@@ initialize the object */
+        /* initialize the object */
+        lixa_xid_create_new(&this->xa_xid);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -81,8 +84,6 @@ void xta_xid_delete(xta_xid_t *this)
     
     LIXA_TRACE(("xta_xid_delete\n"));
     TRY {
-        /* @@@ destroy the object content if necessary */
-
         g_free(this);
         
         THROW(NONE);
@@ -101,4 +102,32 @@ void xta_xid_delete(xta_xid_t *this)
 }
 
 
+
+const XID *xta_xid_get_xa_xid(xta_xid_t *this)
+{
+    enum Exception { NULL_OBJECT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    XID *xa_xid = NULL;
+    
+    LIXA_TRACE(("xta_xid_get_xa_xid\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        xa_xid = &this->xa_xid;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_xid_get_xa_xid/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return xa_xid;
+}
 

@@ -447,7 +447,7 @@ int lixa_monkeyrm_close(char *xa_info, int rmid, long flags)
 
 
 
-int lixa_monkeyrm_start(XID *xid, int rmid, long flags)
+int lixa_monkeyrm_start(const XID *xid, int rmid, long flags)
 {
     enum Exception { NULL_MONKEY_STATUS
                      , INVALID_STATUS1

@@ -100,7 +100,7 @@ int lixa_randomrm_close(char *xa_info, int rmid, long flags) {
 /*
  * Random implementation of xa_start function
  */ 
-int lixa_randomrm_start(XID *xid, int rmid, long flags) {
+int lixa_randomrm_start(const XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
     if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_randomrm_start: xid='%s', rmid=%d, flags=0x%lx\n",

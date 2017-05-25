@@ -1808,23 +1808,21 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
 }
 
 
-int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
+int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
+                  int *txrc, const XID *xid, int txstate,
                   int next_txstate, int *dupid_or_proto, int xa_start_flags)
 {
-    enum Exception
-    {
-        MSG_SERIALIZE_ERROR1,
-        MSG_SEND_ERROR,
-        MSG_RETRIEVE_ERROR,
-        MSG_DESERIALIZE_ERROR,
-        ERROR_FROM_SERVER,
-        MSG_SERIALIZE_ERROR2,
-        ASYNC_NOT_IMPLEMENTED,
-        UNEXPECTED_XA_RC,
-        MSG_SEND_ERROR2,
-        XA_ERROR,
-        NONE
-    } excp;
+    enum Exception { MSG_SERIALIZE_ERROR1
+                     , MSG_SEND_ERROR
+                     , MSG_RETRIEVE_ERROR
+                     , MSG_DESERIALIZE_ERROR
+                     , ERROR_FROM_SERVER
+                     , MSG_SERIALIZE_ERROR2
+                     , ASYNC_NOT_IMPLEMENTED
+                     , UNEXPECTED_XA_RC
+                     , MSG_SEND_ERROR2
+                     , XA_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     struct lixa_msg_s msg;
@@ -1849,10 +1847,10 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
         msg.body.start_8.rsrmgrs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_start_8_rsrmgr_s),
-            global_ccc.actconf.rsrmgrs->len);
-        for (i = 0; i < global_ccc.actconf.rsrmgrs->len; ++i) {
+            ccc->actconf.rsrmgrs->len);
+        for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
-                global_ccc.actconf.rsrmgrs,
+                ccc->actconf.rsrmgrs,
                 struct act_rsrmgr_config_s, i);
             struct lixa_msg_body_open_8_rsrmgr_s record;
             /* if resource manager supports dynamic registration, xa_start
@@ -1872,8 +1870,9 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
             memset(&msg, 0, sizeof(msg));
         } else {
             if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                                   &msg, buffer, sizeof(buffer) - 1, &buffer_size))) THROW(
-                                       MSG_SERIALIZE_ERROR1);
+                                   &msg, buffer, sizeof(buffer) - 1,
+                                   &buffer_size)))
+                THROW(MSG_SERIALIZE_ERROR1);
 
             /* only the GArray needs to be released to avoid memory leaks */
             g_array_free(msg.body.start_8.rsrmgrs, TRUE);
@@ -1893,7 +1892,8 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                        client_status_get_crash_count(cs));
 
             if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                                   fd, buffer, sizeof(buffer) - 1, &read_bytes))) {
+                                   fd, buffer, sizeof(buffer) - 1,
+                                   &read_bytes))) {
                 client_status_check_socket(cs, ret_cod);
                 THROW(MSG_RETRIEVE_ERROR);
             }
@@ -1905,13 +1905,14 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                        client_status_get_crash_count(cs));
 
             if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                                   buffer, read_bytes, &msg))) THROW(MSG_DESERIALIZE_ERROR);
+                                   buffer, read_bytes, &msg)))
+                THROW(MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
             lixa_msg_trace(&msg);
 #endif
             /* check the answer from the server */
-            if (LIXA_RC_OK != (ret_cod = msg.body.start_16.answer.rc)) THROW(
-                ERROR_FROM_SERVER);
+            if (LIXA_RC_OK != (ret_cod = msg.body.start_16.answer.rc))
+                THROW(ERROR_FROM_SERVER);
         }
 
         /* prepare the next message */
@@ -1921,13 +1922,13 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
         msg.body.start_24.xa_start_execs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_start_24_xa_start_execs_s),
-            global_ccc.actconf.rsrmgrs->len);
+            ccc->actconf.rsrmgrs->len);
 
         /* loop on all the resource managers and call xa_start function */
         *txrc = TX_OK;
-        for (i = 0; i < global_ccc.actconf.rsrmgrs->len; ++i) {
+        for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
-                global_ccc.actconf.rsrmgrs,
+                ccc->actconf.rsrmgrs,
                 struct act_rsrmgr_config_s, i);
             struct client_status_rsrmgr_s *csr = &g_array_index(
                 cs->rmstatus,
@@ -1966,7 +1967,8 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                            (char *) act_rsrmgr->generic->name, record.rmid);
                     tmp_txrc = TX_ERROR;
                     if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags) {
-                        LIXA_TRACE(("lixa_xa_start: no state change required\n"));
+                        LIXA_TRACE(("lixa_xa_start: no state change "
+                                    "required\n"));
                     } else {
                         csr->common.xa_td_state = XA_STATE_T0;
                     }
@@ -1979,7 +1981,8 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                     *dupid_or_proto = TRUE;
                     tmp_txrc = TX_ERROR;
                     if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags) {
-                        LIXA_TRACE(("lixa_xa_start: no state change required\n"));
+                        LIXA_TRACE(("lixa_xa_start: no state change "
+                                    "required\n"));
                     } else {
                         csr->common.xa_td_state = XA_STATE_T0;
                     }
@@ -2006,7 +2009,8 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                         syslog(LOG_WARNING, LIXA_SYSLOG_LXC029W,
                                (char *) act_rsrmgr->generic->name, record.rmid,
                                NULL != ser_xid ? ser_xid : "");
-                        LIXA_TRACE(("lixa_xa_start: xa_start returned XAER_NOTA "
+                        LIXA_TRACE(("lixa_xa_start: xa_start returned "
+                                    "XAER_NOTA "
                                    "for rmid=%d,xid='%s' and this should NOT "
                                    "happen!'n", record.rmid, ser_xid));
                         *txrc = TX_FAIL;
@@ -2074,8 +2078,9 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
             memset(&msg, 0, sizeof(msg));
         } else {
             if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                                   &msg, buffer, sizeof(buffer), &buffer_size))) THROW(
-                                       MSG_SERIALIZE_ERROR2);
+                                   &msg, buffer, sizeof(buffer),
+                                   &buffer_size)))
+                THROW(MSG_SERIALIZE_ERROR2);
 
             /* this object contains references to external stuff and
                cannot be freed using standard lixa_msg_free; we are freeing the
@@ -2097,46 +2102,45 @@ int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid, int txstate,
                        client_status_get_crash_count(cs));
         }
 
-        if (TX_OK != *txrc) THROW(XA_ERROR);
+        if (TX_OK != *txrc)
+            THROW(XA_ERROR);
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case MSG_SERIALIZE_ERROR1:
-                case MSG_SEND_ERROR:
-                case MSG_RETRIEVE_ERROR:
-                case MSG_DESERIALIZE_ERROR:
-                    break;
-                case ERROR_FROM_SERVER:
-                    ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
-                    break;
-                case MSG_SERIALIZE_ERROR2:
-                    break;
-                case ASYNC_NOT_IMPLEMENTED:
-                    ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
-                    break;
-                case UNEXPECTED_XA_RC:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-                    break;
-                case MSG_SEND_ERROR2:
-                    break;
-                case XA_ERROR:
-                    ret_cod = LIXA_RC_XA_ERROR;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-            /* memory recovery */
-            if (NULL != msg.body.start_24.xa_start_execs) {
-                g_array_free(msg.body.start_24.xa_start_execs, TRUE);
-                msg.body.start_24.xa_start_execs = NULL;
-            }
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case MSG_SERIALIZE_ERROR1:
+            case MSG_SEND_ERROR:
+            case MSG_RETRIEVE_ERROR:
+            case MSG_DESERIALIZE_ERROR:
+                break;
+            case ERROR_FROM_SERVER:
+                ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
+                break;
+            case MSG_SERIALIZE_ERROR2:
+                break;
+            case ASYNC_NOT_IMPLEMENTED:
+                ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
+                break;
+            case UNEXPECTED_XA_RC:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case MSG_SEND_ERROR2:
+                break;
+            case XA_ERROR:
+                ret_cod = LIXA_RC_XA_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* memory recovery */
+        if (NULL != msg.body.start_24.xa_start_execs) {
+            g_array_free(msg.body.start_24.xa_start_execs, TRUE);
+            msg.body.start_24.xa_start_execs = NULL;
+        }
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

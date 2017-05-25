@@ -22,6 +22,7 @@
 
 
 /* LIXA includes */
+#include <xa.h>
 #include "lixa_trace.h"
 
 
@@ -41,7 +42,10 @@
  * XTA Transaction data type
  */
 typedef struct {
-    int dummy;
+    /**
+     * Transaction ID using the standard XA format
+     */
+    XID          xa_xid;
 } xta_xid_t;
 
 
@@ -69,6 +73,15 @@ extern "C" {
 
 
 
+    /**
+     * Retrieve the transaction ID in the XA standard format
+     * @param[in] this : xid object
+     * @return a reference to the XA representation of the transaction id
+     */
+    const XID *xta_xid_get_xa_xid(xta_xid_t *this);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

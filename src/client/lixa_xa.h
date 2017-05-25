@@ -160,6 +160,7 @@ extern "C" {
     /**
      * Send xa_start to all the resource manager does not support dynamic
      * registration
+     * @param[in] ccc : client config collection
      * @param[in] cs reference to the status of the calling client
      * @param[out] txrc return code prepared for tx_open call
      * @param[in] xid transaction id of the new transaction
@@ -171,10 +172,12 @@ extern "C" {
      * @param[in] xa_start_flags the flags to send to xa_start
      * @return a reason code
      */
-    int lixa_xa_start(client_status_t *cs, int *txrc, XID *xid,
+    int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
+                      int *txrc, const XID *xid,
                       int txstate, int next_txstate, int *dupid_or_proto,
                       int xa_start_flags);
 
+    
 
 #ifdef __cplusplus
 }

@@ -98,7 +98,7 @@ struct xa_switch_t
     /**
      * xa_start function pointer
      */
-    int (*xa_start_entry)(XID *, int, long);
+    int (*xa_start_entry)(const XID *, int, long);
     /**
      * xa_end function pointer
      */

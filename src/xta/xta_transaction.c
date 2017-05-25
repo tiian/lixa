@@ -83,6 +83,8 @@ xta_transaction_t *xta_transaction_new(void)
                                client_status_get_sockfd(
                                    &this->client_status))))
             THROW(CLIENT_CONFIG_JOB_ERROR);
+        /* reset the XID reference */
+        this->xid = NULL;
         
         THROW(NONE);
     } CATCH {
@@ -151,6 +153,10 @@ void xta_transaction_delete(xta_transaction_t *this)
         /* free the memory associated to client status */
         client_status_free(&this->client_status);
 
+        /* release the memory of the XID */
+        if (NULL != this->xid)
+            xta_xid_delete(this->xid);
+        
         /* release the memory of this object */
         g_free(this);
         
@@ -417,19 +423,24 @@ int xta_transaction_redigest(xta_transaction_t *this,
 
 int xta_transaction_begin(xta_transaction_t *this)
 {
-    enum Exception { NULL_OBJECT
+    enum Exception { NULL_OBJECT1
                      , INVALID_STATUS
                      , LIXA_XA_OPEN_ERROR
+                     , INTERNAL_ERROR
+                     , NULL_OBJECT2
+                     , LIXA_XA_START_ERROR1
+                     , LIXA_XA_START_ERROR2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_begin\n"));
     TRY {
-        int next_txstate, txrc;
+        int txstate, next_txstate, txrc;
+        int dupid_or_proto = FALSE;
         
         /* check object */
         if (NULL == this)
-            THROW(NULL_OBJECT);
+            THROW(NULL_OBJECT1);
         /* check transaction state before going on */
         if (TX_STATE_S0 != client_status_get_txstate(&this->client_status)) {
             LIXA_TRACE(("xta_transaction_begin: expected client status %d, "
@@ -445,19 +456,83 @@ int xta_transaction_begin(xta_transaction_t *this)
             THROW(LIXA_XA_OPEN_ERROR);
         /* set new state after RMs are open... */
         client_status_set_txstate(&this->client_status, next_txstate);
+        txstate = next_txstate;
+        next_txstate = TX_STATE_S3;
+        
+        /* this should never happen! */
+        if (NULL != this->xid)
+            THROW(INTERNAL_ERROR);
 
-        /* @@@ grab logic from lixa_tx_begin */
+        /* create a new xid */
+        if (NULL == (this->xid = xta_xid_new()))
+            THROW(NULL_OBJECT2);
+
+        /* this could be useless for XTA, but backported from TX layer */
+        client_status_set_xid(&this->client_status,
+                              xta_xid_get_xa_xid(this->xid));
+        
+        /* logic grabbed from lixa_tx_begin */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
+                               &this->local_ccc, &this->client_status, &txrc,
+                               xta_xid_get_xa_xid(this->xid),
+                               txstate, next_txstate,
+                               &dupid_or_proto, TMNOFLAGS))) {
+            int retry_ok = FALSE;
+            if (dupid_or_proto) {
+                int txrc2 = TX_FAIL;
+                LIXA_TRACE(("xta_transaction_begin: XAER_DUPID or XAER_PROTO "
+                            "returned from any resource manager after "
+                            "xa_start call; trying a new synchronization with "
+                            "tx_rollback...\n"));
+                if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
+                                       &this->client_status, &txrc2, FALSE,
+                                       TMNOFLAGS))) {
+                    LIXA_TRACE(("xta_transaction_begin: error while calling "
+                                "lixa_xa_end (ret_cod=%d, txrc2=%d), going "
+                                "on...\n", ret_cod, txrc2));
+                }
+                if (LIXA_RC_OK !=
+                    (ret_cod = lixa_xa_rollback(&this->client_status,
+                                                &txrc2, FALSE))) {
+                    LIXA_TRACE(("xta_transaction_begin: error while calling "
+                                "lixa_xa_rollback (ret_cod=%d, txrc2=%d), "
+                                "going on...\n", ret_cod, txrc2));
+                }
+                if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
+                                       &this->local_ccc, &this->client_status,
+                                       &txrc, xta_xid_get_xa_xid(this->xid),
+                                       txstate, next_txstate,
+                                       &dupid_or_proto, TMNOFLAGS))) {
+                    LIXA_TRACE(("xta_transaction_begin: lixa_xa_start failed "
+                                "again, returning TX_FAIL\n"));
+                    txrc = TX_FAIL;
+                    THROW(LIXA_XA_START_ERROR1);
+                }
+                retry_ok = TRUE;
+            }
+            if (!retry_ok)
+                THROW(LIXA_XA_START_ERROR2);
+        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case NULL_OBJECT:
+            case NULL_OBJECT1:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case LIXA_XA_OPEN_ERROR:
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case NULL_OBJECT2:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case LIXA_XA_START_ERROR1:
+            case LIXA_XA_START_ERROR2:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -72,6 +72,10 @@ typedef struct xta_transaction_s {
      * limitation
      */
     xta_transaction_config_t         local_ccc;
+    /**
+     * Transaction ID
+     */
+    xta_xid_t                       *xid;
 } xta_transaction_t;
 
 
