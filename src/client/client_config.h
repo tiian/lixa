@@ -72,6 +72,7 @@
 #include <lixa_trace.h>
 #include <lixa_config.h>
 #include <xa.h>
+#include "lixa_iface.h"
 
 
 
@@ -172,27 +173,20 @@ struct act_rsrmgr_config_s {
     struct rsrmgr_config_s *generic;
     /**
      * This is a pointer to the dynamically loaded module containing the
-     * interface wrapped by @ref xa_switch
+     * interface wrapped by @ref xa_switch_t
      */
     GModule                *module;
     /**
      * Pointer to the structure must be used to interface the resource
      * manager
      */
-    struct xa_switch_t     *xa_switch;
+    struct lixa_iface_s     lixa_iface;
     /**
      * TRUE if the configuration has been dynamically defined by the
      * Application Program using XTA interface; FALSE if the configuration has
      * been statically defined inside the lixac.conf file
      */
     int                     dynamically_defined;
-    /**
-     * TRUE if the XA Resource Manager has been defined dynamically using XTA
-     * and it has been opened by the Application Program <br>
-     * FALSE if the XA Resource Manager must be opened by the Transaction
-     * Manager by mean of xa_open (XA standard)
-     */
-    int                     skip_xa_open;
 };
 
 

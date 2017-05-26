@@ -1,5 +1,4 @@
-Port some logic from lixa_tx_open to xta_transaction_open (tx state) and then
-call lixa_xa_open...
+Create a macro to wrap XA calls against lixa_iface_s interface
 
 Open Point: automatic recovery. 
 Automatic recovery must be managed in a different way in comparison with

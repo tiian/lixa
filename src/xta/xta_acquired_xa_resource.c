@@ -41,11 +41,13 @@
 
 
 int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
+                                  const struct xta_iface_s *iface,
                                   const char *name,
                                   const char *open_info)
 {
-    enum Exception { NULL_OBJECT
+    enum Exception { NULL_OBJECT1
                      , OBJ_CORRUPTED
+                     , NULL_OBJECT2
                      , INVALID_OPTION1
                      , INVALID_OPTION2
                      , XTA_XA_RESOURCE_INIT_ERROR
@@ -56,10 +58,13 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
     LIXA_TRACE(("xta_acquired_xa_resource_init\n"));
     TRY {
         if (NULL == this)
-            THROW(NULL_OBJECT);
+            THROW(NULL_OBJECT1);
         /* check the object has not already been initialized */
         if (NULL != this->xa_resource.rsrmgr_config.name)
             THROW(OBJ_CORRUPTED);
+        /* interface can't be NULL */
+        if (NULL == iface)
+            THROW(NULL_OBJECT2);
         /* name can't be NULL or empty */
         if (NULL == name || 0 == strlen(name))
             THROW(INVALID_OPTION1);
@@ -78,9 +83,10 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
          * xa_open, xa_close
          */
         if (LIXA_RC_OK != (ret_cod = xta_xa_resource_init(
-                               (xta_xa_resource_t *)this, TRUE)))
+                               (xta_xa_resource_t *)this, FALSE)))
             THROW(XTA_XA_RESOURCE_INIT_ERROR);
         /* set object properties */
+        this->iface = iface;
         if (NULL == (this->xa_resource.rsrmgr_config.name =
                      xmlCharStrdup(name)))
             THROW(XML_STRDUP_ERROR);
@@ -91,11 +97,14 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case NULL_OBJECT:
+            case NULL_OBJECT1:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case OBJ_CORRUPTED:
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case NULL_OBJECT2:
+                ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case INVALID_OPTION1:
             case INVALID_OPTION2:

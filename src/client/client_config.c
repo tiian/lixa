@@ -610,9 +610,9 @@ int client_config_validate(client_config_coll_t *ccc)
                             struct act_rsrmgr_config_s record;
                             record.generic = conf_rsrmgr;
                             record.module = NULL;
-                            record.xa_switch = NULL;
+                            memset(&record.lixa_iface, 0,
+                                   sizeof(struct lixa_iface_s));
                             record.dynamically_defined = FALSE;
-                            record.skip_xa_open = FALSE;
                             client_config_append_rsrmgr(ccc, NULL, &record);
                             LIXA_TRACE(("client_config_validate: resource "
                                         "manager '%s' found at pos %u in "
@@ -785,9 +785,8 @@ int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr,
                         xa_switch()->flags & TMUSEASYNC ?
                         "true" : "false"));
             act_rsrmgr->module = module;
-            act_rsrmgr->xa_switch = xa_switch();
+            act_rsrmgr->lixa_iface.std = xa_switch();
             act_rsrmgr->dynamically_defined = dynamically_defined;
-            act_rsrmgr->skip_xa_open = FALSE;
         }
             
         THROW(NONE);
@@ -981,10 +980,10 @@ int client_config_unload_all_switch_files(client_config_coll_t *ccc)
                             "xa_switch->name='%s', xa_switch->flags=%ld\n", i,
                             act_rsrmgr->generic->name,
                             act_rsrmgr->module,
-                            act_rsrmgr->xa_switch ?
-                            act_rsrmgr->xa_switch->name : "",
-                            act_rsrmgr->xa_switch ?
-                            act_rsrmgr->xa_switch->flags : 0));
+                            act_rsrmgr->lixa_iface.std ?
+                            act_rsrmgr->lixa_iface.std->name : "",
+                            act_rsrmgr->lixa_iface.std ?
+                            act_rsrmgr->lixa_iface.std->flags : 0));
                 if (LIXA_RC_OK != (ret_cod = client_config_unload_switch_file(
                                        act_rsrmgr)))
                     THROW(UNLOAD_SWITCH_FILE_ERROR);
@@ -1031,7 +1030,7 @@ int client_config_unload_switch_file(struct act_rsrmgr_config_s *act_rsrmgr)
             THROW(G_MODULE_CLOSE_ERROR);
         }
         act_rsrmgr->module = NULL;
-        act_rsrmgr->xa_switch = NULL;
+        memset(&act_rsrmgr->lixa_iface, 0, sizeof(struct lixa_iface_s));
         
         THROW(NONE);
     } CATCH {
@@ -1139,11 +1138,9 @@ void client_config_display_rsrmgr(const struct act_rsrmgr_config_s *arc)
                 " '%s'\n", arc->generic->xa_close_info));
     LIXA_TRACE(("client_config_display_rsrmgr: module = %p\n", arc->module));
     LIXA_TRACE(("client_config_display_rsrmgr: xa_switch = %p\n",
-                arc->xa_switch));
+                arc->lixa_iface.std));
     LIXA_TRACE(("client_config_display_rsrmgr: dynamically_defined = %d\n",
                 arc->dynamically_defined));
-    LIXA_TRACE(("client_config_display_rsrmgr: skip_xa_open = %d\n",
-                arc->skip_xa_open));
 }
 
 

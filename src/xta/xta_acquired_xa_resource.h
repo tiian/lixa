@@ -33,6 +33,7 @@
 #include "lixa_trace.h"
 /* XTA includes */
 #include "xta_xa_resource.h"
+#include "xta_iface.h"
 /* XA include */
 #include "xa.h"
 
@@ -56,6 +57,10 @@ typedef struct {
     union {
         xta_xa_resource_t           xa_resource;
     };
+    /**
+     * XTA interface for XA functions
+     */
+    const struct xta_iface_s       *iface;
 } xta_acquired_xa_resource_t;
 
 
@@ -69,6 +74,7 @@ extern "C" {
     /**
      * Initialize the common properties of Acquired XA Resources
      * @param[in,out] this : Acquired XA Resource object
+     * @param[in] iface : interface with XA function pointers
      * @param[in] name : unique identifier of the resource
      * @param[in] open_info : unique description of the connection properties
      *                        like network name/IP address, port, user/schema,
@@ -77,6 +83,7 @@ extern "C" {
      * @return a reason code
      */
     int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
+                                      const struct xta_iface_s *iface,
                                       const char *name,
                                       const char *open_info);
     

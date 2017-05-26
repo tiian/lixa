@@ -54,6 +54,13 @@ typedef struct {
 
 
 
+/**
+ * Interface with XA function pointers
+ */
+const struct xta_iface_s xta_mysql_iface;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -111,8 +118,133 @@ extern "C" {
      */
     void xta_mysql_xa_resource_clean(xta_mysql_xa_resource_t *this);
 
-    
-    
+
+
+    /**
+     * Open a MySQL resource manager
+     * @param[in] xa_info : null-terminated character string that may contain
+     *                      instance-specific information for the resource
+     *                      manager
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @return a XA return code
+     */
+    int xta_mysql_xa_open(char *xa_info, int rmid);
+
+
+
+    /**
+     * Close a MySQL resource manager
+     * @param[in] xa_info : null-terminated character string that may contain
+     *                      instance-specific information for the resource
+     *                      manager
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @return a XA return code
+     */
+    int xta_mysql_xa_close(char *xa_info, int rmid);
+
+
+
+    /**
+     * Start work on behalf of a transaction branch
+     * @param[in] xid : a pointer to the XID that a resource manager must
+     *                  associate with the calling thread of control
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @param[in] flags : only @ref TMNOFLAGS can be passed to a MySQL resource
+     * @return a XA return code
+     */
+    int xta_mysql_xa_start(const XID *xid, int rmid, long flags);
+
+
+
+    /**
+     * End work performed on behalf of a transaction branch
+     * @param[in] xid : a pointer to the XID that a resource manager must
+     *                  associate with the calling thread of control
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @param[in] flags : only @ref TMSUCCESS can be passed to a MySQL resource
+     * @return a XA return code
+     */
+    int xta_mysql_xa_end(XID *xid, int rmid, long flags);
+
+
+
+    /**
+     * Roll back work done on behalf of a transaction branch
+     * @param[in] xid : a pointer to the XID that a resource manager must
+     *                  associate with the calling thread of control
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @return a XA return code
+     */
+    int xta_mysql_xa_rollback(XID *xid, int rmid);
+
+
+
+    /**
+     * Prepare to commit work done on behalf of a transaction branch
+     * @param[in] xid : a pointer to the XID that a resource manager must
+     *                  associate with the calling thread of control
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @return a XA return code
+     */
+    int xta_mysql_xa_prepare(XID *xid, int rmid);
+
+
+
+    /**
+     * Commit work done on behalf of a transaction branch
+     * @param[in] xid : a pointer to the XID that a resource manager must
+     *                  associate with the calling thread of control
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @param[in] flags : @ref TMONEPHASE or @ref TMNOFLAGS
+     * @return a XA return code
+     */
+    int xta_mysql_xa_commit(XID *xid, int rmid, long flags);
+
+
+
+    /**
+     * Obtain a list of prepared transaction branches from a resource manager
+     * @param[in] xids : an array into which the resource manager places XIDs
+     *                   for list of transaction branches that are currently
+     *                   in a prepared or heuristically completed state
+     * @param[in] count : the maximum number of XIDs that fit into that array
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @param[in] flags : @ref TMSTARTRSCAN, @ref TMENDRSCAN, @ref TMNOFLAGS
+     * @return a XA return code
+     */
+    int xta_mysql_xa_recover(XID *xids, long count, int rmid, long flags);
+
+
+
+    /**
+     * Forget about a heuristically completed transaction branch
+     * @param[in] xid : a pointer to the XID that a resource manager must
+     *                  associate with the calling thread of control
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @return a XA return code
+     */
+    int xta_mysql_xa_forget(XID *xid, int rmid);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

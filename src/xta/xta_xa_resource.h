@@ -91,12 +91,10 @@ typedef struct xta_xa_resource_s {
      */
     int                              dynamic;
     /**
-     * TRUE if the XA Resource Manager has been defined dynamically using XTA
-     * and it has been opened by the Application Program <br>
-     * FALSE if the XA Resource Manager must be opened by the Transaction
-     * Manager by mean of xa_open (XA standard)
+     * TRUE if the XA Resource Manager has a native XA interface <br>
+     * FALSE if the XA Resource Manager is acquired through XTA interface
      */
-    int                              skip_xa_open;
+    int                              native;
     /**
      * The reference to the Transaction that registered this resource
      * or NULL
@@ -115,15 +113,13 @@ extern "C" {
     /**
      * Initialize the common properties of XA Resources
      * @param[in,out] this : XA Resource object
-     * @param[in] skip_xa_open FALSE : the XA Resource needs an explicit call
-     *                         to xa_open before usage and xa_close after
-     *                         usage end <br>
-     *                         TRUE : the XA Resource has been opened and will
-     *                         be closed by the Application Program
+     * @param[in] native : TRUE, the XA Resource uses an XA native
+     *                     interface <br>
+     *                     FALSE, the XA Resource uses an XTA interface
      * @return a reason code
      */
     int xta_xa_resource_init(xta_xa_resource_t *this,
-                             int skip_xa_open);
+                             int native);
     
 
     
@@ -154,11 +150,20 @@ extern "C" {
      * @return a boolean value
      */
     static inline int xta_xa_resource_is_dynamic(
-        const xta_xa_resource_t *this) {
-        return this->dynamic; }
+        const xta_xa_resource_t *this) { return this->dynamic; }
 
 
 
+    /**
+     * Check if the XA Resouce uses a native XA interface or not
+     * @param[in] this : XA Resource object
+     * @return a boolean value
+     */
+    static inline int xta_xa_resource_is_native(
+        const xta_xa_resource_t *this) { return this->native; }
+     
+
+    
     /**
      * This call back method is invoked by a Transaction Manager when an
      * Application Program registers an XA Resource to a Transaction Manager.

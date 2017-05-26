@@ -41,7 +41,7 @@
 
 
 int xta_xa_resource_init(xta_xa_resource_t *this,
-                         int skip_xa_open)
+                         int native)
 {
     enum Exception { NULL_OBJECT
                      , NONE } excp;
@@ -59,8 +59,13 @@ int xta_xa_resource_init(xta_xa_resource_t *this,
         /* set resource description (second part) */
         this->act_rsrmgr_config.generic = &this->rsrmgr_config;
         this->act_rsrmgr_config.module = NULL;
-        this->act_rsrmgr_config.xa_switch = NULL;
-        this->act_rsrmgr_config.skip_xa_open = skip_xa_open;
+        if (native) {
+            this->act_rsrmgr_config.lixa_iface.type = LIXA_IFACE_STD;
+            this->act_rsrmgr_config.lixa_iface.std = NULL;
+        } else {
+            this->act_rsrmgr_config.lixa_iface.type = LIXA_IFACE_XTA;
+            this->act_rsrmgr_config.lixa_iface.xta = NULL;
+        }
         /* set dynamic to TRUE: XTA is typically dynamic with few exceptions */
         this->dynamic = TRUE;
         

@@ -472,6 +472,7 @@ int xta_transaction_begin(xta_transaction_t *this)
                               xta_xid_get_xa_xid(this->xid));
         
         /* logic grabbed from lixa_tx_begin */
+        /*
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
                                &this->local_ccc, &this->client_status, &txrc,
                                xta_xid_get_xa_xid(this->xid),
@@ -513,7 +514,7 @@ int xta_transaction_begin(xta_transaction_t *this)
             if (!retry_ok)
                 THROW(LIXA_XA_START_ERROR2);
         }
-        
+        */        
         THROW(NONE);
     } CATCH {
         switch (excp) {

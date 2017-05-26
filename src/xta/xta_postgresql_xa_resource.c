@@ -41,6 +41,20 @@
 
 
 
+const struct xta_iface_s xta_postgresql_iface = {
+    xta_postgresql_xa_open,
+    xta_postgresql_xa_close,
+    xta_postgresql_xa_start,
+    xta_postgresql_xa_end,
+    xta_postgresql_xa_rollback,
+    xta_postgresql_xa_prepare,
+    xta_postgresql_xa_commit,
+    xta_postgresql_xa_recover,
+    xta_postgresql_xa_forget
+};
+
+
+
 xta_postgresql_xa_resource_t *xta_postgresql_xa_resource_new(
     PGconn *connection, const char *name, const char *open_info)
 {
@@ -125,10 +139,9 @@ int xta_postgresql_xa_resource_init(
         /* initialize "base class" (xta_acquired_xa_resource_t) properties */
         if (LIXA_RC_OK != (ret_cod = xta_acquired_xa_resource_init(
                                (xta_acquired_xa_resource_t *)this,
+                               &xta_postgresql_iface,
                                name, open_info)))
             THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
-        /* initialize PostgreSQL XA function pointers */
-        this->xa_resource.act_rsrmgr_config.xa_switch = &xapqls;
         
         THROW(NONE);
     } CATCH {
@@ -157,7 +170,7 @@ void xta_postgresql_xa_resource_clean(xta_postgresql_xa_resource_t *this)
     LIXA_TRACE(("xta_postgresql_xa_resource_clean\n"));
     TRY {
         /* clean PostgreSQL XA function pointers */
-        this->xa_resource.act_rsrmgr_config.xa_switch = NULL;
+        this->xa_resource.act_rsrmgr_config.lixa_iface.std = NULL;
         /* clean "base class" (xta_acquired_xa_resource_t) properties */
         xta_acquired_xa_resource_clean(
             (xta_acquired_xa_resource_t *)this);
@@ -177,3 +190,228 @@ void xta_postgresql_xa_resource_clean(xta_postgresql_xa_resource_t *this)
     return;
 }
 
+
+
+int xta_postgresql_xa_open(char *xa_info, int rmid)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = XAER_RMERR;
+    
+    LIXA_TRACE(("xta_postgresql_xa_open\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = XA_OK;
+                break;
+            default:
+                ret_cod = XAER_RMERR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_postgresql_xa_open/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_postgresql_xa_close(char *xa_info, int rmid)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = XAER_RMERR;
+    
+    LIXA_TRACE(("xta_postgresql_xa_close\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = XA_OK;
+                break;
+            default:
+                ret_cod = XAER_RMERR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_postgresql_xa_close/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_postgresql_xa_start(const XID *xid, int rmid, long flags)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = XAER_RMERR;
+    
+    LIXA_TRACE(("xta_postgresql_xa_start\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = XA_OK;
+                break;
+            default:
+                ret_cod = XAER_RMERR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_postgresql_xa_start/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_postgresql_xa_end(XID *xid, int rmid, long flags)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = XAER_RMERR;
+    
+    LIXA_TRACE(("xta_postgresql_xa_end\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = XA_OK;
+                break;
+            default:
+                ret_cod = XAER_RMERR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_postgresql_xa_end/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+    
+
+
+
+int xta_postgresql_xa_rollback(XID *xid, int rmid)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = XAER_RMERR;
+    
+    LIXA_TRACE(("xta_postgresql_xa_rollback\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = XA_OK;
+                break;
+            default:
+                ret_cod = XAER_RMERR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_postgresql_xa_rollback/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+    
+
+
+int xta_postgresql_xa_prepare(XID *xid, int rmid)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = XAER_RMERR;
+    
+    LIXA_TRACE(("xta_postgresql_xa_prepare\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = XA_OK;
+                break;
+            default:
+                ret_cod = XAER_RMERR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_postgresql_xa_prepare/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+    
+
+
+int xta_postgresql_xa_commit(XID *xid, int rmid, long flags)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = XAER_RMERR;
+    
+    LIXA_TRACE(("xta_postgresql_xa_commit\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = XA_OK;
+                break;
+            default:
+                ret_cod = XAER_RMERR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_postgresql_xa_commit/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+    
+
+
+int xta_postgresql_xa_recover(XID *xids, long count, int rmid, long flags)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = XAER_RMERR;
+    
+    LIXA_TRACE(("xta_postgresql_xa_recover\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = XA_OK;
+                break;
+            default:
+                ret_cod = XAER_RMERR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_postgresql_xa_recover/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+    
+
+
+int xta_postgresql_xa_forget(XID *xid, int rmid)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = XAER_RMERR;
+    
+    LIXA_TRACE(("xta_postgresql_xa_forget\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = XA_OK;
+                break;
+            default:
+                ret_cod = XAER_RMERR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_postgresql_xa_forget/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
