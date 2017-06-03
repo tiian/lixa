@@ -133,17 +133,17 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixac_la_DEPENDENCIES = ../common/liblixab.la
 am__liblixac_la_SOURCES_DIST = client_config.c client_conn.c \
-	client_recovery.c client_status.c lixa_ax.c lixa_tx.c \
-	lixa_tx_rc.c lixa_xa.c tx.c lixanonapi.c client_tpm.c \
-	lixa_tx_cobol.c
+	client_recovery.c client_status.c lixa_ax.c lixa_iface.c \
+	lixa_tx.c lixa_tx_rc.c lixa_xa.c tx.c lixanonapi.c \
+	client_tpm.c lixa_tx_cobol.c
 @COND_COBOLAPI_TRUE@am__objects_1 = liblixac_la-lixa_tx_cobol.lo
 am_liblixac_la_OBJECTS = liblixac_la-client_config.lo \
 	liblixac_la-client_conn.lo liblixac_la-client_recovery.lo \
 	liblixac_la-client_status.lo liblixac_la-lixa_ax.lo \
-	liblixac_la-lixa_tx.lo liblixac_la-lixa_tx_rc.lo \
-	liblixac_la-lixa_xa.lo liblixac_la-tx.lo \
-	liblixac_la-lixanonapi.lo liblixac_la-client_tpm.lo \
-	$(am__objects_1)
+	liblixac_la-lixa_iface.lo liblixac_la-lixa_tx.lo \
+	liblixac_la-lixa_tx_rc.lo liblixac_la-lixa_xa.lo \
+	liblixac_la-tx.lo liblixac_la-lixanonapi.lo \
+	liblixac_la-client_tpm.lo $(am__objects_1)
 liblixac_la_OBJECTS = $(am_liblixac_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -498,8 +498,8 @@ noinst_HEADERS = client_config.h client_conn.h client_recovery.h \
 
 lib_LTLIBRARIES = liblixac.la
 liblixac_la_SOURCES = client_config.c client_conn.c client_recovery.c \
-	client_status.c lixa_ax.c lixa_tx.c lixa_tx_rc.c lixa_xa.c tx.c \
-	lixanonapi.c client_tpm.c $(COBOL_SOURCE)
+	client_status.c lixa_ax.c lixa_iface.c lixa_tx.c lixa_tx_rc.c \
+	lixa_xa.c tx.c lixanonapi.c client_tpm.c $(COBOL_SOURCE)
 
 AM_CFLAGS = -Wall -fno-strict-aliasing
 liblixac_la_CPPFLAGS = -DLIXA_MULTITHREAD=1 -I$(srcdir)/../common
@@ -695,6 +695,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-client_status.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-client_tpm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-lixa_ax.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-lixa_iface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-lixa_tx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-lixa_tx_cobol.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixac_la-lixa_tx_rc.Plo@am__quote@
@@ -763,6 +764,13 @@ liblixac_la-lixa_ax.lo: lixa_ax.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lixa_ax.c' object='liblixac_la-lixa_ax.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixac_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixac_la-lixa_ax.lo `test -f 'lixa_ax.c' || echo '$(srcdir)/'`lixa_ax.c
+
+liblixac_la-lixa_iface.lo: lixa_iface.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixac_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixac_la-lixa_iface.lo -MD -MP -MF $(DEPDIR)/liblixac_la-lixa_iface.Tpo -c -o liblixac_la-lixa_iface.lo `test -f 'lixa_iface.c' || echo '$(srcdir)/'`lixa_iface.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixac_la-lixa_iface.Tpo $(DEPDIR)/liblixac_la-lixa_iface.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lixa_iface.c' object='liblixac_la-lixa_iface.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixac_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixac_la-lixa_iface.lo `test -f 'lixa_iface.c' || echo '$(srcdir)/'`lixa_iface.c
 
 liblixac_la-lixa_tx.lo: lixa_tx.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixac_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixac_la-lixa_tx.lo -MD -MP -MF $(DEPDIR)/liblixac_la-lixa_tx.Tpo -c -o liblixac_la-lixa_tx.lo `test -f 'lixa_tx.c' || echo '$(srcdir)/'`lixa_tx.c

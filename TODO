@@ -1,4 +1,6 @@
-Create a macro to wrap XA calls against lixa_iface_s interface
+Go on with debugging of XTA and lixa_iface_t : every resource must be set it
+in some place...
+Remove all references to lixa_iface.std and replace it with proper functions
 
 Open Point: automatic recovery. 
 Automatic recovery must be managed in a different way in comparison with

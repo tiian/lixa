@@ -180,7 +180,7 @@ struct act_rsrmgr_config_s {
      * Pointer to the structure must be used to interface the resource
      * manager
      */
-    struct lixa_iface_s     lixa_iface;
+    lixa_iface_t            lixa_iface;
     /**
      * TRUE if the configuration has been dynamically defined by the
      * Application Program using XTA interface; FALSE if the configuration has

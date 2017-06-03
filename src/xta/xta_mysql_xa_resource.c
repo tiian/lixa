@@ -42,6 +42,9 @@
 
 
 const struct xta_iface_s xta_mysql_iface = {
+    "XTA MySQL",
+    TMNOFLAGS,
+    0,
     xta_mysql_xa_open,
     xta_mysql_xa_close,
     xta_mysql_xa_start,

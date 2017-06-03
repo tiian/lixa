@@ -611,7 +611,7 @@ int client_config_validate(client_config_coll_t *ccc)
                             record.generic = conf_rsrmgr;
                             record.module = NULL;
                             memset(&record.lixa_iface, 0,
-                                   sizeof(struct lixa_iface_s));
+                                   sizeof(lixa_iface_t));
                             record.dynamically_defined = FALSE;
                             client_config_append_rsrmgr(ccc, NULL, &record);
                             LIXA_TRACE(("client_config_validate: resource "
@@ -670,7 +670,7 @@ void client_config_append_rsrmgr(client_config_coll_t *ccc,
                                  const struct act_rsrmgr_config_s *act_rsrmgr)
 {
     LIXA_TRACE(("client_config_append_rsrmgr\n"));
-        
+    
     if (NULL != rsrmgr) {
         g_ptr_array_add(ccc->rsrmgrs, (gpointer)rsrmgr);
     } else {
@@ -785,7 +785,7 @@ int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr,
                         xa_switch()->flags & TMUSEASYNC ?
                         "true" : "false"));
             act_rsrmgr->module = module;
-            act_rsrmgr->lixa_iface.std = xa_switch();
+            lixa_iface_set_std(&act_rsrmgr->lixa_iface, xa_switch());
             act_rsrmgr->dynamically_defined = dynamically_defined;
         }
             
@@ -1030,7 +1030,7 @@ int client_config_unload_switch_file(struct act_rsrmgr_config_s *act_rsrmgr)
             THROW(G_MODULE_CLOSE_ERROR);
         }
         act_rsrmgr->module = NULL;
-        memset(&act_rsrmgr->lixa_iface, 0, sizeof(struct lixa_iface_s));
+        memset(&act_rsrmgr->lixa_iface, 0, sizeof(lixa_iface_t));
         
         THROW(NONE);
     } CATCH {

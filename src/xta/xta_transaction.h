@@ -48,7 +48,7 @@ typedef client_config_coll_t xta_transaction_config_t;
 
 
 
-/**
+/*
  * This type is a declaration only statement: the real type is defined inside
  * XA Resource header file. Here we just need to store a pointer to
  * a XA Resource inside an XA Transaction.

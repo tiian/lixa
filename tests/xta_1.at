@@ -1,8 +1,8 @@
 AT_BANNER([XTA: dummy tests])
 
-#AT_SETUP([XTA/open close])
-#AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset recycle case0100 2>&1], [0], [ignore], [ignore])
-#AT_CLEANUP
+AT_SETUP([XTA/open close])
+AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset recycle case0100 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
 
 #AT_SETUP([suspend tests here!])
 #AT_CHECK([false], [0], [ignore], [ignore])

@@ -10,8 +10,8 @@ noinst_HEADERS = client_config.h client_conn.h client_recovery.h \
 	client_tpm.h $(COBOL_INCLUDE)
 lib_LTLIBRARIES = liblixac.la
 liblixac_la_SOURCES = client_config.c client_conn.c client_recovery.c \
-	client_status.c lixa_ax.c lixa_tx.c lixa_tx_rc.c lixa_xa.c tx.c \
-	lixanonapi.c client_tpm.c $(COBOL_SOURCE)
+	client_status.c lixa_ax.c lixa_iface.c lixa_tx.c lixa_tx_rc.c \
+	lixa_xa.c tx.c lixanonapi.c client_tpm.c $(COBOL_SOURCE)
 AM_CFLAGS = -Wall -fno-strict-aliasing
 liblixac_la_CPPFLAGS = -DLIXA_MULTITHREAD=1 -I$(srcdir)/../common
 liblixac_la_LIBADD = ../common/liblixab.la

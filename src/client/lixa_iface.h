@@ -46,6 +46,17 @@
 
 
 
+/* save old LIXA_TRACE_MODULE and set a new value */
+#ifdef LIXA_TRACE_MODULE
+# define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
+# undef LIXA_TRACE_MODULE
+#else
+# undef LIXA_TRACE_MODULE_SAVE
+#endif /* LIXA_TRACE_MODULE */
+#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_CLIENT_CONFIG
+
+
+
 /**
  * Standard XA interface, as in xa.h file
  */
@@ -57,11 +68,20 @@
 
 
 
+/*
+ * This type is a declaration only statement: the real type is defined inside
+ * XA Resource header file. Here we just need to store a pointer to
+ * a XA Resource inside LIXA interface.
+ */
+typedef struct xta_xa_resource_s xta_xa_resource_t;
+
+
+
 /**
  * This interface is a wrapper used to pass different interfaces in absence
  * of polymorphism
  */
-struct lixa_iface_s {
+typedef struct lixa_iface_s {
     /**
      * Interface type: <br>
      * @ref LIXA_IFACE_STD : standard XA interface as provided by some
@@ -80,7 +100,90 @@ struct lixa_iface_s {
          */
         struct xta_iface_s   *xta;
     };
-};
+    /**
+     * Reference to XTA Resource context: NULL for standard XA Resources
+     */
+    xta_xa_resource_t        *context;
+} lixa_iface_t;
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+    
+
+    /**
+     * Reset a Resource Manager interface
+     * @param[out] iface : reference to the object that must be resetted
+     */
+    void lixa_iface_reset(lixa_iface_t *iface);
+    
+    
+
+    /**
+     * Set a standard LIXA interface for Resource Manager
+     * @param[out] iface : reference to the object that must be set
+     * @param[in] std : reference to XA standard function struct
+     */
+    void lixa_iface_set_std(lixa_iface_t *iface, struct xa_switch_t *std);
+
+
+
+    /**
+     * Set an XTA interface for the Resource Manager
+     * @param[out] iface : reference to the object that must be set
+     * @param[in] xta : reference to XTA interface struct
+     * @param[in] context : reference to the resource context that will be
+     *                      passed to functions
+     */
+    void lixa_iface_set_xta(lixa_iface_t *iface, struct xta_iface_s *xta,
+                            xta_xa_resource_t *context);
+
+
+
+    /**
+     * Returns the flags for the resource managed by an interface
+     * @param[in] iface : reference to the interface object
+     * @return flags for the resource managed by the interface
+     */
+    static inline long lixa_iface_get_flags(const lixa_iface_t *iface) {
+        if (LIXA_IFACE_STD == iface->type)
+            return iface->std->flags;
+        else
+            return iface->xta->flags;
+    }
+
+    
+
+    /**
+     * This function implements some sort of polymorphism and call the correct
+     * xa_open function
+     * @param[in] iface : reference to the interface object
+     */
+    static inline int lixa_iface_xa_open(lixa_iface_t *iface, char *info,
+                                         int rmid, long flags) {
+        if (LIXA_IFACE_STD == iface->type)
+            return iface->std->xa_open_entry(info,rmid,flags);
+        else
+            return iface->xta->xa_open_entry(info,rmid);
+    }
+
+
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+
+
+/* restore old value of LIXA_TRACE_MODULE */
+#ifdef LIXA_TRACE_MODULE_SAVE
+# undef LIXA_TRACE_MODULE
+# define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
+# undef LIXA_TRACE_MODULE_SAVE
+#endif /* LIXA_TRACE_MODULE_SAVE */
 
 
 

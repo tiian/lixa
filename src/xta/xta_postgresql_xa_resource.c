@@ -42,6 +42,9 @@
 
 
 const struct xta_iface_s xta_postgresql_iface = {
+    "XTA PostgreSQL",
+    TMNOFLAGS,
+    0,
     xta_postgresql_xa_open,
     xta_postgresql_xa_close,
     xta_postgresql_xa_start,

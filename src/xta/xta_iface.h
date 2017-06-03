@@ -26,6 +26,18 @@
  */
 struct xta_iface_s {
     /**
+     * name of resource manager
+     */
+    char name[RMNAMESZ];
+    /**
+     * options specific to the resource manager
+     */
+    long flags;
+    /**
+     * must be 0
+     */
+    long version;
+    /**
      * xa_open function pointer
      */
     int (*xa_open_entry)(char *, int);

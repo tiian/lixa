@@ -995,7 +995,8 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
             for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
                 struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                     ccc->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-                int dynamic = act_rsrmgr->lixa_iface.std->flags & TMREGISTER;
+                int dynamic = lixa_iface_get_flags(&act_rsrmgr->lixa_iface) &
+                    TMREGISTER;
                 struct client_status_rsrmgr_s csr;
                 client_status_rsrmgr_init(&csr, dynamic);
                 g_array_append_val(cs->rmstatus, csr);
@@ -1126,8 +1127,9 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
             record.xa_info = (xmlChar *) act_rsrmgr->generic->xa_open_info;
             record.rmid = i;
             record.flags = xa_open_flags;
-            record.rc = act_rsrmgr->lixa_iface.std->xa_open_entry(
-                (char *) record.xa_info, record.rmid, record.flags);
+            record.rc = lixa_iface_xa_open(&act_rsrmgr->lixa_iface,
+                                           (char *) record.xa_info,
+                                           record.rmid, record.flags);
             LIXA_TRACE(("lixa_xa_open: xa_open_entry('%s', %d, 0x%lx) = "
                         "%d\n",
                         (char *) record.xa_info, record.rmid, record.flags,

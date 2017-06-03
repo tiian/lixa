@@ -59,13 +59,7 @@ int xta_xa_resource_init(xta_xa_resource_t *this,
         /* set resource description (second part) */
         this->act_rsrmgr_config.generic = &this->rsrmgr_config;
         this->act_rsrmgr_config.module = NULL;
-        if (native) {
-            this->act_rsrmgr_config.lixa_iface.type = LIXA_IFACE_STD;
-            this->act_rsrmgr_config.lixa_iface.std = NULL;
-        } else {
-            this->act_rsrmgr_config.lixa_iface.type = LIXA_IFACE_XTA;
-            this->act_rsrmgr_config.lixa_iface.xta = NULL;
-        }
+        lixa_iface_reset(&this->act_rsrmgr_config.lixa_iface);
         /* set dynamic to TRUE: XTA is typically dynamic with few exceptions */
         this->dynamic = TRUE;
         
