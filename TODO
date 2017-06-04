@@ -1,5 +1,3 @@
-Go on with debugging of XTA and lixa_iface_t : every resource must be set it
-in some place...
 Remove all references to lixa_iface.std and replace it with proper functions
 
 Open Point: automatic recovery. 

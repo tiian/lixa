@@ -79,7 +79,7 @@ void lixa_iface_set_std(lixa_iface_t *iface, struct xa_switch_t *std)
 
 
 
-void lixa_iface_set_xta(lixa_iface_t *iface, struct xta_iface_s *xta,
+void lixa_iface_set_xta(lixa_iface_t *iface, const struct xta_iface_s *xta,
                         xta_xa_resource_t *context)
 {
     LIXA_TRACE(("lixa_iface_set_xta\n"));

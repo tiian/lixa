@@ -22,6 +22,13 @@
 
 
 /**
+ * This is a declaration only statement to allow circular pointer reference
+ */
+typedef struct xta_xa_resource_s xta_xa_resource_t;
+
+
+
+/**
  * XTA interface that are used to collect the function pointers
  */
 struct xta_iface_s {
@@ -40,7 +47,7 @@ struct xta_iface_s {
     /**
      * xa_open function pointer
      */
-    int (*xa_open_entry)(char *, int);
+    int (*xa_open_entry)(xta_xa_resource_t *,char *, int);
     /**
      * xa_close function pointer
      */

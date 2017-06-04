@@ -264,8 +264,7 @@ int xta_transaction_enlist_resource(xta_transaction_t *this,
                 THROW(CLIENT_CONFIG_DUP_ERROR);
             /* append the resource manager to the list of actual configured
                resource managers */
-            client_config_append_rsrmgr(&this->local_ccc, rsrmgr,
-                                        &act_rsrmgr);
+            client_config_append_rsrmgr(&this->local_ccc, rsrmgr, &act_rsrmgr);
             /* compute again the configuration digest (fingerprint) because
                a new resource has been added */
             if (LIXA_RC_OK != (ret_cod = xta_transaction_redigest(

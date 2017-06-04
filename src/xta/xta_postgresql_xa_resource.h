@@ -52,6 +52,10 @@ typedef struct {
         xta_xa_resource_t                    xa_resource;
         xta_acquired_xa_resource_t  acquired_xa_resource;
     };
+    /**
+     * PostgreSQL connection handler
+     */
+    PGconn                         *connection;
 } xta_postgresql_xa_resource_t;
 
 
@@ -122,7 +126,8 @@ extern "C" {
     
     
     /**
-     * Open a MySQL resource manager
+     * Open a PostgreSQL resource manager
+     * @param[in,out] context : XTA resource context
      * @param[in] xa_info : null-terminated character string that may contain
      *                      instance-specific information for the resource
      *                      manager
@@ -131,7 +136,8 @@ extern "C" {
      *                   instance within the thread of control
      * @return a XA return code
      */
-    int xta_postgresql_xa_open(char *xa_info, int rmid);
+    int xta_postgresql_xa_open(xta_xa_resource_t *context, char *xa_info,
+                               int rmid);
 
 
 

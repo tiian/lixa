@@ -134,22 +134,33 @@ int xta_mysql_xa_resource_init(xta_mysql_xa_resource_t *this,
                                MYSQL *connection,
                                const char *name, const char *open_info)
 {
-    enum Exception { XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR
+    enum Exception { NULL_OBJECT
+                     , XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_mysql_xa_resource_init\n"));
     TRY {
+        if (NULL == connection)
+            THROW(NULL_OBJECT);
         /* initialize "base class" (xta_acquired_xa_resource_t) properties */
         if (LIXA_RC_OK != (ret_cod = xta_acquired_xa_resource_init(
                                (xta_acquired_xa_resource_t *)this,
                                &xta_mysql_iface,
                                name, open_info)))
             THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
+        /* set connection */
+        this->connection = connection;
+        /* set resource interface */
+        lixa_iface_set_xta(&this->xa_resource.act_rsrmgr_config.lixa_iface,
+                           &xta_mysql_iface, (xta_xa_resource_t *)this);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR:
                 break;
             case NONE:
@@ -196,17 +207,27 @@ void xta_mysql_xa_resource_clean(xta_mysql_xa_resource_t *this)
 
 
 
-int xta_mysql_xa_open(char *xa_info, int rmid)
+int xta_mysql_xa_open(xta_xa_resource_t *context, char *xa_info, int rmid)
 {
-    enum Exception { NONE } excp;
+    enum Exception { OBJ_CORRUPTED
+                     , NONE } excp;
     int ret_cod = XAER_RMERR;
     
     LIXA_TRACE(("xta_mysql_xa_open\n"));
     TRY {
-        
+        xta_mysql_xa_resource_t *this = (xta_mysql_xa_resource_t *)context;
+        if (NULL != this->connection) {
+            LIXA_TRACE(("xta_mysql_xa_open: MySQL connection is already open "
+                        "(%p)\n", this->connection));
+        } else {
+            LIXA_TRACE(("xta_mysql_xa_open: MySQL connection is NULL!\n"));
+            THROW(OBJ_CORRUPTED);
+        }
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OBJ_CORRUPTED:
+                break;
             case NONE:
                 ret_cod = XA_OK;
                 break;

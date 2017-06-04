@@ -98,7 +98,7 @@ typedef struct lixa_iface_s {
         /**
          * XTA Resource interface
          */
-        struct xta_iface_s   *xta;
+        const struct xta_iface_s   *xta;
     };
     /**
      * Reference to XTA Resource context: NULL for standard XA Resources
@@ -138,7 +138,7 @@ extern "C" {
      * @param[in] context : reference to the resource context that will be
      *                      passed to functions
      */
-    void lixa_iface_set_xta(lixa_iface_t *iface, struct xta_iface_s *xta,
+    void lixa_iface_set_xta(lixa_iface_t *iface, const struct xta_iface_s *xta,
                             xta_xa_resource_t *context);
 
 
@@ -167,7 +167,7 @@ extern "C" {
         if (LIXA_IFACE_STD == iface->type)
             return iface->std->xa_open_entry(info,rmid,flags);
         else
-            return iface->xta->xa_open_entry(info,rmid);
+            return iface->xta->xa_open_entry(iface->context,info,rmid);
     }
 
 
