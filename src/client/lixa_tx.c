@@ -292,19 +292,18 @@ int lixa_tx_begin(int *txrc, XID *xid, int flags)
     return ret_cod;
 }
 
+
+
 int lixa_tx_close(int *txrc)
 {
-    enum Exception
-    {
-        CLIENT_STATUS_FAILED,
-        COLL_GET_CS_ERROR,
-        CONNECTION_CLOSED,
-        PROTOCOL_ERROR,
-        INVALID_STATUS,
-        LIXA_XA_CLOSE_ERROR,
-        CLIENT_DISCONNECT_ERROR,
-        NONE
-    } excp;
+    enum Exception { CLIENT_STATUS_FAILED
+                     , COLL_GET_CS_ERROR
+                     , CONNECTION_CLOSED
+                     , PROTOCOL_ERROR
+                     , INVALID_STATUS
+                     , LIXA_XA_CLOSE_ERROR
+                     , CLIENT_DISCONNECT_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int tmp_txrc = TX_OK;
     client_status_t *cs = NULL;
@@ -321,16 +320,19 @@ int lixa_tx_close(int *txrc)
         ret_cod = client_status_coll_get_cs(&global_csc, &cs);
         switch (ret_cod) {
             case LIXA_RC_OK: /* nothing to do */
-                if (client_status_is_failed(cs)) THROW(CLIENT_STATUS_FAILED);
+                if (client_status_is_failed(cs))
+                    THROW(CLIENT_STATUS_FAILED);
                 break;
             case LIXA_RC_OBJ_NOT_FOUND:
                 *txrc = TX_OK;
                 /* break intentionally missed */
-            default: THROW(COLL_GET_CS_ERROR);
+            default:
+                THROW(COLL_GET_CS_ERROR);
         }
 
         /* check the connection to the server is still alive */
-        if (!client_status_is_connected(cs)) THROW(CONNECTION_CLOSED);
+        if (!client_status_is_connected(cs))
+            THROW(CONNECTION_CLOSED);
 
         /* check TX state (see Table 7-1) */
         txstate = client_status_get_txstate(cs);
@@ -341,59 +343,62 @@ int lixa_tx_close(int *txrc)
             case TX_STATE_S2:
                 break;
             case TX_STATE_S3:
-            case TX_STATE_S4: THROW(PROTOCOL_ERROR);
-            default: THROW(INVALID_STATUS);
+            case TX_STATE_S4:
+                THROW(PROTOCOL_ERROR);
+            default:
+                THROW(INVALID_STATUS);
         }
 
         /* update the TX state, now TX_STATE_S0; the result of XA calls
            must not be waited; see bug 3006369 */
         client_status_set_txstate(cs, TX_STATE_S0);
 
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_close(cs, &tmp_txrc))) THROW(
-            LIXA_XA_CLOSE_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_close(
+                               &global_ccc, cs, &tmp_txrc)))
+            THROW(LIXA_XA_CLOSE_ERROR);
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case CLIENT_STATUS_FAILED:
-                    *txrc = TX_FAIL;
-                    ret_cod = LIXA_RC_TX_FAIL;
-                    break;
-                case COLL_GET_CS_ERROR:
-                case CONNECTION_CLOSED:
-                    break;
-                case PROTOCOL_ERROR:
-                    *txrc = TX_PROTOCOL_ERROR;
-                    ret_cod = LIXA_RC_PROTOCOL_ERROR;
-                    break;
-                case INVALID_STATUS:
-                    ret_cod = LIXA_RC_INVALID_STATUS;
-                    break;
-                case LIXA_XA_CLOSE_ERROR:
-                    *txrc = tmp_txrc;
-                    break;
-                case CLIENT_DISCONNECT_ERROR:
-                    *txrc = TX_ERROR;
-                    break;
-                case NONE:
-                    *txrc = tmp_txrc;
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-                    break;
-            } /* switch (excp) */
-            if (TX_FAIL == *txrc && NULL != cs)
-                client_status_failed(cs);
-            if (TX_PROTOCOL_ERROR != *txrc)
-                lixa_tx_cleanup();
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case CLIENT_STATUS_FAILED:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_TX_FAIL;
+                break;
+            case COLL_GET_CS_ERROR:
+            case CONNECTION_CLOSED:
+                break;
+            case PROTOCOL_ERROR:
+                *txrc = TX_PROTOCOL_ERROR;
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case LIXA_XA_CLOSE_ERROR:
+                *txrc = tmp_txrc;
+                break;
+            case CLIENT_DISCONNECT_ERROR:
+                *txrc = TX_ERROR;
+                break;
+            case NONE:
+                *txrc = tmp_txrc;
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+        } /* switch (excp) */
+        if (TX_FAIL == *txrc && NULL != cs)
+            client_status_failed(cs);
+        if (TX_PROTOCOL_ERROR != *txrc)
+            lixa_tx_cleanup();
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_close/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
     return ret_cod;
 }
+
+
 
 void lixa_tx_close_cleanup(void)
 {
@@ -948,8 +953,7 @@ int lixa_tx_info(int *txrc, TXINFO *info)
 
 int lixa_tx_open(int *txrc, int mmode)
 {
-    enum Exception
-    {
+    enum Exception {
         CLIENT_STATUS_FAILED,
         CLIENT_STATUS_COLL_REGISTER_ERROR,
         ADDED_AND_NOT_FOUND,
@@ -986,7 +990,8 @@ int lixa_tx_open(int *txrc, int mmode)
             case LIXA_RC_OBJ_NOT_FOUND: /* first time, it must be registered */
                 /* register this thread in library status */
                 if (LIXA_RC_OK != (ret_cod = client_status_coll_add(
-                                       &global_csc))) THROW(CLIENT_STATUS_COLL_REGISTER_ERROR);
+                                       &global_csc)))
+                    THROW(CLIENT_STATUS_COLL_REGISTER_ERROR);
                 if (LIXA_RC_OK != (ret_cod = client_status_coll_get_cs(
                                        &global_csc, &cs))) {
                     LIXA_TRACE(("lixa_tx_open: the status was added but "
@@ -995,7 +1000,8 @@ int lixa_tx_open(int *txrc, int mmode)
                     THROW(ADDED_AND_NOT_FOUND);
                 }
                 break;
-            default: THROW(CLIENT_STATUS_COLL_GET_CS_ERROR);
+            default:
+                THROW(CLIENT_STATUS_COLL_GET_CS_ERROR);
         }
 
         /* check TX state (see Table 7-1) */

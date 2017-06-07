@@ -186,17 +186,27 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    /* begin a new Distributed Transaction */
-    if (LIXA_RC_OK != (rc = xta_transaction_begin(tx))) {
-        printf("%s| xta_transaction_manager_begin: "
+    /* open all the resources for Distributed Transactions */
+    if (LIXA_RC_OK != (rc = xta_transaction_open(tx))) {
+        printf("%s| xta_transaction_manager_open: "
                "returned %d\n", pgm, rc);
         return 1;
     }
+
+
     
     /*
      * some code here ...
      */
+
+
     
+    /* close all the resources for Distributed Transactions */
+    if (LIXA_RC_OK != (rc = xta_transaction_close(tx))) {
+        printf("%s| xta_transaction_manager_close: "
+               "returned %d\n", pgm, rc);
+        return 1;
+    }
     /*
      * delete Transaction Manager object
      */

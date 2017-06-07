@@ -65,13 +65,16 @@ extern "C" {
 
     /**
      * Close all the resource managers necessary for the transaction
+     * @param[in] ccc : client config collection
      * @param[in] cs : reference to the status of the calling client
      * @param[out] txrc : return code prepared for tx_close call
      * @return a reason code
      */
-    int lixa_xa_close(client_status_t *cs, int *txrc);
+    int lixa_xa_close(client_config_coll_t *ccc, client_status_t *cs,
+                      int *txrc);
 
 
+    
     /**
      * Commit work performed on behalf of the transaction manager
      * @param[in] cs reference to the status of the calling client

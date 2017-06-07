@@ -80,7 +80,8 @@
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_XA
 
 
-int lixa_xa_close(client_status_t *cs, int *txrc)
+
+int lixa_xa_close(client_config_coll_t *ccc, client_status_t *cs, int *txrc)
 {
     enum Exception
     {
@@ -106,11 +107,11 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
            completion code; the message is sent only to free the slots
            reserved for the current thread of control */
         *txrc = TX_OK;
-        for (i = 0; i < global_ccc.actconf.rsrmgrs->len; ++i) {
+        for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
             int tmp_txrc = TX_OK;
             int rc;
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
-                global_ccc.actconf.rsrmgrs,
+                ccc->actconf.rsrmgrs,
                 struct act_rsrmgr_config_s, i);
             rc = act_rsrmgr->lixa_iface.std->xa_close_entry(
                 act_rsrmgr->generic->xa_close_info, i, xa_close_flags);
@@ -155,16 +156,16 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
         msg.body.close_8.rsrmgrs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_close_8_rsrmgr_s),
-            global_ccc.actconf.rsrmgrs->len);
-        for (i = 0; i < global_ccc.actconf.rsrmgrs->len; ++i) {
+            ccc->actconf.rsrmgrs->len);
+        for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
             struct lixa_msg_body_close_8_rsrmgr_s record;
             record.rmid = i;
             g_array_append_val(msg.body.close_8.rsrmgrs, record);
         }
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size))) THROW(
-                                   MSG_SERIALIZE_ERROR);
+                               &msg, buffer, sizeof(buffer), &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR);
 
         /* this object contains a lot of references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
@@ -184,38 +185,38 @@ int lixa_xa_close(client_status_t *cs, int *txrc)
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_CLOSE_1,
                    client_status_get_crash_count(cs));
 
-        if (TX_OK != *txrc) THROW(XA_ERROR);
+        if (TX_OK != *txrc)
+            THROW(XA_ERROR);
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case ASYNC_NOT_IMPLEMENTED:
-                    ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
-                    break;
-                case UNEXPECTED_XA_RC:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-                    break;
-                case MSG_SERIALIZE_ERROR:
-                case MSG_SEND_ERROR:
-                    *txrc = TX_FAIL;
-                    break;
-                case XA_ERROR:
-                    ret_cod = LIXA_RC_XA_ERROR;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    *txrc = TX_FAIL;
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case ASYNC_NOT_IMPLEMENTED:
+                ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
+                break;
+            case UNEXPECTED_XA_RC:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case MSG_SERIALIZE_ERROR:
+            case MSG_SEND_ERROR:
+                *txrc = TX_FAIL;
+                break;
+            case XA_ERROR:
+                ret_cod = LIXA_RC_XA_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                *txrc = TX_FAIL;
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_close/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
 
 
 int lixa_xa_commit(client_status_t *cs, XID *xid, int *txrc,
@@ -1099,7 +1100,8 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
             recovery_pending = TRUE;
             LIXA_TRACE(("lixa_xa_open: the server replied RECOVERY "
                         "PENDING condition\n"));
-        } else if (LIXA_RC_OK != ret_cod) THROW(ERROR_FROM_SERVER);
+        } else if (LIXA_RC_OK != ret_cod)
+            THROW(ERROR_FROM_SERVER);
 
         /* prepare the next message */
         msg.header.level = LIXA_MSG_LEVEL;
@@ -1166,8 +1168,8 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
         } /* for (i=0; ...) */
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size))) THROW(
-                                   MSG_SERIALIZE_ERROR2);
+                               &msg, buffer, sizeof(buffer), &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR2);
 
         LIXA_TRACE(("lixa_xa_open: sending "
                     SIZE_T_FORMAT
@@ -1185,7 +1187,7 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
             int txrc2, rc2;
             LIXA_TRACE(("lixa_xa_open: performing xa_close on all the "
                         "resource managers because tx_open is not TX_OK\n"));
-            rc2 = lixa_xa_close(cs, &txrc2);
+            rc2 = lixa_xa_close(ccc, cs, &txrc2);
             LIXA_TRACE(("lixa_xa_open/lixa_xa_close: rc=%d, txrx=%d\n",
                         rc2, txrc2));
             THROW(XA_ERROR);
@@ -1203,51 +1205,49 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case OBJ_CORRUPTED:
-                    ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                    break;
-                case MSG_SERIALIZE_ERROR1:
-                case MSG_SEND_ERROR1:
-                    break;
-                case MSG_RETRIEVE_ERROR:
-                case MSG_DESERIALIZE_ERROR:
-                    break;
-                case ERROR_FROM_SERVER:
-                    ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
-                    break;
-                case MSG_SERIALIZE_ERROR2:
-                    break;
-                case ASYNC_NOT_IMPLEMENTED:
-                    ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
-                    break;
-                case UNEXPECTED_XA_RC:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-                    break;
-                case MSG_SEND_ERROR2:
-                    break;
-                case XA_ERROR:
-                    ret_cod = LIXA_RC_XA_ERROR;
-                    break;
-                case CLIENT_RECOVERY_ERROR:
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-
-            /* this object contains references to external stuff and
-               cannot be freed using standard lixa_msg_free; we are freeing the
-               array to avoid memory leaks */
-            if (NULL != msg.body.open_24.xa_open_execs)
-                g_array_free(msg.body.open_24.xa_open_execs, TRUE);
-
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case OBJ_CORRUPTED:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case MSG_SERIALIZE_ERROR1:
+            case MSG_SEND_ERROR1:
+                break;
+            case MSG_RETRIEVE_ERROR:
+            case MSG_DESERIALIZE_ERROR:
+                break;
+            case ERROR_FROM_SERVER:
+                ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
+                break;
+            case MSG_SERIALIZE_ERROR2:
+                break;
+            case ASYNC_NOT_IMPLEMENTED:
+                ret_cod = LIXA_RC_ASYNC_NOT_IMPLEMENTED;
+                break;
+            case UNEXPECTED_XA_RC:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case MSG_SEND_ERROR2:
+                break;
+            case XA_ERROR:
+                ret_cod = LIXA_RC_XA_ERROR;
+                break;
+            case CLIENT_RECOVERY_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        
+        /* this object contains references to external stuff and
+           cannot be freed using standard lixa_msg_free; we are freeing the
+           array to avoid memory leaks */
+        if (NULL != msg.body.open_24.xa_open_execs)
+            g_array_free(msg.body.open_24.xa_open_execs, TRUE);
+        
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_open/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

@@ -51,7 +51,7 @@ struct xta_iface_s {
     /**
      * xa_close function pointer
      */
-    int (*xa_close_entry)(char *, int);
+    int (*xa_close_entry)(xta_xa_resource_t *,char *, int);
     /**
      * xa_start function pointer
      */

@@ -161,6 +161,10 @@ extern "C" {
      * This function implements some sort of polymorphism and call the correct
      * xa_open function
      * @param[in] iface : reference to the interface object
+     * @param[in] info : open string as documented in XA specification
+     * @param[in] rmid : resource manager id as documented in XA specification
+     * @param[in] flags : as documented in XA specification
+     * @return an XA return code as documented in XA specification
      */
     static inline int lixa_iface_xa_open(lixa_iface_t *iface, char *info,
                                          int rmid, long flags) {
@@ -168,6 +172,25 @@ extern "C" {
             return iface->std->xa_open_entry(info,rmid,flags);
         else
             return iface->xta->xa_open_entry(iface->context,info,rmid);
+    }
+
+
+
+    /**
+     * This function implements some sort of polymorphism and call the correct
+     * xa_close function
+     * @param[in] iface : reference to the interface object
+     * @param[in] info : close string as documented in XA specification
+     * @param[in] rmid : resource manager id as documented in XA specification
+     * @param[in] flags : as documented in XA specification
+     * @return an XA return code as documented in XA specification
+     */
+    static inline int lixa_iface_xa_close(lixa_iface_t *iface, char *info,
+                                          int rmid, long flags) {
+        if (LIXA_IFACE_STD == iface->type)
+            return iface->std->xa_close_entry(info,rmid,flags);
+        else
+            return iface->xta->xa_close_entry(iface->context,info,rmid);
     }
 
 

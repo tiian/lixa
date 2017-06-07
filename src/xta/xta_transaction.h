@@ -129,13 +129,23 @@ extern "C" {
     /**
      * Prepare the XA Resource Managers and the XA Transaction Manager for a
      * new transactional Unit of Work. From the XA specification point of view,
-     * it calls xa_open (for the statically defined XA Resource Managers)
-     * and xa_start
+     * it calls xa_open (for the Native XA Resource Managers)
      * @param[in,out] this : transaction object
      * @return a reason code
      */
-    int xta_transaction_begin(xta_transaction_t *this);
+    int xta_transaction_open(xta_transaction_t *this);
 
+
+    
+    /**
+     * Shut down the XA Resource Managers and the XA Transaction Manager after
+     * transactional Unit of Work completion. From the XA specification point
+     * of view, it calls xa_close (for the Native XA Resource Managers)
+     * @param[in,out] this : transaction object
+     * @return a reason code
+     */
+    int xta_transaction_close(xta_transaction_t *this);
+    
     
     
     /**
