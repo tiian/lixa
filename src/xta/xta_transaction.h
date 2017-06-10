@@ -67,7 +67,7 @@ typedef struct xta_transaction_s {
     client_status_t                  client_status;
     /**
      * LIXA client configuration (it's a collection). The name of the property
-     * contains the previx "local" to strongly distinguish it from the
+     * contains the prefix "local" to strongly distinguish it from the
      * "global" instance that's used by legacy LIXA due to TX specification
      * limitation
      */
@@ -147,6 +147,16 @@ extern "C" {
     int xta_transaction_close(xta_transaction_t *this);
     
     
+    
+    /**
+     * Start a new XA Transaction. From the XA specification point of
+     * view, it calls xa_start (for the Native XA Resource Managers)
+     * @param[in,out] this : transaction object
+     * @return a reason code
+     */
+    int xta_transaction_start(xta_transaction_t *this);
+
+
     
     /**
      * Commit the transaction represented by this transaction object

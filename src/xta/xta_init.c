@@ -26,6 +26,7 @@
 #endif
 /* LIXA includes */
 #include "lixa_trace.h"
+#include "lixa_crash.h"
 /* XTA includes */
 #include "xta_init.h"
 
@@ -42,9 +43,10 @@
 void xta_init(void)
 {
     /* initialize LIXA trace feature */
-    lixa_trace_init();
+    LIXA_TRACE_INIT;
     LIXA_TRACE(("xta_init: XTA (XA Transaction API) initialized for this "
                 "process\n"));
+    LIXA_CRASH_INIT;
 }
 
 

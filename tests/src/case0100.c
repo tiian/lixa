@@ -188,7 +188,14 @@ int main(int argc, char *argv[])
 
     /* open all the resources for Distributed Transactions */
     if (LIXA_RC_OK != (rc = xta_transaction_open(tx))) {
-        printf("%s| xta_transaction_manager_open: "
+        printf("%s| xta_transaction_open: "
+               "returned %d\n", pgm, rc);
+        return 1;
+    }
+
+    /* start a Distributed Transactions */
+    if (LIXA_RC_OK != (rc = xta_transaction_start(tx))) {
+        printf("%s| xta_transaction_start: "
                "returned %d\n", pgm, rc);
         return 1;
     }
@@ -203,7 +210,7 @@ int main(int argc, char *argv[])
     
     /* close all the resources for Distributed Transactions */
     if (LIXA_RC_OK != (rc = xta_transaction_close(tx))) {
-        printf("%s| xta_transaction_manager_close: "
+        printf("%s| xta_transaction_close: "
                "returned %d\n", pgm, rc);
         return 1;
     }

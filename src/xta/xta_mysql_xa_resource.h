@@ -141,6 +141,7 @@ extern "C" {
 
     /**
      * Close a MySQL resource manager
+     * @param[in,out] context : XTA resource context
      * @param[in] xa_info : null-terminated character string that may contain
      *                      instance-specific information for the resource
      *                      manager
@@ -149,21 +150,21 @@ extern "C" {
      *                   instance within the thread of control
      * @return a XA return code
      */
-    int xta_mysql_xa_close(char *xa_info, int rmid);
+    int xta_mysql_xa_close(xta_xa_resource_t *context, char *xa_info,
+                           int rmid);
 
 
 
     /**
      * Start work on behalf of a transaction branch
-     * @param[in] xid : a pointer to the XID that a resource manager must
-     *                  associate with the calling thread of control
+     * @param[in,out] context : XTA resource context
      * @param[in] rmid : an integer assigned by the transaction manager,
      *                   uniquely identifies the called resource manager
      *                   instance within the thread of control
      * @param[in] flags : only @ref TMNOFLAGS can be passed to a MySQL resource
      * @return a XA return code
      */
-    int xta_mysql_xa_start(const XID *xid, int rmid, long flags);
+    int xta_mysql_xa_start(xta_xa_resource_t *context, int rmid, long flags);
 
 
 

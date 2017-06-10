@@ -237,17 +237,32 @@ int xta_postgresql_xa_open(xta_xa_resource_t *context, char *xa_info, int rmid)
 
 
 
-int xta_postgresql_xa_close(char *xa_info, int rmid)
+int xta_postgresql_xa_close(xta_xa_resource_t *context, char *xa_info,
+                            int rmid)
 {
-    enum Exception { NONE } excp;
+    enum Exception { OBJ_CORRUPTED
+                     , NONE } excp;
     int ret_cod = XAER_RMERR;
     
     LIXA_TRACE(("xta_postgresql_xa_close\n"));
     TRY {
+        xta_postgresql_xa_resource_t *this =
+            (xta_postgresql_xa_resource_t *)context;
+        if (NULL != this->connection) {
+            LIXA_TRACE(("xta_postgresql_xa_close: PostgreSQL connection (%p) "
+                        "must be closed by the Application Program\n",
+                        this->connection));
+        } else {
+            LIXA_TRACE(("xta_postgresql_xa_close: MySQL connection is "
+                        "NULL!\n"));
+            THROW(OBJ_CORRUPTED);
+        }        
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OBJ_CORRUPTED:
+                break;
             case NONE:
                 ret_cod = XA_OK;
                 break;
@@ -262,17 +277,27 @@ int xta_postgresql_xa_close(char *xa_info, int rmid)
 
 
 
-int xta_postgresql_xa_start(const XID *xid, int rmid, long flags)
+int xta_postgresql_xa_start(xta_xa_resource_t *context, int rmid, long flags)
 {
-    enum Exception { NONE } excp;
+    enum Exception { OBJ_CORRUPTED
+                     , NONE } excp;
     int ret_cod = XAER_RMERR;
     
     LIXA_TRACE(("xta_postgresql_xa_start\n"));
     TRY {
+        xta_postgresql_xa_resource_t *this =
+            (xta_postgresql_xa_resource_t *)context;
+        if (NULL == this->connection) {
+            LIXA_TRACE(("xta_postgresql_xa_start: PostgreSQL connection is "
+                        "NULL!\n"));
+            THROW(OBJ_CORRUPTED);
+        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OBJ_CORRUPTED:
+                break;
             case NONE:
                 ret_cod = XA_OK;
                 break;
