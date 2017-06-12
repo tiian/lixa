@@ -1,4 +1,8 @@
 Remove all references to lixa_iface.std and replace it with proper functions
+Identify minimum set of arguments for xta methods
+Split lixa_my_ functions extracting the state retrieval (lpsr pointer)
+Split lixa_pq_ functions extracting the state retrieval (lpsr pointer)
+
 
 Open Point: automatic recovery. 
 Automatic recovery must be managed in a different way in comparison with

@@ -195,6 +195,16 @@ extern "C" {
 
 
 
+    static inline int lixa_iface_xa_start(lixa_iface_t *iface, const XID *xid,
+                                          int rmid, long flags) {
+        if (LIXA_IFACE_STD == iface->type)
+            return iface->std->xa_start_entry(xid,rmid,flags);
+        else
+            return iface->xta->xa_start_entry(iface->context,rmid,flags);
+    }
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

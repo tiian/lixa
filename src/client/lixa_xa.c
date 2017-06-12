@@ -1923,7 +1923,6 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
                 cs->rmstatus,
                 struct client_status_rsrmgr_s, i);
             struct lixa_msg_body_start_24_xa_start_execs_s record;
-            int rc;
             int tmp_txrc = TX_OK;
             lixa_ser_xid_t ser_xid = "";
 
@@ -1937,8 +1936,8 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
 
             record.rmid = i;
             record.flags = xa_start_flags;
-            record.rc = rc = act_rsrmgr->lixa_iface.std->xa_start_entry(
-                xid, record.rmid, record.flags);
+            record.rc = lixa_iface_xa_start(&act_rsrmgr->lixa_iface,
+                                            xid, record.rmid, record.flags);
             LIXA_TRACE(("lixa_xa_start: xa_start_entry(xid, %d, 0x%lx) = %d\n",
                         record.rmid, record.flags, record.rc));
 
