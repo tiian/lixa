@@ -105,11 +105,12 @@ int ax_reg(int rmid, XID *xid, long flags)
         if (TM_OK == xa_ret_cod) {
             act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, rmid);
-            if (!(TMREGISTER & act_rsrmgr->lixa_iface.std->flags)) {
+            if (!(TMREGISTER &
+                  lixa_iface_get_flags(&act_rsrmgr->lixa_iface))) {
                 LIXA_TRACE(("ax_reg: resource manager %d ('%s') did not set "
                             "TMREGISTER flag (flags=0x%lx)\n", rmid,
-                            act_rsrmgr->lixa_iface.std->name,
-                            act_rsrmgr->lixa_iface.std->flags));
+                            lixa_iface_get_name(&act_rsrmgr->lixa_iface),
+                            lixa_iface_get_flags(&act_rsrmgr->lixa_iface)));
                 xa_ret_cod = TMER_TMERR;
             }
         }
@@ -284,10 +285,11 @@ int ax_unreg(int rmid, long flags)
         if (TM_OK == xa_ret_cod) {
             act_rsrmgr = &g_array_index(
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, rmid);
-            if (!(TMREGISTER & act_rsrmgr->lixa_iface.std->flags)) {
+            if (!(TMREGISTER &
+                  lixa_iface_get_flags(&act_rsrmgr->lixa_iface))) {
                 LIXA_TRACE(("ax_unreg: resource manager %d did not set "
                             "TMREGISTER flag (flags=0x%lx)\n", rmid,
-                            act_rsrmgr->lixa_iface.std->flags));
+                            lixa_iface_get_flags(&act_rsrmgr->lixa_iface)));
                 xa_ret_cod = TMER_TMERR;
             }        
         }

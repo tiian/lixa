@@ -470,7 +470,7 @@ int lixa_pq_start(const XID *xid, int rmid, long flags)
 
 
 
-int lixa_pq_end(XID *xid, int rmid, long flags)
+int lixa_pq_end(const XID *xid, int rmid, long flags)
 {
     enum Exception { INVALID_FLAGS1
                      , INVALID_FLAGS2
@@ -585,7 +585,7 @@ int lixa_pq_end(XID *xid, int rmid, long flags)
 
 
 
-int lixa_pq_rollback(XID *xid, int rmid, long flags)
+int lixa_pq_rollback(const XID *xid, int rmid, long flags)
 {
     enum Exception { INVALID_FLAGS1
                      , INVALID_FLAGS2
@@ -767,7 +767,7 @@ int lixa_pq_rollback(XID *xid, int rmid, long flags)
 
 
 
-int lixa_pq_prepare(XID *xid, int rmid, long flags)
+int lixa_pq_prepare(const XID *xid, int rmid, long flags)
 {
     enum Exception { INVALID_FLAGS1
                      , INVALID_FLAGS2
@@ -891,7 +891,7 @@ int lixa_pq_prepare(XID *xid, int rmid, long flags)
 
 
 
-int lixa_pq_commit(XID *xid, int rmid, long flags)
+int lixa_pq_commit(const XID *xid, int rmid, long flags)
 {
     enum Exception { INVALID_FLAGS1
                      , INVALID_FLAGS2
@@ -1251,7 +1251,7 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
 
 
 
-int lixa_pq_forget(XID *xid, int rmid, long flags)
+int lixa_pq_forget(const XID *xid, int rmid, long flags)
 {
     /* this Resource Manager does not heuristically resolve the transactions
        and this function should never be called */

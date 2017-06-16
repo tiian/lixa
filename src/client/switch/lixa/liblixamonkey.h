@@ -204,42 +204,43 @@ extern "C" {
     /**
      * LIXA Monkey RM implementation of xa_end function
      */
-    int lixa_monkeyrm_end(XID *xid, int rmid, long flags);
+    int lixa_monkeyrm_end(const XID *xid, int rmid, long flags);
 
 
 
     /**
      * LIXA Monkey RM implementation of xa_rollback function
      */
-    int lixa_monkeyrm_rollback(XID *xid, int rmid, long flags);
+    int lixa_monkeyrm_rollback(const XID *xid, int rmid, long flags);
 
 
 
     /**
      * LIXA Monkey RM implementation of xa_prepare function
      */
-    int lixa_monkeyrm_prepare(XID *xid, int rmid, long flags);
+    int lixa_monkeyrm_prepare(const XID *xid, int rmid, long flags);
 
 
     
     /**
      * LIXA Monkey RM implementation of xa_commit function
      */
-    int lixa_monkeyrm_commit(XID *xid, int rmid, long flags);
+    int lixa_monkeyrm_commit(const XID *xid, int rmid, long flags);
 
 
 
     /**
      * LIXA Monkey RM implementation of xa_recover function
      */
-    int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags);
+    int lixa_monkeyrm_recover(XID *xids, long count, int rmid,
+                              long flags);
 
 
 
     /**
      * LIXA Monkey RM implementation of xa_forget function
      */
-    int lixa_monkeyrm_forget(XID *xid, int rmid, long flags);
+    int lixa_monkeyrm_forget(const XID *xid, int rmid, long flags);
 
 
 

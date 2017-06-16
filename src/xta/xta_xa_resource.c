@@ -120,8 +120,8 @@ const xta_xa_resource_config_t *xta_xa_resource_get_config(
 
 
 
-int xta_xa_resource_registered(xta_xa_resource_t *this,
-                               const xta_transaction_t *tx)
+int xta_xa_resource_enlisted(xta_xa_resource_t *this,
+                             const xta_transaction_t *tx)
 {
     enum Exception { NULL_OBJECT1
                      , NULL_OBJECT2
@@ -129,28 +129,28 @@ int xta_xa_resource_registered(xta_xa_resource_t *this,
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("xta_xa_resource_registered\n"));
+    LIXA_TRACE(("xta_xa_resource_enlisted\n"));
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT1);
         if (NULL == tx)
             THROW(NULL_OBJECT2);
-        if (NULL != this->registered_tx) {
+        if (NULL != this->enlisted_tx) {
             /* already registered resource, checking the Transaction Manager */
-            if (tx != this->registered_tx) {
-                LIXA_TRACE(("xta_xa_resource_registered: this resource has "
+            if (tx != this->enlisted_tx) {
+                LIXA_TRACE(("xta_xa_resource_enlisted: this resource has "
                             "been already registered by another TX: %p\n",
-                            this->registered_tx));
+                            this->enlisted_tx));
                 THROW(RESOURCE_ALREADY_REGISTERED);
             } else {
-                LIXA_TRACE(("xta_xa_resource_registered: this resource has "
+                LIXA_TRACE(("xta_xa_resource_enlisted: this resource has "
                             "been already registered by this TX, "
                             "skipping...\n"));
             } /* if (tm != this->registered_tx) */
         } else {
-            this->registered_tx = tx;
-            LIXA_TRACE(("xta_xa_resource_registered: this resource is now "
-                        "registered by TX: %p\n", this->registered_tx));
+            this->enlisted_tx = tx;
+            LIXA_TRACE(("xta_xa_resource_enlisted: this resource is now "
+                        "registered by TX: %p\n", this->enlisted_tx));
         } /* if (NULL != this->registered_tx) */
         
         THROW(NONE);
@@ -170,7 +170,7 @@ int xta_xa_resource_registered(xta_xa_resource_t *this,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_xa_resource_registered/excp=%d/"
+    LIXA_TRACE(("xta_xa_resource_enlisted/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

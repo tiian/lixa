@@ -144,15 +144,29 @@ extern "C" {
 
 
     /**
-     * Returns the flags for the resource managed by an interface
+     * Returns the XA flags for the resource managed by an interface
      * @param[in] iface : reference to the interface object
-     * @return flags for the resource managed by the interface
+     * @return XA flags for the resource managed by the interface
      */
     static inline long lixa_iface_get_flags(const lixa_iface_t *iface) {
         if (LIXA_IFACE_STD == iface->type)
             return iface->std->flags;
         else
             return iface->xta->flags;
+    }
+
+
+    
+    /**
+     * Returns the XA name for the resource managed by an interface
+     * @param[in] iface : reference to the interface object
+     * @return XA name for the resource managed by the interface
+     */
+    static inline const char *lixa_iface_get_name(const lixa_iface_t *iface) {
+        if (LIXA_IFACE_STD == iface->type)
+            return iface->std->name;
+        else
+            return iface->xta->name;
     }
 
     
@@ -195,12 +209,141 @@ extern "C" {
 
 
 
+    /**
+     * This function implements some sort of polymorphism and call the correct
+     * xa_start function
+     * @param[in] iface : reference to the interface object
+     * @param[in] xid : transaction id, XA style
+     * @param[in] rmid : resource manager id as documented in XA specification
+     * @param[in] flags : as documented in XA specification
+     * @return an XA return code as documented in XA specification
+     */
     static inline int lixa_iface_xa_start(lixa_iface_t *iface, const XID *xid,
                                           int rmid, long flags) {
         if (LIXA_IFACE_STD == iface->type)
             return iface->std->xa_start_entry(xid,rmid,flags);
         else
             return iface->xta->xa_start_entry(iface->context,rmid,flags);
+    }
+
+
+    
+    /**
+     * This function implements some sort of polymorphism and call the correct
+     * xa_commit function
+     * @param[in] iface : reference to the interface object
+     * @param[in] xid : transaction id, XA style
+     * @param[in] rmid : resource manager id as documented in XA specification
+     * @param[in] flags : as documented in XA specification
+     * @return an XA return code as documented in XA specification
+     */
+    static inline int lixa_iface_xa_commit(lixa_iface_t *iface,
+        const XID *xid, int rmid, long flags) {
+    if (LIXA_IFACE_STD == iface->type)
+            return iface->std->xa_commit_entry(xid,rmid,flags);
+        else
+            return iface->xta->xa_commit_entry(iface->context,rmid,flags);
+    }
+
+
+    
+    /**
+     * This function implements some sort of polymorphism and call the correct
+     * xa_rollback function
+     * @param[in] iface : reference to the interface object
+     * @param[in] xid : transaction id, XA style
+     * @param[in] rmid : resource manager id as documented in XA specification
+     * @param[in] flags : as documented in XA specification
+     * @return an XA return code as documented in XA specification
+     */
+    static inline int lixa_iface_xa_rollback(lixa_iface_t *iface,
+                                             const XID *xid, int rmid,
+                                             long flags) {
+        if (LIXA_IFACE_STD == iface->type)
+            return iface->std->xa_rollback_entry(xid,rmid,flags);
+        else
+            return iface->xta->xa_rollback_entry(iface->context,rmid);
+    }
+
+
+    
+    /**
+     * This function implements some sort of polymorphism and call the correct
+     * xa_recover function
+     * @param[in] iface : reference to the interface object
+     * @param[out] xids : an array into which the resource manager places
+     *                    XIDs for these transactions
+     * @param[in] count : maximum number of XIDs that fit into that array
+     * @param[in] flags : as documented in XA specification
+     * @return >= 0, total number of XIDs it returned in *xids <br>
+     *         an XA error code as documented in XA specification
+     */
+    static inline int lixa_iface_xa_recover(lixa_iface_t *iface,
+                                            XID *xids, long count,
+                                            int rmid, long flags) {
+        if (LIXA_IFACE_STD == iface->type)
+            return iface->std->xa_recover_entry(
+                xids,count,rmid,flags);
+        else
+            return iface->xta->xa_recover_entry(
+                iface->context,xids,count,rmid,flags);
+    }
+
+
+    
+    /**
+     * This function implements some sort of polymorphism and call the correct
+     * xa_forget function
+     * @param[in] iface : reference to the interface object
+     * @param[in] xid : transaction id, XA style
+     * @param[in] rmid : resource manager id as documented in XA specification
+     * @param[in] flags : as documented in XA specification
+     * @return an XA return code as documented in XA specification
+     */
+    static inline int lixa_iface_xa_forget(lixa_iface_t *iface,
+        const XID *xid, int rmid, long flags) {
+    if (LIXA_IFACE_STD == iface->type)
+            return iface->std->xa_forget_entry(xid,rmid,flags);
+        else
+            return iface->xta->xa_forget_entry(iface->context,rmid);
+    }
+
+
+    
+    /**
+     * This function implements some sort of polymorphism and call the correct
+     * xa_end function
+     * @param[in] iface : reference to the interface object
+     * @param[in] xid : transaction id, XA style
+     * @param[in] rmid : resource manager id as documented in XA specification
+     * @param[in] flags : as documented in XA specification
+     * @return an XA return code as documented in XA specification
+     */
+    static inline int lixa_iface_xa_end(lixa_iface_t *iface,
+        const XID *xid, int rmid, long flags) {
+    if (LIXA_IFACE_STD == iface->type)
+            return iface->std->xa_end_entry(xid,rmid,flags);
+        else
+            return iface->xta->xa_end_entry(iface->context,rmid,flags);
+    }
+
+
+    
+    /**
+     * This function implements some sort of polymorphism and call the correct
+     * xa_prepare function
+     * @param[in] iface : reference to the interface object
+     * @param[in] xid : transaction id, XA style
+     * @param[in] rmid : resource manager id as documented in XA specification
+     * @param[in] flags : as documented in XA specification
+     * @return an XA return code as documented in XA specification
+     */
+    static inline int lixa_iface_xa_prepare(lixa_iface_t *iface,
+        const XID *xid, int rmid, long flags) {
+    if (LIXA_IFACE_STD == iface->type)
+            return iface->std->xa_prepare_entry(xid,rmid,flags);
+        else
+            return iface->xta->xa_prepare_entry(iface->context,rmid);
     }
 
 

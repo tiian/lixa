@@ -102,19 +102,19 @@ struct xa_switch_t
     /**
      * xa_end function pointer
      */
-    int (*xa_end_entry)(XID *, int, long); 
+    int (*xa_end_entry)(const XID *, int, long); 
     /**
      * xa_rollback function pointer
      */
-    int (*xa_rollback_entry)(XID *, int, long);
+    int (*xa_rollback_entry)(const XID *, int, long);
     /**
      * xa_prepare function pointer
      */
-    int (*xa_prepare_entry)(XID *, int, long);
+    int (*xa_prepare_entry)(const XID *, int, long);
     /**
      * xa_commit function pointer
      */
-    int (*xa_commit_entry)(XID *, int, long); 
+    int (*xa_commit_entry)(const XID *, int, long); 
     /**
      * xa_recover function pointer
      */
@@ -122,7 +122,7 @@ struct xa_switch_t
     /**
      * xa_forget function pointer
      */
-    int (*xa_forget_entry)(XID *, int, long); 
+    int (*xa_forget_entry)(const XID *, int, long); 
     /**
      * xa_complete function pointer
      */

@@ -170,60 +170,57 @@ extern "C" {
 
     /**
      * End work performed on behalf of a transaction branch
-     * @param[in] xid : a pointer to the XID that a resource manager must
-     *                  associate with the calling thread of control
+     * @param[in,out] context : XTA resource context
      * @param[in] rmid : an integer assigned by the transaction manager,
      *                   uniquely identifies the called resource manager
      *                   instance within the thread of control
      * @param[in] flags : only @ref TMSUCCESS can be passed to a MySQL resource
      * @return a XA return code
      */
-    int xta_mysql_xa_end(XID *xid, int rmid, long flags);
+    int xta_mysql_xa_end(xta_xa_resource_t *context, int rmid, long flags);
 
 
 
     /**
      * Roll back work done on behalf of a transaction branch
-     * @param[in] xid : a pointer to the XID that a resource manager must
-     *                  associate with the calling thread of control
+     * @param[in,out] context : XTA resource context
      * @param[in] rmid : an integer assigned by the transaction manager,
      *                   uniquely identifies the called resource manager
      *                   instance within the thread of control
      * @return a XA return code
      */
-    int xta_mysql_xa_rollback(XID *xid, int rmid);
+    int xta_mysql_xa_rollback(xta_xa_resource_t *context, int rmid);
 
 
 
     /**
      * Prepare to commit work done on behalf of a transaction branch
-     * @param[in] xid : a pointer to the XID that a resource manager must
-     *                  associate with the calling thread of control
+     * @param[in,out] context : XTA resource context
      * @param[in] rmid : an integer assigned by the transaction manager,
      *                   uniquely identifies the called resource manager
      *                   instance within the thread of control
      * @return a XA return code
      */
-    int xta_mysql_xa_prepare(XID *xid, int rmid);
+    int xta_mysql_xa_prepare(xta_xa_resource_t *context, int rmid);
 
 
 
     /**
      * Commit work done on behalf of a transaction branch
-     * @param[in] xid : a pointer to the XID that a resource manager must
-     *                  associate with the calling thread of control
+     * @param[in,out] context : XTA resource context
      * @param[in] rmid : an integer assigned by the transaction manager,
      *                   uniquely identifies the called resource manager
      *                   instance within the thread of control
      * @param[in] flags : @ref TMONEPHASE or @ref TMNOFLAGS
      * @return a XA return code
      */
-    int xta_mysql_xa_commit(XID *xid, int rmid, long flags);
+    int xta_mysql_xa_commit(xta_xa_resource_t *context, int rmid, long flags);
 
 
 
     /**
      * Obtain a list of prepared transaction branches from a resource manager
+     * @param[in,out] context : XTA resource context
      * @param[in] xids : an array into which the resource manager places XIDs
      *                   for list of transaction branches that are currently
      *                   in a prepared or heuristically completed state
@@ -234,20 +231,20 @@ extern "C" {
      * @param[in] flags : @ref TMSTARTRSCAN, @ref TMENDRSCAN, @ref TMNOFLAGS
      * @return a XA return code
      */
-    int xta_mysql_xa_recover(XID *xids, long count, int rmid, long flags);
+    int xta_mysql_xa_recover(xta_xa_resource_t *context,
+                             XID *xids, long count, int rmid, long flags);
 
 
 
     /**
      * Forget about a heuristically completed transaction branch
-     * @param[in] xid : a pointer to the XID that a resource manager must
-     *                  associate with the calling thread of control
+     * @param[in,out] context : XTA resource context
      * @param[in] rmid : an integer assigned by the transaction manager,
      *                   uniquely identifies the called resource manager
      *                   instance within the thread of control
      * @return a XA return code
      */
-    int xta_mysql_xa_forget(XID *xid, int rmid);
+    int xta_mysql_xa_forget(xta_xa_resource_t *context, int rmid);
 
 
 

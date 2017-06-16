@@ -113,7 +113,8 @@ int lixa_xa_close(client_config_coll_t *ccc, client_status_t *cs, int *txrc)
             struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                 ccc->actconf.rsrmgrs,
                 struct act_rsrmgr_config_s, i);
-            rc = act_rsrmgr->lixa_iface.std->xa_close_entry(
+            rc = lixa_iface_xa_close(
+                &act_rsrmgr->lixa_iface,
                 act_rsrmgr->generic->xa_close_info, i, xa_close_flags);
             LIXA_TRACE(("lixa_xa_close: xa_close_entry('%s', %d, 0x%lx) = "
                         "%d\n", act_rsrmgr->generic->xa_close_info,
@@ -319,16 +320,16 @@ int lixa_xa_commit(client_status_t *cs, XID *xid, int *txrc,
             }
 
             record.flags = one_phase_commit ? TMONEPHASE : TMNOFLAGS;
-            record.rc = act_rsrmgr->lixa_iface.std->xa_commit_entry(
-                xid, record.rmid, record.flags);
+            record.rc = lixa_iface_xa_commit(&act_rsrmgr->lixa_iface,
+                                             xid, record.rmid, record.flags);
             LIXA_TRACE(("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) = "
                         "%d\n", record.rmid, record.flags, record.rc));
             if (XA_RETRY == record.rc) {
                 /* try a second time */
                 sleep(1); /* this is a critical choice... */
                 LIXA_TRACE(("lixa_xa_commit: XA_RETRY, trying again...\n"));
-                record.rc = act_rsrmgr->lixa_iface.std->xa_commit_entry(
-                    xid, record.rmid, record.flags);
+                record.rc = lixa_iface_xa_commit(
+                    &act_rsrmgr->lixa_iface, xid, record.rmid, record.flags);
                 LIXA_TRACE(("lixa_xa_commit: xa_commit_entry(xid, %d, 0x%lx) "
                             "= %d\n", record.rmid, record.flags, record.rc));
             }
@@ -562,8 +563,9 @@ int lixa_xa_end(client_status_t *cs, int *txrc, int commit, int xa_end_flags)
 
             record.rmid = i;
             record.flags = xa_end_flags;
-            record.rc = act_rsrmgr->lixa_iface.std->xa_end_entry(
-                client_status_get_xid(cs), record.rmid, record.flags);
+            record.rc = lixa_iface_xa_end(&act_rsrmgr->lixa_iface,
+                                          client_status_get_xid(cs),
+                                          record.rmid, record.flags);
             LIXA_TRACE(("lixa_xa_end: xa_end_entry(xid, %d, 0x%lx) = %d\n",
                         record.rmid, record.flags, record.rc));
 
@@ -827,8 +829,9 @@ int lixa_xa_forget(client_status_t *cs, GArray *xida, int finished)
                     XID xid;
                     if (!lixa_xid_deserialize(&xid, sxid)) THROW(
                         XID_DESERIALIZE_ERROR);
-                    record.rc = act_rsrmgr->lixa_iface.std->xa_forget_entry(
-                        &xid, record.rmid, record.flags);
+                    record.rc = lixa_iface_xa_forget(
+                        &act_rsrmgr->lixa_iface, &xid,
+                        record.rmid, record.flags);
                     LIXA_TRACE(("lixa_xa_forget: xa_forget_entry('%s', %d, "
                                 "0x%lx) = %d\n",
                                 NULL != ser_xid ? ser_xid : "",
@@ -1007,7 +1010,8 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
             for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
                 struct act_rsrmgr_config_s *act_rsrmgr = &g_array_index(
                     ccc->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
-                int dynamic = act_rsrmgr->lixa_iface.std->flags & TMREGISTER;
+                int dynamic = lixa_iface_get_flags(&act_rsrmgr->lixa_iface)
+                    & TMREGISTER;
                 struct client_status_rsrmgr_s *csr = &g_array_index(
                     cs->rmstatus,
                     struct client_status_rsrmgr_s, i);
@@ -1045,10 +1049,11 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
                 ccc->actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
             struct lixa_msg_body_open_8_rsrmgr_s record;
             record.rmid = i;
-            record.dynamic = act_rsrmgr->lixa_iface.std->flags & TMREGISTER ?
-                1 : 0;
+            record.dynamic = lixa_iface_get_flags(&act_rsrmgr->lixa_iface)
+                & TMREGISTER ? 1 : 0;
             record.name = act_rsrmgr->generic->name;
-            record.xa_name = (xmlChar *) act_rsrmgr->lixa_iface.std->name;
+            record.xa_name =
+                (xmlChar *)lixa_iface_get_name(&act_rsrmgr->lixa_iface);
             g_array_append_val(msg.body.open_8.rsrmgrs, record);
         }
 
@@ -1332,8 +1337,8 @@ int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc, int *commit,
                 if (!lixa_xid_deserialize(xid, sxid))
                     THROW(XID_DESERIALIZE_ERROR);
                 record.rc = csr->prepare_rc =
-                    act_rsrmgr->lixa_iface.std->xa_prepare_entry(
-                        xid, record.rmid, record.flags);
+                    lixa_iface_xa_prepare(&act_rsrmgr->lixa_iface,
+                                          xid, record.rmid, record.flags);
                 LIXA_TRACE(("lixa_xa_prepare: xa_prepare_entry(xid, %d, "
                             "0x%lx) = %d\n", record.rmid, record.flags,
                             record.rc));
@@ -1627,16 +1632,18 @@ int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit)
             }
 
             record.flags = TMNOFLAGS;
-            record.rc = act_rsrmgr->lixa_iface.std->xa_rollback_entry(
-                client_status_get_xid(cs), record.rmid, record.flags);
+            record.rc = lixa_iface_xa_rollback(&act_rsrmgr->lixa_iface,
+                                               client_status_get_xid(cs),
+                                               record.rmid, record.flags);
             LIXA_TRACE(
                 ("lixa_xa_rollback: xa_rollback_entry(xid, %d, 0x%lx) "
                  "= %d\n", record.rmid, record.flags, record.rc));
             if (XA_RETRY == record.rc) {
                 sleep(1); /* this is a critical choice */
                 LIXA_TRACE(("lixa_xa_rollback: XA_RETRY, trying again..."));
-                record.rc = act_rsrmgr->lixa_iface.std->xa_rollback_entry(
-                    client_status_get_xid(cs), record.rmid, record.flags);
+                record.rc = lixa_iface_xa_rollback(&act_rsrmgr->lixa_iface,
+                                                   client_status_get_xid(cs),
+                                                   record.rmid, record.flags);
                 LIXA_TRACE(("lixa_xa_rollback: xa_rollback_entry("
                             "xid, %d, 0x%lx) = %d\n", record.rmid,
                             record.flags, record.rc));
@@ -1844,7 +1851,7 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
             struct lixa_msg_body_open_8_rsrmgr_s record;
             /* if resource manager supports dynamic registration, xa_start
                must not be performed */
-            if (act_rsrmgr->lixa_iface.std->flags & TMREGISTER) {
+            if (lixa_iface_get_flags(&act_rsrmgr->lixa_iface) & TMREGISTER) {
                 LIXA_TRACE(("lixa_xa_start: resource manager # %d registers "
                             "dynamically, skipping...\n", i));
                 continue;
@@ -1928,7 +1935,7 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
 
             /* if resource manager supports dynamic registration, xa_start
                must not be performed */
-            if (act_rsrmgr->lixa_iface.std->flags & TMREGISTER) {
+            if (lixa_iface_get_flags(&act_rsrmgr->lixa_iface) & TMREGISTER) {
                 LIXA_TRACE(("lixa_xa_start: resource manager # %d registers "
                             "dynamically, skipping...\n", i));
                 continue;

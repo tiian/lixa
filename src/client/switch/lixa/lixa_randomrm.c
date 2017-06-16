@@ -116,7 +116,7 @@ int lixa_randomrm_start(const XID *xid, int rmid, long flags) {
 /*
  * Random implementation of xa_end function
  */ 
-int lixa_randomrm_end(XID *xid, int rmid, long flags) {
+int lixa_randomrm_end(const XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
     if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_randomrm_end: xid='%s', rmid=%d, flags=0x%lx\n",
@@ -132,7 +132,7 @@ int lixa_randomrm_end(XID *xid, int rmid, long flags) {
 /*
  * Random implementation of xa_rollback function
  */ 
-int lixa_randomrm_rollback(XID *xid, int rmid, long flags) {
+int lixa_randomrm_rollback(const XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
     if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_randomrm_rollback: xid='%s', rmid=%d, flags=0x%lx\n",
@@ -148,7 +148,7 @@ int lixa_randomrm_rollback(XID *xid, int rmid, long flags) {
 /*
  * Random implementation of xa_prepare function
  */ 
-int lixa_randomrm_prepare(XID *xid, int rmid, long flags) {
+int lixa_randomrm_prepare(const XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
     if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_randomrm_prepare: xid='%s', rmid=%d, flags=0x%lx\n",
@@ -162,7 +162,7 @@ int lixa_randomrm_prepare(XID *xid, int rmid, long flags) {
 /*
  * Random implementation of xa_commit function
  */ 
-int lixa_randomrm_commit(XID *xid, int rmid, long flags) {
+int lixa_randomrm_commit(const XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
     if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_randomrm_commit: xid='%s', rmid=%d, flags=0x%lx\n",
@@ -178,9 +178,9 @@ int lixa_randomrm_commit(XID *xid, int rmid, long flags) {
 /*
  * Random implementation of xa_recover function
  */ 
-int lixa_randomrm_recover(XID *xid, long count, int rmid, long flags) {
+int lixa_randomrm_recover(XID *xids, long count, int rmid, long flags) {
     LIXA_TRACE(("lixa_randomrm_recover: *xid=%p, count=%ld, rmid=%d, "
-                "flags=0x%lx\n", xid, count, rmid, flags));
+                "flags=0x%lx\n", xids, count, rmid, flags));
     if (random() % 100 < ERROR_PERC)
         return XAER_RMERR;
     return XA_OK;
@@ -191,7 +191,7 @@ int lixa_randomrm_recover(XID *xid, long count, int rmid, long flags) {
 /*
  * Random implementation of xa_forget function
  */ 
-int lixa_randomrm_forget(XID *xid, int rmid, long flags) {
+int lixa_randomrm_forget(const XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
     if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_randomrm_forget: xid='%s', rmid=%d, flags=0x%lx\n",

@@ -277,7 +277,7 @@ int xta_transaction_enlist_resource(xta_transaction_t *this,
                         "resource, skipping config dup...\n"));
         } /* if (!xta_xa_resource_is_dynamic(xa_res)) */
         /* send a registration message to the XA Resource */
-        if (LIXA_RC_OK != (ret_cod = xta_xa_resource_registered(
+        if (LIXA_RC_OK != (ret_cod = xta_xa_resource_enlisted(
                                xa_res, this)))
             THROW(XA_RESOURCE_REGISTERED);
         

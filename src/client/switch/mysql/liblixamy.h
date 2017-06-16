@@ -219,7 +219,7 @@ int lixa_my_start(const XID *xid, int rmid, long flags);
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description
  */
-int lixa_my_end(XID *xid, int rmid, long flags);
+int lixa_my_end(const XID *xid, int rmid, long flags);
 
 
     
@@ -228,7 +228,7 @@ int lixa_my_end(XID *xid, int rmid, long flags);
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description
  */
-int lixa_my_rollback(XID *xid, int rmid, long flags);
+int lixa_my_rollback(const XID *xid, int rmid, long flags);
 
 
     
@@ -237,7 +237,7 @@ int lixa_my_rollback(XID *xid, int rmid, long flags);
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description
  */
-int lixa_my_prepare(XID *xid, int rmid, long flags);
+int lixa_my_prepare(const XID *xid, int rmid, long flags);
 
 
     
@@ -246,7 +246,7 @@ int lixa_my_prepare(XID *xid, int rmid, long flags);
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description
  */
-int lixa_my_commit(XID *xid, int rmid, long flags);
+int lixa_my_commit(const XID *xid, int rmid, long flags);
 
 
     
@@ -269,7 +269,7 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags);
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description
  */
-int lixa_my_forget(XID *xid, int rmid, long flags);
+int lixa_my_forget(const XID *xid, int rmid, long flags);
 
 
     

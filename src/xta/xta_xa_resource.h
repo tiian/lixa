@@ -96,10 +96,10 @@ typedef struct xta_xa_resource_s {
      */
     int                              native;
     /**
-     * The reference to the Transaction that registered this resource
+     * The reference to the Transaction that enlisted this resource
      * or NULL
      */
-    const xta_transaction_t         *registered_tx;
+    const xta_transaction_t         *enlisted_tx;
 } xta_xa_resource_t;
 
 
@@ -166,14 +166,14 @@ extern "C" {
     
     /**
      * This call back method is invoked by a Transaction Manager when an
-     * Application Program registers an XA Resource to a Transaction Manager.
+     * Application Program enlists an XA Resource to a Transaction Manager.
      * The TM calls back the XA Resource to notify it has been registered.
      * @param[in,out] this : XA Resource object
      * @param[in] tx : XA Transaction
      * @return a reason code
      */    
-    int xta_xa_resource_registered(xta_xa_resource_t *this,
-                                   const xta_transaction_t *tx);
+    int xta_xa_resource_enlisted(xta_xa_resource_t *this,
+                                 const xta_transaction_t *tx);
 
 
     

@@ -101,7 +101,7 @@ int lixa_dummyrm_start(const XID *xid, int rmid, long flags) {
 /*
  * Dummy implementation of xa_end function
  */ 
-int lixa_dummyrm_end(XID *xid, int rmid, long flags) {
+int lixa_dummyrm_end(const XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
     if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_dummyrm_end: xid='%s', rmid=%d, flags=0x%lx\n",
@@ -115,7 +115,7 @@ int lixa_dummyrm_end(XID *xid, int rmid, long flags) {
 /*
  * Dummy implementation of xa_rollback function
  */ 
-int lixa_dummyrm_rollback(XID *xid, int rmid, long flags) {
+int lixa_dummyrm_rollback(const XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
     if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_dummyrm_rollback: xid='%s', rmid=%d, flags=0x%lx\n",
@@ -129,7 +129,7 @@ int lixa_dummyrm_rollback(XID *xid, int rmid, long flags) {
 /*
  * Dummy implementation of xa_prepare function
  */ 
-int lixa_dummyrm_prepare(XID *xid, int rmid, long flags) {
+int lixa_dummyrm_prepare(const XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
     if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_dummyrm_prepare: xid='%s', rmid=%d, flags=0x%lx\n",
@@ -143,7 +143,7 @@ int lixa_dummyrm_prepare(XID *xid, int rmid, long flags) {
 /*
  * Dummy implementation of xa_commit function
  */ 
-int lixa_dummyrm_commit(XID *xid, int rmid, long flags) {
+int lixa_dummyrm_commit(const XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
     if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_dummyrm_commit: xid='%s', rmid=%d, flags=0x%lx\n",
@@ -157,9 +157,9 @@ int lixa_dummyrm_commit(XID *xid, int rmid, long flags) {
 /*
  * Dummy implementation of xa_recover function
  */ 
-int lixa_dummyrm_recover(XID *xid, long count, int rmid, long flags) {
-    LIXA_TRACE(("lixa_dummyrm_recover: *xid=%p, count=%ld, rmid=%d, "
-                "flags=0x%lx\n", xid, count, rmid, flags));
+int lixa_dummyrm_recover(XID *xids, long count, int rmid, long flags) {
+    LIXA_TRACE(("lixa_dummyrm_recover: *xids=%p, count=%ld, rmid=%d, "
+                "flags=0x%lx\n", xids, count, rmid, flags));
     return XA_OK;
 }
 
@@ -168,7 +168,7 @@ int lixa_dummyrm_recover(XID *xid, long count, int rmid, long flags) {
 /*
  * Dummy implementation of xa_forget function
  */ 
-int lixa_dummyrm_forget(XID *xid, int rmid, long flags) {
+int lixa_dummyrm_forget(const XID *xid, int rmid, long flags) {
     lixa_ser_xid_t xid_str;
     if (lixa_xid_serialize(xid, xid_str)) {
         LIXA_TRACE(("lixa_dummyrm_forget: xid='%s', rmid=%d, flags=0x%lx\n",

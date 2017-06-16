@@ -388,8 +388,9 @@ int client_recovery_commit(const client_status_t *cs,
             LIXA_TRACE(("client_recovery_commit: xa_commit for rmid=%d, "
                         "name='%s', xa_name='%s'...\n",
                         rsrmgr->rmid, (char *)act_rsrmgr->generic->name,
-                        act_rsrmgr->lixa_iface.std->name));
-            rc = act_rsrmgr->lixa_iface.std->xa_commit_entry(
+                        lixa_iface_get_name(&act_rsrmgr->lixa_iface)));
+            rc = lixa_iface_xa_commit(
+                &act_rsrmgr->lixa_iface,
                 &rpl->body.qrcvr_16.client.state.xid, i,
                 rpl->body.qrcvr_16.rsrmgrs->len == 1 ? TMONEPHASE : TMNOFLAGS);
             LIXA_TRACE(("client_recovery_commit: rc=%d\n", rc));
@@ -494,9 +495,10 @@ int client_recovery_rollback(const client_status_t *cs,
             LIXA_TRACE(("client_recovery_rollback: xa_rollback for rmid=%d, "
                         "name='%s', xa_name='%s'...\n",
                         rsrmgr->rmid, (char *)act_rsrmgr->generic->name,
-                        act_rsrmgr->lixa_iface.std->name));
-            rc = act_rsrmgr->lixa_iface.std->xa_rollback_entry(
-                &rpl->body.qrcvr_16.client.state.xid, i,
+                        lixa_iface_get_name(&act_rsrmgr->lixa_iface)));
+            rc = lixa_iface_xa_rollback(
+                &act_rsrmgr->lixa_iface, &rpl->body.qrcvr_16.client.state.xid,
+                i,
                 rpl->body.qrcvr_16.rsrmgrs->len == 1 ? TMONEPHASE : TMNOFLAGS);
             LIXA_TRACE(("client_recovery_rollback: rc=%d\n", rc));
             switch (rc) {
@@ -504,7 +506,8 @@ int client_recovery_rollback(const client_status_t *cs,
                     break;
                 case XA_RDONLY:
                     syslog(LOG_NOTICE, LIXA_SYSLOG_LXC007N,
-                           act_rsrmgr->lixa_iface.std->name, rc, ser_xid);
+                           lixa_iface_get_name(&act_rsrmgr->lixa_iface),
+                           rc, ser_xid);
                     break;
                 case XAER_NOTA:
                     syslog(LOG_INFO, LIXA_SYSLOG_LXC018I,
@@ -512,7 +515,8 @@ int client_recovery_rollback(const client_status_t *cs,
                     break;
                 default:
                     syslog(LOG_CRIT, LIXA_SYSLOG_LXC004C,
-                           act_rsrmgr->lixa_iface.std->name, rc, ser_xid);
+                           lixa_iface_get_name(&act_rsrmgr->lixa_iface),
+                           rc, ser_xid);
                     failed = TRUE;
             }
             /* prepare record for server update */
@@ -569,25 +573,25 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
             LIXA_TRACE(("client_recovery_scan: rmid=%u, "
                         "lixa_name='%s', xa_name='%s'\n", i,
                         act_rsrmgr->generic->name,
-                        act_rsrmgr->lixa_iface.std->name));
+                        lixa_iface_get_name(&act_rsrmgr->lixa_iface)));
             do {
                 int j;
                 long flags = first ? TMSTARTRSCAN : TMNOFLAGS;
-                found = act_rsrmgr->lixa_iface.std->xa_recover_entry(
-                    xid_array, count, (int)i, flags);
+                found = lixa_iface_xa_recover(&act_rsrmgr->lixa_iface,
+                                              xid_array, count, (int)i, flags);
                 first = FALSE;
                 LIXA_TRACE(("client_recovery_scan: rmid=%u, found=%d\n",
                             i, found));
                 if (found < 0) {
                     syslog(LOG_ERR, LIXA_SYSLOG_LXC024E,
-                           act_rsrmgr->lixa_iface.std->name, i, found, flags,
-                           count);
+                           lixa_iface_get_name(&act_rsrmgr->lixa_iface),
+                           i, found, flags, count);
                     THROW(RECOVER_ERROR1);
                 }
                 if (found > count) {
                     syslog(LOG_ERR, LIXA_SYSLOG_LXC025C,
-                           act_rsrmgr->lixa_iface.std->name, i, found, flags,
-                           count);
+                           lixa_iface_get_name(&act_rsrmgr->lixa_iface),
+                           i, found, flags, count);
                     THROW(RECOVER_ERROR2);
                 }
                 for (j=0; j<found; ++j) {
@@ -640,8 +644,9 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                 /* stop the scan; Oracle XE 10.2 does not like this call,
                    while it is accepted by DB2 Express-C 9.7; it's an optional
                    flag on lixar command line */
-                xa_rc = act_rsrmgr->lixa_iface.std->xa_recover_entry(
-                    xid_array, 0, (int)i, TMENDRSCAN);
+                xa_rc = lixa_iface_xa_recover(&act_rsrmgr->lixa_iface,
+                                              xid_array, 0, (int)i,
+                                              TMENDRSCAN);
                 LIXA_TRACE(("client_recovery_scan: rmid=%u, flag=0x%lx "
                             "(TMENDRSCAN), xa_rc=%d\n", i, TMENDRSCAN, xa_rc));
                 if (XA_OK != xa_rc) {
@@ -695,7 +700,7 @@ int client_recovery_report(const client_status_t *cs, GTree *crt)
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
             printf("rmid=%u, lixa_name='%s', xa_name='%s'\n", i,
                    act_rsrmgr->generic->name,
-                   act_rsrmgr->lixa_iface.std->name);
+                   lixa_iface_get_name(&act_rsrmgr->lixa_iface));
         }
 
         if (g_tree_nnodes(crt)) {
@@ -784,15 +789,15 @@ int client_recovery_cold_commit(const client_status_t *cs,
             LIXA_TRACE(("client_recovery_cold_commit: rmid=%d, "
                         "lixa_name='%s', xa_name='%s'\n", *rmid,
                         act_rsrmgr->generic->name,
-                        act_rsrmgr->lixa_iface.std->name));
-            xa_rc = act_rsrmgr->lixa_iface.std->xa_commit_entry(
-                xid, *rmid, flags);
+                        lixa_iface_get_name(&act_rsrmgr->lixa_iface)));
+            xa_rc = lixa_iface_xa_commit(&act_rsrmgr->lixa_iface,
+                                         xid, *rmid, flags);
             LIXA_TRACE(("client_recovery_cold_commit: "
                         "xa_commit_entry(xid, %d, 0x%lx) = %d\n",
                         *rmid, flags, xa_rc));
             printf("xa_commit --> rmid=%d, lixa_name='%s', xa_name='%s', "
                    "rc=%d\n", *rmid, act_rsrmgr->generic->name,
-                   act_rsrmgr->lixa_iface.std->name, xa_rc);
+                   lixa_iface_get_name(&act_rsrmgr->lixa_iface), xa_rc);
             if (XA_HEURCOM == xa_rc || XA_HEURRB == xa_rc ||
                 XA_HEURMIX == xa_rc || XA_HEURHAZ == xa_rc) {
                 lixa_ser_xid_t ser_xid = "";
@@ -801,14 +806,14 @@ int client_recovery_cold_commit(const client_status_t *cs,
                             "manager returned heuristic completion, calling "
                             "xa_forget...\n"));
                 syslog(LOG_CRIT, LIXA_SYSLOG_LXR004W, xa_rc, ser_xid);
-                xa_rc = act_rsrmgr->lixa_iface.std->xa_forget_entry(
-                    xid, *rmid, flags);
+                xa_rc = lixa_iface_xa_forget(&act_rsrmgr->lixa_iface,
+                                             xid, *rmid, flags);
                 LIXA_TRACE(("client_recovery_cold_commit: "
                             "xa_forget_entry('%s', %d, 0x%lx) = %d\n",
                             ser_xid, *rmid, flags, xa_rc));
                 printf("xa_forget --> rmid=%d, lixa_name='%s', xa_name='%s', "
                        "rc=%d\n", *rmid, act_rsrmgr->generic->name,
-                       act_rsrmgr->lixa_iface.std->name, xa_rc);
+                       lixa_iface_get_name(&act_rsrmgr->lixa_iface), xa_rc);
             }
         }
         
@@ -850,15 +855,15 @@ int client_recovery_cold_rollback(const client_status_t *cs,
             LIXA_TRACE(("client_recovery_cold_rollback: rmid=%d, "
                         "lixa_name='%s', xa_name='%s'\n", *rmid,
                         act_rsrmgr->generic->name,
-                        act_rsrmgr->lixa_iface.std->name));
-            xa_rc = act_rsrmgr->lixa_iface.std->xa_rollback_entry(
-                xid, *rmid, flags);
+                        lixa_iface_get_name(&act_rsrmgr->lixa_iface)));
+            xa_rc = lixa_iface_xa_rollback(&act_rsrmgr->lixa_iface,
+                                           xid, *rmid, flags);
             LIXA_TRACE(("client_recovery_cold_rollback: "
                         "xa_rollback_entry(xid, %d, 0x%lx) = %d\n",
                         *rmid, flags, xa_rc));
             printf("xa_rollback --> rmid=%d, lixa_name='%s', xa_name='%s', "
                    "rc=%d\n", *rmid, act_rsrmgr->generic->name,
-                   act_rsrmgr->lixa_iface.std->name, xa_rc);
+                   lixa_iface_get_name(&act_rsrmgr->lixa_iface), xa_rc);
             if (XA_HEURCOM == xa_rc || XA_HEURRB == xa_rc ||
                 XA_HEURMIX == xa_rc || XA_HEURHAZ == xa_rc) {
                 lixa_ser_xid_t ser_xid = "";
@@ -867,14 +872,14 @@ int client_recovery_cold_rollback(const client_status_t *cs,
                             "manager returned heuristic completion, calling "
                             "xa_forget...\n"));
                 syslog(LOG_CRIT, LIXA_SYSLOG_LXR005W, xa_rc, ser_xid);
-                xa_rc = act_rsrmgr->lixa_iface.std->xa_forget_entry(
-                    xid, *rmid, flags);
+                xa_rc = lixa_iface_xa_forget(&act_rsrmgr->lixa_iface,
+                                             xid, *rmid, flags);
                 LIXA_TRACE(("client_recovery_cold_rollback: "
                             "xa_forget_entry('%s', %d, 0x%lx) = %d\n",
                             ser_xid, *rmid, flags, xa_rc));
                 printf("xa_forget --> rmid=%d, lixa_name='%s', xa_name='%s', "
                        "rc=%d\n", *rmid, act_rsrmgr->generic->name,
-                       act_rsrmgr->lixa_iface.std->name, xa_rc);
+                       lixa_iface_get_name(&act_rsrmgr->lixa_iface), xa_rc);
             }
         }
 

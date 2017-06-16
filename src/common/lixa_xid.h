@@ -182,17 +182,17 @@ extern "C" {
 
 /**
  * Serialize XID to a string
- * @param xid IN the XID to be serialized
- * @param lsx OUT the serialized XID
+ * @param[in] xid the XID to be serialized
+ * @param[out] lsx the serialized XID
  * @return TRUE if serialization was completed, FALSE if there was an error
  */
     int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx);
 
 /**
  * Deserialize a string compatible with PostgreSQL to a XID
- * @param xid OUT the deserialized XID
- * @param lsx IN the string must be deserialized
- * @return TRUE if deserialization was completed,
+ * @param[out] xid the deserialized XID
+ * @param[in] lsx the string must be deserialized
+ * @return TRUE if deserialization was completed, <br>
  *         FALSE if there was an error
  */
     int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx);

@@ -912,8 +912,9 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                             PARSABLE_FUNCTIONS[parsed_function->fid],
                             info, parsed_function->rmid,
                             parsed_function->flags));
-                *rc = act_rsrmgr->lixa_iface.std->xa_close_entry(
-                    info, parsed_function->rmid, parsed_function->flags);
+                *rc = lixa_iface_xa_close(&act_rsrmgr->lixa_iface,
+                                          info, parsed_function->rmid,
+                                          parsed_function->flags);
                 LIXA_TRACE(("lixavsr_execute_function: executed "
                             "%s(\"%s\",%d,0x%8.8x)=%d\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],
@@ -927,9 +928,10 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                             PARSABLE_FUNCTIONS[parsed_function->fid],
                             lsx, parsed_function->rmid,
                             parsed_function->flags));
-                *rc = act_rsrmgr->lixa_iface.std->xa_commit_entry(
-                    &parsed_function->xid, parsed_function->rmid,
-                    parsed_function->flags);
+                *rc = lixa_iface_xa_commit(&act_rsrmgr->lixa_iface,
+                                           &parsed_function->xid,
+                                           parsed_function->rmid,
+                                           parsed_function->flags);
                 LIXA_TRACE(("lixavsr_execute_function: executed "
                             "%s(\"%s\",%d,0x%8.8x)=%d\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],
@@ -943,9 +945,10 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                             PARSABLE_FUNCTIONS[parsed_function->fid],
                             lsx, parsed_function->rmid,
                             parsed_function->flags));
-                *rc = act_rsrmgr->lixa_iface.std->xa_end_entry(
-                    &parsed_function->xid, parsed_function->rmid,
-                    parsed_function->flags);
+                *rc = lixa_iface_xa_end(&act_rsrmgr->lixa_iface,
+                                        &parsed_function->xid,
+                                        parsed_function->rmid,
+                                        parsed_function->flags);
                 LIXA_TRACE(("lixavsr_execute_function: executed "
                             "%s(\"%s\",%d,0x%8.8x)=%d\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],
@@ -959,9 +962,10 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                             PARSABLE_FUNCTIONS[parsed_function->fid],
                             lsx, parsed_function->rmid,
                             parsed_function->flags));
-                *rc = act_rsrmgr->lixa_iface.std->xa_forget_entry(
-                    &parsed_function->xid, parsed_function->rmid,
-                    parsed_function->flags);
+                *rc = lixa_iface_xa_forget(&act_rsrmgr->lixa_iface,
+                                           &parsed_function->xid,
+                                           parsed_function->rmid,
+                                           parsed_function->flags);
                 LIXA_TRACE(("lixavsr_execute_function: executed "
                             "%s(\"%s\",%d,0x%8.8x)=%d\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],
@@ -979,8 +983,9 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                             PARSABLE_FUNCTIONS[parsed_function->fid],
                             info, parsed_function->rmid,
                             parsed_function->flags));
-                *rc = act_rsrmgr->lixa_iface.std->xa_open_entry(
-                    info, parsed_function->rmid, parsed_function->flags);
+                *rc = lixa_iface_xa_open(&act_rsrmgr->lixa_iface,
+                                         info, parsed_function->rmid,
+                                         parsed_function->flags);
                 LIXA_TRACE(("lixavsr_execute_function: executed "
                             "%s(\"%s\",%d,0x%8.8x)=%d\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],
@@ -994,9 +999,10 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                             PARSABLE_FUNCTIONS[parsed_function->fid],
                             lsx, parsed_function->rmid,
                             parsed_function->flags));
-                *rc = act_rsrmgr->lixa_iface.std->xa_prepare_entry(
-                    &parsed_function->xid, parsed_function->rmid,
-                    parsed_function->flags);
+                *rc = lixa_iface_xa_prepare(&act_rsrmgr->lixa_iface,
+                                            &parsed_function->xid,
+                                            parsed_function->rmid,
+                                            parsed_function->flags);
                 LIXA_TRACE(("lixavsr_execute_function: executed "
                             "%s(\"%s\",%d,0x%8.8x)=%d\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],
@@ -1010,9 +1016,10 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                             PARSABLE_FUNCTIONS[parsed_function->fid],
                             lsx, parsed_function->rmid,
                             parsed_function->flags));
-                *rc = act_rsrmgr->lixa_iface.std->xa_rollback_entry(
-                    &parsed_function->xid, parsed_function->rmid,
-                    parsed_function->flags);
+                *rc = lixa_iface_xa_rollback(&act_rsrmgr->lixa_iface,
+                                             &parsed_function->xid,
+                                             parsed_function->rmid,
+                                             parsed_function->flags);
                 LIXA_TRACE(("lixavsr_execute_function: executed "
                             "%s(\"%s\",%d,0x%8.8x)=%d\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],
@@ -1026,9 +1033,10 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                             PARSABLE_FUNCTIONS[parsed_function->fid],
                             lsx, parsed_function->rmid,
                             parsed_function->flags));
-                *rc = act_rsrmgr->lixa_iface.std->xa_start_entry(
-                    &parsed_function->xid, parsed_function->rmid,
-                    parsed_function->flags);
+                *rc = lixa_iface_xa_start(&act_rsrmgr->lixa_iface,
+                                          &parsed_function->xid,
+                                          parsed_function->rmid,
+                                          parsed_function->flags);
                 LIXA_TRACE(("lixavsr_execute_function: executed "
                             "%s(\"%s\",%d,0x%8.8x)=%d\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],

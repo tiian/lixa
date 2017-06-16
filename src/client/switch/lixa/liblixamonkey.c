@@ -523,7 +523,7 @@ int lixa_monkeyrm_start(const XID *xid, int rmid, long flags)
 
 
 
-int lixa_monkeyrm_end(XID *xid, int rmid, long flags)
+int lixa_monkeyrm_end(const XID *xid, int rmid, long flags)
 {
     enum Exception { NULL_MONKEY_STATUS
                      , INVALID_STATUS1
@@ -599,7 +599,7 @@ int lixa_monkeyrm_end(XID *xid, int rmid, long flags)
 
 
 
-int lixa_monkeyrm_rollback(XID *xid, int rmid, long flags)
+int lixa_monkeyrm_rollback(const XID *xid, int rmid, long flags)
 {
     enum Exception { NULL_MONKEY_STATUS
                      , INVALID_STATUS1
@@ -675,7 +675,7 @@ int lixa_monkeyrm_rollback(XID *xid, int rmid, long flags)
 
 
 
-int lixa_monkeyrm_prepare(XID *xid, int rmid, long flags)
+int lixa_monkeyrm_prepare(const XID *xid, int rmid, long flags)
 {
     enum Exception { NULL_MONKEY_STATUS
                      , INVALID_STATUS1
@@ -751,7 +751,7 @@ int lixa_monkeyrm_prepare(XID *xid, int rmid, long flags)
 
 
 
-int lixa_monkeyrm_commit(XID *xid, int rmid, long flags)
+int lixa_monkeyrm_commit(const XID *xid, int rmid, long flags)
 {
     enum Exception { NULL_MONKEY_STATUS
                      , INVALID_STATUS1
@@ -827,7 +827,7 @@ int lixa_monkeyrm_commit(XID *xid, int rmid, long flags)
 
 
 
-int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
+int lixa_monkeyrm_recover(XID *xids, long count, int rmid, long flags)
 {
     enum Exception { NULL_MONKEY_STATUS
                      , INVALID_STATUS1
@@ -838,7 +838,7 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
     int xa_rc = XA_OK;
     
     LIXA_TRACE(("lixa_monkeyrm_recover: *xid=%p, count=%ld, rmid=%d, "
-                "flags=0x%lx\n", xid, count, rmid, flags));
+                "flags=0x%lx\n", xids, count, rmid, flags));
     
     TRY {
         pthread_t tid;
@@ -873,15 +873,15 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
             strcat(ser_xid,
                    ".11111111222233334444555555555555.66666666777788889999000000000000");
             /* this is a constant value used to perform basic testing */
-            lixa_xid_deserialize(xid, ser_xid);
+            lixa_xid_deserialize(xids, ser_xid);
         } else if (1 < xa_rc) {
             long n = xa_rc < count ? xa_rc : count;
             long i,j;
             for (i=0; i<n; ++i) {
-                xid[i].formatID = (long)random();
-                xid[i].gtrid_length = xid[i].bqual_length = 16;
+                xids[i].formatID = (long)random();
+                xids[i].gtrid_length = xids[i].bqual_length = 16;
                 for (j=0; j<32; ++j) {
-                    xid[i].data[j] = (char)random();
+                    xids[i].data[j] = (char)random();
                 }
             }
         }
@@ -919,7 +919,7 @@ int lixa_monkeyrm_recover(XID *xid, long count, int rmid, long flags)
 
 
 
-int lixa_monkeyrm_forget(XID *xid, int rmid, long flags)
+int lixa_monkeyrm_forget(const XID *xid, int rmid, long flags)
 {
     enum Exception { NULL_MONKEY_STATUS
                      , INVALID_STATUS1

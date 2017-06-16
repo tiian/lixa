@@ -312,7 +312,7 @@ int xta_mysql_xa_start(xta_xa_resource_t *context, int rmid, long flags)
 
 
 
-int xta_mysql_xa_end(XID *xid, int rmid, long flags)
+int xta_mysql_xa_end(xta_xa_resource_t *context, int rmid, long flags)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;
@@ -338,7 +338,7 @@ int xta_mysql_xa_end(XID *xid, int rmid, long flags)
 
 
 
-int xta_mysql_xa_rollback(XID *xid, int rmid)
+int xta_mysql_xa_rollback(xta_xa_resource_t *context, int rmid)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;
@@ -363,7 +363,7 @@ int xta_mysql_xa_rollback(XID *xid, int rmid)
     
 
 
-int xta_mysql_xa_prepare(XID *xid, int rmid)
+int xta_mysql_xa_prepare(xta_xa_resource_t *context, int rmid)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;
@@ -388,7 +388,7 @@ int xta_mysql_xa_prepare(XID *xid, int rmid)
     
 
 
-int xta_mysql_xa_commit(XID *xid, int rmid, long flags)
+int xta_mysql_xa_commit(xta_xa_resource_t *context, int rmid, long flags)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;
@@ -413,7 +413,8 @@ int xta_mysql_xa_commit(XID *xid, int rmid, long flags)
     
 
 
-int xta_mysql_xa_recover(XID *xids, long count, int rmid, long flags)
+int xta_mysql_xa_recover(xta_xa_resource_t *context,
+                         XID *xids, long count, int rmid, long flags)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;
@@ -438,7 +439,7 @@ int xta_mysql_xa_recover(XID *xids, long count, int rmid, long flags)
     
 
 
-int xta_mysql_xa_forget(XID *xid, int rmid)
+int xta_mysql_xa_forget(xta_xa_resource_t *context, int rmid)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;

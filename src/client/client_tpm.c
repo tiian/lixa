@@ -256,7 +256,7 @@ int client_tpm_report(const client_status_t *cs, GTree *xidt)
                 global_ccc.actconf.rsrmgrs, struct act_rsrmgr_config_s, i);
             printf("rmid=%u, lixa_name='%s', xa_name='%s'\n", i,
                    act_rsrmgr->generic->name,
-                   act_rsrmgr->lixa_iface.std->name);
+                   lixa_iface_get_name(&act_rsrmgr->lixa_iface));
         }
 
         if (g_tree_nnodes(xidt)) {
