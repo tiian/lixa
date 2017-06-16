@@ -47,15 +47,15 @@ struct xta_iface_s {
     /**
      * xa_open function pointer
      */
-    int (*xa_open_entry)(xta_xa_resource_t *,char *, int);
+    int (*xa_open_entry)(xta_xa_resource_t *,char *, int, long);
     /**
      * xa_close function pointer
      */
-    int (*xa_close_entry)(xta_xa_resource_t *,char *, int);
+    int (*xa_close_entry)(xta_xa_resource_t *,char *, int, long);
     /**
      * xa_start function pointer
      */
-    int (*xa_start_entry)(xta_xa_resource_t *, int, long);
+    int (*xa_start_entry)(xta_xa_resource_t *, const XID *, int, long);
     /**
      * xa_end function pointer
      */
@@ -63,11 +63,11 @@ struct xta_iface_s {
     /**
      * xa_rollback function pointer
      */
-    int (*xa_rollback_entry)(xta_xa_resource_t *, int);
+    int (*xa_rollback_entry)(xta_xa_resource_t *, int, long);
     /**
      * xa_prepare function pointer
      */
-    int (*xa_prepare_entry)(xta_xa_resource_t *, int);
+    int (*xa_prepare_entry)(xta_xa_resource_t *, int, long);
     /**
      * xa_commit function pointer
      */
@@ -79,7 +79,7 @@ struct xta_iface_s {
     /**
      * xa_forget function pointer
      */
-    int (*xa_forget_entry)(xta_xa_resource_t *, int); 
+    int (*xa_forget_entry)(xta_xa_resource_t *, int, long);
 };
 
 

@@ -28,6 +28,8 @@
 #include <mysql.h>
 /* XTA includes */
 #include "xta_acquired_xa_resource.h"
+/* LIXA includes */
+#include "lixa_sw.h"
 
 
 
@@ -54,6 +56,11 @@ typedef struct {
      * MySQL connection handler
      */
     MYSQL                          *connection;
+    /**
+     * Resource status, backward compatibility struct with legacy XA
+     * MySQL Resource Manager
+     */
+    struct lixa_sw_status_rm_s      lssr;
 } xta_mysql_xa_resource_t;
 
 
@@ -125,21 +132,6 @@ extern "C" {
 
 
     /**
-     * Open a MySQL resource manager
-     * @param[in,out] context : XTA resource context
-     * @param[in] xa_info : null-terminated character string that may contain
-     *                      instance-specific information for the resource
-     *                      manager
-     * @param[in] rmid : an integer assigned by the transaction manager,
-     *                   uniquely identifies the called resource manager
-     *                   instance within the thread of control
-     * @return a XA return code
-     */
-    int xta_mysql_xa_open(xta_xa_resource_t *context, char *xa_info, int rmid);
-
-
-
-    /**
      * Close a MySQL resource manager
      * @param[in,out] context : XTA resource context
      * @param[in] xa_info : null-terminated character string that may contain
@@ -148,60 +140,11 @@ extern "C" {
      * @param[in] rmid : an integer assigned by the transaction manager,
      *                   uniquely identifies the called resource manager
      *                   instance within the thread of control
+     * @param[in] flags : @ref TMNOFLAGS, future usage only
      * @return a XA return code
      */
     int xta_mysql_xa_close(xta_xa_resource_t *context, char *xa_info,
-                           int rmid);
-
-
-
-    /**
-     * Start work on behalf of a transaction branch
-     * @param[in,out] context : XTA resource context
-     * @param[in] rmid : an integer assigned by the transaction manager,
-     *                   uniquely identifies the called resource manager
-     *                   instance within the thread of control
-     * @param[in] flags : only @ref TMNOFLAGS can be passed to a MySQL resource
-     * @return a XA return code
-     */
-    int xta_mysql_xa_start(xta_xa_resource_t *context, int rmid, long flags);
-
-
-
-    /**
-     * End work performed on behalf of a transaction branch
-     * @param[in,out] context : XTA resource context
-     * @param[in] rmid : an integer assigned by the transaction manager,
-     *                   uniquely identifies the called resource manager
-     *                   instance within the thread of control
-     * @param[in] flags : only @ref TMSUCCESS can be passed to a MySQL resource
-     * @return a XA return code
-     */
-    int xta_mysql_xa_end(xta_xa_resource_t *context, int rmid, long flags);
-
-
-
-    /**
-     * Roll back work done on behalf of a transaction branch
-     * @param[in,out] context : XTA resource context
-     * @param[in] rmid : an integer assigned by the transaction manager,
-     *                   uniquely identifies the called resource manager
-     *                   instance within the thread of control
-     * @return a XA return code
-     */
-    int xta_mysql_xa_rollback(xta_xa_resource_t *context, int rmid);
-
-
-
-    /**
-     * Prepare to commit work done on behalf of a transaction branch
-     * @param[in,out] context : XTA resource context
-     * @param[in] rmid : an integer assigned by the transaction manager,
-     *                   uniquely identifies the called resource manager
-     *                   instance within the thread of control
-     * @return a XA return code
-     */
-    int xta_mysql_xa_prepare(xta_xa_resource_t *context, int rmid);
+                           int rmid, long flags);
 
 
 
@@ -215,6 +158,63 @@ extern "C" {
      * @return a XA return code
      */
     int xta_mysql_xa_commit(xta_xa_resource_t *context, int rmid, long flags);
+
+
+
+    /**
+     * End work performed on behalf of a transaction branch
+     * @param[in,out] context : XTA resource context
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @param[in] flags : only @ref TMSUCCESS and @ref TMFAIL can be passed to
+     *                    a MySQL resource
+     * @return a XA return code
+     */
+    int xta_mysql_xa_end(xta_xa_resource_t *context, int rmid, long flags);
+
+
+
+    /**
+     * Forget about a heuristically completed transaction branch
+     * @param[in,out] context : XTA resource context
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @param[in] flags : @ref TMNOFLAGS, future usage only
+     * @return a XA return code
+     */
+    int xta_mysql_xa_forget(xta_xa_resource_t *context, int rmid, long flags);
+
+
+
+    /**
+     * Open a MySQL resource manager
+     * @param[in,out] context : XTA resource context
+     * @param[in] xa_info : null-terminated character string that may contain
+     *                      instance-specific information for the resource
+     *                      manager
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @param[in] flags : @ref TMNOFLAGS, future usage only
+     * @return a XA return code
+     */
+    int xta_mysql_xa_open(xta_xa_resource_t *context, char *xa_info,
+                          int rmid, long flags);
+
+
+
+    /**
+     * Prepare to commit work done on behalf of a transaction branch
+     * @param[in,out] context : XTA resource context
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @param[in] flags : @ref TMNOFLAGS, future usage only
+     * @return a XA return code
+     */
+    int xta_mysql_xa_prepare(xta_xa_resource_t *context, int rmid, long flags);
 
 
 
@@ -237,14 +237,31 @@ extern "C" {
 
 
     /**
-     * Forget about a heuristically completed transaction branch
+     * Roll back work done on behalf of a transaction branch
      * @param[in,out] context : XTA resource context
      * @param[in] rmid : an integer assigned by the transaction manager,
      *                   uniquely identifies the called resource manager
      *                   instance within the thread of control
+     * @param[in] flags : @ref TMNOFLAGS, future usage only
      * @return a XA return code
      */
-    int xta_mysql_xa_forget(xta_xa_resource_t *context, int rmid);
+    int xta_mysql_xa_rollback(xta_xa_resource_t *context,
+                              int rmid, long flags);
+
+
+
+    /**
+     * Start work on behalf of a transaction branch
+     * @param[in,out] context : XTA resource context
+     * @param[in] xid : transaction identifier, XA spec
+     * @param[in] rmid : an integer assigned by the transaction manager,
+     *                   uniquely identifies the called resource manager
+     *                   instance within the thread of control
+     * @param[in] flags : only @ref TMNOFLAGS can be passed to a MySQL resource
+     * @return a XA return code
+     */
+    int xta_mysql_xa_start(xta_xa_resource_t *context, const XID *xid,
+                           int rmid, long flags);
 
 
 

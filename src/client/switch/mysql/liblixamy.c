@@ -737,11 +737,53 @@ int lixa_my_close(char *xa_info, int rmid, long flags)
 
 int lixa_my_start(const XID *xid, int rmid, long flags)
 {
+    enum Exception { PROTOCOL_ERROR
+                     , NONE} excp;
+    int xa_rc = XAER_RMFAIL;
+    char *stmt = NULL;
+    
+    LIXA_TRACE(("lixa_my_start\n"));
+    TRY {
+        struct lixa_sw_status_rm_s *lpsr = NULL;
+        
+        /* lock the status mutex */
+        g_mutex_lock(&lixa_sw_status_mutex);
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR);
+
+        xa_rc = lixa_my_start_core(lpsr, xid, rmid, flags);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case PROTOCOL_ERROR:
+                xa_rc = XAER_PROTO;
+                break;
+            case NONE:
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+        /* unlock the status mutex */
+        g_mutex_unlock(&lixa_sw_status_mutex);
+        if (NULL != stmt)
+            free(stmt);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_my_start/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
+}
+
+
+
+int lixa_my_start_core(struct lixa_sw_status_rm_s *lpsr,
+                       const XID *xid, int rmid, long flags)
+    
+{
     enum Exception { INVALID_FLAGS1
                      , INVALID_FLAGS2
                      , INVALID_FLAGS3
-                     , PROTOCOL_ERROR1
-                     , PROTOCOL_ERROR2
+                     , PROTOCOL_ERROR
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
                      , MALLOC_ERROR
@@ -750,9 +792,8 @@ int lixa_my_start(const XID *xid, int rmid, long flags)
     int xa_rc = XAER_RMFAIL;
     char *stmt = NULL;
     
-    LIXA_TRACE(("lixa_my_start\n"));
+    LIXA_TRACE(("lixa_my_start_core\n"));
     TRY {
-        struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMJOIN|TMRESUME|TMNOWAIT|TMASYNC|TMNOFLAGS;
         /* 2017-03-09: TMJOIN and TMRESUME are still not supported by MySQL */
         const long supp_flags = /*TMJOIN|TMRESUME|*/TMNOFLAGS;
@@ -762,48 +803,45 @@ int lixa_my_start(const XID *xid, int rmid, long flags)
         size_t stmt_size;
         lixa_my_ser_xid_t lmsx;
         
-        /* lock the status mutex */
-        g_mutex_lock(&lixa_sw_status_mutex);
-
         if ((flags|valid_flags) != valid_flags) {
-            LIXA_TRACE(("lixa_my_end: invalid flag in 0x%x\n", flags));
+            LIXA_TRACE(("lixa_my_start_core: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
         }
         
         if ((flags|supp_flags) != supp_flags) {
-            LIXA_TRACE(("lixa_my_start: flags 0x%x are not supported\n",
+            LIXA_TRACE(("lixa_my_start_core: flags 0x%x are not supported\n",
                         flags));
             THROW(INVALID_FLAGS2);
         }
 
         if (flags&TMJOIN && flags&TMRESUME) {
-            LIXA_TRACE(("lixa_my_start: flags 0x%x are invalid (TMJOIN and "
-                        "TMRESUME can not be used together\n", flags));
+            LIXA_TRACE(("lixa_my_start_core: flags 0x%x are invalid (TMJOIN "
+                        "and TMRESUME can not be used together\n", flags));
             THROW(INVALID_FLAGS3);            
         }
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
 
         /* this step does not check for TMJOIN/TMRESUME: it might be bugged */
         if (lpsr->state.R != 1 || lpsr->state.T != 0 ||
             (lpsr->state.S != 0 && lpsr->state.S != 2)) {
-            LIXA_TRACE(("lixa_my_start: rmid %d state(R,S,T)={%d,%d,%d}\n",
+            LIXA_TRACE(("lixa_my_start_core: rmid %d "
+                        "state(R,S,T)={%d,%d,%d}\n",
                         rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
-            THROW(PROTOCOL_ERROR2);
+            THROW(PROTOCOL_ERROR);
         }
 
         /* this is an internal error :( */
         if (NULL == lpsr->conn) {
-            LIXA_TRACE(("lixa_my_start: conn is NULL for rmid %d\n", rmid));
+            LIXA_TRACE(("lixa_my_start_core: conn is NULL for rmid %d\n",
+                        rmid));
             THROW(NULL_CONN);
         }
 
         /* serialize XID */
         if (!lixa_my_xid_serialize(xid, lmsx)) {
-            LIXA_TRACE(("lixa_my_start: unable to serialize XID\n"));
+            LIXA_TRACE(("lixa_my_start_core: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
-        LIXA_TRACE(("lixa_my_start: starting XID %s\n", lmsx));
+        LIXA_TRACE(("lixa_my_start_core: starting XID %s\n", lmsx));
         
         /* saving xid */
         lpsr->xid = *xid;
@@ -819,7 +857,7 @@ int lixa_my_start(const XID *xid, int rmid, long flags)
             strncat(stmt, stmt_resume, stmt_size);
         /* starting transaction */
         if (mysql_query(lpsr->conn, stmt)) {
-            LIXA_TRACE(("lixa_my_start: MySQL error while executing "
+            LIXA_TRACE(("lixa_my_start_core: MySQL error while executing "
                         "'%s': %u/%s\n", stmt,
                         mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
             THROW(MYSQL_ERROR);
@@ -834,8 +872,7 @@ int lixa_my_start(const XID *xid, int rmid, long flags)
             case INVALID_FLAGS3:
                 xa_rc = XAER_INVAL;
                 break;
-            case PROTOCOL_ERROR1:
-            case PROTOCOL_ERROR2:
+            case PROTOCOL_ERROR:
                 xa_rc = XAER_PROTO;
                 break;
             case NULL_CONN:
@@ -854,12 +891,10 @@ int lixa_my_start(const XID *xid, int rmid, long flags)
             default:
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
-        /* unlock the status mutex */
-        g_mutex_unlock(&lixa_sw_status_mutex);
         if (NULL != stmt)
             free(stmt);
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_my_start/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    LIXA_TRACE(("lixa_my_start_core/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
 }
 
@@ -867,9 +902,9 @@ int lixa_my_start(const XID *xid, int rmid, long flags)
 
 int lixa_my_end(const XID *xid, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS1
+    enum Exception { PROTOCOL_ERROR1
+                     , INVALID_FLAGS1
                      , INVALID_FLAGS2
-                     , PROTOCOL_ERROR1
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR1
@@ -897,7 +932,10 @@ int lixa_my_end(const XID *xid, int rmid, long flags)
 
         /* lock the status mutex */
         g_mutex_lock(&lixa_sw_status_mutex);
-
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
+        
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_end: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
@@ -908,9 +946,6 @@ int lixa_my_end(const XID *xid, int rmid, long flags)
                         flags));
             THROW(INVALID_FLAGS2);
         }
-        
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
         
         if (lpsr->state.R != 1 || lpsr->state.T != 1 ||
             (lpsr->state.S != 1 && lpsr->state.S != 2)) {
@@ -981,11 +1016,13 @@ int lixa_my_end(const XID *xid, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROTOCOL_ERROR1:
+                xa_rc = XAER_PROTO;
+                break;
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
                 break;
-            case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
                 xa_rc = XAER_PROTO;
                 break;
@@ -1029,9 +1066,9 @@ int lixa_my_end(const XID *xid, int rmid, long flags)
 
 int lixa_my_rollback(const XID *xid, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS1
+    enum Exception { PROTOCOL_ERROR1
+                     , INVALID_FLAGS1
                      , INVALID_FLAGS2
-                     , PROTOCOL_ERROR1
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
@@ -1051,7 +1088,10 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
 
         /* lock the status mutex */
         g_mutex_lock(&lixa_sw_status_mutex);
-
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
+        
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_rollback: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
@@ -1062,9 +1102,6 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
                         flags));
             THROW(INVALID_FLAGS2);
         }
-        
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
         
         if (lpsr->state.R != 1 || lpsr->state.T != 0) {
             LIXA_TRACE(("lixa_my_rollback: rmid %d state(R,S,T)={%d,%d,%d}\n",
@@ -1160,11 +1197,13 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROTOCOL_ERROR1:
+                xa_rc = XAER_PROTO;
+                break;
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
                 break;
-            case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
             case PROTOCOL_ERROR3:
                 xa_rc = XAER_PROTO;
@@ -1202,9 +1241,9 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
 
 int lixa_my_prepare(const XID *xid, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS1
+    enum Exception { PROTOCOL_ERROR1
+                     , INVALID_FLAGS1
                      , INVALID_FLAGS2
-                     , PROTOCOL_ERROR1
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
@@ -1223,6 +1262,9 @@ int lixa_my_prepare(const XID *xid, int rmid, long flags)
         
         /* lock the status mutex */
         g_mutex_lock(&lixa_sw_status_mutex);
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
 
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_prepare: invalid flag in 0x%x\n", flags));
@@ -1234,9 +1276,6 @@ int lixa_my_prepare(const XID *xid, int rmid, long flags)
                         flags));
             THROW(INVALID_FLAGS2);
         }
-                
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
         
         if (lpsr->state.R != 1 || lpsr->state.T != 0 || lpsr->state.S != 2) {
             LIXA_TRACE(("lixa_my_prepare: rmid %d state(R,S,T)={%d,%d,%d}\n",
@@ -1282,11 +1321,13 @@ int lixa_my_prepare(const XID *xid, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROTOCOL_ERROR1:
+                xa_rc = XAER_PROTO;
+                break;
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
                 break;
-            case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
                 xa_rc = XAER_PROTO;
                 break;
@@ -1319,9 +1360,9 @@ int lixa_my_prepare(const XID *xid, int rmid, long flags)
 
 int lixa_my_commit(const XID *xid, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS1
+    enum Exception { PROTOCOL_ERROR1
+                     , INVALID_FLAGS1
                      , INVALID_FLAGS2
-                     , PROTOCOL_ERROR1
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
@@ -1342,6 +1383,9 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
 
         /* lock the status mutex */
         g_mutex_lock(&lixa_sw_status_mutex);
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
 
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_commit: invalid flag in 0x%x\n", flags));
@@ -1352,10 +1396,7 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
             LIXA_TRACE(("lixa_my_commit: flags 0x%x are not supported\n",
                         flags));
             THROW(INVALID_FLAGS2);
-        }
-        
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
+        }        
         
         if (lpsr->state.R != 1 || lpsr->state.T != 0) {
             LIXA_TRACE(("lixa_my_commit: rmid %d state(R,S,T)={%d,%d,%d}\n",
@@ -1453,11 +1494,13 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROTOCOL_ERROR1:
+                xa_rc = XAER_PROTO;
+                break;
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
                 break;
-            case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
             case PROTOCOL_ERROR3:
                 xa_rc = XAER_PROTO;
@@ -1495,9 +1538,9 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
 
 int lixa_my_recover(XID *xids, long count, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS
+    enum Exception { PROTOCOL_ERROR1
+                     , INVALID_FLAGS
                      , INVALID_OPTIONS1
-                     , PROTOCOL_ERROR1
                      , INVALID_OPTIONS2
                      , PROTOCOL_ERROR2
                      , NULL_CONN
@@ -1513,6 +1556,9 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
 
         /* lock the status mutex */
         g_mutex_lock(&lixa_sw_status_mutex);
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
 
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_recover: invalid flag in 0x%x\n", flags));
@@ -1523,9 +1569,6 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
             LIXA_TRACE(("lixa_my_recover: xids=%p, count=%ld\n", xids, count));
             THROW(INVALID_OPTIONS1);
         }
-        
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
         
         if (!(flags & TMSTARTRSCAN)) {
             LIXA_TRACE(("lixa_my_recover: TMSTARTRSCAN flag must be set\n"));
@@ -1582,12 +1625,14 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROTOCOL_ERROR1:
+                xa_rc = XAER_PROTO;
+                break;
             case INVALID_FLAGS:
             case INVALID_OPTIONS1:
             case INVALID_OPTIONS2:
                 xa_rc = XAER_INVAL;
                 break;
-            case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
                 xa_rc = XAER_PROTO;
                 break;

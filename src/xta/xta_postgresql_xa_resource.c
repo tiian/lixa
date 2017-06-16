@@ -200,7 +200,8 @@ void xta_postgresql_xa_resource_clean(xta_postgresql_xa_resource_t *this)
 
 
 
-int xta_postgresql_xa_open(xta_xa_resource_t *context, char *xa_info, int rmid)
+int xta_postgresql_xa_open(xta_xa_resource_t *context, char *xa_info,
+                           int rmid, long flags)
 {
     enum Exception { OBJ_CORRUPTED
                      , NONE } excp;
@@ -238,7 +239,7 @@ int xta_postgresql_xa_open(xta_xa_resource_t *context, char *xa_info, int rmid)
 
 
 int xta_postgresql_xa_close(xta_xa_resource_t *context, char *xa_info,
-                            int rmid)
+                            int rmid, long flags)
 {
     enum Exception { OBJ_CORRUPTED
                      , NONE } excp;
@@ -277,7 +278,8 @@ int xta_postgresql_xa_close(xta_xa_resource_t *context, char *xa_info,
 
 
 
-int xta_postgresql_xa_start(xta_xa_resource_t *context, int rmid, long flags)
+int xta_postgresql_xa_start(xta_xa_resource_t *context, const XID * xid,
+                            int rmid, long flags)
 {
     enum Exception { OBJ_CORRUPTED
                      , NONE } excp;
@@ -338,7 +340,8 @@ int xta_postgresql_xa_end(xta_xa_resource_t *context, int rmid, long flags)
 
 
 
-int xta_postgresql_xa_rollback(xta_xa_resource_t *context, int rmid)
+int xta_postgresql_xa_rollback(xta_xa_resource_t *context,
+                               int rmid, long flags)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;
@@ -363,7 +366,7 @@ int xta_postgresql_xa_rollback(xta_xa_resource_t *context, int rmid)
     
 
 
-int xta_postgresql_xa_prepare(xta_xa_resource_t *context, int rmid)
+int xta_postgresql_xa_prepare(xta_xa_resource_t *context, int rmid, long flags)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;
@@ -439,7 +442,7 @@ int xta_postgresql_xa_recover(xta_xa_resource_t *context,
     
 
 
-int xta_postgresql_xa_forget(xta_xa_resource_t *context, int rmid)
+int xta_postgresql_xa_forget(xta_xa_resource_t *context, int rmid, long flags)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;

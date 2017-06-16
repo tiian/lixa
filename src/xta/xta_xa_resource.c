@@ -62,6 +62,7 @@ int xta_xa_resource_init(xta_xa_resource_t *this,
         lixa_iface_reset(&this->act_rsrmgr_config.lixa_iface);
         /* set dynamic to TRUE: XTA is typically dynamic with few exceptions */
         this->dynamic = TRUE;
+        this->enlisted_tx = NULL;
         
         THROW(NONE);
     } CATCH {
@@ -150,7 +151,7 @@ int xta_xa_resource_enlisted(xta_xa_resource_t *this,
         } else {
             this->enlisted_tx = tx;
             LIXA_TRACE(("xta_xa_resource_enlisted: this resource is now "
-                        "registered by TX: %p\n", this->enlisted_tx));
+                        "registered by TX %p\n", this->enlisted_tx));
         } /* if (NULL != this->registered_tx) */
         
         THROW(NONE);

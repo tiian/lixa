@@ -213,7 +213,16 @@ int lixa_my_close(char *xa_info, int rmid, long flags);
 int lixa_my_start(const XID *xid, int rmid, long flags);
 
 
-    
+
+/**
+ * Core implementation of "xa_start" for MySQL: it's referenced by
+ * @ref lixa_my_start (XA interface) and by @ref xta_mysql_xa_start
+ */
+int lixa_my_start_core(struct lixa_sw_status_rm_s *lpsr,
+                       const XID *xid, int rmid, long flags);
+
+
+
 /**
  * Implementation of "xa_end" for MySQL;
  * refer to "Distributed Transaction Processing: The XA Specification" for

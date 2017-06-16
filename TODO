@@ -1,7 +1,5 @@
-Remove "rmid" from xta_iface and store it in xta_xa_resource (the context) at
-enlist time.
-Identify minimum set of arguments for xta methods
-Split lixa_my_ functions extracting the state retrieval (lpsr pointer)
+Split lixa_my_ functions extracting the state retrieval (lpsr pointer):
+	go on with lixa_my_*_core technique and call it from xta too
 Split lixa_pq_ functions extracting the state retrieval (lpsr pointer)
 
 

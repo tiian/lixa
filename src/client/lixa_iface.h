@@ -183,9 +183,10 @@ extern "C" {
     static inline int lixa_iface_xa_open(lixa_iface_t *iface, char *info,
                                          int rmid, long flags) {
         if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_open_entry(info,rmid,flags);
+            return iface->std->xa_open_entry(info, rmid, flags);
         else
-            return iface->xta->xa_open_entry(iface->context,info,rmid);
+            return iface->xta->xa_open_entry(iface->context, info,
+                                             rmid, flags);
     }
 
 
@@ -202,9 +203,10 @@ extern "C" {
     static inline int lixa_iface_xa_close(lixa_iface_t *iface, char *info,
                                           int rmid, long flags) {
         if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_close_entry(info,rmid,flags);
+            return iface->std->xa_close_entry(info, rmid, flags);
         else
-            return iface->xta->xa_close_entry(iface->context,info,rmid);
+            return iface->xta->xa_close_entry(iface->context, info,
+                                              rmid, flags);
     }
 
 
@@ -221,9 +223,10 @@ extern "C" {
     static inline int lixa_iface_xa_start(lixa_iface_t *iface, const XID *xid,
                                           int rmid, long flags) {
         if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_start_entry(xid,rmid,flags);
+            return iface->std->xa_start_entry(xid, rmid, flags);
         else
-            return iface->xta->xa_start_entry(iface->context,rmid,flags);
+            return iface->xta->xa_start_entry(iface->context, xid,
+                                              rmid, flags);
     }
 
 
@@ -260,9 +263,9 @@ extern "C" {
                                              const XID *xid, int rmid,
                                              long flags) {
         if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_rollback_entry(xid,rmid,flags);
+            return iface->std->xa_rollback_entry(xid, rmid, flags);
         else
-            return iface->xta->xa_rollback_entry(iface->context,rmid);
+            return iface->xta->xa_rollback_entry(iface->context, rmid, flags);
     }
 
 
@@ -274,6 +277,7 @@ extern "C" {
      * @param[out] xids : an array into which the resource manager places
      *                    XIDs for these transactions
      * @param[in] count : maximum number of XIDs that fit into that array
+     * @param[in] rmid : resource manager id as documented in XA specification
      * @param[in] flags : as documented in XA specification
      * @return >= 0, total number of XIDs it returned in *xids <br>
      *         an XA error code as documented in XA specification
@@ -303,9 +307,9 @@ extern "C" {
     static inline int lixa_iface_xa_forget(lixa_iface_t *iface,
         const XID *xid, int rmid, long flags) {
     if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_forget_entry(xid,rmid,flags);
+            return iface->std->xa_forget_entry(xid, rmid, flags);
         else
-            return iface->xta->xa_forget_entry(iface->context,rmid);
+            return iface->xta->xa_forget_entry(iface->context, rmid, flags);
     }
 
 
@@ -341,9 +345,9 @@ extern "C" {
     static inline int lixa_iface_xa_prepare(lixa_iface_t *iface,
         const XID *xid, int rmid, long flags) {
     if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_prepare_entry(xid,rmid,flags);
+            return iface->std->xa_prepare_entry(xid, rmid, flags);
         else
-            return iface->xta->xa_prepare_entry(iface->context,rmid);
+            return iface->xta->xa_prepare_entry(iface->context, rmid, flags);
     }
 
 

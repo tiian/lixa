@@ -364,9 +364,9 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
 
 int lixa_pq_start(const XID *xid, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS1
+    enum Exception { PROTOCOL_ERROR1
+                     , INVALID_FLAGS1
                      , INVALID_FLAGS2
-                     , PROTOCOL_ERROR1
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
@@ -383,7 +383,10 @@ int lixa_pq_start(const XID *xid, int rmid, long flags)
 
         /* lock the status mutex */
         g_mutex_lock(&lixa_sw_status_mutex);
-
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
+        
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_end: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
@@ -394,9 +397,6 @@ int lixa_pq_start(const XID *xid, int rmid, long flags)
                         flags));
             THROW(INVALID_FLAGS2);
         }
-        
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
         
         if (lpsr->state.R != 1 || lpsr->state.T != 0 ||
             (lpsr->state.S != 0 && lpsr->state.S != 2)) {
@@ -436,11 +436,13 @@ int lixa_pq_start(const XID *xid, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROTOCOL_ERROR1:
+                xa_rc = XAER_PROTO;
+                break;
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
                 break;
-            case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
                 xa_rc = XAER_PROTO;
                 break;
@@ -472,9 +474,9 @@ int lixa_pq_start(const XID *xid, int rmid, long flags)
 
 int lixa_pq_end(const XID *xid, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS1
+    enum Exception { PROTOCOL_ERROR1
+                     , INVALID_FLAGS1
                      , INVALID_FLAGS2
-                     , PROTOCOL_ERROR1
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
@@ -491,6 +493,9 @@ int lixa_pq_end(const XID *xid, int rmid, long flags)
 
         /* lock the status mutex */
         g_mutex_lock(&lixa_sw_status_mutex);
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
 
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_end: invalid flag in 0x%x\n", flags));
@@ -502,10 +507,7 @@ int lixa_pq_end(const XID *xid, int rmid, long flags)
                         flags));
             THROW(INVALID_FLAGS2);
         }
-        
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
-        
+                
         if (lpsr->state.R != 1 || lpsr->state.T != 1 ||
             (lpsr->state.S != 1 && lpsr->state.S != 2)) {
             LIXA_TRACE(("lixa_pq_end: rmid %d state(R,S,T)={%d,%d,%d}\n",
@@ -550,11 +552,13 @@ int lixa_pq_end(const XID *xid, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROTOCOL_ERROR1:
+                xa_rc = XAER_PROTO;
+                break;
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
                 break;
-            case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
                 xa_rc = XAER_PROTO;
                 break;
@@ -587,9 +591,9 @@ int lixa_pq_end(const XID *xid, int rmid, long flags)
 
 int lixa_pq_rollback(const XID *xid, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS1
+    enum Exception { PROTOCOL_ERROR1
+                     , INVALID_FLAGS1
                      , INVALID_FLAGS2
-                     , PROTOCOL_ERROR1
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
@@ -611,7 +615,10 @@ int lixa_pq_rollback(const XID *xid, int rmid, long flags)
 
         /* lock the status mutex */
         g_mutex_lock(&lixa_sw_status_mutex);
-
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
+        
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_rollback: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
@@ -622,9 +629,6 @@ int lixa_pq_rollback(const XID *xid, int rmid, long flags)
                         flags));
             THROW(INVALID_FLAGS2);
         }
-        
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
         
         if (lpsr->state.R != 1 || lpsr->state.T != 0) {
             LIXA_TRACE(("lixa_pq_rollback: rmid %d state(R,S,T)={%d,%d,%d}\n",
@@ -722,11 +726,13 @@ int lixa_pq_rollback(const XID *xid, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROTOCOL_ERROR1:
+                xa_rc = XAER_PROTO;
+                break;
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
                 break;
-            case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
             case PROTOCOL_ERROR3:
                 xa_rc = XAER_PROTO;
@@ -769,9 +775,9 @@ int lixa_pq_rollback(const XID *xid, int rmid, long flags)
 
 int lixa_pq_prepare(const XID *xid, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS1
+    enum Exception { PROTOCOL_ERROR1
+                     , INVALID_FLAGS1
                      , INVALID_FLAGS2
-                     , PROTOCOL_ERROR1
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
@@ -791,7 +797,10 @@ int lixa_pq_prepare(const XID *xid, int rmid, long flags)
         
         /* lock the status mutex */
         g_mutex_lock(&lixa_sw_status_mutex);
-
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
+        
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_prepare: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
@@ -803,9 +812,6 @@ int lixa_pq_prepare(const XID *xid, int rmid, long flags)
             THROW(INVALID_FLAGS2);
         }
                 
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
-        
         if (lpsr->state.R != 1 || lpsr->state.T != 0 || lpsr->state.S != 2) {
             LIXA_TRACE(("lixa_pq_prepare: rmid %d state(R,S,T)={%d,%d,%d}\n",
                         rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
@@ -854,11 +860,13 @@ int lixa_pq_prepare(const XID *xid, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROTOCOL_ERROR1:
+                xa_rc = XAER_PROTO;
+                break;
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
                 break;
-            case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
                 xa_rc = XAER_PROTO;
                 break;
@@ -893,9 +901,9 @@ int lixa_pq_prepare(const XID *xid, int rmid, long flags)
 
 int lixa_pq_commit(const XID *xid, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS1
+    enum Exception { PROTOCOL_ERROR1
+                     , INVALID_FLAGS1
                      , INVALID_FLAGS2
-                     , PROTOCOL_ERROR1
                      , PROTOCOL_ERROR2
                      , NULL_CONN
                      , XID_SERIALIZE_ERROR
@@ -918,7 +926,10 @@ int lixa_pq_commit(const XID *xid, int rmid, long flags)
 
         /* lock the status mutex */
         g_mutex_lock(&lixa_sw_status_mutex);
-
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
+        
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_commit: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
@@ -929,9 +940,6 @@ int lixa_pq_commit(const XID *xid, int rmid, long flags)
                         flags));
             THROW(INVALID_FLAGS2);
         }
-        
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
         
         if (lpsr->state.R != 1 || lpsr->state.T != 0) {
             LIXA_TRACE(("lixa_pq_commit: rmid %d state(R,S,T)={%d,%d,%d}\n",
@@ -1032,11 +1040,13 @@ int lixa_pq_commit(const XID *xid, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROTOCOL_ERROR1:
+                xa_rc = XAER_PROTO;
+                break;
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
                 break;
-            case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
             case PROTOCOL_ERROR3:
                 xa_rc = XAER_PROTO;
@@ -1079,9 +1089,9 @@ int lixa_pq_commit(const XID *xid, int rmid, long flags)
 
 int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS
+    enum Exception { PROTOCOL_ERROR1
+                     , INVALID_FLAGS
                      , INVALID_OPTIONS1
-                     , PROTOCOL_ERROR1
                      , INVALID_OPTIONS2
                      , PROTOCOL_ERROR2
                      , NULL_CONN
@@ -1112,7 +1122,10 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
 
         /* lock the status mutex */
         g_mutex_lock(&lixa_sw_status_mutex);
-
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR1);
+        
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_pq_recover: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS);
@@ -1122,9 +1135,6 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
             LIXA_TRACE(("lixa_pq_recover: xids=%p, count=%ld\n", xids, count));
             THROW(INVALID_OPTIONS1);
         }
-        
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
         
         if (!(flags & TMSTARTRSCAN)) {
             LIXA_TRACE(("lixa_pq_recover: TMSTARTRSCAN flag must be set\n"));
@@ -1213,12 +1223,14 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROTOCOL_ERROR1:
+                xa_rc = XAER_PROTO;
+                break;
             case INVALID_FLAGS:
             case INVALID_OPTIONS1:
             case INVALID_OPTIONS2:
                 xa_rc = XAER_INVAL;
                 break;
-            case PROTOCOL_ERROR1:
             case PROTOCOL_ERROR2:
                 xa_rc = XAER_PROTO;
                 break;
