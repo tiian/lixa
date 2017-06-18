@@ -1,3 +1,5 @@
+go on with xta_transaction_commit: implement the second branch of the if
+statement (rollback branch) grabbing code from the link in the comment
 Split lixa_my_ functions extracting the state retrieval (lpsr pointer):
 	go on with lixa_my_*_core technique and call it from xta too
 Split lixa_pq_ functions extracting the state retrieval (lpsr pointer)

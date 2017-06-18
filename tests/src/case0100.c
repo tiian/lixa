@@ -169,49 +169,53 @@ int main(int argc, char *argv[])
     }
 #ifdef HAVE_MYSQL
     /* register the MySQL XA Resource to the transaction manager */
+    /*
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                            tx, (xta_xa_resource_t *)mysql_xa_res))) {
         printf("%s| xta_transaction_enlist_resource/mysql_xa_res: "
                "returned %d\n", pgm, rc);
         return 1;
     }
+    */
 #endif
 #ifdef HAVE_POSTGRESQL
     /* register the PostgreSQL XA Resource to the transaction manager */
+    /*
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                            tx, (xta_xa_resource_t *)postgresql_xa_res))) {
         printf("%s| xta_transaction_enlist_resource/postgresql_xa_res: "
                "returned %d\n", pgm, rc);
         return 1;
     }
+    */
 #endif
 
     /* open all the resources for Distributed Transactions */
     if (LIXA_RC_OK != (rc = xta_transaction_open(tx))) {
-        printf("%s| xta_transaction_open: "
-               "returned %d\n", pgm, rc);
+        printf("%s| xta_transaction_open: returned %d\n", pgm, rc);
         return 1;
     }
 
-    /* start a Distributed Transactions */
+    /* start a Distributed Transaction */
     if (LIXA_RC_OK != (rc = xta_transaction_start(tx))) {
-        printf("%s| xta_transaction_start: "
-               "returned %d\n", pgm, rc);
+        printf("%s| xta_transaction_start: returned %d\n", pgm, rc);
         return 1;
     }
-
 
     
     /*
      * some code here ...
      */
 
-
+    /* commit the Distributed Transaction */
+    if (LIXA_RC_OK != (rc = xta_transaction_commit(tx))) {
+        printf("%s| xta_transaction_commit: returned %d\n", pgm, rc);
+        return 1;
+    }
     
     /* close all the resources for Distributed Transactions */
     if (LIXA_RC_OK != (rc = xta_transaction_close(tx))) {
-        printf("%s| xta_transaction_close: "
-               "returned %d\n", pgm, rc);
+        printf("%s| xta_transaction_close: returned %d\n", pgm, rc);
         return 1;
     }
     /*

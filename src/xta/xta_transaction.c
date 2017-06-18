@@ -558,7 +558,7 @@ int xta_transaction_start(xta_transaction_t *this)
     enum Exception { NULL_OBJECT1,
                      INVALID_STATUS,
                      NULL_OBJECT2,
-                     LIXA_XA_OPEN_ERROR,
+                     LIXA_XA_START_ERROR,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -574,7 +574,7 @@ int xta_transaction_start(xta_transaction_t *this)
         /* check TX state */
         txstate = client_status_get_txstate(&this->client_status);
         if (TX_STATE_S1 != txstate) {
-            LIXA_TRACE(("xta_transaction_open: expected client status %d, "
+            LIXA_TRACE(("xta_transaction_start: expected client status %d, "
                         "current client status %d\n", TX_STATE_S1, txstate));
             THROW(INVALID_STATUS);
         } else
@@ -593,7 +593,7 @@ int xta_transaction_start(xta_transaction_t *this)
                                &txrc,
                                xta_xid_get_xa_xid(this->xid), txstate,
                                next_txstate, &dupid_or_proto, TMNOFLAGS)))
-            THROW(LIXA_XA_OPEN_ERROR);        
+            THROW(LIXA_XA_START_ERROR);        
         /* update the TX state */
         client_status_set_txstate(&this->client_status, next_txstate);
         
@@ -609,7 +609,7 @@ int xta_transaction_start(xta_transaction_t *this)
             case NULL_OBJECT2:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
-            case LIXA_XA_OPEN_ERROR:
+            case LIXA_XA_START_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -625,18 +625,112 @@ int xta_transaction_start(xta_transaction_t *this)
 
 
 
-int xta_transaction_commit(xta_transaction_t *transaction)
+int xta_transaction_commit(xta_transaction_t *this)
 {
-    enum Exception { NONE } excp;
+    enum Exception { NULL_OBJECT
+                     , INVALID_STATUS
+                     , LIXA_XA_END_ERROR
+                     , LIXA_XA_PREPARE_ERROR
+                     , LIXA_XA_COMMIT_ERROR
+                     , INVALID_STATE1
+                     , INVALID_STATE2
+                     , INVALID_TXRC1
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_commit\n"));
     TRY {
-        /* @@@ */
+        int one_phase_commit = FALSE, commit = TRUE, finished = TRUE;
+        int txrc = TX_OK, txstate, prepare_txrc, next_txstate;
+        
+        /* check object */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* check TX state */
+        txstate = client_status_get_txstate(&this->client_status);
+        if (TX_STATE_S3 != txstate) {
+            LIXA_TRACE(("xta_transaction_commit: expected client status %d, "
+                        "current client status %d\n", TX_STATE_S3, txstate));
+            THROW(INVALID_STATUS);
+        }
+        /* check if One Phase Commit optimization can be applied */
+        one_phase_commit = client_status_could_one_phase(&this->client_status);
+        /* detach the transaction */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
+                               &this->local_ccc, &this->client_status, &txrc,
+                               commit, TMSUCCESS))) {
+            if (TX_ROLLBACK == txrc)
+                commit = FALSE;
+            else
+                THROW(LIXA_XA_END_ERROR);
+        }
+        /* prepare (skip if we are rollbacking) */
+        if (commit) {
+            /* bypass xa_prepare if one_phase_commit is TRUE */
+            if (!one_phase_commit &&
+                LIXA_RC_OK != (ret_cod = lixa_xa_prepare(
+                                   &this->local_ccc, &this->client_status,
+                                   xta_xid_get_xa_xid(this->xid),
+                                   &txrc, &commit)))
+                THROW(LIXA_XA_PREPARE_ERROR);
+        }
+        prepare_txrc = txrc;
+        /* commit or rollback the transaction */
+        if (commit) {
+            LIXA_TRACE(("xta_transaction_commit: go on with commit...\n"));
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_commit(
+                                   &this->local_ccc, &this->client_status,
+                                   xta_xid_get_xa_xid(this->xid),
+                                   &txrc, one_phase_commit)))
+                THROW(LIXA_XA_COMMIT_ERROR);
+            switch (txrc) {
+                case TX_OK:
+                case TX_ROLLBACK:
+                case TX_ERROR:
+                case TX_MIXED:
+                case TX_HAZARD:
+                    if (TX_STATE_S3 == txstate)
+                        next_txstate = TX_STATE_S1;
+                    else
+                        THROW(INVALID_STATE1);
+                    break;
+                case TX_NO_BEGIN:
+                case TX_ROLLBACK_NO_BEGIN:
+                case TX_MIXED_NO_BEGIN:
+                case TX_HAZARD_NO_BEGIN:
+                    THROW(INVALID_STATE2);
+                    break;
+                case TX_FAIL:
+                    next_txstate = txstate;
+                    finished = FALSE;
+                    break;
+                default:
+                    THROW(INVALID_TXRC1);
+            } /* switch */
+        }
+        /* @@@
+           grab code from lixa_tx tx_commit 1.1.1
+           https://github.com/tiian/lixa/blob/1.1.1/src/client/lixa_tx.c
+         */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case LIXA_XA_END_ERROR:
+            case LIXA_XA_PREPARE_ERROR:
+            case LIXA_XA_COMMIT_ERROR:
+                break;
+            case INVALID_STATE1:
+            case INVALID_STATE2:
+            case INVALID_TXRC1:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

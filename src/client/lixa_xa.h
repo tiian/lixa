@@ -77,20 +77,22 @@ extern "C" {
     
     /**
      * Commit work performed on behalf of the transaction manager
+     * @param[in] ccc : client config collection
      * @param[in] cs reference to the status of the calling client
-     * @param[in] xid array of XID to commit
+     * @param[in] xid transaction ID to commit
      * @param[out] txrc return code prepared for tx_commit/tx_rollback call
      * @param[in] one_phase_commit boolean value:
      *            TRUE = the T.M. is performing a ONE phase commit
      *            FALSE = the T.M. is performing a standard TWO phase commit
      * @return a reason code
      */
-    int lixa_xa_commit(client_status_t *cs, XID *xid, int *txrc,
-                       int one_phase_commit);
+    int lixa_xa_commit(client_config_coll_t *ccc, client_status_t *cs,
+                       const XID *xid, int *txrc, int one_phase_commit);
 
 
     /**
      * End work performed on behalf of the transaction manager
+     * @param[in] ccc : client config collection
      * @param[in] cs : reference to the status of the calling client
      * @param[out] txrc : return code prepared for tx_commit/tx_rollback call
      * @param[in] commit : boolean value: <BR>
@@ -99,15 +101,15 @@ extern "C" {
      * @param[in] xa_end_flags : flags to send to xa_end
      * @return a reason code
      */
-    int lixa_xa_end(client_status_t *cs, int *txrc, int commit,
-                    int xa_end_flags);
+    int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
+                    int *txrc, int commit, int xa_end_flags);
 
 
     /**
      * This function is not directly called by the TX layer, but it's an
      * helper function for @ref lixa_xa_commit and @ref lixa_xa_rollback
      * @param[in] cs reference to the status of the calling client
-     * @param xida
+     * @param[in] xida
      * @param[in] finished boolean value: TRUE, the transaction can be
      *                    finished; FALSE, a blocking error marked the
      *                    transaction as not finished
@@ -132,7 +134,32 @@ extern "C" {
 
 
     /**
-     * End work performed on behalf of the transaction manager
+     * End work performed on behalf of the transaction manager; this is the
+     * original LIXA version that supports XTA implementation and does not
+     * need the multi xids extension implemented by TC TX (see
+     * @ref lixa_xa_prepare_multi)
+     * @param[in] ccc : client config collection
+     * @param[in] cs reference to the status of the calling client
+     * @param[in] xid transaction ID to prepare
+     * @param[out] txrc return code prepared for tx_commit/tx_rollback call
+     * @param[out] commit boolean value: <br>
+     *                  TRUE = xa_prepare will be followed by xa_commit <br>
+     *                  FALSE = xa_prepare will be followed by xa_rollback
+     *                          (one resource manager is not able to prepare
+     *                          for commit and the transaction must be backed
+     *                          out)
+     * @return a reason code
+     */
+    int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
+                        const XID *xid, int *txrc, int *commit);
+
+    
+
+    /**
+     * End work performed on behalf of the transaction manager; this is a
+     * specific version of @ref lixa_xa_prepare designed to support the
+     * TC TX extension provided by Globetom; XTA implementation does not need
+     * multiple xids prepare
      * @param[in] cs : reference to the status of the calling client
      * @param[in] xida array of XID to prepare
      * @param[out] txrc : return code prepared for tx_commit/tx_rollback call
@@ -145,8 +172,8 @@ extern "C" {
      * @param[out] xid the final XID to commit on
      * @return a reason code
      */
-    int lixa_xa_prepare(client_status_t *cs, GArray *xida, int *txrc,
-                        int *commit, XID *xid);
+    int lixa_xa_prepare_multi(client_status_t *cs,
+                              GArray *xida, int *txrc, int *commit, XID *xid);
 
 
     /**
