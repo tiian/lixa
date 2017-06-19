@@ -81,6 +81,14 @@ extern "C" {
     const XID *xta_xid_get_xa_xid(xta_xid_t *this);
 
 
+
+    /**
+     * Reset a Transaction identifier object
+     * @param[in,out] this xid object to delete
+     */
+    void xta_xid_reset(xta_xid_t *this);
+
+
     
 #ifdef __cplusplus
 }

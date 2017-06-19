@@ -131,3 +131,31 @@ const XID *xta_xid_get_xa_xid(xta_xid_t *this)
     return xa_xid;
 }
 
+
+
+void xta_xid_reset(xta_xid_t *this)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_xid_reset\n"));
+    TRY {
+        lixa_xid_reset(&this->xa_xid);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_xid_reset/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return;
+}
+
+
+

@@ -105,9 +105,31 @@ extern "C" {
                     int *txrc, int commit, int xa_end_flags);
 
 
+    
     /**
      * This function is not directly called by the TX layer, but it's an
-     * helper function for @ref lixa_xa_commit and @ref lixa_xa_rollback
+     * helper function for @ref lixa_xa_commit and @ref lixa_xa_rollback; this
+     * is the original LIXA version that supports XTA implementation and does
+     * not need the multi xids extension implemented by TC TX (see
+     * @ref lixa_xa_forget_multi)
+     * @param[in] ccc client config collection
+     * @param[in] cs reference to the status of the calling client
+     * @param[in] finished boolean value: TRUE, the transaction can be
+     *                    finished; FALSE, a blocking error marked the
+     *                    transaction as not finished
+     * @return a reason code
+     */
+    int lixa_xa_forget(client_config_coll_t *ccc, client_status_t *cs,
+                       int finished);
+
+    
+    
+    /**
+     * This function is not directly called by the TX layer, but it's an
+     * helper function for @ref lixa_xa_commit and @ref lixa_xa_rollback; this
+     * is a specific version of @ref lixa_xa_prepare designed to support the
+     * TC TX extension provided by Globetom; XTA implementation does not need
+     * multiple xids prepare
      * @param[in] cs reference to the status of the calling client
      * @param[in] xida
      * @param[in] finished boolean value: TRUE, the transaction can be
@@ -115,7 +137,7 @@ extern "C" {
      *                    transaction as not finished
      * @return a reason code
      */
-    int lixa_xa_forget(client_status_t *cs, GArray *xida, int finished);
+    int lixa_xa_forget_multi(client_status_t *cs, GArray *xida, int finished);
 
 
     /**
@@ -178,13 +200,15 @@ extern "C" {
 
     /**
      * Roll back work performed on behalf of the transaction manager
+     * @param[in] ccc : client config collection
      * @param[in] cs : reference to the status of the calling client
      * @param[out] txrc : return code prepared for tx_commit/tx_rollback call
      * @param[in] tx_commit : the function is called from tx_commit (TRUE) or
      *                  from tx_rollback (FALSE)
      * @return a reason code
      */
-    int lixa_xa_rollback(client_status_t *cs, int *txrc, int tx_commit);
+    int lixa_xa_rollback(client_config_coll_t *ccc, client_status_t *cs,
+                         int *txrc, int tx_commit);
 
 
     /**

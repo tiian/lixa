@@ -635,13 +635,19 @@ int xta_transaction_commit(xta_transaction_t *this)
                      , INVALID_STATE1
                      , INVALID_STATE2
                      , INVALID_TXRC1
+                     , LIXA_XA_ROLLBACK_ERROR
+                     , INVALID_STATE3
+                     , INVALID_STATE4
+                     , INVALID_TXRC2
+                     , LIXA_XA_FORGET_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_commit\n"));
+    int txrc = TX_OK;
     TRY {
         int one_phase_commit = FALSE, commit = TRUE, finished = TRUE;
-        int txrc = TX_OK, txstate, prepare_txrc, next_txstate;
+        int txstate, prepare_txrc, next_txstate;
         
         /* check object */
         if (NULL == this)
@@ -707,7 +713,56 @@ int xta_transaction_commit(xta_transaction_t *this)
                 default:
                     THROW(INVALID_TXRC1);
             } /* switch */
-        }
+        } else {
+            LIXA_TRACE(("xta_transaction_commit: go on with rollback...\n"));
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(
+                                   &this->local_ccc, &this->client_status,
+                                   &txrc, TRUE)))
+                THROW(LIXA_XA_ROLLBACK_ERROR);
+            if (TX_FAIL == prepare_txrc) {
+                LIXA_TRACE(("xta_transaction_commit: txrc=%d, "
+                            "prepare_txrc=%d, "
+                            "returning TX_FAIL to Application Program\n",
+                            txrc, prepare_txrc));
+                txrc = TX_FAIL;
+            }
+            switch (txrc) {
+                case TX_OK:
+                case TX_ROLLBACK:
+                case TX_MIXED:
+                case TX_HAZARD:
+                    if (TX_STATE_S3 == txstate)
+                        next_txstate = TX_STATE_S1;
+                    else
+                        THROW(INVALID_STATE3);
+                    break;
+                case TX_NO_BEGIN:
+                case TX_ROLLBACK_NO_BEGIN:
+                case TX_MIXED_NO_BEGIN:
+                case TX_HAZARD_NO_BEGIN:
+                case TX_COMMITTED_NO_BEGIN:
+                    THROW(INVALID_STATE4);
+                    break;
+                case TX_FAIL:
+                    next_txstate = txstate;
+                    finished = FALSE;
+                    break;
+                default:
+                    THROW(INVALID_TXRC2);
+            } /* switch */
+        } /* else */
+
+        /* clean Heurstically Completed states... */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(
+                               &this->local_ccc, &this->client_status,
+                               finished)))
+            THROW(LIXA_XA_FORGET_ERROR);
+        
+        /* update the TX state, now TX_STATE_S0 */
+        client_status_set_txstate(&this->client_status, next_txstate);
+        /* reset the transaction id */
+        xta_xid_reset(this->xid);
+        
         /* @@@
            grab code from lixa_tx tx_commit 1.1.1
            https://github.com/tiian/lixa/blob/1.1.1/src/client/lixa_tx.c
@@ -731,12 +786,24 @@ int xta_transaction_commit(xta_transaction_t *this)
             case INVALID_TXRC1:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
+            case LIXA_XA_ROLLBACK_ERROR:
+                break;
+            case INVALID_STATE3:
+            case INVALID_STATE4:
+            case INVALID_TXRC2:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case LIXA_XA_FORGET_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* LIXA backward compatibility, but it might be useless */
+        if (TX_FAIL == txrc && NULL != &this->client_status)
+            client_status_failed(&this->client_status);
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
