@@ -663,7 +663,8 @@ int xta_transaction_commit(xta_transaction_t *this)
         one_phase_commit = client_status_could_one_phase(&this->client_status);
         /* detach the transaction */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
-                               &this->local_ccc, &this->client_status, &txrc,
+                               &this->local_ccc, &this->client_status,
+                               xta_xid_get_xa_xid(this->xid), &txrc,
                                commit, TMSUCCESS))) {
             if (TX_ROLLBACK == txrc)
                 commit = FALSE;
@@ -717,6 +718,7 @@ int xta_transaction_commit(xta_transaction_t *this)
             LIXA_TRACE(("xta_transaction_commit: go on with rollback...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(
                                    &this->local_ccc, &this->client_status,
+                                   xta_xid_get_xa_xid(this->xid),
                                    &txrc, TRUE)))
                 THROW(LIXA_XA_ROLLBACK_ERROR);
             if (TX_FAIL == prepare_txrc) {
@@ -755,7 +757,7 @@ int xta_transaction_commit(xta_transaction_t *this)
         /* clean Heurstically Completed states... */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(
                                &this->local_ccc, &this->client_status,
-                               finished)))
+                               xta_xid_get_xa_xid(this->xid), finished)))
             THROW(LIXA_XA_FORGET_ERROR);
         
         /* update the TX state, now TX_STATE_S0 */

@@ -158,15 +158,16 @@ extern "C" {
 
     /**
      * End work performed on behalf of a transaction branch
-     * @param[in,out] context : XTA resource context
-     * @param[in] rmid : an integer assigned by the transaction manager,
-     *                   uniquely identifies the called resource manager
-     *                   instance within the thread of control
-     * @param[in] flags : only @ref TMSUCCESS and @ref TMFAIL can be passed to
-     *                    a Postgresql resource
+     * @param[in,out] context XTA resource context
+     * @param[in] xid transaction identifier, XA spec
+     * @param[in] rmid an integer assigned by the transaction manager,
+     *                 uniquely identifies the called resource manager
+     *                 instance within the thread of control
+     * @param[in] flags only @ref TMSUCCESS and @ref TMFAIL can be passed to
+     *                  a Postgresql resource
      * @return a XA return code
      */
-    int xta_postgresql_xa_end(xta_xa_resource_t *context,
+    int xta_postgresql_xa_end(xta_xa_resource_t *context, const XID *xid,
                               int rmid, long flags);
 
 
@@ -250,13 +251,13 @@ extern "C" {
 
     /**
      * Start work on behalf of a transaction branch
-     * @param[in,out] context : XTA resource context
-     * @param[in] xid : transaction identifier, XA spec
-     * @param[in] rmid : an integer assigned by the transaction manager,
-     *                   uniquely identifies the called resource manager
-     *                   instance within the thread of control
-     * @param[in] flags : only @ref TMNOFLAGS can be passed to a Postgresql
-     *                    resource
+     * @param[in,out] context XTA resource context
+     * @param[in] xid transaction identifier, XA spec
+     * @param[in] rmid an integer assigned by the transaction manager,
+     *                 uniquely identifies the called resource manager
+     *                 instance within the thread of control
+     * @param[in] flags only @ref TMNOFLAGS can be passed to a Postgresql
+     *                  resource
      * @return a XA return code
      */
     int xta_postgresql_xa_start(xta_xa_resource_t *context, const XID *xid,

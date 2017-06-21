@@ -77,7 +77,7 @@ extern "C" {
     
     /**
      * Commit work performed on behalf of the transaction manager
-     * @param[in] ccc : client config collection
+     * @param[in] ccc client config collection
      * @param[in] cs reference to the status of the calling client
      * @param[in] xid transaction ID to commit
      * @param[out] txrc return code prepared for tx_commit/tx_rollback call
@@ -92,17 +92,18 @@ extern "C" {
 
     /**
      * End work performed on behalf of the transaction manager
-     * @param[in] ccc : client config collection
-     * @param[in] cs : reference to the status of the calling client
-     * @param[out] txrc : return code prepared for tx_commit/tx_rollback call
-     * @param[in] commit : boolean value: <BR>
+     * @param[in] ccc client config collection
+     * @param[in] cs reference to the status of the calling client
+     * @param[in] xid transaction ID to detach
+     * @param[out] txrc return code prepared for tx_commit/tx_rollback call
+     * @param[in] commit boolean value: <BR>
      *                  TRUE = xa_end will be followed by xa_commit <BR>
      *                  FALSE = xa_end will be followed by xa_rollback
-     * @param[in] xa_end_flags : flags to send to xa_end
+     * @param[in] xa_end_flags flags to send to xa_end
      * @return a reason code
      */
     int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
-                    int *txrc, int commit, int xa_end_flags);
+                    const XID *xid, int *txrc, int commit, int xa_end_flags);
 
 
     
@@ -114,13 +115,14 @@ extern "C" {
      * @ref lixa_xa_forget_multi)
      * @param[in] ccc client config collection
      * @param[in] cs reference to the status of the calling client
+     * @param[in] xid transaction ID to forget
      * @param[in] finished boolean value: TRUE, the transaction can be
      *                    finished; FALSE, a blocking error marked the
      *                    transaction as not finished
      * @return a reason code
      */
     int lixa_xa_forget(client_config_coll_t *ccc, client_status_t *cs,
-                       int finished);
+                       const XID *xid, int finished);
 
     
     
@@ -160,7 +162,7 @@ extern "C" {
      * original LIXA version that supports XTA implementation and does not
      * need the multi xids extension implemented by TC TX (see
      * @ref lixa_xa_prepare_multi)
-     * @param[in] ccc : client config collection
+     * @param[in] ccc client config collection
      * @param[in] cs reference to the status of the calling client
      * @param[in] xid transaction ID to prepare
      * @param[out] txrc return code prepared for tx_commit/tx_rollback call
@@ -200,21 +202,22 @@ extern "C" {
 
     /**
      * Roll back work performed on behalf of the transaction manager
-     * @param[in] ccc : client config collection
-     * @param[in] cs : reference to the status of the calling client
-     * @param[out] txrc : return code prepared for tx_commit/tx_rollback call
-     * @param[in] tx_commit : the function is called from tx_commit (TRUE) or
+     * @param[in] ccc client config collection
+     * @param[in] cs reference to the status of the calling client
+     * @param[in] xid transaction ID to prepare
+     * @param[out] txrc return code prepared for tx_commit/tx_rollback call
+     * @param[in] tx_commit the function is called from tx_commit (TRUE) or
      *                  from tx_rollback (FALSE)
      * @return a reason code
      */
     int lixa_xa_rollback(client_config_coll_t *ccc, client_status_t *cs,
-                         int *txrc, int tx_commit);
+                         const XID *xid, int *txrc, int tx_commit);
 
 
     /**
      * Send xa_start to all the resource manager does not support dynamic
      * registration
-     * @param[in] ccc : client config collection
+     * @param[in] ccc client config collection
      * @param[in] cs reference to the status of the calling client
      * @param[out] txrc return code prepared for tx_open call
      * @param[in] xid transaction id of the new transaction

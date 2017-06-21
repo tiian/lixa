@@ -161,22 +161,22 @@ int main(int argc, char *argv[])
         return 1;
     }
     /* register the dynamic native XA Resource to the transaction manager */
+    /*
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                            tx, (xta_xa_resource_t *)dynamic_native_xa_res))) {
         printf("%s| xta_transaction_enlist_resource/dynamic_native_xa_res: "
                "returned %d\n", pgm, rc);
         return 1;
     }
+    */
 #ifdef HAVE_MYSQL
     /* register the MySQL XA Resource to the transaction manager */
-    /*
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                            tx, (xta_xa_resource_t *)mysql_xa_res))) {
         printf("%s| xta_transaction_enlist_resource/mysql_xa_res: "
                "returned %d\n", pgm, rc);
         return 1;
     }
-    */
 #endif
 #ifdef HAVE_POSTGRESQL
     /* register the PostgreSQL XA Resource to the transaction manager */

@@ -59,7 +59,7 @@ struct xta_iface_s {
     /**
      * xa_end function pointer
      */
-    int (*xa_end_entry)(xta_xa_resource_t *, int, long); 
+    int (*xa_end_entry)(xta_xa_resource_t *, const XID *, int, long); 
     /**
      * xa_rollback function pointer
      */

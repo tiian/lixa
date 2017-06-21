@@ -326,9 +326,9 @@ extern "C" {
     static inline int lixa_iface_xa_end(lixa_iface_t *iface,
         const XID *xid, int rmid, long flags) {
     if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_end_entry(xid,rmid,flags);
+            return iface->std->xa_end_entry(xid, rmid, flags);
         else
-            return iface->xta->xa_end_entry(iface->context,rmid,flags);
+            return iface->xta->xa_end_entry(iface->context, xid, rmid, flags);
     }
 
 

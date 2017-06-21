@@ -233,6 +233,15 @@ int lixa_my_end(const XID *xid, int rmid, long flags);
 
     
 /**
+ * Core implementation of "xa_end" for MySQL: it's referenced by
+ * @ref lixa_my_end (XA interface) and by @ref xta_mysql_xa_end
+ */
+int lixa_my_end_core(struct lixa_sw_status_rm_s *lpsr,
+                     const XID *xid, int rmid, long flags);
+
+
+
+/**
  * Implementation of "xa_rollback" for MySQL;
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description

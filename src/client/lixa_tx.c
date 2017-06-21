@@ -199,14 +199,14 @@ int lixa_tx_begin(int *txrc, XID *xid, int flags)
                             "xa_start call; trying a new synchronization with "
                             "tx_rollback...\n"));
                 if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
-                                       &global_ccc, cs, &txrc2, FALSE,
+                                       &global_ccc, cs, xid, &txrc2, FALSE,
                                        TMNOFLAGS))) {
                     LIXA_TRACE(("lixa_tx_begin: error while calling "
                                 "lixa_xa_end (ret_cod=%d, txrc2=%d), going "
                                 "on...\n", ret_cod, txrc2));
                 }
                 if (LIXA_RC_OK !=
-                    (ret_cod = lixa_xa_rollback(&global_ccc, cs,
+                    (ret_cod = lixa_xa_rollback(&global_ccc, cs, xid,
                                                 &txrc2, FALSE))) {
                     LIXA_TRACE(("lixa_tx_begin: error while calling "
                                 "lixa_xa_rollback (ret_cod=%d, txrc2=%d), "
@@ -487,7 +487,8 @@ int lixa_tx_end(int *txrc, int flags)
             commit = FALSE;
         }
         if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
-                               &global_ccc, cs, txrc, commit, flags))) {
+                               &global_ccc, cs, client_status_get_xid(cs),
+                               txrc, commit, flags))) {
             if (TX_ROLLBACK == *txrc)
                 commit = FALSE;
             else THROW(XA_END_ERROR);
@@ -668,8 +669,8 @@ int lixa_tx_commit(int *txrc, int *begin_new)
 
         /* detach the transaction */
         if (LIXA_RC_OK !=
-            (ret_cod = lixa_xa_end(&global_ccc, cs, txrc, commit,
-                                   TMSUCCESS))) {
+            (ret_cod = lixa_xa_end(&global_ccc, cs, client_status_get_xid(cs),
+                                   txrc, commit, TMSUCCESS))) {
             if (TX_ROLLBACK == *txrc)
                 commit = FALSE;
             else THROW(XA_END_ERROR);
@@ -695,7 +696,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         }
 
         /* prepare (skip if we are rolling back) */
-        XID xid;
+        XID xid = *client_status_get_xid(cs);
         if (commit) {
             /* bypass xa_prepare if one_phase_commit is TRUE */
             if (!one_phase_commit &&
@@ -703,8 +704,6 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                 (ret_cod = lixa_xa_prepare_multi(cs, xida, txrc,
                                                  &commit, &xid)))
                 THROW(XA_PREPARE_ERROR);
-            if (one_phase_commit)
-                xid = *client_status_get_xid(cs);
         }
         prepare_txrc = *txrc;
         /* commit/rollback */
@@ -746,7 +745,8 @@ int lixa_tx_commit(int *txrc, int *begin_new)
         } else {
             LIXA_TRACE(("lixa_tx_commit: go on with rollback...\n"));
             if (LIXA_RC_OK !=
-                (ret_cod = lixa_xa_rollback(&global_ccc, cs, txrc, TRUE)))
+                (ret_cod = lixa_xa_rollback(
+                    &global_ccc, cs, &xid, txrc, TRUE)))
                 THROW(XA_ROLLBACK_ERROR);
             if (TX_FAIL == prepare_txrc) {
                 LIXA_TRACE(("lixa_tx_commit: txrc=%d, prepare_txrc=%d, "
@@ -1156,11 +1156,13 @@ int lixa_tx_rollback(int *txrc, int *begin_new)
         LIXA_TRACE(("lixa_tx_rollback: txstate = S%d\n", txstate));
 
         if (LIXA_RC_OK !=
-            (ret_cod = lixa_xa_end(&global_ccc, cs, txrc, FALSE, TMSUCCESS)))
+            (ret_cod = lixa_xa_end(&global_ccc, cs, client_status_get_xid(cs),
+                                   txrc, FALSE, TMSUCCESS)))
             THROW(XA_END_ERROR);
 
         if (LIXA_RC_OK !=
-            (ret_cod = lixa_xa_rollback(&global_ccc, cs, txrc, FALSE)))
+            (ret_cod = lixa_xa_rollback(
+                &global_ccc, cs, client_status_get_xid(cs), txrc, FALSE)))
             THROW(XA_ROLLBACK_ERROR);
         switch (*txrc) {
             case TX_OK:

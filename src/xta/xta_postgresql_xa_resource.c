@@ -314,7 +314,8 @@ int xta_postgresql_xa_start(xta_xa_resource_t *context, const XID * xid,
 
 
 
-int xta_postgresql_xa_end(xta_xa_resource_t *context, int rmid, long flags)
+int xta_postgresql_xa_end(xta_xa_resource_t *context, const XID *xid,
+                          int rmid, long flags)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;

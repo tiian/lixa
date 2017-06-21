@@ -8,7 +8,7 @@ if COMPILE_POSTGRESQL_STUFF
   MAYBE_POSTGRESQL_SOURCES = xta_postgresql_xa_resource.c
   MAYBE_POSTGRESQL_CPPFLAGS = @POSTGRESQL_CPPFLAGS@ \
 	-I$(top_srcdir)/src/client/switch/postgresql
-  MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
+MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
 endif
 includedir = $(prefix)/include/xta
 include_HEADERS = xta.h xta_errors.h xta_init.h xta_transaction.h \

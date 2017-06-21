@@ -290,8 +290,8 @@ int xta_mysql_xa_close(xta_xa_resource_t *context, char *xa_info,
 
 
 
-int xta_mysql_xa_start(xta_xa_resource_t *context, const XID *xid,
-                       int rmid, long flags)
+int xta_mysql_xa_start(xta_xa_resource_t *context,
+                       const XID *xid, int rmid, long flags)
 {
     enum Exception { OBJ_CORRUPTED
                      , NONE } excp;
@@ -325,17 +325,28 @@ int xta_mysql_xa_start(xta_xa_resource_t *context, const XID *xid,
 
 
 
-int xta_mysql_xa_end(xta_xa_resource_t *context, int rmid, long flags)
+int xta_mysql_xa_end(xta_xa_resource_t *context,
+                     const XID *xid, int rmid, long flags)
 {
-    enum Exception { NONE } excp;
+    enum Exception { OBJ_CORRUPTED
+                     , NONE } excp;
     int ret_cod = XAER_RMERR;
     
     LIXA_TRACE(("xta_mysql_xa_end\n"));
     TRY {
+        xta_mysql_xa_resource_t *this = (xta_mysql_xa_resource_t *)context;
+        if (NULL == this->connection) {
+            LIXA_TRACE(("xta_mysql_xa_end: MySQL connection is NULL!\n"));
+            THROW(OBJ_CORRUPTED);
+        }
+        /* call legacy switch file based code */
+        ret_cod = lixa_my_end_core(&this->lssr, xid, rmid, flags);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OBJ_CORRUPTED:
+                break;
             case NONE:
                 ret_cod = XA_OK;
                 break;
