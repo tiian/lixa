@@ -251,6 +251,15 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags);
 
     
 /**
+ * Core implementation of "xa_rollback" for MySQL: it's referenced by
+ * @ref lixa_my_rollback (XA interface) and by @ref xta_mysql_xa_rollback
+ */
+int lixa_my_rollback_core(struct lixa_sw_status_rm_s *lpsr,
+                          const XID *xid, int rmid, long flags);
+
+
+    
+/**
  * Implementation of "xa_prepare" for MySQL;
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description
@@ -260,11 +269,29 @@ int lixa_my_prepare(const XID *xid, int rmid, long flags);
 
     
 /**
+ * Core implementation of "xa_prepare" for MySQL: it's referenced by
+ * @ref lixa_my_prepare (XA interface) and by @ref xta_mysql_xa_prepare
+ */
+int lixa_my_prepare_core(struct lixa_sw_status_rm_s *lpsr,
+                         const XID *xid, int rmid, long flags);
+
+
+    
+/**
  * Implementation of "xa_commit" for MySQL;
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description
  */
 int lixa_my_commit(const XID *xid, int rmid, long flags);
+
+
+    
+/**
+ * Core implementation of "xa_commit" for MySQL: it's referenced by
+ * @ref lixa_my_commit (XA interface) and by @ref xta_mysql_xa_commit
+ */
+int lixa_my_commit_core(struct lixa_sw_status_rm_s *lpsr,
+                        const XID *xid, int rmid, long flags);
 
 
     
@@ -283,11 +310,29 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags);
 
     
 /**
+ * Core implementation of "xa_recover" for MySQL: it's referenced by
+ * @ref lixa_my_recover (XA interface) and by @ref xta_mysql_xa_recover
+ */
+int lixa_my_recover_core(struct lixa_sw_status_rm_s *lpsr,
+                         XID *xids, long count, int rmid, long flags);
+
+
+    
+/**
  * Implementation of "xa_forget" for MySQL;
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description
  */
 int lixa_my_forget(const XID *xid, int rmid, long flags);
+
+
+    
+/**
+ * Core implementation of "xa_forget" for MySQL: it's referenced by
+ * @ref lixa_my_forget (XA interface) and by @ref xta_mysql_xa_forget
+ */
+int lixa_my_forget_core(struct lixa_sw_status_rm_s *lpsr,
+                        const XID *xid, int rmid, long flags);
 
 
     

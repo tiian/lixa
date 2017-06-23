@@ -238,13 +238,14 @@ extern "C" {
     /**
      * Roll back work done on behalf of a transaction branch
      * @param[in,out] context : XTA resource context
+     * @param[in] xid transaction identifier, XA spec
      * @param[in] rmid : an integer assigned by the transaction manager,
      *                   uniquely identifies the called resource manager
      *                   instance within the thread of control
      * @param[in] flags : @ref TMNOFLAGS, future usage only
      * @return a XA return code
      */
-    int xta_postgresql_xa_rollback(xta_xa_resource_t *context,
+    int xta_postgresql_xa_rollback(xta_xa_resource_t *context, const XID *xid,
                                    int rmid, long flags);
 
 

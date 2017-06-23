@@ -1090,8 +1090,47 @@ int lixa_my_end_core(struct lixa_sw_status_rm_s *lpsr,
 
 int lixa_my_rollback(const XID *xid, int rmid, long flags)
 {
-    enum Exception { PROTOCOL_ERROR1
-                     , INVALID_FLAGS1
+    enum Exception { PROTOCOL_ERROR
+                     , NONE } excp;
+    int xa_rc = XAER_RMFAIL;
+    
+    LIXA_TRACE(("lixa_my_rollback\n"));
+    TRY {
+        struct lixa_sw_status_rm_s *lpsr = NULL;
+
+        /* lock the status mutex */
+        g_mutex_lock(&lixa_sw_status_mutex);
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR);
+
+        xa_rc = lixa_my_rollback_core(lpsr, xid, rmid, flags);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case PROTOCOL_ERROR:
+                xa_rc = XAER_PROTO;
+                break;
+            case NONE:
+                xa_rc = XA_OK;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+        /* unlock the status mutex */
+        g_mutex_unlock(&lixa_sw_status_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_my_rollback/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
+}
+
+
+
+int lixa_my_rollback_core(struct lixa_sw_status_rm_s *lpsr,
+                          const XID *xid, int rmid, long flags)
+{
+    enum Exception { INVALID_FLAGS1
                      , INVALID_FLAGS2
                      , PROTOCOL_ERROR2
                      , NULL_CONN
@@ -1104,44 +1143,40 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
     
-    LIXA_TRACE(("lixa_my_rollback\n"));
+    LIXA_TRACE(("lixa_my_rollback_core\n"));
     TRY {
-        struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMFAIL|TMASYNC;
         lixa_my_ser_xid_t lmsx;
 
-        /* lock the status mutex */
-        g_mutex_lock(&lixa_sw_status_mutex);
-        /* retrieve the status for this resource manager */
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
-        
         if ((flags|valid_flags) != valid_flags) {
-            LIXA_TRACE(("lixa_my_rollback: invalid flag in 0x%x\n", flags));
+            LIXA_TRACE(("lixa_my_rollback_core: invalid flag in 0x%x\n",
+                        flags));
             THROW(INVALID_FLAGS1);
         }
         
         if (TMASYNC & flags) {
-            LIXA_TRACE(("lixa_my_rollback: flags 0x%x are not supported\n",
-                        flags));
+            LIXA_TRACE(("lixa_my_rollback_core: flags 0x%x are not "
+                        "supported\n", flags));
             THROW(INVALID_FLAGS2);
         }
         
         if (lpsr->state.R != 1 || lpsr->state.T != 0) {
-            LIXA_TRACE(("lixa_my_rollback: rmid %d state(R,S,T)={%d,%d,%d}\n",
-                        rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
+            LIXA_TRACE(("lixa_my_rollback_core: rmid %d "
+                        "state(R,S,T)={%d,%d,%d}\n", rmid, lpsr->state.R,
+                        lpsr->state.S, lpsr->state.T));
             THROW(PROTOCOL_ERROR2);
         }
         
         /* this is an internal error :( */
         if (NULL == lpsr->conn) {
-            LIXA_TRACE(("lixa_my_rollback: conn is NULL for rmid %d\n", rmid));
+            LIXA_TRACE(("lixa_my_rollback_core: conn is NULL for rmid %d\n",
+                        rmid));
             THROW(NULL_CONN);
         }
 
         /* serialize XID */
         if (!lixa_my_xid_serialize(xid, lmsx)) {
-            LIXA_TRACE(("lixa_my_rollback: unable to serialize XID\n"));
+            LIXA_TRACE(("lixa_my_rollback_core: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
 
@@ -1151,7 +1186,7 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
             XID xid_r;
             int num_fields;
             if (mysql_query(lpsr->conn, "XA RECOVER")) {
-                LIXA_TRACE(("lixa_my_rollback: error while executing "
+                LIXA_TRACE(("lixa_my_rollback_core: error while executing "
                             "'XA RECOVER' command: %u/%s\n",
                             mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
                 THROW(XA_RECOVER_ERROR);
@@ -1163,17 +1198,17 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
                 const char *gtrid_length = row[1] ? row[1] : "";
                 const char *bqual_length = row[2] ? row[2] : "";
                 const char *data = row[3] ? row[3] : "";
-                LIXA_TRACE(("lixa_my_rollback: formatID=%s, "
+                LIXA_TRACE(("lixa_my_rollback_core: formatID=%s, "
                             "gtrid_length=%s, bqual_length=%s, data=%s\n",
                             formatID, gtrid_length, bqual_length, data));
                 if (!lixa_my_xid_deserialize(&xid_r, formatID, gtrid_length,
                                             bqual_length, data)) {
-                    LIXA_TRACE(("lixa_my_rollback: unable to deserialize the "
-                                "XID retrieved with XA RECOVER\n"));
+                    LIXA_TRACE(("lixa_my_rollback_core: unable to deserialize "
+                                "the XID retrieved with XA RECOVER\n"));
                 }
                 if (!lixa_xid_compare(xid, &xid_r)) {
-                    LIXA_TRACE(("lixa_my_rollback: the transaction %s is in "
-                                "prepared state\n", lmsx));
+                    LIXA_TRACE(("lixa_my_rollback_core: the transaction %s is "
+                                "in prepared state\n", lmsx));
                     lpsr->state.S = 3;
                     lpsr->xid = xid_r;
                     break;
@@ -1181,14 +1216,15 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
             }
             mysql_free_result(res);
             if (lpsr->state.S != 3) {
-                LIXA_TRACE(("lixa_my_rollback: the transaction %s is not "
+                LIXA_TRACE(("lixa_my_rollback_core: the transaction %s is not "
                             "available\n", lmsx));
                 THROW(XID_NOT_AVAILABLE);
             }
         }
 
         if (lpsr->state.S != 2 && lpsr->state.S != 3 && lpsr->state.S != 4) {
-            LIXA_TRACE(("lixa_my_rollback: rmid %d state(R,S,T)={%d,%d,%d}\n",
+            LIXA_TRACE(("lixa_my_rollback_core: rmid %d "
+                        "state(R,S,T)={%d,%d,%d}\n",
                         rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
             THROW(PROTOCOL_ERROR3);
         }
@@ -1197,11 +1233,11 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
         if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
             lixa_my_ser_xid_t lmsx2;
             lixa_my_xid_serialize(&(lpsr->xid), lmsx2);
-            LIXA_TRACE(("lixa_my_rollback: rolling back XID '%s' is not the "
-                        "same of started XID '%s'\n", lmsx, lmsx2));
+            LIXA_TRACE(("lixa_my_rollback_core: rolling back XID '%s' is not "
+                        "the same of started XID '%s'\n", lmsx, lmsx2));
             THROW(XID_MISMATCH);
         }
-        LIXA_TRACE(("lixa_my_rollback: rolling back XID %s\n", lmsx));
+        LIXA_TRACE(("lixa_my_rollback_core: rolling back XID %s\n", lmsx));
 
         if (lpsr->state.S == 3 || lpsr->state.S == 2) {
             const char ROLLBACK_PREP_FMT[] = "XA ROLLBACK %s";
@@ -1211,7 +1247,7 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
             /* rolling back the transaction */
             snprintf(my_cmd_buf, sizeof(my_cmd_buf), ROLLBACK_PREP_FMT, lmsx);
             if (mysql_query(lpsr->conn, my_cmd_buf)) {
-                LIXA_TRACE(("lixa_my_rollback: error while executing "
+                LIXA_TRACE(("lixa_my_rollback_core: error while executing "
                             "'%s': %u/%s\n", my_cmd_buf,
                             mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
                 THROW(ROLLBACK_ERROR);
@@ -1221,9 +1257,6 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case PROTOCOL_ERROR1:
-                xa_rc = XAER_PROTO;
-                break;
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
@@ -1254,10 +1287,8 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
             default:
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
-        /* unlock the status mutex */
-        g_mutex_unlock(&lixa_sw_status_mutex);
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_my_rollback/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    LIXA_TRACE(("lixa_my_rollback_core/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
 }
 
@@ -1265,8 +1296,47 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
 
 int lixa_my_prepare(const XID *xid, int rmid, long flags)
 {
-    enum Exception { PROTOCOL_ERROR1
-                     , INVALID_FLAGS1
+    enum Exception { PROTOCOL_ERROR
+                     , NONE } excp;
+    int xa_rc = XAER_RMFAIL;
+    
+    LIXA_TRACE(("lixa_my_prepare\n"));
+    TRY {
+        struct lixa_sw_status_rm_s *lpsr = NULL;
+
+        /* lock the status mutex */
+        g_mutex_lock(&lixa_sw_status_mutex);
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR);
+
+        xa_rc = lixa_my_prepare_core(lpsr, xid, rmid, flags);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case PROTOCOL_ERROR:
+                xa_rc = XAER_PROTO;
+                break;
+            case NONE:
+                xa_rc = XA_OK;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+        /* unlock the status mutex */
+        g_mutex_unlock(&lixa_sw_status_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_my_prepare/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
+}
+
+
+
+int lixa_my_prepare_core(struct lixa_sw_status_rm_s *lpsr,
+                         const XID *xid, int rmid, long flags)
+{
+    enum Exception { INVALID_FLAGS1
                      , INVALID_FLAGS2
                      , PROTOCOL_ERROR2
                      , NULL_CONN
@@ -1276,46 +1346,42 @@ int lixa_my_prepare(const XID *xid, int rmid, long flags)
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
     
-    LIXA_TRACE(("lixa_my_prepare\n"));
+    LIXA_TRACE(("lixa_my_prepare_core\n"));
     TRY {
-        struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMFAIL|TMASYNC;
         lixa_my_ser_xid_t lmsx;
         const char PREPARE_TRANS_FMT[] = "XA PREPARE %s";
         char my_cmd_buf[sizeof(PREPARE_TRANS_FMT) + sizeof(lixa_my_ser_xid_t)];
         
-        /* lock the status mutex */
-        g_mutex_lock(&lixa_sw_status_mutex);
-        /* retrieve the status for this resource manager */
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
-
         if ((flags|valid_flags) != valid_flags) {
-            LIXA_TRACE(("lixa_my_prepare: invalid flag in 0x%x\n", flags));
+            LIXA_TRACE(("lixa_my_prepare_core: invalid flag in 0x%x\n",
+                        flags));
             THROW(INVALID_FLAGS1);
         }
         
         if (TMASYNC & flags) {
-            LIXA_TRACE(("lixa_my_prepare: flags 0x%x are not supported\n",
+            LIXA_TRACE(("lixa_my_prepare_core: flags 0x%x are not supported\n",
                         flags));
             THROW(INVALID_FLAGS2);
         }
         
         if (lpsr->state.R != 1 || lpsr->state.T != 0 || lpsr->state.S != 2) {
-            LIXA_TRACE(("lixa_my_prepare: rmid %d state(R,S,T)={%d,%d,%d}\n",
+            LIXA_TRACE(("lixa_my_prepare_core: rmid %d "
+                        "state(R,S,T)={%d,%d,%d}\n",
                         rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
             THROW(PROTOCOL_ERROR2);
         }
 
         /* this is an internal error :( */
         if (NULL == lpsr->conn) {
-            LIXA_TRACE(("lixa_my_prepare: conn is NULL for rmid %d\n", rmid));
+            LIXA_TRACE(("lixa_my_prepare_core: conn is NULL for rmid %d\n",
+                        rmid));
             THROW(NULL_CONN);
         }
 
         /* serialize XID */
         if (!lixa_my_xid_serialize(xid, lmsx)) {
-            LIXA_TRACE(("lixa_my_prepare: unable to serialize XID\n"));
+            LIXA_TRACE(("lixa_my_prepare_core: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
 
@@ -1323,16 +1389,16 @@ int lixa_my_prepare(const XID *xid, int rmid, long flags)
         if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
             lixa_my_ser_xid_t lmsx2;
             lixa_my_xid_serialize(&(lpsr->xid), lmsx2);
-            LIXA_TRACE(("lixa_my_prepare: preparing XID %s is not the same "
-                        "of started XID %s\n", lmsx, lmsx2));
+            LIXA_TRACE(("lixa_my_prepare_core: preparing XID %s is not the "
+                        "same of started XID %s\n", lmsx, lmsx2));
             THROW(XID_MISMATCH);
         }
-        LIXA_TRACE(("lixa_my_prepare: preparing XID %s\n", lmsx));
+        LIXA_TRACE(("lixa_my_prepare_core: preparing XID %s\n", lmsx));
 
         /* preparing transaction */
         snprintf(my_cmd_buf, sizeof(my_cmd_buf), PREPARE_TRANS_FMT, lmsx);
         if (mysql_query(lpsr->conn, my_cmd_buf)) {
-            LIXA_TRACE(("lixa_my_prepare: error while executing "
+            LIXA_TRACE(("lixa_my_prepare_core: error while executing "
                         "'%s': %u/%s)\n", my_cmd_buf,
                         mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
             /* the resource manager could unilaterally rollback and return
@@ -1345,9 +1411,6 @@ int lixa_my_prepare(const XID *xid, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case PROTOCOL_ERROR1:
-                xa_rc = XAER_PROTO;
-                break;
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
@@ -1373,10 +1436,8 @@ int lixa_my_prepare(const XID *xid, int rmid, long flags)
             default:
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
-        /* unlock the status mutex */
-        g_mutex_unlock(&lixa_sw_status_mutex);
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_my_prepare/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    LIXA_TRACE(("lixa_my_prepare_core/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
 }
 
@@ -1384,8 +1445,47 @@ int lixa_my_prepare(const XID *xid, int rmid, long flags)
 
 int lixa_my_commit(const XID *xid, int rmid, long flags)
 {
-    enum Exception { PROTOCOL_ERROR1
-                     , INVALID_FLAGS1
+    enum Exception { PROTOCOL_ERROR
+                     , NONE } excp;
+    int xa_rc = XAER_RMFAIL;
+    
+    LIXA_TRACE(("lixa_my_commit\n"));
+    TRY {
+        struct lixa_sw_status_rm_s *lpsr = NULL;
+
+        /* lock the status mutex */
+        g_mutex_lock(&lixa_sw_status_mutex);
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR);
+
+        xa_rc = lixa_my_commit_core(lpsr, xid, rmid, flags);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case PROTOCOL_ERROR:
+                xa_rc = XAER_PROTO;
+                break;
+            case NONE:
+                xa_rc = XA_OK;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+        /* unlock the status mutex */
+        g_mutex_unlock(&lixa_sw_status_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_my_commit/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
+}
+
+
+
+int lixa_my_commit_core(struct lixa_sw_status_rm_s *lpsr,
+                        const XID *xid, int rmid, long flags)
+{
+    enum Exception { INVALID_FLAGS1
                      , INVALID_FLAGS2
                      , PROTOCOL_ERROR2
                      , NULL_CONN
@@ -1398,45 +1498,40 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
                      , NONE } excp;
     int xa_rc = XAER_RMFAIL;
     
-    LIXA_TRACE(("lixa_my_commit\n"));
+    LIXA_TRACE(("lixa_my_commit_core\n"));
     TRY {
-        struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMNOWAIT|TMASYNC|TMONEPHASE|TMNOFLAGS;
         lixa_my_ser_xid_t lmsx;
         int one_phase = flags & TMONEPHASE;
 
-        /* lock the status mutex */
-        g_mutex_lock(&lixa_sw_status_mutex);
-        /* retrieve the status for this resource manager */
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
-
         if ((flags|valid_flags) != valid_flags) {
-            LIXA_TRACE(("lixa_my_commit: invalid flag in 0x%x\n", flags));
+            LIXA_TRACE(("lixa_my_commit_core: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
         }
         
         if (TMNOWAIT & flags || TMASYNC & flags) {
-            LIXA_TRACE(("lixa_my_commit: flags 0x%x are not supported\n",
+            LIXA_TRACE(("lixa_my_commit_core: flags 0x%x are not supported\n",
                         flags));
             THROW(INVALID_FLAGS2);
         }        
         
         if (lpsr->state.R != 1 || lpsr->state.T != 0) {
-            LIXA_TRACE(("lixa_my_commit: rmid %d state(R,S,T)={%d,%d,%d}\n",
+            LIXA_TRACE(("lixa_my_commit_core: rmid %d "
+                        "state(R,S,T)={%d,%d,%d}\n",
                         rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
             THROW(PROTOCOL_ERROR2);
         }
 
         /* this is an internal error :( */
         if (NULL == lpsr->conn) {
-            LIXA_TRACE(("lixa_my_commit: conn is NULL for rmid %d\n", rmid));
+            LIXA_TRACE(("lixa_my_commit_core: conn is NULL for rmid %d\n",
+                        rmid));
             THROW(NULL_CONN);
         }
 
         /* serialize XID */
         if (!lixa_my_xid_serialize(xid, lmsx)) {
-            LIXA_TRACE(("lixa_my_commit: unable to serialize XID\n"));
+            LIXA_TRACE(("lixa_my_commit_core: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
 
@@ -1446,7 +1541,7 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
             XID xid_r;
             int num_fields;
             if (mysql_query(lpsr->conn, "XA RECOVER")) {
-                LIXA_TRACE(("lixa_my_commit: error while executing "
+                LIXA_TRACE(("lixa_my_commit_core: error while executing "
                             "'XA RECOVER' command: %u/%s\n",
                             mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
                 THROW(XA_RECOVER_ERROR);
@@ -1458,17 +1553,17 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
                 const char *gtrid_length = row[1] ? row[1] : "";
                 const char *bqual_length = row[2] ? row[2] : "";
                 const char *data = row[3] ? row[3] : "";
-                LIXA_TRACE(("lixa_my_commit: formatID=%s, "
+                LIXA_TRACE(("lixa_my_commit_core: formatID=%s, "
                             "gtrid_length=%s, bqual_length=%s, data=%s\n",
                             formatID, gtrid_length, bqual_length, data));
                 if (!lixa_my_xid_deserialize(&xid_r, formatID, gtrid_length,
                                             bqual_length, data)) {
-                    LIXA_TRACE(("lixa_my_commit: unable to deserialize the "
-                                "XID retrieved with XA RECOVER\n"));
+                    LIXA_TRACE(("lixa_my_commit_core: unable to deserialize "
+                                "the XID retrieved with XA RECOVER\n"));
                 }
                 if (!lixa_xid_compare(xid, &xid_r)) {
-                    LIXA_TRACE(("lixa_my_commit: the transaction %s is in "
-                                "prepared state\n", lmsx));
+                    LIXA_TRACE(("lixa_my_commit_core: the transaction %s is "
+                                "in prepared state\n", lmsx));
                     lpsr->state.S = 3;
                     lpsr->xid = xid_r;
                     break;
@@ -1476,7 +1571,7 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
             }
             mysql_free_result(res);
             if (lpsr->state.S != 3) {
-                LIXA_TRACE(("lixa_my_commit: the transaction %s is not "
+                LIXA_TRACE(("lixa_my_commit_core: the transaction %s is not "
                             "available\n", lmsx));
                 THROW(XID_NOT_AVAILABLE);
             }
@@ -1486,16 +1581,17 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
         if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
             lixa_my_ser_xid_t lmsx2;
             lixa_my_xid_serialize(&(lpsr->xid), lmsx2);
-            LIXA_TRACE(("lixa_my_commit: committing XID %s is not the "
+            LIXA_TRACE(("lixa_my_commit_core: committing XID %s is not the "
                         "same of started XID %s\n", lmsx, lmsx2));
             THROW(XID_MISMATCH);
         }
-        LIXA_TRACE(("lixa_my_commit: committing XID %s\n", lmsx));
+        LIXA_TRACE(("lixa_my_commit_core: committing XID %s\n", lmsx));
 
         if ((lpsr->state.S != 2 && one_phase) ||
             (lpsr->state.S != 3 && !one_phase)) {
-            LIXA_TRACE(("lixa_my_commit: rmid %d state(R,S,T)={%d,%d,%d}, "
-                        "one_phase_commit=%d\n",
+            LIXA_TRACE(("lixa_my_commit_core: rmid %d "
+                        "state(R,S,T)={%d,%d,%d}, "
+                        "one_phase_commit_core=%d\n",
                         rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T,
                         one_phase));
             THROW(PROTOCOL_ERROR3);
@@ -1509,7 +1605,7 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
             snprintf(my_cmd_buf, sizeof(my_cmd_buf),
                      one_phase ? COMMIT_1_FMT : COMMIT_2_FMT, lmsx);
             if (mysql_query(lpsr->conn, my_cmd_buf)) {
-                LIXA_TRACE(("lixa_my_commit: error while executing "
+                LIXA_TRACE(("lixa_my_commit_core: error while executing "
                             "'%s': %u/%s\n", my_cmd_buf,
                             mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
                 THROW(COMMIT_ERROR);
@@ -1518,9 +1614,6 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case PROTOCOL_ERROR1:
-                xa_rc = XAER_PROTO;
-                break;
             case INVALID_FLAGS1:
             case INVALID_FLAGS2:
                 xa_rc = XAER_INVAL;
@@ -1551,10 +1644,8 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
             default:
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
-        /* unlock the status mutex */
-        g_mutex_unlock(&lixa_sw_status_mutex);
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_my_commit/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    LIXA_TRACE(("lixa_my_commit_core/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
 }
 
@@ -1562,8 +1653,47 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
 
 int lixa_my_recover(XID *xids, long count, int rmid, long flags)
 {
-    enum Exception { PROTOCOL_ERROR1
-                     , INVALID_FLAGS
+    enum Exception { PROTOCOL_ERROR
+                     , NONE } excp;
+    int xa_rc = XAER_RMFAIL;
+    
+    LIXA_TRACE(("lixa_my_recover\n"));
+    TRY {
+        struct lixa_sw_status_rm_s *lpsr = NULL;
+
+        /* lock the status mutex */
+        g_mutex_lock(&lixa_sw_status_mutex);
+        /* retrieve the status for this resource manager */
+        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
+            THROW(PROTOCOL_ERROR);
+
+        xa_rc = lixa_my_recover_core(lpsr, xids, count, rmid, flags);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case PROTOCOL_ERROR:
+                xa_rc = XAER_PROTO;
+                break;
+            case NONE:
+                xa_rc = XA_OK;
+                break;
+            default:
+                xa_rc = XAER_RMFAIL;
+        } /* switch (excp) */
+        /* unlock the status mutex */
+        g_mutex_unlock(&lixa_sw_status_mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_my_recover/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    return xa_rc;
+}
+
+
+
+int lixa_my_recover_core(struct lixa_sw_status_rm_s *lpsr,
+                         XID *xids, long count, int rmid, long flags)
+{
+    enum Exception { INVALID_FLAGS
                      , INVALID_OPTIONS1
                      , INVALID_OPTIONS2
                      , PROTOCOL_ERROR2
@@ -1573,41 +1703,39 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
     int xa_rc = XAER_RMFAIL;
     long out_count = 0;
     
-    LIXA_TRACE(("lixa_my_recover\n"));
+    LIXA_TRACE(("lixa_my_recover_core\n"));
     TRY {
-        struct lixa_sw_status_rm_s *lpsr = NULL;
         const long valid_flags = TMSTARTRSCAN|TMENDRSCAN|TMNOFLAGS;
 
-        /* lock the status mutex */
-        g_mutex_lock(&lixa_sw_status_mutex);
-        /* retrieve the status for this resource manager */
-        if (NULL == (lpsr = lixa_sw_status_rm_get(rmid)))
-            THROW(PROTOCOL_ERROR1);
-
         if ((flags|valid_flags) != valid_flags) {
-            LIXA_TRACE(("lixa_my_recover: invalid flag in 0x%x\n", flags));
+            LIXA_TRACE(("lixa_my_recover_core: invalid flag in 0x%x\n",
+                        flags));
             THROW(INVALID_FLAGS);
         }
 
         if ((NULL == xids && count > 0) || (count < 0)) {
-            LIXA_TRACE(("lixa_my_recover: xids=%p, count=%ld\n", xids, count));
+            LIXA_TRACE(("lixa_my_recover_core: xids=%p, count=%ld\n",
+                        xids, count));
             THROW(INVALID_OPTIONS1);
         }
         
         if (!(flags & TMSTARTRSCAN)) {
-            LIXA_TRACE(("lixa_my_recover: TMSTARTRSCAN flag must be set\n"));
+            LIXA_TRACE(("lixa_my_recover_core: TMSTARTRSCAN flag must be "
+                        "set\n"));
             THROW(INVALID_OPTIONS2);
         }
         
         if (lpsr->state.R != 1) {
-            LIXA_TRACE(("lixa_my_recover: rmid %d state(R,S,T)={%d,%d,%d}\n",
+            LIXA_TRACE(("lixa_my_recover_core: rmid %d "
+                        "state(R,S,T)={%d,%d,%d}\n",
                         rmid, lpsr->state.R, lpsr->state.S, lpsr->state.T));
             THROW(PROTOCOL_ERROR2);
         }
 
         /* this is an internal error :( */
         if (NULL == lpsr->conn) {
-            LIXA_TRACE(("lixa_my_recover: conn is NULL for rmid %d\n", rmid));
+            LIXA_TRACE(("lixa_my_recover_core: conn is NULL for rmid %d\n",
+                        rmid));
             THROW(NULL_CONN);
         }
 
@@ -1617,30 +1745,30 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
             MYSQL_ROW row;
             XID xid;
             int num_fields;
-            LIXA_TRACE(("lixa_my_recover: executing XA RECOVER\n"));
+            LIXA_TRACE(("lixa_my_recover_core: executing XA RECOVER\n"));
             if (mysql_query(lpsr->conn, "XA RECOVER")) {
-                LIXA_TRACE(("lixa_my_recover: error while executing "
+                LIXA_TRACE(("lixa_my_recover_core: error while executing "
                             "'XA RECOVER' command: %u/%s\n",
                             mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
                 THROW(XA_RECOVER_ERROR);
             }
             res = mysql_store_result(lpsr->conn);
             num_fields = mysql_num_fields(res);
-            LIXA_TRACE(("lixa_my_recover: num_fields=%d\n", num_fields));
+            LIXA_TRACE(("lixa_my_recover_core: num_fields=%d\n", num_fields));
             while ((row = mysql_fetch_row(res)) && (out_count < count)) {
                 const char *formatID = row[0] ? row[0] : "";
                 const char *gtrid_length = row[1] ? row[1] : "";
                 const char *bqual_length = row[2] ? row[2] : "";
                 const char *data = row[3] ? row[3] : "";
-                LIXA_TRACE(("lixa_my_recover: formatID=%s, "
+                LIXA_TRACE(("lixa_my_recover_core: formatID=%s, "
                             "gtrid_length=%s, bqual_length=%s, data=%s\n",
                             formatID, gtrid_length, bqual_length, data));
                 if (lixa_my_xid_deserialize(&xid, formatID, gtrid_length,
                                             bqual_length, data)) {
                     xids[out_count++] = xid;
                 } else {
-                    LIXA_TRACE(("lixa_my_recover: unable to deserialize the "
-                                "XID retrieved with XA RECOVER\n"));
+                    LIXA_TRACE(("lixa_my_recover_core: unable to deserialize "
+                                "the XID retrieved with XA RECOVER\n"));
                 }
             }
             mysql_free_result(res);
@@ -1649,9 +1777,6 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case PROTOCOL_ERROR1:
-                xa_rc = XAER_PROTO;
-                break;
             case INVALID_FLAGS:
             case INVALID_OPTIONS1:
             case INVALID_OPTIONS2:
@@ -1672,16 +1797,24 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
             default:
                 xa_rc = XAER_RMFAIL;
         } /* switch (excp) */
-        /* unlock the status mutex */
-        g_mutex_unlock(&lixa_sw_status_mutex);
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_my_recover/excp=%d/xa_rc=%d\n", excp, xa_rc));
+    LIXA_TRACE(("lixa_my_recover_core/excp=%d/xa_rc=%d\n", excp, xa_rc));
     return xa_rc;
 }
 
 
 
 int lixa_my_forget(const XID *xid, int rmid, long flags)
+{
+    /* this Resource Manager does not heuristically resolve the transactions
+       and this function should never be called */
+    return XAER_PROTO;
+}
+
+
+
+int lixa_my_forget_core(struct lixa_sw_status_rm_s *lpsr,
+                        const XID *xid, int rmid, long flags)
 {
     /* this Resource Manager does not heuristically resolve the transactions
        and this function should never be called */

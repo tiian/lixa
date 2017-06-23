@@ -245,7 +245,8 @@ extern "C" {
     if (LIXA_IFACE_STD == iface->type)
             return iface->std->xa_commit_entry(xid,rmid,flags);
         else
-            return iface->xta->xa_commit_entry(iface->context,rmid,flags);
+            return iface->xta->xa_commit_entry(
+                iface->context, xid, rmid, flags);
     }
 
 
@@ -265,7 +266,8 @@ extern "C" {
         if (LIXA_IFACE_STD == iface->type)
             return iface->std->xa_rollback_entry(xid, rmid, flags);
         else
-            return iface->xta->xa_rollback_entry(iface->context, rmid, flags);
+            return iface->xta->xa_rollback_entry(
+                iface->context, xid, rmid, flags);
     }
 
 
@@ -309,7 +311,8 @@ extern "C" {
     if (LIXA_IFACE_STD == iface->type)
             return iface->std->xa_forget_entry(xid, rmid, flags);
         else
-            return iface->xta->xa_forget_entry(iface->context, rmid, flags);
+            return iface->xta->xa_forget_entry(
+                iface->context, xid, rmid, flags);
     }
 
 
@@ -347,7 +350,8 @@ extern "C" {
     if (LIXA_IFACE_STD == iface->type)
             return iface->std->xa_prepare_entry(xid, rmid, flags);
         else
-            return iface->xta->xa_prepare_entry(iface->context, rmid, flags);
+            return iface->xta->xa_prepare_entry(
+                iface->context, xid, rmid, flags);
     }
 
 

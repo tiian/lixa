@@ -1,5 +1,4 @@
-Split lixa_my_ functions extracting the state retrieval (lpsr pointer):
-	go on with lixa_my_*_core technique and call it from xta too
+client_status_could_one_phase is not correct when called by xta_transaction_commit: it returns TRUE even if it should be FALSE
 Split lixa_pq_ functions extracting the state retrieval (lpsr pointer)
 implement xta_transaction_rollback grabbing code from lixa_tx_rollback (version
 1.1.1)

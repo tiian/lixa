@@ -341,7 +341,7 @@ int xta_postgresql_xa_end(xta_xa_resource_t *context, const XID *xid,
 
 
 
-int xta_postgresql_xa_rollback(xta_xa_resource_t *context,
+int xta_postgresql_xa_rollback(xta_xa_resource_t *context, const XID *xid,
                                int rmid, long flags)
 {
     enum Exception { NONE } excp;

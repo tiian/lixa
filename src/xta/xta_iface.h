@@ -63,15 +63,15 @@ struct xta_iface_s {
     /**
      * xa_rollback function pointer
      */
-    int (*xa_rollback_entry)(xta_xa_resource_t *, int, long);
+    int (*xa_rollback_entry)(xta_xa_resource_t *, const XID *, int, long);
     /**
      * xa_prepare function pointer
      */
-    int (*xa_prepare_entry)(xta_xa_resource_t *, int, long);
+    int (*xa_prepare_entry)(xta_xa_resource_t *, const XID *, int, long);
     /**
      * xa_commit function pointer
      */
-    int (*xa_commit_entry)(xta_xa_resource_t *, int, long); 
+    int (*xa_commit_entry)(xta_xa_resource_t *, const XID *, int, long); 
     /**
      * xa_recover function pointer
      */
@@ -79,7 +79,7 @@ struct xta_iface_s {
     /**
      * xa_forget function pointer
      */
-    int (*xa_forget_entry)(xta_xa_resource_t *, int, long);
+    int (*xa_forget_entry)(xta_xa_resource_t *, const XID *, int, long);
 };
 
 
