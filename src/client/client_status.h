@@ -470,11 +470,13 @@ extern "C" {
      * computed and can depends on: <br>
      * - the number of static Resource Managers <br>
      * - the number of registered dynamic Resource Managers <br>
-     * @param cs IN client status reference
+     * @param[in] cs client status reference
+     * @param[in] ccc client config collection reference
      * @return a boolean value; if any error happens, it return FALSE
      *         (conservative behavior)
      */
-    int client_status_could_one_phase(const client_status_t *cs);
+    int client_status_could_one_phase(const client_status_t *cs,
+                                      const client_config_coll_t *ccc);
 
     
 

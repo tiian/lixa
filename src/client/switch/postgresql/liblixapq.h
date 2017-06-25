@@ -103,6 +103,15 @@ int lixa_pq_close(char *xa_info, int rmid, long flags);
 int lixa_pq_start(const XID *xid, int rmid, long flags);
 
 
+
+/**
+ * Core implementation of "xa_start" for PostgreSQL: it's referenced by
+ * @ref lixa_pq_start (XA interface) and by @ref xta_postgresql_xa_start
+ */
+int lixa_pq_start_core(struct lixa_sw_status_rm_s *lpsr,
+                       const XID *xid, int rmid, long flags);
+
+
     
 /**
  * Implementation of "xa_end" for PostgreSQL;
@@ -110,6 +119,15 @@ int lixa_pq_start(const XID *xid, int rmid, long flags);
  * a complete description
  */
 int lixa_pq_end(const XID *xid, int rmid, long flags);
+
+
+
+/**
+ * Core implementation of "xa_end" for PostgreSQL: it's referenced by
+ * @ref lixa_pq_end (XA interface) and by @ref xta_postgresql_xa_end
+ */
+int lixa_pq_end_core(struct lixa_sw_status_rm_s *lpsr,
+                     const XID *xid, int rmid, long flags);
 
 
     
@@ -121,6 +139,15 @@ int lixa_pq_end(const XID *xid, int rmid, long flags);
 int lixa_pq_rollback(const XID *xid, int rmid, long flags);
 
 
+
+/**
+ * Core implementation of "xa_rollback" for PostgreSQL: it's referenced by
+ * @ref lixa_pq_rollback (XA interface) and by @ref xta_postgresql_xa_rollback
+ */
+int lixa_pq_rollback_core(struct lixa_sw_status_rm_s *lpsr,
+                          const XID *xid, int rmid, long flags);
+
+
     
 /**
  * Implementation of "xa_prepare" for PostgreSQL;
@@ -130,6 +157,15 @@ int lixa_pq_rollback(const XID *xid, int rmid, long flags);
 int lixa_pq_prepare(const XID *xid, int rmid, long flags);
 
 
+
+/**
+ * Core implementation of "xa_prepare" for PostgreSQL: it's referenced by
+ * @ref lixa_pq_prepare (XA interface) and by @ref xta_postgresql_xa_prepare
+ */
+int lixa_pq_prepare_core(struct lixa_sw_status_rm_s *lpsr,
+                         const XID *xid, int rmid, long flags);
+
+
     
 /**
  * Implementation of "xa_commit" for PostgreSQL;
@@ -137,6 +173,15 @@ int lixa_pq_prepare(const XID *xid, int rmid, long flags);
  * a complete description
  */
 int lixa_pq_commit(const XID *xid, int rmid, long flags);
+
+
+
+/**
+ * Core implementation of "xa_commit" for PostgreSQL: it's referenced by
+ * @ref lixa_pq_commit (XA interface) and by @ref xta_postgresql_xa_commit
+ */
+int lixa_pq_commit_core(struct lixa_sw_status_rm_s *lpsr,
+                        const XID *xid, int rmid, long flags);
 
 
     
@@ -153,6 +198,15 @@ int lixa_pq_commit(const XID *xid, int rmid, long flags);
 int lixa_pq_recover(XID *xids, long count, int rmid, long flags);
 
 
+
+/**
+ * Core implementation of "xa_recover" for PostgreSQL: it's referenced by
+ * @ref lixa_pq_recover (XA interface) and by @ref xta_postgresql_xa_recover
+ */
+int lixa_pq_recover_core(struct lixa_sw_status_rm_s *lpsr,
+                         XID *xids, long count, int rmid, long flags);
+
+
     
 /**
  * Implementation of "xa_forget" for PostgreSQL;
@@ -160,6 +214,15 @@ int lixa_pq_recover(XID *xids, long count, int rmid, long flags);
  * a complete description
  */
 int lixa_pq_forget(const XID *xid, int rmid, long flags);
+
+
+
+/**
+ * Core implementation of "xa_forget" for PostgreSQL: it's referenced by
+ * @ref lixa_pq_forget (XA interface) and by @ref xta_postgresql_xa_forget
+ */
+int lixa_pq_forget_core(struct lixa_sw_status_rm_s *lpsr,
+                        const XID *xid, int rmid, long flags);
 
 
     

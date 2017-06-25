@@ -249,14 +249,17 @@ int client_status_coll_del(client_status_coll_t *csc) {
 }
 
 
-int client_status_could_one_phase(const client_status_t *cs) {
+
+int client_status_could_one_phase(const client_status_t *cs,
+                                  const client_config_coll_t *ccc)
+{
     guint i, n = 0;
 
-    if (global_ccc.actconf.rsrmgrs->len == 1)
+    if (ccc->actconf.rsrmgrs->len == 1)
         return TRUE;
 
     /* scan all the resource manager status */
-    for (i = 0; i < global_ccc.actconf.rsrmgrs->len; ++i) {
+    for (i = 0; i < ccc->actconf.rsrmgrs->len; ++i) {
         struct client_status_rsrmgr_s *csr = &g_array_index(
             cs->rmstatus,
             struct client_status_rsrmgr_s, i);
@@ -274,6 +277,7 @@ int client_status_could_one_phase(const client_status_t *cs) {
                 "resource managers\n", n));
     return n == 1;
 }
+
 
 
 gboolean client_status_coll_gequal(gconstpointer a, gconstpointer b) {

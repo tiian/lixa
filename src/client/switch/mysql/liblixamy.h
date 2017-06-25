@@ -267,7 +267,7 @@ int lixa_my_rollback_core(struct lixa_sw_status_rm_s *lpsr,
 int lixa_my_prepare(const XID *xid, int rmid, long flags);
 
 
-    
+
 /**
  * Core implementation of "xa_prepare" for MySQL: it's referenced by
  * @ref lixa_my_prepare (XA interface) and by @ref xta_mysql_xa_prepare

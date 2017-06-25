@@ -1676,7 +1676,6 @@ int lixa_my_recover(XID *xids, long count, int rmid, long flags)
                 xa_rc = XAER_PROTO;
                 break;
             case NONE:
-                xa_rc = XA_OK;
                 break;
             default:
                 xa_rc = XAER_RMFAIL;

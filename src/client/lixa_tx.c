@@ -665,7 +665,7 @@ int lixa_tx_commit(int *txrc, int *begin_new)
                         "rolling back...\n", txstate));
             commit = FALSE;
         } else
-            one_phase_commit = client_status_could_one_phase(cs);
+            one_phase_commit = client_status_could_one_phase(cs, &global_ccc);
 
         /* detach the transaction */
         if (LIXA_RC_OK !=

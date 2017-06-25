@@ -367,7 +367,8 @@ int xta_postgresql_xa_rollback(xta_xa_resource_t *context, const XID *xid,
     
 
 
-int xta_postgresql_xa_prepare(xta_xa_resource_t *context, int rmid, long flags)
+int xta_postgresql_xa_prepare(xta_xa_resource_t *context, const XID *xid,
+                              int rmid, long flags)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;
@@ -392,7 +393,8 @@ int xta_postgresql_xa_prepare(xta_xa_resource_t *context, int rmid, long flags)
     
 
 
-int xta_postgresql_xa_commit(xta_xa_resource_t *context, int rmid, long flags)
+int xta_postgresql_xa_commit(xta_xa_resource_t *context, const XID *xid,
+                             int rmid, long flags)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;
@@ -443,7 +445,8 @@ int xta_postgresql_xa_recover(xta_xa_resource_t *context,
     
 
 
-int xta_postgresql_xa_forget(xta_xa_resource_t *context, int rmid, long flags)
+int xta_postgresql_xa_forget(xta_xa_resource_t *context, const XID *xid,
+                             int rmid, long flags)
 {
     enum Exception { NONE } excp;
     int ret_cod = XAER_RMERR;

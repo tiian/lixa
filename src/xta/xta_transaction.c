@@ -660,7 +660,8 @@ int xta_transaction_commit(xta_transaction_t *this)
             THROW(INVALID_STATUS);
         }
         /* check if One Phase Commit optimization can be applied */
-        one_phase_commit = client_status_could_one_phase(&this->client_status);
+        one_phase_commit = client_status_could_one_phase(
+            &this->client_status, &this->local_ccc);
         /* detach the transaction */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
                                &this->local_ccc, &this->client_status,
