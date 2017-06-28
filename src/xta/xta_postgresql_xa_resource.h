@@ -56,6 +56,11 @@ typedef struct {
      * PostgreSQL connection handler
      */
     PGconn                         *connection;
+    /**
+     * Resource status, backward compatibility struct with legacy XA
+     * PostgreSQL Resource Manager
+     */
+    struct lixa_sw_status_rm_s      lssr;
 } xta_postgresql_xa_resource_t;
 
 

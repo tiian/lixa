@@ -150,6 +150,8 @@ int xta_postgresql_xa_resource_init(
         /* set resource interface */
         lixa_iface_set_xta(&this->xa_resource.act_rsrmgr_config.lixa_iface,
                            &xta_postgresql_iface, (xta_xa_resource_t *)this);
+        /* reset status */
+        memset(&this->lssr, 0, sizeof(struct lixa_sw_status_rm_s));
         
         THROW(NONE);
     } CATCH {
@@ -215,10 +217,17 @@ int xta_postgresql_xa_open(xta_xa_resource_t *context, char *xa_info,
             LIXA_TRACE(("xta_postgresql_xa_open: PostgreSQL connection is "
                         "already open (%p)\n", this->connection));
         } else {
-            LIXA_TRACE(("xta_postgresql_xa_open: MySQL connection is "
+            LIXA_TRACE(("xta_postgresql_xa_open: PostgreSQL connection is "
                         "NULL!\n"));
             THROW(OBJ_CORRUPTED);
         }        
+        /* save the connection state: backward compatibility with switch
+         * file based implemetation */
+        this->lssr.rmid = rmid;
+        this->lssr.rm_type = LIXA_SW_STATUS_RM_TYPE_POSTGRESQL;
+        this->lssr.state.R = 1;
+        this->lssr.conn = (gpointer)this->connection;
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -254,7 +263,7 @@ int xta_postgresql_xa_close(xta_xa_resource_t *context, char *xa_info,
                         "must be closed by the Application Program\n",
                         this->connection));
         } else {
-            LIXA_TRACE(("xta_postgresql_xa_close: MySQL connection is "
+            LIXA_TRACE(("xta_postgresql_xa_close: PostgreSQL connection is "
                         "NULL!\n"));
             THROW(OBJ_CORRUPTED);
         }        
@@ -294,6 +303,8 @@ int xta_postgresql_xa_start(xta_xa_resource_t *context, const XID * xid,
                         "NULL!\n"));
             THROW(OBJ_CORRUPTED);
         }
+        /* call legacy switch file based code */
+        ret_cod = lixa_pq_start_core(&this->lssr, xid, rmid, flags);
         
         THROW(NONE);
     } CATCH {
@@ -317,15 +328,27 @@ int xta_postgresql_xa_start(xta_xa_resource_t *context, const XID * xid,
 int xta_postgresql_xa_end(xta_xa_resource_t *context, const XID *xid,
                           int rmid, long flags)
 {
-    enum Exception { NONE } excp;
+    enum Exception { OBJ_CORRUPTED
+                     , NONE } excp;
     int ret_cod = XAER_RMERR;
     
     LIXA_TRACE(("xta_postgresql_xa_end\n"));
     TRY {
-        
+        xta_postgresql_xa_resource_t *this =
+            (xta_postgresql_xa_resource_t *)context;
+        if (NULL == this->connection) {
+            LIXA_TRACE(("xta_postgresql_xa_end: PostgreSQL connection is "
+                        "NULL!\n"));
+            THROW(OBJ_CORRUPTED);
+        }
+        /* call legacy switch file based code */
+        ret_cod = lixa_pq_end_core(&this->lssr, xid, rmid, flags);
+                
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OBJ_CORRUPTED:
+                break;
             case NONE:
                 ret_cod = XA_OK;
                 break;
@@ -344,15 +367,27 @@ int xta_postgresql_xa_end(xta_xa_resource_t *context, const XID *xid,
 int xta_postgresql_xa_rollback(xta_xa_resource_t *context, const XID *xid,
                                int rmid, long flags)
 {
-    enum Exception { NONE } excp;
+    enum Exception { OBJ_CORRUPTED
+                     , NONE } excp;
     int ret_cod = XAER_RMERR;
     
     LIXA_TRACE(("xta_postgresql_xa_rollback\n"));
     TRY {
+        xta_postgresql_xa_resource_t *this =
+            (xta_postgresql_xa_resource_t *)context;
+        if (NULL == this->connection) {
+            LIXA_TRACE(("xta_postgresql_xa_rollback: PostgreSQL connection is "
+                        "NULL!\n"));
+            THROW(OBJ_CORRUPTED);
+        }
+        /* call legacy switch file based code */
+        ret_cod = lixa_pq_rollback_core(&this->lssr, xid, rmid, flags);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OBJ_CORRUPTED:
+                break;
             case NONE:
                 ret_cod = XA_OK;
                 break;
@@ -370,15 +405,27 @@ int xta_postgresql_xa_rollback(xta_xa_resource_t *context, const XID *xid,
 int xta_postgresql_xa_prepare(xta_xa_resource_t *context, const XID *xid,
                               int rmid, long flags)
 {
-    enum Exception { NONE } excp;
+    enum Exception { OBJ_CORRUPTED
+                     , NONE } excp;
     int ret_cod = XAER_RMERR;
     
     LIXA_TRACE(("xta_postgresql_xa_prepare\n"));
     TRY {
+        xta_postgresql_xa_resource_t *this =
+            (xta_postgresql_xa_resource_t *)context;
+        if (NULL == this->connection) {
+            LIXA_TRACE(("xta_postgresql_xa_prepare: PostgreSQL connection is "
+                        "NULL!\n"));
+            THROW(OBJ_CORRUPTED);
+        }
+        /* call legacy switch file based code */
+        ret_cod = lixa_pq_prepare_core(&this->lssr, xid, rmid, flags);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OBJ_CORRUPTED:
+                break;
             case NONE:
                 ret_cod = XA_OK;
                 break;
@@ -396,15 +443,27 @@ int xta_postgresql_xa_prepare(xta_xa_resource_t *context, const XID *xid,
 int xta_postgresql_xa_commit(xta_xa_resource_t *context, const XID *xid,
                              int rmid, long flags)
 {
-    enum Exception { NONE } excp;
+    enum Exception { OBJ_CORRUPTED
+                     , NONE } excp;
     int ret_cod = XAER_RMERR;
     
     LIXA_TRACE(("xta_postgresql_xa_commit\n"));
     TRY {
+        xta_postgresql_xa_resource_t *this =
+            (xta_postgresql_xa_resource_t *)context;
+        if (NULL == this->connection) {
+            LIXA_TRACE(("xta_postgresql_xa_commit: PostgreSQL connection is "
+                        "NULL!\n"));
+            THROW(OBJ_CORRUPTED);
+        }
+        /* call legacy switch file based code */
+        ret_cod = lixa_pq_commit_core(&this->lssr, xid, rmid, flags);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OBJ_CORRUPTED:
+                break;
             case NONE:
                 ret_cod = XA_OK;
                 break;
@@ -422,15 +481,27 @@ int xta_postgresql_xa_commit(xta_xa_resource_t *context, const XID *xid,
 int xta_postgresql_xa_recover(xta_xa_resource_t *context,
                               XID *xids, long count, int rmid, long flags)
 {
-    enum Exception { NONE } excp;
+    enum Exception { OBJ_CORRUPTED
+                     , NONE } excp;
     int ret_cod = XAER_RMERR;
     
     LIXA_TRACE(("xta_postgresql_xa_recover\n"));
     TRY {
+        xta_postgresql_xa_resource_t *this =
+            (xta_postgresql_xa_resource_t *)context;
+        if (NULL == this->connection) {
+            LIXA_TRACE(("xta_postgresql_xa_recover: PostgreSQL connection is "
+                        "NULL!\n"));
+            THROW(OBJ_CORRUPTED);
+        }
+        /* call legacy switch file based code */
+        ret_cod = lixa_pq_recover_core(&this->lssr, xids, count, rmid, flags);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OBJ_CORRUPTED:
+                break;
             case NONE:
                 ret_cod = XA_OK;
                 break;
@@ -448,15 +519,27 @@ int xta_postgresql_xa_recover(xta_xa_resource_t *context,
 int xta_postgresql_xa_forget(xta_xa_resource_t *context, const XID *xid,
                              int rmid, long flags)
 {
-    enum Exception { NONE } excp;
+    enum Exception { OBJ_CORRUPTED
+                     , NONE } excp;
     int ret_cod = XAER_RMERR;
     
     LIXA_TRACE(("xta_postgresql_xa_forget\n"));
     TRY {
+        xta_postgresql_xa_resource_t *this =
+            (xta_postgresql_xa_resource_t *)context;
+        if (NULL == this->connection) {
+            LIXA_TRACE(("xta_postgresql_xa_forget: PostgreSQL connection is "
+                        "NULL!\n"));
+            THROW(OBJ_CORRUPTED);
+        }
+        /* call legacy switch file based code */
+        ret_cod = lixa_pq_forget_core(&this->lssr, xid, rmid, flags);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OBJ_CORRUPTED:
+                break;
             case NONE:
                 ret_cod = XA_OK;
                 break;

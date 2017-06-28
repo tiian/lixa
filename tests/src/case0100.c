@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
     /*
      * dynamically create an XA native resource object
      */
+#ifdef HAVE_ORACLE
     if (NULL == (dynamic_native_xa_res = xta_native_xa_resource_new(
                      "OracleIC_stareg",
                      "/opt/lixa/lib/switch_oracle_stareg.so",
@@ -76,22 +77,7 @@ int main(int argc, char *argv[])
                "dynamically creted resource\n", pgm);
         return 1;
     }
-    /*
-     * create a Transaction Manager object
-     */
-    if (NULL == (tm = xta_transaction_manager_new())) {
-        printf("%s| xta_transaction_manager_new: returned NULL\n", pgm);
-        return 1;
-    }
-    /*
-     * create an XA native resource object linked to the first Resouce
-     * Manager configured in LIXA profile
-     */
-    if (NULL == (native_xa_res = xta_native_xa_resource_new_by_rmid(
-                     0, xta_transaction_manager_get_config()))) {
-        printf("%s| xta_native_xa_resource_new: returned NULL\n", pgm);
-        return 1;
-    }
+#endif
 #ifdef HAVE_MYSQL
     /*
      * create a MySQL native connection
@@ -136,6 +122,22 @@ int main(int argc, char *argv[])
         return 1;
     }
 #endif
+    /*
+     * create a Transaction Manager object
+     */
+    if (NULL == (tm = xta_transaction_manager_new())) {
+        printf("%s| xta_transaction_manager_new: returned NULL\n", pgm);
+        return 1;
+    }
+    /*
+     * create an XA native (static) resource object linked to the first Resouce
+     * Manager configured in LIXA profile
+     */
+    if (NULL == (native_xa_res = xta_native_xa_resource_new_by_rmid(
+                     0, xta_transaction_manager_get_config()))) {
+        printf("%s| xta_native_xa_resource_new: returned NULL\n", pgm);
+        return 1;
+    }
     /* create a new transaction for this thread */
     if (NULL == (tx = xta_transaction_manager_create_transaction(tm))) {
         printf("%s| xta_transaction_manager_begin: returned NULL\n", pgm);
@@ -160,15 +162,16 @@ int main(int argc, char *argv[])
                "returned %d\n", pgm, rc);
         return 1;
     }
-    /* register the dynamic native XA Resource to the transaction manager */
-    /*
+    /* register the dynamic native XA Resource (Oracle) to the transaction
+     * manager */
+#ifdef HAVE_ORACLE
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                            tx, (xta_xa_resource_t *)dynamic_native_xa_res))) {
         printf("%s| xta_transaction_enlist_resource/dynamic_native_xa_res: "
                "returned %d\n", pgm, rc);
         return 1;
     }
-    */
+#endif
 #ifdef HAVE_MYSQL
     /* register the MySQL XA Resource to the transaction manager */
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
@@ -180,14 +183,12 @@ int main(int argc, char *argv[])
 #endif
 #ifdef HAVE_POSTGRESQL
     /* register the PostgreSQL XA Resource to the transaction manager */
-    /*
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                            tx, (xta_xa_resource_t *)postgresql_xa_res))) {
         printf("%s| xta_transaction_enlist_resource/postgresql_xa_res: "
                "returned %d\n", pgm, rc);
         return 1;
     }
-    */
 #endif
 
     /* open all the resources for Distributed Transactions */
@@ -241,11 +242,13 @@ int main(int argc, char *argv[])
      * close MySQL database connection
      */
     mysql_close(mysql_conn);
-#endif    
+#endif
+#ifdef HAVE_ORACLE
     /*
-     * delete dynamically created native XA Resource object
+     * delete dynamically created native XA Resource object for Oracle
      */
     xta_native_xa_resource_delete(dynamic_native_xa_res);
+#endif 
     /*
      * delete native XA Resource object
      */
