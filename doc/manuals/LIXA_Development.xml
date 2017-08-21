@@ -697,6 +697,24 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
 	      </screen>
 	      You may perform the same operation using the graphical (web 
 	      based) interface.
+	      <note><para>
+		Newer Oracle database versions set a default password limit: 
+		after such a limit, Oracle will start to issue
+		<command>ORA-28002</command> messages and XA functions will
+		return with an error like below:
+		<screen>
+215229.2063.1888967424.1:
+ORA-28002: the password will expire within 6 days
+
+215229.2063.1888967424.1:
+xaolgn: XAER_RMERR; logon failed. ORA-28002.
+
+215229.2063.1888967424.1:
+xaoopen: return -3
+		</screen>
+		To avoid this potential error, configure your users in the
+		right way.
+	      </para></note>
 	    </para>
 	  </section>
 	</section>

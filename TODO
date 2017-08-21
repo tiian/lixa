@@ -1,3 +1,5 @@
+case0100: inject PostgreSQL statements and prepare for rollback implementation
+
 implement xta_transaction_rollback grabbing code from lixa_tx_rollback (version
 1.1.1)
 
@@ -7,6 +9,24 @@ TX API because some resources enlist dynamically and they are not described
 in the static configuration.
 Job id must be computed using a different approach: instead of signing the
 XML config file, the memory real Resource Manager set must signed.
+
+remove these deprecated statements:
+case0032.c: In function ‘main’:
+case0032.c:107:9: warning: ‘g_thread_init’ is deprecated (declared at /usr/incl\
+ude/glib-2.0/glib/deprecated/gthread.h:261) [-Wdeprecated-declarations]
+         g_thread_init(NULL);
+         ^
+case0032.c: In function ‘transaction’:
+case0032.c:151:9: warning: ‘g_static_mutex_get_mutex_impl’ is deprecated (decla\
+red at /usr/include/glib-2.0/glib/deprecated/gthread.h:150): Use 'GMutex' inste\
+ad [-Wdeprecated-declarations]
+         g_static_mutex_lock(&mutex);
+         ^
+case0032.c:159:9: warning: ‘g_static_mutex_get_mutex_impl’ is deprecated (decla\
+red at /usr/include/glib-2.0/glib/deprecated/gthread.h:150): Use 'GMutex' inste\
+ad [-Wdeprecated-declarations]
+         g_static_mutex_unlock(&mutex);
+         ^
 
 Implement XTA for C/C++
 

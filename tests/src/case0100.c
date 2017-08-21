@@ -32,6 +32,13 @@
 
 
 
+#ifdef HAVE_ORACLE
+/* Oracle C Interface API header */
+# include <oci.h>
+#endif
+
+
+
 #include "xta/xta.h"
 
 
@@ -46,15 +53,37 @@ int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
     int rc;
+    /* XTA variables (objects) */
     xta_transaction_manager_t *tm;
     xta_transaction_t *tx;
     xta_native_xa_resource_t *native_xa_res;
     xta_native_xa_resource_t *dynamic_native_xa_res;
+    /* control variables */
+    int        commit;
+    int        insert;
 #ifdef HAVE_MYSQL
+    /* MySQL variables */
     MYSQL *mysql_conn = NULL;
+    char  *mysql_stmt_insert =
+        "INSERT INTO authors VALUES(9, 'Name', 'Surname')";
+    char  *mysql_stmt_delete = "DELETE FROM authors";
     xta_mysql_xa_resource_t *mysql_xa_res;
 #endif
+#ifdef HAVE_ORACLE
+    /* Oracle variables */
+    int            oci_rc;
+    OCIEnv        *oci_env;
+    OCISvcCtx     *oci_svc_ctx;
+    OCIStmt       *oci_stmt_hndl;
+    OCIError      *oci_err_hndl;
+    text          *oci_stmt_insert =
+        (text *) "INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
+        "VALUES ('IS', 'Iceland', 1)";
+    text          *oci_stmt_delete =
+        (text *) "DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'IS'";
+#endif
 #ifdef HAVE_POSTGRESQL
+    /* PostgreSQL variables */
     PGconn *postgres_conn = NULL;
     xta_postgresql_xa_resource_t *postgresql_xa_res;
 #endif
@@ -63,6 +92,14 @@ int main(int argc, char *argv[])
     xta_init();
     
     printf("%s| starting...\n", pgm);
+    if (argc < 3) {
+        fprintf(stderr, "%s: at least two options must be specified\n",
+                argv[0]);
+        return 1;
+    }
+    commit = strtol(argv[1], NULL, 0);
+    insert = strtol(argv[2], NULL, 0);
+    
     /*
      * dynamically create an XA native resource object
      */
@@ -203,6 +240,96 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+#ifdef HAVE_MYSQL
+    /* insert data */
+    if (insert) {
+        if (mysql_query(mysql_conn, mysql_stmt_insert)) {
+            fprintf(stderr, "%s| INSERT INTO authors: %u/%s",
+                    pgm, mysql_errno(mysql_conn), mysql_error(mysql_conn));
+            mysql_close(mysql_conn);
+            return 1;
+        }
+        printf("%s| MySQL statement >%s< completed\n",
+               pgm, mysql_stmt_insert);
+    } else {
+        if (mysql_query(mysql_conn, mysql_stmt_delete)) {
+            fprintf(stderr, "%s| DELETE FROM authors: %u/%s",
+                    pgm, mysql_errno(mysql_conn), mysql_error(mysql_conn));
+            mysql_close(mysql_conn);
+            return 1;
+        }
+        printf("%s| MySQL statement >%s< completed\n",
+               pgm, mysql_stmt_delete);
+    }
+#endif /* HAVE_MYSQL */
+    
+#ifdef HAVE_ORACLE
+    /* retrieve environment and context */
+    if (NULL == (oci_env = xaoEnv(NULL))) {
+        fprintf(stderr, "%s| xaoEnv returned a NULL pointer\n", pgm);
+        return 1;
+    }
+    if (NULL == (oci_svc_ctx = xaoSvcCtx(NULL))) {
+        fprintf(stderr, "%s| xaoSvcCtx returned a NULL pointer\n", pgm);
+        return 1;
+    }
+    /* allocate statement and error handles */
+    if (0 != OCIHandleAlloc( (dvoid *)oci_env, (dvoid **)&oci_stmt_hndl,
+                             OCI_HTYPE_STMT, (size_t)0, (dvoid **)0)) {
+        fprintf(stderr, "%s| Unable to allocate OCI statement handle\n", pgm);
+        return 1;
+    }
+    if (0 != OCIHandleAlloc( (dvoid *)oci_env, (dvoid **)&oci_err_hndl,
+                             OCI_HTYPE_ERROR, (size_t)0, (dvoid **)0)) {
+        fprintf(stderr, "%s| Unable to allocate OCI error handle\n", pgm);
+        return 1;
+    }
+    /* insert data */
+    if (insert) {
+        if (OCI_SUCCESS != OCIStmtPrepare(
+                oci_stmt_hndl, oci_err_hndl, oci_stmt_insert,
+                (ub4) strlen((char *)oci_stmt_insert),
+                (ub4) OCI_NTV_SYNTAX, (ub4) OCI_DEFAULT)) {
+            fprintf(stderr, "%s| Unable to prepare INSERT OCI statement for "
+                    "execution\n", pgm);
+            return 1;
+        }
+        oci_rc = OCIStmtExecute(
+            oci_svc_ctx, oci_stmt_hndl, oci_err_hndl,
+            (ub4)1, (ub4)0, (CONST OCISnapshot *)NULL,
+            (OCISnapshot *)NULL, OCI_DEFAULT);
+        if (OCI_SUCCESS != oci_rc && OCI_SUCCESS_WITH_INFO != oci_rc) {
+            fprintf(stderr, "%s| Error while executing INSERT statement; "
+                    "ocirc = %d\n", pgm, oci_rc);
+            return oci_rc;
+        }
+        printf("%s| OCI statement >%s< completed\n",
+               pgm, (char *)oci_stmt_insert);
+    } else {
+        if (OCI_SUCCESS != OCIStmtPrepare(
+                oci_stmt_hndl, oci_err_hndl, oci_stmt_delete,
+                (ub4) strlen((char *)oci_stmt_delete),
+                (ub4) OCI_NTV_SYNTAX, (ub4) OCI_DEFAULT)) {
+            fprintf(stderr, "%s| Unable to prepare DELETE statement for "
+                    "execution\n", pgm);
+            return 1;
+        }
+        oci_rc = OCIStmtExecute(
+            oci_svc_ctx, oci_stmt_hndl, oci_err_hndl,
+            (ub4)1, (ub4)0, (CONST OCISnapshot *)NULL,
+            (OCISnapshot *)NULL, OCI_DEFAULT);
+        if (OCI_SUCCESS != oci_rc && OCI_SUCCESS_WITH_INFO != oci_rc) {
+            fprintf(stderr, "%s| Error while executing DELETE statement; "
+                    "ocirc = %d\n", pgm, oci_rc);
+            return oci_rc;
+        }
+        printf("%s| OCI statement >%s< completed\n",
+               pgm, (char *)oci_stmt_delete);
+    }
+    /* free the allocated handles */
+    OCIHandleFree((dvoid *)oci_stmt_hndl, (ub4)OCI_HTYPE_STMT);
+    OCIHandleFree((dvoid *)oci_err_hndl, (ub4)OCI_HTYPE_ERROR);
+#endif /* HAVE_ORACLE */
     
     /*
      * some code here ...

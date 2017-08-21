@@ -27,6 +27,7 @@
 
 
 
+#include <xta_init.h>
 #include <xta_errors.h>
 #include <xta_xa_resource.h>
 #include <xta_native_xa_resource.h>

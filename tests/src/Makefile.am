@@ -22,6 +22,7 @@ if COMPILE_MYSQL_POSTGRESQL_STUFF
 endif
 if COMPILE_ORACLE_STUFF
   MAYBE_ORACLE = case0038
+  LDADD_ORACLE = -lclntsh
 endif
 if COMPILE_IBMDB2_STUFF
   MAYBE_IBMDB2 = case0039
@@ -146,9 +147,10 @@ case0050_SOURCES = case0050.c
 case0051_SOURCES = case0051.c
 case0052_SOURCES = case0052.c
 case0053_SOURCES = case0053.c
-case0100_CPPFLAGS = @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@ \
-	-I../../src/client -I../../src/common -I../../src
+case0100_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
+	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 case0100_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
-	../../src/xta/liblixta.la
+	../../src/xta/liblixta.la $(LDADD_ORACLE)
 case0100_SOURCES = case0100.c
-case0100_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
+case0100_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
+

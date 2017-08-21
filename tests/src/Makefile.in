@@ -464,8 +464,10 @@ case0053_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/switch/lixa/liblixamonkey.la
 am_case0100_OBJECTS = case0100-case0100.$(OBJEXT)
 case0100_OBJECTS = $(am_case0100_OBJECTS)
+am__DEPENDENCIES_1 =
 case0100_DEPENDENCIES = ../../src/common/liblixab.la \
-	../../src/client/liblixac.la ../../src/xta/liblixta.la
+	../../src/client/liblixac.la ../../src/xta/liblixta.la \
+	$(am__DEPENDENCIES_1)
 case0100_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(case0100_LDFLAGS) $(LDFLAGS) -o $@
@@ -810,6 +812,7 @@ LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL = case0037
 @COMPILE_MYSQL_POSTGRESQL_STUFF_TRUE@MAYBE_MYSQL_POSTGRESQL = case0042
 @COMPILE_ORACLE_STUFF_TRUE@MAYBE_ORACLE = case0038
+@COMPILE_ORACLE_STUFF_TRUE@LDADD_ORACLE = -lclntsh
 @COMPILE_IBMDB2_STUFF_TRUE@MAYBE_IBMDB2 = case0039
 @COMPILE_WEBSPHEREMQ_STUFF_TRUE@MAYBE_WEBSPHEREMQ = case0044
 case0000_SOURCES = case0000.c
@@ -930,14 +933,14 @@ case0050_SOURCES = case0050.c
 case0051_SOURCES = case0051.c
 case0052_SOURCES = case0052.c
 case0053_SOURCES = case0053.c
-case0100_CPPFLAGS = @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@ \
-	-I../../src/client -I../../src/common -I../../src
+case0100_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
+	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 
 case0100_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
-	../../src/xta/liblixta.la
+	../../src/xta/liblixta.la $(LDADD_ORACLE)
 
 case0100_SOURCES = case0100.c
-case0100_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
+case0100_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 all: all-recursive
 
 .SUFFIXES:
