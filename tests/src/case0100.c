@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
     /* control variables */
     int        commit;
     int        insert;
+    int        test_rc;
 #ifdef HAVE_MYSQL
     /* MySQL variables */
     MYSQL *mysql_conn = NULL;
@@ -85,20 +86,25 @@ int main(int argc, char *argv[])
 #ifdef HAVE_POSTGRESQL
     /* PostgreSQL variables */
     PGconn *postgres_conn = NULL;
+    PGresult *postgres_res;
     xta_postgresql_xa_resource_t *postgresql_xa_res;
+    char *postgres_stmt_insert = "INSERT INTO authors VALUES("
+        "9, 'Name', 'Surname');";
+    char *postgres_stmt_delete = "DELETE FROM authors;";
 #endif
 
     /* turn ON trace for debugging purpose */
     xta_init();
     
     printf("%s| starting...\n", pgm);
-    if (argc < 3) {
-        fprintf(stderr, "%s: at least two options must be specified\n",
+    if (argc < 4) {
+        fprintf(stderr, "%s: at least three options must be specified\n",
                 argv[0]);
         return 1;
     }
     commit = strtol(argv[1], NULL, 0);
     insert = strtol(argv[2], NULL, 0);
+    test_rc = strtol(argv[3], NULL, 0);
     
     /*
      * dynamically create an XA native resource object
@@ -330,15 +336,56 @@ int main(int argc, char *argv[])
     OCIHandleFree((dvoid *)oci_stmt_hndl, (ub4)OCI_HTYPE_STMT);
     OCIHandleFree((dvoid *)oci_err_hndl, (ub4)OCI_HTYPE_ERROR);
 #endif /* HAVE_ORACLE */
+
+#ifdef HAVE_POSTGRESQL
+    if (insert) {
+        postgres_res = PQexec(
+            postgres_conn, postgres_stmt_insert);
+        if (PGRES_COMMAND_OK != PQresultStatus(postgres_res)) {
+            fprintf(stderr, "%s| error while executing >%s< %s\n",
+                    pgm, postgres_stmt_insert, PQerrorMessage(postgres_conn));
+            PQclear(postgres_res);
+            PQfinish(postgres_conn);
+            return 1;
+        }
+        PQclear(postgres_res);
+        printf("%s| PostgreSQL statement >%s< completed\n",
+               pgm, postgres_stmt_insert);
+    } else {
+        postgres_res = PQexec(
+            postgres_conn, postgres_stmt_delete);
+        if (PGRES_COMMAND_OK != PQresultStatus(postgres_res)) {
+            fprintf(stderr, "%s| error while executing >%s< %s\n",
+                    pgm, postgres_stmt_delete, PQerrorMessage(postgres_conn));
+            PQclear(postgres_res);
+            PQfinish(postgres_conn);
+            return 1;
+        }
+        PQclear(postgres_res);
+        printf("%s| PostgreSQL statement >%s< completed\n",
+               pgm, postgres_stmt_delete);
+    }    
+#endif /* HAVE_POSTGRESQL */
     
     /*
      * some code here ...
      */
 
     /* commit the Distributed Transaction */
-    if (LIXA_RC_OK != (rc = xta_transaction_commit(tx))) {
-        printf("%s| xta_transaction_commit: returned %d\n", pgm, rc);
-        return 1;
+    if (commit) {
+        if (test_rc != (rc = xta_transaction_commit(tx))) {
+            fprintf(stderr, "%s| xta_transaction_commit: returned %d instead "
+                    "of %d\n", pgm, rc, test_rc);
+            return 1;
+        }
+        printf("%s| XTA commit performed\n", pgm);
+    } else {
+        if (test_rc != (rc = xta_transaction_rollback(tx))) {
+            fprintf(stderr, "%s| xta_transaction_rollback: returned %d "
+                    "instead of %d\n", pgm, rc, test_rc);
+            return 1;
+        }
+        printf("%s| XTA rollback performed\n", pgm);
     }
     
     /* close all the resources for Distributed Transactions */

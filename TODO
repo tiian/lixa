@@ -1,5 +1,3 @@
-case0100: inject PostgreSQL statements and prepare for rollback implementation
-
 implement xta_transaction_rollback grabbing code from lixa_tx_rollback (version
 1.1.1)
 
