@@ -3,6 +3,13 @@ It's just a place to avoid human memory leak.
 
 
 
+*** Low Latency Persistence ***
+A partial improvement, without completely redesigning the foundation of the
+state server, can be obtained as explained in document "Low Latency State Server
+Enhancement"
+
+
+
 *** Serialization: ***
 
 protobuf / protobuf-c
