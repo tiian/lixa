@@ -6,6 +6,9 @@ AT_CLEANUP
 AT_SETUP([XTA/delete and commit])
 AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset stop case0100 1 0 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
+AT_SETUP([XTA/insert and rollback])
+AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset start case0100 0 1 0 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
 
 AT_SETUP([suspend tests here!])
 AT_CHECK([false], [0], [ignore], [ignore])

@@ -1367,7 +1367,7 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
         if (TX_OK != *txrc) {
             int txrc2, rc2;
             LIXA_TRACE(("lixa_xa_open: performing xa_close on all the "
-                        "resource managers because tx_open is not TX_OK\n"));
+                        "resource managers because txrc is not TX_OK\n"));
             rc2 = lixa_xa_close(ccc, cs, &txrc2);
             LIXA_TRACE(("lixa_xa_open/lixa_xa_close: rc=%d, txrx=%d\n",
                         rc2, txrc2));

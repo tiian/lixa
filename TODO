@@ -31,6 +31,9 @@ Implement XTA for C/C++
 Explore high availability features (active/active) with dynamic or static
 workload. Avoid disk persistence, prefer distributed memory semi persistence.
 
+Implement an utility feature to check disk synchronization latency and report
+it.
+
 Resource Managers suggested:
 RabbitMQ (Jim Doyle)
 Berkeley DB - Sleepycat (Jim Doyle)

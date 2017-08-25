@@ -6,7 +6,28 @@ It's just a place to avoid human memory leak.
 *** Low Latency Persistence ***
 A partial improvement, without completely redesigning the foundation of the
 state server, can be obtained as explained in document "Low Latency State Server
-Enhancement"
+Enhancement".
+Useful info related to disk sync latency are available at these URLs:
+http://yoshinorimatsunobu.blogspot.it/2014/03/why-buffered-writes-are-sometimes.html
+http://yoshinorimatsunobu.blogspot.it/2009/05/overwriting-is-much-faster-than_28.html
+Another possible improvement of the current state server is the adoption of
+files dedicated to the redo log: it must be understood if memory mapping or
+standard write/fdatasync is the best solution for few records between two
+syncpoints.
+
+
+
+*** State file replacement ***
+State files could be replaced with standard key/value store, but the change
+must be accurately investigated.
+
+Rocksdb: http://rocksdb.org/
+It's embeddable: +++
+It's a full db with maintenance aspects like backup, garbage collection, etc: ---
+
+etcd: https://coreos.com/etcd/
+It's distributed (it uses Raft consensus protocol) and natively enable an high availability version of lixad: +++
+It's an additional tier with additional network latency and additional configuration and skills: ---
 
 
 

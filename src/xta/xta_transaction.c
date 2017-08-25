@@ -815,18 +815,38 @@ int xta_transaction_commit(xta_transaction_t *this)
 
 
 
-int xta_transaction_rollback(xta_transaction_t *transaction)
+int xta_transaction_rollback(xta_transaction_t *this)
 {
-    enum Exception { NONE } excp;
+    enum Exception { NULL_OBJECT
+                     , INVALID_STATUS
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_rollback\n"));
     TRY {
+        int txstate;
+        
+        /* check object */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* check TX state */
+        txstate = client_status_get_txstate(&this->client_status);
+        if (TX_STATE_S3 != txstate) {
+            LIXA_TRACE(("xta_transaction_commit: expected client status %d, "
+                        "current client status %d\n", TX_STATE_S3, txstate));
+            THROW(INVALID_STATUS);
+        }
         /* @@@ */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
