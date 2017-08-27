@@ -4,9 +4,9 @@
  *
  * This file is part of LIXA.
  *
- * LIXA is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as published
- * by the Free Software Foundation.
+ * LIXA is free software: you can redistribute this file and/or modify
+ * it under the terms of the GNU Lesser General Public License version 2.1 as
+ * published by the Free Software Foundation.
  *
  * LIXA is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -633,11 +633,9 @@ int xta_transaction_commit(xta_transaction_t *this)
                      , LIXA_XA_PREPARE_ERROR
                      , LIXA_XA_COMMIT_ERROR
                      , INVALID_STATE1
-                     , INVALID_STATE2
                      , INVALID_TXRC1
                      , LIXA_XA_ROLLBACK_ERROR
-                     , INVALID_STATE3
-                     , INVALID_STATE4
+                     , INVALID_STATE2
                      , INVALID_TXRC2
                      , LIXA_XA_FORGET_ERROR
                      , NONE } excp;
@@ -697,16 +695,13 @@ int xta_transaction_commit(xta_transaction_t *this)
                 case TX_ERROR:
                 case TX_MIXED:
                 case TX_HAZARD:
-                    if (TX_STATE_S3 == txstate)
-                        next_txstate = TX_STATE_S1;
-                    else
-                        THROW(INVALID_STATE1);
+                    next_txstate = TX_STATE_S1;
                     break;
                 case TX_NO_BEGIN:
                 case TX_ROLLBACK_NO_BEGIN:
                 case TX_MIXED_NO_BEGIN:
                 case TX_HAZARD_NO_BEGIN:
-                    THROW(INVALID_STATE2);
+                    THROW(INVALID_STATE1);
                     break;
                 case TX_FAIL:
                     next_txstate = txstate;
@@ -734,17 +729,14 @@ int xta_transaction_commit(xta_transaction_t *this)
                 case TX_ROLLBACK:
                 case TX_MIXED:
                 case TX_HAZARD:
-                    if (TX_STATE_S3 == txstate)
-                        next_txstate = TX_STATE_S1;
-                    else
-                        THROW(INVALID_STATE3);
+                    next_txstate = TX_STATE_S1;
                     break;
                 case TX_NO_BEGIN:
                 case TX_ROLLBACK_NO_BEGIN:
                 case TX_MIXED_NO_BEGIN:
                 case TX_HAZARD_NO_BEGIN:
                 case TX_COMMITTED_NO_BEGIN:
-                    THROW(INVALID_STATE4);
+                    THROW(INVALID_STATE2);
                     break;
                 case TX_FAIL:
                     next_txstate = txstate;
@@ -766,11 +758,6 @@ int xta_transaction_commit(xta_transaction_t *this)
         /* reset the transaction id */
         xta_xid_reset(this->xid);
         
-        /* @@@
-           grab code from lixa_tx tx_commit 1.1.1
-           https://github.com/tiian/lixa/blob/1.1.1/src/client/lixa_tx.c
-         */
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -785,14 +772,12 @@ int xta_transaction_commit(xta_transaction_t *this)
             case LIXA_XA_COMMIT_ERROR:
                 break;
             case INVALID_STATE1:
-            case INVALID_STATE2:
             case INVALID_TXRC1:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case LIXA_XA_ROLLBACK_ERROR:
                 break;
-            case INVALID_STATE3:
-            case INVALID_STATE4:
+            case INVALID_STATE2:
             case INVALID_TXRC2:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
@@ -819,12 +804,18 @@ int xta_transaction_rollback(xta_transaction_t *this)
 {
     enum Exception { NULL_OBJECT
                      , INVALID_STATUS
+                     , LIXA_XA_END_ERROR
+                     , LIXA_XA_ROLLBACK_ERROR
+                     , INVALID_STATE
+                     , INVALID_TXRC
+                     , LIXA_XA_FORGET_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_rollback\n"));
+    int txrc = TX_OK;
     TRY {
-        int txstate;
+        int txstate, next_txstate, finished = TRUE;
         
         /* check object */
         if (NULL == this)
@@ -836,8 +827,50 @@ int xta_transaction_rollback(xta_transaction_t *this)
                         "current client status %d\n", TX_STATE_S3, txstate));
             THROW(INVALID_STATUS);
         }
-        /* @@@ */
+        /* detach the transaction */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
+                               &this->local_ccc, &this->client_status,
+                               xta_xid_get_xa_xid(this->xid), &txrc,
+                               FALSE, TMSUCCESS)))
+            THROW(LIXA_XA_END_ERROR);
+        /* rollback the transaction */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(
+                               &this->local_ccc, &this->client_status,
+                               xta_xid_get_xa_xid(this->xid), &txrc, FALSE)))
+            THROW(LIXA_XA_ROLLBACK_ERROR);
+        switch (txrc) {
+            case TX_OK:
+            case TX_MIXED:
+            case TX_HAZARD:
+            case TX_COMMITTED:
+            case TX_ERROR:
+                next_txstate = TX_STATE_S1;
+                break;
+            case TX_NO_BEGIN:
+            case TX_MIXED_NO_BEGIN:
+            case TX_HAZARD_NO_BEGIN:
+            case TX_COMMITTED_NO_BEGIN:
+                THROW(INVALID_STATE);
+                break;
+            case TX_FAIL:
+                next_txstate = txstate;
+                finished = FALSE;
+                break;
+            default:
+                THROW(INVALID_TXRC);
+        } /* switch */
+
+        /* clean Heurstically Completed states... */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(
+                               &this->local_ccc, &this->client_status,
+                               xta_xid_get_xa_xid(this->xid), finished)))
+            THROW(LIXA_XA_FORGET_ERROR);
         
+        /* update the TX state, now TX_STATE_S0 */
+        client_status_set_txstate(&this->client_status, next_txstate);
+        /* reset the transaction id */
+        xta_xid_reset(this->xid);
+                
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -846,6 +879,15 @@ int xta_transaction_rollback(xta_transaction_t *this)
                 break;
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case LIXA_XA_END_ERROR:
+            case LIXA_XA_ROLLBACK_ERROR:
+                break;
+            case INVALID_STATE:
+            case INVALID_TXRC:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case LIXA_XA_FORGET_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
