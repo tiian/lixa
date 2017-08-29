@@ -1,27 +1,13 @@
-Open Point: automatic recovery. 
-Automatic recovery must be managed in a different way in comparison with
-TX API because some resources enlist dynamically and they are not described
-in the static configuration.
-Job id must be computed using a different approach: instead of signing the
-XML config file, the memory real Resource Manager set must signed.
+Investigate this error:
+TX: 5.26 tx_open()
 
-remove these deprecated statements:
-case0032.c: In function ‘main’:
-case0032.c:107:9: warning: ‘g_thread_init’ is deprecated (declared at /usr/incl\
-ude/glib-2.0/glib/deprecated/gthread.h:261) [-Wdeprecated-declarations]
-         g_thread_init(NULL);
-         ^
-case0032.c: In function ‘transaction’:
-case0032.c:151:9: warning: ‘g_static_mutex_get_mutex_impl’ is deprecated (decla\
-red at /usr/include/glib-2.0/glib/deprecated/gthread.h:150): Use 'GMutex' inste\
-ad [-Wdeprecated-declarations]
-         g_static_mutex_lock(&mutex);
-         ^
-case0032.c:159:9: warning: ‘g_static_mutex_get_mutex_impl’ is deprecated (decla\
-red at /usr/include/glib-2.0/glib/deprecated/gthread.h:150): Use 'GMutex' inste\
-ad [-Wdeprecated-declarations]
-         g_static_mutex_unlock(&mutex);
-         ^
+455: TX/5.26/0.0                                     FAILED (tx_5_26.at:25)
+It has been reproduced 3 consecutive times...
+
+
+
+Implement XTA recovery tests copying from postgresql (tests all the crash point) with different resource managers (Oracle, PostgreSQL, MySQL) and have good
+luck 
 
 Implement XTA for C/C++
 

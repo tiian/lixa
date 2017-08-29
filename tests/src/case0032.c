@@ -64,7 +64,7 @@ void *transaction(void *parm);
 
 char *LIXAC, *LIXAD, *SWITCH;
 
-GStaticMutex mutex = G_STATIC_MUTEX_INIT;
+static GMutex mutex;
 
 
 
@@ -102,9 +102,6 @@ int main(int argc, char *argv[])
 
     if (MODE_XML_READ_FREE & mode)
         xmlInitParser();
-
-    if (!g_thread_supported ())
-        g_thread_init(NULL);
 
     for (j=0; j<m; ++j) {
         for (i=0; i<n; ++i) {
@@ -148,7 +145,7 @@ void *transaction(void *parm)
 
     if (MODE_MODULE_OPEN_CLOSE & *mode) {
         printf("%u locking mutex... %p\n", pid, &mutex);
-        g_static_mutex_lock(&mutex);
+        g_mutex_lock(&mutex);
         printf("%u ...mutex locked\n", pid);
         printf("%u opening module...\n", pid);
         m = g_module_open(SWITCH, G_MODULE_BIND_LOCAL);
@@ -156,7 +153,7 @@ void *transaction(void *parm)
         printf("%u closing module...\n", pid);
         g_module_close(m);
         printf("%u unlocking mutex... %p\n", pid, &mutex);
-        g_static_mutex_unlock(&mutex);
+        g_mutex_unlock(&mutex);
         printf("%u ...mutex unlocked\n", pid);
     }
 
