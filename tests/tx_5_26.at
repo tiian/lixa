@@ -22,7 +22,7 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0003 ; lixa_test_exec.sh reset start case0018 -6 2>$TESTS_TMP_FILE1], [0], [ignore], [ignore])
 #
 # If tx_open( ) returns [TX_ERROR], no resource managers are open.
-AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'performing xa_close on all the resource managers because tx_open is not TX_OK' $TESTS_TMP_FILE2], [0], [ignore], [ignore])
+AT_CHECK([cat $TESTS_TMP_FILE1 | tee $TESTS_TMP_FILE2 && grep 'performing xa_close on all the resource managers because txrc is not TX_OK' $TESTS_TMP_FILE2], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TX/5.26/0.1])

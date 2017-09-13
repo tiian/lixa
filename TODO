@@ -1,11 +1,3 @@
-Investigate this error:
-TX: 5.26 tx_open()
-
-455: TX/5.26/0.0                                     FAILED (tx_5_26.at:25)
-It has been reproduced 3 consecutive times...
-
-
-
 Implement XTA recovery tests copying from postgresql (tests all the crash point) with different resource managers (Oracle, PostgreSQL, MySQL) and have good
 luck 
 
