@@ -542,6 +542,21 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * Manager
  */
 #define LIXA_RC_RESOURCE_ALREADY_REGISTERED    -500
+/**
+ * The XA transaction was rolled back (like TX_ROLLBACK in TX transaction
+ * demarcation specification)
+ */
+#define LIXA_RC_TX_ROLLBACK                    -502
+/**
+ * The XA transaction was partially committed and partially rolled back (like
+ * TX_MIXED in TX transaction demarcation specification)
+ */
+#define LIXA_RC_TX_MIXED                       -503
+/**
+ * The XA transaction may have been partially committed and partially rolled
+ * back (like TX_HAZARD in TX transaction demarcation specification)
+ */
+#define LIXA_RC_TX_HAZARD                      -504
 
 
 

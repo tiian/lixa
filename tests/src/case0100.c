@@ -378,14 +378,14 @@ int main(int argc, char *argv[])
                     "of %d\n", pgm, rc, test_rc);
             return 1;
         }
-        printf("%s| XTA commit performed\n", pgm);
+        printf("%s| XTA commit returned %d as expected\n", pgm, rc);
     } else {
         if (test_rc != (rc = xta_transaction_rollback(tx))) {
             fprintf(stderr, "%s| xta_transaction_rollback: returned %d "
                     "instead of %d\n", pgm, rc, test_rc);
             return 1;
         }
-        printf("%s| XTA rollback performed\n", pgm);
+        printf("%s| XTA rollback returned %d as expected\n", pgm, rc);
     }
     
     /* close all the resources for Distributed Transactions */

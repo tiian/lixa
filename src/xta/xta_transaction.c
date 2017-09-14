@@ -679,6 +679,8 @@ int xta_transaction_commit(xta_transaction_t *this)
                                    xta_xid_get_xa_xid(this->xid),
                                    &txrc, &commit)))
                 THROW(LIXA_XA_PREPARE_ERROR);
+            LIXA_TRACE(("xta_transaction_commit: lixa_xa_prepare returned "
+                        "txrc=%d\n", txrc));
         }
         prepare_txrc = txrc;
         /* commit or rollback the transaction */
@@ -784,7 +786,22 @@ int xta_transaction_commit(xta_transaction_t *this)
             case LIXA_XA_FORGET_ERROR:
                 break;
             case NONE:
-                ret_cod = LIXA_RC_OK;
+                switch (txrc) {
+                    case TX_OK:
+                        ret_cod = LIXA_RC_OK;
+                        break;
+                    case TX_ROLLBACK:
+                        ret_cod = LIXA_RC_TX_ROLLBACK;
+                        break;
+                    case TX_MIXED:
+                        ret_cod = LIXA_RC_TX_MIXED;
+                        break;
+                    case TX_HAZARD:
+                        ret_cod = LIXA_RC_TX_HAZARD;
+                        break;
+                    default:
+                        ret_cod = LIXA_RC_INTERNAL_ERROR;
+                } /* switch (txrc) */
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;

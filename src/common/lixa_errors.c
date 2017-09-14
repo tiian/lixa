@@ -326,6 +326,17 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_RESOURCE_ALREADY_REGISTERED:
             return "ERROR: the XA Resource has been already registered to a "
                 "different Transaction Manager";
+        case LIXA_RC_TX_ROLLBACK:
+            return "ERROR: the XA transaction was rolled back (like "
+                "TX_ROLLBACK in TX transaction demarcation specification)";
+        case LIXA_RC_TX_MIXED:
+            return "ERROR: the XA transaction was partially committed and "
+                "partially rolled back (like TX_MIXED in TX transaction "
+                "demarcation specification)";
+        case LIXA_RC_TX_HAZARD:
+            return "ERROR: the XA transaction may have been partially "
+                "committed and partially rolled back (like TX_HAZARD in TX "
+                "transaction demarcation specification)";
         default:
             return "ERROR: unknown error";
     } /* switch (ret_cod) */

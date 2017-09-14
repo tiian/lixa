@@ -127,6 +127,11 @@ xta_native_xa_resource_t *xta_native_xa_resource_new_by_rmid(
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    if (NONE > excp) {
+        /* memory recovery */
+        g_free(this);
+        this = NULL;
+    }
     LIXA_TRACE(("xta_native_xa_resource_new_by_rmid/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return this;
@@ -241,7 +246,7 @@ int xta_native_xa_resource_init(
             this->xa_resource.dynamic = FALSE;
             if (rmid >= config->actconf.rsrmgrs->len) {
                 LIXA_TRACE(("xta_native_xa_resource_init: rmid=%d is out of "
-                            "range [0,%u]\n",
+                            "range [0,%u]\n", rmid,
                             config->actconf.rsrmgrs->len-1));
                 THROW(OUT_OF_RANGE);
             }

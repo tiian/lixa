@@ -1,14 +1,67 @@
-AT_BANNER([XTA: dummy tests])
+AT_BANNER([XTA: XA Transaction API])
 
-AT_SETUP([XTA/insert and commit])
+AT_SETUP([XTA/0.1/0.0 Insert and commit])
 AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset start case0100 1 1 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
-AT_SETUP([XTA/delete and commit])
+AT_SETUP([XTA/0.1/0.1 Delete and commit])
 AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
-AT_SETUP([XTA/insert and rollback])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset stop case0100 0 1 0 2>&1], [0], [ignore], [ignore])
+AT_SETUP([XTA/0.1/0.2 Insert and rollback])
+AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 0 1 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
+
+# One phase commit
+AT_SETUP([XTA/0.2/0.0 One phase commit])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0101 1 0 1 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# Two phase commit
+AT_SETUP([XTA/0.2/0.1 Two phase commit])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none case0101 1 0 2 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# Rollback after prepare
+AT_SETUP([XTA/0.2/0.2 Rollback after prepare])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset stop case0100 1 1 -502 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+
 
 #AT_SETUP([suspend tests here!])
 #AT_CHECK([false], [0], [ignore], [ignore])

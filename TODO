@@ -1,6 +1,10 @@
 Implement XTA recovery tests copying from postgresql (tests all the crash point) with different resource managers (Oracle, PostgreSQL, MySQL) and have good
 luck 
 
+Including xta/xta.h will include some resource manager include files (MySQL,
+PostgreSQL, Oracle, etc...). Provide utility for CPPFLAGS and LDADD for custom
+software build.
+
 Implement XTA for C/C++
 
 Explore high availability features (active/active) with dynamic or static
