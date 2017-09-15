@@ -1376,7 +1376,7 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
 
         /* manage recovery pending phase (see doc/seq_diagr.txt) */
         if (recovery_pending &&
-            LIXA_RC_OK != (ret_cod = client_recovery(cs, &client))) {
+            LIXA_RC_OK != (ret_cod = client_recovery(ccc, cs, &client))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod) {
                 /* the server probably crashed */
                 syslog(LOG_NOTICE, LIXA_SYSLOG_LXC028N);

@@ -144,13 +144,13 @@ extern "C" {
 
     /**
      * Open all the resource managers necessary for the transaction
-     * @param[in] ccc : client config collection
-     * @param[in] cs : reference to the status of the calling client
-     * @param[out] txrc : return code prepared for tx_open call
-     * @param[in] next_txstate : the txstate will be reached by the control
-     *                           thread after executing this function
-     * @param[in] mmode : the operation is performed inside a maintenance
-     *                    session
+     * @param[in] ccc client config collection
+     * @param[in] cs reference to the status of the calling client
+     * @param[out] txrc return code prepared for tx_open call
+     * @param[in] next_txstate the txstate will be reached by the control
+     *                         thread after executing this function
+     * @param[in] mmode the operation is performed inside a maintenance
+     *                  session
      * @return a reason code
      */
     int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,

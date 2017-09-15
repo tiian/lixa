@@ -76,39 +76,43 @@ extern "C" {
     /**
      * Perform the revovery action: the server (lixad) is
      * polled to retrieve the transactions need to be recovered
-     * @param cs IN reference to the status of the calling client
-     * @param client IN reference to the client piece of info sent with
+     * @param[in] ccc client config collection
+     * @param[in] cs reference to the status of the calling client
+     * @param[in] client reference to the client piece of info sent with
      *               @ref LIXA_MSG_VERB_OPEN message
      * @return a reason code     
      */
-    int client_recovery(client_status_t *cs,
+    int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
                         const struct lixa_msg_body_open_8_client_s *client);
     
 
 
     /**
      * Analyze the data received from the server
-     * @param cs IN reference to the status of the calling client
-     * @param rpl IN information received from the server
-     * @param commit OUT boolean value: TRUE = perform commit, FALSE = perform
-     *               rollback
+     * @param[in] ccc client config collection
+     * @param[in] cs reference to the status of the calling client
+     * @param[in] rpl information received from the server
+     * @param[out] commit boolean value: TRUE = perform commit,
+     *                                   FALSE = perform rollback
      * @return a reason code
      */
-    int client_recovery_analyze(const client_status_t *cs,
-                                struct lixa_msg_s *rpl,
-                                int *commit);
+    int client_recovery_analyze(client_config_coll_t *ccc,
+                                const client_status_t *cs,
+                                struct lixa_msg_s *rpl, int *commit);
 
 
     
     /**
      * Commit the transaction received from the server
-     * @param cs IN reference to the status of the calling client
-     * @param rpl IN information received from the server
-     * @param updt IN information must be sent to the server (recovery
+     * @param[in] ccc client config collection
+     * @param[in] cs reference to the status of the calling client
+     * @param[in] rpl information received from the server
+     * @param[in] updt information must be sent to the server (recovery
      *                update info)
      * @return a reason code
      */
-    int client_recovery_commit(const client_status_t *cs,
+    int client_recovery_commit(client_config_coll_t *ccc,
+                               const client_status_t *cs,
                                struct lixa_msg_s *rpl,
                                struct lixa_msg_s *updt);
 
@@ -116,13 +120,15 @@ extern "C" {
     
     /**
      * Rollback the transaction received from the server
-     * @param cs IN reference to the status of the calling client
-     * @param rpl IN information received from the server
-     * @param updt IN information must be sent to the server (recovery
+     * @param[in] ccc client config collection
+     * @param[in] cs reference to the status of the calling client
+     * @param[in] rpl information received from the server
+     * @param[in] updt information must be sent to the server (recovery
      *                update info)
      * @return a reason code
      */
-    int client_recovery_rollback(const client_status_t *cs,
+    int client_recovery_rollback(client_config_coll_t *ccc,
+                                 const client_status_t *cs,
                                  struct lixa_msg_s *rpl,
                                  struct lixa_msg_s *updt);
 

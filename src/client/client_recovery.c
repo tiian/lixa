@@ -67,7 +67,7 @@
 
 
 
-int client_recovery(client_status_t *cs,
+int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
                     const struct lixa_msg_body_open_8_client_s *client)
 {
     enum Exception { XML_STRDUP_ERROR
@@ -186,7 +186,7 @@ int client_recovery(client_status_t *cs,
 
             /* check the answer is arrived from the server */
             if (LIXA_RC_OK != (ret_cod = client_recovery_analyze(
-                                   cs, &rpl, &commit)))
+                                   ccc, cs, &rpl, &commit)))
                 THROW(ANALYZE_ERROR);
             LIXA_TRACE(("client_recovery: transaction '%s' must be %s\n",
                         ser_xid, commit ? "committed" : "rolled back"));
@@ -199,11 +199,11 @@ int client_recovery(client_status_t *cs,
             
             if (commit) {
                 if (LIXA_RC_OK != (ret_cod = client_recovery_commit(
-                                       cs, &rpl, &updt)))
+                                       ccc, cs, &rpl, &updt)))
                     THROW(COMMIT_ERROR);
             } else {
                 if (LIXA_RC_OK != (ret_cod = client_recovery_rollback(
-                                       cs, &rpl, &updt)))
+                                       ccc, cs, &rpl, &updt)))
                     THROW(ROLLBACK_ERROR);
             }
             if (updt.body.qrcvr_24.recovery.failed)
@@ -276,7 +276,8 @@ int client_recovery(client_status_t *cs,
 
 
 
-int client_recovery_analyze(const client_status_t *cs,
+int client_recovery_analyze(client_config_coll_t *ccc,
+                            const client_status_t *cs,
                             struct lixa_msg_s *rpl,
                             int *commit)
 {
@@ -313,11 +314,11 @@ int client_recovery_analyze(const client_status_t *cs,
         }
         /* check resource managers match */
         if (rpl->body.qrcvr_16.rsrmgrs->len !=
-            global_ccc.actconf.rsrmgrs->len) {
+            ccc->actconf.rsrmgrs->len) {
             LIXA_TRACE(("client_recovery_analyze: the number of resource "
-                        "managers does not match (%ud,%ud)\n",
+                        "managers does not match (%u,%u)\n",
                         rpl->body.qrcvr_16.rsrmgrs->len,
-                        global_ccc.actconf.rsrmgrs->len));
+                        ccc->actconf.rsrmgrs->len));
             THROW(DIFFERENT_NUMBER);
         }
         
@@ -341,7 +342,8 @@ int client_recovery_analyze(const client_status_t *cs,
 
 
 
-int client_recovery_commit(const client_status_t *cs,
+int client_recovery_commit(client_config_coll_t *ccc,
+                           const client_status_t *cs,
                            struct lixa_msg_s *rpl,
                            struct lixa_msg_s *updt)
 {
@@ -373,7 +375,7 @@ int client_recovery_commit(const client_status_t *cs,
                 &g_array_index(rpl->body.qrcvr_16.rsrmgrs,
                                struct lixa_msg_body_qrcvr_16_rsrmgr_s, i);
             struct act_rsrmgr_config_s *act_rsrmgr =
-                &g_array_index(global_ccc.actconf.rsrmgrs,
+                &g_array_index(ccc->actconf.rsrmgrs,
                                struct act_rsrmgr_config_s, i);
             struct lixa_msg_body_qrcvr_24_rsrmgr_s record;
 
@@ -438,7 +440,8 @@ int client_recovery_commit(const client_status_t *cs,
 
 
     
-int client_recovery_rollback(const client_status_t *cs,
+int client_recovery_rollback(client_config_coll_t *ccc,
+                             const client_status_t *cs,
                              struct lixa_msg_s *rpl,
                              struct lixa_msg_s *updt)
 {
@@ -469,7 +472,7 @@ int client_recovery_rollback(const client_status_t *cs,
                 &g_array_index(rpl->body.qrcvr_16.rsrmgrs,
                                struct lixa_msg_body_qrcvr_16_rsrmgr_s, i);
             struct act_rsrmgr_config_s *act_rsrmgr =
-                &g_array_index(global_ccc.actconf.rsrmgrs,
+                &g_array_index(ccc->actconf.rsrmgrs,
                                struct act_rsrmgr_config_s, i);
             struct lixa_msg_body_qrcvr_24_rsrmgr_s record;
 
