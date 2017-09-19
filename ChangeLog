@@ -1,5 +1,9 @@
 LOG:
 
+20170918 - 1.3.4 Globetom accepts that the license of all LIXA client 
+                 code (currently located in directories src/client, 
+		 src/common, src/xta) will change to LGPL 2.1.
+
 20170318 - 1.3.4 LIXA Very Stupid Robot (lixavsr) additional use cases:
 		- branch for MySQL database
 		- branch for PostgreSQL database
