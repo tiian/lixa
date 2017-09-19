@@ -1,5 +1,8 @@
 LOG:
 
+         - 1.5.0 XTA API release (XA Transaction API)
+                 Change of client linkable code (libraries) to LGPL 2.1
+
 20170918 - 1.3.4 Globetom accepts that the license of all LIXA client 
                  code (currently located in directories src/client, 
 		 src/common, src/xta) will change to LGPL 2.1.

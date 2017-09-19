@@ -197,7 +197,7 @@ AT_CLEANUP
 
 
 
-AT_SETUP([suspend tests here!])
-AT_CHECK([false], [0], [ignore], [ignore])
-AT_CLEANUP
+#AT_SETUP([suspend tests here!])
+#AT_CHECK([false], [0], [ignore], [ignore])
+#AT_CLEANUP
 
