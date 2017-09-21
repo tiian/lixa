@@ -1,4 +1,4 @@
-AC_INIT([lixa], [1.5.0-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [1.5.0], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
@@ -125,10 +125,9 @@ EXPANDED_LIBDIR=$(eval echo $libdir)
 
 AC_PRESERVE_HELP_ORDER
 AC_ARG_ENABLE([xta],
-	AS_HELP_STRING([--enable-xta],
-		[enable XTA (XA Transaction API) support]),
-	[LIXA_XTA="yes" ],
-	[LIXA_XTA="no" ])
+	AS_HELP_STRING([--disable-xta],
+		[disable XTA (XA Transaction API) support]),
+	[LIXA_XTA="no" ], [LIXA_XTA="yes" ])
 AM_CONDITIONAL([COMPILE_XTA], [test "$LIXA_XTA" = "yes"])
 AC_ARG_ENABLE([debug],
         AS_HELP_STRING([--enable-debug],
@@ -321,6 +320,7 @@ AC_SUBST(EXPANDED_SYSCONFDIR)
 AC_SUBST(EXPANDED_LOCALSTATEDIR)
 AC_SUBST(EXPANDED_LIBDIR)
 AC_SUBST(LIXA_CRASH)
+AC_SUBST(LIXA_XTA)
 AC_SUBST(XSLTPROC)
 AC_SUBST(HAVE_DOT)
 AC_SUBST(LIXA_CONFIG_INCLUDEDIR)

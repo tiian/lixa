@@ -30,6 +30,8 @@
 #endif
 /* XTA includes */
 #include "xta_acquired_xa_resource.h"
+/* LIXA includes */
+#include "lixa_sw.h"
 
 
 

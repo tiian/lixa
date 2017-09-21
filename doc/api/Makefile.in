@@ -80,7 +80,7 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = doc/api
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(dist_noinst_DATA)
+	$(dist_noinst_DATA) README
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -186,6 +186,7 @@ LIXA_CONFIG_LOCALSTATEDIR = @LIXA_CONFIG_LOCALSTATEDIR@
 LIXA_CONFIG_PREFIX = @LIXA_CONFIG_PREFIX@
 LIXA_CONFIG_SYSCONFDIR = @LIXA_CONFIG_SYSCONFDIR@
 LIXA_CRASH = @LIXA_CRASH@
+LIXA_XTA = @LIXA_XTA@
 LN_S = @LN_S@
 LTDLINCL = @LTDLINCL@
 LTLIBOBJS = @LTLIBOBJS@
@@ -303,8 +304,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-@COND_DOXYGEN_TRUE@MAYBE_API = xta/html/index.html lixa/html/index.html
-EXTRA_DIST = $(MAYBE_API)
+@COND_DOXYGEN_TRUE@MAYBE_API = lixa/html/index.html
+@COMPILE_XTA_TRUE@@COND_DOXYGEN_TRUE@MAYBE_XTA = xta/html/index.html
+EXTRA_DIST = $(MAYBE_API) $(MAYBE_XTA) \
+	doxygen_footer.html doxygen_header_lixa.html doxygen_header_xta.html
+
 dist_noinst_DATA = doxygen.xta.in doxygen.lixa.in
 all: all-am
 
@@ -509,7 +513,7 @@ doxygen.lixa:   doxygen.lixa.in
         -e 's|@HAVE_DOT[@]|$(HAVE_DOT)|g' \
         $< >$@
 
-all:	$(MAYBE_API)
+all:	$(MAYBE_API) $(MAYBE_XTA)
 
 xta/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h
 	doxygen doxygen.xta

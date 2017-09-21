@@ -30,14 +30,14 @@ transactional environment.
 ********
 LICENSE:
 
- * LIXA is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as published
- * by the Free Software Foundation.
- *
- * LIXA is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+LIXA is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License version 2 as published
+by the Free Software Foundation.
+
+LIXA is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
 ******************
 LICENSE EXCEPTION:
@@ -60,10 +60,29 @@ and poverty.
 
 
 
+*****************
+XTA SPECIAL NOTE:
+XA Transaction API (XTA) is a testing feature introduced since LIXA 1.5.0 and
+it's not yet ready for a production environment: the development phase has not
+been completed and the code can still contains severe bugs.
+If you don't like to test XTA, you can disable it at configure time using:
+./configure --disable-xta .....
+Please use SourceForge ticketing system https://sourceforge.net/p/lixa/bug/
+or Github issue tracking https://github.com/tiian/lixa/issues to document
+XTA possible bugs.
+End user documentation is not yet available, but 2 case tests programs can be
+used as examples:
+test/src/case0100.c
+test/src/case0101.c
+
+
+
+**************
+DOCUMENTATION:
 Documentation is available in these places:
 - local directory doc/manuals/index.html after tarball extraction
 - http://lixa.sourceforge.net/lixa-doc/html/
-- http://lixa.sourceforge.net/lixa-doc/ext/html/
+- http://lixa.sourceforge.net/lixa-doc/xta/
 
 Some important things you should check in the documentation before going on:
 1. check LIXA dependency looking at "Installation/System requirements"
@@ -84,7 +103,10 @@ Use "configure" (see above) to produce "doxygen.conf" file.
 If you installed Graphviz (http://www.graphviz.org/), configure should detect
 it and would produce data and headers dependencies too.
 
-Dependencies report:
+
+
+********************
+DEPENDENCIES REPORT:
 O.S.            Feature         Packages
 Ubuntu          Basic           make gcc libglib2.0-dev libxml2-dev uuid-dev pkg-config automake
 Ubuntu		MySQL		mysql-server libmysqlclient-dev

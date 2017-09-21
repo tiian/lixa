@@ -1,7 +1,11 @@
 if COND_DOXYGEN
-  MAYBE_API = xta/html/index.html lixa/html/index.html
+  MAYBE_API = lixa/html/index.html
+if COMPILE_XTA
+    MAYBE_XTA = xta/html/index.html
 endif
-EXTRA_DIST = $(MAYBE_API)
+endif
+EXTRA_DIST = $(MAYBE_API) $(MAYBE_XTA) \
+	doxygen_footer.html doxygen_header_lixa.html doxygen_header_xta.html
 dist_noinst_DATA = doxygen.xta.in doxygen.lixa.in
 
 doxygen.xta:   doxygen.xta.in
@@ -16,7 +20,7 @@ doxygen.lixa:   doxygen.lixa.in
         -e 's|@HAVE_DOT[@]|$(HAVE_DOT)|g' \
         $< >$@
 
-all:	$(MAYBE_API)
+all:	$(MAYBE_API) $(MAYBE_XTA)
 
 xta/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h
 	doxygen doxygen.xta

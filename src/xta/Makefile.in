@@ -282,6 +282,7 @@ LIXA_CONFIG_LOCALSTATEDIR = @LIXA_CONFIG_LOCALSTATEDIR@
 LIXA_CONFIG_PREFIX = @LIXA_CONFIG_PREFIX@
 LIXA_CONFIG_SYSCONFDIR = @LIXA_CONFIG_SYSCONFDIR@
 LIXA_CRASH = @LIXA_CRASH@
+LIXA_XTA = @LIXA_XTA@
 LN_S = @LN_S@
 LTDLINCL = @LTDLINCL@
 LTLIBOBJS = @LTLIBOBJS@
@@ -412,7 +413,7 @@ top_srcdir = @top_srcdir@
 include_HEADERS = xta.h xta_errors.h xta_init.h xta_transaction.h \
 	xta_transaction_manager.h xta_xid.h \
 	xta_xa_resource.h xta_native_xa_resource.h xta_acquired_xa_resource.h \
-	xta_mysql_xa_resource.h
+	xta_postgresql_xa_resource.h xta_mysql_xa_resource.h
 
 noinst_HEADERS = xta.h.in xta_iface.h
 lib_LTLIBRARIES = liblixta.la

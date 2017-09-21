@@ -30,6 +30,9 @@ endif
 if COMPILE_WEBSPHEREMQ_STUFF
   MAYBE_WEBSPHEREMQ = case0044
 endif
+if COMPILE_XTA
+  MAYBE_XTA = case0100 case0101
+endif
 check_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0006 case0007 case0008 case0009 case0010 case0011 case0012 \
 	case0013 case0014 case0015 case0016 case0017 case0018 case0019 \
@@ -37,10 +40,9 @@ check_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0027 case0028 case0029 case0030 case0031 case0032 case0033 \
 	case0034 case0035 case0036 case0043 case0046 case0048 case0049 \
 	case0050 case0051 case0052 case0053 \
-	case0100 case0101 \
 	$(MAYBE_POSTGRESQL) $(MAYBE_ORACLE) \
 	$(MAYBE_IBMDB2) $(MAYBE_MYSQL) $(MAYBE_MYSQL_POSTGRESQL) \
-	$(MAYBE_WEBSPHEREMQ)
+	$(MAYBE_WEBSPHEREMQ) $(MAYBE_XTA)
 case0000_SOURCES = case0000.c
 case0001_SOURCES = case0001.c
 case0002_SOURCES = case0002.c

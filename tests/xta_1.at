@@ -1,24 +1,21 @@
 AT_BANNER([XTA: XA Transaction API])
 
-#AT_SETUP([XTA/0.1/0.1 Delete and commit])
-#AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset start case0100 1 0 0 2>&1], [0], [ignore], [ignore])
-#AT_CLEANUP
-#AT_SETUP([suspend tests here!])
-#AT_CHECK([false], [0], [ignore], [ignore])
-#AT_CLEANUP
-
 AT_SETUP([XTA/0.1/0.0 Insert and commit])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset start case0100 1 1 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 AT_SETUP([XTA/0.1/0.1 Delete and commit])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 AT_SETUP([XTA/0.1/0.2 Insert and rollback])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 0 1 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # One phase commit
 AT_SETUP([XTA/0.2/0.0 One phase commit])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -32,6 +29,7 @@ AT_CLEANUP
 
 # Two phase commit
 AT_SETUP([XTA/0.2/0.1 Two phase commit])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -55,6 +53,7 @@ AT_CLEANUP
 
 # Rollback after prepare
 AT_SETUP([XTA/0.2/0.2 Rollback after prepare])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -70,6 +69,7 @@ AT_CLEANUP
 
 # Crash after connect
 AT_SETUP([XTA/0.3/0.0 Crash after connect])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
 AT_DATA([monkey1s.conf],
@@ -83,6 +83,7 @@ AT_CLEANUP
 
 # Crash in the middle of xa_open 1/2
 AT_SETUP([XTA/0.3/0.1 Crash in the middle of xa_open (1)])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
 AT_DATA([monkey1s.conf],
@@ -96,6 +97,7 @@ AT_CLEANUP
 
 # Crash in the middle of xa_open 2/2
 AT_SETUP([XTA/0.3/0.2 Crash in the middle of xa_open (2)])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
 AT_DATA([monkey1s.conf],
@@ -109,6 +111,7 @@ AT_CLEANUP
 
 # Crash after xa_open
 AT_SETUP([XTA/0.3/0.3 Crash after xa_open])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
 AT_DATA([monkey1s.conf],
@@ -122,6 +125,7 @@ AT_CLEANUP
 
 # Crash in the middle of xa_end
 AT_SETUP([XTA/0.3/1.0 Crash in the middle of xa_end])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
 AT_DATA([monkey1s.conf],
@@ -135,6 +139,7 @@ AT_CLEANUP
 
 # Automatic recovery
 AT_SETUP([XTA/0.3/1.1 Automatic recovery])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
 AT_DATA([monkey1s.conf],
@@ -154,11 +159,13 @@ AT_CLEANUP
 # This step is necessary because oldest MySQL versions are bugged and don't
 # automatically rollback the previous crash
 AT_SETUP([XTA/0.3/1.2 Delete and commit])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Crash after xa_end
 AT_SETUP([XTA/0.3/2.0 Crash after xa_end])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
 AT_DATA([monkey1s.conf],
@@ -172,6 +179,7 @@ AT_CLEANUP
 
 # Automatic recovery
 AT_SETUP([XTA/0.3/2.1 Automatic recovery])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
 AT_DATA([monkey1s.conf],
@@ -191,13 +199,97 @@ AT_CLEANUP
 # This step is necessary because oldest MySQL versions are bugged and don't
 # automatically rollback the previous crash
 AT_SETUP([XTA/0.3/2.2 Delete and commit])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset stop case0100 1 0 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
+# Crash in the middle of xa_prepare
+AT_SETUP([XTA/0.3/3.0 Crash in the middle of xa_prepare])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=14 ; lixa_test_exec.sh noreset none case0100 1 1 0], [134], [ignore], [ignore])
+AT_CLEANUP
 
+# Automatic recovery
+AT_SETUP([XTA/0.3/3.1 Automatic recovery])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
+# this delay is necessary on fast multicore systems: the risk is that the new
+# client connects to the state server before the state server completed the
+# synchronization on disk of the state. When this condition happens, instead of
+# a recovery pending transaction, the new client will find a clean state
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0100 1 0 0], [0], [ignore], [ignore])
+AT_CLEANUP
 
+# This step is necessary because oldest MySQL versions are bugged and don't
+# automatically rollback the previous crash
+AT_SETUP([XTA/0.3/3.2 Delete and commit])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
 
-#AT_SETUP([suspend tests here!])
-#AT_CHECK([false], [0], [ignore], [ignore])
-#AT_CLEANUP
+# Crash after xa_prepare
+AT_SETUP([XTA/0.3/4.0 Crash after xa_prepare])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset none case0100 1 1 0], [134], [ignore], [ignore])
+AT_CLEANUP
+
+# Automatic recovery
+AT_SETUP([XTA/0.3/4.1 Automatic recovery])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
+# this delay is necessary on fast multicore systems: the risk is that the new
+# client connects to the state server before the state server completed the
+# synchronization on disk of the state. When this condition happens, instead of
+# a recovery pending transaction, the new client will find a clean state
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0100 1 0 0], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# This step is necessary because oldest MySQL versions are bugged and don't
+# automatically rollback the previous crash
+AT_SETUP([XTA/0.3/4.2 Delete and commit])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset stop case0100 1 0 0 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
 
