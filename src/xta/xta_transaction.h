@@ -198,8 +198,7 @@ extern "C" {
      *            transaction migration and @ref TMNOFLAGS otherwise
      * @return a reason code
      */
-    int xta_transaction_suspend(xta_transaction_t *this,
-                                long flags);
+    int xta_transaction_suspend(xta_transaction_t *this, long flags);
     
 
     

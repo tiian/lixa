@@ -88,7 +88,11 @@
  * control characteristics is TX_CHAINED
  */
 #define TX_STATE_S4    4
-
+/**
+ * The thread of control has suspended the transaction; this state is used by
+ * XTA, but it's not used by TX
+ */
+#define TX_STATE_S5    5
 
 
 /**

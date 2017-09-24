@@ -1,0 +1,9 @@
+AT_BANNER([XTA: Suspend Resume])
+
+# This case test needs Oracle because MySQL and PostgreSQL don't support
+# XA Suspend/Resume
+AT_SETUP([XTA/1.0/0.0 Insert and commit])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset start case0102 0 1 1 0 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP

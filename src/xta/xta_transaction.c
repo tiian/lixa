@@ -486,7 +486,7 @@ int xta_transaction_open(xta_transaction_t *this)
 
 int xta_transaction_close(xta_transaction_t *this)
 {
-    enum Exception { NULL_OBJECT1
+    enum Exception { NULL_OBJECT
                      , PROTOCOL_ERROR
                      , INVALID_STATUS
                      , LIXA_XA_CLOSE_ERROR
@@ -499,17 +499,17 @@ int xta_transaction_close(xta_transaction_t *this)
         
         /* check object */
         if (NULL == this)
-            THROW(NULL_OBJECT1);
+            THROW(NULL_OBJECT);
         /* check transaction state before going on */
         txstate = client_status_get_txstate(&this->client_status);
         switch (txstate) {
             case TX_STATE_S0:
             case TX_STATE_S1:
-            case TX_STATE_S2:
                 break;
             case TX_STATE_S3:
-            case TX_STATE_S4:
                 THROW(PROTOCOL_ERROR);
+            case TX_STATE_S5:
+                break;
             default:
                 THROW(INVALID_STATUS);
         }
@@ -528,7 +528,7 @@ int xta_transaction_close(xta_transaction_t *this)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case NULL_OBJECT1:
+            case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case PROTOCOL_ERROR:
@@ -920,19 +920,51 @@ int xta_transaction_rollback(xta_transaction_t *this)
 
 
 
-int xta_transaction_suspend(xta_transaction_t *transaction,
-                                   long flags)
+int xta_transaction_suspend(xta_transaction_t *this, long flags)
 {
-    enum Exception { NONE } excp;
+    enum Exception { NULL_OBJECT
+                     , PROTOCOL_ERROR
+                     , INVALID_STATUS
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("xta_transaction_suspend\n"));
+    LIXA_TRACE(("xta_transaction_suspend: flags=%ld\n", flags));
     TRY {
+        int txstate, next_txstate;
+        
+        /* check object */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* check transaction state before going on */
+        txstate = client_status_get_txstate(&this->client_status);
+        switch (txstate) {
+            case TX_STATE_S0:
+            case TX_STATE_S1:
+                THROW(PROTOCOL_ERROR);
+            case TX_STATE_S3:
+                break;
+            default:
+                THROW(INVALID_STATUS);
+        }
+        
         /* @@@ */
+
+        next_txstate = TX_STATE_S5;
+        /* set new state after RMs are suspended... */
+        client_status_set_txstate(&this->client_status, next_txstate);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case PROTOCOL_ERROR:
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
