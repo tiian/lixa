@@ -925,12 +925,14 @@ int xta_transaction_suspend(xta_transaction_t *this, long flags)
     enum Exception { NULL_OBJECT
                      , PROTOCOL_ERROR
                      , INVALID_STATUS
+                     , INVALID_FLAGS
+                     , LIXA_XA_END_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("xta_transaction_suspend: flags=%ld\n", flags));
+    LIXA_TRACE(("xta_transaction_suspend\n"));
     TRY {
-        int txstate, next_txstate;
+        int txstate, next_txstate, txrc;
         
         /* check object */
         if (NULL == this)
@@ -946,9 +948,24 @@ int xta_transaction_suspend(xta_transaction_t *this, long flags)
             default:
                 THROW(INVALID_STATUS);
         }
+        /* check flags */
+        if (TMMIGRATE == flags) {
+            LIXA_TRACE(("xta_transaction_suspend: flags=TMMIGRATE, "
+                        "suspend for resume\n"));
+        } else if (TMNOFLAGS == flags) {
+            LIXA_TRACE(("xta_transaction_suspend: flags=TMNOFLAGS, "
+                        "suspend for join\n"));
+        } else
+            THROW(INVALID_FLAGS);
+        /* add suspend flag */
+        flags |= TMSUSPEND;
+        /* detach the transaction */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
+                               &this->local_ccc, &this->client_status,
+                               xta_xid_get_xa_xid(this->xid), &txrc,
+                               FALSE, flags)))
+            THROW(LIXA_XA_END_ERROR);
         
-        /* @@@ */
-
         next_txstate = TX_STATE_S5;
         /* set new state after RMs are suspended... */
         client_status_set_txstate(&this->client_status, next_txstate);
@@ -964,6 +981,11 @@ int xta_transaction_suspend(xta_transaction_t *this, long flags)
                 break;
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case INVALID_FLAGS:
+                ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case LIXA_XA_END_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
