@@ -53,6 +53,9 @@ int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
     int rc;
+    char *xid_string = NULL;
+    FILE *xid_file = NULL;
+    
     /* XTA variables (objects) */
     xta_transaction_manager_t *tm;
     xta_transaction_t *tx;
@@ -63,6 +66,7 @@ int main(int argc, char *argv[])
     int        commit;
     int        insert;
     int        test_rc;
+    const char *filename;
 #ifdef HAVE_ORACLE
     /* Oracle variables */
     int            oci_rc;
@@ -81,8 +85,8 @@ int main(int argc, char *argv[])
     xta_init();
     
     fprintf(stderr, "%s| starting...\n", pgm);
-    if (argc < 5) {
-        fprintf(stderr, "%s: at least four options must be specified\n",
+    if (argc < 6) {
+        fprintf(stderr, "%s: at least five options must be specified\n",
                 argv[0]);
         return 1;
     }
@@ -90,17 +94,33 @@ int main(int argc, char *argv[])
     insert = strtol(argv[2], NULL, 0);
     commit = strtol(argv[3], NULL, 0);
     test_rc = strtol(argv[4], NULL, 0);
+    filename = argv[5];
 
     /* check phase */
     switch(phase) {
         case INITIAL:
             fprintf(stderr, "%s| phase=%d (INITIAL)\n", pgm, phase);
+            /* open file for write */
+            if (NULL == (xid_file = fopen(filename, "w"))) {
+                fprintf(stderr, "%s| error while opening file '%s'\n",
+                        pgm, filename);
+            }
             break;
         case INTERMEDIATE:
             fprintf(stderr, "%s| phase=%d (INTERMEDIATE)\n", pgm, phase);
+            /* open file for read */
+            if (NULL == (xid_file = fopen(filename, "r"))) {
+                fprintf(stderr, "%s| error while opening file '%s'\n",
+                        pgm, filename);
+            }
             break;
         case FINAL:
             fprintf(stderr, "%s| phase=%d (FINAL)\n", pgm, phase);
+            /* open file for read */
+            if (NULL == (xid_file = fopen(filename, "r"))) {
+                fprintf(stderr, "%s| error while opening file '%s'\n",
+                        pgm, filename);
+            }
             break;
         default:
             fprintf(stderr, "%s| phase=%d UNKNOWN!\n", pgm, phase);
@@ -174,12 +194,45 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    /* start a Distributed Transaction */
-    if (LIXA_RC_OK != (rc = xta_transaction_start(tx))) {
-        fprintf(stderr, "%s| xta_transaction_start: returned %d\n", pgm, rc);
-        return 1;
-    }
+    if (INITIAL == phase) {
+        /* start a Distributed Transaction */
+        if (LIXA_RC_OK != (rc = xta_transaction_start(tx))) {
+            fprintf(stderr, "%s| xta_transaction_start: returned %d\n",
+                    pgm, rc);
+            return 1;
+        }
 
+        /* get XID as a string */
+        if (NULL == (xid_string = xta_xid_get_as_string(
+                         xta_transaction_get_xid(tx)))) {
+            fprintf(stderr, "%s| xta XID is NULL\n", pgm);
+            return 1;
+        } else {
+            fprintf(stderr, "%s| xta XID is '%s'\n", pgm, xid_string);
+        }
+        /* write to xid_file the transaction that will be resumed */
+        fprintf(xid_file, "%s", xid_string);
+        fclose(xid_file);
+        xid_file = NULL;
+        /* release xid_string */
+        free(xid_string);
+        xid_string = NULL;
+    } else {
+        char buffer[1000];
+        /* read from xid_file the transaction that must be resumed */
+        if (NULL == fgets(buffer, sizeof(buffer), xid_file)) {
+            fprintf(stderr, "%s| error while retrieving XID from file '%s'\n",
+                    pgm, filename);
+            return 1;
+        }
+        fprintf(stderr, "%s| xta XID is '%s'\n", pgm, buffer);
+        fclose(xid_file);
+        
+        /* resume the transaction */
+        /*
+        @@@
+        */
+    }
     
 #ifdef HAVE_ORACLE
     /* retrieve environment and context */

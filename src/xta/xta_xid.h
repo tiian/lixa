@@ -83,6 +83,16 @@ extern "C" {
 
 
     /**
+     * Retrieve the transaction ID as an ASCII string
+     * @param[in] this xid object
+     * @return a string that must be released using free() function by the
+     *         caller
+     */
+    char *xta_xid_get_as_string(const xta_xid_t *this);
+
+
+
+    /**
      * Reset a Transaction identifier object
      * @param[in,out] this xid object to delete
      */

@@ -119,6 +119,9 @@ const XID *xta_xid_get_xa_xid(xta_xid_t *this)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -129,6 +132,52 @@ const XID *xta_xid_get_xa_xid(xta_xid_t *this)
     LIXA_TRACE(("xta_xid_get_xa_xid/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return xa_xid;
+}
+
+
+
+char *xta_xid_get_as_string(const xta_xid_t *this)
+{
+    enum Exception { NULL_OBJECT
+                     , MALLOC_ERROR
+                     , LIXA_XID_SERIALIZE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    char *string = NULL;
+    
+    LIXA_TRACE(("xta_xid_get_as_string\n"));
+    TRY {
+        lixa_ser_xid_t lsx;
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* allocate the dynamic memory */
+        if (NULL == (string = malloc(sizeof(lixa_ser_xid_t))))
+            THROW(MALLOC_ERROR);
+        if (!lixa_xid_serialize(&this->xa_xid, lsx))
+            THROW(LIXA_XID_SERIALIZE_ERROR);
+        strncpy(string, lsx, sizeof(lixa_ser_xid_t));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case LIXA_XID_SERIALIZE_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_xid_get_as_string/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return string;
 }
 
 

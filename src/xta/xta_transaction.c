@@ -1053,19 +1053,25 @@ int xta_transaction_branch(xta_transaction_t *transaction,
 
 
 
-const xta_xid_t *xta_transaction_get_xid(const xta_transaction_t *t)
+const xta_xid_t *xta_transaction_get_xid(const xta_transaction_t *this)
 {
-    enum Exception { NONE } excp;
+    enum Exception { NULL_OBJECT
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     xta_xid_t *xid = NULL;
     
     LIXA_TRACE(("xta_transaction_get_xid\n"));
     TRY {
-        /* @@@ */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        xid = this->xid;
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
