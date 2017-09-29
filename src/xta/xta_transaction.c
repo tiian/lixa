@@ -582,11 +582,6 @@ int xta_transaction_start(xta_transaction_t *this)
         /* create a new xid */
         if (NULL == (this->xid = xta_xid_new()))
             THROW(NULL_OBJECT2);
-        /* this could be useless for XTA, but backported from TX layer
-         * @@@ remove me if not necessary
-        client_status_set_xid(&this->client_status,
-                              xta_xid_get_xa_xid(this->xid));
-        */
         /* start the transaction in all the XA Resource Managers */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
                                &this->local_ccc, &this->client_status,
@@ -1001,18 +996,84 @@ int xta_transaction_suspend(xta_transaction_t *this, long flags)
 
 
 
-int xta_transaction_resume(xta_transaction_t *transaction,
-                           const xta_xid_t *xid)
+int xta_transaction_resume(xta_transaction_t *this,
+                           const char *xid_string, long flags)
 {
-    enum Exception { NONE } excp;
+    enum Exception { NULL_OBJECT1
+                     , INVALID_STATUS
+                     , PROTOCOL_ERROR
+                     , INVALID_FLAGS
+                     , NULL_OBJECT2
+                     , LIXA_XA_START_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_resume\n"));
     TRY {
+        int txstate, next_txstate, dupid_or_proto = FALSE;
+        int txrc = 0;
+        
+        /* check object and serialized XID */
+        if (NULL == this || NULL == xid_string)
+            THROW(NULL_OBJECT1);
+        /* check current XID is not set */
+        if (NULL != this->xid)
+            THROW(INVALID_STATUS);
+        /* check transaction state before going on */
+        txstate = client_status_get_txstate(&this->client_status);
+        switch (txstate) {
+            case TX_STATE_S0:
+            case TX_STATE_S3:
+                THROW(PROTOCOL_ERROR);
+            case TX_STATE_S1:
+            case TX_STATE_S5:
+                break;
+            default:
+                THROW(PROTOCOL_ERROR);
+        }
+        next_txstate = TX_STATE_S3;
+        /* check flags */
+        if (TMRESUME == flags) {
+            LIXA_TRACE(("xta_transaction_resume: flags=TMRESUME, "
+                        "resuming after possible migration\n"));
+        } else if (TMJOIN == flags) {
+            LIXA_TRACE(("xta_transaction_resume: flags=TMJOIN, "
+                        "joining an existent transaction\n"));
+        } else
+            THROW(INVALID_FLAGS);
+        /* deserialize the passed XID */
+        if (NULL == (this->xid = xta_xid_new_from_string(xid_string)))
+            THROW(NULL_OBJECT2);
+        /* start the transaction in all the XA Resource Managers */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
+                               &this->local_ccc, &this->client_status,
+                               &txrc,
+                               xta_xid_get_xa_xid(this->xid), txstate,
+                               next_txstate, &dupid_or_proto, flags)))
+            THROW(LIXA_XA_START_ERROR);        
+        /* update the TX state */
+        client_status_set_txstate(&this->client_status, next_txstate);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT1:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case PROTOCOL_ERROR:
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case INVALID_FLAGS:
+                ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case NULL_OBJECT2:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case LIXA_XA_START_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

@@ -57,13 +57,24 @@ extern "C" {
 
 
     /**
-     * Create a new Transaction Identifier object
+     * Create a new Transaction Identifier object and generate a new unique XID
      * @return a new transaction identifier object or NULL in the event of an
      *         error occurred
      */
     xta_xid_t *xta_xid_new(void);
 
 
+
+    /**
+     * Create a new Transaction Identifier object and set XID as passed by the
+     * caller
+     * @param[in] xid_string a serialized XID, see @ref xta_xid_to_string
+     * @return a new transaction identifier object or NULL in the event of an
+     *         error occurred
+     */
+    xta_xid_t *xta_xid_new_from_string(const char *xid_string);
+
+    
 
     /**
      * Delete a Transaction Identifier object
@@ -83,12 +94,12 @@ extern "C" {
 
 
     /**
-     * Retrieve the transaction ID as an ASCII string
+     * Convert the transaction ID to an ASCII string
      * @param[in] this xid object
      * @return a string that must be released using free() function by the
      *         caller
      */
-    char *xta_xid_get_as_string(const xta_xid_t *this);
+    char *xta_xid_to_string(const xta_xid_t *this);
 
 
 

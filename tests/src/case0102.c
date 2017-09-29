@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
         }
 
         /* get XID as a string */
-        if (NULL == (xid_string = xta_xid_get_as_string(
+        if (NULL == (xid_string = xta_xid_to_string(
                          xta_transaction_get_xid(tx)))) {
             fprintf(stderr, "%s| xta XID is NULL\n", pgm);
             return 1;
@@ -229,9 +229,12 @@ int main(int argc, char *argv[])
         fclose(xid_file);
         
         /* resume the transaction */
-        /*
-        @@@
-        */
+        if (LIXA_RC_OK != (rc = xta_transaction_resume(
+                               tx, buffer, TMRESUME))) {
+            fprintf(stderr, "%s| xta_transaction_resume returned %d\n",
+                    pgm, rc);
+            return 1;
+        }
     }
     
 #ifdef HAVE_ORACLE
@@ -302,7 +305,7 @@ int main(int argc, char *argv[])
     OCIHandleFree((dvoid *)oci_err_hndl, (ub4)OCI_HTYPE_ERROR);
 #endif /* HAVE_ORACLE */
 
-    if (INITIAL == phase) {
+    if (INITIAL == phase || INTERMEDIATE == phase) {
         /* suspend the transaction */
         if (test_rc != (rc = xta_transaction_suspend(tx, TMMIGRATE))) {
             fprintf(stderr, "%s| xta_transaction_suspend: returned %d instead "

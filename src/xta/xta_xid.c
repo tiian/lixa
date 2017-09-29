@@ -77,6 +77,51 @@ xta_xid_t *xta_xid_new(void)
 
 
 
+xta_xid_t *xta_xid_new_from_string(const char *xid_string)
+{
+    enum Exception { G_TRY_MALLOC_ERROR
+                     , LIXA_XID_DESERIALIZE_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    xta_xid_t *this = NULL;
+    
+    LIXA_TRACE(("xta_xid_new_from_string\n"));
+    TRY {
+        /* allocate the object */
+        if (NULL == (this = (xta_xid_t *)
+                     g_try_malloc0(sizeof(xta_xid_t))))
+            THROW(G_TRY_MALLOC_ERROR);
+        /* deserialize XID */
+        if (!lixa_xid_deserialize(&this->xa_xid, xid_string))
+            THROW(LIXA_XID_DESERIALIZE_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case LIXA_XID_DESERIALIZE_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* clean-up memory in the event of an error */
+    if (NONE != excp) {
+        g_free(this);
+        this = NULL;
+    }   
+    LIXA_TRACE(("xta_xid_new_from_string/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return this;
+}
+
+
+
 void xta_xid_delete(xta_xid_t *this)
 {
     enum Exception { NONE } excp;
@@ -136,7 +181,7 @@ const XID *xta_xid_get_xa_xid(xta_xid_t *this)
 
 
 
-char *xta_xid_get_as_string(const xta_xid_t *this)
+char *xta_xid_to_string(const xta_xid_t *this)
 {
     enum Exception { NULL_OBJECT
                      , MALLOC_ERROR
@@ -145,7 +190,7 @@ char *xta_xid_get_as_string(const xta_xid_t *this)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     char *string = NULL;
     
-    LIXA_TRACE(("xta_xid_get_as_string\n"));
+    LIXA_TRACE(("xta_xid_to_string\n"));
     TRY {
         lixa_ser_xid_t lsx;
         if (NULL == this)
@@ -175,7 +220,7 @@ char *xta_xid_get_as_string(const xta_xid_t *this)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_xid_get_as_string/excp=%d/"
+    LIXA_TRACE(("xta_xid_to_string/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return string;
 }

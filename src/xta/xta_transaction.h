@@ -206,12 +206,16 @@ extern "C" {
      * Resume the transaction represented by xid in this transaction object;
      * the transaction has been previously suspended with
      * @ref xta_transaction_suspend
-     * @param[in,out] this : transaction object
-     * @param[in] xid identifier of the transaction that must be resumed
+     * @param[in,out] this transaction object
+     * @param[in] xid_string serialized identifier of the transaction that
+     *            must be resumed (see @ref xta_xid_to_string)
+     * @param[in] flags can be @ref TMRESUME if the transaction has been
+     *            suspended using @ref TMMIGRATE or @ref TMJOIN if the
+     *            transaction has been suspended using @ref TMNOFLAGS
      * @return a reason code
      */
     int xta_transaction_resume(xta_transaction_t *this,
-                               const xta_xid_t *xid);
+                               const char *xid_string, long flags);
     
 
     
