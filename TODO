@@ -1,6 +1,7 @@
-Go on with xta_2.at:
-- case0102.c
-- implement xta_transaction_resume using a char string instead of a XID object
+When a thread of control resumes a XID, in the state server the old one is not
+re-used: understand if it's OK or not from a recover perspective.
+Try crash test for suspend/resume.
+
 
 
 Including xta/xta.h will include some resource manager include files (MySQL,
