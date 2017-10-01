@@ -1,6 +1,7 @@
-When a thread of control resumes a XID, in the state server the old one is not
-re-used: understand if it's OK or not from a recover perspective.
-Try crash test for suspend/resume.
+Case test to develop:
+Try crash test for suspend/resume: copy from XTA basic tests "Crash in the
+middle of xa_end".
+Try automatic recovery for a resumed transaction.
 
 
 

@@ -656,6 +656,18 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
                 *txrc = tmp_txrc;
         } /* for (i=0; ...) */
 
+        /* @@@ 2017-10-01
+         * is this a real possible optimization?
+         * if it worked for TMJOIN and TMRESUME it should work in any case,
+         * but server state miss information about xa_start and xa_end.
+         * But removing messages for both xa_start and xa_end breaks
+         * autorecovery test cases... mumbling...
+        if (TMSUSPEND & xa_end_flags) {
+            // release memory associated to the array
+            g_array_free(msg.body.end_8.xa_end_execs, TRUE);
+            memset(&msg, 0, sizeof(msg));
+        } else {
+        */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer) - 1,
                                &buffer_size)))
@@ -699,7 +711,10 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
         /* check the answer from the server */
         if (LIXA_RC_OK != (ret_cod = msg.body.end_16.answer.rc))
             THROW(ERROR_FROM_SERVER);
-        
+
+        /*
+          } if (TMSUSPEND & xa_end_flags)
+        */
         if (TX_OK != *txrc)
             THROW(XA_ERROR);
 
@@ -2234,57 +2249,66 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
             g_array_append_val(msg.body.start_8.rsrmgrs, record);
         }
 
+        /* @@@ 2017-10-01
+         * is this a real possible optimization?
+         * if it worked for TMJOIN and TMRESUME it should work in any case,
+         * but server state miss information about xa_start and xa_end.
+         * But removing messages for both xa_start and xa_end breaks
+         * autorecovery test cases... mumbling...
         if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags) {
-            /* only the GArray needs to be released to avoid memory leaks */
+            // only the GArray needs to be released to avoid memory leaks
             g_array_free(msg.body.start_8.rsrmgrs, TRUE);
             memset(&msg, 0, sizeof(msg));
         } else {
-            if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                                   &msg, buffer, sizeof(buffer) - 1,
-                                   &buffer_size)))
-                THROW(MSG_SERIALIZE_ERROR1);
+        */
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
+                               &msg, buffer, sizeof(buffer) - 1,
+                               &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR1);
 
-            /* only the GArray needs to be released to avoid memory leaks */
-            g_array_free(msg.body.start_8.rsrmgrs, TRUE);
-            memset(&msg, 0, sizeof(msg));
-
-            LIXA_TRACE(("lixa_xa_start: sending "
-                        SIZE_T_FORMAT
-                        " bytes to the server for step 8\n", buffer_size));
-            if (LIXA_RC_OK !=
-                (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
-                if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
-                    client_status_set_sockfd(cs, LIXA_NULL_FD);
-                THROW(MSG_SEND_ERROR);
-            }
-
-            LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_START_1,
-                       client_status_get_crash_count(cs));
-
-            if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                                   fd, buffer, sizeof(buffer) - 1,
-                                   &read_bytes))) {
-                client_status_check_socket(cs, ret_cod);
-                THROW(MSG_RETRIEVE_ERROR);
-            }
-            LIXA_TRACE(("lixa_xa_start: receiving %d"
-                        " bytes from the server |%*.*s|\n",
-                        read_bytes, read_bytes, read_bytes, buffer));
-
-            LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_START_2,
-                       client_status_get_crash_count(cs));
-
-            if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                                   buffer, read_bytes, &msg)))
-                THROW(MSG_DESERIALIZE_ERROR);
-#ifdef _TRACE
-            lixa_msg_trace(&msg);
-#endif
-            /* check the answer from the server */
-            if (LIXA_RC_OK != (ret_cod = msg.body.start_16.answer.rc))
-                THROW(ERROR_FROM_SERVER);
+        /* only the GArray needs to be released to avoid memory leaks */
+        g_array_free(msg.body.start_8.rsrmgrs, TRUE);
+        memset(&msg, 0, sizeof(msg));
+        
+        LIXA_TRACE(("lixa_xa_start: sending "
+                    SIZE_T_FORMAT
+                    " bytes to the server for step 8\n", buffer_size));
+        if (LIXA_RC_OK !=
+            (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR);
         }
-
+        
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_START_1,
+                   client_status_get_crash_count(cs));
+        
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
+                               fd, buffer, sizeof(buffer) - 1,
+                               &read_bytes))) {
+            client_status_check_socket(cs, ret_cod);
+            THROW(MSG_RETRIEVE_ERROR);
+        }
+        LIXA_TRACE(("lixa_xa_start: receiving %d"
+                    " bytes from the server |%*.*s|\n",
+                    read_bytes, read_bytes, read_bytes, buffer));
+        
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_START_2,
+                   client_status_get_crash_count(cs));
+        
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
+                               buffer, read_bytes, &msg)))
+            THROW(MSG_DESERIALIZE_ERROR);
+#ifdef _TRACE
+        lixa_msg_trace(&msg);
+#endif
+        /* check the answer from the server */
+        if (LIXA_RC_OK != (ret_cod = msg.body.start_16.answer.rc))
+            THROW(ERROR_FROM_SERVER);
+        /*
+          } if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags)
+        */
+            
         /* prepare the next message */
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.pvs.verb = LIXA_MSG_VERB_START;
@@ -2439,38 +2463,47 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
         else
             msg.body.start_24.conthr.txstate = txstate;
 
+        /* @@@ 2017-10-01
+         * is this a real possible optimization?
+         * if it worked for TMJOIN and TMRESUME it should work in any case,
+         * but server state miss information about xa_start and xa_end.
+         * But removing messages for both xa_start and xa_end breaks
+         * autorecovery test cases... mumbling...
         if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags) {
-            /* this object contains references to external stuff and
-               cannot be freed using standard lixa_msg_free; we are freeing the
-               array to avoid memory leaks */
+            // this object contains references to external stuff and
+            // cannot be freed using standard lixa_msg_free; we are freeing the
+            // array to avoid memory leaks
             g_array_free(msg.body.start_24.xa_start_execs, TRUE);
             memset(&msg, 0, sizeof(msg));
         } else {
-            if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                                   &msg, buffer, sizeof(buffer),
-                                   &buffer_size)))
-                THROW(MSG_SERIALIZE_ERROR2);
-
-            /* this object contains references to external stuff and
-               cannot be freed using standard lixa_msg_free; we are freeing the
-               array to avoid memory leaks */
-            g_array_free(msg.body.start_24.xa_start_execs, TRUE);
-            memset(&msg, 0, sizeof(msg));
-
-            LIXA_TRACE(("lixa_xa_start: sending "
-                        SIZE_T_FORMAT
-                        " bytes to the server for step 24\n", buffer_size));
-            if (LIXA_RC_OK !=
-                (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
-                if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
-                    client_status_set_sockfd(cs, LIXA_NULL_FD);
-                THROW(MSG_SEND_ERROR2);
-            }
-
-            LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_START_3,
-                       client_status_get_crash_count(cs));
+        */
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
+                               &msg, buffer, sizeof(buffer),
+                               &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR2);
+        
+        /* this object contains references to external stuff and
+           cannot be freed using standard lixa_msg_free; we are freeing the
+           array to avoid memory leaks */
+        g_array_free(msg.body.start_24.xa_start_execs, TRUE);
+        memset(&msg, 0, sizeof(msg));
+        
+        LIXA_TRACE(("lixa_xa_start: sending "
+                    SIZE_T_FORMAT
+                    " bytes to the server for step 24\n", buffer_size));
+        if (LIXA_RC_OK !=
+            (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR2);
         }
-
+        
+        LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_START_3,
+                   client_status_get_crash_count(cs));
+        /*
+          } if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags)
+        */
+        
         if (TX_OK != *txrc)
             THROW(XA_ERROR);
 

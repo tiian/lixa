@@ -62,7 +62,7 @@ AT_CLEANUP
 AT_SETUP([XTA/2.0/1.2 Resume, Insert and Commit])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 2 1 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 2 1 1 0 $TESTS_TMP_FILE1 2>&1], [1], [ignore], [ignore])
 AT_CLEANUP
 
 # Try to resume the XID again... it must return an error!!!
