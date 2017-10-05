@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     xta_native_xa_resource_t *native_xa_res;
     xta_native_xa_resource_t *dynamic_native_xa_res;
     /* control variables */
-    enum Phase { INITIAL, INTERMEDIATE, FINAL } phase;
+    enum Phase { INITIAL, INTERMEDIATE, FINAL, NO_PHASE } phase;
     int        commit;
     int        insert;
     int        test_rc;
@@ -121,6 +121,9 @@ int main(int argc, char *argv[])
                 fprintf(stderr, "%s| error while opening file '%s'\n",
                         pgm, filename);
             }
+            break;
+        case NO_PHASE:
+            fprintf(stderr, "%s| phase=%d (NO_PHASE)\n", pgm, phase);
             break;
         default:
             fprintf(stderr, "%s| phase=%d UNKNOWN!\n", pgm, phase);
@@ -194,7 +197,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (INITIAL == phase) {
+    if (INITIAL == phase || NO_PHASE == phase) {
         /* start a Distributed Transaction */
         if (LIXA_RC_OK != (rc = xta_transaction_start(tx))) {
             fprintf(stderr, "%s| xta_transaction_start: returned %d\n",
@@ -210,10 +213,12 @@ int main(int argc, char *argv[])
         } else {
             fprintf(stderr, "%s| xta XID is '%s'\n", pgm, xid_string);
         }
-        /* write to xid_file the transaction that will be resumed */
-        fprintf(xid_file, "%s", xid_string);
-        fclose(xid_file);
-        xid_file = NULL;
+        if (INITIAL == phase) {
+            /* write to xid_file the transaction that will be resumed */
+            fprintf(xid_file, "%s", xid_string);
+            fclose(xid_file);
+            xid_file = NULL;
+        }
         /* release xid_string */
         free(xid_string);
         xid_string = NULL;
@@ -314,7 +319,7 @@ int main(int argc, char *argv[])
         }
     } /* if (INITIAL == phase) */
 
-    if (FINAL == phase) {
+    if (FINAL == phase || NO_PHASE == phase) {
         /* commit the Distributed Transaction */
         if (commit) {
             if (test_rc != (rc = xta_transaction_commit(tx))) {
