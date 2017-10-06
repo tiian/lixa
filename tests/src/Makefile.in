@@ -122,7 +122,7 @@ CONFIG_CLEAN_VPATH_FILES =
 @COMPILE_MYSQL_POSTGRESQL_STUFF_TRUE@am__EXEEXT_5 = case0042$(EXEEXT)
 @COMPILE_WEBSPHEREMQ_STUFF_TRUE@am__EXEEXT_6 = case0044$(EXEEXT)
 @COMPILE_XTA_TRUE@am__EXEEXT_7 = case0100$(EXEEXT) case0101$(EXEEXT) \
-@COMPILE_XTA_TRUE@	case0102$(EXEEXT)
+@COMPILE_XTA_TRUE@	case0102$(EXEEXT) case0103$(EXEEXT)
 am_case0000_OBJECTS = case0000.$(OBJEXT)
 case0000_OBJECTS = $(am_case0000_OBJECTS)
 case0000_LDADD = $(LDADD)
@@ -485,6 +485,10 @@ case0102_DEPENDENCIES = ../../src/common/liblixab.la \
 case0102_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(case0102_LDFLAGS) $(LDFLAGS) -o $@
+am_case0103_OBJECTS = case0103-case0103.$(OBJEXT)
+case0103_OBJECTS = $(am_case0103_OBJECTS)
+case0103_DEPENDENCIES = ../../src/common/liblixab.la \
+	../../src/client/liblixac.la ../../src/xta/liblixta.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -537,7 +541,8 @@ SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) $(case0002_SOURCES) \
 	$(case0045_SOURCES) $(case0046_SOURCES) $(case0047_SOURCES) \
 	$(case0048_SOURCES) $(case0049_SOURCES) $(case0050_SOURCES) \
 	$(case0051_SOURCES) $(case0052_SOURCES) $(case0053_SOURCES) \
-	$(case0100_SOURCES) $(case0101_SOURCES) $(case0102_SOURCES)
+	$(case0100_SOURCES) $(case0101_SOURCES) $(case0102_SOURCES) \
+	$(case0103_SOURCES)
 DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0002_SOURCES) $(case0003_SOURCES) $(case0004_SOURCES) \
 	$(case0005_SOURCES) $(case0006_SOURCES) $(case0007_SOURCES) \
@@ -557,7 +562,7 @@ DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0047_SOURCES) $(case0048_SOURCES) $(case0049_SOURCES) \
 	$(case0050_SOURCES) $(case0051_SOURCES) $(case0052_SOURCES) \
 	$(case0053_SOURCES) $(case0100_SOURCES) $(case0101_SOURCES) \
-	$(case0102_SOURCES)
+	$(case0102_SOURCES) $(case0103_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -831,7 +836,7 @@ LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 @COMPILE_ORACLE_STUFF_TRUE@LDADD_ORACLE = -lclntsh
 @COMPILE_IBMDB2_STUFF_TRUE@MAYBE_IBMDB2 = case0039
 @COMPILE_WEBSPHEREMQ_STUFF_TRUE@MAYBE_WEBSPHEREMQ = case0044
-@COMPILE_XTA_TRUE@MAYBE_XTA = case0100 case0101 case0102
+@COMPILE_XTA_TRUE@MAYBE_XTA = case0100 case0101 case0102 case0103
 case0000_SOURCES = case0000.c
 case0001_SOURCES = case0001.c
 case0002_SOURCES = case0002.c
@@ -973,6 +978,13 @@ case0102_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 
 case0102_SOURCES = case0102.c
 case0102_LDFLAGS = @ORACLE_OCI_LDFLAGS@
+case0103_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
+	@MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
+
+case0103_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
+	../../src/xta/liblixta.la
+
+case0103_SOURCES = case0103.c
 all: all-recursive
 
 .SUFFIXES:
@@ -1245,6 +1257,10 @@ case0102$(EXEEXT): $(case0102_OBJECTS) $(case0102_DEPENDENCIES) $(EXTRA_case0102
 	@rm -f case0102$(EXEEXT)
 	$(AM_V_CCLD)$(case0102_LINK) $(case0102_OBJECTS) $(case0102_LDADD) $(LIBS)
 
+case0103$(EXEEXT): $(case0103_OBJECTS) $(case0103_DEPENDENCIES) $(EXTRA_case0103_DEPENDENCIES) 
+	@rm -f case0103$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(case0103_OBJECTS) $(case0103_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -1308,6 +1324,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0100-case0100.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0101-case0101.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0102-case0102.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0103-case0103.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1497,6 +1514,20 @@ case0102-case0102.obj: case0102.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='case0102.c' object='case0102-case0102.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0102_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o case0102-case0102.obj `if test -f 'case0102.c'; then $(CYGPATH_W) 'case0102.c'; else $(CYGPATH_W) '$(srcdir)/case0102.c'; fi`
+
+case0103-case0103.o: case0103.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0103_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT case0103-case0103.o -MD -MP -MF $(DEPDIR)/case0103-case0103.Tpo -c -o case0103-case0103.o `test -f 'case0103.c' || echo '$(srcdir)/'`case0103.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case0103-case0103.Tpo $(DEPDIR)/case0103-case0103.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='case0103.c' object='case0103-case0103.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0103_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o case0103-case0103.o `test -f 'case0103.c' || echo '$(srcdir)/'`case0103.c
+
+case0103-case0103.obj: case0103.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0103_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT case0103-case0103.obj -MD -MP -MF $(DEPDIR)/case0103-case0103.Tpo -c -o case0103-case0103.obj `if test -f 'case0103.c'; then $(CYGPATH_W) 'case0103.c'; else $(CYGPATH_W) '$(srcdir)/case0103.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case0103-case0103.Tpo $(DEPDIR)/case0103-case0103.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='case0103.c' object='case0103-case0103.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0103_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o case0103-case0103.obj `if test -f 'case0103.c'; then $(CYGPATH_W) 'case0103.c'; else $(CYGPATH_W) '$(srcdir)/case0103.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

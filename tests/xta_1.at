@@ -2,15 +2,15 @@ AT_BANNER([XTA: XA Transaction API])
 
 AT_SETUP([XTA/1.0/0.0 Insert and commit])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset start case0100 1 1 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset start case0100 1 1 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 AT_SETUP([XTA/1.0/0.1 Delete and commit])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 AT_SETUP([XTA/1.0/0.2 Insert and rollback])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 0 1 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 0 1 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # One phase commit
@@ -24,7 +24,7 @@ xa_end/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0101 1 0 1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0101 1 0 1 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Two phase commit
@@ -48,7 +48,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none case0101 1 0 2 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none case0101 1 0 2 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Rollback after prepare
@@ -64,7 +64,7 @@ xa_prepare/-3
 xa_rollback/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0100 1 1 -502 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0100 1 1 -502 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Crash after connect
@@ -78,7 +78,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=2 ; lixa_test_exec.sh noreset none case0100 1 1 0], [134], [ignore], [ignore])
+AT_CHECK([export LIA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=2 ; lixa_test_exec.sh noreset none case0100 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
 # Crash in the middle of xa_open 1/2
@@ -160,7 +160,7 @@ AT_CLEANUP
 # automatically rollback the previous crash
 AT_SETUP([XTA/1.0/3.2 Delete and commit])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Crash after xa_end
@@ -200,7 +200,7 @@ AT_CLEANUP
 # automatically rollback the previous crash
 AT_SETUP([XTA/1.0/4.2 Delete and commit])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Crash in the middle of xa_prepare
@@ -245,7 +245,7 @@ AT_CLEANUP
 # automatically rollback the previous crash
 AT_SETUP([XTA/1.0/5.2 Delete and commit])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Crash after xa_prepare
@@ -290,6 +290,6 @@ AT_CLEANUP
 # automatically rollback the previous crash
 AT_SETUP([XTA/1.0/6.2 Delete and commit])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset stop case0100 1 0 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset stop case0100 1 0 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 

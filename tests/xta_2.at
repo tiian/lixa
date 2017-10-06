@@ -1,4 +1,4 @@
-AT_BANNER([XTA: Suspend and Resume])
+AT_BANNER([XTA: Suspend and Resume with Oracle RDBMS])
 
 # This case tests needs Oracle because MySQL and PostgreSQL don't support
 # XA Suspend/Resume
@@ -10,7 +10,7 @@ AT_BANNER([XTA: Suspend and Resume])
 AT_SETUP([XTA/2.0/0.0 Insert and Suspend])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset start case0102 0 1 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset start case0102 0 1 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Second step:
@@ -20,7 +20,7 @@ AT_CLEANUP
 AT_SETUP([XTA/2.0/0.1 Resume and Delete])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 1 0 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 1 0 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Third step:
@@ -30,7 +30,7 @@ AT_CLEANUP
 AT_SETUP([XTA/2.0/0.2 Resume, Insert and Rollback])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 2 1 0 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 2 1 0 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Redo with commit
@@ -42,7 +42,7 @@ AT_CLEANUP
 AT_SETUP([XTA/2.0/1.0 Insert and Suspend])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 0 1 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 0 1 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Second step:
@@ -52,7 +52,7 @@ AT_CLEANUP
 AT_SETUP([XTA/2.0/1.1 Resume and Delete])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 1 0 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 1 0 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Third step:
@@ -62,7 +62,7 @@ AT_CLEANUP
 AT_SETUP([XTA/2.0/1.2 Resume, Insert and Commit])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 2 1 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 2 1 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Try to resume the XID again... it must return an error!!!
@@ -70,13 +70,13 @@ AT_CLEANUP
 AT_SETUP([XTA/2.0/2.0 Resume a committed XID])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 1 0 1 0 $TESTS_TMP_FILE1 2>&1], [1], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0102 1 0 1 0 $TESTS_TMP_FILE1 2>&1], [1], [ignore], [ignore])
 AT_CLEANUP
 
 # clean-up the table
 AT_SETUP([XTA/2.0/2.1 Delete and commit])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Crash in the middle of suspend (xa_end)
@@ -94,7 +94,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh noreset none case0102 0 1 1 0 $TESTS_TMP_FILE1 2>&1], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=11 ; lixa_test_exec.sh noreset none case0102 0 1 1 0 $TESTS_TMP_FILE1 2>&1], [134], [ignore], [ignore])
 AT_CLEANUP
 
 # Automatic recovery
@@ -133,7 +133,7 @@ xa_open/0
 xa_start/0
 xa_end/0
 ]])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0102 0 1 1 0 $TESTS_TMP_FILE1 2>&1], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=12 ; lixa_test_exec.sh noreset none case0102 0 1 1 0 $TESTS_TMP_FILE1 2>&1], [134], [ignore], [ignore])
 AT_CLEANUP
 
 # Automatic recovery
@@ -173,7 +173,7 @@ xa_start/0
 xa_end/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0102 0 1 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0102 0 1 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Second step:
@@ -190,7 +190,7 @@ xa_start/0
 xa_end/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0102 1 0 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0102 1 0 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # Third step:
@@ -208,7 +208,7 @@ xa_start/0
 xa_end/0
 xa_prepare/0
 ]])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=14 ; lixa_test_exec.sh noreset none case0102 2 1 1 0 $TESTS_TMP_FILE1 2>&1], [134], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=14 ; lixa_test_exec.sh noreset none case0102 2 1 1 0 $TESTS_TMP_FILE1 2>&1], [134], [ignore], [ignore])
 AT_CLEANUP
 
 # Automatic recovery
@@ -233,10 +233,87 @@ AT_CLEANUP
 # clean-up the table
 AT_SETUP([XTA/2.0/4.4 Delete and commit])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_TRACE_MASK=0x00000020 ; export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset stop case0100 1 0 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 0 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
-#AT_SETUP([XTA stop test])
-#AT_CHECK([/bin/false], [0], [ignore], [ignore])
-#AT_CLEANUP
+# Crash after xa_prepare
+# - create a new transaction (XID)
+# - insert a row in the table
+# - suspend the transaction for migrate
+# - crash
+#
+# NOTE: this test is slow because the previous session lock needs a time-out
+#       for automatic removal
+AT_SETUP([XTA/2.0/5.0 Insert and suspend])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0102 0 1 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# Second step:
+# - resume the previous transaction (XID)
+# - delete the row from the table
+# - suspend again
+AT_SETUP([XTA/2.0/5.1 Resume, delete and suspend])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0102 1 0 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# Third step:
+# - resume the previous transaction (XID)
+# - insert the row in the table
+# - crash in the middle of xa_prepare
+# - commit
+AT_SETUP([XTA/2.0/5.2 Crash after xa_prepare])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=15 ; lixa_test_exec.sh noreset none case0102 2 1 1 0 $TESTS_TMP_FILE1 2>&1], [134], [ignore], [ignore])
+AT_CLEANUP
+
+# Automatic recovery
+AT_SETUP([XTA/2.0/5.3 Automatic recovery])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0102 3 0 1 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# clean-up the table
+AT_SETUP([XTA/2.0/5.4 Delete and commit])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset stop case0100 1 0 0 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
 
