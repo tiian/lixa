@@ -1,8 +1,4 @@
-Case test to develop:
-Try crash test for suspend/resume: copy from XTA basic tests "Crash in the
-middle of xa_end".
-Try automatic recovery for a resumed transaction.
-
+xta_transaction_manager_delete does not release created transactions!
 
 
 Including xta/xta.h will include some resource manager include files (MySQL,
