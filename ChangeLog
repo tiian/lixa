@@ -1,6 +1,6 @@
 LOG:
 
-         - 1.5.1 XTA support for "Suspend / Resume" pattern
+20171010 - 1.5.1 XTA support for "Suspend/Resume" pattern
 
 20170921 - 1.5.0 Release of XTA API (XA Transaction API)
 		 Change of client linkable code (libraries) to LGPL 2.1

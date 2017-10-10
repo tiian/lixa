@@ -1,3 +1,8 @@
+Release: 1.5.1 (Tester: Tiian; Test purpose: XTA)
+Date: 2017-10-10
+Configuration: --enable-crash --with-docbook --with-mysql --with-postgresql --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_12_1/
+Ubuntu 14.04	|x86_64	|virtual (KVM)	|2 vCPU
+
 Release: 1.5.0 (Tester: Tiian; Test purpose: XTA)
 Date: 2017-09-21
 Configuration: --enable-crash --with-docbook --with-mysql --with-postgresql --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_12_1/

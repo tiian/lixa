@@ -161,8 +161,7 @@ xta_transaction_manager_create_transaction(xta_transaction_manager_t *this)
             if (!g_hash_table_insert(this->transactions, self, tx)) {
                 THROW(INTERNAL_ERROR);
             }
-            /* @@@ implement some code related to XID... */
-        }
+        } /* if (NULL == (tx = g_hash_table_lookup */
         
         THROW(NONE);
     } CATCH {

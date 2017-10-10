@@ -1,6 +1,3 @@
-xta_transaction_manager_delete does not release created transactions!
-
-
 Including xta/xta.h will include some resource manager include files (MySQL,
 PostgreSQL, Oracle, etc...). Provide utility for CPPFLAGS and LDADD for custom
 software build.
