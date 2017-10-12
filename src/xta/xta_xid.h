@@ -58,10 +58,12 @@ extern "C" {
 
     /**
      * Create a new Transaction Identifier object and generate a new unique XID
+     * @param[in] branch_qualifier that must be assigned to the XID
+     *            (in ASCII HEX format)
      * @return a new transaction identifier object or NULL in the event of an
      *         error occurred
      */
-    xta_xid_t *xta_xid_new(void);
+    xta_xid_t *xta_xid_new(const char *branch_qualifier);
 
 
 

@@ -580,7 +580,7 @@ int xta_transaction_start(xta_transaction_t *this)
         } else
             next_txstate = TX_STATE_S3;
         /* create a new xid */
-        if (NULL == (this->xid = xta_xid_new()))
+        if (NULL == (this->xid = xta_xid_new(this->local_ccc.config_digest)))
             THROW(NULL_OBJECT2);
         /* start the transaction in all the XA Resource Managers */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(

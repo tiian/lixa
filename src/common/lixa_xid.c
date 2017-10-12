@@ -85,17 +85,26 @@ int lixa_xid_bqual_is_global(const XID *xid)
 
 
 
-void lixa_xid_create_new(XID *xid)
+void lixa_xid_create_new(uuid_t branch_qualifier, XID *xid)
 {
     uuid_t uuid_obj;
     
     xid->formatID = LIXA_XID_FORMAT_ID;
     xid->gtrid_length = sizeof(uuid_t);
     xid->bqual_length = sizeof(uuid_t);
-    memset(xid->data, 0, XIDDATASIZE); /* this is not necessary, but... */
+    /* this is not necessary, but... */
+    memset(xid->data, 0, XIDDATASIZE);
     uuid_generate(uuid_obj);
-    memcpy(xid->data, uuid_obj, sizeof(uuid_t)); /* global transaction identifier */
-    memcpy(xid->data + sizeof(uuid_t), lixa_xid_global_bqual, sizeof(uuid_t)); /* branch qualifier */
+    /* global transaction identifier */
+    memcpy(xid->data, uuid_obj, sizeof(uuid_t));
+    /* branch qualifier */
+    if (NULL == branch_qualifier) {
+        memcpy(xid->data + sizeof(uuid_t),
+               lixa_xid_global_bqual, sizeof(uuid_t));
+    } else {
+        memcpy(xid->data + sizeof(uuid_t),
+               branch_qualifier, sizeof(uuid_t));
+    }
 #ifdef LIXA_DEBUG
     {
     char *gtrid, *bqual;
@@ -217,7 +226,7 @@ int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx)
 
 
 
-int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx)
+int lixa_xid_deserialize(XID *xid, const lixa_ser_xid_t lsx)
 {
     enum Exception
     {

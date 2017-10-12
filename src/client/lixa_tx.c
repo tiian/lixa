@@ -150,7 +150,7 @@ int lixa_tx_begin(int *txrc, XID *xid, int flags)
         if (lixa_xid_is_reset(xid)) {
             /* generate the transaction id */
             LIXA_TRACE(("lixa_tx_begin: generating new xid for transaction\n"));
-            lixa_xid_create_new(xid);
+            lixa_xid_create_new(NULL, xid);
         } else {
             if (TMJOIN & flags) {
                 LIXA_TRACE(

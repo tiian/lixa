@@ -4,4 +4,5 @@ http://lixa.sourceforge.net/lixa-doc/xta/
 cd doc/api/xta/html
 sftp tiian@web.sourceforge.net
 cd /home/project-web/lixa/htdocs/lixa-doc/xta
+put *
 

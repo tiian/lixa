@@ -41,7 +41,7 @@
 
 
 
-xta_xid_t *xta_xid_new(void)
+xta_xid_t *xta_xid_new(const char *branch_qualifier)
 {
     enum Exception { G_TRY_MALLOC_ERROR
                      , NONE } excp;
@@ -54,8 +54,11 @@ xta_xid_t *xta_xid_new(void)
         if (NULL == (this = (xta_xid_t *)
                      g_try_malloc0(sizeof(xta_xid_t))))
             THROW(G_TRY_MALLOC_ERROR);
-        /* initialize the object */
-        lixa_xid_create_new(&this->xa_xid);
+        /*
+         * @@@ convert from ASCII HEX to binary unsigned hex
+         */
+        /* initialize the object */        
+        lixa_xid_create_new((unsigned char *)branch_qualifier, &this->xa_xid);
         
         THROW(NONE);
     } CATCH {

@@ -107,9 +107,11 @@ extern "C" {
     
     /**
      * Create a new XID
+     * @param[in] branch_qualifier the branch qualifier that must be assigned
+     *            to xid or NULL if the global one is OK
      * @param[out] xid the generated unique transaction id
      */
-    void lixa_xid_create_new(XID *xid);
+    void lixa_xid_create_new(uuid_t branch_qualifier, XID *xid);
 
 
     
@@ -197,7 +199,7 @@ extern "C" {
      * @return TRUE if deserialization was completed, <br>
      *         FALSE if there was an error
      */
-    int lixa_xid_deserialize(XID *xid, lixa_ser_xid_t lsx);
+    int lixa_xid_deserialize(XID *xid, const lixa_ser_xid_t lsx);
 
 
     

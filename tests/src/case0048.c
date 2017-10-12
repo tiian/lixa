@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 
     LIXA_TRACE_INIT;
 
-    lixa_xid_create_new(&info1.xid);
+    lixa_xid_create_new(NULL, &info1.xid);
 
     char *xid = NULL;
     if (tx_xid_serialize(info1, &xid) != TX_OK) {
