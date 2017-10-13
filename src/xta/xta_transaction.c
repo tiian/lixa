@@ -358,7 +358,8 @@ int xta_transaction_redigest(xta_transaction_t *this,
         if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))
             THROW(G_CHECKSUM_NEW_ERROR);
         /* use current digest as the initial content */
-        g_checksum_update(checksum, (guchar *)this->local_ccc.config_digest,
+        g_checksum_update(checksum,
+                          (guchar *)this->local_ccc.config_digest,
                           sizeof(md5_digest_hex_t));
         /* append the config of the current resource */
         g_checksum_update(checksum, (guchar *)config_tostring,

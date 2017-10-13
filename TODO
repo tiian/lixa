@@ -1,12 +1,12 @@
-Go on with xta_xid_new see @@@
-
-
 
 Including xta/xta.h will include some resource manager include files (MySQL,
 PostgreSQL, Oracle, etc...). Provide utility for CPPFLAGS and LDADD for custom
 software build.
 
-Implement XTA for C/C++
+Implement XTA for C++
+
+Put all configuration in XTA without necessity to load lixac_conf.xml file
+
 
 Explore high availability features (active/active) with dynamic or static
 workload. Avoid disk persistence, prefer distributed memory semi persistence.

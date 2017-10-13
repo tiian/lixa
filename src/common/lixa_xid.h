@@ -85,13 +85,16 @@ extern "C" {
 
     
     /**
-     * Use an MD5 digest to set the global bqual
-     * <b>Note:</b> this function is not thread safe and MUST be called
-     * with a serialization technique
+     * Use an MD5 digest to set a branch qualifier.
+     * <b>Note:</b> this function is not thread safe and if used to set
+     *         lixa_xid_global_bqual MUST be called with a serialization
+     *         technique
      * @param[in] md5_digest_hex pointer to a string of
-     * @ref MD5_DIGEST_LENGTH * 2 characters
+     *            @ref MD5_DIGEST_LENGTH * 2 characters
+     * @param[out] branch_qualifier that must be set
      */
-    void lixa_xid_set_global_bqual(const char *md5_digest_hex);
+    void lixa_xid_set_bqual(const char *md5_digest_hex,
+                            uuid_t branch_qualifier);
 
 
     

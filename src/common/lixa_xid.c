@@ -57,10 +57,11 @@ uuid_t lixa_xid_global_bqual;
 
 
 
-void lixa_xid_set_global_bqual(const char *md5_digest_hex)
+void lixa_xid_set_bqual(const char *md5_digest_hex,
+                        uuid_t branch_qualifier)
 {
     int i;
-    unsigned char *p = (unsigned char *)&lixa_xid_global_bqual;
+    unsigned char *p = (unsigned char *)branch_qualifier;
     char tmp[3];
     tmp[2] = '\0';
     for (i=0; i<MD5_DIGEST_LENGTH; ++i) {
