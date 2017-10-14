@@ -117,6 +117,17 @@ extern "C" {
     void lixa_xid_create_new(uuid_t branch_qualifier, XID *xid);
 
 
+
+    /**
+     * Create a new subordinate XID for a branch of a superior XID: global
+     * transaction ID is preserved, branch transaction ID is partially
+     * preserved and partially new
+     * @param[in] superior is the XID of the superior branch
+     * @param[out] subordinate is the XID of the subordinate branch
+     */
+    void lixa_xid_branch_new(const XID *superior, XID *subordinate);
+
+    
     
     /**
      * Generate a new branch qualifier and update the XID

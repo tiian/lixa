@@ -56,7 +56,7 @@ xta_xid_t *xta_xid_new(const char *branch_qualifier)
         if (NULL == (this = (xta_xid_t *)
                      g_try_malloc0(sizeof(xta_xid_t))))
             THROW(G_TRY_MALLOC_ERROR);
-        /* convert from ASCII HEX to binary unsigned hex */
+        /* convert from ASCII HEX to binary hex */
         lixa_xid_set_bqual(branch_qualifier, tmp_bqual);
         /* initialize the object */        
         lixa_xid_create_new(tmp_bqual, &this->xa_xid);

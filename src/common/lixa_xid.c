@@ -100,9 +100,11 @@ void lixa_xid_create_new(uuid_t branch_qualifier, XID *xid)
     memcpy(xid->data, uuid_obj, sizeof(uuid_t));
     /* branch qualifier */
     if (NULL == branch_qualifier) {
+        /* this is used by TX */
         memcpy(xid->data + sizeof(uuid_t),
                lixa_xid_global_bqual, sizeof(uuid_t));
     } else {
+        /* this is used by XTA */
         memcpy(xid->data + sizeof(uuid_t),
                branch_qualifier, sizeof(uuid_t));
     }
@@ -120,6 +122,41 @@ void lixa_xid_create_new(uuid_t branch_qualifier, XID *xid)
 #endif /* LIXA_DEBUG */
 }
 
+
+
+void lixa_xid_branch_new(const XID *superior, XID *subordinate)
+{
+    uuid_t uuid_obj;
+    
+    /* this is not necessary, but... */
+    memset(subordinate->data, 0, XIDDATASIZE);
+    /* generate a new unique id */
+    uuid_generate(uuid_obj);
+    /* copy control fields */
+    subordinate->formatID = superior->formatID;
+    subordinate->gtrid_length = superior->gtrid_length;
+    subordinate->bqual_length = superior->bqual_length;
+    /* copy global and first half of branch */
+    memcpy(subordinate->data, subordinate->data,
+           sizeof(uuid_t) + sizeof(uuid_t)/2);
+    /* copy second half of branch from new unique id */
+    memcpy(subordinate->data + sizeof(uuid_t) + sizeof(uuid_t)/2,
+           uuid_obj, sizeof(uuid_t)/2);
+#ifdef LIXA_DEBUG
+    {
+    char *gtrid, *bqual;
+    gtrid = lixa_xid_get_gtrid_ascii(subordinate);
+    bqual = lixa_xid_get_bqual_ascii(subordinate);
+    if (NULL != gtrid && NULL != bqual)
+        LIXA_TRACE(("lixa_xid_branch_new: gtrid='%s'; bqual='%s'\n",
+                    gtrid, bqual));
+    if (NULL != bqual) free(bqual);
+    if (NULL != gtrid) free(gtrid);
+    }
+#endif /* LIXA_DEBUG */
+}
+
+
 void lixa_xid_create_new_bqual(XID *xid)
 {
     char *gtrid = (char *) malloc(xid->gtrid_length);
@@ -135,7 +172,7 @@ void lixa_xid_create_new_bqual(XID *xid)
     memcpy(xid->data, gtrid, sizeof(uuid_t)); // global transaction identifier
     memcpy(xid->data + sizeof(uuid_t), uuid_obj,
            sizeof(uuid_t)); // branch qualifier
-
+    free(gtrid); /* Tiian 2017-10-14: unmached malloc, fixed */
 #ifdef LIXA_DEBUG
 {
     char *gtrid, *bqual;
@@ -150,6 +187,8 @@ void lixa_xid_create_new_bqual(XID *xid)
 }
 #endif /* LIXA_DEBUG */
 }
+
+
 
 char *lixa_xid_get_gtrid_ascii(const XID *xid)
 {

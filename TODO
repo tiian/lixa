@@ -1,3 +1,26 @@
+How to test transaction branches (do a simulated test before developing real
+programs):
+AT_CHECK([    mkfifo fifo1; mkfifo fifo2;     )
+AT_CHECK([ ... ; lixa_test_exec.sh ... &], ...)
+AT_CHECK([ ... ; lixa_test_exec.sh ... &], ...)
+AT_CHECK([    check the result of the executions   ])
+There are some points:
+- execution1 passes data to execution2 through fifo1
+- execution2 passes data to execution1 through fifo2 (if necessary)
+- the result is checked at the last step using "wait <pid>" and peeking $?
+The test scripts must be modified for background execution, pid saving and
+pid wait.
+If it works, shell function "exec_test" must be updated to support background
+executions:
+	$PGM $* &
+	PID=$!
+	# save pid somewhere
+difficult to say if this change can support valgrind and/or gdb execution
+
+
+Implement xta_transaction_branch;
+NOTE: if the father commits before the child branches, the child transaction
+      become an indipendent transaction.
 
 Including xta/xta.h will include some resource manager include files (MySQL,
 PostgreSQL, Oracle, etc...). Provide utility for CPPFLAGS and LDADD for custom
@@ -7,6 +30,12 @@ Implement XTA for C++
 
 Put all configuration in XTA without necessity to load lixac_conf.xml file
 
+Replace IP address with machine_id in lixa_job_set_source_ip to get unique ID
+for every system partecipanting in transactions.
+As an example see function flom_tls_get_unique_id from flom project:
+https://github.com/tiian/flom/blob/master/src/flom_tls.c
+The dbus_get_local_machine_id() function is easy to use, but requires dbus
+installed.
 
 Explore high availability features (active/active) with dynamic or static
 workload. Avoid disk persistence, prefer distributed memory semi persistence.

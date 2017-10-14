@@ -26,5 +26,6 @@ xta/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h
 	doxygen doxygen.xta
 
 lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
-	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h
+	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h \
+	$(top_srcdir)/src/xta/*.h
 	doxygen doxygen.lixa
