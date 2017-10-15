@@ -56,7 +56,6 @@ int main(int argc, char *argv[])
     /* control variables */
     enum Phase { INITIAL, INTERMEDIATE, FINAL, NO_PHASE } phase;
     int        commit;
-    int        insert;
     int        test_rc;
     const char *filename;
 
@@ -64,16 +63,15 @@ int main(int argc, char *argv[])
     xta_init();
     
     fprintf(stderr, "%s| starting...\n", pgm);
-    if (argc < 6) {
-        fprintf(stderr, "%s: at least five options must be specified\n",
+    if (argc < 5) {
+        fprintf(stderr, "%s: at least four options must be specified\n",
                 argv[0]);
         return 1;
     }
     phase = strtol(argv[1], NULL, 0);
-    insert = strtol(argv[2], NULL, 0);
-    commit = strtol(argv[3], NULL, 0);
-    test_rc = strtol(argv[4], NULL, 0);
-    filename = argv[5];
+    commit = strtol(argv[2], NULL, 0);
+    test_rc = strtol(argv[3], NULL, 0);
+    filename = argv[4];
 
     /* check phase */
     switch(phase) {

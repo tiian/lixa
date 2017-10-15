@@ -223,12 +223,12 @@ extern "C" {
      * Create a new branch of the transaction represented by xid in this
      * transaction object; the global transaction has been previously started
      * @param[in,out] this : transaction object
-     * @param[in] xid identifier of the global transaction that must be
-     *            branched
+     * @param[in] xid_string serialized identifier of the global transaction
+     *            that must be branched
      * @return a reason code
      */
     int xta_transaction_branch(xta_transaction_t *this,
-                               const xta_xid_t *xid);
+                               const char *xid_string);
     
 
     

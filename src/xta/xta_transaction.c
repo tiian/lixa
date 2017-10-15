@@ -1090,7 +1090,7 @@ int xta_transaction_resume(xta_transaction_t *this,
 
 
 int xta_transaction_branch(xta_transaction_t *transaction,
-                           const xta_xid_t *xid)
+                           const char *xid_string)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
