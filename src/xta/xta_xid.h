@@ -76,6 +76,18 @@ extern "C" {
      */
     xta_xid_t *xta_xid_new_from_string(const char *xid_string);
 
+
+
+    /**
+     * Create a new Transaction Identifier object and set XID as passed by the
+     * caller. This is considered a private method because the an XTA
+     * application should not manage the XID struct directly.
+     * @param[in] xid a native XA XID
+     * @return a new transaction identifier object or NULL in the event of an
+     *         error occurred
+     */
+    xta_xid_t *xta_xid_new_from_XID(const XID *xid);
+
     
 
     /**

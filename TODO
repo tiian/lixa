@@ -1,24 +1,7 @@
-How to test transaction branches (do a simulated test before developing real
-programs):
-AT_CHECK([    mkfifo fifo1; mkfifo fifo2;     )
-AT_CHECK([ ... ; lixa_test_exec.sh ... &], ...)
-AT_CHECK([ ... ; lixa_test_exec.sh ... &], ...)
-AT_CHECK([    check the result of the executions   ])
-There are some points:
-- execution1 passes data to execution2 through fifo1
-- execution2 passes data to execution1 through fifo2 (if necessary)
-- the result is checked at the last step using "wait <pid>" and peeking $?
-The test scripts must be modified for background execution, pid saving and
-pid wait.
-If it works, shell function "exec_test" must be updated to support background
-executions:
-	$PGM $* &
-	PID=$!
-	# save pid somewhere
-difficult to say if this change can support valgrind and/or gdb execution
+Branching:
+- go on with case0104 (prepare and commit)
+- implement serialization in state server
 
-
-Implement xta_transaction_branch;
 NOTE: if the father commits before the child branches, the child transaction
       become an indipendent transaction.
 

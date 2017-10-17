@@ -137,7 +137,7 @@ void lixa_xid_branch_new(const XID *superior, XID *subordinate)
     subordinate->gtrid_length = superior->gtrid_length;
     subordinate->bqual_length = superior->bqual_length;
     /* copy global and first half of branch */
-    memcpy(subordinate->data, subordinate->data,
+    memcpy(subordinate->data, superior->data,
            sizeof(uuid_t) + sizeof(uuid_t)/2);
     /* copy second half of branch from new unique id */
     memcpy(subordinate->data + sizeof(uuid_t) + sizeof(uuid_t)/2,
@@ -155,6 +155,7 @@ void lixa_xid_branch_new(const XID *superior, XID *subordinate)
     }
 #endif /* LIXA_DEBUG */
 }
+
 
 
 void lixa_xid_create_new_bqual(XID *xid)

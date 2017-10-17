@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
             fprintf(stderr, "%s| xta XID is NULL\n", pgm);
             return 1;
         } else {
-            fprintf(stderr, "%s| xta XID is '%s'\n", pgm, xid_string);
+            fprintf(stderr, "%s| passed XID is '%s'\n", pgm, xid_string);
         }
         if (SUPERIOR == phase) {
             /* write to xid_file the transaction that will be branched */
@@ -221,10 +221,10 @@ int main(int argc, char *argv[])
                     pgm, filename);
             return 1;
         }
-        fprintf(stderr, "%s| xta XID is '%s'\n", pgm, buffer);
+        fprintf(stderr, "%s| retrieved XID is '%s'\n", pgm, buffer);
         fclose(xid_file);
         
-        /* resume the transaction */
+        /* branch the transaction */
         if (LIXA_RC_OK != (rc = xta_transaction_branch(
                                tx, buffer))) {
             fprintf(stderr, "%s| xta_transaction_branch returned %d\n",

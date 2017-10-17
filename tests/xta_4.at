@@ -1,11 +1,14 @@
 AT_BANNER([XTA: Branch support])
 
 AT_SETUP([XTA/4.0/0.0 Insert and Branch])
+# create a FIFO object for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo tmp_fifo], [0], [ignore], [ignore])
+# just start the state server
+AT_CHECK([lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
 AT_DATA([commands],
-[[/bin/true
-/bin/true
-lixa_test_exec.sh reset start case0104 0 1 1 /tmp/aaa
-/bin/true
+[[lixa_test_exec.sh noreset none case0104 0 1 1 0 tmp_fifo
+lixa_test_exec.sh noreset none case0104 1 0 1 0 tmp_fifo
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config

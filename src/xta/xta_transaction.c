@@ -556,11 +556,11 @@ int xta_transaction_close(xta_transaction_t *this)
 
 int xta_transaction_start(xta_transaction_t *this)
 {
-    enum Exception { NULL_OBJECT1,
-                     INVALID_STATUS,
-                     NULL_OBJECT2,
-                     LIXA_XA_START_ERROR,
-                     NONE } excp;
+    enum Exception { NULL_OBJECT1
+                     , INVALID_STATUS
+                     , NULL_OBJECT2
+                     , LIXA_XA_START_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_start\n"));
@@ -1089,18 +1089,85 @@ int xta_transaction_resume(xta_transaction_t *this,
 
 
 
-int xta_transaction_branch(xta_transaction_t *transaction,
-                           const char *xid_string)
+int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
 {
-    enum Exception { NONE } excp;
+    enum Exception { NULL_OBJECT1
+                     , INVALID_STATUS
+                     , XID_DESERIALIZE
+                     , XID_SERIALIZE
+                     , NULL_OBJECT2
+                     , LIXA_XA_START_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_branch\n"));
     TRY {
+        XID superior, subordinate;
+        lixa_ser_xid_t lsx;
+        int txstate, next_txstate, dupid_or_proto = FALSE;
+        int txrc = 0;
+        
+        /* check object */
+        if (NULL == this)
+            THROW(NULL_OBJECT1);
+        
+        /* check TX state */
+        txstate = client_status_get_txstate(&this->client_status);
+        if (TX_STATE_S1 != txstate) {
+            LIXA_TRACE(("xta_transaction_branch: expected client status %d, "
+                        "current client status %d\n", TX_STATE_S1, txstate));
+            THROW(INVALID_STATUS);
+        } else
+            next_txstate = TX_STATE_S3;
+        
+        /* deserialize superior XID */
+        if (!lixa_xid_deserialize(&superior, xid_string)) {
+            LIXA_TRACE(("xta_transaction_branch: unable to deserialize "
+                        "superior XID '%s'\n", xid_string));
+            THROW(XID_DESERIALIZE);
+        }
+        /* generate subordinate XID */
+        lixa_xid_branch_new(&superior, &subordinate);
+        /* serialize subordiante XID */
+        if (!lixa_xid_serialize(&subordinate, lsx)) {
+            LIXA_TRACE(("xta_transaction_branch: unable to serialize "
+                        "subordinate XID\n"));
+            THROW(XID_SERIALIZE);
+        }
+        /* debug message */
+        LIXA_TRACE(("xta_transaction_branch: superior XID is '%s', "
+                    "subordinate XID is '%s'\n", xid_string, lsx));        
+        /* create a new xid */
+        if (NULL == (this->xid = xta_xid_new_from_XID(&subordinate)))
+            THROW(NULL_OBJECT2);
+        /* start the transaction in all the XA Resource Managers */
+        if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
+                               &this->local_ccc, &this->client_status,
+                               &txrc,
+                               xta_xid_get_xa_xid(this->xid), txstate,
+                               next_txstate, &dupid_or_proto, TMNOFLAGS)))
+            THROW(LIXA_XA_START_ERROR);        
+        /* update the TX state */
+        client_status_set_txstate(&this->client_status, next_txstate);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT1:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case XID_DESERIALIZE:
+            case XID_SERIALIZE:
+                ret_cod = LIXA_RC_MALFORMED_XID;
+                break;
+            case NULL_OBJECT2:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case LIXA_XA_START_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
