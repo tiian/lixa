@@ -1,20 +1,26 @@
 AT_BANNER([XTA: Branch support])
 
-AT_SETUP([XTA/4.0/0.0 Insert and Branch])
+AT_SETUP([XTA/4.0/0.0 Branch and commit])
 # create a FIFO object for communication between superior and subordinate
 # process
 AT_CHECK([mkfifo tmp_fifo], [0], [ignore], [ignore])
 # just start the state server
 AT_CHECK([lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
-AT_DATA([commands],
-[[lixa_test_exec.sh noreset none case0104 0 1 1 0 tmp_fifo
-lixa_test_exec.sh noreset none case0104 1 0 1 0 tmp_fifo
+AT_DATA([insert],
+[[lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo
+lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo
+]])
+AT_DATA([delete],
+[[lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo
+lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
 xa_start/0
 xa_end/0
+xa_prepare/0
+xa_commit/0
 xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
@@ -22,9 +28,41 @@ AT_DATA([monkey2s.conf],
 xa_open/0
 xa_start/0
 xa_end/0
+xa_prepare/0
+xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_group.sh commands], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_group.sh insert], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
+AT_CHECK([rm tmp_fifo], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/4.0/0.1 Branch and delete])
+# create a FIFO object for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo tmp_fifo], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[lixa_test_exec.sh noreset none case0104 0 1 1 0 0 tmp_fifo
+lixa_test_exec.sh noreset none case0104 1 1 2 0 0 tmp_fifo
+]])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_group.sh insert], [0], [ignore], [ignore])
+AT_CHECK([rm tmp_fifo], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Interrupt tests with an error])

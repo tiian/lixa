@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
     enum Phase { SUPERIOR, SUBORDINATE, NO_PHASE } phase;
     int        commit;
     int        insert;
+    int        statement;
     int        test_rc;
     const char *filename;
 #ifdef HAVE_ORACLE
@@ -74,30 +75,38 @@ int main(int argc, char *argv[])
     OCISvcCtx     *oci_svc_ctx;
     OCIStmt       *oci_stmt_hndl;
     OCIError      *oci_err_hndl;
-    text          *oci_stmt_insert =
+    text          *oci_stmt_insert1 =
         (text *) "INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
         "VALUES ('IS', 'Iceland', 1)";
-    text          *oci_stmt_delete =
+    text          *oci_stmt_delete1 =
         (text *) "DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'IS'";
+    text          *oci_stmt_insert2 =
+        (text *) "INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
+        "VALUES ('ZA', 'South Africa', 4)";
+    text          *oci_stmt_delete2 =
+        (text *) "DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'";
+    text          *oci_stmt_insert = NULL;
+    text          *oci_stmt_delete = NULL;
 #endif
 
     /* turn ON trace for debugging purpose */
     xta_init();
     
     fprintf(stderr, "%s| starting...\n", pgm);
-    if (argc < 6) {
-        fprintf(stderr, "%s: at least five options must be specified\n",
+    if (argc < 7) {
+        fprintf(stderr, "%s: at least six options must be specified\n",
                 argv[0]);
         return 1;
     }
     phase = strtol(argv[1], NULL, 0);
     insert = strtol(argv[2], NULL, 0);
-    commit = strtol(argv[3], NULL, 0);
-    test_rc = strtol(argv[4], NULL, 0);
-    filename = argv[5];
+    statement = strtol(argv[3], NULL, 0);
+    commit = strtol(argv[4], NULL, 0);
+    test_rc = strtol(argv[5], NULL, 0);
+    filename = argv[6];
 
     /* check phase */
-    switch(phase) {
+    switch (phase) {
         case SUPERIOR:
             fprintf(stderr, "%s| phase=%d (SUPERIOR)\n", pgm, phase);
             /* open file for write */
@@ -119,8 +128,28 @@ int main(int argc, char *argv[])
             break;
         default:
             fprintf(stderr, "%s| phase=%d UNKNOWN!\n", pgm, phase);
-            break;
+            return 1;
     } /* switch(phase) */
+
+    /* check statement */
+    switch (statement) {
+        case 1:
+#ifdef HAVE_ORACLE
+            oci_stmt_insert = oci_stmt_insert1;
+            oci_stmt_delete = oci_stmt_delete1;
+#endif
+            break;
+        case 2:
+#ifdef HAVE_ORACLE
+            oci_stmt_insert = oci_stmt_insert2;
+            oci_stmt_delete = oci_stmt_delete2;
+#endif
+            break;
+        default:
+            fprintf(stderr, "%s| statement=%d is not valid!\n",
+                    pgm, statement);
+            return 1;
+    } /* check statement */
     
     /*
      * dynamically create an XA native resource object
@@ -202,7 +231,8 @@ int main(int argc, char *argv[])
             fprintf(stderr, "%s| xta XID is NULL\n", pgm);
             return 1;
         } else {
-            fprintf(stderr, "%s| passed XID is '%s'\n", pgm, xid_string);
+            fprintf(stderr, "%s| passing XID '%s' to subordinate\n",
+                    pgm, xid_string);
         }
         if (SUPERIOR == phase) {
             /* write to xid_file the transaction that will be branched */
