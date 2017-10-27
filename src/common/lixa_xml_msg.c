@@ -88,6 +88,7 @@ const xmlChar *LIXA_XML_MSG_PROP_RC = (xmlChar *) "rc";
 const xmlChar *LIXA_XML_MSG_PROP_RMID = (xmlChar *) "rmid";
 const xmlChar *LIXA_XML_MSG_PROP_R_STATE = (xmlChar *) "r_state";
 const xmlChar *LIXA_XML_MSG_PROP_S_STATE = (xmlChar *) "s_state";
+const xmlChar *LIXA_XML_MSG_PROP_SUB_BRANCH = (xmlChar *) "sub_branch";
 const xmlChar *LIXA_XML_MSG_PROP_TD_STATE = (xmlChar *) "td_state";
 const xmlChar *LIXA_XML_MSG_PROP_TXSTATE = (xmlChar *) "txstate";
 const xmlChar *LIXA_XML_MSG_PROP_STEP = (xmlChar *) "step";

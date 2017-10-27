@@ -77,7 +77,7 @@
  * Current protocol level; it's used to recognize incompatible client/server
  * configuration at run-time
  */
-#define LIXA_MSG_LEVEL          0
+#define LIXA_MSG_LEVEL          1
 /**
  * Id reserved for a null message: do NOT change this value because it
  * would break the @ref lixa_msg_init behavior
@@ -201,6 +201,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_R_STATE;
  * Label used to specify "s_state" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_S_STATE;
+/**
+ * Label used to specify "sub_branch" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_SUB_BRANCH;
 /**
  * Label used to specify "td_state" property
  */
@@ -529,6 +533,11 @@ struct lixa_msg_body_start_8_conthr_s
      * Transaction id
      */
     XID xid;
+    /**
+     * TRUE if the transaction id represent a subordinate branch inside a
+     * global transaction
+     */
+    int sub_branch;
 };
 
 

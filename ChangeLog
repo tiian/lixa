@@ -1,5 +1,11 @@
 LOG:
 
+         - 1.5.2 XTA support for Superior/Subordinate branches
+		 This release is *NOT* compatible with previous ones: you can't
+		 mix 1.5.2 and previous versions in the same environment
+		 (message LXC030E will be logged in the event of level
+		 mismatch)
+
 20171010 - 1.5.1 XTA support for "Suspend/Resume" pattern
 
 20170921 - 1.5.0 Release of XTA API (XA Transaction API)

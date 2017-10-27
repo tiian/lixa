@@ -1140,12 +1140,13 @@ int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
         /* create a new xid */
         if (NULL == (this->xid = xta_xid_new_from_XID(&subordinate)))
             THROW(NULL_OBJECT2);
-        /* start the transaction in all the XA Resource Managers */
+        /* start the transaction in all the XA Resource Managers as a new
+         * branch under the scope of an existing global transaction */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
                                &this->local_ccc, &this->client_status,
                                &txrc,
                                xta_xid_get_xa_xid(this->xid), txstate,
-                               next_txstate, &dupid_or_proto, TMNOFLAGS)))
+                               next_txstate, &dupid_or_proto, TMXTABRANCH)))
             THROW(LIXA_XA_START_ERROR);        
         /* update the TX state */
         client_status_set_txstate(&this->client_status, next_txstate);

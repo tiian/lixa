@@ -1209,6 +1209,12 @@ int server_xa_start_8(struct thread_status_s *ts,
                              ts->updated_records);
         ts->curr_status[block_id].sr.data.pld.ph.state.xid =
             lmi->body.start_8.conthr.xid;
+        /* check if the xa_start is related to a subordinate branch */
+        if (lmi->body.start_8.conthr.sub_branch) {
+            LIXA_TRACE(("server_xa_start_8: the client is asking a new "
+                        "subordinate branch\n"));
+            /* @@@ */
+        } /* if (lmi->body.start_8.conthr.sub_branch) */
         /* store XID in the global transaction table */
         struct server_trans_tbl_rec_s sttr;
         sttr.gtrid = lixa_xid_get_gtrid_ascii(&(lmi->body.start_8.conthr.xid));

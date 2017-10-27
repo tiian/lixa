@@ -28,7 +28,7 @@
 /* This file contains only syslog messages: they are specified as macros
    because every message must be used only once inside the source code;
    used prefixes:
-   LXC: LiXa Client
+   LXC: LiXa Client & Common
    LXD: LiXa Daemon (server)
    used messages code:
    D: LOG_DEBUG
@@ -126,6 +126,8 @@
     "after a query recovery (step=8) message: it might be crashed"
 #define LIXA_SYSLOG_LXC029W "LXC029W resource manager '%s' (rmid=%d) " \
     "returned XAER_NOTA during xa_start(TMJOIN|TMRESUME) for xid='%s' and this should NOT happen"
+#define LIXA_SYSLOG_LXC030E "LXC030E protocol level mismatch: message is at " \
+    "level %d, code is at level %d"
 
 
 

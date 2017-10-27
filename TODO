@@ -1,3 +1,5 @@
+Restart from server_xa.c function server_xa_start_8
+
 Branching:
 - all the branches of a global transaction must be migrated to the same
   thread in the state server (see functions server_manager_switch_* 
@@ -10,6 +12,9 @@ NOTE: if the father commits before the child branches, the child transaction
 Including xta/xta.h will include some resource manager include files (MySQL,
 PostgreSQL, Oracle, etc...). Provide utility for CPPFLAGS and LDADD for custom
 software build.
+
+Is the state file synchronization after xa_start really necessary? Can it be
+removed?
 
 Implement XTA for C++
 

@@ -20,20 +20,15 @@
 
 
 #ifdef HAVE_UNISTD_H
-
 # include <unistd.h>
-
 #endif
 #ifdef HAVE_STRING_H
-
 # include <string.h>
-
 #endif
 #ifdef HAVE_SYSLOG_H
-
 # include <syslog.h>
-
 #endif
+
 
 
 #include <lixa_crash.h>
@@ -2229,6 +2224,11 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
         memcpy(&msg.body.start_8.conthr.xid, xid, sizeof(XID));
+        /* check if the start is related to a subordinate branch */
+        if (TMXTABRANCH & xa_start_flags)
+            msg.body.start_8.conthr.sub_branch = TRUE;
+        else
+            msg.body.start_8.conthr.sub_branch = FALSE;
         msg.body.start_8.rsrmgrs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_start_8_rsrmgr_s),
@@ -2270,8 +2270,7 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
         g_array_free(msg.body.start_8.rsrmgrs, TRUE);
         memset(&msg, 0, sizeof(msg));
         
-        LIXA_TRACE(("lixa_xa_start: sending "
-                    SIZE_T_FORMAT
+        LIXA_TRACE(("lixa_xa_start: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
         if (LIXA_RC_OK !=
             (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
@@ -2340,7 +2339,8 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
             }
 
             record.rmid = i;
-            record.flags = xa_start_flags;
+            /* remove TMXTABRANCH bit if set */
+            record.flags = xa_start_flags & ~TMXTABRANCH;
             record.rc = lixa_iface_xa_start(&act_rsrmgr->lixa_iface,
                                             xid, record.rmid, record.flags);
             LIXA_TRACE(("lixa_xa_start: xa_start_entry(xid, %d, 0x%lx) = %d\n",

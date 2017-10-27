@@ -211,6 +211,10 @@
  * A malformed XID has been discovered
  */
 #define LIXA_RC_MALFORMED_XID                  -26
+/**
+ * A message with a wrong level has been detected; see also @ref LIXA_MSG_LEVEL
+ */
+#define LIXA_RC_MESSAGE_LEVEL_MISMATCH         -27
 
 
 

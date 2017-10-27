@@ -121,6 +121,8 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: client/server recovery configuration do not match";
         case LIXA_RC_MALFORMED_XID:
             return "ERROR: a malformed XID has been discovered";
+        case LIXA_RC_MESSAGE_LEVEL_MISMATCH:
+            return "ERROR: a message with a wrong level has been detected";
         case LIXA_RC_RM_ERROR:
             return "ERROR: generic errof for a Resource Manager operation";
         case LIXA_RC_TX_FAIL:

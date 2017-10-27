@@ -19,22 +19,24 @@
 #include <config.h>
 
 
+
 #ifdef HAVE_STDLIB_H
-
 # include <stdlib.h>
-
 #endif
 #ifdef HAVE_STRING_H
-
 # include <string.h>
-
+#endif
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
 #endif
 
 
-#include <lixa_errors.h>
-#include <lixa_trace.h>
-#include <lixa_xml_msg_deserialize.h>
-#include <lixa_xid.h>
+
+#include "lixa_errors.h"
+#include "lixa_syslog.h"
+#include "lixa_trace.h"
+#include "lixa_xml_msg_deserialize.h"
+#include "lixa_xid.h"
 #include "lixa_xml_msg.h"
 
 
@@ -46,34 +48,33 @@
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_COMMON_XML_MSG
 
 
+
 int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                          struct lixa_msg_s *msg)
 {
-    enum Exception
-    {
-        XML_READ_MEMORY,
-        EMPTY_XML_MSG,
-        ROOT_TAG_IS_NOT_MSG,
-        MISSING_TAGS,
-        VERB_NOT_FOUND,
-        STEP_NOT_FOUND,
-        LEVEL_NOT_FOUND,
-        INVALID_STEP1,
-        INVALID_STEP2,
-        INVALID_STEP3,
-        INVALID_STEP4,
-        INVALID_STEP5,
-        INVALID_STEP6,
-        INVALID_STEP7,
-        INVALID_STEP8,
-        INVALID_STEP9,
-        INVALID_STEP10,
-        INVALID_STEP11,
-        INVALID_STEP12,
-        INVALID_VERB,
-        CHILD_LEVEL_ERROR,
-        NONE
-    } excp;
+    enum Exception { XML_READ_MEMORY,
+                     EMPTY_XML_MSG,
+                     ROOT_TAG_IS_NOT_MSG,
+                     MISSING_TAGS,
+                     VERB_NOT_FOUND,
+                     STEP_NOT_FOUND,
+                     LEVEL_NOT_FOUND,
+                     MESSAGE_LEVEL_MISMATCH,
+                     INVALID_STEP1,
+                     INVALID_STEP2,
+                     INVALID_STEP3,
+                     INVALID_STEP4,
+                     INVALID_STEP5,
+                     INVALID_STEP6,
+                     INVALID_STEP7,
+                     INVALID_STEP8,
+                     INVALID_STEP9,
+                     INVALID_STEP10,
+                     INVALID_STEP11,
+                     INVALID_STEP12,
+                     INVALID_VERB,
+                     CHILD_LEVEL_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     xmlDocPtr doc = NULL;
@@ -85,35 +86,44 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
 
         LIXA_TRACE(("lixa_msg_deserialize: deserializing message |%*.*s|\n",
                     buffer_len, buffer_len, buffer));
-        LIXA_TRACE(("lixa_msg_deserialize/xmlReadMemory\n"));
         if (NULL == (doc = xmlReadMemory(
-                         buffer, buffer_len, "buffer.xml", NULL, 0))) THROW(XML_READ_MEMORY);
+                         buffer, buffer_len, "buffer.xml", NULL, 0)))
+            THROW(XML_READ_MEMORY);
 
         /* retrieve header message properties */
-        if (NULL == (cur = xmlDocGetRootElement(doc))) THROW(EMPTY_XML_MSG);
-        if (xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_MSG)) THROW(
-            ROOT_TAG_IS_NOT_MSG);
+        if (NULL == (cur = xmlDocGetRootElement(doc)))
+            THROW(EMPTY_XML_MSG);
+        if (xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_MSG))
+            THROW(ROOT_TAG_IS_NOT_MSG);
         /* check there is at least a child */
-        if (NULL == cur->xmlChildrenNode) THROW(MISSING_TAGS);
+        if (NULL == cur->xmlChildrenNode)
+            THROW(MISSING_TAGS);
         /* reset output message */
         memset(msg, 0, sizeof(struct lixa_msg_s));
         /* retrieve verb */
-        if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_VERB))) THROW(
-            VERB_NOT_FOUND);
+        if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_VERB)))
+            THROW(VERB_NOT_FOUND);
         msg->header.pvs.verb = (int) strtol((char *) tmp, NULL, 0);
         xmlFree(tmp);
         /* retrieve step */
-        if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_STEP))) THROW(
-            STEP_NOT_FOUND);
+        if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_STEP)))
+            THROW(STEP_NOT_FOUND);
         msg->header.pvs.step = (int) strtol((char *) tmp, NULL, 0);
         xmlFree(tmp);
         /* retrieve level */
-        if (msg->header.pvs.step == LIXA_MSG_STEP_INCR) {
-            if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_LEVEL))) THROW(
-                LEVEL_NOT_FOUND);
-            msg->header.level = (int) strtol((char *) tmp, NULL, 0);
-            xmlFree(tmp);
-        }
+        if (NULL == (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_LEVEL)))
+            THROW(LEVEL_NOT_FOUND);
+        msg->header.level = (int) strtol((char *) tmp, NULL, 0);
+        xmlFree(tmp);
+        /* check level is compatible with current code */
+        if (LIXA_MSG_LEVEL != msg->header.level) {
+            syslog(LOG_ERR, LIXA_SYSLOG_LXC030E, msg->header.level,
+                   LIXA_MSG_LEVEL);
+            LIXA_TRACE(("lixa_msg_deserialize: protocol level mismatch: "
+                        "message is at level %d, code is at level %d\n",
+                        msg->header.level, LIXA_MSG_LEVEL));
+            THROW(MESSAGE_LEVEL_MISMATCH);
+        } /* if (LIXA_MSG_LEVEL != msg->header.level) */
         switch (msg->header.pvs.verb) {
             case LIXA_MSG_VERB_OPEN: /* open */
                 switch (msg->header.pvs.step) {
@@ -129,7 +139,8 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_open_24(
                             cur->xmlChildrenNode, msg);
                         break;
-                    default: THROW(INVALID_STEP1);
+                    default:
+                        THROW(INVALID_STEP1);
                 }
                 break;
             case LIXA_MSG_VERB_CLOSE: /* close */
@@ -138,7 +149,8 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_close_8(
                             cur->xmlChildrenNode, msg);
                         break;
-                    default: THROW(INVALID_STEP2);
+                    default:
+                        THROW(INVALID_STEP2);
                 }
                 break;
             case LIXA_MSG_VERB_START: /* start */
@@ -155,7 +167,8 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_start_24(
                             cur->xmlChildrenNode, msg);
                         break;
-                    default: THROW(INVALID_STEP3);
+                    default:
+                        THROW(INVALID_STEP3);
                 }
                 break;
             case LIXA_MSG_VERB_END: /* end */
@@ -168,7 +181,8 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_end_16(
                             cur->xmlChildrenNode, msg);
                         break;
-                    default: THROW(INVALID_STEP4);
+                    default:
+                        THROW(INVALID_STEP4);
                 }
                 break;
             case LIXA_MSG_VERB_PREPARE: /* prepare */
@@ -181,7 +195,8 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_prepare_16(
                             cur->xmlChildrenNode, msg);
                         break;
-                    default: THROW(INVALID_STEP5);
+                    default:
+                        THROW(INVALID_STEP5);
                 }
                 break;
             case LIXA_MSG_VERB_COMMIT: /* commit */
@@ -190,7 +205,8 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_commit_8(
                             cur->xmlChildrenNode, msg);
                         break;
-                    default: THROW(INVALID_STEP6);
+                    default:
+                        THROW(INVALID_STEP6);
                 }
                 break;
             case LIXA_MSG_VERB_ROLLBACK: /* rollback */
@@ -199,7 +215,8 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_rollback_8(
                             cur->xmlChildrenNode, msg);
                         break;
-                    default: THROW(INVALID_STEP7);
+                    default:
+                        THROW(INVALID_STEP7);
                 }
                 break;
             case LIXA_MSG_VERB_QRCVR: /* qrcvr */
@@ -216,7 +233,8 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_qrcvr_24(
                             cur->xmlChildrenNode, msg);
                         break;
-                    default: THROW(INVALID_STEP8);
+                    default:
+                        THROW(INVALID_STEP8);
                 }
                 break;
             case LIXA_MSG_VERB_REG: /* reg */
@@ -225,7 +243,8 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_reg_8(
                             cur->xmlChildrenNode, msg);
                         break;
-                    default: THROW(INVALID_STEP9);
+                    default:
+                        THROW(INVALID_STEP9);
                 }
                 break;
             case LIXA_MSG_VERB_UNREG: /* unreg */
@@ -234,7 +253,8 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_unreg_8(
                             cur->xmlChildrenNode, msg);
                         break;
-                    default: THROW(INVALID_STEP10);
+                    default:
+                        THROW(INVALID_STEP10);
                 }
                 break;
             case LIXA_MSG_VERB_FORGET: /* forget */
@@ -243,7 +263,8 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_forget_8(
                             cur->xmlChildrenNode, msg);
                         break;
-                    default: THROW(INVALID_STEP11);
+                    default:
+                        THROW(INVALID_STEP11);
                 }
                 break;
             case LIXA_MSG_VERB_TRANS: /* trans */
@@ -256,65 +277,70 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                         ret_cod = lixa_msg_deserialize_trans_16(
                             cur->xmlChildrenNode, msg);
                         break;
-                    default: THROW(INVALID_STEP12);
+                    default:
+                        THROW(INVALID_STEP12);
                 }
                 break;
-            default: THROW(INVALID_VERB);
+            default:
+                THROW(INVALID_VERB);
         }
-        if (LIXA_RC_OK != ret_cod) THROW(CHILD_LEVEL_ERROR);
+        if (LIXA_RC_OK != ret_cod)
+            THROW(CHILD_LEVEL_ERROR);
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case XML_READ_MEMORY:
-                    ret_cod = LIXA_RC_XML_READ_MEMORY_ERROR;
-                    break;
-                case EMPTY_XML_MSG:
-                    ret_cod = LIXA_RC_EMPTY_XML_MSG;
-                    break;
-                case ROOT_TAG_IS_NOT_MSG:
-                case MISSING_TAGS:
-                case VERB_NOT_FOUND:
-                case STEP_NOT_FOUND:
-                case LEVEL_NOT_FOUND:
-                    ret_cod = LIXA_RC_MALFORMED_XML_MSG;
-                    break;
-                case INVALID_STEP1:
-                case INVALID_STEP2:
-                case INVALID_STEP3:
-                case INVALID_STEP4:
-                case INVALID_STEP5:
-                case INVALID_STEP6:
-                case INVALID_STEP7:
-                case INVALID_STEP8:
-                case INVALID_STEP9:
-                case INVALID_STEP10:
-                case INVALID_STEP11:
-                case INVALID_STEP12:
-                case INVALID_VERB:
-                    ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
-                    break;
-                case CHILD_LEVEL_ERROR: /* propagate child's ret_cod */
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-            /* recover resources */
-            if (NULL != doc) {
-                /* free parsed document */
-                LIXA_TRACE(("lixa_msg_deserialize/xmlFreeDoc\n"));
-                xmlFreeDoc(doc);
-            }
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case XML_READ_MEMORY:
+                ret_cod = LIXA_RC_XML_READ_MEMORY_ERROR;
+                break;
+            case EMPTY_XML_MSG:
+                ret_cod = LIXA_RC_EMPTY_XML_MSG;
+                break;
+            case ROOT_TAG_IS_NOT_MSG:
+            case MISSING_TAGS:
+            case VERB_NOT_FOUND:
+            case STEP_NOT_FOUND:
+            case LEVEL_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
+            case MESSAGE_LEVEL_MISMATCH:
+                ret_cod = LIXA_RC_MESSAGE_LEVEL_MISMATCH;
+                break;
+            case INVALID_STEP1:
+            case INVALID_STEP2:
+            case INVALID_STEP3:
+            case INVALID_STEP4:
+            case INVALID_STEP5:
+            case INVALID_STEP6:
+            case INVALID_STEP7:
+            case INVALID_STEP8:
+            case INVALID_STEP9:
+            case INVALID_STEP10:
+            case INVALID_STEP11:
+            case INVALID_STEP12:
+            case INVALID_VERB:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case CHILD_LEVEL_ERROR: /* propagate child's ret_cod */
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* recover resources */
+        if (NULL != doc) {
+            /* free parsed document */
+            LIXA_TRACE(("lixa_msg_deserialize/xmlFreeDoc\n"));
+            xmlFreeDoc(doc);
+        }
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
 
 
 int lixa_msg_deserialize_close_8(xmlNodePtr cur, struct lixa_msg_s *msg)
@@ -1671,16 +1697,15 @@ int lixa_msg_deserialize_rollback_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 }
 
 
+
 int lixa_msg_deserialize_start_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
-    enum Exception
-    {
-        XID_NOT_FOUND,
-        XID_DESERIALIZE_ERROR,
-        RMID_NOT_FOUND,
-        XML_UNRECOGNIZED_TAG,
-        NONE
-    } excp;
+    enum Exception { XID_NOT_FOUND
+                     , XID_DESERIALIZE_ERROR
+                     , SUB_BRANCH_NOT_FOUND
+                     , RMID_NOT_FOUND
+                     , XML_UNRECOGNIZED_TAG
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("lixa_msg_deserialize_start_8\n"));
@@ -1688,16 +1713,23 @@ int lixa_msg_deserialize_start_8(xmlNodePtr cur, struct lixa_msg_s *msg)
         while (NULL != cur) {
             if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CONTHR)) {
                 xmlChar *tmp;
-                /* retrieve xid properties */
+                /* retrieve xid property */
                 if (NULL ==
-                    (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_XID))) THROW(
-                        XID_NOT_FOUND);
+                    (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_XID)))
+                    THROW(XID_NOT_FOUND);
                 if (!lixa_xid_deserialize(
                         &msg->body.start_8.conthr.xid, (char *) tmp)) {
                     xmlFree(tmp);
                     THROW(XID_DESERIALIZE_ERROR);
                 } else
                     xmlFree(tmp);
+                /* retrieve sub_branch property */ 
+                if (NULL == (tmp = xmlGetProp(
+                                 cur, LIXA_XML_MSG_PROP_SUB_BRANCH)))
+                    THROW(SUB_BRANCH_NOT_FOUND);
+                msg->body.start_8.conthr.sub_branch =
+                    (int) strtol((char *) tmp, NULL, 0);
+                xmlFree(tmp);
             } else if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_RSRMGRS)) {
                 xmlNodePtr cur2 = cur->xmlChildrenNode;
                 /* initialize array (3 slots may be a good choice for
@@ -1713,43 +1745,44 @@ int lixa_msg_deserialize_start_8(xmlNodePtr cur, struct lixa_msg_s *msg)
                         struct lixa_msg_body_start_8_rsrmgr_s rsrmgr;
                         /* retrieve rmid */
                         if (NULL == (tmp = xmlGetProp(
-                                         cur2, LIXA_XML_MSG_PROP_RMID))) THROW(
-                                             RMID_NOT_FOUND);
+                                         cur2, LIXA_XML_MSG_PROP_RMID)))
+                            THROW(RMID_NOT_FOUND);
                         rsrmgr.rmid = (int) strtol((char *) tmp, NULL, 0);
                         xmlFree(tmp);
                         g_array_append_val(msg->body.start_8.rsrmgrs, rsrmgr);
                         cur2 = cur2->next;
                     }
                 } /* while (NULL != child) */
-            } else THROW(XML_UNRECOGNIZED_TAG);
+            } else
+                THROW(XML_UNRECOGNIZED_TAG);
             cur = cur->next;
         } /* while (NULL != cur) */
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case XID_NOT_FOUND:
-                    ret_cod = LIXA_RC_MALFORMED_XML_MSG;
-                    break;
-                case XID_DESERIALIZE_ERROR:
-                    break;
-                case RMID_NOT_FOUND:
-                case XML_UNRECOGNIZED_TAG:
-                    ret_cod = LIXA_RC_MALFORMED_XML_MSG;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case XID_NOT_FOUND:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
+            case XID_DESERIALIZE_ERROR:
+                break;
+            case SUB_BRANCH_NOT_FOUND:
+            case RMID_NOT_FOUND:
+            case XML_UNRECOGNIZED_TAG:
+                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_start_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
 
 
 int lixa_msg_deserialize_start_16(xmlNodePtr cur, struct lixa_msg_s *msg)

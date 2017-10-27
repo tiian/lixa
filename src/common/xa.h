@@ -18,7 +18,7 @@
  * Define a symbol to prevent multiple inclusions of this header file
  */
 #ifndef XA_H
-#define XA_H
+# define XA_H
 
 /*
  * Transaction branch identification: XID and NULLXID:
@@ -206,6 +206,16 @@ typedef struct xa_switch_t *(*lixa_get_xa_switch_f)(void);
  * caller intends to perform migration
  */
 #define TMMIGRATE 0x00100000L
+/*
+ * NOTE: this is an extension implemented by LIXA but it'soutside the XA
+ *       standard
+ * Flag definitions for xta_
+ */
+/**
+ * caller is creating a new branch under the scope of an already existent
+ * global transaction
+ */
+#define TMXTABRANCH   0x00008000L
 
 
 
