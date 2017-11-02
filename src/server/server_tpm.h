@@ -19,13 +19,19 @@
 #ifndef LIXA_SERVER_TPM_H
 #define LIXA_SERVER_TPM_H
 
-#include <config.h>
 
-#include <lixa_errors.h>
-#include <lixa_trace.h>
-#include <lixa_xml_msg.h>
-#include <server_status.h>
-#include <server_trans_tbl.h>
+
+#include "config.h"
+
+
+
+#include "lixa_errors.h"
+#include "lixa_trace.h"
+#include "lixa_xml_msg.h"
+#include "server_status.h"
+#include "server_trans_tbl.h"
+
+
 
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
@@ -40,27 +46,36 @@
 extern "C" {
 #endif /* __cplusplus */
 
+
+    
     int server_trans(struct thread_status_s *ts, size_t slot_id,
                      const struct lixa_msg_s *lmi, struct lixa_msg_s *lmo,
                      uint32_t block_id,
                      struct lixa_msg_verb_step_s *last_verb_step);
 
+
+    
     int server_trans_8(struct thread_status_s *ts, size_t slot_id,
                        const struct lixa_msg_s *lmi, struct lixa_msg_s *lmo,
                        uint32_t block_id,
                        struct lixa_msg_verb_step_s *last_verb_step);
 
+
+    
     int server_trans_result(struct thread_status_s *ts,
-                            const struct server_trans_tbl_rec_s *record,
-                            const guint record_array_size,
+                            const GArray *records,
                             const struct lixa_msg_s *lmi,
                             struct lixa_msg_s *lmo,
                             uint32_t block_id);
 
+
+    
     int server_trans_empty_result(struct thread_status_s *ts,
                                   const struct lixa_msg_s *lmi,
                                   struct lixa_msg_s *lmo);
 
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -273,10 +273,9 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: 'xmlCharStrdup' function returned a NULL pointer";
         case LIXA_RC_XML_STRDUP_ERROR:
             return "ERROR: 'xmlStrdup' function returned a NULL pointer";
-        case LIXA_RC_G_RETURNED_NULL:
-            return "ERROR:  a glib function returned a NULL pointer; the "
-                "function is not documented as returnig NULL. This is "
-                "an internal error";
+        case LIXA_RC_G_ARRAY_NEW_ERROR:
+            return "ERROR: 'g_array_new' function returned an "
+                "error condition";
         case LIXA_RC_G_CHECKSUM_GET_STRING_ERROR:
             return "ERROR: 'g_checksum_get_string' function returned an "
                 "error condition";
@@ -295,6 +294,10 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_G_MODULE_SYMBOL_ERROR:
             return "ERROR: 'g_module_symbol' function returned an "
                 "error condition";
+        case LIXA_RC_G_RETURNED_NULL:
+            return "ERROR:  a glib function returned a NULL pointer; the "
+                "function is not documented as returnig NULL. This is "
+                "an internal error";
         case LIXA_RC_G_STRCONCAT_ERROR:
             return "ERROR: 'g_strconcat' function returned an error condition";
         case LIXA_RC_G_STRDUP_ERROR:

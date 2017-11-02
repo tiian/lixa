@@ -1186,18 +1186,16 @@ int server_xa_start(struct thread_status_s *ts,
 }
 
 
+
 int server_xa_start_8(struct thread_status_s *ts,
                       const struct lixa_msg_s *lmi,
                       struct lixa_msg_s *lmo,
                       uint32_t block_id,
                       struct lixa_msg_verb_step_s *last_verb_step)
 {
-    enum Exception
-    {
-        TRANS_TABLE_INSERT_ERROR,
-        XID_SERIALIZE_ERROR,
-        NONE
-    } excp;
+    enum Exception { TRANS_TABLE_INSERT_ERROR,
+                     XID_SERIALIZE_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_xa_start_8\n"));
@@ -1218,12 +1216,13 @@ int server_xa_start_8(struct thread_status_s *ts,
         /* store XID in the global transaction table */
         struct server_trans_tbl_rec_s sttr;
         sttr.gtrid = lixa_xid_get_gtrid_ascii(&(lmi->body.start_8.conthr.xid));
-        if (!lixa_xid_serialize(&(lmi->body.start_8.conthr.xid),
-                                sttr.xid)) THROW(XID_SERIALIZE_ERROR);
+        if (!lixa_xid_serialize(&(lmi->body.start_8.conthr.xid), sttr.xid))
+            THROW(XID_SERIALIZE_ERROR);
         sttr.tsid = ts->id;
         sttr.block_id = block_id;
         if (LIXA_RC_OK != (ret_cod = server_trans_tbl_insert(
-                               ts->trans_table, &sttr))) THROW(TRANS_TABLE_INSERT_ERROR);
+                               ts->trans_table, &sttr)))
+            THROW(TRANS_TABLE_INSERT_ERROR);
         /* reset finished state */
         ts->curr_status[block_id].sr.data.pld.ph.state.finished = FALSE;
 
@@ -1238,9 +1237,7 @@ int server_xa_start_8(struct thread_status_s *ts,
             slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
                 rsrmgrs->rmid];
             LIXA_TRACE(("server_xa_start_8: updating next_verb for resource "
-                        "manager # "
-                        UINT32_T_FORMAT
-                        "\n", rsrmgrs->rmid));
+                        "manager # " UINT32_T_FORMAT "\n", rsrmgrs->rmid));
             sr = ts->curr_status + slot;
             /* update the block */
             status_record_update(ts->curr_status + slot, slot,
@@ -1258,29 +1255,28 @@ int server_xa_start_8(struct thread_status_s *ts,
         status_sync_ask_sync(&ts->status_sync);
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case TRANS_TABLE_INSERT_ERROR:
-                    break;
-                case XID_SERIALIZE_ERROR:
-                    ret_cod = LIXA_RC_MALFORMED_XID;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case TRANS_TABLE_INSERT_ERROR:
+                break;
+            case XID_SERIALIZE_ERROR:
+                ret_cod = LIXA_RC_MALFORMED_XID;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_start_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-
+    
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_START_8,
                thread_status_get_crash_count(ts));
     return ret_cod;
 }
+
 
 
 int server_xa_start_24(struct thread_status_s *ts,

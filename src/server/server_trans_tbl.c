@@ -16,12 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
-#include <lixa_errors.h>
-#include <lixa_crash.h>
-#include <lixa_trace.h>
+
+
+#include "lixa_errors.h"
+#include "lixa_crash.h"
+#include "lixa_trace.h"
 #include "server_trans_tbl.h"
+
+
 
 /* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
@@ -231,30 +235,28 @@ gboolean server_trans_tbl_traverse(gpointer key, gpointer value, gpointer data)
 
 int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
                                const struct server_trans_tbl_rec_s *sttr,
-                               struct server_trans_tbl_rec_s *out,
-                               guint *out_array_size, int maint)
+                               GArray *result, int maint)
 {
-    enum Exception
-    {
-        OBJ_CORRUPTED,
-        OUT_OF_RANGE,
-        OBJ_NOT_FOUND1,
-        OBJ_NOT_FOUND2,
-        REALLOC_ERROR,
-        NONE
-    } excp;
+    enum Exception { OBJ_CORRUPTED,
+                     NULL_OBJECT,
+                     OUT_OF_RANGE,
+                     OBJ_NOT_FOUND1,
+                     OBJ_NOT_FOUND2,
+                     REALLOC_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_trans_tbl_query_xid\n"));
     TRY {
         gpointer *node;
 
-        LIXA_TRACE(
-            ("server_trans_tbl_query_xid: query is gtrid='%s', tsid=%u\n",
-             sttr->gtrid, sttr->tsid));
+        LIXA_TRACE(("server_trans_tbl_query_xid: query is gtrid='%s', "
+                    "tsid=%u\n", sttr->gtrid, sttr->tsid));
 
         if (NULL == stt->records)
             THROW(OBJ_CORRUPTED);
+        if (NULL == result)
+            THROW(NULL_OBJECT);
 
         /* lock mutex */
         g_mutex_lock(&stt->mutex);
@@ -264,7 +266,6 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
             THROW(OUT_OF_RANGE);
 
         gboolean hastransactions = FALSE;
-        guint last = 0;
         if (maint) {
             GList *list = NULL;
             g_tree_foreach(stt->records, server_trans_tbl_traverse, &list);
@@ -286,11 +287,12 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
                                 /* add all entries from queue to out record */
                                 guint x;
                                 for (x = 0; x < q->length; x++) {
-                                    char *xid = (char *) g_queue_peek_nth(q,
-                                                                          x);
-                                    memcpy(out[last].xid, xid,
+                                    struct server_trans_tbl_rec_s record;
+                                    char *xid = (char *)g_queue_peek_nth(q, x);
+                                    memset(&record, 0, sizeof(record));
+                                    memcpy(record.xid, xid,
                                            LIXA_XID_SERIALIZE_LENGTH);
-                                    last++;
+                                    g_array_append_val(result, record);
                                 }
                             } /* if (!g_queue_is_empty(q)) */
                         } /* for i */
@@ -313,30 +315,31 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
                     /* add all entries from queue to out record */
                     guint x;
                     for (x = 0; x < q->length; x++) {
-                        char *xid = (char *) g_queue_peek_nth(q, x);
-                        memcpy(out[last].xid, xid,
+                        struct server_trans_tbl_rec_s record;
+                        char *xid = (char *)g_queue_peek_nth(q, x);
+                        memset(&record, 0, sizeof(record));
+                        memcpy(record.xid, xid,
                                LIXA_XID_SERIALIZE_LENGTH);
-                        last++;
+                        g_array_append_val(result, record);
                     }
                 } /* if (!g_queue_is_empty(q)) */
             } /* for i */
         }
 
-        if (!hastransactions) {
+        if (!hastransactions)
             THROW(OBJ_NOT_FOUND2);
-        }
 
-        *out_array_size = last;
-
-        LIXA_TRACE(("server_trans_tbl_query_xid: result is transactions="
-                    UINT32_T_FORMAT
-                    "\n", *out_array_size));
+        LIXA_TRACE(("server_trans_tbl_query_xid: result is "
+                    "transactions = %u\n", result->len));
 
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case OBJ_CORRUPTED:
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case OUT_OF_RANGE:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
@@ -361,6 +364,8 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
 
 int server_trans_tbl_remove(server_trans_tbl_t *stt,
                             const struct server_trans_tbl_rec_s *sttr)

@@ -17,20 +17,26 @@
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef LIXA_SERVER_TRANS_TBL_H
-#define LIXA_SERVER_TRANS_TBL_H
+# define LIXA_SERVER_TRANS_TBL_H
 
-#include <config.h>
+
+
+#include "config.h"
+
+
 
 #ifdef HAVE_GLIB_H
-
-#include <glib.h>
-#include <glibconfig.h>
-
+# include <glib.h>
+# include <glibconfig.h>
 #endif
 
-#include <lixa_trace.h>
-#include <lixa_xid.h>
-#include <xa.h>
+
+
+#include "lixa_trace.h"
+#include "lixa_xid.h"
+#include "xa.h"
+
+
 
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
@@ -43,20 +49,52 @@
 
 
 
-struct server_trans_tbl_rec_s
-{
-    char *gtrid; /** key */
-    guint tsid; /** thread status identifier */
-    lixa_ser_xid_t xid; /** the transaction XID */
-    uint32_t block_id; /** relevant block inside the status file */
+/**
+ * Server Transaction Table Record is the record used by
+ * @ref server_trans_tbl_s to index state file content
+ */
+struct server_trans_tbl_rec_s {
+    /**
+     * Global TRansaction ID is used as key
+     */
+    char *gtrid;
+    /**
+     * Thread State IDentifier
+     */
+    guint tsid;
+    /**
+     * Transaction ID, XID
+     */
+    lixa_ser_xid_t xid;
+    /**
+     * Relevant block inside the state file
+     */
+    uint32_t block_id;
 };
 
-struct server_trans_tbl_s
-{
+
+
+/**
+ * Server Transaction Table is an index of the state file content: it keeps
+ * track of the currently managed transactions
+ */
+struct server_trans_tbl_s {
+    /**
+     * This structure is used by all state thread and the access to it must be
+     * serialized by a mutex
+     */
     GMutex    mutex;
-    GTree    *records; /** multidimentional tree with gtrid as key */
-    guint     tsid_array_size; /** size of thread status identifier array */
+    /**
+     * Multidimentional tree with gtrid as key
+     */
+    GTree    *records;
+    /**
+     * size of thread status identifier array
+     */
+    guint     tsid_array_size;
 };
+
+
 
 typedef struct server_trans_tbl_s server_trans_tbl_t;
 
@@ -79,14 +117,28 @@ extern "C" {
 
     int server_trans_tbl_clear(server_trans_tbl_t *stt);
 
+
+    
+    /**
+     * Query the Server Transaction Table and returns an array with all the
+     * records with a specified Global TRansaction ID
+     * @param[in] stt Server Transaction Table
+     * @param[in] sttr Server Tramsactopm Table Record used for the query
+     * @param[in,out] result GArray with all the matching records
+     * @param[in] maint boolean value, TRUE for maintenance mode
+     * @return a reason code
+     */
     int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
                                    const struct server_trans_tbl_rec_s *sttr,
-                                   struct server_trans_tbl_rec_s *out,
-                                   guint *out_array_size,
-                                   int main);
+                                   GArray *result, int maint);
 
-    gboolean server_trans_tbl_traverse(gpointer key, gpointer value, gpointer data);
 
+    
+    gboolean server_trans_tbl_traverse(gpointer key, gpointer value,
+                                       gpointer data);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
