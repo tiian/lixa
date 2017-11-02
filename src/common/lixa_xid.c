@@ -194,9 +194,17 @@ void lixa_xid_create_new_bqual(XID *xid)
 char *lixa_xid_get_gtrid_ascii(const XID *xid)
 {
     char *gtrid;
-    if (NULL == (gtrid = (char *)malloc(LIXA_XID_GTRID_ASCII_LENGTH)))
+    byte_t *p;
+    int i=0, j=0;
+    
+    if (NULL == (gtrid = (char *)malloc(xid->gtrid_length*2+1)))
         return NULL;
-    uuid_unparse((unsigned char *)xid->data, gtrid);
+    p = (byte_t *)&(xid->data[0]);
+    for (i=0; i<xid->gtrid_length; ++i) {
+        sprintf(gtrid+j, "%2.2x", p[i]);
+        j += 2;
+    }
+    *(gtrid+j) = '\0';
     return gtrid;
 }
 
@@ -205,9 +213,17 @@ char *lixa_xid_get_gtrid_ascii(const XID *xid)
 char *lixa_xid_get_bqual_ascii(const XID *xid)
 {
     char *bqual;
-    if (NULL == (bqual = (char *)malloc(LIXA_XID_BQUAL_ASCII_LENGTH)))
+    byte_t *p;
+    int i=0, j=0;
+    
+    if (NULL == (bqual = (char *)malloc(xid->bqual_length*2+1)))
         return NULL;
-    uuid_unparse((unsigned char *)xid->data + sizeof(uuid_t), bqual);
+    p = (byte_t *)&(xid->data[xid->gtrid_length]);
+    for (i=0; i<xid->bqual_length; ++i) {
+        sprintf(bqual+j, "%2.2x", p[i]);
+        j += 2;
+    }
+    *(bqual+j) = '\0';
     return bqual;
 }
 
@@ -254,6 +270,7 @@ int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx)
     /* put the second separator */
     *(lsx+j) = LIXA_XID_SEPARATOR;
     j += 1;
+    /* serialize bqual */
     p = (byte_t *)&(xid->data[xid->gtrid_length]);
     for (i=0; i<xid->bqual_length; ++i) {
         sprintf(lsx+j, "%2.2x", p[i]);

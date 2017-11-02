@@ -50,8 +50,8 @@
 
 
 /**
- * Server Transaction Table Record is the record used by
- * @ref server_trans_tbl_s to index state file content
+ * Server Transaction Table Record is the record used to query and pass data
+ * to @ref server_trans_tbl_s functions
  */
 struct server_trans_tbl_rec_s {
     /**
@@ -66,10 +66,6 @@ struct server_trans_tbl_rec_s {
      * Transaction ID, XID
      */
     lixa_ser_xid_t xid;
-    /**
-     * Relevant block inside the state file
-     */
-    uint32_t block_id;
 };
 
 

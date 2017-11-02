@@ -90,19 +90,17 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
         GQueue *queue;
 
         LIXA_TRACE(("server_trans_tbl_insert: gtrid='%s', xid='%s', "
-                    "tsid=%u, block_id="
-                    UINT32_T_FORMAT
-                    "\n", sttr->gtrid, sttr->xid,
-                    sttr->tsid, sttr->block_id));
+                    "tsid=%u\n", sttr->gtrid, sttr->xid, sttr->tsid));
 
-        if (NULL == stt->records) THROW(OBJ_CORRUPTED);
+        if (NULL == stt->records)
+            THROW(OBJ_CORRUPTED);
 
         /* lock mutex */
         g_mutex_lock(&stt->mutex);
 
         /* check tsid is not out of range */
-        if (sttr->tsid == 0 || sttr->tsid >= stt->tsid_array_size) THROW(
-            OUT_OF_RANGE);
+        if (sttr->tsid == 0 || sttr->tsid >= stt->tsid_array_size)
+            THROW(OUT_OF_RANGE);
 
         /* look for gtrid */
         if (NULL == (node = g_tree_lookup(stt->records, sttr->gtrid))) {
@@ -113,60 +111,63 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
 
             if (NULL == (tsid = g_array_sized_new(
                              FALSE, FALSE, sizeof(GQueue),
-                             stt->tsid_array_size))) THROW(G_ARRAY_SIZED_NEW_ERROR);
-            /* prepare the array: all the elements are initialized with an empty queue object */
+                             stt->tsid_array_size)))
+                THROW(G_ARRAY_SIZED_NEW_ERROR);
+            /* prepare the array: all the elements are initialized with an
+             * empty queue object */
             for (i = 0; i < stt->tsid_array_size; ++i) {
                 GQueue q;
                 g_queue_init(&q);
                 g_array_append_val(tsid, q);
             }
             if (NULL ==
-                (key = (char *) malloc(LIXA_XID_GTRID_ASCII_LENGTH))) THROW(
-                    MALLOC_ERROR);
+                (key = (char *) malloc(LIXA_XID_GTRID_ASCII_LENGTH)))
+                THROW(MALLOC_ERROR);
             memcpy(key, sttr->gtrid, LIXA_XID_GTRID_ASCII_LENGTH);
             /* insert the new element in the tree */
             g_tree_insert(stt->records, key, tsid);
             node = (gpointer *) tsid;
         }
 
-        /* retrieve the queue associated to the thread status id tsid and push the XID */
+        /* retrieve the queue associated to the thread status id tsid and
+         * push the XID */
         queue = &g_array_index((GArray *) node, GQueue, sttr->tsid);
         char *xid = NULL;
-        if (NULL == (xid = (char *) malloc(LIXA_XID_SERIALIZE_LENGTH))) THROW(
-            MALLOC_ERROR);
+        if (NULL == (xid = (char *) malloc(LIXA_XID_SERIALIZE_LENGTH)))
+            THROW(MALLOC_ERROR);
         memcpy(xid, sttr->xid, LIXA_XID_SERIALIZE_LENGTH);
         g_queue_push_tail(queue, (gpointer *) xid);
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case OBJ_CORRUPTED:
-                    ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                    break;
-                case OUT_OF_RANGE:
-                    ret_cod = LIXA_RC_OUT_OF_RANGE;
-                    break;
-                case G_ARRAY_SIZED_NEW_ERROR:
-                    ret_cod = LIXA_RC_G_RETURNED_NULL;
-                    break;
-                case MALLOC_ERROR:
-                    ret_cod = LIXA_RC_MALLOC_ERROR;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-            /* unlock mutex */
-            g_mutex_unlock(&stt->mutex);
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case OBJ_CORRUPTED:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case OUT_OF_RANGE:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case G_ARRAY_SIZED_NEW_ERROR:
+                ret_cod = LIXA_RC_G_RETURNED_NULL;
+                break;
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* unlock mutex */
+        g_mutex_unlock(&stt->mutex);
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_tbl_insert/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
 
 void server_trans_tbl_value_destroy(gpointer data)
 {
@@ -185,14 +186,18 @@ void server_trans_tbl_value_destroy(gpointer data)
     g_array_free(tsid, TRUE);
 }
 
+
+
 int server_trans_tbl_comp(gconstpointer a, gconstpointer b, gpointer user_data)
 {
     const char *gtrida = (const char *) a;
     const char *gtridb = (const char *) b;
-    LIXA_TRACE(
-        ("server_trans_tbl_comp: gtrida='%s', gtridb='%s'\n", gtrida, gtridb));
+    LIXA_TRACE(("server_trans_tbl_comp: gtrida='%s', gtridb='%s'\n",
+                gtrida, gtridb));
     return strcmp(gtrida, gtridb);
 }
+
+
 
 int server_trans_tbl_clear(server_trans_tbl_t *stt)
 {
@@ -223,6 +228,8 @@ int server_trans_tbl_clear(server_trans_tbl_t *stt)
     return ret_cod;
 }
 
+
+
 gboolean server_trans_tbl_traverse(gpointer key, gpointer value, gpointer data)
 {
     char *gtrid = (char *) key;
@@ -232,6 +239,8 @@ gboolean server_trans_tbl_traverse(gpointer key, gpointer value, gpointer data)
 
     return FALSE;
 }
+
+
 
 int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
                                const struct server_trans_tbl_rec_s *sttr,
@@ -320,6 +329,7 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
                         memset(&record, 0, sizeof(record));
                         memcpy(record.xid, xid,
                                LIXA_XID_SERIALIZE_LENGTH);
+                        record.tsid = i;
                         g_array_append_val(result, record);
                     }
                 } /* if (!g_queue_is_empty(q)) */
@@ -381,11 +391,8 @@ int server_trans_tbl_remove(server_trans_tbl_t *stt,
 
     LIXA_TRACE(("server_trans_tbl_remove\n"));
     TRY {
-        LIXA_TRACE(
-            ("server_trans_tbl_remove: gtrid='%s', xid='%s', tsid=%u, block_id="
-             UINT32_T_FORMAT
-             "\n", sttr->gtrid, sttr->xid,
-             sttr->tsid, sttr->block_id));
+        LIXA_TRACE(("server_trans_tbl_remove: gtrid='%s', xid='%s', tsid=%u\n",
+                    sttr->gtrid, sttr->xid, sttr->tsid));
 
         if (NULL == stt->records)
             THROW(OBJ_CORRUPTED);
@@ -398,29 +405,28 @@ int server_trans_tbl_remove(server_trans_tbl_t *stt,
             THROW(OUT_OF_RANGE);
 
         /* remove */
-        if (!g_tree_remove(stt->records, sttr->gtrid)) THROW(NOT_FOUND_ERROR);
+        if (!g_tree_remove(stt->records, sttr->gtrid))
+            THROW(NOT_FOUND_ERROR);
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case OBJ_CORRUPTED:
-                    ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                    break;
-                case OUT_OF_RANGE:
-                    ret_cod = LIXA_RC_OUT_OF_RANGE;
-                    break;
-                case NOT_FOUND_ERROR:
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-            /* unlock mutex */
-            g_mutex_unlock(&stt->mutex);
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case OBJ_CORRUPTED:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case OUT_OF_RANGE:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case NOT_FOUND_ERROR:
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* unlock mutex */
+        g_mutex_unlock(&stt->mutex);
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_tbl_insert/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

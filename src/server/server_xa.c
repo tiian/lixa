@@ -290,7 +290,9 @@ int server_xa_commit_8(struct thread_status_s *ts,
                 &(ts->curr_status[block_id].sr.data.pld.ph.state.xid),
                 sttr.xid)) THROW(XID_SERIALIZE_ERROR);
         sttr.tsid = ts->id;
+        /*
         sttr.block_id = block_id;
+        */
         if (LIXA_RC_OK != (ret_cod = server_trans_tbl_remove(
                                ts->trans_table, &sttr))) THROW(TRANS_TABLE_REMOVE_ERROR);
 
@@ -1076,7 +1078,9 @@ int server_xa_rollback_8(struct thread_status_s *ts,
                 &(ts->curr_status[block_id].sr.data.pld.ph.state.xid),
                 sttr.xid)) THROW(XID_SERIALIZE_ERROR);
         sttr.tsid = ts->id;
+        /*
         sttr.block_id = block_id;
+        */
         if (LIXA_RC_OK != (ret_cod = server_trans_tbl_remove(
                                ts->trans_table, &sttr))) THROW(TRANS_TABLE_REMOVE_ERROR);
 
@@ -1193,36 +1197,78 @@ int server_xa_start_8(struct thread_status_s *ts,
                       uint32_t block_id,
                       struct lixa_msg_verb_step_s *last_verb_step)
 {
-    enum Exception { TRANS_TABLE_INSERT_ERROR,
+    enum Exception { XID_GET_GTRID_ERROR, 
                      XID_SERIALIZE_ERROR,
+                     G_ARRAY_NEW_ERROR,
+                     TRANS_TBL_QUERY_XID_ERROR,
+                     BRANCHES_ON_MULTIPLE_THREADS,
+                     TRANS_TABLE_INSERT_ERROR,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    struct server_trans_tbl_rec_s sttr;
+    GArray *query_result = NULL;
 
     LIXA_TRACE(("server_xa_start_8\n"));
     TRY {
         uint32_t i;
 
+        /* prepare transaction table record */
+        memset(&sttr, 0, sizeof(sttr));
+        if (NULL == (sttr.gtrid = lixa_xid_get_gtrid_ascii(
+                         &(lmi->body.start_8.conthr.xid))))
+            THROW(XID_GET_GTRID_ERROR);
+        if (!lixa_xid_serialize(&(lmi->body.start_8.conthr.xid), sttr.xid))
+            THROW(XID_SERIALIZE_ERROR);
+        sttr.tsid = ts->id;
+        /* check if the xa_start is related to a subordinate branch */
+        if (lmi->body.start_8.conthr.sub_branch) {
+            guint i, tsid = 0;
+            LIXA_TRACE(("server_xa_start_8: the client is asking a new "
+                        "subordinate branch\n"));
+            /* looking for other branches of the same global transaction */
+            if (NULL == (query_result = g_array_new(
+                             FALSE, FALSE,
+                             sizeof(struct server_trans_tbl_rec_s))))
+                THROW(G_ARRAY_NEW_ERROR);
+            if (LIXA_RC_OK != (ret_cod = server_trans_tbl_query_xid(
+                                   ts->trans_table, &sttr, query_result,
+                                   FALSE)))
+                THROW(TRANS_TBL_QUERY_XID_ERROR);
+            /* check result: only one thread must contain it*/
+            for (i=0; i<query_result->len; ++i) {
+                struct server_trans_tbl_rec_s *result =
+                    &g_array_index(query_result,
+                                   struct server_trans_tbl_rec_s, i);
+                LIXA_TRACE(("server_xa_start_8: xid='%s' found in "
+                            "thread %u\n", result->xid, result->tsid));
+                if (0 == tsid) {
+                    /* first entry */
+                    tsid = result->tsid;
+                } else {
+                    if (tsid != result->tsid) {
+                        LIXA_TRACE(("server_xa_start_8: the same global "
+                                    "transaction has been found in two "
+                                    "state threads: %u and %u\n",
+                                    tsid, result->tsid));
+                        THROW(BRANCHES_ON_MULTIPLE_THREADS);
+                    } /* if (tsid != result->tsid) */
+                } /* if (0 == tsid) */
+                            
+            }
+            
+            /* @@@ move to the proper thread */
+        } /* if (lmi->body.start_8.conthr.sub_branch) */
+        
         /* store XID in the header block */
         status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
         ts->curr_status[block_id].sr.data.pld.ph.state.xid =
             lmi->body.start_8.conthr.xid;
-        /* check if the xa_start is related to a subordinate branch */
-        if (lmi->body.start_8.conthr.sub_branch) {
-            LIXA_TRACE(("server_xa_start_8: the client is asking a new "
-                        "subordinate branch\n"));
-            /* @@@ */
-        } /* if (lmi->body.start_8.conthr.sub_branch) */
         /* store XID in the global transaction table */
-        struct server_trans_tbl_rec_s sttr;
-        sttr.gtrid = lixa_xid_get_gtrid_ascii(&(lmi->body.start_8.conthr.xid));
-        if (!lixa_xid_serialize(&(lmi->body.start_8.conthr.xid), sttr.xid))
-            THROW(XID_SERIALIZE_ERROR);
-        sttr.tsid = ts->id;
-        sttr.block_id = block_id;
         if (LIXA_RC_OK != (ret_cod = server_trans_tbl_insert(
                                ts->trans_table, &sttr)))
             THROW(TRANS_TABLE_INSERT_ERROR);
+        sttr.gtrid = NULL; /* avoid string free */
         /* reset finished state */
         ts->curr_status[block_id].sr.data.pld.ph.state.finished = FALSE;
 
@@ -1257,10 +1303,19 @@ int server_xa_start_8(struct thread_status_s *ts,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case TRANS_TABLE_INSERT_ERROR:
-                break;
+            case XID_GET_GTRID_ERROR:
             case XID_SERIALIZE_ERROR:
                 ret_cod = LIXA_RC_MALFORMED_XID;
+                break;
+            case G_ARRAY_NEW_ERROR:
+                ret_cod = LIXA_RC_G_ARRAY_NEW_ERROR;
+                break;
+            case TRANS_TBL_QUERY_XID_ERROR:
+                break;
+            case BRANCHES_ON_MULTIPLE_THREADS:
+                ret_cod = LIXA_RC_BRANCHES_ON_MULTIPLE_THREADS;
+                break;
+            case TRANS_TABLE_INSERT_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1269,9 +1324,13 @@ int server_xa_start_8(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* memory recovery to avoid memory leak */
+    if (NULL != sttr.gtrid)
+        free(sttr.gtrid);
+    if (NULL != query_result)
+        g_array_free(query_result, TRUE);
     LIXA_TRACE(("server_xa_start_8/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));    
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_START_8,
                thread_status_get_crash_count(ts));
     return ret_cod;

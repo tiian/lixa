@@ -215,6 +215,10 @@
  * A message with a wrong level has been detected; see also @ref LIXA_MSG_LEVEL
  */
 #define LIXA_RC_MESSAGE_LEVEL_MISMATCH         -27
+/**
+ * Branches of the same global transaction are managed by multiple threads
+ */
+#define LIXA_RC_BRANCHES_ON_MULTIPLE_THREADS   -28
 
 
 
