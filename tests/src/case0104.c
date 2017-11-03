@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
     int rc;
     char *xid_string = NULL;
     FILE *xid_file = NULL;
+    FILE *xid_file2 = NULL;
     
     /* XTA variables (objects) */
     xta_transaction_manager_t *tm;
@@ -67,7 +68,8 @@ int main(int argc, char *argv[])
     int        insert;
     int        statement;
     int        test_rc;
-    const char *filename;
+    const char *filename = NULL;
+    const char *filename2 = NULL;
 #ifdef HAVE_ORACLE
     /* Oracle variables */
     int            oci_rc;
@@ -85,6 +87,11 @@ int main(int argc, char *argv[])
         "VALUES ('ZA', 'South Africa', 4)";
     text          *oci_stmt_delete2 =
         (text *) "DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'";
+    text          *oci_stmt_insert3 =
+        (text *) "INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
+        "VALUES ('MV', 'Republic of Maldives', 3)";
+    text          *oci_stmt_delete3 =
+        (text *) "DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'MV'";
     text          *oci_stmt_insert = NULL;
     text          *oci_stmt_delete = NULL;
 #endif
@@ -104,11 +111,14 @@ int main(int argc, char *argv[])
     commit = strtol(argv[4], NULL, 0);
     test_rc = strtol(argv[5], NULL, 0);
     filename = argv[6];
+    /* check if a second filename is provided */
+    if (argc == 8)
+        filename2 = argv[7];
 
     /* check phase */
     switch (phase) {
-        case SUPERIOR:
-            fprintf(stderr, "%s| phase=%d (SUPERIOR)\n", pgm, phase);
+    case SUPERIOR:
+        fprintf(stderr, "%s| phase=%d (SUPERIOR)\n", pgm, phase);
             /* open file for write */
             if (NULL == (xid_file = fopen(filename, "w"))) {
                 fprintf(stderr, "%s| error while opening file '%s'\n",
@@ -121,6 +131,11 @@ int main(int argc, char *argv[])
             if (NULL == (xid_file = fopen(filename, "r"))) {
                 fprintf(stderr, "%s| error while opening file '%s'\n",
                         pgm, filename);
+            }
+            /* open file for write */
+            if (NULL == (xid_file2 = fopen(filename2, "w"))) {
+                fprintf(stderr, "%s| error while opening file '%s'\n",
+                        pgm, filename2);
             }
             break;
         case NO_PHASE:
@@ -143,6 +158,12 @@ int main(int argc, char *argv[])
 #ifdef HAVE_ORACLE
             oci_stmt_insert = oci_stmt_insert2;
             oci_stmt_delete = oci_stmt_delete2;
+#endif
+            break;
+        case 3:
+#ifdef HAVE_ORACLE
+            oci_stmt_insert = oci_stmt_insert3;
+            oci_stmt_delete = oci_stmt_delete3;
 #endif
             break;
         default:
@@ -260,6 +281,15 @@ int main(int argc, char *argv[])
             fprintf(stderr, "%s| xta_transaction_branch returned %d\n",
                     pgm, rc);
             return 1;
+        }
+
+        /* write to xid_file2 the transaction that will be branched again */
+        if (NULL != xid_file2) {
+            fprintf(stderr, "%s| passing XID '%s' to subordinate\n",
+                    pgm, buffer);
+            fprintf(xid_file2, "%s", buffer);
+            fclose(xid_file2);
+            xid_file2 = NULL;
         }
     }
     

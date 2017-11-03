@@ -16,19 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
+
 
 
 #ifdef HAVE_STRING_H
-
 # include <string.h>
-
+#endif
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
 #endif
 
 
-#include <lixa_errors.h>
-#include <lixa_crash.h>
-#include <server_xa.h>
+
+#include "lixa_errors.h"
+#include "lixa_crash.h"
+#include "lixa_syslog.h"
+#include "server_xa.h"
 
 
 
@@ -1040,18 +1044,16 @@ int server_xa_rollback(struct thread_status_s *ts,
 }
 
 
+
 int server_xa_rollback_8(struct thread_status_s *ts,
                          const struct lixa_msg_s *lmi,
                          uint32_t block_id)
 {
-    enum Exception
-    {
-        INVALID_BLOCK_ID,
-        NUMBER_OF_RSRMGRS_MISMATCH,
-        XID_SERIALIZE_ERROR,
-        TRANS_TABLE_REMOVE_ERROR,
-        NONE
-    } excp;
+    enum Exception { INVALID_BLOCK_ID,
+                     NUMBER_OF_RSRMGRS_MISMATCH,
+                     XID_SERIALIZE_ERROR,
+                     TRANS_TABLE_REMOVE_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_xa_rollback_8\n"));
@@ -1060,11 +1062,12 @@ int server_xa_rollback_8(struct thread_status_s *ts,
 
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=
-            DATA_PAYLOAD_TYPE_HEADER) THROW(INVALID_BLOCK_ID);
+            DATA_PAYLOAD_TYPE_HEADER)
+            THROW(INVALID_BLOCK_ID);
         /* check children blocks match with the arrived update */
         if (lmi->body.rollback_8.xa_rollback_execs->len >
-            ts->curr_status[block_id].sr.data.pld.ph.n) THROW(
-                NUMBER_OF_RSRMGRS_MISMATCH);
+            ts->curr_status[block_id].sr.data.pld.ph.n)
+            THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* store rollback intent */
         status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
@@ -1076,13 +1079,15 @@ int server_xa_rollback_8(struct thread_status_s *ts,
             &(ts->curr_status[block_id].sr.data.pld.ph.state.xid));
         if (!lixa_xid_serialize(
                 &(ts->curr_status[block_id].sr.data.pld.ph.state.xid),
-                sttr.xid)) THROW(XID_SERIALIZE_ERROR);
+                sttr.xid))
+            THROW(XID_SERIALIZE_ERROR);
         sttr.tsid = ts->id;
         /*
         sttr.block_id = block_id;
         */
         if (LIXA_RC_OK != (ret_cod = server_trans_tbl_remove(
-                               ts->trans_table, &sttr))) THROW(TRANS_TABLE_REMOVE_ERROR);
+                               ts->trans_table, &sttr)))
+            THROW(TRANS_TABLE_REMOVE_ERROR);
 
         /* store data in the children blocks... */
         for (i = 0; i < lmi->body.rollback_8.xa_rollback_execs->len; ++i) {
@@ -1107,35 +1112,34 @@ int server_xa_rollback_8(struct thread_status_s *ts,
         } /* for (i=0; ... */
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case TRANS_TABLE_REMOVE_ERROR:
-                    break;
-                case XID_SERIALIZE_ERROR:
-                    ret_cod = LIXA_RC_MALFORMED_XID;
-                    break;
-                case INVALID_BLOCK_ID:
-                    ret_cod = LIXA_RC_INVALID_STATUS;
-                    break;
-                case NUMBER_OF_RSRMGRS_MISMATCH:
-                    ret_cod = LIXA_RC_OUT_OF_RANGE;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case TRANS_TABLE_REMOVE_ERROR:
+                break;
+            case XID_SERIALIZE_ERROR:
+                ret_cod = LIXA_RC_MALFORMED_XID;
+                break;
+            case INVALID_BLOCK_ID:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NUMBER_OF_RSRMGRS_MISMATCH:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_rollback_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-
+    
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_ROLLBACK_8,
                thread_status_get_crash_count(ts));
     return ret_cod;
 }
+
 
 
 int server_xa_start(struct thread_status_s *ts,
@@ -1144,10 +1148,10 @@ int server_xa_start(struct thread_status_s *ts,
                     uint32_t block_id,
                     struct lixa_msg_verb_step_s *last_verb_step)
 {
-    enum Exception
-    {
-        SERVER_XA_START_8_ERROR, SERVER_XA_START_24_ERROR, INVALID_STEP, NONE
-    } excp;
+    enum Exception { SERVER_XA_START_8_ERROR,
+                     SERVER_XA_START_24_ERROR,
+                     INVALID_STEP,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_xa_start\n"));
@@ -1156,34 +1160,33 @@ int server_xa_start(struct thread_status_s *ts,
             case 8:
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_start_8(
-                            ts, lmi, lmo, block_id, last_verb_step))) THROW(
-                                SERVER_XA_START_8_ERROR);
+                            ts, lmi, lmo, block_id, last_verb_step)))
+                    THROW(SERVER_XA_START_8_ERROR);
                 break;
             case 24:
                 if (LIXA_RC_OK != (ret_cod = server_xa_start_24(
-                                       ts, lmi, block_id))) THROW(SERVER_XA_START_24_ERROR);
+                                       ts, lmi, block_id)))
+                    THROW(SERVER_XA_START_24_ERROR);
                 break;
             default: THROW(INVALID_STEP);
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case SERVER_XA_START_8_ERROR:
-                case SERVER_XA_START_24_ERROR:
-                    break;
-                case INVALID_STEP:
-                    ret_cod = LIXA_RC_INVALID_STATUS;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case SERVER_XA_START_8_ERROR:
+            case SERVER_XA_START_24_ERROR:
+                break;
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -1247,9 +1250,11 @@ int server_xa_start_8(struct thread_status_s *ts,
                 } else {
                     if (tsid != result->tsid) {
                         LIXA_TRACE(("server_xa_start_8: the same global "
-                                    "transaction has been found in two "
+                                    "transaction %s has been found in two "
                                     "state threads: %u and %u\n",
-                                    tsid, result->tsid));
+                                    result->xid, tsid, result->tsid));
+                        syslog(LOG_WARNING, LIXA_SYSLOG_LXD029W,
+                               result->xid, tsid, result->tsid);
                         THROW(BRANCHES_ON_MULTIPLE_THREADS);
                     } /* if (tsid != result->tsid) */
                 } /* if (0 == tsid) */
