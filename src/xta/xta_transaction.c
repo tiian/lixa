@@ -1099,6 +1099,7 @@ int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
                      , LIXA_XA_START_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int warning = LIXA_RC_OK;
     
     LIXA_TRACE(("xta_transaction_branch\n"));
     TRY {
@@ -1142,12 +1143,21 @@ int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
             THROW(NULL_OBJECT2);
         /* start the transaction in all the XA Resource Managers as a new
          * branch under the scope of an existing global transaction */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
-                               &this->local_ccc, &this->client_status,
-                               &txrc,
-                               xta_xid_get_xa_xid(this->xid), txstate,
-                               next_txstate, &dupid_or_proto, TMXTABRANCH)))
-            THROW(LIXA_XA_START_ERROR);        
+        ret_cod = lixa_xa_start(&this->local_ccc, &this->client_status,
+                                &txrc,
+                                xta_xid_get_xa_xid(this->xid), txstate,
+                                next_txstate, &dupid_or_proto, TMXTABRANCH);
+        switch (ret_cod) {
+            case LIXA_RC_OK:
+                break;
+            case LIXA_RC_ERROR_FROM_SERVER_OFFSET+
+                LIXA_RC_NO_SUPERIOR_BRANCH:
+                /* set the warning condition, but the transaction can go on */
+                warning = ret_cod;
+                break;
+            default:
+                THROW(LIXA_XA_START_ERROR);        
+        } /* switch (ret_cod) */
         /* update the TX state */
         client_status_set_txstate(&this->client_status, next_txstate);
         
@@ -1170,7 +1180,7 @@ int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
             case LIXA_XA_START_ERROR:
                 break;
             case NONE:
-                ret_cod = LIXA_RC_OK;
+                ret_cod = warning;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;

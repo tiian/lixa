@@ -93,8 +93,11 @@
  */
 #define LIXA_RC_MAINTENANCE_MODE               +10
 /**
- * The current thread has already started a transaction and it's still active
+ * The Application Program wants to branch an existing superior branch, but
+ * it does not exist. The transaction can go on as a standard one.
  */
+#define LIXA_RC_NO_SUPERIOR_BRANCH             +11
+
 
 
 

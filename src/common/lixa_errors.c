@@ -33,6 +33,10 @@ const char *lixa_strerror(int ret_cod)
         ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
     
     switch (ret_cod) {
+        case LIXA_RC_NO_SUPERIOR_BRANCH:
+            return "WARNING: the Application Program wants to branch an "
+                "existing superior branch, but it does not exist. The "
+                "transaction can go on as a standard one";
         case LIXA_RC_MAINTENANCE_MODE:
             return "WARNING: maintenance mode execution only";
         case LIXA_RC_ASKED_SHUTDOWN:

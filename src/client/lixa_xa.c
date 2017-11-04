@@ -2204,6 +2204,7 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
                      , XA_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int warning = LIXA_RC_OK;
 
     struct lixa_msg_s msg;
 
@@ -2302,8 +2303,18 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
         lixa_msg_trace(&msg);
 #endif
         /* check the answer from the server */
-        if (LIXA_RC_OK != (ret_cod = msg.body.start_16.answer.rc))
-            THROW(ERROR_FROM_SERVER);
+        ret_cod = msg.body.start_16.answer.rc;
+        switch (ret_cod) {
+            case LIXA_RC_OK:
+                break;
+            case LIXA_RC_NO_SUPERIOR_BRANCH:
+                /* just propagate a warning condition to the Application
+                   Program */
+                warning = LIXA_RC_ERROR_FROM_SERVER_OFFSET+ret_cod;
+                break;
+            default:
+                THROW(ERROR_FROM_SERVER);
+        } /* switch (ret_cod) */
         /*
           } if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags)
         */
@@ -2532,7 +2543,7 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
                 ret_cod = LIXA_RC_XA_ERROR;
                 break;
             case NONE:
-                ret_cod = LIXA_RC_OK;
+                ret_cod = warning;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;

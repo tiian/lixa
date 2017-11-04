@@ -600,6 +600,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                      MSG_RETRIEVE_ERROR,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int warning = LIXA_RC_OK;
 
     LIXA_TRACE(("server_manager_pollin_data\n"));
     TRY {
@@ -642,6 +643,10 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                                            ts, slot_id)))
                         THROW(DROP_CLIENT_ERROR2);
                     break;
+                case LIXA_RC_NO_SUPERIOR_BRANCH:
+                    /* nothing special to do, just send the reason code to
+                       the client */
+                    break;
                 default:
                     THROW(XML_PROC);
             }
@@ -670,7 +675,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
             case MSG_RETRIEVE_ERROR:
                 break;
             case NONE:
-                ret_cod = LIXA_RC_OK;
+                ret_cod = warning;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;

@@ -37,7 +37,8 @@
 
 
 /*
- * Standard case test for XTA: simple transaction
+ * Special case tests for XTA branching:
+ * - superior branch does not exist
  */
 
 
@@ -48,23 +49,25 @@ int main(int argc, char *argv[])
     int rc;
     char *xid_string = NULL;
     FILE *xid_file = NULL;
+    FILE *xid_file2 = NULL;
     
     /* XTA variables (objects) */
     xta_transaction_manager_t *tm;
     xta_transaction_t *tx;
-    xta_native_xa_resource_t *native_xa_res0, *native_xa_res1;
+    xta_native_xa_resource_t *native_xa_res;
     /* control variables */
-    enum Phase { INITIAL, INTERMEDIATE, FINAL, NO_PHASE } phase;
+    enum Phase { SUPERIOR, SUBORDINATE, NO_PHASE } phase;
     int        commit;
     int        test_rc;
-    const char *filename;
+    const char *filename = NULL;
+    const char *filename2 = NULL;
 
     /* turn ON trace for debugging purpose */
     xta_init();
     
     fprintf(stderr, "%s| starting...\n", pgm);
     if (argc < 5) {
-        fprintf(stderr, "%s: at least four options must be specified\n",
+        fprintf(stderr, "%s: at least six options must be specified\n",
                 argv[0]);
         return 1;
     }
@@ -72,31 +75,31 @@ int main(int argc, char *argv[])
     commit = strtol(argv[2], NULL, 0);
     test_rc = strtol(argv[3], NULL, 0);
     filename = argv[4];
+    /* check if a second filename is provided */
+    if (argc == 6)
+        filename2 = argv[5];
 
     /* check phase */
-    switch(phase) {
-        case INITIAL:
-            fprintf(stderr, "%s| phase=%d (INITIAL)\n", pgm, phase);
+    switch (phase) {
+    case SUPERIOR:
+        fprintf(stderr, "%s| phase=%d (SUPERIOR)\n", pgm, phase);
             /* open file for write */
             if (NULL == (xid_file = fopen(filename, "w"))) {
                 fprintf(stderr, "%s| error while opening file '%s'\n",
                         pgm, filename);
             }
             break;
-        case INTERMEDIATE:
-            fprintf(stderr, "%s| phase=%d (INTERMEDIATE)\n", pgm, phase);
+        case SUBORDINATE:
+            fprintf(stderr, "%s| phase=%d (SUBORDINATE)\n", pgm, phase);
             /* open file for read */
             if (NULL == (xid_file = fopen(filename, "r"))) {
                 fprintf(stderr, "%s| error while opening file '%s'\n",
                         pgm, filename);
             }
-            break;
-        case FINAL:
-            fprintf(stderr, "%s| phase=%d (FINAL)\n", pgm, phase);
-            /* open file for read */
-            if (NULL == (xid_file = fopen(filename, "r"))) {
+            /* open file for write */
+            if (NULL == (xid_file2 = fopen(filename2, "w"))) {
                 fprintf(stderr, "%s| error while opening file '%s'\n",
-                        pgm, filename);
+                        pgm, filename2);
             }
             break;
         case NO_PHASE:
@@ -104,9 +107,9 @@ int main(int argc, char *argv[])
             break;
         default:
             fprintf(stderr, "%s| phase=%d UNKNOWN!\n", pgm, phase);
-            break;
+            return 1;
     } /* switch(phase) */
-    
+
     /*
      * create a Transaction Manager object
      */
@@ -116,18 +119,12 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * create two XA native (static) resource objects linked to the first and
-     * second Resouce Managers configured in LIXA profile
+     * create an XA native (static) resource object linked to the first Resouce
+     * Manager configured in LIXA profile
      */
-    if (NULL == (native_xa_res0 = xta_native_xa_resource_new_by_rmid(
+    if (NULL == (native_xa_res = xta_native_xa_resource_new_by_rmid(
                      0, xta_transaction_manager_get_config()))) {
-        fprintf(stderr, "%s| xta_native_xa_resource_new(0): returned NULL\n",
-                pgm);
-        return 1;
-    }
-    if (NULL == (native_xa_res1 = xta_native_xa_resource_new_by_rmid(
-                     1, xta_transaction_manager_get_config()))) {
-        fprintf(stderr, "%s| xta_native_xa_resource_new(1): returned NULL\n",
+        fprintf(stderr, "%s| xta_native_xa_resource_new: returned NULL\n",
                 pgm);
         return 1;
     }
@@ -140,16 +137,10 @@ int main(int argc, char *argv[])
         fprintf(stderr, "%s| xta_transaction_manager_get_transaction: "
                 "transaction reference is %p\n", pgm, tx);
     }
-    /* register the native XA Resources to the transaction manager: this step
+    /* register the native XA Resource to the transaction manager: this step
      * is useless but it's not dangerous */
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
-                           tx, (xta_xa_resource_t *)native_xa_res0))) {
-        fprintf(stderr, "%s| xta_transaction_enlist_resource/native_xa_res: "
-               "returned %d\n", pgm, rc);
-        return 1;
-    }
-    if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
-                           tx, (xta_xa_resource_t *)native_xa_res1))) {
+                           tx, (xta_xa_resource_t *)native_xa_res))) {
         fprintf(stderr, "%s| xta_transaction_enlist_resource/native_xa_res: "
                "returned %d\n", pgm, rc);
         return 1;
@@ -161,24 +152,24 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (INITIAL == phase || NO_PHASE == phase) {
+    if (SUPERIOR == phase || NO_PHASE == phase) {
         /* start a Distributed Transaction */
         if (LIXA_RC_OK != (rc = xta_transaction_start(tx))) {
             fprintf(stderr, "%s| xta_transaction_start: returned %d\n",
                     pgm, rc);
             return 1;
         }
-
         /* get XID as a string */
         if (NULL == (xid_string = xta_xid_to_string(
                          xta_transaction_get_xid(tx)))) {
             fprintf(stderr, "%s| xta XID is NULL\n", pgm);
             return 1;
         } else {
-            fprintf(stderr, "%s| xta XID is '%s'\n", pgm, xid_string);
+            fprintf(stderr, "%s| passing XID '%s' to subordinate\n",
+                    pgm, xid_string);
         }
-        if (INITIAL == phase) {
-            /* write to xid_file the transaction that will be resumed */
+        if (SUPERIOR == phase) {
+            /* write to xid_file the transaction that will be branched */
             fprintf(xid_file, "%s", xid_string);
             fclose(xid_file);
             xid_file = NULL;
@@ -194,47 +185,48 @@ int main(int argc, char *argv[])
                     pgm, filename);
             return 1;
         }
-        fprintf(stderr, "%s| xta XID is '%s'\n", pgm, buffer);
+        fprintf(stderr, "%s| retrieved XID is '%s'\n", pgm, buffer);
         fclose(xid_file);
         
-        /* resume the transaction */
-        if (LIXA_RC_OK != (rc = xta_transaction_resume(
-                               tx, buffer, TMRESUME))) {
-            fprintf(stderr, "%s| xta_transaction_resume returned %d\n",
+        /* branch the transaction */
+        if (test_rc != (rc = xta_transaction_branch(
+                               tx, buffer))) {
+            fprintf(stderr, "%s| xta_transaction_branch returned %d\n",
                     pgm, rc);
             return 1;
         }
-    }
-    
-    if (INITIAL == phase || INTERMEDIATE == phase) {
-        /* suspend the transaction */
-        if (test_rc != (rc = xta_transaction_suspend(tx, TMMIGRATE))) {
-            fprintf(stderr, "%s| xta_transaction_suspend: returned %d instead "
-                    "of %d\n", pgm, rc, test_rc);
-            return 1;
-        }
-    } /* if (INITIAL == phase) */
 
-    if (FINAL == phase || NO_PHASE == phase) {
-        /* commit the Distributed Transaction */
-        if (commit) {
-            if (test_rc != (rc = xta_transaction_commit(tx))) {
-                fprintf(stderr, "%s| xta_transaction_commit: returned %d "
-                        "instead of %d\n", pgm, rc, test_rc);
-                return 1;
-            }
-            fprintf(stderr, "%s| XTA commit returned %d as expected\n",
-                    pgm, rc);
-        } else {
-            if (test_rc != (rc = xta_transaction_rollback(tx))) {
-                fprintf(stderr, "%s| xta_transaction_rollback: returned %d "
-                        "instead of %d\n", pgm, rc, test_rc);
-                return 1;
-            }
-            fprintf(stderr, "%s| XTA rollback returned %d as expected\n",
-                    pgm, rc);
+        /* write to xid_file2 the transaction that will be branched again */
+        if (NULL != xid_file2) {
+            fprintf(stderr, "%s| passing XID '%s' to subordinate\n",
+                    pgm, buffer);
+            fprintf(xid_file2, "%s", buffer);
+            fclose(xid_file2);
+            xid_file2 = NULL;
         }
-    } /* if (FINAL == phase) */
+    }    
+
+    /* put a simple delay to allow the progress of the other branches */
+    sleep(1);
+
+    /* commit the Distributed Transaction */
+    if (commit) {
+        if (LIXA_RC_OK != (rc = xta_transaction_commit(tx))) {
+            fprintf(stderr, "%s| xta_transaction_commit: returned %d "
+                    "instead of %d\n", pgm, rc, test_rc);
+            return 1;
+        }
+        fprintf(stderr, "%s| XTA commit returned %d as expected\n",
+                pgm, rc);
+    } else {
+        if (LIXA_RC_OK != (rc = xta_transaction_rollback(tx))) {
+            fprintf(stderr, "%s| xta_transaction_rollback: returned %d "
+                    "instead of %d\n", pgm, rc, test_rc);
+            return 1;
+        }
+        fprintf(stderr, "%s| XTA rollback returned %d as expected\n",
+                pgm, rc);
+    }
     
     /* close all the resources for Distributed Transactions */
     if (LIXA_RC_OK != (rc = xta_transaction_close(tx))) {
@@ -246,10 +238,9 @@ int main(int argc, char *argv[])
      */
     xta_transaction_manager_delete(tm);
     /*
-     * delete native XA Resource objects
+     * delete native XA Resource object
      */
-    xta_native_xa_resource_delete(native_xa_res0);
-    xta_native_xa_resource_delete(native_xa_res1);
+    xta_native_xa_resource_delete(native_xa_res);
     /*
      * end of XTA API calls
      */

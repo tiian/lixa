@@ -175,6 +175,8 @@
 #define LIXA_SYSLOG_LXD028N "LXD026N value %ld is invalid for parameter '%s', fixing it to %ld"
 #define LIXA_SYSLOG_LXD029W "LXD029W the same global transaction ID (%s) " \
     "has been found in two distinct state threads: %u and %u"
+#define LIXA_SYSLOG_LXD030N "LXD030N client is asking to branch an existing " \
+    "global transaction, but not other branches are available for xid='%s'"
     
 
 

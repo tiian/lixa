@@ -44,7 +44,7 @@
 
 
 /*
- * Trivial case test for XTA: just assuring it can be compiled and executed!
+ * Branch case test for XTA
  */
 
 
