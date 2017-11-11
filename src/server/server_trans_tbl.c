@@ -71,17 +71,17 @@ int server_trans_tbl_init(server_trans_tbl_t *stt, guint tsid_array_size)
     return ret_cod;
 }
 
+
+
 int server_trans_tbl_insert(server_trans_tbl_t *stt,
                             const struct server_trans_tbl_rec_s *sttr)
 {
-    enum Exception
-    {
-        OBJ_CORRUPTED,
-        OUT_OF_RANGE,
-        G_ARRAY_SIZED_NEW_ERROR,
-        MALLOC_ERROR,
-        NONE
-    } excp;
+    enum Exception { OBJ_CORRUPTED,
+                     OUT_OF_RANGE,
+                     G_ARRAY_SIZED_NEW_ERROR,
+                     STRDUP_ERROR,
+                     MALLOC_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_trans_tbl_insert\n"));
@@ -120,12 +120,11 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
                 g_queue_init(&q);
                 g_array_append_val(tsid, q);
             }
-            if (NULL ==
-                (key = (char *) malloc(LIXA_XID_GTRID_ASCII_LENGTH)))
-                THROW(MALLOC_ERROR);
-            memcpy(key, sttr->gtrid, LIXA_XID_GTRID_ASCII_LENGTH);
+            /* duplicate the key before inserting it in the tree */
+            if (NULL == (key = strdup(sttr->gtrid)))
+                THROW(STRDUP_ERROR);
             /* insert the new element in the tree */
-            g_tree_insert(stt->records, key, tsid);
+            g_tree_insert(stt->records, (gpointer)key, tsid);
             node = (gpointer *) tsid;
         }
 
@@ -149,6 +148,9 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
                 break;
             case G_ARRAY_SIZED_NEW_ERROR:
                 ret_cod = LIXA_RC_G_RETURNED_NULL;
+                break;
+            case STRDUP_ERROR:
+                ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;

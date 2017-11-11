@@ -1,9 +1,4 @@
-Restart from server_xa.c function server_xa_start_8
-
 Branching:
-- all the branches of a global transaction must be migrated to the same
-  thread in the state server (see functions server_manager_switch_* 
-  implemented for server_recovery)
 - implement serialization in state server
 
 NOTE: if the father commits before the child branches, the child transaction

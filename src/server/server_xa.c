@@ -1143,6 +1143,7 @@ int server_xa_rollback_8(struct thread_status_s *ts,
 
 
 int server_xa_start(struct thread_status_s *ts,
+                    size_t slot_id,
                     const struct lixa_msg_s *lmi,
                     struct lixa_msg_s *lmo,
                     uint32_t block_id,
@@ -1160,7 +1161,7 @@ int server_xa_start(struct thread_status_s *ts,
             case 8:
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_start_8(
-                            ts, lmi, lmo, block_id, last_verb_step)))
+                            ts, slot_id, lmi, lmo, block_id, last_verb_step)))
                     THROW(SERVER_XA_START_8_ERROR);
                 break;
             case 24:
@@ -1195,6 +1196,7 @@ int server_xa_start(struct thread_status_s *ts,
 
 
 int server_xa_start_8(struct thread_status_s *ts,
+                      size_t slot_id,
                       const struct lixa_msg_s *lmi,
                       struct lixa_msg_s *lmo,
                       uint32_t block_id,
@@ -1205,6 +1207,7 @@ int server_xa_start_8(struct thread_status_s *ts,
                      G_ARRAY_NEW_ERROR,
                      TRANS_TBL_QUERY_XID_ERROR,
                      BRANCHES_ON_MULTIPLE_THREADS,
+                     THREAD_SWITCH,
                      TRANS_TABLE_INSERT_ERROR,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1251,11 +1254,11 @@ int server_xa_start_8(struct thread_status_s *ts,
             } else if (LIXA_RC_OK != ret_cod) {
                 THROW(TRANS_TBL_QUERY_XID_ERROR);
             } else {
+                struct server_trans_tbl_rec_s *result = NULL;
                 /* check result: only one thread must contain it*/
                 for (i=0; i<query_result->len; ++i) {
-                    struct server_trans_tbl_rec_s *result =
-                        &g_array_index(query_result,
-                                       struct server_trans_tbl_rec_s, i);
+                    result = &g_array_index(query_result,
+                                            struct server_trans_tbl_rec_s, i);
                     LIXA_TRACE(("server_xa_start_8: xid='%s' found in "
                                 "thread %u\n", result->xid, result->tsid));
                     if (0 == tsid) {
@@ -1271,9 +1274,24 @@ int server_xa_start_8(struct thread_status_s *ts,
                         THROW(BRANCHES_ON_MULTIPLE_THREADS);
                     } /* if (tsid != result->tsid) */
                 } /* for (i=0; i<query_result->len; ++i) */
-                
-                /* @@@ move to the proper thread */
-                
+                /* at this point one or more branches of the same global
+                   transaction have been found in thread tsid */
+                if (tsid != ts->id) {
+                    struct thread_status_switch_s *tss =
+                        &(ts->client_array[slot_id].switch_thread);
+                    /* move to the proper thread, 
+                       set destination switch thread */
+                    tss->id = tsid;
+                    LIXA_TRACE(("server_xa_start_8: tsid=%u, ts->id=%u, "
+                                "tss->id=%u\n", tsid, ts->id, tss->id));
+                    LIXA_TRACE(("server_xa_start_8: client is working on "
+                                "branch %s that must be managed by state "
+                                "thread id %u (this thread id is %u)\n",
+                                sttr.xid, tss->id, ts->id));
+                    syslog(LOG_INFO, LIXA_SYSLOG_LXD031I,
+                           result->xid, tss->id, ts->id);
+                    THROW(THREAD_SWITCH);
+                } /* if (tsid != ts->id) */
             } /* check query result */
         } /* if (lmi->body.start_8.conthr.sub_branch) */
         
@@ -1332,6 +1350,9 @@ int server_xa_start_8(struct thread_status_s *ts,
                 break;
             case BRANCHES_ON_MULTIPLE_THREADS:
                 ret_cod = LIXA_RC_BRANCHES_ON_MULTIPLE_THREADS;
+                break;
+            case THREAD_SWITCH:
+                ret_cod = LIXA_RC_THREAD_SWITCH;
                 break;
             case TRANS_TABLE_INSERT_ERROR:
                 break;

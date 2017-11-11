@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
     char *xid_string = NULL;
     FILE *xid_file = NULL;
     FILE *xid_file2 = NULL;
+    unsigned pid = (unsigned)getpid();
     
     /* XTA variables (objects) */
     xta_transaction_manager_t *tm;
@@ -99,10 +100,10 @@ int main(int argc, char *argv[])
     /* turn ON trace for debugging purpose */
     xta_init();
     
-    fprintf(stderr, "%s| starting...\n", pgm);
+    fprintf(stderr, "%s/%u| starting...\n", pgm, pid);
     if (argc < 7) {
-        fprintf(stderr, "%s: at least six options must be specified\n",
-                argv[0]);
+        fprintf(stderr, "%s/%u: at least six options must be specified\n",
+                argv[0], pid);
         return 1;
     }
     phase = strtol(argv[1], NULL, 0);
@@ -117,32 +118,37 @@ int main(int argc, char *argv[])
 
     /* check phase */
     switch (phase) {
-    case SUPERIOR:
-        fprintf(stderr, "%s| phase=%d (SUPERIOR)\n", pgm, phase);
+        case SUPERIOR:
+            fprintf(stderr, "%s/%u| phase=%d (SUPERIOR)\n", pgm, pid, phase);
             /* open file for write */
             if (NULL == (xid_file = fopen(filename, "w"))) {
-                fprintf(stderr, "%s| error while opening file '%s'\n",
-                        pgm, filename);
+                fprintf(stderr, "%s/%u| error while opening file '%s'\n",
+                        pgm, pid, filename);
+                return 1;
             }
             break;
         case SUBORDINATE:
-            fprintf(stderr, "%s| phase=%d (SUBORDINATE)\n", pgm, phase);
+            fprintf(stderr, "%s/%u| phase=%d (SUBORDINATE)\n",
+                    pgm, pid, phase);
             /* open file for read */
             if (NULL == (xid_file = fopen(filename, "r"))) {
-                fprintf(stderr, "%s| error while opening file '%s'\n",
-                        pgm, filename);
+                fprintf(stderr, "%s/%u| error while opening file '%s'\n",
+                        pgm, pid, filename);
+                return 1;
             }
             /* open file for write */
-            if (NULL == (xid_file2 = fopen(filename2, "w"))) {
-                fprintf(stderr, "%s| error while opening file '%s'\n",
-                        pgm, filename2);
+            if (NULL != filename2 &&
+                NULL == (xid_file2 = fopen(filename2, "w"))) {
+                fprintf(stderr, "%s/%u| error while opening file '%s'\n",
+                        pgm, pid, filename2);
+                return 1;
             }
             break;
         case NO_PHASE:
-            fprintf(stderr, "%s| phase=%d (NO_PHASE)\n", pgm, phase);
+            fprintf(stderr, "%s/%u| phase=%d (NO_PHASE)\n", pgm, pid, phase);
             break;
         default:
-            fprintf(stderr, "%s| phase=%d UNKNOWN!\n", pgm, phase);
+            fprintf(stderr, "%s/%u| phase=%d UNKNOWN!\n", pgm, pid, phase);
             return 1;
     } /* switch(phase) */
 
@@ -167,8 +173,8 @@ int main(int argc, char *argv[])
 #endif
             break;
         default:
-            fprintf(stderr, "%s| statement=%d is not valid!\n",
-                    pgm, statement);
+            fprintf(stderr, "%s/%u| statement=%d is not valid!\n",
+                    pgm, pid, statement);
             return 1;
     } /* check statement */
     
@@ -182,8 +188,8 @@ int main(int argc, char *argv[])
                      "ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+"
                      "threads=true+DbgFl=7+SqlNet=lixa_ora_db+"
                      "Loose_Coupling=true", ""))) {
-        fprintf(stderr, "%s| xta_native_xa_resource_new: returned NULL for "
-               "dynamically creted resource\n", pgm);
+        fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned NULL for "
+                "dynamically creted resource\n", pgm, pid);
         return 1;
     }
 #endif
@@ -191,8 +197,8 @@ int main(int argc, char *argv[])
      * create a Transaction Manager object
      */
     if (NULL == (tm = xta_transaction_manager_new())) {
-        fprintf(stderr, "%s| xta_transaction_manager_new: returned NULL\n",
-                pgm);
+        fprintf(stderr, "%s/%u| xta_transaction_manager_new: returned NULL\n",
+                pgm, pid);
         return 1;
     }
     /*
@@ -201,25 +207,25 @@ int main(int argc, char *argv[])
      */
     if (NULL == (native_xa_res = xta_native_xa_resource_new_by_rmid(
                      0, xta_transaction_manager_get_config()))) {
-        fprintf(stderr, "%s| xta_native_xa_resource_new: returned NULL\n",
-                pgm);
+        fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned NULL\n",
+                pgm, pid);
         return 1;
     }
     /* create a new transaction for this thread */
     if (NULL == (tx = xta_transaction_manager_create_transaction(tm))) {
-        fprintf(stderr, "%s| xta_transaction_manager_begin: returned NULL\n",
-                pgm);
+        fprintf(stderr, "%s/%u| xta_transaction_manager_begin: returned "
+                "NULL\n", pgm, pid);
         return 1;
     } else {
-        fprintf(stderr, "%s| xta_transaction_manager_get_transaction: "
-                "transaction reference is %p\n", pgm, tx);
+        fprintf(stderr, "%s/%u| xta_transaction_manager_get_transaction: "
+                "transaction reference is %p\n", pgm, pid, tx);
     }
     /* register the native XA Resource to the transaction manager: this step
      * is useless but it's not dangerous */
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                            tx, (xta_xa_resource_t *)native_xa_res))) {
-        fprintf(stderr, "%s| xta_transaction_enlist_resource/native_xa_res: "
-               "returned %d\n", pgm, rc);
+        fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
+                "native_xa_res: returned %d\n", pgm, pid, rc);
         return 1;
     }
     /* register the dynamic native XA Resource (Oracle) to the transaction
@@ -227,33 +233,34 @@ int main(int argc, char *argv[])
 #ifdef HAVE_ORACLE
     if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                            tx, (xta_xa_resource_t *)dynamic_native_xa_res))) {
-        fprintf(stderr, "%s| xta_transaction_enlist_resource/"
-                "dynamic_native_xa_res: returned %d\n", pgm, rc);
+        fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
+                "dynamic_native_xa_res: returned %d\n", pgm, pid, rc);
         return 1;
     }
 #endif
 
     /* open all the resources for Distributed Transactions */
     if (LIXA_RC_OK != (rc = xta_transaction_open(tx))) {
-        fprintf(stderr, "%s| xta_transaction_open: returned %d\n", pgm, rc);
+        fprintf(stderr, "%s/%u| xta_transaction_open: returned %d\n",
+                pgm, pid, rc);
         return 1;
     }
 
     if (SUPERIOR == phase || NO_PHASE == phase) {
         /* start a Distributed Transaction */
         if (LIXA_RC_OK != (rc = xta_transaction_start(tx))) {
-            fprintf(stderr, "%s| xta_transaction_start: returned %d\n",
-                    pgm, rc);
+            fprintf(stderr, "%s/%u| xta_transaction_start: returned %d\n",
+                    pgm, pid, rc);
             return 1;
         }
         /* get XID as a string */
         if (NULL == (xid_string = xta_xid_to_string(
                          xta_transaction_get_xid(tx)))) {
-            fprintf(stderr, "%s| xta XID is NULL\n", pgm);
+            fprintf(stderr, "%s/%u| xta XID is NULL\n", pgm, pid);
             return 1;
         } else {
-            fprintf(stderr, "%s| passing XID '%s' to subordinate\n",
-                    pgm, xid_string);
+            fprintf(stderr, "%s/%u| passing XID '%s' to subordinate\n",
+                    pgm, pid, xid_string);
         }
         if (SUPERIOR == phase) {
             /* write to xid_file the transaction that will be branched */
@@ -268,25 +275,25 @@ int main(int argc, char *argv[])
         char buffer[1000];
         /* read from xid_file the transaction that must be resumed */
         if (NULL == fgets(buffer, sizeof(buffer), xid_file)) {
-            fprintf(stderr, "%s| error while retrieving XID from file '%s'\n",
-                    pgm, filename);
+            fprintf(stderr, "%s/%u| error while retrieving XID from file "
+                    "'%s'\n", pgm, pid, filename);
             return 1;
         }
-        fprintf(stderr, "%s| retrieved XID is '%s'\n", pgm, buffer);
+        fprintf(stderr, "%s/%u| retrieved XID is '%s'\n", pgm, pid, buffer);
         fclose(xid_file);
         
         /* branch the transaction */
         if (LIXA_RC_OK != (rc = xta_transaction_branch(
                                tx, buffer))) {
-            fprintf(stderr, "%s| xta_transaction_branch returned %d\n",
-                    pgm, rc);
+            fprintf(stderr, "%s/%u| xta_transaction_branch returned %d\n",
+                    pgm, pid, rc);
             return 1;
         }
 
         /* write to xid_file2 the transaction that will be branched again */
         if (NULL != xid_file2) {
-            fprintf(stderr, "%s| passing XID '%s' to subordinate\n",
-                    pgm, buffer);
+            fprintf(stderr, "%s/%u| passing XID '%s' to subordinate\n",
+                    pgm, pid, buffer);
             fprintf(xid_file2, "%s", buffer);
             fclose(xid_file2);
             xid_file2 = NULL;
@@ -296,22 +303,25 @@ int main(int argc, char *argv[])
 #ifdef HAVE_ORACLE
     /* retrieve environment and context */
     if (NULL == (oci_env = xaoEnv(NULL))) {
-        fprintf(stderr, "%s| xaoEnv returned a NULL pointer\n", pgm);
+        fprintf(stderr, "%s/%u| xaoEnv returned a NULL pointer\n", pgm, pid);
         return 1;
     }
     if (NULL == (oci_svc_ctx = xaoSvcCtx(NULL))) {
-        fprintf(stderr, "%s| xaoSvcCtx returned a NULL pointer\n", pgm);
+        fprintf(stderr, "%s/%u| xaoSvcCtx returned a NULL pointer\n",
+                pgm, pid);
         return 1;
     }
     /* allocate statement and error handles */
     if (0 != OCIHandleAlloc( (dvoid *)oci_env, (dvoid **)&oci_stmt_hndl,
                              OCI_HTYPE_STMT, (size_t)0, (dvoid **)0)) {
-        fprintf(stderr, "%s| Unable to allocate OCI statement handle\n", pgm);
+        fprintf(stderr, "%s/%u| Unable to allocate OCI statement handle\n",
+                pgm, pid);
         return 1;
     }
     if (0 != OCIHandleAlloc( (dvoid *)oci_env, (dvoid **)&oci_err_hndl,
                              OCI_HTYPE_ERROR, (size_t)0, (dvoid **)0)) {
-        fprintf(stderr, "%s| Unable to allocate OCI error handle\n", pgm);
+        fprintf(stderr, "%s/%u| Unable to allocate OCI error handle\n",
+                pgm, pid);
         return 1;
     }
     /* insert data */
@@ -320,8 +330,8 @@ int main(int argc, char *argv[])
                 oci_stmt_hndl, oci_err_hndl, oci_stmt_insert,
                 (ub4) strlen((char *)oci_stmt_insert),
                 (ub4) OCI_NTV_SYNTAX, (ub4) OCI_DEFAULT)) {
-            fprintf(stderr, "%s| Unable to prepare INSERT OCI statement for "
-                    "execution\n", pgm);
+            fprintf(stderr, "%s/%u| Unable to prepare INSERT OCI statement "
+                    "for execution\n", pgm, pid);
             return 1;
         }
         oci_rc = OCIStmtExecute(
@@ -329,19 +339,19 @@ int main(int argc, char *argv[])
             (ub4)1, (ub4)0, (CONST OCISnapshot *)NULL,
             (OCISnapshot *)NULL, OCI_DEFAULT);
         if (OCI_SUCCESS != oci_rc && OCI_SUCCESS_WITH_INFO != oci_rc) {
-            fprintf(stderr, "%s| Error while executing INSERT statement; "
-                    "ocirc = %d\n", pgm, oci_rc);
+            fprintf(stderr, "%s/%u| Error while executing INSERT statement; "
+                    "ocirc = %d\n", pgm, pid, oci_rc);
             return oci_rc;
         }
-        fprintf(stderr, "%s| OCI statement >%s< completed\n",
-               pgm, (char *)oci_stmt_insert);
+        fprintf(stderr, "%s/%u| OCI statement >%s< completed\n",
+                pgm, pid, (char *)oci_stmt_insert);
     } else {
         if (OCI_SUCCESS != OCIStmtPrepare(
                 oci_stmt_hndl, oci_err_hndl, oci_stmt_delete,
                 (ub4) strlen((char *)oci_stmt_delete),
                 (ub4) OCI_NTV_SYNTAX, (ub4) OCI_DEFAULT)) {
-            fprintf(stderr, "%s| Unable to prepare DELETE statement for "
-                    "execution\n", pgm);
+            fprintf(stderr, "%s/%u| Unable to prepare DELETE statement for "
+                    "execution\n", pgm, pid);
             return 1;
         }
         oci_rc = OCIStmtExecute(
@@ -349,12 +359,12 @@ int main(int argc, char *argv[])
             (ub4)1, (ub4)0, (CONST OCISnapshot *)NULL,
             (OCISnapshot *)NULL, OCI_DEFAULT);
         if (OCI_SUCCESS != oci_rc && OCI_SUCCESS_WITH_INFO != oci_rc) {
-            fprintf(stderr, "%s| Error while executing DELETE statement; "
-                    "ocirc = %d\n", pgm, oci_rc);
+            fprintf(stderr, "%s/%u| Error while executing DELETE statement; "
+                    "ocirc = %d\n", pgm, pid, oci_rc);
             return oci_rc;
         }
-        fprintf(stderr, "%s| OCI statement >%s< completed\n",
-               pgm, (char *)oci_stmt_delete);
+        fprintf(stderr, "%s/%u| OCI statement >%s< completed\n",
+                pgm, pid, (char *)oci_stmt_delete);
     }
     /* free the allocated handles */
     OCIHandleFree((dvoid *)oci_stmt_hndl, (ub4)OCI_HTYPE_STMT);
@@ -367,25 +377,26 @@ int main(int argc, char *argv[])
     /* commit the Distributed Transaction */
     if (commit) {
         if (test_rc != (rc = xta_transaction_commit(tx))) {
-            fprintf(stderr, "%s| xta_transaction_commit: returned %d "
-                    "instead of %d\n", pgm, rc, test_rc);
+            fprintf(stderr, "%s/%u| xta_transaction_commit: returned %d "
+                    "instead of %d\n", pgm, pid, rc, test_rc);
             return 1;
         }
-        fprintf(stderr, "%s| XTA commit returned %d as expected\n",
-                pgm, rc);
+        fprintf(stderr, "%s/%u| XTA commit returned %d as expected\n",
+                pgm, pid, rc);
     } else {
         if (test_rc != (rc = xta_transaction_rollback(tx))) {
-            fprintf(stderr, "%s| xta_transaction_rollback: returned %d "
-                    "instead of %d\n", pgm, rc, test_rc);
+            fprintf(stderr, "%s/%u| xta_transaction_rollback: returned %d "
+                    "instead of %d\n", pgm, pid, rc, test_rc);
             return 1;
         }
-        fprintf(stderr, "%s| XTA rollback returned %d as expected\n",
-                pgm, rc);
+        fprintf(stderr, "%s/%u| XTA rollback returned %d as expected\n",
+                pgm, pid, rc);
     }
     
     /* close all the resources for Distributed Transactions */
     if (LIXA_RC_OK != (rc = xta_transaction_close(tx))) {
-        fprintf(stderr, "%s| xta_transaction_close: returned %d\n", pgm, rc);
+        fprintf(stderr, "%s/%u| xta_transaction_close: returned %d\n",
+                pgm, pid, rc);
         return 1;
     }
     /*
@@ -405,6 +416,6 @@ int main(int argc, char *argv[])
     /*
      * end of XTA API calls
      */
-    fprintf(stderr, "%s| ...finished\n", pgm);
+    fprintf(stderr, "%s/%u| ...finished\n", pgm, pid);
     return 0;
 }

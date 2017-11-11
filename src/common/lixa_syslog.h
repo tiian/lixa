@@ -177,7 +177,10 @@
     "has been found in two distinct state threads: %u and %u"
 #define LIXA_SYSLOG_LXD030N "LXD030N client is asking to branch an existing " \
     "global transaction, but not other branches are available for xid='%s'"
-    
+#define LIXA_SYSLOG_LXD031I "LXD031I client is working on branch %s that " \
+    "must be managed by state thread id %u (this thread id is %u), " \
+    "switching it to the right thread..."
+
 
 
 #define LIXA_SYSLOG_LXR000I "LXR000I LIXA recovery process is starting " \

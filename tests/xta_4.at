@@ -41,8 +41,8 @@ lixa_test_exec.sh noreset none case0104 1 1 3 1 0 tmp_fifo2
 ]])
 AT_DATA([delete],
 [[lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo
-lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo
-lixa_test_exec.sh noreset none case0104 1 0 3 1 0 tmp_fifo
+lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo tmp_fifo2
+lixa_test_exec.sh noreset none case0104 1 0 3 1 0 tmp_fifo2
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config

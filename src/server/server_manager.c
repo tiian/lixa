@@ -1340,7 +1340,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
             case LIXA_MSG_VERB_START:
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_start(
-                            ts, &lmi, lmo, block_id,
+                            ts, slot_id, &lmi, lmo, block_id,
                             &(ts->client_array[slot_id].last_verb_step))))
                     THROW(SERVER_XA_START_ERROR);
                 break;
