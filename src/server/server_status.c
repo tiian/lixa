@@ -53,11 +53,11 @@
 
 
 
-#include <lixa_errors.h>
-#include <lixa_trace.h>
-#include <lixa_syslog.h>
-#include <server_status.h>
-#include <server_thread_status.h>
+#include "lixa_errors.h"
+#include "lixa_trace.h"
+#include "lixa_syslog.h"
+#include "server_status.h"
+#include "server_thread_status.h"
 
 
 

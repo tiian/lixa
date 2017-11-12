@@ -94,23 +94,75 @@ struct server_trans_tbl_s {
 
 typedef struct server_trans_tbl_s server_trans_tbl_t;
 
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+    
+
+    /**
+     * Initialize a Server Transaction Table object
+     * @param[in,out] stt reference to the object that must be initialized
+     * @param[in] tsid_array_size is the number of state threads and should be
+     *            no more useful because all the branches are managed by a
+     *            single state thread
+     * @return a reason code
+     */
     int server_trans_tbl_init(server_trans_tbl_t *stt, guint tsid_array_size);
 
+
+
+    /**
+     * Compare two global transaction identifiers passed like serialized ASCII
+     * C strings
+     * @param[in] a first global transaction identifier
+     * @param[in] b second global transaction identifier
+     * @param[in] user_data UNUSED
+     * @return comparison values -1, 0, +1
+     */
     int server_trans_tbl_comp(gconstpointer a, gconstpointer b,
                               gpointer user_data);
 
+
+
+    /**
+     * Helper function used for data clean-up and associated to the g_tree
+     * that store all the keys (global transaction ids)
+     * @param[in] data represents the value field associated to the key
+     */
     void server_trans_tbl_value_destroy(gpointer data);
 
+
+
+    /**
+     * Insert a new record in the Server Transaction Table
+     * @param[in,out] stt reference to the Server Transaction Table
+     * @param[in] sttr referenct to the record that must be inserted
+     * @return a reason code
+     */
     int server_trans_tbl_insert(server_trans_tbl_t *stt,
                                 const struct server_trans_tbl_rec_s *sttr);
 
+
+    
+    /**
+     * Remove a record from the Server Transaction Table
+     * @param[in,out] stt reference to the Server Transaction Table
+     * @param[in] sttr referenct to the record that must be removed
+     * @return a reason code
+     */
     int server_trans_tbl_remove(server_trans_tbl_t *stt,
                                 const struct server_trans_tbl_rec_s *sttr);
 
+
+
+    /**
+     * Delete and release all the memory of a Server Transaction Table
+     * @param[in,out] stt reference to the Server Transaction Table
+     * @return a reason code
+     */
     int server_trans_tbl_clear(server_trans_tbl_t *stt);
 
 

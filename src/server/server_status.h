@@ -20,37 +20,32 @@
 # define SERVER_STATUS_H
 
 
-#include <config.h>
+
+#include "config.h"
+
 
 
 #ifdef HAVE_POLL_H
-
 # include <poll.h>
-
 #endif
 #ifdef HAVE_PTHREAD_H
-
 # include <pthread.h>
-
 #endif
 #ifdef HAVE_NETINET_IN_H
-
 # include <netinet/in.h>
-
 #endif
 #ifdef HAVE_STDINT_H
-
 # include <stdint.h>
-
 #endif
 
 
-#include <lixa_common_status.h>
-#include <lixa_config.h>
-#include <lixa_xml_msg.h>
-#include <lixa_utils.h>
-#include <xa.h>
-#include <srvr_rcvr_tbl.h>
+
+#include "lixa_common_status.h"
+#include "lixa_config.h"
+#include "lixa_xml_msg.h"
+#include "lixa_utils.h"
+#include "xa.h"
+#include "srvr_rcvr_tbl.h"
 #include "server_trans_tbl.h"
 
 
@@ -97,7 +92,6 @@
  * Maximum number of blocks in a chain used by a session
  */
 #define CHAIN_MAX_SIZE 20
-
 /**
  * The data record is an header
  */
@@ -106,16 +100,15 @@
  * The data record is a resource manager block
  */
 #define DATA_PAYLOAD_TYPE_RSRMGR  2
-
 /**
  * Maximum lenght (null char terminator included) of resource manager name
  */
 #define PAYLOAD_RSRMGR_NAME_MAX   30
-
 /**
  * Number of (verb,step) values are stored by the server
  */
 #define PAYLOAD_HEADER_VERB_STEP  5
+
 
 
 /**
@@ -132,6 +125,7 @@ enum shutdown_type_e
 };
 
 
+
 /**
  * It contains the configuration common to any thread
  */
@@ -146,6 +140,7 @@ struct thread_pipe_s
      */
     int pipefd[2];
 };
+
 
 
 /**
@@ -165,11 +160,13 @@ struct thread_pipe_array_s
 };
 
 
+
 /**
  * This "object" is statically allocated outside main stack because it must
  * be accessible from signal handler
  */
 extern struct thread_pipe_array_s tpa;
+
 
 
 /**
@@ -194,6 +191,7 @@ struct thread_status_switch_s
      */
     char *buffer;
 };
+
 
 
 /**
@@ -235,6 +233,7 @@ struct server_client_status_s
 };
 
 
+
 /**
  * This is the control record type and is used for first record only
  */
@@ -268,6 +267,7 @@ struct status_record_ctrl_s
      */
     uint32_t first_free_block;
 };
+
 
 
 /**
@@ -333,6 +333,7 @@ struct payload_header_s
      */
     int recovery_commit;
 };
+
 
 
 /**
@@ -440,6 +441,7 @@ struct payload_rsrmgr_s
 };
 
 
+
 /**
  * This struct is used to separate scaffolding from payload in data records;
  * all the payload data are kept by this structure
@@ -467,6 +469,7 @@ struct status_record_data_payload_s
 };
 
 
+
 /**
  * This is the data record type and is used for all but first records
  */
@@ -484,6 +487,7 @@ struct status_record_data_s
 };
 
 
+
 /**
  * This union is used to store and retrieve a record from the status file
  */
@@ -499,6 +503,7 @@ union status_record_u
      */
     struct status_record_data_s data;
 };
+
 
 
 /**
@@ -536,10 +541,12 @@ struct status_record_s
                                      sizeof(md5_digest_t))
 
 
+
 /**
  * It's defined as a type because it's used in an object oriented fashion
  */
 typedef struct status_record_s status_record_t;
+
 
 
 /**
@@ -560,6 +567,7 @@ struct two_status_record_s
 };
 
 
+
 /**
  * The base struct for object @ref status_sync_t
  */
@@ -576,11 +584,13 @@ struct status_sync_s
 };
 
 
+
 /**
  * The object tells how many sessions have asked state synchronization and
  * the current delay from first synchronization request
  */
 typedef struct status_sync_s status_sync_t;
+
 
 
 /**
@@ -705,6 +715,7 @@ struct thread_status_s
 };
 
 
+
 /**
  * It contains the argument passed to all the thread
  */
@@ -721,15 +732,17 @@ struct thread_status_array_s
 };
 
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 
-/**
- * Initialize a struct of type @ref thread_status_switch_s
- * @param tss IN/OUT reference to the struct must be initialized
- */
+    
+    /**
+     * Initialize a struct of type @ref thread_status_switch_s
+     * @param[in,out] tss reference to the struct must be initialized
+     */
     inline static void thread_status_switch_init(
         struct thread_status_switch_s *tss)
     {
@@ -739,10 +752,11 @@ extern "C" {
     }
 
 
-/**
- * Initialize a struct of type @ref server_client_status_s
- * @param scs IN/OUT reference to the struct must be initialized
- */
+    
+    /**
+     * Initialize a struct of type @ref server_client_status_s
+     * @param[in,out] scs reference to the struct must be initialized
+     */
     inline static void server_client_status_init(
         struct server_client_status_s *scs)
     {
@@ -755,148 +769,161 @@ extern "C" {
         thread_status_switch_init(&scs->switch_thread);
     }
 
+    
 
-/**
- * This is a callback function used for traversing and synchronizing all
- * the records stored in the tree structure
- * @param key IN the key of the traversed node, it is casted to
- *               uintptr_t because it's the index inside a status record
- *               array
- * @param value IN unused
- * @param data IN/OUT reference to the status record array (@ref
- *                    status_record_t)
- * @return TRUE (!LIXA_RC_OK) only in an error happens
- */
+    /**
+     * This is a callback function used for traversing and synchronizing all
+     * the records stored in the tree structure
+     * @param[in] key of the traversed node, it is casted to
+     *               uintptr_t because it's the index inside a status record
+     *               array
+     * @param[in] value UNUSED
+     * @param[in,out] data reference to the status record array (@ref
+     *                    status_record_t)
+     * @return TRUE (!LIXA_RC_OK) only in an error happens
+     */
     gboolean traverse_and_sync(gpointer key, gpointer value, gpointer data);
 
 
-/**
- * This is a callback function used for traversing and copying blocks
- * stored in the tree structure
- * @param key IN the key of the traversed node, it is casted to
- *               uintptr_t because it's the index inside a status record
- *               array
- * @param value IN unused
- * @param data IN reference to the special struct
- *                (@ref two_status_record_s) used to store the pointers to
- *                two memory mapped files
- * @return FALSE
- */
+    
+    /**
+     * This is a callback function used for traversing and copying blocks
+     * stored in the tree structure
+     * @param[in] key of the traversed node, it is casted to
+     *               uintptr_t because it's the index inside a status record
+     *               array
+     * @param[in] value UNUSED
+     * @param[in] data reference to the special struct
+     *                (@ref two_status_record_s) used to store the pointers to
+     *                two memory mapped files
+     * @return FALSE
+     */
     gboolean traverse_and_copy(gpointer key, gpointer value, gpointer data);
 
 
-/**
- * Initialize a block as an header (first block of a chain)
- * @param srd IN reference to the record must be initialized
- * @param fd IN file descriptor of the session associated to this header
- *              record
- * @return a standardized return code
- */
+    
+    /**
+     * Initialize a block as an header (first block of a chain)
+     * @param[in] srd reference to the record must be initialized
+     * @param[in] fd file descriptor of the session associated to this header
+     *              record
+     * @return a standardized return code
+     */
     int payload_header_init(struct status_record_data_s *srd, int fd);
 
 
-/**
- * Store last (verb,step) value inside the payload header; oldest value
- * is erased if necessary
- * @param ts IN/OUT a reference to thread status
- * @param block_id IN id of the block contains the header chain block
- * @param vs IN reference to a (verb,step) value
- * @return a standardized return code
- */
+    
+    /**
+     * Store last (verb,step) value inside the payload header; oldest value
+     * is erased if necessary
+     * @param[in,out] ts reference to thread status
+     * @param[in] block_id id of the block that contains the header chain block
+     * @param[in] vs reference to a (verb,step) value
+     * @return a standardized return code
+     */
     int payload_header_store_verb_step(struct thread_status_s *ts,
                                        uint32_t block_id,
                                        const struct lixa_msg_verb_step_s *vs);
 
+    
 
-/**
- * Release a chain of records allocated inside the status record
- * memory mapped array. It must start from an header initialized with
- * @ref payload_header_init
- * @param ts IN/OUT a reference to thread status: it's used to retrieve the
- *                  status files and change them when a dynamic resize is
- *                  necessary
- * @param block_id IN id of the block contains the header chain block
- * @return a standardized return code
- */
+    /**
+     * Release a chain of records allocated inside the status record
+     * memory mapped array. It must start from an header initialized with
+     * @ref payload_header_init
+     * @param[in,out] ts reference to thread status: it's used to retrieve the
+     *                  status files and change them when a dynamic resize is
+     *                  necessary
+     * @param[in] block_id id of the block that contains the header chain block
+     * @return a standardized return code
+     */
     int payload_chain_release(struct thread_status_s *ts, uint32_t block_id);
 
+    
 
-/**
- * Allocate a chain of records inside the status record memory mapped
- * array. The allocation is atomically: all or none of the records are
- * allocated at exit
- * @param ts IN/OUT reference to thread status
- * @param block_id IN id of the block contains the header chain block
- * @param size IN number of blocks must be allocated
- * @return a reason code
- */
+    /**
+     * Allocate a chain of records inside the status record memory mapped
+     * array. The allocation is atomically: all or none of the records are
+     * allocated at exit
+     * @param[in,out] ts reference to thread status
+     * @param[in] block_id id of the block that contains the header chain block
+     * @param[in] size number of blocks that must be allocated
+     * @return a reason code
+     */
     int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
                                int size);
 
 
-/**
- * Load status records from status file
- * @param sr OUT pointer to the mapped file
- * @param status_file IN the name of the status file to be loaded
- * @param updated_records IN set of record has been updated since last
- *                           synchronization
- * @param readonly IN the status file must be opened in read-only mode to
- *                    avoid updates to the file
- * @return a standardized return code
- */
+    
+    /**
+     * Load status records from status file
+     * @param[out] sr pointer to the mapped file
+     * @param[in] status_file the name of the status file to be loaded
+     * @param[in] updated_records set of record has been updated since last
+     *                           synchronization
+     * @param[in] readonly boolean value, must the state file be opened in
+     *            read-only mode to avoid file updates
+     * @return a standardized return code
+     */
     int status_record_load(status_record_t **sr,
                            const char *status_file,
                            GTree **updated_records,
                            int readonly);
 
 
-/**
- * Check status integrity
- * @param sr IN memory mapped status file
- * @return LIXA_RC_OK if the status file is OK, an error otherwise
- */
+    
+    /**
+     * Check status integrity
+     * @param[in] sr memory mapped status file
+     * @return LIXA_RC_OK if the status file is OK, an error otherwise
+     */
     int status_record_check_integrity(status_record_t *sr);
 
+    
 
-/**
- * Travel and display the free block chain and used block chain
- * @param sr IN memory mapped status file
- */
+    /**
+     * Travel and display the free block chain and used block chain.
+     * Debugging function, typically not used, but available for future usages
+     * @param[in] sr memory mapped status file
+     */
     void status_record_display_chains(const status_record_t *sr);
 
 
-/**
- * Insert a new element in the used slot list
- * @param ts IN/OUT a reference to thread status: it's used to retrieve the
- *                  status files and change them when a dynamic resize is
- *                  necessary
- * @param slot OUT the index of the found free slot
- * @return a standardized return code
- */
+    
+    /**
+     * Insert a new element in the used slot list
+     * @param[in,out] ts reference to thread status: it's used to retrieve the
+     *                  status files and change them when a dynamic resize is
+     *                  necessary
+     * @param[out] slot the index of the found free slot
+     * @return a standardized return code
+     */
     int status_record_insert(struct thread_status_s *ts,
                              uint32_t *slot);
 
+    
 
-/**
- * Remove an element from the used slot list
- * @param ts IN/OUT a reference to thread status: it's used to retrieve the
- *                  status files and change them when a dynamic resize is
- *                  necessary
- * @param slot IN the index of the slot must be released
- * @return a standardized return code
- *
- */
+    /**
+     * Remove an element from the used slot list
+     * @param[in,out] ts reference to thread status: it's used to retrieve the
+     *                  status files and change them when a dynamic resize is
+     *                  necessary
+     * @param[in] slot the index of the slot must be released
+     * @return a standardized return code
+     *
+     */
     int status_record_delete(struct thread_status_s *ts,
                              uint32_t slot);
 
 
-/**
- * Mark a record for update
- * @param sr IN/OUT reference to the record must be marked for update
- * @param index IN position of the record in the status file (first = 0)
- * @param updated_records IN/OUT the tree containing all the modified
- *                               records (blocks) since last synch
- */
+    
+    /**
+     * Mark a record for update
+     * @param[in,out] sr reference to the record must be marked for update
+     * @param[in] index position of the record in the status file (first = 0)
+     * @param updated_records IN/OUT the tree containing all the modified
+     *                               records (blocks) since last synch
+     */
     static inline void status_record_update(status_record_t *sr,
                                             uintptr_t index,
                                             GTree *updated_records)
@@ -917,50 +944,55 @@ extern "C" {
     }
 
 
-/**
- * Prepare a record for synchronization: counter is changed from odd to
- * even, digest is computed
- * @param sr IN/OUT reference to the record must be marked for update
- * @return a reason code
- */
+    
+    /**
+     * Prepare a record for synchronization: counter is changed from odd to
+     * even, digest is computed
+     * @param[in,out] sr reference to the record must be marked for update
+     * @return a reason code
+     */
     int status_record_sync(status_record_t *sr);
 
 
-/**
- * Copy status record mapped file from source to target
- * @param dest OUT the mapped file will receive status
- * @param src IN the mapped file will supply status
- * @param ts IN reference to thread status
- * @return a reason code
- */
+    
+    /**
+     * Copy status record mapped file from source to target
+     * @param[out] dest mapped file that will receive status
+     * @param[in] src mapped file that will supply status
+     * @param[in] ts reference to thread status
+     * @return a reason code
+     */
     int status_record_copy(status_record_t *dest, const status_record_t *src,
                            struct thread_status_s *ts);
 
 
-/**
- * This is a convenience function used as comparison call back function
- * for GTree
- * @param a IN pointer to first arg
- * @param b IN pointer to second arg
- * @return a<b => -1, a>b => +1, a=b =>0
- */
+    
+    /**
+     * This is a convenience function used as comparison call back function
+     * for GTree
+     * @param[in] a pointer to first arg
+     * @param[in] b pointer to second arg
+     * @return a<b => -1, a>b => +1, a=b =>0
+     */
     int size_t_compare_func(gconstpointer a, gconstpointer b);
 
+    
 
-/**
- * Initialize a @ref status_sync_t object
- * @param ssy OUT the object to initialize
- */
+    /**
+     * Initialize a @ref status_sync_t object
+     * @param[out] ssy object to be initialize
+     */
     static inline void status_sync_init(status_sync_t *ssy)
     {
         ssy->asked_sync = 0;
     }
 
 
-/**
- * Ask a synchronization of the state file
- * @param ssy IN/OUT the object to update
- */
+    
+    /**
+     * Ask a synchronization of the state file
+     * @param[in,out] ssy object to update
+     */
     static inline void status_sync_ask_sync(status_sync_t *ssy)
     {
         if (ssy->asked_sync == 0)
@@ -968,23 +1000,25 @@ extern "C" {
         ssy->asked_sync++;
     }
 
+    
 
-/**
- * Retrieve the number of sessions that asked state synchronization
- * @param ssy IN the object to query
- * @return the number of sessions that asked state synchronization
- */
+    /**
+     * Retrieve the number of sessions that asked state synchronization
+     * @param[in] ssy object to query
+     * @return the number of sessions that asked state synchronization
+     */
     static inline int status_sync_get_asked(const status_sync_t *ssy)
     {
         return ssy->asked_sync;
     }
 
+    
 
-/**
- * Retrieve the current delay between first asked synchronization and now
- * @param ssy IN/OUT the object to query and update
- * @return the delay expressed in microseconds
- */
+    /**
+     * Retrieve the current delay between first asked synchronization and now
+     * @param[in,out] ssy object to query and update
+     * @return the delay expressed in microseconds
+     */
     static inline long status_sync_get_sync_delay(status_sync_t *ssy)
     {
         if (ssy->asked_sync == 0)
@@ -994,19 +1028,21 @@ extern "C" {
     }
 
 
+    
 #ifdef _CRASH
-/**
- * Get a writable reference to crash_count property
- * @param ts IN struct reference
- * @return a writable reference to the number of times the crash point
- * was traversed
- */
+    /**
+     * Get a writable reference to crash_count property
+     * @param[in] ts struct reference
+     * @return a writable reference to the number of times the crash point
+     * was traversed
+     */
     static inline long *thread_status_get_crash_count(
         struct thread_status_s *ts) {
         return ts->crash_count;
     }
 #endif /* _CRASH */
 
+    
 
 #ifdef __cplusplus
 }
@@ -1020,6 +1056,5 @@ extern "C" {
 # define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE_SAVE */
-
 
 #endif /* SERVER_STATUS_H */

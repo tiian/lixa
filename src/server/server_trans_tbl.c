@@ -37,10 +37,8 @@
 
 int server_trans_tbl_init(server_trans_tbl_t *stt, guint tsid_array_size)
 {
-    enum Exception {
-        G_TREE_NEW_ERROR
-        , NONE
-    } excp;
+    enum Exception { G_TREE_NEW_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_trans_tbl_init\n"));
@@ -382,13 +380,10 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
 int server_trans_tbl_remove(server_trans_tbl_t *stt,
                             const struct server_trans_tbl_rec_s *sttr)
 {
-    enum Exception
-    {
-        OBJ_CORRUPTED,
-        OUT_OF_RANGE,
-        NOT_FOUND_ERROR,
-        NONE
-    } excp;
+    enum Exception { OBJ_CORRUPTED,
+                     OUT_OF_RANGE,
+                     NOT_FOUND_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_trans_tbl_remove\n"));

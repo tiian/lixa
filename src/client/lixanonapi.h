@@ -50,10 +50,10 @@ extern "C" {
      * @param use_lixa_id OUT integer: meaningful only if
      *                        use_lixa_conn == TRUE; <BR>
      *                        it specifies the value to be passed to
-     *                        @ref lixa_my_get_conn_by_pos,
-     *                        @ref lixa_my_get_conn_by_rmid,
-     *                        @ref lixa_pq_get_conn_by_pos,
-     *                        @ref lixa_pq_get_conn_by_rmid
+     *                        lixa_my_get_conn_by_pos,
+     *                        lixa_my_get_conn_by_rmid,
+     *                        lixa_pq_get_conn_by_pos,
+     *                        lixa_pq_get_conn_by_rmid
      * @return 0 if parsing was OK, <BR>
      *         !0 if an error happened (the error is
      *           encoded as a LIXA standard return code)
