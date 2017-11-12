@@ -1000,6 +1000,92 @@ Static XA Resources may be enlisted but it's not necessary because they are auto
       <message xmi:type="uml:Message" xmi:id="_yUIJcFt8EeemsuvEn48b6A" name="commit" receiveEvent="_yUIwgFt8EeemsuvEn48b6A" sendEvent="_yUIJcVt8EeemsuvEn48b6A" signature="_4EBbyRTAEeebgf8_LMBiHA"/>
       <message xmi:type="uml:Message" xmi:id="__NdMUFt8EeemsuvEn48b6A" name="close" receiveEvent="__NdzYVt8EeemsuvEn48b6A" sendEvent="__NdzYFt8EeemsuvEn48b6A" signature="_Bmx4AEvCEeeyNebjNUVSEw"/>
     </packagedElement>
+    <packagedElement xmi:type="uml:StateMachine" xmi:id="_WW5b8MfMEeeBNuKlNzpvHw" name="2 branches coordinate commit">
+      <region xmi:type="uml:Region" xmi:id="_cfbgcMfMEeeBNuKlNzpvHw" name="Region1">
+        <ownedComment xmi:type="uml:Comment" xmi:id="_qfmSwMfQEeeBNuKlNzpvHw">
+          <body>S0: Non-existent Transaction
+S1: Active
+S2: Idle
+S3: Prepared
+S4: Rollback Only
+S5: Heuristically Completed</body>
+        </ownedComment>
+        <transition xmi:type="uml:Transition" xmi:id="_zpqycMfMEeeBNuKlNzpvHw" name="xa_start(b1)" source="_leQnMMfNEeeBNuKlNzpvHw" target="_4tn_EMfNEeeBNuKlNzpvHw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_pMelYMfNEeeBNuKlNzpvHw" name="xa_end(b0)" source="_PpoyYMfPEeeBNuKlNzpvHw" target="_2a7uQMfOEeeBNuKlNzpvHw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_vH5a8MfNEeeBNuKlNzpvHw" name="xa_end(b1)" source="_BXTVMMfPEeeBNuKlNzpvHw" target="_vmCTAMfOEeeBNuKlNzpvHw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_0PgYgMfOEeeBNuKlNzpvHw" name="xa_prepare(b0)" source="_leQnMMfNEeeBNuKlNzpvHw" target="__sn0sMfREeeBNuKlNzpvHw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_ZJ5yQMfQEeeBNuKlNzpvHw" name="xa_commit(b0)" source="_Gp-TQMfQEeeBNuKlNzpvHw" target="_Rm7wEMfQEeeBNuKlNzpvHw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_bYphwMfQEeeBNuKlNzpvHw" name="xa_commit(b1)" source="_DhhUkMfQEeeBNuKlNzpvHw" target="_Rm7wEMfQEeeBNuKlNzpvHw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_6jF2cMfOEeeBNuKlNzpvHw" name="xa_prepare(b1)" source="_tZdjMMfNEeeBNuKlNzpvHw" target="_GQg_gMfSEeeBNuKlNzpvHw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_wVnAsMfMEeeBNuKlNzpvHw" name="xa_start(b0)" source="_tZdjMMfNEeeBNuKlNzpvHw" target="__XAt4MfNEeeBNuKlNzpvHw"/>
+        <subvertex xmi:type="uml:Pseudostate" xmi:id="_fjK-QMfMEeeBNuKlNzpvHw" name="b0.S0;B1.S0"/>
+        <subvertex xmi:type="uml:State" xmi:id="_imaFwMfMEeeBNuKlNzpvHw" name="b0.S1;b1.S0"/>
+        <subvertex xmi:type="uml:State" xmi:id="_uAp7gMfMEeeBNuKlNzpvHw" name="b0.S0;b1.S1"/>
+        <subvertex xmi:type="uml:State" xmi:id="_CebAMMfNEeeBNuKlNzpvHw" name="b0.S1;b1.S1"/>
+        <subvertex xmi:type="uml:State" xmi:id="_leQnMMfNEeeBNuKlNzpvHw" name="b0.S2;b1.S0"/>
+        <subvertex xmi:type="uml:State" xmi:id="_tZdjMMfNEeeBNuKlNzpvHw" name="b0.S0;b1.S2"/>
+        <subvertex xmi:type="uml:State" xmi:id="_4tn_EMfNEeeBNuKlNzpvHw" name="b0.S2;b1.S1"/>
+        <subvertex xmi:type="uml:State" xmi:id="__XAt4MfNEeeBNuKlNzpvHw" name="b0.S1;b1.S2"/>
+        <subvertex xmi:type="uml:State" xmi:id="_IWkC0MfOEeeBNuKlNzpvHw" name="State1"/>
+        <subvertex xmi:type="uml:State" xmi:id="_MKAfQMfOEeeBNuKlNzpvHw" name="b0.S2;b1.S2"/>
+        <subvertex xmi:type="uml:State" xmi:id="_vmCTAMfOEeeBNuKlNzpvHw" name="b0.S3;b1.S2"/>
+        <subvertex xmi:type="uml:State" xmi:id="_2a7uQMfOEeeBNuKlNzpvHw" name="b0.S2;b1.S3"/>
+        <subvertex xmi:type="uml:State" xmi:id="_BXTVMMfPEeeBNuKlNzpvHw" name="b0.S3;b1.S1"/>
+        <subvertex xmi:type="uml:State" xmi:id="_PpoyYMfPEeeBNuKlNzpvHw" name="b0.S1;b1.S3"/>
+        <subvertex xmi:type="uml:State" xmi:id="_kCsWMMfPEeeBNuKlNzpvHw" name="b0.S3;b1.S3"/>
+        <subvertex xmi:type="uml:State" xmi:id="_DhhUkMfQEeeBNuKlNzpvHw" name="b0.S0;b1.S3"/>
+        <subvertex xmi:type="uml:State" xmi:id="_Gp-TQMfQEeeBNuKlNzpvHw" name="b0.S3;b1.S0"/>
+        <subvertex xmi:type="uml:FinalState" xmi:id="_Rm7wEMfQEeeBNuKlNzpvHw" name="b0.S0;b1.S0"/>
+        <subvertex xmi:type="uml:FinalState" xmi:id="__sn0sMfREeeBNuKlNzpvHw" name="b0-only-tx"/>
+        <subvertex xmi:type="uml:FinalState" xmi:id="_GQg_gMfSEeeBNuKlNzpvHw" name="b1-only-tx"/>
+      </region>
+    </packagedElement>
+    <packagedElement xmi:type="uml:StateMachine" xmi:id="_aricwMfTEeeBNuKlNzpvHw" name="N branches coordinate commit">
+      <ownedComment xmi:type="uml:Comment" xmi:id="_x9v60MfaEeeBNuKlNzpvHw" annotatedElement="_6q-_cMfUEeeBNuKlNzpvHw">
+        <body>S3 is a synchronization point: all the branches must reach S3 before xa_commits can happen</body>
+      </ownedComment>
+      <region xmi:type="uml:Region" xmi:id="_dhWMQMfTEeeBNuKlNzpvHw" name="Single State Branches">
+        <ownedComment xmi:type="uml:Comment" xmi:id="_P1gDIMfaEeeBNuKlNzpvHw">
+          <body>All the branches (at least 2) are in the same state</body>
+        </ownedComment>
+        <transition xmi:type="uml:Transition" xmi:id="_1stcsMfWEeeBNuKlNzpvHw" name="xa_commit" source="_B1naIMfVEeeBNuKlNzpvHw" target="_E6ZZwMfVEeeBNuKlNzpvHw"/>
+        <subvertex xmi:type="uml:Pseudostate" xmi:id="_vF9SgMfTEeeBNuKlNzpvHw" name="S0"/>
+        <subvertex xmi:type="uml:State" xmi:id="_EYkUgMfUEeeBNuKlNzpvHw" name="S1"/>
+        <subvertex xmi:type="uml:State" xmi:id="_bV-EYMfUEeeBNuKlNzpvHw" name="S2"/>
+        <subvertex xmi:type="uml:State" xmi:id="_6q-_cMfUEeeBNuKlNzpvHw" name="S3"/>
+        <subvertex xmi:type="uml:FinalState" xmi:id="_E6ZZwMfVEeeBNuKlNzpvHw" name="S0"/>
+      </region>
+      <region xmi:type="uml:Region" xmi:id="_SLsQsMfVEeeBNuKlNzpvHw" name="Double State Branches">
+        <ownedComment xmi:type="uml:Comment" xmi:id="_XkKX8MfaEeeBNuKlNzpvHw">
+          <body>The branches are in 2 different states</body>
+        </ownedComment>
+        <transition xmi:type="uml:Transition" xmi:id="_48RQUMfTEeeBNuKlNzpvHw" name="xa_start" source="_fCsi4MfWEeeBNuKlNzpvHw" target="_WDp2MMfUEeeBNuKlNzpvHw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_y2bBgMfVEeeBNuKlNzpvHw" name="xa_end" source="_iU3MUMfYEeeBNuKlNzpvHw" target="_2yfq8MfUEeeBNuKlNzpvHw"/>
+        <transition xmi:type="uml:Transition" xmi:id="_LcBeQMfWEeeBNuKlNzpvHw" name="xa_prepare" source="_WDp2MMfUEeeBNuKlNzpvHw" target="_iU3MUMfYEeeBNuKlNzpvHw"/>
+        <subvertex xmi:type="uml:State" xmi:id="_2CowwMfTEeeBNuKlNzpvHw" name="S0;S1"/>
+        <subvertex xmi:type="uml:State" xmi:id="_Mn2qIMfUEeeBNuKlNzpvHw" name="S0;S2"/>
+        <subvertex xmi:type="uml:State" xmi:id="_B1naIMfVEeeBNuKlNzpvHw" name="S0;S3"/>
+        <subvertex xmi:type="uml:State" xmi:id="_2yfq8MfUEeeBNuKlNzpvHw" name="S2;S3"/>
+        <subvertex xmi:type="uml:State" xmi:id="_dCi68MfUEeeBNuKlNzpvHw" name="S1;S3"/>
+        <subvertex xmi:type="uml:State" xmi:id="_WDp2MMfUEeeBNuKlNzpvHw" name="S1;S2"/>
+      </region>
+      <region xmi:type="uml:Region" xmi:id="_ZeLKYMfWEeeBNuKlNzpvHw" name="Triple State Branches">
+        <ownedComment xmi:type="uml:Comment" xmi:id="_sLdQQMfTEeeBNuKlNzpvHw">
+          <body>Legenda of XA states:
+S0: Non-existent Transaction
+S1: Active
+S2: Idle
+S3: Prepared
+S4: Rollback Only
+S5: Heuristically Completed</body>
+        </ownedComment>
+        <ownedComment xmi:type="uml:Comment" xmi:id="_fFhQkMfaEeeBNuKlNzpvHw">
+          <body>The branches are in 3 different states</body>
+        </ownedComment>
+        <subvertex xmi:type="uml:State" xmi:id="_fCsi4MfWEeeBNuKlNzpvHw" name="S0;S1;S2"/>
+        <subvertex xmi:type="uml:State" xmi:id="_iU3MUMfYEeeBNuKlNzpvHw" name="S1;S2;S3"/>
+      </region>
+    </packagedElement>
   </packagedElement>
   <packagedElement xmi:type="uml:Package" xmi:id="_UUQxkBPtEeeDbpR_R0y-uQ" name="Types">
     <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_wRHeABPtEeeDbpR_R0y-uQ" name="boolean"/>
@@ -1015,4 +1101,10 @@ Static XA Resources may be enlisted but it's not necessary because they are auto
     </eAnnotations>
     <ownedEnd xmi:type="uml:Property" xmi:id="_NGP8cy6sEeeCPvts7Lg2Jg" name="xaresource" type="_7KY_kBPrEeeDbpR_R0y-uQ" association="_NGPVYC6sEeeCPvts7Lg2Jg"/>
   </packagedElement>
+  <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_-D8Y8MfMEeeBNuKlNzpvHw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_-D9nEMfMEeeBNuKlNzpvHw" source="http://www.eclipse.org/uml2/2.0.0/UML">
+      <references xmi:type="ecore:EPackage" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"/>
+    </eAnnotations>
+    <appliedProfile xmi:type="uml:Profile" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#ActionLanguage"/>
+  </profileApplication>
 </uml:Model>
