@@ -1,3 +1,5 @@
+Check server_trans_tbl_* for memory leaks
+
 Branching:
 - implement serialization in state server
 

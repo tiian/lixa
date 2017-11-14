@@ -301,6 +301,9 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_G_MODULE_SYMBOL_ERROR:
             return "ERROR: 'g_module_symbol' function returned an "
                 "error condition";
+        case LIXA_RC_G_PTR_ARRAY_NEW_ERROR:
+            return "ERROR: 'g_ptr_array_new' function returned an "
+                "error condition";
         case LIXA_RC_G_RETURNED_NULL:
             return "ERROR:  a glib function returned a NULL pointer; the "
                 "function is not documented as returnig NULL. This is "

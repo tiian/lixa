@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of LIXA.
@@ -50,18 +50,22 @@
 
 
 /**
- * Server Transaction Table Record is the record used to query and pass data
+ * Server Transaction Table Query is the record used to query and pass data
  * to @ref server_trans_tbl_s functions
  */
-struct server_trans_tbl_rec_s {
+struct server_trans_tbl_qry_s {
     /**
      * Global TRansaction ID is used as key
      */
-    char *gtrid;
+    char          *gtrid;
     /**
      * Thread State IDentifier
      */
-    guint tsid;
+    int            tsid;
+    /**
+     * Position of the header record of the branch inside the state file
+     */
+    uint32_t       slot_id;
     /**
      * Transaction ID, XID
      */
@@ -84,10 +88,43 @@ struct server_trans_tbl_s {
      * Multidimentional tree with gtrid as key
      */
     GTree    *records;
+};
+
+
+
+/**
+ * Record for the first level of the Server Transaction Table: every leaf of
+ * three uses this type of record
+ */
+struct server_trans_tbl_rec1_s {
     /**
-     * size of thread status identifier array
+     * Identifier of the status thread that manages all the branches of this
+     * global transaction id
      */
-    guint     tsid_array_size;
+    int          tsid;
+    /**
+     * Array that contains all the branches related to the same global
+     * transaction id. Every element of the GPtrArray is of type
+     * @ref server_trans_tbl_rec2_s
+     */
+    GPtrArray   *branches;
+};
+
+
+
+/**
+ * Record for the second level of the Server Transaction Table: every array of
+ * branches uses this element.
+ */
+struct server_trans_tbl_rec2_s {
+    /**
+     * Position of the header record inside the state file
+     */
+    uint32_t       slot_id;
+    /**
+     * Serialized XID of the branch
+     */
+    lixa_ser_xid_t xid;
 };
 
 
@@ -132,29 +169,29 @@ extern "C" {
      * that store all the keys (global transaction ids)
      * @param[in] data represents the value field associated to the key
      */
-    void server_trans_tbl_value_destroy(gpointer data);
+    void server_trans_tbl_rec1_destroy(gpointer data);
 
 
 
     /**
      * Insert a new record in the Server Transaction Table
      * @param[in,out] stt reference to the Server Transaction Table
-     * @param[in] sttr referenct to the record that must be inserted
+     * @param[in] sttq reference to the record that must be inserted
      * @return a reason code
      */
     int server_trans_tbl_insert(server_trans_tbl_t *stt,
-                                const struct server_trans_tbl_rec_s *sttr);
+                                const struct server_trans_tbl_qry_s *sttq);
 
 
     
     /**
      * Remove a record from the Server Transaction Table
      * @param[in,out] stt reference to the Server Transaction Table
-     * @param[in] sttr referenct to the record that must be removed
+     * @param[in] sttq reference to the record that must be removed
      * @return a reason code
      */
     int server_trans_tbl_remove(server_trans_tbl_t *stt,
-                                const struct server_trans_tbl_rec_s *sttr);
+                                const struct server_trans_tbl_qry_s *sttq);
 
 
 
@@ -171,13 +208,13 @@ extern "C" {
      * Query the Server Transaction Table and returns an array with all the
      * records with a specified Global TRansaction ID
      * @param[in] stt Server Transaction Table
-     * @param[in] sttr Server Tramsactopm Table Record used for the query
+     * @param[in] sttq Server Tramsactopm Table Query used for the query
      * @param[in,out] result GArray with all the matching records
      * @param[in] maint boolean value, TRUE for maintenance mode
      * @return a reason code
      */
     int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
-                                   const struct server_trans_tbl_rec_s *sttr,
+                                   const struct server_trans_tbl_qry_s *sttq,
                                    GArray *result, int maint);
 
 

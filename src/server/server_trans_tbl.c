@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2009-2017, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of LIXA.
@@ -47,9 +47,8 @@ int server_trans_tbl_init(server_trans_tbl_t *stt, guint tsid_array_size)
         g_mutex_init(&stt->mutex);
         if (NULL == (stt->records = g_tree_new_full(
                          server_trans_tbl_comp, NULL,
-                         free, server_trans_tbl_value_destroy)))
+                         free, server_trans_tbl_rec1_destroy)))
             THROW(G_TREE_NEW_ERROR);
-        stt->tsid_array_size = tsid_array_size;
 
         THROW(NONE);
     } CATCH {
@@ -72,23 +71,25 @@ int server_trans_tbl_init(server_trans_tbl_t *stt, guint tsid_array_size)
 
 
 int server_trans_tbl_insert(server_trans_tbl_t *stt,
-                            const struct server_trans_tbl_rec_s *sttr)
+                            const struct server_trans_tbl_qry_s *sttq)
 {
     enum Exception { OBJ_CORRUPTED,
                      OUT_OF_RANGE,
-                     G_ARRAY_SIZED_NEW_ERROR,
+                     G_TRY_MALLOC_ERROR1,
+                     G_PTR_ARRAY_NEW_ERROR,
                      STRDUP_ERROR,
-                     MALLOC_ERROR,
+                     G_TRY_MALLOC_ERROR2,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_trans_tbl_insert\n"));
     TRY {
-        gpointer *node;
-        GQueue *queue;
+        gpointer node = NULL;
+        struct server_trans_tbl_rec1_s *sttr1 = NULL;
+        struct server_trans_tbl_rec2_s *sttr2 = NULL;
 
         LIXA_TRACE(("server_trans_tbl_insert: gtrid='%s', xid='%s', "
-                    "tsid=%u\n", sttr->gtrid, sttr->xid, sttr->tsid));
+                    "tsid=%u\n", sttq->gtrid, sttq->xid, sttq->tsid));
 
         if (NULL == stt->records)
             THROW(OBJ_CORRUPTED);
@@ -97,43 +98,39 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
         g_mutex_lock(&stt->mutex);
 
         /* check tsid is not out of range */
-        if (sttr->tsid == 0 || sttr->tsid >= stt->tsid_array_size)
+        if (sttq->tsid == 0)
             THROW(OUT_OF_RANGE);
 
         /* look for gtrid */
-        if (NULL == (node = g_tree_lookup(stt->records, sttr->gtrid))) {
-            /* create a new array */
-            GArray *tsid = NULL;
-            guint i;
+        if (NULL == (node = g_tree_lookup(stt->records, sttq->gtrid))) {
             char *key = NULL;
-
-            if (NULL == (tsid = g_array_sized_new(
-                             FALSE, FALSE, sizeof(GQueue),
-                             stt->tsid_array_size)))
-                THROW(G_ARRAY_SIZED_NEW_ERROR);
-            /* prepare the array: all the elements are initialized with an
-             * empty queue object */
-            for (i = 0; i < stt->tsid_array_size; ++i) {
-                GQueue q;
-                g_queue_init(&q);
-                g_array_append_val(tsid, q);
-            }
+            /* allocate a new record for this global transaction id */
+            if (NULL == (sttr1 = (struct server_trans_tbl_rec1_s *)
+                         g_try_malloc0(
+                             sizeof(struct server_trans_tbl_rec1_s))))
+                THROW(G_TRY_MALLOC_ERROR1);
+            sttr1->tsid = sttq->tsid;
+            if (NULL == (sttr1->branches = g_ptr_array_new_with_free_func(
+                             g_free)))
+                THROW(G_PTR_ARRAY_NEW_ERROR);
             /* duplicate the key before inserting it in the tree */
-            if (NULL == (key = strdup(sttr->gtrid)))
+            if (NULL == (key = strdup(sttq->gtrid)))
                 THROW(STRDUP_ERROR);
             /* insert the new element in the tree */
-            g_tree_insert(stt->records, (gpointer)key, tsid);
-            node = (gpointer *) tsid;
+            g_tree_insert(stt->records, (gpointer)key, sttr1);
+            node = (gpointer *)sttr1;
         }
+        /* create a new second level record */
+        /* allocate a new record for this branch */
+        if (NULL == (sttr2 = (struct server_trans_tbl_rec2_s *)
+                         g_try_malloc0(
+                             sizeof(struct server_trans_tbl_rec2_s))))
+            THROW(G_TRY_MALLOC_ERROR2);
 
-        /* retrieve the queue associated to the thread status id tsid and
-         * push the XID */
-        queue = &g_array_index((GArray *) node, GQueue, sttr->tsid);
-        char *xid = NULL;
-        if (NULL == (xid = (char *) malloc(LIXA_XID_SERIALIZE_LENGTH)))
-            THROW(MALLOC_ERROR);
-        memcpy(xid, sttr->xid, LIXA_XID_SERIALIZE_LENGTH);
-        g_queue_push_tail(queue, (gpointer *) xid);
+        sttr2->slot_id = sttq->slot_id;
+        memcpy(sttr2->xid, sttq->xid, sizeof(lixa_ser_xid_t));
+        sttr1 = (struct server_trans_tbl_rec1_s *)node;
+        g_ptr_array_add(sttr1->branches, sttr2);
 
         THROW(NONE);
     } CATCH {
@@ -144,14 +141,17 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
             case OUT_OF_RANGE:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
                 break;
-            case G_ARRAY_SIZED_NEW_ERROR:
-                ret_cod = LIXA_RC_G_RETURNED_NULL;
+            case G_TRY_MALLOC_ERROR1:
+                ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case G_PTR_ARRAY_NEW_ERROR:
+                ret_cod = LIXA_RC_G_PTR_ARRAY_NEW_ERROR;
                 break;
             case STRDUP_ERROR:
                 ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
-            case MALLOC_ERROR:
-                ret_cod = LIXA_RC_MALLOC_ERROR;
+            case G_TRY_MALLOC_ERROR2:
+                ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -169,21 +169,16 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
 
 
 
-void server_trans_tbl_value_destroy(gpointer data)
+void server_trans_tbl_rec1_destroy(gpointer data)
 {
-    GArray *tsid;
-    GQueue *queue;
-    gint i;
+    struct server_trans_tbl_rec1_s *sttr;
 
-    LIXA_TRACE(("server_trans_tbl_value_destroy: data=%p\n", data));
-    tsid = (GArray *) data;
-    for (i = 0; i < tsid->len; ++i) {
-        queue = &g_array_index(tsid, GQueue, i);
-        while (!g_queue_is_empty(queue)) {
-            g_queue_pop_tail(queue);
-        }
+    LIXA_TRACE(("server_trans_tbl_rec1_destroy: data=%p\n", data));
+    if (NULL != data) {
+        sttr = (struct server_trans_tbl_rec1_s *)data;
+        if (NULL != sttr->branches)
+            g_ptr_array_free(sttr->branches, TRUE);
     }
-    g_array_free(tsid, TRUE);
 }
 
 
@@ -201,9 +196,7 @@ int server_trans_tbl_comp(gconstpointer a, gconstpointer b, gpointer user_data)
 
 int server_trans_tbl_clear(server_trans_tbl_t *stt)
 {
-    enum Exception {
-        NONE
-    } excp;
+    enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_trans_tbl_clear\n"));
@@ -232,24 +225,40 @@ int server_trans_tbl_clear(server_trans_tbl_t *stt)
 
 gboolean server_trans_tbl_traverse(gpointer key, gpointer value, gpointer data)
 {
-    char *gtrid = (char *) key;
-    GList **list = (GList **) data;
+    char *gtrid = (char *)key;
+    struct server_trans_tbl_rec1_s *sttr1 =
+        (struct server_trans_tbl_rec1_s *)value;
+    GArray *result = (GArray *)data;
+    struct server_trans_tbl_qry_s record;
+    guint i;
 
-    *list = g_list_prepend(*list, gtrid);
-
+    for (i=0; i<sttr1->branches->len; ++i) {
+        struct server_trans_tbl_rec2_s *sttr2 =
+            g_ptr_array_index(sttr1->branches, i);
+        if (NULL == (record.gtrid = strdup(gtrid))) {
+            LIXA_TRACE(("server_trans_tbl_traverse: error while calling "
+                        "strdup\n"));
+        }
+        record.tsid = sttr1->tsid;
+        record.slot_id = sttr2->slot_id;
+        memcpy(record.xid, sttr2->xid, sizeof(record.xid));
+        g_array_append_val(result, record);
+    } /* for (i=0; i<sttr->branches.len; ++i) */
+    
     return FALSE;
 }
 
 
 
 int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
-                               const struct server_trans_tbl_rec_s *sttr,
+                               const struct server_trans_tbl_qry_s *sttq,
                                GArray *result, int maint)
 {
     enum Exception { OBJ_CORRUPTED,
                      NULL_OBJECT,
                      OUT_OF_RANGE,
                      OBJ_NOT_FOUND1,
+                     STRDUP_ERROR,
                      OBJ_NOT_FOUND2,
                      REALLOC_ERROR,
                      NONE } excp;
@@ -257,10 +266,8 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
 
     LIXA_TRACE(("server_trans_tbl_query_xid\n"));
     TRY {
-        gpointer *node;
-
         LIXA_TRACE(("server_trans_tbl_query_xid: query is gtrid='%s', "
-                    "tsid=%u\n", sttr->gtrid, sttr->tsid));
+                    "tsid=%u\n", sttq->gtrid, sttq->tsid));
 
         if (NULL == stt->records)
             THROW(OBJ_CORRUPTED);
@@ -271,74 +278,36 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
         g_mutex_lock(&stt->mutex);
 
         /* check tsid is not out of range */
-        if (sttr->tsid == 0 || sttr->tsid >= stt->tsid_array_size)
+        if (sttq->tsid == 0)
             THROW(OUT_OF_RANGE);
 
-        gboolean hastransactions = FALSE;
         if (maint) {
-            GList *list = NULL;
-            g_tree_foreach(stt->records, server_trans_tbl_traverse, &list);
-
-            if (NULL != list) {
-                list = g_list_first(list);
-                guint li;
-                for (li = 0; li < g_list_length(list); li++) {
-                    gpointer data = g_list_nth_data(list, li);
-
-                    if (NULL != (node = g_tree_lookup(stt->records, data))) {
-                        guint i;
-                        for (i = 1; i < stt->tsid_array_size; ++i) {
-                            GQueue *q = &g_array_index((GArray *) node, GQueue,
-                                                       i);
-                            if (!g_queue_is_empty(q)) {
-                                hastransactions = TRUE;
-
-                                /* add all entries from queue to out record */
-                                guint x;
-                                for (x = 0; x < q->length; x++) {
-                                    struct server_trans_tbl_rec_s record;
-                                    char *xid = (char *)g_queue_peek_nth(q, x);
-                                    memset(&record, 0, sizeof(record));
-                                    memcpy(record.xid, xid,
-                                           LIXA_XID_SERIALIZE_LENGTH);
-                                    g_array_append_val(result, record);
-                                }
-                            } /* if (!g_queue_is_empty(q)) */
-                        } /* for i */
-                    }
-                }
-            }
+            g_tree_foreach(stt->records, server_trans_tbl_traverse, result);
         } else {
+            guint i;
+            struct server_trans_tbl_rec1_s *sttr1 = NULL;
+            struct server_trans_tbl_qry_s record;
             /* look for gtrid */
-            if (NULL == (node = g_tree_lookup(stt->records, sttr->gtrid))) {
+                if (NULL == (sttr1 = (struct server_trans_tbl_rec1_s *)
+                             g_tree_lookup(stt->records, sttq->gtrid))) {
                 /* no transactions for this global transaction identifier */
                 THROW(OBJ_NOT_FOUND1);
             }
 
-            guint i;
-            for (i = 1; i < stt->tsid_array_size; ++i) {
-                GQueue *q = &g_array_index((GArray *) node, GQueue, i);
-                if (!g_queue_is_empty(q)) {
-                    hastransactions = TRUE;
+            for (i=0; i<sttr1->branches->len; ++i) {
+                struct server_trans_tbl_rec2_s *sttr2 =
+                    g_ptr_array_index(sttr1->branches, i);
+                if (NULL == (record.gtrid = strdup(sttq->gtrid)))
+                    THROW(STRDUP_ERROR);
+                record.tsid = sttr1->tsid;
+                record.slot_id = sttr2->slot_id;
+                memcpy(record.xid, sttr2->xid, sizeof(record.xid));
+                g_array_append_val(result, record);
+            } /* for (i=0; i<sttr->branches.len; ++i) */
+        } /* if (maint) */
 
-                    /* add all entries from queue to out record */
-                    guint x;
-                    for (x = 0; x < q->length; x++) {
-                        struct server_trans_tbl_rec_s record;
-                        char *xid = (char *)g_queue_peek_nth(q, x);
-                        memset(&record, 0, sizeof(record));
-                        memcpy(record.xid, xid,
-                               LIXA_XID_SERIALIZE_LENGTH);
-                        record.tsid = i;
-                        g_array_append_val(result, record);
-                    }
-                } /* if (!g_queue_is_empty(q)) */
-            } /* for i */
-        }
-
-        if (!hastransactions)
+        if (0 == result->len)
             THROW(OBJ_NOT_FOUND2);
-
         LIXA_TRACE(("server_trans_tbl_query_xid: result is "
                     "transactions = %u\n", result->len));
 
@@ -357,6 +326,9 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
             case OBJ_NOT_FOUND1:
             case OBJ_NOT_FOUND2:
                 ret_cod = LIXA_RC_OBJ_NOT_FOUND;
+                break;
+            case STRDUP_ERROR:
+                ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
             case REALLOC_ERROR:
                 ret_cod = LIXA_RC_REALLOC_ERROR;
@@ -378,7 +350,7 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
 
 
 int server_trans_tbl_remove(server_trans_tbl_t *stt,
-                            const struct server_trans_tbl_rec_s *sttr)
+                            const struct server_trans_tbl_qry_s *sttq)
 {
     enum Exception { OBJ_CORRUPTED,
                      OUT_OF_RANGE,
@@ -389,7 +361,7 @@ int server_trans_tbl_remove(server_trans_tbl_t *stt,
     LIXA_TRACE(("server_trans_tbl_remove\n"));
     TRY {
         LIXA_TRACE(("server_trans_tbl_remove: gtrid='%s', xid='%s', tsid=%u\n",
-                    sttr->gtrid, sttr->xid, sttr->tsid));
+                    sttq->gtrid, sttq->xid, sttq->tsid));
 
         if (NULL == stt->records)
             THROW(OBJ_CORRUPTED);
@@ -398,11 +370,11 @@ int server_trans_tbl_remove(server_trans_tbl_t *stt,
         g_mutex_lock(&stt->mutex);
 
         /* check tsid is not out of range */
-        if (sttr->tsid == 0 || sttr->tsid >= stt->tsid_array_size)
+        if (sttq->tsid == 0)
             THROW(OUT_OF_RANGE);
 
         /* remove */
-        if (!g_tree_remove(stt->records, sttr->gtrid))
+        if (!g_tree_remove(stt->records, sttq->gtrid))
             THROW(NOT_FOUND_ERROR);
 
         THROW(NONE);

@@ -112,7 +112,7 @@ int server_trans_8(struct thread_status_s *ts, size_t slot_id,
 
     LIXA_TRACE(("server_trans_8\n"));
     TRY {
-        struct server_trans_tbl_rec_s query;
+        struct server_trans_tbl_qry_s query;
         
         if (LIXA_MSG_VERB_TRANS != lmi->header.pvs.verb)
             THROW(PROTOCOL_ERROR);
@@ -124,7 +124,7 @@ int server_trans_8(struct thread_status_s *ts, size_t slot_id,
 
         /* allocate a new array to store query results */
         if (NULL == (result = g_array_new(FALSE, TRUE, sizeof(
-                                              struct server_trans_tbl_rec_s))))
+                                              struct server_trans_tbl_qry_s))))
             THROW(G_ARRAY_NEW_ERROR);
         
         ret_cod = server_trans_tbl_query_xid(ts->trans_table, &query, result,
@@ -237,8 +237,8 @@ int server_trans_result(struct thread_status_s *ts,
         guint i;
         for (i = 0; i < records->len; ++i) {
             struct lixa_msg_body_trans_16_transaction_s trans;
-            struct server_trans_tbl_rec_s *record = &g_array_index(
-                records, struct server_trans_tbl_rec_s, i);
+            struct server_trans_tbl_qry_s *record = &g_array_index(
+                records, struct server_trans_tbl_qry_s, i);
             memcpy(trans.xid, record->xid, LIXA_XID_SERIALIZE_LENGTH);
             g_array_append_val(lmo->body.trans_16.transactions, trans);
         }

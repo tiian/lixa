@@ -287,18 +287,20 @@ int server_xa_commit_8(struct thread_status_s *ts,
         ts->curr_status[block_id].sr.data.pld.ph.state.finished =
             lmi->body.commit_8.conthr.finished;
         /* remove XID from the global transaction table */
-        struct server_trans_tbl_rec_s sttr;
-        sttr.gtrid = lixa_xid_get_gtrid_ascii(
+        struct server_trans_tbl_qry_s sttq;
+        sttq.gtrid = lixa_xid_get_gtrid_ascii(
             &(ts->curr_status[block_id].sr.data.pld.ph.state.xid));
         if (!lixa_xid_serialize(
                 &(ts->curr_status[block_id].sr.data.pld.ph.state.xid),
-                sttr.xid)) THROW(XID_SERIALIZE_ERROR);
-        sttr.tsid = ts->id;
+                sttq.xid))
+            THROW(XID_SERIALIZE_ERROR);
+        sttq.tsid = ts->id;
         /*
         sttr.block_id = block_id;
         */
         if (LIXA_RC_OK != (ret_cod = server_trans_tbl_remove(
-                               ts->trans_table, &sttr))) THROW(TRANS_TABLE_REMOVE_ERROR);
+                               ts->trans_table, &sttq)))
+            THROW(TRANS_TABLE_REMOVE_ERROR);
 
         /* store data in the children blocks... */
         for (i = 0; i < lmi->body.commit_8.xa_commit_execs->len; ++i) {
@@ -624,10 +626,10 @@ int server_xa_open(struct thread_status_s *ts,
                    uint32_t block_id,
                    struct lixa_msg_verb_step_s *last_verb_step)
 {
-    enum Exception
-    {
-        SERVER_XA_OPEN_8_ERROR, SERVER_XA_OPEN_24_ERROR, INVALID_STEP, NONE
-    } excp;
+    enum Exception { SERVER_XA_OPEN_8_ERROR
+                     , SERVER_XA_OPEN_24_ERROR
+                     , INVALID_STEP
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_xa_open\n"));
@@ -636,38 +638,38 @@ int server_xa_open(struct thread_status_s *ts,
             case 8:
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_open_8(
-                            ts, lmi, lmo, block_id, last_verb_step))) THROW(
-                                SERVER_XA_OPEN_8_ERROR);
+                            ts, lmi, lmo, block_id, last_verb_step)))
+                    THROW(SERVER_XA_OPEN_8_ERROR);
                 break;
             case 24:
                 if (LIXA_RC_OK != (ret_cod = server_xa_open_24(
-                                       ts, lmi, block_id))) THROW(SERVER_XA_OPEN_24_ERROR);
+                                       ts, lmi, block_id)))
+                    THROW(SERVER_XA_OPEN_24_ERROR);
                 break;
             default: THROW(INVALID_STEP);
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case SERVER_XA_OPEN_8_ERROR:
-                case SERVER_XA_OPEN_24_ERROR:
-                    break;
-                case INVALID_STEP:
-                    ret_cod = LIXA_RC_INVALID_STATUS;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case SERVER_XA_OPEN_8_ERROR:
+            case SERVER_XA_OPEN_24_ERROR:
+                break;
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_open/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
 
 
 int server_xa_open_8(struct thread_status_s *ts,
@@ -676,14 +678,11 @@ int server_xa_open_8(struct thread_status_s *ts,
                      uint32_t block_id,
                      struct lixa_msg_verb_step_s *last_verb_step)
 {
-    enum Exception
-    {
-        RSRMGRS_ARRAY_NULL,
-        MAINTENANCE_MODE,
-        TOO_MANY_RSRMGRS,
-        PAYLOAD_CHAIN_ALLOCATE_ERROR,
-        NONE
-    } excp;
+    enum Exception { RSRMGRS_ARRAY_NULL,
+                     MAINTENANCE_MODE,
+                     TOO_MANY_RSRMGRS,
+                     PAYLOAD_CHAIN_ALLOCATE_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_xa_open_8\n"));
@@ -755,47 +754,46 @@ int server_xa_open_8(struct thread_status_s *ts,
         last_verb_step->step = lmo->header.pvs.step;
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
+    } CATCH {
+        switch (excp) {
 #ifdef LIXA_DEBUG
-                case RSRMGRS_ARRAY_NULL:
-                    ret_cod = LIXA_RC_NULL_OBJECT;
-                    break;
+            case RSRMGRS_ARRAY_NULL:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
 #endif /* LIXA_DEBUG */
-                case MAINTENANCE_MODE:
-                    ret_cod = LIXA_RC_MAINTENANCE_MODE;
-                    break;
-                case TOO_MANY_RSRMGRS:
-                    ret_cod = LIXA_RC_TOO_MANY_RSRMGRS;
-                    break;
-                case PAYLOAD_CHAIN_ALLOCATE_ERROR:
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+            case MAINTENANCE_MODE:
+                ret_cod = LIXA_RC_MAINTENANCE_MODE;
+                break;
+            case TOO_MANY_RSRMGRS:
+                ret_cod = LIXA_RC_TOO_MANY_RSRMGRS;
+                break;
+            case PAYLOAD_CHAIN_ALLOCATE_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_open_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-
+    
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_OPEN_8,
                thread_status_get_crash_count(ts));
     return ret_cod;
 }
 
 
+
 int server_xa_open_24(struct thread_status_s *ts,
                       const struct lixa_msg_s *lmi,
                       uint32_t block_id)
 {
-    enum Exception
-    {
-        INVALID_BLOCK_ID, NUMBER_OF_RSRMGRS_MISMATCH, INVALID_RMID, NONE
-    } excp;
+    enum Exception { INVALID_BLOCK_ID
+                     , NUMBER_OF_RSRMGRS_MISMATCH
+                     , INVALID_RMID
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_xa_open_24\n"));
@@ -838,26 +836,24 @@ int server_xa_open_24(struct thread_status_s *ts,
         } /* for (i=0; ... */
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case INVALID_BLOCK_ID:
-                    ret_cod = LIXA_RC_INVALID_STATUS;
-                    break;
-                case NUMBER_OF_RSRMGRS_MISMATCH:
-                    ret_cod = LIXA_RC_OUT_OF_RANGE;
-                    break;
-                case INVALID_RMID:
-                    ret_cod = LIXA_RC_INVALID_STATUS;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case INVALID_BLOCK_ID:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NUMBER_OF_RSRMGRS_MISMATCH:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case INVALID_RMID:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_open_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
 
@@ -867,16 +863,16 @@ int server_xa_open_24(struct thread_status_s *ts,
 }
 
 
+
 int server_xa_prepare(struct thread_status_s *ts,
                       const struct lixa_msg_s *lmi,
                       struct lixa_msg_s *lmo,
                       uint32_t block_id,
                       struct lixa_msg_verb_step_s *last_verb_step)
 {
-    enum Exception
-    {
-        SERVER_XA_PREPARE_8_ERROR, INVALID_STEP, NONE
-    } excp;
+    enum Exception { SERVER_XA_PREPARE_8_ERROR
+                     , INVALID_STEP
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_xa_prepare\n"));
@@ -884,30 +880,29 @@ int server_xa_prepare(struct thread_status_s *ts,
         if (8 != lmi->header.pvs.step) {
             THROW(INVALID_STEP);
         } else if (LIXA_RC_OK != (ret_cod = server_xa_prepare_8(
-                                      ts, lmi, lmo, block_id, last_verb_step))) THROW(
-                                          SERVER_XA_PREPARE_8_ERROR);
+                                      ts, lmi, lmo, block_id, last_verb_step)))
+            THROW(SERVER_XA_PREPARE_8_ERROR);
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case SERVER_XA_PREPARE_8_ERROR:
-                    break;
-                case INVALID_STEP:
-                    ret_cod = LIXA_RC_INVALID_STATUS;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case SERVER_XA_PREPARE_8_ERROR:
+                break;
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_prepare/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
 
 
 int server_xa_prepare_8(struct thread_status_s *ts,
@@ -916,10 +911,9 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                         uint32_t block_id,
                         struct lixa_msg_verb_step_s *last_verb_step)
 {
-    enum Exception
-    {
-        INVALID_BLOCK_ID, NUMBER_OF_RSRMGRS_MISMATCH, NONE
-    } excp;
+    enum Exception { INVALID_BLOCK_ID
+                     , NUMBER_OF_RSRMGRS_MISMATCH
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_xa_prepare_8\n"));
@@ -928,11 +922,12 @@ int server_xa_prepare_8(struct thread_status_s *ts,
 
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=
-            DATA_PAYLOAD_TYPE_HEADER) THROW(INVALID_BLOCK_ID);
+            DATA_PAYLOAD_TYPE_HEADER)
+            THROW(INVALID_BLOCK_ID);
         /* check children blocks match with the arrived update */
         if (lmi->body.prepare_8.xa_prepare_execs->len >
-            ts->curr_status[block_id].sr.data.pld.ph.n) THROW(
-                NUMBER_OF_RSRMGRS_MISMATCH);
+            ts->curr_status[block_id].sr.data.pld.ph.n)
+            THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* store commit/rollback intent after prepare phase */
         status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
@@ -978,40 +973,38 @@ int server_xa_prepare_8(struct thread_status_s *ts,
         status_sync_ask_sync(&ts->status_sync);
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case INVALID_BLOCK_ID:
-                    ret_cod = LIXA_RC_INVALID_STATUS;
-                    break;
-                case NUMBER_OF_RSRMGRS_MISMATCH:
-                    ret_cod = LIXA_RC_OUT_OF_RANGE;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case INVALID_BLOCK_ID:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NUMBER_OF_RSRMGRS_MISMATCH:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_prepare_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-
+    
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_PREPARE_8,
                thread_status_get_crash_count(ts));
     return ret_cod;
 }
 
 
+
 int server_xa_rollback(struct thread_status_s *ts,
                        const struct lixa_msg_s *lmi,
                        uint32_t block_id)
 {
-    enum Exception
-    {
-        SERVER_XA_ROLLBACK_8_ERROR, INVALID_STEP, NONE
-    } excp;
+    enum Exception { SERVER_XA_ROLLBACK_8_ERROR
+                     , INVALID_STEP
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_xa_rollback\n"));
@@ -1019,25 +1012,24 @@ int server_xa_rollback(struct thread_status_s *ts,
         if (8 != lmi->header.pvs.step) {
             THROW(INVALID_STEP);
         } else if (LIXA_RC_OK != (ret_cod = server_xa_rollback_8(
-                                      ts, lmi, block_id))) THROW(SERVER_XA_ROLLBACK_8_ERROR);
+                                      ts, lmi, block_id)))
+            THROW(SERVER_XA_ROLLBACK_8_ERROR);
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case SERVER_XA_ROLLBACK_8_ERROR:
-                    break;
-                case INVALID_STEP:
-                    ret_cod = LIXA_RC_INVALID_STATUS;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case SERVER_XA_ROLLBACK_8_ERROR:
+                break;
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -1074,19 +1066,19 @@ int server_xa_rollback_8(struct thread_status_s *ts,
         ts->curr_status[block_id].sr.data.pld.ph.state.finished =
             lmi->body.rollback_8.conthr.finished;
         /* remove XID from the global transaction table */
-        struct server_trans_tbl_rec_s sttr;
-        sttr.gtrid = lixa_xid_get_gtrid_ascii(
+        struct server_trans_tbl_qry_s sttq;
+        sttq.gtrid = lixa_xid_get_gtrid_ascii(
             &(ts->curr_status[block_id].sr.data.pld.ph.state.xid));
         if (!lixa_xid_serialize(
                 &(ts->curr_status[block_id].sr.data.pld.ph.state.xid),
-                sttr.xid))
+                sttq.xid))
             THROW(XID_SERIALIZE_ERROR);
-        sttr.tsid = ts->id;
+        sttq.tsid = ts->id;
         /*
         sttr.block_id = block_id;
         */
         if (LIXA_RC_OK != (ret_cod = server_trans_tbl_remove(
-                               ts->trans_table, &sttr)))
+                               ts->trans_table, &sttq)))
             THROW(TRANS_TABLE_REMOVE_ERROR);
 
         /* store data in the children blocks... */
@@ -1212,7 +1204,7 @@ int server_xa_start_8(struct thread_status_s *ts,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int warning = LIXA_RC_OK;
-    struct server_trans_tbl_rec_s sttr;
+    struct server_trans_tbl_qry_s sttq;
     GArray *query_result = NULL;
 
     LIXA_TRACE(("server_xa_start_8\n"));
@@ -1220,13 +1212,13 @@ int server_xa_start_8(struct thread_status_s *ts,
         uint32_t i;
 
         /* prepare transaction table record */
-        memset(&sttr, 0, sizeof(sttr));
-        if (NULL == (sttr.gtrid = lixa_xid_get_gtrid_ascii(
+        memset(&sttq, 0, sizeof(sttq));
+        if (NULL == (sttq.gtrid = lixa_xid_get_gtrid_ascii(
                          &(lmi->body.start_8.conthr.xid))))
             THROW(XID_GET_GTRID_ERROR);
-        if (!lixa_xid_serialize(&(lmi->body.start_8.conthr.xid), sttr.xid))
+        if (!lixa_xid_serialize(&(lmi->body.start_8.conthr.xid), sttq.xid))
             THROW(XID_SERIALIZE_ERROR);
-        sttr.tsid = ts->id;
+        sttq.tsid = ts->id;
         /* check if the xa_start is related to a subordinate branch */
         if (lmi->body.start_8.conthr.sub_branch) {
             guint i, tsid = 0;
@@ -1235,10 +1227,10 @@ int server_xa_start_8(struct thread_status_s *ts,
             /* preparying query_result array for next step */
             if (NULL == (query_result = g_array_new(
                              FALSE, FALSE,
-                             sizeof(struct server_trans_tbl_rec_s))))
+                             sizeof(struct server_trans_tbl_qry_s))))
                 THROW(G_ARRAY_NEW_ERROR);
             /* looking for other branches of the same global transaction */
-            ret_cod = server_trans_tbl_query_xid(ts->trans_table, &sttr,
+            ret_cod = server_trans_tbl_query_xid(ts->trans_table, &sttq,
                                                  query_result, FALSE);
             if (LIXA_RC_OBJ_NOT_FOUND == ret_cod) {
                 /* this could happen if a subordinate branch is late and
@@ -1247,18 +1239,18 @@ int server_xa_start_8(struct thread_status_s *ts,
                 LIXA_TRACE(("server_xa_start_8: client is asking to "
                             "branch an existing global transaction, but "
                             "no other branches have been found for "
-                            "xid='%s'\n", sttr.xid));
-                syslog(LOG_WARNING, LIXA_SYSLOG_LXD030N, sttr.xid);
+                            "xid='%s'\n", sttq.xid));
+                syslog(LOG_WARNING, LIXA_SYSLOG_LXD030N, sttq.xid);
                 /* set a warning condition */
                 warning = LIXA_RC_NO_SUPERIOR_BRANCH;
             } else if (LIXA_RC_OK != ret_cod) {
                 THROW(TRANS_TBL_QUERY_XID_ERROR);
             } else {
-                struct server_trans_tbl_rec_s *result = NULL;
+                struct server_trans_tbl_qry_s *result = NULL;
                 /* check result: only one thread must contain it*/
                 for (i=0; i<query_result->len; ++i) {
                     result = &g_array_index(query_result,
-                                            struct server_trans_tbl_rec_s, i);
+                                            struct server_trans_tbl_qry_s, i);
                     LIXA_TRACE(("server_xa_start_8: xid='%s' found in "
                                 "thread %u\n", result->xid, result->tsid));
                     if (0 == tsid) {
@@ -1287,7 +1279,7 @@ int server_xa_start_8(struct thread_status_s *ts,
                     LIXA_TRACE(("server_xa_start_8: client is working on "
                                 "branch %s that must be managed by state "
                                 "thread id %u (this thread id is %u)\n",
-                                sttr.xid, tss->id, ts->id));
+                                sttq.xid, tss->id, ts->id));
                     syslog(LOG_INFO, LIXA_SYSLOG_LXD031I,
                            result->xid, tss->id, ts->id);
                     THROW(THREAD_SWITCH);
@@ -1302,9 +1294,9 @@ int server_xa_start_8(struct thread_status_s *ts,
             lmi->body.start_8.conthr.xid;
         /* store XID in the global transaction table */
         if (LIXA_RC_OK != (ret_cod = server_trans_tbl_insert(
-                               ts->trans_table, &sttr)))
+                               ts->trans_table, &sttq)))
             THROW(TRANS_TABLE_INSERT_ERROR);
-        sttr.gtrid = NULL; /* avoid string free */
+        sttq.gtrid = NULL; /* avoid string free */
         /* reset finished state */
         ts->curr_status[block_id].sr.data.pld.ph.state.finished = FALSE;
 
@@ -1364,8 +1356,8 @@ int server_xa_start_8(struct thread_status_s *ts,
         } /* switch (excp) */
     } /* TRY-CATCH */
     /* memory recovery to avoid memory leak */
-    if (NULL != sttr.gtrid)
-        free(sttr.gtrid);
+    if (NULL != sttq.gtrid)
+        free(sttq.gtrid);
     if (NULL != query_result)
         g_array_free(query_result, TRUE);
     LIXA_TRACE(("server_xa_start_8/excp=%d/"
