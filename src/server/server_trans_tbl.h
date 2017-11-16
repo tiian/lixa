@@ -75,6 +75,14 @@ struct server_trans_tbl_qry_s {
 
 
 /**
+ * An array of @ref server_trans_tbl_qry_s is used as the result of queries
+ * on @ref server_trans_tbl_s
+ */
+typedef GArray server_trans_tbl_qry_arr_t;
+
+
+
+/**
  * Server Transaction Table is an index of the state file content: it keeps
  * track of the currently managed transactions
  */
@@ -209,20 +217,48 @@ extern "C" {
      * records with a specified Global TRansaction ID
      * @param[in] stt Server Transaction Table
      * @param[in] sttq Server Tramsactopm Table Query used for the query
-     * @param[in,out] result GArray with all the matching records
+     * @param[in,out] result with all the matching records
      * @param[in] maint boolean value, TRUE for maintenance mode
      * @return a reason code
      */
     int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
                                    const struct server_trans_tbl_qry_s *sttq,
-                                   GArray *result, int maint);
+                                   server_trans_tbl_qry_arr_t *result,
+                                   int maint);
 
 
-    
+
+    /**
+     * Traverse the three and collect all the branches
+     */
     gboolean server_trans_tbl_traverse(gpointer key, gpointer value,
                                        gpointer data);
 
 
+
+    /**
+     * Create a new array to store query results
+     * @return a new object or NULL in the event of error
+     */
+    server_trans_tbl_qry_arr_t *server_trans_tbl_qry_arr_new(void);
+
+
+
+    /**
+     * Delete an array that stores query results
+     * @param[in,out] sttqa is the array to delete
+     */
+    void server_trans_tbl_qry_arr_delete(server_trans_tbl_qry_arr_t *sttqa);
+
+
+
+    /**
+     * This function implements a GDestroyNotify associated to
+     * @ref server_trans_tbl_qry_s
+     */
+    void server_trans_tbl_qry_destroy(gpointer data);
+
+    
     
 #ifdef __cplusplus
 }

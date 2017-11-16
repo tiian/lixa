@@ -113,7 +113,7 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
             if (NULL == (sttr1->branches = g_ptr_array_new_with_free_func(
                              g_free)))
                 THROW(G_PTR_ARRAY_NEW_ERROR);
-            /* duplicate the key before inserting it in the tree */
+            /* duplicate gtrid to insert a new node in the tree */
             if (NULL == (key = strdup(sttq->gtrid)))
                 THROW(STRDUP_ERROR);
             /* insert the new element in the tree */
@@ -171,13 +171,14 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
 
 void server_trans_tbl_rec1_destroy(gpointer data)
 {
-    struct server_trans_tbl_rec1_s *sttr;
+    struct server_trans_tbl_rec1_s *sttr1;
 
     LIXA_TRACE(("server_trans_tbl_rec1_destroy: data=%p\n", data));
     if (NULL != data) {
-        sttr = (struct server_trans_tbl_rec1_s *)data;
-        if (NULL != sttr->branches)
-            g_ptr_array_free(sttr->branches, TRUE);
+        sttr1 = (struct server_trans_tbl_rec1_s *)data;
+        if (NULL != sttr1->branches)
+            g_ptr_array_free(sttr1->branches, TRUE);
+        g_free(sttr1);
     }
 }
 
@@ -252,7 +253,7 @@ gboolean server_trans_tbl_traverse(gpointer key, gpointer value, gpointer data)
 
 int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
                                const struct server_trans_tbl_qry_s *sttq,
-                               GArray *result, int maint)
+                               server_trans_tbl_qry_arr_t *result, int maint)
 {
     enum Exception { OBJ_CORRUPTED,
                      NULL_OBJECT,
@@ -399,4 +400,38 @@ int server_trans_tbl_remove(server_trans_tbl_t *stt,
     LIXA_TRACE(("server_trans_tbl_insert/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+server_trans_tbl_qry_arr_t *server_trans_tbl_qry_arr_new(void)
+{
+    server_trans_tbl_qry_arr_t *arr = NULL;
+    if (NULL == (arr = g_array_new(FALSE, FALSE,
+                                   sizeof(struct server_trans_tbl_qry_s)))) {
+        LIXA_TRACE(("server_trans_tbl_qry_arr_new: g_array_new returned "
+                    "NULL\n"));
+    } else {
+        g_array_set_clear_func(arr, server_trans_tbl_qry_destroy);
+    }
+    return arr;
+}
+
+
+
+void server_trans_tbl_qry_arr_delete(server_trans_tbl_qry_arr_t *sttqa)
+{
+    if (NULL != sttqa)
+        g_array_free(sttqa, TRUE);
+}
+
+
+
+void server_trans_tbl_qry_destroy(gpointer data)
+{
+    struct server_trans_tbl_qry_s *qry = (struct server_trans_tbl_qry_s *)data;
+    if (NULL != qry && NULL != qry->gtrid) {
+        free(qry->gtrid);
+        qry->gtrid = NULL;
+    }
 }
