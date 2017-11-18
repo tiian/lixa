@@ -115,6 +115,7 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
         srd->pld.type = DATA_PAYLOAD_TYPE_HEADER;
         srd->pld.ph.n = 0;
         memset(&srd->pld.ph.block_array, 0, sizeof(uint32_t) * CHAIN_MAX_SIZE);
+        srd->pld.ph.next_branch_block = 0;
         memset(&srd->pld.ph.local_sock_addr, 0, sizeof(struct sockaddr_in));
         memset(&srd->pld.ph.peer_sock_addr, 0, sizeof(struct sockaddr_in));
         memset(&srd->pld.ph.config_digest, 0, sizeof(md5_digest_hex_t));
@@ -1265,4 +1266,69 @@ int size_t_compare_func(gconstpointer a, gconstpointer b) {
 }
 
 
+
+int status_record_branch_chain(struct thread_status_s *ts,
+                               uint32_t block_id,
+                               server_trans_tbl_qry_arr_t *array)
+{
+    enum Exception { INTERNAL_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("status_record_branch_chain\n"));
+    TRY {
+        guint i;
+        int chained = FALSE;
+        
+        /* loop on all the already chained blocks: only one should have a
+           null next_branch_block */
+        for (i=0; i<array->len; ++i) {
+            struct server_trans_tbl_qry_s *record =
+                &g_array_index(array, struct server_trans_tbl_qry_s, i);
+            uint32_t next_branch_block =
+                ts->curr_status[record->block_id
+                                ].sr.data.pld.ph.next_branch_block;
+            LIXA_TRACE(("status_record_branch_chain: item=%u, block_id=%u, "
+                        "next_branch_block=%u\n", i, record->block_id,
+                        next_branch_block));
+            if (0 == next_branch_block) {
+                if (!chained) {
+                    /* this is the point to connect */
+                    status_record_update(ts->curr_status + record->block_id,
+                                         record->block_id,
+                                         ts->updated_records);
+                    ts->curr_status[record->block_id
+                                    ].sr.data.pld.ph.next_branch_block =
+                        block_id;
+                    chained = TRUE;
+                    LIXA_TRACE(("status_record_branch_chain: chained to "
+                                "block_id=%u\n", block_id));
+                } else {
+                    /* this is an internal error and it should never happen */
+                    LIXA_TRACE(("status_record_branch_chain: two records "
+                                "with next_branch_block=0 have been found. "
+                                "This should never happen and it's an "
+                                "internal error\n"));
+                    THROW(INTERNAL_ERROR);
+                }
+            } /* if (0 == next_branch_block) */
+        } /* for (i=0; i<array->len; ++i) */        
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("status_record_branch_chain/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
 

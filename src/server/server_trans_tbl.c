@@ -127,7 +127,7 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
                              sizeof(struct server_trans_tbl_rec2_s))))
             THROW(G_TRY_MALLOC_ERROR2);
 
-        sttr2->slot_id = sttq->slot_id;
+        sttr2->block_id = sttq->block_id;
         memcpy(sttr2->xid, sttq->xid, sizeof(lixa_ser_xid_t));
         sttr1 = (struct server_trans_tbl_rec1_s *)node;
         g_ptr_array_add(sttr1->branches, sttr2);
@@ -241,7 +241,7 @@ gboolean server_trans_tbl_traverse(gpointer key, gpointer value, gpointer data)
                         "strdup\n"));
         }
         record.tsid = sttr1->tsid;
-        record.slot_id = sttr2->slot_id;
+        record.block_id = sttr2->block_id;
         memcpy(record.xid, sttr2->xid, sizeof(record.xid));
         g_array_append_val(result, record);
     } /* for (i=0; i<sttr->branches.len; ++i) */
@@ -301,7 +301,7 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
                 if (NULL == (record.gtrid = strdup(sttq->gtrid)))
                     THROW(STRDUP_ERROR);
                 record.tsid = sttr1->tsid;
-                record.slot_id = sttr2->slot_id;
+                record.block_id = sttr2->block_id;
                 memcpy(record.xid, sttr2->xid, sizeof(record.xid));
                 g_array_append_val(result, record);
             } /* for (i=0; i<sttr->branches.len; ++i) */

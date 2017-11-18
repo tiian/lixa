@@ -1,8 +1,8 @@
+status_record_branch_chain: check there are no prepared branches in the chain;
+if this is the case, return specific warning
+
 Branching:
 - implement serialization in state server
-
-NOTE: if the father commits before the child branches, the child transaction
-      become an indipendent transaction.
 
 All branches must prepare before commit can start.
 If one branch is not able to prepare, all branches must be rolled-back.

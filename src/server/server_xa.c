@@ -1204,6 +1204,7 @@ int server_xa_start_8(struct thread_status_s *ts,
                      TRANS_TBL_QUERY_XID_ERROR,
                      BRANCHES_ON_MULTIPLE_THREADS,
                      THREAD_SWITCH,
+                     SERVER_RECORD_BRANCH_CHAIN,
                      TRANS_TABLE_INSERT_ERROR,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1215,6 +1216,7 @@ int server_xa_start_8(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_start_8\n"));
     TRY {
         uint32_t i;
+        int chain_branch = FALSE;
 
         /* prepare transaction table record */
         memset(&sttq, 0, sizeof(sttq));
@@ -1224,6 +1226,7 @@ int server_xa_start_8(struct thread_status_s *ts,
         if (!lixa_xid_serialize(&(lmi->body.start_8.conthr.xid), sttq.xid))
             THROW(XID_SERIALIZE_ERROR);
         sttq.tsid = ts->id;
+        sttq.block_id = block_id;
         /* check if the xa_start is related to a subordinate branch */
         if (lmi->body.start_8.conthr.sub_branch) {
             guint i, tsid = 0;
@@ -1286,6 +1289,9 @@ int server_xa_start_8(struct thread_status_s *ts,
                     syslog(LOG_INFO, LIXA_SYSLOG_LXD031I,
                            result->xid, tss->id, ts->id);
                     THROW(THREAD_SWITCH);
+                } else {
+                    /* the branch must be chained with the other ones */
+                    chain_branch = TRUE;
                 } /* if (tsid != ts->id) */
             } /* check query result */
         } /* if (lmi->body.start_8.conthr.sub_branch) */
@@ -1295,6 +1301,12 @@ int server_xa_start_8(struct thread_status_s *ts,
                              ts->updated_records);
         ts->curr_status[block_id].sr.data.pld.ph.state.xid =
             lmi->body.start_8.conthr.xid;
+        /* chain this record to other branches */
+        if (chain_branch) {
+            if (LIXA_RC_OK != (ret_cod = status_record_branch_chain(
+                                   ts, block_id, query_result)))
+                THROW(SERVER_RECORD_BRANCH_CHAIN);
+        } /* if (chain_branch) */
         /* store XID in the global transaction table */
         if (LIXA_RC_OK != (ret_cod = server_trans_tbl_insert(
                                ts->trans_table, &sttq)))
@@ -1348,6 +1360,7 @@ int server_xa_start_8(struct thread_status_s *ts,
             case THREAD_SWITCH:
                 ret_cod = LIXA_RC_THREAD_SWITCH;
                 break;
+            case SERVER_RECORD_BRANCH_CHAIN:
             case TRANS_TABLE_INSERT_ERROR:
                 break;
             case NONE:

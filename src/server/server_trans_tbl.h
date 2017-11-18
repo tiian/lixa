@@ -65,7 +65,7 @@ struct server_trans_tbl_qry_s {
     /**
      * Position of the header record of the branch inside the state file
      */
-    uint32_t       slot_id;
+    uint32_t       block_id;
     /**
      * Transaction ID, XID
      */
@@ -128,7 +128,7 @@ struct server_trans_tbl_rec2_s {
     /**
      * Position of the header record inside the state file
      */
-    uint32_t       slot_id;
+    uint32_t       block_id;
     /**
      * Serialized XID of the branch
      */

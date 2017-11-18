@@ -280,37 +280,42 @@ struct payload_header_s
     /**
      * Number of elements in the block array
      */
-    int n;
+    int                           n;
     /**
      * Array of "pointers" to the blocks of this logical concatenation
      */
-    uint32_t block_array[CHAIN_MAX_SIZE];
+    uint32_t                      block_array[CHAIN_MAX_SIZE];
+    /**
+     * Block of the next branch in the same global transaction; this field is
+     * meaningful only for global transactions with multiple branches
+     */
+    uint32_t                      next_branch_block;
     /**
      * Timestamp of the client's arrival time
      */
-    struct timeval arrival_time;
+    struct timeval                arrival_time;
     /**
      * TCP/IP coordinates of the local socket
      */
-    struct sockaddr_in local_sock_addr;
+    struct sockaddr_in            local_sock_addr;
     /**
      * TCP/IP coordinates of the peer socket
      */
-    struct sockaddr_in peer_sock_addr;
+    struct sockaddr_in            peer_sock_addr;
     /**
      * Hex format of the MD5 digest of lixac_conf file & profile
      */
-    md5_digest_hex_t config_digest;
+    md5_digest_hex_t              config_digest;
     /**
      * Logical JOB associated to the transaction
      */
-    lixa_job_t job;
+    lixa_job_t                    job;
     /**
      * Sequence of last (verb,step) stored for the client.
      * This array is used as a circular buffer and position 0 contains ever
      * the last (verb,step)
      */
-    struct lixa_msg_verb_step_s last_verb_step[PAYLOAD_HEADER_VERB_STEP];
+    struct lixa_msg_verb_step_s   last_verb_step[PAYLOAD_HEADER_VERB_STEP];
     /**
      * Status of the control thread is managing the transaction
      */
@@ -318,20 +323,20 @@ struct payload_header_s
     /**
      * Id of the block is in recovery phase (if any)
      */
-    uint32_t recovering_block_id;
+    uint32_t                      recovering_block_id;
     /**
      * An attempted recovery failed
      */
-    int recovery_failed;
+    int                           recovery_failed;
     /**
      * Date and time of the recovery failed event
      */
-    struct timeval recovery_failed_time;
+    struct timeval                recovery_failed_time;
     /**
      * recovery phase attempted xa_commit (TRUE) or xa_rollback (FALSE);
      * meaningless if recovery phase did not happen
      */
-    int recovery_commit;
+    int                           recovery_commit;
 };
 
 
@@ -921,8 +926,8 @@ extern "C" {
      * Mark a record for update
      * @param[in,out] sr reference to the record must be marked for update
      * @param[in] index position of the record in the status file (first = 0)
-     * @param updated_records IN/OUT the tree containing all the modified
-     *                               records (blocks) since last synch
+     * @param[in,out] updated_records is the tree containing all the modified
+     *                records (blocks) since last synch
      */
     static inline void status_record_update(status_record_t *sr,
                                             uintptr_t index,
@@ -1042,8 +1047,22 @@ extern "C" {
     }
 #endif /* _CRASH */
 
+
+
+    /**
+     * Add a new branch to the chain of the already existent branches in the
+     * same global transaction
+     * @param[in,out] ts reference to thread status
+     * @param[in] block_id of the new branch
+     * @param[in] array with the existent branches
+     * @return a reason code
+     */
+    int status_record_branch_chain(struct thread_status_s *ts,
+                                   uint32_t block_id,
+                                   server_trans_tbl_qry_arr_t *array);
     
 
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
