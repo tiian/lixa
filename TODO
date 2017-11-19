@@ -9,9 +9,8 @@ If one branch is not able to prepare, all branches must be rolled-back.
 Implement the above logic even in recovery management (restart).
 In the event of branch, all branches must use xa_prepare even if they are
 using just one Resource Manager
-
-Remove Thread State ID (tsid) level (array) from server_trans_tbl: now only
-one thread can host a global transaction id
+Create a test case to check LXD032N message: one branch already started 
+xa_prepare, a subordinate one tryes to branch.
 
 Check memory leaks in state server after branch implementation.
 

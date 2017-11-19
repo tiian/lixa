@@ -33,6 +33,10 @@ const char *lixa_strerror(int ret_cod)
         ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
     
     switch (ret_cod) {
+        case LIXA_RC_NOT_CHAINABLE_BRANCH:
+            return "WARNING: the Application Program wants to branch an "
+                "existing superior branch, but the superior branch has "
+                "already started to prepare the global transacation";
         case LIXA_RC_NO_SUPERIOR_BRANCH:
             return "WARNING: the Application Program wants to branch an "
                 "existing superior branch, but it does not exist. The "

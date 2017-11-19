@@ -278,7 +278,8 @@ struct status_record_ctrl_s
 struct payload_header_s
 {
     /**
-     * Number of elements in the block array
+     * Number of elements in the block array: it should ever be equal to the
+     * number of the resource managers
      */
     int                           n;
     /**
@@ -1049,20 +1050,6 @@ extern "C" {
 
 
 
-    /**
-     * Add a new branch to the chain of the already existent branches in the
-     * same global transaction
-     * @param[in,out] ts reference to thread status
-     * @param[in] block_id of the new branch
-     * @param[in] array with the existent branches
-     * @return a reason code
-     */
-    int status_record_branch_chain(struct thread_status_s *ts,
-                                   uint32_t block_id,
-                                   server_trans_tbl_qry_arr_t *array);
-    
-
-    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

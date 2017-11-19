@@ -644,6 +644,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                         THROW(DROP_CLIENT_ERROR2);
                     break;
                 case LIXA_RC_NO_SUPERIOR_BRANCH:
+                case LIXA_RC_NOT_CHAINABLE_BRANCH:
                     /* nothing special to do, just send the reason code to
                        the client */
                     break;

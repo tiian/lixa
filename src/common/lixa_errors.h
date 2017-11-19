@@ -97,6 +97,11 @@
  * it does not exist. The transaction can go on as a standard one.
  */
 #define LIXA_RC_NO_SUPERIOR_BRANCH             +11
+/**
+ * The Application Program wants to branch an existing superior branch, but
+ * the superior branch has already started to prepare the global transacation
+ */
+#define LIXA_RC_NOT_CHAINABLE_BRANCH           +12
 
 
 

@@ -180,6 +180,9 @@
 #define LIXA_SYSLOG_LXD031I "LXD031I client is working on branch %s that " \
     "must be managed by state thread id %u (this thread id is %u), " \
     "switching it to the right thread..."
+#define LIXA_SYSLOG_LXD032N "LXD032N client is asking to branch an existing " \
+    "global transaction, but anoher branch (xid='%s') of the same global " \
+    "transaction has already started the XA prepare phase"
 
 
 

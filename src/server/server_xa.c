@@ -33,6 +33,7 @@
 #include "lixa_crash.h"
 #include "lixa_syslog.h"
 #include "server_xa.h"
+#include "server_xa_branch.h"
 
 
 
@@ -1303,7 +1304,7 @@ int server_xa_start_8(struct thread_status_s *ts,
             lmi->body.start_8.conthr.xid;
         /* chain this record to other branches */
         if (chain_branch) {
-            if (LIXA_RC_OK != (ret_cod = status_record_branch_chain(
+            if (LIXA_RC_OK != (ret_cod = server_xa_branch_chain(
                                    ts, block_id, query_result)))
                 THROW(SERVER_RECORD_BRANCH_CHAIN);
         } /* if (chain_branch) */
