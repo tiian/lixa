@@ -67,6 +67,38 @@ extern "C" {
                                server_trans_tbl_qry_arr_t *array);
     
 
+
+    /**
+     * Check if a block_id is part of a chain of branches
+     * @param[in] ts reference to thread status
+     * @param[in] block_id of the branch
+     * @return a boolean value
+     */
+    static inline int server_xa_branch_is_chained(
+        const struct thread_status_s *ts, uint32_t block_id) {
+        return
+            0 != ts->curr_status[block_id].sr.data.pld.ph.next_branch_block ||
+            0 != ts->curr_status[block_id].sr.data.pld.ph.prev_branch_block;
+    }
+
+    
+
+    /**
+     * Retrieve all the block_id related to all the branches chained in the
+     * same multiple branches global transaction
+     * @param[in] ts reference to thread status
+     * @param[in] block_id of the current branch
+     * @param[out] number of found items
+     * @param[out] items contains a C dynamically allocated array of number
+     *             elements; the caller MUST free the array using "free"
+     *             standard C function
+     * @return a reason code
+     */
+    int server_xa_branch_list(const struct thread_status_s *ts,
+                              uint32_t block_id,
+                              uint32_t *number, uint32_t **items);
+
+    
     
 #ifdef __cplusplus
 }

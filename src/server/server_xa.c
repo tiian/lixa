@@ -912,21 +912,38 @@ int server_xa_prepare_8(struct thread_status_s *ts,
 {
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
+                     , BRANCH_LIST
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    uint32_t *branch_array = NULL;
 
     LIXA_TRACE(("server_xa_prepare_8\n"));
     TRY {
         uint32_t i;
+        uint32_t branch_array_size;
 
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=
             DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_ID);
-        /* check children blocks match with the arrived update */
+        /* check the number of children blocks matches with the arrived
+           update resource manager records */
         if (lmi->body.prepare_8.xa_prepare_execs->len >
             ts->curr_status[block_id].sr.data.pld.ph.n)
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
+        /* check if the block is a branch inside a multiple branches
+           transaction */
+        if (server_xa_branch_is_chained(ts, block_id)) {
+            LIXA_TRACE(("server_xa_prepare_8: this branch is part of a "
+                        "multiple branches transaction\n"));
+            /* retrieve the list of all the branches in this global
+               transaction */
+            if (LIXA_RC_OK != (ret_cod = server_xa_branch_list(
+                                   ts, block_id, &branch_array_size,
+                                   &branch_array)))
+                THROW(BRANCH_LIST);
+        }
+        /* restart from here @@@ */
         /* store commit/rollback intent after prepare phase */
         status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
@@ -980,6 +997,8 @@ int server_xa_prepare_8(struct thread_status_s *ts,
             case NUMBER_OF_RSRMGRS_MISMATCH:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
                 break;
+            case BRANCH_LIST:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -987,6 +1006,11 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* clean memory */
+    if (NULL != branch_array) {
+        free(branch_array);
+        branch_array = NULL;
+    }
     LIXA_TRACE(("server_xa_prepare_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     

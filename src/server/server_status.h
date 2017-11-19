@@ -292,6 +292,11 @@ struct payload_header_s
      */
     uint32_t                      next_branch_block;
     /**
+     * Block of the previous branch in the same global transaction; this field
+     * is meaningful only for global transactions with multiple branches
+     */
+    uint32_t                      prev_branch_block;
+    /**
      * Timestamp of the client's arrival time
      */
     struct timeval                arrival_time;

@@ -63,9 +63,13 @@ int server_xa_branch_chain(struct thread_status_s *ts,
             uint32_t next_branch_block =
                 ts->curr_status[record->block_id
                                 ].sr.data.pld.ph.next_branch_block;
+            uint32_t prev_branch_block =
+                ts->curr_status[record->block_id
+                                ].sr.data.pld.ph.prev_branch_block;
             LIXA_TRACE(("server_xa_branch_chain: item=%u, block_id=%u, "
-                        "next_branch_block=%u\n", i, record->block_id,
-                        next_branch_block));
+                        "next_branch_block=%u, prev_branch_block=%u\n",
+                        i, record->block_id, next_branch_block,
+                        prev_branch_block));
             /* check if the branch has already called xa_prepare; loop all
                rmids*/
             for (rmid=0; rmid<ts->curr_status[record->block_id
@@ -111,6 +115,9 @@ int server_xa_branch_chain(struct thread_status_s *ts,
                     ts->curr_status[record->block_id
                                     ].sr.data.pld.ph.next_branch_block =
                         block_id;
+                    ts->curr_status[block_id
+                                    ].sr.data.pld.ph.prev_branch_block =
+                        record->block_id;
                     chained = TRUE;
                     LIXA_TRACE(("server_xa_branch_chain: chained to "
                                 "block_id=%u\n", block_id));
@@ -142,6 +149,72 @@ int server_xa_branch_chain(struct thread_status_s *ts,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_branch_chain/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_xa_branch_list(const struct thread_status_s *ts,
+                          uint32_t block_id,
+                          uint32_t *number, uint32_t **items)
+{
+    enum Exception { INVALID_STATUS
+                     , MALLOC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_branch_list\n"));
+    TRY {
+        uint32_t first, i, j;
+        /* reset output values */
+        *number = 0;
+        *items = NULL;
+        /* check it's really a chain... */
+        if (!server_xa_branch_is_chained(ts, block_id))
+            THROW(INVALID_STATUS);
+        /* move to the first block in the chain */
+        first = block_id;
+        while (0 != ts->curr_status[first].sr.data.pld.ph.prev_branch_block)
+            first = ts->curr_status[first].sr.data.pld.ph.prev_branch_block;
+        /* count all the elements */
+        i = first;
+        while (i != 0) {
+            (*number)++;
+            i = ts->curr_status[i].sr.data.pld.ph.next_branch_block;
+        }
+        /* allocate the output array */
+        if (NULL == (*items = malloc(*number * sizeof(uint32_t))))
+            THROW(MALLOC_ERROR);
+        /* fill the output array */
+        i = first;
+        j = 0;
+        while (i != 0) {
+            (*items)[j++] = i;
+            i = ts->curr_status[i].sr.data.pld.ph.next_branch_block;
+        }
+        LIXA_TRACE(("server_xa_branch_list: number=%u\n", *number));
+        for (j=0; j<*number; ++j)
+            LIXA_TRACE(("server_xa_branch_list: *items[%u]=%u\n",
+                        j, (*items)[j]));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_branch_list/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

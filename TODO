@@ -1,5 +1,4 @@
-status_record_branch_chain: check there are no prepared branches in the chain;
-if this is the case, return specific warning
+Restart from server_xa_prepare_8
 
 Branching:
 - implement serialization in state server

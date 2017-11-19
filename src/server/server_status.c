@@ -115,7 +115,7 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
         srd->pld.type = DATA_PAYLOAD_TYPE_HEADER;
         srd->pld.ph.n = 0;
         memset(&srd->pld.ph.block_array, 0, sizeof(uint32_t) * CHAIN_MAX_SIZE);
-        srd->pld.ph.next_branch_block = 0;
+        srd->pld.ph.next_branch_block = srd->pld.ph.prev_branch_block = 0;
         memset(&srd->pld.ph.local_sock_addr, 0, sizeof(struct sockaddr_in));
         memset(&srd->pld.ph.peer_sock_addr, 0, sizeof(struct sockaddr_in));
         memset(&srd->pld.ph.config_digest, 0, sizeof(md5_digest_hex_t));
