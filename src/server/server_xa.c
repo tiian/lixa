@@ -913,6 +913,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
                      , BRANCH_LIST
+                     , PREPARE_BRANCHES
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     uint32_t *branch_array = NULL;
@@ -920,7 +921,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_prepare_8\n"));
     TRY {
         uint32_t i;
-        uint32_t branch_array_size;
+        uint32_t branch_array_size=0;
 
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=
@@ -943,7 +944,6 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                                    &branch_array)))
                 THROW(BRANCH_LIST);
         }
-        /* restart from here @@@ */
         /* store commit/rollback intent after prepare phase */
         status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
@@ -956,7 +956,6 @@ int server_xa_prepare_8(struct thread_status_s *ts,
             ts->curr_status[block_id].sr.data.pld.ph.state.will_rollback =
                 TRUE;
         }
-
         /* store data in the children blocks... */
         for (i = 0; i < lmi->body.prepare_8.xa_prepare_execs->len; ++i) {
             status_record_t *sr;
@@ -978,7 +977,12 @@ int server_xa_prepare_8(struct thread_status_s *ts,
             sr->sr.data.pld.rm.xa_prepare_flags = xa_prepare_execs->flags;
             sr->sr.data.pld.rm.xa_prepare_rc = xa_prepare_execs->rc;
         } /* for (i=0; ... */
-
+        /* check all the branches if this is a multiple branches transaction */
+        if (0 < branch_array_size) {
+            if (LIXA_RC_OK != (ret_cod = server_xa_branch_prepare(
+                                   ts, branch_array_size, branch_array)))
+                THROW(PREPARE_BRANCHES);
+        } /* if (0 < branch_array_size) */
         /* prepare output message */
         lmo->header.pvs.verb = lmi->header.pvs.verb;
         /* prepare next protocol step */
@@ -998,6 +1002,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
                 break;
             case BRANCH_LIST:
+            case PREPARE_BRANCHES:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -108,13 +108,16 @@ int server_xa_branch_chain(struct thread_status_s *ts,
             
             if (0 == next_branch_block) {
                 if (!chained) {
-                    /* this is the point to connect */
+                    /* this is the point to connect to */
                     status_record_update(ts->curr_status + record->block_id,
                                          record->block_id,
                                          ts->updated_records);
                     ts->curr_status[record->block_id
                                     ].sr.data.pld.ph.next_branch_block =
                         block_id;
+                    /* this is the block to connect */
+                    status_record_update(ts->curr_status + block_id,
+                                         block_id, ts->updated_records);
                     ts->curr_status[block_id
                                     ].sr.data.pld.ph.prev_branch_block =
                         record->block_id;
@@ -219,3 +222,62 @@ int server_xa_branch_list(const struct thread_status_s *ts,
     return ret_cod;
 }
 
+
+
+int server_xa_branch_prepare(struct thread_status_s *ts,
+                             uint32_t branch_array_size,
+                             const uint32_t *branch_array)
+{
+    enum Exception { OBJ_CORRUPTED
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_branch_prepare\n"));
+    TRY {
+        uint32_t i, will_commit=0, will_rollback=0, unknown=0;
+        /* assess all the branches */
+        for (i=0; i<branch_array_size; ++i) {
+            struct common_status_conthr_s *state =
+                &ts->curr_status[branch_array[i]].sr.data.pld.ph.state;
+            LIXA_TRACE(("server_xa_branch_prepare: i=%u, "
+                        "branch_array[i]=%u, will_commit=%d, "
+                        "will_rollback=%d\n", i, branch_array[i],
+                        state->will_commit, state->will_rollback));
+            /* check the prepared state of the branch */
+            /* @@@ this logic does not work because will_commit is set to TRUE
+               even by server_xa_end_8, not only by server_xa_prepare_8
+            */
+               
+            if (TRUE == state->will_commit) {
+                if (FALSE == state->will_rollback)
+                    will_commit++;
+                else
+                    THROW(OBJ_CORRUPTED);
+            } else {
+                if (TRUE == state->will_rollback)
+                    will_rollback++;
+                else
+                    unknown++;
+            } /* if (TRUE == state->will_commit) */
+        } /* for (i=0; i<branch_array_size; ++i) */
+        LIXA_TRACE(("server_xa_branch_prepare: #will_commit=%u, "
+                    "#will_rollback=%u, #unknown=%d\n", will_commit,
+                    will_rollback, unknown));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OBJ_CORRUPTED:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_branch_prepare/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}

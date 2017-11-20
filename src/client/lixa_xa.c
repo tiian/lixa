@@ -31,20 +31,20 @@
 
 
 
-#include <lixa_crash.h>
-#include <lixa_trace.h>
-#include <lixa_errors.h>
-#include <lixa_xid.h>
-#include <lixa_tx_rc.h>
-#include <lixa_xa.h>
-#include <lixa_syslog.h>
-#include <lixa_xml_msg_deserialize.h>
-#include <lixa_xml_msg_serialize.h>
-#include <lixa_xml_msg_trace.h>
-#include <client_recovery.h>
-#include <client_status.h>
-#include <tx.h>
-#include <xa.h>
+#include "lixa_crash.h"
+#include "lixa_trace.h"
+#include "lixa_errors.h"
+#include "lixa_xid.h"
+#include "lixa_tx_rc.h"
+#include "lixa_xa.h"
+#include "lixa_syslog.h"
+#include "lixa_xml_msg_deserialize.h"
+#include "lixa_xml_msg_serialize.h"
+#include "lixa_xml_msg_trace.h"
+#include "client_recovery.h"
+#include "client_status.h"
+#include "tx.h"
+#include "xa.h"
 
 
 
@@ -978,8 +978,8 @@ int lixa_xa_forget_multi(client_status_t *cs, GArray *xida, int finished)
                 /* loop on all XID */
                 for (j = 0; j < xida->len; j++) {
                     char *sxid = g_array_index(xida, char*, j);
-                    LIXA_TRACE(
-                        ("lixa_xa_prepare: preparing sxid='%s'\n", sxid));
+                    LIXA_TRACE(("lixa_xa_forget_multi: preparing sxid='%s'\n",
+                                sxid));
 
                     XID xid;
                     if (!lixa_xid_deserialize(&xid, sxid))

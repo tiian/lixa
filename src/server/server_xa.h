@@ -259,7 +259,7 @@ extern "C" {
                           struct lixa_msg_verb_step_s *last_verb_step);
 
 
-    
+
     /**
      * Executes the logic related to the first step of "xa_prepare" on the
      * server side

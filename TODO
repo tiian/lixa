@@ -1,4 +1,4 @@
-Restart from server_xa_prepare_8
+Restart from server_xa_branch_prepare
 
 Branching:
 - implement serialization in state server
