@@ -104,6 +104,7 @@ extern "C" {
      * Asses the state of all the branches that are participating in the
      * global transaction
      * @param[in,out] ts reference to the current thread status
+     * @param[in] block_id of the current branch
      * @param[in] branch_array_size is the number of branches that participate
      *            in the global transaction
      * @param[in] branch_array is the set of branches that participate in the
@@ -112,6 +113,7 @@ extern "C" {
      * @return a reason code
      */
     int server_xa_branch_prepare(struct thread_status_s *ts,
+                                 uint32_t block_id,
                                  uint32_t branch_array_size,
                                  const uint32_t *branch_array);
 

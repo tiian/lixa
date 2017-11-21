@@ -225,50 +225,77 @@ int server_xa_branch_list(const struct thread_status_s *ts,
 
 
 int server_xa_branch_prepare(struct thread_status_s *ts,
+                             uint32_t block_id,
                              uint32_t branch_array_size,
                              const uint32_t *branch_array)
 {
-    enum Exception { OBJ_CORRUPTED
+    enum Exception { OBJ_CORRUPTED1
+                     , OBJ_CORRUPTED2
+                     , MULTIBRANCH_PREPARE_FAILED
+                     , PREPARE_DELAYED
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("server_xa_branch_prepare\n"));
+    LIXA_TRACE(("server_xa_branch_prepare: block_id=" UINT32_T_FORMAT "\n",
+                block_id));
     TRY {
         uint32_t i, will_commit=0, will_rollback=0, unknown=0;
         /* assess all the branches */
         for (i=0; i<branch_array_size; ++i) {
             struct common_status_conthr_s *state =
                 &ts->curr_status[branch_array[i]].sr.data.pld.ph.state;
-            LIXA_TRACE(("server_xa_branch_prepare: i=%u, "
-                        "branch_array[i]=%u, will_commit=%d, "
-                        "will_rollback=%d\n", i, branch_array[i],
+            struct lixa_msg_verb_step_s *verb_step =
+                &ts->curr_status[branch_array[i]
+                                 ].sr.data.pld.ph.last_verb_step[0];
+            LIXA_TRACE(("server_xa_branch_prepare: i=" UINT32_T_FORMAT ", "
+                        "branch_array[i]=" UINT32_T_FORMAT ", last_verb=%d, "
+                        "will_commit=%d, will_rollback=%d\n",
+                        i, branch_array[i], verb_step->verb,
                         state->will_commit, state->will_rollback));
+            /* check the branch reached the prepare verb, but not for
+               current branch*/
+            if (LIXA_MSG_VERB_PREPARE != verb_step->verb &&
+                block_id != branch_array[i]) {
+                LIXA_TRACE(("server_xa_branch_prepare: this branch has not "
+                            "yet prepared, skipping it\n"));
+                unknown++;
+                continue;
+            }
             /* check the prepared state of the branch */
-            /* @@@ this logic does not work because will_commit is set to TRUE
-               even by server_xa_end_8, not only by server_xa_prepare_8
-            */
-               
             if (TRUE == state->will_commit) {
                 if (FALSE == state->will_rollback)
                     will_commit++;
                 else
-                    THROW(OBJ_CORRUPTED);
+                    THROW(OBJ_CORRUPTED1);
             } else {
                 if (TRUE == state->will_rollback)
                     will_rollback++;
                 else
-                    unknown++;
+                    THROW(OBJ_CORRUPTED2);
             } /* if (TRUE == state->will_commit) */
         } /* for (i=0; i<branch_array_size; ++i) */
-        LIXA_TRACE(("server_xa_branch_prepare: #will_commit=%u, "
-                    "#will_rollback=%u, #unknown=%d\n", will_commit,
-                    will_rollback, unknown));
+        LIXA_TRACE(("server_xa_branch_prepare: #will_commit=" UINT32_T_FORMAT
+                    ", #will_rollback=" UINT32_T_FORMAT ", #unknown="
+                    UINT32_T_FORMAT "\n",
+                    will_commit, will_rollback, unknown));
+        if (0 < will_rollback) {
+            THROW(MULTIBRANCH_PREPARE_FAILED);
+        } else if (0 < unknown) {
+            THROW(PREPARE_DELAYED);
+        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case OBJ_CORRUPTED:
+            case OBJ_CORRUPTED1:
+            case OBJ_CORRUPTED2:
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case MULTIBRANCH_PREPARE_FAILED:
+                ret_cod = LIXA_RC_MULTIBRANCH_PREPARE_FAILED;
+                break;
+            case PREPARE_DELAYED:
+                ret_cod = LIXA_RC_PREPARE_DELAYED;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -980,7 +980,9 @@ int server_xa_prepare_8(struct thread_status_s *ts,
         /* check all the branches if this is a multiple branches transaction */
         if (0 < branch_array_size) {
             if (LIXA_RC_OK != (ret_cod = server_xa_branch_prepare(
-                                   ts, branch_array_size, branch_array)))
+                                   ts, block_id, branch_array_size,
+                                   branch_array)))
+                /* @@@ manage specific return codes for delay and failure */
                 THROW(PREPARE_BRANCHES);
         } /* if (0 < branch_array_size) */
         /* prepare output message */

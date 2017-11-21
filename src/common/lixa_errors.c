@@ -33,6 +33,10 @@ const char *lixa_strerror(int ret_cod)
         ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
     
     switch (ret_cod) {
+        case LIXA_RC_PREPARE_DELAYED:
+            return "WARNING: one or more branches in the same global "
+                "transaction have not yet been prepared and the global "
+                "prepare is delayed";
         case LIXA_RC_NOT_CHAINABLE_BRANCH:
             return "WARNING: the Application Program wants to branch an "
                 "existing superior branch, but the superior branch has "
@@ -134,6 +138,9 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_BRANCHES_ON_MULTIPLE_THREADS:
             return "ERROR: branches of the same global transaction are "
                 "managed by multiple threads";
+        case LIXA_RC_MULTIBRANCH_PREPARE_FAILED:
+            return "ERROR: multiple branches prepare has be failed due to "
+                "one or more branches";
         case LIXA_RC_RM_ERROR:
             return "ERROR: generic errof for a Resource Manager operation";
         case LIXA_RC_TX_FAIL:

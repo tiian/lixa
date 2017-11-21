@@ -102,6 +102,11 @@
  * the superior branch has already started to prepare the global transacation
  */
 #define LIXA_RC_NOT_CHAINABLE_BRANCH           +12
+/**
+ * One or more branches in the same global transaction have not yet been
+ * prepared and the global prepare is delayed
+ */
+#define LIXA_RC_PREPARE_DELAYED                +13
 
 
 
@@ -227,6 +232,10 @@
  * Branches of the same global transaction are managed by multiple threads
  */
 #define LIXA_RC_BRANCHES_ON_MULTIPLE_THREADS   -28
+/**
+ * Multiple branches prepare has be failed due to one or more branches
+ */
+#define LIXA_RC_MULTIBRANCH_PREPARE_FAILED     -29
 
 
 
