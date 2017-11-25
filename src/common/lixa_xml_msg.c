@@ -84,6 +84,7 @@ const xmlChar *LIXA_XML_MSG_PROP_LEVEL = (xmlChar *) "level";
 const xmlChar *LIXA_XML_MSG_PROP_MAINT = (xmlChar *) "maint";
 const xmlChar *LIXA_XML_MSG_PROP_NAME = (xmlChar *) "name";
 const xmlChar *LIXA_XML_MSG_PROP_NEXT_VERB = (xmlChar *) "next_verb";
+const xmlChar *LIXA_XML_MSG_PROP_NON_BLOCK = (xmlChar *) "non_block";
 const xmlChar *LIXA_XML_MSG_PROP_RC = (xmlChar *) "rc";
 const xmlChar *LIXA_XML_MSG_PROP_RMID = (xmlChar *) "rmid";
 const xmlChar *LIXA_XML_MSG_PROP_R_STATE = (xmlChar *) "r_state";

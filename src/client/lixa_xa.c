@@ -1421,7 +1421,7 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
 
 
 int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
-                    const XID *xid, int *txrc, int *commit)
+                    const XID *xid, int non_block, int *txrc, int *commit)
 {
     enum Exception { ASYNC_NOT_IMPLEMENTED
                      , UNEXPECTED_XA_RC
@@ -1555,6 +1555,7 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
         } /* for (i=0; ...) */
         
         msg.body.prepare_8.conthr.commit = *commit;
+        msg.body.prepare_8.conthr.non_block = non_block;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);

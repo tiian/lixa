@@ -145,6 +145,10 @@ extern "C" {
      * @param[in] ccc client config collection
      * @param[in] cs reference to the status of the calling client
      * @param[in] xid transaction ID to prepare
+     * @param[in] non_block boolean value: <br>
+     *            TRUE = xa_prepare will not block the caller <br>
+     *            FALSE = xa_prepare will block the caller <br>
+     *            the option is used only for multiple branch transactions
      * @param[out] txrc return code prepared for tx_commit/tx_rollback call
      * @param[out] commit boolean value: <br>
      *                  TRUE = xa_prepare will be followed by xa_commit <br>
@@ -155,7 +159,7 @@ extern "C" {
      * @return a reason code
      */
     int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
-                        const XID *xid, int *txrc, int *commit);
+                        const XID *xid, int non_block, int *txrc, int *commit);
 
     
 

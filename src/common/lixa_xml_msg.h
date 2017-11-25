@@ -186,6 +186,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_MAINT;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_NEXT_VERB;
 /**
+ * Label used to specify "non_block" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_NON_BLOCK;
+/**
  * Label used to specify "rc" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_RC;
@@ -712,6 +716,11 @@ struct lixa_msg_body_prepare_8_conthr_s
      * FALSE = rollback
      */
     int commit;
+    /**
+     * TRUE = step 8 for prepare will not block the caller
+     * FALSE = default, step 8 for prepare will block the caller
+     */    
+    int non_block;
 };
 
 

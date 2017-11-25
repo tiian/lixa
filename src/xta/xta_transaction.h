@@ -161,9 +161,13 @@ extern "C" {
     /**
      * Commit the transaction represented by this transaction object
      * @param[in,out] this : transaction object
+     * @param[in] non_block boolean value: <br>
+     *            TRUE = xa_prepare will not block the caller <br>
+     *            FALSE = xa_prepare will block the caller <br>
+     *            the option is used only for multiple branch transactions
      * @return a reason code
      */
-    int xta_transaction_commit(xta_transaction_t *this);
+    int xta_transaction_commit(xta_transaction_t *this, int non_block);
 
     
     

@@ -227,6 +227,16 @@ struct server_client_status_s
      */
     int control_only;
     /**
+     * Boolean value: last operation would block the client, but "NON BLOCK"
+     * option has been specified
+     */
+    int would_block;
+    /**
+     * Boolean value: last operation must be postponed because not all
+     * conditions are met
+     */
+    int operation_postponed;
+    /**
      * Info necessary to switch the current client to a different thread
      */
     struct thread_status_switch_s switch_thread;
@@ -775,8 +785,10 @@ extern "C" {
         scs->output_buffer_size = 0;
         scs->last_verb_step.verb = 0;
         scs->last_verb_step.step = 0;
-        scs->first_message = TRUE;
         scs->control_only = FALSE;
+        scs->would_block = FALSE;
+        scs->operation_postponed = FALSE;
+        scs->first_message = TRUE;
         thread_status_switch_init(&scs->switch_thread);
     }
 

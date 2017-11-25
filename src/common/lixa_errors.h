@@ -103,11 +103,14 @@
  */
 #define LIXA_RC_NOT_CHAINABLE_BRANCH           +12
 /**
- * One or more branches in the same global transaction have not yet been
- * prepared and the global prepare is delayed
+ * An operation must be postponed because not all conditions are met
  */
-#define LIXA_RC_PREPARE_DELAYED                +13
-
+#define LIXA_RC_OPERATION_POSTPONED            +13
+/**
+ * The operation would block the client, but "NON BLOCK" option has been
+ * specified
+ */
+#define LIXA_RC_WOULD_BLOCK                    +14
 
 
 

@@ -48,25 +48,23 @@
 static const xmlChar *nil_str = (xmlChar *) "(nil)";
 
 
+
 int lixa_msg_trace(const struct lixa_msg_s *msg)
 {
-    enum Exception
-    {
-        TRACE_OPEN_ERROR,
-        TRACE_CLOSE_ERROR,
-        TRACE_START_ERROR,
-        TRACE_END_ERROR,
-        TRACE_PREPARE_ERROR,
-        TRACE_COMMIT_ERROR,
-        TRACE_ROLLBACK_ERROR,
-        TRACE_QRCVR_ERROR,
-        TRACE_REG_ERROR,
-        TRACE_UNREG_ERROR,
-        TRACE_FORGET_ERROR,
-        TRACE_TRANS_ERROR,
-        INVALID_VERB,
-        NONE
-    } excp;
+    enum Exception { TRACE_OPEN_ERROR,
+                     TRACE_CLOSE_ERROR,
+                     TRACE_START_ERROR,
+                     TRACE_END_ERROR,
+                     TRACE_PREPARE_ERROR,
+                     TRACE_COMMIT_ERROR,
+                     TRACE_ROLLBACK_ERROR,
+                     TRACE_QRCVR_ERROR,
+                     TRACE_REG_ERROR,
+                     TRACE_UNREG_ERROR,
+                     TRACE_FORGET_ERROR,
+                     TRACE_TRANS_ERROR,
+                     INVALID_VERB,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("lixa_msg_trace\n"));
@@ -77,90 +75,89 @@ int lixa_msg_trace(const struct lixa_msg_s *msg)
                     msg->header.pvs.step));
         switch (msg->header.pvs.verb) {
             case LIXA_MSG_VERB_OPEN: /* open */
-                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_open(msg))) THROW(
-                    TRACE_OPEN_ERROR);
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_open(msg)))
+                    THROW(TRACE_OPEN_ERROR);
                 break;
             case LIXA_MSG_VERB_CLOSE: /* close */
-                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_close(msg))) THROW(
-                    TRACE_CLOSE_ERROR);
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_close(msg)))
+                    THROW(TRACE_CLOSE_ERROR);
                 break;
             case LIXA_MSG_VERB_START: /* start */
-                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_start(msg))) THROW(
-                    TRACE_START_ERROR);
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_start(msg)))
+                    THROW(TRACE_START_ERROR);
                 break;
             case LIXA_MSG_VERB_END: /* end */
-                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_end(msg))) THROW(
-                    TRACE_END_ERROR);
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_end(msg)))
+                    THROW(TRACE_END_ERROR);
                 break;
             case LIXA_MSG_VERB_PREPARE: /* prepare */
                 if (LIXA_RC_OK !=
-                    (ret_cod = lixa_msg_trace_prepare(msg))) THROW(
-                        TRACE_PREPARE_ERROR);
+                    (ret_cod = lixa_msg_trace_prepare(msg)))
+                    THROW(TRACE_PREPARE_ERROR);
                 break;
             case LIXA_MSG_VERB_COMMIT: /* commit */
-                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_commit(msg))) THROW(
-                    TRACE_COMMIT_ERROR);
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_commit(msg)))
+                    THROW(TRACE_COMMIT_ERROR);
                 break;
             case LIXA_MSG_VERB_ROLLBACK: /* rollback */
                 if (LIXA_RC_OK !=
-                    (ret_cod = lixa_msg_trace_rollback(msg))) THROW(
-                        TRACE_ROLLBACK_ERROR);
+                    (ret_cod = lixa_msg_trace_rollback(msg)))
+                    THROW(TRACE_ROLLBACK_ERROR);
                 break;
             case LIXA_MSG_VERB_QRCVR: /* qrcvr */
-                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_qrcvr(msg))) THROW(
-                    TRACE_QRCVR_ERROR);
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_qrcvr(msg)))
+                    THROW(TRACE_QRCVR_ERROR);
                 break;
             case LIXA_MSG_VERB_REG: /* reg */
-                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_reg(msg))) THROW(
-                    TRACE_REG_ERROR);
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_reg(msg)))
+                    THROW(TRACE_REG_ERROR);
                 break;
             case LIXA_MSG_VERB_UNREG: /* unreg */
-                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_unreg(msg))) THROW(
-                    TRACE_UNREG_ERROR);
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_unreg(msg)))
+                    THROW(TRACE_UNREG_ERROR);
                 break;
             case LIXA_MSG_VERB_FORGET: /* forget */
-                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_forget(msg))) THROW(
-                    TRACE_FORGET_ERROR);
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_forget(msg)))
+                    THROW(TRACE_FORGET_ERROR);
                 break;
             case LIXA_MSG_VERB_TRANS: /* transactions */
-                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_trans(msg))) THROW(
-                    TRACE_TRANS_ERROR);
+                if (LIXA_RC_OK != (ret_cod = lixa_msg_trace_trans(msg)))
+                    THROW(TRACE_TRANS_ERROR);
                 break;
-            default: THROW(INVALID_VERB);
+            default:
+                THROW(INVALID_VERB);
         }
-
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case TRACE_OPEN_ERROR:
-                case TRACE_CLOSE_ERROR:
-                case TRACE_START_ERROR:
-                case TRACE_END_ERROR:
-                case TRACE_PREPARE_ERROR:
-                case TRACE_COMMIT_ERROR:
-                case TRACE_ROLLBACK_ERROR:
-                case TRACE_QRCVR_ERROR:
-                case TRACE_REG_ERROR:
-                case TRACE_UNREG_ERROR:
-                case TRACE_FORGET_ERROR:
-                case TRACE_TRANS_ERROR:
-                    break;
-                case INVALID_VERB:
-                    ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case TRACE_OPEN_ERROR:
+            case TRACE_CLOSE_ERROR:
+            case TRACE_START_ERROR:
+            case TRACE_END_ERROR:
+            case TRACE_PREPARE_ERROR:
+            case TRACE_COMMIT_ERROR:
+            case TRACE_ROLLBACK_ERROR:
+            case TRACE_QRCVR_ERROR:
+            case TRACE_REG_ERROR:
+            case TRACE_UNREG_ERROR:
+            case TRACE_FORGET_ERROR:
+            case TRACE_TRANS_ERROR:
+                break;
+            case INVALID_VERB:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_trace/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
 
 
 int lixa_msg_trace_commit(const struct lixa_msg_s *msg)
@@ -503,10 +500,8 @@ int lixa_msg_trace_open(const struct lixa_msg_s *msg)
 
 int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
 {
-    enum Exception
-    {
-        INVALID_STEP, NONE
-    } excp;
+    enum Exception { INVALID_STEP
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("lixa_msg_trace_prepare\n"));
@@ -517,8 +512,12 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
             case 8:
                 if (NULL != msg->body.prepare_8.xa_prepare_execs) {
                     LIXA_TRACE(("lixa_msg_trace_prepare: body["
-                                "conthr[commit=%d]]\n",
-                                msg->body.prepare_8.conthr.commit));
+                                "%s[%s=%d,%s=%d]]\n",
+                                LIXA_XML_MSG_TAG_CONTHR,
+                                LIXA_XML_MSG_PROP_COMMIT,
+                                msg->body.prepare_8.conthr.commit,
+                                LIXA_XML_MSG_PROP_NON_BLOCK,
+                                msg->body.prepare_8.conthr.non_block));
                     for (i = 0; i < msg->body.prepare_8.xa_prepare_execs->len;
                          ++i) {
                         struct lixa_msg_body_prepare_8_xa_prepare_execs_s
@@ -529,44 +528,50 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
                                 lixa_msg_body_prepare_8_xa_prepare_execs_s,
                                 i);
                         LIXA_TRACE(("lixa_msg_trace_prepare: body["
-                                    "xa_prepare_execs["
-                                    "xa_prepare_exec["
-                                    "rmid=%d,flags=0x%lx,"
-                                    "rc=%d,s_state=%d,td_state=%d]]]\n",
+                                    "%s[%s[%s=%d,%s=0x%lx,"
+                                    "%s=%d,%s=%d,%s=%d]]]\n",
+                                    LIXA_XML_MSG_TAG_XA_FORGET_EXECS,
+                                    LIXA_XML_MSG_TAG_XA_FORGET_EXEC,
+                                    LIXA_XML_MSG_PROP_RMID,
                                     xa_prepare_exec->rmid,
+                                    LIXA_XML_MSG_PROP_FLAGS,
                                     xa_prepare_exec->flags,
+                                    LIXA_XML_MSG_PROP_RC,
                                     xa_prepare_exec->rc,
+                                    LIXA_XML_MSG_PROP_S_STATE,
                                     xa_prepare_exec->s_state,
+                                    LIXA_XML_MSG_PROP_TD_STATE,
                                     xa_prepare_exec->td_state));
                     }
                 }
                 break;
             case 16:
-                LIXA_TRACE(("lixa_msg_trace_prepare: body[answer[rc[%d]]]\n",
+                LIXA_TRACE(("lixa_msg_trace_prepare: body[%s[%s[%d]]]\n",
+                            LIXA_XML_MSG_TAG_ANSWER,
+                            LIXA_XML_MSG_PROP_RC,
                             msg->body.prepare_16.answer.rc));
                 break;
-            default: THROW(INVALID_STEP);
+            default:
+                THROW(INVALID_STEP);
         } /* switch (msg->header.pvs.step) */
-
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case INVALID_STEP:
-                    ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_trace_prepare/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
 
 
 int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)

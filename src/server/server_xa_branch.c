@@ -295,7 +295,7 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_MULTIBRANCH_PREPARE_FAILED;
                 break;
             case PREPARE_DELAYED:
-                ret_cod = LIXA_RC_PREPARE_DELAYED;
+                ret_cod = LIXA_RC_OPERATION_POSTPONED;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -914,6 +914,8 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                      , NUMBER_OF_RSRMGRS_MISMATCH
                      , BRANCH_LIST
                      , PREPARE_BRANCHES
+                     , WOULD_BLOCK
+                     , PREPARE_DELAYED
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     uint32_t *branch_array = NULL;
@@ -979,20 +981,33 @@ int server_xa_prepare_8(struct thread_status_s *ts,
         } /* for (i=0; ... */
         /* check all the branches if this is a multiple branches transaction */
         if (0 < branch_array_size) {
-            if (LIXA_RC_OK != (ret_cod = server_xa_branch_prepare(
-                                   ts, block_id, branch_array_size,
-                                   branch_array)))
-                /* @@@ manage specific return codes for delay and failure */
+            ret_cod = server_xa_branch_prepare(
+                ts, block_id, branch_array_size, branch_array);
+            if (LIXA_RC_OK != ret_cod &&
+                LIXA_RC_OPERATION_POSTPONED != ret_cod)
                 THROW(PREPARE_BRANCHES);
-        } /* if (0 < branch_array_size) */
-        /* prepare output message */
-        lmo->header.pvs.verb = lmi->header.pvs.verb;
-        /* prepare next protocol step */
-        last_verb_step->verb = lmo->header.pvs.verb;
-        last_verb_step->step = lmo->header.pvs.step;
+            if (LIXA_RC_OPERATION_POSTPONED == ret_cod &&
+                lmi->body.prepare_8.conthr.non_block)
+                ret_cod = LIXA_RC_WOULD_BLOCK;
+        } else
+            ret_cod = LIXA_RC_OK;
+            
+        /* send an anser message only if OK or WOULD_BLOCK */
+        if (LIXA_RC_OK == ret_cod ||
+            LIXA_RC_WOULD_BLOCK == ret_cod) {
+            /* prepare output message */
+            lmo->header.pvs.verb = lmi->header.pvs.verb;
+            /* prepare next protocol step */
+            last_verb_step->verb = lmo->header.pvs.verb;
+            last_verb_step->step = lmo->header.pvs.step;
+            /* the status file must be synchronized */
+            status_sync_ask_sync(&ts->status_sync);
+        } /* if (LIXA_RC_OK == ret_cod || */
 
-        /* the status file must be synchronized */
-        status_sync_ask_sync(&ts->status_sync);
+        if (LIXA_RC_WOULD_BLOCK == ret_cod)
+            THROW(WOULD_BLOCK);
+        if (LIXA_RC_OPERATION_POSTPONED == ret_cod)
+            THROW(PREPARE_DELAYED);
 
         THROW(NONE);
     } CATCH {
@@ -1004,7 +1019,14 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
                 break;
             case BRANCH_LIST:
+                break;
             case PREPARE_BRANCHES:
+                break;
+            case WOULD_BLOCK:
+                ret_cod = LIXA_RC_WOULD_BLOCK;
+                break;
+            case PREPARE_DELAYED:
+                ret_cod = LIXA_RC_OPERATION_POSTPONED;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -621,7 +621,7 @@ int xta_transaction_start(xta_transaction_t *this)
 
 
 
-int xta_transaction_commit(xta_transaction_t *this)
+int xta_transaction_commit(xta_transaction_t *this, int non_block)
 {
     enum Exception { NULL_OBJECT
                      , INVALID_STATUS
@@ -672,7 +672,7 @@ int xta_transaction_commit(xta_transaction_t *this)
             if (!one_phase_commit &&
                 LIXA_RC_OK != (ret_cod = lixa_xa_prepare(
                                    &this->local_ccc, &this->client_status,
-                                   xta_xid_get_xa_xid(this->xid),
+                                   xta_xid_get_xa_xid(this->xid), non_block,
                                    &txrc, &commit)))
                 THROW(LIXA_XA_PREPARE_ERROR);
             LIXA_TRACE(("xta_transaction_commit: lixa_xa_prepare returned "

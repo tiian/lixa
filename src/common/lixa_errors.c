@@ -33,10 +33,12 @@ const char *lixa_strerror(int ret_cod)
         ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
     
     switch (ret_cod) {
-        case LIXA_RC_PREPARE_DELAYED:
-            return "WARNING: one or more branches in the same global "
-                "transaction have not yet been prepared and the global "
-                "prepare is delayed";
+        case LIXA_RC_WOULD_BLOCK:
+            return "WARNING:tThe operation would block the client, but 'NON "
+                "BLOCK' option has been specified";
+        case LIXA_RC_OPERATION_POSTPONED:
+            return "WARNING: an operation must be postponed because not all "
+                "conditions are met";
         case LIXA_RC_NOT_CHAINABLE_BRANCH:
             return "WARNING: the Application Program wants to branch an "
                 "existing superior branch, but the superior branch has "

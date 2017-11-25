@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
 
     /* commit the Distributed Transaction */
     if (commit) {
-        if (LIXA_RC_OK != (rc = xta_transaction_commit(tx))) {
+        if (LIXA_RC_OK != (rc = xta_transaction_commit(tx, FALSE))) {
             fprintf(stderr, "%s| xta_transaction_commit: returned %d "
                     "instead of %d\n", pgm, rc, test_rc);
             return 1;
