@@ -111,6 +111,11 @@
  * specified
  */
 #define LIXA_RC_WOULD_BLOCK                    +14
+/**
+ * The operation can not be completed due to an error happened in a different
+ * branch that's part of the same global transaction
+ */
+#define LIXA_RC_OTHER_BRANCH_ERROR             +15
 
 
 
@@ -236,7 +241,7 @@
  */
 #define LIXA_RC_BRANCHES_ON_MULTIPLE_THREADS   -28
 /**
- * Multiple branches prepare has be failed due to one or more branches
+ * Multiple branches prepare has been failed due to one or more branches
  */
 #define LIXA_RC_MULTIBRANCH_PREPARE_FAILED     -29
 

@@ -258,15 +258,17 @@ extern "C" {
     /**
      * Prepare the output message must be sent to the client
      * @param[in,out] ts thread status structure
-     * @param[in] slot_id the slot associated to the file descriptor raised the
-     *                   POLLIN event
+     * @param[in] list_size number of clients that must be notified by the
+     *            message
+     * @param[in] list of the clients that must be notified
      * @param[in] lmo message will be returned to the client
      * @param[in] rc return code of the previous operations must be returned
      *              to the client
      * @return a standardized return code
      */
-    int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
-                                   struct lixa_msg_s *lmo, int rc);
+    int server_manager_outmsg_prep(struct thread_status_s *ts,
+                                   size_t list_size, const size_t *list,
+                                   const struct lixa_msg_s *lmo, int rc);
 
     
 
@@ -302,7 +304,7 @@ extern "C" {
      * Fix the status of poll_array: sessions must send back data to client
      * will be input disabled; sessions don't have to send back data to client
      * will be output disabled
-     * @param[in,ouot] ts thread status structure
+     * @param[in,out] ts thread status structure
      * @return a standardized return code
      */
     int server_manager_fix_poll(struct thread_status_s *ts);
@@ -321,8 +323,27 @@ extern "C" {
     int server_manager_new_client(struct thread_status_s *ts, int fd,
                                   nfds_t place);
 
-    
 
+
+    /**
+     * Retrieve all the slot_id(s) related to all the branches chained in the
+     * same multiple branch global transaction of the client specified by
+     * slot_id
+     * @param[in] ts reference to thread status
+     * @param[in] slot_id of the client that's looking for the other chained
+     *            clients
+     * @param[out] number of found items
+     * @param[out] items contains a C dynamically allocated array of number
+     *             elements; the caller MUST free the array using "free"
+     *             standard C function
+     * @return a reason code
+     */
+    int server_manager_branch_list(const struct thread_status_s *ts,
+                                   size_t slot_id,
+                                   size_t *number, size_t **items);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

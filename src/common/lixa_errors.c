@@ -33,8 +33,12 @@ const char *lixa_strerror(int ret_cod)
         ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
     
     switch (ret_cod) {
+        case LIXA_RC_OTHER_BRANCH_ERROR:
+            return "WARNING: the operation can not be completed due to an "
+                "error happened in a different branch that's part of the "
+                "same global transaction";
         case LIXA_RC_WOULD_BLOCK:
-            return "WARNING:tThe operation would block the client, but 'NON "
+            return "WARNING: the operation would block the client, but 'NON "
                 "BLOCK' option has been specified";
         case LIXA_RC_OPERATION_POSTPONED:
             return "WARNING: an operation must be postponed because not all "

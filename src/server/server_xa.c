@@ -867,7 +867,7 @@ int server_xa_prepare(struct thread_status_s *ts,
                       const struct lixa_msg_s *lmi,
                       struct lixa_msg_s *lmo,
                       uint32_t block_id,
-                      struct lixa_msg_verb_step_s *last_verb_step)
+                      struct server_client_status_s *cs)
 {
     enum Exception { SERVER_XA_PREPARE_8_ERROR
                      , INVALID_STEP
@@ -879,7 +879,7 @@ int server_xa_prepare(struct thread_status_s *ts,
         if (8 != lmi->header.pvs.step) {
             THROW(INVALID_STEP);
         } else if (LIXA_RC_OK != (ret_cod = server_xa_prepare_8(
-                                      ts, lmi, lmo, block_id, last_verb_step)))
+                                      ts, lmi, lmo, block_id, cs)))
             THROW(SERVER_XA_PREPARE_8_ERROR);
 
         THROW(NONE);
@@ -908,7 +908,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                         const struct lixa_msg_s *lmi,
                         struct lixa_msg_s *lmo,
                         uint32_t block_id,
-                        struct lixa_msg_verb_step_s *last_verb_step)
+                        struct server_client_status_s *cs)
 {
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
@@ -983,31 +983,35 @@ int server_xa_prepare_8(struct thread_status_s *ts,
         if (0 < branch_array_size) {
             ret_cod = server_xa_branch_prepare(
                 ts, block_id, branch_array_size, branch_array);
-            if (LIXA_RC_OK != ret_cod &&
-                LIXA_RC_OPERATION_POSTPONED != ret_cod)
-                THROW(PREPARE_BRANCHES);
-            if (LIXA_RC_OPERATION_POSTPONED == ret_cod &&
-                lmi->body.prepare_8.conthr.non_block)
-                ret_cod = LIXA_RC_WOULD_BLOCK;
+            switch (ret_cod) {
+                case LIXA_RC_OK:
+                    cs->state = CLIENT_STATUS_CHAIN_JOIN_OK;
+                    break;
+                case LIXA_RC_MULTIBRANCH_PREPARE_FAILED:
+                    cs->state = CLIENT_STATUS_CHAIN_JOIN_KO;
+                    break;
+                case LIXA_RC_OPERATION_POSTPONED:
+                    if (lmi->body.prepare_8.conthr.non_block)
+                        cs->state = CLIENT_STATUS_WOULD_BLOCK;
+                    else
+                        cs->state = CLIENT_STATUS_OPERATION_POSTPONED;
+                    break;
+                default:
+                    THROW(PREPARE_BRANCHES);
+            } /* switch (ret_cod) */
         } else
             ret_cod = LIXA_RC_OK;
             
-        /* send an anser message only if OK or WOULD_BLOCK */
-        if (LIXA_RC_OK == ret_cod ||
-            LIXA_RC_WOULD_BLOCK == ret_cod) {
+        /* send an answer message only if OK or WOULD_BLOCK */
+        if (CLIENT_STATUS_OPERATION_POSTPONED != cs->state) {
             /* prepare output message */
             lmo->header.pvs.verb = lmi->header.pvs.verb;
             /* prepare next protocol step */
-            last_verb_step->verb = lmo->header.pvs.verb;
-            last_verb_step->step = lmo->header.pvs.step;
+            cs->last_verb_step.verb = lmo->header.pvs.verb;
+            cs->last_verb_step.step = lmo->header.pvs.step;
             /* the status file must be synchronized */
             status_sync_ask_sync(&ts->status_sync);
         } /* if (LIXA_RC_OK == ret_cod || */
-
-        if (LIXA_RC_WOULD_BLOCK == ret_cod)
-            THROW(WOULD_BLOCK);
-        if (LIXA_RC_OPERATION_POSTPONED == ret_cod)
-            THROW(PREPARE_DELAYED);
 
         THROW(NONE);
     } CATCH {

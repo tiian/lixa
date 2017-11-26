@@ -52,8 +52,9 @@
 #include "server_thread_status.h"
 #include "server_recovery.h"
 #include "server_reply.h"
-#include "server_xa.h"
 #include "server_tpm.h"
+#include "server_xa.h"
+#include "server_xa_branch.h"
 
 
 
@@ -309,8 +310,7 @@ void *server_manager_thread(void *void_ts)
             LIXA_TRACE(("server_manager_thread: id=%d, entering poll "
                         "with timeout=%dms\n",
                         ts->id, timeout));
-            if (0 >=
-                (ready_fd = poll(ts->poll_array, ts->poll_size, -1)))
+            if (0 >= (ready_fd = poll(ts->poll_array, ts->poll_size, -1)))
                 THROW(POLL_ERROR);
             LIXA_TRACE(("server_manager_thread: id=%d, ready file "
                         "descriptors=%d\n", ts->id, ready_fd));
@@ -387,9 +387,17 @@ void *server_manager_thread(void *void_ts)
                 if (!connection_closed &&
                     ts->poll_array[i].revents & POLLOUT) {
                     found_fd++;
-                    if (LIXA_RC_OK != (
-                            ret_cod = server_manager_pollout(ts, i)))
-                        THROW(POLLOUT_ERROR);
+                    /* skip if operation postponed condition is present */
+                    if (CLIENT_STATUS_OPERATION_POSTPONED !=
+                        ts->client_array[i].state) {
+                        if (LIXA_RC_OK != (
+                                ret_cod = server_manager_pollout(ts, i)))
+                            THROW(POLLOUT_ERROR);
+                    } else {
+                        LIXA_TRACE(("server_manager_thread: operation "
+                                    "postponed, no reply to the client "
+                                    "for slot=" NFDS_T_FORMAT "...\n", i));
+                    } /* if (!ts->client_array[i].operation_postponed) */
                 }
                 if (found_fd == ready_fd)
                     break;
@@ -827,17 +835,15 @@ int server_manager_switch_1(struct thread_status_s *ts,
 }
 
 
+
 int server_manager_switch_2(struct thread_status_s *ts,
                             const struct srv_msg_s *msg)
 {
-    enum Exception
-    {
-        ADD_POLL_ERROR,
-        NEW_CLIENT_ERROR,
-        CHAIN_ALLOCATE_ERROR,
-        MSG_PROC_ERROR,
-        NONE
-    } excp;
+    enum Exception { ADD_POLL_ERROR,
+                     NEW_CLIENT_ERROR,
+                     CHAIN_ALLOCATE_ERROR,
+                     MSG_PROC_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     struct srv_msg_s answer;
@@ -850,12 +856,15 @@ int server_manager_switch_2(struct thread_status_s *ts,
         int i;
 
         if (LIXA_RC_OK != (ret_cod = server_manager_add_poll(
-                               ts, msg->body.sr.fd, &slot_id))) THROW(ADD_POLL_ERROR);
+                               ts, msg->body.sr.fd, &slot_id)))
+            THROW(ADD_POLL_ERROR);
         if (LIXA_RC_OK != (ret_cod = server_manager_new_client(
-                               ts, msg->body.sr.fd, slot_id))) THROW(NEW_CLIENT_ERROR);
+                               ts, msg->body.sr.fd, slot_id)))
+            THROW(NEW_CLIENT_ERROR);
         block_id = ts->client_array[slot_id].pers_status_slot_id;
         if (LIXA_RC_OK != (ret_cod = payload_chain_allocate(
-                               ts, block_id, msg->body.sr.header->n))) THROW(CHAIN_ALLOCATE_ERROR);
+                               ts, block_id, msg->body.sr.header->n)))
+            THROW(CHAIN_ALLOCATE_ERROR);
         /* copy header block */
         /* save the chain block array */
         memcpy(tmp_block_array,
@@ -882,51 +891,50 @@ int server_manager_switch_2(struct thread_status_s *ts,
 
         if (LIXA_RC_OK != (ret_cod = server_manager_msg_proc(
                                ts, slot_id, msg->body.sr.buffer,
-                               msg->body.sr.buffer_size))) THROW(MSG_PROC_ERROR);
+                               msg->body.sr.buffer_size)))
+            THROW(MSG_PROC_ERROR);
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case ADD_POLL_ERROR:
-                case NEW_CLIENT_ERROR:
-                case CHAIN_ALLOCATE_ERROR:
-                case MSG_PROC_ERROR:
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-            /* prepare answer message */
-            memset(&answer, 0, sizeof(answer));
-            answer.type = SRV_MSG_TYPE_SWITCH_REP;
-            answer.body.sp.result = ret_cod;
-            answer.body.sp.block_id = msg->body.sr.block_id;
-            answer.body.sp.slot_id = msg->body.sr.slot_id;
-            if (sizeof(answer) != write(
-                    ts->tpa->array[msg->body.sr.source].pipefd[1],
-                    &answer, sizeof(answer))) {
-                LIXA_TRACE(("server_manager_switch_2: error while writing to "
-                            "control pipe of thread # %d\n", msg->body.sr.source));
-                ret_cod = LIXA_RC_WRITE_ERROR;
-            }
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case ADD_POLL_ERROR:
+            case NEW_CLIENT_ERROR:
+            case CHAIN_ALLOCATE_ERROR:
+            case MSG_PROC_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* prepare answer message */
+        memset(&answer, 0, sizeof(answer));
+        answer.type = SRV_MSG_TYPE_SWITCH_REP;
+        answer.body.sp.result = ret_cod;
+        answer.body.sp.block_id = msg->body.sr.block_id;
+        answer.body.sp.slot_id = msg->body.sr.slot_id;
+        if (sizeof(answer) != write(
+                ts->tpa->array[msg->body.sr.source].pipefd[1],
+                &answer, sizeof(answer))) {
+            LIXA_TRACE(("server_manager_switch_2: error while writing to "
+                        "control pipe of thread # %d\n", msg->body.sr.source));
+            ret_cod = LIXA_RC_WRITE_ERROR;
+        }
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_switch_2/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
+
 int server_manager_switch_3(struct thread_status_s *ts,
                             const struct srv_msg_s *msg)
 {
-    enum Exception
-    {
-        PAYLOAD_CHAIN_RELEASE, MANAGER_FREE_SLOTS, NONE
-    } excp;
+    enum Exception { PAYLOAD_CHAIN_RELEASE,
+                     MANAGER_FREE_SLOTS,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_manager_switch_3\n"));
@@ -944,9 +952,11 @@ int server_manager_switch_3(struct thread_status_s *ts,
         if (LIXA_RC_OK == msg->body.sp.result) {
             LIXA_TRACE(("server_manager_switch_3: release switched client\n"));
             if (LIXA_RC_OK != (ret_cod = payload_chain_release(
-                                   ts, msg->body.sp.block_id))) THROW(PAYLOAD_CHAIN_RELEASE);
+                                   ts, msg->body.sp.block_id)))
+                THROW(PAYLOAD_CHAIN_RELEASE);
             if (LIXA_RC_OK != (ret_cod = server_manager_free_slots(
-                                   ts, msg->body.sp.slot_id))) THROW(MANAGER_FREE_SLOTS);
+                                   ts, msg->body.sp.slot_id)))
+                THROW(MANAGER_FREE_SLOTS);
         } else {
             LIXA_TRACE(("server_manager_switch_3: the client can not be "
                         "switched; keeped in this thread\n"));
@@ -954,33 +964,30 @@ int server_manager_switch_3(struct thread_status_s *ts,
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case PAYLOAD_CHAIN_RELEASE:
-                case MANAGER_FREE_SLOTS:
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case PAYLOAD_CHAIN_RELEASE:
+            case MANAGER_FREE_SLOTS:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_switch_3/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
+
 int server_manager_shutdown(struct thread_status_s *ts,
                             const struct srv_msg_s *msg)
 {
-    enum Exception
-    {
-        INVALID_TYPE, NONE
-    } excp;
+    enum Exception { INVALID_TYPE,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_manager_shutdown\n"));
@@ -991,36 +998,35 @@ int server_manager_shutdown(struct thread_status_s *ts,
             case SHUTDOWN_FORCE:
                 ts->shutdown_type = msg->body.sd.type;
                 break;
-            default: THROW(INVALID_TYPE);
+            default:
+                THROW(INVALID_TYPE);
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case INVALID_TYPE:
-                    ret_cod = LIXA_RC_INVALID_OPTION;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case INVALID_TYPE:
+                ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_shutdown/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
+
 int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
 {
-    enum Exception
-    {
-        SEND_ERROR, STORE_VERB_STEP_ERROR, NONE
-    } excp;
+    enum Exception { SEND_ERROR
+                     , STORE_VERB_STEP_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_manager_pollout\n"));
@@ -1032,7 +1038,8 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
             (wrote_bytes = send(ts->poll_array[slot_id].fd,
                                 ts->client_array[slot_id].output_buffer,
                                 ts->client_array[slot_id].output_buffer_size,
-                                0))) THROW(SEND_ERROR);
+                                0)))
+            THROW(SEND_ERROR);
         LIXA_TRACE(("server_manager_pollout: sent "
                     SSIZE_T_FORMAT
                     " bytes "
@@ -1078,42 +1085,41 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
                     "\n", slot_id, block_id));
         if (LIXA_RC_OK != (ret_cod = payload_header_store_verb_step(
                                ts, block_id,
-                               &ts->client_array[slot_id].last_verb_step))) THROW(
-                                   STORE_VERB_STEP_ERROR);
+                               &ts->client_array[slot_id].last_verb_step)))
+            THROW(STORE_VERB_STEP_ERROR);
 
         /* now useless, reset for first cycle */
         ts->client_array[slot_id].last_verb_step.verb = 0;
         ts->client_array[slot_id].last_verb_step.step = 0;
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case SEND_ERROR:
-                    ret_cod = LIXA_RC_SEND_ERROR;
-                    break;
-                case STORE_VERB_STEP_ERROR:
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case SEND_ERROR:
+                ret_cod = LIXA_RC_SEND_ERROR;
+                break;
+            case STORE_VERB_STEP_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_pollout/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
+
 int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id)
 {
-    enum Exception
-    {
-        INTERNAL_ERROR, REALLOC_ERROR1, REALLOC_ERROR2, NONE
-    } excp;
+    enum Exception { INTERNAL_ERROR
+                     , REALLOC_ERROR1
+                     , REALLOC_ERROR2
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_manager_free_slots\n"));
@@ -1150,32 +1156,32 @@ int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id)
                         "\n", ts->poll_size, new_poll_size));
             if (NULL == (ts->poll_array = realloc(
                              ts->poll_array,
-                             new_poll_size * sizeof(struct pollfd)))) THROW(REALLOC_ERROR1);
+                             new_poll_size * sizeof(struct pollfd))))
+                THROW(REALLOC_ERROR1);
             if (NULL == (ts->client_array = realloc(
                              ts->client_array,
                              new_poll_size * sizeof(
-                                 struct server_client_status_s)))) THROW(REALLOC_ERROR2);
+                                 struct server_client_status_s))))
+                THROW(REALLOC_ERROR2);
             ts->poll_size = new_poll_size;
         }
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case INTERNAL_ERROR:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-                    break;
-                case REALLOC_ERROR1:
-                case REALLOC_ERROR2:
-                    ret_cod = LIXA_RC_REALLOC_ERROR;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case REALLOC_ERROR1:
+            case REALLOC_ERROR2:
+                ret_cod = LIXA_RC_REALLOC_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_free_slots/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -1183,21 +1189,24 @@ int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id)
 
 
 
-int server_manager_msg_proc(struct thread_status_s *ts,
-                            size_t slot_id, char *buf, ssize_t read_bytes)
+int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
+                            char *buf, ssize_t read_bytes)
 {
-    enum Exception { THREAD_SWITCH,
-                     MAINTENANCE_MODE,
-                     OUTMSG_PREP_ERROR,
-                     INMSG_PROC_ERROR,
-                     NONE } excp;
+    enum Exception { THREAD_SWITCH
+                     , BRANCH_LIST
+                     , OUTMSG_PREP_ERROR
+                     , MAINTENANCE_MODE
+                     , INMSG_PROC_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int rc;
+    size_t *branch_list = NULL;
 
     struct lixa_msg_s lmo;
 
     LIXA_TRACE(("server_manager_msg_proc\n"));
     TRY {
+        size_t branch_list_size = 0;
         lixa_msg_init(&lmo);
 
         /* process the input message */
@@ -1205,12 +1214,36 @@ int server_manager_msg_proc(struct thread_status_s *ts,
         if (LIXA_RC_THREAD_SWITCH == rc)
             THROW(THREAD_SWITCH);
 
-        if (LIXA_RC_OK != (ret_cod = server_manager_outmsg_prep(
-                               ts, slot_id, &lmo, rc))) {
-            LIXA_TRACE(("server_manager_msg_proc: server_manager_outmsg_prep "
-                        "return code is %d\n", ret_cod));
-            THROW(OUTMSG_PREP_ERROR);
-        }
+        /* don't prepare the message in the event of operation postponed */
+        if (CLIENT_STATUS_OPERATION_POSTPONED !=
+            ts->client_array[slot_id].state) {
+            /* fix rc for some conditions */
+            switch (ts->client_array[slot_id].state) {
+                case CLIENT_STATUS_WOULD_BLOCK:
+                    rc = LIXA_RC_WOULD_BLOCK;
+                    break;
+                case CLIENT_STATUS_CHAIN_JOIN_KO:
+                    rc = LIXA_RC_OTHER_BRANCH_ERROR;
+                    break;
+                default:
+                    break;
+            } /* switch (ts->client_array[slot_id].state) */
+            /* retrieve the list of all the clients that must be notified
+               by the same message (typically only 1, but many in the event
+               of multiple branch transactions) */
+            if (LIXA_RC_OK != (ret_cod = server_manager_branch_list(
+                                   ts, slot_id, &branch_list_size,
+                                   &branch_list)))
+                THROW(BRANCH_LIST);
+            if (LIXA_RC_OK != (ret_cod = server_manager_outmsg_prep(
+                                   ts, branch_list_size, branch_list,
+                                   &lmo, rc))) {
+                LIXA_TRACE(("server_manager_msg_proc: "
+                            "server_manager_outmsg_prep "
+                            "return code is %d\n", ret_cod));
+                THROW(OUTMSG_PREP_ERROR);
+            }
+        } /* if (!ts->client_array[slot_id].operation_postponed) */
 
         if (LIXA_RC_MAINTENANCE_MODE == rc)
             THROW(MAINTENANCE_MODE);
@@ -1243,6 +1276,11 @@ int server_manager_msg_proc(struct thread_status_s *ts,
         /* release message memory */
         lixa_msg_free(&lmo);
     } /* TRY-CATCH */
+    /* recovery memory */
+    if (NULL != branch_list) {
+        free(branch_list);
+        branch_list = NULL;
+    } /* if (NULL != branch_list) */
     LIXA_TRACE(("server_manager_msg_proc/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -1355,13 +1393,8 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                 break;
             case LIXA_MSG_VERB_PREPARE:
                 ret_cod = server_xa_prepare(
-                    ts, &lmi, lmo, block_id,
-                    &(ts->client_array[slot_id].last_verb_step));
-                if (LIXA_RC_OPERATION_POSTPONED == ret_cod)
-                    ts->client_array[slot_id].operation_postponed = TRUE;
-                else if (LIXA_RC_WOULD_BLOCK == ret_cod)
-                    ts->client_array[slot_id].would_block = TRUE;
-                else if (LIXA_RC_OK != ret_cod)
+                    ts, &lmi, lmo, block_id, &(ts->client_array[slot_id]));
+                if (LIXA_RC_OK != ret_cod)
                     THROW(SERVER_XA_PREPARE_ERROR);
                 break;
             case LIXA_MSG_VERB_COMMIT:
@@ -1454,8 +1487,9 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
 
 
 
-int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
-                               struct lixa_msg_s *lmo, int rc)
+int server_manager_outmsg_prep(struct thread_status_s *ts,
+                               size_t list_size, const size_t *list,
+                               const struct lixa_msg_s *lmo, int rc)
 {
     enum Exception { NOTHING_TO_DO,
                      MALLOC_ERROR,
@@ -1471,55 +1505,69 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
 
     LIXA_TRACE(("server_manager_outmsg_prep\n"));
     TRY {
+        size_t i;
+        
         if (lmo->header.pvs.verb == LIXA_MSG_VERB_NULL)
             THROW(NOTHING_TO_DO);
 
-        /* allocate the output buffer */
-        if (NULL == (ts->client_array[slot_id].output_buffer = malloc(
-                         LIXA_MSG_XML_BUFFER_SIZE))) {
-            LIXA_TRACE(("server_manager_outmsg_proc: error while "
-                        "allocating the buffer to reply to client\n"));
-            THROW(MALLOC_ERROR);
-        }
+        LIXA_TRACE(("server_manager_outmsg_prep: " SIZE_T_FORMAT " clients "
+                    "must be notified with this message\n", list_size));
 
-        /* prepare output message */
-        switch (lmo->header.pvs.verb) {
-            case LIXA_MSG_VERB_NULL:
-                break;
-            case LIXA_MSG_VERB_OPEN:
-                if (LIXA_RC_OK != (ret_cod = server_reply_open(
-                                       ts, slot_id, lmo, rc)))
-                    THROW(REPLY_OPEN_ERROR);
-                break;
-            case LIXA_MSG_VERB_START:
-                if (LIXA_RC_OK != (ret_cod = server_reply_start(
-                                       ts, slot_id, lmo, rc)))
-                    THROW(REPLY_START_ERROR);
-                break;
-            case LIXA_MSG_VERB_END:
-                if (LIXA_RC_OK != (ret_cod = server_reply_end(
-                                       ts, slot_id, lmo, rc)))
-                    THROW(REPLY_END_ERROR);
-                break;
-            case LIXA_MSG_VERB_PREPARE:
-                if (LIXA_RC_OK != (ret_cod = server_reply_prepare(
-                                       ts, slot_id, lmo, rc)))
-                    THROW(REPLY_PREPARE_ERROR);
-                break;
-            case LIXA_MSG_VERB_QRCVR:
-                if (LIXA_RC_OK != (ret_cod = server_reply_qrcvr(
-                                       ts, slot_id, lmo)))
-                    THROW(REPLY_QRCVR_ERROR);
-                break;
-            case LIXA_MSG_VERB_TRANS:
-                if (LIXA_RC_OK !=
-                    (ret_cod = server_reply_trans(ts, slot_id, lmo)))
-                    THROW(REPLY_SCAN_ERROR);
-                break;
-            default:
-                THROW(VERB_NOT_FOUND);
-        } /* switch (lmo.header.pvs.verb) */
-
+        /* create an output buffer for every client */
+        for (i=0; i<list_size; ++i) {
+            struct lixa_msg_s tmp_msg;
+            size_t slot_id = list[i];
+            
+            /* allocate the output buffer */
+            if (NULL == (ts->client_array[slot_id].output_buffer = malloc(
+                             LIXA_MSG_XML_BUFFER_SIZE))) {
+                LIXA_TRACE(("server_manager_outmsg_proc: error while "
+                            "allocating the buffer to reply to client\n"));
+                THROW(MALLOC_ERROR);
+            }
+            /* duplicate lmo to tmp_msg before updating it; maybe not
+               necessary, but formally safer */
+            memcpy(&tmp_msg, lmo, sizeof(struct lixa_msg_s));
+            
+            /* prepare output message */
+            switch (tmp_msg.header.pvs.verb) {
+                case LIXA_MSG_VERB_NULL:
+                    break;
+                case LIXA_MSG_VERB_OPEN:
+                    if (LIXA_RC_OK != (ret_cod = server_reply_open(
+                                           ts, slot_id, &tmp_msg, rc)))
+                        THROW(REPLY_OPEN_ERROR);
+                    break;
+                case LIXA_MSG_VERB_START:
+                    if (LIXA_RC_OK != (ret_cod = server_reply_start(
+                                           ts, slot_id, &tmp_msg, rc)))
+                        THROW(REPLY_START_ERROR);
+                    break;
+                case LIXA_MSG_VERB_END:
+                    if (LIXA_RC_OK != (ret_cod = server_reply_end(
+                                           ts, slot_id, &tmp_msg, rc)))
+                        THROW(REPLY_END_ERROR);
+                    break;
+                case LIXA_MSG_VERB_PREPARE:
+                    if (LIXA_RC_OK != (ret_cod = server_reply_prepare(
+                                           ts, slot_id, &tmp_msg, rc)))
+                        THROW(REPLY_PREPARE_ERROR);
+                    break;
+                case LIXA_MSG_VERB_QRCVR:
+                    if (LIXA_RC_OK != (ret_cod = server_reply_qrcvr(
+                                           ts, slot_id, &tmp_msg)))
+                        THROW(REPLY_QRCVR_ERROR);
+                    break;
+                case LIXA_MSG_VERB_TRANS:
+                    if (LIXA_RC_OK !=
+                        (ret_cod = server_reply_trans(ts, slot_id, &tmp_msg)))
+                        THROW(REPLY_SCAN_ERROR);
+                    break;
+                default:
+                    THROW(VERB_NOT_FOUND);
+            } /* switch (tmp_msg.header.pvs.verb) */
+        } /* for (i=0; i<list_size; ++i) */
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -1557,10 +1605,10 @@ int server_manager_check_recovery(struct thread_status_s *ts,
                                   const struct lixa_msg_s *lmi,
                                   int *recovery_pending)
 {
-    enum Exception
-    {
-        PROTOCOL_ERROR, JOB_SET_RAW_ERROR, GET_BLOCK_ERROR, NONE
-    } excp;
+    enum Exception { PROTOCOL_ERROR
+                     , JOB_SET_RAW_ERROR
+                     , GET_BLOCK_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_manager_check_recovery\n"));
@@ -1571,13 +1619,14 @@ int server_manager_check_recovery(struct thread_status_s *ts,
         /* optimistic guess */
         *recovery_pending = FALSE;
 
-        if (LIXA_MSG_VERB_OPEN != lmi->header.pvs.verb) THROW(PROTOCOL_ERROR);
+        if (LIXA_MSG_VERB_OPEN != lmi->header.pvs.verb)
+            THROW(PROTOCOL_ERROR);
 
         /* prepare the query object */
         if (LIXA_RC_OK != (ret_cod = lixa_job_set_raw(
                                &query_job,
-                               (const char *) lmi->body.open_8.client.job))) THROW(
-                                   JOB_SET_RAW_ERROR);
+                               (const char *) lmi->body.open_8.client.job)))
+            THROW(JOB_SET_RAW_ERROR);
         query.job = &query_job;
         query.tsid = ts->id;
         result.job = &result_job; /* reserve room for job object */
@@ -1593,41 +1642,40 @@ int server_manager_check_recovery(struct thread_status_s *ts,
             case LIXA_RC_OBJ_NOT_FOUND:
                 /* nothing to do */
                 break;
-            default: THROW(GET_BLOCK_ERROR);
+            default:
+                THROW(GET_BLOCK_ERROR);
         } /* switch (rc) */
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case PROTOCOL_ERROR:
-                    ret_cod = LIXA_RC_PROTOCOL_ERROR;
-                    break;
-                case JOB_SET_RAW_ERROR:
-                    break;
-                case GET_BLOCK_ERROR:
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case PROTOCOL_ERROR:
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case JOB_SET_RAW_ERROR:
+                break;
+            case GET_BLOCK_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_check_recovery/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
+
 int server_manager_add_poll(struct thread_status_s *ts,
                             int new_fd, nfds_t *place)
 {
-    enum Exception
-    {
-        REALLOC_ERROR1, REALLOC_ERROR2, NONE
-    } excp;
+    enum Exception { REALLOC_ERROR1
+                     , REALLOC_ERROR2
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_manager_add_poll\n"));
@@ -1650,12 +1698,13 @@ int server_manager_add_poll(struct thread_status_s *ts,
             /* no free slot, allocate a new slot at the end of the array */
             if (NULL == (ts->poll_array = realloc(
                              ts->poll_array,
-                             ++ts->poll_size * sizeof(struct pollfd)))) THROW(
-                                 REALLOC_ERROR1);
+                             ++ts->poll_size * sizeof(struct pollfd))))
+                THROW(REALLOC_ERROR1);
             if (NULL == (ts->client_array = realloc(
                              ts->client_array,
                              ts->poll_size * sizeof(
-                                 struct server_client_status_s)))) THROW(REALLOC_ERROR2);
+                                 struct server_client_status_s))))
+                THROW(REALLOC_ERROR2);
             *place = ts->poll_size - 1;
         } /* if (*place > 0) */
         ts->poll_array[*place].fd = new_fd;
@@ -1670,33 +1719,29 @@ int server_manager_add_poll(struct thread_status_s *ts,
                     ts->poll_array[*place].fd, *place));
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case REALLOC_ERROR1:
-                case REALLOC_ERROR2:
-                    ret_cod = LIXA_RC_REALLOC_ERROR;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case REALLOC_ERROR1:
+            case REALLOC_ERROR2:
+                ret_cod = LIXA_RC_REALLOC_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_add_poll/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
+
 int server_manager_fix_poll(struct thread_status_s *ts)
 {
-    enum Exception
-    {
-        NONE
-    } excp;
+    enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_manager_fix_poll\n"));
@@ -1718,29 +1763,27 @@ int server_manager_fix_poll(struct thread_status_s *ts)
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_fix_poll/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
+
 int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
 {
-    enum Exception
-    {
-        RECORD_INSERT_ERROR, PAYLOAD_HEADER_INIT, NONE
-    } excp;
+    enum Exception { RECORD_INSERT_ERROR
+                     , PAYLOAD_HEADER_INIT
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_manager_new_client\n"));
@@ -1748,12 +1791,13 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
         uint32_t slot = 0;
 
         /* get a free block from status file and insert in used list */
-        if (LIXA_RC_OK != (ret_cod = status_record_insert(ts, &slot))) THROW(
-            RECORD_INSERT_ERROR);
+        if (LIXA_RC_OK != (ret_cod = status_record_insert(ts, &slot)))
+            THROW(RECORD_INSERT_ERROR);
 
         /* create the header and reset it */
         if (LIXA_RC_OK != (ret_cod = payload_header_init(
-                               &ts->curr_status[slot].sr.data, fd))) THROW(PAYLOAD_HEADER_INIT);
+                               &ts->curr_status[slot].sr.data, fd)))
+            THROW(PAYLOAD_HEADER_INIT);
 
         /* save a reference to the slot */
         ts->client_array[place].pers_status_slot_id = slot;
@@ -1762,23 +1806,133 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
         server_client_status_init(&(ts->client_array[place]));
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case RECORD_INSERT_ERROR:
-                    break;
-                case PAYLOAD_HEADER_INIT:
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case RECORD_INSERT_ERROR:
+                break;
+            case PAYLOAD_HEADER_INIT:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_new_client/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int server_manager_branch_list(const struct thread_status_s *ts,
+                               size_t slot_id,
+                               size_t *number, size_t **items)
+{
+    enum Exception { MALLOC_ERROR1
+                     , NO_CHAINED_BRANCH
+                     , XA_BRANCH_LIST
+                     , MALLOC_ERROR2
+                     , INVALID_STATUS
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    uint32_t *branch_array = NULL;
+    
+    LIXA_TRACE(("server_manager_branch_list\n"));
+    TRY {
+        uint32_t block_id, i_block_id;
+        uint32_t branch_array_size = 0;
+        nfds_t i;
+        size_t k=0;
+        
+        /* retrieve the block_id of slot_id */
+        block_id = ts->client_array[slot_id].pers_status_slot_id;
+        /* check if block_id is part of a chained branch */
+        if (!server_xa_branch_is_chained(ts, block_id)) {
+            /* allocate just one element for slot_id/block_id */
+            *number = 1;
+            if (NULL == (*items = malloc(*number * sizeof(size_t))))
+                THROW(MALLOC_ERROR1);
+            (*items)[0] = slot_id;
+            LIXA_TRACE(("server_manager_branch_list: client slot_id "
+                        SIZE_T_FORMAT " is associated to block_id "
+                        UINT32_T_FORMAT " that's not part of a chained "
+                        "branch\n", slot_id, block_id));
+            THROW(NO_CHAINED_BRANCH);
+        } /* if (!server_xa_branch_is_chained(ts, block_id)) */
+        /* retrieve the list of all the chained block_id(s) */
+        if (LIXA_RC_OK != (ret_cod = server_xa_branch_list(
+                               ts, block_id, &branch_array_size,
+                               &branch_array)))
+            THROW(XA_BRANCH_LIST);
+        /* allocate a new array for slot_id(s) */
+        *number = (size_t)branch_array_size;
+        if (NULL == (*items = malloc(*number * sizeof(size_t))))
+            THROW(MALLOC_ERROR2);
+        /* loop on all the active clients */
+        for (i=0; i<ts->poll_size; ++i) {
+            uint32_t j;
+            /* skip inactive slots */
+            if (LIXA_NULL_FD == ts->poll_array[i].fd)
+                continue;
+            /* get the position in the persistent status that's associated to
+               client i */
+            i_block_id = ts->client_array[i].pers_status_slot_id;
+            /* scan block_ids to search for this one */
+            for (j=0; j<branch_array_size; ++j) {
+                if (branch_array[j] == i_block_id) {
+                    LIXA_TRACE(("server_manager_branch_list: "
+                                "client " NFDS_T_FORMAT " is linked to "
+                                "block_id " UINT32_T_FORMAT "\n",
+                                i, i_block_id));
+                    (*items)[k] = i;
+                    break;
+                } /* if (branch_array[j] == i_block_id) */
+            } /* for (j=0; j<branch_array_size; ++j) */
+        } /* for (i=0; i<ts->poll_size; ++i) */
+        /* check all the items have been found */
+        if (k != *number) {
+            LIXA_TRACE(("server_manager_branch_list: the global transaction "
+                        "should contain " SIZE_T_FORMAT " branches, but only "
+                        SIZE_T_FORMAT " clients have been found\n",
+                        *number, k));
+            THROW(INVALID_STATUS);
+        }        
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case MALLOC_ERROR1:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case NO_CHAINED_BRANCH:
+                ret_cod = LIXA_RC_OK;
+                break;
+            case XA_BRANCH_LIST:
+                break;
+            case MALLOC_ERROR2:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* recover memory */
+    if (NULL != branch_array) {
+        free(branch_array);
+        branch_array = NULL;
+    } /* if (NULL != branch_array) */
+    LIXA_TRACE(("server_manager_branch_list/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
 

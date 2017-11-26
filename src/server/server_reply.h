@@ -20,10 +20,12 @@
 # define SERVER_REPLY_H
 
 
+
 #include <config.h>
 
 
-#include <lixa_trace.h>
+
+#include "lixa_trace.h"
 
 
 
@@ -41,96 +43,106 @@
 extern "C" {
 #endif /* __cplusplus */
 
+    
 
-/**
- * Send the default output message to the client
- * @param ts IN/OUT thread status structure
- * @param slot_id IN the slot associated to the file descriptor raised the
- *                   POLLIN event
- * @param lmo IN message will be returned to the client
- * @return a standardized return code
- */
+    /**
+     * Send the default output message to the client
+     * @param[in,out] ts thread status structure
+     * @param[in] slot_id the slot associated to the file descriptor raised the
+     *                   POLLIN event
+     * @param[in] lmo message will be returned to the client
+     * @return a standardized return code
+     */
     int server_reply_default(struct thread_status_s *ts, size_t slot_id,
-                             struct lixa_msg_s *lmo);
+                             const struct lixa_msg_s *lmo);
 
 
-/**
- * Send the output message related to "end" verb to the client
- * @param ts IN/OUT thread status structure
- * @param slot_id IN the slot associated to the file descriptor raised the
- *                   POLLIN event
- * @param lmo IN message will be returned to the client
- * @param rc IN return code of the previous operations must be returned
- *              to the client
- * @return a standardized return code
- */
+    
+    /**
+     * Send the output message related to "end" verb to the client
+     * @param[in,out] ts thread status structure
+     * @param[in] slot_id the slot associated to the file descriptor raised the
+     *                   POLLIN event
+     * @param[in,out] lmo message will be returned to the client
+     * @param[in] rc return code of the previous operations must be returned
+     *              to the client
+     * @return a standardized return code
+     */
     int server_reply_end(struct thread_status_s *ts, size_t slot_id,
                          struct lixa_msg_s *lmo, int rc);
 
 
-/**
- * Send the output message related to "open" verb to the client
- * @param ts IN/OUT thread status structure
- * @param slot_id IN the slot associated to the file descriptor raised the
- *                   POLLIN event
- * @param lmo IN message will be returned to the client
- * @param rc IN return code of the previous operations must be returned
- *              to the client
- * @return a standardized return code
- */
+    /**
+     * Send the output message related to "open" verb to the client
+     * @param[in,out] ts thread status structure
+     * @param[in] slot_id the slot associated to the file descriptor raised the
+     *                   POLLIN event
+     * @param[in,out] lmo message will be returned to the client
+     * @param[in] rc return code of the previous operations must be returned
+     *              to the client
+     * @return a standardized return code
+     */
     int server_reply_open(struct thread_status_s *ts, size_t slot_id,
                           struct lixa_msg_s *lmo, int rc);
 
 
-/**
- * Send the output message related to "prepare" verb to the client
- * @param ts IN/OUT thread status structure
- * @param slot_id IN the slot associated to the file descriptor raised the
- *                   POLLIN event
- * @param lmo IN message will be returned to the client
- * @param rc IN return code of the previous operations must be returned
- *              to the client
- * @return a standardized return code
- */
+    
+    /**
+     * Send the output message related to "prepare" verb to the client
+     * @param[in,out] ts thread status structure
+     * @param[in] slot_id the slot associated to the file descriptor raised the
+     *                   POLLIN event
+     * @param[in,out] lmo message will be returned to the client
+     * @param[in] rc return code of the previous operations must be returned
+     *              to the client
+     * @return a standardized return code
+     */
     int server_reply_prepare(struct thread_status_s *ts, size_t slot_id,
                              struct lixa_msg_s *lmo, int rc);
 
 
-/**
- * Send the output message related to "qrcvr" verb to the client
- * @param ts IN/OUT thread status structure
- * @param slot_id IN the slot associated to the file descriptor raised the
- *                   POLLIN event
- * @param lmo IN message will be returned to the client
- * @return a standardized return code
- */
+    
+    /**
+     * Send the output message related to "qrcvr" verb to the client
+     * @param[in,out] ts thread status structure
+     * @param[in] slot_id the slot associated to the file descriptor raised the
+     *                   POLLIN event
+     * @param[in,out] lmo message will be returned to the client
+     * @return a standardized return code
+     */
     int server_reply_qrcvr(struct thread_status_s *ts, size_t slot_id,
                            struct lixa_msg_s *lmo);
 
 
-/**
- * Send the output message related to "start" verb to the client
- * @param ts IN/OUT thread status structure
- * @param slot_id IN the slot associated to the file descriptor raised the
- *                   POLLIN event
- * @param lmo IN message will be returned to the client
- * @param rc IN return code of the previous operations must be returned
- *              to the client
- * @return a standardized return code
- */
+    
+    /**
+     * Send the output message related to "start" verb to the client
+     * @param[in,out] ts thread status structure
+     * @param[in] slot_id the slot associated to the file descriptor raised the
+     *                   POLLIN event
+     * @param[in,out] lmo message will be returned to the client
+     * @param[in] rc return code of the previous operations must be returned
+     *              to the client
+     * @return a standardized return code
+     */
     int server_reply_start(struct thread_status_s *ts, size_t slot_id,
                            struct lixa_msg_s *lmo, int rc);
 
-/**
- * @brief Send the output message related to the "trans" verb to the client
- * @param ts
- * @param slot_id
- * @param lmo
- * @return a standardized return code
- */
+
+    
+    /**
+     * @brief Send the output message related to the "trans" verb to the client
+     * @param[in,out] ts thread status
+     * @param[in] slot_id the slot associated to the file descriptor raised the
+     *                   POLLIN event
+     * @param[in,out] lmo message will be returned to the client
+     * @return a standardized return code
+     */
     int server_reply_trans(struct thread_status_s *ts, size_t slot_id,
                            struct lixa_msg_s *lmo);
 
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

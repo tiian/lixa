@@ -248,15 +248,14 @@ extern "C" {
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] last_verb_step last verb and step values (prepared for
-     *                       reply function)
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_prepare(struct thread_status_s *ts,
                           const struct lixa_msg_s *lmi,
                           struct lixa_msg_s *lmo,
                           uint32_t block_id,
-                          struct lixa_msg_verb_step_s *last_verb_step);
+                          struct server_client_status_s *cs);
 
 
 
@@ -268,15 +267,14 @@ extern "C" {
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] last_verb_step last verb and step values (prepared for
-     *                       reply function)
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_prepare_8(struct thread_status_s *ts,
                             const struct lixa_msg_s *lmi,
                             struct lixa_msg_s *lmo,
                             uint32_t block_id,
-                            struct lixa_msg_verb_step_s *last_verb_step);
+                            struct server_client_status_s *cs);
 
 
     

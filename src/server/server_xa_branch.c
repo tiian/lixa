@@ -231,8 +231,8 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
 {
     enum Exception { OBJ_CORRUPTED1
                      , OBJ_CORRUPTED2
-                     , MULTIBRANCH_PREPARE_FAILED
                      , PREPARE_DELAYED
+                     , MULTIBRANCH_PREPARE_FAILED
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -278,11 +278,14 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
                     ", #will_rollback=" UINT32_T_FORMAT ", #unknown="
                     UINT32_T_FORMAT "\n",
                     will_commit, will_rollback, unknown));
-        if (0 < will_rollback) {
-            THROW(MULTIBRANCH_PREPARE_FAILED);
-        } else if (0 < unknown) {
+        if (0 < unknown) {
+            /* at least one not prepared branch */
             THROW(PREPARE_DELAYED);
-        }
+        } else if (0 < will_rollback && 0 == unknown) {
+            /* at least one failed branch, but all the branch has been
+               prepared */
+            THROW(MULTIBRANCH_PREPARE_FAILED);
+        } /* if (0 < unknown) */
         
         THROW(NONE);
     } CATCH {
@@ -291,11 +294,11 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
             case OBJ_CORRUPTED2:
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
                 break;
-            case MULTIBRANCH_PREPARE_FAILED:
-                ret_cod = LIXA_RC_MULTIBRANCH_PREPARE_FAILED;
-                break;
             case PREPARE_DELAYED:
                 ret_cod = LIXA_RC_OPERATION_POSTPONED;
+                break;
+            case MULTIBRANCH_PREPARE_FAILED:
+                ret_cod = LIXA_RC_MULTIBRANCH_PREPARE_FAILED;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

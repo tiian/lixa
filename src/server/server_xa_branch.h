@@ -84,8 +84,8 @@ extern "C" {
     
 
     /**
-     * Retrieve all the block_id related to all the branches chained in the
-     * same multiple branches global transaction
+     * Retrieve all the block_id(s) related to all the branches chained in the
+     * same multiple branch global transaction
      * @param[in] ts reference to thread status
      * @param[in] block_id of the current branch
      * @param[out] number of found items

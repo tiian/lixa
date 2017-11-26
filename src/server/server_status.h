@@ -119,10 +119,10 @@
  *            files and exit
  * FORCE: the server will synchronize status files and abruptly exit
  */
-enum shutdown_type_e
-{
-    SHUTDOWN_NULL, SHUTDOWN_QUIESCE, SHUTDOWN_IMMEDIATE, SHUTDOWN_FORCE
-};
+enum shutdown_type_e { SHUTDOWN_NULL
+                       , SHUTDOWN_QUIESCE
+                       , SHUTDOWN_IMMEDIATE
+                       , SHUTDOWN_FORCE };
 
 
 
@@ -195,6 +195,17 @@ struct thread_status_switch_s
 
 
 /**
+ * Logical session state
+ */
+enum server_client_status_e { CLIENT_STATUS_NULL
+                              , CLIENT_STATUS_OPERATION_POSTPONED
+                              , CLIENT_STATUS_WOULD_BLOCK
+                              , CLIENT_STATUS_CHAIN_JOIN_OK
+                              , CLIENT_STATUS_CHAIN_JOIN_KO };
+
+
+
+/**
  * It's the struct used to keep the status of a client
  */
 struct server_client_status_s
@@ -227,15 +238,9 @@ struct server_client_status_s
      */
     int control_only;
     /**
-     * Boolean value: last operation would block the client, but "NON BLOCK"
-     * option has been specified
+     * Flag used for specific states that change the client/server flow
      */
-    int would_block;
-    /**
-     * Boolean value: last operation must be postponed because not all
-     * conditions are met
-     */
-    int operation_postponed;
+    enum server_client_status_e   state;
     /**
      * Info necessary to switch the current client to a different thread
      */
@@ -786,8 +791,7 @@ extern "C" {
         scs->last_verb_step.verb = 0;
         scs->last_verb_step.step = 0;
         scs->control_only = FALSE;
-        scs->would_block = FALSE;
-        scs->operation_postponed = FALSE;
+        scs->state = CLIENT_STATUS_NULL;
         scs->first_message = TRUE;
         thread_status_switch_init(&scs->switch_thread);
     }

@@ -1,4 +1,4 @@
-Restart from server_xa_prepare_8, see @@@
+Test multiple branch client notification
 
 Branching:
 - implement serialization in state server
@@ -10,15 +10,8 @@ In the event of branch, all branches must use xa_prepare even if they are
 using just one Resource Manager
 Create a test case to check LXD032N message: one branch already started 
 xa_prepare, a subordinate one tryes to branch.
-
-Understand what happens when both "operation_postponed" and "recovery_pending"
-are TRUE in server_manager_inmsg_proc:
-            case NONE:
-                ret_cod	= operation_postponed ?
-                    LIXA_RC_OPERATION_POSTPONED	: LIXA_RC_OK;
-                ret_cod = recovery_pending ?
-                    LIXA_RC_RECOVERY_PENDING_TX : LIXA_RC_OK;
-                break;
+Move control_only boolean value (struct server_client_status_s) to
+enum server_client_status_e
 
 Check memory leaks in state server after branch implementation.
 
