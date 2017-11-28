@@ -216,14 +216,20 @@ struct server_client_status_s
      */
     uint32_t pers_status_slot_id;
     /**
-     * Buffer must be sent to the client: if NULL, no buffer needs to be sent
+     * Buffer that must be sent to the client: if NULL, no buffer needs to be
+     * sent
      */
     char *output_buffer;
     /**
-     * Size of the buffer must be sent to the client; if @ref output_buffer is
-     * NULL, this field is meaningless
+     * Size of the buffer that must be sent to the client;
+     * if @ref output_buffer is NULL, this field is meaningless
      */
     size_t output_buffer_size;
+    /**
+     * Message that must be sent to the client; don't confuse this internal
+     * representation with the serialized buffer that can be sent on the wire
+     */
+    struct lixa_msg_s output_message;
     /**
      * (verb,step) related to the output_buffer
      */
