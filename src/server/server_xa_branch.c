@@ -158,6 +158,71 @@ int server_xa_branch_chain(struct thread_status_s *ts,
 
 
 
+int server_xa_branch_unchain(struct thread_status_s *ts,
+                             uint32_t block_id)
+{
+    enum Exception { BYPASSED_OPERATION
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_branch_unchain\n"));
+    TRY {
+        uint32_t next_branch_block =
+            ts->curr_status[block_id].sr.data.pld.ph.next_branch_block;
+        uint32_t prev_branch_block =
+            ts->curr_status[block_id].sr.data.pld.ph.prev_branch_block;
+        if (0 == next_branch_block && 0 == prev_branch_block) {
+            LIXA_TRACE(("server_xa_branch_unchain: block_id "
+                        UINT32_T_FORMAT " is not chained because prev and "
+                        "next blocks are 0\n", block_id));
+            THROW(BYPASSED_OPERATION);
+        } /* if (0 == next_branch_block && 0 == prev_branch_block) */
+        if (0 != prev_branch_block) {
+            LIXA_TRACE(("server_xa_branch_unchain: unchaining previous "
+                        "block " UINT32_T_FORMAT " from this one ("
+                        UINT32_T_FORMAT ")\n", prev_branch_block, block_id));
+            status_record_update(ts->curr_status + prev_branch_block,
+                                 prev_branch_block, ts->updated_records);
+            ts->curr_status[prev_branch_block
+                            ].sr.data.pld.ph.next_branch_block =
+                next_branch_block;
+        } /* if (0 != prev_branch_block) */
+        if (0 != next_branch_block) {
+            LIXA_TRACE(("server_xa_branch_unchain: unchaining next "
+                        "block " UINT32_T_FORMAT " from this one ("
+                        UINT32_T_FORMAT ")\n", next_branch_block, block_id));
+            status_record_update(ts->curr_status + next_branch_block,
+                                 next_branch_block, ts->updated_records);
+            ts->curr_status[next_branch_block
+                            ].sr.data.pld.ph.prev_branch_block =
+                prev_branch_block;
+        } /* if (0 != prev_branch_block) */
+        /* resetting current block_id */
+        ts->curr_status[block_id].sr.data.pld.ph.next_branch_block = 0;
+        ts->curr_status[block_id].sr.data.pld.ph.prev_branch_block = 0;
+        status_record_update(ts->curr_status + block_id,
+                             block_id, ts->updated_records);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BYPASSED_OPERATION:
+                ret_cod = LIXA_RC_BYPASSED_OPERATION;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_branch_unchain/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int server_xa_branch_list(const struct thread_status_s *ts,
                           uint32_t block_id,
                           uint32_t *number, uint32_t **items)

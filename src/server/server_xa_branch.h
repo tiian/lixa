@@ -69,6 +69,18 @@ extern "C" {
 
 
     /**
+     * Remove a branch form the chain of the already existent branches in the
+     * same global transaction
+     * @param[in,out] ts reference to thread status
+     * @param[in] block_id of the new branch
+     * @return a reason code
+     */
+    int server_xa_branch_unchain(struct thread_status_s *ts,
+                                 uint32_t block_id);
+    
+
+
+    /**
      * Check if a block_id is part of a chain of branches
      * @param[in] ts reference to thread status
      * @param[in] block_id of the branch
