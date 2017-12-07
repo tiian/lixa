@@ -72,8 +72,7 @@ or Github issue tracking https://github.com/tiian/lixa/issues to document
 XTA possible bugs.
 End user documentation is not yet available, but 2 case tests programs can be
 used as examples:
-test/src/case0100.c
-test/src/case0101.c
+test/src/case010*.c
 
 
 

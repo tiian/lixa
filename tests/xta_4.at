@@ -29,7 +29,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none ca
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none case0105 1 1 1011 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/4.1/0.0 Branch and commit])
+AT_SETUP([XTA/4.1/0.0 Async branch and commit])
 # create a FIFO object for communication between superior and subordinate
 # process
 AT_CHECK([mkfifo tmp_fifo], [0], [ignore], [ignore])
@@ -67,7 +67,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_group.sh delete], [0], 
 AT_CHECK([rm tmp_fifo], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/4.1/0.1 Branch and delete])
+AT_SETUP([XTA/4.1/0.1 Async branch and rollback])
 # create a FIFO object for communication between superior and subordinate
 # process
 AT_CHECK([mkfifo tmp_fifo], [0], [ignore], [ignore])
@@ -94,6 +94,42 @@ xa_rollback/0
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_group.sh insert], [0], [ignore], [ignore])
+AT_CHECK([rm tmp_fifo], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/4.2/0.0 Sync branch and commit])
+# create a FIFO object for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply 
+lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply
+]])
+AT_DATA([delete],
+[[lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply 
+lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply
+]])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_group.sh insert], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo], [0], [ignore], [ignore])
 AT_CLEANUP
 

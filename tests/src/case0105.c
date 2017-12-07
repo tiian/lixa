@@ -37,8 +37,7 @@
 
 
 /*
- * Special case tests for XTA branching:
- * - superior branch does not exist
+ * Asynchronous branch case test for XTA
  */
 
 
@@ -81,8 +80,8 @@ int main(int argc, char *argv[])
 
     /* check phase */
     switch (phase) {
-    case SUPERIOR:
-        fprintf(stderr, "%s| phase=%d (SUPERIOR)\n", pgm, phase);
+        case SUPERIOR:
+            fprintf(stderr, "%s| phase=%d (SUPERIOR)\n", pgm, phase);
             /* open file for write */
             if (NULL == (xid_file = fopen(filename, "w"))) {
                 fprintf(stderr, "%s| error while opening file '%s'\n",

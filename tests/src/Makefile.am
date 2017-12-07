@@ -31,7 +31,7 @@ if COMPILE_WEBSPHEREMQ_STUFF
   MAYBE_WEBSPHEREMQ = case0044
 endif
 if COMPILE_XTA
-  MAYBE_XTA = case0100 case0101 case0102 case0103 case0104 case0105
+  MAYBE_XTA = case0100 case0101 case0102 case0103 case0104 case0105 case0106
 endif
 check_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0006 case0007 case0008 case0009 case0010 case0011 case0012 \
@@ -183,5 +183,11 @@ case0105_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/xta/liblixta.la $(LDADD_ORACLE)
 case0105_SOURCES = case0105.c
 case0105_LDFLAGS = @ORACLE_OCI_LDFLAGS@
+case0106_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
+	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
+case0106_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
+	../../src/xta/liblixta.la $(LDADD_ORACLE)
+case0106_SOURCES = case0106.c case_test_functions.c
+case0106_LDFLAGS = @ORACLE_OCI_LDFLAGS@
 
 
