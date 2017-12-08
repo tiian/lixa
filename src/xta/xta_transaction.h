@@ -76,6 +76,12 @@ typedef struct xta_transaction_s {
      * Transaction ID
      */
     xta_xid_t                       *xid;
+    /**
+     * The transaction has already called @ref xta_transaction_commit with
+     * non_block flag and must call @ref xta_transaction_commit again to
+     * complete it
+     */
+    int                              commit_suspended;
 } xta_transaction_t;
 
 

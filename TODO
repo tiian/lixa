@@ -1,3 +1,7 @@
+case0106: monkey RM for superior and subordinate must use a different configuration because subordinate uses non_block in xta_transaction_commit.
+Possibile solutions:
+- create the resources dynamically, passing a different config file
+- use distinct LIXA_PROFILEs for the two (try to put export in front of the command for lixa_test_group.sh
 Go on with test multiple branch: @@@ in case0106.c
 
 Branching:

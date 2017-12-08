@@ -85,6 +85,8 @@ xta_transaction_t *xta_transaction_new(void)
             THROW(CLIENT_CONFIG_JOB_ERROR);
         /* reset the XID reference */
         this->xid = NULL;
+        /* reset the commit suspended */
+        this->commit_suspended = FALSE;
         
         THROW(NONE);
     } CATCH {
@@ -626,6 +628,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
     enum Exception { NULL_OBJECT
                      , INVALID_STATUS
                      , LIXA_XA_END_ERROR
+                     , COMMIT_SUSPENDED
                      , LIXA_XA_PREPARE_ERROR
                      , LIXA_XA_COMMIT_ERROR
                      , INVALID_STATE1
@@ -653,31 +656,44 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
                         "current client status %d\n", TX_STATE_S3, txstate));
             THROW(INVALID_STATUS);
         }
-        /* check if One Phase Commit optimization can be applied */
-        one_phase_commit = client_status_could_one_phase(
-            &this->client_status, &this->local_ccc);
-        /* detach the transaction */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
-                               &this->local_ccc, &this->client_status,
-                               xta_xid_get_xa_xid(this->xid), &txrc,
-                               commit, TMSUCCESS))) {
-            if (TX_ROLLBACK == txrc)
-                commit = FALSE;
-            else
-                THROW(LIXA_XA_END_ERROR);
-        }
+        if (this->commit_suspended) {
+            LIXA_TRACE(("xta_transaction_commit: a previously suspended "
+                        "commit must be completed\n"));
+        } else {
+            /* check if One Phase Commit optimization can be applied */
+            one_phase_commit = client_status_could_one_phase(
+                &this->client_status, &this->local_ccc);
+            /* detach the transaction */
+            if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
+                                   &this->local_ccc, &this->client_status,
+                                   xta_xid_get_xa_xid(this->xid), &txrc,
+                                   commit, TMSUCCESS))) {
+                if (TX_ROLLBACK == txrc)
+                    commit = FALSE;
+                else
+                    THROW(LIXA_XA_END_ERROR);
+            } /* if (LIXA_RC_OK != (ret_cod = lixa_xa_end( */
+        } /* if (this->commit_suspended) */
         /* prepare (skip if we are rollbacking) */
         if (commit) {
             /* bypass xa_prepare if one_phase_commit is TRUE */
-            if (!one_phase_commit &&
-                LIXA_RC_OK != (ret_cod = lixa_xa_prepare(
-                                   &this->local_ccc, &this->client_status,
-                                   xta_xid_get_xa_xid(this->xid), non_block,
-                                   &txrc, &commit)))
-                THROW(LIXA_XA_PREPARE_ERROR);
-            LIXA_TRACE(("xta_transaction_commit: lixa_xa_prepare returned "
-                        "txrc=%d\n", txrc));
-        }
+            if (!one_phase_commit) {
+                ret_cod = lixa_xa_prepare(
+                    &this->local_ccc, &this->client_status,
+                    xta_xid_get_xa_xid(this->xid), non_block,
+                    &txrc, &commit);
+                switch (ret_cod) {
+                    case LIXA_RC_OK:
+                        break;
+                    case LIXA_RC_WOULD_BLOCK:
+                        this->commit_suspended = TRUE;
+                        THROW(COMMIT_SUSPENDED);
+                        break;
+                    default:
+                        THROW(LIXA_XA_PREPARE_ERROR);
+                } /* switch (ret_cod) */
+            } /* if (!one_phase_commit) */
+        } /* if (commit) */
         prepare_txrc = txrc;
         /* commit or rollback the transaction */
         if (commit) {
@@ -767,6 +783,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
                 break;
             case LIXA_XA_END_ERROR:
             case LIXA_XA_PREPARE_ERROR:
+            case COMMIT_SUSPENDED:
             case LIXA_XA_COMMIT_ERROR:
                 break;
             case INVALID_STATE1:
