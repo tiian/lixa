@@ -91,6 +91,7 @@ const xmlChar *LIXA_XML_MSG_PROP_R_STATE = (xmlChar *) "r_state";
 const xmlChar *LIXA_XML_MSG_PROP_S_STATE = (xmlChar *) "s_state";
 const xmlChar *LIXA_XML_MSG_PROP_SUB_BRANCH = (xmlChar *) "sub_branch";
 const xmlChar *LIXA_XML_MSG_PROP_TD_STATE = (xmlChar *) "td_state";
+const xmlChar *LIXA_XML_MSG_PROP_TIMEOUT = (xmlChar *) "timeout";
 const xmlChar *LIXA_XML_MSG_PROP_TXSTATE = (xmlChar *) "txstate";
 const xmlChar *LIXA_XML_MSG_PROP_STEP = (xmlChar *) "step";
 const xmlChar *LIXA_XML_MSG_PROP_VERB = (xmlChar *) "verb";
@@ -127,20 +128,19 @@ const xmlChar *LIXA_XML_MSG_TAG_XA_START_EXECS = (xmlChar *) "xa_start_execs";
 const xmlChar *LIXA_XML_MSG_TAG_TRAN = (xmlChar *) "transaction";
 const xmlChar *LIXA_XML_MSG_TAG_TRANS = (xmlChar *) "transactions";
 
+
+
 int lixa_msg_retrieve(int fd,
                       char *buf, size_t buf_size,
                       ssize_t *read_bytes)
 {
-    enum Exception
-    {
-        RECV_ERROR1,
-        CONNECTION_CLOSED,
-        INVALID_PREFIX_SIZE,
-        BUFFER_OVERFLOW,
-        RECV_ERROR2,
-        INVALID_LENGTH_XML_MSG,
-        NONE
-    } excp;
+    enum Exception { RECV_ERROR1
+                     , CONNECTION_CLOSED
+                     , INVALID_PREFIX_SIZE
+                     , BUFFER_OVERFLOW
+                     , RECV_ERROR2
+                     , INVALID_LENGTH_XML_MSG
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("lixa_msg_retrieve\n"));
@@ -171,9 +171,11 @@ int lixa_msg_retrieve(int fd,
                         ")\n", prefix, to_read));
         }
 
-        if (to_read > buf_size) THROW(BUFFER_OVERFLOW);
+        if (to_read > buf_size)
+            THROW(BUFFER_OVERFLOW);
 
-        if (0 > (*read_bytes = recv(fd, buf, to_read, 0))) THROW(RECV_ERROR2);
+        if (0 > (*read_bytes = recv(fd, buf, to_read, 0)))
+            THROW(RECV_ERROR2);
 
         LIXA_TRACE(("lixa_msg_retrieve: fd = %d returned "
                     SSIZE_T_FORMAT
@@ -189,47 +191,46 @@ int lixa_msg_retrieve(int fd,
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case RECV_ERROR1:
-                    ret_cod = LIXA_RC_RECV_ERROR;
-                    break;
-                case CONNECTION_CLOSED:
-                    ret_cod = LIXA_RC_CONNECTION_CLOSED;
-                    break;
-                case INVALID_PREFIX_SIZE:
-                    ret_cod = LIXA_RC_INVALID_PREFIX_SIZE;
-                    break;
-                case BUFFER_OVERFLOW:
-                    ret_cod = LIXA_RC_BUFFER_OVERFLOW;
-                    break;
-                case RECV_ERROR2:
-                    ret_cod = LIXA_RC_RECV_ERROR;
-                    break;
-                case INVALID_LENGTH_XML_MSG:
-                    ret_cod = LIXA_RC_INVALID_LENGTH_XML_MSG;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case RECV_ERROR1:
+                ret_cod = LIXA_RC_RECV_ERROR;
+                break;
+            case CONNECTION_CLOSED:
+                ret_cod = LIXA_RC_CONNECTION_CLOSED;
+                break;
+            case INVALID_PREFIX_SIZE:
+                ret_cod = LIXA_RC_INVALID_PREFIX_SIZE;
+                break;
+            case BUFFER_OVERFLOW:
+                ret_cod = LIXA_RC_BUFFER_OVERFLOW;
+                break;
+            case RECV_ERROR2:
+                ret_cod = LIXA_RC_RECV_ERROR;
+                break;
+            case INVALID_LENGTH_XML_MSG:
+                ret_cod = LIXA_RC_INVALID_LENGTH_XML_MSG;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_retrieve/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
+
 int lixa_msg_send(int fd, const char *buf, size_t buf_size)
 {
-    enum Exception
-    {
-        GETSOCKOPT_ERROR, CONNECTION_CLOSED, SEND_ERROR, NONE
-    } excp;
+    enum Exception { GETSOCKOPT_ERROR
+                     , CONNECTION_CLOSED
+                     , SEND_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("lixa_msg_send\n"));
@@ -238,8 +239,8 @@ int lixa_msg_send(int fd, const char *buf, size_t buf_size)
         int optval;
         socklen_t optlen = sizeof(optval);
 
-        if (0 != getsockopt(fd, SOL_SOCKET, SO_ERROR, &optval, &optlen)) THROW(
-            GETSOCKOPT_ERROR);
+        if (0 != getsockopt(fd, SOL_SOCKET, SO_ERROR, &optval, &optlen))
+            THROW(GETSOCKOPT_ERROR);
         LIXA_TRACE(("lixa_msg_send: so_error=%d (EPIPE=%d, ECONNRESET=%d)\n",
                     optval, EPIPE, ECONNRESET));
         if (EPIPE == optval || ECONNRESET == optval) {
@@ -266,36 +267,34 @@ int lixa_msg_send(int fd, const char *buf, size_t buf_size)
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case GETSOCKOPT_ERROR:
-                    ret_cod = LIXA_RC_GETSOCKOPT_ERROR;
-                    break;
-                case CONNECTION_CLOSED:
-                    ret_cod = LIXA_RC_CONNECTION_CLOSED;
-                    break;
-                case SEND_ERROR:
-                    ret_cod = LIXA_RC_SEND_ERROR;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case GETSOCKOPT_ERROR:
+                ret_cod = LIXA_RC_GETSOCKOPT_ERROR;
+                break;
+            case CONNECTION_CLOSED:
+                ret_cod = LIXA_RC_CONNECTION_CLOSED;
+                break;
+            case SEND_ERROR:
+                ret_cod = LIXA_RC_SEND_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_send/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
+
 int lixa_msg_free(struct lixa_msg_s *msg)
 {
-    enum Exception
-    {
+    enum Exception {
         INVALID_STEP1,
         INVALID_STEP2,
         INVALID_STEP3,
@@ -309,8 +308,7 @@ int lixa_msg_free(struct lixa_msg_s *msg)
         INVALID_STEP11,
         INVALID_STEP12,
         INVALID_VERB,
-        NONE
-    } excp;
+        NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("lixa_msg_free\n"));
@@ -365,7 +363,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                             msg->body.open_24.xa_open_execs = NULL;
                         }
                         break;
-                    default: THROW(INVALID_STEP1);
+                    default:
+                        THROW(INVALID_STEP1);
                 }
                 break;
             case LIXA_MSG_VERB_CLOSE: /* close */
@@ -376,7 +375,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                             msg->body.open_8.rsrmgrs = NULL;
                         }
                         break;
-                    default: THROW(INVALID_STEP2);
+                    default:
+                        THROW(INVALID_STEP2);
                 }
                 break;
             case LIXA_MSG_VERB_START: /* start */
@@ -396,7 +396,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                             msg->body.start_24.xa_start_execs = NULL;
                         }
                         break;
-                    default: THROW(INVALID_STEP3);
+                    default:
+                        THROW(INVALID_STEP3);
                 }
                 break;
             case LIXA_MSG_VERB_END: /* end */
@@ -409,7 +410,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                         break;
                     case 16: /* nothing to release */
                         break;
-                    default: THROW(INVALID_STEP4);
+                    default:
+                        THROW(INVALID_STEP4);
                 }
                 break;
             case LIXA_MSG_VERB_PREPARE: /* prepare */
@@ -422,8 +424,11 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                         }
                         break;
                     case 16: /* nothing to release */
+                    case 24: /* nothing to release */
+                    case 32: /* nothing to release */
                         break;
-                    default: THROW(INVALID_STEP5);
+                    default:
+                        THROW(INVALID_STEP5);
                 }
                 break;
             case LIXA_MSG_VERB_COMMIT: /* commit */
@@ -435,7 +440,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                             msg->body.commit_8.xa_commit_execs = NULL;
                         }
                         break;
-                    default: THROW(INVALID_STEP6);
+                    default:
+                        THROW(INVALID_STEP6);
                 }
                 break;
             case LIXA_MSG_VERB_ROLLBACK: /* rollback */
@@ -448,7 +454,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                             msg->body.rollback_8.xa_rollback_execs = NULL;
                         }
                         break;
-                    default: THROW(INVALID_STEP7);
+                    default:
+                        THROW(INVALID_STEP7);
                 }
                 break;
             case LIXA_MSG_VERB_QRCVR: /* qrcvr */
@@ -478,21 +485,24 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                             msg->body.qrcvr_24.rsrmgrs = NULL;
                         }
                         break;
-                    default: THROW(INVALID_STEP8);
+                    default:
+                        THROW(INVALID_STEP8);
                 }
                 break;
             case LIXA_MSG_VERB_REG: /* reg */
                 switch (msg->header.pvs.step) {
                     case 8:
                         break;
-                    default: THROW(INVALID_STEP9);
+                    default:
+                        THROW(INVALID_STEP9);
                 }
                 break;
             case LIXA_MSG_VERB_UNREG: /* unreg */
                 switch (msg->header.pvs.step) {
                     case 8:
                         break;
-                    default: THROW(INVALID_STEP10);
+                    default:
+                        THROW(INVALID_STEP10);
                 }
                 break;
             case LIXA_MSG_VERB_FORGET: /* forget */
@@ -504,7 +514,8 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                             msg->body.forget_8.xa_forget_execs = NULL;
                         }
                         break;
-                    default: THROW(INVALID_STEP11);
+                    default:
+                        THROW(INVALID_STEP11);
                 }
                 break;
             case LIXA_MSG_VERB_TRANS: /* trans */
@@ -515,41 +526,41 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                             msg->body.trans_8.client.job = NULL;
                         }
                         break;
-                    default: THROW(INVALID_STEP12);
+                    default:
+                        THROW(INVALID_STEP12);
                 }
                 break;
-            default: THROW(INVALID_VERB);
+            default:
+                THROW(INVALID_VERB);
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case INVALID_STEP1:
-                case INVALID_STEP2:
-                case INVALID_STEP3:
-                case INVALID_STEP4:
-                case INVALID_STEP5:
-                case INVALID_STEP6:
-                case INVALID_STEP7:
-                case INVALID_STEP8:
-                case INVALID_STEP9:
-                case INVALID_STEP10:
-                case INVALID_STEP11:
-                case INVALID_STEP12:
-                case INVALID_VERB:
-                    LIXA_TRACE(("lixa_msg_free: verb=%d, step=%d\n",
-                                msg->header.pvs.verb, msg->header.pvs.step));
-                    ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP1:
+            case INVALID_STEP2:
+            case INVALID_STEP3:
+            case INVALID_STEP4:
+            case INVALID_STEP5:
+            case INVALID_STEP6:
+            case INVALID_STEP7:
+            case INVALID_STEP8:
+            case INVALID_STEP9:
+            case INVALID_STEP10:
+            case INVALID_STEP11:
+            case INVALID_STEP12:
+            case INVALID_VERB:
+                LIXA_TRACE(("lixa_msg_free: verb=%d, step=%d\n",
+                            msg->header.pvs.verb, msg->header.pvs.step));
+                ret_cod = LIXA_RC_PROPERTY_INVALID_VALUE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_free/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

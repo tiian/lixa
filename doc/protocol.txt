@@ -159,11 +159,11 @@ verb=5 (xa_prepare)
 
   level: message level, version
   verb:  xa_prepare -> 5
-  step:  8, 16
+  step:  8, 16, 24 (optional), 32 (optional)
 
   client->server message (send the xa_prepare result)
   <msg level="1" verb="5" step="8">
-    <conthr commit="1" non_block="0"/>
+    <conthr commit="1" non_block="0" timeout="5000"/>
     <xa_prepare_execs>
       <xa_prepare_exec rmid="0" flags="0x0" rc="0" s_state="33" td_state="10"/>
       <xa_prepare_exec rmid="1" flags="0x0" rc="0" s_state="33" td_state="10"/>
@@ -175,11 +175,30 @@ verb=5 (xa_prepare)
     <answer rc="0"/>
   </msg>
 
+  Optional messages for multiple branches transactions and "non_block" 
+  option passed at xta_transaction_commit. These messages are used only by XTA.
+
+  client->server message (enqueue and wait the completion of all branches)
+  <msg level="1" verb="5" step="24">
+    <conthr timeout="5000"/>
+  </msg>
+
+  server -> client message (answer: rc is related to the global result of all
+                            branches)
+  <msg level="1" verb="5" step="32">
+    <answer rc="0"/>
+  </msg>
+
+  
 
 client 			 server		description
 verb=5,step=8 -->			send xa_prepare result
 		<-- verb=5,step=16	synchronize status file
 		    			confirm operation
+optional, XTA non_block commit only:
+verb=5,step=24 -->                      enqueue on state server
+                <-- verb=5,step=32      prepare complete for all the
+                                        branches
 
 ***************************************************************************
 

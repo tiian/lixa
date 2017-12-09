@@ -19,27 +19,29 @@
 #ifndef LIXA_XML_MSG_H
 # define LIXA_XML_MSG_H
 
-#include <config.h>
+
+
+#include "config.h"
+
+
 
 #ifdef HAVE_LIBXML_TREE_H
-
 # include <libxml/tree.h>
-
 #endif
 #ifdef HAVE_LIBXML_PARSER_H
-
 # include <libxml/parser.h>
-
 #endif
 #ifdef HAVE_GLIB_H
-
 # include <glib.h>
-
 #endif
 
-#include <lixa_config.h>
-#include <xa.h>
+
+
+#include "lixa_config.h"
+#include "xa.h"
 #include "lixa_xid.h"
+
+
 
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
@@ -50,11 +52,15 @@
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_COMMON_XML_MSG
 
+
+
 /**
  * Default buffer size for XML messages (used for serialization/
  * deserialization)
  **/
 #define LIXA_MSG_XML_BUFFER_SIZE 4096
+
+
 
 /**
  * Initial array size for resource managers related arrays; this is not the
@@ -63,15 +69,21 @@
  */
 #define LIXA_MSG_XML_DEFAULT_RSRMGRS  3
 
+
+
 /**
  * @brief Initial array size for transactions
  */
 #define LIXA_MSG_XML_DEFAULT_TRANS 2
 
+
+
 /**
  * Number of digits prefix an XML message
  */
 #define LIXA_MSG_XML_PREFIX_DIGITS  6
+
+
 
 /**
  * Current protocol level; it's used to recognize incompatible client/server
@@ -132,10 +144,14 @@
  */
 #define LIXA_MSG_VERB_TRANS    12
 
+
+
 /**
  * Default increment for message step
  */
 #define LIXA_MSG_STEP_INCR      8
+
+
 
 /**
  * Label used to specify initial XML header
@@ -213,6 +229,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_SUB_BRANCH;
  * Label used to specify "td_state" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_TD_STATE;
+/**
+ * Label used to specify "timeout" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_TIMEOUT;
 /**
  * Label used to specify "txstate" property
  */
@@ -354,6 +374,8 @@ extern const xmlChar *LIXA_XML_MSG_TAG_TRAN;
  */
 extern const xmlChar *LIXA_XML_MSG_TAG_TRANS;
 
+
+
 /**
  * The communication protocol is discrete and the values are in the set
  * (verb x step)
@@ -370,6 +392,8 @@ struct lixa_msg_verb_step_s
     int step;
 };
 
+
+
 /**
  * Mandatory header for every message encoded as @ref lixa_msg_s
  */
@@ -385,6 +409,8 @@ struct lixa_msg_header_s
     struct lixa_msg_verb_step_s pvs;
 };
 
+
+
 /**
  * Generic answer message struct
  */
@@ -396,6 +422,8 @@ struct lixa_msg_body_answer_s
     int rc;
 };
 
+
+
 /**
  * Convenience struct for @ref lixa_msg_body_open_8_s
  */
@@ -405,7 +433,6 @@ struct lixa_msg_body_open_8_client_s
     md5_digest_hex_t config_digest;
     int maint;
 };
-
 
 /**
  * Convenience struct for @ref lixa_msg_body_open_8_s
@@ -430,7 +457,6 @@ struct lixa_msg_body_open_8_rsrmgr_s
      */
     xmlChar *xa_name;
 };
-
 
 /**
  * Message body for verb "open", step "8"
@@ -462,7 +488,6 @@ struct lixa_msg_body_open_24_conthr_s
     int txstate;
 };
 
-
 /**
  * Convenience struct for @ref lixa_msg_body_open_24_s
  */
@@ -490,7 +515,6 @@ struct lixa_msg_body_open_24_xa_open_execs_s
     int r_state;
 };
 
-
 /**
  * Message body for verb "open", step "24"
  */
@@ -507,6 +531,7 @@ struct lixa_msg_body_open_24_s
 };
 
 
+
 /**
  * Convenience struct for @ref lixa_msg_body_open_8_s
  */
@@ -518,7 +543,6 @@ struct lixa_msg_body_close_8_rsrmgr_s
     int rmid;
 };
 
-
 /**
  * Message body for verb "close", step "8"
  */
@@ -526,6 +550,7 @@ struct lixa_msg_body_close_8_s
 {
     GArray *rsrmgrs;
 };
+
 
 
 /**
@@ -544,7 +569,6 @@ struct lixa_msg_body_start_8_conthr_s
     int sub_branch;
 };
 
-
 /**
  * Convenience struct for @ref lixa_msg_body_start_8_s
  */
@@ -555,7 +579,6 @@ struct lixa_msg_body_start_8_rsrmgr_s
      */
     int rmid;
 };
-
 
 /**
  * Message body for verb "start", step "8"
@@ -586,7 +609,6 @@ struct lixa_msg_body_start_24_conthr_s
      */
     int txstate;
 };
-
 
 /**
  * Convenience struct for @ref lixa_msg_body_start_24_s
@@ -619,7 +641,6 @@ struct lixa_msg_body_start_24_xa_start_execs_s
     int s_state;
 };
 
-
 /**
  * Message body for verb "start", step "24"
  */
@@ -636,6 +657,7 @@ struct lixa_msg_body_start_24_s
 };
 
 
+
 /**
  * Convenience struct for @ref lixa_msg_body_end_8_s
  */
@@ -647,7 +669,6 @@ struct lixa_msg_body_end_8_conthr_s
      */
     int commit;
 };
-
 
 /**
  * Convenience struct for @ref lixa_msg_body_end_8_s
@@ -680,7 +701,6 @@ struct lixa_msg_body_end_8_xa_end_execs_s
     int s_state;
 };
 
-
 /**
  * Message body for verb "end", step "8"
  */
@@ -706,6 +726,7 @@ struct lixa_msg_body_end_16_s
 };
 
 
+
 /**
  * Control thread status
  */
@@ -721,8 +742,12 @@ struct lixa_msg_body_prepare_8_conthr_s
      * FALSE = default, step 8 for prepare will block the caller
      */    
     int non_block;
+    /**
+     * Max number of milliseconds that the client can stay blocked in the
+     * event of a multiple branches blocking global transaction
+     */
+    int timeout;
 };
-
 
 /**
  * Convenience struct for @ref lixa_msg_body_prepare_8_s
@@ -755,7 +780,6 @@ struct lixa_msg_body_prepare_8_xa_prepare_execs_s
     int td_state;
 };
 
-
 /**
  * Message body for verb "prepare", step "8"
  */
@@ -784,6 +808,40 @@ struct lixa_msg_body_prepare_16_s
 /**
  * Control thread status
  */
+struct lixa_msg_body_prepare_24_conthr_s
+{
+    /**
+     * Max number of milliseconds that the client can stay blocked in the
+     * event of a multiple branches blocking global transaction
+     */
+    int timeout;
+};
+
+/**
+ * Message body for verb "prepare", step "24"
+ */
+struct lixa_msg_body_prepare_24_s
+{
+    /**
+     * Control thread information
+     */
+    struct lixa_msg_body_prepare_24_conthr_s conthr;
+};
+
+
+/**
+ * Message body for verb "prepare", step "32"
+ */
+struct lixa_msg_body_prepare_32_s
+{
+    struct lixa_msg_body_answer_s answer;
+};
+
+
+
+/**
+ * Control thread status
+ */
 struct lixa_msg_body_commit_8_conthr_s
 {
     /**
@@ -792,7 +850,6 @@ struct lixa_msg_body_commit_8_conthr_s
      */
     int finished;
 };
-
 
 /**
  * Convenience struct for @ref lixa_msg_body_commit_8_s
@@ -823,7 +880,6 @@ struct lixa_msg_body_commit_8_xa_commit_execs_s
     int s_state;
 };
 
-
 /**
  * Message body for verb "commit", step "8"
  */
@@ -840,6 +896,7 @@ struct lixa_msg_body_commit_8_s
 };
 
 
+
 /**
  * Control thread status
  */
@@ -851,7 +908,6 @@ struct lixa_msg_body_rollback_8_conthr_s
      */
     int finished;
 };
-
 
 /**
  * Convenience struct for @ref lixa_msg_body_rollback_8_s
@@ -882,7 +938,6 @@ struct lixa_msg_body_rollback_8_xa_rollback_execs_s
     int s_state;
 };
 
-
 /**
  * Message body for verb "rollback", step "8"
  */
@@ -899,6 +954,7 @@ struct lixa_msg_body_rollback_8_s
 };
 
 
+
 /**
  * Convenience struct for @ref lixa_msg_body_qrcvr_8_s
  */
@@ -907,7 +963,6 @@ struct lixa_msg_body_qrcvr_8_client_s
     xmlChar *job;
     md5_digest_hex_t config_digest;
 };
-
 
 /**
  * Message body for verb "qrcvr", step "8"
@@ -945,7 +1000,6 @@ struct lixa_msg_body_qrcvr_16_state_s
     XID xid;
 };
 
-
 /**
  * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
  */
@@ -974,7 +1028,6 @@ struct lixa_msg_body_qrcvr_16_rsrmgr_s
     int td_state;
 };
 
-
 /**
  * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
  */
@@ -985,7 +1038,6 @@ struct lixa_msg_body_qrcvr_16_client_s
     struct lixa_msg_verb_step_s last_verb_step;
     struct lixa_msg_body_qrcvr_16_state_s state;
 };
-
 
 /**
  * Message body for verb "qrcvr", step "16"
@@ -1013,7 +1065,6 @@ struct lixa_msg_body_qrcvr_24_recovery_s
     int commit;
 };
 
-
 /**
  * Convenience struct for @ref lixa_msg_body_qrcvr_24_s
  */
@@ -1029,7 +1080,6 @@ struct lixa_msg_body_qrcvr_24_rsrmgr_s
     int rc;
 };
 
-
 /**
  * Message body for verb "qrcvr", step "24"
  */
@@ -1038,6 +1088,7 @@ struct lixa_msg_body_qrcvr_24_s
     struct lixa_msg_body_qrcvr_24_recovery_s recovery;
     GArray *rsrmgrs;
 };
+
 
 
 /**
@@ -1067,7 +1118,6 @@ struct lixa_msg_body_reg_8_ax_reg_exec_s
     int s_state;
 };
 
-
 /**
  * Message body for verb "reg", step "8"
  */
@@ -1078,6 +1128,7 @@ struct lixa_msg_body_reg_8_s
      */
     struct lixa_msg_body_reg_8_ax_reg_exec_s ax_reg_exec;
 };
+
 
 
 /**
@@ -1103,7 +1154,6 @@ struct lixa_msg_body_unreg_8_ax_unreg_exec_s
     int td_state;
 };
 
-
 /**
  * Message body for verb "unreg", step "8"
  */
@@ -1114,6 +1164,7 @@ struct lixa_msg_body_unreg_8_s
      */
     struct lixa_msg_body_unreg_8_ax_unreg_exec_s ax_unreg_exec;
 };
+
 
 
 /**
@@ -1127,7 +1178,6 @@ struct lixa_msg_body_forget_8_conthr_s
      */
     int finished;
 };
-
 
 /**
  * Convenience struct for @ref lixa_msg_body_forget_8_s
@@ -1154,7 +1204,6 @@ struct lixa_msg_body_forget_8_xa_forget_execs_s
     int s_state;
 };
 
-
 /**
  * Message body for verb "forget", step "8"
  */
@@ -1169,6 +1218,8 @@ struct lixa_msg_body_forget_8_s
      */
     GArray *xa_forget_execs;
 };
+
+
 
 /**
  * Convenience struct for @ref lixa_msg_body_trans_8_s
@@ -1187,6 +1238,7 @@ struct lixa_msg_body_trans_8_s
 {
     struct lixa_msg_body_trans_8_client_s client;
 };
+
 
 struct lixa_msg_body_trans_16_transaction_s
 {
@@ -1209,6 +1261,8 @@ struct lixa_msg_body_trans_16_s
     struct lixa_msg_body_trans_16_client_s client;
     GArray *transactions;
 };
+
+
 
 /**
  * This structure maps the messages flowing between LIXA client (lixac) and
@@ -1238,6 +1292,8 @@ struct lixa_msg_s
         struct lixa_msg_body_end_16_s end_16;
         struct lixa_msg_body_prepare_8_s prepare_8;
         struct lixa_msg_body_prepare_16_s prepare_16;
+        struct lixa_msg_body_prepare_24_s prepare_24;
+        struct lixa_msg_body_prepare_32_s prepare_32;
         struct lixa_msg_body_commit_8_s commit_8;
         struct lixa_msg_body_rollback_8_s rollback_8;
         struct lixa_msg_body_qrcvr_8_s qrcvr_8;
@@ -1252,52 +1308,58 @@ struct lixa_msg_s
 };
 
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 
-/**
- * Initialize an empty message
- * @param msg IN/OUT message must be initialized
- */
+    
+    /**
+     * Initialize an empty message
+     * @param[in,out] msg message must be initialized
+     */
     static inline void lixa_msg_init(struct lixa_msg_s *msg)
     {
         memset(msg, 0, sizeof(struct lixa_msg_s));
     }
 
 
-/**
- * Retrieve the first XML message from a TCP/IP socket (file descriptor)
- * @param fd IN file descriptor associated to the TCP/IP socket
- * @param buf OUT buffer will be used to store the XML message
- * @param buf_size IN size of buf
- * @param read_bytes OUT number of bytes read, XML message length
- * @return a reason code
- */
+    
+    /**
+     * Retrieve the first XML message from a TCP/IP socket (file descriptor)
+     * @param[in] fd file descriptor associated to the TCP/IP socket
+     * @param[out] buf buffer will be used to store the XML message
+     * @param[in] buf_size size of buf
+     * @param[out] read_bytes number of bytes read, XML message length
+     * @return a reason code
+     */
     int lixa_msg_retrieve(int fd,
                           char *buf, size_t buf_size,
                           ssize_t *read_bytes);
 
 
-/**
- * Send a message to a TCP/IP socket (file descriptor)
- * @param fd IN file descriptor associated to the TCP/IP socket
- * @param buf IN buffer will be used to store the XML message
- * @param buf_size IN size of buf
- * @return a reason code
- */
+    
+    /**
+     * Send a message to a TCP/IP socket (file descriptor)
+     * @param[in] fd file descriptor associated to the TCP/IP socket
+     * @param[in] buf buffer will be used to store the XML message
+     * @param[in] buf_size size of buf
+     * @return a reason code
+     */
     int lixa_msg_send(int fd, const char *buf, size_t buf_size);
 
 
-/**
- * Free all the dynamically allocated strings previously allocated by
- * @ref lixa_msg_deserialize using xmlGetProp method
- * @param msg IN/OUT the message must be massaged
- * @return a reason code
- */
+    
+    /**
+     * Free all the dynamically allocated strings previously allocated by
+     * @ref lixa_msg_deserialize using xmlGetProp method
+     * @param[in,out] msg the message must be massaged
+     * @return a reason code
+     */
     int lixa_msg_free(struct lixa_msg_s *msg);
 
+    
 
 #ifdef __cplusplus
 }
@@ -1311,6 +1373,7 @@ extern "C" {
 # define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE_SAVE */
+
 
 
 #endif /* LIXA_XML_MSG_H */

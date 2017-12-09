@@ -1638,6 +1638,38 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
 
 
 
+int lixa_xa_prepare_wait_branches(client_config_coll_t *ccc,
+                                  client_status_t *cs)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    struct lixa_msg_s msg;
+    
+    LIXA_TRACE(("lixa_xa_prepare_wait_branches\n"));
+    TRY {
+        /* send a message that's necessary to synchronize on state server and
+           wait all the branches completed */
+
+        /* receive a message from state server to get the results of the global
+           prepare, for all the branches */
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_xa_prepare_wait_branches/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_xa_prepare_multi(client_status_t *cs,
                           GArray *xida, int *txrc, int *commit, XID *xid)
 {

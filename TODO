@@ -1,7 +1,6 @@
-case0106: monkey RM for superior and subordinate must use a different configuration because subordinate uses non_block in xta_transaction_commit.
-Possibile solutions:
-- create the resources dynamically, passing a different config file
-- use distinct LIXA_PROFILEs for the two (try to put export in front of the command for lixa_test_group.sh
+Implement deserialize for messages: prepare_24, prepare_32
+Implement trace for messages: prepare_24, prepare_32
+go on with lixa_xa_prepare_wait_branches
 Go on with test multiple branch: @@@ in case0106.c
 
 Branching:
@@ -14,6 +13,8 @@ In the event of branch, all branches must use xa_prepare even if they are
 using just one Resource Manager
 Create a test case to check LXD032N message: one branch already started 
 xa_prepare, a subordinate one tryes to branch.
+Implement timeout to avoid a too long block time for clients (timeout parameter
+in xa_prepare step 8 and step 24 messages)
 Move control_only boolean value (struct server_client_status_s) to
 enum server_client_status_e
 

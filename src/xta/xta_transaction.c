@@ -676,8 +676,9 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
         } /* if (this->commit_suspended) */
         /* prepare (skip if we are rollbacking) */
         if (commit) {
-            /* bypass xa_prepare if one_phase_commit is TRUE */
-            if (!one_phase_commit) {
+            /* bypass xa_prepare if one_phase_commit is TRUE or xa_prepare
+             * has been already performed in the previous suspended commit */
+            if (!one_phase_commit && !this->commit_suspended) {
                 ret_cod = lixa_xa_prepare(
                     &this->local_ccc, &this->client_status,
                     xta_xid_get_xa_xid(this->xid), non_block,

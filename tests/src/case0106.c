@@ -64,7 +64,6 @@
 void statements_setup(void);
 void create_dynamic_native_xa_resources();
 void create_a_new_transaction_manager(void);
-void create_static_native_xa_resources(void);
 void create_a_new_transaction(void);
 void enlist_resources_to_transaction(void);
 void open_all_the_resources(void);
@@ -97,17 +96,18 @@ enum BranchType { SUPERIOR, SUBORDINATE, NO_BRANCH_TYPE } branch_type;
 /* XTA variables (objects) */
 xta_transaction_manager_t *tm;
 xta_transaction_t *tx;
-xta_native_xa_resource_t *native_xa_res;
-xta_native_xa_resource_t *dynamic_native_xa_res;
+xta_native_xa_resource_t *dynamic_native_xa_res_monkey;
+xta_native_xa_resource_t *dynamic_native_xa_res_ora;
 /* work variables */
 char response_buffer[100];
 char request_buffer[100];
+/* control variables */
+int         statement;
+int         commit;
+int         insert;
 const char *fifo_request = NULL;
 const char *fifo_reply = NULL;
-/* control variables */
-int        statement;
-int        commit;
-int        insert;
+const char *monkeyrm_config = NULL;
 #ifdef HAVE_ORACLE
 /* Oracle variables */
 int            oci_rc;
@@ -141,8 +141,8 @@ int main(int argc, char *argv[])
     /* parse command line parameters */
     pgm = argv[0];
     fprintf(stderr, "%s/%u| starting...\n", pgm, pid);
-    if (argc < 7) {
-        fprintf(stderr, "%s/%u: at least six options must be specified\n",
+    if (argc < 8) {
+        fprintf(stderr, "%s/%u: at least seven options must be specified\n",
                 argv[0], pid);
         return 1;
     }
@@ -152,6 +152,7 @@ int main(int argc, char *argv[])
     commit = strtol(argv[4], NULL, 0);
     fifo_request = argv[5];
     fifo_reply = argv[6];
+    monkeyrm_config = argv[7];
 
     /* choose the SQL statements that must be executed by this branch */
     statements_setup();
@@ -191,7 +192,6 @@ void superior(void)
     /* initial boilerplate code */
     create_dynamic_native_xa_resources();
     create_a_new_transaction_manager();
-    create_static_native_xa_resources();
     create_a_new_transaction();
     enlist_resources_to_transaction();
     open_all_the_resources();
@@ -266,7 +266,6 @@ void subordinate(void)
     /* initial boilerplate code */
     create_dynamic_native_xa_resources();
     create_a_new_transaction_manager();
-    create_static_native_xa_resources();
     create_a_new_transaction();
     enlist_resources_to_transaction();
     open_all_the_resources();
@@ -361,16 +360,29 @@ void statements_setup(void)
 void create_dynamic_native_xa_resources()
 {
     /*
-     * dynamically create an XA native resource object
+     * dynamically create an XA native resource object for the LIXA
+     * Monkey Resource Manager (test & debugging tool)
+     */
+    dynamic_native_xa_res_monkey = xta_native_xa_resource_new(
+        "LIXA Monkey RM (static)",
+        "/opt/lixa/lib/switch_lixa_monkeyrm_stareg.so",
+        monkeyrm_config, "");
+    if (dynamic_native_xa_res_monkey == NULL) {
+        fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned NULL for "
+                "dynamically creted resource\n", pgm, pid);
+        exit(1);
+    }
+    /*
+     * dynamically create an XA native resource object for Oracle database
      */
 #ifdef HAVE_ORACLE
-    dynamic_native_xa_res = xta_native_xa_resource_new(
+    dynamic_native_xa_res_ora = xta_native_xa_resource_new(
         "OracleIC_stareg",
         "/opt/lixa/lib/switch_oracle_stareg.so",
         "ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+"
         "threads=true+DbgFl=7+SqlNet=lixa_ora_db+"
         "Loose_Coupling=true", "");
-    if (dynamic_native_xa_res == NULL) {
+    if (dynamic_native_xa_res_ora == NULL) {
         fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned NULL for "
                 "dynamically creted resource\n", pgm, pid);
         exit(1);
@@ -395,23 +407,6 @@ void create_a_new_transaction_manager(void)
 
 
 
-void create_static_native_xa_resources(void)
-{
-    /*
-     * create an XA native (static) resource object linked to the first Resouce
-     * Manager configured in LIXA profile
-     */
-    native_xa_res = xta_native_xa_resource_new_by_rmid(
-        0, xta_transaction_manager_get_config());
-    if (native_xa_res == NULL) {
-        fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned NULL\n",
-                pgm, pid);
-        exit(1);
-    }    
-}
-
-
-
 void create_a_new_transaction(void)
 {
     /* create a new transaction for this thread */
@@ -430,22 +425,20 @@ void create_a_new_transaction(void)
 
 void enlist_resources_to_transaction(void)
 {
-    /* enlist the native XA Resource to the transaction: this step
-     * is useless but it's not dangerous */
+    /* enlist the dynamic native XA Resources to the transaction */
     rc = xta_transaction_enlist_resource(
-        tx, (xta_xa_resource_t *)native_xa_res);
+        tx, (xta_xa_resource_t *)dynamic_native_xa_res_monkey);
     if (rc != LIXA_RC_OK) {
         fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
-                "native_xa_res: returned %d\n", pgm, pid, rc);
+                "dynamic_native_xa_res_monkey: returned %d\n", pgm, pid, rc);
         exit(1);
     }
-    /* enlist the dynamic native XA Resource (Oracle) to the transaction */
 #ifdef HAVE_ORACLE
     rc = xta_transaction_enlist_resource(tx,
-        (xta_xa_resource_t *)dynamic_native_xa_res);
+        (xta_xa_resource_t *)dynamic_native_xa_res_ora);
     if (rc != LIXA_RC_OK) {
         fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
-                "dynamic_native_xa_res: returned %d\n", pgm, pid, rc);
+                "dynamic_native_xa_res_ora: returned %d\n", pgm, pid, rc);
         exit(1);
     }
 #endif
@@ -586,10 +579,10 @@ void delete_all_xa_resources(void)
     /*
      * delete dynamically created native XA Resource object for Oracle
      */
-    xta_native_xa_resource_delete(dynamic_native_xa_res);
+    xta_native_xa_resource_delete(dynamic_native_xa_res_ora);
 #endif 
     /*
      * delete native XA Resource object
      */
-    xta_native_xa_resource_delete(native_xa_res);
+    xta_native_xa_resource_delete(dynamic_native_xa_res_monkey);
 }

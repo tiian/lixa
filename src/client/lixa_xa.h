@@ -136,9 +136,10 @@ extern "C" {
     int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
                      int *txrc, int next_txstate, int mmode);
 
+    
 
     /**
-     * End work performed on behalf of the transaction manager; this is the
+     * Prepare work performed on behalf of the transaction manager; this is the
      * original LIXA version that supports XTA implementation and does not
      * need the multi xids extension implemented by TC TX (see
      * @ref lixa_xa_prepare_multi)
@@ -163,8 +164,21 @@ extern "C" {
 
     
 
+    
     /**
-     * End work performed on behalf of the transaction manager; this is a
+     * Wait all the branches prepared: this step is necessary before commit
+     * can be performed in a multiple branches global transaction
+     * @param[in] ccc client config collection
+     * @param[in] cs reference to the status of the calling client
+     * @return a reason code
+     */
+    int lixa_xa_prepare_wait_branches(client_config_coll_t *ccc,
+                                      client_status_t *cs);
+
+
+    
+    /**
+     * Prepare work performed on behalf of the transaction manager; this is a
      * specific version of @ref lixa_xa_prepare designed to support the
      * TC TX extension provided by Globetom; XTA implementation does not need
      * multiple xids prepare

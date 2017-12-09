@@ -1035,6 +1035,7 @@ int lixa_msg_deserialize_prepare_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
     enum Exception { COMMIT_NOT_FOUND,
                      NON_BLOCK_NOT_FOUND,
+                     TIMEOUT_NOT_FOUND,
                      XA_INFO_NOT_FOUND,
                      RMID_NOT_FOUND,
                      FLAGS_NOT_FOUND,
@@ -1065,6 +1066,13 @@ int lixa_msg_deserialize_prepare_8(xmlNodePtr cur, struct lixa_msg_s *msg)
                 msg->body.prepare_8.conthr.non_block =
                     (int) strtol((char *) tmp, NULL, 0);
                 xmlFree(tmp);
+                /* timeout */
+                if (NULL ==
+                    (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_TIMEOUT)))
+                    THROW(TIMEOUT_NOT_FOUND);
+                msg->body.prepare_8.conthr.timeout =
+                    (int) strtol((char *) tmp, NULL, 0);
+                xmlFree(tmp);                
             } else if (!xmlStrcmp(cur->name,
                                   LIXA_XML_MSG_TAG_XA_PREPARE_EXECS)) {
                 xmlNodePtr cur2 = cur->xmlChildrenNode;
@@ -1129,6 +1137,7 @@ int lixa_msg_deserialize_prepare_8(xmlNodePtr cur, struct lixa_msg_s *msg)
         switch (excp) {
             case COMMIT_NOT_FOUND:
             case NON_BLOCK_NOT_FOUND:
+            case TIMEOUT_NOT_FOUND:
             case XA_INFO_NOT_FOUND:
             case RMID_NOT_FOUND:
             case FLAGS_NOT_FOUND:
