@@ -491,7 +491,8 @@ am_case0103_OBJECTS = case0103-case0103.$(OBJEXT)
 case0103_OBJECTS = $(am_case0103_OBJECTS)
 case0103_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la ../../src/xta/liblixta.la
-am_case0104_OBJECTS = case0104-case0104.$(OBJEXT)
+am_case0104_OBJECTS = case0104-case0104.$(OBJEXT) \
+	case0104-case_test_functions.$(OBJEXT)
 case0104_OBJECTS = $(am_case0104_OBJECTS)
 case0104_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la ../../src/xta/liblixta.la \
@@ -1020,7 +1021,7 @@ case0104_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 case0104_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/xta/liblixta.la $(LDADD_ORACLE)
 
-case0104_SOURCES = case0104.c
+case0104_SOURCES = case0104.c case_test_functions.c
 case0104_LDFLAGS = @ORACLE_OCI_LDFLAGS@
 case0105_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
@@ -1391,6 +1392,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0102-case0102.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0103-case0103.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0104-case0104.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0104-case_test_functions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0105-case0105.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0106-case0106.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0106-case_test_functions.Po@am__quote@
@@ -1611,6 +1613,20 @@ case0104-case0104.obj: case0104.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='case0104.c' object='case0104-case0104.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0104_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o case0104-case0104.obj `if test -f 'case0104.c'; then $(CYGPATH_W) 'case0104.c'; else $(CYGPATH_W) '$(srcdir)/case0104.c'; fi`
+
+case0104-case_test_functions.o: case_test_functions.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0104_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT case0104-case_test_functions.o -MD -MP -MF $(DEPDIR)/case0104-case_test_functions.Tpo -c -o case0104-case_test_functions.o `test -f 'case_test_functions.c' || echo '$(srcdir)/'`case_test_functions.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case0104-case_test_functions.Tpo $(DEPDIR)/case0104-case_test_functions.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='case_test_functions.c' object='case0104-case_test_functions.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0104_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o case0104-case_test_functions.o `test -f 'case_test_functions.c' || echo '$(srcdir)/'`case_test_functions.c
+
+case0104-case_test_functions.obj: case_test_functions.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0104_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT case0104-case_test_functions.obj -MD -MP -MF $(DEPDIR)/case0104-case_test_functions.Tpo -c -o case0104-case_test_functions.obj `if test -f 'case_test_functions.c'; then $(CYGPATH_W) 'case_test_functions.c'; else $(CYGPATH_W) '$(srcdir)/case_test_functions.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case0104-case_test_functions.Tpo $(DEPDIR)/case0104-case_test_functions.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='case_test_functions.c' object='case0104-case_test_functions.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0104_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o case0104-case_test_functions.obj `if test -f 'case_test_functions.c'; then $(CYGPATH_W) 'case_test_functions.c'; else $(CYGPATH_W) '$(srcdir)/case_test_functions.c'; fi`
 
 case0105-case0105.o: case0105.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case0105_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT case0105-case0105.o -MD -MP -MF $(DEPDIR)/case0105-case0105.Tpo -c -o case0105-case0105.o `test -f 'case0105.c' || echo '$(srcdir)/'`case0105.c
