@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -24,6 +24,9 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+
+
+
 /* LIXA includes */
 #include "lixa_errors.h"
 #include "lixa_trace.h"
@@ -628,6 +631,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
     enum Exception { NULL_OBJECT
                      , INVALID_STATUS
                      , LIXA_XA_END_ERROR
+                     , LIXA_XA_PREPARE_WAIT_BRANCHES_ERROR
                      , COMMIT_SUSPENDED
                      , LIXA_XA_PREPARE_ERROR
                      , LIXA_XA_COMMIT_ERROR
@@ -676,9 +680,15 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
         } /* if (this->commit_suspended) */
         /* prepare (skip if we are rollbacking) */
         if (commit) {
+            /* check if multiple branches prepare must be waited */
+            if (this->commit_suspended) {
+                ret_cod = lixa_xa_prepare_wait_branches(
+                    &this->local_ccc, &this->client_status);
+                if (LIXA_RC_OK != ret_cod)
+                    THROW(LIXA_XA_PREPARE_WAIT_BRANCHES_ERROR);
+            } else if (!one_phase_commit) {
             /* bypass xa_prepare if one_phase_commit is TRUE or xa_prepare
              * has been already performed in the previous suspended commit */
-            if (!one_phase_commit && !this->commit_suspended) {
                 ret_cod = lixa_xa_prepare(
                     &this->local_ccc, &this->client_status,
                     xta_xid_get_xa_xid(this->xid), non_block,
@@ -783,6 +793,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case LIXA_XA_END_ERROR:
+            case LIXA_XA_PREPARE_WAIT_BRANCHES_ERROR:
             case LIXA_XA_PREPARE_ERROR:
             case COMMIT_SUSPENDED:
             case LIXA_XA_COMMIT_ERROR:

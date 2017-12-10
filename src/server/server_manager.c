@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -637,6 +637,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                 case LIXA_RC_MAINTENANCE_MODE:
                     break;
                 case LIXA_RC_BRANCHES_ON_MULTIPLE_THREADS:
+                case LIXA_RC_PROTOCOL_ERROR:
                     /* drop client connection */
                     if (LIXA_RC_OK != (ret_cod =
                                        server_manager_drop_client(

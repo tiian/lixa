@@ -279,6 +279,26 @@ extern "C" {
 
     
     /**
+     * Executes the logic related to the third step of "xa_prepare" on the
+     * server side. It's used to suspend client activity until all branches
+     * have prepared their own resource managers.
+     * @param[in,out] ts reference to the current thread status
+     * @param[in] lmi reference to the message received from the client
+     * @param[out] lmo reference to the message must be sent to the client
+     * @param[in] block_id position of the block is storing the status of the
+     *                    client is calling the server
+     * @param[out] cs client status record
+     * @return a reason code
+     */
+    int server_xa_prepare_24(struct thread_status_s *ts,
+                             const struct lixa_msg_s *lmi,
+                             struct lixa_msg_s *lmo,
+                             uint32_t block_id,
+                             struct server_client_status_s *cs);
+
+
+    
+    /**
      * Executes the logic related to "xa_rollback" on the server side
      * @param[in,out] ts reference to the current thread status
      * @param[in] lmi reference to the message received from the client

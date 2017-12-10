@@ -21,11 +21,11 @@
 
 
 
-#include <config.h>
+#include "config.h"
 
 
 
-#include <lixa_defines.h>
+#include "lixa_defines.h"
 
 
 
@@ -114,6 +114,14 @@
  * The client crashes after successful message retrieved xa_prepare/step=16
  */
 #define LIXA_CRASH_POINT_PREPARE_2                15
+/**
+ * The client crashes after successful message sent xa_prepare/step=24
+ */
+#define LIXA_CRASH_POINT_PREPARE_3                44
+/**
+ * The client crashes after successful message retrieve xa_prepare/step=32
+ */
+#define LIXA_CRASH_POINT_PREPARE_4                45
 /**
  * The client crashes after successful message sent xa_commit/step=8
  */

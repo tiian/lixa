@@ -196,7 +196,8 @@ int lixa_msg_trace_commit(const struct lixa_msg_s *msg)
                     }
                 }
                 break;
-            default: THROW(INVALID_STEP);
+            default:
+                THROW(INVALID_STEP);
         } /* switch (msg->header.pvs.step) */
 
         THROW(NONE);
@@ -539,6 +540,19 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
                             LIXA_XML_MSG_TAG_ANSWER,
                             LIXA_XML_MSG_PROP_RC,
                             msg->body.prepare_16.answer.rc));
+                break;
+            case 24:
+                LIXA_TRACE(("lixa_msg_trace_prepare: body["
+                            "%s[%s=%d]]\n",
+                                LIXA_XML_MSG_TAG_CONTHR,
+                                LIXA_XML_MSG_PROP_TIMEOUT,
+                                msg->body.prepare_24.conthr.timeout));
+                break;
+            case 32:
+                LIXA_TRACE(("lixa_msg_trace_prepare: body[%s[%s[%d]]]\n",
+                            LIXA_XML_MSG_TAG_ANSWER,
+                            LIXA_XML_MSG_PROP_RC,
+                            msg->body.prepare_32.answer.rc));
                 break;
             default:
                 THROW(INVALID_STEP);

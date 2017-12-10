@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -312,20 +312,23 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
             struct lixa_msg_verb_step_s *verb_step =
                 &ts->curr_status[branch_array[i]
                                  ].sr.data.pld.ph.last_verb_step[0];
+            /* check the branch reached the prepare verb, but not for
+               current branch*/
+            if (LIXA_MSG_VERB_PREPARE != verb_step->verb &&
+                block_id != branch_array[i]) {
+                LIXA_TRACE(("server_xa_branch_prepare: i=" UINT32_T_FORMAT ", "
+                            "branch_array[i]=" UINT32_T_FORMAT ", "
+                            "last_verb=%d, this branch has not "
+                            "yet prepared, skipping it\n",
+                            i, branch_array[i], verb_step->verb));
+                unknown++;
+                continue;
+            }
             LIXA_TRACE(("server_xa_branch_prepare: i=" UINT32_T_FORMAT ", "
                         "branch_array[i]=" UINT32_T_FORMAT ", last_verb=%d, "
                         "will_commit=%d, will_rollback=%d\n",
                         i, branch_array[i], verb_step->verb,
                         state->will_commit, state->will_rollback));
-            /* check the branch reached the prepare verb, but not for
-               current branch*/
-            if (LIXA_MSG_VERB_PREPARE != verb_step->verb &&
-                block_id != branch_array[i]) {
-                LIXA_TRACE(("server_xa_branch_prepare: this branch has not "
-                            "yet prepared, skipping it\n"));
-                unknown++;
-                continue;
-            }
             /* check the prepared state of the branch */
             if (TRUE == state->will_commit) {
                 if (FALSE == state->will_rollback)

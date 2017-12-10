@@ -1558,6 +1558,8 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
         
         msg.body.prepare_8.conthr.commit = *commit;
         msg.body.prepare_8.conthr.non_block = non_block;
+        msg.body.prepare_8.conthr.timeout =
+            LIXA_XA_DEFAULT_MULTI_PREPARE_TIMEOUT;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
@@ -1641,23 +1643,76 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
 int lixa_xa_prepare_wait_branches(client_config_coll_t *ccc,
                                   client_status_t *cs)
 {
-    enum Exception { NONE } excp;
+    enum Exception { MSG_SERIALIZE_ERROR
+                     , MSG_SEND_ERROR
+                     , MSG_RETRIEVE_ERROR
+                     , MSG_DESERIALIZE_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int warning = LIXA_RC_OK;
 
     struct lixa_msg_s msg;
     
     LIXA_TRACE(("lixa_xa_prepare_wait_branches\n"));
     TRY {
-        /* send a message that's necessary to synchronize on state server and
+        int fd;
+        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        size_t buffer_size = 0;
+        ssize_t read_bytes;
+        
+        /* retrieve the socket */
+        fd = client_status_get_sockfd(cs);
+        
+        /* build the message to synchronize on state server and
            wait all the branches completed */
+        msg.header.level = LIXA_MSG_LEVEL;
+        msg.header.pvs.verb = LIXA_MSG_VERB_PREPARE;
+        msg.header.pvs.step = 3*LIXA_MSG_STEP_INCR;
+        msg.body.prepare_24.conthr.timeout =
+            LIXA_XA_DEFAULT_MULTI_PREPARE_TIMEOUT;
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
+                               &msg, buffer, sizeof(buffer), &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR);
+        LIXA_TRACE(("lixa_xa_prepare_wait_branches: sending " SIZE_T_FORMAT
+                    " bytes to the server for step 24\n", buffer_size));
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
+                client_status_set_sockfd(cs, LIXA_NULL_FD);
+            THROW(MSG_SEND_ERROR);
+        }
+
+        LIXA_CRASH(LIXA_CRASH_POINT_PREPARE_3,
+                   client_status_get_crash_count(cs));
 
         /* receive a message from state server to get the results of the global
            prepare, for all the branches */
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
+                               fd, buffer, sizeof(buffer)-1, &read_bytes))) {
+            client_status_check_socket(cs, ret_cod);
+            THROW(MSG_RETRIEVE_ERROR);
+        }
+        LIXA_TRACE(("lixa_xa_prepare_wait_branches: receiving %d"
+                    " bytes from the server |%*.*s|\n",
+                    read_bytes, read_bytes, read_bytes, buffer));
+
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
+                               buffer, read_bytes, &msg)))
+            THROW(MSG_DESERIALIZE_ERROR);
+        warning = msg.body.prepare_32.answer.rc;
+        
+        LIXA_CRASH(LIXA_CRASH_POINT_PREPARE_4,
+                   client_status_get_crash_count(cs));
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case MSG_SERIALIZE_ERROR:
+            case MSG_SEND_ERROR:
+            case MSG_RETRIEVE_ERROR:
+            case MSG_DESERIALIZE_ERROR:
+                break;
             case NONE:
-                ret_cod = LIXA_RC_OK;
+                ret_cod = warning;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1823,6 +1878,9 @@ int lixa_xa_prepare_multi(client_status_t *cs,
         } /* for (i=0; ...) */
 
         msg.body.prepare_8.conthr.commit = *commit;
+        msg.body.prepare_8.conthr.non_block = FALSE;
+        msg.body.prepare_8.conthr.timeout =
+            LIXA_XA_DEFAULT_MULTI_PREPARE_TIMEOUT;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, buffer, sizeof(buffer), &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);

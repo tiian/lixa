@@ -1,12 +1,4 @@
-Implement deserialize for messages: prepare_24, prepare_32
-Implement trace for messages: prepare_24, prepare_32
-go on with lixa_xa_prepare_wait_branches
-Go on with test multiple branch: @@@ in case0106.c
-
-Branching:
-- implement serialization in state server
-
-All branches must prepare before commit can start.
+Test all the possible conditions in sync and async branch with different errors.
 If one branch is not able to prepare, all branches must be rolled-back.
 Implement the above logic even in recovery management (restart).
 In the event of branch, all branches must use xa_prepare even if they are

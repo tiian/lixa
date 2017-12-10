@@ -232,7 +232,7 @@ void superior(void)
     fprintf(stderr, "%s/%u| subordinate task replied '%s'\n",
             pgm, pid, response_buffer);
     /* use XA resources under the control of XTA */
-    // use_xa_resources(); @@@
+    use_xa_resources();
     /* the application can decide to commit or rollback the transaction */
     if (commit) {
         /* commit is performed with "non_block" flag set to FALSE: this is
@@ -288,7 +288,7 @@ void subordinate(void)
         exit(1);
     }
     /* upadate XA resources under the control of XTA */
-    // use_xa_resources(); @@@
+    use_xa_resources();
     /* the application can decide to commit or rollback the transaction */
     if (commit) {
         /* commit is performed with "non_block" flag set to TRUE: this is
@@ -509,6 +509,7 @@ void use_xa_resources(void)
         fprintf(stderr, "%s/%u| OCI statement >%s< completed\n",
                 pgm, pid, (char *)oci_stmt_insert);
     } else {
+        /* delete data */
         if (OCI_SUCCESS != OCIStmtPrepare(
                 oci_stmt_hndl, oci_err_hndl, oci_stmt_delete,
                 (ub4) strlen((char *)oci_stmt_delete),

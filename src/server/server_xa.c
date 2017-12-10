@@ -877,22 +877,33 @@ int server_xa_prepare(struct thread_status_s *ts,
                       struct server_client_status_s *cs)
 {
     enum Exception { SERVER_XA_PREPARE_8_ERROR
+                     , SERVER_XA_PREPARE_24_ERROR
                      , INVALID_STEP
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_xa_prepare\n"));
     TRY {
-        if (8 != lmi->header.pvs.step) {
-            THROW(INVALID_STEP);
-        } else if (LIXA_RC_OK != (ret_cod = server_xa_prepare_8(
-                                      ts, lmi, lmo, block_id, cs)))
-            THROW(SERVER_XA_PREPARE_8_ERROR);
+        switch (lmi->header.pvs.step) {
+            case 8:
+                if (LIXA_RC_OK != (ret_cod = server_xa_prepare_8(
+                                       ts, lmi, lmo, block_id, cs)))
+                    THROW(SERVER_XA_PREPARE_8_ERROR);
+                break;
+            case 24:
+                if (LIXA_RC_OK != (ret_cod = server_xa_prepare_24(
+                                       ts, lmi, lmo, block_id, cs)))
+                    THROW(SERVER_XA_PREPARE_24_ERROR);
+                break;
+            default:
+                THROW(INVALID_STEP);
+        } /* switch (lmi->header.pvs.step) */
 
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case SERVER_XA_PREPARE_8_ERROR:
+            case SERVER_XA_PREPARE_24_ERROR:
                 break;
             case INVALID_STEP:
                 ret_cod = LIXA_RC_INVALID_STATUS;
@@ -1056,6 +1067,107 @@ int server_xa_prepare_8(struct thread_status_s *ts,
     
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_PREPARE_8,
                thread_status_get_crash_count(ts));
+    return ret_cod;
+}
+
+
+
+int server_xa_prepare_24(struct thread_status_s *ts,
+                        const struct lixa_msg_s *lmi,
+                        struct lixa_msg_s *lmo,
+                        uint32_t block_id,
+                        struct server_client_status_s *cs)
+{
+    enum Exception { INVALID_BLOCK_ID
+                     , BRANCH_LIST
+                     , PROTOCOL_ERROR
+                     , PREPARE_BRANCHES
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    uint32_t *branch_array = NULL;
+    
+    LIXA_TRACE(("server_xa_prepare_24\n"));
+    TRY {
+        uint32_t branch_array_size=0;
+        
+        /* check block_id is a valid block */
+        if (ts->curr_status[block_id].sr.data.pld.type !=
+            DATA_PAYLOAD_TYPE_HEADER)
+            THROW(INVALID_BLOCK_ID);
+        /* check if the block is a branch inside a multiple branches
+           transaction */
+        if (server_xa_branch_is_chained(ts, block_id)) {
+            LIXA_TRACE(("server_xa_prepare_24: this branch is part of a "
+                        "multiple branches transaction\n"));
+            /* retrieve the list of all the branches in this global
+               transaction */
+            if (LIXA_RC_OK != (ret_cod = server_xa_branch_list(
+                                   ts, block_id, &branch_array_size,
+                                   &branch_array)))
+                THROW(BRANCH_LIST);
+        } else {
+            LIXA_TRACE(("server_xa_prepare_24: this message can't arrive "
+                        "from a client that's not part of a "
+                        "multiple branches transaction\n"));
+            THROW(PROTOCOL_ERROR);
+        } /* if (server_xa_branch_is_chained(ts, block_id)) */
+        
+        /* check all the branches if this is a multiple branches transaction */
+        if (0 < branch_array_size) {
+            ret_cod = server_xa_branch_prepare(
+                ts, block_id, branch_array_size, branch_array);
+            switch (ret_cod) {
+                case LIXA_RC_OK:
+                    cs->state = CLIENT_STATUS_CHAIN_JOIN_OK;
+                    break;
+                case LIXA_RC_MULTIBRANCH_PREPARE_FAILED:
+                    cs->state = CLIENT_STATUS_CHAIN_JOIN_KO;
+                    break;
+                case LIXA_RC_OPERATION_POSTPONED:
+                    cs->state = CLIENT_STATUS_OPERATION_POSTPONED;
+                    break;
+                default:
+                    THROW(PREPARE_BRANCHES);
+            } /* switch (ret_cod) */
+        } else
+            ret_cod = LIXA_RC_OK;
+            
+        /* send an answer message only if not postponed */
+        if (CLIENT_STATUS_OPERATION_POSTPONED != cs->state) {
+            /* prepare output message */
+            lmo->header.pvs.verb = lmi->header.pvs.verb;
+            /* prepare next protocol step */
+            cs->last_verb_step.verb = lmo->header.pvs.verb;
+            cs->last_verb_step.step = lmo->header.pvs.step;
+        } /* if (LIXA_RC_OK == ret_cod || */
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_BLOCK_ID:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case BRANCH_LIST:
+                break;
+            case PROTOCOL_ERROR:
+                ret_cod = LIXA_RC_PROTOCOL_ERROR;
+                break;
+            case PREPARE_BRANCHES:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* clean memory */
+    if (NULL != branch_array) {
+        free(branch_array);
+        branch_array = NULL;
+    }
+    LIXA_TRACE(("server_xa_prepare_24/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 

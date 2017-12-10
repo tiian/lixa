@@ -20,11 +20,13 @@
 # define LIXA_XA_H
 
 
-#include <config.h>
+
+#include "config.h"
 
 
-#include <lixa_trace.h>
-#include <client_status.h>
+
+#include "lixa_trace.h"
+#include "client_status.h"
 
 
 
@@ -36,6 +38,15 @@
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_CLIENT_XA
+
+
+
+/**
+ * Default value for the number of milliseconds should be waited by a client
+ * when a prepare inside a multiple branch transaction is performed
+ */
+#define LIXA_XA_DEFAULT_MULTI_PREPARE_TIMEOUT      5000
+
 
 
 #ifdef __cplusplus
