@@ -7,8 +7,6 @@ Create a test case to check LXD032N message: one branch already started
 xa_prepare, a subordinate one tryes to branch.
 Implement timeout to avoid a too long block time for clients (timeout parameter
 in xa_prepare step 8 and step 24 messages)
-Move control_only boolean value (struct server_client_status_s) to
-enum server_client_status_e
 
 Check memory leaks in state server after branch implementation.
 

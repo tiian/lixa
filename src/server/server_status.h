@@ -201,7 +201,8 @@ enum server_client_status_e { CLIENT_STATUS_NULL
                               , CLIENT_STATUS_OPERATION_POSTPONED
                               , CLIENT_STATUS_WOULD_BLOCK
                               , CLIENT_STATUS_CHAIN_JOIN_OK
-                              , CLIENT_STATUS_CHAIN_JOIN_KO };
+                              , CLIENT_STATUS_CHAIN_JOIN_KO
+                              , CLIENT_STATUS_CONTROL_ONLY };
 
 
 
@@ -238,11 +239,6 @@ struct server_client_status_s
      * Boolean value: is the client sending the first message?
      */
     int first_message;
-    /**
-     * Boolean value: the thread is in "control only" mode: no buffer from
-     * the client will be read, but only from control pipe
-     */
-    int control_only;
     /**
      * Flag used for specific states that change the client/server flow
      */
@@ -796,7 +792,6 @@ extern "C" {
         scs->output_buffer_size = 0;
         scs->last_verb_step.verb = 0;
         scs->last_verb_step.step = 0;
-        scs->control_only = FALSE;
         scs->state = CLIENT_STATUS_NULL;
         scs->first_message = TRUE;
         thread_status_switch_init(&scs->switch_thread);

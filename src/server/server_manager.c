@@ -312,14 +312,14 @@ void *server_manager_thread(void *void_ts)
                 LIXA_TRACE(("server_manager_thread: slot="
                             NFDS_T_FORMAT
                             ", fd=%d, POLLIN=%d, POLLOUT=%d, POLLERR=%d, "
-                            "POLLHUP=%d, POLLNVAL=%d, control_only=%d\n",
+                            "POLLHUP=%d, POLLNVAL=%d, state=%d\n",
                             i, ts->poll_array[i].fd,
                             ts->poll_array[i].revents & POLLIN,
                             ts->poll_array[i].revents & POLLOUT,
                             ts->poll_array[i].revents & POLLERR,
                             ts->poll_array[i].revents & POLLHUP,
                             ts->poll_array[i].revents & POLLNVAL,
-                            i ? ts->client_array[i].control_only : 0));
+                            i ? ts->client_array[i].state : 0));
                 if (LIXA_NULL_FD == ts->poll_array[i].fd) {
                     LIXA_TRACE(("server_manager_thread: this slot must "
                                 "be temporary skipped\n"));
@@ -803,7 +803,7 @@ int server_manager_switch_1(struct thread_status_s *ts,
         }
 
         /* move the thread to control only state */
-        ts->client_array[slot_id].control_only = TRUE;
+        ts->client_array[slot_id].state = CLIENT_STATUS_CONTROL_ONLY;
         /* send the message to the destination thread */
         if (sizeof(msg) != write(ts->tpa->array[tss->id].pipefd[1],
                                  &msg, sizeof(msg))) THROW(WRITE_ERROR);
@@ -936,7 +936,7 @@ int server_manager_switch_3(struct thread_status_s *ts,
         struct thread_status_switch_s *tss =
             &(ts->client_array[msg->body.sp.slot_id].switch_thread);
         /* clear switch info */
-        ts->client_array[msg->body.sp.slot_id].control_only = FALSE;
+        ts->client_array[msg->body.sp.slot_id].state = CLIENT_STATUS_NULL;
         tss->id = 0;
         tss->buffer_size = 0;
         if (NULL != tss->buffer) {
@@ -1745,7 +1745,7 @@ int server_manager_fix_poll(struct thread_status_s *ts)
                 ts->poll_array[i].events = 0;
                 continue;
             }
-            if (ts->client_array[i].control_only)
+            if (CLIENT_STATUS_CONTROL_ONLY == ts->client_array[i].state)
                 ts->poll_array[i].events = 0;
             else if (ts->client_array[i].output_buffer == NULL)
                 ts->poll_array[i].events = POLLIN;
