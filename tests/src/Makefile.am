@@ -176,7 +176,7 @@ case0104_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 case0104_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/xta/liblixta.la $(LDADD_ORACLE)
 case0104_SOURCES = case0104.c case_test_functions.c
-case0104_LDFLAGS = @ORACLE_OCI_LDFLAGS@
+case0104_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 case0105_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 case0105_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
@@ -188,6 +188,6 @@ case0106_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 case0106_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/xta/liblixta.la $(LDADD_ORACLE)
 case0106_SOURCES = case0106.c case_test_functions.c
-case0106_LDFLAGS = @ORACLE_OCI_LDFLAGS@
+case0106_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 
 

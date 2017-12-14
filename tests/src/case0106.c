@@ -108,8 +108,21 @@ int         insert;
 const char *fifo_request = NULL;
 const char *fifo_reply = NULL;
 const char *monkeyrm_config = NULL;
-#ifdef HAVE_ORACLE
+/* MySQL variables */
+#ifdef HAVE_MYSQL
+xta_mysql_xa_resource_t *mysql_xa_res;
+MYSQL *mysql_conn = NULL;
+char  *mysql_stmt_insert1 =
+    "INSERT INTO authors VALUES(101, 'Ernest', 'Hemingway')";
+char  *mysql_stmt_delete1 = "DELETE FROM authors WHERE id=101";
+char  *mysql_stmt_insert2 =
+    "INSERT INTO authors VALUES(102, 'Giorgio', 'Saviane')";
+char  *mysql_stmt_delete2 = "DELETE FROM authors WHERE id=102";
+char  *mysql_stmt_insert = NULL;
+char  *mysql_stmt_delete = NULL;
+#endif
 /* Oracle variables */
+#ifdef HAVE_ORACLE
 int            oci_rc;
 OCIEnv        *oci_env;
 OCISvcCtx     *oci_svc_ctx;
@@ -128,6 +141,21 @@ text          *oci_stmt_delete2 =
 text          *oci_stmt_insert = NULL;
 text          *oci_stmt_delete = NULL;
 #endif
+/* PostgreSQL variables */
+#ifdef HAVE_POSTGRESQL
+xta_postgresql_xa_resource_t *postgresql_xa_res;
+PGconn *postgres_conn = NULL;
+PGresult *postgres_res;
+char *postgres_stmt_insert1 = "INSERT INTO authors VALUES("
+    "101, 'Milan', 'Kundera');";
+char *postgres_stmt_delete1 = "DELETE FROM authors WHERE id=101;";
+char *postgres_stmt_insert2 = "INSERT INTO authors VALUES("
+    "102, 'Jostein', 'Gaarder');";
+char *postgres_stmt_delete2 = "DELETE FROM authors WHERE id=102;";
+char *postgres_stmt_insert = NULL;
+char *postgres_stmt_delete = NULL;
+#endif
+
 
 
 
@@ -337,15 +365,31 @@ void statements_setup(void)
        among concurrent branches */
     switch (statement) {
         case 1:
+#ifdef HAVE_MYSQL
+            mysql_stmt_insert = mysql_stmt_insert1;
+            mysql_stmt_delete = mysql_stmt_delete1;
+#endif
 #ifdef HAVE_ORACLE
             oci_stmt_insert = oci_stmt_insert1;
             oci_stmt_delete = oci_stmt_delete1;
 #endif
+#ifdef HAVE_POSTGRESQL
+            postgres_stmt_insert = postgres_stmt_insert1;
+            postgres_stmt_delete = postgres_stmt_delete1;
+#endif
             break;
         case 2:
+#ifdef HAVE_MYSQL
+            mysql_stmt_insert = mysql_stmt_insert2;
+            mysql_stmt_delete = mysql_stmt_delete2;
+#endif
 #ifdef HAVE_ORACLE
             oci_stmt_insert = oci_stmt_insert2;
             oci_stmt_delete = oci_stmt_delete2;
+#endif
+#ifdef HAVE_POSTGRESQL
+            postgres_stmt_insert = postgres_stmt_insert2;
+            postgres_stmt_delete = postgres_stmt_delete2;
 #endif
             break;
         default:
@@ -372,10 +416,34 @@ void create_dynamic_native_xa_resources()
                 "dynamically creted resource\n", pgm, pid);
         exit(1);
     }
+#ifdef HAVE_MYSQL
+    /*
+     * create a MySQL native connection
+     */
+    if (NULL == (mysql_conn = mysql_init(NULL))) {
+        fprintf(stderr, "%s/%u| mysql_init: returned NULL\n", pgm, pid);
+        exit(1);
+    }
+    if (NULL == mysql_real_connect(mysql_conn, "localhost", "lixa", "",
+                                   "lixa", 0, NULL, 0)) {
+        fprintf(stderr, "%s/%u| mysql_real_connect: returned error: %u, %s\n",
+               pgm, pid, mysql_errno(mysql_conn), mysql_error(mysql_conn));
+        exit(1);
+    }
+    /*
+     * create a MySQL XA resource object
+     */
+    if (NULL == (mysql_xa_res = xta_mysql_xa_resource_new(
+                     mysql_conn, "MySQL", "localhost,0,lixa,,lixa"))) {
+        fprintf(stderr, "%s/%u| xta_mysql_xa_resource_new: returned NULL\n",
+                pgm, pid);
+        exit(1);
+    }
+#endif
+#ifdef HAVE_ORACLE
     /*
      * dynamically create an XA native resource object for Oracle database
      */
-#ifdef HAVE_ORACLE
     dynamic_native_xa_res_ora = xta_native_xa_resource_new(
         "OracleIC_stareg",
         "/opt/lixa/lib/switch_oracle_stareg.so",
@@ -386,6 +454,28 @@ void create_dynamic_native_xa_resources()
         fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned NULL for "
                 "dynamically creted resource\n", pgm, pid);
         exit(1);
+    }
+#endif
+#ifdef HAVE_POSTGRESQL
+    /*
+     * create a PostgreSQL native connection
+     */
+    postgres_conn = PQconnectdb("dbname=testdb");
+    if (CONNECTION_OK != PQstatus(postgres_conn)) {
+        fprintf(stderr, "%s/%u| PQconnectdb: returned error %s\n",
+               pgm, pid, PQerrorMessage(postgres_conn));
+        PQfinish(postgres_conn);
+        exit(1);
+    }
+    /*
+     * create a PostgreSQL XA resource object
+     */
+    if (NULL == (postgresql_xa_res = xta_postgresql_xa_resource_new(
+                     postgres_conn, "PostgreSQL",
+                     "dbname=testdb"))) {
+        fprintf(stderr, "%s/%u| xta_postgresql_xa_resource_new: returned "
+                "NULL\n", pgm, pid);
+    exit(1);
     }
 #endif
 }
@@ -433,6 +523,15 @@ void enlist_resources_to_transaction(void)
                 "dynamic_native_xa_res_monkey: returned %d\n", pgm, pid, rc);
         exit(1);
     }
+#ifdef HAVE_MYSQL
+    /* register the MySQL XA Resource to the transaction manager */
+    if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
+                           tx, (xta_xa_resource_t *)mysql_xa_res))) {
+        fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/mysql_xa_res: "
+                "returned %d\n", pgm, pid, rc);
+        exit(1);
+    }
+#endif    
 #ifdef HAVE_ORACLE
     rc = xta_transaction_enlist_resource(tx,
         (xta_xa_resource_t *)dynamic_native_xa_res_ora);
@@ -442,6 +541,15 @@ void enlist_resources_to_transaction(void)
         exit(1);
     }
 #endif
+#ifdef HAVE_POSTGRESQL
+    /* register the PostgreSQL XA Resource to the transaction manager */
+    if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
+                           tx, (xta_xa_resource_t *)postgresql_xa_res))) {
+        fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
+                "postgresql_xa_res: returned %d\n", pgm, pid, rc);
+        exit(1);
+    }
+#endif    
 }
 
 
@@ -461,6 +569,30 @@ void open_all_the_resources(void)
 
 void use_xa_resources(void)
 {
+#ifdef HAVE_MYSQL
+    /* insert data */
+    if (insert) {
+        if (mysql_query(mysql_conn, mysql_stmt_insert)) {
+            fprintf(stderr, "%s/%u| INSERT INTO authors: %u/%s",
+                    pgm, pid, mysql_errno(mysql_conn),
+                    mysql_error(mysql_conn));
+            mysql_close(mysql_conn);
+            exit(1);
+        }
+        fprintf(stderr, "%s/%u| MySQL statement >%s< completed\n",
+                pgm, pid, mysql_stmt_insert);
+    } else {
+        if (mysql_query(mysql_conn, mysql_stmt_delete)) {
+            fprintf(stderr, "%s/%u| DELETE FROM authors: %u/%s",
+                    pgm, pid, mysql_errno(mysql_conn),
+                    mysql_error(mysql_conn));
+            mysql_close(mysql_conn);
+            exit(1);
+        }
+        printf("%s/%u| MySQL statement >%s< completed\n",
+               pgm, pid, mysql_stmt_delete);
+    }
+#endif /* HAVE_MYSQL */
 #ifdef HAVE_ORACLE
     /* retrieve environment and context */
     oci_env = xaoEnv(NULL);
@@ -534,6 +666,37 @@ void use_xa_resources(void)
     OCIHandleFree((dvoid *)oci_stmt_hndl, (ub4)OCI_HTYPE_STMT);
     OCIHandleFree((dvoid *)oci_err_hndl, (ub4)OCI_HTYPE_ERROR);
 #endif /* HAVE_ORACLE */
+#ifdef HAVE_POSTGRESQL
+    if (insert) {
+        postgres_res = PQexec(
+            postgres_conn, postgres_stmt_insert);
+        if (PGRES_COMMAND_OK != PQresultStatus(postgres_res)) {
+            fprintf(stderr, "%s/%u| error while executing >%s< %s\n",
+                    pgm, pid, postgres_stmt_insert,
+                    PQerrorMessage(postgres_conn));
+            PQclear(postgres_res);
+            PQfinish(postgres_conn);
+            exit(1);
+        }
+        PQclear(postgres_res);
+        fprintf(stderr, "%s/%u| PostgreSQL statement >%s< completed\n",
+                pgm, pid, postgres_stmt_insert);
+    } else {
+        postgres_res = PQexec(
+            postgres_conn, postgres_stmt_delete);
+        if (PGRES_COMMAND_OK != PQresultStatus(postgres_res)) {
+            fprintf(stderr, "%s/%u| error while executing >%s< %s\n",
+                    pgm, pid, postgres_stmt_delete,
+                    PQerrorMessage(postgres_conn));
+            PQclear(postgres_res);
+            PQfinish(postgres_conn);
+            exit(1);
+        }
+        PQclear(postgres_res);
+        fprintf(stderr, "%s/%u| PostgreSQL statement >%s< completed\n",
+                pgm, pid, postgres_stmt_delete);
+    }
+#endif /* HAVE_POSTGRESQL */    
 }
 
 
@@ -576,12 +739,32 @@ void delete_transaction_manager(void)
 
 void delete_all_xa_resources(void)
 {
+#ifdef HAVE_POSTGRESQL
+    /*
+     * delete the PostgreSQL XA resource object
+     */
+    xta_postgresql_xa_resource_delete(postgresql_xa_res);
+    /*
+     * close PostgreSQL database connection
+     */
+    PQfinish(postgres_conn);
+#endif    
 #ifdef HAVE_ORACLE
     /*
      * delete dynamically created native XA Resource object for Oracle
      */
     xta_native_xa_resource_delete(dynamic_native_xa_res_ora);
 #endif 
+#ifdef HAVE_MYSQL
+    /*
+     * delete the MySQL XA resource object
+     */
+    xta_mysql_xa_resource_delete(mysql_xa_res);
+    /*
+     * close MySQL database connection
+     */
+    mysql_close(mysql_conn);
+#endif    
     /*
      * delete native XA Resource object
      */
