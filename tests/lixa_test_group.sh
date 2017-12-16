@@ -37,6 +37,7 @@ fi
 
 PID_LIST=""
 
+# all commands are executed with a reasonable timeout
 while IFS='' read -r LINE || [[ -n "$LINE" ]]; do
 	echo "Command to execute: $LINE"
 	$LINE 2>&1 &

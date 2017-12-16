@@ -156,7 +156,7 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: generic error for a TX error (a TX return code "
                 "not equal TX_OK)";
         case LIXA_RC_XA_ERROR:
-            return "ERROR: an XA function returned an unexpcted return code";
+            return "ERROR: an XA function returned an unexpected return code";
         case LIXA_RC_MALLOC_ERROR:
             return "ERROR: 'malloc'/'g_malloc' function returned an error "
                 "condition";

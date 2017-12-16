@@ -1,3 +1,10 @@
+Test case XTA/5.1/0.0 if a branch send some sort of KO for xa_end
+rc!=0
+flags=TMFAIL
+signal all the prepared branches about a branch error.
+Mark the branch as rollback only if more branches will arrive...
+
+
 Test all the possible conditions in sync and async branch with different errors.
 If one branch is not able to prepare, all branches must be rolled-back.
 Implement the above logic even in recovery management (restart).

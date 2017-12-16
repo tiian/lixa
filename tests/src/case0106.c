@@ -58,6 +58,17 @@
 
 
 /*
+ * EXIT CODES:
+ * 0:   OK
+ * 1:   generic error
+ * 2:   superior branch / xta_transaction_start() error
+ * 3:   subordinate branch / xta_transaction_branch() error
+ * 4:   superior branch / xta_transaction_commit() error
+ */
+
+
+
+/*
  * Boilerplate functions: they are defined only to improve the readability of
  * the interesting part of the program
  */
@@ -231,7 +242,7 @@ void superior(void)
     if (rc != LIXA_RC_OK) {
         fprintf(stderr, "%s/%u| xta_transaction_start: returned %d\n",
                 pgm, pid, rc);
-        exit(1);
+        exit(2);
     }
     /* retrieve the XID associated to the started transaction */
     xid_string = xta_xid_to_string(xta_transaction_get_xid(tx));
@@ -269,7 +280,7 @@ void superior(void)
         if (rc != LIXA_RC_OK) {
             fprintf(stderr, "%s/%u| xta_transaction_commit returned %d (%s)\n",
                     pgm, pid, rc, lixa_strerror(rc));
-            exit(1);
+            exit(4);
         }
     } else {
         rc = xta_transaction_rollback(tx);
@@ -313,7 +324,7 @@ void subordinate(void)
     if (rc != LIXA_RC_OK) {
         fprintf(stderr, "%s/%u| xta_transaction_branch returned %d\n",
                 pgm, pid, rc);
-        exit(1);
+        exit(3);
     }
     /* upadate XA resources under the control of XTA */
     use_xa_resources();
