@@ -1,10 +1,14 @@
-Test case XTA/5.1/0.0 if a branch send some sort of KO for xa_end
-rc!=0
-flags=TMFAIL
-signal all the prepared branches about a branch error.
+In 
+server_manager_outmsg_proc
+line 1523
+replace
+	    switch (lmo->header.pvs.verb) {
+with the real verb of the waiting client and increment from last step (now
+it's static and it works only for prepare!)
+
 Mark the branch as rollback only if more branches will arrive...
-
-
+Check for other branches that ended with error when xa_prepare is passed to
+the state server.
 Test all the possible conditions in sync and async branch with different errors.
 If one branch is not able to prepare, all branches must be rolled-back.
 Implement the above logic even in recovery management (restart).
