@@ -661,7 +661,7 @@ void use_xa_resources(void)
     /* insert data */
     if (insert) {
         if (mysql_query(mysql_conn, mysql_stmt_insert)) {
-            fprintf(stderr, "%s/%u| INSERT INTO authors: %u/%s",
+            fprintf(stderr, "%s/%u| MySQL INSERT INTO authors: %u/%s",
                     pgm, pid, mysql_errno(mysql_conn),
                     mysql_error(mysql_conn));
             mysql_close(mysql_conn);
@@ -671,7 +671,7 @@ void use_xa_resources(void)
                 pgm, pid, mysql_stmt_insert);
     } else {
         if (mysql_query(mysql_conn, mysql_stmt_delete)) {
-            fprintf(stderr, "%s/%u| DELETE FROM authors: %u/%s",
+            fprintf(stderr, "%s/%u| MySQL DELETE FROM authors: %u/%s",
                     pgm, pid, mysql_errno(mysql_conn),
                     mysql_error(mysql_conn));
             mysql_close(mysql_conn);
@@ -759,8 +759,8 @@ void use_xa_resources(void)
         postgres_res = PQexec(
             postgres_conn, postgres_stmt_insert);
         if (PGRES_COMMAND_OK != PQresultStatus(postgres_res)) {
-            fprintf(stderr, "%s/%u| error while executing >%s< %s\n",
-                    pgm, pid, postgres_stmt_insert,
+            fprintf(stderr, "%s/%u| PostgreSQL error while executing "
+                    ">%s< %s\n", pgm, pid, postgres_stmt_insert,
                     PQerrorMessage(postgres_conn));
             PQclear(postgres_res);
             PQfinish(postgres_conn);
@@ -773,8 +773,8 @@ void use_xa_resources(void)
         postgres_res = PQexec(
             postgres_conn, postgres_stmt_delete);
         if (PGRES_COMMAND_OK != PQresultStatus(postgres_res)) {
-            fprintf(stderr, "%s/%u| error while executing >%s< %s\n",
-                    pgm, pid, postgres_stmt_delete,
+            fprintf(stderr, "%s/%u| PostgreSQL error while executing "
+                    ">%s< %s\n", pgm, pid, postgres_stmt_delete,
                     PQerrorMessage(postgres_conn));
             PQclear(postgres_res);
             PQfinish(postgres_conn);

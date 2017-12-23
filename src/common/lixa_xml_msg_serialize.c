@@ -63,7 +63,6 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
         INVALID_START_STEP,
         SERIALIZE_END_8_ERROR,
         SERIALIZE_END_16_ERROR,
-        SERIALIZE_END_24_ERROR,
         INVALID_END_STEP,
         SERIALIZE_PREPARE_8_ERROR,
         SERIALIZE_PREPARE_16_ERROR,
@@ -394,7 +393,6 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
             case SERIALIZE_START_24_ERROR:
             case SERIALIZE_END_8_ERROR:
             case SERIALIZE_END_16_ERROR:
-            case SERIALIZE_END_24_ERROR:
             case SERIALIZE_PREPARE_8_ERROR:
             case SERIALIZE_PREPARE_16_ERROR:
             case SERIALIZE_PREPARE_24_ERROR:

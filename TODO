@@ -1,10 +1,4 @@
-In 
-server_manager_outmsg_proc
-line 1523
-replace
-	    switch (lmo->header.pvs.verb) {
-with the real verb of the waiting client and increment from last step (now
-it's static and it works only for prepare!)
+restart from case test xta_5_0.at
 
 Mark the branch as rollback only if more branches will arrive...
 Check for other branches that ended with error when xa_prepare is passed to

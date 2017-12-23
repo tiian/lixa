@@ -1229,15 +1229,18 @@ int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
                                    ts, slot_id, &branch_list_size,
                                    &branch_list)))
                 THROW(BRANCH_LIST);
-            if (LIXA_RC_OK != (ret_cod = server_manager_outmsg_prep(
-                                   ts, branch_list_size, branch_list,
-                                   &ts->client_array[slot_id].output_message,
-                                   rc))) {
-                LIXA_TRACE(("server_manager_msg_proc: "
-                            "server_manager_outmsg_prep "
-                            "return code is %d\n", ret_cod));
-                THROW(OUTMSG_PREP_ERROR);
-            }
+            /* prepare output message if necessary */
+            if (LIXA_MSG_VERB_NULL !=
+                ts->client_array[slot_id].output_message.header.pvs.verb) {
+                if (LIXA_RC_OK != (ret_cod = server_manager_outmsg_prep(
+                                       ts, slot_id, branch_list_size,
+                                       branch_list, rc))) {
+                    LIXA_TRACE(("server_manager_msg_proc: "
+                                "server_manager_outmsg_prep "
+                                "return code is %d\n", ret_cod));
+                    THROW(OUTMSG_PREP_ERROR);
+                } /* if (LIXA_RC_OK != (ret_cod = server_manager_outmsg_prep */
+            } /* if (LIXA_MSG_VERB_NULL != */
         } /* if (!ts->client_array[slot_id].operation_postponed) */
 
         if (LIXA_RC_MAINTENANCE_MODE == rc)
@@ -1482,12 +1485,10 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
 
 
 
-int server_manager_outmsg_prep(struct thread_status_s *ts,
-                               size_t list_size, const size_t *list,
-                               struct lixa_msg_s *lmo, int rc)
+int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
+                               size_t list_size, const size_t *list, int rc)
 {
-    enum Exception { NOTHING_TO_DO,
-                     MALLOC_ERROR,
+    enum Exception { MALLOC_ERROR,
                      REPLY_OPEN_ERROR,
                      REPLY_START_ERROR,
                      REPLY_END_ERROR,
@@ -1500,70 +1501,97 @@ int server_manager_outmsg_prep(struct thread_status_s *ts,
 
     LIXA_TRACE(("server_manager_outmsg_prep\n"));
     TRY {
+        struct lixa_msg_s tmp_msg, *out_msg = NULL;
         size_t i;
         
-        if (lmo->header.pvs.verb == LIXA_MSG_VERB_NULL)
-            THROW(NOTHING_TO_DO);
-
         LIXA_TRACE(("server_manager_outmsg_prep: " SIZE_T_FORMAT " clients "
                     "must be notified with this message\n", list_size));
 
-        /* create an output buffer for every client */
+        /* multicast the message to many clients (or one!) */
         for (i=0; i<list_size; ++i) {
-            size_t slot_id = list[i];
+            size_t j = list[i];
+            /* retrieve the block_id of j-th slot */
+            uint32_t block_id = ts->client_array[j].pers_status_slot_id;
             
-            /* allocate the output buffer */
-            if (NULL == (ts->client_array[slot_id].output_buffer = malloc(
+            /* create an output buffer for every client */
+            if (NULL == (ts->client_array[j].output_buffer = malloc(
                              LIXA_MSG_XML_BUFFER_SIZE))) {
-                LIXA_TRACE(("server_manager_outmsg_proc: error while "
+                LIXA_TRACE(("server_manager_outmsg_prep: error while "
                             "allocating the buffer to reply to client\n"));
                 THROW(MALLOC_ERROR);
             }
+            if (j != slot_id) {
+                /* this is a message for client different from the current
+                   one: publish a multicast message to many */
+                /* initialize the temporary message */
+                lixa_msg_init(&tmp_msg);
+                tmp_msg.header.level = LIXA_MSG_LEVEL;
+                /* copy from lmo (lixa message out of the current client to
+                   out_msg, lixa message of all the clients that are chained */
+                tmp_msg.header.pvs =
+                    ts->curr_status[block_id].sr.data.pld.ph.last_verb_step[0];
+                /* increment the step */
+                tmp_msg.header.pvs.step += LIXA_MSG_STEP_INCR;
+                out_msg = &tmp_msg;
+                LIXA_TRACE(("server_manager_outmsg_prep: slot_id="
+                            SIZE_T_FORMAT ", block_id=" UINT32_T_FORMAT
+                            " ,verb=%d, step=%d\n", j, block_id,
+                            out_msg->header.pvs.verb,
+                            out_msg->header.pvs.step));
+            } else {
+                /* this is a message for the current client */
+                out_msg = &ts->client_array[j].output_message;
+            }
+            LIXA_TRACE(("server_manager_outmsg_prep: slot_id="
+                        SIZE_T_FORMAT ", block_id=" UINT32_T_FORMAT
+                        ", verb=%d, step=%d\n", j, block_id,
+                        out_msg->header.pvs.verb, out_msg->header.pvs.step));
             /* prepare output message */
-            switch (lmo->header.pvs.verb) {
+            switch (out_msg->header.pvs.verb) {
                 case LIXA_MSG_VERB_NULL:
                     break;
                 case LIXA_MSG_VERB_OPEN:
                     if (LIXA_RC_OK != (ret_cod = server_reply_open(
-                                           ts, slot_id, lmo, rc)))
+                                           ts, j, out_msg, rc)))
                         THROW(REPLY_OPEN_ERROR);
                     break;
                 case LIXA_MSG_VERB_START:
                     if (LIXA_RC_OK != (ret_cod = server_reply_start(
-                                           ts, slot_id, lmo, rc)))
+                                           ts, j, out_msg, rc)))
                         THROW(REPLY_START_ERROR);
                     break;
                 case LIXA_MSG_VERB_END:
                     if (LIXA_RC_OK != (ret_cod = server_reply_end(
-                                           ts, slot_id, lmo, rc)))
+                                           ts, j, out_msg, rc)))
                         THROW(REPLY_END_ERROR);
                     break;
                 case LIXA_MSG_VERB_PREPARE:
                     if (LIXA_RC_OK != (ret_cod = server_reply_prepare(
-                                           ts, slot_id, lmo, rc)))
+                                           ts, j, out_msg, rc)))
                         THROW(REPLY_PREPARE_ERROR);
                     break;
                 case LIXA_MSG_VERB_QRCVR:
                     if (LIXA_RC_OK != (ret_cod = server_reply_qrcvr(
-                                           ts, slot_id, lmo)))
+                                           ts, j, out_msg)))
                         THROW(REPLY_QRCVR_ERROR);
                     break;
                 case LIXA_MSG_VERB_TRANS:
-                    if (LIXA_RC_OK !=
-                        (ret_cod = server_reply_trans(ts, slot_id, lmo)))
+                    if (LIXA_RC_OK != (ret_cod = server_reply_trans(
+                                           ts, j, out_msg)))
                         THROW(REPLY_SCAN_ERROR);
                     break;
                 default:
                     THROW(VERB_NOT_FOUND);
             } /* switch (tmp_msg.header.pvs.verb) */
+            if (j != slot_id) {
+                /* reset the temporary message */
+                lixa_msg_free(&tmp_msg);
+            } /* if (j != slot_id) */
         } /* for (i=0; i<list_size; ++i) */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case NOTHING_TO_DO:
-                ret_cod = LIXA_RC_OK;
-                break;
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
                 break;

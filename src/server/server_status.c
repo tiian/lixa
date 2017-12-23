@@ -200,23 +200,25 @@ int payload_header_store_verb_step(struct thread_status_s *ts,
         }
         for (i=0; i<PAYLOAD_HEADER_VERB_STEP-1; ++i) {
             LIXA_TRACE(("payload_header_store_verb_step:"
-                        "(verb,step): (%d,%d) --> (%d,%d)\n",
+                        "(verb,step): (%d,%d)[%d] <-- (%d,%d)[%d]\n",
+                        pld->ph.last_verb_step[
+                            PAYLOAD_HEADER_VERB_STEP-i-1].verb,
+                        pld->ph.last_verb_step[
+                            PAYLOAD_HEADER_VERB_STEP-i-1].step,
+                        PAYLOAD_HEADER_VERB_STEP-i-1,
                         pld->ph.last_verb_step[
                             PAYLOAD_HEADER_VERB_STEP-i-2].verb,
                         pld->ph.last_verb_step[
                             PAYLOAD_HEADER_VERB_STEP-i-2].step,
-                        pld->ph.last_verb_step[
-                            PAYLOAD_HEADER_VERB_STEP-i-1].verb,
-                        pld->ph.last_verb_step[
-                            PAYLOAD_HEADER_VERB_STEP-i-1].step));
+                        PAYLOAD_HEADER_VERB_STEP-i-2));
             pld->ph.last_verb_step[PAYLOAD_HEADER_VERB_STEP-i-1] =
                 pld->ph.last_verb_step[PAYLOAD_HEADER_VERB_STEP-i-2];
         } /* for (i=0; ... */
         LIXA_TRACE(("payload_header_store_verb_step:"
-                    "(verb,step): (%d,%d) --> (%d,%d)\n",
-                    vs->verb, vs->step,
+                    "(verb,step): (%d,%d)[0] <--- (%d,%d)\n",
                     pld->ph.last_verb_step[0].verb,
-                    pld->ph.last_verb_step[0].step));
+                    pld->ph.last_verb_step[0].step,
+                    vs->verb, vs->step));
         pld->ph.last_verb_step[0] = *vs;
         /* update the record */
         status_record_update(ts->curr_status + block_id, block_id,

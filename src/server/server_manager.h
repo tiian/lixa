@@ -258,17 +258,18 @@ extern "C" {
     /**
      * Prepare the output message must be sent to the client
      * @param[in,out] ts thread status structure
+     * @param[in] slot_id the slot associated to the file descriptor raised the
+     *            POLLIN event (current session client)
      * @param[in] list_size number of clients that must be notified by the
      *            message
      * @param[in] list of the clients that must be notified
-     * @param[in,out] lmo message will be returned to the client
      * @param[in] rc return code of the previous operations must be returned
      *              to the client
      * @return a standardized return code
      */
     int server_manager_outmsg_prep(struct thread_status_s *ts,
-                                   size_t list_size, const size_t *list,
-                                   struct lixa_msg_s *lmo, int rc);
+                                   size_t slot_id, size_t list_size,
+                                   const size_t *list, int rc);
 
     
 
