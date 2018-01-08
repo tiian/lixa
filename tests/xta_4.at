@@ -35,14 +35,14 @@ AT_SETUP([XTA/4.1/0.0 Async branch and commit])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 2 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 2 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 2 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2 monkey3s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
+timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2 monkey3s.conf
 ]])
 AT_DATA([delete],
-[[timeout 2 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 2 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 2 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2 monkey3s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 foo monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
+timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2 monkey3s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config

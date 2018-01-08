@@ -684,7 +684,11 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
             if (this->commit_suspended) {
                 ret_cod = lixa_xa_prepare_wait_branches(
                     &this->local_ccc, &this->client_status);
-                if (LIXA_RC_OK != ret_cod)
+                if (LIXA_RC_OTHER_BRANCH_ERROR == ret_cod) {
+                    /* force rollback */
+                    txrc = TX_ROLLBACK;
+                    commit = FALSE;
+                } else if (LIXA_RC_OK != ret_cod)
                     THROW(LIXA_XA_PREPARE_WAIT_BRANCHES_ERROR);
             } else if (!one_phase_commit) {
             /* bypass xa_prepare if one_phase_commit is TRUE or xa_prepare

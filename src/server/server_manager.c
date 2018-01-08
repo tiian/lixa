@@ -1533,11 +1533,6 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
                 /* increment the step */
                 tmp_msg.header.pvs.step += LIXA_MSG_STEP_INCR;
                 out_msg = &tmp_msg;
-                LIXA_TRACE(("server_manager_outmsg_prep: slot_id="
-                            SIZE_T_FORMAT ", block_id=" UINT32_T_FORMAT
-                            " ,verb=%d, step=%d\n", j, block_id,
-                            out_msg->header.pvs.verb,
-                            out_msg->header.pvs.step));
             } else {
                 /* this is a message for the current client */
                 out_msg = &ts->client_array[j].output_message;

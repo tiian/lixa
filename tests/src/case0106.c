@@ -63,7 +63,9 @@
  * 1:   generic error
  * 2:   superior branch / xta_transaction_start() error
  * 3:   subordinate branch / xta_transaction_branch() error
- * 4:   superior branch / xta_transaction_commit() error
+ * 4:   superior branch / xta_transaction_commit() generic error
+ * 5:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
+ * 6:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
  */
 
 
@@ -280,7 +282,10 @@ void superior(void)
         if (rc != LIXA_RC_OK) {
             fprintf(stderr, "%s/%u| xta_transaction_commit returned %d (%s)\n",
                     pgm, pid, rc, lixa_strerror(rc));
-            exit(4);
+            if (rc == LIXA_RC_TX_ROLLBACK)
+                exit(5);
+            else
+                exit(4);
         }
     } else {
         rc = xta_transaction_rollback(tx);
@@ -344,7 +349,10 @@ void subordinate(void)
                 fprintf(stderr, "%s/%u| xta_transaction_commit (second "
                         "phase) returned %d (%s)\n",
                         pgm, pid, rc, lixa_strerror(rc));
-                exit(1);
+                if (rc == LIXA_RC_TX_ROLLBACK)
+                    exit(6);
+                else
+                    exit(1);
             }
         } else {
             fprintf(stderr, "%s/%u| xta_transaction_commit (first "

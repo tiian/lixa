@@ -473,18 +473,15 @@ int lixa_xa_commit(client_config_coll_t *ccc, client_status_t *cs,
 int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
                 const XID *xid, int *txrc, int commit, int xa_end_flags)
 {
-    enum Exception
-    {
-        MSG_SERIALIZE_ERROR1,
-        MSG_SEND_ERROR,
-        MSG_RETRIEVE_ERROR,
-        MSG_DESERIALIZE_ERROR,
-        ERROR_FROM_SERVER,
-        ASYNC_NOT_IMPLEMENTED,
-        UNEXPECTED_XA_RC,
-        XA_ERROR,
-        NONE
-    } excp;
+    enum Exception { MSG_SERIALIZE_ERROR1,
+                     MSG_SEND_ERROR,
+                     MSG_RETRIEVE_ERROR,
+                     MSG_DESERIALIZE_ERROR,
+                     ERROR_FROM_SERVER,
+                     ASYNC_NOT_IMPLEMENTED,
+                     UNEXPECTED_XA_RC,
+                     XA_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     struct lixa_msg_s msg;
@@ -704,7 +701,11 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
         lixa_msg_trace(&msg);
 #endif
         /* check the answer from the server */
-        if (LIXA_RC_OK != (ret_cod = msg.body.end_16.answer.rc))
+        ret_cod = msg.body.end_16.answer.rc;
+        if (LIXA_RC_OTHER_BRANCH_ERROR == ret_cod) {
+            /* force a rollback: some branches failed */
+            *txrc = TX_ROLLBACK;
+        } else if (LIXA_RC_OK != ret_cod)
             THROW(ERROR_FROM_SERVER);
 
         /*

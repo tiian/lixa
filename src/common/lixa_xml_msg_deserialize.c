@@ -561,7 +561,7 @@ int lixa_msg_deserialize_default_answer(xmlNodePtr cur,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        } /* TRY-CATCH */
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_default_answer/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
