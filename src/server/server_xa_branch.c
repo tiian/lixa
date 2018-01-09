@@ -223,6 +223,68 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
 
 
 
+int server_xa_branch_want_replies(const struct thread_status_s *ts,
+                                  uint32_t block_id)
+{
+    enum Exception { NOT_CHAINED
+                     , NONE } excp;
+    int ret_cod = FALSE;
+    
+    LIXA_TRACE(("server_xa_branch_want_replies\n"));
+    TRY {
+        const struct lixa_msg_verb_step_s *vs = NULL;
+        
+        /* check it's part of a branch */
+        if (!server_xa_branch_is_chained(ts, block_id))
+            THROW(NOT_CHAINED);
+        vs = &ts->curr_status[block_id].sr.data.pld.ph.last_verb_step[0];
+        LIXA_TRACE(("server_xa_branch_want_replies: block_id=" UINT32_T_FORMAT
+                    " ,last_verb=%d, last_step=%d\n", block_id, vs->verb,
+                    vs->step));
+        /* check verb and step */
+        switch (vs->verb) {
+            case LIXA_MSG_VERB_OPEN:
+                if (LIXA_MSG_STEP_INCR == vs->step)
+                    ret_cod = TRUE;
+                break;
+            case LIXA_MSG_VERB_START:
+                if (LIXA_MSG_STEP_INCR == vs->step)
+                    ret_cod = TRUE;
+                break;
+            case LIXA_MSG_VERB_END:
+                if (LIXA_MSG_STEP_INCR == vs->step)
+                    ret_cod = TRUE;
+                break;
+            case LIXA_MSG_VERB_PREPARE:
+                if (LIXA_MSG_STEP_INCR == vs->step ||
+                    3*LIXA_MSG_STEP_INCR == vs->step)
+                    ret_cod = TRUE;
+                break;
+            case LIXA_MSG_VERB_QRCVR:
+                if (LIXA_MSG_STEP_INCR == vs->step)
+                    ret_cod = TRUE;
+                break;
+            default:
+                break;
+        } /* switch (vs->verb) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NOT_CHAINED:
+            case NONE:
+                break;
+            default:
+                break;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_branch_want_replies/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int server_xa_branch_list(const struct thread_status_s *ts,
                           uint32_t block_id,
                           uint32_t *number, uint32_t **items)

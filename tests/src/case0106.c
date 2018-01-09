@@ -358,6 +358,9 @@ void subordinate(void)
             fprintf(stderr, "%s/%u| xta_transaction_commit (first "
                     "phase) returned %d (%s)\n",
                     pgm, pid, rc, lixa_strerror(rc));
+            if (rc == LIXA_RC_TX_ROLLBACK)
+                exit(6);
+            else
             exit(1);
         }
     } else {

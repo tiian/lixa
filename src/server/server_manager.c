@@ -698,7 +698,8 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 
 int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
 {
-    enum Exception { BLOCK_STATUS_ERROR,
+    enum Exception { XA_BRANCH_UNCHAIN,
+                     BLOCK_STATUS_ERROR,
                      RECOVERY_TABLE_INSERT_ERROR,
                      PAYLOAD_CHAIN_RELEASE,
                      CLOSE_ERROR,
@@ -713,6 +714,11 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
         struct status_record_data_s *data =
             &(ts->curr_status[block_id].sr.data);
 
+        /* unchain the branch if necessary */
+        ret_cod = server_xa_branch_unchain(ts, block_id);
+        if (LIXA_RC_OK != ret_cod && LIXA_RC_BYPASSED_OPERATION != ret_cod)
+            THROW(XA_BRANCH_UNCHAIN);
+        /* check recovery pending state */
         if (LIXA_RC_OK != (ret_cod = thread_status_check_recovery_pending(
                                data, &rec_pend)))
             THROW(BLOCK_STATUS_ERROR);
@@ -743,6 +749,7 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case XA_BRANCH_UNCHAIN:
             case BLOCK_STATUS_ERROR:
             case RECOVERY_TABLE_INSERT_ERROR:
             case PAYLOAD_CHAIN_RELEASE:
@@ -1505,13 +1512,23 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
         size_t i;
         
         LIXA_TRACE(("server_manager_outmsg_prep: " SIZE_T_FORMAT " clients "
-                    "must be notified with this message\n", list_size));
+                    "might be notified with this message\n", list_size));
 
         /* multicast the message to many clients (or one!) */
         for (i=0; i<list_size; ++i) {
             size_t j = list[i];
             /* retrieve the block_id of j-th slot */
             uint32_t block_id = ts->client_array[j].pers_status_slot_id;
+
+            /* check if the client can accept a reply: only for other
+               clients, not for the current one */
+            if (j != slot_id && !server_xa_branch_want_replies(ts, block_id)) {
+                LIXA_TRACE(("server_manager_outmsg_prep: this client can't "
+                            "accept a reply, bypassing it: slot_id="
+                            SIZE_T_FORMAT ", block_id=" UINT32_T_FORMAT "\n",
+                            j, block_id));
+                continue;
+            }
             
             /* create an output buffer for every client */
             if (NULL == (ts->client_array[j].output_buffer = malloc(

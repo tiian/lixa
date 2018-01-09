@@ -1,6 +1,6 @@
-restart from case test xta_5_0.at: switch the error condition between
-superior and subordinate
-XTA/5.1/0.0 sup xa_end XAER_RMFAIL
+restart from case test xta_5_0.at: 
+test for xa_prepare XA_RBROLLBACK 
+test for xa_prepare XAER_RMERR
 
 Mark the branch as rollback only if more branches will arrive...
 Check for other branches that ended with error when xa_prepare is passed to

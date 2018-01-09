@@ -456,9 +456,8 @@ int server_xa_end_8(struct thread_status_s *ts,
             uint32_t slot;
             slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
             LIXA_TRACE(("server_xa_end_8: updating next_verb for resource "
-                        "manager # "
-                        UINT32_T_FORMAT
-                        "\n", slot));
+                        "manager # " UINT32_T_FORMAT " (" UINT32_T_FORMAT ") "
+                        "\n", i, slot));
             sr = ts->curr_status + slot;
             /* update the block */
             status_record_update(ts->curr_status + slot, slot,

@@ -72,7 +72,7 @@ extern "C" {
      * Remove a branch form the chain of the already existent branches in the
      * same global transaction
      * @param[in,out] ts reference to thread status
-     * @param[in] block_id of the new branch
+     * @param[in] block_id of the branch that must be unchained
      * @return a reason code
      */
     int server_xa_branch_unchain(struct thread_status_s *ts,
@@ -95,6 +95,19 @@ extern "C" {
 
     
 
+    
+    /**
+     * Check if a block_id is related to a branch that wants replies for events
+     * happened in other branches
+     * @param[in] ts reference to thread status
+     * @param[in] block_id of the branch
+     * @return a boolean value
+     */
+    int server_xa_branch_want_replies(const struct thread_status_s *ts,
+                                      uint32_t block_id);
+    
+
+    
     /**
      * Retrieve all the block_id(s) related to all the branches chained in the
      * same multiple branch global transaction
