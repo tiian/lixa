@@ -878,10 +878,10 @@ int xta_transaction_rollback(xta_transaction_t *this)
             THROW(INVALID_STATUS);
         }
         /* detach the transaction */
-        if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
-                               &this->local_ccc, &this->client_status,
-                               xta_xid_get_xa_xid(this->xid), &txrc,
-                               FALSE, TMSUCCESS)))
+        ret_cod = lixa_xa_end(&this->local_ccc, &this->client_status,
+                              xta_xid_get_xa_xid(this->xid), &txrc,
+                              FALSE, TMSUCCESS);
+        if (LIXA_RC_OK != ret_cod && TX_ROLLBACK != txrc)
             THROW(LIXA_XA_END_ERROR);
         /* rollback the transaction */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(
@@ -940,7 +940,20 @@ int xta_transaction_rollback(xta_transaction_t *this)
             case LIXA_XA_FORGET_ERROR:
                 break;
             case NONE:
-                ret_cod = LIXA_RC_OK;
+                switch (txrc) {
+                    case TX_OK:
+                    case TX_ROLLBACK:
+                        ret_cod = LIXA_RC_OK;
+                        break;
+                    case TX_MIXED:
+                        ret_cod = LIXA_RC_TX_MIXED;
+                        break;
+                    case TX_HAZARD:
+                        ret_cod = LIXA_RC_TX_HAZARD;
+                        break;
+                    default:
+                        ret_cod = LIXA_RC_INTERNAL_ERROR;
+                } /* switch (txrc) */
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;

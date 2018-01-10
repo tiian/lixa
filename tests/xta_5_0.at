@@ -7,9 +7,11 @@ AT_CHECK([lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
 # process
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+# first case test require a high timeout because the resource managers can be
+# "sleeping"
 AT_DATA([insert],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 # Superior thread xa_start() --> XAER_RMFAIL
 AT_DATA([monkey1s.conf],
@@ -473,7 +475,7 @@ AT_DATA([insert],
 [[timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
 timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
-# Superior thread xa_prepare() --> XAER_RMERR
+# Superior thread xa_commit() --> XAER_RMERR
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -515,7 +517,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-# Subordinate thread xa_prepare() --> XAER_RMERR
+# Subordinate thread xa_commit() --> XAER_RMERR
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -539,7 +541,7 @@ AT_DATA([insert],
 [[timeout 2 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
 timeout 2 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
-# Superior thread xa_prepare() --> XA_RETRY
+# Superior thread xa_commit() --> XA_RETRY
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -582,7 +584,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-# Subordinate thread xa_prepare() --> XA_RETRY
+# Subordinate thread xa_commit() --> XA_RETRY
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -598,11 +600,76 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([XTA/5.3/0.4 sup xa_commit XA_HEURHAZ])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+# Superior thread xa_commit() --> XA_HEURHAZ
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [9], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/5.3/0.5 sub xa_commit XA_HEURHAZ])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([delete],
+[[timeout 1 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 1 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+# Subordinate thread xa_commit() --> XA_HEURHAZ
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/8
+xa_forget/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [10], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
 # just stop the state server
-AT_SETUP([Stop the state server, tmp step])
+AT_SETUP([Stop the state server])
 AT_CHECK([lixa_test_exec.sh none stop true], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Interrupt tests with an error])
-AT_CHECK([/bin/false], [0], [ignore], [ignore])
-AT_CLEANUP

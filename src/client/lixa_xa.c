@@ -2088,7 +2088,8 @@ int lixa_xa_rollback(client_config_coll_t *ccc, client_status_t *cs,
                 continue;
             }
 
-            /* bypass resource managers have not dynamically registered and statically ended the transaction */
+            /* bypass resource managers have not dynamically registered and
+               statically ended the transaction */
             if (csr->common.dynamic && csr->common.xa_s_state != XA_STATE_S2 &&
                 csr->common.xa_s_state != XA_STATE_S3 &&
                 csr->common.xa_s_state != XA_STATE_S4) {

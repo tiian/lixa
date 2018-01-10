@@ -59,15 +59,19 @@
 
 /*
  * EXIT CODES:
- * 0:   OK
- * 1:   generic error
- * 2:   superior branch / xta_transaction_start() error
- * 3:   subordinate branch / xta_transaction_branch() error
- * 4:   superior branch / xta_transaction_commit() generic error
- * 5:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
- * 6:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
- * 7:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_MIXED
- * 8:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_MIXED
+ *  0:   OK
+ *  1:   generic error
+ *  2:   superior branch / xta_transaction_start() error
+ *  3:   subordinate branch / xta_transaction_branch() error
+ *  4:   superior branch / xta_transaction_commit() generic error
+ *  5:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
+ *  6:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
+ *  7:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_MIXED
+ *  8:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_MIXED
+ *  9:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_HAZARD
+ * 10:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_HAZARD
+ * 11:   superior branch / xta_transaction_rollback() generic error
+ * 12:   subordinate branch / xta_transaction_rollback() generic error
  */
 
 
@@ -288,6 +292,8 @@ void superior(void)
                 exit(5);
             else if (rc == LIXA_RC_TX_MIXED)
                 exit(7);
+            else if (rc == LIXA_RC_TX_HAZARD)
+                exit(9);
             else
                 exit(4);
         }
@@ -296,7 +302,7 @@ void superior(void)
         if (rc != LIXA_RC_OK) {
             fprintf(stderr, "%s/%u| xta_transaction_rollback: returned %d (%s)"
                     "\n", pgm, pid, rc, lixa_strerror(rc));
-            exit(1);
+            exit(11);
         }
     }
     /* final boilerplate code */
@@ -357,6 +363,8 @@ void subordinate(void)
                     exit(6);
                 else if (rc == LIXA_RC_TX_MIXED)
                     exit(8);
+                else if (rc == LIXA_RC_TX_HAZARD)
+                    exit(10);
                 else
                     exit(1);
             }
@@ -374,7 +382,7 @@ void subordinate(void)
         if (rc != LIXA_RC_OK) {
             fprintf(stderr, "%s/%u| xta_transaction_rollback: returned %d (%s)"
                     "\n", pgm, pid, rc, lixa_strerror(rc));
-            exit(1);
+            exit(12);
         }
         /* return to superior branch ROLLBACK message */
         reply_to_superior("ROLLBACK");

@@ -949,6 +949,12 @@ int lixa_my_end_core(struct lixa_sw_status_rm_s *lpsr,
             LIXA_TRACE(("lixa_my_end_core: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
         }
+
+        if (flags&TMFAIL) {
+            LIXA_TRACE(("lixa_my_end_core: MySQL/MariaDB does not support "
+                        "TMFAIL, ignoring it...\n"));
+            flags ^= TMFAIL;
+        }
         
         if ((flags|supp_flags) != supp_flags) {
             LIXA_TRACE(("lixa_my_end_core: flags 0x%x are not supported\n",

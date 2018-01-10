@@ -1,11 +1,5 @@
-restart from case test xta_5_0.at: 
-test for xa_prepare XA_RBROLLBACK 
-test for xa_prepare XAER_RMERR
-
-Mark the branch as rollback only if more branches will arrive...
-Check for other branches that ended with error when xa_prepare is passed to
-the state server.
-Test all the possible conditions in sync and async branch with different errors.
+Test all the possible conditions in async branch with different errors as done
+for sync branches in XTA/5.x
 If one branch is not able to prepare, all branches must be rolled-back.
 Implement the above logic even in recovery management (restart).
 In the event of branch, all branches must use xa_prepare even if they are
