@@ -1,4 +1,4 @@
-AT_BANNER([XTA: Sync branch & xa_start])
+AT_BANNER([XTA: Sync branch & commit])
 
 AT_SETUP([XTA/5.0/0.0 sup xa_start XAER_RMFAIL])
 # just start the state server
@@ -361,6 +361,239 @@ xa_rollback/0
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [11], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/5.2/0.3 sub xa_prepare XA_RBROLLBACK])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+xa_close/0
+]])
+# Superior thread xa_prepare() --> XA_RBROLLBACK
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/100
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [11], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/5.2/0.4 sup xa_prepare XAER_RMERR])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+# Superior thread xa_prepare() --> XAER_RMERR
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [11], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/5.2/0.5 sub xa_prepare XAER_RMERR])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_rollback/0
+xa_close/0
+]])
+# Superior thread xa_prepare() --> XAER_RMERR
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/-3
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [11], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/5.3/0.0 sup xa_commit XAER_RMERR])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+# Superior thread xa_prepare() --> XAER_RMERR
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/-3
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [7], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/5.3/0.1 sub xa_commit XAER_RMERR])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([delete],
+[[timeout 1 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 1 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+# Subordinate thread xa_prepare() --> XAER_RMERR
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/-3
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [8], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/5.3/0.2 sup xa_commit XA_RETRY])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[timeout 2 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 2 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+# Superior thread xa_prepare() --> XA_RETRY
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/4
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/5.3/0.3 sub xa_commit XA_RETRY])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([delete],
+[[timeout 2 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 2 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+# Subordinate thread xa_prepare() --> XA_RETRY
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/4
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP

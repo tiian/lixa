@@ -1,6 +1,6 @@
 # XTA (XA Transaction API) case tests
 
-#m4_include([xta_5_0.at])
+m4_include([xta_5_0.at])
 m4_include([xta_4.at])
 m4_include([xta_1.at])
 m4_include([xta_2.at])

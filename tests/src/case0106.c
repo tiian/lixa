@@ -66,6 +66,8 @@
  * 4:   superior branch / xta_transaction_commit() generic error
  * 5:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
  * 6:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
+ * 7:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_MIXED
+ * 8:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_MIXED
  */
 
 
@@ -284,6 +286,8 @@ void superior(void)
                     pgm, pid, rc, lixa_strerror(rc));
             if (rc == LIXA_RC_TX_ROLLBACK)
                 exit(5);
+            else if (rc == LIXA_RC_TX_MIXED)
+                exit(7);
             else
                 exit(4);
         }
@@ -351,6 +355,8 @@ void subordinate(void)
                         pgm, pid, rc, lixa_strerror(rc));
                 if (rc == LIXA_RC_TX_ROLLBACK)
                     exit(6);
+                else if (rc == LIXA_RC_TX_MIXED)
+                    exit(8);
                 else
                     exit(1);
             }
@@ -361,7 +367,7 @@ void subordinate(void)
             if (rc == LIXA_RC_TX_ROLLBACK)
                 exit(6);
             else
-            exit(1);
+                exit(1);
         }
     } else {
         rc = xta_transaction_rollback(tx);

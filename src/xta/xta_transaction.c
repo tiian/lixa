@@ -704,6 +704,10 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
                         this->commit_suspended = TRUE;
                         THROW(COMMIT_SUSPENDED);
                         break;
+                    case LIXA_RC_OTHER_BRANCH_ERROR: /* force rollback */
+                        txrc = TX_ROLLBACK;
+                        commit = FALSE;
+                        break;
                     default:
                         THROW(LIXA_XA_PREPARE_ERROR);
                 } /* switch (ret_cod) */

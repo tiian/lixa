@@ -1597,7 +1597,8 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
         lixa_msg_trace(&msg);
 #endif
         /* check the answer from the server */
-        if (LIXA_RC_WOULD_BLOCK == msg.body.prepare_16.answer.rc)
+        if (LIXA_RC_WOULD_BLOCK == msg.body.prepare_16.answer.rc ||
+            LIXA_RC_OTHER_BRANCH_ERROR == msg.body.prepare_16.answer.rc)
             warning = msg.body.prepare_16.answer.rc;
         else if (LIXA_RC_OK != (ret_cod = msg.body.prepare_16.answer.rc))
             THROW(ERROR_FROM_SERVER);
