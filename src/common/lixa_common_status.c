@@ -26,9 +26,9 @@
 
 
 
-#include <lixa_errors.h>
-#include <lixa_common_status.h>
-#include <lixa_trace.h>
+#include "lixa_errors.h"
+#include "lixa_common_status.h"
+#include "lixa_trace.h"
 
 
 
@@ -43,9 +43,9 @@
 void common_status_conthr_display(const struct common_status_conthr_s *csc)
 {
     LIXA_TRACE(("common_status_conthr_display: finished=%d, txstate=%d, "
-                "will_commit=%d, will_rollback=%d\n",
+                "will_commit=%d, will_rollback=%d, global_recovery=%d\n",
                 csc->finished, csc->txstate, csc->will_commit,
-                csc->will_rollback));
+                csc->will_rollback, csc->global_recovery));
     LIXA_TRACE_HEX_DATA("common_status_conthr_display: xid = ",
                         (const byte_t *)&csc->xid, sizeof(XID));
 }

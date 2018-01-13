@@ -25,9 +25,9 @@
 
 
 
-#include <lixa_xml_msg.h>
-#include <lixa_trace.h>
-#include <lixa_config.h>
+#include "lixa_xml_msg.h"
+#include "lixa_trace.h"
+#include "lixa_config.h"
 
 
 
@@ -174,6 +174,12 @@ struct common_status_conthr_s {
     int   will_rollback;
     /**
      * Boolean value:
+     * one or more branches in the global transaction requires recovery: all
+     * the branches must be recovered to guarantee consistency
+     */
+    int   global_recovery;
+    /**
+     * Boolean value:
      * the Application Program transaction is completed and there are no more
      * tasks related to it
      */
@@ -234,6 +240,7 @@ extern "C" {
         csc->xid.formatID = NULLXID;
         csc->will_commit = FALSE;
         csc->will_rollback = FALSE;
+        csc->global_recovery = FALSE;
         csc->finished = FALSE;
         return;
     }

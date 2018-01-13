@@ -698,7 +698,10 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 
 int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
 {
-    enum Exception { XA_BRANCH_UNCHAIN,
+    enum Exception { XA_BRANCH_LIST,
+                     CHECK_RECOVERY_PENDING,
+                     SET_GLOBAL_RECOVERY,
+                     XA_BRANCH_UNCHAIN,
                      BLOCK_STATUS_ERROR,
                      RECOVERY_TABLE_INSERT_ERROR,
                      PAYLOAD_CHAIN_RELEASE,
@@ -706,23 +709,56 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
                      FREE_SLOTS,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    uint32_t *list_of_branches = NULL;
 
     LIXA_TRACE(("server_manager_drop_client\n"));
     TRY {
-        int rec_pend = FALSE;
+        int branch_rec_pend = FALSE;
+        int global_rec_pend = FALSE;
         uint32_t block_id = ts->client_array[slot_id].pers_status_slot_id;
-        struct status_record_data_s *data =
-            &(ts->curr_status[block_id].sr.data);
+        struct status_record_data_s *data = NULL;
+        uint32_t number_of_branches = 0;
 
-        /* unchain the branch if necessary */
-        ret_cod = server_xa_branch_unchain(ts, block_id);
-        if (LIXA_RC_OK != ret_cod && LIXA_RC_BYPASSED_OPERATION != ret_cod)
-            THROW(XA_BRANCH_UNCHAIN);
+        /* is the client part of a chain of branches? */
+        if (server_xa_branch_is_chained(ts, block_id)) {
+            uint32_t i;
+            /* retrieve the list of all the blocks */
+            if (LIXA_RC_OK != (ret_cod = server_xa_branch_list(
+                                   ts, block_id, &number_of_branches,
+                                   &list_of_branches)))
+                THROW(XA_BRANCH_LIST);
+            /* check if at least one block is in recovery pending state */
+            for (i=0; i<number_of_branches; ++i) {
+                data = &(ts->curr_status[list_of_branches[i]].sr.data);
+                /* check recovery pending state */
+                if (LIXA_RC_OK != (
+                        ret_cod = thread_status_check_recovery_pending(
+                            data, &branch_rec_pend, &global_rec_pend)))
+                    THROW(CHECK_RECOVERY_PENDING);
+                if (branch_rec_pend || global_rec_pend)
+                    break; /* this condition is sufficient to interrupt */
+            } /* for (i=0; i<number_of_branches; ++i) */
+            /* if at least one block is in recovery pending, set the
+               global recovery pending for all */
+            if (branch_rec_pend) {
+                for (i=0; i<number_of_branches; ++i) {
+                    if (LIXA_RC_OK != (ret_cod =
+                                       thread_status_set_global_recovery(
+                                           ts, list_of_branches[i])))
+                        THROW(SET_GLOBAL_RECOVERY);
+                } /* for (i=0; i<number_of_branches; ++i) */
+            } /* if (branch_rec_pend) */            
+            /* unchain the branch */
+            if (LIXA_RC_OK != (ret_cod = server_xa_branch_unchain(
+                                   ts, block_id)))
+                THROW(XA_BRANCH_UNCHAIN);
+        } /* if (server_xa_branch_is_chained(ts, block_id)) */
         /* check recovery pending state */
+        data = &(ts->curr_status[block_id].sr.data);
         if (LIXA_RC_OK != (ret_cod = thread_status_check_recovery_pending(
-                               data, &rec_pend)))
+                               data, &branch_rec_pend, &global_rec_pend)))
             THROW(BLOCK_STATUS_ERROR);
-        if (rec_pend) {
+        if (branch_rec_pend || global_rec_pend) {
             struct srvr_rcvr_tbl_rec_s srtr;
             /* insert a new record in the recovery pending table */
             srtr.job = &data->pld.ph.job;
@@ -749,6 +785,9 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case XA_BRANCH_LIST:
+            case CHECK_RECOVERY_PENDING:
+            case SET_GLOBAL_RECOVERY:
             case XA_BRANCH_UNCHAIN:
             case BLOCK_STATUS_ERROR:
             case RECOVERY_TABLE_INSERT_ERROR:
@@ -766,6 +805,11 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release memory if necessary */
+    if (NULL != list_of_branches) {
+        free(list_of_branches);
+        list_of_branches = NULL;
+    } /* if (NULL != list_of_branches) */
     LIXA_TRACE(("server_manager_drop_client/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

@@ -391,7 +391,8 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	package.m4 mysql_postgresql.at webspheremq.at lixa-config.at.in \
 	lixavsr.at.in \
 	xta.at xta_1.at xta_2.at xta_3.at xta_4.at \
-	xta_5_0.at xta_5_5.at
+	xta_5_0.at xta_5_5.at xta_6_0.at \
+	$(TESTSUITE) atlocal.in lixa_test_exec.sh lixa_test_functions.sh
 
 TESTSUITE = $(srcdir)/testsuite
 AUTOM4TE = autom4te
@@ -729,7 +730,6 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	  echo 'm4_define([AT_PACKAGE_URL],       [$(PACKAGE_URL)])'; \
 	} > $@-t
 	mv $@-t $@
-	$(TESTSUITE) atlocal.in lixa_test_exec.sh lixa_test_functions.sh
 
 lixavsr.at: lixavsr.at.in
 	sed \
@@ -809,6 +809,7 @@ $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/xta.at $(srcdir)/xta_1.at $(srcdir)/xta_2.at \
 		$(srcdir)/xta_3.at $(srcdir)/xta_4.at \
 		$(srcdir)/xta_5_0.at $(srcdir)/xta_5_5.at \
+		$(srcdir)/xta_6.at \
 		$(srcdir)/package.m4
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@

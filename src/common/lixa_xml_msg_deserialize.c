@@ -1296,6 +1296,7 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
                      PROP_TXSTATE_NOT_FOUND,
                      PROP_WILL_COMMIT_NOT_FOUND,
                      PROP_WILL_ROLLBACK_NOT_FOUND,
+                     PROP_GLOBAL_RECOVERY_NOT_FOUND,
                      XID_NOT_FOUND,
                      XID_DESERIALIZE_ERROR,
                      XML_UNRECOGNIZED_TAG1,
@@ -1364,6 +1365,7 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
                         msg->body.qrcvr_16.client.state.txstate =
                             (int) strtol((char *) tmp, NULL, 0);
                         xmlFree(tmp);
+                        /* retrieve will_commit property */
                         if (NULL == (tmp = xmlGetProp(
                                          cur2,
                                          LIXA_XML_MSG_PROP_WILL_COMMIT)))
@@ -1371,11 +1373,20 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
                         msg->body.qrcvr_16.client.state.will_commit =
                             (int) strtol((char *) tmp, NULL, 0);
                         xmlFree(tmp);
+                        /* retrieve will_rollback property */
                         if (NULL == (
                                 tmp = xmlGetProp(
                                     cur2, LIXA_XML_MSG_PROP_WILL_ROLLBACK)))
                             THROW(PROP_WILL_ROLLBACK_NOT_FOUND);
                         msg->body.qrcvr_16.client.state.will_rollback =
+                            (int) strtol((char *) tmp, NULL, 0);
+                        xmlFree(tmp);
+                        /* retrieve global_recovery property */
+                        if (NULL == (
+                                tmp = xmlGetProp(
+                                    cur2, LIXA_XML_MSG_PROP_GLOBAL_RECOVERY)))
+                            THROW(PROP_GLOBAL_RECOVERY_NOT_FOUND);
+                        msg->body.qrcvr_16.client.state.global_recovery =
                             (int) strtol((char *) tmp, NULL, 0);
                         xmlFree(tmp);
                         /* retrieve xid properties */

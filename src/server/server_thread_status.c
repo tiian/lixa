@@ -323,6 +323,9 @@ int thread_status_dump_header(const struct payload_header_s *ph)
                 printf(UINT32_T_FORMAT " ", ph->block_array[i]);
             printf("\n");
         }
+        printf("\tTrnhdr/previous and next branch blocks: " UINT32_T_FORMAT
+               " " UINT32_T_FORMAT "\n", ph->prev_branch_block,
+               ph->next_branch_block);
         if (LIXA_RC_OK != (ret_cod = lixa_utils_iso_timestamp(
                                &ph->arrival_time, tmp_str_time,
                                sizeof(tmp_str_time))))
@@ -350,9 +353,10 @@ int thread_status_dump_header(const struct payload_header_s *ph)
                "\tTrnhdr/state/txstate: %d\n"
                "\tTrnhdr/state/will commit: %d\n"
                "\tTrnhdr/state/will rollback: %d\n"
+               "\tTrnhdr/state/global recovery: %d\n"
                "\tTrnhdr/state/xid: '%s'\n", 
                ph->state.finished, ph->state.txstate, ph->state.will_commit,
-               ph->state.will_rollback, xid_str);
+               ph->state.will_rollback, ph->state.global_recovery, xid_str);
         if (LIXA_RC_OK != (ret_cod = lixa_utils_iso_timestamp(
                                &ph->recovery_failed_time, tmp_str_time,
                                sizeof(tmp_str_time))))
@@ -634,14 +638,16 @@ int thread_status_recovery(struct thread_status_s *ts,
                             " is a transaction resource manager block, "
                             "skipping...\n", i));
             } else if (DATA_PAYLOAD_TYPE_HEADER == data->pld.type) {
-                int recovery_pending = FALSE;
+                int branch_recovery_pending = FALSE;
+                int global_recovery_pending = FALSE;
                 LIXA_TRACE(("thread_status_recovery: block # " UINT32_T_FORMAT
                             " is a transaction header block\n", i));
                 if (LIXA_RC_OK != (
                         ret_cod = thread_status_check_recovery_pending(
-                            data, &recovery_pending)))
+                            data, &branch_recovery_pending,
+                            &global_recovery_pending)))
                     THROW(CHECK_RECOVERY_PENDING_ERROR);
-                if (recovery_pending) {
+                if (branch_recovery_pending) {
                     struct srvr_rcvr_tbl_rec_s srtr;
                     LIXA_TRACE(("thread_status_recovery: block # "
                                 UINT32_T_FORMAT " is related to a recovery "
@@ -747,7 +753,7 @@ int thread_status_clean_failed(struct thread_status_s *ts)
 
 
 int thread_status_check_recovery_pending(
-    const struct status_record_data_s *data, int *result)
+    const struct status_record_data_s *data, int *branch, int *global)
 {
     enum Exception { INVALID_HEADER_TYPE
                      , FINISHED_TRANSACTION
@@ -759,8 +765,8 @@ int thread_status_check_recovery_pending(
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    /* conservative behavior */
-    *result = TRUE;
+    *branch = TRUE; /* conservative behavior */
+    *global = FALSE;
     
     LIXA_TRACE(("thread_status_check_recovery_pending\n"));
     TRY {
@@ -775,6 +781,12 @@ int thread_status_check_recovery_pending(
         /* the logic of this function could be improved in the future, but
            at this time the algorithm is very conservative: probably some
            unnecessary recovery operations will be performed */
+
+        /* check if a global recovery pending condition has already been set */
+        LIXA_TRACE(("thread_status_check_recovery_pending: "
+                    "data->pld.ph.state.global_recovery=%d\n",
+                    data->pld.ph.state.global_recovery));
+        *global = data->pld.ph.state.global_recovery;
         
         /* is the transaction already marked as finished? */
         if (data->pld.ph.state.finished) {
@@ -852,7 +864,7 @@ int thread_status_check_recovery_pending(
             case NOT_STARTED_TRANSACTION1:
             case NOT_STARTED_TRANSACTION2:
             case NOT_STARTED_TRANSACTION3:
-                *result = FALSE;
+                *branch = FALSE;
                 ret_cod = LIXA_RC_OK;
                 break;
             case NONE:
@@ -863,6 +875,37 @@ int thread_status_check_recovery_pending(
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("thread_status_check_recovery_pending/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int thread_status_set_global_recovery(struct thread_status_s *ts,
+                                      uint32_t block_id)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("thread_status_set_global_recovery\n"));
+    TRY {
+        struct status_record_data_s *data =
+            &(ts->curr_status[block_id].sr.data);
+        status_record_update(ts->curr_status + block_id, block_id,
+                             ts->updated_records);
+        data->pld.ph.state.global_recovery = TRUE;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("thread_status_set_global_recovery/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

@@ -25,7 +25,7 @@
 
 
 
-#include <server_status.h>
+#include "server_status.h"
 
 
 
@@ -84,10 +84,10 @@ extern "C" {
 
     /**
      * Initialize a structure of type @ref thread_status_s
-     * @param ts OUT reference to the structure must be initialized
-     * @param id IN thread id must assigned
-     * @param tpa IN reference to the thread pipe array
-     * @param crash_count IN reference to the crash counter
+     * @param[out] ts reference to the structure must be initialized
+     * @param[in] id thread id must assigned
+     * @param[in] tpa reference to the thread pipe array
+     * @param[in] crash_count reference to the crash counter
      * @param mmode IN the thread must operate in maintenance mode
      */
     void thread_status_init(struct thread_status_s *ts, int id,
@@ -98,7 +98,7 @@ extern "C" {
 
     /**
      * Release the memory allocated to a thread status object
-     * @param ts OUT reference to the structure must be destroyed
+     * @param[out] ts reference to the structure must be destroyed
      */
     void thread_status_destroy(struct thread_status_s *ts);
 
@@ -107,8 +107,8 @@ extern "C" {
     /**
      * Dump the content of the thread status files
      * WARNING: THIS FUNCTION IS *** NOT *** THREAD SAFE
-     * @param ts IN thread status reference
-     * @param tsds IN dump specification
+     * @param[in] ts thread status reference
+     * @param[in] tsds dump specification
      * @return a reason code
      */
     int thread_status_dump(const struct thread_status_s *ts,
@@ -119,7 +119,7 @@ extern "C" {
     /**
      * Dump a transaction header record; see @ref thread_status_dump
      * WARNING: THIS FUNCTION IS *** NOT *** THREAD SAFE
-     * @param ph IN payload header reference
+     * @param[in] ph payload header reference
      * @return a reason code
      */
     int thread_status_dump_header(const struct payload_header_s *ph);
@@ -128,7 +128,7 @@ extern "C" {
 
     /**
      * Dump a resource manager record; see @ref thread_status_dump
-     * @param rm IN resource manager reference
+     * @param[in] rm resource manager reference
      * @return a reason code
      */
     int thread_status_dump_rsrmgr(const struct payload_rsrmgr_s *rm);
@@ -137,9 +137,9 @@ extern "C" {
     
     /**
      * Load the files associated to memory mapped status
-     * @param ts IN/OUT pointer to the thread status structure
-     * @param status_file_prefix IN the prefix used for status files
-     * @param tsds IN dump specification (load and dump if activated)
+     * @param[in,out] ts pointer to the thread status structure
+     * @param[in] status_file_prefix the prefix used for status files
+     * @param[in] tsds dump specification (load and dump if activated)
      * @return a reason code
      */
     int thread_status_load_files(struct thread_status_s *ts,
@@ -151,8 +151,8 @@ extern "C" {
     /**
      * Scan the status file and enqueue recovery pending transactions in
      * the server recovery table
-     * @param ts IN/OUT thread status reference
-     * @param srt IN/OUT server recovery table reference
+     * @param[in,out] ts thread status reference
+     * @param[in,out] srt server recovery table reference
      * @return a standardized return code
      */
     int thread_status_recovery(struct thread_status_s *ts,
@@ -162,7 +162,7 @@ extern "C" {
 
     /**
      * Free a chain of blocks and returns the new next block
-     * @param ts IN/OUT thread status reference
+     * @param[in,out] ts thread status reference
      * @return a standardized reason code
      */
     int thread_status_clean_failed(struct thread_status_s *ts);
@@ -172,20 +172,32 @@ extern "C" {
     /**
      * Check a transaction header block and determines if it's in recovery
      * pending state
-     * @param data IN transaction header block must be analyzed
-     * @param result OUT boolean value: TRUE if the transaction is in recovery
-     *        pending result
+     * @param[in] data transaction header block must be analyzed
+     * @param[out] branch: TRUE if the branch is in recovery pending state
+     * @param[out] global: TRUE if all the branches of the global transaction
+     *             are in recovery pending state
      * @return a standardized return code
      */
     int thread_status_check_recovery_pending(
-        const struct status_record_data_s *data, int *result);
+        const struct status_record_data_s *data, int *branch, int *global);
 
 
+
+    /**
+     * Set the global recovery pending state for a record
+     * @param[in,out] ts thread status reference
+     * @param[in] block_id of the record that must be updated
+     * @return a standardized return code
+     */
+    int thread_status_set_global_recovery(struct thread_status_s *ts,
+                                          uint32_t block_id);
+
+    
     
     /**
      * Synchronize status files: this is the atomic operation necessary to
      * guarantee transactionality property of the system
-     * @param ts IN thread status reference
+     * @param[in] ts thread status reference
      * @return a reason code
      */
     int thread_status_sync_files(struct thread_status_s *ts);

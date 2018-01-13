@@ -182,6 +182,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_FINISHED;
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_FLAGS;
 /**
+ * Label used to specify "global_recovery" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_GLOBAL_RECOVERY;
+/**
  * Label used to specify "job" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_JOB;
@@ -994,6 +998,10 @@ struct lixa_msg_body_qrcvr_16_state_s
      * Boolean: did the transaction asked rollback?
      */
     int will_rollback;
+    /**
+     * Boolean: must all the branches recovered?
+     */
+    int global_recovery;
     /**
      * Transaction id
      */

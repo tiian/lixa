@@ -19,48 +19,36 @@
 #include <config.h>
 
 
+
 #ifdef HAVE_PTHREAD_H
-
 # include <pthread.h>
-
 #endif
 #ifdef HAVE_UNISTD_H
-
 # include <unistd.h>
-
 #endif
 #ifdef HAVE_STDLIB_H
-
 # include <stdlib.h>
-
 #endif
 #ifdef HAVE_STRING_H
-
 # include <string.h>
-
 #endif
 #ifdef HAVE_SYSLOG_H
-
 # include <syslog.h>
-
 #endif
 #ifdef HAVE_SYS_TYPES_H
-
 # include <sys/types.h>
-
 #endif
 #ifdef HAVE_SYS_SOCKET_H
-
 # include <sys/socket.h>
-
 #endif
 
 
-#include <lixa_errors.h>
-#include <lixa_trace.h>
-#include <lixa_xml_msg.h>
-#include <lixa_common_status.h>
-#include <lixa_syslog.h>
+
+#include "lixa_errors.h"
+#include "lixa_trace.h"
+#include "lixa_xml_msg.h"
+#include "lixa_common_status.h"
+#include "lixa_syslog.h"
 #include "lixa_xml_msg.h"
 
 
@@ -79,6 +67,7 @@ const xmlChar *LIXA_XML_MSG_PROP_DYNAMIC = (xmlChar *) "dynamic";
 const xmlChar *LIXA_XML_MSG_PROP_FAILED = (xmlChar *) "failed";
 const xmlChar *LIXA_XML_MSG_PROP_FINISHED = (xmlChar *) "finished";
 const xmlChar *LIXA_XML_MSG_PROP_FLAGS = (xmlChar *) "flags";
+const xmlChar *LIXA_XML_MSG_PROP_GLOBAL_RECOVERY = (xmlChar *) "global_recovery";
 const xmlChar *LIXA_XML_MSG_PROP_JOB = (xmlChar *) "job";
 const xmlChar *LIXA_XML_MSG_PROP_LEVEL = (xmlChar *) "level";
 const xmlChar *LIXA_XML_MSG_PROP_MAINT = (xmlChar *) "maint";

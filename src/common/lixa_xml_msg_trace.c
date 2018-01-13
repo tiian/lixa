@@ -615,11 +615,13 @@ int lixa_msg_trace_qrcvr(const struct lixa_msg_s *msg)
                             msg->body.qrcvr_16.client.last_verb_step.step));
                 LIXA_TRACE(("lixa_msg_trace_qrcvr: body[client[state["
                             "finished=%d,txstate=%d,will_commit=%d,"
-                            "will_rollback=%d,xid='%s']]]]\n",
+                            "will_rollback=%d,global_recovery=%d,"
+                            "xid='%s']]]]\n",
                             msg->body.qrcvr_16.client.state.finished,
                             msg->body.qrcvr_16.client.state.txstate,
                             msg->body.qrcvr_16.client.state.will_commit,
                             msg->body.qrcvr_16.client.state.will_rollback,
+                            msg->body.qrcvr_16.client.state.global_recovery,
                             ser_xid));
                 if (NULL != msg->body.qrcvr_16.rsrmgrs) {
                     for (i = 0; i < msg->body.qrcvr_16.rsrmgrs->len; ++i) {

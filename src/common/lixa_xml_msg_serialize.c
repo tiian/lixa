@@ -1380,7 +1380,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
         /* <state/> */
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "<%s %s=\"%d\" %s=\"%d\" %s=\"%d\" %s=\"%d\" "
-                              "%s=\"%s\"/>",
+                              "%s=\"%d\" %s=\"%s\"/>",
                               LIXA_XML_MSG_TAG_STATE,
                               LIXA_XML_MSG_PROP_FINISHED,
                               msg->body.qrcvr_16.client.state.finished,
@@ -1390,6 +1390,8 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
                               msg->body.qrcvr_16.client.state.will_commit,
                               LIXA_XML_MSG_PROP_WILL_ROLLBACK,
                               msg->body.qrcvr_16.client.state.will_rollback,
+                              LIXA_XML_MSG_PROP_GLOBAL_RECOVERY,
+                              msg->body.qrcvr_16.client.state.global_recovery,
                               LIXA_XML_MSG_PROP_XID,
                               ser_xid);
         if (used_chars >= *free_chars)

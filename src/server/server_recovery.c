@@ -38,6 +38,7 @@
 #include "lixa_syslog.h"
 #include "lixa_xid.h"
 #include "server_recovery.h"
+#include "server_xa_branch.h"
 
 
 
@@ -347,6 +348,17 @@ int server_recovery_result(struct thread_status_s *ts,
                         lmi->body.qrcvr_8.client.config_digest));
         }
 
+        /* check if the block is part of chain (multiple branches
+           transaction) */
+        LIXA_TRACE(("server_recovery_result: block_id=" UINT32_T_FORMAT "\n",
+                    block_id));
+        if (server_xa_branch_is_chained(ts, block_id)) {
+            LIXA_TRACE(("server_recovery_result: block_id=" UINT32_T_FORMAT
+                        " is part of a multiple branch transaction\n",
+                        block_id));
+            
+        } /* if (server_xa_branch_is_chained(ts, block_id)) */
+        
         lmo->body.qrcvr_16.client.last_verb_step.verb =
             pld->ph.last_verb_step[0].verb;
         lmo->body.qrcvr_16.client.last_verb_step.step =
@@ -358,6 +370,8 @@ int server_recovery_result(struct thread_status_s *ts,
             pld->ph.state.will_commit;
         lmo->body.qrcvr_16.client.state.will_rollback =
             pld->ph.state.will_rollback;
+        lmo->body.qrcvr_16.client.state.global_recovery =
+            pld->ph.state.global_recovery;
         memcpy(&lmo->body.qrcvr_16.client.state.xid, &pld->ph.state.xid,
                sizeof(XID));
 

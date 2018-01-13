@@ -26,16 +26,13 @@
 
 
 
-#include <lixa_errors.h>
-#include <lixa_xid.h>
-/*
-  #include <lixa_common_status.h>
-*/
-#include <lixa_xml_msg_deserialize.h>
-#include <lixa_xml_msg_serialize.h>
-#include <lixa_xml_msg_trace.h>
-#include <lixa_syslog.h>
-#include <client_recovery.h>
+#include "lixa_errors.h"
+#include "lixa_xid.h"
+#include "lixa_xml_msg_deserialize.h"
+#include "lixa_xml_msg_serialize.h"
+#include "lixa_xml_msg_trace.h"
+#include "lixa_syslog.h"
+#include "client_recovery.h"
 
 
 
@@ -270,9 +267,14 @@ int client_recovery_analyze(client_config_coll_t *ccc,
         guint i;
         
         *commit = FALSE;
-        /* intention of the client (transaction manager) */
-        if (rpl->body.qrcvr_16.client.state.will_commit) {
-            int /* all_prepared = TRUE, */ any_prepared = FALSE;
+        /* check if a global recovery has been signaled by the state server */
+        if (rpl->body.qrcvr_16.client.state.global_recovery) {
+            LIXA_TRACE(("client_recovery_analyze: the TX was a branch inside "
+                        "a global transaction that has been marked for "
+                        "global recovery, rolling back...\n"));
+        } else if (rpl->body.qrcvr_16.client.state.will_commit) {
+            /* intention of the client (transaction manager) */
+            int any_prepared = FALSE;
             int only_one = TRUE;
             LIXA_TRACE(("client_recovery_analyze: the TX was committing\n"));
             *commit = TRUE;

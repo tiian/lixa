@@ -45,7 +45,7 @@
 
 
 /*
- * Synchronous branch case test for XTA
+ * Asynchronous branch case test for XTA
  *
  * NOTE: this is not a good example to learn the C programming language
  *       because the usage of global variables has been abused and you should
@@ -53,6 +53,17 @@
  *       A huge amount of global variables has been used to avoid parameters
  *       for boilerplate functions: the meaning of the flow should be more
  *       evident without useless details.
+ */
+
+
+
+/*
+ * EXIT CODES:
+ *  0:   OK
+ *  1:   generic error
+ *  2:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
+ *  2:   intermediate branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
+ *  4:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
  */
 
 
@@ -281,9 +292,12 @@ void superior(void)
     if (commit) {
         rc = xta_transaction_commit(tx, FALSE);
         if (rc != test_rc) {
-            fprintf(stderr, "%s/%u| xta_transaction_commit: returned %d "
-                    "instead of %d\n", pgm, pid, rc, test_rc);
-            exit(1);
+            fprintf(stderr, "%s/%u| xta_transaction_commit: returned "
+                    "%d (%s)\n", pgm, pid, rc, lixa_strerror(rc));
+            if (rc == LIXA_RC_TX_ROLLBACK)
+                exit(2);
+            else
+                exit(1);
         }
         fprintf(stderr, "%s/%u| XTA commit returned %d as expected\n",
                 pgm, pid, rc);
@@ -349,9 +363,12 @@ void intermediate(void)
     if (commit) {
         rc = xta_transaction_commit(tx, FALSE);
         if (rc != test_rc) {
-            fprintf(stderr, "%s/%u| xta_transaction_commit: returned %d "
-                    "instead of %d\n", pgm, pid, rc, test_rc);
-            exit(1);
+            fprintf(stderr, "%s/%u| xta_transaction_commit: returned "
+                    "%d (%s)\n", pgm, pid, rc, lixa_strerror(rc));
+            if (rc == LIXA_RC_TX_ROLLBACK)
+                exit(3);
+            else
+                exit(1);
         }
         fprintf(stderr, "%s/%u| XTA commit returned %d as expected\n",
                 pgm, pid, rc);
@@ -409,9 +426,12 @@ void subordinate(void)
     if (commit) {
         rc = xta_transaction_commit(tx, FALSE);
         if (rc != test_rc) {
-            fprintf(stderr, "%s/%u| xta_transaction_commit: returned %d "
-                    "instead of %d\n", pgm, pid, rc, test_rc);
-            exit(1);
+            fprintf(stderr, "%s/%u| xta_transaction_commit: returned "
+                    "%d (%s)\n", pgm, pid, rc, lixa_strerror(rc));
+            if (rc == LIXA_RC_TX_ROLLBACK)
+                exit(4);
+            else
+                exit(1);
         }
         fprintf(stderr, "%s/%u| XTA commit returned %d as expected\n",
                 pgm, pid, rc);
