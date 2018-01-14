@@ -40,7 +40,7 @@ PID_LIST=""
 # all commands are executed with a reasonable timeout
 while IFS='' read -r LINE || [[ -n "$LINE" ]]; do
 	echo "Command to execute: $LINE"
-	$LINE 2>&1 &
+	sh -c "$LINE" 2>&1 &
 	PID=$!
 	echo "Started with pid $PID"
 	PID_LIST="$PID_LIST $PID" 

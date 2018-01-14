@@ -366,7 +366,8 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_branch_prepare: block_id=" UINT32_T_FORMAT "\n",
                 block_id));
     TRY {
-        uint32_t i, will_commit=0, will_rollback=0, unknown=0;
+        uint32_t i, will_commit=0, will_rollback=0, global_recovery=0,
+            unknown=0;
         /* assess all the branches */
         for (i=0; i<branch_array_size; ++i) {
             struct common_status_conthr_s *state =
@@ -375,7 +376,7 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
                 &ts->curr_status[branch_array[i]
                                  ].sr.data.pld.ph.last_verb_step[0];
             /* check the branch reached the prepare verb, but not for
-               current branch*/
+               current branch */
             if (LIXA_MSG_VERB_PREPARE != verb_step->verb &&
                 block_id != branch_array[i]) {
                 LIXA_TRACE(("server_xa_branch_prepare: i=" UINT32_T_FORMAT ", "
@@ -388,9 +389,13 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
             }
             LIXA_TRACE(("server_xa_branch_prepare: i=" UINT32_T_FORMAT ", "
                         "branch_array[i]=" UINT32_T_FORMAT ", last_verb=%d, "
-                        "will_commit=%d, will_rollback=%d\n",
+                        "will_commit=%d, will_rollback=%d, "
+                        "global_recovery=%d\n",
                         i, branch_array[i], verb_step->verb,
-                        state->will_commit, state->will_rollback));
+                        state->will_commit, state->will_rollback,
+                        state->global_recovery));
+            if (state->global_recovery)
+                global_recovery++;
             /* check the prepared state of the branch */
             if (TRUE == state->will_commit) {
                 if (FALSE == state->will_rollback)
@@ -406,14 +411,15 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
         } /* for (i=0; i<branch_array_size; ++i) */
         LIXA_TRACE(("server_xa_branch_prepare: #will_commit=" UINT32_T_FORMAT
                     ", #will_rollback=" UINT32_T_FORMAT ", #unknown="
-                    UINT32_T_FORMAT "\n",
-                    will_commit, will_rollback, unknown));
+                    UINT32_T_FORMAT ", #global_recovery=" UINT32_T_FORMAT "\n",
+                    will_commit, will_rollback, unknown, global_recovery));
         if (0 < unknown) {
             /* at least one not prepared branch */
             THROW(PREPARE_DELAYED);
-        } else if (0 < will_rollback && 0 == unknown) {
-            /* at least one failed branch, but all the branch has been
-               prepared */
+        } else if ((0 < will_rollback || 0 < global_recovery) &&
+                   0 == unknown) {
+            /* at least one failed branch or a global_recovery condition has
+               been rised, but all the branch has been prepared */
             THROW(MULTIBRANCH_PREPARE_FAILED);
         } /* if (0 < unknown) */
         
