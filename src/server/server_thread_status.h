@@ -172,6 +172,7 @@ extern "C" {
     /**
      * Check a transaction header block and determines if it's in recovery
      * pending state
+     * @param[in] ts thread status reference
      * @param[in] data transaction header block must be analyzed
      * @param[out] branch: TRUE if the branch is in recovery pending state
      * @param[out] global: TRUE if all the branches of the global transaction
@@ -179,7 +180,9 @@ extern "C" {
      * @return a standardized return code
      */
     int thread_status_check_recovery_pending(
-        const struct status_record_data_s *data, int *branch, int *global);
+        const struct thread_status_s *ts,
+        const struct status_record_data_s *data,
+        int *branch, int *global);
 
 
 
@@ -187,10 +190,12 @@ extern "C" {
      * Set the global recovery pending state for a record
      * @param[in,out] ts thread status reference
      * @param[in] block_id of the record that must be updated
+     * @param[in] global_recovery value that must be set
      * @return a standardized return code
      */
     int thread_status_set_global_recovery(struct thread_status_s *ts,
-                                          uint32_t block_id);
+                                          uint32_t block_id,
+                                          int global_recovery);
 
     
     

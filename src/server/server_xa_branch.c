@@ -447,3 +447,151 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int server_xa_branch_check_recovery(const struct thread_status_s *ts,
+                                    uint32_t branch_array_size,
+                                    const uint32_t *branch_array,
+                                    int *global_recovery)
+{
+    enum Exception { INVALID_HEADER_TYPE
+                     , SKIP_ANALYSIS
+                     , POSSIBLE_IN_FLIGHT_TX
+                     , UNPREPARED_RESOURCE_MANAGERS
+                     , AT_LEAST_ONE_ROLLBACK
+                     , ALL_THE_BRANCHES_PREPARED
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_xa_branch_check_recovery\n"));
+    TRY {
+        uint32_t i, j;
+        const struct status_record_data_s *data = NULL;
+        const struct payload_rsrmgr_s *rm = NULL;
+        /* a bunch of statistic vars */
+        int finished = 0, will_commit = 0, will_rollback = 0;
+        int prepared_rm = 0, prepared_branches = 0;
+        /* reset the condition */
+        *global_recovery = XTA_GLOBAL_RECOV_NULL;
+        /* loop on all the branches */
+        for (i=0; i<branch_array_size; ++i) {
+            data = &(ts->curr_status[branch_array[i]].sr.data);
+            /* check the record is an header (consistency check) */
+            if (DATA_PAYLOAD_TYPE_HEADER != data->pld.type) {
+                LIXA_TRACE(("server_xa_branch_check_recovery: "
+                            "data->pld.type=%d\n", data->pld.type));
+                THROW(INVALID_HEADER_TYPE);
+            }
+            /* trace a lot of info */
+            LIXA_TRACE(("server_xa_branch_check_recovery: branch="
+                        UINT32_T_FORMAT ", block_id=" UINT32_T_FORMAT
+                        ", last verb=%d, last step=%d, finished=%d, "
+                        "txstate=%d, will_commit=%d, will_rollback=%d, "
+                        "global_recovery=%d\n",
+                        i, branch_array[i],
+                        data->pld.ph.last_verb_step[0].verb,
+                        data->pld.ph.last_verb_step[0].step,
+                        data->pld.ph.state.finished,
+                        data->pld.ph.state.txstate,
+                        data->pld.ph.state.will_commit,
+                        data->pld.ph.state.will_rollback,
+                        data->pld.ph.state.global_recovery));
+            /* check if the global_recovery has been already set for this
+               branch */
+            if (XTA_GLOBAL_RECOV_NULL != data->pld.ph.state.global_recovery) {
+                LIXA_TRACE(("server_xa_branch_check_recovery: global_recovery "
+                            "is already set for this branch, skipping "
+                            "analysis...\n"));
+                /* stop here the analysis, it has already been done! */
+                THROW(SKIP_ANALYSIS);
+            } /* if (XTA_GLOBAL_RECOV_NULL != data->pld.ph.state... */
+            /* check the last verb */
+            switch (data->pld.ph.last_verb_step[0].verb) {
+                case LIXA_MSG_VERB_START:
+                case LIXA_MSG_VERB_END:
+                    LIXA_TRACE(("server_xa_branch_check_recovery: this branch "
+                                "started but didn't prepare, there can be a "
+                                "possigle 'in flight' transaction, forcing "
+                                "rollback\n"));
+                    *global_recovery = XTA_GLOBAL_RECOV_FORCE_ROLLBACK;
+                    THROW(POSSIBLE_IN_FLIGHT_TX);
+                    break;
+                default: /* nothing to do */
+                    break;
+            } /* switch (data->pld.ph.last_verb_step[0].verb) */
+            if (data->pld.ph.state.finished)
+                finished++;
+            if (data->pld.ph.state.will_commit)
+                will_commit++;
+            if (data->pld.ph.state.will_rollback)
+                will_rollback++;
+            /* reset the number of prepared resource managers */
+            prepared_rm = 0;
+            /* loop on all the resource managers used by the branch */
+            for (j=0; j<data->pld.ph.n; ++j) {
+                rm = &(ts->curr_status[
+                           data->pld.ph.block_array[j]].sr.data.pld.rm);
+                LIXA_TRACE(("server_xa_branch_check_recovery: rmid=%d, "
+                            "name='%s', xa_s_state=%d\n",
+                            rm->rmid, rm->name, rm->state.xa_s_state));
+                if (XA_STATE_S3 == rm->state.xa_s_state)
+                    prepared_rm++;
+            } /* for (j=0; j<data->pld.n; ++j) */
+            if (0 < prepared_rm && prepared_rm < data->pld.ph.n) {
+                LIXA_TRACE(("server_xa_branch_check_recovery: the number of "
+                            "prepared resource managers (%d) is different "
+                            "than the total number of resource managers (%d), "
+                            "forcing rollback...",
+                            prepared_rm, data->pld.ph.n));
+                *global_recovery = XTA_GLOBAL_RECOV_FORCE_ROLLBACK;
+                THROW(UNPREPARED_RESOURCE_MANAGERS);
+            } else if (prepared_rm == data->pld.ph.n) {
+                LIXA_TRACE(("server_xa_branch_check_recovery: all the "
+                            "resource managers (%d) have been prepared for "
+                            "this branch\n", prepared_rm));
+                prepared_branches++;
+            } /* if (0 < prepared_rm && prepared_rm < data->pld.ph.n) */
+        } /* for (i=0; i<branch_array_size; ++i) */
+        /* if at least one branch wanted to rollback, forcing rollback... */
+        if (0 < will_rollback) {
+            LIXA_TRACE(("server_xa_branch_check_recovery: there's at least "
+                        "one (%d) branch that asked for rollback, forcing "
+                        "rollback...\n", will_rollback));
+            *global_recovery = XTA_GLOBAL_RECOV_FORCE_ROLLBACK;
+            THROW(AT_LEAST_ONE_ROLLBACK);
+        }
+        /* if all the branches prepared, force commit... */
+        if (prepared_branches == branch_array_size) {
+            LIXA_TRACE(("server_xa_branch_check_recovery: all the resource "
+                        "managers in all the branches prepared for commit, "
+                        "forcing commit...\n"));
+            *global_recovery = XTA_GLOBAL_RECOV_FORCE_COMMIT;
+            THROW(ALL_THE_BRANCHES_PREPARED);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_HEADER_TYPE:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case SKIP_ANALYSIS:
+            case POSSIBLE_IN_FLIGHT_TX:
+            case UNPREPARED_RESOURCE_MANAGERS:
+            case AT_LEAST_ONE_ROLLBACK:
+            case ALL_THE_BRANCHES_PREPARED:
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        LIXA_TRACE(("server_xa_branch_check_recovery: global_recovery=%d\n",
+                    *global_recovery));
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_xa_branch_check_recovery/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

@@ -143,6 +143,23 @@
 
 
 /**
+ * The global recovery field has not been set to a specific value (reset value)
+ */
+#define XTA_GLOBAL_RECOV_NULL           0
+/**
+ * The global transaction must be forced to commit during the automatic
+ * recovery phase
+ */
+#define XTA_GLOBAL_RECOV_FORCE_COMMIT   1
+/**
+ * The global transaction must be forced to rollback during the automatic
+ * recovery phase
+ */
+#define XTA_GLOBAL_RECOV_FORCE_ROLLBACK 2
+
+
+
+/**
  * Store the status of the current control thread is partecipating in the
  * transaction; the client keeps a volatile copy, the server stores the
  * persistent copy
@@ -173,9 +190,12 @@ struct common_status_conthr_s {
      */
     int   will_rollback;
     /**
-     * Boolean value:
-     * one or more branches in the global transaction requires recovery: all
-     * the branches must be recovered to guarantee consistency
+     * It reports to the client which type of action must be performed on the
+     * branch when a global transaction with multiple branches has not
+     * completed all the steps. Possible values are:
+     * @ref XTA_GLOBAL_RECOV_NULL,
+     * @ref XTA_GLOBAL_RECOV_FORCE_COMMIT,
+     * @ref XTA_GLOBAL_RECOV_FORCE_ROLLBACK
      */
     int   global_recovery;
     /**
@@ -233,24 +253,19 @@ extern "C" {
 
 
 
-    static inline void common_status_conthr_init(
-        struct common_status_conthr_s *csc) {
-        csc->txstate = TX_STATE_S0;
-        memset(&csc->xid, 0, sizeof(XID));
-        csc->xid.formatID = NULLXID;
-        csc->will_commit = FALSE;
-        csc->will_rollback = FALSE;
-        csc->global_recovery = FALSE;
-        csc->finished = FALSE;
-        return;
-    }
+    
+    /**
+     * Initialize a common status control thread structure
+     * @param[in,out] csc reference to the struct must be initialized
+     */
+    void common_status_conthr_init(struct common_status_conthr_s *csc);
 
 
 
     /**
      * Initialize a common status resource manager structure
-     * @param csr IN/OUT reference to the struct must be initialized
-     * @param dynamic IN boolean: the resource manager uses dynamic
+     * @param[in,out] csr reference to the struct must be initialized
+     * @param[in] dynamic boolean: the resource manager uses dynamic
      *                registration (TRUE) or static registration (FALSE)
      */
     static inline void common_status_rsrmgr_init(

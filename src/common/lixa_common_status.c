@@ -40,6 +40,20 @@
 
 
 
+void common_status_conthr_init(
+    struct common_status_conthr_s *csc) {
+    csc->txstate = TX_STATE_S0;
+    memset(&csc->xid, 0, sizeof(XID));
+    csc->xid.formatID = NULLXID;
+    csc->will_commit = FALSE;
+    csc->will_rollback = FALSE;
+    csc->global_recovery = XTA_GLOBAL_RECOV_NULL;
+    csc->finished = FALSE;
+    return;
+}
+
+
+
 void common_status_conthr_display(const struct common_status_conthr_s *csc)
 {
     LIXA_TRACE(("common_status_conthr_display: finished=%d, txstate=%d, "

@@ -1,4 +1,4 @@
-Replicate xta_6.at (synchronous branches crash tests for asynchronous branches)
+Change xta_6.at following the pattern of xta_7.at
 
 In the event of branch, all branches must use xa_prepare even if they are
 using just one Resource Manager

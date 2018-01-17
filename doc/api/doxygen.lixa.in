@@ -743,8 +743,8 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../../src/client \
-                         ../../src/common \
+INPUT                  = ../../src/common \
+                         ../../src/client \
                          ../../src/server \
 			 ../../src/xta
 

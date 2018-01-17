@@ -142,6 +142,29 @@ extern "C" {
                                  uint32_t branch_array_size,
                                  const uint32_t *branch_array);
 
+
+
+    /**
+     * Check the current state of all the branches that have participated in
+     * the global transaction and determine what type of global recovery
+     * action would be performed during automatic recovery. This function must
+     * be called when the global transaction is not able to complete all the
+     * branches.
+     * @param[in] ts reference to the current thread status
+     * @param[in] branch_array_size is the number of branches that participate
+     *            in the global transaction
+     * @param[in] branch_array is the set of branches that participate in the
+     *            global transaction (it contains the block ids of the header
+     *            record of every branch)
+     * @param[out] global_recovery is the action that would be performed
+     *             by client during automatic recovery
+     * @return a reason code
+     */
+    int server_xa_branch_check_recovery(const struct thread_status_s *ts,
+                                        uint32_t branch_array_size,
+                                        const uint32_t *branch_array,
+                                        int *global_recovery);
+
     
     
 #ifdef __cplusplus

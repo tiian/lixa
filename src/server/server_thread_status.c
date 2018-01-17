@@ -47,13 +47,13 @@
 
 
 
-#include <lixa_crash.h>
-#include <lixa_errors.h>
-#include <lixa_trace.h>
-#include <lixa_utils.h>
-#include <lixa_xid.h>
-#include <lixa_syslog.h>
-#include <server_thread_status.h>
+#include "lixa_crash.h"
+#include "lixa_errors.h"
+#include "lixa_trace.h"
+#include "lixa_utils.h"
+#include "lixa_xid.h"
+#include "lixa_syslog.h"
+#include "server_thread_status.h"
 
 
 
@@ -644,7 +644,7 @@ int thread_status_recovery(struct thread_status_s *ts,
                             " is a transaction header block\n", i));
                 if (LIXA_RC_OK != (
                         ret_cod = thread_status_check_recovery_pending(
-                            data, &branch_recovery_pending,
+                            ts, data, &branch_recovery_pending,
                             &global_recovery_pending)))
                     THROW(CHECK_RECOVERY_PENDING_ERROR);
                 if (branch_recovery_pending) {
@@ -753,6 +753,7 @@ int thread_status_clean_failed(struct thread_status_s *ts)
 
 
 int thread_status_check_recovery_pending(
+    const struct thread_status_s *ts,
     const struct status_record_data_s *data, int *branch, int *global)
 {
     enum Exception { INVALID_HEADER_TYPE
@@ -760,6 +761,7 @@ int thread_status_check_recovery_pending(
                      , RECOVERY_FAILED_TRANSACTION
                      , NOT_STARTED_TRANSACTION1
                      , NOT_STARTED_TRANSACTION2
+                     , ALL_PREPARED
                      , NOT_STARTED_TRANSACTION3
                      , INVALID_VERB
                      , NONE } excp;
@@ -834,6 +836,13 @@ int thread_status_check_recovery_pending(
             case LIXA_MSG_VERB_ROLLBACK:
             case LIXA_MSG_VERB_FORGET:
                 break;
+                /* check if all resource manager switched to "prepared" (S3)
+                   state */
+                /* 20180115 old stuff, remove me
+                if (thread_status_check_all_prepared(ts, data))
+                    THROW(ALL_PREPARED);
+                break;
+                */
             case LIXA_MSG_VERB_REG:
                 /* check TX state */
                 if (data->pld.ph.state.txstate != TX_STATE_S3 &&
@@ -863,6 +872,7 @@ int thread_status_check_recovery_pending(
             case RECOVERY_FAILED_TRANSACTION:
             case NOT_STARTED_TRANSACTION1:
             case NOT_STARTED_TRANSACTION2:
+            case ALL_PREPARED:
             case NOT_STARTED_TRANSACTION3:
                 *branch = FALSE;
                 ret_cod = LIXA_RC_OK;
@@ -881,8 +891,10 @@ int thread_status_check_recovery_pending(
 
 
 
+
 int thread_status_set_global_recovery(struct thread_status_s *ts,
-                                      uint32_t block_id)
+                                      uint32_t block_id,
+                                      int global_recovery)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -893,7 +905,7 @@ int thread_status_set_global_recovery(struct thread_status_s *ts,
             &(ts->curr_status[block_id].sr.data);
         status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
-        data->pld.ph.state.global_recovery = TRUE;
+        data->pld.ph.state.global_recovery = global_recovery;
         
         THROW(NONE);
     } CATCH {

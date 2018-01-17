@@ -268,10 +268,18 @@ int client_recovery_analyze(client_config_coll_t *ccc,
         
         *commit = FALSE;
         /* check if a global recovery has been signaled by the state server */
-        if (rpl->body.qrcvr_16.client.state.global_recovery) {
+        if (XTA_GLOBAL_RECOV_FORCE_ROLLBACK ==
+            rpl->body.qrcvr_16.client.state.global_recovery) {
             LIXA_TRACE(("client_recovery_analyze: the TX was a branch inside "
                         "a global transaction that has been marked for "
-                        "global recovery, rolling back...\n"));
+                        "global recovery rollback: rolling back...\n"));
+            *commit = FALSE;
+        } else if (XTA_GLOBAL_RECOV_FORCE_COMMIT ==
+                   rpl->body.qrcvr_16.client.state.global_recovery) {
+            LIXA_TRACE(("client_recovery_analyze: the TX was a branch inside "
+                        "a global transaction that has been marked for "
+                        "global recovery commit: committing...\n"));
+            *commit = TRUE;
         } else if (rpl->body.qrcvr_16.client.state.will_commit) {
             /* intention of the client (transaction manager) */
             int any_prepared = FALSE;
