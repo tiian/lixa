@@ -1,4 +1,5 @@
-Change xta_6.at following the pattern of xta_7.at
+Change XTA_6 and XTA_7 to use different sets of resource managers for different
+branches.
 
 In the event of branch, all branches must use xa_prepare even if they are
 using just one Resource Manager
