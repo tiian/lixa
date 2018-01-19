@@ -453,28 +453,31 @@ void create_dynamic_native_xa_resources()
         exit(1);
     }
 #ifdef HAVE_MYSQL
-    /*
-     * create a MySQL native connection
-     */
-    if (NULL == (mysql_conn = mysql_init(NULL))) {
-        fprintf(stderr, "%s/%u| mysql_init: returned NULL\n", pgm, pid);
-        exit(1);
-    }
-    if (NULL == mysql_real_connect(mysql_conn, "localhost", "lixa", "",
-                                   "lixa", 0, NULL, 0)) {
-        fprintf(stderr, "%s/%u| mysql_real_connect: returned error: %u, %s\n",
-               pgm, pid, mysql_errno(mysql_conn), mysql_error(mysql_conn));
-        exit(1);
-    }
-    /*
-     * create a MySQL XA resource object
-     */
-    if (NULL == (mysql_xa_res = xta_mysql_xa_resource_new(
-                     mysql_conn, "MySQL", "localhost,0,lixa,,lixa"))) {
-        fprintf(stderr, "%s/%u| xta_mysql_xa_resource_new: returned NULL\n",
-                pgm, pid);
-        exit(1);
-    }
+    if (branch_type == SUPERIOR) {
+        /*
+         * create a MySQL native connection
+         */
+        if (NULL == (mysql_conn = mysql_init(NULL))) {
+            fprintf(stderr, "%s/%u| mysql_init: returned NULL\n", pgm, pid);
+            exit(1);
+        }
+        if (NULL == mysql_real_connect(mysql_conn, "localhost", "lixa", "",
+                                       "lixa", 0, NULL, 0)) {
+            fprintf(stderr, "%s/%u| mysql_real_connect: returned error: "
+                    "%u, %s\n", pgm, pid, mysql_errno(mysql_conn),
+                    mysql_error(mysql_conn));
+            exit(1);
+        }
+        /*
+         * create a MySQL XA resource object
+         */
+        if (NULL == (mysql_xa_res = xta_mysql_xa_resource_new(
+                         mysql_conn, "MySQL", "localhost,0,lixa,,lixa"))) {
+            fprintf(stderr, "%s/%u| xta_mysql_xa_resource_new: returned "
+                    "NULL\n", pgm, pid);
+            exit(1);
+        }
+    } /* if (branch_type == SUPERIOR) */
 #endif
 #ifdef HAVE_ORACLE
     /*
@@ -493,26 +496,28 @@ void create_dynamic_native_xa_resources()
     }
 #endif
 #ifdef HAVE_POSTGRESQL
-    /*
-     * create a PostgreSQL native connection
-     */
-    postgres_conn = PQconnectdb("dbname=testdb");
-    if (CONNECTION_OK != PQstatus(postgres_conn)) {
-        fprintf(stderr, "%s/%u| PQconnectdb: returned error %s\n",
-               pgm, pid, PQerrorMessage(postgres_conn));
-        PQfinish(postgres_conn);
-        exit(1);
-    }
-    /*
-     * create a PostgreSQL XA resource object
-     */
-    if (NULL == (postgresql_xa_res = xta_postgresql_xa_resource_new(
-                     postgres_conn, "PostgreSQL",
-                     "dbname=testdb"))) {
-        fprintf(stderr, "%s/%u| xta_postgresql_xa_resource_new: returned "
-                "NULL\n", pgm, pid);
-    exit(1);
-    }
+    if (branch_type == SUBORDINATE) {
+        /*
+         * create a PostgreSQL native connection
+         */
+        postgres_conn = PQconnectdb("dbname=testdb");
+        if (CONNECTION_OK != PQstatus(postgres_conn)) {
+            fprintf(stderr, "%s/%u| PQconnectdb: returned error %s\n",
+                    pgm, pid, PQerrorMessage(postgres_conn));
+            PQfinish(postgres_conn);
+            exit(1);
+        }
+        /*
+         * create a PostgreSQL XA resource object
+         */
+        if (NULL == (postgresql_xa_res = xta_postgresql_xa_resource_new(
+                         postgres_conn, "PostgreSQL",
+                         "dbname=testdb"))) {
+            fprintf(stderr, "%s/%u| xta_postgresql_xa_resource_new: returned "
+                    "NULL\n", pgm, pid);
+            exit(1);
+        }
+    } /* if (branch_type == SUBORDINATE) */
 #endif
 }
 
@@ -560,13 +565,15 @@ void enlist_resources_to_transaction(void)
         exit(1);
     }
 #ifdef HAVE_MYSQL
-    /* register the MySQL XA Resource to the transaction manager */
-    if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
-                           tx, (xta_xa_resource_t *)mysql_xa_res))) {
-        fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/mysql_xa_res: "
-                "returned %d\n", pgm, pid, rc);
-        exit(1);
-    }
+    if (branch_type == SUPERIOR) {
+        /* register the MySQL XA Resource to the transaction manager */
+        if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
+                               tx, (xta_xa_resource_t *)mysql_xa_res))) {
+            fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
+                    "mysql_xa_res: returned %d\n", pgm, pid, rc);
+            exit(1);
+        }
+    } /* if (branch_type == SUPERIOR) */
 #endif    
 #ifdef HAVE_ORACLE
     rc = xta_transaction_enlist_resource(tx,
@@ -578,13 +585,15 @@ void enlist_resources_to_transaction(void)
     }
 #endif
 #ifdef HAVE_POSTGRESQL
-    /* register the PostgreSQL XA Resource to the transaction manager */
-    if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
-                           tx, (xta_xa_resource_t *)postgresql_xa_res))) {
-        fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
-                "postgresql_xa_res: returned %d\n", pgm, pid, rc);
-        exit(1);
-    }
+    if (branch_type == SUBORDINATE) {
+        /* register the PostgreSQL XA Resource to the transaction manager */
+        if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
+                               tx, (xta_xa_resource_t *)postgresql_xa_res))) {
+            fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
+                    "postgresql_xa_res: returned %d\n", pgm, pid, rc);
+            exit(1);
+        }
+    } /* if (branch_type == SUBORDINATE) */
 #endif    
 }
 
@@ -606,28 +615,30 @@ void open_all_the_resources(void)
 void use_xa_resources(void)
 {
 #ifdef HAVE_MYSQL
-    /* insert data */
-    if (insert) {
-        if (mysql_query(mysql_conn, mysql_stmt_insert)) {
-            fprintf(stderr, "%s/%u| INSERT INTO authors: %u/%s",
-                    pgm, pid, mysql_errno(mysql_conn),
-                    mysql_error(mysql_conn));
-            mysql_close(mysql_conn);
-            exit(1);
+    if (branch_type == SUPERIOR) {
+        /* insert data */
+        if (insert) {
+            if (mysql_query(mysql_conn, mysql_stmt_insert)) {
+                fprintf(stderr, "%s/%u| INSERT INTO authors: %u/%s",
+                        pgm, pid, mysql_errno(mysql_conn),
+                        mysql_error(mysql_conn));
+                mysql_close(mysql_conn);
+                exit(1);
+            }
+            fprintf(stderr, "%s/%u| MySQL statement >%s< completed\n",
+                    pgm, pid, mysql_stmt_insert);
+        } else {
+            if (mysql_query(mysql_conn, mysql_stmt_delete)) {
+                fprintf(stderr, "%s/%u| DELETE FROM authors: %u/%s",
+                        pgm, pid, mysql_errno(mysql_conn),
+                        mysql_error(mysql_conn));
+                mysql_close(mysql_conn);
+                exit(1);
+            }
+            printf("%s/%u| MySQL statement >%s< completed\n",
+                   pgm, pid, mysql_stmt_delete);
         }
-        fprintf(stderr, "%s/%u| MySQL statement >%s< completed\n",
-                pgm, pid, mysql_stmt_insert);
-    } else {
-        if (mysql_query(mysql_conn, mysql_stmt_delete)) {
-            fprintf(stderr, "%s/%u| DELETE FROM authors: %u/%s",
-                    pgm, pid, mysql_errno(mysql_conn),
-                    mysql_error(mysql_conn));
-            mysql_close(mysql_conn);
-            exit(1);
-        }
-        printf("%s/%u| MySQL statement >%s< completed\n",
-               pgm, pid, mysql_stmt_delete);
-    }
+    } /* if (branch_type == SUPERIOR) */
 #endif /* HAVE_MYSQL */
 #ifdef HAVE_ORACLE
     /* retrieve environment and context */
@@ -703,35 +714,37 @@ void use_xa_resources(void)
     OCIHandleFree((dvoid *)oci_err_hndl, (ub4)OCI_HTYPE_ERROR);
 #endif /* HAVE_ORACLE */
 #ifdef HAVE_POSTGRESQL
-    if (insert) {
-        postgres_res = PQexec(
-            postgres_conn, postgres_stmt_insert);
-        if (PGRES_COMMAND_OK != PQresultStatus(postgres_res)) {
-            fprintf(stderr, "%s/%u| error while executing >%s< %s\n",
-                    pgm, pid, postgres_stmt_insert,
-                    PQerrorMessage(postgres_conn));
+    if (branch_type == SUBORDINATE) {
+        if (insert) {
+            postgres_res = PQexec(
+                postgres_conn, postgres_stmt_insert);
+            if (PGRES_COMMAND_OK != PQresultStatus(postgres_res)) {
+                fprintf(stderr, "%s/%u| error while executing >%s< %s\n",
+                        pgm, pid, postgres_stmt_insert,
+                        PQerrorMessage(postgres_conn));
+                PQclear(postgres_res);
+                PQfinish(postgres_conn);
+                exit(1);
+            }
             PQclear(postgres_res);
-            PQfinish(postgres_conn);
-            exit(1);
-        }
-        PQclear(postgres_res);
-        fprintf(stderr, "%s/%u| PostgreSQL statement >%s< completed\n",
-                pgm, pid, postgres_stmt_insert);
-    } else {
-        postgres_res = PQexec(
-            postgres_conn, postgres_stmt_delete);
-        if (PGRES_COMMAND_OK != PQresultStatus(postgres_res)) {
-            fprintf(stderr, "%s/%u| error while executing >%s< %s\n",
-                    pgm, pid, postgres_stmt_delete,
-                    PQerrorMessage(postgres_conn));
+            fprintf(stderr, "%s/%u| PostgreSQL statement >%s< completed\n",
+                    pgm, pid, postgres_stmt_insert);
+        } else {
+            postgres_res = PQexec(
+                postgres_conn, postgres_stmt_delete);
+            if (PGRES_COMMAND_OK != PQresultStatus(postgres_res)) {
+                fprintf(stderr, "%s/%u| error while executing >%s< %s\n",
+                        pgm, pid, postgres_stmt_delete,
+                        PQerrorMessage(postgres_conn));
+                PQclear(postgres_res);
+                PQfinish(postgres_conn);
+                exit(1);
+            }
             PQclear(postgres_res);
-            PQfinish(postgres_conn);
-            exit(1);
+            fprintf(stderr, "%s/%u| PostgreSQL statement >%s< completed\n",
+                    pgm, pid, postgres_stmt_delete);
         }
-        PQclear(postgres_res);
-        fprintf(stderr, "%s/%u| PostgreSQL statement >%s< completed\n",
-                pgm, pid, postgres_stmt_delete);
-    }
+    } /* if (branch_type == SUBORDINATE) */
 #endif /* HAVE_POSTGRESQL */    
 }
 
@@ -776,14 +789,16 @@ void delete_transaction_manager(void)
 void delete_all_xa_resources(void)
 {
 #ifdef HAVE_POSTGRESQL
-    /*
-     * delete the PostgreSQL XA resource object
-     */
-    xta_postgresql_xa_resource_delete(postgresql_xa_res);
-    /*
-     * close PostgreSQL database connection
-     */
-    PQfinish(postgres_conn);
+    if (branch_type == SUBORDINATE) {
+        /*
+         * delete the PostgreSQL XA resource object
+         */
+        xta_postgresql_xa_resource_delete(postgresql_xa_res);
+        /*
+         * close PostgreSQL database connection
+         */
+        PQfinish(postgres_conn);
+    } /* if (branch_type == SUBORDINATE) */
 #endif    
 #ifdef HAVE_ORACLE
     /*
@@ -792,14 +807,16 @@ void delete_all_xa_resources(void)
     xta_native_xa_resource_delete(dynamic_native_xa_res_ora);
 #endif 
 #ifdef HAVE_MYSQL
-    /*
-     * delete the MySQL XA resource object
-     */
-    xta_mysql_xa_resource_delete(mysql_xa_res);
-    /*
-     * close MySQL database connection
-     */
-    mysql_close(mysql_conn);
+    if (branch_type == SUPERIOR) {
+        /*
+         * delete the MySQL XA resource object
+         */
+        xta_mysql_xa_resource_delete(mysql_xa_res);
+        /*
+         * close MySQL database connection
+         */
+        mysql_close(mysql_conn);
+    } /* if (branch_type == SUPERIOR) */
 #endif    
     /*
      * delete native XA Resource object

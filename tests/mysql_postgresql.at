@@ -211,7 +211,7 @@ xa_prepare/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0025 ; export LIXA_CRASH_POINT=14 ; lixa_test_exec.sh noreset none case0042 1 1 0], [134], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([MY/0.1/3.1 Automatic recovery (1/2)])
+AT_SETUP([MP/0.1/3.1 Automatic recovery (1/2)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_MYSQL" = "no"; then exit 77; fi])
@@ -225,6 +225,8 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
+# wait 1 second to wait the socket error propagation
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0025 ; lixa_test_exec.sh noreset none case0042 1 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
