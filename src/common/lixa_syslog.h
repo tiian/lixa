@@ -128,6 +128,10 @@
     "returned XAER_NOTA during xa_start(TMJOIN|TMRESUME) for xid='%s' and this should NOT happen"
 #define LIXA_SYSLOG_LXC030E "LXC030E protocol level mismatch: message is at " \
     "level %d, code is at level %d"
+#define LIXA_SYSLOG_LXC031E "LXC031E transaction with xid='%s' can't be " \
+    "used to create a subordinate branch because bqual='%s' is related to " \
+    "a non branchable transaction"
+    
 
 
 

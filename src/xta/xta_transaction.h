@@ -158,9 +158,16 @@ extern "C" {
      * Start a new XA Transaction. From the XA specification point of
      * view, it calls xa_start (for the Native XA Resource Managers)
      * @param[in,out] this : transaction object
+     * @param[in] multiple_branches : boolean value: <br>
+     *            TRUE = the created transaction will span more applications,
+     *                   @ref xta_transaction_branch will be called
+     *                   subsequently <br>
+     *            FALSE = the created transaction will not span more
+     *                   applications and @ref xta_transaction_branch will not
+     *                   be called for this transaction <br>
      * @return a reason code
      */
-    int xta_transaction_start(xta_transaction_t *this);
+    int xta_transaction_start(xta_transaction_t *this, int multiple_branches);
 
 
     

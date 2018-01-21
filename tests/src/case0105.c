@@ -59,14 +59,15 @@ int main(int argc, char *argv[])
     int        commit;
     int        test_rc;
     const char *filename = NULL;
+    int        multiple_branches;
     const char *filename2 = NULL;
 
     /* turn ON trace for debugging purpose */
     xta_init();
     
     fprintf(stderr, "%s| starting...\n", pgm);
-    if (argc < 5) {
-        fprintf(stderr, "%s: at least six options must be specified\n",
+    if (argc < 6) {
+        fprintf(stderr, "%s: at least five options must be specified\n",
                 argv[0]);
         return 1;
     }
@@ -74,9 +75,10 @@ int main(int argc, char *argv[])
     commit = strtol(argv[2], NULL, 0);
     test_rc = strtol(argv[3], NULL, 0);
     filename = argv[4];
+    multiple_branches = strtol(argv[5], NULL, 0);
     /* check if a second filename is provided */
-    if (argc == 6)
-        filename2 = argv[5];
+    if (argc == 7)
+        filename2 = argv[6];
 
     /* check phase */
     switch (phase) {
@@ -153,7 +155,8 @@ int main(int argc, char *argv[])
 
     if (SUPERIOR == phase || NO_PHASE == phase) {
         /* start a Distributed Transaction */
-        if (LIXA_RC_OK != (rc = xta_transaction_start(tx))) {
+        if (LIXA_RC_OK != (rc = xta_transaction_start(
+                               tx, multiple_branches))) {
             fprintf(stderr, "%s| xta_transaction_start: returned %d\n",
                     pgm, rc);
             return 1;
@@ -192,7 +195,7 @@ int main(int argc, char *argv[])
                                tx, buffer))) {
             fprintf(stderr, "%s| xta_transaction_branch returned %d\n",
                     pgm, rc);
-            return 1;
+            return 2;
         }
 
         /* write to xid_file2 the transaction that will be branched again */

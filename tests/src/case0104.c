@@ -262,7 +262,7 @@ void superior(void)
      * interesting code for XTA branching
      */
     /* start a new Distributed Transaction */
-    rc = xta_transaction_start(tx);
+    rc = xta_transaction_start(tx, TRUE);
     if (rc != LIXA_RC_OK) {
         fprintf(stderr, "%s/%u| xta_transaction_start: returned %d\n",
                 pgm, pid, rc);

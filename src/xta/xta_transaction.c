@@ -24,6 +24,9 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
+#endif
 
 
 
@@ -33,6 +36,7 @@
 #include "client_conn.h"
 #include "client_config.h"
 #include "lixa_xa.h"
+#include "lixa_syslog.h"
 /* XTA includes */
 #include "xta_transaction.h"
 
@@ -88,7 +92,7 @@ xta_transaction_t *xta_transaction_new(void)
             THROW(CLIENT_CONFIG_JOB_ERROR);
         /* reset the XID reference */
         this->xid = NULL;
-        /* reset the commit suspended */
+        /* reset flag */
         this->commit_suspended = FALSE;
         
         THROW(NONE);
@@ -559,7 +563,7 @@ int xta_transaction_close(xta_transaction_t *this)
 
 
 
-int xta_transaction_start(xta_transaction_t *this)
+int xta_transaction_start(xta_transaction_t *this, int multiple_branches)
 {
     enum Exception { NULL_OBJECT1
                      , INVALID_STATUS
@@ -586,7 +590,8 @@ int xta_transaction_start(xta_transaction_t *this)
         } else
             next_txstate = TX_STATE_S3;
         /* create a new xid */
-        if (NULL == (this->xid = xta_xid_new(this->local_ccc.config_digest)))
+        if (NULL == (this->xid = xta_xid_new(this->local_ccc.config_digest,
+                                             multiple_branches)))
             THROW(NULL_OBJECT2);
         /* start the transaction in all the XA Resource Managers */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
@@ -630,6 +635,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
 {
     enum Exception { NULL_OBJECT
                      , INVALID_STATUS
+                     , GET_BQUAL_ASCII
                      , LIXA_XA_END_ERROR
                      , LIXA_XA_PREPARE_WAIT_BRANCHES_ERROR
                      , COMMIT_SUSPENDED
@@ -643,6 +649,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
                      , LIXA_XA_FORGET_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    char *bqual = NULL;
     
     LIXA_TRACE(("xta_transaction_commit\n"));
     int txrc = TX_OK;
@@ -665,8 +672,23 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
                         "commit must be completed\n"));
         } else {
             /* check if One Phase Commit optimization can be applied */
-            one_phase_commit = client_status_could_one_phase(
-                &this->client_status, &this->local_ccc);
+            one_phase_commit = (client_status_could_one_phase(
+                                    &this->client_status, &this->local_ccc));
+            if (one_phase_commit) {
+                /* check if the transaction has been create with the multiple
+                   branches option */
+                if (NULL == (bqual = lixa_xid_get_bqual_ascii(
+                                 xta_xid_get_xa_xid(this->xid))))
+                    THROW(GET_BQUAL_ASCII);
+                if (xta_xid_branch_qualifier_is_multibranch(bqual)) {
+                    LIXA_TRACE(("xta_transaction_commit: forcing "
+                                "one_phase_commit to FALSE because the branch "
+                                "qualifier (%s) of this transaction is "
+                                "related to a multiple branches transaction\n",
+                                bqual));
+                    one_phase_commit = FALSE;
+                }
+            } /* if (one_phase_commit) */
             /* detach the transaction */
             if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
                                    &this->local_ccc, &this->client_status,
@@ -800,6 +822,9 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
+            case GET_BQUAL_ASCII:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case LIXA_XA_END_ERROR:
             case LIXA_XA_PREPARE_WAIT_BRANCHES_ERROR:
             case LIXA_XA_PREPARE_ERROR:
@@ -843,6 +868,11 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
         if (TX_FAIL == txrc && NULL != &this->client_status)
             client_status_failed(&this->client_status);
     } /* TRY-CATCH */
+    /* memory recovery */
+    if (NULL != bqual) {
+        free(bqual);
+        bqual = NULL;
+    }
     LIXA_TRACE(("xta_transaction_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -1144,12 +1174,15 @@ int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
     enum Exception { NULL_OBJECT1
                      , INVALID_STATUS
                      , XID_DESERIALIZE
+                     , GET_BQUAL_ASCII
+                     , NON_BRANCHABLE_TX
                      , XID_SERIALIZE
                      , NULL_OBJECT2
                      , LIXA_XA_START_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int warning = LIXA_RC_OK;
+    char *bqual = NULL;
     
     LIXA_TRACE(("xta_transaction_branch\n"));
     TRY {
@@ -1177,6 +1210,17 @@ int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
                         "superior XID '%s'\n", xid_string));
             THROW(XID_DESERIALIZE);
         }
+        /* retrieve the branch qualifier to check it's for multiple branches */
+        if (NULL == (bqual = lixa_xid_get_bqual_ascii(&superior)))
+            THROW(GET_BQUAL_ASCII);
+        if (!xta_xid_branch_qualifier_is_multibranch(bqual)) {
+            LIXA_TRACE(("xta_transaction_branch: this transaction "
+                        "(xid=%s) can't be branched because bqual (%s) is "
+                        "related to a non branchable transaction\n",
+                        xid_string, bqual));
+            syslog(LOG_ERR, LIXA_SYSLOG_LXC031E, xid_string, bqual);
+            THROW(NON_BRANCHABLE_TX);
+        }
         /* generate subordinate XID */
         lixa_xid_branch_new(&superior, &subordinate);
         /* serialize subordiante XID */
@@ -1200,8 +1244,7 @@ int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
         switch (ret_cod) {
             case LIXA_RC_OK:
                 break;
-            case LIXA_RC_ERROR_FROM_SERVER_OFFSET+
-                LIXA_RC_NO_SUPERIOR_BRANCH:
+            case LIXA_RC_NO_SUPERIOR_BRANCH:
                 /* set the warning condition, but the transaction can go on */
                 warning = ret_cod;
                 break;
@@ -1222,7 +1265,11 @@ int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
                 break;
             case XID_DESERIALIZE:
             case XID_SERIALIZE:
+            case GET_BQUAL_ASCII:
                 ret_cod = LIXA_RC_MALFORMED_XID;
+                break;
+            case NON_BRANCHABLE_TX:
+                ret_cod = LIXA_RC_NON_BRANCHABLE_TX;
                 break;
             case NULL_OBJECT2:
                 ret_cod = LIXA_RC_NULL_OBJECT;
@@ -1236,6 +1283,11 @@ int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* memory recovery */
+    if (NULL != bqual) {
+        free(bqual);
+        bqual = NULL;
+    }
     LIXA_TRACE(("xta_transaction_branch/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

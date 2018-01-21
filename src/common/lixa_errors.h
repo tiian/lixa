@@ -578,6 +578,11 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * back (like TX_HAZARD in TX transaction demarcation specification)
  */
 #define LIXA_RC_TX_HAZARD                      -504
+/**
+ * The XA transaction can be branched because it has been create as non
+ * branchable
+ */
+#define LIXA_RC_NON_BRANCHABLE_TX              -505
 
 
 

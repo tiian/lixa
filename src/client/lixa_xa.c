@@ -2408,7 +2408,7 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
             case LIXA_RC_NO_SUPERIOR_BRANCH:
                 /* just propagate a warning condition to the Application
                    Program */
-                warning = LIXA_RC_ERROR_FROM_SERVER_OFFSET+ret_cod;
+                warning = ret_cod;
                 break;
             default:
                 THROW(ERROR_FROM_SERVER);

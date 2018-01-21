@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
 
     if (INITIAL == phase || NO_PHASE == phase) {
         /* start a Distributed Transaction */
-        if (LIXA_RC_OK != (rc = xta_transaction_start(tx))) {
+        if (LIXA_RC_OK != (rc = xta_transaction_start(tx, FALSE))) {
             fprintf(stderr, "%s| xta_transaction_start: returned %d\n",
                     pgm, rc);
             return 1;

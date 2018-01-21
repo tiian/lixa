@@ -1,6 +1,6 @@
 AT_BANNER([XTA: Sync branch & rollback])
 
-AT_SETUP([XTA/5.5/0.0 sup xa_start XAER_RMFAIL])
+AT_SETUP([XTA/5.5/0.0 SUP xa_start XAER_RMFAIL])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # just start the state server
 AT_CHECK([lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
@@ -36,7 +36,7 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/5.5/0.1 sup xa_start XA_RBROLLBACK])
+AT_SETUP([XTA/5.5/0.1 SUP xa_start XA_RBROLLBACK])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
 # process
@@ -68,7 +68,7 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/5.5/0.2 sub xa_start XAER_RMFAIL])
+AT_SETUP([XTA/5.5/0.2 SUB xa_start XAER_RMFAIL])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
 # process
@@ -100,7 +100,7 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/5.5/0.3 sub xa_start XA_RBROLLBACK])
+AT_SETUP([XTA/5.5/0.3 SUB xa_start XA_RBROLLBACK])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
 # process
@@ -132,7 +132,7 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/5.6/0.0 sup xa_end XAER_RMERR])
+AT_SETUP([XTA/5.6/0.0 SUP xa_end XAER_RMERR])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
 # process
@@ -164,7 +164,7 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/5.6/0.1 sup xa_end XA_RBROLLBACK])
+AT_SETUP([XTA/5.6/0.1 SUP xa_end XA_RBROLLBACK])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
 # process
@@ -196,7 +196,7 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/5.6/0.2 sub xa_end XAER_RMERR])
+AT_SETUP([XTA/5.6/0.2 SUB xa_end XAER_RMERR])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
 # process
@@ -230,7 +230,7 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/5.6/0.3 sub xa_end XA_RBROLLBACK])
+AT_SETUP([XTA/5.6/0.3 SUB xa_end XA_RBROLLBACK])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
 # process
@@ -264,7 +264,7 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/5.8/0.0 sup xa_rollback XAER_RMERR])
+AT_SETUP([XTA/5.8/0.0 SUP xa_rollback XAER_RMERR])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
 # process
@@ -296,7 +296,7 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/5.8/0.1 sub xa_rollback XAER_RMERR])
+AT_SETUP([XTA/5.8/0.1 SUB xa_rollback XAER_RMERR])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
 # process
@@ -328,7 +328,7 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/5.8/0.4 sup xa_rollback XA_HEURHAZ])
+AT_SETUP([XTA/5.8/0.4 SUP xa_rollback XA_HEURHAZ])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
 # process
@@ -361,7 +361,7 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/5.8/0.5 sub xa_rollback XA_HEURHAZ])
+AT_SETUP([XTA/5.8/0.5 SUB xa_rollback XA_HEURHAZ])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
 # process

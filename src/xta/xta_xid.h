@@ -60,12 +60,49 @@ extern "C" {
      * Create a new Transaction Identifier object and generate a new unique XID
      * @param[in] branch_qualifier that must be assigned to the XID
      *            (in ASCII HEX format)
+     * @param[in] multiple_branches : boolean value: <br>
+     *            TRUE = the created transaction will span more applications,
+     *                   @ref xta_transaction_branch will be called
+     *                   subsequently <br>
+     *            FALSE = the created transaction will not span more
+     *                   applications and @ref xta_transaction_branch will not
+     *                   be called for this transaction <br>
      * @return a new transaction identifier object or NULL in the event of an
      *         error occurred
      */
-    xta_xid_t *xta_xid_new(const char *branch_qualifier);
+    xta_xid_t *xta_xid_new(const char *branch_qualifier,
+                           int multiple_branches);
 
 
+
+    /**
+     * Check if a branch_qualifier is related to a multiple branches
+     * transaction or not
+     * @param[in] branch_qualifier that must be checked
+     * @return a boolean value: TRUE for multiple branches transaction
+     */
+    int xta_xid_branch_qualifier_is_multibranch(
+        const char *branch_qualifier);
+
+    
+
+    /**
+     * Set branch_qualifier to be a multiple branches transaction
+     * @param[in,out] branch_qualifier that must be checked
+     * @return a boolean value: TRUE if branch_qualifier has been changed
+     */
+    int xta_xid_branch_qualifier_set_multibranch(char *branch_qualifier);
+
+    
+
+    /**
+     * Unset branch_qualifier to be a multiple branches transaction
+     * @param[in,out] branch_qualifier that must be checked
+     * @return a boolean value: TRUE if branch_qualifier has been changed
+     */
+    int xta_xid_branch_qualifier_unset_multibranch(char *branch_qualifier);
+
+    
 
     /**
      * Create a new Transaction Identifier object and set XID as passed by the
@@ -77,7 +114,7 @@ extern "C" {
     xta_xid_t *xta_xid_new_from_string(const char *xid_string);
 
 
-
+    
     /**
      * Create a new Transaction Identifier object and set XID as passed by the
      * caller. This is considered a private method because the an XTA

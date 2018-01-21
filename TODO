@@ -1,6 +1,3 @@
-
-In the event of branch, all branches must use xa_prepare even if they are
-using just one Resource Manager
 Create a test case to check LXD032N message: one branch already started 
 xa_prepare, a subordinate one tryes to branch.
 Implement timeout to avoid a too long block time for clients (timeout parameter

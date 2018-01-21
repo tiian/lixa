@@ -29,9 +29,9 @@
 
 
 
-#include <lixa_config.h>
-#include <lixa_trace.h>
-#include <lixa_xid.h>
+#include "lixa_config.h"
+#include "lixa_trace.h"
+#include "lixa_xid.h"
 
 
 

@@ -41,29 +41,47 @@
 
 
 
-xta_xid_t *xta_xid_new(const char *branch_qualifier)
+xta_xid_t *xta_xid_new(const char *branch_qualifier,
+                       int multiple_branches)
 {
-    enum Exception { G_TRY_MALLOC_ERROR
+    enum Exception { STRDUP_ERROR
+                     , G_TRY_MALLOC_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     xta_xid_t *this = NULL;
+    char *tmp_branch_qualifier = NULL;
     
-    LIXA_TRACE(("xta_xid_t\n"));
+    LIXA_TRACE(("xta_xid_new: branch_qualifier=%s, multiple_branches=%d\n",
+                branch_qualifier, multiple_branches));
     TRY {
         uuid_t tmp_bqual;
-        
+
+        /* duplicate branch_qualifier */
+        if (NULL == (tmp_branch_qualifier = strdup(branch_qualifier)))
+            THROW(STRDUP_ERROR);
         /* allocate the object */
         if (NULL == (this = (xta_xid_t *)
                      g_try_malloc0(sizeof(xta_xid_t))))
             THROW(G_TRY_MALLOC_ERROR);
+        /* set the first HEX digit of tmp_branch_qualifier according to
+           multiple_branches flag */
+        if (multiple_branches && !xta_xid_branch_qualifier_is_multibranch(
+                tmp_branch_qualifier))
+            xta_xid_branch_qualifier_set_multibranch(tmp_branch_qualifier);
+        else if (!multiple_branches && xta_xid_branch_qualifier_is_multibranch(
+                     tmp_branch_qualifier))
+            xta_xid_branch_qualifier_unset_multibranch(tmp_branch_qualifier);
         /* convert from ASCII HEX to binary hex */
-        lixa_xid_set_bqual(branch_qualifier, tmp_bqual);
+        lixa_xid_set_bqual(tmp_branch_qualifier, tmp_bqual);
         /* initialize the object */        
         lixa_xid_create_new(tmp_bqual, &this->xa_xid);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case STRDUP_ERROR:
+                ret_cod = LIXA_RC_STRDUP_ERROR;
+                break;
             case G_TRY_MALLOC_ERROR:
                 ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
                 break;
@@ -74,9 +92,186 @@ xta_xid_t *xta_xid_new(const char *branch_qualifier)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_xid_t/excp=%d/"
+    /* memory recovery */
+    if (NULL != tmp_branch_qualifier) {
+        free(tmp_branch_qualifier);
+        tmp_branch_qualifier = NULL;
+    }   
+    LIXA_TRACE(("xta_xid_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return this;
+}
+
+
+
+int xta_xid_branch_qualifier_is_multibranch(const char *branch_qualifier)
+{
+    int ret_value = FALSE;
+    switch (branch_qualifier[0]) {
+        case '0':
+        case '2':
+        case '4':
+        case '6':
+        case '8':
+        case 'a':
+        case 'A':
+        case 'c':
+        case 'C':
+        case 'e':
+        case 'E':
+            ret_value = TRUE;
+            break;
+        default:
+            break;
+    } /* switch (branch_qualifier[0]) */
+    LIXA_TRACE(("xta_xid_branch_qualifier_is_multibranch: "
+                "branch_qualifier=%s, ret_value=%d\n", branch_qualifier,
+                ret_value));
+    return ret_value;
+}
+
+
+
+int xta_xid_branch_qualifier_set_multibranch(char *branch_qualifier)
+{
+    int ret_value = FALSE;
+    LIXA_TRACE(("xta_xid_branch_qualifier_set_multibranch: "
+                "branch_qualifier=%s\n", branch_qualifier));
+    switch (branch_qualifier[0]) {
+        case '0':
+            break;
+        case '1':
+            branch_qualifier[0] = '0';
+            ret_value = TRUE;
+            break;
+        case '2':
+            break;
+        case '3':
+            branch_qualifier[0] = '2';
+            ret_value = TRUE;
+            break;
+        case '4':
+            break;
+        case '5':
+            branch_qualifier[0] = '4';
+            ret_value = TRUE;
+            break;
+        case '6':
+            break;
+        case '7':
+            branch_qualifier[0] = '6';
+            ret_value = TRUE;
+            break;
+        case '8':
+            break;
+        case '9':
+            branch_qualifier[0] = '8';
+            ret_value = TRUE;
+            break;
+        case 'a':
+        case 'A':
+            break;
+        case 'b':
+        case 'B':
+            branch_qualifier[0] = 'A';
+            ret_value = TRUE;
+            break;
+        case 'c':
+        case 'C':
+            break;
+        case 'd':
+        case 'D':
+            branch_qualifier[0] = 'C';
+            ret_value = TRUE;
+            break;
+        case 'e':
+        case 'E':
+            break;
+        case 'f':
+        case 'F':
+            branch_qualifier[0] = 'E';
+            ret_value = TRUE;
+            break;
+        default:
+            LIXA_TRACE(("xta_xid_branch_qualifier_set_multibranch: "
+                        "branch_qualifier[0]='%c' (%s), this is an INTERNAL "
+                        "ERROR\n", branch_qualifier[0], branch_qualifier));
+    } /* switch (branch_qualifier[0]) */
+    LIXA_TRACE(("xta_xid_branch_qualifier_set_multibranch: "
+                "branch_qualifier=%s\n", branch_qualifier));
+    return ret_value;
+}
+
+
+
+int xta_xid_branch_qualifier_unset_multibranch(char *branch_qualifier)
+{
+    int ret_value = FALSE;
+    LIXA_TRACE(("xta_xid_branch_qualifier_unset_multibranch: "
+                "branch_qualifier=%s\n", branch_qualifier));
+    switch (branch_qualifier[0]) {
+        case '0':
+            branch_qualifier[0] = '1';
+            ret_value = TRUE;
+            break;
+        case '1':
+            break;
+        case '2':
+            branch_qualifier[0] = '3';
+            ret_value = TRUE;
+            break;
+        case '3':
+            break;
+        case '4':
+            branch_qualifier[0] = '5';
+            ret_value = TRUE;
+            break;
+        case '5':
+            break;
+        case '6':
+            branch_qualifier[0] = '7';
+            ret_value = TRUE;
+            break;
+        case '7':
+            break;
+        case '8':
+            branch_qualifier[0] = '9';
+            ret_value = TRUE;
+            break;
+        case '9':
+            break;
+        case 'a':
+        case 'A':
+            branch_qualifier[0] = 'B';
+            ret_value = TRUE;
+            break;
+        case 'b':
+        case 'B':
+            break;
+        case 'c':
+        case 'C':
+            branch_qualifier[0] = 'D';
+            ret_value = TRUE;
+            break;
+        case 'd':
+        case 'D':
+            break;
+        case 'e':
+        case 'E':
+            branch_qualifier[0] = 'F';
+            ret_value = TRUE;
+            break;
+        case 'f':
+        case 'F':
+            break;
+        default:
+            LIXA_TRACE(("xta_xid_branch_qualifier_unset_multibranch: "
+                        "branch_qualifier[0]='%c' (%s), this is an INTERNAL "
+                        "ERROR\n", branch_qualifier[0], branch_qualifier));
+    } /* switch (branch_qualifier[0]) */
+    LIXA_TRACE(("xta_xid_branch_qualifier_unset_multibranch: "
+                "branch_qualifier=%s\n", branch_qualifier));
+    return ret_value;
 }
 
 
