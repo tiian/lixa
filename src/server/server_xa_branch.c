@@ -96,6 +96,10 @@ int server_xa_branch_chain(struct thread_status_s *ts,
                 if (lixa_xid_serialize(
                         &ts->curr_status[block_id].sr.data.pld.ph.state.xid,
                         lsx)) {
+                    /* 2018-01-21 Ch.F.
+                     * Unfortunately, no idea how to create a case test that
+                     * can reproduce this behavior in a consistent manner.
+                     * This piece code will remain untested... */
                     LIXA_TRACE(("server_xa_branch_chain: client is asking to "
                                 "branch an existing global transaction, but "
                                 "another branch (xid='%s') of the same global "

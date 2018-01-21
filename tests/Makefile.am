@@ -44,7 +44,8 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	lixavsr.at.in \
 	xta.at xta_1.at xta_2.at xta_3.at xta_4.at \
 	xta_5_0.at xta_5_5.at xta_6.at xta_7.at \
-	$(TESTSUITE) atlocal.in lixa_test_exec.sh lixa_test_functions.sh
+	lixa_test_group.sh lixa_test_exec.sh lixa_test_functions.sh \
+	atlocal.in $(TESTSUITE)
 TESTSUITE = $(srcdir)/testsuite
 
 lixavsr.at: lixavsr.at.in

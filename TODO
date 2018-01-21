@@ -1,5 +1,3 @@
-Create a test case to check LXD032N message: one branch already started 
-xa_prepare, a subordinate one tryes to branch.
 Implement timeout to avoid a too long block time for clients (timeout parameter
 in xa_prepare step 8 and step 24 messages)
 

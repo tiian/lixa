@@ -14392,7 +14392,7 @@ else
   ac_cv_prog_HAVE_DOXYGEN="$HAVE_DOXYGEN" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in NO
+for as_dir in $PATH
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
@@ -14420,9 +14420,8 @@ fi
 
   test -n "$HAVE_DOXYGEN" && break
 done
-test -n "$HAVE_DOXYGEN" || HAVE_DOXYGEN="YES"
 
- if test "$HAVE_DOXYGEN" = "YES"; then
+ if test "z$HAVE_DOXYGEN" != "z"; then
   COND_DOXYGEN_TRUE=
   COND_DOXYGEN_FALSE='#'
 else
@@ -14443,7 +14442,7 @@ else
   ac_cv_prog_HAVE_DOT="$HAVE_DOT" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in NO
+for as_dir in $PATH
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
@@ -14471,7 +14470,6 @@ fi
 
   test -n "$HAVE_DOT" && break
 done
-test -n "$HAVE_DOT" || HAVE_DOT="YES"
 
 for ac_prog in netstat
 do
@@ -14514,9 +14512,8 @@ fi
 
   test -n "$HAVE_NETSTAT" && break
 done
-test -n "$HAVE_NETSTAT" || HAVE_NETSTAT="NO"
 
-if test "$HAVE_NETSTAT" = "NO"
+if test "z$HAVE_NETSTAT" = "z"
 then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: netstat was not found, make check can not be executed" >&5
 $as_echo "$as_me: WARNING: netstat was not found, make check can not be executed" >&2;}
