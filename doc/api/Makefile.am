@@ -23,18 +23,20 @@ doxygen.lixa:   doxygen.lixa.in
 all:	$(MAYBE_API) $(MAYBE_XTA)
 
 if COND_DOXYGEN
-xta/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h
+xta/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h \
+	doxygen_footer.html
 	doxygen doxygen.xta
 lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h \
-	$(top_srcdir)/src/xta/*.h
+	$(top_srcdir)/src/xta/*.h doxygen_footer.html
 	doxygen doxygen.lixa
 else
-xta/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h
+xta/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h \
+	doxygen_footer.html
 	@echo "XTA API documentation skipped because doxygen is not available"
 lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h \
-	$(top_srcdir)/src/xta/*.h
+	$(top_srcdir)/src/xta/*.h doxygen_footer.html
 	@echo "LIXA source code documentation skipped because doxygen is not available"
 endif
 

@@ -1,4 +1,10 @@
-Update copyright
+XTA_7 case tests are time dependent: no way to get valid results on RHEL 7.4;
+a different design for those case tests is necessary
+
+Branch refinement: check in server_xa_8 if the other branches already found
+an error; if yes, propagate an error to the client that will start rollback
+instead of commit
+
 Implement timeout to avoid a too long block time for clients (timeout parameter
 in xa_prepare step 8 and step 24 messages)
 
