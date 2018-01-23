@@ -1,3 +1,4 @@
+Update copyright
 Implement timeout to avoid a too long block time for clients (timeout parameter
 in xa_prepare step 8 and step 24 messages)
 

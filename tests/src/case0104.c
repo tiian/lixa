@@ -694,6 +694,8 @@ void use_xa_resources(void)
     if (branch_type == SUPERIOR) {
         /* insert data */
         if (insert) {
+            printf("%s/%u| MySQL statement to execute >%s<\n",
+                    pgm, pid, mysql_stmt_insert);
             if (mysql_query(mysql_conn, mysql_stmt_insert)) {
                 fprintf(stderr, "%s/%u| MySQL INSERT INTO authors: %u/%s",
                         pgm, pid, mysql_errno(mysql_conn),
@@ -704,6 +706,8 @@ void use_xa_resources(void)
             fprintf(stderr, "%s/%u| MySQL statement >%s< completed\n",
                     pgm, pid, mysql_stmt_insert);
         } else {
+            printf("%s/%u| MySQL statement to execute >%s<\n",
+                   pgm, pid, mysql_stmt_delete);
             if (mysql_query(mysql_conn, mysql_stmt_delete)) {
                 fprintf(stderr, "%s/%u| MySQL DELETE FROM authors: %u/%s",
                         pgm, pid, mysql_errno(mysql_conn),
@@ -746,6 +750,8 @@ void use_xa_resources(void)
         }
         /* insert data */
         if (insert) {
+            fprintf(stderr, "%s/%u| OCI statement to execute >%s<\n",
+                    pgm, pid, (char *)oci_stmt_insert);
             if (OCI_SUCCESS != OCIStmtPrepare(
                     oci_stmt_hndl, oci_err_hndl, oci_stmt_insert,
                     (ub4) strlen((char *)oci_stmt_insert),
@@ -767,6 +773,8 @@ void use_xa_resources(void)
                     pgm, pid, (char *)oci_stmt_insert);
         } else {
             /* delete data */
+            fprintf(stderr, "%s/%u| OCI statement to execute >%s<\n",
+                    pgm, pid, (char *)oci_stmt_delete);
             if (OCI_SUCCESS != OCIStmtPrepare(
                     oci_stmt_hndl, oci_err_hndl, oci_stmt_delete,
                     (ub4) strlen((char *)oci_stmt_delete),
@@ -795,6 +803,8 @@ void use_xa_resources(void)
 #ifdef HAVE_POSTGRESQL
     if (branch_type == SUBORDINATE) {
         if (insert) {
+            fprintf(stderr, "%s/%u| PostgreSQL statement to execute >%s<\n",
+                    pgm, pid, postgres_stmt_insert);
             postgres_res = PQexec(
                 postgres_conn, postgres_stmt_insert);
             if (PGRES_COMMAND_OK != PQresultStatus(postgres_res)) {
@@ -809,6 +819,8 @@ void use_xa_resources(void)
             fprintf(stderr, "%s/%u| PostgreSQL statement >%s< completed\n",
                     pgm, pid, postgres_stmt_insert);
         } else {
+            fprintf(stderr, "%s/%u| PostgreSQL statement to execute >%s<\n",
+                    pgm, pid, postgres_stmt_delete);
             postgres_res = PQexec(
                 postgres_conn, postgres_stmt_delete);
             if (PGRES_COMMAND_OK != PQresultStatus(postgres_res)) {

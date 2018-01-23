@@ -45,7 +45,7 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 # process
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
-# first case test require a high timeout because the resource managers can be
+# first case test requires a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([delete],
 [[timeout 1 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf

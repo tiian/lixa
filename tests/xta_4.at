@@ -112,9 +112,9 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 2 lixa_test_exec.sh noreset none case0104 0 1 1 0 0 tmp_fifo1 foo monkey1s.conf
-timeout 2 lixa_test_exec.sh noreset none case0104 1 1 2 0 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 2 lixa_test_exec.sh noreset none case0104 2 1 3 0 0 foo tmp_fifo2 monkey3s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 0 0 tmp_fifo1 foo monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 0 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
+timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 0 0 foo tmp_fifo2 monkey3s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -152,12 +152,12 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([delete],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -190,8 +190,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 0 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 0 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 0 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 0 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
