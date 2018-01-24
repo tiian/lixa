@@ -1,5 +1,10 @@
 AT_BANNER([XTA: Async branch & crash])
 
+#AT_SETUP([script test])
+#AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
+#AT_CHECK([/bin/false], [0], [ignore], [ignore])
+#AT_CLEANUP
+
 AT_SETUP([XTA/7.0/0.0 ALL crash in the middle of xa_end])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])

@@ -870,7 +870,9 @@ ORA_DYN
 	<section>
 	  <title>Check the data table before execution</title>
 	  <para>
-	    Execute the below commands:
+	    Execute the below commands to check the existence of table
+	    <filename>countries</filename> and to create a new table with
+	    name <filename>authors</filename>:
 	    <screen>
 tiian@ubuntu:~$ sqlplus "hr/hr"<footnote><para>
   use <screen>sqlplus hr/hr@lixa_ora_db</screen> in the event that you are 
@@ -888,6 +890,13 @@ Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
 SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
 
 no rows selected
+
+SQL> CREATE TABLE hr.authors (
+  2  id INTEGER NOT NULL,
+  3  last_name VARCHAR2(20),
+  4  first_name VARCHAR2(20));
+
+Table created.
 
 SQL> exit
 Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
