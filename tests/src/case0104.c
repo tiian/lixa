@@ -94,10 +94,13 @@ void delete_all_xa_resources(void);
  *   the transactional context by superior and it passes it to subordinate
  * - subordinate implements the logic of the subordinate branch: it receives
  *   the transactional context by intermediate
+ * - recovery implements the logic to open all the resources, apply automatic
+ *   recovery step and exit
  */
 void superior(void);
 void intermediate(void);
 void subordinate(void);
+void recovery(void);
 
 
 
@@ -115,20 +118,19 @@ unsigned pid;
 /* XTA variables (objects) */
 xta_transaction_manager_t *tm;
 xta_transaction_t *tx;
-xta_native_xa_resource_t *dynamic_native_xa_res_monkey;
+xta_native_xa_resource_t *dynamic_native_xa_res_dummy;
 xta_native_xa_resource_t *dynamic_native_xa_res_ora;
 /* work variables */
 char request_buffer[100];
 /* control variables */
 enum BranchType { SUPERIOR, INTERMEDIATE,
-                  SUBORDINATE, NO_BRANCH_TYPE } branch_type;
+                  SUBORDINATE, RECOVERY=10 } branch_type;
 int        commit;
 int        insert;
 int        statement;
 int        test_rc;
 const char *fifo_to = NULL;
 const char *fifo_from = NULL;
-const char *monkeyrm_config = NULL;
 /* MySQL variables */
 #ifdef HAVE_MYSQL
 xta_mysql_xa_resource_t *mysql_xa_res;
@@ -153,20 +155,20 @@ OCISvcCtx     *oci_svc_ctx;
 OCIStmt       *oci_stmt_hndl;
 OCIError      *oci_err_hndl;
 text          *oci_stmt_insert1 =
-    (text *) "INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
-    "VALUES ('IS', 'Iceland', 1)";
+    (text *) "INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) "
+    "VALUES (101, 'Bulgakov', 'Michail')";
 text          *oci_stmt_delete1 =
-    (text *) "DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'IS'";
+    (text *) "DELETE FROM authors WHERE ID = 101";
 text          *oci_stmt_insert2 =
-    (text *) "INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
-    "VALUES ('ZA', 'South Africa', 4)";
+    (text *) "INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) "
+    "VALUES (102, 'Solzenicyn', 'Aleksandr')";
 text          *oci_stmt_delete2 =
-    (text *) "DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'";
+    (text *) "DELETE FROM authors WHERE ID = 102";
 text          *oci_stmt_insert3 =
-    (text *) "INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
-    "VALUES ('MV', 'Republic of Maldives', 3)";
+    (text *) "INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) "
+    "VALUES (103, 'Dostoevskij', 'Fedor')";
 text          *oci_stmt_delete3 =
-    (text *) "DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'MV'";
+    (text *) "DELETE FROM authors WHERE ID = 103";
 text          *oci_stmt_insert = NULL;
 text          *oci_stmt_delete = NULL;
 #endif
@@ -202,7 +204,7 @@ int main(int argc, char *argv[])
     pgm = argv[0];
     fprintf(stderr, "%s/%u| starting...\n", pgm, pid);
     if (argc < 7) {
-        fprintf(stderr, "%s/%u: at least six options must be specified\n",
+        fprintf(stderr, "%s/%u: at least seven options must be specified\n",
                 argv[0], pid);
         return 1;
     }
@@ -213,33 +215,35 @@ int main(int argc, char *argv[])
     test_rc = strtol(argv[5], NULL, 0);
     fifo_to = argv[6];
     fifo_from = argv[7];
-    monkeyrm_config = argv[8];
 
     /* choose the SQL statements that must be executed by this branch */
     statements_setup();
     
     /* check branch_type */
-    switch (branch_type) {
-        case SUPERIOR:
-            /* this is the superior task: it passes the transactional
-             * context to intermediate */
-            superior();
-            break;
-        case INTERMEDIATE:
-            /* this is the intermediate task: it receives the transactional
-             * context by superior and it passes it to subordinate */
-            intermediate();
-            break;
-        case SUBORDINATE:
-            /* this is the subordinate task: it receives the transactional
-             * context by intermediate */
-            subordinate();
-            break;
-        default:
-            fprintf(stderr, "%s/%u| branch_type=%d UNKNOWN\n",
-                    pgm, pid, branch_type);
-            exit(1);
-    } /* switch(branch_type) */    
+    if (branch_type >= RECOVERY) {
+        branch_type -= RECOVERY;
+        recovery();
+    } else switch (branch_type) {
+            case SUPERIOR:
+                /* this is the superior task: it passes the transactional
+                 * context to intermediate */
+                superior();
+                break;
+            case INTERMEDIATE:
+                /* this is the intermediate task: it receives the transactional
+                 * context by superior and it passes it to subordinate */
+                intermediate();
+                break;
+            case SUBORDINATE:
+                /* this is the subordinate task: it receives the transactional
+                 * context by intermediate */
+                subordinate();
+                break;
+            default:
+                fprintf(stderr, "%s/%u| branch_type=%d UNKNOWN\n",
+                        pgm, pid, branch_type);
+                exit(1);
+        } /* switch(branch_type) */    
     fprintf(stderr, "%s/%u| ...finished\n", pgm, pid);
     return 0;
 }
@@ -453,6 +457,25 @@ void subordinate(void)
 
 
 
+void recovery(void)
+{
+    fprintf(stderr, "%s/%u| branch_type=%d (RECOVERY)\n",
+            pgm, pid, branch_type);
+    /* initial boilerplate code */
+    create_dynamic_native_xa_resources();
+    create_a_new_transaction_manager();
+    create_a_new_transaction();
+    enlist_resources_to_transaction();
+    open_all_the_resources();
+    /* final boilerplate code */
+    close_all_the_resources();
+    delete_transaction_manager();    
+    delete_all_xa_resources();
+    /* only boilerplate code, no real resource usage! */
+}
+
+
+
 void statements_setup(void)
 {
     /* choose the statements that must be executed to avoid conflicts
@@ -513,15 +536,14 @@ void create_dynamic_native_xa_resources()
 {
     /*
      * dynamically create an XA native resource object for the LIXA
-     * Monkey Resource Manager (test & debugging tool)
+     * Dummy Resource Manager (test & debugging tool)
      */
-    dynamic_native_xa_res_monkey = xta_native_xa_resource_new(
-        "LIXA Monkey RM (static)",
-        "/opt/lixa/lib/switch_lixa_monkeyrm_stareg.so",
-        monkeyrm_config, "");
-    if (dynamic_native_xa_res_monkey == NULL) {
+    dynamic_native_xa_res_dummy = xta_native_xa_resource_new(
+        "LIXA Dummy RM (static)",
+        "/opt/lixa/lib/switch_lixa_dummyrm.so", "", "");
+    if (dynamic_native_xa_res_dummy == NULL) {
         fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned NULL for "
-                "dynamically creted resource\n", pgm, pid);
+                "dynamically created resource\n", pgm, pid);
         exit(1);
     }
 #ifdef HAVE_MYSQL
@@ -632,10 +654,10 @@ void enlist_resources_to_transaction(void)
 {
     /* enlist the dynamic native XA Resources to the transaction */
     rc = xta_transaction_enlist_resource(
-        tx, (xta_xa_resource_t *)dynamic_native_xa_res_monkey);
+        tx, (xta_xa_resource_t *)dynamic_native_xa_res_dummy);
     if (rc != LIXA_RC_OK) {
         fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
-                "dynamic_native_xa_res_monkey: returned %d\n", pgm, pid, rc);
+                "dynamic_native_xa_res_dummy: returned %d\n", pgm, pid, rc);
         exit(1);
     }
 #ifdef HAVE_MYSQL
@@ -901,5 +923,5 @@ void delete_all_xa_resources(void)
     /*
      * delete native XA Resource object
      */
-    xta_native_xa_resource_delete(dynamic_native_xa_res_monkey);
+    xta_native_xa_resource_delete(dynamic_native_xa_res_dummy);
 }

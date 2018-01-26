@@ -1,5 +1,4 @@
-XTA_7 case tests are time dependent: no way to get valid results on RHEL 7.4;
-a different design for those case tests is necessary
+Go on fixing XTA_7 case tests 
 
 Branch refinement: check in server_xa_8 if the other branches already found
 an error; if yes, propagate an error to the client that will start rollback

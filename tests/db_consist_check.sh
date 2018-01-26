@@ -32,12 +32,21 @@ echo "HAVE_POSTGRESQL=$HAVE_POSTGRESQL"
 
 if test "$HAVE_MYSQL" = "yes"
 then
-	echo "Checking MySQL / MariaDB..."
-	TMP_MYSQL=$(mktemp)
-	echo "select count(*) as NumberOfRows from authors;" | mysql -h localhost -u lixa lixa > $TMP_MYSQL
-	cat $TMP_MYSQL | grep -E -e '^[[:space:]]*[[:digit:]]+$' | tr -d '[:blank:]'
-	NOR_MYSQL=$(cat $TMP_MYSQL | grep -E -e '^[[:space:]]*[[:digit:]]+$' | tr -d '[:blank:]')
-	rm $TMP_MYSQL
+	echo "Checking if MySQL/MariaDB is probably affected by bug 12161..."
+	grep -E '.*lixa_my_commit_core.*is not available$' testsuite.log
+	if test $? -eq 0 
+	then
+		echo "There's a chance the installed version is less than 5.7,"
+		echo "MySQL consistency behavior will not be checked!"
+		export HAVE_MYSQL=no
+	else
+		echo "Checking MySQL / MariaDB..."
+		TMP_MYSQL=$(mktemp)
+		echo "select count(*) as NumberOfRows from authors;" | mysql -h localhost -u lixa lixa > $TMP_MYSQL
+		cat $TMP_MYSQL | grep -E -e '^[[:space:]]*[[:digit:]]+$' | tr -d '[:blank:]'
+		NOR_MYSQL=$(cat $TMP_MYSQL | grep -E -e '^[[:space:]]*[[:digit:]]+$' | tr -d '[:blank:]')
+		rm $TMP_MYSQL
+	fi
 fi
 
 if test "$HAVE_ORACLE" = "yes"
@@ -66,17 +75,17 @@ echo "NOR_POSTGRESQL=$NOR_POSTGRESQL"
 
 NOR=0
 NOV=0
-if test "$HAVE_MYSQL"
+if test "$HAVE_MYSQL" = "yes"
 then
 	NOR=$((NOR + NOR_MYSQL))
 	NOV=$((NOV + 1))
 fi
-if test "$HAVE_ORACLE"
+if test "$HAVE_ORACLE" = "yes"
 then
 	NOR=$((NOR + NOR_ORACLE))
 	NOV=$((NOV + 1))
 fi
-if test "$HAVE_POSTGRESQL"
+if test "$HAVE_POSTGRESQL" = "yes"
 then
 	NOR=$((NOR + NOR_POSTGRESQL))
 	NOV=$((NOV + 1))
@@ -93,7 +102,7 @@ echo "Total Number Of Rows=$NOR"
 echo "Total Number Of Variables=$NOV"
 echo "Equal Number Of Rows=$ENOR"
 
-if test "$HAVE_MYSQL"
+if test "$HAVE_MYSQL" = "yes"
 then
 	if [ "$NOR_MYSQL" -ne "$ENOR" ]
 	then
@@ -102,7 +111,7 @@ then
 	fi
 fi
 
-if test "$HAVE_ORACLE"
+if test "$HAVE_ORACLE" = "yes"
 then
 	if [ "$NOR_ORACLE" -ne "$ENOR" ]
 	then
@@ -111,9 +120,9 @@ then
 	fi
 fi
 
-if test "$HAVE_POSTGRESQL"
+if test "$HAVE_POSTGRESQL" = "yes"
 then
-	if [ "$NOR_POSTGRESSQL" -ne "$ENOR" ]
+	if [ "$NOR_POSTGRESQL" -ne "$ENOR" ]
 	then
 		echo "NOR_POSTGRESQL != ENOR: $NOR_POSTGRESQL != $ENOR"
 		exit 1
