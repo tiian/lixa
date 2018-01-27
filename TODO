@@ -1,5 +1,3 @@
-Go on fixing XTA_7 case tests 
-
 Branch refinement: check in server_xa_8 if the other branches already found
 an error; if yes, propagate an error to the client that will start rollback
 instead of commit

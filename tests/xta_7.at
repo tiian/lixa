@@ -325,7 +325,7 @@ timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([rm tmp_fifo2], [10], [ignore], [ignore])
+AT_CHECK([rm tmp_fifo2], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([XTA/7.0/2.6 SUB crash in the middle of xa_prepare])
@@ -336,43 +336,24 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-export LIXA_CRASH_POINT=14 ; timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2 monkey3s.conf
-]])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey3s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo
+timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
+export LIXA_CRASH_POINT=14 ; timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [ignore], [ignore], [ignore])
+# wait 1 second to avoid the query for recovery pending is activated too early
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
+# execute the program again to activate automatic recovery
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+# check database consistency
+AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo2], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/7.0/2.7 Recovery after crash])
+AT_SETUP([XTA/7.0/2.7 Delete tables content])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
@@ -380,37 +361,9 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([delete],
-[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2 monkey3s.conf
-]])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey3s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_commit/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 foo
+timeout 3 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1
+timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -425,43 +378,24 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2 monkey3s.conf
-]])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey3s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo
+timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
+timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; export LIXA_CRASH_POINT=15 ; lixa_test_group.sh insert], [ignore], [ignore], [ignore])
+# wait 1 second to avoid the query for recovery pending is activated too early
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
+# execute the program again to activate automatic recovery
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+# check database consistency
+AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo2], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/7.0/3.1 Recovery after crash])
+AT_SETUP([XTA/7.0/3.1 Delete tables content])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
@@ -469,39 +403,9 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([delete],
-[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2 monkey3s.conf
-]])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_commit/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_commit/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey3s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_commit/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1
+timeout 3 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1
+timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -516,43 +420,24 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[export LIXA_CRASH_POINT=15 ; timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2 monkey3s.conf
-]])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey3s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
+[[export LIXA_CRASH_POINT=15 ; timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo
+timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
+timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [ignore], [ignore], [ignore])
+# wait 1 second to avoid the query for recovery pending is activated too early
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
+# execute the program again to activate automatic recovery
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+# check database consistency
+AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo2], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/7.0/3.3 Recovery after crash])
+AT_SETUP([XTA/7.0/3.3 Delete tables content])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
@@ -560,37 +445,9 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([delete],
-[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2 monkey3s.conf
-]])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_commit/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey3s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 foo
+timeout 3 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1
+timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -605,43 +462,24 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo monkey1s.conf
-export LIXA_CRASH_POINT=15 ; timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2 monkey3s.conf
-]])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey3s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo
+export LIXA_CRASH_POINT=15 ; timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
+timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [ignore], [ignore], [ignore])
+# wait 1 second to avoid the query for recovery pending is activated too early
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
+# execute the program again to activate automatic recovery
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+# check database consistency
+AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo2], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/7.0/3.5 Recovery after crash])
+AT_SETUP([XTA/7.0/3.5 Delete tables content])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
@@ -649,37 +487,9 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([delete],
-[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2 monkey3s.conf
-]])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_commit/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey3s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 foo
+timeout 3 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1
+timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -694,43 +504,24 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-export LIXA_CRASH_POINT=15 ; timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2 monkey3s.conf
-]])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey3s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo
+timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
+export LIXA_CRASH_POINT=15 ; timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [ignore], [ignore], [ignore])
+# wait 1 second to avoid the query for recovery pending is activated too early
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
+# execute the program again to activate automatic recovery
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+# check database consistency
+AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo2], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/7.0/3.7 Recovery after crash])
+AT_SETUP([XTA/7.0/3.7 Delete tables content])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
@@ -738,37 +529,9 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([delete],
-[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2 monkey3s.conf
-]])
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey3s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_commit/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 foo
+timeout 3 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1
+timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -776,10 +539,4 @@ AT_CHECK([rm tmp_fifo2], [0], [ignore], [ignore])
 # just stop the state server
 AT_CHECK([lixa_test_exec.sh none stop true], [0], [ignore], [ignore])
 AT_CLEANUP
-
-# just stop the state server
-#AT_SETUP([Stop the state server])
-#AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-#AT_CHECK([lixa_test_exec.sh none stop true], [0], [ignore], [ignore])
-#AT_CLEANUP
 
