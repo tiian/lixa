@@ -29,7 +29,7 @@
 
 
 
-#include <lixa_defines.h>
+#include "lixa_defines.h"
 
 
 
@@ -287,59 +287,55 @@
 /**
  * "poll" function error
  */
-#define LIXA_RC_POLL_ERROR                   -108
+#define LIXA_RC_POLL_ERROR                    -108
 /**
  * "pipe" function error
  */
-#define LIXA_RC_PIPE_ERROR                   -109
+#define LIXA_RC_PIPE_ERROR                    -109
 /**
  * "open" function error
  */
-#define LIXA_RC_OPEN_ERROR                   -110
+#define LIXA_RC_OPEN_ERROR                    -110
 /**
  * "close" function error
  */
-#define LIXA_RC_CLOSE_ERROR                  -111
+#define LIXA_RC_CLOSE_ERROR                   -111
 /**
  * "truncate" function error
  */
-#define LIXA_RC_TRUNCATE_ERROR               -112
+#define LIXA_RC_TRUNCATE_ERROR                -112
 /**
  * "write" function error
  */
-#define LIXA_RC_WRITE_ERROR                  -113
+#define LIXA_RC_WRITE_ERROR                   -113
 /**
  * "fread" function error
  */
-#define LIXA_RC_READ_ERROR                   -114
+#define LIXA_RC_READ_ERROR                    -114
 /**
  * "pathconf" function error
  */
-#define LIXA_RC_PATHCONF_ERROR               -115
+#define LIXA_RC_PATHCONF_ERROR                -115
 /**
  * "realpath" function error
  */
-#define LIXA_RC_REALPATH_ERROR               -116
+#define LIXA_RC_REALPATH_ERROR                -116
 /**
  * "fopen" function error
  */
-#define LIXA_RC_FOPEN_ERROR                  -117
+#define LIXA_RC_FOPEN_ERROR                   -117
 /**
  * "fclose" function error
  */
-#define LIXA_RC_FCLOSE_ERROR                 -118
+#define LIXA_RC_FCLOSE_ERROR                  -118
 /**
  * "fgets" function/macro error
  */
-#define LIXA_RC_FGETS_ERROR                  -119
+#define LIXA_RC_FGETS_ERROR                   -119
 /**
- * "fdatasync" function error
-define LIXA_RC_FDATASYNC_ERROR               -118
+ * "waitpit" function error
  */
-/**
- * "fputc"/"putc" function/macro error
-define LIXA_RC_FPUTC_ERROR                   -119
- */
+#define LIXA_RC_WAITPID_ERROR                 -120
 /**
  * "ftruncate" function error
 define LIXA_RC_FTRUNCATE_ERROR               -121

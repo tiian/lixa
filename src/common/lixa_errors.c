@@ -192,6 +192,8 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: 'fclose' function returned an error condition";
         case LIXA_RC_FGETS_ERROR:
             return "ERROR: 'fgets' function returned an error condition";
+        case LIXA_RC_WAITPID_ERROR:
+            return "ERROR: 'waitpid' function returned an error condition";
             /*
               case LIXA_RC_FDATASYNC_ERROR:
               return "ERROR: 'fdatasync' function returned an error "

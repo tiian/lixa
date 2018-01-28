@@ -1,7 +1,9 @@
 Release: 1.5.2 (Tester: Tiian; Test purpose: XTA)
-Date: 2018-01-21
+Date: 2018-01-27
 Configuration: --enable-crash --with-docbook --with-mysql --with-postgresql --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_12_1/
 Ubuntu 14.04	|x86_64	|virtual (KVM)	|2 vCPU
+RHEL 7.4 	|x86_64	|virtual (KVM)	|2 vCPU **
+** cpe:/o:redhat:enterprise_linux:7.4:GA:server
 
 Release: 1.5.1 (Tester: Tiian; Test purpose: XTA)
 Date: 2017-10-10

@@ -1,3 +1,6 @@
+Go on with tests for Ubuntu1604 and CentOS 7
+Test again with only 1 or 2 resource managers
+
 Branch refinement: check in server_xa_8 if the other branches already found
 an error; if yes, propagate an error to the client that will start rollback
 instead of commit

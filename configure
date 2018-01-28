@@ -14879,6 +14879,18 @@ fi
 
 done
 
+for ac_header in sys/wait.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/wait.h" "ac_cv_header_sys_wait_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_wait_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_WAIT_H 1
+_ACEOF
+
+fi
+
+done
+
 for ac_header in time.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "time.h" "ac_cv_header_time_h" "$ac_includes_default"

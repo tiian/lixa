@@ -472,32 +472,40 @@ case0100_OBJECTS = $(am_case0100_OBJECTS)
 am__DEPENDENCIES_1 =
 case0100_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la ../../src/xta/liblixta.la \
-	$(am__DEPENDENCIES_1)
+	$(LDADD_MYSQL) $(LDADD_POSTGRESQL) $(am__DEPENDENCIES_1)
 case0100_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(case0100_LDFLAGS) $(LDFLAGS) -o $@
 am_case0101_OBJECTS = case0101-case0101.$(OBJEXT)
 case0101_OBJECTS = $(am_case0101_OBJECTS)
 case0101_DEPENDENCIES = ../../src/common/liblixab.la \
-	../../src/client/liblixac.la ../../src/xta/liblixta.la
+	../../src/client/liblixac.la ../../src/xta/liblixta.la \
+	$(LDADD_MYSQL) $(LDADD_POSTGRESQL) $(am__DEPENDENCIES_1)
+case0101_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(case0101_LDFLAGS) $(LDFLAGS) -o $@
 am_case0102_OBJECTS = case0102-case0102.$(OBJEXT)
 case0102_OBJECTS = $(am_case0102_OBJECTS)
 case0102_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la ../../src/xta/liblixta.la \
-	$(am__DEPENDENCIES_1)
+	$(LDADD_MYSQL) $(LDADD_POSTGRESQL) $(am__DEPENDENCIES_1)
 case0102_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(case0102_LDFLAGS) $(LDFLAGS) -o $@
 am_case0103_OBJECTS = case0103-case0103.$(OBJEXT)
 case0103_OBJECTS = $(am_case0103_OBJECTS)
 case0103_DEPENDENCIES = ../../src/common/liblixab.la \
-	../../src/client/liblixac.la ../../src/xta/liblixta.la
+	../../src/client/liblixac.la ../../src/xta/liblixta.la \
+	$(LDADD_MYSQL) $(LDADD_POSTGRESQL) $(am__DEPENDENCIES_1)
+case0103_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(case0103_LDFLAGS) $(LDFLAGS) -o $@
 am_case0104_OBJECTS = case0104-case0104.$(OBJEXT) \
 	case0104-case_test_functions.$(OBJEXT)
 case0104_OBJECTS = $(am_case0104_OBJECTS)
 case0104_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la ../../src/xta/liblixta.la \
-	$(am__DEPENDENCIES_1)
+	$(LDADD_MYSQL) $(LDADD_POSTGRESQL) $(am__DEPENDENCIES_1)
 case0104_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(case0104_LDFLAGS) $(LDFLAGS) -o $@
@@ -505,7 +513,7 @@ am_case0105_OBJECTS = case0105-case0105.$(OBJEXT)
 case0105_OBJECTS = $(am_case0105_OBJECTS)
 case0105_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la ../../src/xta/liblixta.la \
-	$(am__DEPENDENCIES_1)
+	$(LDADD_MYSQL) $(LDADD_POSTGRESQL) $(am__DEPENDENCIES_1)
 case0105_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(case0105_LDFLAGS) $(LDFLAGS) -o $@
@@ -514,7 +522,7 @@ am_case0106_OBJECTS = case0106-case0106.$(OBJEXT) \
 case0106_OBJECTS = $(am_case0106_OBJECTS)
 case0106_DEPENDENCIES = ../../src/common/liblixab.la \
 	../../src/client/liblixac.la ../../src/xta/liblixta.la \
-	$(am__DEPENDENCIES_1)
+	$(LDADD_MYSQL) $(LDADD_POSTGRESQL) $(am__DEPENDENCIES_1)
 case0106_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(case0106_LDFLAGS) $(LDFLAGS) -o $@
@@ -864,7 +872,9 @@ LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 
 @COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL = case0040 case0041 case0045 case0047
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL = case0037
+@COMPILE_POSTGRESQL_STUFF_TRUE@LDADD_POSTGRESQL = ../../src/client/switch/postgresql/liblixapq.la
 @COMPILE_MYSQL_POSTGRESQL_STUFF_TRUE@MAYBE_MYSQL_POSTGRESQL = case0042
+@COMPILE_MYSQL_POSTGRESQL_STUFF_TRUE@LDADD_MYSQL = ../../src/client/switch/mysql/liblixamy.la
 @COMPILE_ORACLE_STUFF_TRUE@MAYBE_ORACLE = case0038
 @COMPILE_ORACLE_STUFF_TRUE@LDADD_ORACLE = -lclntsh
 @COMPILE_IBMDB2_STUFF_TRUE@MAYBE_IBMDB2 = case0039
@@ -992,7 +1002,8 @@ case0100_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 
 case0100_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
-	../../src/xta/liblixta.la $(LDADD_ORACLE)
+	../../src/xta/liblixta.la $(LDADD_MYSQL) \
+	$(LDADD_POSTGRESQL) $(LDADD_ORACLE)
 
 case0100_SOURCES = case0100.c
 case0100_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
@@ -1000,29 +1011,35 @@ case0101_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 
 case0101_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
-	../../src/xta/liblixta.la
+	../../src/xta/liblixta.la $(LDADD_MYSQL) \
+	$(LDADD_POSTGRESQL) $(LDADD_ORACLE)
 
 case0101_SOURCES = case0101.c
+case0101_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 case0102_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 
 case0102_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
-	../../src/xta/liblixta.la $(LDADD_ORACLE)
+	../../src/xta/liblixta.la $(LDADD_MYSQL) \
+	$(LDADD_POSTGRESQL) $(LDADD_ORACLE)
 
 case0102_SOURCES = case0102.c
-case0102_LDFLAGS = @ORACLE_OCI_LDFLAGS@
+case0102_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 case0103_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 	@MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 
 case0103_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
-	../../src/xta/liblixta.la
+	../../src/xta/liblixta.la $(LDADD_MYSQL) \
+	$(LDADD_POSTGRESQL) $(LDADD_ORACLE)
 
 case0103_SOURCES = case0103.c
+case0103_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 case0104_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 
 case0104_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
-	../../src/xta/liblixta.la $(LDADD_ORACLE)
+	../../src/xta/liblixta.la $(LDADD_MYSQL) \
+	$(LDADD_POSTGRESQL) $(LDADD_ORACLE)
 
 case0104_SOURCES = case0104.c case_test_functions.c
 case0104_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
@@ -1030,15 +1047,17 @@ case0105_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 
 case0105_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
-	../../src/xta/liblixta.la $(LDADD_ORACLE)
+	../../src/xta/liblixta.la $(LDADD_MYSQL) \
+	$(LDADD_POSTGRESQL) $(LDADD_ORACLE)
 
 case0105_SOURCES = case0105.c
-case0105_LDFLAGS = @ORACLE_OCI_LDFLAGS@
+case0105_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 case0106_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 
 case0106_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
-	../../src/xta/liblixta.la $(LDADD_ORACLE)
+	../../src/xta/liblixta.la $(LDADD_MYSQL) \
+	$(LDADD_POSTGRESQL) $(LDADD_ORACLE)
 
 case0106_SOURCES = case0106.c case_test_functions.c
 case0106_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
@@ -1308,7 +1327,7 @@ case0100$(EXEEXT): $(case0100_OBJECTS) $(case0100_DEPENDENCIES) $(EXTRA_case0100
 
 case0101$(EXEEXT): $(case0101_OBJECTS) $(case0101_DEPENDENCIES) $(EXTRA_case0101_DEPENDENCIES) 
 	@rm -f case0101$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(case0101_OBJECTS) $(case0101_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(case0101_LINK) $(case0101_OBJECTS) $(case0101_LDADD) $(LIBS)
 
 case0102$(EXEEXT): $(case0102_OBJECTS) $(case0102_DEPENDENCIES) $(EXTRA_case0102_DEPENDENCIES) 
 	@rm -f case0102$(EXEEXT)
@@ -1316,7 +1335,7 @@ case0102$(EXEEXT): $(case0102_OBJECTS) $(case0102_DEPENDENCIES) $(EXTRA_case0102
 
 case0103$(EXEEXT): $(case0103_OBJECTS) $(case0103_DEPENDENCIES) $(EXTRA_case0103_DEPENDENCIES) 
 	@rm -f case0103$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(case0103_OBJECTS) $(case0103_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(case0103_LINK) $(case0103_OBJECTS) $(case0103_LDADD) $(LIBS)
 
 case0104$(EXEEXT): $(case0104_OBJECTS) $(case0104_DEPENDENCIES) $(EXTRA_case0104_DEPENDENCIES) 
 	@rm -f case0104$(EXEEXT)

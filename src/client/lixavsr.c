@@ -38,6 +38,12 @@
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_WAIT_H
+# include <sys/wait.h>
+#endif
 
 
 
@@ -1252,11 +1258,15 @@ int lixavsr_activate_threadofcontrol(xa_context_t *xa_context,
                     THROW(FORK_ERROR);
                     break;
                 case 0:
-                    /* this is the child */
+                    /* this is the child, close useless pipe ends */
+                    close(xa_context->down_pipefd[thread_of_control][1]);
+                    close(xa_context->up_pipefd[thread_of_control][0]);
                     lixavsr_threadofcontrol(tmp_pipes);
                     break;
                 default:
-                    /* this is the father */
+                    /* this is the father, close useless pipe ends */
+                    close(xa_context->down_pipefd[thread_of_control][0]);
+                    close(xa_context->up_pipefd[thread_of_control][1]);
                     LIXA_TRACE(("lixavsr_activate_threadofcontrol: started "
                                 "process " PID_T_FORMAT "\n",
                                 xa_context->child_process[thread_of_control]));
@@ -1301,6 +1311,7 @@ int lixavsr_execute_record(xa_context_t *xa_context,
                      , WRITE_ERROR
                      , READ_ERROR
                      , XA_ERROR
+                     , WAITPID_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -1360,6 +1371,37 @@ int lixavsr_execute_record(xa_context_t *xa_context,
             fflush(stdout);
             THROW(XA_ERROR);
         }
+        /* waith the child process/thread */
+        if (VSR_QUIT == parsed_statement->function.fid) {
+            LIXA_TRACE(("lixavsr_execute_record: thread of control must "
+                        "terminate, waiting for it...\n"));
+            if (threads) {
+                LIXA_TRACE(("lixavsr_execute_record: waiting for thread %p\n",
+                            xa_context->child_thread[
+                                parsed_statement->thread_of_control]));
+                g_thread_join(xa_context->child_thread[
+                                  parsed_statement->thread_of_control]);
+            } else {
+                pid_t result;
+                int status=0;
+                
+                LIXA_TRACE(("lixavsr_execute_record: waiting for process id "
+                            PID_T_FORMAT "...\n",
+                            xa_context->child_process[
+                                parsed_statement->thread_of_control]));
+                result = waitpid(xa_context->child_process[
+                                     parsed_statement->thread_of_control],
+                                 &status, 0);
+                if (result != xa_context->child_process[
+                        parsed_statement->thread_of_control]) {
+                    LIXA_TRACE(("lixavsr_execute_record: waitpid() returned "
+                                PID_T_FORMAT " instead of " PID_T_FORMAT "\n",
+                                result, xa_context->child_process[
+                                    parsed_statement->thread_of_control]));
+                    THROW(WAITPID_ERROR);
+                }
+            }
+        }
         
         THROW(NONE);
     } CATCH {
@@ -1378,6 +1420,9 @@ int lixavsr_execute_record(xa_context_t *xa_context,
             case XA_ERROR:
                 ret_cod = LIXA_RC_XA_ERROR;
                 break;
+            case WAITPID_ERROR:
+                ret_cod = LIXA_RC_WAITPID_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -1392,54 +1437,12 @@ int lixavsr_execute_record(xa_context_t *xa_context,
 
 
 
-int lixavsr_terminate_children(xa_context_t *xa_context)
-{
-    enum Exception { KILL_ERROR
-                     , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("lixavsr_terminate_children\n"));
-    TRY {
-        int i;
-        if (sleep_before_kill)
-            sleep(1);
-        if (!threads) {
-            for (i=0; i<MAX_THREADS_OF_CONTROL; ++i) {
-                if (xa_context->child_process[i] > 0) {
-                    LIXA_TRACE(("lixavsr_terminate_children: killing child "
-                                PID_T_FORMAT "\n",
-                                xa_context->child_process[i]));
-                    if (0 > kill(xa_context->child_process[i],
-                                 SIGINT))
-                        THROW(KILL_ERROR);
-                } /* if (xa_context->child_process[i] > 0) */
-            } /* for (i=0; */
-        } /* if (!threads) */
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case KILL_ERROR:
-                ret_cod = LIXA_RC_KILL_ERROR;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixavsr_terminate_children/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-    
 int lixavsr_parse_file(const char *filename)
 {
     enum Exception { NULL_OBJECT
+                     , G_PTR_ARRAY_NEW_ERROR
                      , FOPEN_ERROR
+                     , G_TRY_MALLOC_ERROR
                      , PARSE_RECORD
                      , EXECUTE_RECORD
                      , NONE } excp;
@@ -1447,15 +1450,21 @@ int lixavsr_parse_file(const char *filename)
     FILE *file = NULL;
     char buffer[RECORD_SIZE];
     xa_context_t xa_context;
-    int rc_term;
+    GPtrArray *parsed_statements = NULL;
+    parsed_statement_t *parsed_statement = NULL;
         
     LIXA_TRACE(("lixavsr_parse_file\n"));
     TRY {
-        parsed_statement_t parsed_statement;
+        int i=0;
+        guint j;
 
         xa_context_reset(&xa_context);
         if (NULL == filename)
             THROW(NULL_OBJECT);
+        /* create array with parsed statements */
+        if (NULL == (parsed_statements = g_ptr_array_new_with_free_func(
+                         g_free)))
+            THROW(G_PTR_ARRAY_NEW_ERROR);
         LIXA_TRACE(("lixavsr_parse_file: parsing file '%s'\n", filename));
         if (NULL == (file = fopen(filename, "r")))
             THROW(FOPEN_ERROR);
@@ -1466,26 +1475,53 @@ int lixavsr_parse_file(const char *filename)
             buffer[strcspn(buffer, "\r\n")] = '\0';
             /* skipping comment lines */
             if ('#' == buffer[0]) {
-                LIXA_TRACE(("lixavsr_parse_file: skipping comment line '%s'\n",
-                            buffer));
+                LIXA_TRACE(("lixavsr_parse_file: line %d, skipping "
+                            "comment '%s'\n", i, buffer));
+                i++;
                 continue;
+            } else {
+                LIXA_TRACE(("lixavsr_parse_file: line %d, parsing '%s'\n",
+                            i, buffer));
             }
-            memset(&parsed_statement, 0, sizeof(parsed_statement));
+            /* allocate a new statement */
+            if (NULL == (parsed_statement = g_try_malloc0(
+                             sizeof(parsed_statement_t))))
+                THROW(G_TRY_MALLOC_ERROR);
             if (LIXA_RC_OK != (ret_cod = lixavsr_parse_record(
-                                   buffer, &parsed_statement)))
+                                   buffer, parsed_statement)))
                 THROW(PARSE_RECORD);
-            if (LIXA_RC_OK != (ret_cod = lixavsr_execute_record(
-                                   &xa_context, &parsed_statement)))
-                THROW(EXECUTE_RECORD);
+            /* add to array */
+            g_ptr_array_add(parsed_statements, (gpointer)parsed_statement);
+            i++;
+            parsed_statement = NULL;
         } /* while (!feof(file)) */
+        fclose(file);
+        file = NULL;
+        
+        /* execute all the statements */
+        for (j=0; j<parsed_statements->len; ++j) {
+            LIXA_TRACE(("lixavsr_parse_file: executing statement %u'\n", j));
+            if (LIXA_RC_OK != (ret_cod = lixavsr_execute_record(
+                                   &xa_context,
+                                   (parsed_statement_t *)g_ptr_array_index(
+                                       parsed_statements, j))))
+                THROW(EXECUTE_RECORD);
+        }
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
+            case G_PTR_ARRAY_NEW_ERROR:
+                ret_cod = LIXA_RC_G_PTR_ARRAY_NEW_ERROR;
+                break;
             case FOPEN_ERROR:
                 ret_cod = LIXA_RC_FOPEN_ERROR;
+                break;
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
                 break;
             case PARSE_RECORD:
             case EXECUTE_RECORD:
@@ -1497,14 +1533,17 @@ int lixavsr_parse_file(const char *filename)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release memory */
+    if (NULL != parsed_statements) {
+        g_free(parsed_statement);
+        parsed_statement = NULL;
+    }
+    if (NULL != parsed_statements) {
+        g_ptr_array_free(parsed_statements, TRUE);
+        parsed_statements = NULL;
+    }
     if (NULL != file)
         fclose(file);
-        /* terminate children */
-    if (LIXA_RC_OK != (rc_term = lixavsr_terminate_children(
-                           &xa_context))) {
-        LIXA_TRACE(("lixavsr_parse_file/lixavsr_terminate_children: "
-                    "rc_term=%d ('%s')\n", rc_term, lixa_strerror(rc_term)));
-    }
     LIXA_TRACE(("lixavsr_parse_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
