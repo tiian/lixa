@@ -68,7 +68,7 @@ typedef struct {
 /**
  * Interface with XA function pointers
  */
-const struct xta_iface_s xta_mysql_iface;
+const static struct xta_iface_s xta_mysql_iface;
 
 
 
