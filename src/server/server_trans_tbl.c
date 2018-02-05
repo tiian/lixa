@@ -375,8 +375,11 @@ int server_trans_tbl_remove(server_trans_tbl_t *stt,
             THROW(OUT_OF_RANGE);
 
         /* remove */
-        if (!g_tree_remove(stt->records, sttq->gtrid))
+        if (!g_tree_remove(stt->records, sttq->gtrid)) {
+            LIXA_TRACE(("server_trans_tbl_remove: not found! "
+                        "(gtrid='%s', xid='%s')\n", sttq->gtrid, sttq->xid));
             THROW(NOT_FOUND_ERROR);
+        }
 
         THROW(NONE);
     } CATCH {
@@ -397,7 +400,7 @@ int server_trans_tbl_remove(server_trans_tbl_t *stt,
         /* unlock mutex */
         g_mutex_unlock(&stt->mutex);
     } /* TRY-CATCH */
-    LIXA_TRACE(("server_trans_tbl_insert/excp=%d/"
+    LIXA_TRACE(("server_trans_tbl_remove/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

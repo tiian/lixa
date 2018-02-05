@@ -19,7 +19,9 @@
 #ifndef LIXA_ERRORS_H
 # define LIXA_ERRORS_H
 
-#include <config.h>
+
+
+#include "config.h"
 
 
 
@@ -244,6 +246,10 @@
  * Multiple branches prepare has been failed due to one or more branches
  */
 #define LIXA_RC_MULTIBRANCH_PREPARE_FAILED     -29
+/**
+ * Last step for the verb has been already reached
+ */
+#define LIXA_RC_LAST_STEP_EXCEEDED             -30
 
 
 

@@ -145,8 +145,7 @@ int lixa_msg_retrieve(int fd,
             THROW(CONNECTION_CLOSED);
         } else if (*read_bytes != LIXA_MSG_XML_PREFIX_DIGITS) {
             /* retrieve XML message size */
-            LIXA_TRACE(("lixa_msg_retrieve: peer sent "
-                        SSIZE_T_FORMAT
+            LIXA_TRACE(("lixa_msg_retrieve: peer sent " SSIZE_T_FORMAT
                         " bytes, expected %d bytes for "
                         "XML message prefix\n", read_bytes,
                         LIXA_MSG_XML_PREFIX_DIGITS));
@@ -155,9 +154,7 @@ int lixa_msg_retrieve(int fd,
             prefix[LIXA_MSG_XML_PREFIX_DIGITS] = '\0';
             to_read = strtol(prefix, NULL, 10);
             LIXA_TRACE(("lixa_msg_retrieve: XML message prefix "
-                        "is '%s' ("
-                        SSIZE_T_FORMAT
-                        ")\n", prefix, to_read));
+                        "is '%s' (" SSIZE_T_FORMAT ")\n", prefix, to_read));
         }
 
         if (to_read > buf_size)
@@ -166,16 +163,12 @@ int lixa_msg_retrieve(int fd,
         if (0 > (*read_bytes = recv(fd, buf, to_read, 0)))
             THROW(RECV_ERROR2);
 
-        LIXA_TRACE(("lixa_msg_retrieve: fd = %d returned "
-                    SSIZE_T_FORMAT
+        LIXA_TRACE(("lixa_msg_retrieve: fd=%d returned " SSIZE_T_FORMAT
                     " bytes\n", fd, *read_bytes));
         if (to_read != *read_bytes) {
-            LIXA_TRACE(("lixa_msg_retrieve: expected "
-                        SSIZE_T_FORMAT
-                        " bytes, received "
-                        SSIZE_T_FORMAT
-                        " bytes\n",
-                        to_read, *read_bytes));
+            LIXA_TRACE(("lixa_msg_retrieve: expected " SSIZE_T_FORMAT
+                        " bytes, received " SSIZE_T_FORMAT
+                        " bytes\n", to_read, *read_bytes));
             THROW(INVALID_LENGTH_XML_MSG);
         }
 
@@ -241,17 +234,13 @@ int lixa_msg_send(int fd, const char *buf, size_t buf_size)
             THROW(CONNECTION_CLOSED);
         }
 
-        LIXA_TRACE(("lixa_msg_send: sending "
-                    SIZE_T_FORMAT
+        LIXA_TRACE(("lixa_msg_send: sending " SIZE_T_FORMAT
                     " bytes to the server (fd=%d)...\n", buf_size, fd));
         wrote_bytes = send(fd, buf, buf_size, 0);
         if (buf_size != wrote_bytes) {
-            LIXA_TRACE(("lixa_msg_send: sent "
-                        SSIZE_T_FORMAT
-                        " bytes instead of "
-                        SIZE_T_FORMAT
-                        " to the server\n",
-                        wrote_bytes, buf_size));
+            LIXA_TRACE(("lixa_msg_send: sent " SSIZE_T_FORMAT
+                        " bytes instead of " SIZE_T_FORMAT
+                        " to the server\n", wrote_bytes, buf_size));
             THROW(SEND_ERROR);
         }
 

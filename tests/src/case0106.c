@@ -635,7 +635,7 @@ void use_xa_resources(void)
                 mysql_close(mysql_conn);
                 exit(1);
             }
-            printf("%s/%u| MySQL statement >%s< completed\n",
+            fprintf(stderr, "%s/%u| MySQL statement >%s< completed\n",
                    pgm, pid, mysql_stmt_delete);
         }
     } /* if (branch_type == SUPERIOR) */

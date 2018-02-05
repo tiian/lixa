@@ -76,7 +76,8 @@ int server_xa_branch_chain(struct thread_status_s *ts,
                                               ].sr.data.pld.ph.n; ++rmid) {
                 status_record_t *sr;
                 uint32_t slot =
-                    ts->curr_status[block_id].sr.data.pld.ph.block_array[rmid];
+                    ts->curr_status[record->block_id
+                                    ].sr.data.pld.ph.block_array[rmid];
                 sr = ts->curr_status + slot;
                 if (XA_STATE_S0 != sr->sr.data.pld.rm.state.xa_s_state &&
                     XA_STATE_S1 != sr->sr.data.pld.rm.state.xa_s_state &&

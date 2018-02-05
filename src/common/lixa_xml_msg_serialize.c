@@ -54,37 +54,49 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
         SERIALIZE_OPEN_8_ERROR,
         SERIALIZE_OPEN_16_ERROR,
         SERIALIZE_OPEN_24_ERROR,
+        LAST_STEP_EXECEEDED_OPEN,
         INVALID_OPEN_STEP,
         SERIALIZE_CLOSE_8_ERROR,
+        LAST_STEP_EXECEEDED_CLOSE,
         INVALID_CLOSE_STEP,
         SERIALIZE_START_8_ERROR,
         SERIALIZE_START_16_ERROR,
         SERIALIZE_START_24_ERROR,
+        LAST_STEP_EXECEEDED_START,
         INVALID_START_STEP,
         SERIALIZE_END_8_ERROR,
         SERIALIZE_END_16_ERROR,
+        LAST_STEP_EXECEEDED_END,
         INVALID_END_STEP,
         SERIALIZE_PREPARE_8_ERROR,
         SERIALIZE_PREPARE_16_ERROR,
         SERIALIZE_PREPARE_24_ERROR,
         SERIALIZE_PREPARE_32_ERROR,
+        LAST_STEP_EXECEEDED_PREPARE,
         INVALID_PREPARE_STEP,
         SERIALIZE_COMMIT_8_ERROR,
+        LAST_STEP_EXECEEDED_COMMIT,
         INVALID_COMMIT_STEP,
         SERIALIZE_ROLLBACK_8_ERROR,
+        LAST_STEP_EXECEEDED_ROLLBACK,
         INVALID_ROLLBACK_STEP,
         SERIALIZE_QRCVR_8_ERROR,
         SERIALIZE_QRCVR_16_ERROR,
         SERIALIZE_QRCVR_24_ERROR,
+        LAST_STEP_EXECEEDED_QRCVR,
         INVALID_QRCVR_STEP,
         SERIALIZE_REG_8_ERROR,
         INVALID_REG_STEP,
+        LAST_STEP_EXECEEDED_REG,
         SERIALIZE_UNREG_8_ERROR,
         INVALID_UNREG_STEP,
+        LAST_STEP_EXECEEDED_UNREG,
         SERIALIZE_FORGET_8_ERROR,
+        LAST_STEP_EXECEEDED_FORGET,
         INVALID_FORGET_STEP,
         SERIALIZE_TRANS_8_ERROR,
         SERIALIZE_TRANS_16_ERROR,
+        LAST_STEP_EXECEEDED_TRANS,
         INVALID_TRANS_STEP,
         INVALID_VERB,
         BUFFER_TOO_SHORT3,
@@ -126,26 +138,29 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
         switch (msg->header.pvs.verb) {
             case LIXA_MSG_VERB_OPEN:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case 1*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_open_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_OPEN_8_ERROR);
                         break;
-                    case 16:
+                    case 2*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_open_16(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_OPEN_16_ERROR);
                         break;
-                    case 24:
+                    case 3*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_open_24(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_OPEN_24_ERROR);
+                        break;
+                    case 4*LIXA_MSG_STEP_INCR:
+                        THROW(LAST_STEP_EXECEEDED_OPEN);
                         break;
                     default:
                         THROW(INVALID_OPEN_STEP);
@@ -153,12 +168,15 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 break;
             case LIXA_MSG_VERB_CLOSE:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case 1*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_close_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_CLOSE_8_ERROR);
+                        break;
+                    case 2*LIXA_MSG_STEP_INCR:
+                        THROW(LAST_STEP_EXECEEDED_CLOSE);
                         break;
                     default:
                         THROW(INVALID_CLOSE_STEP);
@@ -166,26 +184,29 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 break;
             case LIXA_MSG_VERB_START:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case 1*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_start_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_START_8_ERROR);
                         break;
-                    case 16:
+                    case 2*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_start_16(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_START_16_ERROR);
                         break;
-                    case 24:
+                    case 3*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_start_24(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_START_24_ERROR);
+                        break;
+                    case 4*LIXA_MSG_STEP_INCR:
+                        THROW(LAST_STEP_EXECEEDED_START);
                         break;
                     default:
                         THROW(INVALID_START_STEP);
@@ -193,19 +214,22 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 break;
             case LIXA_MSG_VERB_END:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case 1*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_end_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_END_8_ERROR);
                         break;
-                    case 16:
+                    case 2*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_end_16(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_END_16_ERROR);
+                        break;
+                    case 3*LIXA_MSG_STEP_INCR:
+                        THROW(LAST_STEP_EXECEEDED_END);
                         break;
                     default:
                         THROW(INVALID_END_STEP);
@@ -213,33 +237,36 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 break;
             case LIXA_MSG_VERB_PREPARE:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case 1*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_prepare_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_PREPARE_8_ERROR);
                         break;
-                    case 16:
+                    case 2*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_prepare_16(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_PREPARE_16_ERROR);
                         break;
-                    case 24:
+                    case 3*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_prepare_24(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_PREPARE_24_ERROR);
                         break;
-                    case 32:
+                    case 4*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_prepare_32(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_PREPARE_32_ERROR);
+                        break;
+                    case 5*LIXA_MSG_STEP_INCR:
+                        THROW(LAST_STEP_EXECEEDED_PREPARE);
                         break;
                     default:
                         THROW(INVALID_PREPARE_STEP);
@@ -247,12 +274,15 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 break;
             case LIXA_MSG_VERB_COMMIT:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case 1*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_commit_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_COMMIT_8_ERROR);
+                        break;
+                    case 2*LIXA_MSG_STEP_INCR:
+                        THROW(LAST_STEP_EXECEEDED_COMMIT);
                         break;
                     default:
                         THROW(INVALID_COMMIT_STEP);
@@ -260,12 +290,15 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 break;
             case LIXA_MSG_VERB_ROLLBACK:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case 1*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_rollback_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_ROLLBACK_8_ERROR);
+                        break;
+                    case 2*LIXA_MSG_STEP_INCR:
+                        THROW(LAST_STEP_EXECEEDED_ROLLBACK);
                         break;
                     default:
                         THROW(INVALID_ROLLBACK_STEP);
@@ -273,26 +306,29 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 break;
             case LIXA_MSG_VERB_QRCVR:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case 1*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_qrcvr_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_QRCVR_8_ERROR);
                         break;
-                    case 16:
+                    case 2*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_qrcvr_16(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_QRCVR_16_ERROR);
                         break;
-                    case 24:
+                    case 3*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_qrcvr_24(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_QRCVR_24_ERROR);
+                        break;
+                    case 4*LIXA_MSG_STEP_INCR:
+                        THROW(LAST_STEP_EXECEEDED_QRCVR);
                         break;
                     default:
                         THROW(INVALID_QRCVR_STEP);
@@ -300,24 +336,30 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 break;
             case LIXA_MSG_VERB_REG:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case 1*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_reg_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_REG_8_ERROR);
                         break;
+                    case 2*LIXA_MSG_STEP_INCR:
+                        THROW(LAST_STEP_EXECEEDED_REG);
+                        break;
                     default: THROW(INVALID_REG_STEP);
                 }
                 break;
             case LIXA_MSG_VERB_UNREG:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case 1*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_unreg_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_UNREG_8_ERROR);
+                        break;
+                    case 2*LIXA_MSG_STEP_INCR:
+                        THROW(LAST_STEP_EXECEEDED_UNREG);
                         break;
                     default:
                         THROW(INVALID_UNREG_STEP);
@@ -325,12 +367,15 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 break;
             case LIXA_MSG_VERB_FORGET:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case 1*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK != (
                                 ret_cod =
                                 lixa_msg_serialize_forget_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_FORGET_8_ERROR);
+                        break;
+                    case 2*LIXA_MSG_STEP_INCR:
+                        THROW(LAST_STEP_EXECEEDED_FORGET);
                         break;
                     default:
                         THROW(INVALID_FORGET_STEP);
@@ -338,17 +383,20 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 break;
             case LIXA_MSG_VERB_TRANS:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case 1*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK !=
                             (ret_cod = lixa_msg_serialize_trans_8(
                                 msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_TRANS_8_ERROR);
                         break;
-                    case 16:
+                    case 2*LIXA_MSG_STEP_INCR:
                         if (LIXA_RC_OK !=
                             (ret_cod = lixa_msg_serialize_trans_16(
                                 msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_TRANS_16_ERROR);
+                        break;
+                    case 3*LIXA_MSG_STEP_INCR:
+                        THROW(LAST_STEP_EXECEEDED_TRANS);
                         break;
                     default:
                         THROW(INVALID_TRANS_STEP);
@@ -407,6 +455,20 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
             case SERIALIZE_FORGET_8_ERROR:
             case SERIALIZE_TRANS_8_ERROR:
             case SERIALIZE_TRANS_16_ERROR:
+                break;
+            case LAST_STEP_EXECEEDED_OPEN:
+            case LAST_STEP_EXECEEDED_CLOSE:
+            case LAST_STEP_EXECEEDED_START:
+            case LAST_STEP_EXECEEDED_END:
+            case LAST_STEP_EXECEEDED_PREPARE:
+            case LAST_STEP_EXECEEDED_COMMIT:
+            case LAST_STEP_EXECEEDED_ROLLBACK:
+            case LAST_STEP_EXECEEDED_QRCVR:
+            case LAST_STEP_EXECEEDED_REG:
+            case LAST_STEP_EXECEEDED_UNREG:
+            case LAST_STEP_EXECEEDED_FORGET:
+            case LAST_STEP_EXECEEDED_TRANS:
+                ret_cod = LIXA_RC_LAST_STEP_EXCEEDED;
                 break;
             case INVALID_OPEN_STEP:
             case INVALID_CLOSE_STEP:

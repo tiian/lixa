@@ -1,3 +1,10 @@
+Implement a session id, a 4 byte signature based on source ip, source port, destination ip, destination port; client and server must create the same signature for every TCP/IP connection. It would be useful for debugging client/server behavior.
+
+Implement a Finite State Machine related to any server side TCP/IP connection:
+remove implicit stated from current code and move the logic inside the FSM.
+This change should help in dealing with complex states introduced by XTA client
+behaviors.
+
 Go on with tests for CentOS 7
 Test again with only 1 or 2 resource managers: with MySQL and PostgreSQL there
 is an error in case test XTA/4.0/1.0

@@ -147,6 +147,8 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_MULTIBRANCH_PREPARE_FAILED:
             return "ERROR: multiple branches prepare has be failed due to "
                 "one or more branches";
+        case LIXA_RC_LAST_STEP_EXCEEDED:
+            return "ERROR: last step for the verb has been already reached";
         case LIXA_RC_RM_ERROR:
             return "ERROR: generic errof for a Resource Manager operation";
         case LIXA_RC_TX_FAIL:

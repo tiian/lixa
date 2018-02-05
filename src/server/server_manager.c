@@ -538,9 +538,16 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
                     THROW(NEW_CLIENT_ERROR);
                 break;
             case SRV_MSG_TYPE_SWITCH_REQ:
-                if (LIXA_RC_OK != (
-                        ret_cod = server_manager_switch_2(ts, &msg)))
-                    THROW(SWITCH_2);
+                ret_cod = server_manager_switch_2(ts, &msg);
+                switch (ret_cod) {
+                    case LIXA_RC_OK:
+                        break;
+                    case LIXA_RC_NOT_CHAINABLE_BRANCH:
+                        /* simply go on and complete the switch */
+                        break;
+                    default:
+                        THROW(SWITCH_2);
+                } /* switch (ret_cod) */
                 break;
             case SRV_MSG_TYPE_SWITCH_REP:
                 if (LIXA_RC_OK != (
@@ -604,7 +611,6 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
                      MSG_RETRIEVE_ERROR,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int warning = LIXA_RC_OK;
 
     LIXA_TRACE(("server_manager_pollin_data\n"));
     TRY {
@@ -683,7 +689,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
             case MSG_RETRIEVE_ERROR:
                 break;
             case NONE:
-                ret_cod = warning;
+                ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -703,6 +709,8 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
                      SET_GLOBAL_RECOVERY,
                      CHECK_RECOVERY_PENDING,
                      XA_BRANCH_UNCHAIN,
+                     XID_SERIALIZE_ERROR,
+                     TRANS_TABLE_REMOVE_ERROR,
                      BLOCK_STATUS_ERROR,
                      RECOVERY_TABLE_INSERT_ERROR,
                      PAYLOAD_CHAIN_RELEASE,
@@ -711,6 +719,8 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     uint32_t *list_of_branches = NULL;
+    struct server_trans_tbl_qry_s sttq;
+    sttq.gtrid = NULL;
 
     LIXA_TRACE(("server_manager_drop_client\n"));
     TRY {
@@ -747,6 +757,17 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
                                    ts, block_id)))
                 THROW(XA_BRANCH_UNCHAIN);
         } /* if (server_xa_branch_is_chained(ts, block_id)) */
+        /* remove XID from the global transaction table */
+        sttq.gtrid = lixa_xid_get_gtrid_ascii(
+            &(ts->curr_status[block_id].sr.data.pld.ph.state.xid));
+        if (!lixa_xid_serialize(
+                &(ts->curr_status[block_id].sr.data.pld.ph.state.xid),
+                sttq.xid))
+            THROW(XID_SERIALIZE_ERROR);
+        sttq.tsid = ts->id;
+        if (LIXA_RC_OK != (ret_cod = server_trans_tbl_remove(
+                               ts->trans_table, &sttq)))
+            THROW(TRANS_TABLE_REMOVE_ERROR);
         /* check recovery pending state */
         data = &(ts->curr_status[block_id].sr.data);
         if (LIXA_RC_OK != (ret_cod = thread_status_check_recovery_pending(
@@ -768,8 +789,8 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
                 THROW(PAYLOAD_CHAIN_RELEASE);
         }
         /* close socket, release file descriptor and thread status slot */
-        LIXA_TRACE(("server_manager_pollin_data: close socket, "
-                    "fd = %d\n", ts->poll_array[slot_id].fd));
+        LIXA_TRACE(("server_manager_drop_client: close socket, fd=%d\n",
+                    ts->poll_array[slot_id].fd));
         if (0 != close(ts->poll_array[slot_id].fd))
             THROW(CLOSE_ERROR);
         if (LIXA_RC_OK != (ret_cod =
@@ -784,6 +805,11 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
             case CHECK_RECOVERY_PENDING:
             case SET_GLOBAL_RECOVERY:
             case XA_BRANCH_UNCHAIN:
+            case TRANS_TABLE_REMOVE_ERROR:
+                break;
+            case XID_SERIALIZE_ERROR:
+                ret_cod = LIXA_RC_MALFORMED_XID;
+                break;
             case BLOCK_STATUS_ERROR:
             case RECOVERY_TABLE_INSERT_ERROR:
             case PAYLOAD_CHAIN_RELEASE:
@@ -805,6 +831,10 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
         free(list_of_branches);
         list_of_branches = NULL;
     } /* if (NULL != list_of_branches) */
+    if (NULL != sttq.gtrid) {
+        free(sttq.gtrid);
+        sttq.gtrid = NULL;
+    }
     LIXA_TRACE(("server_manager_drop_client/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -990,7 +1020,8 @@ int server_manager_switch_3(struct thread_status_s *ts,
             free(tss->buffer);
             tss->buffer = NULL;
         }
-        if (LIXA_RC_OK == msg->body.sp.result) {
+        if (LIXA_RC_OK == msg->body.sp.result ||
+            LIXA_RC_NOT_CHAINABLE_BRANCH == msg->body.sp.result) {
             LIXA_TRACE(("server_manager_switch_3: release switched client\n"));
             if (LIXA_RC_OK != (ret_cod = payload_chain_release(
                                    ts, msg->body.sp.block_id)))
@@ -1000,7 +1031,7 @@ int server_manager_switch_3(struct thread_status_s *ts,
                 THROW(MANAGER_FREE_SLOTS);
         } else {
             LIXA_TRACE(("server_manager_switch_3: the client can not be "
-                        "switched; keeped in this thread\n"));
+                        "switched; kept in this thread\n"));
             syslog(LOG_WARNING, LIXA_SYSLOG_LXD013W);
         }
 
@@ -1559,6 +1590,7 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
 
             /* check if the client can accept a reply: only for other
                clients, not for the current one */
+            /* @@@ remove me?! 2018-02-03
             if (j != slot_id && !server_xa_branch_want_replies(ts, block_id)) {
                 LIXA_TRACE(("server_manager_outmsg_prep: this client can't "
                             "accept a reply, bypassing it: slot_id="
@@ -1566,6 +1598,7 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
                             j, block_id));
                 continue;
             }
+            */
             
             /* create an output buffer for every client */
             if (NULL == (ts->client_array[j].output_buffer = malloc(
@@ -1602,33 +1635,39 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
                 case LIXA_MSG_VERB_NULL:
                     break;
                 case LIXA_MSG_VERB_OPEN:
-                    if (LIXA_RC_OK != (ret_cod = server_reply_open(
-                                           ts, j, out_msg, rc)))
+                    ret_cod = server_reply_open(ts, j, out_msg, rc);
+                    if (LIXA_RC_OK != ret_cod &&
+                        LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
                         THROW(REPLY_OPEN_ERROR);
                     break;
                 case LIXA_MSG_VERB_START:
-                    if (LIXA_RC_OK != (ret_cod = server_reply_start(
-                                           ts, j, out_msg, rc)))
+                    ret_cod = server_reply_start(ts, j, out_msg, rc);
+                    if (LIXA_RC_OK != ret_cod &&
+                        LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
                         THROW(REPLY_START_ERROR);
                     break;
                 case LIXA_MSG_VERB_END:
-                    if (LIXA_RC_OK != (ret_cod = server_reply_end(
-                                           ts, j, out_msg, rc)))
+                    ret_cod = server_reply_end(ts, j, out_msg, rc);
+                    if (LIXA_RC_OK != ret_cod &&
+                        LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
                         THROW(REPLY_END_ERROR);
                     break;
                 case LIXA_MSG_VERB_PREPARE:
-                    if (LIXA_RC_OK != (ret_cod = server_reply_prepare(
-                                           ts, j, out_msg, rc)))
+                    ret_cod = server_reply_prepare(ts, j, out_msg, rc);
+                    if (LIXA_RC_OK != ret_cod &&
+                        LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
                         THROW(REPLY_PREPARE_ERROR);
                     break;
                 case LIXA_MSG_VERB_QRCVR:
-                    if (LIXA_RC_OK != (ret_cod = server_reply_qrcvr(
-                                           ts, j, out_msg)))
+                    ret_cod = server_reply_qrcvr(ts, j, out_msg);
+                    if (LIXA_RC_OK != ret_cod &&
+                        LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
                         THROW(REPLY_QRCVR_ERROR);
                     break;
                 case LIXA_MSG_VERB_TRANS:
-                    if (LIXA_RC_OK != (ret_cod = server_reply_trans(
-                                           ts, j, out_msg)))
+                    ret_cod = server_reply_trans(ts, j, out_msg);
+                    if (LIXA_RC_OK != ret_cod &&
+                        LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
                         THROW(REPLY_SCAN_ERROR);
                     break;
                 default:

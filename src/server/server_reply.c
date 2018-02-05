@@ -37,36 +37,47 @@ int server_reply_default(struct thread_status_s *ts, size_t slot_id,
                          const struct lixa_msg_s *lmo)
 {
     enum Exception { SERIALIZE_ERROR
+                     , LAST_STEP_EXCEEDED
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_reply_default\n"));
     TRY {
-        if (LIXA_RC_OK != (
-                ret_cod = lixa_msg_serialize(
-                    lmo,
-                    ts->client_array[slot_id].output_buffer,
+        ret_cod = lixa_msg_serialize(
+                    lmo, ts->client_array[slot_id].output_buffer,
                     LIXA_MSG_XML_BUFFER_SIZE,
-                    &ts->client_array[slot_id].output_buffer_size))) {
-            LIXA_TRACE(("server_reply_default: error while "
-                        "serializing reply message to client\n"));
-            /* release the buffer to avoid transmission */
-            free(ts->client_array[slot_id].output_buffer);
-            ts->client_array[slot_id].output_buffer = NULL;
-            THROW(SERIALIZE_ERROR);
-        }
-        if (LIXA_RC_OK == ret_cod) {
-            LIXA_TRACE(("server_reply_default: reply message is "
-                        "|%*.*s|\n",
-                        ts->client_array[slot_id].output_buffer_size,
-                        ts->client_array[slot_id].output_buffer_size,
-                        ts->client_array[slot_id].output_buffer));
-        }
+                    &ts->client_array[slot_id].output_buffer_size);
+        switch (ret_cod) {
+            case LIXA_RC_OK:
+                LIXA_TRACE(("server_reply_default: reply message is "
+                            "|%*.*s|\n",
+                            ts->client_array[slot_id].output_buffer_size,
+                            ts->client_array[slot_id].output_buffer_size,
+                            ts->client_array[slot_id].output_buffer));
+                break;
+            case LIXA_RC_LAST_STEP_EXCEEDED:
+                LIXA_TRACE(("server_reply_default: the protocol has already "
+                            "reached the last step, skipping...\n"));
+                /* release the buffer to avoid transmission */
+                free(ts->client_array[slot_id].output_buffer);
+                ts->client_array[slot_id].output_buffer = NULL;
+                THROW(LAST_STEP_EXCEEDED);
+                break;
+            default:
+                LIXA_TRACE(("server_reply_default: error while "
+                            "serializing reply message to client\n"));
+                /* release the buffer to avoid transmission */
+                free(ts->client_array[slot_id].output_buffer);
+                ts->client_array[slot_id].output_buffer = NULL;
+                THROW(SERIALIZE_ERROR);
+        } /* switch (ret_cod) */
 
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case SERIALIZE_ERROR:
+                break;
+            case LAST_STEP_EXCEEDED:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
