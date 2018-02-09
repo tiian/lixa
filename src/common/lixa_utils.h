@@ -21,7 +21,7 @@
 
 
 
-#include <config.h>
+#include "config.h"
 
 
 
@@ -87,6 +87,33 @@ typedef struct lixa_timer_s lixa_timer_t;
 
 
 
+/**
+ * Number of char necessary for a session id: too many chars are not practical
+ * during troubleshooting
+ */
+#define LIXA_SESSION_ID_LENGTH      (6+1)
+
+
+
+/**
+ * Basic structure for object @ref lixa_session_t
+ */
+struct lixa_session_s {
+    /**
+     * C string representation of a LIXA session id (null terminator included!)
+     */
+    char        sid[LIXA_SESSION_ID_LENGTH];
+};
+
+
+
+/**
+ * LIXA client/server session identifier
+ */
+typedef struct lixa_session_s lixa_session_t;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -95,7 +122,7 @@ extern "C" {
 
     /**
      * Print software version info
-     * @param stream IN stdio stream to use for fprintf function
+     * @param[out] stream stdio stream to use for fprintf function
      */
     void lixa_print_version(FILE *stream);
     
@@ -103,12 +130,12 @@ extern "C" {
 
     /**
      * Retrieve an ISO formatted timestamp from a timeval struct;
-     * @param tv IN the timeval struct retrieved with gettimeofday system
+     * @param[in] tv the timeval struct retrieved with gettimeofday system
      *              function
-     * @param buf OUT the buffer will filled with the ISO formatted timestamp
+     * @param[out] buf the buffer will filled with the ISO formatted timestamp
      *                (it must be at least @ref ISO_TIMESTAMP_BUFFER_SIZE
      *                characters long)
-     * @param buf_size IN the buffer size
+     * @param[in] buf_size the buffer size
      * @return a standardized reason code
      */
     int lixa_utils_iso_timestamp(const struct timeval *tv, char *buf,
@@ -120,9 +147,10 @@ extern "C" {
      * Retrieve the name of the current running program
      * NOTE: this function is strictly PLATFORM DEPENDENT and returns a
      * default constant value on a system there is no implementation for
-     * @param buf OUT buffer will contain the output string; the returned
+     * @param[out] buf buffer that will contain the output string; the returned
      *            string is NULL TERMINATED, ever
-     * @param buf_size IN buffer size (trailing zero uses 1 char in the buffer)
+     * @param[in] buf_size buffer size (trailing zero uses 1 char in the
+     *            buffer)
      * @return a standardized reason code
      */
     int lixa_get_program_name(char *buf, size_t buf_size);
@@ -131,7 +159,7 @@ extern "C" {
 
     /**
      * Micro seconds sleep based on select call
-     * @param usec IN micro seconds
+     * @param[in] usec micro seconds
      */
     void lixa_micro_sleep(long usec);
 
@@ -139,7 +167,7 @@ extern "C" {
 
     /**
      * Start a timing
-     * @param lt IN/OUT timer object
+     * @param[in,out] lt timer object
      */
     void lixa_timer_start(lixa_timer_t *lt);
 
@@ -147,7 +175,7 @@ extern "C" {
     
     /**
      * Stop a timing
-     * @param lt IN/OUT timer object
+     * @param[in,out] lt timer object
      */
     void lixa_timer_stop(lixa_timer_t *lt);
 
@@ -158,7 +186,7 @@ extern "C" {
      * @ref lixa_timer_stop.
      * Warning: undefined result are if the timer was not properly started and
      * stopped
-     * @param lt IN timer object
+     * @param[in] lt timer object
      * @return elapsed number of microseconds
      */
     static inline long lixa_timer_get_diff(const lixa_timer_t *lt) {
@@ -168,6 +196,37 @@ extern "C" {
     
 
 
+    /**
+     * Reset a session object
+     * @param[out] session object to be resetted
+     */
+    void  lixa_session_reset(lixa_session_t *session);
+    
+
+    
+    /**
+     * Initialize a session object
+     * @param[out] session object to be initialized
+     * @param[in] fd file descriptor of the TCP/IP connection
+     * @param[in] client boolean value, TRUE if the file descriptor is on the
+     *           client side, FALSE if the file descriptor is on the server
+     *           side
+     * @return a reason code
+     */
+    int lixa_session_init(lixa_session_t *session, int fd, int client);
+
+
+
+    /**
+     * Return the C string representation of the session id
+     */
+    static inline const char *lixa_session_get_sid(
+        const lixa_session_t *session) {
+        return session->sid;
+    }
+
+    
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

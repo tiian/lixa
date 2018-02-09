@@ -16,18 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 #ifdef HAVE_LIBGEN_H
 # include <libgen.h>
 #endif
 #ifdef HAVE_STRING_H
 # include <string.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
 #endif
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
@@ -41,10 +47,10 @@
 
 
 
-#include <lixa_errors.h>
-#include <lixa_inst_conf.h>
-#include <lixa_trace.h>
-#include <lixa_utils.h>
+#include "lixa_errors.h"
+#include "lixa_inst_conf.h"
+#include "lixa_trace.h"
+#include "lixa_utils.h"
 
 
 
@@ -212,4 +218,82 @@ void lixa_timer_stop(lixa_timer_t *lt) {
 }
 
 
+
+void  lixa_session_reset(lixa_session_t *session)
+{
+    memset(session, 0, sizeof(lixa_session_t));
+}
+    
+
+
+int lixa_session_init(lixa_session_t *session, int fd, int client)
+{
+    enum Exception { GETSOCKNAME_ERROR
+                     , GETPEERNAME_ERROR
+                     , G_COMPUTE_CHECKSUM_FOR_DATA
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    struct sockaddr_storage sa[2];
+    struct sockaddr *sock_sa, *peer_sa;
+    socklen_t sock_addrlen = sizeof(struct sockaddr_storage);
+    socklen_t peer_addrlen = sizeof(struct sockaddr_storage);
+    gchar *checksum = NULL;
+    
+    LIXA_TRACE(("lixa_session_init\n"));
+    TRY {
+        /* reset the socket storage area for both socket ends */
+        memset(sa, 0, 2*sizeof(struct sockaddr_storage));
+        /* the hash must computed in the same order: client, server */
+        if (client) {
+            sock_sa = (struct sockaddr *)&sa[0];
+            peer_sa = (struct sockaddr *)&sa[1];
+        } else {
+            sock_sa = (struct sockaddr *)&sa[1];
+            peer_sa = (struct sockaddr *)&sa[0];
+        }
+        /* collect the info from the TCP/IP stack */
+        if (0 != getsockname(fd, sock_sa, &sock_addrlen))
+            THROW(GETSOCKNAME_ERROR);
+        if (0 != getpeername(fd, peer_sa, &peer_addrlen))
+            THROW(GETPEERNAME_ERROR);
+        /* compute checksum */
+        if (NULL == (checksum = g_compute_checksum_for_data(
+                         G_CHECKSUM_MD5, (guchar *)sa,
+                         2*sizeof(struct sockaddr_storage))))
+            THROW(G_COMPUTE_CHECKSUM_FOR_DATA);
+        /* copy the first part in sid field */
+        strncpy(session->sid, checksum, LIXA_SESSION_ID_LENGTH);
+        session->sid[LIXA_SESSION_ID_LENGTH-1] = '\0';
+        LIXA_TRACE(("lixa_session_init: checksum='%s', sid='%s'\n",
+                    checksum, session->sid));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GETSOCKNAME_ERROR:
+                ret_cod = LIXA_RC_GETSOCKNAME_ERROR;
+                break;
+            case GETPEERNAME_ERROR:
+                ret_cod = LIXA_RC_GETPEERNAME_ERROR;
+                break;
+            case G_COMPUTE_CHECKSUM_FOR_DATA:
+                ret_cod = LIXA_RC_G_COMPUTE_CHECKSUM_FOR_DATA;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* memory free */
+    if (NULL != checksum) {
+        g_free(checksum);
+        checksum = NULL;
+    }
+    LIXA_TRACE(("lixa_session_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
 

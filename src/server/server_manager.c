@@ -1891,6 +1891,7 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
 {
     enum Exception { RECORD_INSERT_ERROR
                      , PAYLOAD_HEADER_INIT
+                     , SESSION_INIT
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -1912,13 +1913,19 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
         /* reset the output buffer pointer (it may be garbage if unused
            before */
         server_client_status_init(&(ts->client_array[place]));
+        /* initialize session id */
+        if (LIXA_RC_OK != (ret_cod = lixa_session_init(
+                               &(ts->client_array[place].session), fd, FALSE)))
+            THROW(SESSION_INIT);
+        LIXA_TRACE(("server_manager_new_client: added client with sid='%s'\n",
+                    lixa_session_get_sid(&(ts->client_array[place].session))));
 
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case RECORD_INSERT_ERROR:
-                break;
             case PAYLOAD_HEADER_INIT:
+            case SESSION_INIT:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

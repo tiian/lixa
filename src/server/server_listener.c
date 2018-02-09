@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -53,12 +53,12 @@
 
 
 
-#include <lixa_errors.h>
-#include <lixa_trace.h>
-#include <lixa_syslog.h>
-#include <server_config.h>
-#include <server_listener.h>
-#include <server_messages.h>
+#include "lixa_errors.h"
+#include "lixa_trace.h"
+#include "lixa_syslog.h"
+#include "server_config.h"
+#include "server_listener.h"
+#include "server_messages.h"
 
 
 

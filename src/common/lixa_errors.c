@@ -304,6 +304,9 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_G_ARRAY_NEW_ERROR:
             return "ERROR: 'g_array_new' function returned an "
                 "error condition";
+        case LIXA_RC_G_COMPUTE_CHECKSUM_FOR_DATA:
+            return "ERROR: 'g_compute_checksum_for_data' function returned "
+                "an error condition";
         case LIXA_RC_G_CHECKSUM_GET_STRING_ERROR:
             return "ERROR: 'g_checksum_get_string' function returned an "
                 "error condition";

@@ -212,6 +212,10 @@ enum server_client_status_e { CLIENT_STATUS_NULL
 struct server_client_status_s
 {
     /**
+     * Session associated to TCP/IP connection
+     */
+    lixa_session_t session;
+    /**
      * Place inside the persistent status (memory mapped records) used to store
      * the status of this client
      */
@@ -788,6 +792,7 @@ extern "C" {
     inline static void server_client_status_init(
         struct server_client_status_s *scs)
     {
+        lixa_session_reset(&scs->session);
         scs->output_buffer = NULL;
         scs->output_buffer_size = 0;
         scs->last_verb_step.verb = 0;

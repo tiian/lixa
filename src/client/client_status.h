@@ -21,7 +21,7 @@
 
 
 
-#include <config.h>
+#include "config.h"
 
 
 
@@ -40,12 +40,13 @@
 
 
 
-#include <tx.h>
-#include <lixa_crash.h>
-#include <lixa_errors.h>
-#include <lixa_trace.h>
-#include <lixa_common_status.h>
-#include <client_config.h>
+#include "tx.h"
+#include "lixa_common_status.h"
+#include "lixa_crash.h"
+#include "lixa_errors.h"
+#include "lixa_utils.h"
+#include "lixa_trace.h"
+#include "client_config.h"
 
 
 
@@ -94,6 +95,10 @@ struct client_status_s {
      * The file descriptor associated to the socket connected to the server
      */
     int                             sockfd;
+    /**
+     * Sessio ID associated to the socket connected to the server
+     */
+    lixa_session_t                  session;
     /**
      * State of the control thread
      */

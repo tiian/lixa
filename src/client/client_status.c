@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
+
 
 
 #ifdef HAVE_ASSERT_H
@@ -33,10 +34,11 @@
 #endif
 
 
-#include <lixa_trace.h>
-#include <lixa_errors.h>
-#include <client_config.h>
-#include <client_status.h>
+
+#include "lixa_trace.h"
+#include "lixa_errors.h"
+#include "client_config.h"
+#include "client_status.h"
 
 
 
@@ -61,10 +63,12 @@ client_status_coll_t global_csc /* = {G_STATIC_MUTEX_INIT,
 client_config_coll_t global_ccc;
 
 
+
 void client_status_init(client_status_t *cs) {
     LIXA_TRACE(("client_status_init: begin\n"));
     cs->active = FALSE;
     cs->sockfd = LIXA_NULL_FD;
+    lixa_session_reset(&cs->session);
     common_status_conthr_init(&cs->state);
     cs->rmstatus = g_array_new(FALSE, FALSE,
                                sizeof(struct client_status_rsrmgr_s));

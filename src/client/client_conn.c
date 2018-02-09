@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -50,13 +50,14 @@
 
 
 
-#include <tx.h>
-#include <lixa_errors.h>
-#include <lixa_config.h>
-#include <lixa_trace.h>
-#include <lixa_syslog.h>
-#include <client_conn.h>
-#include <client_status.h>
+#include "tx.h"
+#include "lixa_errors.h"
+#include "lixa_config.h"
+#include "lixa_trace.h"
+#include "lixa_utils.h"
+#include "lixa_syslog.h"
+#include "client_conn.h"
+#include "client_status.h"
 
 
 
@@ -75,6 +76,7 @@ int client_connect(client_status_t *cs,
                      , SOCKET_ERROR
                      , CONNECT_ERROR
                      , SETSOCKOPT_ERROR
+                     , SESSION_INIT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -100,13 +102,17 @@ int client_connect(client_status_t *cs,
             syslog(LOG_ERR, LIXA_SYSLOG_LXC002E, tc->address, tc->port);
             THROW(CONNECT_ERROR);
         }
-
         /* disable Nagle's algorithm to reduce latency */
         if (0 != setsockopt(out_socket, IPPROTO_TCP, TCP_NODELAY,
                             (void *)(&sock_opt), sizeof(sock_opt)))
             THROW(SETSOCKOPT_ERROR);
+        /* initialize session id */
+        if (LIXA_RC_OK != (ret_cod = lixa_session_init(
+                               &cs->session, out_socket, TRUE)))
+            THROW(SESSION_INIT_ERROR);
         
-        LIXA_TRACE(("client_connect: cs = %p\n", cs));
+        LIXA_TRACE(("client_connect: cs=%p, sid='%s'\n", cs,
+                    lixa_session_get_sid(&cs->session)));
         LIXA_CRASH(LIXA_CRASH_POINT_CLIENT_CONNECT_1,
                    client_status_get_crash_count(cs));
         
@@ -125,7 +131,9 @@ int client_connect(client_status_t *cs,
                 break;
             case SETSOCKOPT_ERROR:
                 ret_cod = LIXA_RC_SETSOCKOPT_ERROR;
-                break;                
+                break;
+            case SESSION_INIT_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
