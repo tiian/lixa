@@ -1086,6 +1086,51 @@ S5: Heuristically Completed</body>
         <subvertex xmi:type="uml:State" xmi:id="_iU3MUMfYEeeBNuKlNzpvHw" name="S1;S2;S3"/>
       </region>
     </packagedElement>
+    <packagedElement xmi:type="uml:StateMachine" xmi:id="_2rlFQBD_Eei4tq65l4Tjng" name="StateMachine1">
+      <region xmi:type="uml:Region" xmi:id="_5lSdUBD_Eei4tq65l4Tjng" name="Region1">
+        <ownedComment xmi:type="uml:Comment" xmi:id="_bpCkoBECEei4tq65l4Tjng" annotatedElement="_rrwFMBEAEei4tq65l4Tjng">
+          <body>{isReady4Output()==TRUE}
+old flag: output_buffer!=NULL</body>
+        </ownedComment>
+        <ownedComment xmi:type="uml:Comment" xmi:id="_mY2WQBECEei4tq65l4Tjng" annotatedElement="_jVx4wBEAEei4tq65l4Tjng">
+          <body>old flag: first_message==FALSE</body>
+        </ownedComment>
+        <ownedComment xmi:type="uml:Comment" xmi:id="_q98SEBECEei4tq65l4Tjng" annotatedElement="_WioWYBEAEei4tq65l4Tjng">
+          <body>{isReady4Input()==TRUE}
+old flag: output_buffer==NULL</body>
+        </ownedComment>
+        <ownedComment xmi:type="uml:Comment" xmi:id="_xuEiEBECEei4tq65l4Tjng" annotatedElement="_HcQNIBEAEei4tq65l4Tjng">
+          <body>{isFirstMessage()==TRUE}
+old flag: first_message==TRUE</body>
+        </ownedComment>
+        <ownedComment xmi:type="uml:Comment" xmi:id="_4Y7QgBECEei4tq65l4Tjng" annotatedElement="_9mC9ABD_Eei4tq65l4Tjng">
+          <body>{isReady4Input()==TRUE}</body>
+        </ownedComment>
+        <ownedComment xmi:type="uml:Comment" xmi:id="_Bgyz8BEDEei4tq65l4Tjng">
+          <body>output_buffer: not necessary to malloc with fixed size in server_manager_outmsg_prep and to free in server_manager_pollout, server_reply_default, server_reply_qrcvr, server_reply_trans</body>
+        </ownedComment>
+        <transition xmi:type="uml:Transition" xmi:id="_M5ZLQBEAEei4tq65l4Tjng" name="Create FSM" source="_8aLm0BD_Eei4tq65l4Tjng" target="_9mC9ABD_Eei4tq65l4Tjng"/>
+        <transition xmi:type="uml:Transition" xmi:id="_STO9wBEAEei4tq65l4Tjng" name="FirstMessageArrival" source="_9mC9ABD_Eei4tq65l4Tjng" target="_HcQNIBEAEei4tq65l4Tjng"/>
+        <transition xmi:type="uml:Transition" xmi:id="_mryyUBEAEei4tq65l4Tjng" name="MessageArrival" source="_WioWYBEAEei4tq65l4Tjng" target="_jVx4wBEAEei4tq65l4Tjng"/>
+        <transition xmi:type="uml:Transition" xmi:id="_2sn8MBEBEei4tq65l4Tjng" name="MessageToSend" source="_jVx4wBEAEei4tq65l4Tjng" target="_rrwFMBEAEei4tq65l4Tjng"/>
+        <transition xmi:type="uml:Transition" xmi:id="_6pFKsBEBEei4tq65l4Tjng" name="MessageDeparture" source="_rrwFMBEAEei4tq65l4Tjng" target="_wLC7ABEAEei4tq65l4Tjng"/>
+        <transition xmi:type="uml:Transition" xmi:id="_IcHcwBECEei4tq65l4Tjng" name="MessageWanted1" source="_jVx4wBEAEei4tq65l4Tjng" target="_WioWYBEAEei4tq65l4Tjng"/>
+        <transition xmi:type="uml:Transition" xmi:id="_STwQQBECEei4tq65l4Tjng" name="MessageWanted2" source="_wLC7ABEAEei4tq65l4Tjng" target="_WioWYBEAEei4tq65l4Tjng"/>
+        <transition xmi:type="uml:Transition" xmi:id="_T3ISEBEDEei4tq65l4Tjng" name="MessageWanted0" source="_HcQNIBEAEei4tq65l4Tjng" target="_WioWYBEAEei4tq65l4Tjng"/>
+        <transition xmi:type="uml:Transition" xmi:id="_c0z-wBEDEei4tq65l4Tjng" name="Delete FSM" source="_jVx4wBEAEei4tq65l4Tjng" target="_bv_rwBEDEei4tq65l4Tjng"/>
+        <transition xmi:type="uml:Transition" xmi:id="_N98w0BEGEei4tq65l4Tjng" name="Switch_1" source="_jVx4wBEAEei4tq65l4Tjng" target="_XYWEIBEFEei4tq65l4Tjng"/>
+        <transition xmi:type="uml:Transition" xmi:id="_VeUyABEGEei4tq65l4Tjng" name="Switch_3" source="_XYWEIBEFEei4tq65l4Tjng" target="_WioWYBEAEei4tq65l4Tjng"/>
+        <subvertex xmi:type="uml:Pseudostate" xmi:id="_8aLm0BD_Eei4tq65l4Tjng" name="Initial1"/>
+        <subvertex xmi:type="uml:State" xmi:id="_9mC9ABD_Eei4tq65l4Tjng" name="WantFirstMessage"/>
+        <subvertex xmi:type="uml:State" xmi:id="_HcQNIBEAEei4tq65l4Tjng" name="FirstMessageReceived"/>
+        <subvertex xmi:type="uml:State" xmi:id="_WioWYBEAEei4tq65l4Tjng" name="WantMessage"/>
+        <subvertex xmi:type="uml:State" xmi:id="_jVx4wBEAEei4tq65l4Tjng" name="MessageReceived"/>
+        <subvertex xmi:type="uml:State" xmi:id="_rrwFMBEAEei4tq65l4Tjng" name="HaveMessage"/>
+        <subvertex xmi:type="uml:State" xmi:id="_wLC7ABEAEei4tq65l4Tjng" name="MessageSent"/>
+        <subvertex xmi:type="uml:FinalState" xmi:id="_bv_rwBEDEei4tq65l4Tjng" name="FinalState1"/>
+        <subvertex xmi:type="uml:State" xmi:id="_XYWEIBEFEei4tq65l4Tjng" name="ControlOnly"/>
+      </region>
+    </packagedElement>
   </packagedElement>
   <packagedElement xmi:type="uml:Package" xmi:id="_UUQxkBPtEeeDbpR_R0y-uQ" name="Types">
     <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_wRHeABPtEeeDbpR_R0y-uQ" name="boolean"/>

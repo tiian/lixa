@@ -1,5 +1,3 @@
-Implement a session id, a 4 byte signature based on source ip, source port, destination ip, destination port; client and server must create the same signature for every TCP/IP connection. It would be useful for debugging client/server behavior.
-
 Implement a Finite State Machine related to any server side TCP/IP connection:
 remove implicit stated from current code and move the logic inside the FSM.
 This change should help in dealing with complex states introduced by XTA client
@@ -8,6 +6,13 @@ struct server_client_status_s
 to have a finite state machine for every connected client using the array
 client_array available in the 
 struct thread_status_s
+
+Rename state in branch_state and remove ControlOnly state that's generic and
+not related to branching
+
+Change lixa_msg_serialize: the buffer is returned as an output parameter and
+must be freed by the caller. This completely change the logic in the state
+server.
 
 Go on with tests for CentOS 7
 Test again with only 1 or 2 resource managers: with MySQL and PostgreSQL there
