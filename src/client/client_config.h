@@ -49,9 +49,9 @@
 
 
 
-#include <lixa_trace.h>
-#include <lixa_config.h>
-#include <xa.h>
+#include "lixa_trace.h"
+#include "lixa_config.h"
+#include "xa.h"
 #include "lixa_iface.h"
 
 

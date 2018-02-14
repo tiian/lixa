@@ -101,12 +101,12 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(sbin_PROGRAMS)
 am_lixad_OBJECTS = lixad.$(OBJEXT) server_config.$(OBJEXT) \
-	server_listener.$(OBJEXT) server_manager.$(OBJEXT) \
-	server_recovery.$(OBJEXT) server_reply.$(OBJEXT) \
-	server_thread_status.$(OBJEXT) server_status.$(OBJEXT) \
-	server_xa.$(OBJEXT) server_xa_branch.$(OBJEXT) \
-	srvr_rcvr_tbl.$(OBJEXT) server_tpm.$(OBJEXT) \
-	server_trans_tbl.$(OBJEXT)
+	server_fsm.$(OBJEXT) server_listener.$(OBJEXT) \
+	server_manager.$(OBJEXT) server_recovery.$(OBJEXT) \
+	server_reply.$(OBJEXT) server_thread_status.$(OBJEXT) \
+	server_status.$(OBJEXT) server_xa.$(OBJEXT) \
+	server_xa_branch.$(OBJEXT) srvr_rcvr_tbl.$(OBJEXT) \
+	server_tpm.$(OBJEXT) server_trans_tbl.$(OBJEXT)
 lixad_OBJECTS = $(am_lixad_OBJECTS)
 lixad_DEPENDENCIES = ../common/liblixab.la
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -361,7 +361,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_HEADERS = ../common/lixa_trace.h server_config.h server_listener.h \
+noinst_HEADERS = ../common/lixa_trace.h server_config.h server_fsm.h \
+	server_listener.h \
 	server_manager.h server_messages.h server_recovery.h \
 	server_reply.h server_thread_status.h server_status.h server_xa.h \
 	server_xa_branch.h srvr_rcvr_tbl.h server_tpm.h server_trans_tbl.h
@@ -370,7 +371,8 @@ AM_CPPFLAGS = -DLIXA_MULTITHREAD=1 -I$(srcdir)/../common
 AM_CFLAGS = -Wall -Wno-unused-but-set-variable
 AM_LDFLAGS = @LDFLAGS_XML2@ @LDFLAGS_GLIB@ @LDFLAGS_GTHREAD@ -lpthread
 lixad_LDADD = ../common/liblixab.la
-lixad_SOURCES = lixad.c server_config.c server_listener.c server_manager.c \
+lixad_SOURCES = lixad.c server_config.c server_fsm.c server_listener.c \
+	server_manager.c \
 	server_recovery.c server_reply.c server_thread_status.c \
 	server_status.c server_xa.c server_xa_branch.c srvr_rcvr_tbl.c \
 	server_tpm.c server_trans_tbl.c
@@ -471,6 +473,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lixad.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_config.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_fsm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_listener.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_recovery.Po@am__quote@

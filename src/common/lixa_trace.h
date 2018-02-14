@@ -92,6 +92,11 @@
 #define LIXA_TRACE_MOD_SERVER_RECOVERY    0x00000100
 
 /**
+ * trace module for server FSM (finite state machine) functions
+ */
+#define LIXA_TRACE_MOD_SERVER_FSM         0x00000200
+
+/**
  * trace module for client TX standard functions
  */
 #define LIXA_TRACE_MOD_CLIENT_TX          0x00001000
