@@ -9,7 +9,14 @@ AT_CLEANUP
 #m4_include([xta.at])
 m4_include([nonapi.at])
 m4_include([lixa-config.at])
+
+m4_include([tx.at])
+AT_SETUP([exit now with error!])
+AT_CHECK([/bin/false], [0], [ignore], [ignore])
+AT_CLEANUP
+
 m4_include([lixavsr.at])
+
 m4_include([mysql.at])
 m4_include([postgresql.at])
 m4_include([mysql_postgresql.at])
@@ -22,7 +29,6 @@ m4_include([xa.at])
 m4_include([generic.at])
 m4_include([memory.at])
 m4_include([bug.at])
-m4_include([tx.at])
 m4_include([tx_cobol.at])
 m4_include([mt.at])
 

@@ -43,7 +43,7 @@
 
 
 
-#include <lixa_inst_conf.h>
+#include "lixa_inst_conf.h"
 
 
 

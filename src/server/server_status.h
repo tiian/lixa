@@ -46,6 +46,7 @@
 #include "lixa_utils.h"
 #include "xa.h"
 #include "srvr_rcvr_tbl.h"
+#include "server_fsm.h"
 #include "server_trans_tbl.h"
 
 
@@ -212,9 +213,13 @@ enum server_client_status_e { CLIENT_STATUS_NULL
 struct server_client_status_s
 {
     /**
-     * Session associated to TCP/IP connection
+     * Client session associated to TCP/IP connection
      */
     lixa_session_t session;
+    /**
+     * Finite state machine associate to the client session
+     */
+    server_fsm_t fsm;
     /**
      * Place inside the persistent status (memory mapped records) used to store
      * the status of this client
@@ -789,18 +794,7 @@ extern "C" {
      * Initialize a struct of type @ref server_client_status_s
      * @param[in,out] scs reference to the struct must be initialized
      */
-    inline static void server_client_status_init(
-        struct server_client_status_s *scs)
-    {
-        lixa_session_reset(&scs->session);
-        scs->output_buffer = NULL;
-        scs->output_buffer_size = 0;
-        scs->last_verb_step.verb = 0;
-        scs->last_verb_step.step = 0;
-        scs->state = CLIENT_STATUS_NULL;
-        scs->first_message = TRUE;
-        thread_status_switch_init(&scs->switch_thread);
-    }
+    void server_client_status_init(struct server_client_status_s *scs);
 
     
 

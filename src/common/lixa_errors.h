@@ -250,6 +250,10 @@
  * Last step for the verb has been already reached
  */
 #define LIXA_RC_LAST_STEP_EXCEEDED             -30
+/**
+ * An invalid state transtion has been requested to a Finite State Machine
+ */
+#define LIXA_RC_INVALID_STATE_TRANSITION       -31
 
 
 

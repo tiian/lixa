@@ -1097,6 +1097,7 @@ int server_manager_shutdown(struct thread_status_s *ts,
 int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
 {
     enum Exception { SEND_ERROR
+                     , FSM_MESSAGE_SENT
                      , STORE_VERB_STEP_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1117,6 +1118,12 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
         free(ts->client_array[slot_id].output_buffer);
         ts->client_array[slot_id].output_buffer = NULL;
         ts->client_array[slot_id].output_buffer_size = 0;
+        /* message sent, update FSM */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_message_sent(
+                               &ts->client_array[slot_id].fsm,
+                               lixa_session_get_sid(
+                                   &ts->client_array[slot_id].session))))
+            THROW(FSM_MESSAGE_SENT);
 
 #ifdef _CRASH
         LIXA_TRACE(("server_manager_pollout: verb=%d\n",
@@ -1166,6 +1173,7 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
             case SEND_ERROR:
                 ret_cod = LIXA_RC_SEND_ERROR;
                 break;
+            case FSM_MESSAGE_SENT:
             case STORE_VERB_STEP_ERROR:
                 break;
             case NONE:
@@ -1260,7 +1268,8 @@ int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id)
 int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
                             char *buf, ssize_t read_bytes)
 {
-    enum Exception { THREAD_SWITCH
+    enum Exception { FSM_MESSAGE_ARRIVED
+                     , THREAD_SWITCH
                      , BRANCH_LIST
                      , OUTMSG_PREP_ERROR
                      , MAINTENANCE_MODE
@@ -1274,6 +1283,12 @@ int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
     TRY {
         size_t branch_list_size = 0;
 
+        /* a new message has been arrived, updating FSM */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_message_arrived(
+                               &ts->client_array[slot_id].fsm,
+                               lixa_session_get_sid(
+                                   &ts->client_array[slot_id].session))))
+            THROW(FSM_MESSAGE_ARRIVED);
         /* initialize output message */
         lixa_msg_init(&ts->client_array[slot_id].output_message);
         /* process the input message */
@@ -1330,6 +1345,8 @@ int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case FSM_MESSAGE_ARRIVED:
+                break;
             case THREAD_SWITCH:
                 ret_cod = LIXA_RC_THREAD_SWITCH;
                 break;
@@ -1442,7 +1459,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_open(
                             ts, &lmi, lmo, block_id,
-                            &(ts->client_array[slot_id].last_verb_step))))
+                            &(ts->client_array[slot_id]))))
                     THROW(SERVER_XA_OPEN_ERROR);
                 break;
             case LIXA_MSG_VERB_CLOSE:
@@ -1917,6 +1934,10 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
         if (LIXA_RC_OK != (ret_cod = lixa_session_init(
                                &(ts->client_array[place].session), fd, FALSE)))
             THROW(SESSION_INIT);
+        /* initialize finite state machine for the client session */
+        server_fsm_init(&(ts->client_array[place].fsm),
+                        lixa_session_get_sid(
+                            &(ts->client_array[place].session)));
         LIXA_TRACE(("server_manager_new_client: added client with sid='%s'\n",
                     lixa_session_get_sid(&(ts->client_array[place].session))));
 

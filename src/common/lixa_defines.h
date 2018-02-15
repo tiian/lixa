@@ -19,7 +19,9 @@
 #ifndef LIXA_DEFINES_H
 # define LIXA_DEFINES_H
 
-#include <config.h>
+
+
+#include "config.h"
 
 
 
@@ -38,6 +40,10 @@
 #ifdef HAVE_TIME_H
 # include <time.h>
 #endif /* HAVE_TIME_H */
+
+
+
+#include "lixa_config.h"
 
 
 
