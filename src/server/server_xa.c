@@ -48,11 +48,13 @@
 
 int server_ax_reg(struct thread_status_s *ts,
                   const struct lixa_msg_s *lmi,
-                  uint32_t block_id)
+                  uint32_t block_id,
+                  struct server_client_status_s *cs)
 {
     enum Exception { INVALID_STEP
                      , INVALID_BLOCK_ID
                      , RMID_OUT_OF_RANGE
+                     , FSM_WANT_MESSAGE
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -90,6 +92,11 @@ int server_ax_reg(struct thread_status_s *ts,
         sr->sr.data.pld.rm.state.xa_s_state = ax_reg_exec->s_state;
         sr->sr.data.pld.rm.ax_reg_flags = ax_reg_exec->flags;
         sr->sr.data.pld.rm.ax_reg_rc = ax_reg_exec->rc;
+        /* update the Finite State Machine */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_want_message(
+                               &cs->fsm, lixa_session_get_sid(
+                                   &cs->session))))
+            THROW(FSM_WANT_MESSAGE);
 
         THROW(NONE);
     } CATCH {
@@ -102,6 +109,8 @@ int server_ax_reg(struct thread_status_s *ts,
                 break;
             case RMID_OUT_OF_RANGE:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case FSM_WANT_MESSAGE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -122,11 +131,13 @@ int server_ax_reg(struct thread_status_s *ts,
 
 int server_ax_unreg(struct thread_status_s *ts,
                     const struct lixa_msg_s *lmi,
-                    uint32_t block_id)
+                    uint32_t block_id,
+                    struct server_client_status_s *cs)
 {
     enum Exception { INVALID_STEP
                      , INVALID_BLOCK_ID
                      , RMID_OUT_OF_RANGE
+                     , FSM_WANT_MESSAGE
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -160,6 +171,11 @@ int server_ax_unreg(struct thread_status_s *ts,
         sr->sr.data.pld.rm.state.xa_td_state = ax_unreg_exec->td_state;
         sr->sr.data.pld.rm.ax_unreg_flags = ax_unreg_exec->flags;
         sr->sr.data.pld.rm.ax_unreg_rc = ax_unreg_exec->rc;
+        /* update the Finite State Machine */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_want_message(
+                               &cs->fsm, lixa_session_get_sid(
+                                   &cs->session))))
+            THROW(FSM_WANT_MESSAGE);
 
         THROW(NONE);
     } CATCH {
@@ -172,6 +188,8 @@ int server_ax_unreg(struct thread_status_s *ts,
                 break;
             case RMID_OUT_OF_RANGE:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case FSM_WANT_MESSAGE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -228,7 +246,8 @@ int server_xa_close(struct thread_status_s *ts,
 
 int server_xa_commit(struct thread_status_s *ts,
                      const struct lixa_msg_s *lmi,
-                     uint32_t block_id)
+                     uint32_t block_id,
+                     struct server_client_status_s *cs)
 {
     enum Exception { SERVER_XA_COMMIT_8_ERROR
                      , INVALID_STEP
@@ -240,7 +259,7 @@ int server_xa_commit(struct thread_status_s *ts,
         if (8 != lmi->header.pvs.step) {
             THROW(INVALID_STEP);
         } else if (LIXA_RC_OK != (ret_cod = server_xa_commit_8(
-                                      ts, lmi, block_id)))
+                                      ts, lmi, block_id, cs)))
             THROW(SERVER_XA_COMMIT_8_ERROR);
 
         THROW(NONE);
@@ -267,12 +286,14 @@ int server_xa_commit(struct thread_status_s *ts,
 
 int server_xa_commit_8(struct thread_status_s *ts,
                        const struct lixa_msg_s *lmi,
-                       uint32_t block_id)
+                       uint32_t block_id,
+                       struct server_client_status_s *cs)
 {
     enum Exception { INVALID_BLOCK_ID,
                      NUMBER_OF_RSRMGRS_MISMATCH,
                      XID_SERIALIZE_ERROR,
                      TRANS_TABLE_REMOVE_ERROR,
+                     FSM_WANT_MESSAGE,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     struct server_trans_tbl_qry_s sttq;
@@ -327,6 +348,11 @@ int server_xa_commit_8(struct thread_status_s *ts,
             sr->sr.data.pld.rm.xa_commit_flags = xa_commit_execs->flags;
             sr->sr.data.pld.rm.xa_commit_rc = xa_commit_execs->rc;
         } /* for (i=0; ... */
+        /* update the Finite State Machine */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_want_message(
+                               &cs->fsm, lixa_session_get_sid(
+                                   &cs->session))))
+            THROW(FSM_WANT_MESSAGE);
 
         THROW(NONE);
     } CATCH {
@@ -341,6 +367,8 @@ int server_xa_commit_8(struct thread_status_s *ts,
                 break;
             case NUMBER_OF_RSRMGRS_MISMATCH:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case FSM_WANT_MESSAGE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -417,6 +445,7 @@ int server_xa_end_8(struct thread_status_s *ts,
 {
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
+                     , FSM_SEND_MESSAGE_AND_WAIT
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -506,6 +535,11 @@ int server_xa_end_8(struct thread_status_s *ts,
         /* prepare next protocol step */
         cs->last_verb_step.verb = lmo->header.pvs.verb;
         cs->last_verb_step.step = lmo->header.pvs.step;
+        /* update the Finite State Machine */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_send_message_and_wait(
+                               &cs->fsm, lixa_session_get_sid(
+                                   &cs->session))))
+            THROW(FSM_SEND_MESSAGE_AND_WAIT);
 
         THROW(NONE);
     } CATCH {
@@ -515,6 +549,8 @@ int server_xa_end_8(struct thread_status_s *ts,
                 break;
             case NUMBER_OF_RSRMGRS_MISMATCH:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case FSM_SEND_MESSAGE_AND_WAIT:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -535,7 +571,8 @@ int server_xa_end_8(struct thread_status_s *ts,
 
 int server_xa_forget(struct thread_status_s *ts,
                      const struct lixa_msg_s *lmi,
-                     uint32_t block_id)
+                     uint32_t block_id,
+                     struct server_client_status_s *cs)
 {
     enum Exception { SERVER_XA_FORGET_8_ERROR
                      , INVALID_STEP
@@ -547,7 +584,7 @@ int server_xa_forget(struct thread_status_s *ts,
         if (8 != lmi->header.pvs.step) {
             THROW(INVALID_STEP);
         } else if (LIXA_RC_OK != (ret_cod = server_xa_forget_8(
-                                      ts, lmi, block_id)))
+                                      ts, lmi, block_id, cs)))
             THROW(SERVER_XA_FORGET_8_ERROR);
 
         THROW(NONE);
@@ -574,10 +611,12 @@ int server_xa_forget(struct thread_status_s *ts,
 
 int server_xa_forget_8(struct thread_status_s *ts,
                        const struct lixa_msg_s *lmi,
-                       uint32_t block_id)
+                       uint32_t block_id,
+                       struct server_client_status_s *cs)
 {
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
+                     , FSM_WANT_MESSAGE
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -618,6 +657,11 @@ int server_xa_forget_8(struct thread_status_s *ts,
             sr->sr.data.pld.rm.xa_forget_flags = xa_forget_execs->flags;
             sr->sr.data.pld.rm.xa_forget_rc = xa_forget_execs->rc;
         } /* for (i=0; ... */
+        /* update the Finite State Machine */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_want_message(
+                               &cs->fsm, lixa_session_get_sid(
+                                   &cs->session))))
+            THROW(FSM_WANT_MESSAGE);
 
         THROW(NONE);
     } CATCH {
@@ -627,6 +671,8 @@ int server_xa_forget_8(struct thread_status_s *ts,
                 break;
             case NUMBER_OF_RSRMGRS_MISMATCH:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case FSM_WANT_MESSAGE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -872,7 +918,7 @@ int server_xa_open_24(struct thread_status_s *ts,
                                &cs->fsm, lixa_session_get_sid(
                                    &cs->session))))
             THROW(FSM_WANT_MESSAGE);
-
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -968,6 +1014,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                      , PREPARE_BRANCHES
                      , WOULD_BLOCK
                      , PREPARE_DELAYED
+                     , FSM_SEND_MESSAGE_AND_WAIT
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     uint32_t *branch_array = NULL;
@@ -1063,6 +1110,11 @@ int server_xa_prepare_8(struct thread_status_s *ts,
             cs->last_verb_step.step = lmo->header.pvs.step;
             /* the status file must be synchronized */
             status_sync_ask_sync(&ts->status_sync);
+            /* update the Finite State Machine */
+            if (LIXA_RC_OK != (ret_cod = server_fsm_send_message_and_wait(
+                                   &cs->fsm, lixa_session_get_sid(
+                                       &cs->session))))
+                THROW(FSM_SEND_MESSAGE_AND_WAIT);
         } /* if (LIXA_RC_OK == ret_cod || */
 
         THROW(NONE);
@@ -1083,6 +1135,8 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                 break;
             case PREPARE_DELAYED:
                 ret_cod = LIXA_RC_OPERATION_POSTPONED;
+                break;
+            case FSM_SEND_MESSAGE_AND_WAIT:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1209,7 +1263,8 @@ int server_xa_prepare_24(struct thread_status_s *ts,
 
 int server_xa_rollback(struct thread_status_s *ts,
                        const struct lixa_msg_s *lmi,
-                       uint32_t block_id)
+                       uint32_t block_id,
+                       struct server_client_status_s *cs)
 {
     enum Exception { SERVER_XA_ROLLBACK_8_ERROR
                      , INVALID_STEP
@@ -1221,7 +1276,7 @@ int server_xa_rollback(struct thread_status_s *ts,
         if (8 != lmi->header.pvs.step) {
             THROW(INVALID_STEP);
         } else if (LIXA_RC_OK != (ret_cod = server_xa_rollback_8(
-                                      ts, lmi, block_id)))
+                                      ts, lmi, block_id, cs)))
             THROW(SERVER_XA_ROLLBACK_8_ERROR);
 
         THROW(NONE);
@@ -1248,12 +1303,14 @@ int server_xa_rollback(struct thread_status_s *ts,
 
 int server_xa_rollback_8(struct thread_status_s *ts,
                          const struct lixa_msg_s *lmi,
-                         uint32_t block_id)
+                         uint32_t block_id,
+                         struct server_client_status_s *cs)
 {
     enum Exception { INVALID_BLOCK_ID,
                      NUMBER_OF_RSRMGRS_MISMATCH,
                      XID_SERIALIZE_ERROR,
                      TRANS_TABLE_REMOVE_ERROR,
+                     FSM_WANT_MESSAGE,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     struct server_trans_tbl_qry_s sttq;
@@ -1312,6 +1369,11 @@ int server_xa_rollback_8(struct thread_status_s *ts,
             sr->sr.data.pld.rm.xa_rollback_flags = xa_rollback_execs->flags;
             sr->sr.data.pld.rm.xa_rollback_rc = xa_rollback_execs->rc;
         } /* for (i=0; ... */
+        /* update the Finite State Machine */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_want_message(
+                               &cs->fsm, lixa_session_get_sid(
+                                   &cs->session))))
+            THROW(FSM_WANT_MESSAGE);
 
         THROW(NONE);
     } CATCH {
@@ -1326,6 +1388,8 @@ int server_xa_rollback_8(struct thread_status_s *ts,
                 break;
             case NUMBER_OF_RSRMGRS_MISMATCH:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case FSM_WANT_MESSAGE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1354,7 +1418,7 @@ int server_xa_start(struct thread_status_s *ts,
                     const struct lixa_msg_s *lmi,
                     struct lixa_msg_s *lmo,
                     uint32_t block_id,
-                    struct lixa_msg_verb_step_s *last_verb_step)
+                    struct server_client_status_s *cs)
 {
     enum Exception { SERVER_XA_START_8_ERROR,
                      SERVER_XA_START_24_ERROR,
@@ -1368,12 +1432,12 @@ int server_xa_start(struct thread_status_s *ts,
             case 8:
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_start_8(
-                            ts, slot_id, lmi, lmo, block_id, last_verb_step)))
+                            ts, slot_id, lmi, lmo, block_id, cs)))
                     THROW(SERVER_XA_START_8_ERROR);
                 break;
             case 24:
                 if (LIXA_RC_OK != (ret_cod = server_xa_start_24(
-                                       ts, lmi, block_id)))
+                                       ts, lmi, block_id, cs)))
                     THROW(SERVER_XA_START_24_ERROR);
                 break;
             default: THROW(INVALID_STEP);
@@ -1407,7 +1471,7 @@ int server_xa_start_8(struct thread_status_s *ts,
                       const struct lixa_msg_s *lmi,
                       struct lixa_msg_s *lmo,
                       uint32_t block_id,
-                      struct lixa_msg_verb_step_s *last_verb_step)
+                      struct server_client_status_s *cs)
 {
     enum Exception { XID_GET_GTRID_ERROR, 
                      XID_SERIALIZE_ERROR,
@@ -1417,6 +1481,7 @@ int server_xa_start_8(struct thread_status_s *ts,
                      THREAD_SWITCH,
                      SERVER_RECORD_BRANCH_CHAIN,
                      TRANS_TABLE_INSERT_ERROR,
+                     FSM_SEND_MESSAGE_AND_WAIT,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int warning = LIXA_RC_OK;
@@ -1547,11 +1612,15 @@ int server_xa_start_8(struct thread_status_s *ts,
         /* prepare output message */
         lmo->header.pvs.verb = lmi->header.pvs.verb;
         /* prepare next protocol step */
-        last_verb_step->verb = lmo->header.pvs.verb;
-        last_verb_step->step = lmo->header.pvs.step;
-
+        cs->last_verb_step.verb = lmo->header.pvs.verb;
+        cs->last_verb_step.step = lmo->header.pvs.step;
         /* the status file must be synchronized */
         status_sync_ask_sync(&ts->status_sync);
+        /* update the Finite State Machine */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_send_message_and_wait(
+                               &cs->fsm, lixa_session_get_sid(
+                                   &cs->session))))
+            THROW(FSM_SEND_MESSAGE_AND_WAIT);
 
         THROW(NONE);
     } CATCH {
@@ -1573,6 +1642,7 @@ int server_xa_start_8(struct thread_status_s *ts,
                 break;
             case SERVER_RECORD_BRANCH_CHAIN:
             case TRANS_TABLE_INSERT_ERROR:
+            case FSM_SEND_MESSAGE_AND_WAIT:
                 break;
             case NONE:
                 ret_cod = warning;
@@ -1597,10 +1667,12 @@ int server_xa_start_8(struct thread_status_s *ts,
 
 int server_xa_start_24(struct thread_status_s *ts,
                        const struct lixa_msg_s *lmi,
-                       uint32_t block_id)
+                       uint32_t block_id,
+                       struct server_client_status_s *cs)
 {
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
+                     , FSM_WANT_MESSAGE
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -1641,6 +1713,11 @@ int server_xa_start_24(struct thread_status_s *ts,
             sr->sr.data.pld.rm.xa_start_flags = xa_start_execs->flags;
             sr->sr.data.pld.rm.xa_start_rc = xa_start_execs->rc;
         } /* for (i=0; ... */
+        /* update the Finite State Machine */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_want_message(
+                               &cs->fsm, lixa_session_get_sid(
+                                   &cs->session))))
+            THROW(FSM_WANT_MESSAGE);
 
         THROW(NONE);
     } CATCH {
@@ -1650,6 +1727,8 @@ int server_xa_start_24(struct thread_status_s *ts,
                 break;
             case NUMBER_OF_RSRMGRS_MISMATCH:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case FSM_WANT_MESSAGE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

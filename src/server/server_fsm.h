@@ -125,6 +125,41 @@ extern "C" {
     const char *server_fsm_get_state_as_str(const server_fsm_t *fsm);
 
     
+
+    /**
+     * Check if the Finite State Machine is in the state "first message
+     * received"
+     * @param[in] fsm is the object that must be inspected
+     * @return a boolean value
+     */
+    static inline int server_fsm_is_first_message(const server_fsm_t *fsm) {
+        return FSM_FIRST_MESSAGE_ARRIVED == fsm->state;
+    }
+
+
+
+    /**
+     * Check if the session wants to read a message from the connected client
+     * @param[in] fsm is the object that must be inspected
+     * @return a boolean value
+     */     
+    static inline int server_fsm_is_ready_for_input(const server_fsm_t *fsm) {
+        return FSM_WANT_FIRST_MESSAGE == fsm->state ||
+            FSM_WANT_MESSAGE == fsm->state;
+    }
+
+
+
+    /**
+     * Check if the session wants to write a message to the connected client
+     * @param[in] fsm is the object that must be inspected
+     * @return a boolean value
+     */     
+    static inline int server_fsm_is_ready_for_output(const server_fsm_t *fsm) {
+        return FSM_HAVE_MESSAGE_AND_WANT == fsm->state;
+    }
+    
+    
     
 #ifdef __cplusplus
 }

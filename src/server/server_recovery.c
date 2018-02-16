@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -55,7 +55,7 @@ int server_recovery(struct thread_status_s *ts,
                     const struct lixa_msg_s *lmi,
                     struct lixa_msg_s *lmo,
                     uint32_t block_id,
-                    struct lixa_msg_verb_step_s *last_verb_step)
+                    struct server_client_status_s *cs)
 {
     enum Exception { SERVER_RECOVERY_8_ERROR
                      , SERVER_RECOVERY_24_ERROR
@@ -69,13 +69,12 @@ int server_recovery(struct thread_status_s *ts,
             case 8:
                 if (LIXA_RC_OK != (
                         ret_cod = server_recovery_8(
-                            ts, slot_id, lmi, lmo, block_id,
-                            last_verb_step)))
+                            ts, slot_id, lmi, lmo, block_id, cs)))
                     THROW(SERVER_RECOVERY_8_ERROR);
                 break;
             case 24:
                 if (LIXA_RC_OK != (ret_cod = server_recovery_24(
-                                       ts, lmi, block_id)))
+                                       ts, lmi, block_id, cs)))
                     THROW(SERVER_RECOVERY_24_ERROR);
                 break;
             default:
@@ -110,7 +109,7 @@ int server_recovery_8(struct thread_status_s *ts,
                       const struct lixa_msg_s *lmi,
                       struct lixa_msg_s *lmo,
                       uint32_t block_id,
-                      struct lixa_msg_verb_step_s *last_verb_step)
+                      struct server_client_status_s *cs)
 {
     enum Exception { PROTOCOL_ERROR,
                      JOB_SET_RAW_ERROR,
@@ -118,6 +117,7 @@ int server_recovery_8(struct thread_status_s *ts,
                      THREAD_SWITCH,
                      RECOVERY_RESULT_EMPTY_ERROR,
                      GET_BLOCK_ERROR,
+                     FSM_SEND_MESSAGE_AND_WAIT,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -166,8 +166,13 @@ int server_recovery_8(struct thread_status_s *ts,
         } /* switch (rc) */
 
         /* prepare next protocol step */
-        last_verb_step->verb = lmo->header.pvs.verb;
-        last_verb_step->step = lmo->header.pvs.step;
+        cs->last_verb_step.verb = lmo->header.pvs.verb;
+        cs->last_verb_step.step = lmo->header.pvs.step;
+        /* update the Finite State Machine */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_send_message_and_wait(
+                               &cs->fsm, lixa_session_get_sid(
+                                   &cs->session))))
+            THROW(FSM_SEND_MESSAGE_AND_WAIT);
 
         THROW(NONE);
     } CATCH {
@@ -184,6 +189,7 @@ int server_recovery_8(struct thread_status_s *ts,
                 break;
             case RECOVERY_RESULT_EMPTY_ERROR:
             case GET_BLOCK_ERROR:
+            case FSM_SEND_MESSAGE_AND_WAIT:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -208,11 +214,13 @@ int server_recovery_8(struct thread_status_s *ts,
 
 int server_recovery_24(struct thread_status_s *ts,
                        const struct lixa_msg_s *lmi,
-                       uint32_t block_id)
+                       uint32_t block_id,
+                       struct server_client_status_s *cs)
 {
     enum Exception { PAYLOAD_CHAIN_RELEASE
                      , GETTIMEOFDAY_ERROR
                      , INVALID_STATUS
+                     , FSM_WANT_MESSAGE
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -267,6 +275,11 @@ int server_recovery_24(struct thread_status_s *ts,
                        recovering_block_id);
             }
         }
+        /* update the Finite State Machine */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_want_message(
+                               &cs->fsm, lixa_session_get_sid(
+                                   &cs->session))))
+            THROW(FSM_WANT_MESSAGE);
 
         THROW(NONE);
     } CATCH {
@@ -278,6 +291,8 @@ int server_recovery_24(struct thread_status_s *ts,
                 break;
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case FSM_WANT_MESSAGE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

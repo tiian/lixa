@@ -21,14 +21,14 @@
 
 
 
-#include <config.h>
+#include "config.h"
 
 
 
-#include <lixa_errors.h>
-#include <lixa_trace.h>
-#include <lixa_xml_msg.h>
-#include <server_status.h>
+#include "lixa_errors.h"
+#include "lixa_trace.h"
+#include "lixa_xml_msg.h"
+#include "server_status.h"
 
 
 
@@ -51,14 +51,13 @@ extern "C" {
 
     /**
      * Executes the logic related to "qrcvr" on the server side
-     * @param ts IN/OUT a reference to the current thread status
-     * @param slot_id IN position inside volatile status
-     * @param lmi IN a reference to the message received from the client
-     * @param lmo OUT a reference to the message must be sent to the client
-     * @param block_id IN position of the block is storing the status of the
+     * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id position inside volatile status
+     * @param[in] lmi reference to the message received from the client
+     * @param[out] lmo reference to the message must be sent to the client
+     * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param last_verb_step OUT last verb and step values (prepared for
-     *                       reply function)
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_recovery(struct thread_status_s *ts,
@@ -66,20 +65,19 @@ extern "C" {
                         const struct lixa_msg_s *lmi,
                         struct lixa_msg_s *lmo,
                         uint32_t block_id,
-                        struct lixa_msg_verb_step_s *last_verb_step);
+                        struct server_client_status_s *cs);
 
     
 
     /**
      * Executes the logic related to "qrcvr" (step 8) on the server side
-     * @param ts IN/OUT a reference to the current thread status
-     * @param slot_id IN position inside volatile status
-     * @param lmi IN a reference to the message received from the client
-     * @param lmo OUT a reference to the message must be sent to the client
-     * @param block_id IN position of the block is storing the status of the
+     * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id position inside volatile status
+     * @param[in] lmi reference to the message received from the client
+     * @param[out] lmo reference to the message must be sent to the client
+     * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param last_verb_step OUT last verb and step values (prepared for
-     *                       reply function)
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_recovery_8(struct thread_status_s *ts,
@@ -87,21 +85,23 @@ extern "C" {
                           const struct lixa_msg_s *lmi,
                           struct lixa_msg_s *lmo,
                           uint32_t block_id,
-                          struct lixa_msg_verb_step_s *last_verb_step);
+                          struct server_client_status_s *cs);
 
     
 
     /**
      * Executes the logic related to "qrcvr" (step 24) on the server side
-     * @param ts IN/OUT a reference to the current thread status
-     * @param lmi IN a reference to the message received from the client
-     * @param block_id IN position of the block is storing the status of the
+     * @param[in,out] ts reference to the current thread status
+     * @param[in] lmi reference to the message received from the client
+     * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_recovery_24(struct thread_status_s *ts,
                            const struct lixa_msg_s *lmi,
-                           uint32_t block_id);
+                           uint32_t block_id,
+                           struct server_client_status_s *cs);
 
     
 

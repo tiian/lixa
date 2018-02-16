@@ -56,11 +56,13 @@ extern "C" {
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block that stores the status of the
      *                    client is calling the server
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_ax_reg(struct thread_status_s *ts,
                       const struct lixa_msg_s *lmi,
-                      uint32_t block_id);
+                      uint32_t block_id,
+                      struct server_client_status_s *cs);
 
 
     
@@ -70,11 +72,13 @@ extern "C" {
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block that stores the status of the
      *                    client is calling the server
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_ax_unreg(struct thread_status_s *ts,
                         const struct lixa_msg_s *lmi,
-                        uint32_t block_id);
+                        uint32_t block_id,
+                        struct server_client_status_s *cs);
 
 
     
@@ -98,11 +102,13 @@ extern "C" {
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block that stores the status of the
      *                    client is calling the server
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_commit(struct thread_status_s *ts,
                          const struct lixa_msg_s *lmi,
-                         uint32_t block_id);
+                         uint32_t block_id,
+                         struct server_client_status_s *cs);
 
     
 
@@ -112,11 +118,13 @@ extern "C" {
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block that stores the status of the
      *                    client is calling the server
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_commit_8(struct thread_status_s *ts,
                            const struct lixa_msg_s *lmi,
-                           uint32_t block_id);
+                           uint32_t block_id,
+                           struct server_client_status_s *cs);
 
 
     
@@ -163,11 +171,13 @@ extern "C" {
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_forget(struct thread_status_s *ts,
                          const struct lixa_msg_s *lmi,
-                         uint32_t block_id);
+                         uint32_t block_id,
+                         struct server_client_status_s *cs);
 
 
     
@@ -177,11 +187,13 @@ extern "C" {
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_forget_8(struct thread_status_s *ts,
                            const struct lixa_msg_s *lmi,
-                           uint32_t block_id);
+                           uint32_t block_id,
+                           struct server_client_status_s *cs);
 
 
     
@@ -302,11 +314,13 @@ extern "C" {
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_rollback(struct thread_status_s *ts,
                            const struct lixa_msg_s *lmi,
-                           uint32_t block_id);
+                           uint32_t block_id,
+                           struct server_client_status_s *cs);
 
     
 
@@ -316,11 +330,13 @@ extern "C" {
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_rollback_8(struct thread_status_s *ts,
                              const struct lixa_msg_s *lmi,
-                             uint32_t block_id);
+                             uint32_t block_id,
+                             struct server_client_status_s *cs);
 
 
     
@@ -332,8 +348,7 @@ extern "C" {
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] last_verb_step last verb and step values (prepared for
-     *                       reply function)
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_start(struct thread_status_s *ts,
@@ -341,7 +356,7 @@ extern "C" {
                         const struct lixa_msg_s *lmi,
                         struct lixa_msg_s *lmo,
                         uint32_t block_id,
-                        struct lixa_msg_verb_step_s *last_verb_step);
+                        struct server_client_status_s *cs);
 
 
     
@@ -354,8 +369,7 @@ extern "C" {
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] last_verb_step last verb and step values (prepared for
-     *                       reply function)
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_start_8(struct thread_status_s *ts,
@@ -363,7 +377,7 @@ extern "C" {
                           const struct lixa_msg_s *lmi,
                           struct lixa_msg_s *lmo,
                           uint32_t block_id,
-                          struct lixa_msg_verb_step_s *last_verb_step);
+                          struct server_client_status_s *cs);
 
 
     
@@ -374,11 +388,13 @@ extern "C" {
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
+     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_start_24(struct thread_status_s *ts,
                            const struct lixa_msg_s *lmi,
-                           uint32_t block_id);
+                           uint32_t block_id,
+                           struct server_client_status_s *cs);
 
     
 

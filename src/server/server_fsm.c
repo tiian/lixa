@@ -110,6 +110,7 @@ int server_fsm_send_message_and_wait(server_fsm_t *fsm, const char *sid)
         
         switch (fsm->state) {
             case FSM_FIRST_MESSAGE_ARRIVED:
+            case FSM_MESSAGE_ARRIVED:
                 fsm->state = FSM_HAVE_MESSAGE_AND_WANT;
                 break;
             default:

@@ -1424,7 +1424,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
 #endif
         /* is this the first message from the client? check recovery pending
            transactions... */
-        if (ts->client_array[slot_id].first_message &&
+        if (server_fsm_is_first_message(&ts->client_array[slot_id].fsm) &&
             LIXA_MSG_VERB_OPEN == lmi.header.pvs.verb) {
             LIXA_TRACE(("server_manager_inmsg_proc: processing the first "
                         "message from this client...\n"));
@@ -1434,9 +1434,6 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                     ret_cod = server_manager_check_recovery(
                         ts, &lmi, &recovery_pending)))
                 THROW(SERVER_MANAGER_RECOVERY_ERROR);
-            /* reset the flag: this check should happen no more for this
-               client */
-            ts->client_array[slot_id].first_message = FALSE;
         }
 
         /* retrieve the block is storing the status of the client inside
@@ -1471,7 +1468,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_start(
                             ts, slot_id, &lmi, lmo, block_id,
-                            &(ts->client_array[slot_id].last_verb_step))))
+                            &(ts->client_array[slot_id]))))
                     THROW(SERVER_XA_START_ERROR);
                 break;
             case LIXA_MSG_VERB_END:
@@ -1488,35 +1485,40 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                     THROW(SERVER_XA_PREPARE_ERROR);
                 break;
             case LIXA_MSG_VERB_COMMIT:
-                if (LIXA_RC_OK != (ret_cod = server_xa_commit(
-                                       ts, &lmi, block_id)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_xa_commit(
+                            ts, &lmi, block_id, &(ts->client_array[slot_id]))))
                     THROW(SERVER_XA_COMMIT_ERROR);
                 break;
             case LIXA_MSG_VERB_ROLLBACK:
-                if (LIXA_RC_OK != (ret_cod = server_xa_rollback(
-                                       ts, &lmi, block_id)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_xa_rollback(
+                            ts, &lmi, block_id, &(ts->client_array[slot_id]))))
                     THROW(SERVER_XA_ROLLBACK_ERROR);
                 break;
             case LIXA_MSG_VERB_QRCVR:
                 if (LIXA_RC_OK != (
                         ret_cod = server_recovery(
                             ts, slot_id, &lmi, lmo, block_id,
-                            &(ts->client_array[slot_id].last_verb_step))))
+                            &(ts->client_array[slot_id]))))
                     THROW(SERVER_QRCVR_ERROR);
                 break;
             case LIXA_MSG_VERB_REG:
-                if (LIXA_RC_OK != (ret_cod = server_ax_reg(
-                                       ts, &lmi, block_id)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_ax_reg(
+                            ts, &lmi, block_id, &(ts->client_array[slot_id]))))
                     THROW(SERVER_AX_REG_ERROR);
                 break;
             case LIXA_MSG_VERB_UNREG:
-                if (LIXA_RC_OK != (ret_cod = server_ax_unreg(
-                                       ts, &lmi, block_id)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_ax_unreg(
+                            ts, &lmi, block_id, &(ts->client_array[slot_id]))))
                     THROW(SERVER_AX_UNREG_ERROR);
                 break;
             case LIXA_MSG_VERB_FORGET:
-                if (LIXA_RC_OK != (ret_cod = server_xa_forget(
-                                       ts, &lmi, block_id)))
+                if (LIXA_RC_OK != (
+                        ret_cod = server_xa_forget(
+                            ts, &lmi, block_id, &(ts->client_array[slot_id]))))
                     THROW(SERVER_XA_FORGET_ERROR);
                 break;
             case LIXA_MSG_VERB_TRANS:
@@ -1881,10 +1883,14 @@ int server_manager_fix_poll(struct thread_status_s *ts)
             }
             if (CLIENT_STATUS_CONTROL_ONLY == ts->client_array[i].state)
                 ts->poll_array[i].events = 0;
-            else if (ts->client_array[i].output_buffer == NULL)
-                ts->poll_array[i].events = POLLIN;
-            else
-                ts->poll_array[i].events = POLLOUT;
+            else {
+                if (server_fsm_is_ready_for_input(
+                        &ts->client_array[i].fsm))
+                    ts->poll_array[i].events = POLLIN;
+                if (server_fsm_is_ready_for_output(
+                        &ts->client_array[i].fsm))
+                    ts->poll_array[i].events = POLLOUT;
+            }
         }
 
         THROW(NONE);

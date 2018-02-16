@@ -245,10 +245,6 @@ struct server_client_status_s
      */
     struct lixa_msg_verb_step_s last_verb_step;
     /**
-     * Boolean value: is the client sending the first message?
-     */
-    int first_message;
-    /**
      * Flag used for specific states that change the client/server flow
      */
     enum server_client_status_e   state;
