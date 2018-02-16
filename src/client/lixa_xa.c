@@ -58,16 +58,14 @@
 
 int lixa_xa_close(client_config_coll_t *ccc, client_status_t *cs, int *txrc)
 {
-    enum Exception
-    {
-        ASYNC_NOT_IMPLEMENTED,
-        UNEXPECTED_XA_RC,
-        MSG_SERIALIZE_ERROR,
-        MSG_SEND_ERROR,
-        XA_ERROR,
-        NONE
-    } excp;
+    enum Exception { ASYNC_NOT_IMPLEMENTED,
+                     UNEXPECTED_XA_RC,
+                     MSG_SERIALIZE_ERROR,
+                     MSG_SEND_ERROR,
+                     XA_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    char *output_buffer = NULL;
 
     LIXA_TRACE(("lixa_xa_close\n"));
     TRY {
@@ -75,7 +73,6 @@ int lixa_xa_close(client_config_coll_t *ccc, client_status_t *cs, int *txrc)
         int fd;
         size_t buffer_size = 0;
         guint i;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         long xa_close_flags = TMNOFLAGS;
 
         /* it seems there's no reason to send info to the server about xa_close
@@ -140,7 +137,7 @@ int lixa_xa_close(client_config_coll_t *ccc, client_status_t *cs, int *txrc)
         }
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
+                               &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
 
         /* this object contains a lot of references to external stuff and
@@ -152,7 +149,8 @@ int lixa_xa_close(client_config_coll_t *ccc, client_status_t *cs, int *txrc)
         LIXA_TRACE(("lixa_xa_close: sending "
                     SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
+                               fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR);
@@ -188,6 +186,11 @@ int lixa_xa_close(client_config_coll_t *ccc, client_status_t *cs, int *txrc)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release memory */
+    if (NULL != output_buffer) {
+        free(output_buffer);
+        output_buffer = NULL;
+    }
     LIXA_TRACE(("lixa_xa_close/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -198,20 +201,18 @@ int lixa_xa_close(client_config_coll_t *ccc, client_status_t *cs, int *txrc)
 int lixa_xa_commit(client_config_coll_t *ccc, client_status_t *cs,
                    const XID *xid, int *txrc, int one_phase_commit)
 {
-    enum Exception
-    {
-        TX_RC_ADD_ERROR1,
-        TX_RC_ADD_ERROR2,
-        INVALID_XA_RC,
-        ASYNC_NOT_IMPLEMENTED,
-        UNEXPECTED_XA_RC,
-        MSG_SERIALIZE_ERROR,
-        MSG_SEND_ERROR,
-        XID_DESERIALIZE_ERROR,
-        NONE
-    } excp;
+    enum Exception { TX_RC_ADD_ERROR1,
+                     TX_RC_ADD_ERROR2,
+                     INVALID_XA_RC,
+                     ASYNC_NOT_IMPLEMENTED,
+                     UNEXPECTED_XA_RC,
+                     MSG_SERIALIZE_ERROR,
+                     MSG_SEND_ERROR,
+                     XID_DESERIALIZE_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
+    char *output_buffer = NULL;
     struct lixa_msg_s msg;
     lixa_tx_rc_t ltr = LIXA_TX_RC_T_INIT;
     *txrc = TX_FAIL;
@@ -222,7 +223,6 @@ int lixa_xa_commit(client_config_coll_t *ccc, client_status_t *cs,
         size_t buffer_size = 0;
         int fd;
         guint i;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         lixa_ser_xid_t ser_xid = "";
 
         /* retrieve the socket */
@@ -411,13 +411,14 @@ int lixa_xa_commit(client_config_coll_t *ccc, client_status_t *cs,
         }
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
+                               &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
 
         LIXA_TRACE(("lixa_xa_commit: sending "
                     SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
+                               fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR);
@@ -454,8 +455,11 @@ int lixa_xa_commit(client_config_coll_t *ccc, client_status_t *cs,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* release memory */
+        if (NULL != output_buffer) {
+            free(output_buffer);
+            output_buffer = NULL;
+        }
         lixa_tx_rc_delete(&ltr);
-        
         /* this object contains references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
@@ -484,6 +488,7 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
+    char *output_buffer = NULL;
     struct lixa_msg_s msg;
     msg.body.end_8.xa_end_execs = NULL;
 
@@ -492,7 +497,7 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
         size_t buffer_size = 0;
         int fd;
         guint i;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        char input_buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
         int read_write_rsrmgr = 0;
 
@@ -661,8 +666,7 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
         } else {
         */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer) - 1,
-                               &buffer_size)))
+                               &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR1);
         /* release memory associated to the array */
         g_array_free(msg.body.end_8.xa_end_execs, TRUE);
@@ -672,7 +676,7 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
                     SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
         if (LIXA_RC_OK !=
-            (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            (ret_cod = lixa_msg_send(fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR);
@@ -682,20 +686,20 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
                    client_status_get_crash_count(cs));
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer) - 1,
+                               fd, input_buffer, sizeof(input_buffer) - 1,
                                &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
         }
         LIXA_TRACE(("lixa_xa_end: receiving %d"
                     " bytes from the server |%*.*s|\n",
-                    read_bytes, read_bytes, read_bytes, buffer));
+                    read_bytes, read_bytes, read_bytes, input_buffer));
         
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_END_2,
                    client_status_get_crash_count(cs));
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                               buffer, read_bytes, &msg)))
+                               input_buffer, read_bytes, &msg)))
             THROW(MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
         lixa_msg_trace(&msg);
@@ -741,7 +745,11 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        
+        /* release memory */
+        if (NULL != output_buffer) {
+            free(output_buffer);
+            output_buffer = NULL;
+        }
         /* this object contains references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
@@ -767,6 +775,7 @@ int lixa_xa_forget(client_config_coll_t *ccc, client_status_t *cs,
     int xa_rc = XA_OK;
     lixa_ser_xid_t ser_xid = "";
     struct lixa_msg_s msg;
+    char *output_buffer = NULL;
 
     msg.body.forget_8.xa_forget_execs = NULL;
     LIXA_TRACE(("lixa_xa_forget\n"));
@@ -774,7 +783,6 @@ int lixa_xa_forget(client_config_coll_t *ccc, client_status_t *cs,
         size_t buffer_size = 0;
         int fd;
         guint i;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -866,13 +874,13 @@ int lixa_xa_forget(client_config_coll_t *ccc, client_status_t *cs,
         /* send the message only if there are records to send */
         if (0 < msg.body.forget_8.xa_forget_execs->len) {
             if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                                   &msg, buffer, sizeof(buffer),
-                                   &buffer_size)))
+                                   &msg, &output_buffer, &buffer_size)))
                 THROW(MSG_SERIALIZE_ERROR);
             LIXA_TRACE(("lixa_xa_forget: sending " SIZE_T_FORMAT
                         " bytes to the server for step 8\n", buffer_size));
             if (LIXA_RC_OK != (ret_cod =
-                               lixa_msg_send(fd, buffer, buffer_size))) {
+                               lixa_msg_send(
+                                   fd, output_buffer, buffer_size))) {
                 if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                     client_status_set_sockfd(cs, LIXA_NULL_FD);
                 THROW(MSG_SEND_ERROR);
@@ -912,6 +920,11 @@ int lixa_xa_forget(client_config_coll_t *ccc, client_status_t *cs,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* release memory */
+        if (NULL != output_buffer) {
+            free(output_buffer);
+            output_buffer = NULL;
+        }
         /* this object contains references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
@@ -927,18 +940,16 @@ int lixa_xa_forget(client_config_coll_t *ccc, client_status_t *cs,
 
 int lixa_xa_forget_multi(client_status_t *cs, GArray *xida, int finished)
 {
-    enum Exception
-    {
-        INTERNAL_ERROR,
-        MSG_SERIALIZE_ERROR,
-        MSG_SEND_ERROR,
-        XID_DESERIALIZE_ERROR,
-        NONE
-    } excp;
+    enum Exception { INTERNAL_ERROR,
+                     MSG_SERIALIZE_ERROR,
+                     MSG_SEND_ERROR,
+                     XID_DESERIALIZE_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int xa_rc = XA_OK;
     lixa_ser_xid_t ser_xid = "";
     struct lixa_msg_s msg;
+    char *output_buffer = NULL;
 
     msg.body.forget_8.xa_forget_execs = NULL;
     LIXA_TRACE(("lixa_xa_forget_multi\n"));
@@ -946,7 +957,6 @@ int lixa_xa_forget_multi(client_status_t *cs, GArray *xida, int finished)
         size_t buffer_size = 0;
         int fd;
         guint i, j;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
 
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
@@ -1058,14 +1068,14 @@ int lixa_xa_forget_multi(client_status_t *cs, GArray *xida, int finished)
         /* send the message only if there are records to send */
         if (0 < msg.body.forget_8.xa_forget_execs->len) {
             if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                                   &msg, buffer, sizeof(buffer),
-                                   &buffer_size)))
+                                   &msg, &output_buffer, &buffer_size)))
                 THROW(MSG_SERIALIZE_ERROR);
             LIXA_TRACE(("lixa_xa_forget_multi: sending "
                         SIZE_T_FORMAT
                         " bytes to the server for step 8\n", buffer_size));
             if (LIXA_RC_OK != (ret_cod =
-                               lixa_msg_send(fd, buffer, buffer_size))) {
+                               lixa_msg_send(
+                                   fd, output_buffer, buffer_size))) {
                 if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                     client_status_set_sockfd(cs, LIXA_NULL_FD);
                 THROW(MSG_SEND_ERROR);
@@ -1108,6 +1118,11 @@ int lixa_xa_forget_multi(client_status_t *cs, GArray *xida, int finished)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* release memory */
+        if (NULL != output_buffer) {
+            free(output_buffer);
+            output_buffer = NULL;
+        }
         /* this object contains references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
@@ -1124,33 +1139,32 @@ int lixa_xa_forget_multi(client_status_t *cs, GArray *xida, int finished)
 int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
                  int *txrc, int next_txstate, int mmode)
 {
-    enum Exception
-    {
-        OBJ_CORRUPTED,
-        MSG_SERIALIZE_ERROR1,
-        MSG_SEND_ERROR1,
-        MSG_RETRIEVE_ERROR,
-        MSG_DESERIALIZE_ERROR,
-        ERROR_FROM_SERVER,
-        MSG_SERIALIZE_ERROR2,
-        ASYNC_NOT_IMPLEMENTED,
-        UNEXPECTED_XA_RC,
-        MSG_SEND_ERROR2,
-        XA_ERROR,
-        CLIENT_RECOVERY_ERROR,
-        NONE
-    } excp;
+    enum Exception { OBJ_CORRUPTED,
+                     MSG_SERIALIZE_ERROR1,
+                     MSG_SEND_ERROR1,
+                     MSG_RETRIEVE_ERROR,
+                     MSG_DESERIALIZE_ERROR,
+                     ERROR_FROM_SERVER,
+                     MSG_SERIALIZE_ERROR2,
+                     ASYNC_NOT_IMPLEMENTED,
+                     UNEXPECTED_XA_RC,
+                     MSG_SEND_ERROR2,
+                     XA_ERROR,
+                     CLIENT_RECOVERY_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
     struct lixa_msg_s msg;
-
     msg.body.open_24.xa_open_execs = NULL;
+    char *output_buffer = NULL;
+    
     LIXA_TRACE(("lixa_xa_open\n"));
     TRY {
         struct lixa_msg_body_open_8_client_s client;
         int fd;
         size_t buffer_size = 0;
         guint i;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        char input_buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
         int recovery_pending = FALSE;
 
@@ -1219,8 +1233,8 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
         }
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer) - 1,
-                               &buffer_size))) THROW(MSG_SERIALIZE_ERROR1);
+                               &msg, &output_buffer, &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR1);
 
         /* this object contains a lot of references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
@@ -1228,12 +1242,12 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
         g_array_free(msg.body.open_8.rsrmgrs, TRUE);
         memset(&msg, 0, sizeof(msg));
 
-        LIXA_TRACE(("lixa_xa_open: sending "
-                    SIZE_T_FORMAT
+        LIXA_TRACE(("lixa_xa_open: sending " SIZE_T_FORMAT
                     " bytes ('%s') to the server for step 8 (socket fd %d)\n",
-                    buffer_size, buffer, fd));
+                    buffer_size, output_buffer, fd));
 
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
+                               fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR1);
@@ -1243,19 +1257,20 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
                    client_status_get_crash_count(cs));
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer) - 1, &read_bytes))) {
+                               fd, input_buffer, sizeof(input_buffer) - 1,
+                               &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
         }
         LIXA_TRACE(("lixa_xa_open: received %d"
                     " bytes from the server |%*.*s|\n",
-                    read_bytes, read_bytes, read_bytes, buffer));
+                    read_bytes, read_bytes, read_bytes, input_buffer));
 
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_OPEN_2,
                    client_status_get_crash_count(cs));
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                               buffer, read_bytes, &msg)))
+                               input_buffer, read_bytes, &msg)))
             THROW(MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
         lixa_msg_trace(&msg);
@@ -1333,14 +1348,16 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
                 *txrc = tmp_txrc;
         } /* for (i=0; ...) */
 
+        free(output_buffer);
+        output_buffer = NULL;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
+                               &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR2);
 
-        LIXA_TRACE(("lixa_xa_open: sending "
-                    SIZE_T_FORMAT
+        LIXA_TRACE(("lixa_xa_open: sending " SIZE_T_FORMAT
                     " bytes to the server for step 24\n", buffer_size));
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
+                               fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR2);
@@ -1406,7 +1423,11 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        
+        /* release memory */
+        if (NULL != output_buffer) {
+            free(output_buffer);
+            output_buffer = NULL;
+        }        
         /* this object contains references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
@@ -1436,6 +1457,7 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
     int warning = LIXA_RC_OK;
     
     struct lixa_msg_s msg;
+    char *output_buffer = NULL;
 
     msg.body.prepare_8.xa_prepare_execs = NULL;
     LIXA_TRACE(("lixa_xa_prepare\n"));
@@ -1443,7 +1465,7 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
         size_t buffer_size = 0;
         int fd, break_prepare;
         guint i;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        char input_buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
 
         /* retrieve the socket */
@@ -1562,12 +1584,13 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
         msg.body.prepare_8.conthr.timeout =
             LIXA_XA_DEFAULT_MULTI_PREPARE_TIMEOUT;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
+                               &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
 
         LIXA_TRACE(("lixa_xa_prepare: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
+                               fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR);
@@ -1582,16 +1605,17 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
 
         /* wait server answer */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer)-1, &read_bytes))) {
+                               fd, input_buffer, sizeof(input_buffer)-1,
+                               &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
         }
         LIXA_TRACE(("lixa_xa_prepare: receiving %d"
                     " bytes from the server |%*.*s|\n",
-                    read_bytes, read_bytes, read_bytes, buffer));
+                    read_bytes, read_bytes, read_bytes, input_buffer));
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                               buffer, read_bytes, &msg)))
+                               input_buffer, read_bytes, &msg)))
             THROW(MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
         lixa_msg_trace(&msg);
@@ -1629,6 +1653,11 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* release memory */
+        if (NULL != output_buffer) {
+            free(output_buffer);
+            output_buffer = NULL;
+        }        
         /* this object contains references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
@@ -1654,11 +1683,12 @@ int lixa_xa_prepare_wait_branches(client_config_coll_t *ccc,
     int warning = LIXA_RC_OK;
 
     struct lixa_msg_s msg;
+    char *output_buffer = NULL;
     
     LIXA_TRACE(("lixa_xa_prepare_wait_branches\n"));
     TRY {
         int fd;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        char input_buffer[LIXA_MSG_XML_BUFFER_SIZE];
         size_t buffer_size = 0;
         ssize_t read_bytes;
         
@@ -1673,11 +1703,12 @@ int lixa_xa_prepare_wait_branches(client_config_coll_t *ccc,
         msg.body.prepare_24.conthr.timeout =
             LIXA_XA_DEFAULT_MULTI_PREPARE_TIMEOUT;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
+                               &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
         LIXA_TRACE(("lixa_xa_prepare_wait_branches: sending " SIZE_T_FORMAT
                     " bytes to the server for step 24\n", buffer_size));
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
+                               fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR);
@@ -1689,16 +1720,17 @@ int lixa_xa_prepare_wait_branches(client_config_coll_t *ccc,
         /* receive a message from state server to get the results of the global
            prepare, for all the branches */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer)-1, &read_bytes))) {
+                               fd, input_buffer, sizeof(input_buffer)-1,
+                               &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
         }
         LIXA_TRACE(("lixa_xa_prepare_wait_branches: receiving %d"
                     " bytes from the server |%*.*s|\n",
-                    read_bytes, read_bytes, read_bytes, buffer));
+                    read_bytes, read_bytes, read_bytes, input_buffer));
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                               buffer, read_bytes, &msg)))
+                               input_buffer, read_bytes, &msg)))
             THROW(MSG_DESERIALIZE_ERROR);
         warning = msg.body.prepare_32.answer.rc;
         
@@ -1720,6 +1752,11 @@ int lixa_xa_prepare_wait_branches(client_config_coll_t *ccc,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release memory */
+    if (NULL != output_buffer) {
+        free(output_buffer);
+        output_buffer = NULL;
+    }        
     LIXA_TRACE(("lixa_xa_prepare_wait_branches/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -1730,28 +1767,27 @@ int lixa_xa_prepare_wait_branches(client_config_coll_t *ccc,
 int lixa_xa_prepare_multi(client_status_t *cs,
                           GArray *xida, int *txrc, int *commit, XID *xid)
 {
-    enum Exception
-    {
-        ASYNC_NOT_IMPLEMENTED,
-        UNEXPECTED_XA_RC,
-        MSG_SERIALIZE_ERROR,
-        MSG_SEND_ERROR,
-        MSG_RETRIEVE_ERROR,
-        MSG_DESERIALIZE_ERROR,
-        ERROR_FROM_SERVER,
-        XID_DESERIALIZE_ERROR,
-        NONE
-    } excp;
+    enum Exception { ASYNC_NOT_IMPLEMENTED,
+                     UNEXPECTED_XA_RC,
+                     MSG_SERIALIZE_ERROR,
+                     MSG_SEND_ERROR,
+                     MSG_RETRIEVE_ERROR,
+                     MSG_DESERIALIZE_ERROR,
+                     ERROR_FROM_SERVER,
+                     XID_DESERIALIZE_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
     struct lixa_msg_s msg;
-
     msg.body.prepare_8.xa_prepare_execs = NULL;
+    char *output_buffer = NULL;
+    
     LIXA_TRACE(("lixa_xa_prepare_multi\n"));
     TRY {
         size_t buffer_size = 0;
         int fd, break_prepare;
         guint i, j;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        char input_buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
 
         /* retrieve the socket */
@@ -1884,13 +1920,14 @@ int lixa_xa_prepare_multi(client_status_t *cs,
         msg.body.prepare_8.conthr.timeout =
             LIXA_XA_DEFAULT_MULTI_PREPARE_TIMEOUT;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
+                               &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
 
         LIXA_TRACE(("lixa_xa_prepare_multi: sending "
                     SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
+                               fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR);
@@ -1905,16 +1942,17 @@ int lixa_xa_prepare_multi(client_status_t *cs,
 
         /* wait server answer */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer) - 1, &read_bytes))) {
+                               fd, input_buffer, sizeof(input_buffer) - 1,
+                               &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
         }
         LIXA_TRACE(("lixa_xa_prepare_multi: receiving %d"
                     " bytes from the server |%*.*s|\n",
-                    read_bytes, read_bytes, read_bytes, buffer));
+                    read_bytes, read_bytes, read_bytes, input_buffer));
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                               buffer, read_bytes, &msg)))
+                               input_buffer, read_bytes, &msg)))
             THROW(MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
         lixa_msg_trace(&msg);
@@ -1952,6 +1990,11 @@ int lixa_xa_prepare_multi(client_status_t *cs,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* release memory */
+        if (NULL != output_buffer) {
+            free(output_buffer);
+            output_buffer = NULL;
+        }        
         /* this object contains references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
@@ -1964,36 +2007,34 @@ int lixa_xa_prepare_multi(client_status_t *cs,
 }
 
 
+
 int lixa_xa_rollback(client_config_coll_t *ccc, client_status_t *cs,
                      const XID *xid, int *txrc, int tx_commit)
 {
-    enum Exception
-    {
-        TX_RC_ADD_ERROR1,
-        TX_RC_ADD_ERROR2,
-        TX_RC_ADD_ERROR3,
-        TX_RC_ADD_ERROR4,
-        TX_RC_ADD_ERROR5,
-        TX_RC_ADD_ERROR6,
-        ASYNC_NOT_IMPLEMENTED,
-        UNEXPECTED_XA_RC,
-        MSG_SERIALIZE_ERROR,
-        MSG_SEND_ERROR,
-        NONE
-    } excp;
+    enum Exception { TX_RC_ADD_ERROR1,
+                     TX_RC_ADD_ERROR2,
+                     TX_RC_ADD_ERROR3,
+                     TX_RC_ADD_ERROR4,
+                     TX_RC_ADD_ERROR5,
+                     TX_RC_ADD_ERROR6,
+                     ASYNC_NOT_IMPLEMENTED,
+                     UNEXPECTED_XA_RC,
+                     MSG_SERIALIZE_ERROR,
+                     MSG_SEND_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     struct lixa_msg_s msg;
     lixa_tx_rc_t ltr = LIXA_TX_RC_T_INIT;
     *txrc = TX_FAIL;
     msg.body.rollback_8.xa_rollback_execs = NULL;
+    char *output_buffer = NULL;
 
     LIXA_TRACE(("lixa_xa_rollback\n"));
     TRY {
         size_t buffer_size = 0;
         int fd;
         guint i;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         lixa_ser_xid_t ser_xid = "";
 
         /* retrieve the socket */
@@ -2229,13 +2270,13 @@ int lixa_xa_rollback(client_config_coll_t *ccc, client_status_t *cs,
         }
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
+                               &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
 
-        LIXA_TRACE(("lixa_xa_rollback: sending "
-                    SIZE_T_FORMAT
+        LIXA_TRACE(("lixa_xa_rollback: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
+                               fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR);
@@ -2271,14 +2312,16 @@ int lixa_xa_rollback(client_config_coll_t *ccc, client_status_t *cs,
         } /* switch (excp) */
         /* release memory */
         lixa_tx_rc_delete(&ltr);
-        
+        if (NULL != output_buffer) {
+            free(output_buffer);
+            output_buffer = NULL;
+        }        
         /* this object contains references to external stuff and
            cannot be freed using standard lixa_msg_free; we are freeing the
            array to avoid memory leaks */
         if (NULL != msg.body.rollback_8.xa_rollback_execs)
             g_array_free(msg.body.rollback_8.xa_rollback_execs, TRUE);
-
-        } /* TRY-CATCH */
+    } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -2305,13 +2348,14 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
     int warning = LIXA_RC_OK;
 
     struct lixa_msg_s msg;
+    char *output_buffer = NULL;
 
     LIXA_TRACE(("lixa_xa_start\n"));
     TRY {
         size_t buffer_size = 0;
         guint i;
         int fd;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        char input_buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
 
         /* retrieve the socket */
@@ -2361,8 +2405,7 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
         } else {
         */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer) - 1,
-                               &buffer_size)))
+                               &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR1);
 
         /* only the GArray needs to be released to avoid memory leaks */
@@ -2372,7 +2415,7 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
         LIXA_TRACE(("lixa_xa_start: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
         if (LIXA_RC_OK !=
-            (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            (ret_cod = lixa_msg_send(fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR);
@@ -2382,20 +2425,20 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
                    client_status_get_crash_count(cs));
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer) - 1,
+                               fd, input_buffer, sizeof(input_buffer) - 1,
                                &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
         }
         LIXA_TRACE(("lixa_xa_start: receiving %d"
                     " bytes from the server |%*.*s|\n",
-                    read_bytes, read_bytes, read_bytes, buffer));
+                    read_bytes, read_bytes, read_bytes, input_buffer));
         
         LIXA_CRASH(LIXA_CRASH_POINT_LIXA_XA_START_2,
                    client_status_get_crash_count(cs));
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                               buffer, read_bytes, &msg)))
+                               input_buffer, read_bytes, &msg)))
             THROW(MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
         lixa_msg_trace(&msg);
@@ -2586,9 +2629,10 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
             memset(&msg, 0, sizeof(msg));
         } else {
         */
+        free(output_buffer);
+        output_buffer = NULL;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer),
-                               &buffer_size)))
+                               &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR2);
         
         /* this object contains references to external stuff and
@@ -2597,11 +2641,10 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
         g_array_free(msg.body.start_24.xa_start_execs, TRUE);
         memset(&msg, 0, sizeof(msg));
         
-        LIXA_TRACE(("lixa_xa_start: sending "
-                    SIZE_T_FORMAT
+        LIXA_TRACE(("lixa_xa_start: sending " SIZE_T_FORMAT
                     " bytes to the server for step 24\n", buffer_size));
         if (LIXA_RC_OK !=
-            (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+            (ret_cod = lixa_msg_send(fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR2);
@@ -2651,6 +2694,10 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
             g_array_free(msg.body.start_24.xa_start_execs, TRUE);
             msg.body.start_24.xa_start_execs = NULL;
         }
+        if (NULL != output_buffer) {
+            free(output_buffer);
+            output_buffer = NULL;
+        }        
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_xa_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

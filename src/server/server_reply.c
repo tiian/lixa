@@ -44,8 +44,7 @@ int server_reply_default(struct thread_status_s *ts, size_t slot_id,
     LIXA_TRACE(("server_reply_default\n"));
     TRY {
         ret_cod = lixa_msg_serialize(
-                    lmo, ts->client_array[slot_id].output_buffer,
-                    LIXA_MSG_XML_BUFFER_SIZE,
+                    lmo, &ts->client_array[slot_id].output_buffer,
                     &ts->client_array[slot_id].output_buffer_size);
         switch (ret_cod) {
             case LIXA_RC_OK:
@@ -203,9 +202,7 @@ int server_reply_qrcvr(struct thread_status_s *ts, size_t slot_id,
     TRY {
         if (LIXA_RC_OK != (
                 ret_cod = lixa_msg_serialize(
-                    lmo,
-                    ts->client_array[slot_id].output_buffer,
-                    LIXA_MSG_XML_BUFFER_SIZE,
+                    lmo, &ts->client_array[slot_id].output_buffer,
                     &ts->client_array[slot_id].output_buffer_size))) {
             LIXA_TRACE(("server_reply_qrcvr: error while "
                         "serializing reply message to client\n"));
@@ -284,9 +281,7 @@ int server_reply_trans(struct thread_status_s *ts, size_t slot_id,
     TRY {
         if (LIXA_RC_OK != (
                 ret_cod = lixa_msg_serialize(
-                    lmo,
-                    ts->client_array[slot_id].output_buffer,
-                    LIXA_MSG_XML_BUFFER_SIZE,
+                    lmo, &ts->client_array[slot_id].output_buffer,
                     &ts->client_array[slot_id].output_buffer_size))) {
             LIXA_TRACE(("server_reply_trans: error while "
                         "serializing reply message to client\n"));

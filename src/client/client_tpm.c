@@ -34,33 +34,33 @@
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE LIXA_TRACE_MOD_CLIENT_TPM
 
+
+
 int client_tpm_trans(client_status_t *cs, GTree *xidt, int maint)
 {
-    enum Exception
-    {
-        XML_STRDUP_ERROR,
-        MSG_SERIALIZE_ERROR1,
-        MSG_SEND_ERROR1,
-        MSG_RETRIEVE_ERROR,
-        MSG_DESERIALIZE_ERROR,
-        SERIALIZE_ERROR,
-        ANALYZE_ERROR,
-        MSG_SERIALIZE_ERROR2,
-        MSG_SEND_ERROR2,
-        NO_TRANSACTIONS,
-        XID_DESERIALIZE_ERROR,
-        G_ARRAY_NEW,
-        MALLOC_ERROR,
-        NONE
-    } excp;
+    enum Exception { XML_STRDUP_ERROR,
+                     MSG_SERIALIZE_ERROR1,
+                     MSG_SEND_ERROR1,
+                     MSG_RETRIEVE_ERROR,
+                     MSG_DESERIALIZE_ERROR,
+                     SERIALIZE_ERROR,
+                     ANALYZE_ERROR,
+                     MSG_SERIALIZE_ERROR2,
+                     MSG_SEND_ERROR2,
+                     NO_TRANSACTIONS,
+                     XID_DESERIALIZE_ERROR,
+                     G_ARRAY_NEW,
+                     MALLOC_ERROR,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     struct lixa_msg_s msg;
+    char *output_buffer = NULL;
 
     LIXA_TRACE(("client_tpm_trans\n"));
     TRY {
         int fd;
         size_t buffer_size = 0;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        char input_buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
 
         /* retrieve the socket */
@@ -82,40 +82,40 @@ int client_tpm_trans(client_status_t *cs, GTree *xidt, int maint)
         msg.header.pvs.step = LIXA_MSG_STEP_INCR;
 
         if (NULL ==
-            (msg.body.trans_8.client.job = xmlStrdup(client.job))) THROW(
-                XML_STRDUP_ERROR);
+            (msg.body.trans_8.client.job = xmlStrdup(client.job)))
+            THROW(XML_STRDUP_ERROR);
         strncpy(msg.body.trans_8.client.config_digest, client.config_digest,
                 sizeof(md5_digest_hex_t));
         msg.body.trans_8.client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
         msg.body.trans_8.client.maint = client.maint;
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer) - 1,
-                               &buffer_size))) THROW(MSG_SERIALIZE_ERROR1);
+                               &msg, &output_buffer, &buffer_size)))
+            THROW(MSG_SERIALIZE_ERROR1);
 
-        LIXA_TRACE(("client_tpm_trans: sending "
-                    SIZE_T_FORMAT
+        LIXA_TRACE(("client_tpm_trans: sending " SIZE_T_FORMAT
                     " bytes ('%s') to the server for step %d\n",
-                    buffer_size, buffer, msg.header.pvs.step));
+                    buffer_size, output_buffer, msg.header.pvs.step));
         if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
-                               fd, buffer, buffer_size))) {
+                               fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR1);
         }
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, buffer, sizeof(buffer) - 1,
+                               fd, input_buffer, sizeof(input_buffer) - 1,
                                &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
         }
         LIXA_TRACE(("client_tpm_trans: receiving %d"
                     " bytes from the server |%*.*s|\n",
-                    read_bytes, read_bytes, read_bytes, buffer));
+                    read_bytes, read_bytes, read_bytes, input_buffer));
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                               buffer, read_bytes, &msg))) THROW(MSG_DESERIALIZE_ERROR);
+                               input_buffer, read_bytes, &msg)))
+            THROW(MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
         lixa_msg_trace(&msg);
 #endif
@@ -138,8 +138,8 @@ int client_tpm_trans(client_status_t *cs, GTree *xidt, int maint)
                 struct lixa_msg_body_trans_16_transaction_s, i);
 
             XID xid;
-            if (!lixa_xid_deserialize(&xid, trans->xid)) THROW(
-                XID_DESERIALIZE_ERROR);
+            if (!lixa_xid_deserialize(&xid, trans->xid))
+                THROW(XID_DESERIALIZE_ERROR);
 
             /* look for the gtrid */
             char *gtrid = lixa_xid_get_gtrid_ascii(&xid);
@@ -149,14 +149,14 @@ int client_tpm_trans(client_status_t *cs, GTree *xidt, int maint)
                 /* initialize the array */
                 GArray *sxid = NULL;
                 if (NULL == (sxid = g_array_new(FALSE, FALSE,
-                                                sizeof(char *)))) THROW(
-                                                    G_ARRAY_NEW);
+                                                sizeof(char *))))
+                    THROW(G_ARRAY_NEW);
 
                 /* insert the node in the tree */
                 char *key = NULL;
                 if (NULL ==
-                    (key = (char *) malloc(LIXA_XID_GTRID_ASCII_LENGTH))) THROW(
-                        MALLOC_ERROR);
+                    (key = (char *) malloc(LIXA_XID_GTRID_ASCII_LENGTH)))
+                    THROW(MALLOC_ERROR);
                 memcpy(key, gtrid, LIXA_XID_GTRID_ASCII_LENGTH);
                 /* insert the new element in the tree */
                 g_tree_insert(xidt, key, sxid);
@@ -171,52 +171,56 @@ int client_tpm_trans(client_status_t *cs, GTree *xidt, int maint)
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case G_ARRAY_NEW:
-                    ret_cod = LIXA_RC_G_RETURNED_NULL;
-                    break;
-                case MALLOC_ERROR:
-                    ret_cod = LIXA_RC_MALLOC_ERROR;
-                    break;
-                case XML_STRDUP_ERROR:
-                    ret_cod = LIXA_RC_XML_STRDUP_ERROR;
-                    break;
-                case MSG_SERIALIZE_ERROR1:
-                case MSG_SEND_ERROR1:
-                    break;
-                case MSG_RETRIEVE_ERROR:
-                case MSG_DESERIALIZE_ERROR:
-                    break;
-                case SERIALIZE_ERROR:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-                    break;
-                case ANALYZE_ERROR:
-                    break;
-                case MSG_SERIALIZE_ERROR2:
-                case MSG_SEND_ERROR2:
-                    break;
-                case NO_TRANSACTIONS:
-                    ret_cod = LIXA_RC_OBJ_NOT_FOUND;
-                    break;
-                case XID_DESERIALIZE_ERROR:
-                    ret_cod = LIXA_RC_MALFORMED_XID;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-            /* release messages */
-            lixa_msg_free(&msg);
-        } /* TRY-CATCH */
-    LIXA_TRACE(
-        ("client_tpm_trans/excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    } CATCH {
+        switch (excp) {
+            case G_ARRAY_NEW:
+                ret_cod = LIXA_RC_G_RETURNED_NULL;
+                break;
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case XML_STRDUP_ERROR:
+                ret_cod = LIXA_RC_XML_STRDUP_ERROR;
+                break;
+            case MSG_SERIALIZE_ERROR1:
+            case MSG_SEND_ERROR1:
+                break;
+            case MSG_RETRIEVE_ERROR:
+            case MSG_DESERIALIZE_ERROR:
+                break;
+            case SERIALIZE_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case ANALYZE_ERROR:
+                break;
+            case MSG_SERIALIZE_ERROR2:
+            case MSG_SEND_ERROR2:
+                break;
+            case NO_TRANSACTIONS:
+                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
+                break;
+            case XID_DESERIALIZE_ERROR:
+                ret_cod = LIXA_RC_MALFORMED_XID;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        if (NULL != output_buffer) {
+            free(output_buffer);
+            output_buffer = NULL;
+        }
+        /* release messages */
+        lixa_msg_free(&msg);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_tpm_trans/excp=%d/ret_cod=%d/errno=%d\n",
+                excp, ret_cod, errno));
     return ret_cod;
 }
+
+
 
 int client_tpm_report(const client_status_t *cs, GTree *xidt)
 {

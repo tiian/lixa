@@ -49,6 +49,7 @@ int ax_reg(int rmid, XID *xid, long flags)
                      , NONE } excp;
     int ret_cod = TMER_TMERR;
     int xa_ret_cod = TM_OK;
+    char *output_buffer = NULL;
 
     LIXA_TRACE_INIT;
     LIXA_TRACE(("ax_reg: rmid=%d, xid=%p, flags=0x%lx\n", rmid, xid, flags));
@@ -58,7 +59,6 @@ int ax_reg(int rmid, XID *xid, long flags)
         struct lixa_msg_s msg;
         size_t buffer_size = 0;
         int fd, txstate, next_xa_td_state = XA_STATE_D1;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         struct act_rsrmgr_config_s *act_rsrmgr;
         lixa_ser_xid_t ser_xid = "";
 
@@ -167,14 +167,15 @@ int ax_reg(int rmid, XID *xid, long flags)
             msg.body.reg_8.ax_reg_exec.s_state = csr->common.xa_s_state;
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
+                               &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
         
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
         LIXA_TRACE(("ax_reg: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
+                               fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR);
@@ -213,6 +214,11 @@ int ax_reg(int rmid, XID *xid, long flags)
                 ret_cod = TMER_TMERR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release memory */
+    if (NULL != output_buffer) {
+        free(output_buffer);
+        output_buffer = NULL;
+    }
     LIXA_TRACE(("ax_reg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -230,6 +236,7 @@ int ax_unreg(int rmid, long flags)
                      , NONE } excp;
     int ret_cod = TMER_TMERR;
     int xa_ret_cod = TM_OK;
+    char *output_buffer = NULL;
     
     LIXA_TRACE_INIT;
     LIXA_TRACE(("ax_unreg: rmid=%d, flags=0x%lx\n", rmid, flags));
@@ -239,7 +246,6 @@ int ax_unreg(int rmid, long flags)
         struct lixa_msg_s msg;
         size_t buffer_size = 0;
         int fd;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
         struct act_rsrmgr_config_s *act_rsrmgr;
 
         /* retrieve a reference to the thread status */
@@ -307,14 +313,15 @@ int ax_unreg(int rmid, long flags)
         msg.body.unreg_8.ax_unreg_exec.td_state = XA_STATE_D0;
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &buffer_size)))
+                               &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
         
         /* retrieve the socket */
         fd = client_status_get_sockfd(cs);
         LIXA_TRACE(("ax_unreg: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
-        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(fd, buffer, buffer_size))) {
+        if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
+                               fd, output_buffer, buffer_size))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                 client_status_set_sockfd(cs, LIXA_NULL_FD);
             THROW(MSG_SEND_ERROR);
@@ -349,6 +356,11 @@ int ax_unreg(int rmid, long flags)
                 ret_cod = TMER_TMERR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release memory */
+    if (NULL != output_buffer) {
+        free(output_buffer);
+        output_buffer = NULL;
+    }
     LIXA_TRACE(("ax_unreg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

@@ -63,12 +63,13 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     struct lixa_msg_s rqst, rpl, updt;
+    char *output_buffer = NULL;
     
     LIXA_TRACE(("client_recovery\n"));
     TRY {
         int fd;
         size_t buffer_size = 0;
-        char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+        char input_buffer[LIXA_MSG_XML_BUFFER_SIZE];
         ssize_t read_bytes;
         int commit;
         lixa_ser_xid_t ser_xid;
@@ -96,15 +97,14 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
                 '\0';
         
             if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
-                                   &rqst, buffer, sizeof(buffer)-1,
-                                   &buffer_size)))
+                                   &rqst, &output_buffer, &buffer_size)))
                 THROW(MSG_SERIALIZE_ERROR1);
 
             LIXA_TRACE(("client_recovery: sending " SIZE_T_FORMAT
                         " bytes ('%s') to the server for step %d\n",
-                        buffer_size, buffer, rqst.header.pvs.step));
+                        buffer_size, output_buffer, rqst.header.pvs.step));
             if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
-                                   fd, buffer, buffer_size))) {
+                                   fd, output_buffer, buffer_size))) {
                 if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                     client_status_set_sockfd(cs, LIXA_NULL_FD);
                 THROW(MSG_SEND_ERROR1);
@@ -114,20 +114,20 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
                        client_status_get_crash_count(cs));
         
             if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                                   fd, buffer, sizeof(buffer)-1,
+                                   fd, input_buffer, sizeof(input_buffer)-1,
                                    &read_bytes))) {
                 client_status_check_socket(cs, ret_cod);
                 THROW(MSG_RETRIEVE_ERROR);
             }
             LIXA_TRACE(("client_recovery: receiving %d"
                         " bytes from the server |%*.*s|\n",
-                        read_bytes, read_bytes, read_bytes, buffer));
+                        read_bytes, read_bytes, read_bytes, input_buffer));
             
             LIXA_CRASH(LIXA_CRASH_POINT_CLIENT_RECOVERY_2,
                        client_status_get_crash_count(cs));
         
             if (LIXA_RC_OK != (ret_cod = lixa_msg_deserialize(
-                                   buffer, read_bytes, &rpl)))
+                                   input_buffer, read_bytes, &rpl)))
                 THROW(MSG_DESERIALIZE_ERROR);
 #ifdef _TRACE
             lixa_msg_trace(&rpl);
@@ -185,17 +185,20 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
             }
             if (updt.body.qrcvr_24.recovery.failed)
                 syslog(LOG_WARNING, LIXA_SYSLOG_LXC005W, ser_xid);
-            
+
+            free(output_buffer);
+            output_buffer = NULL;
             if (LIXA_RC_OK != (
                     ret_cod = lixa_msg_serialize(
-                        &updt, buffer, sizeof(buffer)-1, &buffer_size)))
+                        &updt, &output_buffer, &buffer_size)))
                 THROW(MSG_SERIALIZE_ERROR2);
             
             LIXA_TRACE(("client_recovery: sending " SIZE_T_FORMAT
                         " bytes ('%s') to the server for step %d\n",
-                        buffer_size, buffer, updt.header.pvs.step));
+                        buffer_size, output_buffer, updt.header.pvs.step));
             if (LIXA_RC_OK != (ret_cod =
-                               lixa_msg_send(fd, buffer, buffer_size))) {
+                               lixa_msg_send(fd, output_buffer,
+                                             buffer_size))) {
                 if (LIXA_RC_CONNECTION_CLOSED == ret_cod)
                     client_status_set_sockfd(cs, LIXA_NULL_FD);
                 THROW(MSG_SEND_ERROR2);
@@ -245,6 +248,10 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
         lixa_msg_free(&rqst);
         lixa_msg_free(&rpl);
         lixa_msg_free(&updt);
+        if (NULL != output_buffer) {
+            free(output_buffer);
+            output_buffer = NULL;
+        }       
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

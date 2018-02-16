@@ -44,9 +44,9 @@
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_COMMON_XML_MSG
 
 
+
 int lixa_msg_serialize(const struct lixa_msg_s *msg,
-                       char *buffer, size_t buffer_len,
-                       size_t *msg_len)
+                       char **output, size_t *output_len)
 {
     enum Exception {
         BUFFER_TOO_SHORT1,
@@ -100,12 +100,14 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
         INVALID_TRANS_STEP,
         INVALID_VERB,
         BUFFER_TOO_SHORT3,
+        STRDUP_ERROR, 
         NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     int used_chars = 0;
-    size_t free_chars = buffer_len, offset = 0;
     char prefix[LIXA_MSG_XML_PREFIX_DIGITS + 1];
+    char buffer[LIXA_MSG_XML_BUFFER_SIZE];
+    size_t free_chars = sizeof(buffer), offset = 0;
 
     LIXA_TRACE(("lixa_msg_serialize\n"));
     TRY {
@@ -420,11 +422,20 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                  (int) (offset - LIXA_MSG_XML_PREFIX_DIGITS));
         strncpy(buffer, prefix, LIXA_MSG_XML_PREFIX_DIGITS);
 
-        *msg_len = offset;
-
+        *output_len = offset;
         LIXA_TRACE(("lixa_msg_serialize: serialized message is |%*.*s|\n",
-                    *msg_len, *msg_len, buffer));
+                    *output_len, *output_len, buffer));
 
+        /* create a dynamic copy for the caller */
+        if (NULL != *output) {
+            LIXA_TRACE(("lixa_msg_serialize: WARNING, output is not NULL, "
+                        "trying to free it before a new allocation...\n"));
+            free(*output);
+            *output = NULL;
+        }
+        if (NULL == (*output = strndup(buffer, sizeof(buffer))))
+            THROW(STRDUP_ERROR);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -487,6 +498,9 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
                 break;
             case BUFFER_TOO_SHORT3:
                 ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case STRDUP_ERROR:
+                ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

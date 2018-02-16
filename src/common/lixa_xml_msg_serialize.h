@@ -47,18 +47,14 @@ extern "C" {
 
     /**
      * Serialize a message struct to an XML buffer for external transmission
-     * @param[in] msg the object must be serialized
-     * @param[out] buffer the buffer will contain the XML serialized object
-     *                   (the size has fixed size of
-     *                   @ref LIXA_MSG_XML_BUFFER_SIZE bytes) and will be
-     *                   null terminated
-     * @param[in] buffer_len the space allocated for buffer
-     * @param[out] msg_len number of chars used in buffer for serializing msg
+     * @param[in] msg the object that must be serialized
+     * @param[out] output contains the XML serialized object and MUST BE FREED
+     *             by the caller using free() function
+     * @param[out] output_len is the length of the produced output
      * @return a reason code
      */
     int lixa_msg_serialize(const struct lixa_msg_s *msg,
-                           char *buffer, size_t buffer_len,
-                           size_t *msg_len);
+                           char **output, size_t *output_len);
 
 
     
