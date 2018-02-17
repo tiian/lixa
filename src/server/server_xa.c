@@ -31,6 +31,7 @@
 
 #include "lixa_errors.h"
 #include "lixa_crash.h"
+#include "lixa_utils.h"
 #include "lixa_syslog.h"
 #include "server_fsm.h"
 #include "server_xa.h"
@@ -1014,7 +1015,8 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                      , PREPARE_BRANCHES
                      , WOULD_BLOCK
                      , PREPARE_DELAYED
-                     , FSM_SEND_MESSAGE_AND_WAIT
+                     , FSM_SEND_MESSAGE_AND_WAIT1
+                     , FSM_SEND_MESSAGE_AND_WAIT2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     uint32_t *branch_array = NULL;
@@ -1022,7 +1024,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_prepare_8\n"));
     TRY {
         uint32_t i;
-        uint32_t branch_array_size=0;
+        uint32_t branch_array_size = 0;
 
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=
@@ -1111,10 +1113,24 @@ int server_xa_prepare_8(struct thread_status_s *ts,
             /* the status file must be synchronized */
             status_sync_ask_sync(&ts->status_sync);
             /* update the Finite State Machine */
-            if (LIXA_RC_OK != (ret_cod = server_fsm_send_message_and_wait(
-                                   &cs->fsm, lixa_session_get_sid(
-                                       &cs->session))))
-                THROW(FSM_SEND_MESSAGE_AND_WAIT);
+            if (0 < branch_array_size) {
+                /* for all the clients of the branch */
+                for (i=0; i<branch_array_size; ++i) {
+                    if (LIXA_RC_OK != (
+                            ret_cod = server_fsm_send_message_and_wait(
+                                &ts->client_array[branch_array[i]].fsm,
+                                lixa_session_get_sid(
+                                    &ts->client_array[
+                                        branch_array[i]].session))))
+                        THROW(FSM_SEND_MESSAGE_AND_WAIT1);
+                } /* for (i=0; i<branch_array_size; ++i) */
+            } else {
+                /* for the current client */
+                if (LIXA_RC_OK != (ret_cod = server_fsm_send_message_and_wait(
+                                       &cs->fsm, lixa_session_get_sid(
+                                           &cs->session))))
+                    THROW(FSM_SEND_MESSAGE_AND_WAIT2);
+            }
         } /* if (LIXA_RC_OK == ret_cod || */
 
         THROW(NONE);
@@ -1136,7 +1152,8 @@ int server_xa_prepare_8(struct thread_status_s *ts,
             case PREPARE_DELAYED:
                 ret_cod = LIXA_RC_OPERATION_POSTPONED;
                 break;
-            case FSM_SEND_MESSAGE_AND_WAIT:
+            case FSM_SEND_MESSAGE_AND_WAIT1:
+            case FSM_SEND_MESSAGE_AND_WAIT2:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

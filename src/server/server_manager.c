@@ -845,7 +845,8 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
 int server_manager_switch_1(struct thread_status_s *ts,
                             size_t slot_id)
 {
-    enum Exception { WRITE_ERROR
+    enum Exception { FSM_SWITCH_THREAD
+                     , WRITE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     LIXA_TRACE(("server_manager_switch_1\n"));
@@ -880,8 +881,12 @@ int server_manager_switch_1(struct thread_status_s *ts,
                                                       ].sr.data.pld.rm);
         }
 
-        /* move the thread to control only state */
-        ts->client_array[slot_id].state = CLIENT_STATUS_CONTROL_ONLY;
+        /* update the FSM accordingly to the switch request */
+        if (LIXA_RC_OK != (ret_cod = server_fsm_switch_thread(
+                               &ts->client_array[slot_id].fsm,
+                               lixa_session_get_sid(
+                                   &ts->client_array[slot_id].session))))
+            THROW(FSM_SWITCH_THREAD);
         /* send the message to the destination thread */
         if (sizeof(msg) != write(ts->tpa->array[tss->id].pipefd[1],
                                  &msg, sizeof(msg)))
@@ -890,6 +895,8 @@ int server_manager_switch_1(struct thread_status_s *ts,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case FSM_SWITCH_THREAD:
+                break;
             case WRITE_ERROR:
                 ret_cod = LIXA_RC_WRITE_ERROR;
                 break;
@@ -1881,7 +1888,7 @@ int server_manager_fix_poll(struct thread_status_s *ts)
                 ts->poll_array[i].events = 0;
                 continue;
             }
-            if (CLIENT_STATUS_CONTROL_ONLY == ts->client_array[i].state)
+            if (server_fsm_is_client_migrating(&ts->client_array[i].fsm))
                 ts->poll_array[i].events = 0;
             else {
                 if (server_fsm_is_ready_for_input(

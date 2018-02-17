@@ -55,7 +55,9 @@ typedef struct server_fsm_s {
             client */
         FSM_WANT_MESSAGE,
         /** A message (not the first) from the client has been arrived */
-        FSM_MESSAGE_ARRIVED
+        FSM_MESSAGE_ARRIVED,
+        /** The session must be switched (migrated) to a different thread */
+        FSM_MUST_SWITCH_THREAD
     } state;
 } server_fsm_t;
 
@@ -70,7 +72,7 @@ extern "C" {
     /**
      * Initialize a Finite State Machine and set it to the first state
      * @param[out] fsm is the object that must be initialized
-     * @param[in] sid, session id for debugging purposes only
+     * @param[in] sid session id for debugging purposes only
      */
     void server_fsm_init(server_fsm_t *fsm, const char *sid);
 
@@ -78,8 +80,8 @@ extern "C" {
 
     /**
      * A new message has been arrived and the FSM must be updated
-     * @param[in,out] fsm is the object that must be initialized
-     * @param[in] sid, session id for debugging purposes only
+     * @param[in,out] fsm is the Finite State Machine object
+     * @param[in] sid session id for debugging purposes only
      * @return a reason code
      */     
     int server_fsm_message_arrived(server_fsm_t *fsm, const char *sid);
@@ -88,8 +90,8 @@ extern "C" {
     
     /**
      * A message must be sent to the client and another one is wanted
-     * @param[in,out] fsm is the object that must be initialized
-     * @param[in] sid, session id for debugging purposes only
+     * @param[in,out] fsm is the Finite State Machine object
+     * @param[in] sid session id for debugging purposes only
      * @return a reason code
      */     
     int server_fsm_send_message_and_wait(server_fsm_t *fsm, const char *sid);
@@ -98,8 +100,8 @@ extern "C" {
     
     /**
      * A message has been sent to the client and the FSM must be updated
-     * @param[in,out] fsm is the object that must be initialized
-     * @param[in] sid, session id for debugging purposes only
+     * @param[in,out] fsm is the Finite State Machine object
+     * @param[in] sid session id for debugging purposes only
      * @return a reason code
      */     
     int server_fsm_message_sent(server_fsm_t *fsm, const char *sid);
@@ -108,13 +110,23 @@ extern "C" {
     
     /**
      * A new message is wanted from the client
-     * @param[in,out] fsm is the object that must be initialized
-     * @param[in] sid, session id for debugging purposes only
+     * @param[in,out] fsm is the Finite State Machine object
+     * @param[in] sid session id for debugging purposes only
      * @return a reason code
      */     
     int server_fsm_want_message(server_fsm_t *fsm, const char *sid);
     
 
+
+    /**
+     * The client must be migrated to another thread
+     * @param[in,out] fsm is the object that must be initialized
+     * @param[in] sid session id for debugging purposes only
+     * @return a reason code
+     */     
+    int server_fsm_switch_thread(server_fsm_t *fsm, const char *sid);
+
+    
     
     /**
      * Retrieve the current state of the Finite State Machine in a human
@@ -159,6 +171,18 @@ extern "C" {
         return FSM_HAVE_MESSAGE_AND_WANT == fsm->state;
     }
     
+
+
+    /**
+     * Check if the session is migrating / has to migrate to a different
+     * thread
+     * @param[in] fsm is the object that must be inspected
+     * @return a boolean value
+     */     
+    static inline int server_fsm_is_client_migrating(const server_fsm_t *fsm) {
+        return FSM_MUST_SWITCH_THREAD == fsm->state;
+    }
+
     
     
 #ifdef __cplusplus

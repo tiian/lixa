@@ -1,5 +1,23 @@
-Rename state in branch_state and remove ControlOnly state that's generic and
-not related to branching
+XTA debug... :(   
+4: XTA/4.0/1.0 Async branch and commit             FAILED (xta_4.at:102)
+server_xa.c:1119 introduced a new bug in lixad:
+2018-02-17 18:09:31.078937 [29824/47267582998272] server_fsm_send_message_and_wa
+it
+2018-02-17 18:09:31.078938 [29824/47267582998272] server_fsm_send_message_and_wa
+it: sessid='1b53bc', old state=4 ('MESSAGE_ARRIVED')
+2018-02-17 18:09:31.078939 [29824/47267582998272] server_fsm_send_message_and_wa
+it: sessid='1b53bc', new state=2 ('HAVE_MESSAGE_AND_WANT')
+2018-02-17 18:09:31.078940 [29824/47267582998272] server_fsm_send_message_and_wa
+it/excp=1/ret_cod=0/errno=0
+2018-02-17 18:09:31.078941 [29824/47267582998272] server_fsm_send_message_and_wa
+it
+2018-02-17 18:09:31.078941 [29824/47267582998272] server_fsm_send_message_and_wa
+it: sessid='', old state=5169 ('INVALID_STATE')
+2018-02-17 18:09:31.078942 [29824/47267582998272] server_fsm_send_message_and_wa
+it: sessid='', this state transition is not allowed
+2018-02-17 18:09:31.078943 [29824/47267582998272] server_fsm_send_message_and_wa
+it/excp=0/ret_cod=-31/errno=0
+
 
 Go on with tests for CentOS 7
 Test again with only 1 or 2 resource managers: with MySQL and PostgreSQL there

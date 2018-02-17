@@ -235,6 +235,53 @@ int server_fsm_want_message(server_fsm_t *fsm, const char *sid)
 
 
 
+int server_fsm_switch_thread(server_fsm_t *fsm, const char *sid)
+{
+    enum Exception { INVALID_STATE_TRANSITION
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_fsm_switch_thread\n"));
+    TRY {
+        LIXA_TRACE(("server_fsm_switch_thread: sessid='%s', "
+                    "old state=%d ('%s')\n", STRORNULL(sid),
+                    fsm->state, server_fsm_get_state_as_str(fsm)));
+        
+        switch (fsm->state) {
+            case FSM_FIRST_MESSAGE_ARRIVED:
+            case FSM_MESSAGE_ARRIVED:
+                fsm->state = FSM_MUST_SWITCH_THREAD;
+                break;
+            default:
+                LIXA_TRACE(("server_fsm_switch_thread: sessid='%s', "
+                            "this state transition is not allowed\n",
+                            STRORNULL(sid)));
+                THROW(INVALID_STATE_TRANSITION);
+        } /* switch (fsm->state) */
+        LIXA_TRACE(("server_fsm_switch_thread: sessid='%s', "
+                    "new state=%d ('%s')\n", STRORNULL(sid),
+                    fsm->state, server_fsm_get_state_as_str(fsm)));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STATE_TRANSITION:
+                ret_cod = LIXA_RC_INVALID_STATE_TRANSITION;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_fsm_switch_thread/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 const char *server_fsm_get_state_as_str(const server_fsm_t *fsm)
 {
     switch (fsm->state) {
@@ -248,6 +295,8 @@ const char *server_fsm_get_state_as_str(const server_fsm_t *fsm)
             return "WANT_MESSAGE";
         case FSM_MESSAGE_ARRIVED:
             return "MESSAGE_ARRIVED";
+        case FSM_MUST_SWITCH_THREAD:
+            return "MUST_SWITCH_THREAD";
         default:
             break;
     } /* switch (fsm->state) */
