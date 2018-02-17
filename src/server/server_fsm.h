@@ -57,7 +57,10 @@ typedef struct server_fsm_s {
         /** A message (not the first) from the client has been arrived */
         FSM_MESSAGE_ARRIVED,
         /** The session must be switched (migrated) to a different thread */
-        FSM_MUST_SWITCH_THREAD
+        FSM_MUST_SWITCH_THREAD,
+        /** The session has to sleep and wants a wake-up message from another
+            client */
+        FSM_WANT_WAKE_UP
     } state;
 } server_fsm_t;
 
@@ -126,7 +129,27 @@ extern "C" {
      */     
     int server_fsm_switch_thread(server_fsm_t *fsm, const char *sid);
 
+
+
+    /**
+     * A wake-up message is wanted from the client
+     * @param[in,out] fsm is the Finite State Machine object
+     * @param[in] sid session id for debugging purposes only
+     * @return a reason code
+     */     
+    int server_fsm_want_wake_up(server_fsm_t *fsm, const char *sid);
     
+
+
+    /**
+     * A wake-up message has been arrived and the FSM must be updated
+     * @param[in,out] fsm is the Finite State Machine object
+     * @param[in] sid session id for debugging purposes only
+     * @return a reason code
+     */     
+    int server_fsm_wake_up_arrived(server_fsm_t *fsm, const char *sid);
+    
+
     
     /**
      * Retrieve the current state of the Finite State Machine in a human

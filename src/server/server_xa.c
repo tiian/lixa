@@ -1012,11 +1012,11 @@ int server_xa_prepare_8(struct thread_status_s *ts,
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
                      , BRANCH_LIST
+                     , FSM_WANT_WAKE_UP
                      , PREPARE_BRANCHES
                      , WOULD_BLOCK
                      , PREPARE_DELAYED
-                     , FSM_SEND_MESSAGE_AND_WAIT1
-                     , FSM_SEND_MESSAGE_AND_WAIT2
+                     , FSM_SEND_MESSAGE_AND_WAIT
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     uint32_t *branch_array = NULL;
@@ -1094,8 +1094,14 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                 case LIXA_RC_OPERATION_POSTPONED:
                     if (lmi->body.prepare_8.conthr.non_block)
                         cs->state = CLIENT_STATUS_WOULD_BLOCK;
-                    else
+                    else {
                         cs->state = CLIENT_STATUS_OPERATION_POSTPONED;
+                        if (LIXA_RC_OK != (
+                                ret_cod = server_fsm_want_wake_up(
+                                    &cs->fsm, lixa_session_get_sid(
+                                        &cs->session))))
+                            THROW(FSM_WANT_WAKE_UP);
+                    }
                     break;
                 default:
                     THROW(PREPARE_BRANCHES);
@@ -1113,25 +1119,11 @@ int server_xa_prepare_8(struct thread_status_s *ts,
             /* the status file must be synchronized */
             status_sync_ask_sync(&ts->status_sync);
             /* update the Finite State Machine */
-            if (0 < branch_array_size) {
-                /* for all the clients of the branch */
-                for (i=0; i<branch_array_size; ++i) {
-                    if (LIXA_RC_OK != (
-                            ret_cod = server_fsm_send_message_and_wait(
-                                &ts->client_array[branch_array[i]].fsm,
-                                lixa_session_get_sid(
-                                    &ts->client_array[
-                                        branch_array[i]].session))))
-                        THROW(FSM_SEND_MESSAGE_AND_WAIT1);
-                } /* for (i=0; i<branch_array_size; ++i) */
-            } else {
-                /* for the current client */
-                if (LIXA_RC_OK != (ret_cod = server_fsm_send_message_and_wait(
-                                       &cs->fsm, lixa_session_get_sid(
-                                           &cs->session))))
-                    THROW(FSM_SEND_MESSAGE_AND_WAIT2);
-            }
-        } /* if (LIXA_RC_OK == ret_cod || */
+            if (LIXA_RC_OK != (ret_cod = server_fsm_send_message_and_wait(
+                                   &cs->fsm, lixa_session_get_sid(
+                                       &cs->session))))
+                THROW(FSM_SEND_MESSAGE_AND_WAIT);
+        } /* if (CLIENT_STATUS_OPERATION_POSTPONED != cs->state) */
 
         THROW(NONE);
     } CATCH {
@@ -1143,7 +1135,6 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
                 break;
             case BRANCH_LIST:
-                break;
             case PREPARE_BRANCHES:
                 break;
             case WOULD_BLOCK:
@@ -1152,8 +1143,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
             case PREPARE_DELAYED:
                 ret_cod = LIXA_RC_OPERATION_POSTPONED;
                 break;
-            case FSM_SEND_MESSAGE_AND_WAIT1:
-            case FSM_SEND_MESSAGE_AND_WAIT2:
+            case FSM_SEND_MESSAGE_AND_WAIT:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
