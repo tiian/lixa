@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
+
 
 
 #ifdef HAVE_UNISTD_H
@@ -67,7 +68,8 @@ int lixa_xa_close(client_config_coll_t *ccc, client_status_t *cs, int *txrc)
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     char *output_buffer = NULL;
 
-    LIXA_TRACE(("lixa_xa_close\n"));
+    LIXA_TRACE(("lixa_xa_close: sessid='%s'\n",
+                lixa_session_get_sid(&cs->session)));
     TRY {
         struct lixa_msg_s msg;
         int fd;
@@ -146,8 +148,7 @@ int lixa_xa_close(client_config_coll_t *ccc, client_status_t *cs, int *txrc)
         g_array_free(msg.body.close_8.rsrmgrs, TRUE);
         memset(&msg, 0, sizeof(msg));
 
-        LIXA_TRACE(("lixa_xa_close: sending "
-                    SIZE_T_FORMAT
+        LIXA_TRACE(("lixa_xa_close: sending " SIZE_T_FORMAT
                     " bytes to the server for step 8\n", buffer_size));
         if (LIXA_RC_OK != (ret_cod = lixa_msg_send(
                                fd, output_buffer, buffer_size))) {
@@ -218,7 +219,8 @@ int lixa_xa_commit(client_config_coll_t *ccc, client_status_t *cs,
     *txrc = TX_FAIL;
     msg.body.commit_8.xa_commit_execs = NULL;
 
-    LIXA_TRACE(("lixa_xa_commit\n"));
+    LIXA_TRACE(("lixa_xa_commit: sessid='%s'\n",
+                lixa_session_get_sid(&cs->session)));
     TRY {
         size_t buffer_size = 0;
         int fd;
@@ -492,7 +494,8 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
     struct lixa_msg_s msg;
     msg.body.end_8.xa_end_execs = NULL;
 
-    LIXA_TRACE(("lixa_xa_end\n"));
+    LIXA_TRACE(("lixa_xa_end: sessid='%s'\n",
+                lixa_session_get_sid(&cs->session)));
     TRY {
         size_t buffer_size = 0;
         int fd;
@@ -778,7 +781,8 @@ int lixa_xa_forget(client_config_coll_t *ccc, client_status_t *cs,
     char *output_buffer = NULL;
 
     msg.body.forget_8.xa_forget_execs = NULL;
-    LIXA_TRACE(("lixa_xa_forget\n"));
+    LIXA_TRACE(("lixa_xa_forget: sessid='%s'\n",
+                lixa_session_get_sid(&cs->session)));
     TRY {
         size_t buffer_size = 0;
         int fd;
@@ -952,7 +956,8 @@ int lixa_xa_forget_multi(client_status_t *cs, GArray *xida, int finished)
     char *output_buffer = NULL;
 
     msg.body.forget_8.xa_forget_execs = NULL;
-    LIXA_TRACE(("lixa_xa_forget_multi\n"));
+    LIXA_TRACE(("lixa_xa_forget_multi: sessid='%s'\n",
+                lixa_session_get_sid(&cs->session)));
     TRY {
         size_t buffer_size = 0;
         int fd;
@@ -1158,7 +1163,8 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
     msg.body.open_24.xa_open_execs = NULL;
     char *output_buffer = NULL;
     
-    LIXA_TRACE(("lixa_xa_open\n"));
+    LIXA_TRACE(("lixa_xa_open: sessid='%s'\n",
+                lixa_session_get_sid(&cs->session)));
     TRY {
         struct lixa_msg_body_open_8_client_s client;
         int fd;
@@ -1460,7 +1466,8 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
     char *output_buffer = NULL;
 
     msg.body.prepare_8.xa_prepare_execs = NULL;
-    LIXA_TRACE(("lixa_xa_prepare\n"));
+    LIXA_TRACE(("lixa_xa_prepare: sessid='%s'\n",
+                lixa_session_get_sid(&cs->session)));
     TRY {
         size_t buffer_size = 0;
         int fd, break_prepare;
@@ -1685,7 +1692,8 @@ int lixa_xa_prepare_wait_branches(client_config_coll_t *ccc,
     struct lixa_msg_s msg;
     char *output_buffer = NULL;
     
-    LIXA_TRACE(("lixa_xa_prepare_wait_branches\n"));
+    LIXA_TRACE(("lixa_xa_prepare_wait_branches: sessid='%s'\n",
+                lixa_session_get_sid(&cs->session)));
     TRY {
         int fd;
         char input_buffer[LIXA_MSG_XML_BUFFER_SIZE];
@@ -1782,7 +1790,8 @@ int lixa_xa_prepare_multi(client_status_t *cs,
     msg.body.prepare_8.xa_prepare_execs = NULL;
     char *output_buffer = NULL;
     
-    LIXA_TRACE(("lixa_xa_prepare_multi\n"));
+    LIXA_TRACE(("lixa_xa_prepare_multi: sessid='%s'\n",
+                lixa_session_get_sid(&cs->session)));
     TRY {
         size_t buffer_size = 0;
         int fd, break_prepare;
@@ -2030,7 +2039,8 @@ int lixa_xa_rollback(client_config_coll_t *ccc, client_status_t *cs,
     msg.body.rollback_8.xa_rollback_execs = NULL;
     char *output_buffer = NULL;
 
-    LIXA_TRACE(("lixa_xa_rollback\n"));
+    LIXA_TRACE(("lixa_xa_rollback: sessid='%s'\n",
+                lixa_session_get_sid(&cs->session)));
     TRY {
         size_t buffer_size = 0;
         int fd;
@@ -2350,7 +2360,8 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
     struct lixa_msg_s msg;
     char *output_buffer = NULL;
 
-    LIXA_TRACE(("lixa_xa_start\n"));
+    LIXA_TRACE(("lixa_xa_start: sessid='%s'\n",
+                lixa_session_get_sid(&cs->session)));
     TRY {
         size_t buffer_size = 0;
         guint i;

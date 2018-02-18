@@ -1589,16 +1589,15 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
 int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
                                size_t list_size, const size_t *list, int rc)
 {
-    enum Exception { /* @@@ remove me MALLOC_ERROR, */
-        FSM_WAKE_UP_ARRIVED,
-        REPLY_OPEN_ERROR,
-        REPLY_START_ERROR,
-        REPLY_END_ERROR,
-        REPLY_PREPARE_ERROR,
-        REPLY_QRCVR_ERROR,
-        REPLY_SCAN_ERROR,
-        VERB_NOT_FOUND,
-        NONE } excp;
+    enum Exception { FSM_WAKE_UP_ARRIVED,
+                     REPLY_OPEN_ERROR,
+                     REPLY_START_ERROR,
+                     REPLY_END_ERROR,
+                     REPLY_PREPARE_ERROR,
+                     REPLY_QRCVR_ERROR,
+                     REPLY_SCAN_ERROR,
+                     VERB_NOT_FOUND,
+                     NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_manager_outmsg_prep\n"));
@@ -1627,15 +1626,6 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
             }
             */
             
-            /* create an output buffer for every client */
-            /* @@@ remove me 2018-02-17
-            if (NULL == (ts->client_array[j].output_buffer = malloc(
-                             LIXA_MSG_XML_BUFFER_SIZE))) {
-                LIXA_TRACE(("server_manager_outmsg_prep: error while "
-                            "allocating the buffer to reply to client\n"));
-                THROW(MALLOC_ERROR);
-            }
-            */
             if (j != slot_id) {
                 /* this is a message for client different from the current
                    one: publish a multicast message to many */
@@ -1650,11 +1640,20 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
                 tmp_msg.header.pvs.step += LIXA_MSG_STEP_INCR;
                 out_msg = &tmp_msg;
                 /* update the FSM, this is a wake-up message! */
-                if (LIXA_RC_OK != (ret_cod = server_fsm_wake_up_arrived(
-                                       &ts->client_array[j].fsm,
-                                       lixa_session_get_sid(
-                                           &ts->client_array[j].session))))
-                    THROW(FSM_WAKE_UP_ARRIVED);
+                ret_cod = server_fsm_wake_up_arrived(
+                    &ts->client_array[j].fsm, lixa_session_get_sid(
+                        &ts->client_array[j].session));
+                switch (ret_cod) {
+                    case LIXA_RC_OK:
+                        break;
+                    case LIXA_RC_INVALID_STATE_TRANSITION:
+                        LIXA_TRACE(("server_manager_outmsg_prep: the client "
+                                    "session can accept a wake-up, ignoring "
+                                    "it\n"));
+                        break;
+                    default:
+                        THROW(FSM_WAKE_UP_ARRIVED);
+                } /* ret_cod */
             } else {
                 /* this is a message for the current client */
                 out_msg = &ts->client_array[j].output_message;
@@ -1717,11 +1716,6 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            /* @@@ remove me
-            case MALLOC_ERROR:
-                ret_cod = LIXA_RC_MALLOC_ERROR;
-                break;
-            */
             case REPLY_OPEN_ERROR:
             case REPLY_START_ERROR:
             case REPLY_END_ERROR:

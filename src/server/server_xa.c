@@ -1177,6 +1177,7 @@ int server_xa_prepare_24(struct thread_status_s *ts,
                      , BRANCH_LIST
                      , PROTOCOL_ERROR
                      , PREPARE_BRANCHES
+                     , FSM_WANT_WAKE_UP
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     uint32_t *branch_array = NULL;
@@ -1234,6 +1235,12 @@ int server_xa_prepare_24(struct thread_status_s *ts,
             /* prepare next protocol step */
             cs->last_verb_step.verb = lmo->header.pvs.verb;
             cs->last_verb_step.step = lmo->header.pvs.step;
+        } else {
+            /* going to sleep and wait for a wake-up */
+            if (LIXA_RC_OK != (ret_cod = server_fsm_want_wake_up(
+                                   &cs->fsm, lixa_session_get_sid(
+                                       &cs->session))))
+                THROW(FSM_WANT_WAKE_UP);
         } /* if (LIXA_RC_OK == ret_cod || */
 
         THROW(NONE);
@@ -1248,6 +1255,7 @@ int server_xa_prepare_24(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_PROTOCOL_ERROR;
                 break;
             case PREPARE_BRANCHES:
+            case FSM_WANT_WAKE_UP:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

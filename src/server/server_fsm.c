@@ -342,7 +342,7 @@ int server_fsm_wake_up_arrived(server_fsm_t *fsm, const char *sid)
         
         switch (fsm->state) {
             case FSM_WANT_WAKE_UP:
-                fsm->state = FSM_WANT_WAKE_UP;
+                fsm->state = FSM_HAVE_MESSAGE_AND_WANT;
                 break;
             default:
                 LIXA_TRACE(("server_fsm_wake_up_arrived: sessid='%s', "
