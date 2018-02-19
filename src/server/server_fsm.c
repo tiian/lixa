@@ -374,6 +374,98 @@ int server_fsm_wake_up_arrived(server_fsm_t *fsm, const char *sid)
 
 
 
+int server_fsm_would_block(server_fsm_t *fsm, const char *sid)
+{
+    enum Exception { INVALID_STATE_TRANSITION
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_fsm_would_block\n"));
+    TRY {
+        LIXA_TRACE(("server_fsm_would_block: sessid='%s', "
+                    "old state=%d ('%s')\n", STRORNULL(sid),
+                    fsm->state, server_fsm_get_state_as_str(fsm)));
+        
+        switch (fsm->state) {
+            case FSM_MESSAGE_ARRIVED:
+                fsm->state = FSM_WOULD_BLOCK;
+                break;
+            default:
+                LIXA_TRACE(("server_fsm_would_block: sessid='%s', "
+                            "this state transition is not allowed\n",
+                            STRORNULL(sid)));
+                THROW(INVALID_STATE_TRANSITION);
+        } /* switch (fsm->state) */
+        LIXA_TRACE(("server_fsm_would_block: sessid='%s', "
+                    "new state=%d ('%s')\n", STRORNULL(sid),
+                    fsm->state, server_fsm_get_state_as_str(fsm)));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STATE_TRANSITION:
+                ret_cod = LIXA_RC_INVALID_STATE_TRANSITION;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_fsm_would_block/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_fsm_unblock(server_fsm_t *fsm, const char *sid)
+{
+    enum Exception { INVALID_STATE_TRANSITION
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_fsm_unblock\n"));
+    TRY {
+        LIXA_TRACE(("server_fsm_unblock: sessid='%s', "
+                    "old state=%d ('%s')\n", STRORNULL(sid),
+                    fsm->state, server_fsm_get_state_as_str(fsm)));
+        
+        switch (fsm->state) {
+            case FSM_WOULD_BLOCK:
+                fsm->state = FSM_HAVE_MESSAGE_AND_WANT;
+                break;
+            default:
+                LIXA_TRACE(("server_fsm_unblock: sessid='%s', "
+                            "this state transition is not allowed\n",
+                            STRORNULL(sid)));
+                THROW(INVALID_STATE_TRANSITION);
+        } /* switch (fsm->state) */
+        LIXA_TRACE(("server_fsm_unblock: sessid='%s', "
+                    "new state=%d ('%s')\n", STRORNULL(sid),
+                    fsm->state, server_fsm_get_state_as_str(fsm)));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STATE_TRANSITION:
+                ret_cod = LIXA_RC_INVALID_STATE_TRANSITION;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_fsm_unblock/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 const char *server_fsm_get_state_as_str(const server_fsm_t *fsm)
 {
     switch (fsm->state) {
@@ -391,6 +483,8 @@ const char *server_fsm_get_state_as_str(const server_fsm_t *fsm)
             return "MUST_SWITCH_THREAD";
         case FSM_WANT_WAKE_UP:
             return "WANT_WAKE_UP";
+        case FSM_WOULD_BLOCK:
+            return "WOULD_BLOCK";
         default:
             break;
     } /* switch (fsm->state) */

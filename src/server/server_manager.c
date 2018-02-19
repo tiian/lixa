@@ -383,8 +383,8 @@ void *server_manager_thread(void *void_ts)
                     ts->poll_array[i].revents & POLLOUT) {
                     found_fd++;
                     /* skip if operation postponed condition is present */
-                    if (CLIENT_STATUS_OPERATION_POSTPONED !=
-                        ts->client_array[i].state) {
+                    if (!server_fsm_is_waiting_wake_up(
+                            &ts->client_array[i].fsm)) {
                         if (LIXA_RC_OK != (
                                 ret_cod = server_manager_pollout(ts, i)))
                             THROW(POLLOUT_ERROR);
@@ -392,7 +392,7 @@ void *server_manager_thread(void *void_ts)
                         LIXA_TRACE(("server_manager_thread: operation "
                                     "postponed, no reply to the client "
                                     "for slot=" NFDS_T_FORMAT "...\n", i));
-                    } /* if (!ts->client_array[i].operation_postponed) */
+                    } /* if (!server_fsm_is_waiting_wake_up( */
                 }
                 if (found_fd == ready_fd)
                     break;
@@ -1277,6 +1277,7 @@ int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
 {
     enum Exception { FSM_MESSAGE_ARRIVED
                      , THREAD_SWITCH
+                     , FSM_UNBLOCK
                      , BRANCH_LIST
                      , OUTMSG_PREP_ERROR
                      , MAINTENANCE_MODE
@@ -1306,19 +1307,26 @@ int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
             THROW(THREAD_SWITCH);
 
         /* don't prepare the message in the event of operation postponed */
-        if (CLIENT_STATUS_OPERATION_POSTPONED !=
-            ts->client_array[slot_id].state) {
+        if (!server_fsm_is_waiting_wake_up(&ts->client_array[slot_id].fsm)) {
             /* fix rc for some conditions */
-            switch (ts->client_array[slot_id].state) {
-                case CLIENT_STATUS_WOULD_BLOCK:
-                    rc = LIXA_RC_WOULD_BLOCK;
-                    break;
-                case CLIENT_STATUS_CHAIN_JOIN_KO:
-                    rc = LIXA_RC_OTHER_BRANCH_ERROR;
-                    break;
-                default:
-                    break;
-            } /* switch (ts->client_array[slot_id].state) */
+            if (server_fsm_is_waiting_unblock(
+                    &ts->client_array[slot_id].fsm)) {
+                rc = LIXA_RC_WOULD_BLOCK;
+                if (LIXA_RC_OK != (
+                        ret_cod = server_fsm_unblock(
+                            &ts->client_array[slot_id].fsm,
+                            lixa_session_get_sid(
+                                &ts->client_array[slot_id].session))))
+                    THROW(FSM_UNBLOCK);
+            } else {
+                switch (ts->client_array[slot_id].state) {
+                    case CLIENT_STATUS_CHAIN_JOIN_KO:
+                        rc = LIXA_RC_OTHER_BRANCH_ERROR;
+                        break;
+                    default:
+                        break;
+                } /* switch (ts->client_array[slot_id].state) */
+            }
             /* retrieve the list of all the clients that must be notified
                by the same message (typically only 1, but many in the event
                of multiple branch transactions) */
@@ -1356,6 +1364,8 @@ int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
                 break;
             case THREAD_SWITCH:
                 ret_cod = LIXA_RC_THREAD_SWITCH;
+                break;
+            case FSM_UNBLOCK:
                 break;
             case MAINTENANCE_MODE:
                 ret_cod = rc;

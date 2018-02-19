@@ -1012,6 +1012,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
                      , BRANCH_LIST
+                     , FSM_WOULD_BLOCK
                      , FSM_WANT_WAKE_UP
                      , PREPARE_BRANCHES
                      , WOULD_BLOCK
@@ -1092,10 +1093,13 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                     cs->state = CLIENT_STATUS_CHAIN_JOIN_KO;
                     break;
                 case LIXA_RC_OPERATION_POSTPONED:
-                    if (lmi->body.prepare_8.conthr.non_block)
-                        cs->state = CLIENT_STATUS_WOULD_BLOCK;
-                    else {
-                        cs->state = CLIENT_STATUS_OPERATION_POSTPONED;
+                    if (lmi->body.prepare_8.conthr.non_block) {
+                        if (LIXA_RC_OK != (
+                                ret_cod = server_fsm_would_block(
+                                    &cs->fsm, lixa_session_get_sid(
+                                        &cs->session))))
+                            THROW(FSM_WOULD_BLOCK);
+                    } else {
                         if (LIXA_RC_OK != (
                                 ret_cod = server_fsm_want_wake_up(
                                     &cs->fsm, lixa_session_get_sid(
@@ -1110,7 +1114,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
             ret_cod = LIXA_RC_OK;
             
         /* send an answer message only if OK or WOULD_BLOCK */
-        if (CLIENT_STATUS_OPERATION_POSTPONED != cs->state) {
+        if (!server_fsm_is_waiting_wake_up(&cs->fsm)) {
             /* prepare output message */
             lmo->header.pvs.verb = lmi->header.pvs.verb;
             /* prepare next protocol step */
@@ -1123,7 +1127,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                                    &cs->fsm, lixa_session_get_sid(
                                        &cs->session))))
                 THROW(FSM_SEND_MESSAGE_AND_WAIT);
-        } /* if (CLIENT_STATUS_OPERATION_POSTPONED != cs->state) */
+        } /* if (!server_fsm_is_waiting_wake_up(&cs->fsm)) */
 
         THROW(NONE);
     } CATCH {
@@ -1135,6 +1139,8 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
                 break;
             case BRANCH_LIST:
+            case FSM_WOULD_BLOCK:
+            case FSM_WANT_WAKE_UP:
             case PREPARE_BRANCHES:
                 break;
             case WOULD_BLOCK:
@@ -1176,8 +1182,8 @@ int server_xa_prepare_24(struct thread_status_s *ts,
     enum Exception { INVALID_BLOCK_ID
                      , BRANCH_LIST
                      , PROTOCOL_ERROR
-                     , PREPARE_BRANCHES
                      , FSM_WANT_WAKE_UP
+                     , PREPARE_BRANCHES
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     uint32_t *branch_array = NULL;
@@ -1220,7 +1226,11 @@ int server_xa_prepare_24(struct thread_status_s *ts,
                     cs->state = CLIENT_STATUS_CHAIN_JOIN_KO;
                     break;
                 case LIXA_RC_OPERATION_POSTPONED:
-                    cs->state = CLIENT_STATUS_OPERATION_POSTPONED;
+                    /* going to sleep and wait for a wake-up */
+                    if (LIXA_RC_OK != (ret_cod = server_fsm_want_wake_up(
+                                           &cs->fsm, lixa_session_get_sid(
+                                               &cs->session))))
+                        THROW(FSM_WANT_WAKE_UP);
                     break;
                 default:
                     THROW(PREPARE_BRANCHES);
@@ -1229,19 +1239,13 @@ int server_xa_prepare_24(struct thread_status_s *ts,
             ret_cod = LIXA_RC_OK;
             
         /* send an answer message only if not postponed */
-        if (CLIENT_STATUS_OPERATION_POSTPONED != cs->state) {
+        if (!server_fsm_is_waiting_wake_up(&cs->fsm)) {
             /* prepare output message */
             lmo->header.pvs.verb = lmi->header.pvs.verb;
             /* prepare next protocol step */
             cs->last_verb_step.verb = lmo->header.pvs.verb;
             cs->last_verb_step.step = lmo->header.pvs.step;
-        } else {
-            /* going to sleep and wait for a wake-up */
-            if (LIXA_RC_OK != (ret_cod = server_fsm_want_wake_up(
-                                   &cs->fsm, lixa_session_get_sid(
-                                       &cs->session))))
-                THROW(FSM_WANT_WAKE_UP);
-        } /* if (LIXA_RC_OK == ret_cod || */
+        } /* if (!server_fsm_is_waiting_wake_up(&cs->fsm)) */
 
         THROW(NONE);
     } CATCH {
@@ -1254,8 +1258,8 @@ int server_xa_prepare_24(struct thread_status_s *ts,
             case PROTOCOL_ERROR:
                 ret_cod = LIXA_RC_PROTOCOL_ERROR;
                 break;
-            case PREPARE_BRANCHES:
             case FSM_WANT_WAKE_UP:
+            case PREPARE_BRANCHES:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

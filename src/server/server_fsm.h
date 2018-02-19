@@ -60,7 +60,10 @@ typedef struct server_fsm_s {
         FSM_MUST_SWITCH_THREAD,
         /** The session has to sleep and wants a wake-up message from another
             client */
-        FSM_WANT_WAKE_UP
+        FSM_WANT_WAKE_UP,
+        /** The session would block, but the client specified non blocking
+            behaviour */
+        FSM_WOULD_BLOCK
     } state;
 } server_fsm_t;
 
@@ -152,6 +155,27 @@ extern "C" {
 
     
     /**
+     * The session would block, but it can't because the client specified
+     * non blocking behaviour
+     * @param[in,out] fsm is the Finite State Machine object
+     * @param[in] sid session id for debugging purposes only
+     * @return a reason code
+     */     
+    int server_fsm_would_block(server_fsm_t *fsm, const char *sid);
+    
+
+
+    /**
+     * Unblock a session that was previously moved in "would lock" state
+     * @param[in,out] fsm is the Finite State Machine object
+     * @param[in] sid session id for debugging purposes only
+     * @return a reason code
+     */     
+    int server_fsm_unblock(server_fsm_t *fsm, const char *sid);
+    
+
+
+    /**
      * Retrieve the current state of the Finite State Machine in a human
      * readable format (C string)
      * @param[in] fsm is the object that must be inspected
@@ -204,6 +228,29 @@ extern "C" {
      */     
     static inline int server_fsm_is_client_migrating(const server_fsm_t *fsm) {
         return FSM_MUST_SWITCH_THREAD == fsm->state;
+    }
+
+
+
+    /**
+     * Check if the session temporary sleeping and waiting for wake-up from
+     * another one
+     * @param[in] fsm is the object that must be inspected
+     * @return a boolean value
+     */     
+    static inline int server_fsm_is_waiting_wake_up(const server_fsm_t *fsm) {
+        return FSM_WANT_WAKE_UP == fsm->state;
+    }
+
+
+
+    /**
+     * Check if the session is waiting an unblock action 
+     * @param[in] fsm is the object that must be inspected
+     * @return a boolean value
+     */     
+    static inline int server_fsm_is_waiting_unblock(const server_fsm_t *fsm) {
+        return FSM_WOULD_BLOCK == fsm->state;
     }
 
     

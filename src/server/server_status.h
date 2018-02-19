@@ -199,8 +199,6 @@ struct thread_status_switch_s
  * Logical session state
  */
 enum server_client_status_e { CLIENT_STATUS_NULL
-                              , CLIENT_STATUS_OPERATION_POSTPONED
-                              , CLIENT_STATUS_WOULD_BLOCK
                               , CLIENT_STATUS_CHAIN_JOIN_OK
                               , CLIENT_STATUS_CHAIN_JOIN_KO };
 
