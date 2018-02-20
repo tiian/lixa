@@ -1276,6 +1276,6 @@ void server_client_status_init(struct server_client_status_s *scs)
     scs->output_buffer_size = 0;
     scs->last_verb_step.verb = 0;
     scs->last_verb_step.step = 0;
-    scs->state = CLIENT_STATUS_NULL;
+    scs->branch_join = CLIENT_BRANCH_JOIN_NULL;
     thread_status_switch_init(&scs->switch_thread);
 }

@@ -125,9 +125,10 @@ extern "C" {
      * @param[in] xid transaction identifier object
      * @return a reason code
      */
+    /*
     int xta_transaction_manager_branch(xta_transaction_manager_t *this,
                                        const xta_xid_t *xid);
-
+    */
 
     
 #ifdef __cplusplus

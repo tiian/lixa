@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -255,7 +255,6 @@ int xta_native_xa_resource_init(
             /* copy it locally to the resource object */
             this->xa_resource.act_rsrmgr_config = *act_rsrmgr;
         }
-        /* nothing else to initialize here... @@@ */
         
         THROW(NONE);
     } CATCH {

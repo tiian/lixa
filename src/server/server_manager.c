@@ -316,14 +316,14 @@ void *server_manager_thread(void *void_ts)
                 LIXA_TRACE(("server_manager_thread: slot="
                             NFDS_T_FORMAT
                             ", fd=%d, POLLIN=%d, POLLOUT=%d, POLLERR=%d, "
-                            "POLLHUP=%d, POLLNVAL=%d, state=%d\n",
+                            "POLLHUP=%d, POLLNVAL=%d, branch_join=%d\n",
                             i, ts->poll_array[i].fd,
                             ts->poll_array[i].revents & POLLIN,
                             ts->poll_array[i].revents & POLLOUT,
                             ts->poll_array[i].revents & POLLERR,
                             ts->poll_array[i].revents & POLLHUP,
                             ts->poll_array[i].revents & POLLNVAL,
-                            i ? ts->client_array[i].state : 0));
+                            i ? ts->client_array[i].branch_join : 0));
                 if (LIXA_NULL_FD == ts->poll_array[i].fd) {
                     LIXA_TRACE(("server_manager_thread: this slot must "
                                 "be temporary skipped\n"));
@@ -1020,7 +1020,8 @@ int server_manager_switch_3(struct thread_status_s *ts,
         struct thread_status_switch_s *tss =
             &(ts->client_array[msg->body.sp.slot_id].switch_thread);
         /* clear switch info */
-        ts->client_array[msg->body.sp.slot_id].state = CLIENT_STATUS_NULL;
+        ts->client_array[msg->body.sp.slot_id].branch_join =
+            CLIENT_BRANCH_JOIN_NULL;
         tss->id = 0;
         tss->buffer_size = 0;
         if (NULL != tss->buffer) {
@@ -1318,15 +1319,9 @@ int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
                             lixa_session_get_sid(
                                 &ts->client_array[slot_id].session))))
                     THROW(FSM_UNBLOCK);
-            } else {
-                switch (ts->client_array[slot_id].state) {
-                    case CLIENT_STATUS_CHAIN_JOIN_KO:
-                        rc = LIXA_RC_OTHER_BRANCH_ERROR;
-                        break;
-                    default:
-                        break;
-                } /* switch (ts->client_array[slot_id].state) */
-            }
+            } else if (CLIENT_BRANCH_JOIN_KO ==
+                       ts->client_array[slot_id].branch_join)
+                rc = LIXA_RC_OTHER_BRANCH_ERROR;
             /* retrieve the list of all the clients that must be notified
                by the same message (typically only 1, but many in the event
                of multiple branch transactions) */
@@ -2009,17 +2004,17 @@ int server_manager_branch_list(const struct thread_status_s *ts,
         uint32_t branch_array_size = 0;
         nfds_t i;
         size_t k=0;
-        enum server_client_status_e state;
+        enum server_client_branch_join_e branch_join;
         
         /* retrieve the block_id of slot_id */
         block_id = ts->client_array[slot_id].pers_status_slot_id;
         /* state of the client associated to slot_id */
-        state = ts->client_array[slot_id].state;
+        branch_join = ts->client_array[slot_id].branch_join;
         /* check if block_id is part of a chained branch or if a single
            client must be notified */
         if (!server_xa_branch_is_chained(ts, block_id) ||
-            (CLIENT_STATUS_CHAIN_JOIN_OK != state &&
-             CLIENT_STATUS_CHAIN_JOIN_KO != state)) {
+            (CLIENT_BRANCH_JOIN_OK != branch_join &&
+             CLIENT_BRANCH_JOIN_KO != branch_join)) {
             /* allocate just one element for slot_id/block_id */
             *number = 1;
             if (NULL == (*items = malloc(*number * sizeof(size_t))))
@@ -2069,9 +2064,9 @@ int server_manager_branch_list(const struct thread_status_s *ts,
                         *number, k));
             THROW(INVALID_STATUS);
         } /* if (k != *number) */
-        /* fix the state for all the chained clients */
+        /* fix the branch_join flag for all the chained clients */
         for (k=0; k<*number; ++k)
-            ts->client_array[(*items)[k]].state = state;
+            ts->client_array[(*items)[k]].branch_join = branch_join;
         
         THROW(NONE);
     } CATCH {

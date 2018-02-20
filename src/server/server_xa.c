@@ -530,7 +530,7 @@ int server_xa_end_8(struct thread_status_s *ts,
 
         /* send KO to all the waiting branches */
         if (multiple_branches_rollback)
-            cs->state = CLIENT_STATUS_CHAIN_JOIN_KO;
+            cs->branch_join = CLIENT_BRANCH_JOIN_KO;
         /* prepare output message */
         lmo->header.pvs.verb = lmi->header.pvs.verb;
         /* prepare next protocol step */
@@ -1087,10 +1087,10 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                 ts, block_id, branch_array_size, branch_array);
             switch (ret_cod) {
                 case LIXA_RC_OK:
-                    cs->state = CLIENT_STATUS_CHAIN_JOIN_OK;
+                    cs->branch_join = CLIENT_BRANCH_JOIN_OK;
                     break;
                 case LIXA_RC_MULTIBRANCH_PREPARE_FAILED:
-                    cs->state = CLIENT_STATUS_CHAIN_JOIN_KO;
+                    cs->branch_join = CLIENT_BRANCH_JOIN_KO;
                     break;
                 case LIXA_RC_OPERATION_POSTPONED:
                     if (lmi->body.prepare_8.conthr.non_block) {
@@ -1220,10 +1220,10 @@ int server_xa_prepare_24(struct thread_status_s *ts,
                 ts, block_id, branch_array_size, branch_array);
             switch (ret_cod) {
                 case LIXA_RC_OK:
-                    cs->state = CLIENT_STATUS_CHAIN_JOIN_OK;
+                    cs->branch_join = CLIENT_BRANCH_JOIN_OK;
                     break;
                 case LIXA_RC_MULTIBRANCH_PREPARE_FAILED:
-                    cs->state = CLIENT_STATUS_CHAIN_JOIN_KO;
+                    cs->branch_join = CLIENT_BRANCH_JOIN_KO;
                     break;
                 case LIXA_RC_OPERATION_POSTPONED:
                     /* going to sleep and wait for a wake-up */

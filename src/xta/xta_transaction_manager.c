@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -210,7 +210,6 @@ int xta_transaction_manager_branch(
     
     LIXA_TRACE(("xta_transaction_manager_branch\n"));
     TRY {
-        /* @@@ implement me */
         
         THROW(NONE);
     } CATCH {
@@ -220,8 +219,8 @@ int xta_transaction_manager_branch(
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        }
+    }
     LIXA_TRACE(("xta_transaction_manager_branch/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

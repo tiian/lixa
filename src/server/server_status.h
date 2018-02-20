@@ -196,11 +196,16 @@ struct thread_status_switch_s
 
 
 /**
- * Logical session state
+ * Used to save the result of the branch join that's the result of the
+ * multiple transaction global prepare
  */
-enum server_client_status_e { CLIENT_STATUS_NULL
-                              , CLIENT_STATUS_CHAIN_JOIN_OK
-                              , CLIENT_STATUS_CHAIN_JOIN_KO };
+enum server_client_branch_join_e {
+    /** Null value, init value */
+    CLIENT_BRANCH_JOIN_NULL,
+    /** All the branches completed OK, join OK */
+    CLIENT_BRANCH_JOIN_OK,
+    /** Some branches completed with errors, join KO */
+    CLIENT_BRANCH_JOIN_KO };
 
 
 
@@ -242,9 +247,10 @@ struct server_client_status_s
      */
     struct lixa_msg_verb_step_s last_verb_step;
     /**
-     * Flag used for specific states that change the client/server flow
+     * Result of the branch join that's the result of the
+     * multiple transaction global prepare
      */
-    enum server_client_status_e   state;
+    enum server_client_branch_join_e   branch_join;
     /**
      * Info necessary to switch the current client to a different thread
      */

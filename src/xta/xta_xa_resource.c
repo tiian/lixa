@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -219,7 +219,6 @@ int xta_xa_resource_start(xta_xa_resource_t *this,
     
     LIXA_TRACE(("xta_xa_resource_start\n"));
     TRY {
-        /* @@@ implement me */
         
         THROW(NONE);
     } CATCH {
@@ -247,7 +246,6 @@ int xta_xa_resource_end(xta_xa_resource_t *this,
     
     LIXA_TRACE(("xta_xa_resource_end\n"));
     TRY {
-        /* @@@ implement me */
         
         THROW(NONE);
     } CATCH {
@@ -274,7 +272,6 @@ int xta_xa_resource_prepare(xta_xa_resource_t *this,
     
     LIXA_TRACE(("xta_xa_resource_prepare\n"));
     TRY {
-        /* @@@ implement me */
         
         THROW(NONE);
     } CATCH {
@@ -302,7 +299,6 @@ int xta_xa_resource_commit(xta_xa_resource_t *this,
     
     LIXA_TRACE(("xta_xa_resource_commit\n"));
     TRY {
-        /* @@@ implement me */
         
         THROW(NONE);
     } CATCH {
