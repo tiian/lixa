@@ -254,18 +254,18 @@ extern "C" {
     /**
      * Executes the logic related to "xa_prepare" on the server side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_prepare(struct thread_status_s *ts,
+                          size_t slot_id,
                           const struct lixa_msg_s *lmi,
                           struct lixa_msg_s *lmo,
-                          uint32_t block_id,
-                          struct server_client_status_s *cs);
+                          uint32_t block_id);
 
 
 
@@ -273,18 +273,18 @@ extern "C" {
      * Executes the logic related to the first step of "xa_prepare" on the
      * server side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_prepare_8(struct thread_status_s *ts,
+                            size_t slot_id,
                             const struct lixa_msg_s *lmi,
                             struct lixa_msg_s *lmo,
-                            uint32_t block_id,
-                            struct server_client_status_s *cs);
+                            uint32_t block_id);
 
 
     
@@ -293,18 +293,18 @@ extern "C" {
      * server side. It's used to suspend client activity until all branches
      * have prepared their own resource managers.
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_prepare_24(struct thread_status_s *ts,
+                             size_t slot_id,
                              const struct lixa_msg_s *lmi,
                              struct lixa_msg_s *lmo,
-                             uint32_t block_id,
-                             struct server_client_status_s *cs);
+                             uint32_t block_id);
 
 
     
@@ -347,16 +347,14 @@ extern "C" {
      * @param[in] lmi reference to the message received from the client
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
-     *                    client is calling the server
-     * @param[out] cs client status record
+     *            client is calling the server
      * @return a reason code
      */
     int server_xa_start(struct thread_status_s *ts,
                         size_t slot_id,
                         const struct lixa_msg_s *lmi,
                         struct lixa_msg_s *lmo,
-                        uint32_t block_id,
-                        struct server_client_status_s *cs);
+                        uint32_t block_id);
 
 
     
@@ -369,15 +367,13 @@ extern "C" {
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_start_8(struct thread_status_s *ts,
                           size_t slot_id,
                           const struct lixa_msg_s *lmi,
                           struct lixa_msg_s *lmo,
-                          uint32_t block_id,
-                          struct server_client_status_s *cs);
+                          uint32_t block_id);
 
 
     
@@ -388,13 +384,12 @@ extern "C" {
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_start_24(struct thread_status_s *ts,
+                           size_t slot_id,
                            const struct lixa_msg_s *lmi,
-                           uint32_t block_id,
-                           struct server_client_status_s *cs);
+                           uint32_t block_id);
 
     
 

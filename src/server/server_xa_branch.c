@@ -384,14 +384,27 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
                current branch */
             if (LIXA_MSG_VERB_PREPARE != verb_step->verb &&
                 block_id != branch_array[i]) {
-                LIXA_TRACE(("server_xa_branch_prepare: i=" UINT32_T_FORMAT ", "
-                            "branch_array[i]=" UINT32_T_FORMAT ", "
-                            "last_verb=%d, this branch has not "
-                            "yet prepared, skipping it\n",
-                            i, branch_array[i], verb_step->verb));
-                unknown++;
-                continue;
-            }
+                /* check if already in error state */
+                if (CLIENT_BRANCH_JOIN_KO ==
+                    ts->client_array[branch_array[i]].branch_join) {
+                    LIXA_TRACE(("server_xa_branch_prepare: i=" UINT32_T_FORMAT
+                                ", branch_array[i]=" UINT32_T_FORMAT ", "
+                                "last_verb=%d, this branch has already "
+                                "rised an error, forcing will_rollback\n",
+                                i, branch_array[i], verb_step->verb));
+                    state->will_rollback = TRUE;
+                    state->will_commit = FALSE;
+                    state->global_recovery = 1;
+                } else {
+                    LIXA_TRACE(("server_xa_branch_prepare: i=" UINT32_T_FORMAT
+                                ", branch_array[i]=" UINT32_T_FORMAT ", "
+                                "last_verb=%d, this branch has not "
+                                "yet prepared, skipping it\n",
+                                i, branch_array[i], verb_step->verb));
+                    unknown++;
+                    continue;
+                } /* if (CLIENT_BRANCH_JOIN_KO */
+            } /* if (LIXA_MSG_VERB_PREPARE != verb_step->verb */
             LIXA_TRACE(("server_xa_branch_prepare: i=" UINT32_T_FORMAT ", "
                         "branch_array[i]=" UINT32_T_FORMAT ", last_verb=%d, "
                         "will_commit=%d, will_rollback=%d, "

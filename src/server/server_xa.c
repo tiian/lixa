@@ -952,10 +952,10 @@ int server_xa_open_24(struct thread_status_s *ts,
 
 
 int server_xa_prepare(struct thread_status_s *ts,
+                      size_t slot_id,
                       const struct lixa_msg_s *lmi,
                       struct lixa_msg_s *lmo,
-                      uint32_t block_id,
-                      struct server_client_status_s *cs)
+                      uint32_t block_id)
 {
     enum Exception { SERVER_XA_PREPARE_8_ERROR
                      , SERVER_XA_PREPARE_24_ERROR
@@ -968,12 +968,12 @@ int server_xa_prepare(struct thread_status_s *ts,
         switch (lmi->header.pvs.step) {
             case 8:
                 if (LIXA_RC_OK != (ret_cod = server_xa_prepare_8(
-                                       ts, lmi, lmo, block_id, cs)))
+                                       ts, slot_id, lmi, lmo, block_id)))
                     THROW(SERVER_XA_PREPARE_8_ERROR);
                 break;
             case 24:
                 if (LIXA_RC_OK != (ret_cod = server_xa_prepare_24(
-                                       ts, lmi, lmo, block_id, cs)))
+                                       ts, slot_id, lmi, lmo, block_id)))
                     THROW(SERVER_XA_PREPARE_24_ERROR);
                 break;
             default:
@@ -1004,10 +1004,10 @@ int server_xa_prepare(struct thread_status_s *ts,
 
 
 int server_xa_prepare_8(struct thread_status_s *ts,
+                        size_t slot_id,
                         const struct lixa_msg_s *lmi,
                         struct lixa_msg_s *lmo,
-                        uint32_t block_id,
-                        struct server_client_status_s *cs)
+                        uint32_t block_id)
 {
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
@@ -1026,7 +1026,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
     TRY {
         uint32_t i;
         uint32_t branch_array_size = 0;
-
+        struct server_client_status_s *cs = &(ts->client_array[slot_id]);
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=
             DATA_PAYLOAD_TYPE_HEADER)
@@ -1122,11 +1122,12 @@ int server_xa_prepare_8(struct thread_status_s *ts,
             cs->last_verb_step.step = lmo->header.pvs.step;
             /* the status file must be synchronized */
             status_sync_ask_sync(&ts->status_sync);
-            /* update the Finite State Machine */
-            if (LIXA_RC_OK != (ret_cod = server_fsm_send_message_and_wait(
-                                   &cs->fsm, lixa_session_get_sid(
-                                       &cs->session))))
-                THROW(FSM_SEND_MESSAGE_AND_WAIT);
+            if (!server_fsm_is_waiting_unblock(&cs->fsm))
+                /* update the Finite State Machine */
+                if (LIXA_RC_OK != (ret_cod = server_fsm_send_message_and_wait(
+                                       &cs->fsm, lixa_session_get_sid(
+                                           &cs->session))))
+                    THROW(FSM_SEND_MESSAGE_AND_WAIT);
         } /* if (!server_fsm_is_waiting_wake_up(&cs->fsm)) */
 
         THROW(NONE);
@@ -1174,10 +1175,10 @@ int server_xa_prepare_8(struct thread_status_s *ts,
 
 
 int server_xa_prepare_24(struct thread_status_s *ts,
-                        const struct lixa_msg_s *lmi,
-                        struct lixa_msg_s *lmo,
-                        uint32_t block_id,
-                        struct server_client_status_s *cs)
+                         size_t slot_id,
+                         const struct lixa_msg_s *lmi,
+                         struct lixa_msg_s *lmo,
+                         uint32_t block_id)
 {
     enum Exception { INVALID_BLOCK_ID
                      , BRANCH_LIST
@@ -1190,7 +1191,8 @@ int server_xa_prepare_24(struct thread_status_s *ts,
     
     LIXA_TRACE(("server_xa_prepare_24\n"));
     TRY {
-        uint32_t branch_array_size=0;
+        uint32_t branch_array_size = 0;
+        struct server_client_status_s *cs = &(ts->client_array[slot_id]);
         
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=
@@ -1208,10 +1210,15 @@ int server_xa_prepare_24(struct thread_status_s *ts,
                                    &branch_array)))
                 THROW(BRANCH_LIST);
         } else {
-            LIXA_TRACE(("server_xa_prepare_24: this message can't arrive "
-                        "from a client that's not part of a "
-                        "multiple branches transaction\n"));
-            THROW(PROTOCOL_ERROR);
+            /* this is an error only if branch_join has not been setup
+               previously */
+            if (CLIENT_BRANCH_JOIN_NULL !=
+                ts->client_array[slot_id].branch_join) {
+                LIXA_TRACE(("server_xa_prepare_24: this message can't arrive "
+                            "from a client that's not part of a "
+                            "multiple branches transaction\n"));
+                THROW(PROTOCOL_ERROR);
+            } /* if (CLIENT_BRANCH_JOIN_NULL != */
         } /* if (server_xa_branch_is_chained(ts, block_id)) */
         
         /* check all the branches if this is a multiple branches transaction */
@@ -1436,8 +1443,7 @@ int server_xa_start(struct thread_status_s *ts,
                     size_t slot_id,
                     const struct lixa_msg_s *lmi,
                     struct lixa_msg_s *lmo,
-                    uint32_t block_id,
-                    struct server_client_status_s *cs)
+                    uint32_t block_id)
 {
     enum Exception { SERVER_XA_START_8_ERROR,
                      SERVER_XA_START_24_ERROR,
@@ -1449,14 +1455,13 @@ int server_xa_start(struct thread_status_s *ts,
     TRY {
         switch (lmi->header.pvs.step) {
             case 8:
-                if (LIXA_RC_OK != (
-                        ret_cod = server_xa_start_8(
-                            ts, slot_id, lmi, lmo, block_id, cs)))
+                if (LIXA_RC_OK != (ret_cod = server_xa_start_8(
+                                       ts, slot_id, lmi, lmo, block_id)))
                     THROW(SERVER_XA_START_8_ERROR);
                 break;
             case 24:
                 if (LIXA_RC_OK != (ret_cod = server_xa_start_24(
-                                       ts, lmi, block_id, cs)))
+                                       ts, slot_id, lmi, block_id)))
                     THROW(SERVER_XA_START_24_ERROR);
                 break;
             default: THROW(INVALID_STEP);
@@ -1489,8 +1494,7 @@ int server_xa_start_8(struct thread_status_s *ts,
                       size_t slot_id,
                       const struct lixa_msg_s *lmi,
                       struct lixa_msg_s *lmo,
-                      uint32_t block_id,
-                      struct server_client_status_s *cs)
+                      uint32_t block_id)
 {
     enum Exception { XID_GET_GTRID_ERROR, 
                      XID_SERIALIZE_ERROR,
@@ -1512,6 +1516,7 @@ int server_xa_start_8(struct thread_status_s *ts,
     TRY {
         uint32_t i;
         int chain_branch = FALSE;
+        struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* prepare transaction table record */
         memset(&sttq, 0, sizeof(sttq));
@@ -1685,9 +1690,9 @@ int server_xa_start_8(struct thread_status_s *ts,
 
 
 int server_xa_start_24(struct thread_status_s *ts,
+                       size_t slot_id,
                        const struct lixa_msg_s *lmi,
-                       uint32_t block_id,
-                       struct server_client_status_s *cs)
+                       uint32_t block_id)
 {
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
@@ -1698,6 +1703,7 @@ int server_xa_start_24(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_start_24\n"));
     TRY {
         uint32_t i;
+        struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=

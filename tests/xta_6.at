@@ -48,8 +48,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test requires a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([delete],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -122,8 +122,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([delete],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -159,8 +159,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([insert],
-[[export LIXA_CRASH_POINT=12 ; timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[export LIXA_CRASH_POINT=12 ; timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -195,8 +195,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([delete],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -233,8 +233,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([insert],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-export LIXA_CRASH_POINT=12 ; timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+export LIXA_CRASH_POINT=12 ; timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -269,8 +269,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([delete],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -306,8 +306,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([insert],
-[[export LIXA_CRASH_POINT=14 ; timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[export LIXA_CRASH_POINT=14 ; timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -342,8 +342,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([delete],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -379,8 +379,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([insert],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-export LIXA_CRASH_POINT=14 ; timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+export LIXA_CRASH_POINT=14 ; timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -415,8 +415,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([delete],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -452,8 +452,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([insert],
-[[export LIXA_CRASH_POINT=15 ; timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[export LIXA_CRASH_POINT=15 ; timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -488,8 +488,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([delete],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -525,8 +525,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([insert],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-export LIXA_CRASH_POINT=15 ; timeout 1 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+export LIXA_CRASH_POINT=15 ; timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -561,8 +561,8 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([delete],
-[[timeout 1 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 1 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config

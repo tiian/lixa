@@ -1479,8 +1479,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
             case LIXA_MSG_VERB_START:
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_start(
-                            ts, slot_id, &lmi, lmo, block_id,
-                            &(ts->client_array[slot_id]))))
+                            ts, slot_id, &lmi, lmo, block_id)))
                     THROW(SERVER_XA_START_ERROR);
                 break;
             case LIXA_MSG_VERB_END:
@@ -1492,7 +1491,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
                 break;
             case LIXA_MSG_VERB_PREPARE:
                 ret_cod = server_xa_prepare(
-                    ts, &lmi, lmo, block_id, &(ts->client_array[slot_id]));
+                    ts, slot_id, &lmi, lmo, block_id);
                 if (LIXA_RC_OK != ret_cod)
                     THROW(SERVER_XA_PREPARE_ERROR);
                 break;
@@ -1618,19 +1617,8 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
             size_t j = list[i];
             /* retrieve the block_id of j-th slot */
             uint32_t block_id = ts->client_array[j].pers_status_slot_id;
+            int create_reply = TRUE;
 
-            /* check if the client can accept a reply: only for other
-               clients, not for the current one */
-            /* @@@ remove me?! 2018-02-03
-            if (j != slot_id && !server_xa_branch_want_replies(ts, block_id)) {
-                LIXA_TRACE(("server_manager_outmsg_prep: this client can't "
-                            "accept a reply, bypassing it: slot_id="
-                            SIZE_T_FORMAT ", block_id=" UINT32_T_FORMAT "\n",
-                            j, block_id));
-                continue;
-            }
-            */
-            
             if (j != slot_id) {
                 /* this is a message for client different from the current
                    one: publish a multicast message to many */
@@ -1655,6 +1643,7 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
                         LIXA_TRACE(("server_manager_outmsg_prep: the client "
                                     "session can accept a wake-up, ignoring "
                                     "it\n"));
+                        create_reply = FALSE;
                         break;
                     default:
                         THROW(FSM_WAKE_UP_ARRIVED);
@@ -1663,55 +1652,58 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
                 /* this is a message for the current client */
                 out_msg = &ts->client_array[j].output_message;
             }
-            LIXA_TRACE(("server_manager_outmsg_prep: slot_id="
-                        SIZE_T_FORMAT ", block_id=" UINT32_T_FORMAT
-                        ", verb=%d, step=%d\n", j, block_id,
-                        out_msg->header.pvs.verb, out_msg->header.pvs.step));
-            /* save for next payload_header_store_verb_step */
-            ts->client_array[j].last_verb_step = out_msg->header.pvs;
-            /* prepare output message */
-            switch (out_msg->header.pvs.verb) {
-                case LIXA_MSG_VERB_NULL:
-                    break;
-                case LIXA_MSG_VERB_OPEN:
-                    ret_cod = server_reply_open(ts, j, out_msg, rc);
-                    if (LIXA_RC_OK != ret_cod &&
-                        LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
-                        THROW(REPLY_OPEN_ERROR);
-                    break;
-                case LIXA_MSG_VERB_START:
-                    ret_cod = server_reply_start(ts, j, out_msg, rc);
-                    if (LIXA_RC_OK != ret_cod &&
-                        LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
-                        THROW(REPLY_START_ERROR);
-                    break;
-                case LIXA_MSG_VERB_END:
-                    ret_cod = server_reply_end(ts, j, out_msg, rc);
-                    if (LIXA_RC_OK != ret_cod &&
-                        LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
-                        THROW(REPLY_END_ERROR);
-                    break;
-                case LIXA_MSG_VERB_PREPARE:
-                    ret_cod = server_reply_prepare(ts, j, out_msg, rc);
-                    if (LIXA_RC_OK != ret_cod &&
-                        LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
-                        THROW(REPLY_PREPARE_ERROR);
-                    break;
-                case LIXA_MSG_VERB_QRCVR:
-                    ret_cod = server_reply_qrcvr(ts, j, out_msg);
-                    if (LIXA_RC_OK != ret_cod &&
-                        LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
-                        THROW(REPLY_QRCVR_ERROR);
-                    break;
-                case LIXA_MSG_VERB_TRANS:
-                    ret_cod = server_reply_trans(ts, j, out_msg);
-                    if (LIXA_RC_OK != ret_cod &&
-                        LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
-                        THROW(REPLY_SCAN_ERROR);
-                    break;
-                default:
-                    THROW(VERB_NOT_FOUND);
-            } /* switch (tmp_msg.header.pvs.verb) */
+            if (create_reply) {
+                LIXA_TRACE(("server_manager_outmsg_prep: slot_id="
+                            SIZE_T_FORMAT ", block_id=" UINT32_T_FORMAT
+                            ", verb=%d, step=%d\n", j, block_id,
+                            out_msg->header.pvs.verb,
+                            out_msg->header.pvs.step));
+                /* save for next payload_header_store_verb_step */
+                ts->client_array[j].last_verb_step = out_msg->header.pvs;
+                /* prepare output message */
+                switch (out_msg->header.pvs.verb) {
+                    case LIXA_MSG_VERB_NULL:
+                        break;
+                    case LIXA_MSG_VERB_OPEN:
+                        ret_cod = server_reply_open(ts, j, out_msg, rc);
+                        if (LIXA_RC_OK != ret_cod &&
+                            LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
+                            THROW(REPLY_OPEN_ERROR);
+                        break;
+                    case LIXA_MSG_VERB_START:
+                        ret_cod = server_reply_start(ts, j, out_msg, rc);
+                        if (LIXA_RC_OK != ret_cod &&
+                            LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
+                            THROW(REPLY_START_ERROR);
+                        break;
+                    case LIXA_MSG_VERB_END:
+                        ret_cod = server_reply_end(ts, j, out_msg, rc);
+                        if (LIXA_RC_OK != ret_cod &&
+                            LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
+                            THROW(REPLY_END_ERROR);
+                        break;
+                    case LIXA_MSG_VERB_PREPARE:
+                        ret_cod = server_reply_prepare(ts, j, out_msg, rc);
+                        if (LIXA_RC_OK != ret_cod &&
+                            LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
+                            THROW(REPLY_PREPARE_ERROR);
+                        break;
+                    case LIXA_MSG_VERB_QRCVR:
+                        ret_cod = server_reply_qrcvr(ts, j, out_msg);
+                        if (LIXA_RC_OK != ret_cod &&
+                            LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
+                            THROW(REPLY_QRCVR_ERROR);
+                        break;
+                    case LIXA_MSG_VERB_TRANS:
+                        ret_cod = server_reply_trans(ts, j, out_msg);
+                        if (LIXA_RC_OK != ret_cod &&
+                            LIXA_RC_LAST_STEP_EXCEEDED != ret_cod)
+                            THROW(REPLY_SCAN_ERROR);
+                        break;
+                    default:
+                        THROW(VERB_NOT_FOUND);
+                } /* switch (tmp_msg.header.pvs.verb) */
+            } /* if (reply_message) */
             if (j != slot_id) {
                 /* reset the temporary message */
                 lixa_msg_free(&tmp_msg);
@@ -1721,6 +1713,7 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case FSM_WAKE_UP_ARRIVED:
             case REPLY_OPEN_ERROR:
             case REPLY_START_ERROR:
             case REPLY_END_ERROR:
