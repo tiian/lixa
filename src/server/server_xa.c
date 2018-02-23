@@ -1185,6 +1185,7 @@ int server_xa_prepare_24(struct thread_status_s *ts,
                      , PROTOCOL_ERROR
                      , FSM_WANT_WAKE_UP
                      , PREPARE_BRANCHES
+                     , FSM_SEND_MESSAGE_AND_WAIT
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     uint32_t *branch_array = NULL;
@@ -1212,8 +1213,7 @@ int server_xa_prepare_24(struct thread_status_s *ts,
         } else {
             /* this is an error only if branch_join has not been setup
                previously */
-            if (CLIENT_BRANCH_JOIN_NULL !=
-                ts->client_array[slot_id].branch_join) {
+            if (CLIENT_BRANCH_JOIN_NULL == cs->branch_join) {
                 LIXA_TRACE(("server_xa_prepare_24: this message can't arrive "
                             "from a client that's not part of a "
                             "multiple branches transaction\n"));
@@ -1252,6 +1252,11 @@ int server_xa_prepare_24(struct thread_status_s *ts,
             /* prepare next protocol step */
             cs->last_verb_step.verb = lmo->header.pvs.verb;
             cs->last_verb_step.step = lmo->header.pvs.step;
+            /* update the Finite State Machine */
+            if (LIXA_RC_OK != (ret_cod = server_fsm_send_message_and_wait(
+                                   &cs->fsm, lixa_session_get_sid(
+                                       &cs->session))))
+                THROW(FSM_SEND_MESSAGE_AND_WAIT);
         } /* if (!server_fsm_is_waiting_wake_up(&cs->fsm)) */
 
         THROW(NONE);
@@ -1267,6 +1272,7 @@ int server_xa_prepare_24(struct thread_status_s *ts,
                 break;
             case FSM_WANT_WAKE_UP:
             case PREPARE_BRANCHES:
+            case FSM_SEND_MESSAGE_AND_WAIT:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

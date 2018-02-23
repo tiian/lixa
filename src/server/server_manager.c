@@ -1641,8 +1641,8 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
                         break;
                     case LIXA_RC_INVALID_STATE_TRANSITION:
                         LIXA_TRACE(("server_manager_outmsg_prep: the client "
-                                    "session can accept a wake-up, ignoring "
-                                    "it\n"));
+                                    "session cannot accept a wake-up, "
+                                    "ignoring it\n"));
                         create_reply = FALSE;
                         break;
                     default:
