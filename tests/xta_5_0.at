@@ -509,7 +509,11 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
+if test "$HAVE_MYSQL" = "no"; then
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [5], [ignore], [ignore])
+else
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [7], [ignore], [ignore])
+fi
 AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -543,7 +547,11 @@ xa_prepare/0
 xa_commit/-3
 xa_close/0
 ]])
+if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_ORACLE" = "no" ; then
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [6], [ignore], [ignore])
+else
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [8], [ignore], [ignore])
+fi
 AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP

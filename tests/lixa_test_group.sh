@@ -29,10 +29,22 @@ fi
 
 if test -e "$1"
 then
-	echo "Reading commands from $1"
+	INPUT=$1
+	echo "Reading commands from $INPUT"
 else
 	echo "File $1 does not exist"
 	exit 1
+fi
+
+# keep in option list only the optional OK values
+shift
+if test $# -ge 1
+then
+	echo "Some positive return codes will be considered OK:"
+	for OKRC in "$@" 
+	do
+		echo "$OKRC will be considered OK"
+	done
 fi
 
 PID_LIST=""
@@ -44,7 +56,7 @@ while IFS='' read -r LINE || [[ -n "$LINE" ]]; do
 	PID=$!
 	echo "Started with pid $PID"
 	PID_LIST="$PID_LIST $PID" 
-done < "$1"
+done < "$INPUT"
 
 TOTAL_ERRORS=0
 for PID in $PID_LIST
@@ -53,6 +65,14 @@ do
 	wait $PID
 	RC=$?
 	echo " ... PID $PID exited with RC=$RC"
+	for OKRC in "$@"
+	do
+		if "$RC" = "$OKRC"
+		then
+			echo "$OKRC is considered OK, forcing to value 0"
+			RC=0
+		fi
+	done
 	TOTAL_ERRORS=$(($TOTAL_ERRORS+$RC))
 done
 

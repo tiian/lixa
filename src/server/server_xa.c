@@ -1233,11 +1233,15 @@ int server_xa_prepare_24(struct thread_status_s *ts,
                     cs->branch_join = CLIENT_BRANCH_JOIN_KO;
                     break;
                 case LIXA_RC_OPERATION_POSTPONED:
-                    /* going to sleep and wait for a wake-up */
-                    if (LIXA_RC_OK != (ret_cod = server_fsm_want_wake_up(
-                                           &cs->fsm, lixa_session_get_sid(
-                                               &cs->session))))
-                        THROW(FSM_WANT_WAKE_UP);
+                    if (CLIENT_BRANCH_JOIN_NULL == cs->branch_join) {
+                        /* going to sleep and wait for a wake-up only
+                           if some other branch has not already rised a
+                           KO or OK condition */
+                        if (LIXA_RC_OK != (ret_cod = server_fsm_want_wake_up(
+                                               &cs->fsm, lixa_session_get_sid(
+                                                   &cs->session))))
+                            THROW(FSM_WANT_WAKE_UP);
+                    } /* if (CLIENT_BRANCH_JOIN_KO != cs->branch_join) */
                     break;
                 default:
                     THROW(PREPARE_BRANCHES);
