@@ -326,25 +326,6 @@ extern "C" {
 
 
 
-    /**
-     * Retrieve all the slot_id(s) related to all the branches chained in the
-     * same multiple branch global transaction of the client specified by
-     * slot_id
-     * @param[in] ts reference to thread status
-     * @param[in] slot_id of the client that's looking for the other chained
-     *            clients
-     * @param[out] number of found items
-     * @param[out] items contains a C dynamically allocated array of number
-     *             elements; the caller MUST free the array using "free"
-     *             standard C function
-     * @return a reason code
-     */
-    int server_manager_branch_list(const struct thread_status_s *ts,
-                                   size_t slot_id,
-                                   size_t *number, size_t **items);
-
-
-    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

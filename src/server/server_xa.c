@@ -1084,7 +1084,8 @@ int server_xa_prepare_8(struct thread_status_s *ts,
         /* check all the branches if this is a multiple branches transaction */
         if (0 < branch_array_size) {
             ret_cod = server_xa_branch_prepare(
-                ts, block_id, branch_array_size, branch_array);
+                ts, block_id, branch_array_size, branch_array,
+                cs->branch_join);
             switch (ret_cod) {
                 case LIXA_RC_OK:
                     cs->branch_join = CLIENT_BRANCH_JOIN_OK;
@@ -1224,7 +1225,8 @@ int server_xa_prepare_24(struct thread_status_s *ts,
         /* check all the branches if this is a multiple branches transaction */
         if (0 < branch_array_size) {
             ret_cod = server_xa_branch_prepare(
-                ts, block_id, branch_array_size, branch_array);
+                ts, block_id, branch_array_size, branch_array,
+                cs->branch_join);
             switch (ret_cod) {
                 case LIXA_RC_OK:
                     cs->branch_join = CLIENT_BRANCH_JOIN_OK;

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -109,6 +109,9 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
                     client_status_set_sockfd(cs, LIXA_NULL_FD);
                 THROW(MSG_SEND_ERROR1);
             }
+            /* release buffer */
+            free(output_buffer);
+            output_buffer = NULL;
 
             LIXA_CRASH(LIXA_CRASH_POINT_CLIENT_RECOVERY_1,
                        client_status_get_crash_count(cs));
@@ -186,8 +189,6 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
             if (updt.body.qrcvr_24.recovery.failed)
                 syslog(LOG_WARNING, LIXA_SYSLOG_LXC005W, ser_xid);
 
-            free(output_buffer);
-            output_buffer = NULL;
             if (LIXA_RC_OK != (
                     ret_cod = lixa_msg_serialize(
                         &updt, &output_buffer, &buffer_size)))
@@ -203,6 +204,9 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
                     client_status_set_sockfd(cs, LIXA_NULL_FD);
                 THROW(MSG_SEND_ERROR2);
             }
+            /* release buffer */
+            free(output_buffer);
+            output_buffer = NULL;
                 
             LIXA_CRASH(LIXA_CRASH_POINT_CLIENT_RECOVERY_3,
                        client_status_get_crash_count(cs));

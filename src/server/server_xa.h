@@ -381,6 +381,7 @@ extern "C" {
      * Executes the logic related to the third step of "xa_start" on the server
      * side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server

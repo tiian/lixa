@@ -1279,7 +1279,8 @@ int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
     enum Exception { FSM_MESSAGE_ARRIVED
                      , THREAD_SWITCH
                      , FSM_UNBLOCK
-                     , BRANCH_LIST
+                     , BRANCH_JOIN_LIST
+                     , BRANCH_JOIN_ADJUST
                      , OUTMSG_PREP_ERROR
                      , MAINTENANCE_MODE
                      , INMSG_PROC_ERROR
@@ -1325,10 +1326,14 @@ int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
             /* retrieve the list of all the clients that must be notified
                by the same message (typically only 1, but many in the event
                of multiple branch transactions) */
-            if (LIXA_RC_OK != (ret_cod = server_manager_branch_list(
+            if (LIXA_RC_OK != (ret_cod = server_client_branch_join_list(
                                    ts, slot_id, &branch_list_size,
                                    &branch_list)))
-                THROW(BRANCH_LIST);
+                THROW(BRANCH_JOIN_LIST);
+            /* adjust the branch_join flag for all the participating clients */
+            if (LIXA_RC_OK != (ret_cod = server_client_branch_join_adjust(
+                                   ts, branch_list_size, branch_list)))
+                THROW(BRANCH_JOIN_ADJUST);
             /* prepare output message if necessary */
             if (LIXA_MSG_VERB_NULL !=
                 ts->client_array[slot_id].output_message.header.pvs.verb) {
@@ -1361,6 +1366,8 @@ int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
                 ret_cod = LIXA_RC_THREAD_SWITCH;
                 break;
             case FSM_UNBLOCK:
+            case BRANCH_JOIN_LIST:
+            case BRANCH_JOIN_ADJUST:
                 break;
             case MAINTENANCE_MODE:
                 ret_cod = rc;
@@ -1972,125 +1979,6 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_new_client/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-int server_manager_branch_list(const struct thread_status_s *ts,
-                               size_t slot_id,
-                               size_t *number, size_t **items)
-{
-    enum Exception { MALLOC_ERROR1
-                     , NO_CHAINED_BRANCH
-                     , XA_BRANCH_LIST
-                     , MALLOC_ERROR2
-                     , INVALID_STATUS
-                     , NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    uint32_t *branch_array = NULL;
-    
-    LIXA_TRACE(("server_manager_branch_list\n"));
-    TRY {
-        uint32_t block_id, i_block_id;
-        uint32_t branch_array_size = 0;
-        nfds_t i;
-        size_t k=0;
-        enum server_client_branch_join_e branch_join;
-        
-        /* retrieve the block_id of slot_id */
-        block_id = ts->client_array[slot_id].pers_status_slot_id;
-        /* state of the client associated to slot_id */
-        branch_join = ts->client_array[slot_id].branch_join;
-        /* check if block_id is part of a chained branch or if a single
-           client must be notified */
-        if (!server_xa_branch_is_chained(ts, block_id) ||
-            (CLIENT_BRANCH_JOIN_OK != branch_join &&
-             CLIENT_BRANCH_JOIN_KO != branch_join)) {
-            /* allocate just one element for slot_id/block_id */
-            *number = 1;
-            if (NULL == (*items = malloc(*number * sizeof(size_t))))
-                THROW(MALLOC_ERROR1);
-            (*items)[0] = slot_id;    
-            LIXA_TRACE(("server_manager_branch_list: client slot_id "
-                        SIZE_T_FORMAT " is associated to block_id "
-                        UINT32_T_FORMAT "\n", slot_id, block_id));
-            THROW(NO_CHAINED_BRANCH);
-        } /* if (!server_xa_branch_is_chained(ts, block_id)) */
-        /* retrieve the list of all the chained block_id(s) */
-        if (LIXA_RC_OK != (ret_cod = server_xa_branch_list(
-                               ts, block_id, &branch_array_size,
-                               &branch_array)))
-            THROW(XA_BRANCH_LIST);
-        /* allocate a new array for slot_id(s) */
-        *number = (size_t)branch_array_size;
-        if (NULL == (*items = malloc(*number * sizeof(size_t))))
-            THROW(MALLOC_ERROR2);
-        /* loop on all the active clients */
-        for (i=0; i<ts->poll_size; ++i) {
-            uint32_t j;
-            /* skip inactive slots */
-            if (LIXA_NULL_FD == ts->poll_array[i].fd)
-                continue;
-            /* get the position in the persistent status that's associated to
-               client i */
-            i_block_id = ts->client_array[i].pers_status_slot_id;
-            /* scan block_ids to search for this one */
-            for (j=0; j<branch_array_size; ++j) {
-                if (branch_array[j] == i_block_id) {
-                    LIXA_TRACE(("server_manager_branch_list: "
-                                SIZE_T_FORMAT 
-                                " client " NFDS_T_FORMAT " is linked to "
-                                "block_id " UINT32_T_FORMAT "\n",
-                                k, i, i_block_id));
-                    (*items)[k++] = i;
-                    break;
-                } /* if (branch_array[j] == i_block_id) */
-            } /* for (j=0; j<branch_array_size; ++j) */
-        } /* for (i=0; i<ts->poll_size; ++i) */
-        /* check all the items have been found */
-        if (k != *number) {
-            LIXA_TRACE(("server_manager_branch_list: the global transaction "
-                        "should contain " SIZE_T_FORMAT " branches, but only "
-                        SIZE_T_FORMAT " clients have been found\n",
-                        *number, k));
-            THROW(INVALID_STATUS);
-        } /* if (k != *number) */
-        /* fix the branch_join flag for all the chained clients */
-        for (k=0; k<*number; ++k)
-            ts->client_array[(*items)[k]].branch_join = branch_join;
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case MALLOC_ERROR1:
-                ret_cod = LIXA_RC_MALLOC_ERROR;
-                break;
-            case NO_CHAINED_BRANCH:
-                ret_cod = LIXA_RC_OK;
-                break;
-            case XA_BRANCH_LIST:
-                break;
-            case MALLOC_ERROR2:
-                ret_cod = LIXA_RC_MALLOC_ERROR;
-                break;
-            case INVALID_STATUS:
-                ret_cod = LIXA_RC_INVALID_STATUS;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    /* recover memory */
-    if (NULL != branch_array) {
-        free(branch_array);
-        branch_array = NULL;
-    } /* if (NULL != branch_array) */
-    LIXA_TRACE(("server_manager_branch_list/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

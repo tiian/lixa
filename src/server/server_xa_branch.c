@@ -359,7 +359,8 @@ int server_xa_branch_list(const struct thread_status_s *ts,
 int server_xa_branch_prepare(struct thread_status_s *ts,
                              uint32_t block_id,
                              uint32_t branch_array_size,
-                             const uint32_t *branch_array)
+                             const uint32_t *branch_array,
+                             enum server_client_branch_join_e branch_join)
 {
     enum Exception { OBJ_CORRUPTED1
                      , OBJ_CORRUPTED2
@@ -385,19 +386,18 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
             if (LIXA_MSG_VERB_PREPARE != verb_step->verb &&
                 block_id != branch_array[i]) {
                 /* check if already in error state */
-                if (CLIENT_BRANCH_JOIN_KO ==
-                    ts->client_array[branch_array[i]].branch_join) {
-                    LIXA_TRACE(("server_xa_branch_prepare: i=" UINT32_T_FORMAT
-                                ", branch_array[i]=" UINT32_T_FORMAT ", "
-                                "last_verb=%d, this branch has already "
-                                "rised an error, forcing will_rollback\n",
-                                i, branch_array[i], verb_step->verb));
+                if (CLIENT_BRANCH_JOIN_KO == branch_join) {
+                    LIXA_TRACE(("server_xa_branch_prepare: i=" SIZE_T_FORMAT
+                                ", branch_join=%d, last_verb=%d, at least one "
+                                "branch has already rised an error, forcing "
+                                "will_rollback\n",
+                                i, branch_join, verb_step->verb));
                     state->will_rollback = TRUE;
                     state->will_commit = FALSE;
                     state->global_recovery = 1;
                 } else {
-                    LIXA_TRACE(("server_xa_branch_prepare: i=" UINT32_T_FORMAT
-                                ", branch_array[i]=" UINT32_T_FORMAT ", "
+                    LIXA_TRACE(("server_xa_branch_prepare: i=" SIZE_T_FORMAT
+                                ", branch_array[i]=" SIZE_T_FORMAT ", "
                                 "last_verb=%d, this branch has not "
                                 "yet prepared, skipping it\n",
                                 i, branch_array[i], verb_step->verb));
@@ -405,8 +405,8 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
                     continue;
                 } /* if (CLIENT_BRANCH_JOIN_KO */
             } /* if (LIXA_MSG_VERB_PREPARE != verb_step->verb */
-            LIXA_TRACE(("server_xa_branch_prepare: i=" UINT32_T_FORMAT ", "
-                        "branch_array[i]=" UINT32_T_FORMAT ", last_verb=%d, "
+            LIXA_TRACE(("server_xa_branch_prepare: i=" SIZE_T_FORMAT ", "
+                        "branch_array[i]=" SIZE_T_FORMAT ", last_verb=%d, "
                         "will_commit=%d, will_rollback=%d, "
                         "global_recovery=%d\n",
                         i, branch_array[i], verb_step->verb,
@@ -612,4 +612,173 @@ int server_xa_branch_check_recovery(const struct thread_status_s *ts,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int server_client_branch_join_adjust(struct thread_status_s *ts,
+                                     size_t number, const size_t *items)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("server_client_branch_join_adjust\n"));
+    TRY {
+        size_t i;
+        enum server_client_branch_join_e branch_join = CLIENT_BRANCH_JOIN_NULL;
+
+        /* analize the valued of every branch */
+        for (i=0; i<number; ++i) {
+            LIXA_TRACE(("server_client_branch_join_adjust: i=" SIZE_T_FORMAT
+                        ", slot_id=" SIZE_T_FORMAT ", branch_join=%d\n",
+                        i, items[i], ts->client_array[items[i]].branch_join));
+            if (CLIENT_BRANCH_JOIN_KO ==
+                ts->client_array[items[i]].branch_join)
+                branch_join = CLIENT_BRANCH_JOIN_KO;
+            else if (CLIENT_BRANCH_JOIN_OK ==
+                     ts->client_array[items[i]].branch_join &&
+                     CLIENT_BRANCH_JOIN_NULL == branch_join)
+                branch_join = CLIENT_BRANCH_JOIN_OK;
+        } /* for (i=0; i<number; ++i) */
+        LIXA_TRACE(("server_client_branch_join_adjust: setting branch_join=%d in "
+                    "all branches\n", branch_join));
+        for (i=0; i<number; ++i)
+            ts->client_array[items[i]].branch_join = branch_join;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("server_client_branch_join_adjust/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_client_branch_join_list(const struct thread_status_s *ts,
+                                   size_t slot_id,
+                                   size_t *number, size_t **items)
+{
+    enum Exception { MALLOC_ERROR1
+                     , NO_CHAINED_BRANCH
+                     , XA_BRANCH_LIST
+                     , MALLOC_ERROR2
+                     , INVALID_STATUS
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    uint32_t *branch_array = NULL;
+    
+    LIXA_TRACE(("server_client_branch_join_list\n"));
+    TRY {
+        uint32_t block_id, i_block_id;
+        uint32_t branch_array_size = 0;
+        nfds_t i;
+        size_t k=0;
+        enum server_client_branch_join_e branch_join;
+        
+        /* retrieve the block_id of slot_id */
+        block_id = ts->client_array[slot_id].pers_status_slot_id;
+        /* state of the client associated to slot_id */
+        branch_join = ts->client_array[slot_id].branch_join;
+        /* check if block_id is part of a chained branch or if a single
+           client must be notified */
+        if (!server_xa_branch_is_chained(ts, block_id) ||
+            (CLIENT_BRANCH_JOIN_OK != branch_join &&
+             CLIENT_BRANCH_JOIN_KO != branch_join)) {
+            /* allocate just one element for slot_id/block_id */
+            *number = 1;
+            if (NULL == (*items = malloc(*number * sizeof(size_t))))
+                THROW(MALLOC_ERROR1);
+            (*items)[0] = slot_id;    
+            LIXA_TRACE(("server_client_branch_join_list: client slot_id "
+                        SIZE_T_FORMAT " is associated to block_id "
+                        UINT32_T_FORMAT "\n", slot_id, block_id));
+            THROW(NO_CHAINED_BRANCH);
+        } /* if (!server_xa_branch_is_chained(ts, block_id)) */
+        /* retrieve the list of all the chained block_id(s) */
+        if (LIXA_RC_OK != (ret_cod = server_xa_branch_list(
+                               ts, block_id, &branch_array_size,
+                               &branch_array)))
+            THROW(XA_BRANCH_LIST);
+        /* allocate a new array for slot_id(s) */
+        *number = (size_t)branch_array_size;
+        if (NULL == (*items = malloc(*number * sizeof(size_t))))
+            THROW(MALLOC_ERROR2);
+        /* loop on all the active clients */
+        for (i=0; i<ts->poll_size; ++i) {
+            uint32_t j;
+            /* skip inactive slots */
+            if (LIXA_NULL_FD == ts->poll_array[i].fd)
+                continue;
+            /* get the position in the persistent status that's associated to
+               client i */
+            i_block_id = ts->client_array[i].pers_status_slot_id;
+            /* scan block_ids to search for this one */
+            for (j=0; j<branch_array_size; ++j) {
+                if (branch_array[j] == i_block_id) {
+                    LIXA_TRACE(("server_client_branch_join_list: "
+                                SIZE_T_FORMAT 
+                                " client " NFDS_T_FORMAT " is linked to "
+                                "block_id " UINT32_T_FORMAT "\n",
+                                k, i, i_block_id));
+                    (*items)[k++] = i;
+                    break;
+                } /* if (branch_array[j] == i_block_id) */
+            } /* for (j=0; j<branch_array_size; ++j) */
+        } /* for (i=0; i<ts->poll_size; ++i) */
+        /* check all the items have been found */
+        if (k != *number) {
+            LIXA_TRACE(("server_client_branch_join_list: the global "
+                        "transaction should contain " SIZE_T_FORMAT
+                        " branches, but only " SIZE_T_FORMAT
+                        " clients have been found\n", *number, k));
+            THROW(INVALID_STATUS);
+        } /* if (k != *number) */
+        /* fix the branch_join flag for all the chained clients */
+        /* @@@ remove me, 2018-02-27 
+        for (k=0; k<*number; ++k)
+            ts->client_array[(*items)[k]].branch_join = branch_join;
+        */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case MALLOC_ERROR1:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case NO_CHAINED_BRANCH:
+                ret_cod = LIXA_RC_OK;
+                break;
+            case XA_BRANCH_LIST:
+                break;
+            case MALLOC_ERROR2:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* recover memory */
+    if (NULL != branch_array) {
+        free(branch_array);
+        branch_array = NULL;
+    } /* if (NULL != branch_array) */
+    LIXA_TRACE(("server_client_branch_join_list/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
 

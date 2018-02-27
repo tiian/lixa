@@ -133,14 +133,17 @@ extern "C" {
      * @param[in] branch_array_size is the number of branches that participate
      *            in the global transaction
      * @param[in] branch_array is the set of branches that participate in the
-     *            global transaction (it contains the block ids of the header
-     *            record of every branch)
+     *            global transaction (it contains the block ids of the headers
+     *            in current state file)
+     * @param[in] branch_join is the state of the branch from the client
+     *            session perspective
      * @return a reason code
      */
     int server_xa_branch_prepare(struct thread_status_s *ts,
                                  uint32_t block_id,
                                  uint32_t branch_array_size,
-                                 const uint32_t *branch_array);
+                                 const uint32_t *branch_array,
+                                 enum server_client_branch_join_e branch_join);
 
 
 
@@ -165,7 +168,40 @@ extern "C" {
                                         const uint32_t *branch_array,
                                         int *global_recovery);
 
+
+
+    /**
+     * Analize all the client sessions that are participating in a branch
+     * and a the branch_join flag as necessary
+     * @param[in,out] ts reference to thread status
+     * @param[in] number of items in the array
+     * @param[in] items is an array of number elements, every element is a
+     *             "slot_id" associated to a client session
+     * @return a reason code
+     */
+    int server_client_branch_join_adjust(struct thread_status_s *ts,
+                                         size_t number, const size_t *items);
+                                    
     
+    
+    /**
+     * Retrieve all the slot_id(s) (clients) related to all the branches
+     * chained in the same multiple branch global transaction of the client
+     * specified by slot_id
+     * @param[in] ts reference to thread status
+     * @param[in] slot_id of the client that's looking for the other chained
+     *            clients
+     * @param[out] number of found items
+     * @param[out] items contains a C dynamically allocated array of number
+     *             elements; the caller MUST free the array using "free"
+     *             standard C function
+     * @return a reason code
+     */
+    int server_client_branch_join_list(const struct thread_status_s *ts,
+                                       size_t slot_id,
+                                       size_t *number, size_t **items);
+
+
     
 #ifdef __cplusplus
 }
