@@ -50,6 +50,9 @@ https://github.com/tiian/flom/blob/master/src/flom_tls.c
 The dbus_get_local_machine_id() function is easy to use, but requires dbus
 installed.
 
+
+Disk sync latency matters and XTA amplifies it: a different journaling strategy
+should be implemented. See doc/improvements.txt
 Explore high availability features (active/active) with dynamic or static
 workload. Avoid disk persistence, prefer distributed memory semi persistence.
 

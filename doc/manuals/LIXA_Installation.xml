@@ -11,7 +11,7 @@
       <link xlink:href="http://www.ubuntu.com/">
 	<citetitle>Ubuntu 14.04 system</citetitle>
       </link>. 
-      LIXA project is ported on different Linux versions for x86_64: major
+      LIXA project is ported on different Linux versions for x86-64: major
       stable releases are tested using some different configurations, please
       refer to file 
       <link xlink:href="https://github.com/tiian/lixa/blob/master/TestLog">
@@ -72,7 +72,7 @@
 	</para>
       </section>
       <section>
-	<title>Packages for Linux CentOS (6.2)</title>
+	<title>Packages for Linux CentOS (7.x)</title>
 	<para>
 	  This packages are necessary to create a build environment:
  	  <application>glib2-devel.i686</application>,
@@ -86,9 +86,17 @@
 	  <application>docbook5-style-xsl.noarch</application> is necessary
 	  to produce this manual.
 	</para>
+	<section>
+	  <title>CentOS, RHEL and derivative notes</title>
+	  <para>
+	    Version 6 of CentOS, RHEL and derivative linux distributions ships
+	    a very old glib version and can't be used to compile LIXA source
+	    code since LIXA 1.3.2
+	  </para>
+	</section>
       </section>
-      <simplesect>
-	<title>Low level pre-requisites</title>
+      <section>
+	<title>Low level software pre-requisites</title>
 	<para>
 	  If you are trying to install LIXA software on a different operating
 	  system, these are some fundamental requirements:
@@ -113,7 +121,24 @@
 	  Without the above functions, a specific porting process is necessary
 	  to adapt LIXA to your system.
 	</para>
-      </simplesect>
+      </section>
+      <section>
+	<title>Hardware requirements</title>
+	<para>
+	  There's no specific hardware requirement for the client part of LIXA
+	  (libraries and utilities): the type of hardware you are using for
+	  your application will be sufficient to run your application even if
+	  you start to use LIXA libraries for TX or XTA.
+	</para>
+	<para>
+	  LIXA state server, <command>lixad</command>, requires low latency
+	  disks to perform at its best: the lower the latency of the disks that
+	  hosts the state files, tipically <filename>/opt/lixa/var</filename>,
+	  the better. The best performance should be expected by a storage
+	  array with battery-backed cache or a technology with equivalent
+	  speed.
+	</para>
+      </section>
     </section>
     <section>
       <title>Co-requisites</title>

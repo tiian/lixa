@@ -639,8 +639,8 @@ int server_client_branch_join_adjust(struct thread_status_s *ts,
                      CLIENT_BRANCH_JOIN_NULL == branch_join)
                 branch_join = CLIENT_BRANCH_JOIN_OK;
         } /* for (i=0; i<number; ++i) */
-        LIXA_TRACE(("server_client_branch_join_adjust: setting branch_join=%d in "
-                    "all branches\n", branch_join));
+        LIXA_TRACE(("server_client_branch_join_adjust: setting branch_join=%d "
+                    "in all branches\n", branch_join));
         for (i=0; i<number; ++i)
             ts->client_array[items[i]].branch_join = branch_join;
         
