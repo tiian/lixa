@@ -323,8 +323,12 @@ make
       </screen>
       <note><para>
         If build issues are experienced with a system that has a newer version 
-        of autotools installed, the build files can be regenerated with the following
-        command:
+        of autotools installed, the build files can be regenerated with the 
+	following command:
+	<screen>
+	  touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
+	</screen>
+	or, in the event that the previous one failed, with the following one:
         <screen>
           autoreconf -v -f -i
         </screen>
