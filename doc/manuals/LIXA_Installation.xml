@@ -305,8 +305,9 @@ logout
     <warning><para>
       The tarball that can be downloaded by SourceForge.net is a release
       that has passed some sort of test and should compile and run
-      flawlessly. Even releases are associated to stable releases and
-      odd releases are associated to testing releases with new features.
+      flawlessly. Even releases are associated to <emphasis>stable</emphasis>
+      software and odd releases are associated to <emphasis>testing</emphasis>
+      software with new features.
     </para></warning>
   </section>
   <section>
@@ -322,13 +323,26 @@ cd lixa-X.Y.Z
 make
       </screen>
       <note><para>
-        If build issues are experienced with a system that has a newer version 
-        of autotools installed, the build files can be regenerated with the 
-	following command:
+	Sometimes, especially if you clone the git repository, you can
+	get an error like the following one:
+	<screen>
+WARNING: 'aclocal-1.14' is missing on your system.
+         You should only need it if you modified 'acinclude.m4' or
+         'configure.ac' or m4 files included by 'configure.ac'.
+         The 'aclocal' program is part of the GNU Automake package:
+         &lt;http://www.gnu.org/software/automake&gt;
+         It also requires GNU Autoconf, GNU m4 and Perl in order to run:
+         &lt;http://www.gnu.org/software/autoconf&gt;
+         &lt;http://www.gnu.org/software/m4/&gt;
+         &lt;http://www.perl.org/&gt;
+Makefile:457: recipe for target 'aclocal.m4' failed
+make: *** [aclocal.m4] Error 127
+	</screen>
+        You can try the following command to solve the issue:
 	<screen>
 	  touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
 	</screen>
-	or, in the event that the previous one failed, with the following one:
+	or, in the event that the previous one failed, the following one:
         <screen>
           autoreconf -v -f -i
         </screen>
