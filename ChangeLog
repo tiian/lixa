@@ -1,6 +1,6 @@
 LOG:
 
-         - 1.5.2 XTA support for Superior/Subordinate branches
+20180304 - 1.5.2 XTA support for concurrent branches
 		 This release is *NOT* compatible with previous ones: you can't
 		 mix 1.5.2 and previous versions in the same environment
 		 (message LXC030E will be logged in the event of level

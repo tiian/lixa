@@ -45,7 +45,7 @@
 
 
 /*
- * Synchronous branch case test for XTA
+ * Pseudo synchronous branch case test for XTA
  *
  * NOTE: this is not a good example to learn the C programming language
  *       because the usage of global variables has been abused and you should

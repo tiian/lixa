@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -37,7 +37,7 @@
 
 
 /*
- * Standard case test for XTA: simple transaction
+ * XTA: suspend/resume test cases with LIXA native resource manager (monkey)
  */
 
 

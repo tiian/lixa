@@ -6,3 +6,12 @@ sftp tiian@web.sourceforge.net
 cd /home/project-web/lixa/htdocs/lixa-doc/xta
 put *
 
+
+
+How to publish XTA documentation on GitHub (tiian.org):
+
+copy all the content of
+repository lixa, directory doc/api/xta/html 
+to
+repository tiian.github.io, directory lixa/manuals/xta
+commit and push tiian.github.io

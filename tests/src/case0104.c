@@ -45,7 +45,7 @@
 
 
 /*
- * Asynchronous branch case test for XTA
+ * Pseudo asynchronous branch case test for XTA
  *
  * NOTE: this is not a good example to learn the C programming language
  *       because the usage of global variables has been abused and you should

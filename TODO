@@ -1,14 +1,10 @@
-Go on with tests for CentOS 7
-
-Test build from github instead of tar file
-
 Remove from server_xa_open, server_xa_end, server_xa_commit, server_recovery,
 server_ax_reg, server_ax_unreg, server_xa_forget, server_trans the parameter
 cs and compute it inside using ts and slot_id
 
 Remove a little of @@@ old piece of codes...
 
-Branch refinement: check in server_xa_8 if the other branches already found
+Branch refinement: check in server_xa_end_8 if the other branches already found
 an error; if yes, propagate an error to the client that will start rollback
 instead of commit
 
@@ -24,6 +20,10 @@ software build.
 Is the state file synchronization after xa_start really necessary? Can it be
 removed?
 
+Implement server side crash tests for XTA
+
+Declare XTA as completed
+
 Implement XTA for C++
 
 Put all configuration in XTA without necessity to load lixac_conf.xml file
@@ -34,7 +34,6 @@ As an example see function flom_tls_get_unique_id from flom project:
 https://github.com/tiian/flom/blob/master/src/flom_tls.c
 The dbus_get_local_machine_id() function is easy to use, but requires dbus
 installed.
-
 
 Disk sync latency matters and XTA amplifies it: a different journaling strategy
 should be implemented. See doc/improvements.txt

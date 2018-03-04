@@ -1,5 +1,5 @@
 Release: 1.5.2 (Tester: Tiian; Test purpose: XTA)
-Date: 2018-03-03
+Date: 2018-03-04
 Configuration: --enable-crash --with-docbook --with-mysql --with-postgresql --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_12_1/
 CentOS          |x86_64 |virtual (KVM)  |2 vCPU *
 RHEL 7.4 	|x86_64	|virtual (KVM)	|2 vCPU **
