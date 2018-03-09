@@ -3,10 +3,10 @@
   <section>
     <title>Why should I use LIXA project?</title>
     <para>
-      LIXA project allows you to develop an Application Program that performs
+      LIXA project allows you to develop Application Programs that perform
       two phase commit transactions against two ore more Resource Managers.
       Two phase commit is a transactional protocol designed to 
-      <quote>guarantee</quote> <acronym>ACID</acronym> (Atomicity, Consistency,
+      guarantee <acronym>ACID</acronym> (Atomicity, Consistency,
       Isolation, Durability) transactionality.
       XA specification is not the only two phase commit protocol implementation
       but it is probably the best known and widespread. For a detailed
@@ -42,6 +42,39 @@
       Resource Managers.
     </para>
   </warning>
+  <note>
+    As an exception of the above warning, LIXA provides an alternative
+    implementation of the following concepts:
+      <itemizedlist mark='bullet'>
+	<listitem><para>Superior Node</para></listitem>
+	<listitem><para>Subordinate Node</para></listitem>
+	<listitem><para>Activity between Functional Components Involving Two or More APs</para></listitem>
+      </itemizedlist>
+      by mean of XTA (XA Transactional API)
+      <footnote><para>
+	See <xref linkend="Development_XTA"/> for more information on XTA.
+      </para></footnote>. 
+  </note>
+  <section xml:id="Supported_Programming_Models">
+    <title>Supported Programming Models</title>
+    <para>
+      Since its inception, LIXA has supported the TX Transaction Demarcation
+      Specification published by X/Open as the standard programming model. TX
+      is a quite old standard published in 1995 and it's based on some
+      architecture choices that are no more actual.
+    </para>
+    <para>
+      As an alternative to TX, LIXA project provides XTA (XA Transactional
+      API)
+      <footnote><para>
+	See <xref linkend="Development_XTA"/> for more information on XTA.
+      </para></footnote>:
+      it's a new interface designed to support distributed transactions
+      among distributed Application Programs developed in possibly different
+      programming languages and without direct coupling among TP Monitors or
+      Application Servers.
+    </para>
+  </section>
   <section xml:id="Transaction_Manager_and_Transaction_Monitor">
     <title>Transaction Manager and Transaction Monitor</title>
     <para>
@@ -81,17 +114,32 @@
       Transaction
       Manager, while in the C language arena it is not easy to find out one.
     </para>
-    <para>
-      The LIXA project implements a stand-alone Transaction Manager that your 
-      Application Program can use in many different ways:
-      <itemizedlist mark='bullet'>
-	<listitem><para>from a C application launched from shell</para></listitem>
-	<listitem><para>from a C application launched via CGI inside a web server</para></listitem>
-	<listitem><para>from a scripting language application<footnote><para>You must wrap the TX C API to be able to use it from Perl, PHP, Python, Ruby...</para></footnote>.</para></listitem>
-      </itemizedlist>
-      With the aid of the LIXA Transaction Manager potentially any web server 
-      can be converted in an Application Server with two phase commit support.
-    </para>
+    <section>
+      <title>LIXA behavior when the TX Transaction Demarcation Specification
+      is used to develop applications</title>
+      <para>
+	The LIXA project implements a stand-alone Transaction Manager that your
+	Application Program can use in many different ways:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>from a C application launched from shell or via CGI
+	  inside a web server</para></listitem>
+	  <listitem><para>from a COBOL application launched from shell</para></listitem>
+	  <listitem><para>from a scripting language application<footnote><para>You must wrap the TX C API to be able to use it from Perl, PHP, Python, Ruby...</para></footnote>.</para></listitem>
+	</itemizedlist>
+	With the aid of the LIXA Transaction Manager potentially any web server
+	can be converted in an Application Server with two phase commit
+	support.
+      </para>
+    </section>
+    <section>
+      <title>LIXA behavior when XTA is used to develop applications</title>
+      <para>
+	The LIXA project implements a distributed Transaction Manager that your
+	Application Programs can use to coordinate a distributed transaction
+	among two or more Application Programs in execution on different
+	systems.
+      </para>
+    </section>
   </section>
   <section>
     <title>LIXA Architecture</title>

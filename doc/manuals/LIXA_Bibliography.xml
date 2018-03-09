@@ -12,7 +12,7 @@
 	<publishername>X/Open Company Ltd., U.K.</publishername>
       </publisher>
       <title>
-	<link xlink:href="https://www2.opengroup.org/ogsys/catalog/G504">Distributed Transaction Processing: Reference Model, Version 3</link>
+	<link xlink:href="http://pubs.opengroup.org/onlinepubs/9294999599/toc.pdf">Distributed Transaction Processing: Reference Model, Version 3</link>
       </title>
     </biblioentry>
 
@@ -25,7 +25,7 @@
 	<publishername>X/Open Company Ltd., U.K.</publishername>
       </publisher>
       <title>
-	<link xlink:href="https://www2.opengroup.org/ogsys/catalog/C504">Distributed TP: The TX (Transaction Demarcation) Specification</link>
+	<link xlink:href="http://pubs.opengroup.org/onlinepubs/9694999599/toc.pdf">Distributed TP: The TX (Transaction Demarcation) Specification</link>
       </title>
     </biblioentry>
 
@@ -51,7 +51,7 @@
 	<publishername>X/Open Company Ltd., U.K.</publishername>
       </publisher>
       <title>
-	<link xlink:href="https://www2.opengroup.org/ogsys/catalog/S423">Distributed TP: The XA+ Specification Version 2</link>
+	<link xlink:href="https://publications.opengroup.org/s243">Distributed TP: The XA+ Specification Version 2</link>
       </title>
     </biblioentry>
 

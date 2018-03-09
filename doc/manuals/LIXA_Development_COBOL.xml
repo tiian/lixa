@@ -1,5 +1,6 @@
 <chapter xml:id="Development_COBOL">
-  <title>Developing COBOL Application Programs</title>
+  <title>Developing COBOL Application Programs using TX (Transaction
+  Demarcation) interface</title>
   <para>
     This chapter explains how you can develop your own COBOL application
     using the libraries and the tools supplied by LIXA project.

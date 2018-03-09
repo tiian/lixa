@@ -339,6 +339,7 @@ manual_sources = LIXA.xml \
 	LIXA_Development.xml \
 	LIXA_Development_COBOL.xml \
 	LIXA_Development_TC.xml \
+	LIXA_Development_XTA.xml \
 	LIXA_Execution.xml \
 	LIXA_In_Depth.xml \
 	LIXA_Installation.xml \

@@ -1,5 +1,6 @@
 <chapter xml:id="Development">
-  <title>Developing C Application Programs</title>
+  <title>Developing C Application Programs using TX (Transaction
+  Demarcation) interface</title>
   <para>
     This chapter explains how you can develop your own C application
     using the libraries and the tools supplied by LIXA project.

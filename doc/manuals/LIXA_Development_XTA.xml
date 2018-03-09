@@ -1,0 +1,69 @@
+<chapter xml:id="Development_XTA">
+  <title>Developing Application Programs using XTA (XA Transactional API) interface</title>
+  <para>
+    This chapter explains how you can develop applications that use XTA 
+    interface.
+  </para>
+  <section>
+    <title>XTA introduction</title>
+    <para>
+      This section introduces some basic concepts for a better comprehension of
+      the following more technical ones.
+    </para>
+    <section>
+      <title>Why XTA?</title>
+      <para>
+	The TX Transaction Demarcation Specification
+	<citation>TXspec</citation>, published in 1995 by
+	X/Open is a programming interface that has been designed for:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	    C and COBOL programming languages
+	  </para></listitem>
+	  <listitem><para>
+	    single thread applications
+	  </para></listitem>
+	  <listitem><para>
+	    applications executed under the control of TP Monitors
+	  </para></listitem>
+	  <listitem><para>
+	    implicit (static) transactional context
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	The DTP Reference Model Version 3
+	<citation>RefModel</citation>, published in 1996 by X/Open is a
+	programming model that has been designed for:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	    applications executed under the control of TP Monitors
+	  </para></listitem>
+	  <listitem><para>
+	    TP Monitors with integrated Transaction Managers
+	  </para></listitem>
+	  <listitem><para>
+	    tight coupling between couple of Transaction Managers to propagate
+	    transactional contexts and to coordinated distributed transactions
+	    among different systems
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	All the above assumptions are no more up-to-date in the cloud native
+	programming models like CaaS (Container as a Service), 
+	PaaS (Platform as a Service) and FaaS (Function as a Service).
+	XTA aims to provide TXaaS (Transaction as a Service) backend services
+	that can be used by cloud native applications that for one reason or
+	another require two phase commit, ACID transactions among distributed
+	applications
+	<footnote><para>
+	  Many authors consider two phase commit the root of every evil in
+	  the realm of massively distributed application, but the author of
+	  XTA thinks that some specific use cases are eligible for two phase
+	  commit usage.
+	</para></footnote>.
+      </para>
+    </section>
+  </section>
+</chapter>
