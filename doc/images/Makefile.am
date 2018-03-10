@@ -1,4 +1,4 @@
-EXTRA_DIST = $(dia_images) $(png_images)
+EXTRA_DIST = $(dia_images) $(png_images) $(draw_io_images)
 
 dia_images = LIXA_Configuration_1.dia  LIXA_Configuration_4.dia \
 	LIXA_Configuration_7.dia LIXA_Configuration_2.dia \
@@ -14,6 +14,8 @@ dia_images = LIXA_Configuration_1.dia  LIXA_Configuration_4.dia \
 	LIXA_Recovery_01.dia LIXA_Recovery_02.dia LIXA_Recovery_03.dia \
 	LIXA_In_Depth_01.dia LIXA_In_Depth_02.dia LIXA_In_Depth_03.dia
 
+draw_io_images = LIXA_Development_XTA.xml
+
 png_images = LIXA_Configuration_1.png  LIXA_Configuration_4.png \
 	LIXA_Configuration_7.png LIXA_Configuration_2.png \
 	LIXA_Configuration_5.png LIXA_Configuration_8.png \
@@ -25,6 +27,8 @@ png_images = LIXA_Configuration_1.png  LIXA_Configuration_4.png \
 	LIXA_Development_10.png LIXA_Development_11.png \
 	LIXA_Development_12.png LIXA_Development_13.png \
 	LIXA_Development_15.png \
+	LIXA_Development_XTA_01.png LIXA_Development_XTA_02.png \
+	LIXA_Development_XTA_03.png \
 	LIXA_Recovery_01.png LIXA_Recovery_02.png LIXA_Recovery_03.png \
 	LIXA_In_Depth_01.png LIXA_In_Depth_02.png LIXA_In_Depth_03.png \
 	LIXA_Tuning_01.png LIXA_Tuning_02.png \

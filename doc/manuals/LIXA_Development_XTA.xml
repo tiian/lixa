@@ -53,17 +53,109 @@
 	All the above assumptions are no more up-to-date in the cloud native
 	programming models like CaaS (Container as a Service), 
 	PaaS (Platform as a Service) and FaaS (Function as a Service).
+      </para>
+      <para>
 	XTA aims to provide TXaaS (Transaction as a Service) backend services
 	that can be used by cloud native applications that for one reason or
-	another require two phase commit, ACID transactions among distributed
+	another require two phase commit ACID transactions among distributed
 	applications
 	<footnote><para>
 	  Many authors consider two phase commit the root of every evil in
-	  the realm of massively distributed application, but the author of
-	  XTA thinks that some specific use cases are eligible for two phase
-	  commit usage.
+	  the realm of massively distributed applications, but the author of
+	  XTA thinks that some specific use cases can take advantage from 
+	  two phase commit transactionality.
 	</para></footnote>.
       </para>
+    </section>
+    <section>
+      <title>XTA architecture</title>
+      <para>
+	<figure xml:id="xta_arch01">
+	  <title>Software stacks of an XTA application</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="../images/LIXA_Development_XTA_01.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	The above picture explains the software stack architecture for an XTA
+	application: the <emphasis>Application Program</emphasis> interacts
+	with XA <emphasis>Resource Managers</emphasis> like PostgreSQL and
+	MySQL with <emphasis>XTA</emphasis>.
+	<emphasis>XTA</emphasis> wraps <emphasis>LIXA</emphasis> libraries that
+	interact with the <emphasis>Resource Managers</emphasis> and implement
+	the client side part of the transaction management logic.
+      </para>
+      <para>
+	<figure xml:id="xta_arch02">
+	  <title>Single application layout</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="../images/LIXA_Development_XTA_02.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	The simplest deployment of an XTA application consists of a single
+	<emphasis>Application Program</emphasis> that uses one or more
+	<emphasis>Resource Managers</emphasis> in a distributed transaction.
+	<emphasis>XTA</emphasis> connects to <emphasis>LIXA state server
+	(<command>lixad</command>)</emphasis> to coordinate the XA two phase
+	commit protocol.
+	<emphasis>Application Program</emphasis>,
+	<emphasis>Resource Managers</emphasis> and
+	<emphasis>LIXA state server</emphasis> does not have to reside in the
+	same system: they can be distributed in different systems that
+	communicate by mean of TCP/IP protocol.
+      </para>
+      <para>
+	<figure xml:id="xta_arch03">
+	  <title>Multiple applications layout</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="../images/LIXA_Development_XTA_03.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	XTA allows deployment of multiple
+	<emphasis>Application Programs</emphasis> that use one or more
+	<emphasis>Resource Managers</emphasis> in a distributed transaction.
+	<emphasis>XTA</emphasis> connects to <emphasis>LIXA state server
+	(<command>lixad</command>)</emphasis> to coordinate the XA two phase
+	commit protocol.
+	<emphasis>Application Programs</emphasis>,
+	<emphasis>Resource Managers</emphasis> and
+	<emphasis>LIXA state server</emphasis> does not have to reside in the
+	same system: they can be distributed in different systems that
+	communicate by mean of TCP/IP protocol.
+      </para>
+      <note>
+	<para>
+	  <emphasis>XTA</emphasis>, in comparison with the standard TX
+	  interface, implements the logic necessary to distribute a
+	  global transaction between two or more
+	  <emphasis>Application Programs</emphasis> but it does not provide
+	  the communication protocol between them. Using the above picture as
+	  an example, it's in charge of
+	  <emphasis>Application Program 1</emphasis> to exchange information
+	  with <emphasis>Application Program 2</emphasis>: any synchronous or
+	  asynchronous protocol can be used.
+	</para>
+	<para>
+	  Anyway, two constraints can't be violated:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+	      all the <emphasis>Application Programs</emphasis> that
+	      participate in the same global transaction, must connect to the
+	      same <emphasis>LIXA state server</emphasis>
+	    </para></listitem>
+	    <listitem><para>
+	      the <emphasis>Application Programs</emphasis> must call XTA
+	      functions in the proper order to partipate in the same global
+	      transaction
+	    </para></listitem>
+	  </itemizedlist>
+	</para>
+      </note>
     </section>
   </section>
 </chapter>

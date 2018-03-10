@@ -2,7 +2,7 @@ L     I X   X   A
 L     I  X X   A A    LIXA
 L     I   X   A   A   LIbre XA
 L     I  X X  AAAAA   a free and open source XA Transaction Manager
-LLLLL I X   X A   A
+LLLLL I X   X A   A   http://www.tiian.org/lixa/
 
 
 
@@ -80,6 +80,7 @@ test/src/case010*.c
 DOCUMENTATION:
 Documentation is available in these places:
 - local directory doc/manuals/index.html after tarball extraction
+- http://www.tiian.org/lixa/manuals/html/
 - http://lixa.sourceforge.net/lixa-doc/html/
 - http://lixa.sourceforge.net/lixa-doc/xta/
 
