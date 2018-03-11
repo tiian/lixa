@@ -15,8 +15,8 @@
 <!ENTITY tuning SYSTEM "LIXA_Tuning.xml">
 <!ENTITY biblio SYSTEM "LIXA_Bibliography.xml">
 ]>
-<book xmlns="http://docbook.org/ns/docbook">
-  <title>LIXA reference guide (version @PACKAGE_VERSION@)</title>
+<book xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">
+  <title>LIXA Reference Guide (version @PACKAGE_VERSION@)</title>
   <subtitle>
     A libre, free, open source implementation of the XA and the TX 
     specifications

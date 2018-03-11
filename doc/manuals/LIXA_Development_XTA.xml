@@ -1,14 +1,14 @@
 <chapter xml:id="Development_XTA">
   <title>Developing Application Programs using XTA (XA Transactional API) interface</title>
   <para>
-    This chapter explains how you can develop applications that use XTA 
-    interface.
+    This chapter explains what XTA is and how you can develop applications
+    that use XTA interface.
   </para>
   <section>
     <title>XTA introduction</title>
     <para>
       This section introduces some basic concepts for a better comprehension of
-      the following more technical ones.
+      XTA topic.
     </para>
     <section>
       <title>Why XTA?</title>
@@ -56,14 +56,14 @@
       </para>
       <para>
 	XTA aims to provide TXaaS (Transaction as a Service) backend services
-	that can be used by cloud native applications that for one reason or
-	another require two phase commit ACID transactions among distributed
-	applications
+	that can be used by cloud native applications that, for one reason or
+	another, require two phase commit ACID transactions among distributed
+	applications.
 	<footnote><para>
 	  Many authors consider two phase commit the root of every evil in
 	  the realm of massively distributed applications, but the author of
 	  XTA thinks that some specific use cases can take advantage from 
-	  two phase commit transactionality.
+	  two phase commit transactionality
 	</para></footnote>.
       </para>
     </section>
@@ -80,8 +80,8 @@
 	</figure>
 	The above picture explains the software stack architecture for an XTA
 	application: the <emphasis>Application Program</emphasis> interacts
-	with XA <emphasis>Resource Managers</emphasis> like PostgreSQL and
-	MySQL with <emphasis>XTA</emphasis>.
+	with XA <emphasis>Resource Managers</emphasis>, like PostgreSQL and
+	MySQL, and with <emphasis>XTA</emphasis>.
 	<emphasis>XTA</emphasis> wraps <emphasis>LIXA</emphasis> libraries that
 	interact with the <emphasis>Resource Managers</emphasis> and implement
 	the client side part of the transaction management logic.
@@ -105,7 +105,7 @@
 	<emphasis>Resource Managers</emphasis> and
 	<emphasis>LIXA state server</emphasis> does not have to reside in the
 	same system: they can be distributed in different systems that
-	communicate by mean of TCP/IP protocol.
+	communicate by mean of the TCP/IP protocol.
       </para>
       <para>
 	<figure xml:id="xta_arch03">
@@ -126,7 +126,7 @@
 	<emphasis>Resource Managers</emphasis> and
 	<emphasis>LIXA state server</emphasis> does not have to reside in the
 	same system: they can be distributed in different systems that
-	communicate by mean of TCP/IP protocol.
+	communicate by mean of the TCP/IP protocol.
       </para>
       <note>
 	<para>
@@ -155,7 +155,80 @@
 	    </para></listitem>
 	  </itemizedlist>
 	</para>
+	<para>
+	  XTA does not constraint many other aspects:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+	      <emphasis>Application Programs</emphasis> don't have to be
+	      developed using the same programming language
+	    </para></listitem>
+	    <listitem><para>
+	      <emphasis>Application Programs</emphasis> don't have to be
+	      executed inside the same sort of <emphasis>application
+	      container or server</emphasis>; example: one
+	      <emphasis>Application Program</emphasis> can be executed inside
+	      a shell script, another one can be executed under the supervision
+	      of an HTTP server
+	    </para></listitem>
+	    <listitem><para>
+	      <emphasis>Application Programs</emphasis> can use any sort of
+	      communication channel to transfer the transaction identifier 
+	      (XID): it can be a REST over HTTP, in can be a message queing
+	      system, it can be a POSIX pipe and so on. Any communication
+	      channel that can send an ASCII string is eligible for passing
+	      the transaction identifier (XID)
+	    </para></listitem>
+	    <listitem><para>
+	      <emphasis>Application Programs</emphasis> can be called using
+	      consecutive calls or can run in concurrent branches
+	    </para></listitem>
+	  </itemizedlist>
+	</para>
       </note>
     </section>
+  </section>
+  <section>
+    <title>The XTA Programming Model</title>
+    <para>
+      XTA support 4 different patterns:
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	  <quote>Single Application</quote>:
+	  single <emphasis>Application Program</emphasis> with single or 
+	  multiple <emphasis>Resource Managers</emphasis> as supported by
+	  the TX Transaction Demarcation Specification
+	</para></listitem>
+	<listitem><para>
+	  <quote>Consecutive Calls</quote>:
+	  multiple <emphasis>Application Programs</emphasis> with single or
+	  multiple <emphasis>Resource Managers</emphasis>, only one
+	  <emphasis>Application Program</emphasis> is working as part of a
+	  transaction at a specified time, the XA global transaction is
+	  composed by a single transaction branch
+	</para></listitem>
+	<listitem><para>
+	  <quote>Consecutive Branches/Pseudo Synchronous</quote>:
+	  multiple <emphasis>Application Programs</emphasis> with single or
+	  multiple <emphasis>Resource Managers</emphasis>, many 
+	  <emphasis>Application Programs</emphasis> are concurrently working
+	  as part of a transaction at a specified time, the XA global
+	  transaction is composed by multiple transaction branches, the
+	  type of interaction among the
+	  <emphasis>Application Programs</emphasis> is
+	  <quote>Pseudo Synchronous</quote>
+	</para></listitem>
+	<listitem><para>
+	  <quote>Consecutive Branches/Pseudo Asynchronous</quote>:
+	  multiple <emphasis>Application Programs</emphasis> with single or
+	  multiple <emphasis>Resource Managers</emphasis>, many 
+	  <emphasis>Application Programs</emphasis> are concurrently working
+	  as part of a transaction at a specified time, the XA global
+	  transaction is composed by multiple transaction branches, the
+	  type of interaction among the
+	  <emphasis>Application Programs</emphasis> is
+	  <quote>Pseudo Asynchronous</quote>
+	</para></listitem>
+      </itemizedlist>
+    </para>
   </section>
 </chapter>
