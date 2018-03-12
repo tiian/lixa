@@ -199,7 +199,7 @@
 	  the TX Transaction Demarcation Specification
 	</para></listitem>
 	<listitem><para>
-	  <quote>Consecutive Calls</quote>:
+	  <quote>Multiple Applications, Consecutive Calls</quote>:
 	  multiple <emphasis>Application Programs</emphasis> with single or
 	  multiple <emphasis>Resource Managers</emphasis>, only one
 	  <emphasis>Application Program</emphasis> is working as part of a
@@ -207,7 +207,7 @@
 	  composed by a single transaction branch
 	</para></listitem>
 	<listitem><para>
-	  <quote>Consecutive Branches/Pseudo Synchronous</quote>:
+	  <quote>Multiple Applications, Concurrent Branches/Pseudo Synchronous</quote>:
 	  multiple <emphasis>Application Programs</emphasis> with single or
 	  multiple <emphasis>Resource Managers</emphasis>, many 
 	  <emphasis>Application Programs</emphasis> are concurrently working
@@ -218,7 +218,7 @@
 	  <quote>Pseudo Synchronous</quote>
 	</para></listitem>
 	<listitem><para>
-	  <quote>Consecutive Branches/Pseudo Asynchronous</quote>:
+	  <quote>Multiple Applications, Concurrent Branches/Pseudo Asynchronous</quote>:
 	  multiple <emphasis>Application Programs</emphasis> with single or
 	  multiple <emphasis>Resource Managers</emphasis>, many 
 	  <emphasis>Application Programs</emphasis> are concurrently working
@@ -230,5 +230,135 @@
 	</para></listitem>
       </itemizedlist>
     </para>
+    <section>
+      <title>The
+      <quote>Single Application</quote>
+      Pattern</title>
+      <table frame="box">
+	<thead>
+	  <tr><td>The pattern in brief:</td></tr>
+	</thead>
+	<tbody>
+	  <tr>
+	    <td>Architecture:</td>
+	    <td>see <xref linkend="xta_arch02"/></td>
+	  </tr>
+	  <tr>
+	    <td>Number of Application Programs:</td>
+	    <td>exactly 1</td>
+	  </tr>
+	  <tr>
+	    <td>Number of Resource Managers:</td>
+	    <td>many, if 1 single phase commit will be used</td>
+	  </tr>
+	  <tr>
+	    <td>Number of Branches in the Gloabal Transaction:</td>
+	    <td>exactly 1</td>
+	  </tr>
+	  <tr>
+	    <td>Concurrency among Application Programs:</td>
+	    <td>not applicable</td>
+	  </tr>
+	</tbody>
+      </table>
+      <para>
+      </para>
+    </section>
+    <section>
+      <title>The
+      <quote>Multiple Applications, Consecutive Calls</quote>
+      Pattern</title>
+      <table frame="box">
+	<thead>
+	  <tr><td>The pattern in brief:</td></tr>
+	</thead>
+	<tbody>
+	  <tr>
+	    <td>Architecture:</td>
+	    <td>see <xref linkend="xta_arch03"/></td>
+	  </tr>
+	  <tr>
+	    <td>Number of Application Programs:</td>
+	    <td>2 or more</td>
+	  </tr>
+	  <tr>
+	    <td>Number of Resource Managers:</td>
+	    <td>1 or more for every Application Program</td>
+	  </tr>
+	  <tr>
+	    <td>Number of Branches in the Gloabal Transaction:</td>
+	    <td>1 for every Application Program</td>
+	  </tr>
+	  <tr>
+	    <td>Concurrency among Application Programs:</td>
+	    <td>no, strictly consecutive executive</td>
+	  </tr>
+	</tbody>
+      </table>
+    </section>
+    <section>
+      <title>The
+      <quote>Multiple Applications, Concurrent Branches/Pseudo Synchronous</quote>
+      Pattern</title>
+      <table frame="box">
+	<thead>
+	  <tr><td>The pattern in brief:</td></tr>
+	</thead>
+	<tbody>
+	  <tr>
+	    <td>Architecture:</td>
+	    <td>see <xref linkend="xta_arch03"/></td>
+	  </tr>
+	  <tr>
+	    <td>Number of Application Programs:</td>
+	    <td>2 or more</td>
+	  </tr>
+	  <tr>
+	    <td>Number of Resource Managers:</td>
+	    <td>1 or more for every Application Program</td>
+	  </tr>
+	  <tr>
+	    <td>Number of Branches in the Gloabal Transaction:</td>
+	    <td>1 for every Application Program</td>
+	  </tr>
+	  <tr>
+	    <td>Concurrency among Application Programs:</td>
+	    <td>yes, subordinate AP prepares the transaction, returns control to superior AP and finally completes commit</td>
+	  </tr>
+	</tbody>
+      </table>
+    </section>
+    <section>
+      <title>The
+      <quote>Multiple Applications, Concurrent Branches/Pseudo Asynchronous</quote>
+      Pattern</title>
+      <table frame="box">
+	<thead>
+	  <tr><td>The pattern in brief:</td></tr>
+	</thead>
+	<tbody>
+	  <tr>
+	    <td>Architecture:</td>
+	    <td>see <xref linkend="xta_arch03"/></td>
+	  </tr>
+	  <tr>
+	    <td>Number of Application Programs:</td>
+	    <td>2 or more</td>
+	  </tr>
+	  <tr>
+	    <td>Number of Resource Managers:</td>
+	    <td>1 or more for every Application Program</td>
+	  </tr>
+	  <tr>
+	    <td>Number of Branches in the Gloabal Transaction:</td>
+	    <td>1 for every Application Program</td>
+	  </tr>
+	  <tr>
+	    <td>Concurrency among Application Programs:</td>
+	    <td>yes, subordinate AP creates a new branch and then executes asynchronously</td>
+	  </tr>
+	</tbody>
+      </table>
+    </section>
   </section>
 </chapter>
