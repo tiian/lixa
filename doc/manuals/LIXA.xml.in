@@ -14,7 +14,9 @@
 <!ENTITY indepth SYSTEM "LIXA_In_Depth.xml">
 <!ENTITY tuning SYSTEM "LIXA_Tuning.xml">
 <!ENTITY biblio SYSTEM "LIXA_Bibliography.xml">
+
 ]>
+
 <book xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">
   <title>LIXA Reference Guide (version @PACKAGE_VERSION@)</title>
   <subtitle>

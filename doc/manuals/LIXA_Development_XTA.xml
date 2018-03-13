@@ -262,7 +262,95 @@
 	</tbody>
       </table>
       <para>
+	This is a traditional Distributed Transaction Processing pattern: a
+	single Application Program uses two or more Resource Managers and
+	performs a transaction that change the state of both. Here is a list
+	of examples:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	    RM1 and RM2 are two different databases, for example PostgreSQL and
+	    MySQL (or MariaDB): the Application Program moves a record from
+	    RM1 (PostgreSQL) to RM2 (MySQL)
+	  </para></listitem>
+	  <listitem><para>
+	    RM1 and RM2 are a messaging system and a database, for example
+	    IBM MQ and Oracle Databae Server: the Application Program get a
+	    message from a queue, insert a row in a table, remove the message
+	    from the queue
+	  </para></listitem>
+	  <listitem><para>
+	    RM1 and RM2 are two different types of database and the 
+	    Application Program inserts exactly the same data in both, maybe
+	    using a different format
+	  </para></listitem>
+	</itemizedlist>
+	The pattern can be implemented even using the standard TX Transaction
+	Demarcation interface, but XTA is much more object oriented.
+	<figure xml:id="xta_pattern01">
+	  <title>simplified sequence diagram for the <quote>Single Application
+	  Program</quote> Pattern</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="../images/LIXA_Development_XTA_04.png"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	The above figure shows the logic necessary to build this type of
+	application; it's <emphasis>not</emphasis> a formally correct UML
+	sequence diagram, but it should be clear enough to understand the
+	proper operations sequence:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	    The Application Program (AP) creates the native
+	    objects/connections/handles
+	    <footnote><para>
+	      Examples: <function>mysql_real_connect</function> for MySQL,
+	      <function>PQconnectDB</function> for PostgreSQL.
+	    </para></footnote>
+	    that are necessary to operate with the Resource Managers
+	    <footnote><para>
+	      Some Resource Managers, like for example Oracle Database Server,
+	      don't allow to be created as <quote>normal</quote> connections
+	      and then transformed in <emphasis>XA connections</emphasis>:
+	      they must be directly created by XTA.
+	    </para></footnote>
+	  </para></listitem>
+	  <listitem><para>
+	    The AP creates a <function>TransactionManager</function> and some 
+	    <function>XaResource</function> objects
+	  </para></listitem>
+	  <listitem><para>
+	    The AP uses the <function>Open()</function> method
+	    to initialized the <function>XaResource</function> objects
+	  </para></listitem>
+	  <listitem><para>
+	    The AP uses the <function>Start()</function> method
+	    to start a new XA distributed transaction
+	  </para></listitem>
+	  <listitem><para>
+	    The AP interacts with the Resource Managers, using the native
+	    objects/connections/handles to operate
+	  </para></listitem>
+	  <listitem><para>
+	    The AP uses the <function>Commit()</function> method to commit the
+	    distributed transaction, or the <function>Rollback()</function>
+	    method to rollback all the changes since
+	    <function>Start()</function>
+	  </para></listitem>
+	  <listitem><para>
+	    The AP cleans-up the environment
+	  </para></listitem>
+	</itemizedlist>
       </para>
+      <note><para>
+	The methods listed in the above description must be considered
+	<quote>pseudo-code</quote>: the real name and signature is language
+	dependent. As an example, 
+	<screen>tm = new TransactionManager()</screen> translates to
+	<screen>tm = xta_transaction_manager_new()</screen> and
+	<screen>tx.Commit()</screen> translates to
+	<screen>xta_transaction_commit(tx, FALSE)</screen> in C.
+      </para></note>
     </section>
     <section>
       <title>The
