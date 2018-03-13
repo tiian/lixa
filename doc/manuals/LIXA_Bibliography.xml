@@ -1,4 +1,5 @@
-<bibliography xmlns='http://docbook.org/ns/docbook'>
+<bibliography xmlns='http://docbook.org/ns/docbook'
+	      xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Bibliography</title>
 
   <bibliodiv><title>Books</title>

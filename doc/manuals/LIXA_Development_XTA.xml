@@ -1,4 +1,5 @@
-<chapter xml:id="Development_XTA">
+<chapter xml:id="Development_XTA"
+	 xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Developing Application Programs using XTA (XA Transactional API) interface</title>
   <para>
     This chapter explains what XTA is and how you can develop applications

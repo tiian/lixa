@@ -1,4 +1,5 @@
-<chapter xml:id="Development_TC">
+<chapter xml:id="Development_TC"
+	 xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Developing C Application Programs with the Transaction Coupling (TC) TX extensions</title>
   <para>
     This chapter explains how you can develop your own C application using the libraries and tools supplied by the LIXA project.

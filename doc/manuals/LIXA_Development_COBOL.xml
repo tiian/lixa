@@ -1,4 +1,5 @@
-<chapter xml:id="Development_COBOL">
+<chapter xml:id="Development_COBOL"
+	 xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Developing COBOL Application Programs using TX (Transaction
   Demarcation) interface</title>
   <para>

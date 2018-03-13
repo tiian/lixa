@@ -1,4 +1,5 @@
-<chapter xml:id="Development">
+<chapter xml:id="Development"
+	 xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Developing C Application Programs using TX (Transaction
   Demarcation) interface</title>
   <para>

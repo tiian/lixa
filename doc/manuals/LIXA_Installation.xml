@@ -1,4 +1,5 @@
-<chapter xml:id="Installation">
+<chapter xml:id="Installation" 
+	 xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Installation</title>
   <para>
     This chapter explains how to download, install and verify the software

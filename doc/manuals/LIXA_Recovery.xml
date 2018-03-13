@@ -1,4 +1,5 @@
-<chapter xml:id="Recovery">
+<chapter xml:id="Recovery"
+	 xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Recovery</title> 
   <para>
     This chapter explains some advanced concepts that the LIXA system

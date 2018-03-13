@@ -1,4 +1,4 @@
-<chapter>
+<chapter xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Execution</title>
   <para>
     Once you have installed (see <xref linkend="Installation"/>)

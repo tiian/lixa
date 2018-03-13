@@ -1,4 +1,5 @@
-<preface>
+<?xml version="1.0" encoding="UTF-8"?>
+<preface xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Preface</title>
   <para>
     LIXA is acronym of LIbre XA: it's a free, libre, open source

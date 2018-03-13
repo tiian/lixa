@@ -1,4 +1,5 @@
-<chapter xml:id="Configuration">
+<chapter xml:id="Configuration"
+	 xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Configuration</title>
   <para>
     A LIXA system is the assembling of two components: the client and 

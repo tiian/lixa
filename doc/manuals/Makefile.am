@@ -24,10 +24,10 @@ all: index_all_in_one.html index.html
 if COMPILE_DOCBOOK_STUFF
 index_all_in_one.html: $(manual_sources)
 	@echo "Creating HTML manual (single page)..."
-	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index_all_in_one.html $(STYLESHEETS_DIR)/docbook.xsl LIXA.xml
+	xsltproc --xinclude --stringparam generate.toc "book toc,title,figure,example,equation" -o index_all_in_one.html $(STYLESHEETS_DIR)/docbook.xsl LIXA.xml
 index.html: $(manual_sources)
 	@echo "Creating HTML manual (multi page)..."
-	xsltproc --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/chunk.xsl LIXA.xml
+	xsltproc --xinclude --stringparam generate.toc "book toc,title,figure,example,equation" -o index.html $(STYLESHEETS_DIR)/chunk.xsl LIXA.xml
 else
 index_all_in_one.html: $(manual_sources)
 	@echo "Sorry, you must have xsltproc and Docbook stylesheets to create HTML manual from XML files"
