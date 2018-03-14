@@ -298,7 +298,8 @@
 	</figure>
 	The above figure shows the logic necessary to build this type of
 	application; it's <emphasis>not</emphasis> a formally correct UML
-	sequence diagram, but it should be clear enough to understand the
+	sequence diagram (all the XTA objects are in the same lifeline), but
+	it should be clear enough to understand the
 	proper operations sequence:
 	<itemizedlist mark='bullet'>
 	  <listitem><para>
@@ -317,8 +318,15 @@
 	    </para></footnote>
 	  </para></listitem>
 	  <listitem><para>
-	    The AP creates a <function>TransactionManager</function> and some 
-	    <function>XaResource</function> objects
+	    The AP creates some XTA objects: a
+	    <function>TransactionManager</function>,
+	    two <function>XaResource</function>
+	    and one <function>Transaction</function>
+	  </para></listitem>
+	  <listitem><para>
+	    The AP <quote>enlists</quote> the XA resources that 
+	    <emphasis>must be controlled by the transaction</emphasis>
+	    using <function>EnlistResource()</function> method
 	  </para></listitem>
 	  <listitem><para>
 	    The AP uses the <function>Open()</function> method
@@ -331,6 +339,7 @@
 	  <listitem><para>
 	    The AP interacts with the Resource Managers, using the native
 	    objects/connections/handles to operate
+	    (<quote>doSomething</quote> method in the diagram)
 	  </para></listitem>
 	  <listitem><para>
 	    The AP uses the <function>Commit()</function> method to commit the

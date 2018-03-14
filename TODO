@@ -43,6 +43,8 @@ workload. Avoid disk persistence, prefer distributed memory semi persistence.
 Implement an utility feature to check disk synchronization latency and report
 it.
 
+Supply Dockerfile to build a Docker container image.
+
 Resource Managers suggested:
 RabbitMQ (Jim Doyle)
 Berkeley DB - Sleepycat (Jim Doyle)
