@@ -21,27 +21,12 @@
 
 
 
-#include <config.h>
-
-
-
 /* LIXA includes */
 #include "client_config.h"
 /* XA include */
 #include "xa.h"
 /* XTA includes */
 #include "xta_xid.h"
-
-
-
-/* save old LIXA_TRACE_MODULE and set a new value */
-#ifdef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
-# undef LIXA_TRACE_MODULE
-#else
-# undef LIXA_TRACE_MODULE_SAVE
-#endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_XTA
 
 
 
@@ -182,10 +167,7 @@ extern "C" {
      * @ref TMJOIN is specified, the start applies to joining a transaction
      * previously seen by the resource manager. If @ref TMRESUME is specified,
      * the start applies to resuming a suspended transaction specified in the
-     * parameter xid. If neither @ref TMJOIN nor @ref TMRESUME is specified and
-     * the transaction specified by xid has previously been seen by the
-     * resource manager, the resource manager returns @ref XTA_RC_XAER_DUPID
-     * error code.
+     * parameter xid.
      * @param[in,out] this : resource object
      * @param[in] xid : transaction identifier object
      * @param[in] flag : one of @ref TMNOFLAGS, @ref TMJOIN, or @ref TMRESUME
@@ -250,15 +232,6 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-
-
-/* restore old value of LIXA_TRACE_MODULE */
-#ifdef LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE_SAVE
-#endif /* LIXA_TRACE_MODULE_SAVE */
 
 
 

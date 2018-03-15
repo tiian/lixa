@@ -4,9 +4,9 @@
  *
  * This file is part of LIXA.
  *
- * LIXA is free software: you can redistribute this file and/or modify
- * it under the terms of the GNU Lesser General Public License version 2.1 as
- * published by the Free Software Foundation.
+ * LIXA is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
  *
  * LIXA is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,28 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef XTA_INIT_H
-# define XTA_INIT_H
 
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+/*
+ * This program is an example implementation of the "Single Application Program
+ * Pattern" as documented in LIXA manual:
+ * http://www.tiian.org/lixa/manuals/html/index.html
+ */
 
 
 
-    /**
-     * Initialize XTA environment: it must be called only once at process start
-     */
-    void xta_init(void);
+/*
+ * This header is necessary for all the XTA related definitions
+ */
+#include <xta/xta.h>
 
 
 
-#ifdef __cplusplus
+int main(int argc, char *argv[])
+{
+    return 0;
 }
-#endif /* __cplusplus */
-
-
-
-#endif /* XTA_INIT_H */
