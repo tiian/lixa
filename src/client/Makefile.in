@@ -84,8 +84,9 @@ bin_PROGRAMS = lixar$(EXEEXT) lixat$(EXEEXT) lixau$(EXEEXT) \
 	lixavsr$(EXEEXT) lixa-config$(EXEEXT) lixatpm$(EXEEXT)
 subdir = src/client
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(srcdir)/lixa-config.c.in $(top_srcdir)/depcomp \
-	$(am__include_HEADERS_DIST) $(am__noinst_HEADERS_DIST)
+	$(srcdir)/lixa.h.in $(srcdir)/lixa-config.c.in \
+	$(top_srcdir)/depcomp $(am__include_HEADERS_DIST) \
+	$(am__noinst_HEADERS_DIST)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -98,7 +99,8 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/config.h $(top_builddir)/src/xta/xta.h
+CONFIG_HEADER = $(top_builddir)/config.h lixa.h \
+	$(top_builddir)/src/xta/xta.h
 CONFIG_CLEAN_FILES = lixa-config.c
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -242,10 +244,10 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__include_HEADERS_DIST = lixa.h lixanonapi.h tx.h TXSTATUS.cpy \
-	TXINFDEF.cpy LIXAXID.cpy
+am__include_HEADERS_DIST = lixa.h lixa_iface.h lixanonapi.h tx.h \
+	TXSTATUS.cpy TXINFDEF.cpy LIXAXID.cpy
 am__noinst_HEADERS_DIST = client_config.h client_conn.h \
-	client_recovery.h client_status.h lixa_iface.h lixa_tx.h \
+	client_recovery.h client_status.h lixa.h.in lixa_tx.h \
 	lixa_tx_rc.h lixa_xa.h client_tpm.h lixa_tx_cobol.h
 HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
@@ -256,7 +258,8 @@ am__recursive_targets = \
   $(am__extra_recursive_targets)
 AM_RECURSIVE_TARGETS = $(am__recursive_targets:-recursive=) TAGS CTAGS \
 	distdir
-am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
+am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
+	$(LISP)lixa.h.in
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
 # *not* preserved.
@@ -364,8 +367,10 @@ LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LIXA_CONFIG_BINDIR = @LIXA_CONFIG_BINDIR@
+LIXA_CONFIG_GLIB2_INCLUDEDIR = @LIXA_CONFIG_GLIB2_INCLUDEDIR@
 LIXA_CONFIG_INCLUDEDIR = @LIXA_CONFIG_INCLUDEDIR@
 LIXA_CONFIG_LIBDIR = @LIXA_CONFIG_LIBDIR@
+LIXA_CONFIG_LIBXML2_INCLUDEDIR = @LIXA_CONFIG_LIBXML2_INCLUDEDIR@
 LIXA_CONFIG_LOCALSTATEDIR = @LIXA_CONFIG_LOCALSTATEDIR@
 LIXA_CONFIG_PREFIX = @LIXA_CONFIG_PREFIX@
 LIXA_CONFIG_SYSCONFDIR = @LIXA_CONFIG_SYSCONFDIR@
@@ -492,9 +497,9 @@ top_srcdir = @top_srcdir@
 @COND_COBOLAPI_TRUE@COBOL_INCLUDE = lixa_tx_cobol.h
 @COND_COBOLAPI_TRUE@COBOL_SOURCE = lixa_tx_cobol.c
 SUBDIRS = switch .
-include_HEADERS = lixa.h lixanonapi.h tx.h $(COBOL_COPYBOOKS)
+include_HEADERS = lixa.h lixa_iface.h lixanonapi.h tx.h $(COBOL_COPYBOOKS)
 noinst_HEADERS = client_config.h client_conn.h client_recovery.h \
-	client_status.h lixa_iface.h lixa_tx.h lixa_tx_rc.h lixa_xa.h \
+	client_status.h lixa.h.in lixa_tx.h lixa_tx_rc.h lixa_xa.h \
 	client_tpm.h $(COBOL_INCLUDE)
 
 lib_LTLIBRARIES = liblixac.la
@@ -536,7 +541,8 @@ lixatpm_CPPFLAGS = -I$(srcdir)/../common
 lixatpm_LDADD = ../common/liblixab.la liblixac.la
 lixatpm_LDFLAGS = @LDFLAGS_GLIB@ @LDFLAGS_XML2@
 lixatpm_SOURCES = lixatpm.c
-all: all-recursive
+all: lixa.h
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -570,6 +576,17 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+
+lixa.h: stamp-h2
+	@test -f $@ || rm -f stamp-h2
+	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) stamp-h2
+
+stamp-h2: $(srcdir)/lixa.h.in $(top_builddir)/config.status
+	@rm -f stamp-h2
+	cd $(top_builddir) && $(SHELL) ./config.status src/client/lixa.h
+
+distclean-hdr:
+	-rm -f lixa.h stamp-h2
 lixa-config.c: $(top_builddir)/config.status $(srcdir)/lixa-config.c.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
@@ -1075,7 +1092,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-recursive
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS) lixa.h
 install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs: installdirs-recursive
@@ -1122,7 +1139,7 @@ distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-tags
+	distclean-hdr distclean-tags
 
 dvi: dvi-recursive
 
@@ -1185,24 +1202,25 @@ ps-am:
 uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS \
 	uninstall-libLTLIBRARIES
 
-.MAKE: $(am__recursive_targets) install-am install-strip
+.MAKE: $(am__recursive_targets) all install-am install-strip
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am check \
 	check-am clean clean-binPROGRAMS clean-generic \
 	clean-libLTLIBRARIES clean-libtool cscopelist-am ctags \
 	ctags-am distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-includeHEADERS install-info install-info-am \
-	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-includeHEADERS uninstall-libLTLIBRARIES
+	distclean-hdr distclean-libtool distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-binPROGRAMS install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-includeHEADERS install-info \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-includeHEADERS \
+	uninstall-libLTLIBRARIES
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

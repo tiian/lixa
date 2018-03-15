@@ -95,7 +95,8 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/config.h xta.h
+CONFIG_HEADER = $(top_builddir)/config.h \
+	$(top_builddir)/src/client/lixa.h xta.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -163,7 +164,7 @@ AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir) -I$(top_builddir)/src/client
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -275,8 +276,10 @@ LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LIXA_CONFIG_BINDIR = @LIXA_CONFIG_BINDIR@
+LIXA_CONFIG_GLIB2_INCLUDEDIR = @LIXA_CONFIG_GLIB2_INCLUDEDIR@
 LIXA_CONFIG_INCLUDEDIR = @LIXA_CONFIG_INCLUDEDIR@
 LIXA_CONFIG_LIBDIR = @LIXA_CONFIG_LIBDIR@
+LIXA_CONFIG_LIBXML2_INCLUDEDIR = @LIXA_CONFIG_LIBXML2_INCLUDEDIR@
 LIXA_CONFIG_LOCALSTATEDIR = @LIXA_CONFIG_LOCALSTATEDIR@
 LIXA_CONFIG_PREFIX = @LIXA_CONFIG_PREFIX@
 LIXA_CONFIG_SYSCONFDIR = @LIXA_CONFIG_SYSCONFDIR@
@@ -409,12 +412,12 @@ top_srcdir = @top_srcdir@
 @COMPILE_POSTGRESQL_STUFF_TRUE@	-I$(top_srcdir)/src/client/switch/postgresql
 
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
-include_HEADERS = xta.h xta_init.h xta_transaction.h \
+include_HEADERS = xta.h xta_iface.h xta_init.h xta_transaction.h \
 	xta_transaction_manager.h xta_xid.h \
 	xta_xa_resource.h xta_native_xa_resource.h xta_acquired_xa_resource.h \
 	xta_postgresql_xa_resource.h xta_mysql_xa_resource.h
 
-noinst_HEADERS = xta.h.in xta_iface.h
+noinst_HEADERS = xta.h.in
 lib_LTLIBRARIES = liblixta.la
 liblixta_la_SOURCES = xta_init.c xta_transaction.c \
 	xta_transaction_manager.c xta_xid.c \
@@ -467,16 +470,16 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 
-xta.h: stamp-h2
-	@test -f $@ || rm -f stamp-h2
-	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) stamp-h2
+xta.h: stamp-h3
+	@test -f $@ || rm -f stamp-h3
+	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) stamp-h3
 
-stamp-h2: $(srcdir)/xta.h.in $(top_builddir)/config.status
-	@rm -f stamp-h2
+stamp-h3: $(srcdir)/xta.h.in $(top_builddir)/config.status
+	@rm -f stamp-h3
 	cd $(top_builddir) && $(SHELL) ./config.status src/xta/xta.h
 
 distclean-hdr:
-	-rm -f xta.h stamp-h2
+	-rm -f xta.h stamp-h3
 
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)

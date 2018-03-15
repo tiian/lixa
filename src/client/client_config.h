@@ -51,6 +51,7 @@
 
 #include "lixa_trace.h"
 #include "lixa_config.h"
+#include "lixa.h"
 #include "xa.h"
 #include "lixa_iface.h"
 
@@ -110,63 +111,6 @@ struct sttsrv_config_s {
      * Port used to reach the transaction manager
      */
     in_port_t port;
-};
-
-
-
-/**
- * It contains the configuration of a resource manager (how to reach and
- * use it)
- */
-struct rsrmgr_config_s {
-    /**
-     * Name associated to the resource manager
-     */
-    xmlChar *name;
-    /**
-     * Switch file must be used to interact with the resource manager
-     */
-    xmlChar *switch_file;
-    /**
-     * xa_info string must be passed to the resource manager at xa_open
-     * invocation
-     */
-    char     xa_open_info[MAXINFOSIZE];
-    /**
-     * xa_info string must be passed to the resource manager at xa_close
-     * invocation
-     */
-    char     xa_close_info[MAXINFOSIZE];
-};
-
-
-
-/**
- * It contains the properties of a resource manager has been specified inside
- * the actual transactional profile; this is a reacher struct than
- * @ref rsrmgr_config_s
- */
-struct act_rsrmgr_config_s {
-    /**
-     * This is a reference to the struct as parsed from XML config file
-     */
-    struct rsrmgr_config_s *generic;
-    /**
-     * This is a pointer to the dynamically loaded module containing the
-     * interface wrapped by @ref xa_switch_t
-     */
-    GModule                *module;
-    /**
-     * Pointer to the structure must be used to interface the resource
-     * manager
-     */
-    lixa_iface_t            lixa_iface;
-    /**
-     * TRUE if the configuration has been dynamically defined by the
-     * Application Program using XTA interface; FALSE if the configuration has
-     * been statically defined inside the lixac.conf file
-     */
-    int                     dynamically_defined;
 };
 
 

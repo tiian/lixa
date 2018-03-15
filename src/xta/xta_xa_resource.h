@@ -22,9 +22,7 @@
 
 
 /* LIXA includes */
-#include "client_config.h"
-/* XA include */
-#include "xa.h"
+#include "lixa.h"
 /* XTA includes */
 #include "xta_xid.h"
 

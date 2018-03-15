@@ -1,3 +1,8 @@
+Restart with the same sample command:
+gcc example_xta_sa01.c $(lixa-config -c -f -l -d) -I/opt/lixa/include/xta -o example_xta_sa01
+executed from directory 
+lixa/doc/examples/xta
+
 Remove from server_xa_open, server_xa_end, server_xa_commit, server_recovery,
 server_ax_reg, server_ax_unreg, server_xa_forget, server_trans the parameter
 cs and compute it inside using ts and slot_id
@@ -25,6 +30,8 @@ Implement server side crash tests for XTA
 Declare XTA as completed
 
 Implement XTA for C++
+
+Implement XTA for PHP, remove "ext" legacy code, update documentation
 
 Put all configuration in XTA without necessity to load lixac_conf.xml file
 

@@ -11,11 +11,11 @@ if COMPILE_POSTGRESQL_STUFF
 MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
 endif
 includedir = $(prefix)/include/xta
-include_HEADERS = xta.h xta_init.h xta_transaction.h \
+include_HEADERS = xta.h xta_iface.h xta_init.h xta_transaction.h \
 	xta_transaction_manager.h xta_xid.h \
 	xta_xa_resource.h xta_native_xa_resource.h xta_acquired_xa_resource.h \
 	xta_postgresql_xa_resource.h xta_mysql_xa_resource.h
-noinst_HEADERS = xta.h.in xta_iface.h
+noinst_HEADERS = xta.h.in
 lib_LTLIBRARIES = liblixta.la
 liblixta_la_SOURCES = xta_init.c xta_transaction.c \
 	xta_transaction_manager.c xta_xid.c \

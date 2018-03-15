@@ -22,10 +22,99 @@
 
 
 /*
- * This header specify the LIXA extensions to TX interface.
- *
- * NOTE: these functions are NOT standard: they are LIXA specific.
+ * WARNING:
+ * xta.h is produced by xta.h.in: don't update xta.h, update only xta.h.in
  */
+
+
+
+/*
+ * This header contains:
+ * - additional type and struct definitions that are necessary for building
+ *   Application Programs
+ * - functions that provides additional features, for instance how the
+ *   project has been compiled
+ */
+
+
+
+#undef HAVE_GLIB_H
+#undef HAVE_GMODULE_H
+#undef HAVE_LIBXML_PARSER_H
+
+
+
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
+#ifdef HAVE_GMODULE_H
+# include <gmodule.h>
+#endif
+#ifdef HAVE_LIBXML_PARSER_H
+# include <libxml/parser.h>
+#endif
+
+
+
+#include "xa.h"
+#include "lixa_iface.h"
+
+
+
+/**
+ * It contains the configuration of a resource manager (how to reach and
+ * use it)
+ */
+struct rsrmgr_config_s {
+    /**
+     * Name associated to the resource manager
+     */
+    xmlChar *name;
+    /**
+     * Switch file must be used to interact with the resource manager
+     */
+    xmlChar *switch_file;
+    /**
+     * xa_info string must be passed to the resource manager at xa_open
+     * invocation
+     */
+    char     xa_open_info[MAXINFOSIZE];
+    /**
+     * xa_info string must be passed to the resource manager at xa_close
+     * invocation
+     */
+    char     xa_close_info[MAXINFOSIZE];
+};
+
+
+
+/**
+ * It contains the properties of a resource manager has been specified inside
+ * the actual transactional profile; this is a reacher struct than
+ * @ref rsrmgr_config_s
+ */
+struct act_rsrmgr_config_s {
+    /**
+     * This is a reference to the struct as parsed from XML config file
+     */
+    struct rsrmgr_config_s *generic;
+    /**
+     * This is a pointer to the dynamically loaded module containing the
+     * interface wrapped by @ref xa_switch_t
+     */
+    GModule                *module;
+    /**
+     * Pointer to the structure must be used to interface the resource
+     * manager
+     */
+    lixa_iface_t            lixa_iface;
+    /**
+     * TRUE if the configuration has been dynamically defined by the
+     * Application Program using XTA interface; FALSE if the configuration has
+     * been statically defined inside the lixac.conf file
+     */
+    int                     dynamically_defined;
+};
 
 
 

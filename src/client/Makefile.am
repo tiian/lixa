@@ -4,9 +4,9 @@ if COND_COBOLAPI
   COBOL_SOURCE = lixa_tx_cobol.c
 endif
 SUBDIRS = switch .
-include_HEADERS = lixa.h lixanonapi.h tx.h $(COBOL_COPYBOOKS)
+include_HEADERS = lixa.h lixa_iface.h lixanonapi.h tx.h $(COBOL_COPYBOOKS)
 noinst_HEADERS = client_config.h client_conn.h client_recovery.h \
-	client_status.h lixa_iface.h lixa_tx.h lixa_tx_rc.h lixa_xa.h \
+	client_status.h lixa.h.in lixa_tx.h lixa_tx_rc.h lixa_xa.h \
 	client_tpm.h $(COBOL_INCLUDE)
 lib_LTLIBRARIES = liblixac.la
 liblixac_la_SOURCES = client_config.c client_conn.c client_recovery.c \

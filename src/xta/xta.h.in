@@ -21,6 +21,20 @@
 
 
 
+/*
+ * WARNING:
+ * xta.h is produced by xta.h.in: don't update xta.h, update only xta.h.in
+ */
+
+
+
+/*
+ * This header contains:
+ * - all the necessary to compile an Application Program that uses XTA
+ *   XA Transactional API
+ */
+
+
 #undef HAVE_MYSQL
 #undef HAVE_ORACLE
 #undef HAVE_POSTGRESQL
@@ -28,7 +42,6 @@
 
 
 #include <xta_init.h>
-#include <xta_errors.h>
 #include <xta_xa_resource.h>
 #include <xta_native_xa_resource.h>
 #ifdef HAVE_MYSQL
