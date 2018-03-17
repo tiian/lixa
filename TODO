@@ -1,5 +1,5 @@
 Restart with the same sample command:
-gcc example_xta_sa01.c $(lixa-config -c -f -l -d) -I/opt/lixa/include/xta -o example_xta_sa01
+gcc example_xta_sa01.c $(lixa-config -x -c -f -l -d) -I/opt/lixa/include/xta -o example_xta_sa01
 executed from directory 
 lixa/doc/examples/xta
 
@@ -17,10 +17,6 @@ Implement timeout to avoid a too long block time for clients (timeout parameter
 in xa_prepare step 8 and step 24 messages)
 
 Check memory leaks in state server after branch implementation.
-
-Including xta/xta.h will include some resource manager include files (MySQL,
-PostgreSQL, Oracle, etc...). Provide utility for CPPFLAGS and LDADD for custom
-software build.
 
 Is the state file synchronization after xa_start really necessary? Can it be
 removed?
