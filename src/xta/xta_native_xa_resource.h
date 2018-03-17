@@ -23,6 +23,7 @@
 
 /* XTA includes */
 #include "xta_xa_resource.h"
+#include "xta_transaction_manager.h"
 
 
 
@@ -80,7 +81,7 @@ extern "C" {
      * @return a new object or NULL in the event of error
      */
     xta_native_xa_resource_t *xta_native_xa_resource_new_by_rmid(
-        int rmid, const client_config_coll_t *config);
+        int rmid, const xta_transaction_manager_config_t *config);
 
     
     
@@ -120,7 +121,7 @@ extern "C" {
      */
     int xta_native_xa_resource_init(
         xta_native_xa_resource_t *this,
-        int rmid, const client_config_coll_t *config,
+        int rmid, const xta_transaction_manager_config_t *config,
         const char *name, const char *switch_file,
         const char *open_info, const char *close_info);
     

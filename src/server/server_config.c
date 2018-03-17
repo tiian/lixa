@@ -16,61 +16,47 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
+
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
-
 # include <sys/types.h>
-
 #endif
 #ifdef HAVE_SYS_STAT_H
-
 # include <sys/stat.h>
-
 #endif
 #ifdef HAVE_FCNTL_H
-
 # include <fcntl.h>
-
 #endif
 #ifdef HAVE_STRING_H
-
 # include <string.h>
-
 #endif
 #ifdef HAVE_SYS_SOCKET_H
-
 # include <sys/socket.h>
-
 #endif
 #ifdef HAVE_SYSLOG_H
-
 # include <syslog.h>
-
 #endif
 #ifdef HAVE_UNISTD_H
-
 # include <unistd.h>
-
 #endif
 #ifdef HAVE_LIBXML_TREE_H
-
 # include <libxml/tree.h>
-
 #endif
 #ifdef HAVE_LIBXML_PARSER_H
-
 # include <libxml/parser.h>
-
 #endif
 
 
-#include <lixa_errors.h>
-#include <lixa_trace.h>
-#include <lixa_config.h>
-#include <lixa_syslog.h>
-#include <server_config.h>
+#include "lixa_errors.h"
+#include "lixa_trace.h"
+#include "lixa_config.h"
+#include "lixa_syslog.h"
+#include "server_config.h"
 
 
 

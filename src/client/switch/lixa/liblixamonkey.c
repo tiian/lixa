@@ -16,12 +16,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
+#endif
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
 #endif
 #ifdef HAVE_GLIB_H
 # include <glib.h>

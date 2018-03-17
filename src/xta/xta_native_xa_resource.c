@@ -93,7 +93,7 @@ xta_native_xa_resource_t *xta_native_xa_resource_new(
 
 
 xta_native_xa_resource_t *xta_native_xa_resource_new_by_rmid(
-    int rmid, const client_config_coll_t *config)
+    int rmid, const xta_transaction_manager_config_t *config)
 {
     enum Exception { G_TRY_MALLOC_ERROR
                      , XTA_NATIVE_XA_RESOURCE_INIT_ERROR
@@ -170,7 +170,7 @@ void xta_native_xa_resource_delete(xta_native_xa_resource_t *this)
 
 int xta_native_xa_resource_init(
     xta_native_xa_resource_t *this,
-    int rmid, const client_config_coll_t *config, const char *name,
+    int rmid, const xta_transaction_manager_config_t *config, const char *name,
     const char *switch_file, const char *open_info, const char *close_info)
 {
     enum Exception { NULL_OBJECT
@@ -244,14 +244,17 @@ int xta_native_xa_resource_init(
             /* rmid >= 0: get the properties from global configuration that
              * has been loaded by xta_transaction_manager_new() */
             this->xa_resource.dynamic = FALSE;
-            if (rmid >= config->actconf.rsrmgrs->len) {
+            if (rmid >=
+                ((client_config_coll_t *)config)->actconf.rsrmgrs->len) {
                 LIXA_TRACE(("xta_native_xa_resource_init: rmid=%d is out of "
                             "range [0,%u]\n", rmid,
-                            config->actconf.rsrmgrs->len-1));
+                            ((client_config_coll_t *)config)->
+                            actconf.rsrmgrs->len-1));
                 THROW(OUT_OF_RANGE);
             }
-            act_rsrmgr = &g_array_index(config->actconf.rsrmgrs,
-                                        struct act_rsrmgr_config_s, rmid);
+            act_rsrmgr = &g_array_index(
+                ((client_config_coll_t *)config)->actconf.rsrmgrs,
+                struct act_rsrmgr_config_s, rmid);
             /* copy it locally to the resource object */
             this->xa_resource.act_rsrmgr_config = *act_rsrmgr;
         }

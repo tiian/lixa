@@ -23,6 +23,9 @@
 #ifdef HAVE_ARPA_INET_H
 # include <arpa/inet.h>
 #endif
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
+#endif
 #ifdef HAVE_LIBXML_TREE_H
 # include <libxml/tree.h>
 #endif

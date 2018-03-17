@@ -27,6 +27,7 @@
 /* LIXA includes */
 #include "lixa_errors.h"
 #include "lixa_trace.h"
+#include "client_status.h"
 /* XTA includes */
 #include "xta_transaction_manager.h"
 
@@ -117,6 +118,13 @@ void xta_transaction_manager_delete(xta_transaction_manager_t *this)
 
 
 
+xta_transaction_manager_config_t *
+xta_transaction_manager_get_config(void) {
+    return &global_ccc;
+}
+
+
+
 xta_transaction_t *
 xta_transaction_manager_create_transaction(xta_transaction_manager_t *this)
 {
@@ -198,31 +206,3 @@ xta_transaction_manager_create_transaction(xta_transaction_manager_t *this)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return tx;
 }
-
-
-
-int xta_transaction_manager_branch(
-    xta_transaction_manager_t *transaction_manager,
-    const xta_xid_t *xid)
-{
-    enum Exception { NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("xta_transaction_manager_branch\n"));
-    TRY {
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        }
-    }
-    LIXA_TRACE(("xta_transaction_manager_branch/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-

@@ -21,13 +21,8 @@
 
 
 
-#include <config.h>
-
-
 /* PostgreSQL front-end */
-#ifdef HAVE_POSTGRESQL
-# include <libpq-fe.h>
-#endif
+#include <libpq-fe.h>
 /* XTA includes */
 #include "xta_acquired_xa_resource.h"
 /* LIXA includes */

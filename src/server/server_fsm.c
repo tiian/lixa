@@ -20,6 +20,12 @@
 
 
 
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
+#endif
+
+
+
 #include "lixa_errors.h"
 #include "lixa_trace.h"
 #include "server_fsm.h"

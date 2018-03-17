@@ -16,12 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
 #ifdef HAVE_ARPA_INET_H
 # include <arpa/inet.h>
+#endif
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
 #endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>

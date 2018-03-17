@@ -21,31 +21,19 @@
 
 
 
-/* LIXA includes */
-#include "lixa_trace.h"
-#include "client_status.h"
 /* XTA includes */
 #include "xta_transaction.h"
 #include "xta_acquired_xa_resource.h"
 
 
 
-/* save old LIXA_TRACE_MODULE and set a new value */
-#ifdef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
-# undef LIXA_TRACE_MODULE
-#else
-# undef LIXA_TRACE_MODULE_SAVE
-#endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_XTA
-
-
-
 /**
- * This type is just a redefinition of the legacy LIXA type
- * "client_config_coll_t" to avoid a type with a "strange name" in the API
+ * This typedef are necessary to avoid the inclusion of LIXA internals that
+ * are unnecessary for the XTA interface, but necessary for XTA implementation.
+ * The real type is @ref client_config_coll_t, by XTA is used only as a
+ * pointer
  */
-typedef client_config_coll_t xta_transaction_manager_config_t;
+typedef void xta_transaction_manager_config_t;
 
 
 
@@ -97,11 +85,8 @@ extern "C" {
      * object state.
      * @return the pointer to the Transaction Manager configuration object
      */
-    static inline
     xta_transaction_manager_config_t *
-    xta_transaction_manager_get_config(void) {
-        return &global_ccc;
-    }
+    xta_transaction_manager_get_config(void);
     
     
 
@@ -118,31 +103,9 @@ extern "C" {
 
 
 
-    /**
-     * Create a new transaction branch inside an existing global transaction
-     * and associate it with the current process/thread
-     * @param[in,out] this : transaction manager object
-     * @param[in] xid transaction identifier object
-     * @return a reason code
-     */
-    /*
-    int xta_transaction_manager_branch(xta_transaction_manager_t *this,
-                                       const xta_xid_t *xid);
-    */
-
-    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-
-
-/* restore old value of LIXA_TRACE_MODULE */
-#ifdef LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE_SAVE
-#endif /* LIXA_TRACE_MODULE_SAVE */
 
 
 

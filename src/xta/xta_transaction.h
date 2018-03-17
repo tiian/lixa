@@ -21,30 +21,25 @@
 
 
 
-/* LIXA includes */
-#include "lixa_trace.h"
-#include "client_status.h"
 /* XTA includes */
 #include "xta_xa_resource.h"
 
 
 
-/* save old LIXA_TRACE_MODULE and set a new value */
-#ifdef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
-# undef LIXA_TRACE_MODULE
-#else
-# undef LIXA_TRACE_MODULE_SAVE
-#endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_XTA
-
-
-
 /**
- * This type is just a redefinition of the legacy LIXA type
- * @ref client_config_coll_t to avoid a type with a "strange name" in the API
+ * This typedef are necessary to avoid the inclusion of LIXA internals that
+ * are unnecessary for the XTA interface, but necessary for XTA implementation.
+ * The real type is @ref client_status_t, by XTA is used only as a
+ * pointer
  */
-typedef client_config_coll_t xta_transaction_config_t;
+typedef void xta_transaction_client_status_t;
+/**
+ * This typedef are necessary to avoid the inclusion of LIXA internals that
+ * are unnecessary for the XTA interface, but necessary for XTA implementation.
+ * The real type is @ref client_config_coll_t, by XTA is used only as a
+ * pointer
+ */
+typedef void xta_transaction_config_t;
 
 
 
@@ -64,14 +59,14 @@ typedef struct xta_transaction_s {
     /**
      * LIXA client status
      */
-    client_status_t                  client_status;
+    xta_transaction_client_status_t *client_status;
     /**
      * LIXA client configuration (it's a collection). The name of the property
      * contains the prefix "local" to strongly distinguish it from the
      * "global" instance that's used by legacy LIXA due to TX specification
      * limitation
      */
-    xta_transaction_config_t         local_ccc;
+    xta_transaction_config_t        *local_ccc;
     /**
      * Transaction ID
      */
@@ -261,15 +256,6 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-
-
-/* restore old value of LIXA_TRACE_MODULE */
-#ifdef LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE_SAVE
-#endif /* LIXA_TRACE_MODULE_SAVE */
 
 
 

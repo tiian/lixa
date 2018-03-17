@@ -16,14 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
-/* system includes */
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
+#endif
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+
+
+
 /* LIXA includes */
 #include "lixa_errors.h"
 #include "lixa_trace.h"

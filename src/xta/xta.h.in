@@ -35,14 +35,25 @@
  */
 
 
+
+/*
+ * These defines are necessary to avoid the inclusion of config.h that could
+ * clash with another config.h file
+ */
 #undef HAVE_MYSQL
 #undef HAVE_ORACLE
 #undef HAVE_POSTGRESQL
 
 
 
+/* include LIXA and XTA error codes */
+#include <lixa_errors.h>
+/* include LIXA compatibility features */
+#include <lixa_sw.h>
+/* include XTA interfaces and data types */
 #include <xta_init.h>
 #include <xta_xa_resource.h>
+#include <xta_acquired_xa_resource.h>
 #include <xta_native_xa_resource.h>
 #ifdef HAVE_MYSQL
 # include <xta_mysql_xa_resource.h>

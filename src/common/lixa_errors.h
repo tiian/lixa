@@ -21,23 +21,11 @@
 
 
 
-#include "config.h"
-
-
-
-#ifdef HAVE_ERRNO_H
-# include <errno.h>
-#endif /* HAVE_ERRNO_H */
-
-
-
-#include "lixa_defines.h"
-
-
-
 /*********************************************************
  *                                                       *
  * REASON / RETURN CODES                                 *
+ *                                                       *
+ * for LIXA and XTA functions                            *
  *                                                       *
  *********************************************************/
 

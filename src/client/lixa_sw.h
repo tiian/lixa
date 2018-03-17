@@ -27,19 +27,8 @@
 
 
 
-#include <config.h>
-
-
-
-#ifdef HAVE_GLIB_H
-# include <glib.h>
-#endif
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif
-
-
-
+#include <glib.h>
+#include <string.h>
 /* XA standard header */
 #include <xa.h>
 

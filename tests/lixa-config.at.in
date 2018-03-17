@@ -6,8 +6,8 @@ AT_CHECK([test "$($CLIENT_DIR/lixa-config -C)" = "@LIXA_CONFIG_SYSCONFDIR@"], [0
 AT_CLEANUP
 
 AT_SETUP([LC/0.0/1.0 -f --cppflags])
-AT_CHECK([test "$($CLIENT_DIR/lixa-config --cppflags)" = "-I@LIXA_CONFIG_INCLUDEDIR@"], [0], [ignore], [ignore])
-AT_CHECK([test "$($CLIENT_DIR/lixa-config -f)" = "-I@LIXA_CONFIG_INCLUDEDIR@"], [0], [ignore], [ignore])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config --cppflags)" = "-I@LIXA_CONFIG_INCLUDEDIR@ @LIXA_CONFIG_GLIB2_INCLUDEDIR@ @LIXA_CONFIG_LIBXML2_INCLUDEDIR@"], [0], [ignore], [ignore])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config -f)" = "-I@LIXA_CONFIG_INCLUDEDIR@ @LIXA_CONFIG_GLIB2_INCLUDEDIR@ @LIXA_CONFIG_LIBXML2_INCLUDEDIR@"], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([LC/0.0/2.0 -i --include-dir])

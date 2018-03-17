@@ -35,6 +35,7 @@
 #include "lixa_trace.h"
 #include "client_conn.h"
 #include "client_config.h"
+#include "client_status.h"
 #include "lixa_xa.h"
 #include "lixa_syslog.h"
 /* XTA includes */
@@ -52,7 +53,9 @@
 
 xta_transaction_t *xta_transaction_new(void)
 {
-    enum Exception { G_TRY_MALLOC_ERROR
+    enum Exception { G_TRY_MALLOC_ERROR1
+                     , G_TRY_MALLOC_ERROR2
+                     , G_TRY_MALLOC_ERROR3
                      , CLIENT_CONFIG_DUP_ERROR
                      , CLIENT_CONFIG_DISPLAY_ERROR
                      , CLIENT_CONNECT_ERROR
@@ -66,29 +69,37 @@ xta_transaction_t *xta_transaction_new(void)
         /* allocate the object */
         if (NULL == (this = (xta_transaction_t *)
                      g_try_malloc0(sizeof(xta_transaction_t))))
-            THROW(G_TRY_MALLOC_ERROR);
+            THROW(G_TRY_MALLOC_ERROR1);
+        /* allocate a client_status object */
+        if (NULL == (this->client_status =
+                     g_try_malloc0(sizeof(client_status_t))))
+            THROW(G_TRY_MALLOC_ERROR2);
         /* initialize the LIXA client status */
-        client_status_init(&this->client_status);
-        client_status_active(&this->client_status);
+        client_status_init(this->client_status);
+        client_status_active(this->client_status);
+        /* allocate a client_config_coll to store a local copy of the
+         * global configuration */
+        if (NULL == (this->local_ccc =
+                     g_try_malloc0(sizeof(client_config_coll_t))))
+            THROW(G_TRY_MALLOC_ERROR3);
         /*
          * copy the configuration for the LIXA client from the static one.
          * Static configuration must be initialized by xta_transaction_manager
          */
         if (LIXA_RC_OK != (ret_cod = client_config_dup(
-                               &global_ccc, &this->local_ccc)))
+                               &global_ccc, this->local_ccc)))
             THROW(CLIENT_CONFIG_DUP_ERROR);
         /* display on trace the duplicated configuration */
-        if (LIXA_RC_OK != (ret_cod = client_config_display(&this->local_ccc)))
+        if (LIXA_RC_OK != (ret_cod = client_config_display(this->local_ccc)))
             THROW(CLIENT_CONFIG_DISPLAY_ERROR);
         /* connect to LIXA state server */
         if (LIXA_RC_OK != (ret_cod = client_connect(
-                               &this->client_status, &this->local_ccc)))
+                               this->client_status, this->local_ccc)))
             THROW(CLIENT_CONNECT_ERROR);
         /* configure the LIXA (transactional) job (if necessary) */
         if (LIXA_RC_OK != (ret_cod = client_config_job(
-                               &this->local_ccc,
-                               client_status_get_sockfd(
-                                   &this->client_status))))
+                               this->local_ccc, client_status_get_sockfd(
+                                   this->client_status))))
             THROW(CLIENT_CONFIG_JOB_ERROR);
         /* reset the XID reference */
         this->xid = NULL;
@@ -98,7 +109,8 @@ xta_transaction_t *xta_transaction_new(void)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case G_TRY_MALLOC_ERROR:
+            case G_TRY_MALLOC_ERROR1:
+            case G_TRY_MALLOC_ERROR2:
                 ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
                 break;
             case CLIENT_CONFIG_DUP_ERROR:
@@ -117,19 +129,35 @@ xta_transaction_t *xta_transaction_new(void)
         if (excp < NONE) {
             LIXA_TRACE(("xta_transaction_new: an internal error "
                         "occurred, releasing allocated memory...\n"));
-            if (excp > G_TRY_MALLOC_ERROR) {
+            if (excp > G_TRY_MALLOC_ERROR2) {
                 LIXA_TRACE(("xta_transaction_new: releasing client "
                             "status objects...\n"));
                 /* free the memory associated to client status */
-                client_status_free(&this->client_status);
+                client_status_free(this->client_status);
             }
             if (excp > CLIENT_CONFIG_DUP_ERROR) {
                 LIXA_TRACE(("xta_transaction_new: releasing "
                             "configuration objects...\n"));
                 /* free the memory associated to client configuration */
-                client_unconfig(&this->local_ccc, FALSE);
+                client_unconfig(this->local_ccc, FALSE);
             }
-            if (excp > G_TRY_MALLOC_ERROR) {
+            if (excp > G_TRY_MALLOC_ERROR3) {
+                LIXA_TRACE(("xta_transaction_new: an internal error "
+                            "occurred, destroying local_ccc object and "
+                            "returning NULL\n"));
+                /* free the memory associated to this object */
+                g_free(this->local_ccc);
+                this->local_ccc = NULL;
+            }
+            if (excp > G_TRY_MALLOC_ERROR2) {
+                LIXA_TRACE(("xta_transaction_new: an internal error "
+                            "occurred, destroying client_status object and "
+                            "returning NULL\n"));
+                /* free the memory associated to this object */
+                g_free(this->client_status);
+                this->client_status = NULL;
+            }
+            if (excp > G_TRY_MALLOC_ERROR1) {
                 LIXA_TRACE(("xta_transaction_new: an internal error "
                             "occurred, destroying this object and returning "
                             "NULL\n"));
@@ -156,11 +184,14 @@ void xta_transaction_delete(xta_transaction_t *this)
     TRY {
         /* unconfigure and release the memory related to client configuration
            collection */
-        if (LIXA_RC_OK != (ret_cod = client_unconfig(&this->local_ccc, FALSE)))
+        if (LIXA_RC_OK != (ret_cod = client_unconfig(this->local_ccc, FALSE)))
             THROW(CLIENT_UNCONFIG_ERROR);
+        /* free the memory associated to local_ccc */
+        g_free(this->local_ccc);
         
         /* free the memory associated to client status */
-        client_status_free(&this->client_status);
+        client_status_free(this->client_status);
+        g_free(this->client_status);
 
         /* release the memory of the XID */
         if (NULL != this->xid)
@@ -199,7 +230,7 @@ xta_transaction_config_t *xta_transaction_get_config(xta_transaction_t *this)
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT);
-        ccc = &this->local_ccc;
+        ccc = this->local_ccc;
         
         THROW(NONE);
     } CATCH {
@@ -248,10 +279,10 @@ int xta_transaction_enlist_resource(xta_transaction_t *this,
         if (NULL == xa_res)
             THROW(NULL_OBJECT2);
         /* check transaction state before going on */
-        if (TX_STATE_S0 != client_status_get_txstate(&this->client_status)) {
+        if (TX_STATE_S0 != client_status_get_txstate(this->client_status)) {
             LIXA_TRACE(("xta_transaction_enlist_resource: expected client "
                         "status %d, current client status %d\n", TX_STATE_S0,
-                        client_status_get_txstate(&this->client_status)));
+                        client_status_get_txstate(this->client_status)));
             THROW(INVALID_STATUS);
         }
         /* if the XA Resource is not dynamic, the following steps are not
@@ -273,7 +304,7 @@ int xta_transaction_enlist_resource(xta_transaction_t *this,
                 THROW(CLIENT_CONFIG_DUP_ERROR);
             /* append the resource manager to the list of actual configured
                resource managers */
-            client_config_append_rsrmgr(&this->local_ccc, rsrmgr, &act_rsrmgr);
+            client_config_append_rsrmgr(this->local_ccc, rsrmgr, &act_rsrmgr);
             /* compute again the configuration digest (fingerprint) because
                a new resource has been added */
             if (LIXA_RC_OK != (ret_cod = xta_transaction_redigest(
@@ -343,6 +374,7 @@ int xta_transaction_redigest(xta_transaction_t *this,
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     gchar *config_tostring = NULL;
     GChecksum *checksum = NULL;
+    client_config_coll_t *local_ccc = NULL;
     
     LIXA_TRACE(("xta_transaction_redigest\n"));
     TRY {
@@ -351,6 +383,7 @@ int xta_transaction_redigest(xta_transaction_t *this,
         /* check the transaction is not NULL */
         if (NULL == this)
             THROW(NULL_OBJECT1);
+        local_ccc = (client_config_coll_t *)this->local_ccc;
         /* check the configuration is not NULL */
         if (NULL == xrc)
             THROW(NULL_OBJECT2);
@@ -359,16 +392,15 @@ int xta_transaction_redigest(xta_transaction_t *this,
             THROW(NULL_OBJECT3);
         /* trace old values */
         LIXA_TRACE(("xta_transaction_redigest: old digest is '%s'\n",
-                    this->local_ccc.config_digest));
+                    local_ccc->config_digest));
         LIXA_TRACE(("xta_transaction_redigest: old job id for this "
                     "transaction is '%s'\n",
-                    lixa_job_get_raw(this->local_ccc.job)));
+                    lixa_job_get_raw(local_ccc->job)));
         /* create a new checksum */
         if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))
             THROW(G_CHECKSUM_NEW_ERROR);
         /* use current digest as the initial content */
-        g_checksum_update(checksum,
-                          (guchar *)this->local_ccc.config_digest,
+        g_checksum_update(checksum, (guchar *)local_ccc->config_digest,
                           sizeof(md5_digest_hex_t));
         /* append the config of the current resource */
         g_checksum_update(checksum, (guchar *)config_tostring,
@@ -376,24 +408,23 @@ int xta_transaction_redigest(xta_transaction_t *this,
         if (NULL == (checksum_string = g_checksum_get_string(checksum)))
             THROW(G_CHECKSUM_GET_STRING_ERROR);
         /* copy back the new digest */
-        strncpy(this->local_ccc.config_digest, (const char *)checksum_string,
-                MD5_DIGEST_LENGTH * 2);
-        this->local_ccc.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
+        strncpy(local_ccc->config_digest,
+                (const char *)checksum_string, MD5_DIGEST_LENGTH * 2);
+        local_ccc->config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
         /* re compute LIXA job id for this transaction */
-        lixa_job_reset(this->local_ccc.job);
-        lixa_job_set_config_digest(this->local_ccc.job,
-                                   this->local_ccc.config_digest);
+        lixa_job_reset(local_ccc->job);
+        lixa_job_set_config_digest(local_ccc->job, local_ccc->config_digest);
         if (LIXA_RC_OK != (ret_cod = lixa_job_set_source_ip(
-                               this->local_ccc.job,
+                               local_ccc->job,
                                client_status_get_sockfd(
-                                   &this->client_status))))
+                                   this->client_status))))
             THROW(JOB_SET_SOURCE_IP_ERROR);
         /* trace new values */
         LIXA_TRACE(("xta_transaction_redigest: new digest is '%s'\n",
-                    this->local_ccc.config_digest));
+                    local_ccc->config_digest));
         LIXA_TRACE(("xta_transaction_redigest: new job id for this "
                     "transaction is '%s'\n",
-                    lixa_job_get_raw(this->local_ccc.job)));
+                    lixa_job_get_raw(local_ccc->job)));
         
         THROW(NONE);
     } CATCH {
@@ -447,20 +478,20 @@ int xta_transaction_open(xta_transaction_t *this)
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check transaction state before going on */
-        if (TX_STATE_S0 != client_status_get_txstate(&this->client_status)) {
+        if (TX_STATE_S0 != client_status_get_txstate(this->client_status)) {
             LIXA_TRACE(("xta_transaction_open: expected client status %d, "
                         "current client status %d\n", TX_STATE_S0,
-                        client_status_get_txstate(&this->client_status)));
+                        client_status_get_txstate(this->client_status)));
             THROW(INVALID_STATUS);
         }
         next_txstate = TX_STATE_S1;
         /* open statically defined XA Resource Managers */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_open(
-                               &this->local_ccc, &this->client_status,
+                               this->local_ccc, this->client_status,
                                &txrc, next_txstate, FALSE)))
             THROW(LIXA_XA_OPEN_ERROR);
         /* set new state after RMs are open... */
-        client_status_set_txstate(&this->client_status, next_txstate);
+        client_status_set_txstate(this->client_status, next_txstate);
         
         /* this should never happen! */
         if (NULL != this->xid)
@@ -511,7 +542,7 @@ int xta_transaction_close(xta_transaction_t *this)
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check transaction state before going on */
-        txstate = client_status_get_txstate(&this->client_status);
+        txstate = client_status_get_txstate(this->client_status);
         switch (txstate) {
             case TX_STATE_S0:
             case TX_STATE_S1:
@@ -527,11 +558,11 @@ int xta_transaction_close(xta_transaction_t *this)
         next_txstate = TX_STATE_S1;
         /* close statically defined XA Resource Managers */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_close(
-                               &this->local_ccc, &this->client_status,
+                               this->local_ccc, this->client_status,
                                &txrc)))
             THROW(LIXA_XA_CLOSE_ERROR);
         /* set new state after RMs are open... */
-        client_status_set_txstate(&this->client_status, next_txstate);
+        client_status_set_txstate(this->client_status, next_txstate);
         txstate = next_txstate;
         next_txstate = TX_STATE_S3;
         
@@ -576,13 +607,15 @@ int xta_transaction_start(xta_transaction_t *this, int multiple_branches)
     TRY {
         int txstate, next_txstate, dupid_or_proto = FALSE;
         int txrc = 0;
+        client_config_coll_t *local_ccc = NULL;
         
         /* check object */
         if (NULL == this)
             THROW(NULL_OBJECT1);
+        local_ccc = (client_config_coll_t *)this->local_ccc;
         
         /* check TX state */
-        txstate = client_status_get_txstate(&this->client_status);
+        txstate = client_status_get_txstate(this->client_status);
         if (TX_STATE_S1 != txstate) {
             LIXA_TRACE(("xta_transaction_start: expected client status %d, "
                         "current client status %d\n", TX_STATE_S1, txstate));
@@ -590,18 +623,18 @@ int xta_transaction_start(xta_transaction_t *this, int multiple_branches)
         } else
             next_txstate = TX_STATE_S3;
         /* create a new xid */
-        if (NULL == (this->xid = xta_xid_new(this->local_ccc.config_digest,
+        if (NULL == (this->xid = xta_xid_new(local_ccc->config_digest,
                                              multiple_branches)))
             THROW(NULL_OBJECT2);
         /* start the transaction in all the XA Resource Managers */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
-                               &this->local_ccc, &this->client_status,
+                               local_ccc, this->client_status,
                                &txrc,
                                xta_xid_get_xa_xid(this->xid), txstate,
                                next_txstate, &dupid_or_proto, TMNOFLAGS)))
             THROW(LIXA_XA_START_ERROR);        
         /* update the TX state */
-        client_status_set_txstate(&this->client_status, next_txstate);
+        client_status_set_txstate(this->client_status, next_txstate);
         
         THROW(NONE);
     } CATCH {
@@ -661,7 +694,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check TX state */
-        txstate = client_status_get_txstate(&this->client_status);
+        txstate = client_status_get_txstate(this->client_status);
         if (TX_STATE_S3 != txstate) {
             LIXA_TRACE(("xta_transaction_commit: expected client status %d, "
                         "current client status %d\n", TX_STATE_S3, txstate));
@@ -673,7 +706,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
         } else {
             /* check if One Phase Commit optimization can be applied */
             one_phase_commit = (client_status_could_one_phase(
-                                    &this->client_status, &this->local_ccc));
+                                    this->client_status, this->local_ccc));
             if (one_phase_commit) {
                 /* check if the transaction has been create with the multiple
                    branches option */
@@ -691,7 +724,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
             } /* if (one_phase_commit) */
             /* detach the transaction */
             if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
-                                   &this->local_ccc, &this->client_status,
+                                   this->local_ccc, this->client_status,
                                    xta_xid_get_xa_xid(this->xid), &txrc,
                                    commit, TMSUCCESS))) {
                 if (TX_ROLLBACK == txrc)
@@ -705,7 +738,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
             /* check if multiple branches prepare must be waited */
             if (this->commit_suspended) {
                 ret_cod = lixa_xa_prepare_wait_branches(
-                    &this->local_ccc, &this->client_status);
+                    this->local_ccc, this->client_status);
                 if (LIXA_RC_OTHER_BRANCH_ERROR == ret_cod) {
                     /* force rollback */
                     txrc = TX_ROLLBACK;
@@ -716,7 +749,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
             /* bypass xa_prepare if one_phase_commit is TRUE or xa_prepare
              * has been already performed in the previous suspended commit */
                 ret_cod = lixa_xa_prepare(
-                    &this->local_ccc, &this->client_status,
+                    this->local_ccc, this->client_status,
                     xta_xid_get_xa_xid(this->xid), non_block,
                     &txrc, &commit);
                 switch (ret_cod) {
@@ -740,7 +773,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
         if (commit) {
             LIXA_TRACE(("xta_transaction_commit: go on with commit...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_xa_commit(
-                                   &this->local_ccc, &this->client_status,
+                                   this->local_ccc, this->client_status,
                                    xta_xid_get_xa_xid(this->xid),
                                    &txrc, one_phase_commit)))
                 THROW(LIXA_XA_COMMIT_ERROR);
@@ -768,7 +801,7 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
         } else {
             LIXA_TRACE(("xta_transaction_commit: go on with rollback...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(
-                                   &this->local_ccc, &this->client_status,
+                                   this->local_ccc, this->client_status,
                                    xta_xid_get_xa_xid(this->xid),
                                    &txrc, TRUE)))
                 THROW(LIXA_XA_ROLLBACK_ERROR);
@@ -804,12 +837,12 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
 
         /* clean Heurstically Completed states... */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(
-                               &this->local_ccc, &this->client_status,
+                               this->local_ccc, this->client_status,
                                xta_xid_get_xa_xid(this->xid), finished)))
             THROW(LIXA_XA_FORGET_ERROR);
         
         /* update the TX state, now TX_STATE_S0 */
-        client_status_set_txstate(&this->client_status, next_txstate);
+        client_status_set_txstate(this->client_status, next_txstate);
         /* reset the transaction id */
         xta_xid_reset(this->xid);
         
@@ -865,8 +898,8 @@ int xta_transaction_commit(xta_transaction_t *this, int non_block)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* LIXA backward compatibility, but it might be useless */
-        if (TX_FAIL == txrc && NULL != &this->client_status)
-            client_status_failed(&this->client_status);
+        if (TX_FAIL == txrc && NULL != this->client_status)
+            client_status_failed(this->client_status);
     } /* TRY-CATCH */
     /* memory recovery */
     if (NULL != bqual) {
@@ -901,21 +934,21 @@ int xta_transaction_rollback(xta_transaction_t *this)
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check TX state */
-        txstate = client_status_get_txstate(&this->client_status);
+        txstate = client_status_get_txstate(this->client_status);
         if (TX_STATE_S3 != txstate) {
             LIXA_TRACE(("xta_transaction_commit: expected client status %d, "
                         "current client status %d\n", TX_STATE_S3, txstate));
             THROW(INVALID_STATUS);
         }
         /* detach the transaction */
-        ret_cod = lixa_xa_end(&this->local_ccc, &this->client_status,
+        ret_cod = lixa_xa_end(this->local_ccc, this->client_status,
                               xta_xid_get_xa_xid(this->xid), &txrc,
                               FALSE, TMSUCCESS);
         if (LIXA_RC_OK != ret_cod && TX_ROLLBACK != txrc)
             THROW(LIXA_XA_END_ERROR);
         /* rollback the transaction */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_rollback(
-                               &this->local_ccc, &this->client_status,
+                               this->local_ccc, this->client_status,
                                xta_xid_get_xa_xid(this->xid), &txrc, FALSE)))
             THROW(LIXA_XA_ROLLBACK_ERROR);
         switch (txrc) {
@@ -942,12 +975,12 @@ int xta_transaction_rollback(xta_transaction_t *this)
 
         /* clean Heurstically Completed states... */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_forget(
-                               &this->local_ccc, &this->client_status,
+                               this->local_ccc, this->client_status,
                                xta_xid_get_xa_xid(this->xid), finished)))
             THROW(LIXA_XA_FORGET_ERROR);
         
         /* update the TX state, now TX_STATE_S0 */
-        client_status_set_txstate(&this->client_status, next_txstate);
+        client_status_set_txstate(this->client_status, next_txstate);
         /* reset the transaction id */
         xta_xid_reset(this->xid);
                 
@@ -1014,7 +1047,7 @@ int xta_transaction_suspend(xta_transaction_t *this, long flags)
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check transaction state before going on */
-        txstate = client_status_get_txstate(&this->client_status);
+        txstate = client_status_get_txstate(this->client_status);
         switch (txstate) {
             case TX_STATE_S0:
             case TX_STATE_S1:
@@ -1037,14 +1070,14 @@ int xta_transaction_suspend(xta_transaction_t *this, long flags)
         flags |= TMSUSPEND;
         /* detach the transaction */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_end(
-                               &this->local_ccc, &this->client_status,
+                               this->local_ccc, this->client_status,
                                xta_xid_get_xa_xid(this->xid), &txrc,
                                FALSE, flags)))
             THROW(LIXA_XA_END_ERROR);
         
         next_txstate = TX_STATE_S5;
         /* set new state after RMs are suspended... */
-        client_status_set_txstate(&this->client_status, next_txstate);
+        client_status_set_txstate(this->client_status, next_txstate);
         
         THROW(NONE);
     } CATCH {
@@ -1101,7 +1134,7 @@ int xta_transaction_resume(xta_transaction_t *this,
         if (NULL != this->xid)
             THROW(INVALID_STATUS);
         /* check transaction state before going on */
-        txstate = client_status_get_txstate(&this->client_status);
+        txstate = client_status_get_txstate(this->client_status);
         switch (txstate) {
             case TX_STATE_S0:
             case TX_STATE_S3:
@@ -1127,13 +1160,13 @@ int xta_transaction_resume(xta_transaction_t *this,
             THROW(NULL_OBJECT2);
         /* start the transaction in all the XA Resource Managers */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
-                               &this->local_ccc, &this->client_status,
+                               this->local_ccc, this->client_status,
                                &txrc,
                                xta_xid_get_xa_xid(this->xid), txstate,
                                next_txstate, &dupid_or_proto, flags)))
             THROW(LIXA_XA_START_ERROR);        
         /* update the TX state */
-        client_status_set_txstate(&this->client_status, next_txstate);
+        client_status_set_txstate(this->client_status, next_txstate);
         
         THROW(NONE);
     } CATCH {
@@ -1196,7 +1229,7 @@ int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
             THROW(NULL_OBJECT1);
         
         /* check TX state */
-        txstate = client_status_get_txstate(&this->client_status);
+        txstate = client_status_get_txstate(this->client_status);
         if (TX_STATE_S1 != txstate) {
             LIXA_TRACE(("xta_transaction_branch: expected client status %d, "
                         "current client status %d\n", TX_STATE_S1, txstate));
@@ -1237,7 +1270,7 @@ int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
             THROW(NULL_OBJECT2);
         /* start the transaction in all the XA Resource Managers as a new
          * branch under the scope of an existing global transaction */
-        ret_cod = lixa_xa_start(&this->local_ccc, &this->client_status,
+        ret_cod = lixa_xa_start(this->local_ccc, this->client_status,
                                 &txrc,
                                 xta_xid_get_xa_xid(this->xid), txstate,
                                 next_txstate, &dupid_or_proto, TMXTABRANCH);
@@ -1252,7 +1285,7 @@ int xta_transaction_branch(xta_transaction_t *this, const char *xid_string)
                 THROW(LIXA_XA_START_ERROR);        
         } /* switch (ret_cod) */
         /* update the TX state */
-        client_status_set_txstate(&this->client_status, next_txstate);
+        client_status_set_txstate(this->client_status, next_txstate);
         
         THROW(NONE);
     } CATCH {
