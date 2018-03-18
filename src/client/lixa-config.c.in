@@ -134,6 +134,7 @@ int main(int argc, char *argv[])
     }
     if (cppflags) {
         printf("%s", CPPFLAGS_STRING);
+        if (xta) printf(" -I@LIXA_CONFIG_INCLUDEDIR@/xta");
 #ifdef HAVE_POSTGRESQL
         if (xta) printf(" -I%s", INCLUDE_DIR_POSTGRESQL_STRING);
 #endif
@@ -152,7 +153,9 @@ int main(int argc, char *argv[])
         printf(OUTPUT_FORMAT, LIB_DIR_STRING);
     }
     if (libs) {
-        printf(OUTPUT_FORMAT, LIBS_STRING);
+        printf("%s", LIBS_STRING);
+        if (xta) printf(" -llixta");
+        printf("\n");
     }
 #ifdef HAVE_POSTGRESQL
     if (include_dir_postgresql) {

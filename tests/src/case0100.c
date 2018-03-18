@@ -183,7 +183,8 @@ int main(int argc, char *argv[])
     }
     /* create a new transaction for this thread */
     if (NULL == (tx = xta_transaction_manager_create_transaction(tm))) {
-        printf("%s| xta_transaction_manager_begin: returned NULL\n", pgm);
+        printf("%s| xta_transaction_manager_get_transaction: returned NULL\n",
+                pgm);
         return 1;
     } else {
         printf("%s| xta_transaction_manager_get_transaction: transaction "
@@ -191,7 +192,8 @@ int main(int argc, char *argv[])
     }
     /* (try to) create again a new transaction for this thread */
     if (NULL == (tx = xta_transaction_manager_create_transaction(tm))) {
-        printf("%s| xta_transaction_manager_begin: returned NULL\n", pgm);
+        printf("%s| xta_transaction_manager_get_transaction: returned NULL\n",
+                pgm);
         return 1;
     } else {
         printf("%s| xta_transaction_manager_get_transaction: transaction "
