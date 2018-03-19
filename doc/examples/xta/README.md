@@ -14,7 +14,7 @@ Program *example_xta_sa01.c* requires MySQL (or MariaDB) and PostgreSQL to work.
 After proper installation of LIXA, you can compile the program with the
 following commands:
 
-. /opt/lixa/bin/lixa_env.sh
+`. /opt/lixa/bin/lixa_env.sh`
 
-gcc example_xta_sa01.c $(lixa-config -x -c -f -l -d) -lpq $(mysql_config --libs_r) -o example_xta_sa01
+`gcc example_xta_sa01.c $(lixa-config -x -c -f -l -d) -lpq $(mysql_config --libs_r) -o example_xta_sa01`
 
