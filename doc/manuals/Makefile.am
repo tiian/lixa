@@ -14,7 +14,8 @@ manual_sources = LIXA.xml \
 	LIXA_Introduction.xml \
 	LIXA_Preface.xml \
 	LIXA_Recovery.xml \
-	LIXA_Tuning.xml
+	LIXA_Tuning.xml \
+	LIXA_App_RM_Config.xml
 
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/html
 doc_DATA = *.html

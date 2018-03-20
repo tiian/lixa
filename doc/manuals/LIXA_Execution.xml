@@ -11,7 +11,7 @@
 	the shown commands consequently.
     </para></note>
   </para>
-  <section>
+  <section xml:id="Starting_the_state_server">
     <title>Starting the state server (<command>lixad</command>)</title>
     <para>
       The first step you must perform is starting the

@@ -273,7 +273,7 @@ ORA_STA
         <para>
           Make sure that the LIXA state server (<filename>lixad</filename>) is 
 	  running before executing the example application, as explained in 
-	  <xref linkend="Development_start_LIXA_server"/>.
+	  <xref linkend="Starting_the_state_server"/>.
         </para>
       </important>
       <section>

@@ -361,6 +361,86 @@
 	<screen>tx.Commit()</screen> translates to
 	<screen>xta_transaction_commit(tx, FALSE)</screen> in C.
       </para></note>
+      <para>
+	The supplied example (<filename>example_xta_sa01.c</filename>) uses
+	PostgreSQL in the role of <quote>Resource Manager 1</quote> and MySQL
+	(or MariaDB) in the role of <quote>Resource Manager 2</quote>; please
+	refer to the instructions explained 
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_MySQL"/>
+	    to set-up a running environment for MySQL server
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_PostgreSQL"/>
+	    to set-up a running environment for PostgreSQL server
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="Starting_the_state_server"/>
+	    to start up the LIXA state server
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Create a working directory in a place you are comfortable with:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ cd
+tiian@ubuntu1404-64:~$ mkdir tmp
+tiian@ubuntu1404-64:~$ cd tmp
+tiian@ubuntu1404-64:~/tmp$ 
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	Copy file <filename>example_xta_sa01.c</filename> in your working dir:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+	    tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/example_xta_sa01.c .
+	  </screen></td></tr></tbody>
+	</table>
+	Substitute <quote>lixa-X.Y.Z</quote> with the actual version of
+	the software you installed.
+      </para>
+      <para>
+	Compile and link the C example program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ . /opt/lixa/bin/lixa_env.sh 
+tiian@ubuntu1404-64:~/tmp$ gcc example_xta_sa01.c $(lixa-config -x -c -f -l -d) -lpq $(mysql_config --libs_r) -o example_xta_sa01
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	If the previous steps worked for you, you would have an executable file
+	of name <filename>example_xta_sa01</filename> in your current 
+	directory:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:/tmp$ ls -l
+total 32
+-rwxrwxr-x 1 tiian tiian 18603 mar 20 22:56 example_xta_sa01
+-rw-r--r-- 1 tiian tiian  8302 mar 20 22:50 example_xta_sa01.c
+	  </screen></td></tr></tbody>
+	</table>
+	The example program accepts two arguments:
+	<itemizedlist mark="bullet">
+          <listitem><para>
+	    commit (or rollback): use <quote>1</quote> if you want to perform
+	    a global commit or <quote>0</quote> if you want to perform a global
+	    rollback
+	  </para></listitem>
+          <listitem><para>
+	    insert (or delete): use <quote>1</quote> if you want to insert rows
+	    in databases or <quote>0</quote> if you want to delete rows from
+	    databases
+	  </para></listitem>
+	</itemizedlist>
+      </para>
     </section>
     <section>
       <title>The

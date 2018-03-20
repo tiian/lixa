@@ -720,18 +720,11 @@ xaoopen: return -3
 	    </para>
 	  </section>
 	</section>
-	<section xml:id="Development_start_LIXA_server">
+	<section>
 	  <title>Start the LIXA state server</title>
 	  <para>
-	    Start the state server as shown below:
-	    <screen>
-tiian@ubuntu:~$ sudo su - lixa
-lixa@ubuntu:~$ /opt/lixa/sbin/lixad --daemon
-lixa@ubuntu:~$ ps -ef|grep lixad|grep -v grep
-lixa      6787     1  0 17:36 ?        00:00:00 /opt/lixa/sbin/lixad --daemon
-lixa@ubuntu:~$ exit
-logout
-	    </screen>
+            The LIXA state server (daemon) must be started as explained in
+            <xref linkend="Starting_the_state_server"/>.
 	  </para>
 	</section>
 	<section>
@@ -1523,7 +1516,7 @@ Disconnected from Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bi
 	  <title>Start the LIXA state server</title>
 	  <para>
 	    The LIXA state server (daemon) must be started as explained in
-	    <xref linkend="Development_start_LIXA_server"/>.
+	    <xref linkend="Starting_the_state_server"/>.
 	  </para>
 	</section>
 	<section>
@@ -1821,7 +1814,7 @@ define=__x86_64__
 	  <title>Start the LIXA state server</title>
 	  <para>
 	    The LIXA state server (daemon) must be started as explained in
-	    <xref linkend="Development_start_LIXA_server"/>.
+	    <xref linkend="Starting_the_state_server"/>.
 	  </para>
 	</section>
 	<section>
@@ -2745,7 +2738,7 @@ tiian@ubuntu:~/tmp$ ./example3_db2 delete dept
 	    to set-up a running environment for IBM DB2 server
 	</para></listitem>
 	<listitem><para>
-	    in <xref linkend="Development_start_LIXA_server"/>
+	    in <xref linkend="Starting_the_state_server"/>
 	    to start up the LIXA state server
 	</para></listitem>
       </itemizedlist>
@@ -3336,190 +3329,11 @@ DEPTNO DEPTNAME                             MGRNO  ADMRDEPT LOCATION
     </section>
   </section>
   <section xml:id="Development_example5_pql">
-    <title>An example with PostgreSQL</title>
-    <figure xml:id="develop5">
-      <title>Deploy model of an example with PostgreSQL DBMS</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata fileref="../images/LIXA_Development_5.png"/>
-	</imageobject>
-      </mediaobject>
-    </figure>
     <para>
-      This example has been developed using PostgreSQL 9.1.24 (and upper)
-      for Linux. Here is a brief list of the tested versions for Ubuntu 12.04,
-      14.04, 16.04 and CentOS/RHEL 7.3 and the installed packages:
-      <screen>
-tiian@ubuntu1204-64:/tmp$ dpkg -l | grep -i -e pq -e postgresql
-ii  libpq-dev                        9.1.24-0ubuntu0.12.04               header files for libpq5 (PostgreSQL library)
-ii  libpq5                           9.1.24-0ubuntu0.12.04               PostgreSQL C client library
-ii  postgresql                       9.1+129ubuntu1                      object-relational SQL database (supported version)
-ii  postgresql-9.1                   9.1.24-0ubuntu0.12.04               object-relational SQL database, version 9.1 server
-ii  postgresql-client-9.1            9.1.24-0ubuntu0.12.04               front-end programs for PostgreSQL 9.1
-ii  postgresql-client-common         129ubuntu1                          manager for multiple PostgreSQL client versions
-ii  postgresql-common                129ubuntu1                          PostgreSQL database-cluster manager
-
-tiian@ubuntu1404-64:/tmp$ dpkg -l | grep -i -e pq -e postgresql
-ii  libpq-dev                           9.3.16-0ubuntu0.14.04               amd64        header files for libpq5 (PostgreSQL library)
-ii  libpq5                              9.3.16-0ubuntu0.14.04               amd64        PostgreSQL C client library
-ii  postgresql                          9.3+154ubuntu1                      all          object-relational SQL database (supported version)
-ii  postgresql-9.3                      9.3.16-0ubuntu0.14.04               amd64        object-relational SQL database, version 9.3 server
-ii  postgresql-client-9.3               9.3.16-0ubuntu0.14.04               amd64        front-end programs for PostgreSQL 9.3
-ii  postgresql-client-common            154ubuntu1                          all          manager for multiple PostgreSQL client versions
-ii  postgresql-common                   154ubuntu1                          all          PostgreSQL database-cluster manager
-
-tiian@ubuntu1604:~$ dpkg -l | grep -i -e pq -e postgresql
-ii  libpq-dev                          9.5.6-0ubuntu0.16.04                amd64        header files for libpq5 (PostgreSQL library)
-ii  libpq5:amd64                       9.5.6-0ubuntu0.16.04                amd64        PostgreSQL C client library
-ii  postgresql                         9.5+173                             all          object-relational SQL database (supported version)
-ii  postgresql-9.5                     9.5.6-0ubuntu0.16.04                amd64        object-relational SQL database, version 9.5 server
-ii  postgresql-client-9.5              9.5.6-0ubuntu0.16.04                amd64        front-end programs for PostgreSQL 9.5
-ii  postgresql-client-common           173                                 all          manager for multiple PostgreSQL client versions
-ii  postgresql-common                  173                                 all          PostgreSQL database-cluster manager
-ii  postgresql-contrib-9.5             9.5.6-0ubuntu0.16.04                amd64        additional facilities for PostgreSQL
-
-[tiian@centos71-64 tmp]$ rpm -qa | grep -i -e pq -e postgresql
-postgresql-libs-9.2.18-1.el7.x86_64
-postgresql-devel-9.2.18-1.el7.x86_64
-postgresql-9.2.18-1.el7.x86_64
-postgresql-server-9.2.18-1.el7.x86_64
-
-[tiian@rhel73 tmp]$ rpm -qa | grep -i -e pq -e postgresql
-postgresql-devel-9.2.18-1.el7.x86_64
-postgresql-9.2.18-1.el7.x86_64
-postgresql-server-9.2.18-1.el7.x86_64
-postgresql-libs-9.2.18-1.el7.x86_64
-      </screen>
-      If you were using a different version you would need to adapt some
-      commands to your environment.
+      Please follow the instructions explained in
+      <xref linkend="App_RM_Config_PostgreSQL"/>                            
+      to set-up a running environment for MySQL or MariaDB server.
     </para>
-    <note><para>
-	If you did not yet installed the software, please refer to the 
-	official site for your Linux distribution or to the official site
-	of PostgreSQL if your operating system does not distribute the
-	software or you want to use a different PostgreSQL version.
-	This manual does not give you information related
-	to PostgreSQL: it is assumed that you have already installed and
-	configured the database.
-    </para></note>
-    <note><para>
-	This example requires you are running the database and the application
-	on the same host: this is not a technical limitation, but a way to
-	make it easy. Client/server configuration must work as well, but
-	it needs some PostgreSQL extra configuration: please refer to the
-	database documentation.
-    </para></note>
-    <important><para>
-	The LIXA software must be configured to support the PostgreSQL
-	server resource manager as explained in 
-	<xref linkend="Linking_third_party_resource_managers"/>.
-    </para></important>
-    <section xml:id="Development_setup_PostgreSQL_environment">
-      <title>Set-up PostgreSQL environment</title>
-      <section>
-	<title>Start-up the PostgreSQL server</title>
-	<para>
-	  If your server didn't start-up automatically at boot time, you
-	  could start it with the following commands:
-	  <table frame="box">
-	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	    <tbody><tr><td><screen>
-tiian@ubuntu1204-64:~$ sudo service postgresql status
-Running clusters: 
-tiian@ubuntu1204-64:~$ ps -ef|grep postgres|grep -v grep
-tiian@ubuntu1204-64:~$ sudo service postgresql start
- * Starting PostgreSQL 9.1 database server                               [ OK ]
-tiian@ubuntu1204-64:~$ sudo service postgresql status
-Running clusters: 9.1/main 
-tiian@ubuntu1204-64:~$ ps -ef|grep postgres|grep -v grep
-postgres  1829     1  1 23:00 ?        00:00:00 /usr/lib/postgresql/9.1/bin/postgres -D /var/lib/postgresql/9.1/main -c config_file=/etc/postgresql/9.1/main/postgresql.conf
-postgres  1831  1829  0 23:00 ?        00:00:00 postgres: writer process
-postgres  1832  1829  0 23:00 ?        00:00:00 postgres: wal writer process
-postgres  1833  1829  0 23:00 ?        00:00:00 postgres: autovacuum launcher process
-postgres  1834  1829  0 23:00 ?        00:00:00 postgres: stats collector process
-	    </screen></td></tr></tbody>
-	  </table>
-	  Switch to user <systemitem class="username">postgres</systemitem>,
-	  associate your user to a matching database user
-	  <footnote><para>
-	      If you wanted to use a database user different than your own
-	      UNIX user, as it ever happens when the database is hosted on
-	      a different system, you should configure
-	      <filename>pg_hba.conf</filename> as well. Look at the PostgreSQL
-	      documentation to pick up all the necessary details.
-	  </para></footnote>
-	  ; my personal account is 
-	  <systemitem class="username">tiian</systemitem>
-	  and I created the same user inside PostgreSQL database:
-	  <table frame="box">
-	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	    <tbody><tr><td><screen>
-tiian@ubuntu1204-64:~$ sudo su - postgres
-[sudo] password for tiian:
-postgres@ubuntu1204-64:~$ createuser --createdb tiian
-Shall the new role be a superuser? (y/n) n
-Shall the new role be allowed to create more new roles? (y/n) n
-postgres@ubuntu1204-64:~$ exit
-logout
-	    </screen></td></tr></tbody>
-	  </table>
-	  Create a new database and a table necessary to store some data:
-	  <table frame="box">
-	    <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
-	    <tbody><tr><td><screen>
-tiian@ubuntu1204-64:~$ createdb testdb
-tiian@ubuntu1204-64:~$ psql testdb
-psql (9.1.24)
-Type "help" for help.
-
-testdb=>
-testdb=> CREATE TABLE "authors" (
-testdb(> "id" integer NOT NULL,
-testdb(> "last_name" text,
-testdb(> "first_name" text,
-testdb(> Constraint "authors_pkey" Primary Key ("id"));
-NOTICE:  CREATE TABLE / PRIMARY KEY will create implicit index "authors_pkey" for table "authors"
-CREATE TABLE
-
-testdb=> select * from authors;
- id | last_name | first_name
-----+-----------+------------
-(0 rows)
-	    </screen></td></tr></tbody>
-	  </table>
-	  OK, the <quote>authors</quote> table was created. 
-	  If something went wrong, you should refer to PostgreSQL
-	  documentation to fix the issue before the next step because
-	  you would not be able to execute the sample program without a
-	  basic running installation.
-	</para>
-	<para>
-	  Change the 
-	  <systemitem class="constant">max_prepared_transactions</systemitem>
-	  parameter in file
-	  <filename>postgresql.conf</filename>
-	  to allow the desired number of prepared transactions (i.e. 10):
-	  <screen>
-shared_buffers = 24MB                   # min 128kB
-                                        # (change requires restart)
-#temp_buffers = 8MB                     # min 800kB
-max_prepared_transactions = 10          # zero disables the feature
-#max_prepared_transactions = 0          # zero disables the feature
-                                        # (change requires restart)
-# Note:  Increasing max_prepared_transactions costs ~600 bytes of shared memory
-# per transaction slot, plus lock space (see max_locks_per_transaction).
-# It is not advisable to set max_prepared_transactions nonzero unless you
-# actively intend to use prepared transactions.
-#work_mem = 1MB                         # min 64kB
-#maintenance_work_mem = 16MB            # min 1MB
-#max_stack_depth = 2MB                  # min 100kB
-	  </screen>
-	  and restart the PostgreSQL server with something like
-	  <screen>service postgresql restart</screen> (Ubuntu, CentOS and RHEL) using
-	  <systemitem class="username">root</systemitem> user.
-	</para>
-      </section>
-    </section>
     <section>
       <title>Start the LIXA state server</title>
       <para>
@@ -3829,7 +3643,7 @@ Deleting a row from the table...
       Please follow the instructions explained 
       <itemizedlist mark="bullet">
 	<listitem><para>
-	    in <xref linkend="Development_setup_PostgreSQL_environment"/>
+	    in <xref linkend="App_RM_Config_PostgreSQL"/>
 	    to set-up a running environment for PostgreSQL server
 	</para></listitem>
 	<listitem><para>
@@ -3837,7 +3651,7 @@ Deleting a row from the table...
 	    to set-up a running environment for Oracle Database Server
 	</para></listitem>
 	<listitem><para>
-	    in <xref linkend="Development_start_LIXA_server"/>
+	    in <xref linkend="Starting_the_state_server"/>
 	    to start up the LIXA state server
 	</para></listitem>
       </itemizedlist>
@@ -4324,7 +4138,7 @@ tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL09202011.trc
       Please follow the instructions explained 
       <itemizedlist mark="bullet">
 	<listitem><para>
-	    in <xref linkend="Development_setup_PostgreSQL_environment"/>
+	    in <xref linkend="App_RM_Config_PostgreSQL"/>
 	    to set-up a running environment for PostgreSQL server
 	</para></listitem>
 	<listitem><para>
@@ -4332,7 +4146,7 @@ tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL09202011.trc
 	    to set-up a running environment for IBM DB2
 	</para></listitem>
 	<listitem><para>
-	    in <xref linkend="Development_start_LIXA_server"/>
+	    in <xref linkend="Starting_the_state_server"/>
 	    to start up the LIXA state server
 	</para></listitem>
       </itemizedlist>
@@ -4694,194 +4508,11 @@ tiian@ubuntu:~/tmp$ ./example7_pql_db2 delete org 2>&amp;1 | grep ax_reg
   </section>
   <section xml:id="Development_example8_mys">
     <title>An example with MySQL/MariaDB</title>
-    <figure xml:id="develop8">
-      <title>Deploy model of an example with MySQL/MariaDB DBMS</title>
-      <mediaobject>
-	<imageobject>
-	  <imagedata fileref="../images/LIXA_Development_8.png"/>
-	</imageobject>
-      </mediaobject>
-    </figure>
     <para>
-      This example has been developed using MySQL 5.5.54 (or upper) and
-      MariaDB 5.5.52 for Linux. 
-      Here is a brief list of the tested versions for Ubuntu 12.04,
-      14.04, 16.04 and CentOS/RHEL 7.3 and the installed packages:
-      <screen>
-tiian@ubuntu1204-64:~$ dpkg -l | grep -i mysql
-ii  libdbd-mysql-perl                4.020-1ubuntu0.1                    Perl5 database interface to the MySQL database
-ii  libmysqlclient-dev               5.5.54-0ubuntu0.12.04.1             MySQL database development files
-ii  libmysqlclient18                 5.5.54-0ubuntu0.12.04.1             MySQL database client library
-ii  mysql-client-5.5                 5.5.54-0ubuntu0.12.04.1             MySQL database client binaries
-ii  mysql-client-core-5.5            5.5.54-0ubuntu0.12.04.1             MySQL database core client binaries
-ii  mysql-common                     5.5.54-0ubuntu0.12.04.1             MySQL database common files, e.g. /etc/mysql/my.cnf
-ii  mysql-server                     5.5.54-0ubuntu0.12.04.1             MySQL database server (metapackage depending on the latest version)
-ii  mysql-server-5.5                 5.5.54-0ubuntu0.12.04.1             MySQL database server binaries and system database setup
-ii  mysql-server-core-5.5            5.5.54-0ubuntu0.12.04.1             MySQL database server binaries
-
-tiian@ubuntu1404-64:~$ dpkg -l | grep -i mysql
-ii  libdbd-mysql-perl                   4.025-1ubuntu0.1                    amd64        Perl5 database interface to the MySQL database
-ii  libmysqlclient-dev                  5.5.54-0ubuntu0.14.04.1             amd64        MySQL database development files
-ii  libmysqlclient18:amd64              5.5.54-0ubuntu0.14.04.1             amd64        MySQL database client library
-ii  mysql-client-5.5                    5.5.54-0ubuntu0.14.04.1             amd64        MySQL database client binaries
-ii  mysql-client-core-5.5               5.5.54-0ubuntu0.14.04.1             amd64        MySQL database core client binaries
-ii  mysql-common                        5.5.54-0ubuntu0.14.04.1             all          MySQL database common files, e.g. /etc/mysql/my.cnf
-ii  mysql-server                        5.5.54-0ubuntu0.14.04.1             all          MySQL database server (metapackage depending on the latest version)
-ii  mysql-server-5.5                    5.5.54-0ubuntu0.14.04.1             amd64        MySQL database server binaries and system database setup
-ii  mysql-server-core-5.5               5.5.54-0ubuntu0.14.04.1             amd64        MySQL database server binaries
-
-tiian@ubuntu1604:~$ dpkg -l | grep -i mysql
-ii  libmysqlclient-dev                 5.7.17-0ubuntu0.16.04.1             amd64        MySQL database development files
-ii  libmysqlclient20:amd64             5.7.17-0ubuntu0.16.04.1             amd64        MySQL database client library
-ii  mysql-client-5.7                   5.7.17-0ubuntu0.16.04.1             amd64        MySQL database client binaries
-ii  mysql-client-core-5.7              5.7.17-0ubuntu0.16.04.1             amd64        MySQL database core client binaries
-ii  mysql-common                       5.7.17-0ubuntu0.16.04.1             all          MySQL database common files, e.g. /etc/mysql/my.cnf
-ii  mysql-server                       5.7.17-0ubuntu0.16.04.1             all          MySQL database server (metapackage depending on the latest version)
-ii  mysql-server-5.7                   5.7.17-0ubuntu0.16.04.1             amd64        MySQL database server binaries and system database setup
-ii  mysql-server-core-5.7              5.7.17-0ubuntu0.16.04.1             amd64        MySQL database server binaries
-
-[tiian@centos71-64 ~]$ rpm -qa | grep -i maria
-mariadb-5.5.52-1.el7.x86_64
-mariadb-server-5.5.52-1.el7.x86_64
-mariadb-libs-5.5.52-1.el7.x86_64
-mariadb-devel-5.5.52-1.el7.x86_64
-
-[tiian@rhel73 ~]$ rpm -qa | grep -i maria
-mariadb-devel-5.5.52-1.el7.x86_64
-mariadb-5.5.52-1.el7.x86_64
-mariadb-server-5.5.52-1.el7.x86_64
-mariadb-libs-5.5.52-1.el7.x86_64
-      </screen>
-      If you were using a different version you would need to adapt some
-      commands to your environment.
+      Please follow the instructions explained in
+      <xref linkend="App_RM_Config_MySQL"/>                            
+      to set-up a running environment for MySQL or MariaDB server.
     </para>
-    <note><para>
-	If you did not yet installed the software, please refer to the 
-	official site for your Linux distribution or to the official site
-	of MySQL/MariaDB if your operating system does not distribute the
-	software or you want to use a different MySQL/MariaDB version.
-	This manual does not give you information related
-	to MySQL/MariaDB: it is assumed that you have already installed and
-	configured the database.
-    </para></note>
-    <note><para>
-	This example requires you are running the database and the application
-	on the same host: this is not a technical limitation, but a way to
-	make it easy. Client/server configuration must work as well, but
-	it needs some MySQL/MariaDB extra configuration: please refer to the
-	database documentation.
-    </para></note>
-    <important><para>
-	The LIXA software must be configured to support the MySQL/MariaDB
-	server resource manager as explained in 
-	<xref linkend="Linking_third_party_resource_managers"/>.
-    </para></important>
-    <section xml:id="Development_setup_MySQL_environment">
-      <title>Set-up MySQL environment</title>
-      <section>
-	<title>Start-up the MySQL server</title>
-	<para>
-	  If your server didn't start-up automatically at boot time, you
-	  could start it with the following commands:
-	  <table frame="box">
-	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	    <tbody><tr><td><screen>
-tiian@ubuntu1204-64:/tmp$ sudo service mysql start
-mysql start/running, process 1607
-tiian@ubuntu1204-64:/tmp$ sudo service mysql status
-mysql start/running, process 1607
-tiian@ubuntu1204-64:/tmp$ ps -ef|grep mysql|grep -v grep
-mysql     1607     1  0 22:43 ?        00:00:00 /usr/sbin/mysqld
-	    </screen></td></tr></tbody>
-	  </table>
-	  Create a new user authorization and a new database
-	  <footnote><para>
-	      You need the password of MySQL root user to execute
-	      these commands
-	  </para></footnote>:
-	  <table frame="box">
-	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	    <tbody><tr><td><screen>
-tiian@ubuntu1204-64:/tmp$ mysql -u root -p
-Enter password: 
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 36
-Server version: 5.5.54-0ubuntu0.12.04.1 (Ubuntu)
-
-Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-mysql> GRANT ALL ON lixa.* TO 'lixa'@'localhost';
-Query OK, 0 rows affected (0.00 sec)
-
-mysql> CREATE DATABASE lixa;
-Query OK, 1 row affected (0.00 sec)
-
-mysql> quit
-Bye
-	    </screen></td></tr></tbody>
-	  </table>
-	  The <systemitem class="username">lixa@localhost</systemitem> user
-	  has been created with all privileges on the <quote>lixa</quote>
-	  database. Now a sample table must be created using this new user:
-	  <table frame="box">
-	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
-	    <tbody><tr><td><screen>
-tiian@ubuntu1204-64:/tmp$ mysql -h localhost -u lixa lixa
-Reading table information for completion of table and column names
-You can turn off this feature to get a quicker startup with -A
-
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 37
-Server version: 5.5.54-0ubuntu0.12.04.1 (Ubuntu)
-
-Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-mysql> SELECT DATABASE();
-+------------+
-| DATABASE() |
-+------------+
-| lixa       |
-+------------+
-1 row in set (0.01 sec)
-
-mysql> CREATE TABLE authors (id INTEGER NOT NULL PRIMARY KEY, last_name TEXT, first_name TEXT) ENGINE=InnoDB;
-Query OK, 0 rows affected (0.02 sec)
-
-mysql> DESCRIBE authors;
-+------------+---------+------+-----+---------+-------+
-| Field      | Type    | Null | Key | Default | Extra |
-+------------+---------+------+-----+---------+-------+
-| id         | int(11) | NO   | PRI | NULL    |       |
-| last_name  | text    | YES  |     | NULL    |       |
-| first_name | text    | YES  |     | NULL    |       |
-+------------+---------+------+-----+---------+-------+
-3 rows in set (0.00 sec)
-
-mysql> SELECT * FROM authors;
-Empty set (0.00 sec)
-	    </screen></td></tr></tbody>
-	  </table>
-	  OK, the <quote>authors</quote> table was created using 
-	  the <quote>InnoDB</quote> engine. 
-	  If something went wrong, you should refer to MySQL
-	  documentation to fix the issue before the next step because
-	  you would not be able to execute the sample program without a
-	  basic running installation.
-	</para>
-      </section>
-    </section>
     <section>
       <title>Start the LIXA state server</title>
       <para>
@@ -5272,15 +4903,15 @@ Deleting a row from the table...
       Please follow the instructions explained 
       <itemizedlist mark="bullet">
 	<listitem><para>
-	    in <xref linkend="Development_setup_MySQL_environment"/>
+	    in <xref linkend="App_RM_Config_MySQL"/>
 	    to set-up a running environment for MySQL server
 	</para></listitem>
 	<listitem><para>
-	    in <xref linkend="Development_setup_PostgreSQL_environment"/>
+	    in <xref linkend="App_RM_Config_PostgreSQL"/>
 	    to set-up a running environment for PostgreSQL server
 	</para></listitem>
 	<listitem><para>
-	    in <xref linkend="Development_start_LIXA_server"/>
+	    in <xref linkend="Starting_the_state_server"/>
 	    to start up the LIXA state server
 	</para></listitem>
       </itemizedlist>
@@ -5614,11 +5245,11 @@ testdb=> select * from AUTHORS;
       Please follow the instructions explained 
       <itemizedlist mark="bullet">
 	<listitem><para>
-	    in <xref linkend="Development_setup_MySQL_environment"/>
+	    in <xref linkend="App_RM_Config_MySQL"/>
 	    to set-up a running environment for MySQL server
 	</para></listitem>
 	<listitem><para>
-	    in <xref linkend="Development_setup_PostgreSQL_environment"/>
+	    in <xref linkend="App_RM_Config_PostgreSQL"/>
 	    to set-up a running environment for PostgreSQL server
 	</para></listitem>
 	<listitem><para>
@@ -5626,7 +5257,7 @@ testdb=> select * from AUTHORS;
 	    to set-up a running environment for Oracle Database Server
 	</para></listitem>
 	<listitem><para>
-	    in <xref linkend="Development_start_LIXA_server"/>
+	    in <xref linkend="Starting_the_state_server"/>
 	    to start up the LIXA state server
 	</para></listitem>
       </itemizedlist>
@@ -6135,11 +5766,11 @@ tiian@ubuntu:~/tmp$ ls -la /tmp/xa_NULL11112011.trc
       Please follow the instructions explained 
       <itemizedlist mark="bullet">
 	<listitem><para>
-	    in <xref linkend="Development_setup_MySQL_environment"/>
+	    in <xref linkend="App_RM_Config_MySQL"/>
 	    to set-up a running environment for MySQL server
 	</para></listitem>
 	<listitem><para>
-	    in <xref linkend="Development_start_LIXA_server"/>
+	    in <xref linkend="Starting_the_state_server"/>
 	    to start up the LIXA state server
 	</para></listitem>
       </itemizedlist>
@@ -7419,15 +7050,15 @@ MQC_STA
 	      to set-up a running environment for WebSphere MQ
 	  </para></listitem>
 	  <listitem><para>
-	      in <xref linkend="Development_setup_MySQL_environment"/>
+	      in <xref linkend="App_RM_Config_MySQL"/>
 	      to set-up a running environment for MySQL server
 	  </para></listitem>
 	  <listitem><para>
-	      in <xref linkend="Development_setup_PostgreSQL_environment"/>
+	      in <xref linkend="App_RM_Config_PostgreSQL"/>
 	      to set-up a running environment for PostgreSQL server
 	  </para></listitem>
 	  <listitem><para>
-	      in <xref linkend="Development_start_LIXA_server"/>
+	      in <xref linkend="Starting_the_state_server"/>
 	      to start up the LIXA state server
 	  </para></listitem>
 	</itemizedlist>
