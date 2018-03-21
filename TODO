@@ -14,7 +14,18 @@ an error; if yes, propagate an error to the client that will start rollback
 instead of commit
 
 Implement timeout to avoid a too long block time for clients (timeout parameter
-in xa_prepare step 8 and step 24 messages)
+in xa_prepare step 8 and step 24 messages):
+- client side only (remove from messsages)
+- pick-up current time at function entry
+- use poll/select to avoid too long blocking for msg put and msg get
+- in the event of timeout, use shutdown to close the local half pipe of the
+  socket
+  - do all the necessary operation, maybe rollback resource managers if
+    necessary
+  - destroy all the objects
+  - close the socket (it could be a not clean close if the server has not close
+    the socket on its side in the meantime, but waiting will break the timeout)
+  - connection can't be reused
 
 Check memory leaks in state server after branch implementation.
 

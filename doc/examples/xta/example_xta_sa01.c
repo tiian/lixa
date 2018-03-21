@@ -79,9 +79,9 @@ int main(int argc, char *argv[])
      * Prepare SQL statement in accordance with "insert" command line parameter
      */
     if (insert) {
-        postgresql_stmt = "INSERT INTO authors VALUES(1921, 'Mario', "
-            "'Rigoni Stern')";
-        mysql_stmt = "INSERT INTO authors VALUES(1919, 'Primo', 'Levi')";
+        postgresql_stmt = "INSERT INTO authors VALUES(1921, 'Rigoni Stern', "
+            "'Mario')";
+        mysql_stmt = "INSERT INTO authors VALUES(1919, 'Levi', 'Primo')";
     } else {
         postgresql_stmt = "DELETE FROM authors WHERE id=1921";
         mysql_stmt = "DELETE FROM authors WHERE id=1919";
