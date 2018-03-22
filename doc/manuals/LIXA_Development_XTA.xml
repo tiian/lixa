@@ -313,6 +313,181 @@
 	</itemizedlist>
       </para>
     </section>
+    <section>
+      <title>XTA Resources and XA Resource Managers</title>
+      <important><para>
+	This section refers to concepts that are linked with deep technical
+	details of the <citation>XAspec</citation>: they are not trivial and
+	sometimes they could even sound strange due to the epoch of XA
+	standard design. XTA tries to provide an easy and modern interface for
+	working with XA, but some caveats still remain at least for these
+	reasons:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	    XA was designed as a protocol between one 
+	    <emphasis>Transaction Manager</emphasis> and one or more
+	    <emphasis>Resource Managers</emphasis>; the designers probably
+	    didn't figure out the usage of XA inside something like XTA
+	  </para></listitem>
+	  <listitem><para>
+	    XA standard predated the free software and open source initiatives
+	    and the design had to cope with commercial closed source softwares.
+	    Furthermore, XA didn't introduce changes in the proprietary 
+	    protocols between
+	    <emphasis>Application Programs</emphasis> and 
+	    <emphasis>Resource Managers</emphasis>, but <quote>sidecar</quote>
+	    approach was choosen.
+	  </para></listitem>
+	</itemizedlist>
+      </para></important>
+      <section>
+	<title>XA Design Considerations</title>
+	<para>
+	  <citation>XAspec</citation> defines the interface that must be
+	  implemented by an <quote>XA standard compliant</quote>
+	  <emphasis>Resource Manager</emphasis>: it's described in file
+	  <link xlink:href="https://github.com/tiian/lixa/blob/master/src/common/xa.h">xa.h</link> by struct <function>xa_switch_t</function>.
+	  One tricky point is a consequence of <function>xa_open()</function>
+	  and <function>xa_close()</function> functions: they must be called to
+	  <quote>open</quote> and <quote>close</quote> the 
+	  <emphasis>Resource Manager</emphasis>. 
+	</para>
+	<para>
+	  Non XA applications use native functions to open and close the
+	  connections with the resource managers.
+	</para>
+	<para>
+	  <emphasis>Application Programs</emphasis> that run in a XA context,
+	  must retrieve the connections with the 
+	  <emphasis>Resource Managers</emphasis> previously opened by the
+	  <emphasis>Transaction Manager</emphasis>.	
+	</para>
+	<para>
+	  During LIXA development, 3 different type of
+	  <emphasis>Resource Managers</emphasis> have been met:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+	      XA standard compliant <emphasis>Resource Managers</emphasis> that
+	      implement <function>xa_switch_t</function> interface and use the
+	      exact same functions to open a new connection and to retrieve a
+	      connection previously opened by the
+	      <emphasis>Transaction Manager</emphasis>: IBM DB2 and IBM MQ
+	      (previously MQSeries and WebSphere MQ) belong to this category
+	      <footnote><para>IBM, DB2, MQ, MQSeries and WebSphere are
+	      trademarks of <trademark>IBM</trademark></para></footnote>
+	    </para></listitem>
+	    <listitem><para>
+	      XA standard compliant <emphasis>Resource Managers</emphasis> that
+	      implement <function>xa_switch_t</function> interface and use
+	      different functions to open a new connection and to retrieve a
+	      connection previously opened by the
+	      <emphasis>Transaction Manager</emphasis>: Oracle Database Server
+	      belongs to this category
+	      <footnote><para>Oracle is a trademark of
+	      <trademark>Oracle Corporation</trademark></para></footnote>
+	    </para></listitem>
+	    <listitem><para>
+	      Non XA standard compliant <emphasis>Resource Managers</emphasis>
+	      that don't implement <function>xa_switch_t</function> interface
+	      and provide some XA equivalent functions by mean of special
+	      commands: MySQL<footnote><para>MySQL is a trademark of
+	      <trademark>Oracle Corporation</trademark></para></footnote>,
+	      MariaDB and PostgreSQL belong to this category
+	    </para></listitem>
+	  </itemizedlist>
+	</para>
+	<para>
+	  The second type of <emphasis>Resource Managers</emphasis> is the
+	  most difficult to integrate from XTA perspective: next paragraphs
+	  explain why.
+	</para>
+      </section>
+      <section>
+	<title>XTA Resource Hierarchy</title>
+	<para>
+	  To cope with the different implementations of XA 
+	  <emphasis>Resource Managers</emphasis>, XTA introduce a specific
+	  hierarchy for resources as depicted in the below image:
+	  <figure xml:id="xta_arch05">
+	  <title>XTA Resource Hierarchy</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="../images/LIXA_Development_XTA_05.png"/>
+	    </imageobject>
+	  </mediaobject>
+	  </figure>
+	</para>
+	<para>
+	  <emphasis>XAResource</emphasis> is an abstract class that can't be
+	  used to map a real <emphasis>Resource Manager</emphasis>, but
+	  useful to pass an object reference.
+	</para>
+	<para>
+	  <emphasis>NativeXAResource</emphasis> is the concrete class that
+	  must be used for all the <emphasis>Resource Managers</emphasis>
+	  that provide XA standard interface.
+	</para>
+	<para>
+	  <emphasis>AcquiredXAResource</emphasis> is a partially abstract
+	  class with basically no practical use (only conceptual).
+	</para>
+	<para>
+	  <emphasis>MySQLXAResource</emphasis> is the concrete class that 
+	  must be used for MySQL and MariaDB
+	  <emphasis>Resource Managers</emphasis>: it implements a specific
+	  constructor that accepts a MYSQL connection.
+	</para>
+	<para>
+	  <emphasis>PostgreSQLXAResource</emphasis> is the concrete class that 
+	  must be used for PostgreSQL <emphasis>Resource Manager</emphasis>:
+	  it implements a specific constructor that accepts a PGconn
+	  connection.
+	</para>
+	<para>
+	  Further non XA standard <emphasis>Resource Managers</emphasis> will
+	  require specialized <emphasis>somethingXAResource</emphasis>.
+	</para>
+      </section>
+      <section>
+	<title>XTA Resource Usage</title>
+	<para>
+	  Due to the above explanation, the usage of the different XTA
+	  resource types present some differences.
+	</para>
+	<para>
+	  Due to the above explanation, the usage of the different XTA
+	  resource types present some differences:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+	      <emphasis>NativeXAResource</emphasis> can be statically defined
+	      inside <filename>lixac_conf.xml</filename> or can be dynamically
+	      defined at run time using the class constructor.
+	    </para></listitem>
+	    <listitem><para>
+	      statically defined <emphasis>NativeXAResource</emphasis>
+	      must be create (method <function>new</function>) after
+	      <emphasis>Transaction Manager</emphasis> object creation
+	    </para></listitem>
+	    <listitem><para>
+	      dynamically defined <emphasis>NativeXAResource</emphasis>
+	      must be create (method <function>new</function>) before
+	      <emphasis>Transaction Manager</emphasis> object creation
+	    </para></listitem>
+	    <listitem><para>
+	      statically defined <emphasis>NativeXAResource</emphasis> can
+	      be enlisted (method <function>enlist</function>), but it's not
+	      necessary
+	    </para></listitem>
+	    <listitem><para>
+	      dynamically defined <emphasis>NativeXAResource</emphasis>
+	      and <emphasis>AcquiredXAResource</emphasis> must be enlisted
+	      (method <function>enlist</function>) to participate in a
+	      distributed <emphasis>Transaction</emphasis>
+	    </para></listitem>
+	  </itemizedlist>
+	</para>
+      </section>
+    </section>
   </section>
   <section>
     <title>The<quote>Single Application</quote>Pattern</title>

@@ -207,7 +207,7 @@ typedef struct xa_switch_t *(*lixa_get_xa_switch_f)(void);
  */
 #define TMMIGRATE 0x00100000L
 /*
- * NOTE: this is an extension implemented by LIXA but it'soutside the XA
+ * NOTE: this is an extension implemented by LIXA but it's outside the XA
  *       standard
  * Flag definitions for xta_
  */
