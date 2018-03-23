@@ -20,6 +20,18 @@
       </para></listitem>
     </itemizedlist>	
   </para>
+  <important>
+    <para>
+      <command>lixar</command> utility was designed to operate with statically
+      defined XA Resource Managers described in
+      <filename>lixac_conf.xml</filename> configuration file.
+      XTA, explained in
+      <xref linkend="Development_XTA">XTA </xref>,
+      introduces dynamically defined XA Resource Managers that can't be managed
+      by <command>lixar</command> utility if they are not defined in
+      <filename>lixac_conf.xml</filename> too
+    </para>
+  </important>
   <section>
     <title>Automatic (warm) recovery</title>
     <section>

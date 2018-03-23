@@ -58,7 +58,7 @@ PROJECT_LOGO           = logo_lixa_55.png
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = xta
+OUTPUT_DIRECTORY       = xta/C
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 4096 sub-
 # directories (in 2 levels) under the output directory of each output format and
@@ -752,9 +752,9 @@ WARN_LOGFILE           =
 #                         src/client/switch/webspheremq \
 #                         src/common \
 #                         src/server
+#			../../src/client/client_config.h \
 INPUT                  = ../../src/xta \
 			../../src/common/xa.h \
-			../../src/client/client_config.h \
 			../../src/client/lixa_iface.h \
 			../../src/common/lixa_config.h \
 			../../src/common/lixa_errors.h

@@ -44,7 +44,7 @@
 	    TP Monitors with integrated Transaction Managers
 	  </para></listitem>
 	  <listitem><para>
-	    tight coupling between couple of Transaction Managers to propagate
+	    tight coupling between couples of Transaction Managers to propagate
 	    transactional contexts and to coordinated distributed transactions
 	    among different systems
 	  </para></listitem>
@@ -59,7 +59,7 @@
 	XTA aims to provide TXaaS (Transaction as a Service) backend services
 	that can be used by cloud native applications that, for one reason or
 	another, require two phase commit ACID transactions among distributed
-	applications.
+	applications
 	<footnote><para>
 	  Many authors consider two phase commit the root of every evil in
 	  the realm of massively distributed applications, but the author of
@@ -72,10 +72,10 @@
       <title>XTA Architecture</title>
       <para>
 	<figure xml:id="xta_arch01">
-	  <title>Software stacks of an XTA application</title>
+	  <title>Software stack of an XTA application</title>
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="../images/LIXA_Development_XTA_01.png"/>
+	      <imagedata fileref="../images/LIXA_Development_XTA_01.svg"/>
 	    </imageobject>
 	  </mediaobject>
 	</figure>
@@ -92,7 +92,7 @@
 	  <title>Single application layout</title>
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="../images/LIXA_Development_XTA_02.png"/>
+	      <imagedata fileref="../images/LIXA_Development_XTA_02.svg"/>
 	    </imageobject>
 	  </mediaobject>
 	</figure>
@@ -104,7 +104,7 @@
 	commit protocol.
 	<emphasis>Application Program</emphasis>,
 	<emphasis>Resource Managers</emphasis> and
-	<emphasis>LIXA state server</emphasis> does not have to reside in the
+	<emphasis>LIXA state server</emphasis> don't have to reside in the
 	same system: they can be distributed in different systems that
 	communicate by mean of the TCP/IP protocol.
       </para>
@@ -113,7 +113,7 @@
 	  <title>Multiple applications layout</title>
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="../images/LIXA_Development_XTA_03.png"/>
+	      <imagedata fileref="../images/LIXA_Development_XTA_03.svg"/>
 	    </imageobject>
 	  </mediaobject>
 	</figure>
@@ -125,7 +125,7 @@
 	commit protocol.
 	<emphasis>Application Programs</emphasis>,
 	<emphasis>Resource Managers</emphasis> and
-	<emphasis>LIXA state server</emphasis> does not have to reside in the
+	<emphasis>LIXA state server</emphasis> don't have to reside in the
 	same system: they can be distributed in different systems that
 	communicate by mean of the TCP/IP protocol.
       </para>
@@ -174,7 +174,7 @@
 	    <listitem><para>
 	      <emphasis>Application Programs</emphasis> can use any sort of
 	      communication channel to transfer the transaction identifier 
-	      (XID): it can be a REST over HTTP, in can be a message queing
+	      (XID): it can be a REST over HTTP, it can be a message queing
 	      system, it can be a POSIX pipe and so on. Any communication
 	      channel that can send an ASCII string is eligible for passing
 	      the transaction identifier (XID)
@@ -327,7 +327,7 @@
 	    XA was designed as a protocol between one 
 	    <emphasis>Transaction Manager</emphasis> and one or more
 	    <emphasis>Resource Managers</emphasis>; the designers probably
-	    didn't figure out the usage of XA inside something like XTA
+	    didn't imagine the usage of XA inside something like XTA
 	  </para></listitem>
 	  <listitem><para>
 	    XA standard predated the free software and open source initiatives
@@ -364,7 +364,7 @@
 	</para>
 	<para>
 	  During LIXA development, 3 different type of
-	  <emphasis>Resource Managers</emphasis> have been met:
+	  <emphasis>Resource Managers</emphasis> have been discovered:
 	  <itemizedlist mark='bullet'>
 	    <listitem><para>
 	      XA standard compliant <emphasis>Resource Managers</emphasis> that
@@ -406,13 +406,13 @@
 	<title>XTA Resource Hierarchy</title>
 	<para>
 	  To cope with the different implementations of XA 
-	  <emphasis>Resource Managers</emphasis>, XTA introduce a specific
+	  <emphasis>Resource Managers</emphasis>, XTA introduces a specific
 	  hierarchy for resources as depicted in the below image:
 	  <figure xml:id="xta_arch05">
 	  <title>XTA Resource Hierarchy</title>
 	  <mediaobject>
 	    <imageobject>
-	      <imagedata fileref="../images/LIXA_Development_XTA_05.png"/>
+	      <imagedata fileref="../images/LIXA_Development_XTA_05.svg"/>
 	    </imageobject>
 	  </mediaobject>
 	  </figure>
@@ -435,12 +435,12 @@
 	  <emphasis>MySQLXAResource</emphasis> is the concrete class that 
 	  must be used for MySQL and MariaDB
 	  <emphasis>Resource Managers</emphasis>: it implements a specific
-	  constructor that accepts a MYSQL connection.
+	  constructor that accepts a MYSQL type connection.
 	</para>
 	<para>
 	  <emphasis>PostgreSQLXAResource</emphasis> is the concrete class that 
 	  must be used for PostgreSQL <emphasis>Resource Manager</emphasis>:
-	  it implements a specific constructor that accepts a PGconn
+	  it implements a specific constructor that accepts a PGconn type
 	  connection.
 	</para>
 	<para>
@@ -450,10 +450,6 @@
       </section>
       <section>
 	<title>XTA Resource Usage</title>
-	<para>
-	  Due to the above explanation, the usage of the different XTA
-	  resource types present some differences.
-	</para>
 	<para>
 	  Due to the above explanation, the usage of the different XTA
 	  resource types present some differences:
@@ -488,9 +484,29 @@
 	</para>
       </section>
     </section>
+    <section>
+      <title>XTA API Reference</title>
+      <para>
+	XTA API Reference is extracted from source code using
+	<link xlink:href="http://www.doxygen.org/">Doxygen</link> tool.
+	If you install <filename>doxygen</filename>, it will be produced
+	during build phase and stored in directory
+	<filename>doc/api/xta/html</filename>.
+      </para>
+      <para>
+	XTA API Reference can be consulted online:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	    XTA API Reference for C language:
+	    <link xlink:href="http://www.tiian.org/lixa/manuals/xta/C/">
+	    http://www.tiian.org/lixa/manuals/xta/C/</link>
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+    </section>
   </section>
   <section>
-    <title>The<quote>Single Application</quote>Pattern</title>
+    <title>The <quote>Single Application</quote> Pattern</title>
     <table frame="box">
       <thead>
 	<tr><td>The pattern in brief:</td></tr>
@@ -554,7 +570,7 @@
 	Program</quote> Pattern</title>
 	<mediaobject>
 	  <imageobject>
-	    <imagedata fileref="../images/LIXA_Development_XTA_04.png"/>
+	    <imagedata fileref="../images/LIXA_Development_XTA_04.svg"/>
 	  </imageobject>
 	</mediaobject>
       </figure>
@@ -667,7 +683,7 @@ tiian@ubuntu1404-64:~/tmp$
 	    tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/example_xta_sa01.c .
 	  </screen></td></tr></tbody>
 	</table>
-	Substitute <quote>lixa-X.Y.Z</quote> with the actual version of
+	Substitute <quote>X.Y.Z</quote> with the actual version of
 	the software you installed.
       </para>
       <para>

@@ -14,7 +14,7 @@ doxygen.xta:   doxygen.xta.in
         -e 's|@HAVE_DOT[@]|$(HAVE_DOT)|g' \
         $< >$@
 
-doxygen.lixa:   doxygen.lixa.in
+doxygen.lixa:   doxygen.lixa.in 
 	sed \
         -e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
         -e 's|@HAVE_DOT[@]|$(HAVE_DOT)|g' \
@@ -24,19 +24,19 @@ all:	$(MAYBE_API) $(MAYBE_XTA)
 
 if COND_DOXYGEN
 xta/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h \
-	doxygen_footer.html
+	doxygen_footer.html doxygen_header_xta.html
 	doxygen doxygen.xta
 lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h \
-	$(top_srcdir)/src/xta/*.h doxygen_footer.html
+	$(top_srcdir)/src/xta/*.h doxygen_footer.html doxygen_header_lixa.html
 	doxygen doxygen.lixa
 else
 xta/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h \
-	doxygen_footer.html
+	doxygen_footer.html doxygen_header_xta.html
 	@echo "XTA API documentation skipped because doxygen is not available"
 lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h \
-	$(top_srcdir)/src/xta/*.h doxygen_footer.html
+	$(top_srcdir)/src/xta/*.h doxygen_footer.html doxygen_header_lixa.html
 	@echo "LIXA source code documentation skipped because doxygen is not available"
 endif
 
