@@ -25,7 +25,12 @@
  * as documented in LIXA manual:
  * http://www.tiian.org/lixa/manuals/html/index.html
  *
- */
+ * This program accepts exactly two parameters on the command line:
+ * first parameter:  "commit", boolean value (if FALSE, "rollback")
+ * second parameter: "insert", boolean value (if FALSE, "delete")
+ * third parameter:  "superior", boolean value (if FALSE, "subordinate")
+ * fourth parameter: "XIDfilename", a string for a filename
+ */ 
 
 
 
@@ -169,8 +174,7 @@ int main(int argc, char *argv[])
      * "Multiple Applications, Consecutive Calls" Pattern:
      *
      * if the program is running with the role of "superior", it starts a new
-     * global transaction and it saves the XID (Transaction ID) in a file for
-     * future reading
+     * global transaction
      *
      * if the program is running with the role of "subordinate", it reads from
      * file the XID (Transaction ID) saved by another program executed with the
@@ -187,35 +191,6 @@ int main(int argc, char *argv[])
                     rc, lixa_strerror(rc));
             return 1;
         }
-        /*
-         * Retrieve the Transaction ID (XID) associated to the transaction that
-         * has been created in the previous step
-         */
-        xid_string = xta_xid_to_string(xta_transaction_get_xid(tx));
-        if (xid_string == NULL) {
-            fprintf(stderr, "xta_transaction_get_xid returned NULL\n");
-            return 1;
-        }
-        /*
-         * Open, write and close the file to pass xid_string from superior to
-         * subordinate
-         */
-        xid_file = fopen(xid_filename, "w");
-        if (xid_file == NULL) {
-            fprintf(stderr, "fopen(\"%s\", \"w\") returned NULL\n",
-                    xid_filename);
-            return 1;
-        }
-        fprintf(xid_file, "%s", xid_string);
-        fclose(xid_file);
-        xid_file = NULL;
-        printf("XID='%s' has been written in file '%s'\n",
-               xid_string, xid_filename);
-        /*
-         * Release xid_string to avoid a memory leak
-         */
-        free(xid_string);
-        xid_string = NULL;
     } else {
         char buffer[200];
         /*
@@ -304,7 +279,8 @@ int main(int argc, char *argv[])
      * "Multiple Applications, Consecutive Calls" Pattern:
      *
      * if the program is running with the role of "superior", it suspends the
-     * global transaction and leaves
+     * global transaction and it saves the XID (Transaction ID) in a file for
+     * future reading (subordinate application program will read it)
      *
      * if the program is running with the role of "subordinate", it commits
      * or rollback the global transaction.
@@ -319,9 +295,76 @@ int main(int argc, char *argv[])
                     rc, lixa_strerror(rc));
             return 1;
         }
+        /*
+         * Retrieve the Transaction ID (XID) associated to the transaction that
+         * has been created in the previous step
+         */
+        xid_string = xta_xid_to_string(xta_transaction_get_xid(tx));
+        if (xid_string == NULL) {
+            fprintf(stderr, "xta_transaction_get_xid returned NULL\n");
+            return 1;
+        }
+        /*
+         * Open, write and close the file to pass xid_string from superior to
+         * subordinate
+         */
+        xid_file = fopen(xid_filename, "w");
+        if (xid_file == NULL) {
+            fprintf(stderr, "fopen(\"%s\", \"w\") returned NULL\n",
+                    xid_filename);
+            return 1;
+        }
+        fprintf(xid_file, "%s", xid_string);
+        fclose(xid_file);
+        xid_file = NULL;
+        printf("XID='%s' has been written in file '%s'\n",
+               xid_string, xid_filename);
+        /*
+         * Release xid_string to avoid a memory leak
+         */
+        free(xid_string);
+        xid_string = NULL;
     } else {
-        
+        if (commit) {
+            /*
+             * Commit the global transaction
+             * Note: second argument ("multiple_branch") has FALSE value
+             */
+            rc = xta_transaction_commit(tx, FALSE);
+            if (rc != LIXA_RC_OK) {
+                fprintf(stderr, "xta_transaction_commit: returned %d (%s)\n",
+                        rc, lixa_strerror(rc));
+                return 1;
+            }
+        } else {
+            /*
+             * Rollback the global transaction
+             */
+            rc = xta_transaction_rollback(tx);
+            if (rc != LIXA_RC_OK) {
+                fprintf(stderr, "xta_transaction_rollback: returned %d (%s)\n",
+                        rc, lixa_strerror(rc));
+                return 1;
+            }
+        }
     }
+    /*
+     * Close all resources enlisted by the Transaction
+     */
+    rc = xta_transaction_close(tx);
+    if (rc != LIXA_RC_OK) {
+        fprintf(stderr, "xta_transaction_close: returned %d (%s)\n",
+                rc, lixa_strerror(rc));
+        return 1;
+    }
+    /*
+     * Delete Transaction Manager object
+     */
+    xta_transaction_manager_delete(tm);
+    /*
+     * delete dynamically created native XA Resource object for Oracle
+     */
+    xta_native_xa_resource_delete(xar);
     
     return 0;
 }

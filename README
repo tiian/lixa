@@ -67,12 +67,10 @@ it's not yet ready for a production environment: the development phase has not
 been completed and the code can still contains severe bugs.
 If you don't like to test XTA, you can disable it at configure time using:
 ./configure --disable-xta .....
-Please use SourceForge ticketing system https://sourceforge.net/p/lixa/bug/
-or Github issue tracking https://github.com/tiian/lixa/issues to document
+Please use Github issue tracking https://github.com/tiian/lixa/issues or
+SourceForge ticketing system https://sourceforge.net/p/lixa/bug/ to document
 XTA possible bugs.
-End user documentation is not yet available, but some case tests programs can be
-used as examples:
-test/src/case010*.c
+Example programs are available in doc/examples/xta
 
 
 

@@ -922,6 +922,79 @@ mysql>
 	</tr>
       </tbody>
     </table>
+    <section>
+      <title>Description</title>
+      <para>
+	This is a Distributed Transaction Processing pattern introduced by XTA:
+	two or more Application Programs use the same Resource Manager(s) and
+	perform consecutive operations inside a single XA global transaction.
+	The Resource Manager(s) must be able to suspend and resume the
+	thread's association with the transaction
+	branch: this feature is part of the XA standard, but some resource
+	managers don't support it (for example MySQL, MariaDB and PostgreSQL).
+	The following picture shows an example that can be implemented using,
+	for example, the Oracle RDBMS:
+	<figure xml:id="xta_pattern06">
+	  <title>example of <quote>Multiple Applications, 
+	  Consecutive Calls</quote> with two Application Programs and one
+	  Resource Manager</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="../images/LIXA_Development_XTA_06.svg"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	The pattern can <emphasis>not</emphasis> be implemented using the
+	standard TX Transaction	Demarcation interface.
+      </para>
+    </section>
+    <section>
+      <title>How it works</title>
+      <figure xml:id="xta_pattern07">
+	<title>The
+	<quote>Multiple Applications, Consecutive Calls</quote>
+	Pattern</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="../images/LIXA_Development_XTA_07.svg"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <para>
+	The above figure shows the logic necessary to build this type of
+	application; it's <emphasis>not</emphasis> a formally correct UML
+	sequence diagram (all the XTA objects are in the same lifeline), but
+	it should be clear enough to understand the
+	proper operations sequence:
+      </para>
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	</para></listitem>
+	<listitem><para>
+	</para></listitem>
+	<listitem><para>
+	</para></listitem>
+	<listitem><para>
+	</para></listitem>
+	<listitem><para>
+	</para></listitem>
+	<listitem><para>
+	</para></listitem>
+	<listitem><para>
+	</para></listitem>
+	<listitem><para>
+	</para></listitem>
+      </itemizedlist>
+      <note><para>
+	The methods listed in the above description must be considered
+	<quote>pseudo-code</quote>: the real name and signature is language
+	dependent. As an example, 
+	<screen>tm = new TransactionManager()</screen> translates to
+	<screen>tm = xta_transaction_manager_new()</screen> and
+	<screen>tx.Commit()</screen> translates to
+	<screen>xta_transaction_commit(tx, FALSE)</screen> in C.
+      </para></note>
+    </section>
   </section>
   <section>
     <title>The
