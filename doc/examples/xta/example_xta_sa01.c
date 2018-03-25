@@ -20,8 +20,9 @@
 
 
 /*
- * This program is an example implementation of the "Single Application Program
- * Pattern" as documented in LIXA manual:
+ * This program is an example implementation of the
+ * "Single Application" Pattern
+ * as documented in LIXA manual:
  * http://www.tiian.org/lixa/manuals/html/index.html
  *
  * This program accepts exactly two parameters on the command line:

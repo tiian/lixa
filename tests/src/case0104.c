@@ -586,7 +586,7 @@ void create_dynamic_native_xa_resources()
             "Loose_Coupling=true", "");
         if (dynamic_native_xa_res_ora == NULL) {
             fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned "
-                    "NULL for dynamically creted resource\n", pgm, pid);
+                    "NULL for dynamically craeted resource\n", pgm, pid);
             exit(1);
         }
     } /* if (branch_type == INTERMEDIATE) */
