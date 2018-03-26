@@ -619,7 +619,7 @@ testdb=> select * from AUTHORS;
       <itemizedlist mark="bullet">
 	<listitem><para>
 	  Set-up the Oracle environment as explained in 
-	  <xref linkend="Development_setup_Oracle_environment"/>
+	  <xref linkend="App_RM_Config_Oracle"/>
 	  and adapt the command to your Oracle Database Server version
 	</para></listitem>
 	<listitem><para>
@@ -1123,7 +1123,7 @@ xaoclose: rtn 0
 	  </para></listitem>
 	  <listitem><para>
 	    Set-up the Oracle environment as explained in 
-	    <xref linkend="Development_setup_Oracle_environment"/>
+	    <xref linkend="App_RM_Config_Oracle"/>
 	    and adapt the command to your Oracle Database Server version
 	  </para></listitem>
 	  <listitem><para>

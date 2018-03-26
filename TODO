@@ -1,7 +1,7 @@
-Restart with the same sample command:
-gcc example_xta_sa01.c $(lixa-config -x -c -f -l -d) -I/opt/lixa/include/xta -o example_xta_sa01
-executed from directory 
-lixa/doc/examples/xta
+Manual:
+ LIXA_Development.xml continue moving Oracle config in Appendix
+ LIXA_Development_XTA.xml continue with consecutive calls pattern, example: 
+  remove MySQL/PostgreSQL references and replace with Oracle
 
 Remove from server_xa_open, server_xa_end, server_xa_commit, server_recovery,
 server_ax_reg, server_ax_unreg, server_xa_forget, server_trans the parameter

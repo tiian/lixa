@@ -148,7 +148,9 @@ cc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-11)
       The environment should be prepared following these steps:
       <itemizedlist mark="bullet">
         <listitem><para>
-          The Oracle environment as explained in <xref linkend="Development_setup_Oracle_environment"/>. Please adapt to your version of Oracle installed.
+          The Oracle environment as explained in
+	  <xref linkend="App_RM_Config_Oracle"/>. Please adapt to your version
+	  of Oracle installed.
         </para></listitem>
         <listitem><para>
           Configuration of the Oracle listener for remote connections as explained in <xref linkend="Development_configure_Oracle_listener"/>.
