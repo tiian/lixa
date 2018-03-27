@@ -5,9 +5,9 @@ dia_images = LIXA_Configuration_1.dia  LIXA_Configuration_4.dia \
 	LIXA_Configuration_5.dia LIXA_Configuration_8.dia \
 	LIXA_Configuration_3.dia LIXA_Configuration_6.dia \
 	LIXA_Configuration_9.dia \
-	LIXA_Development_1.dia LIXA_Development_2.dia LIXA_Development_3.dia \
-	LIXA_Development_4.dia LIXA_Development_5.dia LIXA_Development_6.dia \
-	LIXA_Development_7.dia LIXA_Development_8.dia LIXA_Development_9.dia \
+	LIXA_Development_1.dia LIXA_App_RM_2.dia LIXA_Development_3.dia \
+	LIXA_Development_4.dia LIXA_App_RM_5.dia LIXA_Development_6.dia \
+	LIXA_Development_7.dia LIXA_App_RM_8.dia LIXA_Development_9.dia \
 	LIXA_Development_10.dia LIXA_Development_11.dia \
 	LIXA_Development_12.dia LIXA_Development_13.dia \
 	LIXA_Development_15.dia \
@@ -21,9 +21,9 @@ png_images = LIXA_Configuration_1.png  LIXA_Configuration_4.png \
 	LIXA_Configuration_5.png LIXA_Configuration_8.png \
 	LIXA_Configuration_3.png LIXA_Configuration_6.png \
 	LIXA_Configuration_9.png \
-	LIXA_Development_1.png LIXA_Development_2.png LIXA_Development_3.png \
-	LIXA_Development_4.png LIXA_Development_5.png LIXA_Development_6.png \
-	LIXA_Development_7.png LIXA_Development_8.png LIXA_Development_9.png \
+	LIXA_Development_1.png LIXA_App_RM_2.png LIXA_Development_3.png \
+	LIXA_Development_4.png LIXA_App_RM_5.png LIXA_Development_6.png \
+	LIXA_Development_7.png LIXA_App_RM_8.png LIXA_Development_9.png \
 	LIXA_Development_10.png LIXA_Development_11.png \
 	LIXA_Development_12.png LIXA_Development_13.png \
 	LIXA_Development_15.png \

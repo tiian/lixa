@@ -153,10 +153,10 @@ cc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-11)
 	  of Oracle installed.
         </para></listitem>
         <listitem><para>
-          Configuration of the Oracle listener for remote connections as explained in <xref linkend="Development_configure_Oracle_listener"/>.
+          Configuration of the Oracle listener for remote connections as explained in <xref linkend="App_RM_configure_Oracle_listener"/>.
         </para></listitem>
         <listitem><para>
-          Installation and configuration of the Oracle Instance Client (if required) as explained in <xref linkend="Development_install_Oracle_Instant_Client"/>.
+          Installation and configuration of the Oracle Instance Client (if required) as explained in <xref linkend="App_RM_install_Oracle_Instant_Client"/>.
         </para></listitem>
       </itemizedlist>
     </para>

@@ -624,11 +624,11 @@ testdb=> select * from AUTHORS;
 	</para></listitem>
 	<listitem><para>
 	  Configure Oracle listener for remote connection as explained in 
-	  <xref linkend="Development_configure_Oracle_listener"/>
+	  <xref linkend="App_RM_configure_Oracle_listener"/>
 	</para></listitem>
 	<listitem><para>
 	  Install and configure Oracle Instant Client as explained in 
-	  <xref linkend="Development_install_Oracle_Instant_Client"/>
+	  <xref linkend="App_RM_install_Oracle_Instant_Client"/>
 	</para></listitem>
 	<listitem><para>
 	  Start the LIXA state server as explained in
@@ -1128,11 +1128,11 @@ xaoclose: rtn 0
 	  </para></listitem>
 	  <listitem><para>
 	    Configure Oracle listener for remote connection as explained in 
-	    <xref linkend="Development_configure_Oracle_listener"/>
+	    <xref linkend="App_RM_configure_Oracle_listener"/>
 	  </para></listitem>
 	  <listitem><para>
 	    Install and configure Oracle Instant Client as explained in 
-	    <xref linkend="Development_install_Oracle_Instant_Client"/>
+	    <xref linkend="App_RM_install_Oracle_Instant_Client"/>
 	  </para></listitem>
 	  <listitem><para>
 	    Start the LIXA state server

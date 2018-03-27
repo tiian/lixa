@@ -289,5 +289,12 @@
         <rsrmgr>PostgreSQL_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="XTA_DYN">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+      </rsrmgrs>
+    </profile>
   </profiles>
 </client>

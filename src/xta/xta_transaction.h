@@ -29,14 +29,14 @@
 /**
  * This typedef are necessary to avoid the inclusion of LIXA internals that
  * are unnecessary for the XTA interface, but necessary for XTA implementation.
- * The real type is @ref client_status_t, by XTA is used only as a
+ * The real type is client_status_t, by XTA is used only as a
  * pointer
  */
 typedef void xta_transaction_client_status_t;
 /**
  * This typedef are necessary to avoid the inclusion of LIXA internals that
  * are unnecessary for the XTA interface, but necessary for XTA implementation.
- * The real type is @ref client_config_coll_t, by XTA is used only as a
+ * The real type is client_config_coll_t, by XTA is used only as a
  * pointer
  */
 typedef void xta_transaction_config_t;

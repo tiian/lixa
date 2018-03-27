@@ -680,7 +680,7 @@ tiian@ubuntu1404-64:~/tmp$
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-	    tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/example_xta_sa01.c .
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/example_xta_sa01.c .
 	  </screen></td></tr></tbody>
 	</table>
 	Substitute <quote>X.Y.Z</quote> with the actual version of
@@ -726,7 +726,7 @@ total 32
       <para>
 	Open three terminal sessions: one for example execution,
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - example]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu1404-64:~/tmp$ ls -la
 total 40
@@ -770,9 +770,20 @@ Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 mysql>
 	  </screen></td></tr></tbody>
 	</table>
+	set <varname>LIXA_PROFILE</varname> to <constant>XTA_DYN</constant>
+	a profile without static Resource Managers defined in
+	<filename>lixac_conf.xml</filename>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
 	insert rows in tables and commit:
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - example]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu1404-64:~/tmp$ ./example_xta_sa01 1 1
 PostgreSQL, executing &gt;INSERT INTO authors VALUES(1921, 'Rigoni Stern', 'Mario')&lt;
@@ -810,7 +821,7 @@ mysql>
 	</table>
 	delete rows from tables, but rollback:
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - example]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu1404-64:~/tmp$ ./example_xta_sa01 0 0
 PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
@@ -848,7 +859,7 @@ mysql>
 	</table>
 	delete rows and commit:
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - example]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu1404-64:~/tmp$ ./example_xta_sa01 1 0
 PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
@@ -1077,15 +1088,11 @@ mysql>
       <para>
 	The supplied example (<filename>example_xta_macc01.c</filename>) uses
 	Oracle in the role of <quote>Resource Manager 1</quote>; please
-	refer to the instructions explained 
+	refer to the instructions explained
 	<itemizedlist mark="bullet">
 	  <listitem><para>
-	    in <xref linkend="App_RM_Config_MySQL"/>
-	    to set-up a running environment for MySQL server
-	  </para></listitem>
-	  <listitem><para>
-	    in <xref linkend="App_RM_Config_PostgreSQL"/>
-	    to set-up a running environment for PostgreSQL server
+	    in <xref linkend="App_RM_Config_Oracle_Remote"/> 
+	    to set-up the correct client/server configuration for Oracle
 	  </para></listitem>
 	  <listitem><para>
 	    in <xref linkend="Starting_the_state_server"/>
@@ -1106,11 +1113,12 @@ tiian@ubuntu1404-64:~/tmp$
 	</table>
       </para>
       <para>
-	Copy file <filename>example_xta_sa01.c</filename> in your working dir:
+	Copy file <filename>example_xta_macc01.c</filename> in your working
+	dir:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-	    tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/example_xta_sa01.c .
+	    tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/example_xta_macc01.c .
 	  </screen></td></tr></tbody>
 	</table>
 	Substitute <quote>X.Y.Z</quote> with the actual version of
@@ -1122,7 +1130,11 @@ tiian@ubuntu1404-64:~/tmp$
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu1404-64:~/tmp$ . /opt/lixa/bin/lixa_env.sh 
-tiian@ubuntu1404-64:~/tmp$ gcc example_xta_sa01.c $(lixa-config -x -c -f -l -d) -lpq $(mysql_config --libs_r) -o example_xta_sa01
+tiian@ubuntu1404-64:~/tmp$ gcc example_xta_macc01.c $(lixa-config -x -c -f -l -d) \
+> -I/opt/oracle/instantclient_12_1/sdk/include \
+> -L/opt/oracle/instantclient_12_1 \
+> -Wl,-rpath -Wl,/opt/oracle/instantclient_12_1 \
+> -l clntsh -l nnz12 -o example_xta_macc01
 	  </screen></td></tr></tbody>
 	</table>
       </para>
@@ -1133,13 +1145,13 @@ tiian@ubuntu1404-64:~/tmp$ gcc example_xta_sa01.c $(lixa-config -x -c -f -l -d) 
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:/tmp$ ls -l
-total 32
--rwxrwxr-x 1 tiian tiian 18603 mar 20 22:56 example_xta_sa01
--rw-r--r-- 1 tiian tiian  8302 mar 20 22:50 example_xta_sa01.c
+tiian@ubuntu1404-64:~/tmp$ ls -l
+total 36
+-rwxrwxr-x 1 tiian tiian 18647 mar 27 21:51 example_xta_macc01
+-rw-r--r-- 1 tiian tiian 12828 mar 27 21:50 example_xta_macc01.c
 	  </screen></td></tr></tbody>
 	</table>
-	The example program accepts two arguments:
+	The example program accepts four arguments:
 	<itemizedlist mark="bullet">
           <listitem><para>
 	    commit (or rollback): use <quote>1</quote> if you want to perform
@@ -1151,172 +1163,311 @@ total 32
 	    in databases or <quote>0</quote> if you want to delete rows from
 	    databases
 	  </para></listitem>
+          <listitem><para>
+	    superior (or subordinate): use <quote>1</quote> if you want to
+	    execute the <quote>superior</quote> part depicted in the
+	    sequence diagram (<quote>Application Program 1</quote>) or
+	    <quote>0</quote> if you want to execute the
+	    <quote>subordinate</quote> part depicted in the sequence diagram
+	    (<quote>Application Program 2</quote>)
+	  </para></listitem>
+          <listitem><para>
+	    XIDfilename: a valid name for a file that must be used to transfer
+	    XID (Transaction ID) from <quote>Application Program 1</quote> to
+	    <quote>Application Program 2</quote>; XIDfilename can be the name
+	    of a regular file or of a FIFO (named pipe) can be used
+	  </para></listitem>
 	</itemizedlist>
       </para>
       <para>
-	Open three terminal sessions: one for example execution,
+	Open three terminal sessions: one for Application Program 1
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - example]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
 tiian@ubuntu1404-64:~/tmp$ ls -la
-total 40
-drwxrwxr-x  2 tiian tiian  4096 mar 20 23:13 .
-drwxr-xr-x 12 tiian tiian  4096 mar 21 22:17 ..
--rwxrwxr-x  1 tiian tiian 18603 mar 20 23:13 example_xta_sa01
--rw-r--r--  1 tiian tiian  8302 mar 20 23:08 example_xta_sa01.c
+total 44
+drwxrwxr-x  2 tiian tiian  4096 mar 27 22:06 .
+drwxr-xr-x 12 tiian tiian  4096 mar 27 21:52 ..
+-rwxrwxr-x  1 tiian tiian 18647 mar 27 21:51 example_xta_macc01
+-rw-r--r--  1 tiian tiian 12828 mar 27 21:50 example_xta_macc01.c
 	  </screen></td></tr></tbody>
 	</table>
-	one for PostgreSQL queries
+	another one for Application Program 2
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~$ psql testdb
-psql (9.3.22)
-Type "help" for help.
-
-testdb=>
+tiian@ubuntu1404-64:~/tmp$ ls -la
+total 44
+drwxrwxr-x  2 tiian tiian  4096 mar 27 22:06 .
+drwxr-xr-x 12 tiian tiian  4096 mar 27 21:52 ..
+-rwxrwxr-x  1 tiian tiian 18647 mar 27 21:51 example_xta_macc01
+-rw-r--r--  1 tiian tiian 12828 mar 27 21:50 example_xta_macc01.c
 	  </screen></td></tr></tbody>
 	</table>
-	and one for MySQL queries
+	and the last one for Oracle <command>sqlplus</command> client
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session - Oracle]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~$ mysql -h localhost -u lixa lixa
-Reading table information for completion of table and column names
-You can turn off this feature to get a quicker startup with -A
+tiian@ubuntu1404-64:~$ . ./oracle_env.sh 
+tiian@ubuntu1404-64:~$ sqlplus hr/hr@lixa_ora_db
 
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 36
-Server version: 5.5.59-0ubuntu0.14.04.1 (Ubuntu)
+SQL*Plus: Release 12.1.0.2.0 Production on Tue Mar 27 22:08:39 2018
 
-Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
 
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
+Last Successful login time: Tue Mar 27 2018 22:00:12 +02:00
 
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
 
-mysql>
+SQL&gt;
 	  </screen></td></tr></tbody>
 	</table>
-	insert rows in tables and commit:
+	create a FIFO (named pipe) in current directory:
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - example]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_sa01 1 1
-PostgreSQL, executing &gt;INSERT INTO authors VALUES(1921, 'Rigoni Stern', 'Mario')&lt;
-MySQL, executing &gt;INSERT INTO authors VALUES(1919, 'Levi', 'Primo')&lt;
-tiian@ubuntu1404-64:~/tmp$
+tiian@ubuntu1404-64:~/tmp$ mkfifo xid.fifo
+tiian@ubuntu1404-64:~/tmp$ ls -la
+total 44
+drwxrwxr-x  2 tiian tiian  4096 mar 27 22:10 .
+drwxr-xr-x 12 tiian tiian  4096 mar 27 21:52 ..
+-rwxrwxr-x  1 tiian tiian 18647 mar 27 21:51 example_xta_macc01
+-rw-r--r--  1 tiian tiian 12828 mar 27 21:50 example_xta_macc01.c
+prw-rw-r--  1 tiian tiian     0 mar 27 22:10 xid.fifo
 	  </screen></td></tr></tbody>
 	</table>
-	check PostgreSQL table content:
+	set <varname>LIXA_PROFILE</varname> to <constant>XTA_DYN</constant>
+	a profile without static Resource Managers defined in
+	<filename>lixac_conf.xml</filename>:
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
-testdb=&gt; select * from authors;
-  id  |  last_name   | first_name 
-------+--------------+------------
- 1921 | Rigoni Stern | Mario
-(1 row)
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	in the first terminal session, start
+	<command>example_xta_macc01</command> in the role of AP1 and in the
+	second terminal session, start <command>example_xta_macc01</command>
+	in the role of AP2
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 1 1 1 xid.fifo 
+OCI statement &gt;INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) VALUES(1930, 'Bonatti', 'Walter')&lt; completed
+XID='1279875137.67f9ed180b7f4fe8a9d0f749a0f9e90b.5ed2d6ffa60ad419517220dd5ab2719e' has been written in file 'xid.fifo'
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 1 1 0 xid.fifo 
+XID='1279875137.67f9ed180b7f4fe8a9d0f749a0f9e90b.5ed2d6ffa60ad419517220dd5ab2719e' has been read from file 'xid.fifo'
+OCI statement &gt;INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) VALUES(1948, 'Casarotto', 'Renato')&lt; completed
+	  </screen></td></tr></tbody>
+	</table>
+	<note><para>
+	  Application Program 1 suspends its execution and waits 
+	  Application Program 2 start: this is a consequence of the FIFO
+	  behavior
+	</para></note>
+	check Oracle table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - Oracle]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL&gt; select * from authors;
 
-testdb=&gt;
-	  </screen></td></tr></tbody>
-	</table>
-	check MySQL table content:
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
-	  <tbody><tr><td><screen>
-mysql> select * from authors;
-+------+-----------+------------+
-| id   | last_name | first_name |
-+------+-----------+------------+
-| 1919 | Levi      | Primo      |
-+------+-----------+------------+
-1 row in set (0.00 sec)
+ID         LAST_NAME            FIRST_NAME
+---------- -------------------- --------------------
+1930       Bonatti              Walter
+1948       Casarotto            Renato
 
-mysql>
 	  </screen></td></tr></tbody>
 	</table>
-	delete rows from tables, but rollback:
+	use a regular file to perform a <command>SQL DELETE</command> followed
+	by a rollback:
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - example]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_sa01 0 0
-PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
-MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
-tiian@ubuntu1404-64:~/tmp$
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 0 0 1 xid.txt
+OCI statement &gt;DELETE FROM authors WHERE ID=1930&lt; completed
+XID='1279875137.1f31836dab1a4081b488a9b3565faaa4.7b4180ecb8fee8c12cbc13637ab4eabb' has been written in file 'xid.txt'
 	  </screen></td></tr></tbody>
 	</table>
-	check PostgreSQL table content:
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
 	  <tbody><tr><td><screen>
-testdb=&gt; select * from authors;
-  id  |  last_name   | first_name 
-------+--------------+------------
- 1921 | Rigoni Stern | Mario
-(1 row)
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 0 0 0 xid.txt
+XID='1279875137.1f31836dab1a4081b488a9b3565faaa4.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid.txt'
+OCI statement &gt;DELETE FROM authors WHERE ID=1948&lt; completed
+	  </screen></td></tr></tbody>
+	</table>
+	<note><para>
+	  Application Program 1 ends its execution without waiting for
+	  Application Program 2 start: this is a consequence of the regular
+	  file behavior
+	</para></note>
+	check Oracle table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - Oracle]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL&gt; select * from authors;
 
-testdb=&gt;
-	  </screen></td></tr></tbody>
-	</table>
-	check MySQL table content:
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
-	  <tbody><tr><td><screen>
-mysql> select * from authors;
-+------+-----------+------------+
-| id   | last_name | first_name |
-+------+-----------+------------+
-| 1919 | Levi      | Primo      |
-+------+-----------+------------+
-1 row in set (0.00 sec)
+ID         LAST_NAME            FIRST_NAME
+---------- -------------------- --------------------
+1930       Bonatti              Walter
+1948       Casarotto            Renato
 
-mysql>
 	  </screen></td></tr></tbody>
 	</table>
-	delete rows and commit:
+	as expected, the two rows are still in the table because the XA global
+	transaction has been rolled back by Application Program 2; XA functions
+	executed by Oracle can be inspected in its trace file:
 	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - example]</td></tr></thead>
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_sa01 1 0
-PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
-MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
-tiian@ubuntu1404-64:~/tmp$
-	  </screen></td></tr></tbody>
-	</table>
-	check PostgreSQL table content:
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
-	  <tbody><tr><td><screen>
-testdb=> select * from authors;
- id | last_name | first_name 
-----+-----------+------------
-(0 rows)
+tiian@ubuntu1404-64:~/tmp$ tail -n 30 /tmp/xa_NULL03272018.trc 
+224024.9416.4016678528.2:
+xaorollback: xid=0x4c495841-1f31836dab1a4081b488a9b3565faaa4-7b4180ecb8fee8c12cbc13637ab4eabb, rmid=0, flags=0x0
 
-testdb=>
-	  </screen></td></tr></tbody>
-	</table>
-	check MySQL table content:
-	<table frame="box">
-	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
-	  <tbody><tr><td><screen>
-mysql> select * from authors;
-Empty set (0.00 sec)
 
-mysql>
+224024.9416.4016678528.2:
+OCITransRollback: Attempting
+
+
+224024.9416.4016678528.2:
+OCITransRollback: Succeeded
+
+
+224024.9416.4016678528.2:
+xaorollback: rtn 0
+
+
+224024.9416.4016678528.2:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+
+224024.9416.4016678528.2:
+OCIServerDetach: Attempting
+
+
+224024.9416.4016678528.2:
+OCIServerDetach: Succeeded
+
+
+224024.9416.4016678528.2:
+xaoclose: rtn 0
 	  </screen></td></tr></tbody>
 	</table>
+	to complete the exercise, use a regular file to perform a
+	<command>SQL DELETE</command> followed by a commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 1 0 1 xid.txt
+OCI statement &gt;DELETE FROM authors WHERE ID=1930&lt; completed
+XID='1279875137.bfd10e4a5fc541f587727304ae34cccf.7b4180ecb8fee8c12cbc13637ab4eabb' has been written in file 'xid.txt'
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 1 0 0 xid.txt
+XID='1279875137.bfd10e4a5fc541f587727304ae34cccf.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid.txt'
+OCI statement &gt;DELETE FROM authors WHERE ID=1948&lt; completed
+	  </screen></td></tr></tbody>
+	</table>
+	check Oracle table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - Oracle]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL&gt; select * from authors;
+
+no rows selected
+
+	  </screen></td></tr></tbody>
+	</table>
+	Finally the table is empty; ; XA functions
+	executed by Oracle can be inspected in its trace file:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ tail -n 50 /tmp/xa_NULL03272018.trc 
+225247.14985.1108846208.0:
+xaostart: return XA_OK
+
+
+225247.14985.1108846208.0:
+xaoend: xid=0x4c495841-bfd10e4a5fc541f587727304ae34cccf-7b4180ecb8fee8c12cbc13637ab4eabb, rmid=0, flags=0x4000000
+
+
+225247.14985.1108846208.0:
+OCITransDetach: Attempting
+
+
+225247.14985.1108846208.0:
+OCITransDetach: Succeeded
+
+
+225247.14985.1108846208.0:
+xaoend: return 0
+
+
+225247.14985.1108846208.0:
+xaocommit: xid=0x4c495841-bfd10e4a5fc541f587727304ae34cccf-7b4180ecb8fee8c12cbc13637ab4eabb, rmid=0, flags=0x40000000
+
+
+225247.14985.1108846208.0:
+OCITransCommit: Attempting
+
+
+225247.14985.1108846208.0:
+OCITransCommit: Succeeded
+
+
+225247.14985.1108846208.0:
+xaocommit: rtn 0
+
+
+225247.14985.1108846208.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+
+225247.14985.1108846208.0:
+OCIServerDetach: Attempting
+
+
+225247.14985.1108846208.0:
+OCIServerDetach: Succeeded
+
+
+225247.14985.1108846208.0:
+xaoclose: rtn 0
+	  </screen></td></tr></tbody>
+	</table>
+	The trace shows that XTA performed a <quote>one phase commit</quote>
+	instead of a <quote>two phase commit</quote> because there's only one
+	Resource Manager (hint: function <function>xaoprepare</function> has
+	not been called by the Transaction Manager).
       </para>
     </section>
     <section>
       <title>Source Code</title>
       <para>
-	Source code for program <filename>example_xta_sa01.c</filename> is
+	Source code for program <filename>example_xta_macc01.c</filename> is
 	installed in directory
 	<filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta</filename> and
-	is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/example_xta_sa01.c">GitHub</link>. Source code is fully
+	is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/example_xta_macc01.c">GitHub</link>. Source code is fully
 	commented for readability.
       </para>
     </section>
