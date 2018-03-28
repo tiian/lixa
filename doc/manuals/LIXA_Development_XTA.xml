@@ -647,7 +647,7 @@
 	The supplied example (<filename>example_xta_sa01.c</filename>) uses
 	PostgreSQL in the role of <quote>Resource Manager 1</quote> and MySQL
 	(or MariaDB) in the role of <quote>Resource Manager 2</quote>; please
-	refer to the instructions explained 
+	refer to the instructions explained :
 	<itemizedlist mark="bullet">
 	  <listitem><para>
 	    in <xref linkend="App_RM_Config_MySQL"/>
@@ -697,8 +697,8 @@ tiian@ubuntu1404-64:~/tmp$ gcc example_xta_sa01.c $(lixa-config -x -c -f -l -d) 
 	</table>
       </para>
       <para>
-	If the previous steps worked for you, you would have an executable file
-	of name <filename>example_xta_sa01</filename> in your current 
+	If the previous steps worked for you, you should have an executable
+	file of name <filename>example_xta_sa01</filename> in your current 
 	directory:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
@@ -770,7 +770,8 @@ Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 mysql>
 	  </screen></td></tr></tbody>
 	</table>
-	set <varname>LIXA_PROFILE</varname> to <constant>XTA_DYN</constant>
+	set <varname>LIXA_PROFILE</varname> environment variable to
+	<constant>XTA_DYN</constant>
 	a profile without static Resource Managers defined in
 	<filename>lixac_conf.xml</filename>:
 	<table frame="box">
@@ -943,6 +944,8 @@ mysql>
 	thread's association with the transaction
 	branch: this feature is part of the XA standard, but some resource
 	managers don't support it (for example MySQL, MariaDB and PostgreSQL).
+      </para>
+      <para>
 	The following picture shows an example that can be implemented using
 	Oracle RDBMS:
 	<figure xml:id="xta_pattern06">
@@ -1071,6 +1074,14 @@ mysql>
 	    languages used: every Application Program can be developed using
 	    a different programming language supported by XTA
 	  </para></listitem>
+	  <listitem><para>
+	    There's no constraint to communication protocol used by 
+	    Application Programs to exchange information: REST API, SOAP based
+	    web services, CORBA, RPC, any network protocol, any inter process
+	    communication, etc... XTA does <emphasis>not</emphasis> force the
+	    developer to use a specific communication protocol: any technique
+	    suitable to send an ASCII string can be used
+	  </para></listitem>
 	</itemizedlist>
       </para></important>
       <note><para>
@@ -1088,7 +1099,7 @@ mysql>
       <para>
 	The supplied example (<filename>example_xta_macc01.c</filename>) uses
 	Oracle in the role of <quote>Resource Manager 1</quote>; please
-	refer to the instructions explained
+	refer to the instructions explained:
 	<itemizedlist mark="bullet">
 	  <listitem><para>
 	    in <xref linkend="App_RM_Config_Oracle_Remote"/> 
@@ -1139,7 +1150,7 @@ tiian@ubuntu1404-64:~/tmp$ gcc example_xta_macc01.c $(lixa-config -x -c -f -l -d
 	</table>
       </para>
       <para>
-	If the previous steps worked for you, you would have an executable file
+	If the previous steps worked for you, you should have an executable file
 	of name <filename>example_xta_sa01</filename> in your current 
 	directory:
 	<table frame="box">
@@ -1175,7 +1186,7 @@ total 36
 	    XIDfilename: a valid name for a file that must be used to transfer
 	    XID (Transaction ID) from <quote>Application Program 1</quote> to
 	    <quote>Application Program 2</quote>; XIDfilename can be the name
-	    of a regular file or of a FIFO (named pipe) can be used
+	    of a regular file or of a FIFO (named pipe)
 	  </para></listitem>
 	</itemizedlist>
       </para>
@@ -1237,8 +1248,9 @@ drwxr-xr-x 12 tiian tiian  4096 mar 27 21:52 ..
 prw-rw-r--  1 tiian tiian     0 mar 27 22:10 xid.fifo
 	  </screen></td></tr></tbody>
 	</table>
-	set <varname>LIXA_PROFILE</varname> to <constant>XTA_DYN</constant>
-	a profile without static Resource Managers defined in
+	set <varname>LIXA_PROFILE</varname> environment variable to
+	<constant>XTA_DYN</constant> a profile without static 
+	Resource Managers defined in
 	<filename>lixac_conf.xml</filename>:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
@@ -1397,7 +1409,7 @@ no rows selected
 
 	  </screen></td></tr></tbody>
 	</table>
-	Finally the table is empty; ; XA functions
+	Finally the table is empty; XA functions
 	executed by Oracle can be inspected in its trace file:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
