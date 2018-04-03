@@ -32,3 +32,16 @@ following commands:
 > -Wl,-rpath -Wl,/opt/oracle/instantclient_12_1 \
 > -l clntsh -l nnz12 -o example_xta_macc01`
 
+## "Multiple Applications, Concurrent Branches/Pseudo Synchronous" Pattern ##
+
+Program *example_xta_macbps01.c* requires MySQL (or MariaDB) to work.
+Program *example_xta_macbps02.c* requires PostgreSQL to work.
+After proper installation of LIXA, you can compile the programs with the
+following commands:
+
+`. /opt/lixa/bin/lixa_env.sh`
+
+`gcc example_xta_macbps01.c $(lixa-config -x -c -f -l -d) $(mysql_config --libs_r) -o example_xta_macbps01`
+`gcc example_xta_macbps02.c $(lixa-config -x -c -f -l -d) -lpq -o example_xta_macbps02`
+
+

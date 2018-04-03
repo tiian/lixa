@@ -25,9 +25,15 @@
  * as documented in LIXA manual:
  * http://www.tiian.org/lixa/manuals/html/index.html
  *
- * This program accepts exactly two parameters on the command line:
+ * This program accepts exactly four parameters on the command line:
  * first parameter:  "commit", boolean value (if FALSE, "rollback")
  * second parameter: "insert", boolean value (if FALSE, "delete")
+ * third parameter:  "sup2sub_filename", a string with the name of the FIFO
+ *                   (named pipe) that must be used for superior->subordinate
+ *                   communication
+ * fourth parameter: "sub2sup_filename", a string with the name of the FIFO
+ *                   (named pipe) that must be used for subordinate->superior
+ *                   communication
  */
 
 
@@ -47,74 +53,71 @@ int main(int argc, char *argv[])
     int                           commit;
     /* Second parameter: insert data in databases? */
     int                           insert;
-    /* native PostgreSQL connection handler */
-    PGconn                       *rm1 = NULL;
-    /* PostgreSQL result */
-    PGresult                     *pg_res;
-    /* variable for PostgreSQL statement to execute */
-    char                         *postgresql_stmt;
-    /* XTA Resource for PostgreSQL */
-    xta_postgresql_xa_resource_t *xar1 = NULL;
+    /* Third parameter: name of the named pipe (FIFO) that must be used to
+       send from superior AP to subordinate AP */
+    const char                   *sup2sub_fifoname = NULL;
+    /* Fourth parameter: name of the named pipe (FIFO) that must be used to
+       send from subordinate AP to superior AP */
+    const char                   *sub2sup_fifoname = NULL;
+    /* File (named pipe/FIFO) that must be used to pass XID from superior to
+       subordinate application program */
+    FILE                         *sup2sub_fifo = NULL;
+    /* File (named pipe/FIFO) that must be used to return the result from
+       subordinate to superior application program */
+    FILE                         *sub2sup_fifo = NULL;
     /* native MySQL connection handler */
-    MYSQL                        *rm2 = NULL;
+    MYSQL                        *rm = NULL;
     /* variable for MySQL statement to execute */
     char                         *mysql_stmt;
     /* XTA Resource for MySQL */
-    xta_mysql_xa_resource_t      *xar2 = NULL;
+    xta_mysql_xa_resource_t      *xar = NULL;
     /* XTA Transaction Manager object reference */
     xta_transaction_manager_t    *tm = NULL;
     /* XTA Transaction object reference */
     xta_transaction_t            *tx = NULL;
+    /* XID (Transaction ID) as a null terminated C string */
+    char                         *xid_string = NULL;
+    /* a buffer to read the reply from the subordinate Application Program */
+    char                          response_buffer[100];
 
     /*
      * Check command line parameters
      */
-    if (argc < 3) {
+    if (argc < 5) {
         fprintf(stderr, "This program requires two boolean parameters: "
-                "'commit' and 'insert'\n");
+                "'commit', 'insert' and two strings: "
+                "'Superior2SubordinateFIFOname', "
+                "'Subordinate2SuperiorFIFOname'\n");
         return 1;
     }
     commit = strtol(argv[1], NULL, 0);
     insert = strtol(argv[2], NULL, 0);
+    sup2sub_fifoname = argv[3];
+    sub2sup_fifoname = argv[4];
     /*
      * Prepare SQL statements in accordance with "insert" command line
      * parameter
      */
-    if (insert) {
-        postgresql_stmt = "INSERT INTO authors VALUES(1921, 'Rigoni Stern', "
-            "'Mario')";
+    if (insert)
         mysql_stmt = "INSERT INTO authors VALUES(1919, 'Levi', 'Primo')";
-    } else {
-        postgresql_stmt = "DELETE FROM authors WHERE id=1921";
+    else
         mysql_stmt = "DELETE FROM authors WHERE id=1919";
-    }
-
     /*
      * initialize XTA environment
      */
     xta_init();
     /*
-     * create a new PostgreSQL connection
+     * create a new MySQL connection (if subordinate Application Program)
      */
-    rm1 = PQconnectdb("dbname=testdb");
-    if (PQstatus(rm1) != CONNECTION_OK) {
-        fprintf(stderr, "PQconnectdb: returned error %s\n",
-                PQerrorMessage(rm1));
-        PQfinish(rm1);
-        return 1;
-    }
-    /*
-     * create a new MySQL connection
-     */
-    rm2 = mysql_init(NULL);
-    if (rm2 == NULL) {
+    rm = mysql_init(NULL);
+    if (rm == NULL) {
         fprintf(stderr, "mysql_init: returned NULL\n");
         return 1;
     }
-    if (mysql_real_connect(rm2, "localhost", "lixa", "",
+    if (mysql_real_connect(rm, "localhost", "lixa", "",
                            "lixa", 0, NULL, 0) == NULL) {
         fprintf(stderr, "mysql_real_connect: returned error: %u, %s\n",
-                mysql_errno(rm2), mysql_error(rm2));
+                mysql_errno(rm), mysql_error(rm));
         return 1;
     }
     /*
@@ -126,20 +129,10 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * create an XA resource for PostgreSQL
-     * second parameter "PostgreSQL" is descriptive
-     * third parameter "dbname=testdb" identifies the specific database
-     */
-    xar1 = xta_postgresql_xa_resource_new(rm1, "PostgreSQL", "dbname=testdb");
-    if (xar1 == NULL) {
-        fprintf(stderr, "xta_postgresql_xa_resource_new: returned NULL\n");
-        return 1;
-    }
-    /*
      * create an XA resource for MySQL
      */
-    xar2 = xta_mysql_xa_resource_new(rm2, "MySQL", "localhost,0,lixa,,lixa");
-    if (xar2 == NULL) {
+    xar = xta_mysql_xa_resource_new(rm, "MySQL", "localhost,0,lixa,,lixa");
+    if (xar == NULL) {
         fprintf(stderr, "xta_mysql_xa_resource_new: returned NULL\n");
         return 1;
     }
@@ -153,18 +146,9 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * Enlist PostgreSQL resource to transaction
-     */
-    rc = xta_transaction_enlist_resource(tx, (xta_xa_resource_t *)xar1);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "xta_transaction_enlist_resource returned %d (%s) for "
-               "PostgreSQL XA resource\n", rc, lixa_strerror(rc));
-        return 1;
-    }
-    /*
      * Enlist MySQL resource to Transaction
      */
-    rc = xta_transaction_enlist_resource(tx, (xta_xa_resource_t *)xar2);
+    rc = xta_transaction_enlist_resource(tx, (xta_xa_resource_t *)xar);
     if (rc != LIXA_RC_OK) {
         fprintf(stderr, "xta_transaction_enlist_resource returned %d (%s) for "
                "MySQL XA resource\n", rc, lixa_strerror(rc));
@@ -190,30 +174,64 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * At this point, it's time to do something with the Resource Managers
-     * (PostgreSQL and MySQL)
-     *
-     * Execute PostgreSQL statement
-     */
-    printf("PostgreSQL, executing >%s<\n", postgresql_stmt);
-    pg_res = PQexec(rm1, postgresql_stmt);
-    if (PQresultStatus(pg_res) != PGRES_COMMAND_OK) {
-        fprintf(stderr, "PostgreSQL, error while executing >%s<: %s\n",
-                postgresql_stmt, PQerrorMessage(rm1));
-        PQclear(pg_res);
-        PQfinish(rm1);
-        return 1;
-    }
-    /*
      * Execute MySQL statement
      */
     printf("MySQL, executing >%s<\n", mysql_stmt);
-    if (mysql_query(rm2, mysql_stmt)) {
+    if (mysql_query(rm, mysql_stmt)) {
         fprintf(stderr, "MySQL, error while executing >%s<: %u/%s\n",
-                mysql_stmt, mysql_errno(rm2), mysql_error(rm2));
-        mysql_close(rm2);
+                mysql_stmt, mysql_errno(rm), mysql_error(rm));
+        mysql_close(rm);
         return 1;
     }
+    /*
+     * Retrieve the Transaction ID (XID) associated to the transaction that
+     * has been created in the previous step
+     */
+    xid_string = xta_xid_to_string(xta_transaction_get_xid(tx));
+    if (xid_string == NULL) {
+        fprintf(stderr, "xta_transaction_get_xid returned NULL\n");
+        return 1;
+    }
+    
+    /*
+     * *** NOTE: ***
+     * a Remote Procedure Call (RPC) or a Web Service (WS) or a REST API is
+     * emulated by a synchronous message passing using a named pipe (FIFO)
+     */
+    
+    /* open the pipe for write operation */
+    if (NULL == (sup2sub_fifo = fopen(sup2sub_fifoname, "w"))) {
+        fprintf(stderr, "fopen error for fifo '%s'\n", sup2sub_fifoname);
+        return 1;
+    }
+    /* write the message */
+    if (0 > fprintf(sup2sub_fifo, "%s", xid_string)) {
+        fprintf(stderr, "fprintf error while writing '%s' to fifo '%s'\n",
+                xid_string, sup2sub_fifoname);
+        return 1;
+    }
+    /* close the pipe */
+    fclose(sup2sub_fifo);
+
+    /* open the pipe for read operation */
+    if (NULL == (sub2sup_fifo = fopen(sub2sup_fifoname, "r"))) {
+        fprintf(stderr, "fopen error for fifo '%s'\n", sub2sup_fifoname);
+        return 1;
+    }
+    /* read the message */
+    if (NULL == fgets(response_buffer, sizeof(response_buffer),
+                      sub2sup_fifo)) {
+        fprintf(stderr, "fgets error while retrieving message from "
+                "fifo '%s'\n", sub2sup_fifoname);
+        return 1;
+    }
+    /* close the pipe */
+    fclose(sub2sup_fifo);
+
+    /*
+     * Go on with the branch created by this Application Program
+     */
+    
     /*
      * commit or rollback the transaction
      */
@@ -247,15 +265,10 @@ int main(int argc, char *argv[])
      */
     xta_transaction_manager_delete(tm);
     /*
-     * Delete PostgreSQL native and XA resource
-     */
-    xta_postgresql_xa_resource_delete(xar1);
-    PQfinish(rm1);
-    /*
      * Delete MySQL native and XA resource
      */
-    xta_mysql_xa_resource_delete(xar2);
-    mysql_close(rm2);
+    xta_mysql_xa_resource_delete(xar);
+    mysql_close(rm);
     
     return 0;
 }

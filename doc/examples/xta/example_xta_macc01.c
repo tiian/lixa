@@ -25,7 +25,7 @@
  * as documented in LIXA manual:
  * http://www.tiian.org/lixa/manuals/html/index.html
  *
- * This program accepts exactly two parameters on the command line:
+ * This program accepts exactly four parameters on the command line:
  * first parameter:  "commit", boolean value (if FALSE, "rollback")
  * second parameter: "insert", boolean value (if FALSE, "delete")
  * third parameter:  "superior", boolean value (if FALSE, "subordinate")

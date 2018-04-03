@@ -335,7 +335,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-doc_DATA = README.md example_xta_sa01.c example_xta_macc01.c
+doc_DATA = README.md example_xta_sa01.c example_xta_macc01.c \
+	example_xta_macbps01.c example_xta_macbps02.c
+
 EXTRA_DIST = $(doc_DATA)
 all: all-am
 
