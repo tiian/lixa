@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     /* XID (Transaction ID) as a null terminated C string */
     char                         *xid_string = NULL;
     /* a buffer to read the reply from the subordinate Application Program */
-    char                          response_buffer[100];
+    char                          fifo_buffer[100];
 
     /*
      * Check command line parameters
@@ -165,9 +165,11 @@ int main(int argc, char *argv[])
     }
     /*
      * Start a new XA global transaction with a single branch
-     * Note: second argument ("multiple_branch") has FALSE value
+     * Note: second argument ("multiple_branch") has TRUE value because the
+     *       transaction will be branched by the subordinate Application
+     *       Program
      */
-    rc = xta_transaction_start(tx, FALSE);
+    rc = xta_transaction_start(tx, TRUE);
     if (rc != LIXA_RC_OK) {
         fprintf(stderr, "xta_transaction_start: returned %d (%s)\n",
                 rc, lixa_strerror(rc));
@@ -197,10 +199,10 @@ int main(int argc, char *argv[])
      * *** NOTE: ***
      * a Remote Procedure Call (RPC) or a Web Service (WS) or a REST API is
      * emulated by a synchronous message passing using a named pipe (FIFO)
-     */
-    
+     */    
     /* open the pipe for write operation */
-    if (NULL == (sup2sub_fifo = fopen(sup2sub_fifoname, "w"))) {
+    sup2sub_fifo = fopen(sup2sub_fifoname, "w");
+    if (sup2sub_fifo == NULL) {
         fprintf(stderr, "fopen error for fifo '%s'\n", sup2sub_fifoname);
         return 1;
     }
@@ -210,33 +212,40 @@ int main(int argc, char *argv[])
                 xid_string, sup2sub_fifoname);
         return 1;
     }
+    printf("Superior AP has sent XID '%s' to subordinate AP\n", xid_string);
     /* close the pipe */
     fclose(sup2sub_fifo);
 
     /* open the pipe for read operation */
-    if (NULL == (sub2sup_fifo = fopen(sub2sup_fifoname, "r"))) {
+    sub2sup_fifo = fopen(sub2sup_fifoname, "r");
+    if (sub2sup_fifo == NULL) {
         fprintf(stderr, "fopen error for fifo '%s'\n", sub2sup_fifoname);
         return 1;
     }
     /* read the message */
-    if (NULL == fgets(response_buffer, sizeof(response_buffer),
+    if (NULL == fgets(fifo_buffer, sizeof(fifo_buffer),
                       sub2sup_fifo)) {
         fprintf(stderr, "fgets error while retrieving message from "
                 "fifo '%s'\n", sub2sup_fifoname);
         return 1;
     }
+    printf("Superior AP has received '%s' reply from subordinate AP\n",
+           fifo_buffer);
     /* close the pipe */
     fclose(sub2sup_fifo);
 
     /*
-     * Go on with the branch created by this Application Program
-     */
-    
+     * *** NOTE: ***
+     * at this point the RPC/WS/REST API emulation terminates: the subordinate
+     * Application Program has been called and this (superior) Application
+     * Program can go on with the branch created by xta_transaction_start
+     */    
     /*
      * commit or rollback the transaction
      */
     if (commit) {
-        /* Note: second argument ("multiple_branch") has FALSE value */
+        /* Note: commit is performed with "non_block" flag set to FALSE: this
+         * is necessary to synchronize with the subordinate branch */
         rc = xta_transaction_commit(tx, FALSE);
         if (rc != LIXA_RC_OK) {
             fprintf(stderr, "xta_transaction_commit: returned %d (%s)\n",

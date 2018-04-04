@@ -77,6 +77,8 @@ int main(int argc, char *argv[])
     xta_transaction_manager_t    *tm = NULL;
     /* XTA Transaction object reference */
     xta_transaction_t            *tx = NULL;
+    /* a buffer to read the reply from the subordinate Application Program */
+    char                          fifo_buffer[100];
 
     /*
      * Check command line parameters
@@ -160,6 +162,148 @@ int main(int argc, char *argv[])
                 rc, lixa_strerror(rc));
         return 1;
     }
+    /*
+     * *** NOTE: ***
+     * at this point, subordinate Application Program must wait a Remote
+     * Procedure Call (RPC) or a Web Service (WS) or a REST API invocation from
+     * superior Application Program. Here the incoming call is emulated with
+     * a synchronous message passing using a named pipe (FIFO)
+     */
+    /* open the pipe for read operation */
+    sup2sub_fifo = fopen(sup2sub_fifoname, "r");
+    if (sup2sub_fifo == NULL) {
+        fprintf(stderr, "fopen error for fifo '%s'\n", sup2sub_fifoname);
+        return 1;
+    }
+    /* read the message */
+    if (NULL == fgets(fifo_buffer, sizeof(fifo_buffer),
+                      sup2sub_fifo)) {
+        fprintf(stderr, "fgets error while retrieving message from "
+                "fifo '%s'\n", sup2sub_fifoname);
+        return 1;
+    }
+    printf("Subordinate AP has received XID '%s' from superior AP\n",
+           fifo_buffer);
+    /* close the pipe */
+    fclose(sup2sub_fifo);
+    /*
+     * *** NOTE: ***
+     * at this point the subordinate Application Program (this one) has been
+     * called by the superior A.P. that's waiting a reply. Now this
+     * program can branch the global transaction previously started by the
+     * superior A.P.
+     */
+    /*
+     * create a new branch in the same global transaction
+     */
+    rc = xta_transaction_branch(tx, fifo_buffer);
+    if (rc != LIXA_RC_OK) {
+        fprintf(stderr, "xta_transaction_branch returned %d (%s)\n",
+                rc, lixa_strerror(rc));
+        return 1;
+    }
+    /*
+     * Execute PostgreSQL statement
+     */
+    printf("PostgreSQL, executing >%s<\n", postgresql_stmt);
+    pg_res = PQexec(rm, postgresql_stmt);
+    if (PQresultStatus(pg_res) != PGRES_COMMAND_OK) {
+        fprintf(stderr, "PostgreSQL, error while executing >%s<: %s\n",
+                postgresql_stmt, PQerrorMessage(rm));
+        PQclear(pg_res);
+        PQfinish(rm);
+        return 1;
+    }
+    /*
+     * commit or rollback the transaction
+     */
+    if (commit) {
+        /*
+         * *** NOTE: ***
+         * commit MUST be performed in two step:
+         * 1. in first step, the branch is only "prepared" (as in XA
+         *    specification) and control can be returned to the superior AP
+         *    that has to start its commit
+         * 2. in the second step, the branch is definitely "committed", but
+         *    the operation will block the caller because the subordinate AP
+         *    must wait the "prepared" state of the superior AP before
+         *    committing
+         */
+        /* commit is performed with "non_block" flag set to TRUE: this is
+           necessary to allow the superior branch to commit */
+        rc = xta_transaction_commit(tx, TRUE);
+        if (rc != LIXA_RC_WOULD_BLOCK) {
+            fprintf(stderr, "xta_transaction_rollback: returned %d (%s) "
+                    "instead of %d (%s)\n",
+                    rc, lixa_strerror(rc),
+                    LIXA_RC_WOULD_BLOCK, lixa_strerror(LIXA_RC_WOULD_BLOCK));
+            return 1;
+        }
+    } else {
+        rc = xta_transaction_rollback(tx);
+        if (rc != LIXA_RC_OK) {
+            fprintf(stderr, "xta_transaction_rollback: returned %d (%s)\n",
+                    rc, lixa_strerror(rc));
+            return 1;
+        }
+    }
+    /*
+     * *** NOTE: ***
+     * at this point the subordinate Application Program (this one) has to
+     * reply to the superior A.P. that's waiting. Here the reply is emulated
+     * with a synchronous message passing using a named pipe (FIFO)
+     */
+    /* open the pipe for write operation */
+    sub2sup_fifo = fopen(sub2sup_fifoname, "w");
+    if (sub2sup_fifo == NULL) {
+        fprintf(stderr, "fopen error for fifo '%s'\n", sub2sup_fifoname);
+        return 1;
+    }
+    /* prepare the reply message */
+    if (commit)
+        sprintf(fifo_buffer, "PREPARED for COMMIT");
+    else
+        sprintf(fifo_buffer, "ROLLBACK");
+    /* write the message */
+    if (0 > fprintf(sub2sup_fifo, "%s", fifo_buffer)) {
+        fprintf(stderr, "fprintf error while writing '%s' to fifo '%s'\n",
+                fifo_buffer, sub2sup_fifoname);
+        return 1;
+    }
+    printf("Superior AP has sent XID '%s' to subordinate AP\n", fifo_buffer);
+    /* close the pipe */
+    fclose(sub2sup_fifo);
+    
+    if (commit) {
+        /*
+         * Complete the second phase of the commit with "non_block" flag set to
+         * FALSE: this is necessary to wait the superior AP prepare phase
+         */
+        rc = xta_transaction_commit(tx, FALSE);
+        if (rc != LIXA_RC_OK) {
+            fprintf(stderr, "xta_transaction_rollback: returned %d (%s)\n",
+                    rc, lixa_strerror(rc));
+            return 1;
+        }
+    }
+    /*
+     * Close all resources enlisted by the Transaction
+     */
+    rc = xta_transaction_close(tx);
+    if (rc != LIXA_RC_OK) {
+        fprintf(stderr, "xta_transaction_close: returned %d (%s)\n",
+                rc, lixa_strerror(rc));
+        return 1;
+    }
+    /*
+     * Delete Transaction Manager object
+     */
+    xta_transaction_manager_delete(tm);
+    /*
+     * Delete PostgreSQL native and XA resource
+     */
+    xta_postgresql_xa_resource_delete(xar);
+    PQfinish(rm);
     
     return 0;
 }

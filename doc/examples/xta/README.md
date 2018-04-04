@@ -26,11 +26,7 @@ following commands:
 
 `. /opt/lixa/bin/lixa_env.sh`
 
-`gcc example_xta_macc01.c $(lixa-config -x -c -f -l -d) \
-> -I/opt/oracle/instantclient_12_1/sdk/include \
-> -L/opt/oracle/instantclient_12_1 \
-> -Wl,-rpath -Wl,/opt/oracle/instantclient_12_1 \
-> -l clntsh -l nnz12 -o example_xta_macc01`
+`gcc example_xta_macc01.c $(lixa-config -x -c -f -l -d) -I/opt/oracle/instantclient_12_1/sdk/include -L/opt/oracle/instantclient_12_1 -Wl,-rpath -Wl,/opt/oracle/instantclient_12_1 -l clntsh -l nnz12 -o example_xta_macc01`
 
 ## "Multiple Applications, Concurrent Branches/Pseudo Synchronous" Pattern ##
 
@@ -42,6 +38,7 @@ following commands:
 `. /opt/lixa/bin/lixa_env.sh`
 
 `gcc example_xta_macbps01.c $(lixa-config -x -c -f -l -d) $(mysql_config --libs_r) -o example_xta_macbps01`
+
 `gcc example_xta_macbps02.c $(lixa-config -x -c -f -l -d) -lpq -o example_xta_macbps02`
 
 
