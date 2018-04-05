@@ -1633,7 +1633,7 @@ xaoclose: rtn 0
 	    the participants
 	  </para></listitem>
 	  <listitem><para>
-	    the second Application Program can <emphasize>not</emphasize> 
+	    the second Application Program can <emphasis>not</emphasis> 
 	    terminate immediately after returning the response to the caller:
 	    it must perform the second phase of the two phase commit protocol
 	  </para></listitem>
