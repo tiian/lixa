@@ -186,6 +186,14 @@
 	  </itemizedlist>
 	</para>
       </note>
+      <important>
+	<para>
+	  Not all Resource Managers can be used in all the possible
+	  configurations that can be inferred from
+	  <xref linkend="xta_arch03"/>; further details will be provided in the
+	  next sections of this chapter.
+	</para>
+      </important>
     </section>
     <section>
       <title>XTA Technology Matrix</title>
@@ -1515,6 +1523,123 @@ xaoclose: rtn 0
 	</tr>
       </tbody>
     </table>
+    <section>
+      <title>Description</title>
+      <para>
+	This is a Distributed Transaction Processing pattern introduced by
+	XTA: two or more Application Programs use any set of Resource
+	Manager(s) and perform concurrent operations inside distinct branches
+	of a common XA global transaction. The Resource Manager(s) must 
+	support concurrent branches of the same global transaction: this is
+	part of XA standard, but some resource managers might not support it.
+      </para>
+      <para>
+	The following picture shows an example that can be implemented, for
+	example, using MySQL (or MariaDB) and PostgreSQL:
+	<figure xml:id="xta_pattern08">
+	  <title>example of <quote>Multiple Applications, 
+	  Consecutive Calls/Pseudo Synchronous</quote> with two Application
+	  Programs and two Resource Managers</title>
+	  <mediaobject>
+	    <imageobject>
+	      <imagedata fileref="../images/LIXA_Development_XTA_08.svg"/>
+	    </imageobject>
+	  </mediaobject>
+	</figure>
+	The pattern can <emphasis>not</emphasis> be implemented using the
+	standard TX Transaction	Demarcation interface.
+      </para>
+    </section>
+    <section>
+      <title>How it works</title>
+      <figure xml:id="xta_pattern09">
+	<title>The
+	<quote>Multiple Applications, Concurrent Branches/Pseudo Synchronous</quote>
+	Pattern</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="../images/LIXA_Development_XTA_09.svg"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <para>
+	The above figure shows the logic necessary to build this type of
+	applications; it's <emphasis>not</emphasis> a formally correct UML
+	sequence diagram (all the XTA objects are in the same lifeline), but
+	it should be clear enough to understand the
+	proper operations sequence:
+      </para>
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	  Both the Application Programs perform some some initial steps like:
+	  opening a native connection to the Resource Manager, creating a 
+	  Transaction Manager object, a XA Resource Manager object, a
+	  Transaction object and finally enlisting and opening the Resource
+	  Manager
+	</para></listitem>
+	<listitem><para>
+	  The first AP, named <quote>superior</quote> using XA terminology,
+	  <emphasis>starts</emphasis> the global transaction and possibly
+	  updates the state of its Resource Manager
+	</para></listitem>
+	<listitem><para>
+	  The first AP, retrieve the XID associated to the global transaction
+	  and start some sort of <quote>remote procedure call</quote>
+	  <footnote><para>
+	    This must not be confused with a specific RPC technology: any
+	    communication technique that supports a request-response protocol
+	    can be used.
+	  </para></footnote>
+	  to invoke the second AP; it must pass the XID and all the application
+	  context necessary to operate (this is not relevant to XTA)
+	</para></listitem>
+	<listitem><para>
+	  The second AP, named <quote>subordinate</quote> using XA terminology,
+	  <emphasis>branches</emphasis> the global transaction and
+	  possibly updates the state of its Resource Manager
+	</para></listitem>
+	<listitem><para>
+	  The second AP <emphasis>starts</emphasis> the first phase of the
+	  distributed <emphasis>commit</emphasis> specifying 
+	  <quote>non_block=TRUE</quote> option: this translates in performing
+	  <quote>XA prepare</quote> without performing <quote>XA commit</quote>
+	</para></listitem>
+	<listitem><para>
+	  At the end of the first phase of the distributed commit, the second
+	  AP responds to first AP: typically a return code related to commit
+	  operation
+	</para></listitem>
+	<listitem><para>
+	  Since then now, both the APs can run concurrently to complete the
+	  distributed <emphasis>commit</emphasis> specifying 
+	  <quote>non_block=FALSE</quote> option
+	</para></listitem>
+	<listitem><para>
+	  The last operations are related to clean-up
+	</para></listitem>
+      </itemizedlist>
+      <important><para>
+	These are the relevant elements of this pattern:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	    it's designed for a typical client/server approach with some sort
+	    of request-response communication protocol in place
+	  </para></listitem>
+	  <listitem><para>
+	    the Application Programs run concurrently, but synchronize 
+	    themselves by mean of the communication protocol and the LIXA
+	    state server: the second phase of the two phase commit protocol
+	    can be started only after the completion of the first phase by all
+	    the participants
+	  </para></listitem>
+	  <listitem><para>
+	    the second Application Program can <emphasize>not</emphasize> 
+	    terminate immediately after returning the response to the caller:
+	    it must perform the second phase of the two phase commit protocol
+	  </para></listitem>
+	</itemizedlist>
+      </para></important>
+    </section>
   </section>
   <section>
     <title>The
