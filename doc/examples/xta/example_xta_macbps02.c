@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
                 fifo_buffer, sub2sup_fifoname);
         return 1;
     }
-    printf("Superior AP has sent XID '%s' to subordinate AP\n", fifo_buffer);
+    printf("Superior AP has returned '%s' to subordinate AP\n", fifo_buffer);
     /* close the pipe */
     fclose(sub2sup_fifo);
     
