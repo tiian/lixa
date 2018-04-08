@@ -69,6 +69,8 @@ int main(int argc, char *argv[])
     MYSQL                        *rm = NULL;
     /* variable for MySQL statement to execute */
     char                         *mysql_stmt;
+    /* variable for a second MySQL statement to execute */
+    char                         *mysql_stmt2;
     /* XTA Resource for MySQL */
     xta_mysql_xa_resource_t      *xar = NULL;
     /* XTA Transaction Manager object reference */
@@ -98,10 +100,14 @@ int main(int argc, char *argv[])
      * Prepare SQL statements in accordance with "insert" command line
      * parameter
      */
-    if (insert)
+    if (insert) {
         mysql_stmt = "INSERT INTO authors VALUES(1919, 'Levi', 'Primo')";
-    else
+        mysql_stmt2 = "INSERT INTO authors VALUES(1898, 'Remarque', "
+            "'Erich Maria')";
+    } else {
         mysql_stmt = "DELETE FROM authors WHERE id=1919";
+        mysql_stmt2 = "DELETE FROM authors WHERE id=1898";
+    }
     /*
      * initialize XTA environment
      */
@@ -233,7 +239,16 @@ int main(int argc, char *argv[])
            fifo_buffer);
     /* close the pipe */
     fclose(sub2sup_fifo);
-
+    /*
+     * Execute another MySQL statement
+     */
+    printf("MySQL, executing >%s<\n", mysql_stmt2);
+    if (mysql_query(rm, mysql_stmt2)) {
+        fprintf(stderr, "MySQL, error while executing >%s<: %u/%s\n",
+                mysql_stmt2, mysql_errno(rm), mysql_error(rm));
+        mysql_close(rm);
+        return 1;
+    }
     /*
      * *** NOTE: ***
      * at this point the RPC/WS/REST API emulation terminates: the subordinate
