@@ -21,8 +21,8 @@ AT_CHECK([test "$($CLIENT_DIR/lixa-config -L)" = "@LIXA_CONFIG_LIBDIR@"], [0], [
 AT_CLEANUP
 
 AT_SETUP([LC/0.0/3.0 -l --libs])
-AT_CHECK([test "$($CLIENT_DIR/lixa-config --libs)" = "-L@LIXA_CONFIG_LIBDIR@ -llixac"], [0], [ignore], [ignore])
-AT_CHECK([test "$($CLIENT_DIR/lixa-config -l)" = "-L@LIXA_CONFIG_LIBDIR@ -llixac"], [0], [ignore], [ignore])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config --libs)" = "-L@LIXA_CONFIG_LIBDIR@ -llixac -llixab"], [0], [ignore], [ignore])
+AT_CHECK([test "$($CLIENT_DIR/lixa-config -l)" = "-L@LIXA_CONFIG_LIBDIR@ -llixac -llixab"], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([LC/0.0/4.0 -o --include-dir-postgresql])

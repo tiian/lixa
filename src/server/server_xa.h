@@ -53,32 +53,32 @@ extern "C" {
     /**
      * Executes the logic related to "ax_reg" on the server side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block that stores the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_ax_reg(struct thread_status_s *ts,
+                      size_t slot_id,
                       const struct lixa_msg_s *lmi,
-                      uint32_t block_id,
-                      struct server_client_status_s *cs);
+                      uint32_t block_id);
 
 
     
     /**
      * Executes the logic related to "ax_unreg" on the server side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block that stores the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_ax_unreg(struct thread_status_s *ts,
+                        size_t slot_id,
                         const struct lixa_msg_s *lmi,
-                        uint32_t block_id,
-                        struct server_client_status_s *cs);
+                        uint32_t block_id);
 
 
     
@@ -99,50 +99,50 @@ extern "C" {
     /**
      * Executes the logic related to "xa_commit" on the server side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block that stores the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_commit(struct thread_status_s *ts,
+                         size_t slot_id,
                          const struct lixa_msg_s *lmi,
-                         uint32_t block_id,
-                         struct server_client_status_s *cs);
+                         uint32_t block_id);
 
     
 
     /**
      * Executes the logic related to "xa_commit" on the server side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block that stores the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_commit_8(struct thread_status_s *ts,
+                           size_t slot_id,
                            const struct lixa_msg_s *lmi,
-                           uint32_t block_id,
-                           struct server_client_status_s *cs);
+                           uint32_t block_id);
 
 
     
     /**
      * Executes the logic related to "xa_end" on the server side
      * @param[in] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_end(struct thread_status_s *ts,
+                      size_t slot_id,
                       const struct lixa_msg_s *lmi,
                       struct lixa_msg_s *lmo,
-                      uint32_t block_id,
-                      struct server_client_status_s *cs);
+                      uint32_t block_id);
 
     
 
@@ -150,68 +150,68 @@ extern "C" {
      * Executes the logic related to the first step of "xa_end" on the
      * server side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_end_8(struct thread_status_s *ts,
+                        size_t slot_id,
                         const struct lixa_msg_s *lmi,
                         struct lixa_msg_s *lmo,
-                        uint32_t block_id,
-                        struct server_client_status_s *cs);
+                        uint32_t block_id);
 
 
     
     /**
      * Executes the logic related to "xa_forget" on the server side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_forget(struct thread_status_s *ts,
+                         size_t slot_id,
                          const struct lixa_msg_s *lmi,
-                         uint32_t block_id,
-                         struct server_client_status_s *cs);
+                         uint32_t block_id);
 
 
     
     /**
      * Executes the logic related to "xa_forget" on the server side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_forget_8(struct thread_status_s *ts,
+                           size_t slot_id,
                            const struct lixa_msg_s *lmi,
-                           uint32_t block_id,
-                           struct server_client_status_s *cs);
+                           uint32_t block_id);
 
 
     
     /**
      * Executes the logic related to "xa_open" on the server side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_open(struct thread_status_s *ts,
+                       size_t slot_id,
                        const struct lixa_msg_s *lmi,
                        struct lixa_msg_s *lmo,
-                       uint32_t block_id,
-                       struct server_client_status_s *cs);
+                       uint32_t block_id);
 
 
     
@@ -219,18 +219,18 @@ extern "C" {
      * Executes the logic related to the first step of "xa_open" on the server
      * side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[out] lmo reference to the message must be sent to the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_open_8(struct thread_status_s *ts,
+                         size_t slot_id,
                          const struct lixa_msg_s *lmi,
                          struct lixa_msg_s *lmo,
-                         uint32_t block_id,
-                         struct server_client_status_s *cs);
+                         uint32_t block_id);
 
 
     
@@ -238,16 +238,16 @@ extern "C" {
      * Executes the logic related to the third step of "xa_open" on the server
      * side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_open_24(struct thread_status_s *ts,
+                          size_t slot_id,
                           const struct lixa_msg_s *lmi,
-                          uint32_t block_id,
-                          struct server_client_status_s *cs);
+                          uint32_t block_id);
 
 
     
@@ -311,32 +311,32 @@ extern "C" {
     /**
      * Executes the logic related to "xa_rollback" on the server side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_rollback(struct thread_status_s *ts,
+                           size_t slot_id,
                            const struct lixa_msg_s *lmi,
-                           uint32_t block_id,
-                           struct server_client_status_s *cs);
+                           uint32_t block_id);
 
     
 
     /**
      * Executes the logic related to "xa_rollback" on the server side
      * @param[in,out] ts reference to the current thread status
+     * @param[in] slot_id client identification, position in the polling array
      * @param[in] lmi reference to the message received from the client
      * @param[in] block_id position of the block is storing the status of the
      *                    client is calling the server
-     * @param[out] cs client status record
      * @return a reason code
      */
     int server_xa_rollback_8(struct thread_status_s *ts,
+                             size_t slot_id,
                              const struct lixa_msg_s *lmi,
-                             uint32_t block_id,
-                             struct server_client_status_s *cs);
+                             uint32_t block_id);
 
 
     

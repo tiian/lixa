@@ -77,6 +77,8 @@ int main(int argc, char *argv[])
     xta_transaction_manager_t    *tm = NULL;
     /* XTA Transaction object reference */
     xta_transaction_t            *tx = NULL;
+    /* XID (Transaction ID) as a null terminated C string */
+    char                         *xid_string = NULL;
     /* a buffer to read the reply from the subordinate Application Program */
     char                          fifo_buffer[100];
 
@@ -203,6 +205,21 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
+     * the branch has the same global identifier, but a different branch id;
+     * the following statement is for the sake of debugging only
+     */
+    xid_string = xta_xid_to_string(xta_transaction_get_xid(tx));
+    if (xid_string == NULL) {
+        fprintf(stderr, "xta_transaction_get_xid returned NULL\n");
+        return 1;
+    } else {
+        printf("Subordinate AP has created a branch with XID '%s'\n",
+               xid_string);
+        /* release the memory allocated for xid_string */
+        free(xid_string);
+        xid_string = NULL;
+    }
+    /*
      * Execute PostgreSQL statement
      */
     printf("PostgreSQL, executing >%s<\n", postgresql_stmt);
@@ -270,7 +287,7 @@ int main(int argc, char *argv[])
                 fifo_buffer, sub2sup_fifoname);
         return 1;
     }
-    printf("Superior AP has returned '%s' to subordinate AP\n", fifo_buffer);
+    printf("Subordinate AP has returned '%s' to superior AP\n", fifo_buffer);
     /* close the pipe */
     fclose(sub2sup_fifo);
     

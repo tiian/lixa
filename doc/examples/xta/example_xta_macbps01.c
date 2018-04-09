@@ -221,6 +221,9 @@ int main(int argc, char *argv[])
     printf("Superior AP has sent XID '%s' to subordinate AP\n", xid_string);
     /* close the pipe */
     fclose(sup2sub_fifo);
+    /* release the memory allocated for xid_string */
+    free(xid_string);
+    xid_string = NULL;
 
     /* open the pipe for read operation */
     sub2sup_fifo = fopen(sub2sup_fifoname, "r");

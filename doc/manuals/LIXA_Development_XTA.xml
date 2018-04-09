@@ -958,9 +958,9 @@ mysql>
       </para>
       <para>
 	The following picture shows an example that can be implemented using
-	Oracle RDBMS:
+	Oracle RDBMS.
 	<figure xml:id="xta_pattern06">
-	  <title>example of <quote>Multiple Applications, 
+	  <title>Example of <quote>Multiple Applications, 
 	  Consecutive Calls</quote> with two Application Programs and one
 	  Resource Manager</title>
 	  <mediaobject>
@@ -1541,9 +1541,9 @@ xaoclose: rtn 0
       </para>
       <para>
 	The following picture shows an example that can be implemented, for
-	example, using MySQL (or MariaDB) and PostgreSQL:
+	example, using MySQL (or MariaDB) and PostgreSQL.
 	<figure xml:id="xta_pattern08">
-	  <title>example of <quote>Multiple Applications, 
+	  <title>Example of <quote>Multiple Applications, 
 	  Consecutive Calls/Pseudo Synchronous</quote> with two Application
 	  Programs and two Resource Managers</title>
 	  <mediaobject>
@@ -1616,12 +1616,11 @@ xaoclose: rtn 0
 	  operation
 	</para></listitem>
 	<listitem><para>
-	  The first AP performs another update to its Resource Manager
-	</para></listitem>
-	<listitem><para>
 	  Since then now, both the APs can run concurrently to complete the
 	  distributed <emphasis>commit</emphasis> specifying 
-	  <quote>non_block=FALSE</quote> option
+	  <quote>non_block=FALSE</quote> option (in the provided example,
+	  the first AP performs another update to its Resource Manager before
+	  committing)
 	</para></listitem>
 	<listitem><para>
 	  The last operations are related to clean-up
@@ -1664,7 +1663,7 @@ xaoclose: rtn 0
 	<filename>example_xta_macbps02.c</filename>) use
 	PostgreSQL in the role of <quote>Resource Manager 2</quote> and MySQL
 	(or MariaDB) in the role of <quote>Resource Manager 1</quote>; please
-	refer to the instructions explained :
+	refer to the instructions explained:
 	<itemizedlist mark="bullet">
 	  <listitem><para>
 	    in <xref linkend="App_RM_Config_MySQL"/>
@@ -1711,7 +1710,7 @@ tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/example_xta_m
 	the software you installed.
       </para>
       <para>
-	Compile and link the C example program:
+	Compile and link the C example programs:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -1774,7 +1773,7 @@ tiian@ubuntu1404-64:~/tmp$ ls -l example_xta_macbps02
 -rwxrwxr-x 1 tiian tiian 18319 apr  8 22:08 example_xta_macbps02
 	  </screen></td></tr></tbody>
 	</table>
-	one for MySQL queries
+	one for MySQL queries,
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -1808,8 +1807,8 @@ Type "help" for help.
 testdb=>
 	  </screen></td></tr></tbody>
 	</table>
-	set <varname>LIXA_PROFILE</varname> environment variable to
-	<constant>XTA_DYN</constant>
+	Set <varname>LIXA_PROFILE</varname> environment variable to
+	<constant>XTA_DYN</constant>,
 	a profile without static Resource Managers defined in
 	<filename>lixac_conf.xml</filename>:
 	<table frame="box">
@@ -1829,7 +1828,7 @@ XTA_DYN
 	  </screen></td></tr></tbody>
 	</table>
 	create two named pipes (FIFO) to support communication between
-	superior and subordinate Application Program
+	superior and subordinate Application Programs
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -1844,9 +1843,8 @@ prw-rw-r-- 1 tiian tiian 0 apr  8 22:22 sup2sub
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macbps01 1 1 sup2sub sub2sup 
-MySQL, executing &gt;INSERT INTO authors VALUES(1919, 'Levi', 'Primo')&lt;
-Superior AP has sent XID '1279875137.fd55ae8297774e25bffd16c890d61705.e107cfeee0661d23da9322f1ee73faba' to subordinate AP
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macbps01 1 1 sup2sub sub2sup MySQL, executing &gt;INSERT INTO authors VALUES(1919, 'Levi', 'Primo')&lt;
+Superior AP has sent XID '1279875137.b6df6743cbf54cb8b8323ca5ab771e6e.e107cfeee0661d23da9322f1ee73faba' to subordinate AP
 Superior AP has received 'PREPARED for COMMIT' reply from subordinate AP
 MySQL, executing &gt;INSERT INTO authors VALUES(1898, 'Remarque', 'Erich Maria')&lt;
 tiian@ubuntu1404-64:~/tmp$
@@ -1855,14 +1853,28 @@ tiian@ubuntu1404-64:~/tmp$
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macbps02 1 1 sup2sub sub2sup 
-Subordinate AP has received XID '1279875137.fd55ae8297774e25bffd16c890d61705.e107cfeee0661d23da9322f1ee73faba' from superior AP
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macbps02 1 1 sup2sub sub2sup
+Subordinate AP has received XID '1279875137.b6df6743cbf54cb8b8323ca5ab771e6e.e107cfeee0661d23da9322f1ee73faba' from superior AP
+Subordinate AP has created a branch with XID '1279875137.b6df6743cbf54cb8b8323ca5ab771e6e.e107cfeee0661d23af7f136da1b84c3b'
 PostgreSQL, executing &gt;INSERT INTO authors VALUES(1921, 'Rigoni Stern', 'Mario')&lt;
-Superior AP has returned 'PREPARED for COMMIT' to subordinate AP
+Subordinate AP has returned 'PREPARED for COMMIT' to superior AP
 tiian@ubuntu1404-64:~/tmp$
 	  </screen></td></tr></tbody>
 	</table>
-	check MySQL table content:
+	<note>
+	  <para>
+	    The first (superior) Application Program suspends and waits the
+	    return value from the second (subordinate) Application Program.
+	  </para>
+	  <para>
+	    The XID generated by the subordinate AP differs from the XID
+	    generated by the superior AP in the last 16 hexadecimal symbols
+	    of the <quote>branch qualifier</quote>; the first 16 hexadecimal
+	    symbols are the same: this is not required by XA specification but
+	    can be useful for troubleshooting purposes.
+	  </para>
+	</note>
+	Check MySQL table content:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -1897,7 +1909,7 @@ testdb=&gt;
 	  <tbody><tr><td><screen>
 tiian@ubuntu1404-64:~/tmp$ ./example_xta_macbps01 0 0 sup2sub sub2sup 
 MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
-Superior AP has sent XID '1279875137.304d06148bc34c0fa8ae7d844d59ccf6.e107cfeee0661d23da9322f1ee73faba' to subordinate AP
+Superior AP has sent XID '1279875137.1911a9c72cec45eea47ffc74cf95e000.e107cfeee0661d23da9322f1ee73faba' to subordinate AP
 Superior AP has received 'ROLLBACK' reply from subordinate AP
 MySQL, executing &gt;DELETE FROM authors WHERE id=1898&lt;
 tiian@ubuntu1404-64:~/tmp$
@@ -1906,10 +1918,11 @@ tiian@ubuntu1404-64:~/tmp$
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macbps02 0 0 sup2sub sub2sup 
-Subordinate AP has received XID '1279875137.304d06148bc34c0fa8ae7d844d59ccf6.e107cfeee0661d23da9322f1ee73faba' from superior AP
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macbps02 0 0 sup2sub sub2sup
+Subordinate AP has received XID '1279875137.1911a9c72cec45eea47ffc74cf95e000.e107cfeee0661d23da9322f1ee73faba' from superior AP
+Subordinate AP has created a branch with XID '1279875137.1911a9c72cec45eea47ffc74cf95e000.e107cfeee0661d233a125b14214944da'
 PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
-Superior AP has returned 'ROLLBACK' to subordinate AP
+Subordinate AP has returned 'ROLLBACK' to superior AP
 tiian@ubuntu1404-64:~/tmp$
 	  </screen></td></tr></tbody>
 	</table>
@@ -1948,7 +1961,7 @@ testdb=&gt;
 	  <tbody><tr><td><screen>
 tiian@ubuntu1404-64:~/tmp$ ./example_xta_macbps01 1 0 sup2sub sub2sup 
 MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
-Superior AP has sent XID '1279875137.2502979ecbfb471f823d0a60ef4c3d88.e107cfeee0661d23da9322f1ee73faba' to subordinate AP
+Superior AP has sent XID '1279875137.c862b6aa72784c808e6c59388e4263a9.e107cfeee0661d23da9322f1ee73faba' to subordinate AP
 Superior AP has received 'PREPARED for COMMIT' reply from subordinate AP
 MySQL, executing &gt;DELETE FROM authors WHERE id=1898&lt;
 tiian@ubuntu1404-64:~/tmp$
@@ -1957,10 +1970,11 @@ tiian@ubuntu1404-64:~/tmp$
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macbps02 1 0 sup2sub sub2sup 
-Subordinate AP has received XID '1279875137.2502979ecbfb471f823d0a60ef4c3d88.e107cfeee0661d23da9322f1ee73faba' from superior AP
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macbps02 1 0 sup2sub sub2sup
+Subordinate AP has received XID '1279875137.c862b6aa72784c808e6c59388e4263a9.e107cfeee0661d23da9322f1ee73faba' from superior AP
+Subordinate AP has created a branch with XID '1279875137.c862b6aa72784c808e6c59388e4263a9.e107cfeee0661d234acf9ddb30da46f9'
 PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
-Superior AP has returned 'PREPARED for COMMIT' to subordinate AP
+Subordinate AP has returned 'PREPARED for COMMIT' to superior AP
 tiian@ubuntu1404-64:~/tmp$
 	  </screen></td></tr></tbody>
 	</table>

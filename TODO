@@ -1,9 +1,5 @@
 Manual:
-document The “Multiple Applications, Concurrent Branches/Pseudo Synchronous” Pattern; go on with example example_xta_macbps02.c
-
-Remove from server_xa_open, server_xa_end, server_xa_commit, server_recovery,
-server_ax_reg, server_ax_unreg, server_xa_forget, server_trans the parameter
-cs and compute it inside using ts and slot_id
+document The “Multiple Applications, Concurrent Branches/Pseudo Asynchronous” Pattern
 
 Remove a little of @@@ old piece of codes...
 

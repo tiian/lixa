@@ -51,9 +51,9 @@
 
 
 int server_ax_reg(struct thread_status_s *ts,
+                  size_t slot_id,
                   const struct lixa_msg_s *lmi,
-                  uint32_t block_id,
-                  struct server_client_status_s *cs)
+                  uint32_t block_id)
 {
     enum Exception { INVALID_STEP
                      , INVALID_BLOCK_ID
@@ -68,6 +68,7 @@ int server_ax_reg(struct thread_status_s *ts,
         const struct lixa_msg_body_reg_8_ax_reg_exec_s *ax_reg_exec =
             &lmi->body.reg_8.ax_reg_exec;
         status_record_t *sr;
+        struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check message step */
         if (8 != lmi->header.pvs.step)
@@ -134,9 +135,9 @@ int server_ax_reg(struct thread_status_s *ts,
 
 
 int server_ax_unreg(struct thread_status_s *ts,
+                    size_t slot_id,
                     const struct lixa_msg_s *lmi,
-                    uint32_t block_id,
-                    struct server_client_status_s *cs)
+                    uint32_t block_id)
 {
     enum Exception { INVALID_STEP
                      , INVALID_BLOCK_ID
@@ -151,6 +152,7 @@ int server_ax_unreg(struct thread_status_s *ts,
         const struct lixa_msg_body_unreg_8_ax_unreg_exec_s *ax_unreg_exec =
             &lmi->body.unreg_8.ax_unreg_exec;
         status_record_t *sr;
+        struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check message step */
         if (8 != lmi->header.pvs.step)
@@ -249,9 +251,9 @@ int server_xa_close(struct thread_status_s *ts,
 
 
 int server_xa_commit(struct thread_status_s *ts,
+                     size_t slot_id,
                      const struct lixa_msg_s *lmi,
-                     uint32_t block_id,
-                     struct server_client_status_s *cs)
+                     uint32_t block_id)
 {
     enum Exception { SERVER_XA_COMMIT_8_ERROR
                      , INVALID_STEP
@@ -263,7 +265,7 @@ int server_xa_commit(struct thread_status_s *ts,
         if (8 != lmi->header.pvs.step) {
             THROW(INVALID_STEP);
         } else if (LIXA_RC_OK != (ret_cod = server_xa_commit_8(
-                                      ts, lmi, block_id, cs)))
+                                      ts, slot_id, lmi, block_id)))
             THROW(SERVER_XA_COMMIT_8_ERROR);
 
         THROW(NONE);
@@ -289,9 +291,9 @@ int server_xa_commit(struct thread_status_s *ts,
 
 
 int server_xa_commit_8(struct thread_status_s *ts,
+                       size_t slot_id,
                        const struct lixa_msg_s *lmi,
-                       uint32_t block_id,
-                       struct server_client_status_s *cs)
+                       uint32_t block_id)
 {
     enum Exception { INVALID_BLOCK_ID,
                      NUMBER_OF_RSRMGRS_MISMATCH,
@@ -306,6 +308,7 @@ int server_xa_commit_8(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_commit_8\n"));
     TRY {
         uint32_t i;
+        struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=
@@ -397,10 +400,10 @@ int server_xa_commit_8(struct thread_status_s *ts,
 
 
 int server_xa_end(struct thread_status_s *ts,
+                  size_t slot_id,
                   const struct lixa_msg_s *lmi,
                   struct lixa_msg_s *lmo,
-                  uint32_t block_id,
-                  struct server_client_status_s *cs)
+                  uint32_t block_id)
 {
     enum Exception { SERVER_XA_END_8_ERROR
                      , INVALID_STEP
@@ -412,7 +415,8 @@ int server_xa_end(struct thread_status_s *ts,
         switch (lmi->header.pvs.step) {
             case 8:
                 if (LIXA_RC_OK != (
-                        ret_cod = server_xa_end_8(ts, lmi, lmo, block_id, cs)))
+                        ret_cod = server_xa_end_8(
+                            ts, slot_id, lmi, lmo, block_id)))
                     THROW(SERVER_XA_END_8_ERROR);
                 break;
             default:
@@ -442,10 +446,10 @@ int server_xa_end(struct thread_status_s *ts,
 
 
 int server_xa_end_8(struct thread_status_s *ts,
+                    size_t slot_id,
                     const struct lixa_msg_s *lmi,
                     struct lixa_msg_s *lmo,
-                    uint32_t block_id,
-                    struct server_client_status_s *cs)
+                    uint32_t block_id)
 {
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
@@ -458,6 +462,7 @@ int server_xa_end_8(struct thread_status_s *ts,
         uint32_t i;
         int multiple_branches = FALSE;
         int multiple_branches_rollback = FALSE;
+        struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=
@@ -574,9 +579,9 @@ int server_xa_end_8(struct thread_status_s *ts,
 
 
 int server_xa_forget(struct thread_status_s *ts,
+                     size_t slot_id,
                      const struct lixa_msg_s *lmi,
-                     uint32_t block_id,
-                     struct server_client_status_s *cs)
+                     uint32_t block_id)
 {
     enum Exception { SERVER_XA_FORGET_8_ERROR
                      , INVALID_STEP
@@ -588,7 +593,7 @@ int server_xa_forget(struct thread_status_s *ts,
         if (8 != lmi->header.pvs.step) {
             THROW(INVALID_STEP);
         } else if (LIXA_RC_OK != (ret_cod = server_xa_forget_8(
-                                      ts, lmi, block_id, cs)))
+                                      ts, slot_id, lmi, block_id)))
             THROW(SERVER_XA_FORGET_8_ERROR);
 
         THROW(NONE);
@@ -614,9 +619,9 @@ int server_xa_forget(struct thread_status_s *ts,
 
 
 int server_xa_forget_8(struct thread_status_s *ts,
+                       size_t slot_id,
                        const struct lixa_msg_s *lmi,
-                       uint32_t block_id,
-                       struct server_client_status_s *cs)
+                       uint32_t block_id)
 {
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
@@ -627,6 +632,7 @@ int server_xa_forget_8(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_forget_8\n"));
     TRY {
         uint32_t i;
+        struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=
@@ -695,10 +701,10 @@ int server_xa_forget_8(struct thread_status_s *ts,
 
 
 int server_xa_open(struct thread_status_s *ts,
+                   size_t slot_id,
                    const struct lixa_msg_s *lmi,
                    struct lixa_msg_s *lmo,
-                   uint32_t block_id,
-                   struct server_client_status_s *cs)
+                   uint32_t block_id)
 {
     enum Exception { SERVER_XA_OPEN_8_ERROR
                      , SERVER_XA_OPEN_24_ERROR
@@ -712,12 +718,12 @@ int server_xa_open(struct thread_status_s *ts,
             case 8:
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_open_8(
-                            ts, lmi, lmo, block_id, cs)))
+                            ts, slot_id, lmi, lmo, block_id)))
                     THROW(SERVER_XA_OPEN_8_ERROR);
                 break;
             case 24:
                 if (LIXA_RC_OK != (ret_cod = server_xa_open_24(
-                                       ts, lmi, block_id, cs)))
+                                       ts, slot_id, lmi, block_id)))
                     THROW(SERVER_XA_OPEN_24_ERROR);
                 break;
             default: THROW(INVALID_STEP);
@@ -747,10 +753,10 @@ int server_xa_open(struct thread_status_s *ts,
 
 
 int server_xa_open_8(struct thread_status_s *ts,
+                     size_t slot_id,
                      const struct lixa_msg_s *lmi,
                      struct lixa_msg_s *lmo,
-                     uint32_t block_id,
-                     struct server_client_status_s *cs)
+                     uint32_t block_id)
 {
     enum Exception { RSRMGRS_ARRAY_NULL,
                      MAINTENANCE_MODE,
@@ -763,6 +769,7 @@ int server_xa_open_8(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_open_8\n"));
     TRY {
         uint32_t i;
+        struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
 #ifdef LIXA_DEBUG
         /* check the resource manager array is OK */
@@ -868,9 +875,9 @@ int server_xa_open_8(struct thread_status_s *ts,
 
 
 int server_xa_open_24(struct thread_status_s *ts,
+                      size_t slot_id,
                       const struct lixa_msg_s *lmi,
-                      uint32_t block_id,
-                      struct server_client_status_s *cs)
+                      uint32_t block_id)
 {
     enum Exception { INVALID_BLOCK_ID
                      , NUMBER_OF_RSRMGRS_MISMATCH
@@ -882,6 +889,7 @@ int server_xa_open_24(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_open_24\n"));
     TRY {
         uint32_t i;
+        struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=
@@ -1303,9 +1311,9 @@ int server_xa_prepare_24(struct thread_status_s *ts,
 
 
 int server_xa_rollback(struct thread_status_s *ts,
+                       size_t slot_id,
                        const struct lixa_msg_s *lmi,
-                       uint32_t block_id,
-                       struct server_client_status_s *cs)
+                       uint32_t block_id)
 {
     enum Exception { SERVER_XA_ROLLBACK_8_ERROR
                      , INVALID_STEP
@@ -1317,7 +1325,7 @@ int server_xa_rollback(struct thread_status_s *ts,
         if (8 != lmi->header.pvs.step) {
             THROW(INVALID_STEP);
         } else if (LIXA_RC_OK != (ret_cod = server_xa_rollback_8(
-                                      ts, lmi, block_id, cs)))
+                                      ts, slot_id, lmi, block_id)))
             THROW(SERVER_XA_ROLLBACK_8_ERROR);
 
         THROW(NONE);
@@ -1343,9 +1351,9 @@ int server_xa_rollback(struct thread_status_s *ts,
 
 
 int server_xa_rollback_8(struct thread_status_s *ts,
+                         size_t slot_id,
                          const struct lixa_msg_s *lmi,
-                         uint32_t block_id,
-                         struct server_client_status_s *cs)
+                         uint32_t block_id)
 {
     enum Exception { INVALID_BLOCK_ID,
                      NUMBER_OF_RSRMGRS_MISMATCH,
@@ -1360,6 +1368,7 @@ int server_xa_rollback_8(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_rollback_8\n"));
     TRY {
         uint32_t i;
+        struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check block_id is a valid block */
         if (ts->curr_status[block_id].sr.data.pld.type !=

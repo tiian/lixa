@@ -1477,8 +1477,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
             case LIXA_MSG_VERB_OPEN:
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_open(
-                            ts, &lmi, lmo, block_id,
-                            &(ts->client_array[slot_id]))))
+                            ts, slot_id, &lmi, lmo, block_id)))
                     THROW(SERVER_XA_OPEN_ERROR);
                 break;
             case LIXA_MSG_VERB_CLOSE:
@@ -1495,8 +1494,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
             case LIXA_MSG_VERB_END:
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_end(
-                            ts, &lmi, lmo, block_id,
-                            &(ts->client_array[slot_id]))))
+                            ts, slot_id, &lmi, lmo, block_id)))
                     THROW(SERVER_XA_END_ERROR);
                 break;
             case LIXA_MSG_VERB_PREPARE:
@@ -1508,13 +1506,13 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
             case LIXA_MSG_VERB_COMMIT:
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_commit(
-                            ts, &lmi, block_id, &(ts->client_array[slot_id]))))
+                            ts, slot_id, &lmi, block_id)))
                     THROW(SERVER_XA_COMMIT_ERROR);
                 break;
             case LIXA_MSG_VERB_ROLLBACK:
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_rollback(
-                            ts, &lmi, block_id, &(ts->client_array[slot_id]))))
+                            ts, slot_id, &lmi, block_id)))
                     THROW(SERVER_XA_ROLLBACK_ERROR);
                 break;
             case LIXA_MSG_VERB_QRCVR:
@@ -1527,19 +1525,19 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
             case LIXA_MSG_VERB_REG:
                 if (LIXA_RC_OK != (
                         ret_cod = server_ax_reg(
-                            ts, &lmi, block_id, &(ts->client_array[slot_id]))))
+                            ts, slot_id, &lmi, block_id)))
                     THROW(SERVER_AX_REG_ERROR);
                 break;
             case LIXA_MSG_VERB_UNREG:
                 if (LIXA_RC_OK != (
                         ret_cod = server_ax_unreg(
-                            ts, &lmi, block_id, &(ts->client_array[slot_id]))))
+                            ts, slot_id, &lmi, block_id)))
                     THROW(SERVER_AX_UNREG_ERROR);
                 break;
             case LIXA_MSG_VERB_FORGET:
                 if (LIXA_RC_OK != (
                         ret_cod = server_xa_forget(
-                            ts, &lmi, block_id, &(ts->client_array[slot_id]))))
+                            ts, slot_id, &lmi, block_id)))
                     THROW(SERVER_XA_FORGET_ERROR);
                 break;
             case LIXA_MSG_VERB_TRANS:
