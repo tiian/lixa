@@ -41,4 +41,17 @@ following commands:
 
 `gcc example_xta_macbps02.c $(lixa-config -x -c -f -l -d) -lpq -o example_xta_macbps02`
 
+## "Multiple Applications, Concurrent Branches/Pseudo Asynchronous" Pattern ##
+
+Program *example_xta_macbpa01.c* requires MySQL (or MariaDB) to work.
+Program *example_xta_macbpa02.c* requires PostgreSQL to work.
+After proper installation of LIXA, you can compile the programs with the
+following commands:
+
+`. /opt/lixa/bin/lixa_env.sh`
+
+`gcc example_xta_macbpa01.c $(lixa-config -x -c -f -l -d) $(mysql_config --libs_r) -o example_xta_macbpa01`
+
+`gcc example_xta_macbpa02.c $(lixa-config -x -c -f -l -d) -lpq -o example_xta_macbpa02`
+
 

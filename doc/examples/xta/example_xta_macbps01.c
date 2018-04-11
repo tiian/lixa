@@ -21,7 +21,7 @@
 
 /*
  * This program is an example implementation of the
- * "Single Application" Pattern
+ * "Multiple Applications, Concurrent Branches/Pseudo Synchronous" Pattern
  * as documented in LIXA manual:
  * http://www.tiian.org/lixa/manuals/html/index.html
  *
@@ -243,6 +243,12 @@ int main(int argc, char *argv[])
     /* close the pipe */
     fclose(sub2sup_fifo);
     /*
+     * *** NOTE: ***
+     * at this point the RPC/WS/REST API emulation terminates: the subordinate
+     * Application Program has been called and this (superior) Application
+     * Program can go on with the branch created by xta_transaction_start
+     */    
+    /*
      * Execute another MySQL statement
      */
     printf("MySQL, executing >%s<\n", mysql_stmt2);
@@ -252,12 +258,6 @@ int main(int argc, char *argv[])
         mysql_close(rm);
         return 1;
     }
-    /*
-     * *** NOTE: ***
-     * at this point the RPC/WS/REST API emulation terminates: the subordinate
-     * Application Program has been called and this (superior) Application
-     * Program can go on with the branch created by xta_transaction_start
-     */    
     /*
      * commit or rollback the transaction
      */
