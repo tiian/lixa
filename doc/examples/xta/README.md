@@ -6,7 +6,7 @@ API.
 All the examples require the availability of LIXA state server: a lixad daemon
 must be up and running.
 
-See [LIXA Reference Guide Manual](http://www.tiian.org/lixa/manuals/html/index.html) for detailed instructions.
+See [LIXA Reference Guide Manual](http://www.tiian.org/lixa/manuals/html/index.html), chapter "Developing Application Programs using XTA (XA Transaction API) interface", for detailed instructions.
 
 ## "Single Application" Pattern ##
 

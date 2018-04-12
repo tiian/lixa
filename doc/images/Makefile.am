@@ -39,7 +39,7 @@ svg_images = LIXA_Development_XTA_01.svg LIXA_Development_XTA_02.svg \
 	LIXA_Development_XTA_03.svg LIXA_Development_XTA_04.svg \
 	LIXA_Development_XTA_05.svg LIXA_Development_XTA_06.svg \
 	LIXA_Development_XTA_07.svg LIXA_Development_XTA_08.svg \
-	LIXA_Development_XTA_09.svg
+	LIXA_Development_XTA_09.svg LIXA_Development_XTA_10.svg
 
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/images
 doc_DATA = $(png_images) $(svg_images)
