@@ -11,13 +11,13 @@ dist_noinst_DATA = doxygen.xta.in doxygen.lixa.in
 doxygen.xta:   doxygen.xta.in
 	sed \
         -e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
-        -e 's|@HAVE_DOT[@]|$(HAVE_DOT)|g' \
+        -e 's|@HAVE_DOT_BOOL[@]|$(HAVE_DOT_BOOL)|g' \
         $< >$@
 
 doxygen.lixa:   doxygen.lixa.in 
 	sed \
         -e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
-        -e 's|@HAVE_DOT[@]|$(HAVE_DOT)|g' \
+        -e 's|@HAVE_DOT_BOOL[@]|$(HAVE_DOT_BOOL)|g' \
         $< >$@
 
 all:	$(MAYBE_API) $(MAYBE_XTA)

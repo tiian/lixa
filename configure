@@ -664,6 +664,7 @@ LT_LIXAC_AGE
 LT_LIXAC_REVISION
 LT_LIXAC_CURRENT
 HAVE_NETSTAT
+HAVE_DOT_BOOL
 HAVE_DOT
 COND_DOXYGEN_FALSE
 COND_DOXYGEN_TRUE
@@ -14478,6 +14479,44 @@ fi
   test -n "$HAVE_DOT" && break
 done
 
+# Extract the first word of "dot", so it can be a program name with args.
+set dummy dot; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_HAVE_DOT_BOOL+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$HAVE_DOT_BOOL"; then
+  ac_cv_prog_HAVE_DOT_BOOL="$HAVE_DOT_BOOL" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_HAVE_DOT_BOOL="YES"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_HAVE_DOT_BOOL" && ac_cv_prog_HAVE_DOT_BOOL="NO"
+fi
+fi
+HAVE_DOT_BOOL=$ac_cv_prog_HAVE_DOT_BOOL
+if test -n "$HAVE_DOT_BOOL"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_DOT_BOOL" >&5
+$as_echo "$HAVE_DOT_BOOL" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
 for ac_prog in netstat
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -15612,6 +15651,7 @@ _ACEOF
 
 fi
 done
+
 
 
 

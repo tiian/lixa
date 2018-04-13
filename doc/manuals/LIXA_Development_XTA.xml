@@ -1659,6 +1659,12 @@ xaoclose: rtn 0
 	    Programs: a subordinate AP can become a superior AP of a called
 	    subordinate AP and so on
 	  </para></listitem>
+	  <listitem><para>
+	    the diagram shows an example with only one Resource Manager for
+	    every Application Program, but there's no restriction on
+	    LIXA and XTA side, on the number of Resource Managers used by an
+	    Application Program
+	  </para></listitem>
 	</itemizedlist>
       </para></important>
     </section>
@@ -2126,7 +2132,7 @@ testdb=&gt;
 	  <emphasis>branches</emphasis> the global transaction and send back
 	  an acknowledge message to the first AP: this is helpful because
 	  the superior AP <emphasis>must not</emphasis> start its commit
-	  before branch creation
+	  before subordinate branch creation
 	</para></listitem>
 	<listitem><para>
 	  Since then now, the Application Programs can proceed asynchronously
@@ -2153,8 +2159,8 @@ testdb=&gt;
 	    the first synchronization point is represented by the XID sent from
 	    the superior AP to the subordinate AP; the acknowledge message is
 	    not strictly necessary, but the first AP must not call
-	    <function>tx.Commit()</function> before the completion of 
-	    <function>tx.Branch(xid)</function> on the second AP side;
+	    <function>tx.Commit()</function> before the second AP completed
+	    <function>tx.Branch(xid)</function>;
 	    conversely, second AP gets a warning because the branch can't be
 	    created
 	  </para></listitem>
@@ -2176,6 +2182,12 @@ testdb=&gt;
 	    Programs in different ways: a subordinate AP can become a superior
 	    AP of a called subordinate AP and so on or the superior AP can
 	    trigger many subordinate APs
+	  </para></listitem>
+	  <listitem><para>
+	    the diagram shows an example with only one Resource Manager for
+	    every Application Program, but there's no restriction on
+	    LIXA and XTA side, on the number of Resource Managers used by an
+	    Application Program
 	  </para></listitem>
 	</itemizedlist>
       </para></important>

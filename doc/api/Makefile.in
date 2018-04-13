@@ -154,6 +154,7 @@ GREP = @GREP@
 HAVE_COBOL = @HAVE_COBOL@
 HAVE_COBOLAPI = @HAVE_COBOLAPI@
 HAVE_DOT = @HAVE_DOT@
+HAVE_DOT_BOOL = @HAVE_DOT_BOOL@
 HAVE_DOXYGEN = @HAVE_DOXYGEN@
 HAVE_IBMDB2 = @HAVE_IBMDB2@
 HAVE_MYSQL = @HAVE_MYSQL@
@@ -508,13 +509,13 @@ uninstall-am:
 doxygen.xta:   doxygen.xta.in
 	sed \
         -e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
-        -e 's|@HAVE_DOT[@]|$(HAVE_DOT)|g' \
+        -e 's|@HAVE_DOT_BOOL[@]|$(HAVE_DOT_BOOL)|g' \
         $< >$@
 
 doxygen.lixa:   doxygen.lixa.in 
 	sed \
         -e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
-        -e 's|@HAVE_DOT[@]|$(HAVE_DOT)|g' \
+        -e 's|@HAVE_DOT_BOOL[@]|$(HAVE_DOT_BOOL)|g' \
         $< >$@
 
 all:	$(MAYBE_API) $(MAYBE_XTA)
