@@ -1,6 +1,7 @@
 LOG:
 
-         - 1.5.3 XTA documentation 
+20180413 - 1.5.3 XTA documentation: a dedicated chapter has been added in the
+		 official LIXA manual
 
 20180304 - 1.5.2 XTA support for concurrent branches
 		 This release is *NOT* compatible with previous ones: you can't

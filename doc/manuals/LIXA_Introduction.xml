@@ -137,7 +137,8 @@
 	The LIXA project implements a distributed Transaction Manager that your
 	Application Programs can use to coordinate a distributed transaction
 	among two or more Application Programs in execution on different
-	systems.
+	systems. See <xref linkend="Development_XTA"/> for more information
+	about XTA.
       </para>
     </section>
   </section>

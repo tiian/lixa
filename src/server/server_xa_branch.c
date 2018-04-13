@@ -743,11 +743,6 @@ int server_client_branch_join_list(const struct thread_status_s *ts,
                         " clients have been found\n", *number, k));
             THROW(INVALID_STATUS);
         } /* if (k != *number) */
-        /* fix the branch_join flag for all the chained clients */
-        /* @@@ remove me, 2018-02-27 
-        for (k=0; k<*number; ++k)
-            ts->client_array[(*items)[k]].branch_join = branch_join;
-        */
         
         THROW(NONE);
     } CATCH {

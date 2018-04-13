@@ -310,7 +310,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @COND_DOXYGEN_TRUE@MAYBE_API = lixa/html/index.html
-@COMPILE_XTA_TRUE@@COND_DOXYGEN_TRUE@MAYBE_XTA = xta/html/index.html
+@COMPILE_XTA_TRUE@@COND_DOXYGEN_TRUE@MAYBE_XTA = xta/C/html/index.html
 EXTRA_DIST = $(MAYBE_API) $(MAYBE_XTA) \
 	doxygen_footer.html doxygen_header_lixa.html doxygen_header_xta.html
 
@@ -520,14 +520,14 @@ doxygen.lixa:   doxygen.lixa.in
 
 all:	$(MAYBE_API) $(MAYBE_XTA)
 
-@COND_DOXYGEN_TRUE@xta/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h \
+@COND_DOXYGEN_TRUE@xta/C/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h \
 @COND_DOXYGEN_TRUE@	doxygen_footer.html doxygen_header_xta.html
 @COND_DOXYGEN_TRUE@	doxygen doxygen.xta
 @COND_DOXYGEN_TRUE@lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 @COND_DOXYGEN_TRUE@	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h \
 @COND_DOXYGEN_TRUE@	$(top_srcdir)/src/xta/*.h doxygen_footer.html doxygen_header_lixa.html
 @COND_DOXYGEN_TRUE@	doxygen doxygen.lixa
-@COND_DOXYGEN_FALSE@xta/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h \
+@COND_DOXYGEN_FALSE@xta/C/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h \
 @COND_DOXYGEN_FALSE@	doxygen_footer.html doxygen_header_xta.html
 @COND_DOXYGEN_FALSE@	@echo "XTA API documentation skipped because doxygen is not available"
 @COND_DOXYGEN_FALSE@lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
