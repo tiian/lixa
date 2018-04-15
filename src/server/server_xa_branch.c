@@ -375,7 +375,7 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
     LIXA_TRACE(("server_xa_branch_prepare: block_id=" UINT32_T_FORMAT "\n",
                 block_id));
     TRY {
-        uint32_t i, will_commit=0, will_rollback=0, global_recovery=0,
+        uint32_t i, will_commit=0, will_rollback=0, global_recovery_num=0,
             unknown=0;
         /* assess all the branches */
         for (i=0; i<branch_array_size; ++i) {
@@ -397,7 +397,7 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
                                 i, branch_join, verb_step->verb));
                     state->will_rollback = TRUE;
                     state->will_commit = FALSE;
-                    state->global_recovery = 1;
+                    state->global_recovery = XTA_GLOBAL_RECOV_FORCE_ROLLBACK;
                 } else {
                     LIXA_TRACE(("server_xa_branch_prepare: i=" SIZE_T_FORMAT
                                 ", branch_array[i]=" SIZE_T_FORMAT ", "
@@ -415,8 +415,8 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
                         i, branch_array[i], verb_step->verb,
                         state->will_commit, state->will_rollback,
                         state->global_recovery));
-            if (state->global_recovery)
-                global_recovery++;
+            if (XTA_GLOBAL_RECOV_NULL != state->global_recovery)
+                global_recovery_num++;
             /* check the prepared state of the branch */
             if (TRUE == state->will_commit) {
                 if (FALSE == state->will_rollback)
@@ -433,11 +433,11 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
         LIXA_TRACE(("server_xa_branch_prepare: #will_commit=" UINT32_T_FORMAT
                     ", #will_rollback=" UINT32_T_FORMAT ", #unknown="
                     UINT32_T_FORMAT ", #global_recovery=" UINT32_T_FORMAT "\n",
-                    will_commit, will_rollback, unknown, global_recovery));
+                    will_commit, will_rollback, unknown, global_recovery_num));
         if (0 < unknown) {
             /* at least one not prepared branch */
             THROW(PREPARE_DELAYED);
-        } else if ((0 < will_rollback || 0 < global_recovery) &&
+        } else if ((0 < will_rollback || 0 < global_recovery_num) &&
                    0 == unknown) {
             /* at least one failed branch or a global_recovery condition has
                been rised, but all the branch has been prepared */
@@ -777,6 +777,3 @@ int server_client_branch_join_list(const struct thread_status_s *ts,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
-
-
-

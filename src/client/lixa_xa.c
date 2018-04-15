@@ -656,18 +656,6 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
                 *txrc = tmp_txrc;
         } /* for (i=0; ...) */
 
-        /* @@@ 2017-10-01
-         * is this a real possible optimization?
-         * if it worked for TMJOIN and TMRESUME it should work in any case,
-         * but server state miss information about xa_start and xa_end.
-         * But removing messages for both xa_start and xa_end breaks
-         * autorecovery test cases... mumbling...
-        if (TMSUSPEND & xa_end_flags) {
-            // release memory associated to the array
-            g_array_free(msg.body.end_8.xa_end_execs, TRUE);
-            memset(&msg, 0, sizeof(msg));
-        } else {
-        */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR1);
@@ -2403,18 +2391,6 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
             g_array_append_val(msg.body.start_8.rsrmgrs, record);
         }
 
-        /* @@@ 2017-10-01
-         * is this a real possible optimization?
-         * if it worked for TMJOIN and TMRESUME it should work in any case,
-         * but server state miss information about xa_start and xa_end.
-         * But removing messages for both xa_start and xa_end breaks
-         * autorecovery test cases... mumbling...
-        if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags) {
-            // only the GArray needs to be released to avoid memory leaks
-            g_array_free(msg.body.start_8.rsrmgrs, TRUE);
-            memset(&msg, 0, sizeof(msg));
-        } else {
-        */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR1);
@@ -2626,20 +2602,6 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
         else
             msg.body.start_24.conthr.txstate = txstate;
 
-        /* @@@ 2017-10-01
-         * is this a real possible optimization?
-         * if it worked for TMJOIN and TMRESUME it should work in any case,
-         * but server state miss information about xa_start and xa_end.
-         * But removing messages for both xa_start and xa_end breaks
-         * autorecovery test cases... mumbling...
-        if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags) {
-            // this object contains references to external stuff and
-            // cannot be freed using standard lixa_msg_free; we are freeing the
-            // array to avoid memory leaks
-            g_array_free(msg.body.start_24.xa_start_execs, TRUE);
-            memset(&msg, 0, sizeof(msg));
-        } else {
-        */
         free(output_buffer);
         output_buffer = NULL;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(

@@ -172,7 +172,7 @@ extern "C" {
 
     /**
      * Analize all the client sessions that are participating in a branch
-     * and a the branch_join flag as necessary
+     * and adjust the branch_join flag as necessary
      * @param[in,out] ts reference to thread status
      * @param[in] number of items in the array
      * @param[in] items is an array of number elements, every element is a

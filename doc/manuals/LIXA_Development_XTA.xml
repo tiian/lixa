@@ -235,7 +235,7 @@
 		<entry>Y<footnote>
 		<para><quote>Multiple Applications, Consecutive Calls</quote>
 		pattern is not
-		available because MySQL/MariaDB don't support TMSUSPEND and
+		available because MySQL/MariaDB doesn't support TMSUSPEND and
 		TMRESUME standard XA flags
 		</para></footnote></entry>
 		<entry>-</entry>
@@ -262,7 +262,7 @@
 		<entry>Y<footnote>
 		<para><quote>Multiple Applications, Consecutive Calls</quote>
 		pattern is not
-		available because MySQL/MariaDB don't support TMSUSPEND and
+		available because PostgreSQL doesn't support TMSUSPEND and
 		TMRESUME standard XA flags
 		</para></footnote></entry>
 		<entry>-</entry>
