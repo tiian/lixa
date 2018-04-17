@@ -41,14 +41,6 @@
 
 
 
-/**
- * Default value for the number of milliseconds should be waited by a client
- * when a prepare inside a multiple branch transaction is performed
- */
-#define LIXA_XA_DEFAULT_MULTI_PREPARE_TIMEOUT      5000
-
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

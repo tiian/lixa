@@ -503,14 +503,12 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
             case 8:
                 if (NULL != msg->body.prepare_8.xa_prepare_execs) {
                     LIXA_TRACE(("lixa_msg_trace_prepare: body["
-                                "%s[%s=%d,%s=%d,%s=%d]]\n",
+                                "%s[%s=%d,%s=%d]]\n",
                                 LIXA_XML_MSG_TAG_CONTHR,
                                 LIXA_XML_MSG_PROP_COMMIT,
                                 msg->body.prepare_8.conthr.commit,
                                 LIXA_XML_MSG_PROP_NON_BLOCK,
-                                msg->body.prepare_8.conthr.non_block,
-                                LIXA_XML_MSG_PROP_TIMEOUT,
-                                msg->body.prepare_8.conthr.timeout));
+                                msg->body.prepare_8.conthr.non_block));
                     for (i = 0; i < msg->body.prepare_8.xa_prepare_execs->len;
                          ++i) {
                         struct lixa_msg_body_prepare_8_xa_prepare_execs_s
@@ -545,11 +543,7 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
                             msg->body.prepare_16.answer.rc));
                 break;
             case 24:
-                LIXA_TRACE(("lixa_msg_trace_prepare: body["
-                            "%s[%s=%d]]\n",
-                                LIXA_XML_MSG_TAG_CONTHR,
-                                LIXA_XML_MSG_PROP_TIMEOUT,
-                                msg->body.prepare_24.conthr.timeout));
+                LIXA_TRACE(("lixa_msg_trace_prepare: body[]\n"));
                 break;
             case 32:
                 LIXA_TRACE(("lixa_msg_trace_prepare: body[%s[%s[%d]]]\n",

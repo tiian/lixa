@@ -1,5 +1,49 @@
-This file contains links to technologies that could improve LIXA.
+This file contains links to technologies and ideas that could improve LIXA.
 It's just a place to avoid human memory leak.
+
+
+
+*** XTA timeout ***
+Naive analysis suggests some sort of timeout for xta_transaction_commit in
+the event of a multiple applications configuration.
+After some more thinking on the subject, I have found out two possible
+"error cases":
+1. a bug inside an Application Program that's cooperating in the DTP
+2. a very slow commit phase in charge of some Resource Manager and/or the
+   LIXA state server
+Trying to solve an application bug with an infrastructure timeout does not
+sound a good idea: fix the Application Program and you will be done.
+The second "error case" seems to be more interesting, but it creates more
+questions than answers: in a multiple application DTP there's high chance at
+least one AP performed xa_prepare in the right way and interrupting the two
+phase commit can generate further complexity that must be handled by a
+recovery phase.
+At the time of this writing (2018-04-17) there are a lot of unclear items:
+1. what's type of hang will real application meet in production?
+2. in what hang behaviors a timeout can be fruitful?
+3. what should be the consequence of the timeout? (A signal to crash the AP,
+   an exit(X>0) to close the AP, a LIXA return code after complete clean-up of
+   most XTA resources, ...) Unfortunately there's no an "easy way" to handle
+   it because LIXA supports and probably will support two completely different
+   programming models: XTA and TX.
+Nevertheless, here are some notes I collected in TODO and moved in this place
+to avoid the trash can, but even to avoid the implementation of a sloppy
+feature.
+Implement timeout to avoid a too long block time for clients (timeout parameter
+in xa_prepare step 8 and step 24 messages):
+- client side only (remove from messsages)
+- pick-up current time at function entry
+- use poll to avoid too long blocking for msg put and msg get
+- in the event of timeout, use shutdown to close the local half pipe of the
+  socket
+  - do all the necessary operation, maybe rollback resource managers if
+    necessary
+  - destroy all the objects
+  - close the socket (it could be a not clean close if the server has not close
+    the socket on its side in the meantime, but waiting will break the timeout)
+  - connection can't be reused: invalidate Transaction Manager and Transaction
+  - return to caller different return codes for the different timeout point
+    (ended, prepared, committed)
 
 
 

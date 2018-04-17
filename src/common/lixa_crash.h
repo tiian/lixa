@@ -187,6 +187,10 @@
  */
 #define LIXA_CRASH_POINT_SERVER_XA_PREPARE_8      32
 /**
+ * The server crashes in server_xa_prepare_24 function
+ */
+#define LIXA_CRASH_POINT_SERVER_XA_PREPARE_24     46
+/**
  * The server crashes in server_xa_commit_8 function
  */
 #define LIXA_CRASH_POINT_SERVER_XA_COMMIT_8       33

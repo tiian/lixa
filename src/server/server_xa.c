@@ -912,8 +912,8 @@ int server_xa_open_24(struct thread_status_s *ts,
                 lmi->body.open_24.xa_open_execs,
                 struct lixa_msg_body_open_24_xa_open_execs_s, i);
             /* check rmid: this check should be useless... */
-            if (sr->sr.data.pld.rm.rmid != xa_open_execs->rmid) THROW(
-                INVALID_RMID);
+            if (sr->sr.data.pld.rm.rmid != xa_open_execs->rmid)
+                THROW(INVALID_RMID);
             /* update the block */
             status_record_update(ts->curr_status + slot, slot,
                                  ts->updated_records);
@@ -1305,6 +1305,9 @@ int server_xa_prepare_24(struct thread_status_s *ts,
     }
     LIXA_TRACE(("server_xa_prepare_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+
+    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_PREPARE_24,
+               thread_status_get_crash_count(ts));
     return ret_cod;
 }
 

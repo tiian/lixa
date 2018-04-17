@@ -89,7 +89,7 @@
  * Current protocol level; it's used to recognize incompatible client/server
  * configuration at run-time
  */
-#define LIXA_MSG_LEVEL          1
+#define LIXA_MSG_LEVEL          2
 /**
  * Id reserved for a null message: do NOT change this value because it
  * would break the @ref lixa_msg_init behavior
@@ -233,10 +233,6 @@ extern const xmlChar *LIXA_XML_MSG_PROP_SUB_BRANCH;
  * Label used to specify "td_state" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_TD_STATE;
-/**
- * Label used to specify "timeout" property
- */
-extern const xmlChar *LIXA_XML_MSG_PROP_TIMEOUT;
 /**
  * Label used to specify "txstate" property
  */
@@ -746,11 +742,6 @@ struct lixa_msg_body_prepare_8_conthr_s
      * FALSE = default, step 8 for prepare will block the caller
      */    
     int non_block;
-    /**
-     * Max number of milliseconds that the client can stay blocked in the
-     * event of a multiple branches blocking global transaction
-     */
-    int timeout;
 };
 
 /**

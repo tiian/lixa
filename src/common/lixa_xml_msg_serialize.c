@@ -1143,14 +1143,12 @@ int lixa_msg_serialize_prepare_8(const struct lixa_msg_s *msg,
 
         /* <conthr> */
         used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
+                              "<%s %s=\"%d\" %s=\"%d\"/>",
                               LIXA_XML_MSG_TAG_CONTHR,
                               LIXA_XML_MSG_PROP_COMMIT,
                               msg->body.prepare_8.conthr.commit,
                               LIXA_XML_MSG_PROP_NON_BLOCK,
-                              msg->body.prepare_8.conthr.non_block,
-                              LIXA_XML_MSG_PROP_TIMEOUT,
-                              msg->body.prepare_8.conthr.timeout);
+                              msg->body.prepare_8.conthr.non_block);
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT1);
         *free_chars -= used_chars;
@@ -1272,16 +1270,9 @@ int lixa_msg_serialize_prepare_24(const struct lixa_msg_s *msg,
 
     LIXA_TRACE(("lixa_msg_serialize_prepare_24\n"));
     TRY {
-        int used_chars;
+        int used_chars=0;
 
-        /* <conthr> */
-        used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%d\"/>",
-                              LIXA_XML_MSG_TAG_CONTHR,
-                              LIXA_XML_MSG_PROP_TIMEOUT,
-                              msg->body.prepare_24.conthr.timeout);
-        if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT1);
+        /* nothing to do */
         *free_chars -= used_chars;
         *offset += used_chars;
 

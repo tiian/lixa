@@ -1576,8 +1576,6 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
         
         msg.body.prepare_8.conthr.commit = *commit;
         msg.body.prepare_8.conthr.non_block = non_block;
-        msg.body.prepare_8.conthr.timeout =
-            LIXA_XA_DEFAULT_MULTI_PREPARE_TIMEOUT;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
@@ -1696,8 +1694,6 @@ int lixa_xa_prepare_wait_branches(client_config_coll_t *ccc,
         msg.header.level = LIXA_MSG_LEVEL;
         msg.header.pvs.verb = LIXA_MSG_VERB_PREPARE;
         msg.header.pvs.step = 3*LIXA_MSG_STEP_INCR;
-        msg.body.prepare_24.conthr.timeout =
-            LIXA_XA_DEFAULT_MULTI_PREPARE_TIMEOUT;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);
@@ -1914,8 +1910,6 @@ int lixa_xa_prepare_multi(client_status_t *cs,
 
         msg.body.prepare_8.conthr.commit = *commit;
         msg.body.prepare_8.conthr.non_block = FALSE;
-        msg.body.prepare_8.conthr.timeout =
-            LIXA_XA_DEFAULT_MULTI_PREPARE_TIMEOUT;
         if (LIXA_RC_OK != (ret_cod = lixa_msg_serialize(
                                &msg, &output_buffer, &buffer_size)))
             THROW(MSG_SERIALIZE_ERROR);

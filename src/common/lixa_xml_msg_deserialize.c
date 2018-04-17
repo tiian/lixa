@@ -58,7 +58,6 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
     enum Exception { XML_READ_MEMORY,
                      EMPTY_XML_MSG,
                      ROOT_TAG_IS_NOT_MSG,
-                     MISSING_TAGS,
                      VERB_NOT_FOUND,
                      STEP_NOT_FOUND,
                      LEVEL_NOT_FOUND,
@@ -98,9 +97,6 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
             THROW(EMPTY_XML_MSG);
         if (xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_MSG))
             THROW(ROOT_TAG_IS_NOT_MSG);
-        /* check there is at least a child */
-        if (NULL == cur->xmlChildrenNode)
-            THROW(MISSING_TAGS);
         /* reset output message */
         memset(msg, 0, sizeof(struct lixa_msg_s));
         /* retrieve verb */
@@ -308,7 +304,6 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
                 ret_cod = LIXA_RC_EMPTY_XML_MSG;
                 break;
             case ROOT_TAG_IS_NOT_MSG:
-            case MISSING_TAGS:
             case VERB_NOT_FOUND:
             case STEP_NOT_FOUND:
             case LEVEL_NOT_FOUND:
@@ -1062,13 +1057,6 @@ int lixa_msg_deserialize_prepare_8(xmlNodePtr cur, struct lixa_msg_s *msg)
                 msg->body.prepare_8.conthr.non_block =
                     (int) strtol((char *) tmp, NULL, 0);
                 xmlFree(tmp);
-                /* timeout */
-                if (NULL ==
-                    (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_TIMEOUT)))
-                    THROW(TIMEOUT_NOT_FOUND);
-                msg->body.prepare_8.conthr.timeout =
-                    (int) strtol((char *) tmp, NULL, 0);
-                xmlFree(tmp);                
             } else if (!xmlStrcmp(cur->name,
                                   LIXA_XML_MSG_TAG_XA_PREPARE_EXECS)) {
                 xmlNodePtr cur2 = cur->xmlChildrenNode;
@@ -1175,35 +1163,19 @@ int lixa_msg_deserialize_prepare_16(xmlNodePtr cur, struct lixa_msg_s *msg)
 
 int lixa_msg_deserialize_prepare_24(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
-    enum Exception { TIMEOUT_NOT_FOUND,
-                     XML_UNRECOGNIZED_TAG,
+    enum Exception { XML_UNRECOGNIZED_TAG,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("lixa_msg_deserialize_prepare_24\n"));
     TRY {
         while (NULL != cur) {
-            xmlChar *tmp;
-            if (!xmlStrcmp(cur->name, LIXA_XML_MSG_TAG_CONTHR)) {
-                /* retrieve control thread properties */
-                /* timeout */
-                if (NULL ==
-                    (tmp = xmlGetProp(cur, LIXA_XML_MSG_PROP_TIMEOUT)))
-                    THROW(TIMEOUT_NOT_FOUND);
-                msg->body.prepare_24.conthr.timeout =
-                    (int) strtol((char *) tmp, NULL, 0);
-                xmlFree(tmp);                
-            } else
-                THROW(XML_UNRECOGNIZED_TAG);
-            cur = cur->next;
+            THROW(XML_UNRECOGNIZED_TAG);
         } /* while (NULL != cur) */
 
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case TIMEOUT_NOT_FOUND:
-                ret_cod = LIXA_RC_MALFORMED_XML_MSG;
-                break;
             case XML_UNRECOGNIZED_TAG:
                 ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
                 break;

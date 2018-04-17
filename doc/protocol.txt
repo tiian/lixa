@@ -163,7 +163,7 @@ verb=5 (xa_prepare)
 
   client->server message (send the xa_prepare result)
   <msg level="1" verb="5" step="8">
-    <conthr commit="1" non_block="0" timeout="5000"/>
+    <conthr commit="1" non_block="0"/>
     <xa_prepare_execs>
       <xa_prepare_exec rmid="0" flags="0x0" rc="0" s_state="33" td_state="10"/>
       <xa_prepare_exec rmid="1" flags="0x0" rc="0" s_state="33" td_state="10"/>
@@ -180,7 +180,6 @@ verb=5 (xa_prepare)
 
   client->server message (enqueue and wait the completion of all branches)
   <msg level="1" verb="5" step="24">
-    <conthr timeout="5000"/>
   </msg>
 
   server -> client message (answer: rc is related to the global result of all
