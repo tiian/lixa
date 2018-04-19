@@ -43,7 +43,7 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	package.m4 mysql_postgresql.at webspheremq.at lixa-config.at.in \
 	lixavsr.at.in \
 	xta.at xta_1.at xta_2.at xta_3.at xta_4.at \
-	xta_5_0.at xta_5_5.at xta_6.at xta_7.at \
+	xta_5_0.at xta_5_5.at xta_6.at xta_7.at xta_8.at \
 	lixa_test_group.sh lixa_test_exec.sh lixa_test_functions.sh \
 	db_consist_check.sh \
 	lixac.supp lixad.supp \
@@ -131,7 +131,7 @@ $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/xta.at $(srcdir)/xta_1.at $(srcdir)/xta_2.at \
 		$(srcdir)/xta_3.at $(srcdir)/xta_4.at \
 		$(srcdir)/xta_5_0.at $(srcdir)/xta_5_5.at \
-		$(srcdir)/xta_6.at $(srcdir)/xta_7.at \
+		$(srcdir)/xta_6.at $(srcdir)/xta_7.at $(srcdir)/xta_8.at \
 		$(srcdir)/package.m4
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@

@@ -44,7 +44,18 @@
 
 
 /*
- * Trivial case test for XTA: just assuring it can be compiled and executed!
+ * A simple case test for XTA for a single Application Program with some
+ * Resource Managers
+ */
+
+
+/*
+ * EXIT CODES:
+ *  0: OK
+ *  1: generic error
+ *  2: xta_transaction_open error
+ *  3: xta_transaction_start error
+ *  4: xta_transaction_commit error
  */
 
 
@@ -66,8 +77,8 @@ int main(int argc, char *argv[])
     /* MySQL variables */
     MYSQL *mysql_conn = NULL;
     char  *mysql_stmt_insert =
-        "INSERT INTO authors VALUES(9, 'Name', 'Surname')";
-    char  *mysql_stmt_delete = "DELETE FROM authors";
+        "INSERT INTO authors VALUES(1930, 'Bonatti', 'Walter')";
+    char  *mysql_stmt_delete = "DELETE FROM authors WHERE ID=1930";
     xta_mysql_xa_resource_t *mysql_xa_res;
 #endif
 #ifdef HAVE_ORACLE
@@ -78,10 +89,10 @@ int main(int argc, char *argv[])
     OCIStmt       *oci_stmt_hndl;
     OCIError      *oci_err_hndl;
     text          *oci_stmt_insert =
-        (text *) "INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
-        "VALUES ('IS', 'Iceland', 1)";
+        (text *) "INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) "
+        "VALUES (1944, 'Messner', 'Reinhold')";
     text          *oci_stmt_delete =
-        (text *) "DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'IS'";
+        (text *) "DELETE FROM authors WHERE ID=1944";
 #endif
 #ifdef HAVE_POSTGRESQL
     /* PostgreSQL variables */
@@ -89,8 +100,8 @@ int main(int argc, char *argv[])
     PGresult *postgres_res;
     xta_postgresql_xa_resource_t *postgresql_xa_res;
     char *postgres_stmt_insert = "INSERT INTO authors VALUES("
-        "9, 'Name', 'Surname');";
-    char *postgres_stmt_delete = "DELETE FROM authors;";
+        "1966, 'Kropp', 'Goran')";
+    char *postgres_stmt_delete = "DELETE FROM authors WHERE ID=1966";
 #endif
 
     /* turn ON trace for debugging purpose */
@@ -239,13 +250,13 @@ int main(int argc, char *argv[])
     /* open all the resources for Distributed Transactions */
     if (LIXA_RC_OK != (rc = xta_transaction_open(tx))) {
         printf("%s| xta_transaction_open: returned %d\n", pgm, rc);
-        return 1;
+        return 2;
     }
 
     /* start a Distributed Transaction */
     if (LIXA_RC_OK != (rc = xta_transaction_start(tx, FALSE))) {
         printf("%s| xta_transaction_start: returned %d\n", pgm, rc);
-        return 1;
+        return 3;
     }
 
 #ifdef HAVE_MYSQL
@@ -378,7 +389,7 @@ int main(int argc, char *argv[])
         if (test_rc != (rc = xta_transaction_commit(tx, FALSE))) {
             fprintf(stderr, "%s| xta_transaction_commit: returned %d instead "
                     "of %d\n", pgm, rc, test_rc);
-            return 1;
+            return 4;
         }
         printf("%s| XTA commit returned %d as expected\n", pgm, rc);
     } else {

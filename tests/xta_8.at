@@ -1,0 +1,57 @@
+AT_BANNER([XTA: state server crash])
+
+AT_SETUP([XTA/8.0/0.0 server_xa_open_8])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+# start the LIXA state server
+AT_CHECK([export LIXA_CRASH_POINT=22; lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
+# start the XTA Application Program
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 1 0 2>&1], [2], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/8.0/0.1 server_xa_open_24])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+# start the LIXA state server
+AT_CHECK([export LIXA_CRASH_POINT=23; lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
+# start the XTA Application Program
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 1 0 2>&1], [3], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/8.0/1.0 server_xa_start_8])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+# start the LIXA state server
+AT_CHECK([export LIXA_CRASH_POINT=28; lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
+# start the XTA Application Program
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 1 0 2>&1], [3], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/8.0/1.1 server_xa_start_24])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+# start the LIXA state server
+AT_CHECK([export LIXA_CRASH_POINT=29; lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
+# start the XTA Application Program
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 1 0 2>&1], [4], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/8.0/2.0 server_xa_end_8])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+# start the LIXA state server
+AT_CHECK([export LIXA_CRASH_POINT=30; lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
+# start the XTA Application Program
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 1 0 2>&1], [4], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/8.0/3.0 server_xa_prepare_8])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+# start the LIXA state server
+AT_CHECK([export LIXA_CRASH_POINT=32; lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
+# start the XTA Application Program
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0100 1 1 0 2>&1], [4], [ignore], [ignore])
+AT_CLEANUP
+AT_SETUP([XTA/8.0/3.1 automatic recovery])
+# recover previous prepared transaction
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset start case0100 1 0 0 2>&1], [0], [ignore], [ignore])
+# stop the LIXA state server
+AT_CHECK([lixa_test_exec.sh noreset stop true], [0], [ignore], [ignore])
+AT_CLEANUP
+
+

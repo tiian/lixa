@@ -1,3 +1,7 @@
+XTA/8.0/3.1 automatic recovery 
+it does NOT perform automatic recovery, state server does not return
+recovery pending transactions!
+
 Implement server side crash tests for XTA, repeat the 4 patterns:
 - single AP
 - multiple AP, consecutive calls

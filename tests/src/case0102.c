@@ -75,10 +75,10 @@ int main(int argc, char *argv[])
     OCIStmt       *oci_stmt_hndl;
     OCIError      *oci_err_hndl;
     text          *oci_stmt_insert =
-        (text *) "INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
-        "VALUES ('IS', 'Iceland', 1)";
+        (text *) "INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) "
+        "VALUES (1886, 'Mallory', 'George')";
     text          *oci_stmt_delete =
-        (text *) "DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'IS'";
+        (text *) "DELETE FROM authors WHERE ID=1886";
 #endif
 
     /* turn ON trace for debugging purpose */
