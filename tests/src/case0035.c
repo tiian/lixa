@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -32,9 +32,9 @@
 
 
 
-#include <tx.h>
-#include <liblixamonkey.h>
-#include <lixa_utils.h>
+#include "tx.h"
+#include "liblixamonkey.h"
+#include "lixa_utils.h"
 
 
 
@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
     printf("%s| tx_info(): %d\n", pgm, rc = tx_info(&info));
     assert(1 == rc);
 
-    /* emulate callback registration from resource manager when accessing
-     * resource manager owned resources; you may imagine these are the
+    /* emulate callback registration from Resource Manager when accessing
+     * resource manager owned resources; you may imagine this is the
      * equivalent of a SQLExecDirect function call */
     lixa_monkeyrm_call_ax_reg(2);
     lixa_micro_sleep(DELAY);

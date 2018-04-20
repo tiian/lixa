@@ -2,9 +2,9 @@
 
 m4_include([xta_8.at])
 
-AT_SETUP([exit with error])
-AT_CHECK([/bin/false], [0], [ignore], [ignore])
-AT_CLEANUP
+#AT_SETUP([exit with error])
+#AT_CHECK([/bin/false], [0], [ignore], [ignore])
+#AT_CLEANUP
 m4_include([xta_1.at])
 m4_include([xta_2.at])
 
