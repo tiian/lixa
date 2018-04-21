@@ -382,5 +382,14 @@
         <rsrmgr>Oracle@ORACLE_RM_TYPE@_stareg</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="CASE_PROF_0038">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>LIXAdummy1RM</rsrmgr>
+        <rsrmgr>LIXAmonkey1staRM</rsrmgr>
+      </rsrmgrs>
+    </profile>
   </profiles>
 </client>

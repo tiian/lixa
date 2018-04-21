@@ -41,9 +41,9 @@
 
 
 
-#include <lixa_errors.h>
-#include <lixa_xid.h>
-#include <liblixamonkey.h>
+#include "lixa_errors.h"
+#include "lixa_xid.h"
+#include "liblixamonkey.h"
 
 
 

@@ -8,9 +8,6 @@
  * ISBN: 1 872630 24 3
  * X/Open Document Number: XO/CAE/91/300
  */
-/**
- * @file
- */
 
 /*
  * Start of xa.h header
