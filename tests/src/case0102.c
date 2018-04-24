@@ -44,7 +44,18 @@
 
 
 /*
- * XTA: suspend/resume test cases with Oracle RDBMS resource manager
+ * XTA: suspend/resume test cases with Oracle RDBMS resource manager (and
+ * others if statically defined in lixac_conf.xml
+ */
+
+
+
+/*
+ * EXIT CODES:
+ *  0: OK
+ *  1: generic error
+ *  2: xta_transaction_resume error
+ *  3: xta_transaction_commit error
  */
 
 
@@ -238,7 +249,7 @@ int main(int argc, char *argv[])
                                tx, buffer, TMRESUME))) {
             fprintf(stderr, "%s| xta_transaction_resume returned %d\n",
                     pgm, rc);
-            return 1;
+            return 2;
         }
     }
     
@@ -325,7 +336,7 @@ int main(int argc, char *argv[])
             if (test_rc != (rc = xta_transaction_commit(tx, FALSE))) {
                 fprintf(stderr, "%s| xta_transaction_commit: returned %d "
                         "instead of %d\n", pgm, rc, test_rc);
-                return 1;
+                return 3;
             }
             fprintf(stderr, "%s| XTA commit returned %d as expected\n",
                     pgm, rc);
