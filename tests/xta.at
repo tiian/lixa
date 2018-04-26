@@ -1,10 +1,10 @@
 # XTA (XA Transaction API) case tests
 
-m4_include([xta_8.at])
+m4_include([xta_8_2.at])
 
-#AT_SETUP([exit with error])
-#AT_CHECK([/bin/false], [0], [ignore], [ignore])
-#AT_CLEANUP
+AT_SETUP([exit with error])
+AT_CHECK([/bin/false], [0], [ignore], [ignore])
+AT_CLEANUP
 
 m4_include([xta_1.at])
 m4_include([xta_2.at])
@@ -15,4 +15,10 @@ m4_include([xta_5_0.at])
 m4_include([xta_5_5.at])
 m4_include([xta_6.at])
 m4_include([xta_7.at])
+m4_include([xta_8_0.at])
+m4_include([xta_8_1.at])
+
+AT_SETUP([exit with error])
+AT_CHECK([/bin/false], [0], [ignore], [ignore])
+AT_CLEANUP
 

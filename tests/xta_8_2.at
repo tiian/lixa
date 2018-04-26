@@ -1,0 +1,184 @@
+# These test cases are not designed to check all the possible server side
+# crashed - that's already addressed by ct_ test cases - but how the XTA client
+# library reacts to server crashes
+AT_BANNER([XTA: Multiple Applications, Concurrent Branches/Pseudo Synchronous, state server crash])
+
+AT_SETUP([XTA/8.2/0.0 server_xa_start_8,count=1])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+# start the LIXA state server
+AT_CHECK([export LIXA_CRASH_POINT=28; export LIXA_CRASH_COUNT=1; lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [126], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/8.2/0.1 server_xa_start_24,count=1])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+# start the LIXA state server
+AT_CHECK([export LIXA_CRASH_POINT=29; export LIXA_CRASH_COUNT=1; lixa_test_exec.sh noreset start true], [0], [ignore], [ignore])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [127], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/8.2/1.0 server_xa_end_8,count=1])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+# start the LIXA state server
+AT_CHECK([export LIXA_CRASH_POINT=30; export LIXA_CRASH_COUNT=1; lixa_test_exec.sh noreset start true], [0], [ignore], [ignore])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [125], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/8.2/1.1 server_xa_prepare_8,count=1])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+# start the LIXA state server
+AT_CHECK([export LIXA_CRASH_POINT=32; export LIXA_CRASH_COUNT=1; export LIXA_SYNC_NODELAY=yes; lixa_test_exec.sh noreset start true], [0], [ignore], [ignore])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [125], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/8.2/1.2 automatic rollback])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+# start the LIXA state server
+AT_CHECK([lixa_test_exec.sh noreset start true], [0], [ignore], [ignore])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+AT_DATA([insert],
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+sleep 1; timeout 5 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+]])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# recovery rollback
+xa_rollback/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+# stop the LIXA state server
+AT_CHECK([lixa_test_exec.sh noreset stop true], [0], [ignore], [ignore])
+AT_CLEANUP
+

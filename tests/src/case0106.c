@@ -132,11 +132,11 @@ const char *monkeyrm_config = NULL;
 xta_mysql_xa_resource_t *mysql_xa_res;
 MYSQL *mysql_conn = NULL;
 char  *mysql_stmt_insert1 =
-    "INSERT INTO authors VALUES(101, 'Ernest', 'Hemingway')";
-char  *mysql_stmt_delete1 = "DELETE FROM authors WHERE id=101";
+    "INSERT INTO authors VALUES(1899, 'Hemingway', 'Ernest')";
+char  *mysql_stmt_delete1 = "DELETE FROM authors WHERE id=1899";
 char  *mysql_stmt_insert2 =
-    "INSERT INTO authors VALUES(102, 'Giorgio', 'Saviane')";
-char  *mysql_stmt_delete2 = "DELETE FROM authors WHERE id=102";
+    "INSERT INTO authors VALUES(1916, 'Saviane', 'Giorgio')";
+char  *mysql_stmt_delete2 = "DELETE FROM authors WHERE id=1916";
 char  *mysql_stmt_insert = NULL;
 char  *mysql_stmt_delete = NULL;
 #endif
@@ -148,15 +148,15 @@ OCISvcCtx     *oci_svc_ctx;
 OCIStmt       *oci_stmt_hndl;
 OCIError      *oci_err_hndl;
 text          *oci_stmt_insert1 =
-    (text *) "INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
-    "VALUES ('IS', 'Iceland', 1)";
+    (text *) "INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) "
+    "VALUES (1932, 'Kapuscinski', 'Ryszard')";
 text          *oci_stmt_delete1 =
-    (text *) "DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'IS'";
+    (text *) "DELETE FROM authors WHERE ID=1932";
 text          *oci_stmt_insert2 =
-    (text *) "INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, REGION_ID) "
-    "VALUES ('ZA', 'South Africa', 4)";
+    (text *) "INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) "
+    "VALUES (1938, 'Terzani', 'Tiziano')";
 text          *oci_stmt_delete2 =
-    (text *) "DELETE FROM COUNTRIES WHERE COUNTRY_ID = 'ZA'";
+    (text *) "DELETE FROM authors WHERE ID=1938";
 text          *oci_stmt_insert = NULL;
 text          *oci_stmt_delete = NULL;
 #endif
@@ -166,11 +166,11 @@ xta_postgresql_xa_resource_t *postgresql_xa_res;
 PGconn *postgres_conn = NULL;
 PGresult *postgres_res;
 char *postgres_stmt_insert1 = "INSERT INTO authors VALUES("
-    "101, 'Milan', 'Kundera');";
-char *postgres_stmt_delete1 = "DELETE FROM authors WHERE id=101;";
+    "1929, 'Kundera', 'Milan');";
+char *postgres_stmt_delete1 = "DELETE FROM authors WHERE id=1929;";
 char *postgres_stmt_insert2 = "INSERT INTO authors VALUES("
-    "102, 'Jostein', 'Gaarder');";
-char *postgres_stmt_delete2 = "DELETE FROM authors WHERE id=102;";
+    "1952, 'Gaarder', 'Jostein');";
+char *postgres_stmt_delete2 = "DELETE FROM authors WHERE id=1952;";
 char *postgres_stmt_insert = NULL;
 char *postgres_stmt_delete = NULL;
 #endif
