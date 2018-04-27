@@ -1,14 +1,8 @@
-XTA/8.0/3.1 automatic recovery 
-it does NOT perform automatic recovery, state server does not return
-recovery pending transactions!
-
-Implement server side crash tests for XTA, repeat the 4 patterns:
-- single AP
-- multiple AP, consecutive calls
-- multiple AP, concurrent branches, pseudo synch
-- multiple AP, concurrent branches, pseudo asynch
+xta_8_2.at: implement test cases for LIXA_CRASH_COUNT=2 when meaningful
 
 Check memory leaks in state server after branch implementation.
+
+Build and test for Ubuntu 18.04
 
 Is the state file synchronization after xa_start really necessary? Can it be
 removed?
