@@ -21,12 +21,12 @@
 
 
 
-#include <config.h>
+#include "config.h"
 
 
 
-#include <lixa_config.h>
-#include <lixa_xml_msg.h>
+#include "lixa_config.h"
+#include "lixa_xml_msg.h"
 
 
 
@@ -98,6 +98,24 @@ struct srvr_rcvr_tbl_s {
  * object oriented fashion see @ref srvr_rcvr_tbl_s
  */
 typedef struct srvr_rcvr_tbl_s srvr_rcvr_tbl_t;
+
+
+
+/**
+ * Struct used only to pass data from @ref srvr_rcvr_tbl_get_array to
+ * @ref srvr_rcvr_tbl_get_array_trav by mean of a generic gpointer type
+ */
+struct srvr_rcvr_tbl_get_array_data_s {
+    /**
+     * thread status identifier
+     */
+    guint     tsid;
+    /**
+     * array that must be used to store all the results found by
+     * @ref srvr_rcvr_tbl_get_array_trav
+     */
+    GArray   *array;
+};
 
 
 
@@ -215,8 +233,8 @@ extern "C" {
      *                         found, block_id was dequeued
      *                         if browse == FALSE;<br>
      *         @ref LIXA_RC_BYPASSED_OPERATION if a transaction for this job,
-     *                         but for a different thread was found, no block_id
-     *                         was dequeued;<br>
+     *                         but for a different thread was found, no
+     *                         block_id was dequeued;<br>
      *         @ref LIXA_RC_OBJ_NOT_FOUND if a transaction for this job was
      *                         NOT found, no block_id was dequeued;<br>
      *         a different codes mean error
@@ -228,6 +246,30 @@ extern "C" {
 
 
 
+
+    /**
+     * Tree traverse function used by @ref srvr_rcvr_tbl_get_array
+     * @param[in] key of the traversed node (job)
+     * @param[in] value of the traversed node (array of block_id)
+     * @param[in,out] data is a GArray to store the retrieved block_id
+     * @return FALSE because TRUE would break tree traversal
+     */
+    gboolean srvr_rcvr_tbl_get_array_trav(gpointer key, gpointer value,
+                                          gpointer data);
+    
+
+    
+    /**
+     * Retrieve a list with all the block_id related to a specific tsid;
+     * caller MUST destroy the returned array with stancard C function "free"
+     * @param[in] str reference to server recovery table
+     * @param[in] tsid thread status identifier
+     * @return an array with the list of elements
+     */
+    GArray *srvr_rcvr_tbl_get_array(const srvr_rcvr_tbl_t *srt, guint tsid);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

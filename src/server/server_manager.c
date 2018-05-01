@@ -88,6 +88,7 @@ int server_manager(struct server_config_s *sc,
                      THREAD_STATUS_DUMP_ERROR,
                      THREAD_STATUS_CLEAN_FAILED_ERROR,
                      THREAD_STATUS_RECOVERY_ERROR,
+                     XA_BRANCH_RESTART_FIX_BRANCHES_ERROR,
                      PTHREAD_CREATE_ERROR,
                      NULL_SERVER_TRANS_TABLE,
                      NONE } excp;
@@ -143,8 +144,16 @@ int server_manager(struct server_config_s *sc,
                                        &(tsa->array[i]), srt)))
                     THROW(THREAD_STATUS_RECOVERY_ERROR);
 
+                /* fix recovery pending branches that are not aligned due to
+                   a previous state server crash or analogous condition */
+                if (LIXA_RC_OK != (
+                        ret_cod = server_xa_branch_restart_fix(
+                            tsa->array + i, srt)))
+                    THROW(XA_BRANCH_RESTART_FIX_BRANCHES_ERROR);
+                
                 /* link to global transaction table */
-                if (NULL == stt) THROW(NULL_SERVER_TRANS_TABLE);
+                if (NULL == stt)
+                    THROW(NULL_SERVER_TRANS_TABLE);
                 tsa->array[i].trans_table = stt;
 
                 /* it will be fixed by the thread itself */
@@ -156,8 +165,8 @@ int server_manager(struct server_config_s *sc,
                 LIXA_TRACE(("server_manager: started thread "
                             PTHREAD_T_FORMAT
                             "\n", tsa->array[i].tid));
-            }
-        }
+            } /* if(i) */
+        } /* for (i = 0; i < tsa->n; ++i) */
 
         THROW(NONE);
     } CATCH {
@@ -175,6 +184,7 @@ int server_manager(struct server_config_s *sc,
             case THREAD_STATUS_DUMP_ERROR:
             case THREAD_STATUS_CLEAN_FAILED_ERROR:
             case THREAD_STATUS_RECOVERY_ERROR:
+            case XA_BRANCH_RESTART_FIX_BRANCHES_ERROR:
                 break;
             case PTHREAD_CREATE_ERROR:
                 ret_cod = LIXA_RC_PTHREAD_CREATE_ERROR;

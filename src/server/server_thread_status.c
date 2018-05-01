@@ -638,7 +638,7 @@ int thread_status_recovery(struct thread_status_s *ts,
             struct status_record_data_s *data = &ts->curr_status[i].sr.data;
             if (DATA_PAYLOAD_TYPE_RSRMGR == data->pld.type) {
                 LIXA_TRACE(("thread_status_recovery: block # " UINT32_T_FORMAT
-                            " is a transaction resource manager block, "
+                            " is a resource manager state block, "
                             "skipping...\n", i));
             } else if (DATA_PAYLOAD_TYPE_HEADER == data->pld.type) {
                 int branch_recovery_pending = FALSE;

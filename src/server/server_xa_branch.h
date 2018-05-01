@@ -170,6 +170,22 @@ extern "C" {
 
 
 
+
+    /**
+     * During state server restart, some branches could be in inconsistent
+     * states due to a journaling fault and/or a states server crash; this
+     * step guarantees all the branches of the same global transaction will be
+     * rolled back or committed
+     * @param[in,out] ts reference to the current thread status
+     * @param[in] srt reference to server recovery table
+     * @return a reason code
+     */
+    int server_xa_branch_restart_fix(struct thread_status_s *ts,
+                                     const srvr_rcvr_tbl_t *srt);
+
+
+
+    
     /**
      * Analize all the client sessions that are participating in a branch
      * and adjust the branch_join flag as necessary

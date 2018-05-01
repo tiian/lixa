@@ -30,6 +30,7 @@
 
 
 #include "lixa_syslog.h"
+#include "server_thread_status.h"
 #include "server_xa_branch.h"
 
 
@@ -612,6 +613,101 @@ int server_xa_branch_check_recovery(const struct thread_status_s *ts,
                     *global_recovery));
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_branch_check_recovery/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int server_xa_branch_restart_fix(struct thread_status_s *ts,
+                                 const srvr_rcvr_tbl_t *srt)
+{
+    enum Exception { NULL_OBJECT
+                     , XA_BRANCH_LIST
+                     , XA_BRANCH_CHECK_RECOVERY
+                     , SET_GLOBAL_RECOVERY
+                     , XA_BRANCH_UNCHAIN
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    GArray *block_id_list = NULL;
+    uint32_t *list_of_branches = NULL;
+    guint j;
+    
+    LIXA_TRACE(("server_xa_branch_restart_fix\n"));
+    TRY {
+        LIXA_TRACE(("server_xa_branch_restart_fix: fixing inconsistent "
+                    "branches for thread status id=%u\n", ts->id));
+        if (NULL == (block_id_list = srvr_rcvr_tbl_get_array(srt, ts->id)))
+            THROW(NULL_OBJECT);
+
+        for (j=0; j<block_id_list->len; ++j) {
+            uint32_t block_id = g_array_index(block_id_list, uint32_t, j);
+            LIXA_TRACE(("server_xa_branch_restart_fix: analyzing %u-th "
+                        "block_id (" UINT32_T_FORMAT ") extracted from server "
+                        "recovery table\n", j, block_id));
+            if (server_xa_branch_is_chained(ts, block_id)) {
+                int global_rec_pend = XTA_GLOBAL_RECOV_NULL;
+                uint32_t i;
+                uint32_t number_of_branches = 0;
+                /* retrieve the list of all the blocks */
+                if (LIXA_RC_OK != (ret_cod = server_xa_branch_list(
+                                       ts, block_id, &number_of_branches,
+                                       &list_of_branches)))
+                    THROW(XA_BRANCH_LIST);
+                /* analyze all the branches for recovery */
+                if (LIXA_RC_OK != (ret_cod = server_xa_branch_check_recovery(
+                                       ts, number_of_branches,
+                                       list_of_branches,
+                                       &global_rec_pend)))
+                    THROW(XA_BRANCH_CHECK_RECOVERY);
+                /* set the condition for all the branches, if necessary */
+                if (XTA_GLOBAL_RECOV_NULL != global_rec_pend)
+                    for (i=0; i<number_of_branches; ++i) {
+                        if (LIXA_RC_OK != (ret_cod =
+                                           thread_status_set_global_recovery(
+                                               ts, list_of_branches[i],
+                                               global_rec_pend)))
+                            THROW(SET_GLOBAL_RECOVERY);
+                    } /* for (i=0; i<number_of_branches; ++i) */
+                /* unchain the branch */
+                if (LIXA_RC_OK != (ret_cod = server_xa_branch_unchain(
+                                       ts, block_id)))
+                    THROW(XA_BRANCH_UNCHAIN);
+            } else {
+                LIXA_TRACE(("server_xa_branch_restart_fix: block_id="
+                            UINT32_T_FORMAT " is no (more) chained, "
+                            "skipping\n"));
+            } /* if (server_xa_branch_is_chained(ts, block_id)) */
+        } /* for (i=0; i<array_size; ++i) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case XA_BRANCH_LIST:
+            case XA_BRANCH_CHECK_RECOVERY:
+            case SET_GLOBAL_RECOVERY:
+            case XA_BRANCH_UNCHAIN:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* release memory if necessary */
+    if (NULL != list_of_branches) {
+        free(list_of_branches);
+        list_of_branches = NULL;
+    }
+    if (NULL != block_id_list) {
+        g_array_free(block_id_list, TRUE);
+        block_id_list = NULL;
+    }
+    LIXA_TRACE(("server_xa_branch_restart_fix/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

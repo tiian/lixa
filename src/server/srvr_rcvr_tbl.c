@@ -357,3 +357,79 @@ int srvr_rcvr_tbl_get_block(srvr_rcvr_tbl_t *srt,
 
 
 
+gboolean srvr_rcvr_tbl_get_array_trav(gpointer key, gpointer value,
+                                      gpointer data)
+{
+    GQueue *queue;
+    guint queue_length, i;
+    
+    struct srvr_rcvr_tbl_get_array_data_s *data_ref =
+        (struct srvr_rcvr_tbl_get_array_data_s *)data;
+
+    if (NULL == data_ref) {
+        LIXA_TRACE(("srvr_rcvr_tbl_get_array_trav: data_ref is NULL, this "
+                    "is an internal error\n"));
+        return TRUE;
+    }
+    
+    LIXA_TRACE(("srvr_rcvr_tbl_get_array_trav: key=%p, value=%p, tsid=%u\n",
+                key, value, data_ref->tsid));
+    /* a node of the tree is an array, the tsid-th position contains the
+       queue of block_id to retrieve */
+    queue = &g_array_index((GArray *) value, GQueue, data_ref->tsid);
+    queue_length = g_queue_get_length(queue);
+    LIXA_TRACE(("srvr_rcvr_tbl_get_array_trav: there are %u block_id to "
+                "pick-up from this node\n", queue_length));
+    for (i=0; i<queue_length; ++i) {
+        uint32_t block_id = GPOINTER_TO_UINT(g_queue_peek_nth(queue, i));
+        LIXA_TRACE(("srvr_rcvr_tbl_get_array_trav: adding block_id "
+                    UINT32_T_FORMAT " to array\n", block_id));
+        g_array_append_val(data_ref->array, block_id);
+    } /* for (i=0; i<queue_length; ++i) */
+    
+    return FALSE;
+}
+
+
+
+GArray *srvr_rcvr_tbl_get_array(const srvr_rcvr_tbl_t *srt, guint tsid)
+{
+    enum Exception { G_ARRAY_NEW
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    struct srvr_rcvr_tbl_get_array_data_s data;
+    
+    LIXA_TRACE(("srvr_rcvr_tbl_get_array: srt=%p, tsid=%u\n", srt, tsid));
+    TRY {
+        /* traverse the tree to collect the block_id related to tsid */
+        data.tsid = tsid;
+        data.array = NULL;
+        /* create a new array to return */
+        if (NULL == (data.array = g_array_new(FALSE, FALSE, sizeof(uint32_t))))
+            THROW(G_ARRAY_NEW);
+        /* lock mutex to guarantee struct stability */
+        g_mutex_lock(&srt->mutex);
+        /* search the block_id and put in data.array */
+        g_tree_foreach(srt->lvl1_job, srvr_rcvr_tbl_get_array_trav,
+                       (gpointer)&data);
+        /* unlock the mutex */
+        g_mutex_unlock(&srt->mutex);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_ARRAY_NEW:
+                ret_cod = LIXA_RC_G_ARRAY_NEW_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("srvr_rcvr_tbl_get_array/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return data.array;
+}
+

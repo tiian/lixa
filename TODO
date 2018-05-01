@@ -1,3 +1,11 @@
+Check the new behaviour of the state server after below change, for instance
+XTA/8.2/2.3 automatic recovery
+switched from commit to rollback! Is it right? Is it wrong?
+
+Implement srvr_rcvr_tbl_get_array and server_xa_branch_restart_fix and
+implement in server_xa_branch_restart_fix the same logic that's available in
+the first part of server_manager_drop_client (server_xa_branch_check_recovery)
+
 xta_8_2.at: implement test cases for LIXA_CRASH_COUNT=2 when meaningful
 
 Check memory leaks in state server after branch implementation.
