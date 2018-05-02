@@ -1,16 +1,15 @@
 AT_INIT
 AT_COPYRIGHT([Copyright (c) 2009-2018, Christian Ferrari <tiian@users.sourceforge.net>])
 
-AT_BANNER([LIXA case tests start-up])
+AT_BANNER([LIXA test cases start-up])
 AT_SETUP([check lixad process is NOT active...])
 AT_CHECK([ps -ef | grep lixad | grep -v grep], [1], [ignore], [ignore])
 AT_CLEANUP
 
-m4_include([xta.at])
 m4_include([nonapi.at])
 m4_include([lixa-config.at])
 m4_include([lixavsr.at])
-#m4_include([xta.at])
+m4_include([xta.at])
 m4_include([mysql.at])
 m4_include([postgresql.at])
 m4_include([mysql_postgresql.at])

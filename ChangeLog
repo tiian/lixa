@@ -5,6 +5,9 @@ LOG:
 		 mix 1.5.4 and previous versions in the same environment
 		 (message LXC030E will be logged in the event of level
 		 mismatch); LIXA_MSG_LEVEL=2
+		 Fixed a bug related to XTA, multiple applications, concurrent
+		 branches in the event of state server crash during two phase
+		 commit.
 
 20180413 - 1.5.3 XTA documentation: a dedicated chapter has been added in the
 		 official LIXA manual

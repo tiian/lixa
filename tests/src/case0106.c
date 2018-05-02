@@ -72,6 +72,7 @@
  * 10:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_HAZARD
  * 11:   superior branch / xta_transaction_rollback() generic error
  * 12:   subordinate branch / xta_transaction_rollback() generic error
+ * 13:   subordinate branch / xta_transaction_commit() generic error
  */
 
 
@@ -366,7 +367,7 @@ void subordinate(void)
                 else if (rc == LIXA_RC_TX_HAZARD)
                     exit(10);
                 else
-                    exit(1);
+                    exit(13);
             }
         } else {
             fprintf(stderr, "%s/%u| xta_transaction_commit (first "
