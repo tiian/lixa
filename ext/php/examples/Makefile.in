@@ -254,6 +254,7 @@ WEBSPHEREMQ_PATH = @WEBSPHEREMQ_PATH@
 WEBSPHEREMQ_PGMLIB = @WEBSPHEREMQ_PGMLIB@
 WEBSPHEREMQ_SWITCH_TYPE = @WEBSPHEREMQ_SWITCH_TYPE@
 XSLTPROC = @XSLTPROC@
+_RELEASE_DATE = @_RELEASE_DATE@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@

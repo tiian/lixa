@@ -116,6 +116,10 @@ CentOS		PostgreSQL	postgresql postgresql-server postgresql-devel
 RHEL 7.3	Basic		gcc glib2-devel libxml2-devel libuuid-devel
 				autoconf net-tools libtool
 
+Optional packages:
+O.S.		Feature		Packages
+Ubuntu		doxygen		doxygen graphviz
+Ubuntu		docbook		xsltproc docbook-xml docbook-xsl
 
 Enjoy LIXA!
 Ch.F.

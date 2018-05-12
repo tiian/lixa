@@ -250,3 +250,6 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* Date of release */
+#undef _RELEASE_DATE

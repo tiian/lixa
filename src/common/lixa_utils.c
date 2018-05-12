@@ -72,9 +72,22 @@ void lixa_print_version(FILE *stream)
             "all rights reserved.\n"
             "License: GPL (GNU Public License) version 2\n"
             "Package name: %s; package version: %s\n"
-            "Access http://sourceforge.net/projects/lixa/ to report bugs "
+            "Release date: %s;\n"
+            "Driver for IBM DB2: %s;\n"
+            "Driver for MySQL: %s;\n"
+            "Driver for Oracle DBMS: %s;\n"
+            "Driver for PostgreSQL: %s;\n"
+            "Driver for IBM MQ: client:%s, server=%s;\n"
+            "Access http://www.tiian.org/lixa/ to report bugs "
             "and partecipate to the project\n",
-            LIXA_PACKAGE_NAME, LIXA_PACKAGE_VERSION);
+            LIXA_PACKAGE_NAME, LIXA_PACKAGE_VERSION,LIXA_RELEASE_DATE,
+            lixa_config_have_ibmdb2() ? "yes" : "no",
+            lixa_config_have_mysql() ? "yes" : "no",
+            lixa_config_have_oracle() ? "yes" : "no",
+            lixa_config_have_postgresql() ? "yes" : "no",
+            lixa_config_have_webspheremq_etc() ? "yes" : "no",
+            lixa_config_have_webspheremq_srv() ? "yes" : "no"
+            );
 }
 
 

@@ -246,6 +246,8 @@ if (envh) OCIHandleFree(envh, OCI_HTYPE_ENV);
 	ORACLE_SQL_NET="lixa_ora_db"
 	dnl client connection (Instant Client or similar)
 	ORACLE_RM_TYPE="IC"
+    else
+        AC_MSG_NOTICE([File oracle_env.sh not found in $oracle_home_dir/bin and in $oracle_lib_dir])
     fi
 
     dnl search for Pro*C and Pro*COBOL precompiler in current path

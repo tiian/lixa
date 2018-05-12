@@ -37,7 +37,7 @@
       This section has been developed using MySQL 5.5.54 (or upper) and
       MariaDB 5.5.52 for Linux. 
       Here is a brief list of the tested versions for Ubuntu 12.04,
-      14.04, 16.04 and CentOS/RHEL 7.3 and the installed packages:
+      14.04, 16.04, 18.04 and CentOS/RHEL 7.3 and the installed packages:
       <screen>
 tiian@ubuntu1204-64:~$ dpkg -l | grep -i mysql
 ii  libdbd-mysql-perl                4.020-1ubuntu0.1                    Perl5 database interface to the MySQL database
@@ -70,6 +70,17 @@ ii  mysql-common                       5.7.17-0ubuntu0.16.04.1             all  
 ii  mysql-server                       5.7.17-0ubuntu0.16.04.1             all          MySQL database server (metapackage depending on the latest version)
 ii  mysql-server-5.7                   5.7.17-0ubuntu0.16.04.1             amd64        MySQL database server binaries and system database setup
 ii  mysql-server-core-5.7              5.7.17-0ubuntu0.16.04.1             amd64        MySQL database server binaries
+
+Last login: Sat May 12 17:29:32 2018 from 192.168.122.1
+tiian@ubuntu1804:~$ dpkg -l | grep -i mysql
+ii  libmysqlclient-dev                    5.7.22-0ubuntu18.04.1              amd64        MySQL database development files
+ii  libmysqlclient20:amd64                5.7.22-0ubuntu18.04.1              amd64        MySQL database client library
+ii  mysql-client-5.7                      5.7.22-0ubuntu18.04.1              amd64        MySQL database client binaries
+ii  mysql-client-core-5.7                 5.7.22-0ubuntu18.04.1              amd64        MySQL database core client binaries
+ii  mysql-common                          5.8+1.0.4                          all          MySQL database common files, e.g. /etc/mysql/my.cnf
+ii  mysql-server                          5.7.22-0ubuntu18.04.1              all          MySQL database server (metapackage depending on the latest version)
+ii  mysql-server-5.7                      5.7.22-0ubuntu18.04.1              amd64        MySQL database server binaries and system database setup
+ii  mysql-server-core-5.7                 5.7.22-0ubuntu18.04.1              amd64        MySQL database server binaries
 
 [tiian@centos71-64 ~]$ rpm -qa | grep -i maria
 mariadb-5.5.52-1.el7.x86_64
@@ -127,8 +138,8 @@ mysql     1607     1  0 22:43 ?        00:00:00 /usr/sbin/mysqld
 	  </table>
 	  Create a new user authorization and a new database
 	  <footnote><para>
-	      You need the password of MySQL root user to execute
-	      these commands
+	    You need the password of MySQL root user to execute
+	    these commands.
 	  </para></footnote>:
 	  <table frame="box">
 	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
@@ -146,6 +157,38 @@ affiliates. Other names may be trademarks of their respective
 owners.
 
 Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> GRANT ALL ON lixa.* TO 'lixa'@'localhost';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> CREATE DATABASE lixa;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> quit
+Bye
+	    </screen></td></tr></tbody>
+	  </table>
+	  On recent systems like Ubuntu 18.04, the following commands can be
+	  used instead of the previous ones that don't work anymore:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1804:~$ sudo mysql -u root 
+[sudo] password for tiian: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 2
+Server version: 5.7.22-0ubuntu18.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> CREATE USER 'lixa'@'localhost';
+Query OK, 0 rows affected (0.02 sec)
 
 mysql> GRANT ALL ON lixa.* TO 'lixa'@'localhost';
 Query OK, 0 rows affected (0.00 sec)
@@ -871,7 +914,8 @@ Disconnected from Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bi
     <para>
       This section has been developed using PostgreSQL 9.1.24 (and upper)
       for Linux. Here is a brief list of the tested versions for Ubuntu
-      12.04, 14.04, 16.04 and CentOS/RHEL 7.3 and the installed packages:
+      12.04, 14.04, 16.04, 18.04 and CentOS/RHEL 7.3 and the installed
+      packages:
       <screen>
 tiian@ubuntu1204-64:/tmp$ dpkg -l | grep -i -e pq -e postgresql
 ii  libpq-dev                        9.1.24-0ubuntu0.12.04               header files for libpq5 (PostgreSQL library)
@@ -900,6 +944,15 @@ ii  postgresql-client-9.5              9.5.6-0ubuntu0.16.04                amd64
 ii  postgresql-client-common           173                                 all          manager for multiple PostgreSQL client versions
 ii  postgresql-common                  173                                 all          PostgreSQL database-cluster manager
 ii  postgresql-contrib-9.5             9.5.6-0ubuntu0.16.04                amd64        additional facilities for PostgreSQL
+
+tiian@ubuntu1804:~$ dpkg -l | grep -i -e pq -e postgresql
+ii  libpq-dev                             10.3-1                             amd64        header files for libpq5 (PostgreSQL library)
+ii  libpq5:amd64                          10.3-1                             amd64        PostgreSQL C client library
+ii  postgresql                            10+190                             all          object-relational SQL database (supported version)
+ii  postgresql-10                         10.3-1                             amd64        object-relational SQL database, version 10 server
+ii  postgresql-client-10                  10.3-1                             amd64        front-end programs for PostgreSQL 10
+ii  postgresql-client-common              190                                all          manager for multiple PostgreSQL client versions
+ii  postgresql-common                     190                                all          PostgreSQL database-cluster manager
 
 [tiian@centos71-64 tmp]$ rpm -qa | grep -i -e pq -e postgresql
 postgresql-libs-9.2.18-1.el7.x86_64

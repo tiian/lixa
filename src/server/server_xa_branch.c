@@ -620,7 +620,7 @@ int server_xa_branch_check_recovery(const struct thread_status_s *ts,
 
 
 int server_xa_branch_restart_fix(struct thread_status_s *ts,
-                                 const srvr_rcvr_tbl_t *srt)
+                                 srvr_rcvr_tbl_t *srt)
 {
     enum Exception { NULL_OBJECT
                      , XA_BRANCH_LIST

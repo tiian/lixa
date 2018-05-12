@@ -593,7 +593,7 @@ PACKAGE_TARNAME='lixa'
 PACKAGE_VERSION='1.5.4-dev'
 PACKAGE_STRING='lixa 1.5.4-dev'
 PACKAGE_BUGREPORT='tiian at users dot sourceforge dot net'
-PACKAGE_URL='http://sourceforge.net/projects/lixa/'
+PACKAGE_URL='http://www.tiian.org/lixa/'
 
 # Factoring default headers for most tests.
 ac_includes_default="\
@@ -663,6 +663,7 @@ LT_LIXAB_CURRENT
 LT_LIXAC_AGE
 LT_LIXAC_REVISION
 LT_LIXAC_CURRENT
+_RELEASE_DATE
 HAVE_NETSTAT
 HAVE_DOT_BOOL
 HAVE_DOT
@@ -1567,7 +1568,7 @@ Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to <tiian at users dot sourceforge dot net>.
-lixa home page: <http://sourceforge.net/projects/lixa/>.
+lixa home page: <http://www.tiian.org/lixa/>.
 _ACEOF
 ac_status=$?
 fi
@@ -4402,6 +4403,13 @@ unknown)
   ;;
 esac
 
+
+#hardwired configuration
+_RELEASE_DATE="2018-05-12"
+
+cat >>confdefs.h <<_ACEOF
+#define _RELEASE_DATE "$_RELEASE_DATE"
+_ACEOF
 
 case `pwd` in
   *\ * | *\	*)
@@ -12995,6 +13003,9 @@ $as_echo "no" >&6; }
         TEST_ORACLE="yes"
 			ORACLE_SQL_NET="lixa_ora_db"
 		ORACLE_RM_TYPE="IC"
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: File oracle_env.sh not found in $oracle_home_dir/bin and in $oracle_lib_dir" >&5
+$as_echo "$as_me: File oracle_env.sh not found in $oracle_home_dir/bin and in $oracle_lib_dir" >&6;}
     fi
 
         if test "$HAVE_ORACLE" = "yes"
@@ -14134,8 +14145,6 @@ CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0) $($PKG_CONFIG --cflags gmod
 LDFLAGS_GLIB="$($PKG_CONFIG --libs glib-2.0)"
 LDFLAGS_GMODULE="$($PKG_CONFIG --libs gmodule-no-export-2.0)"
 LDFLAGS_GTHREAD="$($PKG_CONFIG --libs gthread-2.0)"
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
 
 # Checking cobc (GNU COBOL compiler) is available
 for ac_prog in cobc
@@ -15688,6 +15697,7 @@ done
 
 
 
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -16331,7 +16341,7 @@ Configuration commands:
 $config_commands
 
 Report bugs to <tiian at users dot sourceforge dot net>.
-lixa home page: <http://sourceforge.net/projects/lixa/>."
+lixa home page: <http://www.tiian.org/lixa/>."
 
 _ACEOF
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1

@@ -262,11 +262,11 @@ extern "C" {
     /**
      * Retrieve a list with all the block_id related to a specific tsid;
      * caller MUST destroy the returned array with stancard C function "free"
-     * @param[in] str reference to server recovery table
+     * @param[in] srt reference to server recovery table
      * @param[in] tsid thread status identifier
      * @return an array with the list of elements
      */
-    GArray *srvr_rcvr_tbl_get_array(const srvr_rcvr_tbl_t *srt, guint tsid);
+    GArray *srvr_rcvr_tbl_get_array(srvr_rcvr_tbl_t *srt, guint tsid);
 
 
     

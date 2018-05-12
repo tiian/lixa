@@ -24,12 +24,10 @@
  * Do NOT edit lixa_inst_conf.c, but lixa_inst_conf.c.in instead!
  */
 
-#include <config.h>
-
-#include <lixa_defines.h>
-
+#include "config.h"
+#include "lixa_defines.h"
 /* some public function are exposed to lixa.h API file */
-#include <lixa.h>
+#include "lixa.h"
 
 
 
@@ -47,6 +45,7 @@ const char *LIXA_SERVER_CONFIG_SYSTEM_FILE = "@EXPANDED_SYSCONFDIR@/lixad_conf.x
 const char *LIXA_PACKAGE_BUGREPORT = "@PACKAGE_BUGREPORT@";
 const char *LIXA_PACKAGE_NAME = "@PACKAGE_NAME@";
 const char *LIXA_PACKAGE_VERSION = "@PACKAGE_VERSION@";
+const char *LIXA_RELEASE_DATE = "@_RELEASE_DATE@";
 
 
 

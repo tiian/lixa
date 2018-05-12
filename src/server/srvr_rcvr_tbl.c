@@ -392,7 +392,7 @@ gboolean srvr_rcvr_tbl_get_array_trav(gpointer key, gpointer value,
 
 
 
-GArray *srvr_rcvr_tbl_get_array(const srvr_rcvr_tbl_t *srt, guint tsid)
+GArray *srvr_rcvr_tbl_get_array(srvr_rcvr_tbl_t *srt, guint tsid)
 {
     enum Exception { G_ARRAY_NEW
                      , NONE } excp;

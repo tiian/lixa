@@ -1,7 +1,10 @@
-AC_INIT([lixa], [1.5.4-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/lixa/])
+AC_INIT([lixa], [1.5.4-dev], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
+#hardwired configuration
+_RELEASE_DATE="2018-05-12"
+AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 LT_INIT
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
@@ -187,7 +190,6 @@ CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0) $($PKG_CONFIG --cflags gmod
 LDFLAGS_GLIB="$($PKG_CONFIG --libs glib-2.0)"
 LDFLAGS_GMODULE="$($PKG_CONFIG --libs gmodule-no-export-2.0)"
 LDFLAGS_GTHREAD="$($PKG_CONFIG --libs gthread-2.0)"
-AC_MSG_RESULT([yes])
 
 # Checking cobc (GNU COBOL compiler) is available
 AC_CHECK_PROGS(COBC, [cobc], [true])
@@ -308,6 +310,7 @@ AC_CHECK_FUNCS(vsnprintf)
 AC_SUBST(PACKAGE_BUGREPORT)
 AC_SUBST(PACKAGE_NAME)
 AC_SUBST(PACKAGE_VERSION)
+AC_SUBST(_RELEASE_DATE)
 AC_SUBST(LT_LIXAC_CURRENT)
 AC_SUBST(LT_LIXAC_REVISION)
 AC_SUBST(LT_LIXAC_AGE)

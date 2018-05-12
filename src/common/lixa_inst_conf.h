@@ -21,7 +21,7 @@
 
 
 
-#include <config.h>
+#include "config.h"
 
 
 
@@ -69,6 +69,10 @@ extern const char *LIXA_PACKAGE_VERSION;
  */
 extern const char *LIXA_PACKAGE_BUGREPORT;
 
+/**
+ * Official version release date
+ */
+extern const char *LIXA_RELEASE_DATE;
 
 
 #ifdef __cplusplus
