@@ -84,11 +84,15 @@ xta_transaction_manager_t *xta_transaction_manager_new(void)
 
 void xta_transaction_manager_delete(xta_transaction_manager_t *this)
 {
-    enum Exception { NONE } excp;
+    enum Exception { CLIENT_UNCONFIG_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_manager_delete\n"));
     TRY {
+        /* configure the global config for LIXA client (if necessary) */
+        if (LIXA_RC_OK != (ret_cod = client_unconfig(&global_ccc, TRUE)))
+            THROW(CLIENT_UNCONFIG_ERROR);
         /* destroy transaction objects if any */
         if (NULL != this->transactions) {
             g_hash_table_destroy(this->transactions);
@@ -104,6 +108,8 @@ void xta_transaction_manager_delete(xta_transaction_manager_t *this)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CLIENT_UNCONFIG_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

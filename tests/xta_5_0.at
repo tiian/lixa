@@ -45,8 +45,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 # Superior thread xa_start() --> XA_RBROLLBACK
 AT_DATA([monkey1s.conf],
@@ -79,8 +79,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -113,8 +113,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -147,8 +147,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 7 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 7 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 # Superior thread xa_end() --> XAER_RMFAIL
 AT_DATA([monkey1s.conf],
@@ -180,8 +180,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 7 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 7 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 # Superior thread xa_end() --> XA_RBROLLBACK
 AT_DATA([monkey1s.conf],
@@ -213,8 +213,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -248,8 +248,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -284,8 +284,8 @@ AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # insert data in table
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 # Superior thread xa_prepare() --> XA_RDONLY
 AT_DATA([monkey1s.conf],
@@ -318,8 +318,8 @@ AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # delete data from table
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -351,8 +351,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 # Superior thread xa_prepare() --> XA_RBROLLBACK
 AT_DATA([monkey1s.conf],
@@ -385,8 +385,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -419,8 +419,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 # Superior thread xa_prepare() --> XAER_RMERR
 AT_DATA([monkey1s.conf],
@@ -453,8 +453,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -487,8 +487,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 # Superior thread xa_commit() --> XAER_RMERR
 AT_DATA([monkey1s.conf],
@@ -525,8 +525,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([delete],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -563,8 +563,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 # Superior thread xa_commit() --> XA_RETRY
 AT_DATA([monkey1s.conf],
@@ -598,8 +598,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([delete],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -633,8 +633,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 # Superior thread xa_commit() --> XA_HEURHAZ
 AT_DATA([monkey1s.conf],
@@ -668,8 +668,8 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([delete],
-[[timeout 3 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 3 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config

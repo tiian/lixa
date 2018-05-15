@@ -319,4 +319,66 @@
    fun:start_thread
    fun:clone
 }
+{
+   oracle_xa_open_00
+   Memcheck:Leak
+   ...
+   fun:xaoopen
+   fun:lixa_iface_xa_open
+   fun:lixa_xa_open
+   fun:xta_transaction_open
+   ...
+   fun:main
+}
+{
+   oracle_xa_open_01
+   Memcheck:Addr4
+   ...
+   fun:xaoopen
+   fun:lixa_iface_xa_open
+   fun:lixa_xa_open
+   fun:xta_transaction_open
+   ...
+   fun:main
+}
+{
+   oracle_xa_open_02
+   Memcheck:Addr16
+   ...
+   fun:xaoopen
+   fun:lixa_iface_xa_open
+   fun:lixa_xa_open
+   fun:xta_transaction_open
+   ...
+   fun:main
+}
+{
+   oracle_xa_open_03
+   Memcheck:Value8
+   ...
+   fun:xaoopen
+   fun:lixa_iface_xa_open
+   fun:lixa_xa_open
+   fun:xta_transaction_open
+   ...
+   fun:main
+}
+{
+   oracle_xa_open_04
+   Memcheck:Cond
+   ...
+   fun:xaoopen
+   fun:lixa_iface_xa_open
+   fun:lixa_xa_open
+   fun:xta_transaction_open
+   ...
+   fun:main
+}
+{
+   mysql_real_connect
+   Memcheck:Leak
+   ...
+   fun:mysql_real_connect
+   fun:main
+}
 

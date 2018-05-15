@@ -1,52 +1,9 @@
 {
-   g_thread_init_00
+   g_mutex_lock_01
    Memcheck:Leak
-   fun:realloc
-   fun:g_realloc
+   ...
    obj:*
-   fun:g_array_set_size
-   fun:g_static_private_set
-   fun:g_get_language_names
-   fun:g_thread_init
-   fun:lixa_trace_init
-   fun:main
-}
-{
-   g_thread_init_01
-   Memcheck:Leak
-   fun:malloc
-   fun:g_malloc
-   obj:*
-   fun:g_thread_init_glib
-   fun:g_thread_init
-   fun:lixa_trace_init
-   fun:main
-}
-{
-   g_thread_init_02
-   Memcheck:Leak
-   fun:memalign
-   fun:posix_memalign
-   obj:*
-   fun:g_slice_alloc
-   fun:g_array_sized_new
-   fun:g_array_new
-   fun:g_static_private_set
-   fun:g_get_filename_charsets
-   obj:*
-   fun:g_thread_init_glib
-   fun:g_thread_init
-   fun:lixa_trace_init
-   fun:main
-}
-{
-   g_thread_init_03
-   Memcheck:Leak
-   fun:calloc
-   fun:g_malloc0
-   fun:g_thread_self
-   fun:g_thread_init_glib
-   fun:g_thread_init
+   fun:g_mutex_lock
    fun:lixa_trace_init
    fun:main
 }
@@ -58,5 +15,54 @@
    fun:server_listener_loop
    fun:server_listener
    fun:main
+}
+{
+   g_option_context_parse
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ... 
+   fun:g_option_context_parse
+   fun:main
+}
+{
+   xmlParseDocument
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:xmlParseDocument
+   obj:*
+   fun:server_config
+   fun:main
+}
+{
+   start_thread
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   ...
+   fun:__nptl_deallocate_tsd
+   fun:start_thread
+   fun:clone
+}
+{
+   g_mutex_lock02
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/lib/x86_64-linux-gnu/libglib-2.0.so.0.4002.0
+   obj:/lib/x86_64-linux-gnu/libglib-2.0.so.0.4002.0
+   fun:g_mutex_lock
+   fun:lixa_crash_init
+   fun:main
+}
+{
+   g_mutex_lock03
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:g_mutex_trylock
+   fun:server_manager_thread
+   fun:start_thread
+   fun:clone
 }
 

@@ -67,8 +67,13 @@ then
 	start_server
 fi
 
-exec_test $*
-rc=$?
+if test "x$1" = "xtrue"
+then
+	echo "true is not a case test, just a dummy step, skipping..."
+else
+	exec_test $*
+	rc=$?
+fi
 
 if test "$STOP_SERVER" = "YES"
 then
