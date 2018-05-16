@@ -70,8 +70,9 @@ start_server() {
 		if [ "x$VALGRIND" != "x" ] 
 		then
 			export G_SLICE=always-malloc
-			echo libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace
-			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
+			echo libtool --mode=execute $VALGRIND --leak-check=full --leak-resolution=high --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace
+#			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
+			libtool --mode=execute $VALGRIND --leak-check=full --leak-resolution=high --num-callers=50 --suppressions=$TESTS_DIR/lixad.supp --gen-suppressions=all $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
 		else
 			echo $SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace
 			$SERVER_DIR/lixad --daemon --config-file=$TESTS_ETC_DIR/${LIXAD_CONF_XML} --trace-file=$PWD/lixad.trace 2>>$PWD/lixad.trace
@@ -148,8 +149,9 @@ exec_test() {
 		if [ "x$VALGRIND" != "x" ] 
 		then
 			export G_SLICE=always-malloc
-			echo libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixac.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
-			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixac.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
+			echo libtool --mode=execute $VALGRIND --leak-check=full --leak-resolution=high --num-callers=50 --suppressions=$TESTS_DIR/lixac.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
+			libtool --mode=execute $VALGRIND --leak-check=full --leak-resolution=high --num-callers=50 --suppressions=$TESTS_DIR/lixac.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
+#			libtool --mode=execute $VALGRIND --leak-check=full --show-reachable=yes --num-callers=50 --suppressions=$TESTS_DIR/lixac.supp --gen-suppressions=all $TESTS_SRC_DIR/$PGM $*
 		else
 			echo $PGM $*
 			$PGM $*

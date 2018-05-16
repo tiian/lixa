@@ -447,7 +447,7 @@ void create_dynamic_native_xa_resources()
     dynamic_native_xa_res_monkey = xta_native_xa_resource_new(
         "LIXA Monkey RM (static)",
         "/opt/lixa/lib/switch_lixa_monkeyrm_stareg.so",
-        monkeyrm_config, "");
+        monkeyrm_config, "FREE MEMORY");
     if (dynamic_native_xa_res_monkey == NULL) {
         fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned NULL for "
                 "dynamically creted resource\n", pgm, pid);

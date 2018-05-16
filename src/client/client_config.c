@@ -19,6 +19,7 @@
 #include "config.h"
 
 
+
 #ifdef HAVE_NETDB_H
 # include <netdb.h>
 #endif
@@ -817,6 +818,8 @@ int client_unconfig(client_config_coll_t *ccc, int global_config)
         LIXA_TRACE(("client_unconfig: ...exclusive mutex acquired!\n"));
 
         if (NULL != ccc->config_threads) {
+            LIXA_TRACE(("client_unconfig: removing current thread from "
+                        "hash table...\n"));
             g_hash_table_remove(ccc->config_threads, (gconstpointer) tid);
             if (g_hash_table_size(ccc->config_threads) != 0) {
                 LIXA_TRACE(("client_unconfig: can not unconfigure (%u), "
@@ -824,6 +827,7 @@ int client_unconfig(client_config_coll_t *ccc, int global_config)
                             g_hash_table_size(ccc->config_threads)));
                 THROW(NONE);
             } else {
+                LIXA_TRACE(("client_unconfig: destroying hash table...\n"));
                 g_hash_table_destroy(ccc->config_threads);
                 ccc->config_threads = NULL;
             }

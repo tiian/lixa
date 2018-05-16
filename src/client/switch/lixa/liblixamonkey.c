@@ -390,7 +390,7 @@ int lixa_monkeyrm_close(char *xa_info, int rmid, long flags)
                          slht, (gconstpointer)((long)rmid))))
             THROW(INVALID_STATUS2);
 
-        /* retrieve the return code must be returned */
+        /* retrieve the return code that must be returned */
         if (LIXA_RC_OK != lixa_monkeyrm_get_rc(mss, XA_CLOSE, &xa_rc))
             THROW(GET_RC_ERROR);
 
