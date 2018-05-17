@@ -381,4 +381,18 @@
    fun:mysql_real_connect
    fun:main
 }
+{
+   g_mutex_lock
+   Memcheck:Leak
+   ...
+   fun:malloc
+   ...
+   fun:g_mutex_lock
+   ...
+   fun:lixa_iface_xa_open
+   fun:lixa_xa_open
+   fun:xta_transaction_open
+   ...
+   fun:main
+}
 
