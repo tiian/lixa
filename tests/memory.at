@@ -20,7 +20,7 @@ xa_close/0
 xa_open/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0032 2 2 0x00000004 $LIXA_CONFIG_FILE $LIXAD_CONFIG_FILE $SAMPLE_SWITCH_FILE], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007_NOFM ; lixa_test_exec.sh noreset none case0032 2 2 0x00000004 $LIXA_CONFIG_FILE $LIXAD_CONFIG_FILE $SAMPLE_SWITCH_FILE], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([ML/0.3 g_thread_init])

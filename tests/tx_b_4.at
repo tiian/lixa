@@ -19,7 +19,7 @@ xa_open/0
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0006 ; lixa_test_exec.sh reset start case0018 -6], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0018 -6], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007_NOFM ; lixa_test_exec.sh noreset none case0018 -6], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TX/B.4/0.1])
@@ -41,7 +41,7 @@ xa_open/0
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0006 ; lixa_test_exec.sh noreset none case0018 -7], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0018 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007_NOFM ; lixa_test_exec.sh noreset none case0018 -7], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TX/B.4/0.2])
@@ -63,7 +63,7 @@ xa_open/0
 xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0006 ; lixa_test_exec.sh noreset none case0018 -7], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset none case0018 -7], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007_NOFM ; lixa_test_exec.sh noreset none case0018 -7], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TX/B.4/1.0])

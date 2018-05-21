@@ -1,6 +1,3 @@
-Check memory leaks in client after branch implementation (server side already
-checked)
-
 Is the state file synchronization after xa_start really necessary? Can it be
 removed?
 
