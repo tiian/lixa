@@ -1024,6 +1024,8 @@ extern "C" {
         if (ssy->asked_sync == 0)
             lixa_timer_start(&ssy->sync_delay);
         ssy->asked_sync++;
+        LIXA_TRACE(("status_sync_ask_sync: # of synchronization requested: "
+                    "%d\n", ssy->asked_sync));
     }
 
     

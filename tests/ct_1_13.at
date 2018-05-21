@@ -1,6 +1,12 @@
 AT_BANNER([Server side crash after msync (one phase commit)])
 
+# 2018-05-21 Ch.F. removed status_sync_ask_sync in server_xa_start_8
+# the first step of every sequence is now useless because server_xa_start_8
+# does not call status_sync_ask_sync; the other steps have a decremented value
+# for environment variable LIXA_CRASH_COUNT because the first crash after
+# server_xa_start_8 can't happen anymore
 AT_SETUP([CT/1.13/0.0 crash after 1-st msync])
+AT_CHECK([exit 77])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -16,6 +22,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=43 ; expo
 AT_CLEANUP
 
 AT_SETUP([CT/1.13/0.1 crash after 1-st msync])
+AT_CHECK([exit 77])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -40,7 +47,7 @@ xa_close/0
 ]])
 # this client forces server crash in server_manager_pollout; the client must 
 # stop with TX_FAIL
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=43 ; export LIXA_CRASH_COUNT=2 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh noreset start case0035 commit 5 -7], [5], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=43 ; export LIXA_CRASH_COUNT=1 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh reset start case0035 commit 5 -7], [5], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([CT/1.13/1.1 crash after 2-nd msync])
@@ -61,6 +68,7 @@ AT_CLEANUP
 AT_BANNER([Server side crash after msync (one phase rollback)])
 
 AT_SETUP([CT/1.13/2.0 crash after 1-st msync])
+AT_CHECK([exit 77])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -76,6 +84,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=43 ; expo
 AT_CLEANUP
 
 AT_SETUP([CT/1.13/2.1 crash after 1-st msync])
+AT_CHECK([exit 77])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -100,7 +109,7 @@ xa_close/0
 ]])
 # this client forces server crash in server_manager_pollout; the client must 
 # stop with TX_FAIL
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=43 ; export LIXA_CRASH_COUNT=2 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh noreset start case0035 rollback 5 -7], [5], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=43 ; export LIXA_CRASH_COUNT=1 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh reset start case0035 rollback 5 -7], [5], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([CT/1.13/3.1 crash after 2-nd msync])

@@ -1665,8 +1665,14 @@ int server_xa_start_8(struct thread_status_s *ts,
         /* prepare next protocol step */
         cs->last_verb_step.verb = lmo->header.pvs.verb;
         cs->last_verb_step.step = lmo->header.pvs.step;
-        /* the status file must be synchronized */
-        status_sync_ask_sync(&ts->status_sync);
+        /* 2018-05-21 Ch.F.
+         * This status file synchronization seems to be useless: no test case
+         * requires it.
+         * This comment will stay here for a long time: before re-activating it
+         * a clear need must be analyzed
+
+         status_sync_ask_sync(&ts->status_sync);
+        */
         /* update the Finite State Machine */
         if (LIXA_RC_OK != (ret_cod = server_fsm_send_message_and_wait(
                                &cs->fsm, lixa_session_get_sid(
