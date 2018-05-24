@@ -100,7 +100,6 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0038 ; lixa_test_exec.sh noreset none ca
 AT_CLEANUP
 AT_SETUP([XTA/8.1/3.1 automatic recovery])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
 # start the LIXA state server
 AT_CHECK([lixa_test_exec.sh noreset start true], [0], [ignore], [ignore])
 # start the XTA Application Program and suspend the transaction
@@ -154,7 +153,6 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0038 ; lixa_test_exec.sh noreset none ca
 AT_CLEANUP
 AT_SETUP([XTA/8.1/4.1 automatic recovery])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
 # start the LIXA state server
 AT_CHECK([lixa_test_exec.sh noreset start true], [0], [ignore], [ignore])
 # start the XTA Application Program and suspend the transaction
@@ -207,7 +205,6 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0038 ; lixa_test_exec.sh noreset none ca
 AT_CLEANUP
 AT_SETUP([XTA/8.1/5.1 automatic recovery])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([if test "$HAVE_ORACLE" = "no"; then exit 77; fi])
 # start the LIXA state server
 AT_CHECK([lixa_test_exec.sh noreset start true], [0], [ignore], [ignore])
 # start the XTA Application Program and suspend the transaction

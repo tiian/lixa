@@ -172,9 +172,15 @@ xta_transaction_manager_create_transaction(xta_transaction_manager_t *this)
                 THROW(NULL_OBJECT2);
             
             /* insert the transaction object in the hash map */
+#if GLIB_MAJOR_VERSION == 2
+# if GLIB_MINOR_VERSION >= 40
             if (!g_hash_table_insert(this->transactions, self, tx)) {
                 THROW(INTERNAL_ERROR);
             }
+# else
+            g_hash_table_insert(this->transactions, self, tx);
+# endif
+#endif
         } /* if (NULL == (tx = g_hash_table_lookup */
         
         THROW(NONE);
