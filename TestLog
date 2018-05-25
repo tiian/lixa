@@ -3,9 +3,15 @@ Date: 2018-05-24
 Configuration: --enable-crash --with-docbook --with-mysql --with-postgresql --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_12_1/
 Ubuntu 12.04	|x86_64	|virtual (KVM)	|2 vCPU *
 Ubuntu 14.04	|x86_64	|virtual (KVM)	|3 vCPU
+Ubuntu 16.04	|x86_64	|virtual (KVM)	|2 vCPU
+Ubuntu 18.04	|x86_64	|virtual (KVM)	|2 vCPU
+
+CentOS 7.5      |x86_64 |virtual (KVM)  |2 vCPU **
 
 * Configuration: --enable-crash --with-docbook --with-mysql --with-postgresql
+** centos-release-7-5.1804.el7.centos.2.x86_64 (rpm --query centos-release)
 
+------------------------------------------------------------------------------
 
 Release: 1.5.3 (Tester: Tiian; Test purpose: XTA)
 Date: 2018-04-13

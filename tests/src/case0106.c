@@ -73,6 +73,7 @@
  * 11:   superior branch / xta_transaction_rollback() generic error
  * 12:   subordinate branch / xta_transaction_rollback() generic error
  * 13:   subordinate branch / xta_transaction_commit() generic error
+ * 14:   xta_transaction_close() generic error
  */
 
 
@@ -771,7 +772,7 @@ void close_all_the_resources(void)
     if (rc != LIXA_RC_OK) {
         fprintf(stderr, "%s/%u| xta_transaction_close: returned %d\n",
                 pgm, pid, rc);
-        exit(1);
+        exit(14);
     }
 }
 

@@ -67,7 +67,7 @@ do
 	echo " ... PID $PID exited with RC=$RC"
 	for OKRC in "$@"
 	do
-		if "$RC" = "$OKRC"
+		if test "$RC" = "$OKRC"
 		then
 			echo "$OKRC is considered OK, forcing to value 0"
 			RC=0
