@@ -11,12 +11,12 @@ ABSTRACT:
 
 LIXA, acronym of LIbre XA, is an open source and free software Transaction
 Manager that implements:
-- the distributed transaction processing "XA specification" and
-  the "TX (transaction demarcation) specification" according to the
-  X/Open CAE Specification
 - XTA, XA Transaction API, an interface specifically designed to supply
   TXaaS (Transaction as a Service) features in a FaaS (Function as a Service)
   ecosystem.
+- the distributed transaction processing "XA specification" and
+  the "TX (transaction demarcation) specification" according to the
+  X/Open CAE Specification
 LIXA is a Transaction Manager but it's not a Transaction Monitor: this is the
 distinguishing feature of the project: it enables every application container,
 like a web server or a shell, to become an XA compliant application server.
@@ -57,20 +57,6 @@ for its donation to Emergency NGO, an international charity that promotes
 a culture of peace, solidarity and respect for human rights providing free, 
 high quality medical and surgical treatment to the victims of war, landmines 
 and poverty.
-
-
-
-*****************
-XTA SPECIAL NOTE:
-XA Transaction API (XTA) is a testing feature introduced since LIXA 1.5.0 and
-it's not yet ready for a production environment: the development phase has not
-been completed and the code can still contains severe bugs.
-If you don't like to test XTA, you can disable it at configure time using:
-./configure --disable-xta .....
-Please use Github issue tracking https://github.com/tiian/lixa/issues or
-SourceForge ticketing system https://sourceforge.net/p/lixa/bug/ to document
-XTA possible bugs.
-Example programs are available in doc/examples/xta
 
 
 

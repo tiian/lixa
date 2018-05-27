@@ -81,6 +81,64 @@ extern "C" {
 
 
 
+    /**
+     * Check if LIXA has been configured to support IBM DB2 Resource Manager
+     * @return a boolean value
+     */
+    int lixa_config_have_ibmdb2(void);
+
+
+
+    /**
+     * Check if LIXA has been configured to support MySQL or MariaDB Resource
+     * Manager
+     * @return a boolean value
+     */
+    int lixa_config_have_mysql(void);
+
+
+
+    /**
+     * Check if LIXA has been configured to support Oracle Database Resource
+     * Manager
+     * @return a boolean value
+     */
+    int lixa_config_have_oracle(void);
+
+
+
+    /**
+     * Check if LIXA has been configured to support PostgreSQL Resource Manager
+     * @return a boolean value
+     */
+    int lixa_config_have_postgresql(void);
+
+
+
+    /**
+     * Check if LIXA has been configured to support IBM MQ/WebSphere MQ
+     * Resource Manager
+     * @return a boolean value
+     */
+    int lixa_config_have_webspheremq(void);
+
+
+
+    /**
+     * Check if LIXA has been configured to support IBM DB2 Resource Manager
+     * @return a boolean value
+     */
+    int lixa_config_have_webspheremq_etc(void);
+
+
+
+    /**
+     * Check if LIXA has been configured to support IBM DB2 Resource Manager
+     * @return a boolean value
+     */
+    int lixa_config_have_webspheremq_srv(void);
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

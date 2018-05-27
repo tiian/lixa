@@ -4,16 +4,28 @@
     <title>Why should I use LIXA project?</title>
     <para>
       LIXA project allows you to develop Application Programs that perform
-      two phase commit transactions against two ore more Resource Managers.
+      <emphasis>two phase commit transactions</emphasis> using multiple
+      Resource Managers.
       Two phase commit is a transactional protocol designed to 
       guarantee <acronym>ACID</acronym> (Atomicity, Consistency,
       Isolation, Durability) transactionality.
-      XA specification is not the only two phase commit protocol implementation
-      but it is probably the best known and widespread. For a detailed
-      explanation please refer to <citation>RefModel</citation>.
+    </para>
+    <para>
+      LIXA supports different programming APIs and different programming
+      models:
+      <itemizedlist mark='bullet'>
+	<listitem><para>XTA, XA Transaction API, an original API implemented
+	by LIXA to provide two phase commit transactions for micro services
+	and/or serverless oriented applications</para></listitem>
+	<listitem><para>TX, a standard developed by X/Open in 1995</para>
+	</listitem>
+      </itemizedlist>      
     </para>
   </section>
   <warning>
+    <para>
+      <emphasis>It applies to XA/TX programming model only.</emphasis>
+    </para>
     <para>
       The reference model (<citation>RefModel</citation>) technical guide
       available on the <trademark>Open Group</trademark> web site is more
@@ -43,8 +55,8 @@
     </para>
   </warning>
   <note>
-    As an exception of the above warning, LIXA provides an alternative
-    implementation of the following concepts:
+    The above warning does not applies to XTA programming model, because it
+    provides an alternative implementation of the following concepts:
       <itemizedlist mark='bullet'>
 	<listitem><para>Superior Node</para></listitem>
 	<listitem><para>Subordinate Node</para></listitem>
@@ -64,7 +76,7 @@
       architecture choices that are no more actual.
     </para>
     <para>
-      As an alternative to TX, LIXA project provides XTA (XA Transactional
+      For modern applications, the LIXA project provides XTA (XA Transactional
       API)
       <footnote><para>
 	See <xref linkend="Development_XTA"/> for more information on XTA.
@@ -115,6 +127,16 @@
       Manager, while in the C language arena it is not easy to find out one.
     </para>
     <section>
+      <title>LIXA behavior when XTA is used to develop applications</title>
+      <para>
+	The LIXA project implements a distributed Transaction Manager that your
+	Application Programs can use to coordinate a distributed transaction
+	among two or more Application Programs in execution on different
+	systems. See <xref linkend="Development_XTA"/> for more information
+	about XTA.
+      </para>
+    </section>
+    <section>
       <title>LIXA behavior when the TX Transaction Demarcation Specification
       is used to develop applications</title>
       <para>
@@ -124,21 +146,15 @@
 	  <listitem><para>from a C application launched from shell or via CGI
 	  inside a web server</para></listitem>
 	  <listitem><para>from a COBOL application launched from shell</para></listitem>
-	  <listitem><para>from a scripting language application<footnote><para>You must wrap the TX C API to be able to use it from Perl, PHP, Python, Ruby...</para></footnote>.</para></listitem>
+	  <listitem>
+	    <para>from a scripting language application<footnote>
+	    <para>You must wrap the TX C API to be able to use it from Perl,
+	    PHP, Python, Ruby...</para></footnote>.</para>
+	  </listitem>
 	</itemizedlist>
 	With the aid of the LIXA Transaction Manager potentially any web server
 	can be converted in an Application Server with two phase commit
 	support.
-      </para>
-    </section>
-    <section>
-      <title>LIXA behavior when XTA is used to develop applications</title>
-      <para>
-	The LIXA project implements a distributed Transaction Manager that your
-	Application Programs can use to coordinate a distributed transaction
-	among two or more Application Programs in execution on different
-	systems. See <xref linkend="Development_XTA"/> for more information
-	about XTA.
       </para>
     </section>
   </section>
@@ -156,6 +172,14 @@
       workloads while the embeddable property is necessary to avoid conflicts
       with the process and thread management feature of any Transaction 
       Monitors.
+    </para>
+    <para>
+      LIXA architecture when used in conjunction with XTA is explained in
+      <xref linkend="Development_XTA"/>.      
+    </para>
+    <para>
+      Generic LIXA architecture is explained in
+      <xref linkend="Configuration"/>
     </para>
   </section>
   <section>
