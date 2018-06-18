@@ -1,5 +1,7 @@
 LOG:
 
+           1.7.0 C++ API for XTA
+
 2018-05-27 1.6.0 First stable official version of XTA XA Transaction API
 		 This release is *NOT* compatible with previous ones: you can't
 		 mix 1.6.0 and previous versions in the same environment

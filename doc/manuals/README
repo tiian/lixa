@@ -6,6 +6,7 @@ sftp tiian@web.sourceforge.net
 cd /home/project-web/lixa/htdocs/lixa-doc
 put html/*.html html
 put images/*.png images
+put images/*.svg images
 put ext/html/*.html ext/html
 
 #########################################################################

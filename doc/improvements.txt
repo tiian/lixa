@@ -58,20 +58,42 @@ Another possible improvement of the current state server is the adoption of
 files dedicated to the redo log: it must be understood if memory mapping or
 standard write/fdatasync is the best solution for few records between two
 syncpoints.
+2018-06-18 The best option I have found till now is based on snapshots +
+journals. 3 snapshots (with msync like now) + 3 journals (with fdatasync) and
+a background thread used to avoid pauses during snapshotting (snapshots must be
+captured by the "just closed" state file, integrity is guaranteed by the
+journals).
 
 
 
-*** State file replacement ***
-State files could be replaced with standard key/value store, but the change
-must be accurately investigated.
-
-Rocksdb: http://rocksdb.org/
-It's embeddable: +++
-It's a full db with maintenance aspects like backup, garbage collection, etc: ---
-
-etcd: https://coreos.com/etcd/
-It's distributed (it uses Raft consensus protocol) and natively enable an high availability version of lixad: +++
-It's an additional tier with additional network latency and additional configuration and skills: ---
+*** High Availability ***
+After a lot of thinking about it, the best pattern aligned with LIXA
+architecture is a client based high availability: a client connect to many
+state servers in parallel and by mean of poll send and receive messages using
+concurrent TCP/IP streams. The total latency becomes the latency introduced by
+the slowest state server.
+Client logic must guarantee that the minimum number of requested state server
+reports exact the same answer. The state server set and the state server quorum
+are configured by the user.
+Some esamples:
+- 2/2: two state servers, both must be aligned
+- 3/2: three state servers, at least two must be aligned
+- 5/3: five state servers, at least three must be aligned
+Some necessary pre-requisites:
+- state servers must have a unique id, used by the client to check them
+- state server set must be registered by all the state servers and when 
+  necessary used by the client to decide
+Architecture plus:
+- LIXA can report to application program a failure related to high availability
+  when it happens, not when it's to late to take the best decision from the
+  application perspective
+Architecture minus:
+- LIXA client and servers must all stay in a low latency network; but even in
+  the case of a server/server propagation, the servers can't use an high
+  latency network
+- it genetates "a lot of" client/server network traffic (but it does not
+  generate server/server traffic), so basically no a big issue inside the same
+  datacenter
 
 
 

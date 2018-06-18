@@ -1,7 +1,7 @@
 How to publish XTA documentation on sourceforge:
 http://lixa.sourceforge.net/lixa-doc/xta/
 
-cd doc/api/xta/html
+cd lixa/doc/api/xta/C/html
 sftp tiian@web.sourceforge.net
 cd /home/project-web/lixa/htdocs/lixa-doc/xta
 put *
