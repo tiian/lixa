@@ -1,3 +1,6 @@
+if COMPILE_XTA_CPP
+  MAYBE_XTA_CPP = cpp
+endif
 if COMPILE_MYSQL_STUFF
   MAYBE_MYSQL_SOURCES = xta_mysql_xa_resource.c
   MAYBE_MYSQL_CPPFLAGS = @MYSQL_CPPFLAGS@ \
@@ -10,6 +13,9 @@ if COMPILE_POSTGRESQL_STUFF
 	-I$(top_srcdir)/src/client/switch/postgresql
 MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
 endif
+
+SUBDIRS = $(MAYBE_XTA_CPP)
+
 includedir = $(prefix)/include/xta
 include_HEADERS = xta.h xta_iface.h xta_init.h xta_transaction.h \
 	xta_transaction_manager.h xta_xid.h \

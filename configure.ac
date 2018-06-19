@@ -10,6 +10,7 @@ AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
 
 AC_PROG_CC
+AC_PROG_CXX
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_HEADER([src/client/lixa.h])
 AC_CONFIG_HEADER([src/xta/xta.h])
@@ -47,6 +48,7 @@ AC_CONFIG_FILES([
   src/client/switch/webspheremq/Makefile
   src/server/Makefile
   src/xta/Makefile
+  src/xta/cpp/Makefile
   tests/Makefile
   tests/atlocal
   tests/lixa-config.at
@@ -150,6 +152,9 @@ AC_ARG_ENABLE([trace],
         [_TRACE="no"], [_TRACE="yes"; CPPFLAGS="$CPPFLAGS -D_TRACE"] )
 
 AM_PROG_CC_C_O
+
+# Checking if C++ compiler is available
+AM_CONDITIONAL([COMPILE_XTA_CPP], [test "x$CXX" != "x"])
 
 # Checking pkg-config is available
 AC_CHECK_PROGS(PKG_CONFIG, [pkg-config], [])
