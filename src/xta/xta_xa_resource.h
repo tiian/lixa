@@ -95,13 +95,13 @@ extern "C" {
 
     /**
      * Initialize the common properties of XA Resources
-     * @param[in,out] this : XA Resource object
+     * @param[in,out] xa_resource : XA Resource object
      * @param[in] native : TRUE, the XA Resource uses an XA native
      *                     interface <br>
      *                     FALSE, the XA Resource uses an XTA interface
      * @return a reason code
      */
-    int xta_xa_resource_init(xta_xa_resource_t *this,
+    int xta_xa_resource_init(xta_xa_resource_t *xa_resource,
                              int native);
     
 
@@ -110,40 +110,40 @@ extern "C" {
      * Clean the properties of a XA Resource; this function must be
      * called after @ref xta_xa_resource_init during object disposition
      * to avoid memory leaks
-     * @param[in,out] this : XA Resource object
+     * @param[in,out] xa_resource : XA Resource object
      */    
-    void xta_xa_resource_clean(xta_xa_resource_t *this);
+    void xta_xa_resource_clean(xta_xa_resource_t *xa_resource);
 
 
 
     /**
      * Return a reference (a pointer) to the configuration parameters of the
      * resource.
-     * @param[in] this : XA Resource object
+     * @param[in] xa_resource : XA Resource object
      * @return a pointer to the resource configuration record
      */
     const xta_xa_resource_config_t *xta_xa_resource_get_config(
-        const xta_xa_resource_t *this);
+        const xta_xa_resource_t *xa_resource);
     
 
 
     /**
      * Check if the XA Resource has been created dynamically or not
-     * @param[in] this : XA Resource object
+     * @param[in] xa_resource : XA Resource object
      * @return a boolean value
      */
     static inline int xta_xa_resource_is_dynamic(
-        const xta_xa_resource_t *this) { return this->dynamic; }
+        const xta_xa_resource_t *xa_resource) { return xa_resource->dynamic; }
 
 
 
     /**
      * Check if the XA Resouce uses a native XA interface or not
-     * @param[in] this : XA Resource object
+     * @param[in] xa_resource : XA Resource object
      * @return a boolean value
      */
     static inline int xta_xa_resource_is_native(
-        const xta_xa_resource_t *this) { return this->native; }
+        const xta_xa_resource_t *xa_resource) { return xa_resource->native; }
      
 
     
@@ -151,11 +151,11 @@ extern "C" {
      * This call back method is invoked by a Transaction Manager when an
      * Application Program enlists an XA Resource to a Transaction Manager.
      * The TM calls back the XA Resource to notify it has been registered.
-     * @param[in,out] this : XA Resource object
+     * @param[in,out] xa_resource : XA Resource object
      * @param[in] tx : XA Transaction
      * @return a reason code
      */    
-    int xta_xa_resource_enlisted(xta_xa_resource_t *this,
+    int xta_xa_resource_enlisted(xta_xa_resource_t *xa_resource,
                                  const xta_transaction_t *tx);
 
 
@@ -166,12 +166,12 @@ extern "C" {
      * previously seen by the resource manager. If @ref TMRESUME is specified,
      * the start applies to resuming a suspended transaction specified in the
      * parameter xid.
-     * @param[in,out] this : resource object
+     * @param[in,out] xa_resource : resource object
      * @param[in] xid : transaction identifier object
      * @param[in] flag : one of @ref TMNOFLAGS, @ref TMJOIN, or @ref TMRESUME
      * @return a reason code
      */
-    int xta_xa_resource_start(xta_xa_resource_t *this,
+    int xta_xa_resource_start(xta_xa_resource_t *xa_resource,
                               const xta_xid_t *xid,
                               long flag);
     
@@ -189,12 +189,12 @@ extern "C" {
      * resource manager may mark the transaction as rollback-only.
      * If @ref TMSUCCESS is specified, the portion of work has completed
      * successfully.
-     * @param[in,out] this : resource object
+     * @param[in,out] xa_resource : resource object
      * @param[in] xid : transaction identifier object
      * @param[in] flag : one of @ref TMSUCCESS, @ref TMFAIL, or @ref TMSUSPEND
      * @return a reason code
      */
-    int xta_xa_resource_end(xta_xa_resource_t *this,
+    int xta_xa_resource_end(xta_xa_resource_t *xa_resource,
                             const xta_xid_t *xid,
                             long flag);
 
@@ -203,25 +203,25 @@ extern "C" {
     /**
      * Ask the resource manager to prepare for a transaction commit of the
      * transaction specified in xid.
-     * @param[in,out] this : resource object
+     * @param[in,out] xa_resource : resource object
      * @param[in] xid : transaction identifier object
      * @return a reason code
      */
-    int xta_xa_resource_prepare(xta_xa_resource_t *this,
+    int xta_xa_resource_prepare(xta_xa_resource_t *xa_resource,
                                 const xta_xid_t *xid);
 
     
     
     /**
      * Commits the global transaction specified by xid.
-     * @param[in,out] this : resource object
+     * @param[in,out] xa_resource : resource object
      * @param[in] xid : transaction identifier object
      * @param[in] one_phase : if true, the resource manager should use a
      *                        one-phase commit protocol to commit the work
      *                        done on behalf of xid
      * @return a reason code
      */
-    int xta_xa_resource_commit(xta_xa_resource_t *this,
+    int xta_xa_resource_commit(xta_xa_resource_t *xa_resource,
                                const xta_xid_t *xid,
                                int one_phase);
     

@@ -1,4 +1,4 @@
-XTA: XA Transaction API
+# XTA: XA Transaction API
 
 XTA is designed to provide TxaaS (Transaction as a Service) support for the
 FaaS (Function as a Service) computing model.

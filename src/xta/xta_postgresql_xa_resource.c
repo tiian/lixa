@@ -46,6 +46,9 @@
 
 
 
+/**
+ * Interface with XA function pointers
+ */
 const static struct xta_iface_s xta_postgresql_iface = {
     "XTA PostgreSQL",
     TMNOFLAGS,
@@ -105,7 +108,7 @@ xta_postgresql_xa_resource_t *xta_postgresql_xa_resource_new(
 
 
 
-void xta_postgresql_xa_resource_delete(xta_postgresql_xa_resource_t *this)
+void xta_postgresql_xa_resource_delete(xta_postgresql_xa_resource_t *xa_resource)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -113,9 +116,9 @@ void xta_postgresql_xa_resource_delete(xta_postgresql_xa_resource_t *this)
     LIXA_TRACE(("xta_postgresql_xa_resource_delete\n"));
     TRY {
         /* clean the object before releasing */
-        xta_postgresql_xa_resource_clean(this);
+        xta_postgresql_xa_resource_clean(xa_resource);
         /* release memory allocated for the object */
-        g_free(this);
+        g_free(xa_resource);
         
         THROW(NONE);
     } CATCH {
@@ -135,7 +138,7 @@ void xta_postgresql_xa_resource_delete(xta_postgresql_xa_resource_t *this)
 
 
 int xta_postgresql_xa_resource_init(
-    xta_postgresql_xa_resource_t *this,
+    xta_postgresql_xa_resource_t *xa_resource,
     PGconn *connection, const char *name, const char *open_info)
 {
     enum Exception { XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR
@@ -146,17 +149,17 @@ int xta_postgresql_xa_resource_init(
     TRY {
         /* initialize "base class" (xta_acquired_xa_resource_t) properties */
         if (LIXA_RC_OK != (ret_cod = xta_acquired_xa_resource_init(
-                               (xta_acquired_xa_resource_t *)this,
+                               (xta_acquired_xa_resource_t *)xa_resource,
                                &xta_postgresql_iface,
                                name, open_info)))
             THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
         /* set connection */
-        this->connection = connection;
+        xa_resource->connection = connection;
         /* set resource interface */
-        lixa_iface_set_xta(&this->xa_resource.act_rsrmgr_config.lixa_iface,
-                           &xta_postgresql_iface, (xta_xa_resource_t *)this);
+        lixa_iface_set_xta(&xa_resource->xa_resource.act_rsrmgr_config.lixa_iface,
+                           &xta_postgresql_iface, (xta_xa_resource_t *)xa_resource);
         /* reset status */
-        memset(&this->lssr, 0, sizeof(struct lixa_sw_status_rm_s));
+        memset(&xa_resource->lssr, 0, sizeof(struct lixa_sw_status_rm_s));
         
         THROW(NONE);
     } CATCH {
@@ -177,7 +180,7 @@ int xta_postgresql_xa_resource_init(
 
 
 
-void xta_postgresql_xa_resource_clean(xta_postgresql_xa_resource_t *this)
+void xta_postgresql_xa_resource_clean(xta_postgresql_xa_resource_t *xa_resource)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -185,10 +188,10 @@ void xta_postgresql_xa_resource_clean(xta_postgresql_xa_resource_t *this)
     LIXA_TRACE(("xta_postgresql_xa_resource_clean\n"));
     TRY {
         /* clean PostgreSQL XA function pointers */
-        this->xa_resource.act_rsrmgr_config.lixa_iface.std = NULL;
+        xa_resource->xa_resource.act_rsrmgr_config.lixa_iface.std = NULL;
         /* clean "base class" (xta_acquired_xa_resource_t) properties */
         xta_acquired_xa_resource_clean(
-            (xta_acquired_xa_resource_t *)this);
+            (xta_acquired_xa_resource_t *)xa_resource);
         
         THROW(NONE);
     } CATCH {

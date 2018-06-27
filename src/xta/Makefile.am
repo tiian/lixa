@@ -14,7 +14,7 @@ if COMPILE_POSTGRESQL_STUFF
 MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
 endif
 
-SUBDIRS = $(MAYBE_XTA_CPP)
+SUBDIRS = . $(MAYBE_XTA_CPP)
 
 includedir = $(prefix)/include/xta
 include_HEADERS = xta.h xta_iface.h xta_init.h xta_transaction.h \

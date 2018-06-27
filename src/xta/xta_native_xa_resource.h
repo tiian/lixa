@@ -87,7 +87,7 @@ extern "C" {
     
     /**
      * Initialize the common properties of Native XA Resources
-     * @param[in,out] this : Native XA Resource object
+     * @param[in,out] xa_resource : Native XA Resource object
      * @param[in] rmid : Resource Manager unique identifier within the thread
      *                   of control. This identifier is even used to
      *                   control the behavior of the constructor: <BR>
@@ -120,7 +120,7 @@ extern "C" {
      * @return a reason code
      */
     int xta_native_xa_resource_init(
-        xta_native_xa_resource_t *this,
+        xta_native_xa_resource_t *xa_resource,
         int rmid, const xta_transaction_manager_config_t *config,
         const char *name, const char *switch_file,
         const char *open_info, const char *close_info);
@@ -129,9 +129,9 @@ extern "C" {
     
     /**
      * Delete an object that represent a native XA Resource
-     * @param[in] this : native XA Resource
+     * @param[in] xa_resource : native XA Resource
      */
-    void xta_native_xa_resource_delete(xta_native_xa_resource_t *this);
+    void xta_native_xa_resource_delete(xta_native_xa_resource_t *xa_resource);
     
 
 
@@ -139,9 +139,9 @@ extern "C" {
      * Clean the properties of a Native XA Resource; this function must be
      * called after @ref xta_native_xa_resource_init during object disposition
      * to avoid memory leaks
-     * @param[in,out] this : Native XA Resource object
+     * @param[in,out] xa_resource : Native XA Resource object
      */
-    void xta_native_xa_resource_clean(xta_native_xa_resource_t *this);
+    void xta_native_xa_resource_clean(xta_native_xa_resource_t *xa_resource);
 
     
 

@@ -62,13 +62,6 @@ typedef struct {
 
 
 
-/**
- * Interface with XA function pointers
- */
-const static struct xta_iface_s xta_postgresql_iface;
-
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -93,15 +86,16 @@ extern "C" {
 
     /**
      * Delete an object that represent a PostgreSQL XA Resource
-     * @param[in] this : PostgreSQL XA Resource
+     * @param[in] xa_resource : PostgreSQL XA Resource
      */
-    void xta_postgresql_xa_resource_delete(xta_postgresql_xa_resource_t *this);
+    void xta_postgresql_xa_resource_delete(
+        xta_postgresql_xa_resource_t *xa_resource);
     
     
 
     /**
      * Initialize the propeties of a PostgreSQL XA resource
-     * @param[in,out] this : PostgreSQL XA Resource object
+     * @param[in,out] xa_resource : PostgreSQL XA Resource object
      * @param[in] connection : to PostgreSQL already opened by the application
      *            program
      * @param[in] name : unique identifier of the resource
@@ -112,7 +106,7 @@ extern "C" {
      * @return a new object or NULL in the event of error
      */
     int xta_postgresql_xa_resource_init(
-        xta_postgresql_xa_resource_t *this,
+        xta_postgresql_xa_resource_t *xa_resource,
         PGconn *connection, const char *name, const char *open_info);
 
     
@@ -121,9 +115,10 @@ extern "C" {
      * Clean the properties of a PostgreSQL XA Resource; this function
      * must be called after @ref xta_postgresql_xa_resource_init during
      * object deletion to avoid memory leaks
-     * @param[in,out] this : PostgreSQL XA Resource object
+     * @param[in,out] xa_resource : PostgreSQL XA Resource object
      */
-    void xta_postgresql_xa_resource_clean(xta_postgresql_xa_resource_t *this);
+    void xta_postgresql_xa_resource_clean(
+        xta_postgresql_xa_resource_t *xa_resource);
 
     
     

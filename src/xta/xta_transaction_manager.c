@@ -82,7 +82,7 @@ xta_transaction_manager_t *xta_transaction_manager_new(void)
 
 
 
-void xta_transaction_manager_delete(xta_transaction_manager_t *this)
+void xta_transaction_manager_delete(xta_transaction_manager_t *tm)
 {
     enum Exception { CLIENT_UNCONFIG_ERROR
                      , NONE } excp;
@@ -94,16 +94,16 @@ void xta_transaction_manager_delete(xta_transaction_manager_t *this)
         if (LIXA_RC_OK != (ret_cod = client_unconfig(&global_ccc, TRUE)))
             THROW(CLIENT_UNCONFIG_ERROR);
         /* destroy transaction objects if any */
-        if (NULL != this->transactions) {
-            g_hash_table_destroy(this->transactions);
-            this->transactions = NULL;
-        } /* if (NULL != this->transactions) */
+        if (NULL != tm->transactions) {
+            g_hash_table_destroy(tm->transactions);
+            tm->transactions = NULL;
+        } /* if (NULL != tm->transactions) */
         
         /* clear the synchronization mutex */
-        g_mutex_clear(&this->mutex);
+        g_mutex_clear(&tm->mutex);
         
         /* destroy the object itself */
-        g_free(this);
+        g_free(tm);
         
         THROW(NONE);
     } CATCH {
@@ -132,7 +132,7 @@ xta_transaction_manager_get_config(void) {
 
 
 xta_transaction_t *
-xta_transaction_manager_create_transaction(xta_transaction_manager_t *this)
+xta_transaction_manager_create_transaction(xta_transaction_manager_t *tm)
 {
     enum Exception { NULL_OBJECT1
                      , G_HASH_TABLE_NEW_ERROR
@@ -147,23 +147,23 @@ xta_transaction_manager_create_transaction(xta_transaction_manager_t *this)
         GThread *self = g_thread_self();
         
         /* check object reference */
-        if (NULL == this)
+        if (NULL == tm)
             THROW(NULL_OBJECT1);
         
         LIXA_TRACE(("xta_transaction_manager_create_transaction: "
                     "locking mutex...\n"));
-        g_mutex_lock(&this->mutex);
+        g_mutex_lock(&tm->mutex);
 
         /* check if the hash table as been already created */
-        if (NULL == this->transactions) {
-            if (NULL == (this->transactions = g_hash_table_new_full(
+        if (NULL == tm->transactions) {
+            if (NULL == (tm->transactions = g_hash_table_new_full(
                              NULL, NULL, NULL,
                              (GDestroyNotify)xta_transaction_delete)))
                 THROW(G_HASH_TABLE_NEW_ERROR);
-        } /* if (NULL == this->transactions) */
+        } /* if (NULL == tm->transactions) */
         
         /* look for transaction in hash table */
-        if (NULL == (tx = g_hash_table_lookup(this->transactions, self))) {
+        if (NULL == (tx = g_hash_table_lookup(tm->transactions, self))) {
             LIXA_TRACE(("xta_transaction_manager_create_transaction: there is "
                         "not a started transactions for this thread, "
                         "starting a new one...\n"));
@@ -174,11 +174,11 @@ xta_transaction_manager_create_transaction(xta_transaction_manager_t *this)
             /* insert the transaction object in the hash map */
 #if GLIB_MAJOR_VERSION == 2
 # if GLIB_MINOR_VERSION >= 40
-            if (!g_hash_table_insert(this->transactions, self, tx)) {
+            if (!g_hash_table_insert(tm->transactions, self, tx)) {
                 THROW(INTERNAL_ERROR);
             }
 # else
-            g_hash_table_insert(this->transactions, self, tx);
+            g_hash_table_insert(tm->transactions, self, tx);
 # endif
 #endif
         } /* if (NULL == (tx = g_hash_table_lookup */
@@ -209,7 +209,7 @@ xta_transaction_manager_create_transaction(xta_transaction_manager_t *this)
             xta_transaction_delete(tx);
         /* clear mutex */
         if (NULL_OBJECT1 < excp) {
-            g_mutex_unlock(&this->mutex);
+            g_mutex_unlock(&tm->mutex);
             LIXA_TRACE(("xta_transaction_manager_create_transaction: "
                         "mutex unlocked\n"));
         }

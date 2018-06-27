@@ -45,7 +45,7 @@
 
 
 
-int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
+int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *xa_resource,
                                   const struct xta_iface_s *iface,
                                   const char *name,
                                   const char *open_info)
@@ -62,10 +62,10 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
     
     LIXA_TRACE(("xta_acquired_xa_resource_init\n"));
     TRY {
-        if (NULL == this)
+        if (NULL == xa_resource)
             THROW(NULL_OBJECT1);
         /* check the object has not already been initialized */
-        if (NULL != this->xa_resource.rsrmgr_config.name)
+        if (NULL != xa_resource->xa_resource.rsrmgr_config.name)
             THROW(OBJ_CORRUPTED);
         /* interface can't be NULL */
         if (NULL == iface)
@@ -88,16 +88,16 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
          * xa_open, xa_close
          */
         if (LIXA_RC_OK != (ret_cod = xta_xa_resource_init(
-                               (xta_xa_resource_t *)this, FALSE)))
+                               (xta_xa_resource_t *)xa_resource, FALSE)))
             THROW(XTA_XA_RESOURCE_INIT_ERROR);
         /* set object properties */
-        this->iface = iface;
-        if (NULL == (this->xa_resource.rsrmgr_config.name =
+        xa_resource->iface = iface;
+        if (NULL == (xa_resource->xa_resource.rsrmgr_config.name =
                      xmlCharStrdup(name)))
             THROW(XML_STRDUP_ERROR);
-        strncpy(this->xa_resource.rsrmgr_config.xa_open_info,
+        strncpy(xa_resource->xa_resource.rsrmgr_config.xa_open_info,
                 open_info, MAXINFOSIZE);
-        this->xa_resource.rsrmgr_config.xa_open_info[MAXINFOSIZE-1] = '\0';
+        xa_resource->xa_resource.rsrmgr_config.xa_open_info[MAXINFOSIZE-1] = '\0';
             
         THROW(NONE);
     } CATCH {
@@ -134,7 +134,7 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
 
 
 
-void xta_acquired_xa_resource_clean(xta_acquired_xa_resource_t *this)
+void xta_acquired_xa_resource_clean(xta_acquired_xa_resource_t *xa_resource)
 {
     enum Exception { NULL_OBJECT
                      , NONE } excp;
@@ -142,13 +142,13 @@ void xta_acquired_xa_resource_clean(xta_acquired_xa_resource_t *this)
     
     LIXA_TRACE(("xta_acquired_xa_resource_clean\n"));
     TRY {
-        if (NULL == this)
+        if (NULL == xa_resource)
             THROW(NULL_OBJECT);
-        if (NULL != this->xa_resource.rsrmgr_config.name) {
-            g_free(this->xa_resource.rsrmgr_config.name);
-            this->xa_resource.rsrmgr_config.name = NULL;
+        if (NULL != xa_resource->xa_resource.rsrmgr_config.name) {
+            g_free(xa_resource->xa_resource.rsrmgr_config.name);
+            xa_resource->xa_resource.rsrmgr_config.name = NULL;
         }
-        this->xa_resource.rsrmgr_config.xa_open_info[0] = '\0';
+        xa_resource->xa_resource.rsrmgr_config.xa_open_info[0] = '\0';
         
         THROW(NONE);
     } CATCH {

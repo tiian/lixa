@@ -117,36 +117,36 @@ extern "C" {
 
     /**
      * Delete a Transaction Identifier object
-     * @param[in] this : xid object to delete
+     * @param[in] xid object to delete
      */
-    void xta_xid_delete(xta_xid_t *this);
+    void xta_xid_delete(xta_xid_t *xid);
 
 
 
     /**
      * Retrieve the transaction ID in the XA standard format
-     * @param[in] this : xid object
+     * @param[in] xid object
      * @return a reference to the XA representation of the transaction id
      */
-    const XID *xta_xid_get_xa_xid(xta_xid_t *this);
+    const XID *xta_xid_get_xa_xid(xta_xid_t *xid);
 
 
 
     /**
      * Convert the transaction ID to an ASCII string
-     * @param[in] this xid object
+     * @param[in] xid object
      * @return a string that must be released using free() function by the
      *         caller
      */
-    char *xta_xid_to_string(const xta_xid_t *this);
+    char *xta_xid_to_string(const xta_xid_t *xid);
 
 
 
     /**
      * Reset a Transaction identifier object
-     * @param[in,out] this xid object to delete
+     * @param[in,out] xid object to delete
      */
-    void xta_xid_reset(xta_xid_t *this);
+    void xta_xid_reset(xta_xid_t *xid);
 
 
     

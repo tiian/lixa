@@ -139,7 +139,7 @@ xta_native_xa_resource_t *xta_native_xa_resource_new_by_rmid(
 
 
 
-void xta_native_xa_resource_delete(xta_native_xa_resource_t *this)
+void xta_native_xa_resource_delete(xta_native_xa_resource_t *xa_resource)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -147,9 +147,9 @@ void xta_native_xa_resource_delete(xta_native_xa_resource_t *this)
     LIXA_TRACE(("xta_native_xa_resource_delete\n"));
     TRY {
         /* dispose object content */
-        xta_native_xa_resource_clean(this);
+        xta_native_xa_resource_clean(xa_resource);
         /* release memory allocated for the object */
-        g_free(this);
+        g_free(xa_resource);
         
         THROW(NONE);
     } CATCH {
@@ -169,7 +169,7 @@ void xta_native_xa_resource_delete(xta_native_xa_resource_t *this)
 
 
 int xta_native_xa_resource_init(
-    xta_native_xa_resource_t *this,
+    xta_native_xa_resource_t *xa_resource,
     int rmid, const xta_transaction_manager_config_t *config, const char *name,
     const char *switch_file, const char *open_info, const char *close_info)
 {
@@ -185,15 +185,15 @@ int xta_native_xa_resource_init(
     
     LIXA_TRACE(("xta_native_xa_resource_init\n"));
     TRY {
-        if (NULL == this)
+        if (NULL == xa_resource)
             THROW(NULL_OBJECT);
         /* call parent initializator */
         if (LIXA_RC_OK != (ret_cod = xta_xa_resource_init(
-                               (xta_xa_resource_t *)this, TRUE)))
+                               (xta_xa_resource_t *)xa_resource, TRUE)))
             THROW(XA_RESOURCE_INIT_ERROR);
         if (rmid < 0) {
             /* rmid < 0: this is a dynamic definition */
-            this->xa_resource.dynamic = TRUE;
+            xa_resource->xa_resource.dynamic = TRUE;
             if (NULL == name || NULL == switch_file || NULL == open_info ||
                 NULL == close_info)
                 THROW(INVALID_OPTION);
@@ -210,40 +210,40 @@ int xta_native_xa_resource_init(
                             MAXINFOSIZE));
             } /* if (strlen(close_info) >= MAXINFOSIZE) */
             /* duplicate resource name */
-            if (NULL == (this->xa_resource.rsrmgr_config.name =
+            if (NULL == (xa_resource->xa_resource.rsrmgr_config.name =
                          xmlCharStrdup(name)))
                 THROW(XML_STRDUP_ERROR1);
             /* duplicate resource switch_file (path) */
-            if (NULL == (this->xa_resource.rsrmgr_config.switch_file =
+            if (NULL == (xa_resource->xa_resource.rsrmgr_config.switch_file =
                          xmlCharStrdup(switch_file)))
                 THROW(XML_STRDUP_ERROR2);
             /* copy open_info */
-            strncpy(this->xa_resource.rsrmgr_config.xa_open_info, open_info,
+            strncpy(xa_resource->xa_resource.rsrmgr_config.xa_open_info, open_info,
                     MAXINFOSIZE);
-            this->xa_resource.rsrmgr_config.xa_open_info[MAXINFOSIZE-1] =
+            xa_resource->xa_resource.rsrmgr_config.xa_open_info[MAXINFOSIZE-1] =
                 '\0';
             /* copy close_info */
-            strncpy(this->xa_resource.rsrmgr_config.xa_close_info, close_info,
+            strncpy(xa_resource->xa_resource.rsrmgr_config.xa_close_info, close_info,
                     MAXINFOSIZE);
-            this->xa_resource.rsrmgr_config.xa_close_info[MAXINFOSIZE-1] =
+            xa_resource->xa_resource.rsrmgr_config.xa_close_info[MAXINFOSIZE-1] =
                 '\0';
             /* load the switch file for the resource manager */
             if (LIXA_RC_OK != (ret_cod = client_config_load_switch_file(
-                                   &this->xa_resource.act_rsrmgr_config,
+                                   &xa_resource->xa_resource.act_rsrmgr_config,
                                    TRUE)))
                 THROW(CLIENT_CONFIG_LOAD_SWITCH_FILE_ERROR);
             LIXA_TRACE(("xta_native_xa_resource_init: initialized resource "
                         "name='%s', switch_file='%s', xa_open_info='%s', "
                         "xa_close_info='%s'\n",
-                        this->xa_resource.rsrmgr_config.name,
-                        this->xa_resource.rsrmgr_config.switch_file,
-                        this->xa_resource.rsrmgr_config.xa_open_info,
-                        this->xa_resource.rsrmgr_config.xa_close_info));
+                        xa_resource->xa_resource.rsrmgr_config.name,
+                        xa_resource->xa_resource.rsrmgr_config.switch_file,
+                        xa_resource->xa_resource.rsrmgr_config.xa_open_info,
+                        xa_resource->xa_resource.rsrmgr_config.xa_close_info));
         } else {
             struct act_rsrmgr_config_s *act_rsrmgr;
             /* rmid >= 0: get the properties from global configuration that
              * has been loaded by xta_transaction_manager_new() */
-            this->xa_resource.dynamic = FALSE;
+            xa_resource->xa_resource.dynamic = FALSE;
             if (rmid >=
                 ((client_config_coll_t *)config)->actconf.rsrmgrs->len) {
                 LIXA_TRACE(("xta_native_xa_resource_init: rmid=%d is out of "
@@ -256,7 +256,7 @@ int xta_native_xa_resource_init(
                 ((client_config_coll_t *)config)->actconf.rsrmgrs,
                 struct act_rsrmgr_config_s, rmid);
             /* copy it locally to the resource object */
-            this->xa_resource.act_rsrmgr_config = *act_rsrmgr;
+            xa_resource->xa_resource.act_rsrmgr_config = *act_rsrmgr;
         }
         
         THROW(NONE);
@@ -293,7 +293,7 @@ int xta_native_xa_resource_init(
 
 
 
-void xta_native_xa_resource_clean(xta_native_xa_resource_t *this)
+void xta_native_xa_resource_clean(xta_native_xa_resource_t *xa_resource)
 {
     enum Exception { CLIENT_CONFIG_UNLOAD_SWITCH_FILE_ERROR
                      , NONE } excp;
@@ -302,31 +302,32 @@ void xta_native_xa_resource_clean(xta_native_xa_resource_t *this)
     LIXA_TRACE(("xta_native_xa_resource_clean\n"));
     TRY {
         /* clean properties only for dynamically created resources */
-        if (this->xa_resource.dynamic) {
+        if (xa_resource->xa_resource.dynamic) {
             /* clean resource name */
-            if (NULL != this->xa_resource.rsrmgr_config.name) {
-                g_free(this->xa_resource.rsrmgr_config.name);
-                this->xa_resource.rsrmgr_config.name = NULL;
+            if (NULL != xa_resource->xa_resource.rsrmgr_config.name) {
+                g_free(xa_resource->xa_resource.rsrmgr_config.name);
+                xa_resource->xa_resource.rsrmgr_config.name = NULL;
             }
             /* clean switch_file */
-            if (NULL != this->xa_resource.rsrmgr_config.switch_file) {
-                g_free(this->xa_resource.rsrmgr_config.switch_file);
-                this->xa_resource.rsrmgr_config.switch_file = NULL;
+            if (NULL != xa_resource->xa_resource.rsrmgr_config.switch_file) {
+                g_free(xa_resource->xa_resource.rsrmgr_config.switch_file);
+                xa_resource->xa_resource.rsrmgr_config.switch_file = NULL;
             }
             /* clean xa_open_info and xa_close_info */
-            this->xa_resource.rsrmgr_config.xa_open_info[0] = '\0';
-            this->xa_resource.rsrmgr_config.xa_close_info[0] = '\0';
+            xa_resource->xa_resource.rsrmgr_config.xa_open_info[0] = '\0';
+            xa_resource->xa_resource.rsrmgr_config.xa_close_info[0] = '\0';
             /* clean pointer from complete to partial structure */
-            this->xa_resource.act_rsrmgr_config.generic = NULL;
+            xa_resource->xa_resource.act_rsrmgr_config.generic = NULL;
             /* unload module */
-            if (NULL != this->xa_resource.act_rsrmgr_config.module) {
-                if (LIXA_RC_OK != (ret_cod = client_config_unload_switch_file(
-                                       &this->xa_resource.act_rsrmgr_config)))
+            if (NULL != xa_resource->xa_resource.act_rsrmgr_config.module) {
+                if (LIXA_RC_OK != (
+                        ret_cod = client_config_unload_switch_file(
+                            &xa_resource->xa_resource.act_rsrmgr_config)))
                     THROW(CLIENT_CONFIG_UNLOAD_SWITCH_FILE_ERROR);
             }
-        } /* if (this->dynamic) */
+        } /* if (xa_resource->dynamic) */
         /* clean "base class" (xta_xa_resource_t) properties */
-        xta_xa_resource_clean((xta_xa_resource_t *)this);
+        xta_xa_resource_clean((xta_xa_resource_t *)xa_resource);
         
         THROW(NONE);
     } CATCH {

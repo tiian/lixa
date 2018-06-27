@@ -82,7 +82,7 @@ host_triplet = @host@
 subdir = src/xta
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/xta.h.in $(top_srcdir)/depcomp $(include_HEADERS) \
-	$(noinst_HEADERS) README
+	$(noinst_HEADERS)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -229,7 +229,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = cpp
+DIST_SUBDIRS = . cpp
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -462,7 +462,7 @@ top_srcdir = @top_srcdir@
 @COMPILE_POSTGRESQL_STUFF_TRUE@	-I$(top_srcdir)/src/client/switch/postgresql
 
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
-SUBDIRS = $(MAYBE_XTA_CPP)
+SUBDIRS = . $(MAYBE_XTA_CPP)
 include_HEADERS = xta.h xta_iface.h xta_init.h xta_transaction.h \
 	xta_transaction_manager.h xta_xid.h \
 	xta_xa_resource.h xta_native_xa_resource.h xta_acquired_xa_resource.h \

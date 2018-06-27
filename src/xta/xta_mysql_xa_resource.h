@@ -51,13 +51,6 @@ typedef struct {
 
 
 
-/**
- * Interface with XA function pointers
- */
-const static struct xta_iface_s xta_mysql_iface;
-
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -83,15 +76,15 @@ extern "C" {
 
     /**
      * Delete an object that represent a MySQL XA Resource
-     * @param[in] this : MySQL XA Resource
+     * @param[in] xa_resource : MySQL XA Resource
      */
-    void xta_mysql_xa_resource_delete(xta_mysql_xa_resource_t *this);
+    void xta_mysql_xa_resource_delete(xta_mysql_xa_resource_t *xa_resource);
     
     
 
     /**
      * Initialize the propeties of a MySQL XA resource
-     * @param[in,out] this : MySQL XA Resource object
+     * @param[in,out] xa_resource : MySQL XA Resource object
      * @param[in] connection : to MySQL already opened by the application
      *            program
      * @param[in] name : unique identifier of the resource
@@ -101,7 +94,7 @@ extern "C" {
      *                        will be kept.
      * @return a reason code
      */
-    int xta_mysql_xa_resource_init(xta_mysql_xa_resource_t *this,
+    int xta_mysql_xa_resource_init(xta_mysql_xa_resource_t *xa_resource,
                                    MYSQL *connection,
                                    const char *name, const char *open_info);
 
@@ -111,9 +104,9 @@ extern "C" {
      * Clean the properties of a MySQL XA Resource; this function
      * must be called after @ref xta_mysql_xa_resource_init during
      * object deletion to avoid memory leaks
-     * @param[in,out] this : MySQL XA Resource object
+     * @param[in,out] xa_resource : MySQL XA Resource object
      */
-    void xta_mysql_xa_resource_clean(xta_mysql_xa_resource_t *this);
+    void xta_mysql_xa_resource_clean(xta_mysql_xa_resource_t *xa_resource);
 
 
 

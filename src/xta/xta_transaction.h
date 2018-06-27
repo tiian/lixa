@@ -98,31 +98,31 @@ extern "C" {
 
     /**
      * Delete a Transaction object
-     * @param[in] this : transaction object to delete
+     * @param[in] transact : transaction object to delete
      */
-    void xta_transaction_delete(xta_transaction_t *this);
+    void xta_transaction_delete(xta_transaction_t *transact);
 
 
 
     /**
      * Get the legacy LIXA object that contains the configurations for all the
      * define Resource Managers
-     * @param[in] this : Transaction object
+     * @param[in] transact : Transaction object
      * @return the pointer to the Transaction configuration object
      */
     xta_transaction_config_t *xta_transaction_get_config(
-        xta_transaction_t *this);
+        xta_transaction_t *transact);
     
     
 
     /**
      * Enlist the resource specified with the Transaction associated with the
      * Transaction object
-     * @param[in,out] this : transaction object
+     * @param[in,out] transact : transaction object
      * @param[in] xa_res : resource to associate
      * @return a reason code
      */
-    int xta_transaction_enlist_resource(xta_transaction_t *this,
+    int xta_transaction_enlist_resource(xta_transaction_t *transact,
                                         xta_xa_resource_t *xa_res);
     
 
@@ -131,10 +131,10 @@ extern "C" {
      * Prepare the XA Resource Managers and the XA Transaction Manager for a
      * new transactional Unit of Work. From the XA specification point of view,
      * it calls xa_open (for the Native XA Resource Managers)
-     * @param[in,out] this : transaction object
+     * @param[in,out] transact : transaction object
      * @return a reason code
      */
-    int xta_transaction_open(xta_transaction_t *this);
+    int xta_transaction_open(xta_transaction_t *transact);
 
 
     
@@ -142,17 +142,17 @@ extern "C" {
      * Shut down the XA Resource Managers and the XA Transaction Manager after
      * transactional Unit of Work completion. From the XA specification point
      * of view, it calls xa_close (for the Native XA Resource Managers)
-     * @param[in,out] this : transaction object
+     * @param[in,out] transact : transaction object
      * @return a reason code
      */
-    int xta_transaction_close(xta_transaction_t *this);
+    int xta_transaction_close(xta_transaction_t *transact);
     
     
     
     /**
      * Start a new XA Transaction. From the XA specification point of
      * view, it calls xa_start (for the Native XA Resource Managers)
-     * @param[in,out] this : transaction object
+     * @param[in,out] transact : transaction object
      * @param[in] multiple_branches : boolean value: <br>
      *            TRUE = the created transaction will span more applications,
      *                   @ref xta_transaction_branch will be called
@@ -162,29 +162,30 @@ extern "C" {
      *                   be called for this transaction <br>
      * @return a reason code
      */
-    int xta_transaction_start(xta_transaction_t *this, int multiple_branches);
+    int xta_transaction_start(xta_transaction_t *transact,
+                              int multiple_branches);
 
 
     
     /**
      * Commit the transaction represented by this transaction object
-     * @param[in,out] this : transaction object
+     * @param[in,out] transact : transaction object
      * @param[in] non_block boolean value: <br>
      *            TRUE = xa_prepare will not block the caller <br>
      *            FALSE = xa_prepare will block the caller <br>
      *            the option is used only for multiple branch transactions
      * @return a reason code
      */
-    int xta_transaction_commit(xta_transaction_t *this, int non_block);
+    int xta_transaction_commit(xta_transaction_t *transact, int non_block);
 
     
     
     /**
      * Rollback the transaction represented by this transaction object
-     * @param[in,out] this : transaction object
+     * @param[in,out] transact : transaction object
      * @return a reason code
      */
-    int xta_transaction_rollback(xta_transaction_t *this);
+    int xta_transaction_rollback(xta_transaction_t *transact);
 
     
     
@@ -192,11 +193,11 @@ extern "C" {
      * When a resource registers dynamically the digest must be updated because
      * the configuration has been altered. This must be considered a PRIVATE
      * method and should not be used by the Application Program.
-     * @param[in,out] this : transaction object
+     * @param[in,out] transact : transaction object
      * @param[in] xrc : XA resource configuration (LIXA legacy structure)
      * @return a reason code
      */
-    int xta_transaction_redigest(xta_transaction_t *this,
+    int xta_transaction_redigest(xta_transaction_t *transact,
                                  const xta_xa_resource_config_t *xrc);
 
     
@@ -205,12 +206,12 @@ extern "C" {
      * Suspend the transaction represented by this transaction object; the
      * transaction can be resumed with @ref xta_transaction_resume at a later
      * time
-     * @param[in,out] this : transaction object
+     * @param[in,out] transact : transaction object
      * @param[in] flags can be @ref TMMIGRATE if the Resource Manager supports
      *            transaction migration and @ref TMNOFLAGS otherwise
      * @return a reason code
      */
-    int xta_transaction_suspend(xta_transaction_t *this, long flags);
+    int xta_transaction_suspend(xta_transaction_t *transact, long flags);
     
 
     
@@ -218,7 +219,7 @@ extern "C" {
      * Resume the transaction represented by xid in this transaction object;
      * the transaction has been previously suspended with
      * @ref xta_transaction_suspend
-     * @param[in,out] this transaction object
+     * @param[in,out] transact transaction object
      * @param[in] xid_string serialized identifier of the transaction that
      *            must be resumed (see @ref xta_xid_to_string)
      * @param[in] flags can be @ref TMRESUME if the transaction has been
@@ -226,7 +227,7 @@ extern "C" {
      *            transaction has been suspended using @ref TMNOFLAGS
      * @return a reason code
      */
-    int xta_transaction_resume(xta_transaction_t *this,
+    int xta_transaction_resume(xta_transaction_t *transact,
                                const char *xid_string, long flags);
     
 
@@ -234,22 +235,23 @@ extern "C" {
     /**
      * Create a new branch of the transaction represented by xid in this
      * transaction object; the global transaction has been previously started
-     * @param[in,out] this : transaction object
+     * @param[in,out] transact : transaction object
      * @param[in] xid_string serialized identifier of the global transaction
      *            that must be branched
      * @return a reason code
      */
-    int xta_transaction_branch(xta_transaction_t *this,
+    int xta_transaction_branch(xta_transaction_t *transact,
                                const char *xid_string);
     
 
     
     /**
      * Get the Xid associated with the Transaction object
-     * @param[in] this : transaction object
+     * @param[in] transact : transaction object
      * @return a reference to the Transaction Identifier
      */
-    const xta_xid_t *xta_transaction_get_xid(const xta_transaction_t *this);
+    const xta_xid_t *xta_transaction_get_xid(
+        const xta_transaction_t *transact);
 
     
     

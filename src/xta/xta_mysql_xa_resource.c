@@ -46,6 +46,9 @@
 
 
 
+/**
+ * Interface with XA function pointers
+ */
 const static struct xta_iface_s xta_mysql_iface = {
     "XTA MySQL",
     TMNOFLAGS,
@@ -106,7 +109,7 @@ xta_mysql_xa_resource_t *xta_mysql_xa_resource_new(MYSQL *connection,
 
 
 
-void xta_mysql_xa_resource_delete(xta_mysql_xa_resource_t *this)
+void xta_mysql_xa_resource_delete(xta_mysql_xa_resource_t *xa_resource)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -114,9 +117,9 @@ void xta_mysql_xa_resource_delete(xta_mysql_xa_resource_t *this)
     LIXA_TRACE(("xta_mysql_xa_resource_delete\n"));
     TRY {
         /* clean the object before releasing */
-        xta_mysql_xa_resource_clean(this);
+        xta_mysql_xa_resource_clean(xa_resource);
         /* release memory allocated for the object */
-        g_free(this);
+        g_free(xa_resource);
         
         THROW(NONE);
     } CATCH {
@@ -135,7 +138,7 @@ void xta_mysql_xa_resource_delete(xta_mysql_xa_resource_t *this)
 
 
 
-int xta_mysql_xa_resource_init(xta_mysql_xa_resource_t *this,
+int xta_mysql_xa_resource_init(xta_mysql_xa_resource_t *xa_resource,
                                MYSQL *connection,
                                const char *name, const char *open_info)
 {
@@ -150,17 +153,17 @@ int xta_mysql_xa_resource_init(xta_mysql_xa_resource_t *this,
             THROW(NULL_OBJECT);
         /* initialize "base class" (xta_acquired_xa_resource_t) properties */
         if (LIXA_RC_OK != (ret_cod = xta_acquired_xa_resource_init(
-                               (xta_acquired_xa_resource_t *)this,
+                               (xta_acquired_xa_resource_t *)xa_resource,
                                &xta_mysql_iface,
                                name, open_info)))
             THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
         /* set connection */
-        this->connection = connection;
+        xa_resource->connection = connection;
         /* set resource interface */
-        lixa_iface_set_xta(&this->xa_resource.act_rsrmgr_config.lixa_iface,
-                           &xta_mysql_iface, (xta_xa_resource_t *)this);
+        lixa_iface_set_xta(&xa_resource->xa_resource.act_rsrmgr_config.lixa_iface,
+                           &xta_mysql_iface, (xta_xa_resource_t *)xa_resource);
         /* reset status */
-        memset(&this->lssr, 0, sizeof(struct lixa_sw_status_rm_s));
+        memset(&xa_resource->lssr, 0, sizeof(struct lixa_sw_status_rm_s));
         
         THROW(NONE);
     } CATCH {
@@ -184,7 +187,7 @@ int xta_mysql_xa_resource_init(xta_mysql_xa_resource_t *this,
 
 
 
-void xta_mysql_xa_resource_clean(xta_mysql_xa_resource_t *this)
+void xta_mysql_xa_resource_clean(xta_mysql_xa_resource_t *xa_resource)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -192,10 +195,10 @@ void xta_mysql_xa_resource_clean(xta_mysql_xa_resource_t *this)
     LIXA_TRACE(("xta_mysql_xa_resource_clean\n"));
     TRY {
         /* clean MySQL XA function pointers */
-        this->xa_resource.act_rsrmgr_config.lixa_iface.std = NULL;
+        xa_resource->xa_resource.act_rsrmgr_config.lixa_iface.std = NULL;
         /* clean "base class" (xta_acquired_xa_resource_t) properties */
         xta_acquired_xa_resource_clean(
-            (xta_acquired_xa_resource_t *)this);
+            (xta_acquired_xa_resource_t *)xa_resource);
         
         THROW(NONE);
     } CATCH {
@@ -223,20 +226,20 @@ int xta_mysql_xa_open(xta_xa_resource_t *context, char *xa_info,
     
     LIXA_TRACE(("xta_mysql_xa_open\n"));
     TRY {
-        xta_mysql_xa_resource_t *this = (xta_mysql_xa_resource_t *)context;
-        if (NULL != this->connection) {
+        xta_mysql_xa_resource_t *xa_resource = (xta_mysql_xa_resource_t *)context;
+        if (NULL != xa_resource->connection) {
             LIXA_TRACE(("xta_mysql_xa_open: MySQL connection is already open "
-                        "(%p)\n", this->connection));
+                        "(%p)\n", xa_resource->connection));
         } else {
             LIXA_TRACE(("xta_mysql_xa_open: MySQL connection is NULL!\n"));
             THROW(OBJ_CORRUPTED);
         }
         /* save the connection state: backward compatibility with switch
          * file based implemetation */
-        this->lssr.rmid = rmid;
-        this->lssr.rm_type = LIXA_SW_STATUS_RM_TYPE_MYSQL;
-        this->lssr.state.R = 1;
-        this->lssr.conn = (gpointer)this->connection;
+        xa_resource->lssr.rmid = rmid;
+        xa_resource->lssr.rm_type = LIXA_SW_STATUS_RM_TYPE_MYSQL;
+        xa_resource->lssr.state.R = 1;
+        xa_resource->lssr.conn = (gpointer)xa_resource->connection;
         
         THROW(NONE);
     } CATCH {

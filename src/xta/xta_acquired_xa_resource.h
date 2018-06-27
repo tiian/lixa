@@ -52,7 +52,7 @@ extern "C" {
 
     /**
      * Initialize the common properties of Acquired XA Resources
-     * @param[in,out] this : Acquired XA Resource object
+     * @param[in,out] xa_resource : Acquired XA Resource object
      * @param[in] iface : interface with XA function pointers
      * @param[in] name : unique identifier of the resource
      * @param[in] open_info : unique description of the connection properties
@@ -61,7 +61,7 @@ extern "C" {
      *                        will be kept.
      * @return a reason code
      */
-    int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *this,
+    int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *xa_resource,
                                       const struct xta_iface_s *iface,
                                       const char *name,
                                       const char *open_info);
@@ -72,9 +72,10 @@ extern "C" {
      * Clean the common properties of Acquired XA Resources; this function
      * must be called after @ref xta_acquired_xa_resource_init during
      * object deletion to avoid memory leaks
-     * @param[in,out] this : Acquired XA Resource object
+     * @param[in,out] xa_resource : Acquired XA Resource object
      */
-    void xta_acquired_xa_resource_clean(xta_acquired_xa_resource_t *this);
+    void xta_acquired_xa_resource_clean(
+        xta_acquired_xa_resource_t *xa_resource);
 
 
     

@@ -72,9 +72,9 @@ extern "C" {
 
     /**
      * Delete a Transaction Manager object
-     * @param[in] this : transaction manager to delete
+     * @param[in] tm : transaction manager to delete
      */
-    void xta_transaction_manager_delete(xta_transaction_manager_t *this);
+    void xta_transaction_manager_delete(xta_transaction_manager_t *tm);
 
 
 
@@ -95,11 +95,11 @@ extern "C" {
      * process/thread and returns it to the caller. In the
      * event that the caller thread has already created an XA Transaction, the
      * previously created XA Transaction object is returned
-     * @param[in,out] this : transaction manager object
+     * @param[in,out] tm : transaction manager object
      * @return the pointer to an XTA Transaction object
      */
     xta_transaction_t *xta_transaction_manager_create_transaction(
-        xta_transaction_manager_t *this);
+        xta_transaction_manager_t *tm);
 
 
 

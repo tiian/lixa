@@ -43,7 +43,7 @@
 
 
 
-int xta_xa_resource_init(xta_xa_resource_t *this,
+int xta_xa_resource_init(xta_xa_resource_t *xa_resource,
                          int native)
 {
     enum Exception { NULL_OBJECT
@@ -52,20 +52,20 @@ int xta_xa_resource_init(xta_xa_resource_t *this,
     
     LIXA_TRACE(("xta_xa_resource_init\n"));
     TRY {
-        if (NULL == this)
+        if (NULL == xa_resource)
             THROW(NULL_OBJECT);
         /* set resource description (first part) */
-        this->rsrmgr_config.name = NULL;
-        this->rsrmgr_config.switch_file = NULL;
-        this->rsrmgr_config.xa_open_info[0] = '\0';
-        this->rsrmgr_config.xa_close_info[0] = '\0';
+        xa_resource->rsrmgr_config.name = NULL;
+        xa_resource->rsrmgr_config.switch_file = NULL;
+        xa_resource->rsrmgr_config.xa_open_info[0] = '\0';
+        xa_resource->rsrmgr_config.xa_close_info[0] = '\0';
         /* set resource description (second part) */
-        this->act_rsrmgr_config.generic = &this->rsrmgr_config;
-        this->act_rsrmgr_config.module = NULL;
-        lixa_iface_reset(&this->act_rsrmgr_config.lixa_iface);
+        xa_resource->act_rsrmgr_config.generic = &xa_resource->rsrmgr_config;
+        xa_resource->act_rsrmgr_config.module = NULL;
+        lixa_iface_reset(&xa_resource->act_rsrmgr_config.lixa_iface);
         /* set dynamic to TRUE: XTA is typically dynamic with few exceptions */
-        this->dynamic = TRUE;
-        this->enlisted_tx = NULL;
+        xa_resource->dynamic = TRUE;
+        xa_resource->enlisted_tx = NULL;
         
         THROW(NONE);
     } CATCH {
@@ -88,7 +88,7 @@ int xta_xa_resource_init(xta_xa_resource_t *this,
 
 
 const xta_xa_resource_config_t *xta_xa_resource_get_config(
-    const xta_xa_resource_t *this)
+    const xta_xa_resource_t *xa_resource)
 {
     enum Exception { NULL_OBJECT
                      , NONE } excp;
@@ -97,12 +97,12 @@ const xta_xa_resource_config_t *xta_xa_resource_get_config(
     
     LIXA_TRACE(("xta_xa_resource_get_config\n"));
     TRY {
-        if (NULL == this)
+        if (NULL == xa_resource)
             THROW(NULL_OBJECT);
         /* duplicate the config structs */
         
         /* return the copy of the config structs */
-        config = &this->act_rsrmgr_config;
+        config = &xa_resource->act_rsrmgr_config;
         
         THROW(NONE);
     } CATCH {
@@ -124,7 +124,7 @@ const xta_xa_resource_config_t *xta_xa_resource_get_config(
 
 
 
-int xta_xa_resource_enlisted(xta_xa_resource_t *this,
+int xta_xa_resource_enlisted(xta_xa_resource_t *xa_resource,
                              const xta_transaction_t *tx)
 {
     enum Exception { NULL_OBJECT1
@@ -135,27 +135,27 @@ int xta_xa_resource_enlisted(xta_xa_resource_t *this,
     
     LIXA_TRACE(("xta_xa_resource_enlisted\n"));
     TRY {
-        if (NULL == this)
+        if (NULL == xa_resource)
             THROW(NULL_OBJECT1);
         if (NULL == tx)
             THROW(NULL_OBJECT2);
-        if (NULL != this->enlisted_tx) {
+        if (NULL != xa_resource->enlisted_tx) {
             /* already registered resource, checking the Transaction Manager */
-            if (tx != this->enlisted_tx) {
+            if (tx != xa_resource->enlisted_tx) {
                 LIXA_TRACE(("xta_xa_resource_enlisted: this resource has "
                             "been already registered by another TX: %p\n",
-                            this->enlisted_tx));
+                            xa_resource->enlisted_tx));
                 THROW(RESOURCE_ALREADY_REGISTERED);
             } else {
                 LIXA_TRACE(("xta_xa_resource_enlisted: this resource has "
                             "been already registered by this TX, "
                             "skipping...\n"));
-            } /* if (tm != this->registered_tx) */
+            } /* if (tm != xa_resource->registered_tx) */
         } else {
-            this->enlisted_tx = tx;
+            xa_resource->enlisted_tx = tx;
             LIXA_TRACE(("xta_xa_resource_enlisted: this resource is now "
-                        "registered by TX %p\n", this->enlisted_tx));
-        } /* if (NULL != this->registered_tx) */
+                        "registered by TX %p\n", xa_resource->enlisted_tx));
+        } /* if (NULL != xa_resource->registered_tx) */
         
         THROW(NONE);
     } CATCH {
@@ -181,7 +181,7 @@ int xta_xa_resource_enlisted(xta_xa_resource_t *this,
 
 
 
-void xta_xa_resource_clean(xta_xa_resource_t *this)
+void xta_xa_resource_clean(xta_xa_resource_t *xa_resource)
 {
     enum Exception { NULL_OBJECT
                      , NONE } excp;
@@ -190,7 +190,7 @@ void xta_xa_resource_clean(xta_xa_resource_t *this)
     LIXA_TRACE(("xta_xa_resource_clean\n"));
     TRY {
         /* check the object is not null */
-        if (NULL == this)
+        if (NULL == xa_resource)
             THROW(NULL_OBJECT);
         
         THROW(NONE);
@@ -213,7 +213,7 @@ void xta_xa_resource_clean(xta_xa_resource_t *this)
 
 
 
-int xta_xa_resource_start(xta_xa_resource_t *this,
+int xta_xa_resource_start(xta_xa_resource_t *xa_resource,
                           const xta_xid_t *xid,
                           long flag)
 {
@@ -240,7 +240,7 @@ int xta_xa_resource_start(xta_xa_resource_t *this,
 
 
 
-int xta_xa_resource_end(xta_xa_resource_t *this,
+int xta_xa_resource_end(xta_xa_resource_t *xa_resource,
                         const xta_xid_t *xid,
                         long flag)
 {
@@ -267,8 +267,8 @@ int xta_xa_resource_end(xta_xa_resource_t *this,
 
 
 
-int xta_xa_resource_prepare(xta_xa_resource_t *this,
-                         const xta_xid_t *xid)
+int xta_xa_resource_prepare(xta_xa_resource_t *xa_resource,
+                            const xta_xid_t *xid)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -293,9 +293,9 @@ int xta_xa_resource_prepare(xta_xa_resource_t *this,
 
 
 
-int xta_xa_resource_commit(xta_xa_resource_t *this,
-                        const xta_xid_t *xid,
-                        int one_phase)
+int xta_xa_resource_commit(xta_xa_resource_t *xa_resource,
+                           const xta_xid_t *xid,
+                           int one_phase)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;

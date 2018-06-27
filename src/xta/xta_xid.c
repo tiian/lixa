@@ -366,14 +366,14 @@ xta_xid_t *xta_xid_new_from_XID(const XID *xid)
 
 
 
-void xta_xid_delete(xta_xid_t *this)
+void xta_xid_delete(xta_xid_t *xid)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_xid_delete\n"));
     TRY {
-        g_free(this);
+        g_free(xid);
         
         THROW(NONE);
     } CATCH {
@@ -392,7 +392,7 @@ void xta_xid_delete(xta_xid_t *this)
 
 
 
-const XID *xta_xid_get_xa_xid(xta_xid_t *this)
+const XID *xta_xid_get_xa_xid(xta_xid_t *xid)
 {
     enum Exception { NULL_OBJECT
                      , NONE } excp;
@@ -401,9 +401,9 @@ const XID *xta_xid_get_xa_xid(xta_xid_t *this)
     
     LIXA_TRACE(("xta_xid_get_xa_xid\n"));
     TRY {
-        if (NULL == this)
+        if (NULL == xid)
             THROW(NULL_OBJECT);
-        xa_xid = &this->xa_xid;
+        xa_xid = &xid->xa_xid;
         
         THROW(NONE);
     } CATCH {
@@ -425,7 +425,7 @@ const XID *xta_xid_get_xa_xid(xta_xid_t *this)
 
 
 
-char *xta_xid_to_string(const xta_xid_t *this)
+char *xta_xid_to_string(const xta_xid_t *xid)
 {
     enum Exception { NULL_OBJECT
                      , MALLOC_ERROR
@@ -437,12 +437,12 @@ char *xta_xid_to_string(const xta_xid_t *this)
     LIXA_TRACE(("xta_xid_to_string\n"));
     TRY {
         lixa_ser_xid_t lsx;
-        if (NULL == this)
+        if (NULL == xid)
             THROW(NULL_OBJECT);
         /* allocate the dynamic memory */
         if (NULL == (string = malloc(sizeof(lixa_ser_xid_t))))
             THROW(MALLOC_ERROR);
-        if (!lixa_xid_serialize(&this->xa_xid, lsx))
+        if (!lixa_xid_serialize(&xid->xa_xid, lsx))
             THROW(LIXA_XID_SERIALIZE_ERROR);
         strncpy(string, lsx, sizeof(lixa_ser_xid_t));
         
@@ -471,14 +471,14 @@ char *xta_xid_to_string(const xta_xid_t *this)
 
 
 
-void xta_xid_reset(xta_xid_t *this)
+void xta_xid_reset(xta_xid_t *xid)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_xid_reset\n"));
     TRY {
-        lixa_xid_reset(&this->xa_xid);
+        lixa_xid_reset(&xid->xa_xid);
         
         THROW(NONE);
     } CATCH {
