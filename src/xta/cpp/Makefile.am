@@ -12,11 +12,11 @@ endif
 dist_doc_DATA = README.md
 
 includedir = $(prefix)/include/xta/cpp
-include_HEADERS = xta.hpp MysqlXaResource.hpp NativeXaResource.hpp \
+include_HEADERS = Xta.hpp MysqlXaResource.hpp NativeXaResource.hpp \
 	PostgresqlXaResource.hpp Transaction.hpp TransactionManager.hpp \
 	XaResource.hpp Xid.hpp
 lib_LTLIBRARIES = liblixtapp.la
-liblixtapp_la_SOURCES = TransactionManager.cpp \
+liblixtapp_la_SOURCES = TransactionManager.cpp Xta.cpp \
 	$(MAYBE_MYSQL_SOURCES) $(MAYBE_POSTGRESQL_SOURCES)
 AM_CXXFLAGS = -Wall -fno-strict-aliasing
 liblixtapp_la_CPPFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/src/client \

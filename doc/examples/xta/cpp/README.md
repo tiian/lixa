@@ -1,4 +1,4 @@
-# XTA example Application Programs for C language #
+# XTA example Application Programs for C++ language #
 
 This directory contains examples related to the usage of XTA: XA Transactional
 API.

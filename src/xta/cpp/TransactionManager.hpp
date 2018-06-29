@@ -21,8 +21,19 @@
 
 
 
+/* include XTA header file */
+#include "xta.h"
+
+
+
 namespace xta {
     class TransactionManager {
+        public:
+        TransactionManager();
+        ~TransactionManager();
+        
+        private:
+        xta_transaction_manager_t *tm;
     };
 };
 

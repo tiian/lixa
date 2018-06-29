@@ -131,13 +131,13 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(docdir)" \
 	"$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixtapp_la_DEPENDENCIES = $(top_srcdir)/src/xta/liblixta.la
-am__liblixtapp_la_SOURCES_DIST = TransactionManager.cpp \
+am__liblixtapp_la_SOURCES_DIST = TransactionManager.cpp Xta.cpp \
 	MysqlXaResource.cpp PostgresqlXaResource.cpp
 @COMPILE_MYSQL_STUFF_TRUE@am__objects_1 =  \
 @COMPILE_MYSQL_STUFF_TRUE@	liblixtapp_la-MysqlXaResource.lo
 @COMPILE_POSTGRESQL_STUFF_TRUE@am__objects_2 = liblixtapp_la-PostgresqlXaResource.lo
 am_liblixtapp_la_OBJECTS = liblixtapp_la-TransactionManager.lo \
-	$(am__objects_1) $(am__objects_2)
+	liblixtapp_la-Xta.lo $(am__objects_1) $(am__objects_2)
 liblixtapp_la_OBJECTS = $(am_liblixtapp_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -414,12 +414,12 @@ top_srcdir = @top_srcdir@
 @COMPILE_POSTGRESQL_STUFF_TRUE@	-I$(top_srcdir)/src/client/switch/postgresql
 
 dist_doc_DATA = README.md
-include_HEADERS = xta.hpp MysqlXaResource.hpp NativeXaResource.hpp \
+include_HEADERS = Xta.hpp MysqlXaResource.hpp NativeXaResource.hpp \
 	PostgresqlXaResource.hpp Transaction.hpp TransactionManager.hpp \
 	XaResource.hpp Xid.hpp
 
 lib_LTLIBRARIES = liblixtapp.la
-liblixtapp_la_SOURCES = TransactionManager.cpp \
+liblixtapp_la_SOURCES = TransactionManager.cpp Xta.cpp \
 	$(MAYBE_MYSQL_SOURCES) $(MAYBE_POSTGRESQL_SOURCES)
 
 AM_CXXFLAGS = -Wall -fno-strict-aliasing
@@ -514,6 +514,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-MysqlXaResource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-PostgresqlXaResource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-TransactionManager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-Xta.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -542,6 +543,13 @@ liblixtapp_la-TransactionManager.lo: TransactionManager.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='TransactionManager.cpp' object='liblixtapp_la-TransactionManager.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblixtapp_la-TransactionManager.lo `test -f 'TransactionManager.cpp' || echo '$(srcdir)/'`TransactionManager.cpp
+
+liblixtapp_la-Xta.lo: Xta.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblixtapp_la-Xta.lo -MD -MP -MF $(DEPDIR)/liblixtapp_la-Xta.Tpo -c -o liblixtapp_la-Xta.lo `test -f 'Xta.cpp' || echo '$(srcdir)/'`Xta.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixtapp_la-Xta.Tpo $(DEPDIR)/liblixtapp_la-Xta.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='Xta.cpp' object='liblixtapp_la-Xta.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblixtapp_la-Xta.lo `test -f 'Xta.cpp' || echo '$(srcdir)/'`Xta.cpp
 
 liblixtapp_la-MysqlXaResource.lo: MysqlXaResource.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblixtapp_la-MysqlXaResource.lo -MD -MP -MF $(DEPDIR)/liblixtapp_la-MysqlXaResource.Tpo -c -o liblixtapp_la-MysqlXaResource.lo `test -f 'MysqlXaResource.cpp' || echo '$(srcdir)/'`MysqlXaResource.cpp

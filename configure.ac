@@ -21,6 +21,7 @@ AC_CONFIG_FILES([
   doc/examples/Makefile
   doc/examples/cobol/Makefile
   doc/examples/xta/Makefile
+  doc/examples/xta/cpp/Makefile
   doc/images/Makefile
   doc/manuals/LIXA.xml
   doc/manuals/Makefile
