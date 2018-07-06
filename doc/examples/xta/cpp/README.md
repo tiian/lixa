@@ -16,7 +16,13 @@ following commands:
 
 `. /opt/lixa/bin/lixa_env.sh`
 
-`gcc example_xta_sa01.c $(lixa-config -x -c -f -l -d) -lpq $(mysql_config --libs_r) -o example_xta_sa01`
+`g++ example_xta_sa11.cpp $(lixa-config -c -f -l -d --xta --language-cpp) -lpq $(mysql_config --libs_r) -o example_xta_sa11`
+
+
+
+Below stuff is not for C++, just copied from C: work in progress...
+
+
 
 ## "Multiple Applications, Consecutive Calls" Pattern ##
 

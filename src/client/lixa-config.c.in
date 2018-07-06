@@ -5,7 +5,7 @@
  * This file is part of LIXA.
  *
  * LIXA is free software: you can redistribute this file and/or modify
- * it under the terms of the GNU Lesser General Public License version 2.1 as
+ * it under the terms of the GNU General Public License version 2.0 as
  * published by the Free Software Foundation.
  *
  * LIXA is distributed in the hope that it will be useful,
@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
+ * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -85,6 +85,7 @@ static gboolean prefix = FALSE;
 static gboolean state_dir = FALSE;
 static gboolean switch_files = FALSE;
 static gboolean xta = FALSE;
+static gboolean language_cpp = FALSE;
 static GOptionEntry entries[] =
 {
     { "cflags", 'c', 0, G_OPTION_ARG_NONE, &cflags, "[" CFLAGS_STRING "]", NULL },
@@ -106,6 +107,7 @@ static GOptionEntry entries[] =
     { "state-dir", 's', 0, G_OPTION_ARG_NONE, &state_dir, "[" STATE_DIR_STRING "]", NULL },
     { "rsrc-mngrs", 'r', 0, G_OPTION_ARG_NONE, &switch_files, "list of configured Resource Managers", NULL },
     { "xta", 'x', 0, G_OPTION_ARG_NONE, &xta, "XTA flag, append stuff necessary to compile and link configure Resource Managers objects", NULL },
+    { "language-cpp", '', 0, G_OPTION_ARG_NONE, &language_cpp, "C++ flag to get libraries necessary to link C++ programs (XTA only)", NULL },
     { NULL }
 };
 
@@ -154,7 +156,12 @@ int main(int argc, char *argv[])
     }
     if (libs) {
         printf("%s", LIBS_STRING);
-        if (xta) printf(" -llixta");
+        if (xta) {
+            if (language_cpp)
+                printf(" -llixtapp");
+            else
+                printf(" -llixta");
+        }
         printf("\n");
     }
 #ifdef HAVE_POSTGRESQL

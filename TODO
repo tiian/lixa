@@ -1,7 +1,4 @@
-Implement XTA for C++:
-- implement language (optional) parameter in lixa-config.c.in for C++ to
-  output -L/opt/lixa/lib -llixtapp if XTA and C++ are chosen
-- update license from GPL to LGPL for XTA/C++
+Implement XTA for C++
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation
 
