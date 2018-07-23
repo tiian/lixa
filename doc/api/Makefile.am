@@ -2,13 +2,23 @@ if COND_DOXYGEN
   MAYBE_API = lixa/html/index.html
 if COMPILE_XTA
     MAYBE_XTA = xta/C/html/index.html
+if COMPILE_XTA_CPP
+      MAYBE_XTA_CPP = xta/CPP/html/index.html
 endif
 endif
-EXTRA_DIST = $(MAYBE_API) $(MAYBE_XTA) \
-	doxygen_footer.html doxygen_header_lixa.html doxygen_header_xta.html
-dist_noinst_DATA = doxygen.xta.in doxygen.lixa.in
+endif
+EXTRA_DIST = $(MAYBE_API) $(MAYBE_XTA) $(MAYBE_XTA_CPP) \
+	doxygen_footer.html doxygen_header_lixa.html \
+	doxygen_header_xta.html doxygen_header_xta-cpp.html
+dist_noinst_DATA = doxygen.xta.in doxygen.xta-cpp.in doxygen.lixa.in
 
 doxygen.xta:   doxygen.xta.in
+	sed \
+        -e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+        -e 's|@HAVE_DOT_BOOL[@]|$(HAVE_DOT_BOOL)|g' \
+        $< >$@
+
+doxygen.xta-cpp:   doxygen.xta-cpp.in
 	sed \
         -e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
         -e 's|@HAVE_DOT_BOOL[@]|$(HAVE_DOT_BOOL)|g' \
@@ -20,12 +30,19 @@ doxygen.lixa:   doxygen.lixa.in
         -e 's|@HAVE_DOT_BOOL[@]|$(HAVE_DOT_BOOL)|g' \
         $< >$@
 
-all:	$(MAYBE_API) $(MAYBE_XTA)
+all:	$(MAYBE_API) $(MAYBE_XTA) $(MAYBE_XTA_CPP)
 
 if COND_DOXYGEN
-xta/C/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h \
+xta/C/html/index.html:	doxygen.xta \
+	$(top_srcdir)/src/xta/*.h \
+	$(top_srcdir)/src/xta/*.c \
 	doxygen_footer.html doxygen_header_xta.html
 	doxygen doxygen.xta
+xta/CPP/html/index.html:	doxygen.xta-cpp \
+	$(top_srcdir)/src/xta/cpp/*.hpp \
+	$(top_srcdir)/src/xta/cpp/*.cpp \
+	doxygen_footer.html doxygen_header_xta-cpp.html
+	doxygen doxygen.xta-cpp
 lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h \
 	$(top_srcdir)/src/xta/*.h doxygen_footer.html doxygen_header_lixa.html
@@ -33,7 +50,10 @@ lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 else
 xta/C/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h \
 	doxygen_footer.html doxygen_header_xta.html
-	@echo "XTA API documentation skipped because doxygen is not available"
+	@echo "XTA C API documentation skipped because doxygen is not available"
+xta/CPP/html/index.html:	doxygen.xta-cpp $(top_srcdir)/src/xta/*.h \
+	doxygen_footer.html doxygen_header_xta-cpp.html
+	@echo "XTA C++ API documentation skipped because doxygen is not available"
 lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h \
 	$(top_srcdir)/src/xta/*.h doxygen_footer.html doxygen_header_lixa.html

@@ -317,10 +317,12 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @COND_DOXYGEN_TRUE@MAYBE_API = lixa/html/index.html
 @COMPILE_XTA_TRUE@@COND_DOXYGEN_TRUE@MAYBE_XTA = xta/C/html/index.html
-EXTRA_DIST = $(MAYBE_API) $(MAYBE_XTA) \
-	doxygen_footer.html doxygen_header_lixa.html doxygen_header_xta.html
+@COMPILE_XTA_CPP_TRUE@@COMPILE_XTA_TRUE@@COND_DOXYGEN_TRUE@MAYBE_XTA_CPP = xta/CPP/html/index.html
+EXTRA_DIST = $(MAYBE_API) $(MAYBE_XTA) $(MAYBE_XTA_CPP) \
+	doxygen_footer.html doxygen_header_lixa.html \
+	doxygen_header_xta.html doxygen_header_xta-cpp.html
 
-dist_noinst_DATA = doxygen.xta.in doxygen.lixa.in
+dist_noinst_DATA = doxygen.xta.in doxygen.xta-cpp.in doxygen.lixa.in
 all: all-am
 
 .SUFFIXES:
@@ -518,24 +520,40 @@ doxygen.xta:   doxygen.xta.in
         -e 's|@HAVE_DOT_BOOL[@]|$(HAVE_DOT_BOOL)|g' \
         $< >$@
 
+doxygen.xta-cpp:   doxygen.xta-cpp.in
+	sed \
+        -e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+        -e 's|@HAVE_DOT_BOOL[@]|$(HAVE_DOT_BOOL)|g' \
+        $< >$@
+
 doxygen.lixa:   doxygen.lixa.in 
 	sed \
         -e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
         -e 's|@HAVE_DOT_BOOL[@]|$(HAVE_DOT_BOOL)|g' \
         $< >$@
 
-all:	$(MAYBE_API) $(MAYBE_XTA)
+all:	$(MAYBE_API) $(MAYBE_XTA) $(MAYBE_XTA_CPP)
 
-@COND_DOXYGEN_TRUE@xta/C/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h \
+@COND_DOXYGEN_TRUE@xta/C/html/index.html:	doxygen.xta \
+@COND_DOXYGEN_TRUE@	$(top_srcdir)/src/xta/*.h \
+@COND_DOXYGEN_TRUE@	$(top_srcdir)/src/xta/*.c \
 @COND_DOXYGEN_TRUE@	doxygen_footer.html doxygen_header_xta.html
 @COND_DOXYGEN_TRUE@	doxygen doxygen.xta
+@COND_DOXYGEN_TRUE@xta/CPP/html/index.html:	doxygen.xta-cpp \
+@COND_DOXYGEN_TRUE@	$(top_srcdir)/src/xta/cpp/*.hpp \
+@COND_DOXYGEN_TRUE@	$(top_srcdir)/src/xta/cpp/*.cpp \
+@COND_DOXYGEN_TRUE@	doxygen_footer.html doxygen_header_xta-cpp.html
+@COND_DOXYGEN_TRUE@	doxygen doxygen.xta-cpp
 @COND_DOXYGEN_TRUE@lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 @COND_DOXYGEN_TRUE@	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h \
 @COND_DOXYGEN_TRUE@	$(top_srcdir)/src/xta/*.h doxygen_footer.html doxygen_header_lixa.html
 @COND_DOXYGEN_TRUE@	doxygen doxygen.lixa
 @COND_DOXYGEN_FALSE@xta/C/html/index.html:	doxygen.xta $(top_srcdir)/src/xta/*.h \
 @COND_DOXYGEN_FALSE@	doxygen_footer.html doxygen_header_xta.html
-@COND_DOXYGEN_FALSE@	@echo "XTA API documentation skipped because doxygen is not available"
+@COND_DOXYGEN_FALSE@	@echo "XTA C API documentation skipped because doxygen is not available"
+@COND_DOXYGEN_FALSE@xta/CPP/html/index.html:	doxygen.xta-cpp $(top_srcdir)/src/xta/*.h \
+@COND_DOXYGEN_FALSE@	doxygen_footer.html doxygen_header_xta-cpp.html
+@COND_DOXYGEN_FALSE@	@echo "XTA C++ API documentation skipped because doxygen is not available"
 @COND_DOXYGEN_FALSE@lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 @COND_DOXYGEN_FALSE@	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h \
 @COND_DOXYGEN_FALSE@	$(top_srcdir)/src/xta/*.h doxygen_footer.html doxygen_header_lixa.html

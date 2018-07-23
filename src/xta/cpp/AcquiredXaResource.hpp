@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef NATIVE_XA_RESOURCE_HPP
-# define NATIVE_XA_RESOURCE_HPP
+#ifndef ACQUIRED_XA_RESOURCE_HPP
+# define ACQUIRED_XA_RESOURCE_HPP
 
 
 
 namespace xta {
-    class NativeXaResource : public XaResource {
+    class AcquiredXaResource : public XaResource {
     };
 };
 
 
 
-#endif /* NATIVE_XA_RESOURCE_HPP */
+#endif /* ACQUIRED_XA_RESOURCE_HPP */

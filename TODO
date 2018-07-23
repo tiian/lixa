@@ -1,4 +1,5 @@
-Implement XTA for C++
+Implement XTA for C++:
+- go on with example example_xta_sa11.cpp
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation
 

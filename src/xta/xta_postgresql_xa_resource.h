@@ -70,8 +70,8 @@ extern "C" {
 
     /**
      * Create a new object to represent a PostgreSQL XA resource
-     * @param[in] connection to PostgreSQL already opened by the application
-     *            program
+     * @param[in,out] connection to PostgreSQL already opened by the
+     *                application program
      * @param[in] name : unique identifier of the resource
      * @param[in] open_info : unique description of the connection properties
      *                        like network name/IP address, port, user/schema,

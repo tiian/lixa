@@ -52,13 +52,13 @@ int main(int argc, char *argv[])
     /* PostgreSQL result */
     PGresult                     *pg_res;
     /* variable for PostgreSQL statement to execute */
-    char                         *postgresql_stmt;
+    const char                   *postgresql_stmt;
     /* XTA Resource for PostgreSQL */
     xta_postgresql_xa_resource_t *xar1 = NULL;
     /* native MySQL connection handler */
     MYSQL                        *rm2 = NULL;
     /* variable for MySQL statement to execute */
-    char                         *mysql_stmt;
+    const char                   *mysql_stmt;
     /* XTA Resource for MySQL */
     xta_mysql_xa_resource_t      *xar2 = NULL;
     /* XTA Transaction Manager object reference */

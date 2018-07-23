@@ -52,17 +52,17 @@ int main(int argc, char *argv[])
     /* Second parameter: insert data in databases? */
     int                           insert;
     /* native PostgreSQL connection handler */
-//    PGconn                       *rm1 = NULL;
+    PGconn                       *rm1 = NULL;
     /* PostgreSQL result */
 //    PGresult                     *pg_res;
     /* variable for PostgreSQL statement to execute */
-    char                         *postgresql_stmt;
+    const char                   *postgresql_stmt;
     /* XTA Resource for PostgreSQL */
 //    xta_postgresql_xa_resource_t *xar1 = NULL;
     /* native MySQL connection handler */
-//    MYSQL                        *rm2 = NULL;
+    MYSQL                        *rm2 = NULL;
     /* variable for MySQL statement to execute */
-    char                         *mysql_stmt;
+    const char                   *mysql_stmt;
     /* XTA Resource for MySQL */
 //    xta_mysql_xa_resource_t      *xar2 = NULL;
     /* XTA Transaction Manager object reference */
@@ -84,7 +84,6 @@ int main(int argc, char *argv[])
      * Prepare SQL statements in accordance with "insert" command line
      * parameter
      */
-/*
     if (insert) {
         postgresql_stmt = "INSERT INTO authors VALUES(1921, 'Rigoni Stern', "
             "'Mario')";
@@ -93,7 +92,6 @@ int main(int argc, char *argv[])
         postgresql_stmt = "DELETE FROM authors WHERE id=1921";
         mysql_stmt = "DELETE FROM authors WHERE id=1919";
     }
-*/
 
     /*
      * initialize XTA environment
@@ -102,7 +100,6 @@ int main(int argc, char *argv[])
     /*
      * create a new PostgreSQL connection
      */
-/*
     rm1 = PQconnectdb("dbname=testdb");
     if (PQstatus(rm1) != CONNECTION_OK) {
         fprintf(stderr, "PQconnectdb: returned error %s\n",
@@ -110,11 +107,9 @@ int main(int argc, char *argv[])
         PQfinish(rm1);
         return 1;
     }
-*/
     /*
      * create a new MySQL connection
      */
-/*
     rm2 = mysql_init(NULL);
     if (rm2 == NULL) {
         fprintf(stderr, "mysql_init: returned NULL\n");
@@ -126,7 +121,6 @@ int main(int argc, char *argv[])
                 mysql_errno(rm2), mysql_error(rm2));
         return 1;
     }
-*/
     /*
      * create a new XTA Transaction Manager object
      */
@@ -285,15 +279,15 @@ int main(int argc, char *argv[])
      */
 /*
     xta_postgresql_xa_resource_delete(xar1);
-    PQfinish(rm1);
 */
+    PQfinish(rm1);
     /*
      * Delete MySQL native and XA resource
      */
 /*
     xta_mysql_xa_resource_delete(xar2);
-    mysql_close(rm2);
 */
+    mysql_close(rm2);
     
     return 0;
 }

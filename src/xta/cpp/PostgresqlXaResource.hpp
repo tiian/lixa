@@ -21,8 +21,34 @@
 
 
 
+#include <string>
+
+
+
+/* include XTA header file */
+#include "xta.h"
+#include "AcquiredXaResource.hpp"
+
+
+
 namespace xta {
-    class PostgresqlXaResource {
+    /**
+     * XTA PostgreSQL XA Resource class
+     */
+    class PostgresqlXaResource : public AcquiredXaResource {
+        public:
+        /**
+         * Create a new PostgreSQL resource
+         * @param[in,out] connection to PostgreSQL already opened by the
+         *                application program
+         * @param[in] name : unique identifier of the resource
+         * @param[in] open_info : unique description of the connection
+         *                        properties like network name/IP address,
+         *                        port, user/schema, etc.
+         */
+        PostgresqlXaResource(PGconn *connection, std::string const& name,
+                             std::string const& open_info);
+        ~PostgresqlXaResource();
     };
 };
 

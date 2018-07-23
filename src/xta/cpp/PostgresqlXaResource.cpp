@@ -32,9 +32,3 @@
 
 
 
-namespace xta {
-    class PostgresqlXaResource {
-        public:
-        int foo() { return 0; }
-    };
-}
