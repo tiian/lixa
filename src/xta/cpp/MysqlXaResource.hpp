@@ -21,8 +21,40 @@
 
 
 
+#include <string>
+
+
+
+/* include XTA header file */
+#include "xta.h"
+#include "AcquiredXaResource.hpp"
+
+
+
 namespace xta {
-    class MysqlXaResource {
+    /**
+     * XTA MySQL/MariaDB XA Resource class
+     */
+    class MysqlXaResource : public AcquiredXaResource {
+        public:
+        /**
+         * Create a new MySQL/MariaDB resource
+         * @param[in,out] connection to MySQL/MariaDB already opened by the
+         *                application program
+         * @param[in] name : unique identifier of the resource
+         * @param[in] open_info : unique description of the connection
+         *                        properties like network name/IP address,
+         *                        port, user/schema, etc.
+         */
+        MysqlXaResource(MYSQL *connection, std::string const& name,
+                        std::string const& open_info);
+        ~MysqlXaResource();
+
+        private:
+        /**
+         * Pointer to the native C object
+         */
+        xta_mysql_xa_resource_t *mxar;
     };
 };
 

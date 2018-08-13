@@ -24,6 +24,9 @@
 /* include XTA header file */
 #include "xta.h"
 /* include all XTA C++ header files */
+#include "MysqlXaResource.hpp"
+#include "PostgresqlXaResource.hpp"
+#include "Transaction.hpp"
 #include "TransactionManager.hpp"
 
 

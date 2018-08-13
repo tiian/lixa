@@ -49,6 +49,12 @@ namespace xta {
         PostgresqlXaResource(PGconn *connection, std::string const& name,
                              std::string const& open_info);
         ~PostgresqlXaResource();
+
+        private:
+        /**
+         * Pointer to the native C object
+         */
+        xta_postgresql_xa_resource_t *pxar;
     };
 };
 

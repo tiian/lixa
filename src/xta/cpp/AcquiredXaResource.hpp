@@ -21,6 +21,10 @@
 
 
 
+#include "XaResource.hpp"
+
+
+
 namespace xta {
     class AcquiredXaResource : public XaResource {
     };

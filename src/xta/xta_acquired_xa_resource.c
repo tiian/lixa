@@ -87,6 +87,8 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *xa_resource,
          * Acquired XA Resources don't generally need explicit
          * xa_open, xa_close
          */
+        LIXA_TRACE(("xta_acquired_xa_resource_init: name='%s', "
+                    "open_info='%s'\n", name, open_info));
         if (LIXA_RC_OK != (ret_cod = xta_xa_resource_init(
                                (xta_xa_resource_t *)xa_resource, FALSE)))
             THROW(XTA_XA_RESOURCE_INIT_ERROR);
@@ -97,7 +99,8 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *xa_resource,
             THROW(XML_STRDUP_ERROR);
         strncpy(xa_resource->xa_resource.rsrmgr_config.xa_open_info,
                 open_info, MAXINFOSIZE);
-        xa_resource->xa_resource.rsrmgr_config.xa_open_info[MAXINFOSIZE-1] = '\0';
+        xa_resource->xa_resource.rsrmgr_config.xa_open_info[MAXINFOSIZE-1] =
+            '\0';
             
         THROW(NONE);
     } CATCH {

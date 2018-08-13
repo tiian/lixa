@@ -108,7 +108,8 @@ xta_postgresql_xa_resource_t *xta_postgresql_xa_resource_new(
 
 
 
-void xta_postgresql_xa_resource_delete(xta_postgresql_xa_resource_t *xa_resource)
+void xta_postgresql_xa_resource_delete(
+    xta_postgresql_xa_resource_t *xa_resource)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -156,8 +157,9 @@ int xta_postgresql_xa_resource_init(
         /* set connection */
         xa_resource->connection = connection;
         /* set resource interface */
-        lixa_iface_set_xta(&xa_resource->xa_resource.act_rsrmgr_config.lixa_iface,
-                           &xta_postgresql_iface, (xta_xa_resource_t *)xa_resource);
+        lixa_iface_set_xta(
+            &xa_resource->xa_resource.act_rsrmgr_config.lixa_iface,
+            &xta_postgresql_iface, (xta_xa_resource_t *)xa_resource);
         /* reset status */
         memset(&xa_resource->lssr, 0, sizeof(struct lixa_sw_status_rm_s));
         

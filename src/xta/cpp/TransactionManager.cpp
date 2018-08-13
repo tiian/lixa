@@ -42,6 +42,15 @@ namespace xta {
     {
         xta_transaction_manager_delete(tm);
     };
-
+    
+    Transaction *TransactionManager::CreateTransaction()
+    {
+        xta_transaction_t *tx = NULL;
+        tx = xta_transaction_manager_create_transaction(tm);
+        /*
+          @@@ throw exception if tx == NULL
+        */
+        return new Transaction(tx); 
+    };
     
 }

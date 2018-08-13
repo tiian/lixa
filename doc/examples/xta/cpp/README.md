@@ -10,7 +10,8 @@ See [LIXA Reference Guide Manual](http://www.tiian.org/lixa/manuals/html/index.h
 
 ## "Single Application" Pattern ##
 
-Program *example_xta_sa01.c* requires MySQL (or MariaDB) and PostgreSQL to work.
+Program *example_xta_sa11.cpp* requires MySQL (or MariaDB) and PostgreSQL to
+work.
 After proper installation of LIXA, you can compile the program with the
 following commands:
 

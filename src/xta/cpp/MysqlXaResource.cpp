@@ -32,9 +32,22 @@
 
 
 
+#include "MysqlXaResource.hpp"
+
+
+
 namespace xta {
-    class MysqlXaResource {
-        public:
-        int foo() { return 0; }
+    MysqlXaResource::MysqlXaResource(
+        MYSQL *connection, std::string const& name,
+        std::string const& open_info)
+    {
+        mxar = xta_mysql_xa_resource_new(connection, name.c_str(),
+                                         open_info.c_str());
     };
+    
+    MysqlXaResource::~MysqlXaResource()
+    {
+        xta_mysql_xa_resource_delete(mxar);
+    };
+    
 }

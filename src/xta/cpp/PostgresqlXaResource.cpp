@@ -32,3 +32,22 @@
 
 
 
+#include "PostgresqlXaResource.hpp"
+
+
+
+namespace xta {
+    PostgresqlXaResource::PostgresqlXaResource(
+        PGconn *connection, std::string const& name,
+        std::string const& open_info)
+    {
+        pxar = xta_postgresql_xa_resource_new(connection, name.c_str(),
+                                              open_info.c_str());
+    };
+    
+    PostgresqlXaResource::~PostgresqlXaResource()
+    {
+        xta_postgresql_xa_resource_delete(pxar);
+    };
+    
+}

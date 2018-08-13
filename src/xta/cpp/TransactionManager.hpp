@@ -23,16 +23,30 @@
 
 /* include XTA header file */
 #include "xta.h"
+#include "Transaction.hpp"
 
 
 
 namespace xta {
+    /**
+     * XTA Transaction Manager class
+     */
     class TransactionManager {
         public:
         TransactionManager();
         ~TransactionManager();
-        
+
+        /**
+         * Create a new XA Transaction object, associate it with the current
+         * process/thread and returns it to the caller. In the event that the
+         * caller thread has already created an XA Transaction, the previously
+         * created XA Transaction object is returned
+         */
+        Transaction *CreateTransaction();
         private:
+        /**
+         * Pointer to the native C object
+         */
         xta_transaction_manager_t *tm;
     };
 };

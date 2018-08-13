@@ -58,17 +58,17 @@ int main(int argc, char *argv[])
     /* variable for PostgreSQL statement to execute */
     const char                   *postgresql_stmt;
     /* XTA Resource for PostgreSQL */
-//    xta_postgresql_xa_resource_t *xar1 = NULL;
+    PostgresqlXaResource         *xar1 = NULL;
     /* native MySQL connection handler */
     MYSQL                        *rm2 = NULL;
     /* variable for MySQL statement to execute */
     const char                   *mysql_stmt;
     /* XTA Resource for MySQL */
-//    xta_mysql_xa_resource_t      *xar2 = NULL;
+    MysqlXaResource              *xar2 = NULL;
     /* XTA Transaction Manager object reference */
-    TransactionManager *tm = NULL;
+    TransactionManager           *tm = NULL;
     /* XTA Transaction object reference */
-//    xta_transaction_t            *tx = NULL;
+    Transaction                  *tx = NULL;
 
     /*
      * Check command line parameters
@@ -134,34 +134,28 @@ int main(int argc, char *argv[])
      * second parameter "PostgreSQL" is descriptive
      * third parameter "dbname=testdb" identifies the specific database
      */
-/*
-    xar1 = xta_postgresql_xa_resource_new(rm1, "PostgreSQL", "dbname=testdb");
+    xar1 = new PostgresqlXaResource(rm1, "PostgreSQL", "dbname=testdb");
     if (xar1 == NULL) {
         fprintf(stderr, "xta_postgresql_xa_resource_new: returned NULL\n");
         return 1;
     }
-*/
     /*
      * create an XA resource for MySQL
      */
-/*
-    xar2 = xta_mysql_xa_resource_new(rm2, "MySQL", "localhost,0,lixa,,lixa");
+    xar2 = new MysqlXaResource(rm2, "MySQL", "localhost,0,lixa,,lixa");
     if (xar2 == NULL) {
         fprintf(stderr, "xta_mysql_xa_resource_new: returned NULL\n");
         return 1;
     }
-*/
     /*
      * Create a new XA global transaction
      */
-/*
-    tx = xta_transaction_manager_create_transaction(tm);
+    tx = tm->CreateTransaction();
     if (tx == NULL) {
         fprintf(stderr, "xta_transaction_manager_get_transaction: "
                 "returned NULL\n");
         return 1;
     }
-*/
     /*
      * Enlist PostgreSQL resource to transaction
      */
@@ -270,6 +264,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 */
+    /*
+     * Delete Transaction object
+     */
+    delete tx;
+    
     /*
      * Delete Transaction Manager object
      */

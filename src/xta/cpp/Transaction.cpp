@@ -16,38 +16,32 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef TRANSACTION_HPP
-# define TRANSACTION_HPP
 
 
 
-/* include XTA header file */
-#include "xta.h"
+/* set module trace flag */
+#ifdef LIXA_TRACE_MODULE
+# undef LIXA_TRACE_MODULE
+#endif /* LIXA_TRACE_MODULE */
+#define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_XTA
+
+
+
+#include "Transaction.hpp"
 
 
 
 namespace xta {
-    /**
-     * XTA Transaction Manager class
-     */
-    class Transaction {
-        public:
-        /**
-         * A Transaction object can be created only if the base C object has
-         * been already created (this is just a wrapper, not a native C++
-         * implementation)
-         */
-        Transaction(xta_transaction_t *tx);
-        ~Transaction();
-        
-        private:
-        /**
-         * Pointer to the native C object
-         */
-        xta_transaction_t *tx;
+    
+    Transaction::Transaction(xta_transaction_t *tx)
+    {
+        this->tx = tx;
     };
-};
 
-
-
-#endif /* TRANSACTION_HPP */
+    Transaction::~Transaction()
+    {
+        xta_transaction_delete(tx);
+        this->tx = NULL;
+    };
+    
+}
