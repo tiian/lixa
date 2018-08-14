@@ -32,6 +32,7 @@
 
 
 
+#include "Exception.hpp"
 #include "PostgresqlXaResource.hpp"
 
 
@@ -41,8 +42,9 @@ namespace xta {
         PGconn *connection, std::string const& name,
         std::string const& open_info)
     {
-        pxar = xta_postgresql_xa_resource_new(connection, name.c_str(),
-                                              open_info.c_str());
+        if (NULL == (pxar = xta_postgresql_xa_resource_new(
+                         connection, name.c_str(), open_info.c_str())))
+            throw Exception(LIXA_RC_NULL_OBJECT, __func__);
     };
     
     PostgresqlXaResource::~PostgresqlXaResource()

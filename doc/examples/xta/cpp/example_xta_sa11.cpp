@@ -32,6 +32,8 @@
 
 
 
+#include <iostream>
+
 /*
  * This header is necessary for all the XTA related definitions
  */
@@ -67,13 +69,12 @@ int main(int argc, char *argv[])
     MysqlXaResource              *xar2 = NULL;
     /* XTA Transaction Manager object reference */
     TransactionManager           *tm = NULL;
-
     /*
      * Check command line parameters
      */
     if (argc < 3) {
-        fprintf(stderr, "This program requires two boolean parameters: "
-                "'commit' and 'insert'\n");
+        cerr << "This program requires two boolean parameters: "
+                "'commit' and 'insert'\n" ;
         return 1;
     }
     commit = strtol(argv[1], NULL, 0);
@@ -97,6 +98,7 @@ int main(int argc, char *argv[])
     Xta::Init();
     /*
      * create a new PostgreSQL connection
+     * Note: using PostgreSQL C API and C standard functions
      */
     rm1 = PQconnectdb("dbname=testdb");
     if (PQstatus(rm1) != CONNECTION_OK) {
@@ -107,6 +109,7 @@ int main(int argc, char *argv[])
     }
     /*
      * create a new MySQL connection
+     * Note: using MySQL C API and C standard functions
      */
     rm2 = mysql_init(NULL);
     if (rm2 == NULL) {
@@ -122,9 +125,11 @@ int main(int argc, char *argv[])
     /*
      * create a new XTA Transaction Manager object
      */
-    tm = new TransactionManager();
-    if (tm == NULL) {
-        fprintf(stderr, "xta::TransactionManager: returned NULL\n");
+    try {
+        tm = new TransactionManager();
+    } catch (Exception e) {
+        cerr << "xta::TransactionManager(): exception " <<
+            e.getReturnCodeText() << endl;
         return 1;
     }
     /*
@@ -132,42 +137,45 @@ int main(int argc, char *argv[])
      * second parameter "PostgreSQL" is descriptive
      * third parameter "dbname=testdb" identifies the specific database
      */
-    xar1 = new PostgresqlXaResource(rm1, "PostgreSQL", "dbname=testdb");
-    if (xar1 == NULL) {
-        fprintf(stderr, "xta_postgresql_xa_resource_new: returned NULL\n");
+    try {
+        xar1 = new PostgresqlXaResource(rm1, "PostgreSQL", "dbname=testdb");
+    } catch (Exception e) {
+        cerr << "xta::PostgresqlXaResource(): exception " <<
+            e.getReturnCodeText() << endl;
         return 1;
     }
     /*
      * create an XA resource for MySQL
      */
-    xar2 = new MysqlXaResource(rm2, "MySQL", "localhost,0,lixa,,lixa");
-    if (xar2 == NULL) {
-        fprintf(stderr, "xta_mysql_xa_resource_new: returned NULL\n");
+    try {
+        xar2 = new MysqlXaResource(rm2, "MySQL", "localhost,0,lixa,,lixa");
+    } catch (Exception e) {
+        cerr << "xta::MysqlXaResource(): exception " <<
+            e.getReturnCodeText() << endl;
         return 1;
     }
     /*
-     * Create a new XA global transaction
+     * Create a new XA global transaction and retrieve a reference from
+     * the TransactionManager object
      */
-    /* XTA Transaction object reference */
-    Transaction tx = tm->CreateTransaction();
-    /*
-    if (tx == NULL) {
-        fprintf(stderr, "xta_transaction_manager_get_transaction: "
-                "returned NULL\n");
+    try {
+        Transaction tx = tm->CreateTransaction();
+        tx.EnlistResource(xar1);
+    } catch (Exception e) {
+        cerr << e.where() << "/" << e.what() << endl;
         return 1;
     }
-    */
     /*
      * Enlist PostgreSQL resource to transaction
      */
-/*
-    rc = xta_transaction_enlist_resource(tx, (xta_xa_resource_t *)xar1);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "xta_transaction_enlist_resource returned %d (%s) for "
-               "PostgreSQL XA resource\n", rc, lixa_strerror(rc));
+    /*
+    try {
+    } catch (Exception e) {
+        cerr << "xta::Transaction::EnlistResource(): exception " <<
+            e.getReturnCodeText() << endl;
         return 1;
     }
-*/
+    */
     /*
      * Enlist MySQL resource to Transaction
      */

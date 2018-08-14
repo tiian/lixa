@@ -27,6 +27,7 @@
 
 
 
+#include "Exception.hpp"
 #include "Transaction.hpp"
 
 
@@ -44,5 +45,12 @@ namespace xta {
            TransactionManager */
         this->tx = NULL;
     };
-    
+
+    void Transaction::EnlistResource(XaResource *xaRes)
+    {
+        int rc;
+        if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
+                               tx, xaRes->getCBaseXaResource())))
+            throw Exception(rc, __func__);
+    }
 }

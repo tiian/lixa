@@ -23,6 +23,7 @@
 
 /* include XTA header file */
 #include "xta.h"
+#include "XaResource.hpp"
 
 
 
@@ -39,6 +40,12 @@ namespace xta {
          */
         Transaction(xta_transaction_t *tx);
         ~Transaction();
+        /**
+         * Enlist the resource specified with the Transaction associated with
+         * the Transaction object
+         * @param[in] xaRes : resource to associate
+         */
+        void EnlistResource(XaResource *xaRes);
         
         private:
         /**

@@ -41,23 +41,26 @@ namespace xta {
      * return code property that maps on C API
      */
     class Exception : public exception {
-        virtual const char* what() const throw()
-        {
-            return lixa_strerror(ReturnCode);
-        }
-
         private:
         /**
          * Return code returned by the failed C function
          */
         int ReturnCode;
-
+        string Function;
         public:
+        virtual const char* what() const throw()
+        {
+            return lixa_strerror(ReturnCode);
+        }
         /**
          * @param[in] ret_cod : the return code of the failed C function
          */
-        Exception(int ret_cod) {
-            ReturnCode = ret_cod; }
+        Exception(int ret_cod, const string& func) {
+            ReturnCode = ret_cod;
+            Function = func;
+        }
+        ~Exception() throw() {;}
+        const string& where() { return Function; }
         /**
          * Retrieve the numeric return code of the failed C function
          */

@@ -1,14 +1,8 @@
 Implement XTA for C++:
 - go on with example example_xta_sa11.cpp
 
-2018-08-13 23:12:40.455340 [1326/140670132926400] xta_transaction_manager_create_transaction: locking mutex...
-2018-08-13 23:12:40.455355 [1326/140670132926400] xta_transaction_manager_create_transaction: there is not a started transactions for this thread, starting a new one...
-2018-08-13 23:12:40.455360 [1326/140670132926400] xta_transaction_new
-2018-08-13 23:12:40.455468 [1326/140670132926400] xta_transaction_new: an internal error occurred, releasing allocated memory...
-2018-08-13 23:12:40.455480 [1326/140670132926400] xta_transaction_new: releasing client status objects...
-
-
-
+Try to replace Exception with standard ones, see 
+https://en.cppreference.com/w/cpp/header/stdexcept
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation
 
