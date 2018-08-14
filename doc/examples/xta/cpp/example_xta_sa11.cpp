@@ -67,8 +67,6 @@ int main(int argc, char *argv[])
     MysqlXaResource              *xar2 = NULL;
     /* XTA Transaction Manager object reference */
     TransactionManager           *tm = NULL;
-    /* XTA Transaction object reference */
-    Transaction                  *tx = NULL;
 
     /*
      * Check command line parameters
@@ -150,12 +148,15 @@ int main(int argc, char *argv[])
     /*
      * Create a new XA global transaction
      */
-    tx = tm->CreateTransaction();
+    /* XTA Transaction object reference */
+    Transaction tx = tm->CreateTransaction();
+    /*
     if (tx == NULL) {
         fprintf(stderr, "xta_transaction_manager_get_transaction: "
                 "returned NULL\n");
         return 1;
     }
+    */
     /*
      * Enlist PostgreSQL resource to transaction
      */
@@ -264,10 +265,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 */
-    /*
-     * Delete Transaction object
-     */
-    delete tx;
     
     /*
      * Delete Transaction Manager object

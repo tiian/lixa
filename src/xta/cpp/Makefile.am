@@ -12,8 +12,8 @@ endif
 dist_doc_DATA = README.md
 
 includedir = $(prefix)/include/xta/cpp
-include_HEADERS = Xta.hpp AcquiredXaResource.hpp MysqlXaResource.hpp \
-	NativeXaResource.hpp \
+include_HEADERS = Xta.hpp AcquiredXaResource.hpp Exception.hpp \
+	MysqlXaResource.hpp NativeXaResource.hpp \
 	PostgresqlXaResource.hpp Transaction.hpp TransactionManager.hpp \
 	XaResource.hpp Xid.hpp
 lib_LTLIBRARIES = liblixtapp.la

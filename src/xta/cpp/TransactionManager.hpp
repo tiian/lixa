@@ -42,7 +42,7 @@ namespace xta {
          * caller thread has already created an XA Transaction, the previously
          * created XA Transaction object is returned
          */
-        Transaction *CreateTransaction();
+        Transaction CreateTransaction();
         private:
         /**
          * Pointer to the native C object

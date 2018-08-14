@@ -416,8 +416,8 @@ top_srcdir = @top_srcdir@
 @COMPILE_POSTGRESQL_STUFF_TRUE@	-I$(top_srcdir)/src/client/switch/postgresql
 
 dist_doc_DATA = README.md
-include_HEADERS = Xta.hpp AcquiredXaResource.hpp MysqlXaResource.hpp \
-	NativeXaResource.hpp \
+include_HEADERS = Xta.hpp AcquiredXaResource.hpp Exception.hpp \
+	MysqlXaResource.hpp NativeXaResource.hpp \
 	PostgresqlXaResource.hpp Transaction.hpp TransactionManager.hpp \
 	XaResource.hpp Xid.hpp
 

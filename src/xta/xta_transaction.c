@@ -94,8 +94,11 @@ xta_transaction_t *xta_transaction_new(void)
             THROW(CLIENT_CONFIG_DISPLAY_ERROR);
         /* connect to LIXA state server */
         if (LIXA_RC_OK != (ret_cod = client_connect(
-                               this->client_status, this->local_ccc)))
+                               this->client_status, this->local_ccc))) {
+            LIXA_TRACE(("xta_transaction_new/client_connect: ret_cod=%d "
+                        "('%s')\n", ret_cod, lixa_strerror(ret_cod)));
             THROW(CLIENT_CONNECT_ERROR);
+        }
         /* configure the LIXA (transactional) job (if necessary) */
         if (LIXA_RC_OK != (ret_cod = client_config_job(
                                this->local_ccc, client_status_get_sockfd(

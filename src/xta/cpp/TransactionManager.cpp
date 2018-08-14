@@ -27,6 +27,7 @@
 
 
 
+#include "Exception.hpp"
 #include "TransactionManager.hpp"
 
 
@@ -35,7 +36,8 @@ namespace xta {
     
     TransactionManager::TransactionManager()
     {
-        tm = xta_transaction_manager_new();
+        if (NULL == (tm = xta_transaction_manager_new()))
+            throw Exception(LIXA_RC_NULL_OBJECT);
     };
 
     TransactionManager::~TransactionManager()
@@ -43,14 +45,13 @@ namespace xta {
         xta_transaction_manager_delete(tm);
     };
     
-    Transaction *TransactionManager::CreateTransaction()
+    Transaction TransactionManager::CreateTransaction()
     {
         xta_transaction_t *tx = NULL;
-        tx = xta_transaction_manager_create_transaction(tm);
-        /*
-          @@@ throw exception if tx == NULL
-        */
-        return new Transaction(tx); 
+        if (NULL == (tx = xta_transaction_manager_create_transaction(tm)))
+            throw Exception(LIXA_RC_NULL_OBJECT);
+        Transaction t(tx);
+        return t;
     };
     
 }

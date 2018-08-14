@@ -40,7 +40,8 @@ namespace xta {
 
     Transaction::~Transaction()
     {
-        xta_transaction_delete(tx);
+        /* this->tx is just a reference to an object created/destroyed by
+           TransactionManager */
         this->tx = NULL;
     };
     
