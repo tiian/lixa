@@ -44,7 +44,8 @@ namespace xta {
     {
         if (NULL == (pxar = xta_postgresql_xa_resource_new(
                          connection, name.c_str(), open_info.c_str())))
-            throw Exception(LIXA_RC_NULL_OBJECT, __func__);
+            throw Exception(LIXA_RC_NULL_OBJECT,
+                            "xta_postgresql_xa_resource_new");
     };
     
     PostgresqlXaResource::~PostgresqlXaResource()

@@ -123,59 +123,37 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * create a new XTA Transaction Manager object
+     * create XTA objects necessary to start a transaction
      */
     try {
+        /*
+         * create a new XTA Transaction Manager object
+         */
         tm = new TransactionManager();
-    } catch (Exception e) {
-        cerr << "xta::TransactionManager(): exception " <<
-            e.getReturnCodeText() << endl;
-        return 1;
-    }
-    /*
-     * create an XA resource for PostgreSQL
-     * second parameter "PostgreSQL" is descriptive
-     * third parameter "dbname=testdb" identifies the specific database
-     */
-    try {
+        /*
+         * create an XA resource for PostgreSQL
+         * second parameter "PostgreSQL" is descriptive
+         * third parameter "dbname=testdb" identifies the specific database
+         */
         xar1 = new PostgresqlXaResource(rm1, "PostgreSQL", "dbname=testdb");
-    } catch (Exception e) {
-        cerr << "xta::PostgresqlXaResource(): exception " <<
-            e.getReturnCodeText() << endl;
-        return 1;
-    }
-    /*
-     * create an XA resource for MySQL
-     */
-    try {
+        /*
+         * create an XA resource for MySQL
+         */
         xar2 = new MysqlXaResource(rm2, "MySQL", "localhost,0,lixa,,lixa");
-    } catch (Exception e) {
-        cerr << "xta::MysqlXaResource(): exception " <<
-            e.getReturnCodeText() << endl;
-        return 1;
-    }
-    /*
-     * Create a new XA global transaction and retrieve a reference from
-     * the TransactionManager object
-     */
-    try {
+        /*
+         * Create a new XA global transaction and retrieve a reference from
+         * the TransactionManager object
+         */
         Transaction tx = tm->CreateTransaction();
+        /*
+         * Enlist PostgreSQL resource to transaction
+         */
         tx.EnlistResource(xar1);
     } catch (Exception e) {
-        cerr << e.where() << "/" << e.what() << endl;
+        cerr << "Exception in function '" << e.where() <<
+            "', return code description: '" << e.what() << "'" << endl;
         return 1;
     }
-    /*
-     * Enlist PostgreSQL resource to transaction
-     */
-    /*
-    try {
-    } catch (Exception e) {
-        cerr << "xta::Transaction::EnlistResource(): exception " <<
-            e.getReturnCodeText() << endl;
-        return 1;
-    }
-    */
     /*
      * Enlist MySQL resource to Transaction
      */

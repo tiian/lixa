@@ -51,6 +51,6 @@ namespace xta {
         int rc;
         if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                                tx, xaRes->getCBaseXaResource())))
-            throw Exception(rc, __func__);
+            throw Exception(rc, "xta_transaction_enlist_resource");
     }
 }

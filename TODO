@@ -1,8 +1,6 @@
 Implement XTA for C++:
 - go on with example example_xta_sa11.cpp
 
-Try to replace Exception with standard ones, see 
-https://en.cppreference.com/w/cpp/header/stdexcept
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation
 

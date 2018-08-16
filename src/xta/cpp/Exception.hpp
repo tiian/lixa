@@ -22,7 +22,7 @@
 
 
 /* include C++ standard header files */
-#include <exception>
+#include <stdexcept>
 #include <string>
 
 /* include XTA header file */
@@ -38,36 +38,46 @@ namespace xta {
 
     /**
      * XTA exception class, it extends standard exception class and adds the
-     * return code property that maps on C API
+     * return code property that maps on C API.
+     * It inherits from stdexcept::runtime_error, so you can simply catch
+     * "exception" or "runtime_error", but add LIXA specific info: the reason
+     * code returned by the failed C XTA function and the name of the C XTA
+     * function that failed
      */
-    class Exception : public exception {
+    class Exception : public runtime_error {
         private:
         /**
-         * Return code returned by the failed C function
+         * LIXA return code returned by the failed C function
          */
         int ReturnCode;
-        string Function;
-        public:
-        virtual const char* what() const throw()
-        {
-            return lixa_strerror(ReturnCode);
-        }
         /**
-         * @param[in] ret_cod : the return code of the failed C function
+         * Name of the function where exception happened
          */
-        Exception(int ret_cod, const string& func) {
+        string Function;
+        
+        public:
+        /**
+         * Default constructor
+         * @param[in] ret_cod returned by the failed C XTA function
+         * @param[in] function name where the expection has been raised
+         */
+        Exception(int ret_cod, const string& function) :
+            runtime_error(lixa_strerror(ret_cod)) {
             ReturnCode = ret_cod;
-            Function = func;
+            Function = function;
         }
         ~Exception() throw() {;}
         const string& where() { return Function; }
         /**
          * Retrieve the numeric return code of the failed C function
+         * @return a LIXA/XTA return code
          */
         int getReturnCode() { return ReturnCode; }
         /**
          * Retrieve the description associated to the numeric return code of
          * the failed C function
+         * @return the human readable description associated to the return code
+         *         of the failed XTA function
          */
         string getReturnCodeText() {
             return (string(lixa_strerror(ReturnCode))); }
