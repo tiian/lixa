@@ -24,6 +24,7 @@
 namespace xta {
     class XaResource {
         public:
+        virtual ~XaResource() { ; /* nothing to do */ }
         virtual xta_xa_resource_t *getCBaseXaResource() = 0;
     };
 };

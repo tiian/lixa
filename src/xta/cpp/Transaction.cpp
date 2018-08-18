@@ -53,4 +53,49 @@ namespace xta {
                                tx, xaRes->getCBaseXaResource())))
             throw Exception(rc, "xta_transaction_enlist_resource");
     }
+
+    void Transaction::Open(void)
+    {
+        int rc;
+        if (LIXA_RC_OK != (rc = xta_transaction_open(tx)))
+            throw Exception(rc, "xta_transaction_open");
+    }
+
+    void Transaction::Start(bool MultipleBranches)
+    {
+        int rc;
+        if (LIXA_RC_OK != (rc = xta_transaction_start(
+                               tx, (int)MultipleBranches)))
+            throw Exception(rc, "xta_transaction_start");
+    }
+    
+    void Transaction::Commit(bool NonBlocking)
+    {
+        int rc;
+        if (LIXA_RC_OK != (rc = xta_transaction_commit(
+                               tx, NonBlocking)))
+            throw Exception(rc, "xta_transaction_commit");
+    }
+    
+    void Transaction::Rollback(void)
+    {
+        int rc;
+        if (LIXA_RC_OK != (rc = xta_transaction_rollback(tx)))
+            throw Exception(rc, "xta_transaction_rollback");
+    }
+    
+    void Transaction::Close(void)
+    {
+        int rc;
+        if (LIXA_RC_OK != (rc = xta_transaction_close(tx)))
+            throw Exception(rc, "xta_transaction_close");
+    }
+
+    void Transaction::Branch(const string& XidString)
+    {
+        int rc;
+        if (LIXA_RC_OK != (rc = xta_transaction_branch(tx, XidString.c_str())))
+            throw Exception(rc, "xta_transaction_branch");
+    }
+
 }

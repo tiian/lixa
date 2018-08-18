@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
      * commit or rollback the transaction
      */
     if (commit) {
-        /* Note: second argument ("multiple_branch") has FALSE value */
+        /* Note: second argument ("non_blocking") has FALSE value */
         rc = xta_transaction_commit(tx, FALSE);
         if (rc != LIXA_RC_OK) {
             fprintf(stderr, "xta_transaction_commit: returned %d (%s)\n",

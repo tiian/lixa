@@ -672,7 +672,7 @@ int xta_transaction_start(xta_transaction_t *transact, int multiple_branches)
 
 
 
-int xta_transaction_commit(xta_transaction_t *transact, int non_block)
+int xta_transaction_commit(xta_transaction_t *transact, int non_blocking)
 {
     enum Exception { NULL_OBJECT
                      , INVALID_STATUS
@@ -760,7 +760,7 @@ int xta_transaction_commit(xta_transaction_t *transact, int non_block)
              * has been already performed in the previous suspended commit */
                 ret_cod = lixa_xa_prepare(
                     transact->local_ccc, transact->client_status,
-                    xta_xid_get_xa_xid(transact->xid), non_block,
+                    xta_xid_get_xa_xid(transact->xid), non_blocking,
                     &txrc, &commit);
                 switch (ret_cod) {
                     case LIXA_RC_OK:

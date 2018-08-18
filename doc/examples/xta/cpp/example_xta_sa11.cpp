@@ -28,6 +28,13 @@
  * This program accepts exactly two parameters on the command line:
  * first parameter:  "commit", boolean value (if FALSE, "rollback")
  * second parameter: "insert", boolean value (if FALSE, "delete")
+ *
+ * Programming Style note:
+ * the purpose of this small program is not to explain C++ development
+ * techniques or good style, but simply to show XTA for C++ using the easiest
+ * approach.
+ * "xta" namespace is explicitly put in every statement (see "xta::") but it
+ * can be avoided with "using namespace xta;"
  */
 
 
@@ -41,14 +48,8 @@
 
 
 
-using namespace xta;
-
-
-
 int main(int argc, char *argv[])
 {
-    /* LIXA / XTA return and reason code */
-    int                           rc;
     /* First parameter: commit transaction? */
     int                           commit;
     /* Second parameter: insert data in databases? */
@@ -56,19 +57,19 @@ int main(int argc, char *argv[])
     /* native PostgreSQL connection handler */
     PGconn                       *rm1 = NULL;
     /* PostgreSQL result */
-//    PGresult                     *pg_res;
+    PGresult                     *pg_res;
     /* variable for PostgreSQL statement to execute */
     const char                   *postgresql_stmt;
     /* XTA Resource for PostgreSQL */
-    PostgresqlXaResource         *xar1 = NULL;
+    xta::PostgresqlXaResource    *xar1 = NULL;
     /* native MySQL connection handler */
     MYSQL                        *rm2 = NULL;
     /* variable for MySQL statement to execute */
     const char                   *mysql_stmt;
     /* XTA Resource for MySQL */
-    MysqlXaResource              *xar2 = NULL;
+    xta::MysqlXaResource         *xar2 = NULL;
     /* XTA Transaction Manager object reference */
-    TransactionManager           *tm = NULL;
+    xta::TransactionManager      *tm = NULL;
     /*
      * Check command line parameters
      */
@@ -95,7 +96,7 @@ int main(int argc, char *argv[])
     /*
      * initialize XTA environment
      */
-    Xta::Init();
+    xta::Xta::Init();
     /*
      * create a new PostgreSQL connection
      * Note: using PostgreSQL C API and C standard functions
@@ -129,147 +130,105 @@ int main(int argc, char *argv[])
         /*
          * create a new XTA Transaction Manager object
          */
-        tm = new TransactionManager();
+        tm = new xta::TransactionManager();
         /*
          * create an XA resource for PostgreSQL
          * second parameter "PostgreSQL" is descriptive
          * third parameter "dbname=testdb" identifies the specific database
          */
-        xar1 = new PostgresqlXaResource(rm1, "PostgreSQL", "dbname=testdb");
+        xar1 = new xta::PostgresqlXaResource(
+            rm1, "PostgreSQL", "dbname=testdb");
         /*
          * create an XA resource for MySQL
          */
-        xar2 = new MysqlXaResource(rm2, "MySQL", "localhost,0,lixa,,lixa");
+        xar2 = new xta::MysqlXaResource(
+            rm2, "MySQL", "localhost,0,lixa,,lixa");
         /*
          * Create a new XA global transaction and retrieve a reference from
          * the TransactionManager object
          */
-        Transaction tx = tm->CreateTransaction();
+        xta::Transaction tx = tm->CreateTransaction();
         /*
          * Enlist PostgreSQL resource to transaction
          */
         tx.EnlistResource(xar1);
-    } catch (Exception e) {
+        /*
+         * Enlist MySQL resource to Transaction
+         */
+        tx.EnlistResource(xar2);
+        /*
+         * Open all resources enlisted by the Transaction
+         */
+        tx.Open();
+        /*
+         * Start a new XA global transaction with a single branch
+         * Note: second argument ("multiple_branch") has FALSE value
+         */
+        tx.Start(false);
+        /*
+         * At this point, it's time to do something with the Resource Managers
+         * (PostgreSQL and MySQL)
+         *
+         * Execute PostgreSQL statement
+         */
+        printf("PostgreSQL, executing >%s<\n", postgresql_stmt);
+        pg_res = PQexec(rm1, postgresql_stmt);
+        if (PQresultStatus(pg_res) != PGRES_COMMAND_OK) {
+            fprintf(stderr, "PostgreSQL, error while executing >%s<: %s\n",
+                    postgresql_stmt, PQerrorMessage(rm1));
+            PQclear(pg_res);
+            PQfinish(rm1);
+            return 1;
+        }
+        /*
+         * Execute MySQL statement
+         */
+        printf("MySQL, executing >%s<\n", mysql_stmt);
+        if (mysql_query(rm2, mysql_stmt)) {
+            fprintf(stderr, "MySQL, error while executing >%s<: %u/%s\n",
+                    mysql_stmt, mysql_errno(rm2), mysql_error(rm2));
+            mysql_close(rm2);
+            return 1;
+        }
+        /*
+         * commit or rollback the transaction
+         */
+        if (commit) {
+        /* Note: second argument ("non_blocking") has FALSE value */
+            tx.Commit(false);
+        } else {
+            tx.Rollback();
+        }
+        /*
+         * Close all resources enlisted by the Transaction
+         */
+        tx.Close();
+        /*
+         * Delete PostgreSQL native and XA resource
+         */
+        delete xar1;
+        /*
+         * Close the PostgreSQL connection
+         */
+        PQfinish(rm1);
+        /*
+         * Delete MySQL native and XA resource
+         */
+        delete xar2;
+        /*
+         * Close the MySQL connection
+         */
+        mysql_close(rm2);
+        /*
+         * Delete Transaction Manager object
+         */
+        delete tm;
+        
+    } catch (xta::Exception e) {
         cerr << "Exception in function '" << e.where() <<
             "', return code description: '" << e.what() << "'" << endl;
         return 1;
     }
-    /*
-     * Enlist MySQL resource to Transaction
-     */
-/*
-    rc = xta_transaction_enlist_resource(tx, (xta_xa_resource_t *)xar2);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "xta_transaction_enlist_resource returned %d (%s) for "
-               "MySQL XA resource\n", rc, lixa_strerror(rc));
-        return 1;
-    }
-*/
-    /*
-     * Open all resources enlisted by the Transaction
-     */
-/*
-    rc = xta_transaction_open(tx);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "xta_transaction_open: returned %d (%s)\n",
-                rc, lixa_strerror(rc));
-        return 1;
-    }
-*/
-    /*
-     * Start a new XA global transaction with a single branch
-     * Note: second argument ("multiple_branch") has FALSE value
-     */
-/*
-    rc = xta_transaction_start(tx, FALSE);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "xta_transaction_start: returned %d (%s)\n",
-                rc, lixa_strerror(rc));
-        return 1;
-    }
-*/
-    /*
-     * At this point, it's time to do something with the Resource Managers
-     * (PostgreSQL and MySQL)
-     *
-     * Execute PostgreSQL statement
-     */
-/*
-    printf("PostgreSQL, executing >%s<\n", postgresql_stmt);
-    pg_res = PQexec(rm1, postgresql_stmt);
-    if (PQresultStatus(pg_res) != PGRES_COMMAND_OK) {
-        fprintf(stderr, "PostgreSQL, error while executing >%s<: %s\n",
-                postgresql_stmt, PQerrorMessage(rm1));
-        PQclear(pg_res);
-        PQfinish(rm1);
-        return 1;
-    }
-*/
-    /*
-     * Execute MySQL statement
-     */
-/*
-    printf("MySQL, executing >%s<\n", mysql_stmt);
-    if (mysql_query(rm2, mysql_stmt)) {
-        fprintf(stderr, "MySQL, error while executing >%s<: %u/%s\n",
-                mysql_stmt, mysql_errno(rm2), mysql_error(rm2));
-        mysql_close(rm2);
-        return 1;
-    }
-*/
-    /*
-     * commit or rollback the transaction
-     */
-/*
-    if (commit) {
-*/
-        /* Note: second argument ("multiple_branch") has FALSE value */
-/*
-        rc = xta_transaction_commit(tx, FALSE);
-        if (rc != LIXA_RC_OK) {
-            fprintf(stderr, "xta_transaction_commit: returned %d (%s)\n",
-                    rc, lixa_strerror(rc));
-            return 1;
-        }
-    } else {
-        rc = xta_transaction_rollback(tx);
-        if (rc != LIXA_RC_OK) {
-            fprintf(stderr, "xta_transaction_rollback: returned %d (%s)\n",
-                    rc, lixa_strerror(rc));
-            return 1;
-        }
-    }
-*/
-    /*
-     * Close all resources enlisted by the Transaction
-     */
-/*
-    rc = xta_transaction_close(tx);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "xta_transaction_close: returned %d (%s)\n",
-                rc, lixa_strerror(rc));
-        return 1;
-    }
-*/
-    
-    /*
-     * Delete Transaction Manager object
-     */
-    delete tm;
-    /*
-     * Delete PostgreSQL native and XA resource
-     */
-/*
-    xta_postgresql_xa_resource_delete(xar1);
-*/
-    PQfinish(rm1);
-    /*
-     * Delete MySQL native and XA resource
-     */
-/*
-    xta_mysql_xa_resource_delete(xar2);
-*/
-    mysql_close(rm2);
     
     return 0;
 }

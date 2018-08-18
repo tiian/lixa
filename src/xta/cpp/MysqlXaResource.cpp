@@ -51,6 +51,7 @@ namespace xta {
     MysqlXaResource::~MysqlXaResource()
     {
         xta_mysql_xa_resource_delete(mxar);
+        mxar = NULL;
     };
     
 }

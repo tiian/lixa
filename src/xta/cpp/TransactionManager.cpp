@@ -44,6 +44,7 @@ namespace xta {
     TransactionManager::~TransactionManager()
     {
         xta_transaction_manager_delete(tm);
+        tm = NULL;
     };
     
     Transaction TransactionManager::CreateTransaction()

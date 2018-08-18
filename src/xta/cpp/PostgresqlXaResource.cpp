@@ -51,6 +51,7 @@ namespace xta {
     PostgresqlXaResource::~PostgresqlXaResource()
     {
         xta_postgresql_xa_resource_delete(pxar);
+        pxar = NULL;
     };
     
 }
