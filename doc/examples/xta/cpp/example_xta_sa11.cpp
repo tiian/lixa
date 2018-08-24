@@ -42,7 +42,7 @@
 #include <iostream>
 
 /*
- * This header is necessary for all the XTA related definitions
+ * This header is necessary for all the stuff related to XTA
  */
 #include <xta/cpp/Xta.hpp>
 
@@ -162,9 +162,8 @@ int main(int argc, char *argv[])
         tx.Open();
         /*
          * Start a new XA global transaction with a single branch
-         * Note: second argument ("multiple_branch") has FALSE value
          */
-        tx.Start(false);
+        tx.Start();
         /*
          * At this point, it's time to do something with the Resource Managers
          * (PostgreSQL and MySQL)
@@ -180,6 +179,7 @@ int main(int argc, char *argv[])
             PQfinish(rm1);
             return 1;
         }
+        PQclear(pg_res);
         /*
          * Execute MySQL statement
          */
@@ -194,8 +194,7 @@ int main(int argc, char *argv[])
          * commit or rollback the transaction
          */
         if (commit) {
-        /* Note: second argument ("non_blocking") has FALSE value */
-            tx.Commit(false);
+            tx.Commit();
         } else {
             tx.Rollback();
         }
@@ -225,8 +224,17 @@ int main(int argc, char *argv[])
         delete tm;
         
     } catch (xta::Exception e) {
+        /*
+         * what() is a standard method that describes the exception
+         * where() is a method provided by XTA to describe the XTA C function
+         *         that raised the exception
+         * getReturnCode() is a method provided by XTA to retrieve the
+         *                 integer reason code returned by XTA C function
+         *                 (see file lixa_errors.h)
+         */
         cerr << "Exception in function '" << e.where() <<
-            "', return code description: '" << e.what() << "'" << endl;
+            "', return code description: '" << e.what() << "', " <<
+            "return code: " << e.getReturnCode() << endl;
         return 1;
     }
     

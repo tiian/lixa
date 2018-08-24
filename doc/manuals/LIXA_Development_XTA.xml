@@ -214,9 +214,7 @@
 	      <row>
 		<entry>Resource Manager</entry>
 		<entry>C</entry>
-		<entry>C++<footnote>
-		<para>Planned a C++ wrapper, not yet implemented
-		</para></footnote></entry>
+		<entry>C++</entry>
 		<entry>Java<footnote>
 		<para>Planned a JNI based wrapper with access to XA native
 		Java classes, not yet implemented
@@ -231,14 +229,14 @@
 	    </thead>
 	    <tbody align="center">
 	      <row>
-		<entry>MySQL, MariaDB</entry>
-		<entry>Y<footnote>
+		<entry>MySQL, MariaDB<footnote>
 		<para><quote>Multiple Applications, Consecutive Calls</quote>
 		pattern is not
 		available because MySQL/MariaDB doesn't support TMSUSPEND and
 		TMRESUME standard XA flags
 		</para></footnote></entry>
-		<entry>-</entry>
+		<entry>Y</entry>
+		<entry>Y</entry>
 		<entry>-</entry>
 		<entry>-</entry>
 		<entry>-</entry>
@@ -246,7 +244,7 @@
 	      <row>
 		<entry>Oracle DBMS</entry>
 		<entry>Y</entry>
-		<entry>-</entry>
+		<entry>Y</entry>
 		<entry>-</entry>
 		<entry>N<footnote>
 		<para>No known way to re-use a standard OCI connection as an 
@@ -258,14 +256,14 @@
 		</para></footnote></entry>
 	      </row>
 	      <row>
-		<entry>PostgreSQL</entry>
-		<entry>Y<footnote>
+		<entry>PostgreSQL<footnote>
 		<para><quote>Multiple Applications, Consecutive Calls</quote>
 		pattern is not
 		available because PostgreSQL doesn't support TMSUSPEND and
 		TMRESUME standard XA flags
 		</para></footnote></entry>
-		<entry>-</entry>
+		<entry>Y</entry>
+		<entry>Y</entry>
 		<entry>-</entry>
 		<entry>-</entry>
 		<entry>-</entry>
@@ -505,9 +503,14 @@
 	XTA API Reference can be consulted online:
 	<itemizedlist mark='bullet'>
 	  <listitem><para>
-	    XTA API Reference for C language:
+	    C language:
 	    <link xlink:href="http://www.tiian.org/lixa/manuals/xta/C/">
 	    http://www.tiian.org/lixa/manuals/xta/C/</link>
+	  </para></listitem>
+	  <listitem><para>
+	    C++ language:
+	    <link xlink:href="http://www.tiian.org/lixa/manuals/xta/CPP/">
+	    http://www.tiian.org/lixa/manuals/xta/CPP/</link>
 	  </para></listitem>
 	</itemizedlist>
       </para>
@@ -653,7 +656,7 @@
       </para></note>
     </section>
     <section>
-      <title>Example</title>
+      <title>Example using C language</title>
       <para>
 	The supplied example (<filename>example_xta_sa01.c</filename>) uses
 	PostgreSQL in the role of <quote>Resource Manager 1</quote> and MySQL
@@ -902,16 +905,278 @@ mysql>
 	  </screen></td></tr></tbody>
 	</table>
       </para>
+      <section>
+	<title>Source Code</title>
+	<para>
+	  Source code for program <filename>example_xta_sa01.c</filename> is
+	  installed in directory
+	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta</filename> and
+	  is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/example_xta_sa01.c">GitHub</link>. Source code is fully
+	  commented for readability.
+	</para>
+      </section>
     </section>
     <section>
-      <title>Source Code</title>
+      <title>Example using C++ language</title>
       <para>
-	Source code for program <filename>example_xta_sa01.c</filename> is
-	installed in directory
-	<filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta</filename> and
-	is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/example_xta_sa01.c">GitHub</link>. Source code is fully
-	commented for readability.
+	The supplied example (<filename>example_xta_sa11.cpp</filename>) uses
+	PostgreSQL in the role of <quote>Resource Manager 1</quote> and MySQL
+	(or MariaDB) in the role of <quote>Resource Manager 2</quote>; please
+	refer to the instructions explained :
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_MySQL"/>
+	    to set-up a running environment for MySQL server
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_PostgreSQL"/>
+	    to set-up a running environment for PostgreSQL server
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="Starting_the_state_server"/>
+	    to start up the LIXA state server
+	  </para></listitem>
+	</itemizedlist>
       </para>
+      <para>
+	Create a working directory in a place you are comfortable with:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ cd
+tiian@ubuntu1404-64:~$ mkdir tmp
+tiian@ubuntu1404-64:~$ cd tmp
+tiian@ubuntu1404-64:~/tmp$ 
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	Copy file <filename>example_xta_sa11.cpp</filename> in your working
+	dir:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/cpp/example_xta_sa11.cpp .
+	  </screen></td></tr></tbody>
+	</table>
+	Substitute <quote>X.Y.Z</quote> with the actual version of
+	the software you installed.
+      </para>
+      <para>
+	Compile and link the C example program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ . /opt/lixa/bin/lixa_env.sh 
+tiian@ubuntu1404-64:~/tmp$ g++ example_xta_sa11.cpp $(lixa-config -c -f -l -d --xta --language-cpp) -lpq $(mysql_config --libs_r) -o example_xta_sa11
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	If the previous steps worked for you, you should have an executable
+	file of name <filename>example_xta_sa11</filename> in your current 
+	directory:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -l
+total 36
+-rwxrwxr-x 1 tiian tiian 25613 ago 24 22:19 example_xta_sa11
+-rw-r--r-- 1 tiian tiian  7748 ago 24 22:19 example_xta_sa11.cpp
+	  </screen></td></tr></tbody>
+	</table>
+	The example program accepts two arguments:
+	<itemizedlist mark="bullet">
+          <listitem><para>
+	    commit (or rollback): use <quote>1</quote> if you want to perform
+	    a global commit or <quote>0</quote> if you want to perform a global
+	    rollback
+	  </para></listitem>
+          <listitem><para>
+	    insert (or delete): use <quote>1</quote> if you want to insert rows
+	    in databases or <quote>0</quote> if you want to delete rows from
+	    databases
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Open three terminal sessions: one for example execution,
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -la
+total 44
+drwxrwxr-x  2 tiian tiian  4096 ago 24 22:19 .
+drwxr-xr-x 12 tiian tiian  4096 ago 24 22:02 ..
+-rwxrwxr-x  1 tiian tiian 25613 ago 24 22:19 example_xta_sa11
+-rw-r--r--  1 tiian tiian  7748 ago 24 22:19 example_xta_sa11.cpp
+	  </screen></td></tr></tbody>
+	</table>
+	one for PostgreSQL queries
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ psql testdb
+psql (9.3.23)
+Type "help" for help.
+
+testdb=>
+	  </screen></td></tr></tbody>
+	</table>
+	and one for MySQL queries
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ mysql -h localhost -u lixa lixa
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 44
+Server version: 5.5.61-0ubuntu0.14.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
+	  </screen></td></tr></tbody>
+	</table>
+	set <varname>LIXA_PROFILE</varname> environment variable to
+	<constant>XTA_DYN</constant>
+	a profile without static Resource Managers defined in
+	<filename>lixac_conf.xml</filename>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	insert rows in tables and commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_sa11 1 1
+PostgreSQL, executing &gt;INSERT INTO authors VALUES(1921, 'Rigoni Stern', 'Mario')&lt;
+MySQL, executing &gt;INSERT INTO authors VALUES(1919, 'Levi', 'Primo')&lt;
+tiian@ubuntu1404-64:~/tmp$
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=&gt; select * from authors;
+  id  |  last_name   | first_name 
+------+--------------+------------
+ 1921 | Rigoni Stern | Mario
+(1 row)
+
+testdb=&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql&gt; select * from authors;
++------+-----------+------------+
+| id   | last_name | first_name |
++------+-----------+------------+
+| 1919 | Levi      | Primo      |
++------+-----------+------------+
+1 row in set (0.00 sec)
+
+mysql&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	delete rows from tables, but rollback:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_sa11 0 0
+PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
+MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
+tiian@ubuntu1404-64:~/tmp$
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=&gt; select * from authors;
+  id  |  last_name   | first_name 
+------+--------------+------------
+ 1921 | Rigoni Stern | Mario
+(1 row)
+
+testdb=&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> select * from authors;
++------+-----------+------------+
+| id   | last_name | first_name |
++------+-----------+------------+
+| 1919 | Levi      | Primo      |
++------+-----------+------------+
+1 row in set (0.00 sec)
+
+mysql>
+	  </screen></td></tr></tbody>
+	</table>
+	delete rows and commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_sa11 1 0
+PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
+MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
+tiian@ubuntu1404-64:~/tmp$
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from authors;
+ id | last_name | first_name 
+----+-----------+------------
+(0 rows)
+
+testdb=>
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> select * from authors;
+Empty set (0.00 sec)
+
+mysql>
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <section>
+	<title>Source Code</title>
+	<para>
+	  Source code for program <filename>example_xta_sa11.c</filename> is
+	  installed in directory
+	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/cpp</filename> and
+	  is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/cpp/example_xta_sa11.cpp">GitHub</link>.
+	  Source code is fully commented for readability.
+	</para>
+      </section>
     </section>
   </section>
   <section>

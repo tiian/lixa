@@ -70,7 +70,7 @@ namespace xta {
          *                   applications and @ref Branch will
          *                   not be called for this transaction <br>
          */
-        void Start(bool MultipleBranches);
+        void Start(bool MultipleBranches=false);
         /**
          * Commit the transaction represented by this transaction object
          * @param[in] NonBlocking boolean value: <br>
@@ -78,7 +78,7 @@ namespace xta {
          *            false = xa_prepare will block the caller <br>
          *            the option is used only for multiple branch transactions
          */
-        void Commit(bool NonBlocking);
+        void Commit(bool NonBlocking=false);
         /**
          * Rollback the transaction represented by this transaction object
          */
