@@ -54,7 +54,7 @@ namespace xta {
          */
         xta_xa_resource_t *getCBaseXaResource() {
             return (xta_xa_resource_t *)mxar; }
-
+        
         private:
         /**
          * Pointer to the native C object

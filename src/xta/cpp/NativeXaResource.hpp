@@ -21,8 +21,45 @@
 
 
 
+/* include XTA header file */
+#include "xta.h"
+#include "XaResource.hpp"
+
+
+
 namespace xta {
     class NativeXaResource : public XaResource {
+        public:
+        /**
+         * Create a new Native XA Resource class
+         * @param[in] name : the name assigned to the Resource Manager just for
+         *                   debugging purposes
+         * @param[in] switch_file : absolute path of the XA switch file that
+         *                          points to xa_ functions for the resource
+         *                          manager
+         * @param[in] open_info : a string that may contain instance-specific
+         *                        information for the resource manager when
+         *                        xa_open must be called
+         * @param[in] close_info : a string that may contain instance-specific
+         *                         information for the resource manager when
+         *                         xa_close must be called
+         */
+        NativeXaResource(std::string const& name,
+                         std::string const& switch_file,
+                         std::string const& open_info,
+                         std::string const& close_info);
+        ~NativeXaResource();
+        /**
+         * Return a pointer to the C base XA resource object
+         */
+        xta_xa_resource_t *getCBaseXaResource() {
+            return (xta_xa_resource_t *)nxar; }
+        
+        private:
+        /**
+         * Pointer to the native C object
+         */
+        xta_native_xa_resource_t *nxar;
     };
 };
 

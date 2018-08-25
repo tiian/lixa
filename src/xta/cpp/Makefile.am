@@ -18,6 +18,7 @@ include_HEADERS = Xta.hpp AcquiredXaResource.hpp Exception.hpp \
 	XaResource.hpp Xid.hpp
 lib_LTLIBRARIES = liblixtapp.la
 liblixtapp_la_SOURCES = Transaction.cpp TransactionManager.cpp Xta.cpp \
+	NativeXaResource.cpp Xid.cpp \
 	$(MAYBE_MYSQL_SOURCES) $(MAYBE_POSTGRESQL_SOURCES)
 AM_CXXFLAGS = -Wall -fno-strict-aliasing
 liblixtapp_la_CPPFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/src/client \

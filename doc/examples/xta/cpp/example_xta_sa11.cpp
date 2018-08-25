@@ -39,11 +39,9 @@
 
 
 
+// Standard headers
 #include <iostream>
-
-/*
- * This header is necessary for all the stuff related to XTA
- */
+// This header is necessary for all the stuff related to XTA
 #include <xta/cpp/Xta.hpp>
 
 

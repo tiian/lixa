@@ -753,8 +753,8 @@ WARN_LOGFILE           =
 #                         src/common \
 #                         src/server
 #			../../src/client/client_config.h \
-INPUT                  = ../../src/xta/cpp 
-#			../../src/common/xa.h \
+INPUT                  = ../../src/xta/cpp \
+			../../src/common/xa.h
 #			../../src/client/lixa_iface.h \
 #			../../src/common/lixa_config.h \
 #			../../src/common/lixa_errors.h

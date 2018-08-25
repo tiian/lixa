@@ -1,7 +1,6 @@
 Implement XTA for C++:
-- go on with example example_xta_sa11.cpp
-  test it and write documentation (manual)
-
+- go on with example example_xta_macc11.cpp : it does not link
+  convert pipe communication from C to C++
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation
 

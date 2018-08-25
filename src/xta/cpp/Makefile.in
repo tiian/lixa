@@ -132,13 +132,14 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(docdir)" \
 LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixtapp_la_DEPENDENCIES = $(top_srcdir)/src/xta/liblixta.la
 am__liblixtapp_la_SOURCES_DIST = Transaction.cpp \
-	TransactionManager.cpp Xta.cpp MysqlXaResource.cpp \
-	PostgresqlXaResource.cpp
+	TransactionManager.cpp Xta.cpp NativeXaResource.cpp Xid.cpp \
+	MysqlXaResource.cpp PostgresqlXaResource.cpp
 @COMPILE_MYSQL_STUFF_TRUE@am__objects_1 =  \
 @COMPILE_MYSQL_STUFF_TRUE@	liblixtapp_la-MysqlXaResource.lo
 @COMPILE_POSTGRESQL_STUFF_TRUE@am__objects_2 = liblixtapp_la-PostgresqlXaResource.lo
 am_liblixtapp_la_OBJECTS = liblixtapp_la-Transaction.lo \
 	liblixtapp_la-TransactionManager.lo liblixtapp_la-Xta.lo \
+	liblixtapp_la-NativeXaResource.lo liblixtapp_la-Xid.lo \
 	$(am__objects_1) $(am__objects_2)
 liblixtapp_la_OBJECTS = $(am_liblixtapp_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -423,6 +424,7 @@ include_HEADERS = Xta.hpp AcquiredXaResource.hpp Exception.hpp \
 
 lib_LTLIBRARIES = liblixtapp.la
 liblixtapp_la_SOURCES = Transaction.cpp TransactionManager.cpp Xta.cpp \
+	NativeXaResource.cpp Xid.cpp \
 	$(MAYBE_MYSQL_SOURCES) $(MAYBE_POSTGRESQL_SOURCES)
 
 AM_CXXFLAGS = -Wall -fno-strict-aliasing
@@ -515,9 +517,11 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-MysqlXaResource.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-NativeXaResource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-PostgresqlXaResource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-Transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-TransactionManager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-Xid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-Xta.Plo@am__quote@
 
 .cpp.o:
@@ -561,6 +565,20 @@ liblixtapp_la-Xta.lo: Xta.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='Xta.cpp' object='liblixtapp_la-Xta.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblixtapp_la-Xta.lo `test -f 'Xta.cpp' || echo '$(srcdir)/'`Xta.cpp
+
+liblixtapp_la-NativeXaResource.lo: NativeXaResource.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblixtapp_la-NativeXaResource.lo -MD -MP -MF $(DEPDIR)/liblixtapp_la-NativeXaResource.Tpo -c -o liblixtapp_la-NativeXaResource.lo `test -f 'NativeXaResource.cpp' || echo '$(srcdir)/'`NativeXaResource.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixtapp_la-NativeXaResource.Tpo $(DEPDIR)/liblixtapp_la-NativeXaResource.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='NativeXaResource.cpp' object='liblixtapp_la-NativeXaResource.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblixtapp_la-NativeXaResource.lo `test -f 'NativeXaResource.cpp' || echo '$(srcdir)/'`NativeXaResource.cpp
+
+liblixtapp_la-Xid.lo: Xid.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblixtapp_la-Xid.lo -MD -MP -MF $(DEPDIR)/liblixtapp_la-Xid.Tpo -c -o liblixtapp_la-Xid.lo `test -f 'Xid.cpp' || echo '$(srcdir)/'`Xid.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixtapp_la-Xid.Tpo $(DEPDIR)/liblixtapp_la-Xid.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='Xid.cpp' object='liblixtapp_la-Xid.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblixtapp_la-Xid.lo `test -f 'Xid.cpp' || echo '$(srcdir)/'`Xid.cpp
 
 liblixtapp_la-MysqlXaResource.lo: MysqlXaResource.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblixtapp_la-MysqlXaResource.lo -MD -MP -MF $(DEPDIR)/liblixtapp_la-MysqlXaResource.Tpo -c -o liblixtapp_la-MysqlXaResource.lo `test -f 'MysqlXaResource.cpp' || echo '$(srcdir)/'`MysqlXaResource.cpp

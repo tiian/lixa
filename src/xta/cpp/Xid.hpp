@@ -23,6 +23,22 @@
 
 namespace xta {
     class Xid {
+        public:
+        /*
+         * Create a new Transaction Identifier object, this class is intended
+         * only to be a proxy of the C base class: it does not allocate and/or
+         * create a real identifier, just map an existent one
+         * @param[in] xid is the C base object that will be wrapped
+         */
+        Xid(const xta_xid_t *xid);
+        ~Xid();
+        /**
+         * Convert the transaction ID to an ASCII string
+         */
+        string toString();
+        
+        private:
+        const xta_xid_t    *xid;
     };
 };
 

@@ -84,6 +84,21 @@ namespace xta {
             throw Exception(rc, "xta_transaction_rollback");
     }
     
+    void Transaction::Suspend(long Flags)
+    {
+        int rc;
+        if (LIXA_RC_OK != (rc = xta_transaction_suspend(tx, Flags)))
+            throw Exception(rc, "xta_transaction_suspend");
+    }
+
+    void Transaction::Resume(const string& XidString, long Flags)
+    {
+        int rc;
+        if (LIXA_RC_OK != (rc = xta_transaction_resume(
+                               tx, XidString.c_str(), Flags)))
+            throw Exception(rc, "xta_transaction_resume");
+    }
+    
     void Transaction::Close(void)
     {
         int rc;
@@ -98,4 +113,11 @@ namespace xta {
             throw Exception(rc, "xta_transaction_branch");
     }
 
+    Xid Transaction::getXid()
+    {
+        const xta_xid_t *xid = NULL;
+        if (NULL == (xid = xta_transaction_get_xid(tx)))
+            throw Exception(LIXA_RC_NULL_OBJECT, "xta_transaction_get_xid");
+        return Xid(xid);
+    }
 }

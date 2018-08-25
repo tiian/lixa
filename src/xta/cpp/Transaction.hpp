@@ -26,6 +26,7 @@
 
 /* include XTA header file */
 #include "xta.h"
+#include "Xid.hpp"
 #include "XaResource.hpp"
 
 
@@ -84,6 +85,25 @@ namespace xta {
          */
         void Rollback(void);
         /**
+         * Suspend the transaction represented by this transaction object; the
+         * transaction can be resumed with @ref Resume at a later time
+         * @param[in] Flags can be @ref TMMIGRATE if the Resource Manager
+         *            supports transaction migration and @ref TMNOFLAGS
+         *            otherwise
+         */
+        void Suspend(long Flags=TMMIGRATE);
+        /**
+         * Resume the transaction represented by xid in this transaction
+         * object; the transaction has been previously suspended with
+         * @ref Suspend
+         * @param[in] XidString serialized identifier of the transaction that
+         *            must be resumed
+         * @param[in] Flags can be @ref TMRESUME if the transaction has been
+         *            suspended using @ref TMMIGRATE or @ref TMJOIN if the
+         *            transaction has been suspended using @ref TMNOFLAGS
+         */
+        void Resume(const string& XidString, long Flags=TMRESUME);
+        /**
          * Shut down the XA Resource Managers and the XA Transaction Manager
          * after transactional Unit of Work completion. From the XA
          * specification point of view, it calls xa_close (for the Native XA
@@ -98,7 +118,8 @@ namespace xta {
          *            that must be branched
          */
         void Branch(const string& XidString);
-        
+
+        Xid getXid();
         private:
         /**
          * Pointer to the native C object

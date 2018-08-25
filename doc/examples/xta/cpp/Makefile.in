@@ -342,7 +342,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-doc_DATA = README.md example_xta_sa11.cpp
+doc_DATA = README.md example_xta_sa11.cpp example_xta_macc11.cpp
 EXTRA_DIST = $(doc_DATA)
 all: all-am
 

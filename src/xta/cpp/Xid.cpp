@@ -16,30 +16,40 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef XTA_HPP
-# define XTA_HPP
 
 
 
 /* include XTA header file */
 #include "xta.h"
-/* include all XTA C++ header files */
+
+
+
+/* set module trace flag */
+#ifdef LIXA_TRACE_MODULE
+# undef LIXA_TRACE_MODULE
+#endif /* LIXA_TRACE_MODULE */
+#define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_XTA
+
+
+
 #include "Exception.hpp"
-#include "NativeXaResource.hpp"
-#include "MysqlXaResource.hpp"
-#include "PostgresqlXaResource.hpp"
-#include "Transaction.hpp"
-#include "TransactionManager.hpp"
+#include "Xid.hpp"
 
 
 
 namespace xta {
-    class Xta {
-        public:
-        static void Init(void);
+    Xid::Xid(const xta_xid_t *xid)
+    {
+        this->xid = xid;
     };
-};
+    
+    Xid::~Xid()
+    {
+        xid = NULL;
+    };
 
-
-
-#endif /* XTA_HPP */
+    string Xid::toString()
+    {
+        return string(xta_xid_to_string(xid));
+    }
+}
