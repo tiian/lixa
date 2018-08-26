@@ -71,9 +71,9 @@ namespace xta {
     
     void Transaction::Commit(bool NonBlocking)
     {
-        int rc;
-        if (LIXA_RC_OK != (rc = xta_transaction_commit(
-                               tx, NonBlocking)))
+        int rc = xta_transaction_commit(tx, NonBlocking);
+        if ((NonBlocking && LIXA_RC_WOULD_BLOCK != rc) ||
+            (!NonBlocking && LIXA_RC_OK != rc))
             throw Exception(rc, "xta_transaction_commit");
     }
     

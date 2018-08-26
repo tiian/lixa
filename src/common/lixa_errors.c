@@ -39,7 +39,7 @@ const char *lixa_strerror(int ret_cod)
                 "same global transaction";
         case LIXA_RC_WOULD_BLOCK:
             return "WARNING: the operation would block the client, but 'NON "
-                "BLOCK' option has been specified";
+                "BLOCKING' option has been specified";
         case LIXA_RC_OPERATION_POSTPONED:
             return "WARNING: an operation must be postponed because not all "
                 "conditions are met";

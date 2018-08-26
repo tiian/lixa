@@ -29,24 +29,24 @@ following commands:
 
 `g++ example_xta_macc11.cpp $(lixa-config -c -f -l -d --xta --language-cpp) -I/opt/oracle/instantclient_12_1/sdk/include -L/opt/oracle/instantclient_12_1 -Wl,-rpath -Wl,/opt/oracle/instantclient_12_1 -l clntsh -l nnz12 -o example_xta_macc11`
 
-
-
-Below stuff is not for C++, just copied from C: work in progress...
-
-
-
 ## "Multiple Applications, Concurrent Branches/Pseudo Synchronous" Pattern ##
 
-Program *example_xta_macbps01.c* requires MySQL (or MariaDB) to work.
-Program *example_xta_macbps02.c* requires PostgreSQL to work.
+Program *example_xta_macbps11.cpp* requires MySQL (or MariaDB) to work.
+Program *example_xta_macbps12.cpp* requires PostgreSQL to work.
 After proper installation of LIXA, you can compile the programs with the
 following commands:
 
 `. /opt/lixa/bin/lixa_env.sh`
 
-`gcc example_xta_macbps01.c $(lixa-config -x -c -f -l -d) $(mysql_config --libs_r) -o example_xta_macbps01`
+`g++ example_xta_macbps11.cpp $(lixa-config -c -f -l -d --xta --language-cpp) $(mysql_config --libs_r) -o example_xta_macbps11`
 
-`gcc example_xta_macbps02.c $(lixa-config -x -c -f -l -d) -lpq -o example_xta_macbps02`
+`g++ example_xta_macbps12.cpp $(lixa-config -c -f -l -d --xta --language-cpp) -lpq -o example_xta_macbps12`
+
+
+
+Below stuff is not for C++, just copied from C: work in progress...
+
+
 
 ## "Multiple Applications, Concurrent Branches/Pseudo Asynchronous" Pattern ##
 
@@ -60,5 +60,4 @@ following commands:
 `gcc example_xta_macbpa01.c $(lixa-config -x -c -f -l -d) $(mysql_config --libs_r) -o example_xta_macbpa01`
 
 `gcc example_xta_macbpa02.c $(lixa-config -x -c -f -l -d) -lpq -o example_xta_macbpa02`
-
 

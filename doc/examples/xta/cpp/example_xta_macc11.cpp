@@ -291,8 +291,7 @@ int main(int argc, char *argv[])
          * Delete MySQL native and XA resource
          */
         delete xar;
-        
-        
+                
     } catch (xta::Exception e) {
         /*
          * what() is a standard method that describes the exception

@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
     }
     /* prepare the reply message */
     if (commit)
-        sprintf(fifo_buffer, "PREPARED for COMMIT");
+        sprintf(fifo_buffer, "PREPARED_for_COMMIT");
     else
         sprintf(fifo_buffer, "ROLLBACK");
     /* write the message */

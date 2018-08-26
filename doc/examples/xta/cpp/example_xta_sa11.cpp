@@ -125,9 +125,7 @@ int main(int argc, char *argv[])
      * create XTA objects necessary to start a transaction
      */
     try {
-        /*
-         * create a new XTA Transaction Manager object
-         */
+        // create a new XTA Transaction Manager object
         tm = new xta::TransactionManager();
         /*
          * create an XA resource for PostgreSQL
@@ -136,31 +134,19 @@ int main(int argc, char *argv[])
          */
         xar1 = new xta::PostgresqlXaResource(
             rm1, "PostgreSQL", "dbname=testdb");
-        /*
-         * create an XA resource for MySQL
-         */
+        // create an XA resource for MySQL
         xar2 = new xta::MysqlXaResource(
             rm2, "MySQL", "localhost,0,lixa,,lixa");
-        /*
-         * Create a new XA global transaction and retrieve a reference from
-         * the TransactionManager object
-         */
+        // Create a new XA global transaction and retrieve a reference from
+        // the TransactionManager object
         xta::Transaction tx = tm->CreateTransaction();
-        /*
-         * Enlist PostgreSQL resource to transaction
-         */
+        // Enlist PostgreSQL resource to transaction
         tx.EnlistResource(xar1);
-        /*
-         * Enlist MySQL resource to Transaction
-         */
+        // Enlist MySQL resource to Transaction
         tx.EnlistResource(xar2);
-        /*
-         * Open all resources enlisted by the Transaction
-         */
+        // Open all resources enlisted by the Transaction
         tx.Open();
-        /*
-         * Start a new XA global transaction with a single branch
-         */
+        // Start a new XA global transaction with a single branch
         tx.Start();
         /*
          * At this point, it's time to do something with the Resource Managers
