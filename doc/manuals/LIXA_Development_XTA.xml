@@ -963,7 +963,7 @@ tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/cpp/example_x
 	the software you installed.
       </para>
       <para>
-	Compile and link the C example program:
+	Compile and link the C++ example program:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -1374,7 +1374,7 @@ mysql>
       </para></note>
     </section>
     <section>
-      <title>Example</title>
+      <title>Example using C language</title>
       <para>
 	The supplied example (<filename>example_xta_macc01.c</filename>) uses
 	Oracle in the role of <quote>Resource Manager 1</quote>; please
@@ -1590,16 +1590,16 @@ ID         LAST_NAME            FIRST_NAME
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 0 0 1 xid.txt
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 0 0 1 xid.fifo
 OCI statement &gt;DELETE FROM authors WHERE ID=1930&lt; completed
-XID='1279875137.1f31836dab1a4081b488a9b3565faaa4.7b4180ecb8fee8c12cbc13637ab4eabb' has been written in file 'xid.txt'
+XID='1279875137.1f31836dab1a4081b488a9b3565faaa4.7b4180ecb8fee8c12cbc13637ab4eabb' has been written in file 'xid.fifo'
 	  </screen></td></tr></tbody>
 	</table>
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 0 0 0 xid.txt
-XID='1279875137.1f31836dab1a4081b488a9b3565faaa4.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid.txt'
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 0 0 0 xid.fifo
+XID='1279875137.1f31836dab1a4081b488a9b3565faaa4.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid.fifo'
 OCI statement &gt;DELETE FROM authors WHERE ID=1948&lt; completed
 	  </screen></td></tr></tbody>
 	</table>
@@ -1665,16 +1665,16 @@ xaoclose: rtn 0
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 1 0 1 xid.txt
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 1 0 1 xid.fifo
 OCI statement &gt;DELETE FROM authors WHERE ID=1930&lt; completed
-XID='1279875137.bfd10e4a5fc541f587727304ae34cccf.7b4180ecb8fee8c12cbc13637ab4eabb' has been written in file 'xid.txt'
+XID='1279875137.bfd10e4a5fc541f587727304ae34cccf.7b4180ecb8fee8c12cbc13637ab4eabb' has been written in file 'xid.fifo'
 	  </screen></td></tr></tbody>
 	</table>
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 1 0 0 xid.txt
-XID='1279875137.bfd10e4a5fc541f587727304ae34cccf.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid.txt'
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 1 0 0 xid.fifo
+XID='1279875137.bfd10e4a5fc541f587727304ae34cccf.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid.fifo'
 OCI statement &gt;DELETE FROM authors WHERE ID=1948&lt; completed
 	  </screen></td></tr></tbody>
 	</table>
@@ -1751,17 +1751,406 @@ xaoclose: rtn 0
 	Resource Manager (hint: function <function>xaoprepare</function> has
 	not been called by the Transaction Manager).
       </para>
+      <section>
+	<title>Source Code</title>
+	<para>
+	  Source code for program <filename>example_xta_macc01.c</filename> is
+	  installed in directory
+	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta</filename>
+	  and is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/example_xta_macc01.c">GitHub</link>.
+	  Source code is fully commented for readability.
+	</para>
+      </section>
     </section>
     <section>
-      <title>Source Code</title>
+      <title>Example using C++ language</title>
       <para>
-	Source code for program <filename>example_xta_macc01.c</filename> is
-	installed in directory
-	<filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta</filename> and
-	is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/example_xta_macc01.c">GitHub</link>. Source code is fully
-	commented for readability.
+	The supplied example (<filename>example_xta_macc11.cpp</filename>) uses
+	Oracle in the role of <quote>Resource Manager 1</quote>; please
+	refer to the instructions explained:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_Oracle_Remote"/> 
+	    to set-up the correct client/server configuration for Oracle
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="Starting_the_state_server"/>
+	    to start up the LIXA state server
+	  </para></listitem>
+	</itemizedlist>
       </para>
+      <para>
+	Create a working directory in a place you are comfortable with:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ cd
+tiian@ubuntu1404-64:~$ mkdir tmp
+tiian@ubuntu1404-64:~$ cd tmp
+tiian@ubuntu1404-64:~/tmp$ 
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	Copy file <filename>example_xta_macc11.cpp</filename> in your working
+	dir:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+	    tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/example_xta_macc11.cpp .
+	  </screen></td></tr></tbody>
+	</table>
+	Substitute <quote>X.Y.Z</quote> with the actual version of
+	the software you installed.
+      </para>
+      <para>
+	Compile and link the C++ example program:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ . /opt/lixa/bin/lixa_env.sh 
+tiian@ubuntu1404-64:~/tmp$ g++ example_xta_macc11.cpp \
+> $(lixa-config -c -f -l -d --xta --language-cpp) \
+> -I/opt/oracle/instantclient_12_1/sdk/include \
+> -L/opt/oracle/instantclient_12_1 -Wl,-rpath \
+> -Wl,/opt/oracle/instantclient_12_1 -l clntsh -l nnz12 -o example_xta_macc11
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	If the previous steps worked for you, you should have an executable
+	file of name <filename>example_xta_macc11</filename> in your current 
+	directory:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -l
+total 40
+-rwxrwxr-x 1 tiian tiian 26479 ago 26 11:54 example_xta_macc11
+-rw-r--r-- 1 tiian tiian 11440 ago 26 11:43 example_xta_macc11.cpp
+	  </screen></td></tr></tbody>
+	</table>
+	The example program accepts four arguments:
+	<itemizedlist mark="bullet">
+          <listitem><para>
+	    commit (or rollback): use <quote>1</quote> if you want to perform
+	    a global commit or <quote>0</quote> if you want to perform a global
+	    rollback
+	  </para></listitem>
+          <listitem><para>
+	    insert (or delete): use <quote>1</quote> if you want to insert rows
+	    in databases or <quote>0</quote> if you want to delete rows from
+	    databases
+	  </para></listitem>
+          <listitem><para>
+	    superior (or subordinate): use <quote>1</quote> if you want to
+	    execute the <quote>superior</quote> part depicted in the
+	    sequence diagram (<quote>Application Program 1</quote>) or
+	    <quote>0</quote> if you want to execute the
+	    <quote>subordinate</quote> part depicted in the sequence diagram
+	    (<quote>Application Program 2</quote>)
+	  </para></listitem>
+          <listitem><para>
+	    XIDfilename: a valid name for a file that must be used to transfer
+	    XID (Transaction ID) from <quote>Application Program 1</quote> to
+	    <quote>Application Program 2</quote>; XIDfilename can be the name
+	    of a regular file or of a FIFO (named pipe)
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Open three terminal sessions: one for Application Program 1
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -la
+total 48
+drwxrwxr-x  2 tiian tiian  4096 ago 26 11:55 .
+drwxr-xr-x 12 tiian tiian  4096 ago 26 11:43 ..
+-rwxrwxr-x  1 tiian tiian 26479 ago 26 11:54 example_xta_macc11
+-rw-r--r--  1 tiian tiian 11440 ago 26 11:43 example_xta_macc11.cpp
+	  </screen></td></tr></tbody>
+	</table>
+	another one for Application Program 2
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -la
+total 48
+drwxrwxr-x  2 tiian tiian  4096 ago 26 11:55 .
+drwxr-xr-x 12 tiian tiian  4096 ago 26 11:43 ..
+-rwxrwxr-x  1 tiian tiian 26479 ago 26 11:54 example_xta_macc11
+-rw-r--r--  1 tiian tiian 11440 ago 26 11:43 example_xta_macc11.cpp
+	  </screen></td></tr></tbody>
+	</table>
+	and the last one for Oracle <command>sqlplus</command> client
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - Oracle]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ . ./oracle_env.sh 
+tiian@ubuntu1404-64:~$ sqlplus hr/hr@lixa_ora_db
+
+SQL*Plus: Release 12.1.0.2.0 Production on Tue Mar 27 22:08:39 2018
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Sun Aug 26 2018 11:42:15 +02:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	create a FIFO (named pipe) in current directory:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -la
+total 48
+drwxrwxr-x  2 tiian tiian  4096 ago 26 11:58 .
+drwxr-xr-x 12 tiian tiian  4096 ago 26 11:57 ..
+-rwxrwxr-x  1 tiian tiian 26479 ago 26 11:54 example_xta_macc11
+-rw-r--r--  1 tiian tiian 11440 ago 26 11:43 example_xta_macc11.cpp
+prw-rw-r--  1 tiian tiian     0 ago 26 11:58 xid.fifo
+	  </screen></td></tr></tbody>
+	</table>
+	set <varname>LIXA_PROFILE</varname> environment variable to
+	<constant>XTA_DYN</constant> a profile without static 
+	Resource Managers defined in
+	<filename>lixac_conf.xml</filename>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	in the first terminal session, start
+	<command>example_xta_macc11</command> in the role of AP1 and in the
+	second terminal session, start <command>example_xta_macc11</command>
+	in the role of AP2
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc11 1 1 1 xid.fifo 
+OCI statement &gt;INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) VALUES(1930, 'Bonatti', 'Walter')&lt; completed
+XID='1279875137.bd729d47f71b408e92c332a64502e068.7b4180ecb8fee8c12cbc13637ab4eabb' has been written to file 'xid.fifo'
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc11 1 1 0 xid.fifo 
+XID='1279875137.bd729d47f71b408e92c332a64502e068.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid.fifo'
+OCI statement &gt;INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) VALUES(1948, 'Casarotto', 'Renato')&lt; completed
+	  </screen></td></tr></tbody>
+	</table>
+	<note><para>
+	  Application Program 1 suspends its execution and waits 
+	  Application Program 2 start: this is a consequence of the FIFO
+	  behavior
+	</para></note>
+	check Oracle table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - Oracle]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL&gt; select * from authors;
+
+ID         LAST_NAME            FIRST_NAME
+---------- -------------------- --------------------
+1930       Bonatti              Walter
+1948       Casarotto            Renato
+
+	  </screen></td></tr></tbody>
+	</table>
+	use a regular file to perform a <command>SQL DELETE</command> followed
+	by a rollback:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc11 0 0 1 xid.fifo
+OCI statement &gt;DELETE FROM authors WHERE ID=1930&lt; completed
+XID='1279875137.f54399449c1d409c999dc8010e7d6e9f.7b4180ecb8fee8c12cbc13637ab4eabb' has been written to file 'xid.fifo'
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc11 0 0 0 xid.fifo
+XID='1279875137.f54399449c1d409c999dc8010e7d6e9f.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid.fifo'
+OCI statement &gt;DELETE FROM authors WHERE ID=1948&lt; completed
+	  </screen></td></tr></tbody>
+	</table>
+	<note><para>
+	  Application Program 1 ends its execution without waiting for
+	  Application Program 2 start: this is a consequence of the regular
+	  file behavior
+	</para></note>
+	check Oracle table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - Oracle]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL&gt; select * from authors;
+
+ID         LAST_NAME            FIRST_NAME
+---------- -------------------- --------------------
+1930       Bonatti              Walter
+1948       Casarotto            Renato
+
+	  </screen></td></tr></tbody>
+	</table>
+	as expected, the two rows are still in the table because the XA global
+	transaction has been rolled back by Application Program 2; XA functions
+	executed by Oracle can be inspected in its trace file:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ tail -n 30 /tmp/xa_NULL08262018.trc 
+120438.18832.1685579456.0:
+xaorollback: xid=0x4c495841-f54399449c1d409c999dc8010e7d6e9f-7b4180ecb8fee8c12cbc13637ab4eabb, rmid=0, flags=0x0
+
+
+120438.18832.1685579456.0:
+OCITransRollback: Attempting
+
+
+120438.18832.1685579456.0:
+OCITransRollback: Succeeded
+
+
+120438.18832.1685579456.0:
+xaorollback: rtn 0
+
+
+120438.18832.1685579456.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+
+120438.18832.1685579456.0:
+OCIServerDetach: Attempting
+
+
+120438.18832.1685579456.0:
+OCIServerDetach: Succeeded
+
+
+120438.18832.1685579456.0:
+xaoclose: rtn 0
+	  </screen></td></tr></tbody>
+	</table>
+	to complete the exercise, use a regular file to perform a
+	<command>SQL DELETE</command> followed by a commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc11 1 0 1 xid.fifo
+OCI statement &gt;DELETE FROM authors WHERE ID=1930&lt; completed
+XID='1279875137.d1c98d095a64415eb7370fc781af25d9.7b4180ecb8fee8c12cbc13637ab4eabb' has been written to file 'xid.fifo'
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc11 1 0 0 xid.fifo
+XID='1279875137.d1c98d095a64415eb7370fc781af25d9.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid.fifo'
+OCI statement &gt;DELETE FROM authors WHERE ID=1948&lt; completed
+	  </screen></td></tr></tbody>
+	</table>
+	check Oracle table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - Oracle]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL&gt; select * from authors;
+
+no rows selected
+
+	  </screen></td></tr></tbody>
+	</table>
+	Finally the table is empty; XA functions
+	executed by Oracle can be inspected in its trace file:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ tail -n 50 /tmp/xa_NULL08262018.trc 
+120832.23393.3240638144.0:
+xaoclose: rtn 0
+
+
+120832.23394.1448613568.0:
+xaoend: xid=0x4c495841-d1c98d095a64415eb7370fc781af25d9-7b4180ecb8fee8c12cbc13637ab4eabb, rmid=0, flags=0x4000000
+
+
+120832.23394.1448613568.0:
+OCITransDetach: Attempting
+
+
+120832.23394.1448613568.0:
+OCITransDetach: Succeeded
+
+
+120832.23394.1448613568.0:
+xaoend: return 0
+
+
+120832.23394.1448613568.0:
+xaocommit: xid=0x4c495841-d1c98d095a64415eb7370fc781af25d9-7b4180ecb8fee8c12cbc13637ab4eabb, rmid=0, flags=0x40000000
+
+
+120832.23394.1448613568.0:
+OCITransCommit: Attempting
+
+
+120832.23394.1448613568.0:
+OCITransCommit: Succeeded
+
+
+120832.23394.1448613568.0:
+xaocommit: rtn 0
+
+
+120832.23394.1448613568.0:
+xaoclose: xa_info=, rmid=0, flags=0x0
+
+
+120832.23394.1448613568.0:
+OCIServerDetach: Attempting
+
+
+120832.23394.1448613568.0:
+OCIServerDetach: Succeeded
+
+
+120832.23394.1448613568.0:
+xaoclose: rtn 0
+	  </screen></td></tr></tbody>
+	</table>
+	The trace shows that XTA performed a <quote>one phase commit</quote>
+	instead of a <quote>two phase commit</quote> because there's only one
+	Resource Manager (hint: function <function>xaoprepare</function> has
+	not been called by the Transaction Manager).
+      </para>
+      <section>
+	<title>Source Code</title>
+	<para>
+	  Source code for program <filename>example_xta_macc11.cpp</filename>
+	  is installed in directory
+	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/cpp</filename>
+	  and is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/cpp/example_xta_macc11.cpp">GitHub</link>.
+	  Source code is fully commented for readability.
+	</para>
+      </section>
     </section>
+
   </section>
   <section xml:id="xta_macbps">
     <title>The

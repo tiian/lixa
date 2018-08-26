@@ -27,7 +27,7 @@ following commands:
 
 `. /opt/lixa/bin/lixa_env.sh`
 
-`gcc example_xta_macc11.cpp $(lixa-config -c -f -l -d --xta --language-cpp) -I/opt/oracle/instantclient_12_1/sdk/include -L/opt/oracle/instantclient_12_1 -Wl,-rpath -Wl,/opt/oracle/instantclient_12_1 -l clntsh -l nnz12 -o example_xta_macc11`
+`g++ example_xta_macc11.cpp $(lixa-config -c -f -l -d --xta --language-cpp) -I/opt/oracle/instantclient_12_1/sdk/include -L/opt/oracle/instantclient_12_1 -Wl,-rpath -Wl,/opt/oracle/instantclient_12_1 -l clntsh -l nnz12 -o example_xta_macc11`
 
 
 

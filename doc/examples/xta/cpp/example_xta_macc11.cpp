@@ -43,6 +43,7 @@
 
 // Standard headers
 #include <iostream>
+#include <fstream>
 // This header is necessary for all the stuff related to XTA
 #include <xta/cpp/Xta.hpp>
 // This header is necessary for Oracle C Interface
@@ -69,9 +70,6 @@ int main(int argc, char *argv[])
     /* Name of the file that must be used to pass XID from superior to
      * subordinate program */
     const char                   *xid_filename = NULL;
-    /* File that must be used to pass XID from superior to
-     * subordinate program */
-    FILE                         *xid_file = NULL;
     /* Oracle OCI environment variables and handles */
     OCIEnv                       *oci_env;
     OCISvcCtx                    *oci_svc_ctx;
@@ -163,30 +161,24 @@ int main(int argc, char *argv[])
              */
             tx.Start();
         } else {
-            char buffer[200];
+            string xidString;
             /*
              * Open, write and close the file to pass xid_string from
              * superior to subordinate
              */
-            xid_file = fopen(xid_filename, "r");
-            if (xid_file == NULL) {
-                fprintf(stderr, "fopen(\"%s\", \"r\") returned NULL\n",
-                        xid_filename);
+            ifstream xidFile(xid_filename);
+            if (!xidFile) {
+                cerr << "Unable to open file '" << xid_filename << "'" << endl;
                 return 1;
             }
-            if (NULL == fgets(buffer, sizeof(buffer), xid_file)) {
-                fprintf(stderr, "Error while retrieving XID from file '%s'\n",
-                        xid_filename);
-                return 1;
-            }
-            fclose(xid_file);
-            xid_file = NULL;
-            printf("XID='%s' has been read from file '%s'\n",
-                   buffer, xid_filename);
+            xidFile >> xidString;
+            xidFile.close();
+            cout << "XID='" << xidString << "' has been read from file '" <<
+                xid_filename << "'" << endl;
             /*
              * Resume the global transaction started by a superior program
              */
-            tx.Resume(buffer);
+            tx.Resume(xidString);
         }
         /*
          * This part is boilerplate code related to Oracle OCI for XA: no
@@ -264,17 +256,15 @@ int main(int argc, char *argv[])
              * Open, write and close the file to pass xid_string from superior
              * to subordinate
              */
-            xid_file = fopen(xid_filename, "w");
-            if (xid_file == NULL) {
-                fprintf(stderr, "fopen(\"%s\", \"w\") returned NULL\n",
-                        xid_filename);
+            ofstream xidFile(xid_filename);
+            if (!xidFile) {
+                cerr << "Unable to open file '" << xid_filename << "'" << endl;
                 return 1;
             }
-            fprintf(xid_file, "%s", xidString.c_str());
-            fclose(xid_file);
-            xid_file = NULL;
-            printf("XID='%s' has been written in file '%s'\n",
-                   xidString.c_str(), xid_filename);
+            xidFile << xidString;
+            xidFile.close();
+            cout << "XID='" << xidString << "' has been written to file '" <<
+                xid_filename << "'" << endl;
         } else {
             if (commit) {
                 /*
