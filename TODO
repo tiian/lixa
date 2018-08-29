@@ -1,5 +1,5 @@
 Implement XTA for C++
-- complete examples
+- complete examples: document example_xta_macbpa11/example_xta_macbpa12
 - develop case tests
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation

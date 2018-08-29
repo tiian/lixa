@@ -44,20 +44,16 @@ following commands:
 
 
 
-Below stuff is not for C++, just copied from C: work in progress...
-
-
-
 ## "Multiple Applications, Concurrent Branches/Pseudo Asynchronous" Pattern ##
 
-Program *example_xta_macbpa01.c* requires MySQL (or MariaDB) to work.
-Program *example_xta_macbpa02.c* requires PostgreSQL to work.
+Program *example_xta_macbpa11.cpp* requires MySQL (or MariaDB) to work.
+Program *example_xta_macbpa12.cpp* requires PostgreSQL to work.
 After proper installation of LIXA, you can compile the programs with the
 following commands:
 
 `. /opt/lixa/bin/lixa_env.sh`
 
-`gcc example_xta_macbpa01.c $(lixa-config -x -c -f -l -d) $(mysql_config --libs_r) -o example_xta_macbpa01`
+`g++ example_xta_macbpa11.cpp $(lixa-config -c -f -l -d --xta --language-cpp) $(mysql_config --libs_r) -o example_xta_macbpa11`
 
-`gcc example_xta_macbpa02.c $(lixa-config -x -c -f -l -d) -lpq -o example_xta_macbpa02`
+`g++ example_xta_macbpa12.cpp $(lixa-config -c -f -l -d --xta --language-cpp) -lpq -o example_xta_macbpa12`
 

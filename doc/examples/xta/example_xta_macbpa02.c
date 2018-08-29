@@ -198,8 +198,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * the branch has the same global identifier, but a different branch id;
-     * the following statement is for the sake of debugging only
+     * the branch has the same global identifier, but a different branch id
      */
     xid_string = xta_xid_to_string(xta_transaction_get_xid(tx));
     if (xid_string == NULL) {

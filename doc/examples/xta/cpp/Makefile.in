@@ -343,7 +343,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 doc_DATA = README.md example_xta_sa11.cpp example_xta_macc11.cpp \
-	example_xta_macbps11.cpp example_xta_macbps12.cpp 
+	example_xta_macbps11.cpp example_xta_macbps12.cpp \
+	example_xta_macbpa11.cpp example_xta_macbpa12.cpp
 
 EXTRA_DIST = $(doc_DATA)
 all: all-am
