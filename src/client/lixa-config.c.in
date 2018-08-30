@@ -107,7 +107,7 @@ static GOptionEntry entries[] =
     { "state-dir", 's', 0, G_OPTION_ARG_NONE, &state_dir, "[" STATE_DIR_STRING "]", NULL },
     { "rsrc-mngrs", 'r', 0, G_OPTION_ARG_NONE, &switch_files, "list of configured Resource Managers", NULL },
     { "xta", 'x', 0, G_OPTION_ARG_NONE, &xta, "XTA flag, append stuff necessary to compile and link configure Resource Managers objects", NULL },
-    { "language-cpp", '', 0, G_OPTION_ARG_NONE, &language_cpp, "C++ flag to get libraries necessary to link C++ programs (XTA only)", NULL },
+    { "language-cpp", '\0', 0, G_OPTION_ARG_NONE, &language_cpp, "C++ flag to get libraries necessary to link C++ programs (XTA only)", NULL },
     { NULL }
 };
 

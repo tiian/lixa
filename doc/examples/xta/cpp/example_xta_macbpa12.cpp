@@ -199,8 +199,10 @@ int main(int argc, char *argv[])
          */
         if (commit) {
             tx.Commit();
+            cout << "Subordinate AP has committed its branch" << endl;
         } else {
             tx.Rollback();
+            cout << "Subordinate AP has rolled back its branch" <<endl;
         }
         // Close all resources enlisted by the Transaction
         tx.Close();
