@@ -2878,7 +2878,8 @@ tiian@ubuntu1404-64:~/tmp$
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macbps12 1 1 sup2sub sub2supSubordinate AP has received XID '1279875137.a65b66b6b0874a948f8f09b7a23dd471.e107cfeee0661d23da9322f1ee73faba' from superior AP
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macbps12 1 1 sup2sub sub2sup
+Subordinate AP has received XID '1279875137.a65b66b6b0874a948f8f09b7a23dd471.e107cfeee0661d23da9322f1ee73faba' from superior AP
 Subordinate AP has created a branch with XID '1279875137.a65b66b6b0874a948f8f09b7a23dd471.e107cfeee0661d235888e12f34d54013'
 PostgreSQL, executing &gt;INSERT INTO authors VALUES(1921, 'Rigoni Stern', 'Mario')&lt;
 Subordinate AP has returned 'PREPARED_for_COMMIT' to superior AP

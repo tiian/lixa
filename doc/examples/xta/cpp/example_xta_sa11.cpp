@@ -135,6 +135,9 @@ int main(int argc, char *argv[])
         xar1 = new xta::PostgresqlXaResource(
             rm1, "PostgreSQL", "dbname=testdb");
         // create an XA resource for MySQL
+        // second parameter "MySQL" is descriptive
+        // third parameter "localhost,0,lixa,,lixa" identifies the specific
+        // database
         xar2 = new xta::MysqlXaResource(
             rm2, "MySQL", "localhost,0,lixa,,lixa");
         // Create a new XA global transaction and retrieve a reference from
@@ -144,7 +147,7 @@ int main(int argc, char *argv[])
         tx.EnlistResource(xar1);
         // Enlist MySQL resource to Transaction
         tx.EnlistResource(xar2);
-        // Open all resources enlisted by the Transaction
+        // Open all resources enlisted by tx Transaction
         tx.Open();
         // Start a new XA global transaction with a single branch
         tx.Start();
@@ -183,7 +186,7 @@ int main(int argc, char *argv[])
             tx.Rollback();
         }
         /*
-         * Close all resources enlisted by the Transaction
+         * Close all resources enlisted by tx Transaction
          */
         tx.Close();
         /*

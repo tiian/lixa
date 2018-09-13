@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * Open all resources enlisted by the Transaction
+     * Open all resources enlisted by tx Transaction
      */
     rc = xta_transaction_open(tx);
     if (rc != LIXA_RC_OK) {
@@ -194,8 +194,7 @@ int main(int argc, char *argv[])
     } else {
         char buffer[200];
         /*
-         * Open, write and close the file to pass xid_string from superior to
-         * subordinate
+         * Open, read and close the file to retrieve xid_string from superior
          */
         xid_file = fopen(xid_filename, "r");
         if (xid_file == NULL) {
@@ -279,7 +278,7 @@ int main(int argc, char *argv[])
      * "Multiple Applications, Consecutive Calls" Pattern:
      *
      * if the program is running with the role of "superior", it suspends the
-     * global transaction and it saves the XID (Transaction ID) in a file for
+     * global transaction and it passes the XID (Transaction ID) a file for
      * future reading (subordinate application program will read it)
      *
      * if the program is running with the role of "subordinate", it commits
@@ -349,7 +348,7 @@ int main(int argc, char *argv[])
         }
     }
     /*
-     * Close all resources enlisted by the Transaction
+     * Close all resources enlisted by tx Transaction
      */
     rc = xta_transaction_close(tx);
     if (rc != LIXA_RC_OK) {

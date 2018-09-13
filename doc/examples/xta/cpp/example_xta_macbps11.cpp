@@ -102,13 +102,9 @@ int main(int argc, char *argv[])
         mysql_stmt = "DELETE FROM authors WHERE id=1919";
         mysql_stmt2 = "DELETE FROM authors WHERE id=1898";
     }
-    /*
-     * initialize XTA environment
-     */
+    // initialize XTA environment
     xta::Xta::Init();
-    /*
-     * create a new MySQL connection (if subordinate Application Program)
-     */
+    // create a new MySQL connection (if subordinate Application Program)
     rm = mysql_init(NULL);
     if (rm == NULL) {
         fprintf(stderr, "mysql_init: returned NULL\n");
@@ -133,8 +129,8 @@ int main(int argc, char *argv[])
         // Open all resources enlisted by the Transaction
         tx.Open();
         /*
-         * Start a new XA global transaction with a single branch
-         * Note: second argument ("MultipleBranch") has true value because the
+         * Start a new XA global transaction with multiple branches
+         * Note: argument ("MultipleBranch") has true value because the
          *       transaction will be branched by the subordinate Application
          *       Program
          */
@@ -151,7 +147,7 @@ int main(int argc, char *argv[])
         }
         /*
          * Retrieve the Transaction ID (XID) associated to the transaction
-         * that has been created in the previous step
+         * that has been started in the previous step
          */
         string xidString = tx.getXid().toString();
         /*
@@ -159,25 +155,25 @@ int main(int argc, char *argv[])
          * a Remote Procedure Call (RPC) or a Web Service (WS) or a REST API is
          * emulated by a synchronous message passing using a named pipe (FIFO)
          */    
-        /* open the pipe for write operation */
+        // open the pipe for write operation
         ofstream sup2subFifo(sup2sub_fifoname);
         if (!sup2subFifo) {
             cerr << "Unable to open file '" << sup2sub_fifoname << "'" << endl;
             return 1;
         }
-        /* write the message */
+        // write the message and close the pipe
         sup2subFifo << xidString;
         sup2subFifo.close();
         cout << "Superior AP has sent XID '" << xidString <<
             "' to subordinate AP" << endl;
 
-        /* open the pipe for read operation */
+        // open the pipe for read operation
         ifstream sub2supFifo(sub2sup_fifoname);
         if (!sub2supFifo) {
             cerr << "Unable to open file '" << sub2sup_fifoname << "'" << endl;
             return 1;
         }
-        /* read the message */
+        // read the reply message
         string reply;
         sub2supFifo >> reply;
         sub2supFifo.close();
@@ -190,9 +186,7 @@ int main(int argc, char *argv[])
          * Application Program can go on with the branch created by tx.Start()
          */
         
-        /*
-         * Execute another MySQL statement
-         */
+        // Execute another MySQL statement
         printf("MySQL, executing >%s<\n", mysql_stmt2);
         if (mysql_query(rm, mysql_stmt2)) {
             fprintf(stderr, "MySQL, error while executing >%s<: %u/%s\n",
@@ -200,15 +194,13 @@ int main(int argc, char *argv[])
             mysql_close(rm);
             return 1;
         }
-        /*
-         * commit or rollback the transaction
-         */
+        // commit or rollback the transaction
         if (commit) {
             tx.Commit();
         } else {
             tx.Rollback();
         }
-        // Close all resources enlisted by the Transaction
+        // Close all resources enlisted by tx Transaction
         tx.Close();
         // Delete MySQL native and XA resource
         delete xar;

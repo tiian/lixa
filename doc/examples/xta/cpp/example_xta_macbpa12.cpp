@@ -99,13 +99,9 @@ int main(int argc, char *argv[])
                 "VALUES(1921, 'Rigoni Stern', 'Mario')";
     else
         postgresql_stmt = "DELETE FROM authors WHERE id=1921";
-    /*
-     * initialize XTA environment
-     */
+    // initialize XTA environment
     xta::Xta::Init();
-    /*
-     * create a new PostgreSQL connection (if superior Application Program)
-     */
+    // create a new PostgreSQL connection
     rm = PQconnectdb("dbname=testdb");
     if (PQstatus(rm) != CONNECTION_OK) {
         fprintf(stderr, "PQconnectdb: returned error %s\n",
@@ -136,25 +132,22 @@ int main(int argc, char *argv[])
          * Here the synchronization is implemented with
          * a synchronous message passing using a named pipe (FIFO)
          */
-        /* open the pipe for read operation */
+        // open the pipe for read operation
         ifstream sup2subFifo(sup2sub_fifoname);
         if (!sup2subFifo) {
             cerr << "Unable to open file '" << sup2sub_fifoname << "'" << endl;
             return 1;
         }
-        /* read the message */
+        // read the message
         string xidString;
         sup2subFifo >> xidString;
         cout << "Subordinate AP has received XID '" << xidString <<
             "' from superior AP" << endl;
-        /* close the pipe */
+        // close the pipe
         sup2subFifo.close();
         // create a new branch in the same global transaction
         tx.Branch(xidString);
-        /*
-         * the branch has the same global identifier, but a different branch
-         * id
-         */
+        // the branch has the same global identifier, but a different branch id
         string branchXidString = tx.getXid().toString();
         cout << "Subordinate AP has created a branch with XID '" <<
             branchXidString << "'" << endl;
@@ -164,26 +157,24 @@ int main(int argc, char *argv[])
          * transaction and must send a message to the superior Application
          * Program that can proceed with it's own operations
          */
-        /* open the pipe for write operation */
+        // open the pipe for write operation
         ofstream sub2supFifo(sub2sup_fifoname);
         if (!sub2supFifo) {
             cerr << "Unable to open file '" << sub2sup_fifoname << "'" << endl;
             return 1;
         }
-        /* write the message */
+        // write the message
         sub2supFifo << branchXidString;
         cout << "Subordinate AP has returned '" << branchXidString <<
             "' to superior AP" << endl;
-        /* close the pipe */
+        // close the pipe
         sub2supFifo.close();
         /*
          * *** NOTE: ***
          * at this point the subordinate Application Program (this one) can
          * go on with its own operations indipendently from the superior AP
          */    
-        /*
-         * Execute PostgreSQL statement
-         */
+        // Execute PostgreSQL statement
         printf("PostgreSQL, executing >%s<\n", postgresql_stmt);
         pg_res = PQexec(rm, postgresql_stmt);
         if (PQresultStatus(pg_res) != PGRES_COMMAND_OK) {
@@ -194,9 +185,7 @@ int main(int argc, char *argv[])
             return 1;
         }
         PQclear(pg_res);
-        /*
-         * commit or rollback the transaction
-         */
+        // commit or rollback the transaction
         if (commit) {
             tx.Commit();
             cout << "Subordinate AP has committed its branch" << endl;
@@ -210,7 +199,7 @@ int main(int argc, char *argv[])
         delete xar;
         // Close the PostgreSQL connection
         PQfinish(rm);
-        //Delete Transaction Manager object
+        // Delete Transaction Manager object
         delete tm;
     } catch (xta::Exception e) {
         /*

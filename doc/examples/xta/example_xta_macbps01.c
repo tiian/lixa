@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * Start a new XA global transaction with a single branch
+     * Start a new XA global transaction with multiple branches
      * Note: second argument ("multiple_branch") has TRUE value because the
      *       transaction will be branched by the subordinate Application
      *       Program
@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "fopen error for fifo '%s'\n", sub2sup_fifoname);
         return 1;
     }
-    /* read the message */
+    /* read the reply message */
     if (NULL == fgets(fifo_buffer, sizeof(fifo_buffer),
                       sub2sup_fifo)) {
         fprintf(stderr, "fgets error while retrieving message from "
@@ -262,8 +262,9 @@ int main(int argc, char *argv[])
      * commit or rollback the transaction
      */
     if (commit) {
-        /* Note: commit is performed with "non_block" flag set to FALSE: this
-         * is necessary to synchronize with the subordinate branch */
+        /* Note: commit is performed with "non_blocking" flag set to FALSE:
+         * this is necessary to synchronize with the branch of the subordinate
+         * Application Program */
         rc = xta_transaction_commit(tx, FALSE);
         if (rc != LIXA_RC_OK) {
             fprintf(stderr, "xta_transaction_commit: returned %d (%s)\n",
@@ -279,7 +280,7 @@ int main(int argc, char *argv[])
         }
     }
     /*
-     * Close all resources enlisted by the Transaction
+     * Close all resources enlisted by tx Transaction
      */
     rc = xta_transaction_close(tx);
     if (rc != LIXA_RC_OK) {

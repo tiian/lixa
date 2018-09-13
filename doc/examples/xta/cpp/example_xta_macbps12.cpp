@@ -99,13 +99,9 @@ int main(int argc, char *argv[])
                 "VALUES(1921, 'Rigoni Stern', 'Mario')";
     else
         postgresql_stmt = "DELETE FROM authors WHERE id=1921";
-    /*
-     * initialize XTA environment
-     */
+    // initialize XTA environment
     xta::Xta::Init();
-    /*
-     * create a new PostgreSQL connection (if superior Application Program)
-     */
+    // create a new PostgreSQL connection
     rm = PQconnectdb("dbname=testdb");
     if (PQstatus(rm) != CONNECTION_OK) {
         fprintf(stderr, "PQconnectdb: returned error %s\n",
@@ -127,7 +123,7 @@ int main(int argc, char *argv[])
         xta::Transaction tx = tm->CreateTransaction();
         // Enlist PostgreSQL resource to transaction
         tx.EnlistResource(xar);
-        // Open all resources enlisted by the Transaction
+        // Open all resources enlisted by tx Transaction
         tx.Open();
         /*
          * *** NOTE: ***
@@ -137,18 +133,18 @@ int main(int argc, char *argv[])
          * emulated with a synchronous message passing using a named pipe
          * (FIFO)
          */
-        /* open the pipe for read operation */
+        // open the pipe for read operation
         ifstream sup2subFifo(sup2sub_fifoname);
         if (!sup2subFifo) {
             cerr << "Unable to open file '" << sup2sub_fifoname << "'" << endl;
             return 1;
         }
-        /* read the message */
+        // read the message
         string xidString;
         sup2subFifo >> xidString;
         cout << "Subordinate AP has received XID '" << xidString <<
             "' from superior AP" << endl;
-        /* close the pipe */
+        // close the pipe
         sup2subFifo.close();
         /*
          * *** NOTE: ***
@@ -167,9 +163,7 @@ int main(int argc, char *argv[])
         string branchXidString = tx.getXid().toString();
         cout << "Subordinate AP has created a branch with XID '" <<
             branchXidString << "'" << endl;
-        /*
-         * Execute PostgreSQL statement
-         */
+        // Execute PostgreSQL statement
         printf("PostgreSQL, executing >%s<\n", postgresql_stmt);
         pg_res = PQexec(rm, postgresql_stmt);
         if (PQresultStatus(pg_res) != PGRES_COMMAND_OK) {
@@ -180,9 +174,7 @@ int main(int argc, char *argv[])
             return 1;
         }
         PQclear(pg_res);
-        /*
-         * commit or rollback the transaction
-         */
+        // commit or rollback the transaction
         if (commit) {
             /*
              * *** NOTE: ***
@@ -196,7 +188,7 @@ int main(int argc, char *argv[])
              *    committing
              */
             /* commit is performed with "NonBlocking" flag set to true: this is
-               necessary to allow the superior branch to commit */
+               necessary to allow the superior branch to start commit */
             tx.Commit(true);
         } else {
             tx.Rollback();
@@ -208,23 +200,23 @@ int main(int argc, char *argv[])
          * emulated with a synchronous message passing using a named pipe
          * (FIFO)
          */
-        /* open the pipe for write operation */
+        // open the pipe for write operation
         ofstream sub2supFifo(sub2sup_fifoname);
         if (!sub2supFifo) {
             cerr << "Unable to open file '" << sub2sup_fifoname << "'" << endl;
             return 1;
         }
-        /* prepare the reply message */
+        // prepare the reply message
         string reply;
         if (commit)
             reply = "PREPARED_for_COMMIT";
         else
             reply = "ROLLBACK";
-        /* write the message */
+        // write the message
         sub2supFifo << reply;
         cout << "Subordinate AP has returned '" << reply <<
             "' to superior AP" << endl;
-        /* close the pipe */
+        // close the pipe
         sub2supFifo.close();
         if (commit) {
             /*
@@ -234,13 +226,13 @@ int main(int argc, char *argv[])
              */
             tx.Commit(false);
         }
-        // Close all resources enlisted by the Transaction
+        // Close all resources enlisted by tx Transaction
         tx.Close();
         // Delete PostgreSQL native and XA resource
         delete xar;
         // Close the PostgreSQL connection
         PQfinish(rm);
-        //Delete Transaction Manager object
+        // Delete Transaction Manager object
         delete tm;
         
     } catch (xta::Exception e) {

@@ -137,6 +137,9 @@ int main(int argc, char *argv[])
     }
     /*
      * create an XA resource for MySQL
+     * second parameter "MySQL" is descriptive
+     * third parameter "localhost,0,lixa,,lixa" identifies the specific
+     * database
      */
     xar2 = xta_mysql_xa_resource_new(rm2, "MySQL", "localhost,0,lixa,,lixa");
     if (xar2 == NULL) {
@@ -171,7 +174,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * Open all resources enlisted by the Transaction
+     * Open all resources enlisted by tx Transaction
      */
     rc = xta_transaction_open(tx);
     if (rc != LIXA_RC_OK) {
@@ -234,7 +237,7 @@ int main(int argc, char *argv[])
         }
     }
     /*
-     * Close all resources enlisted by the Transaction
+     * Close all resources enlisted by tx Transaction
      */
     rc = xta_transaction_close(tx);
     if (rc != LIXA_RC_OK) {

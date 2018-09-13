@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * Open all resources enlisted by the Transaction
+     * Open all resources enlisted by tx Transaction
      */
     rc = xta_transaction_open(tx);
     if (rc != LIXA_RC_OK) {
@@ -231,6 +231,7 @@ int main(int argc, char *argv[])
         PQfinish(rm);
         return 1;
     }
+    PQclear(pg_res);
     /*
      * commit or rollback the transaction
      */
@@ -246,7 +247,7 @@ int main(int argc, char *argv[])
          *    must wait the "prepared" state of the superior AP before
          *    committing
          */
-        /* commit is performed with "non_block" flag set to TRUE: this is
+        /* commit is performed with "non_blocking" flag set to TRUE: this is
            necessary to allow the superior branch to commit */
         rc = xta_transaction_commit(tx, TRUE);
         if (rc != LIXA_RC_WOULD_BLOCK) {
@@ -293,8 +294,8 @@ int main(int argc, char *argv[])
     
     if (commit) {
         /*
-         * Complete the second phase of the commit with "non_block" flag set to
-         * FALSE: this is necessary to wait the superior AP prepare phase
+         * Complete the second phase of the commit with "non_blocking" flag set
+         * to FALSE: this is necessary to wait the superior AP prepare phase
          */
         rc = xta_transaction_commit(tx, FALSE);
         if (rc != LIXA_RC_OK) {
@@ -304,7 +305,7 @@ int main(int argc, char *argv[])
         }
     }
     /*
-     * Close all resources enlisted by the Transaction
+     * Close all resources enlisted by tx Transaction
      */
     rc = xta_transaction_close(tx);
     if (rc != LIXA_RC_OK) {

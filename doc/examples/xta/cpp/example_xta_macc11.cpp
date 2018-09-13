@@ -89,12 +89,10 @@ int main(int argc, char *argv[])
     insert = strtol(argv[2], NULL, 0);
     superior = strtol(argv[3], NULL, 0);
     xid_filename = argv[4];
-    /*
-     * Prepare SQL statement in accordance with "insert" and "superior" command
-     * line parameter
-     */
+    // Prepare SQL statement in accordance with "insert" and "superior" command
+    // line parameter
     if (insert) {
-        /* SQL INSERT */
+        // SQL INSERT
         if (superior)
             oci_stmt = (text *)
                 "INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) "
@@ -104,43 +102,31 @@ int main(int argc, char *argv[])
                 "INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) "
                 "VALUES(1948, 'Casarotto', 'Renato')";
     } else {
-        /* SQL DELETE */
+        // SQL DELETE
         if (superior)
             oci_stmt = (text *) "DELETE FROM authors WHERE ID=1930";
         else
             oci_stmt = (text *) "DELETE FROM authors WHERE ID=1948";
     }
 
-    /*
-     * initialize XTA environment
-     */
+    // initialize XTA environment
     xta::Xta::Init();
     try {
-        /*
-         * dynamically create a native XA resource for Oracle DBMS
-         */
+        // dynamically create a native XA resource for Oracle DBMS
         xar = new xta::NativeXaResource(
             "OracleIC_stareg",
             "/opt/lixa/lib/switch_oracle_stareg.so",
             "ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+"
             "threads=true+DbgFl=7+SqlNet=lixa_ora_db+"
             "Loose_Coupling=true", "");
-        /*
-         * create a new XTA Transaction Manager object
-         */
+        // create a new XTA Transaction Manager object
         tm = new xta::TransactionManager();
-        /*
-         * Create a new XA global transaction and retrieve a reference from
-         * the TransactionManager object
-         */
+        // Create a new XA global transaction and retrieve a reference from
+        // the TransactionManager object
         xta::Transaction tx = tm->CreateTransaction();
-        /*
-         * Enlist Oracle DMBS resource to transaction
-         */
+        // Enlist Oracle DMBS resource to transaction
         tx.EnlistResource(xar);
-        /*
-         * Open all resources enlisted by the Transaction
-         */
+        // Open all resources enlisted by tx Transaction
         tx.Open();
         /*
          * *NOTE:*
@@ -156,16 +142,12 @@ int main(int argc, char *argv[])
          * transaction.
          */
         if (superior) {
-            /*
-             * Start a new XA global transaction with a single branch
-             */
+            // Start a new XA global transaction with a single branch
             tx.Start();
         } else {
             string xidString;
-            /*
-             * Open, write and close the file to pass xid_string from
-             * superior to subordinate
-             */
+            // Open, read and close the file to retrieve xidString from
+            // superior
             ifstream xidFile(xid_filename);
             if (!xidFile) {
                 cerr << "Unable to open file '" << xid_filename << "'" << endl;
@@ -175,9 +157,7 @@ int main(int argc, char *argv[])
             xidFile.close();
             cout << "XID='" << xidString << "' has been read from file '" <<
                 xid_filename << "'" << endl;
-            /*
-             * Resume the global transaction started by a superior program
-             */
+            // Resume the global transaction started by a superior program
             tx.Resume(xidString);
         }
         /*
@@ -236,9 +216,10 @@ int main(int argc, char *argv[])
          * "Multiple Applications, Consecutive Calls" Pattern:
          *
          * if the program is running with the role of "superior", it suspends
-         * the global transaction and it saves the XID (Transaction ID) in a
-         * file for future reading (subordinate application program will read
-         * it)
+         * the global transaction and it passes the XID (Transaction ID) in a
+         * file (fifo) for future reading (subordinate application program
+         * will read it)
+         *
          * if the program is running with the role of "subordinate", it commits
          * or rollback the global transaction.
          */
@@ -253,7 +234,7 @@ int main(int argc, char *argv[])
              */
             string xidString = tx.getXid().toString();
             /*
-             * Open, write and close the file to pass xid_string from superior
+             * Open, write and close the file to pass xidString from superior
              * to subordinate
              */
             ofstream xidFile(xid_filename);
@@ -267,29 +248,18 @@ int main(int argc, char *argv[])
                 xid_filename << "'" << endl;
         } else {
             if (commit) {
-                /*
-                 * Commit the global transaction
-                 * Note: second argument ("multiple_branch") has FALSE value
-                 */
+                // Commit the global transaction
                 tx.Commit();
             } else {
-                /*
-                 * Rollback the global transaction
-                 */
+                // Rollback the global transaction
                 tx.Rollback();
             }
         }
-        /*
-         * Close all resources enlisted by the Transaction
-         */
+        // Close all resources enlisted by tx Transaction
         tx.Close();
-        /*
-         * Delete Transaction Manager object
-         */
+        // Delete Transaction Manager object
         delete tm;
-        /*
-         * Delete MySQL native and XA resource
-         */
+        // Delete MySQL native and XA resource
         delete xar;
                 
     } catch (xta::Exception e) {
