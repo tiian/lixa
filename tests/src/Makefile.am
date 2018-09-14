@@ -1,7 +1,10 @@
+if COMPILE_XTA_CPP
+  MAYBE_XTA_CPP = cpp
+endif
 if COND_COBOLAPI
   MAYBE_COBOLAPI = cobol
 endif
-SUBDIRS = . $(MAYBE_COBOLAPI)
+SUBDIRS = . $(MAYBE_XTA_CPP) $(MAYBE_COBOLAPI)
 noinst_HEADERS = case_test_functions.h
 
 #AM_CPPFLAGS = -DLIXA_MULTITHREAD=0 -I../../src/client -I../../src/common \

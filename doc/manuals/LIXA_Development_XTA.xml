@@ -151,7 +151,7 @@
 	    </para></listitem>
 	    <listitem><para>
 	      the <emphasis>Application Programs</emphasis> must call XTA
-	      functions in the proper order to partipate in the same global
+	      functions in the proper order to participate in the same global
 	      transaction
 	    </para></listitem>
 	  </itemizedlist>

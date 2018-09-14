@@ -60,6 +60,7 @@ AC_CONFIG_FILES([
   tests/scripts/Makefile
   tests/src/Makefile
   tests/src/cobol/Makefile
+  tests/src/cpp/Makefile
   utils/Makefile
   var/Makefile
 ])
@@ -155,7 +156,14 @@ AC_ARG_ENABLE([trace],
 AM_PROG_CC_C_O
 
 # Checking if C++ compiler is available
+AC_MSG_CHECKING([if C++ compiler is available])
+CPP_COMPILER_AVAILABLE="no"
 AM_CONDITIONAL([COMPILE_XTA_CPP], [test "x$CXX" != "x"])
+if test "x$CXX" != "x"
+then
+	AC_MSG_RESULT([yes])
+	CPP_COMPILER_AVAILABLE="yes"
+fi
 
 # Checking pkg-config is available
 AC_CHECK_PROGS(PKG_CONFIG, [pkg-config], [])
@@ -337,6 +345,7 @@ AC_SUBST(EXPANDED_LOCALSTATEDIR)
 AC_SUBST(EXPANDED_LIBDIR)
 AC_SUBST(LIXA_CRASH)
 AC_SUBST(LIXA_XTA)
+AC_SUBST(CPP_COMPILER_AVAILABLE)
 AC_SUBST(XSLTPROC)
 AC_SUBST(HAVE_DOT)
 AC_SUBST(HAVE_DOT_BOOL)

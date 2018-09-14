@@ -128,6 +128,7 @@ stop_server() {
 exec_test() {
 	echo "Starting case test $1"
 	# check lixar link
+	echo "PATH=$PATH"
 	echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 	if [ ! -h $TESTS_SRC_DIR/lixar ]
 	then
@@ -181,6 +182,7 @@ exec_test() {
 			$PGM $*
 		fi
 	else
+		echo $PGM $*
 		$PGM $*
 	fi
 	rc=$?

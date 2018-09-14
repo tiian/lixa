@@ -1,0 +1,14 @@
+AT_BANNER([XTA C++ API])
+
+AT_SETUP([XTA/C++/1.0 Simple Application Pattern 1/3])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$CPP_COMPILER_AVAILABLE" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027; lixa_test_exec.sh reset start case2100 0 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([/bin/false], [0], [ignore], [ignore])
+AT_CLEANUP
+
+
+
+#AT_CHECK([if test "$HAVE_ORACLE" = "no" ; then exit 77; fi])
+

@@ -643,6 +643,7 @@ LIXA_CONFIG_BINDIR
 LIXA_CONFIG_LIBXML2_INCLUDEDIR
 LIXA_CONFIG_GLIB2_INCLUDEDIR
 LIXA_CONFIG_INCLUDEDIR
+CPP_COMPILER_AVAILABLE
 LIXA_XTA
 LIXA_CRASH
 EXPANDED_LIBDIR
@@ -16460,7 +16461,7 @@ ac_config_headers="$ac_config_headers src/client/lixa.h"
 
 ac_config_headers="$ac_config_headers src/xta/xta.h"
 
-ac_config_files="$ac_config_files Makefile doc/Makefile doc/api/Makefile doc/examples/Makefile doc/examples/cobol/Makefile doc/examples/xta/Makefile doc/examples/xta/cpp/Makefile doc/images/Makefile doc/manuals/LIXA.xml doc/manuals/Makefile etc/lixad_conf.xml etc/Makefile etc/lixavsr/Makefile ext/Makefile ext/doc/Makefile ext/doc/manuals/LIXA_EXT.xml ext/doc/manuals/Makefile ext/php/Makefile ext/php/examples/Makefile ext/php/tests/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/lixa-config.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/ibmdb2/Makefile src/client/switch/oracle/Makefile src/client/switch/postgresql/Makefile src/client/switch/mysql/Makefile src/client/switch/webspheremq/Makefile src/server/Makefile src/xta/Makefile src/xta/cpp/Makefile tests/Makefile tests/atlocal tests/lixa-config.at tests/etc/lixac_conf.xml tests/etc/lixad_conf.xml tests/etc/lixad_conf2.xml tests/etc/Makefile tests/scripts/Makefile tests/src/Makefile tests/src/cobol/Makefile utils/Makefile var/Makefile"
+ac_config_files="$ac_config_files Makefile doc/Makefile doc/api/Makefile doc/examples/Makefile doc/examples/cobol/Makefile doc/examples/xta/Makefile doc/examples/xta/cpp/Makefile doc/images/Makefile doc/manuals/LIXA.xml doc/manuals/Makefile etc/lixad_conf.xml etc/Makefile etc/lixavsr/Makefile ext/Makefile ext/doc/Makefile ext/doc/manuals/LIXA_EXT.xml ext/doc/manuals/Makefile ext/php/Makefile ext/php/examples/Makefile ext/php/tests/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/lixa-config.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/ibmdb2/Makefile src/client/switch/oracle/Makefile src/client/switch/postgresql/Makefile src/client/switch/mysql/Makefile src/client/switch/webspheremq/Makefile src/server/Makefile src/xta/Makefile src/xta/cpp/Makefile tests/Makefile tests/atlocal tests/lixa-config.at tests/etc/lixac_conf.xml tests/etc/lixad_conf.xml tests/etc/lixad_conf2.xml tests/etc/Makefile tests/scripts/Makefile tests/src/Makefile tests/src/cobol/Makefile tests/src/cpp/Makefile utils/Makefile var/Makefile"
 
 ac_config_commands="$ac_config_commands tests/atconfig"
 
@@ -17782,6 +17783,9 @@ fi
 
 
 # Checking if C++ compiler is available
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if C++ compiler is available" >&5
+$as_echo_n "checking if C++ compiler is available... " >&6; }
+CPP_COMPILER_AVAILABLE="no"
  if test "x$CXX" != "x"; then
   COMPILE_XTA_CPP_TRUE=
   COMPILE_XTA_CPP_FALSE='#'
@@ -17790,6 +17794,12 @@ else
   COMPILE_XTA_CPP_FALSE=
 fi
 
+if test "x$CXX" != "x"
+then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	CPP_COMPILER_AVAILABLE="yes"
+fi
 
 # Checking pkg-config is available
 for ac_prog in pkg-config
@@ -19430,6 +19440,7 @@ done
 
 
 
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -20642,6 +20653,7 @@ do
     "tests/scripts/Makefile") CONFIG_FILES="$CONFIG_FILES tests/scripts/Makefile" ;;
     "tests/src/Makefile") CONFIG_FILES="$CONFIG_FILES tests/src/Makefile" ;;
     "tests/src/cobol/Makefile") CONFIG_FILES="$CONFIG_FILES tests/src/cobol/Makefile" ;;
+    "tests/src/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES tests/src/cpp/Makefile" ;;
     "utils/Makefile") CONFIG_FILES="$CONFIG_FILES utils/Makefile" ;;
     "var/Makefile") CONFIG_FILES="$CONFIG_FILES var/Makefile" ;;
     "tests/atconfig") CONFIG_COMMANDS="$CONFIG_COMMANDS tests/atconfig" ;;
