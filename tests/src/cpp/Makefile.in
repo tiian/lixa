@@ -77,7 +77,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = $(am__EXEEXT_1)
+check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
 subdir = tests/src/cpp
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -98,7 +98,12 @@ CONFIG_HEADER = $(top_builddir)/config.h \
 	$(top_builddir)/src/xta/xta.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-@COMPILE_MYSQL_STUFF_TRUE@@COMPILE_POSTGRESQL_STUFF_TRUE@@COMPILE_XTA_CPP_TRUE@am__EXEEXT_1 = case2100$(EXEEXT)
+@COMPILE_MYSQL_STUFF_TRUE@@COMPILE_POSTGRESQL_STUFF_TRUE@@COMPILE_XTA_CPP_TRUE@am__EXEEXT_1 = case2100$(EXEEXT) \
+@COMPILE_MYSQL_STUFF_TRUE@@COMPILE_POSTGRESQL_STUFF_TRUE@@COMPILE_XTA_CPP_TRUE@	case2104$(EXEEXT) \
+@COMPILE_MYSQL_STUFF_TRUE@@COMPILE_POSTGRESQL_STUFF_TRUE@@COMPILE_XTA_CPP_TRUE@	case2105$(EXEEXT) \
+@COMPILE_MYSQL_STUFF_TRUE@@COMPILE_POSTGRESQL_STUFF_TRUE@@COMPILE_XTA_CPP_TRUE@	case2106$(EXEEXT) \
+@COMPILE_MYSQL_STUFF_TRUE@@COMPILE_POSTGRESQL_STUFF_TRUE@@COMPILE_XTA_CPP_TRUE@	case2107$(EXEEXT)
+@COMPILE_ORACLE_STUFF_TRUE@@COMPILE_XTA_CPP_TRUE@am__EXEEXT_2 = case2102$(EXEEXT)
 am_case2100_OBJECTS = case2100-case2100.$(OBJEXT)
 case2100_OBJECTS = $(am_case2100_OBJECTS)
 case2100_DEPENDENCIES = ../../../src/xta/cpp/liblixtapp.la
@@ -109,6 +114,36 @@ am__v_lt_1 =
 case2100_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(case2100_LDFLAGS) $(LDFLAGS) -o $@
+am_case2102_OBJECTS = case2102-case2102.$(OBJEXT)
+case2102_OBJECTS = $(am_case2102_OBJECTS)
+case2102_DEPENDENCIES = ../../../src/xta/cpp/liblixtapp.la
+case2102_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(case2102_LDFLAGS) $(LDFLAGS) -o $@
+am_case2104_OBJECTS = case2104-case2104.$(OBJEXT)
+case2104_OBJECTS = $(am_case2104_OBJECTS)
+case2104_DEPENDENCIES = ../../../src/xta/cpp/liblixtapp.la
+case2104_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(case2104_LDFLAGS) $(LDFLAGS) -o $@
+am_case2105_OBJECTS = case2105-case2105.$(OBJEXT)
+case2105_OBJECTS = $(am_case2105_OBJECTS)
+case2105_DEPENDENCIES = ../../../src/xta/cpp/liblixtapp.la
+case2105_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(case2105_LDFLAGS) $(LDFLAGS) -o $@
+am_case2106_OBJECTS = case2106-case2106.$(OBJEXT)
+case2106_OBJECTS = $(am_case2106_OBJECTS)
+case2106_DEPENDENCIES = ../../../src/xta/cpp/liblixtapp.la
+case2106_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(case2106_LDFLAGS) $(LDFLAGS) -o $@
+am_case2107_OBJECTS = case2107-case2107.$(OBJEXT)
+case2107_OBJECTS = $(am_case2107_OBJECTS)
+case2107_DEPENDENCIES = ../../../src/xta/cpp/liblixtapp.la
+case2107_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(case2107_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -143,8 +178,11 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(case2100_SOURCES)
-DIST_SOURCES = $(case2100_SOURCES)
+SOURCES = $(case2100_SOURCES) $(case2102_SOURCES) $(case2104_SOURCES) \
+	$(case2105_SOURCES) $(case2106_SOURCES) $(case2107_SOURCES)
+DIST_SOURCES = $(case2100_SOURCES) $(case2102_SOURCES) \
+	$(case2104_SOURCES) $(case2105_SOURCES) $(case2106_SOURCES) \
+	$(case2107_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -366,13 +404,48 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-@COMPILE_MYSQL_STUFF_TRUE@@COMPILE_POSTGRESQL_STUFF_TRUE@@COMPILE_XTA_CPP_TRUE@MAYBE_XTA_SRC1 = case2100
+@COMPILE_MYSQL_STUFF_TRUE@@COMPILE_POSTGRESQL_STUFF_TRUE@@COMPILE_XTA_CPP_TRUE@MAYBE_XTA_SRC1 = case2100 case2104 case2105 case2106 case2107
+@COMPILE_ORACLE_STUFF_TRUE@@COMPILE_XTA_CPP_TRUE@MAYBE_ORACLE = case2102
+@COMPILE_ORACLE_STUFF_TRUE@@COMPILE_XTA_CPP_TRUE@LDADD_ORACLE = -lclntsh
 case2100_SOURCES = case2100.cpp
 case2100_CPPFLAGS = -I../../../src/client -I../../../src/common \
 	@MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 
 case2100_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 case2100_LDADD = ../../../src/xta/cpp/liblixtapp.la
+case2102_SOURCES = case2102.cpp
+case2102_CPPFLAGS = @ORACLE_OCI_CFLAGS@ \
+	@MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@ \
+	-I../../../src/client -I../../../src/common
+
+case2102_LDFLAGS = @ORACLE_OCI_LDFLAGS@
+case2102_LDADD = ../../../src/xta/cpp/liblixtapp.la \
+        -lclntsh
+
+case2104_SOURCES = case2104.cpp
+case2104_CPPFLAGS = -I../../../src/client -I../../../src/common \
+	@MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
+
+case2104_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
+case2104_LDADD = ../../../src/xta/cpp/liblixtapp.la
+case2105_SOURCES = case2105.cpp
+case2105_CPPFLAGS = -I../../../src/client -I../../../src/common \
+	@MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
+
+case2105_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
+case2105_LDADD = ../../../src/xta/cpp/liblixtapp.la
+case2106_SOURCES = case2106.cpp
+case2106_CPPFLAGS = -I../../../src/client -I../../../src/common \
+	@MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
+
+case2106_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
+case2106_LDADD = ../../../src/xta/cpp/liblixtapp.la
+case2107_SOURCES = case2107.cpp
+case2107_CPPFLAGS = -I../../../src/client -I../../../src/common \
+	@MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
+
+case2107_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
+case2107_LDADD = ../../../src/xta/cpp/liblixtapp.la
 all: all-am
 
 .SUFFIXES:
@@ -421,6 +494,26 @@ case2100$(EXEEXT): $(case2100_OBJECTS) $(case2100_DEPENDENCIES) $(EXTRA_case2100
 	@rm -f case2100$(EXEEXT)
 	$(AM_V_CXXLD)$(case2100_LINK) $(case2100_OBJECTS) $(case2100_LDADD) $(LIBS)
 
+case2102$(EXEEXT): $(case2102_OBJECTS) $(case2102_DEPENDENCIES) $(EXTRA_case2102_DEPENDENCIES) 
+	@rm -f case2102$(EXEEXT)
+	$(AM_V_CXXLD)$(case2102_LINK) $(case2102_OBJECTS) $(case2102_LDADD) $(LIBS)
+
+case2104$(EXEEXT): $(case2104_OBJECTS) $(case2104_DEPENDENCIES) $(EXTRA_case2104_DEPENDENCIES) 
+	@rm -f case2104$(EXEEXT)
+	$(AM_V_CXXLD)$(case2104_LINK) $(case2104_OBJECTS) $(case2104_LDADD) $(LIBS)
+
+case2105$(EXEEXT): $(case2105_OBJECTS) $(case2105_DEPENDENCIES) $(EXTRA_case2105_DEPENDENCIES) 
+	@rm -f case2105$(EXEEXT)
+	$(AM_V_CXXLD)$(case2105_LINK) $(case2105_OBJECTS) $(case2105_LDADD) $(LIBS)
+
+case2106$(EXEEXT): $(case2106_OBJECTS) $(case2106_DEPENDENCIES) $(EXTRA_case2106_DEPENDENCIES) 
+	@rm -f case2106$(EXEEXT)
+	$(AM_V_CXXLD)$(case2106_LINK) $(case2106_OBJECTS) $(case2106_LDADD) $(LIBS)
+
+case2107$(EXEEXT): $(case2107_OBJECTS) $(case2107_DEPENDENCIES) $(EXTRA_case2107_DEPENDENCIES) 
+	@rm -f case2107$(EXEEXT)
+	$(AM_V_CXXLD)$(case2107_LINK) $(case2107_OBJECTS) $(case2107_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -428,6 +521,11 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case2100-case2100.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case2102-case2102.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case2104-case2104.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case2105-case2105.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case2106-case2106.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case2107-case2107.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -463,6 +561,76 @@ case2100-case2100.obj: case2100.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='case2100.cpp' object='case2100-case2100.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2100_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o case2100-case2100.obj `if test -f 'case2100.cpp'; then $(CYGPATH_W) 'case2100.cpp'; else $(CYGPATH_W) '$(srcdir)/case2100.cpp'; fi`
+
+case2102-case2102.o: case2102.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2102_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT case2102-case2102.o -MD -MP -MF $(DEPDIR)/case2102-case2102.Tpo -c -o case2102-case2102.o `test -f 'case2102.cpp' || echo '$(srcdir)/'`case2102.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case2102-case2102.Tpo $(DEPDIR)/case2102-case2102.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='case2102.cpp' object='case2102-case2102.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2102_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o case2102-case2102.o `test -f 'case2102.cpp' || echo '$(srcdir)/'`case2102.cpp
+
+case2102-case2102.obj: case2102.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2102_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT case2102-case2102.obj -MD -MP -MF $(DEPDIR)/case2102-case2102.Tpo -c -o case2102-case2102.obj `if test -f 'case2102.cpp'; then $(CYGPATH_W) 'case2102.cpp'; else $(CYGPATH_W) '$(srcdir)/case2102.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case2102-case2102.Tpo $(DEPDIR)/case2102-case2102.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='case2102.cpp' object='case2102-case2102.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2102_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o case2102-case2102.obj `if test -f 'case2102.cpp'; then $(CYGPATH_W) 'case2102.cpp'; else $(CYGPATH_W) '$(srcdir)/case2102.cpp'; fi`
+
+case2104-case2104.o: case2104.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2104_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT case2104-case2104.o -MD -MP -MF $(DEPDIR)/case2104-case2104.Tpo -c -o case2104-case2104.o `test -f 'case2104.cpp' || echo '$(srcdir)/'`case2104.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case2104-case2104.Tpo $(DEPDIR)/case2104-case2104.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='case2104.cpp' object='case2104-case2104.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2104_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o case2104-case2104.o `test -f 'case2104.cpp' || echo '$(srcdir)/'`case2104.cpp
+
+case2104-case2104.obj: case2104.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2104_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT case2104-case2104.obj -MD -MP -MF $(DEPDIR)/case2104-case2104.Tpo -c -o case2104-case2104.obj `if test -f 'case2104.cpp'; then $(CYGPATH_W) 'case2104.cpp'; else $(CYGPATH_W) '$(srcdir)/case2104.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case2104-case2104.Tpo $(DEPDIR)/case2104-case2104.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='case2104.cpp' object='case2104-case2104.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2104_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o case2104-case2104.obj `if test -f 'case2104.cpp'; then $(CYGPATH_W) 'case2104.cpp'; else $(CYGPATH_W) '$(srcdir)/case2104.cpp'; fi`
+
+case2105-case2105.o: case2105.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2105_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT case2105-case2105.o -MD -MP -MF $(DEPDIR)/case2105-case2105.Tpo -c -o case2105-case2105.o `test -f 'case2105.cpp' || echo '$(srcdir)/'`case2105.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case2105-case2105.Tpo $(DEPDIR)/case2105-case2105.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='case2105.cpp' object='case2105-case2105.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2105_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o case2105-case2105.o `test -f 'case2105.cpp' || echo '$(srcdir)/'`case2105.cpp
+
+case2105-case2105.obj: case2105.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2105_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT case2105-case2105.obj -MD -MP -MF $(DEPDIR)/case2105-case2105.Tpo -c -o case2105-case2105.obj `if test -f 'case2105.cpp'; then $(CYGPATH_W) 'case2105.cpp'; else $(CYGPATH_W) '$(srcdir)/case2105.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case2105-case2105.Tpo $(DEPDIR)/case2105-case2105.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='case2105.cpp' object='case2105-case2105.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2105_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o case2105-case2105.obj `if test -f 'case2105.cpp'; then $(CYGPATH_W) 'case2105.cpp'; else $(CYGPATH_W) '$(srcdir)/case2105.cpp'; fi`
+
+case2106-case2106.o: case2106.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2106_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT case2106-case2106.o -MD -MP -MF $(DEPDIR)/case2106-case2106.Tpo -c -o case2106-case2106.o `test -f 'case2106.cpp' || echo '$(srcdir)/'`case2106.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case2106-case2106.Tpo $(DEPDIR)/case2106-case2106.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='case2106.cpp' object='case2106-case2106.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2106_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o case2106-case2106.o `test -f 'case2106.cpp' || echo '$(srcdir)/'`case2106.cpp
+
+case2106-case2106.obj: case2106.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2106_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT case2106-case2106.obj -MD -MP -MF $(DEPDIR)/case2106-case2106.Tpo -c -o case2106-case2106.obj `if test -f 'case2106.cpp'; then $(CYGPATH_W) 'case2106.cpp'; else $(CYGPATH_W) '$(srcdir)/case2106.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case2106-case2106.Tpo $(DEPDIR)/case2106-case2106.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='case2106.cpp' object='case2106-case2106.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2106_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o case2106-case2106.obj `if test -f 'case2106.cpp'; then $(CYGPATH_W) 'case2106.cpp'; else $(CYGPATH_W) '$(srcdir)/case2106.cpp'; fi`
+
+case2107-case2107.o: case2107.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2107_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT case2107-case2107.o -MD -MP -MF $(DEPDIR)/case2107-case2107.Tpo -c -o case2107-case2107.o `test -f 'case2107.cpp' || echo '$(srcdir)/'`case2107.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case2107-case2107.Tpo $(DEPDIR)/case2107-case2107.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='case2107.cpp' object='case2107-case2107.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2107_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o case2107-case2107.o `test -f 'case2107.cpp' || echo '$(srcdir)/'`case2107.cpp
+
+case2107-case2107.obj: case2107.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2107_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT case2107-case2107.obj -MD -MP -MF $(DEPDIR)/case2107-case2107.Tpo -c -o case2107-case2107.obj `if test -f 'case2107.cpp'; then $(CYGPATH_W) 'case2107.cpp'; else $(CYGPATH_W) '$(srcdir)/case2107.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/case2107-case2107.Tpo $(DEPDIR)/case2107-case2107.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='case2107.cpp' object='case2107-case2107.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(case2107_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o case2107-case2107.obj `if test -f 'case2107.cpp'; then $(CYGPATH_W) 'case2107.cpp'; else $(CYGPATH_W) '$(srcdir)/case2107.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

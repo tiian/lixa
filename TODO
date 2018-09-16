@@ -1,7 +1,8 @@
-Implement XTA for C++
-- develop case tests
-
 Implement XTA for PHP, remove "ext" legacy code, update documentation
+
+Implememt XTA for Python
+
+Implement XTA for Java
 
 Put all configuration in XTA without necessity to load lixac_conf.xml file
 

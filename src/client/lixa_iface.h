@@ -203,7 +203,7 @@ extern "C" {
     static inline int lixa_iface_xa_start(lixa_iface_t *iface, const XID *xid,
                                           int rmid, long flags) {
         if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_start_entry(xid, rmid, flags);
+            return iface->std->xa_start_entry((XID *)xid, rmid, flags);
         else
             return iface->xta->xa_start_entry(iface->context, xid,
                                               rmid, flags);
@@ -223,7 +223,7 @@ extern "C" {
     static inline int lixa_iface_xa_commit(lixa_iface_t *iface,
         const XID *xid, int rmid, long flags) {
     if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_commit_entry(xid,rmid,flags);
+        return iface->std->xa_commit_entry((XID *)xid,rmid,flags);
         else
             return iface->xta->xa_commit_entry(
                 iface->context, xid, rmid, flags);
@@ -244,7 +244,7 @@ extern "C" {
                                              const XID *xid, int rmid,
                                              long flags) {
         if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_rollback_entry(xid, rmid, flags);
+            return iface->std->xa_rollback_entry((XID *)xid, rmid, flags);
         else
             return iface->xta->xa_rollback_entry(
                 iface->context, xid, rmid, flags);
@@ -269,7 +269,7 @@ extern "C" {
                                             int rmid, long flags) {
         if (LIXA_IFACE_STD == iface->type)
             return iface->std->xa_recover_entry(
-                xids,count,rmid,flags);
+                (XID *)xids,count,rmid,flags);
         else
             return iface->xta->xa_recover_entry(
                 iface->context,xids,count,rmid,flags);
@@ -289,7 +289,7 @@ extern "C" {
     static inline int lixa_iface_xa_forget(lixa_iface_t *iface,
         const XID *xid, int rmid, long flags) {
     if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_forget_entry(xid, rmid, flags);
+        return iface->std->xa_forget_entry((XID *)xid, rmid, flags);
         else
             return iface->xta->xa_forget_entry(
                 iface->context, xid, rmid, flags);
@@ -309,7 +309,7 @@ extern "C" {
     static inline int lixa_iface_xa_end(lixa_iface_t *iface,
         const XID *xid, int rmid, long flags) {
     if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_end_entry(xid, rmid, flags);
+        return iface->std->xa_end_entry((XID *)xid, rmid, flags);
         else
             return iface->xta->xa_end_entry(iface->context, xid, rmid, flags);
     }
@@ -328,7 +328,7 @@ extern "C" {
     static inline int lixa_iface_xa_prepare(lixa_iface_t *iface,
         const XID *xid, int rmid, long flags) {
     if (LIXA_IFACE_STD == iface->type)
-            return iface->std->xa_prepare_entry(xid, rmid, flags);
+        return iface->std->xa_prepare_entry((XID *)xid, rmid, flags);
         else
             return iface->xta->xa_prepare_entry(
                 iface->context, xid, rmid, flags);
