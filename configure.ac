@@ -1,9 +1,9 @@
-AC_INIT([lixa], [1.7.0-rc], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
+AC_INIT([lixa], [1.7.0], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 #hardwired configuration
-_RELEASE_DATE="2018-05-27"
+_RELEASE_DATE="2018-09-17"
 AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 LT_INIT
 AC_PROG_LIBTOOL

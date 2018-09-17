@@ -1,7 +1,9 @@
-Release: 1.7.0 (Tester: Tiian; Test purpose: XTA stable release)
-Date: 2018-09-16
+Release: 1.7.0 (Tester: Tiian; Test purpose: XTA C++ API)
+Date: 2018-09-17
 Configuration: --enable-crash --with-docbook --with-mysql --with-postgresql --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_12_1/
 Ubuntu 14.04	|x86_64	|virtual (KVM)	|3 vCPU
+Ubuntu 18.04	|x86_64	|virtual (KVM)	|2 vCPU
+CentOS 7.5      |x86_64 |virtual (KVM)  |2 vCPU **
 
 ------------------------------------------------------------------------------
 
