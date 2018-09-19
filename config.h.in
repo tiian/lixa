@@ -93,6 +93,9 @@
 /* Define to 1 if the system has the type `pthread_t'. */
 #undef HAVE_PTHREAD_T
 
+/* If available, contains the Python version number currently in use. */
+#undef HAVE_PYTHON
+
 /* Define to 1 if you have the <regex.h> header file. */
 #undef HAVE_REGEX_H
 

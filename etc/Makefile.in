@@ -90,6 +90,11 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_mysql.m4 \
 	$(top_srcdir)/m4include/ax_lib_webspheremq.m4 \
 	$(top_srcdir)/m4include/ax_docbook.m4 \
+	$(top_srcdir)/m4include/ax_python_devel.m4 \
+	$(top_srcdir)/m4include/ax_pkg_swig.m4 \
+	$(top_srcdir)/m4include/ax_swig_enable_cxx.m4 \
+	$(top_srcdir)/m4include/ax_swig_multi_module_support.m4 \
+	$(top_srcdir)/m4include/ax_swig_python.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -217,6 +222,8 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+AX_SWIG_PYTHON_CPPFLAGS = @AX_SWIG_PYTHON_CPPFLAGS@
+AX_SWIG_PYTHON_OPT = @AX_SWIG_PYTHON_OPT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -336,12 +343,21 @@ POSTGRESQL_LDADD = @POSTGRESQL_LDADD@
 POSTGRESQL_LDFLAGS = @POSTGRESQL_LDFLAGS@
 PROC = @PROC@
 PROCOB = @PROCOB@
+PYTHON = @PYTHON@
+PYTHON_CPPFLAGS = @PYTHON_CPPFLAGS@
+PYTHON_EXTRA_LDFLAGS = @PYTHON_EXTRA_LDFLAGS@
+PYTHON_EXTRA_LIBS = @PYTHON_EXTRA_LIBS@
+PYTHON_LIBS = @PYTHON_LIBS@
+PYTHON_SITE_PKG = @PYTHON_SITE_PKG@
+PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 STYLESHEETS_DIR = @STYLESHEETS_DIR@
+SWIG = @SWIG@
+SWIG_LIB = @SWIG_LIB@
 TEST_ORACLE = @TEST_ORACLE@
 VALGRIND = @VALGRIND@
 VERSION = @VERSION@

@@ -64,9 +64,9 @@ and poverty.
 DOCUMENTATION:
 Documentation is available in these places:
 - local directory doc/manuals/index.html after tarball extraction
-- http://www.tiian.org/lixa/manuals/html/
-- http://lixa.sourceforge.net/lixa-doc/html/
-- http://lixa.sourceforge.net/lixa-doc/xta/
+- http://www.tiian.org/lixa/manuals/html/index.html
+- http://www.tiian.org/lixa/manuals/xta/C/index.html
+- http://www.tiian.org/lixa/manuals/xta/CPP/index.html
 
 Some important things you should check in the documentation before going on:
 1. check LIXA dependency looking at "Installation/System requirements"

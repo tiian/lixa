@@ -1,4 +1,4 @@
-AC_INIT([lixa], [1.7.0], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
+AC_INIT([lixa], [1.7.1-dev], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
@@ -50,6 +50,7 @@ AC_CONFIG_FILES([
   src/server/Makefile
   src/xta/Makefile
   src/xta/cpp/Makefile
+  src/xta/python/Makefile
   tests/Makefile
   tests/atlocal
   tests/lixa-config.at
@@ -96,6 +97,20 @@ AM_CONDITIONAL([COMPILE_WEBSPHEREMQ_STUFF], [test "$HAVE_WEBSPHEREMQ" = "yes"])
 m4_include(m4include/ax_docbook.m4)
 AX_DOCBOOK
 AM_CONDITIONAL([COMPILE_DOCBOOK_STUFF], [test "$HAVE_DOCBOOK" = "yes"])
+
+# Check Python availability
+m4_include(m4include/ax_python_devel.m4)
+AX_PYTHON_DEVEL([>= '2.7'])
+
+# Check SWIG availability
+m4_include(m4include/ax_pkg_swig.m4)
+AX_PKG_SWIG([2.0])
+m4_include(m4include/ax_swig_enable_cxx.m4)
+AX_SWIG_ENABLE_CXX
+m4_include(m4include/ax_swig_multi_module_support.m4)
+AX_SWIG_MULTI_MODULE_SUPPORT
+m4_include(m4include/ax_swig_python.m4)
+AX_SWIG_PYTHON
 
 #
 # From libtool manual:

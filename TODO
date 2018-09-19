@@ -1,6 +1,8 @@
-Implement XTA for PHP, remove "ext" legacy code, update documentation
-
 Implememt XTA for Python
+ - copy SWIG stuff from FLoM configure.ac to LIXA
+ - Makefile for Python, initially only Xta class...
+
+Implement XTA for PHP, remove "ext" legacy code, update documentation
 
 Implement XTA for Java
 
