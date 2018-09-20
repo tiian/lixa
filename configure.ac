@@ -3,6 +3,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 #hardwired configuration
+_XTA_PREFIX="xta"
 _RELEASE_DATE="2018-09-17"
 AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 LT_INIT
@@ -107,10 +108,12 @@ m4_include(m4include/ax_pkg_swig.m4)
 AX_PKG_SWIG([2.0])
 m4_include(m4include/ax_swig_enable_cxx.m4)
 AX_SWIG_ENABLE_CXX
-m4_include(m4include/ax_swig_multi_module_support.m4)
-AX_SWIG_MULTI_MODULE_SUPPORT
+#m4_include(m4include/ax_swig_multi_module_support.m4)
+#AX_SWIG_MULTI_MODULE_SUPPORT
 m4_include(m4include/ax_swig_python.m4)
 AX_SWIG_PYTHON
+
+AM_CONDITIONAL([COMPILE_XTA_PYTHON], [test "z$SWIG" != "z" -a "z$PYTHON" != "z"])
 
 #
 # From libtool manual:
@@ -245,8 +248,12 @@ AC_SUBST([HAVE_COBOLAPI])
 # Vars useful for lixa-config utility program
 #eval "LIXA_CONFIG_INCLUDEDIR=$includedir $($PKG_CONFIG --cflags glib-2.0) $($PKG_CONFIG --cflags gmodule-no-export-2.0)"
 eval "LIXA_CONFIG_INCLUDEDIR=$includedir"
-LIXA_CONFIG_GLIB2_INCLUDEDIR=$($PKG_CONFIG --cflags glib-2.0)
-LIXA_CONFIG_LIBXML2_INCLUDEDIR=$($PKG_CONFIG --cflags libxml-2.0)
+LIXA_CONFIG_GLIB2_INCLUDEDIR=$($PKG_CONFIG --cflags-only-I glib-2.0)
+LIXA_CONFIG_LIBXML2_INCLUDEDIR=$($PKG_CONFIG --cflags-only-I libxml-2.0)
+# this is pure hacking, no better known way to get the list of headers without
+# -I prefix for setup.py
+LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR=$($PKG_CONFIG --cflags-only-I glib-2.0 | sed 's/-I//' | sed "s/ -I/', '/g" | sed 's/[ ]*$//')
+LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR=$($PKG_CONFIG --cflags-only-I libxml-2.0 | sed 's/-I//' | sed "s/ -I/', '/g" | sed 's/[ ]*$//')
 eval "LIXA_CONFIG_BINDIR=$bindir"
 eval "LIXA_CONFIG_LIBDIR=$libdir"
 eval "LIXA_CONFIG_PREFIX=$prefix"
@@ -339,6 +346,7 @@ AC_CHECK_FUNCS(vsnprintf)
 AC_SUBST(PACKAGE_BUGREPORT)
 AC_SUBST(PACKAGE_NAME)
 AC_SUBST(PACKAGE_VERSION)
+AC_SUBST(_XTA_PREFIX)
 AC_SUBST(_RELEASE_DATE)
 AC_SUBST(LT_LIXAC_CURRENT)
 AC_SUBST(LT_LIXAC_REVISION)
@@ -366,7 +374,9 @@ AC_SUBST(HAVE_DOT)
 AC_SUBST(HAVE_DOT_BOOL)
 AC_SUBST(LIXA_CONFIG_INCLUDEDIR)
 AC_SUBST(LIXA_CONFIG_GLIB2_INCLUDEDIR)
+AC_SUBST(LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR)
 AC_SUBST(LIXA_CONFIG_LIBXML2_INCLUDEDIR)
+AC_SUBST(LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR)
 AC_SUBST(LIXA_CONFIG_BINDIR)
 AC_SUBST(LIXA_CONFIG_LIBDIR)
 AC_SUBST(LIXA_CONFIG_PREFIX)

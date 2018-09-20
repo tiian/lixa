@@ -92,7 +92,6 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_python_devel.m4 \
 	$(top_srcdir)/m4include/ax_pkg_swig.m4 \
 	$(top_srcdir)/m4include/ax_swig_enable_cxx.m4 \
-	$(top_srcdir)/m4include/ax_swig_multi_module_support.m4 \
 	$(top_srcdir)/m4include/ax_swig_python.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -196,9 +195,11 @@ LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LIXA_CONFIG_BINDIR = @LIXA_CONFIG_BINDIR@
 LIXA_CONFIG_GLIB2_INCLUDEDIR = @LIXA_CONFIG_GLIB2_INCLUDEDIR@
+LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR = @LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR@
 LIXA_CONFIG_INCLUDEDIR = @LIXA_CONFIG_INCLUDEDIR@
 LIXA_CONFIG_LIBDIR = @LIXA_CONFIG_LIBDIR@
 LIXA_CONFIG_LIBXML2_INCLUDEDIR = @LIXA_CONFIG_LIBXML2_INCLUDEDIR@
+LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR = @LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR@
 LIXA_CONFIG_LOCALSTATEDIR = @LIXA_CONFIG_LOCALSTATEDIR@
 LIXA_CONFIG_PREFIX = @LIXA_CONFIG_PREFIX@
 LIXA_CONFIG_SYSCONFDIR = @LIXA_CONFIG_SYSCONFDIR@
@@ -279,6 +280,7 @@ WEBSPHEREMQ_PGMLIB = @WEBSPHEREMQ_PGMLIB@
 WEBSPHEREMQ_SWITCH_TYPE = @WEBSPHEREMQ_SWITCH_TYPE@
 XSLTPROC = @XSLTPROC@
 _RELEASE_DATE = @_RELEASE_DATE@
+_XTA_PREFIX = @_XTA_PREFIX@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -332,7 +334,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_noinst_DATA = xta.i
+dist_noinst_DATA = xta.i setup.py.i
 all: all-am
 
 .SUFFIXES:
@@ -411,7 +413,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(DATA)
+all-am: Makefile $(DATA) all-local
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -445,7 +447,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-am
 	-rm -f Makefile
@@ -469,7 +471,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am:
+install-exec-am: install-exec-local
 
 install-html: install-html-am
 
@@ -507,27 +509,58 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-local
 
 .MAKE: install-am install-strip
 
-.PHONY: all all-am check check-am clean clean-generic clean-libtool \
-	cscopelist-am ctags-am distclean distclean-generic \
-	distclean-libtool distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
+.PHONY: all all-am all-local check check-am clean clean-generic \
+	clean-libtool clean-local cscopelist-am ctags-am distclean \
+	distclean-generic distclean-libtool distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-exec-local install-html \
 	install-html-am install-info install-info-am install-man \
 	install-pdf install-pdf-am install-ps install-ps-am \
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags-am uninstall uninstall-am
+	tags-am uninstall uninstall-am uninstall-local
 
 
 # Produce XTA wrapper using SWIG (C++)
 
-xta_wrap.cxx: xta.i ../cpp/Xta.hpp
-	$(SWIG) -c++ -python -I../cpp
+xta_wrap.cpp: xta.i ../cpp/Xta.hpp
+	$(SWIG) -python -I../cpp -o $@ xta.i
+
+setup.py:	setup.py.i ../../../config.status
+	sed \
+	-e 's|@libdir[@]|$(libdir)|g' \
+        -e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	-e 's|@_XTA_PREFIX[@]|$(_XTA_PREFIX)|g' \
+	-e 's|@PACKAGE_BUGREPORT[@]|$(PACKAGE_BUGREPORT)|g' \
+	-e 's|@PACKAGE_NAME[@]|$(PACKAGE_NAME)|g' \
+	-e 's|@PACKAGE_STRING[@]|$(PACKAGE_STRING)|g' \
+	-e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+	-e "s|@LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR[@]|$(LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR)|g" \
+	-e "s|@LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR[@]|$(LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR)|g" \
+	-e "s|@MYSQL_INCLUDE_DIR[@]|$(MYSQL_INCLUDE_DIR)|g" \
+	-e "s|@POSTGRESQL_INCLUDE_DIR[@]|$(POSTGRESQL_INCLUDE_DIR)|g" \
+	$< >$@
+
+# Build Python module extension
+all-local:	xta_wrap.cpp setup.py
+	python setup.py build_ext --inplace
+
+clean-local:
+	rm -f xta_wrap.cpp _xta.so xta.py setup.py
+
+# Install Python module extension
+install-exec-local:
+	python setup.py install --record installed_files.txt
+
+# Uninstall Python module extension
+uninstall-local:
+	cat installed_files.txt | xargs rm -rfv
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

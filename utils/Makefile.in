@@ -92,7 +92,6 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_python_devel.m4 \
 	$(top_srcdir)/m4include/ax_pkg_swig.m4 \
 	$(top_srcdir)/m4include/ax_swig_enable_cxx.m4 \
-	$(top_srcdir)/m4include/ax_swig_multi_module_support.m4 \
 	$(top_srcdir)/m4include/ax_swig_python.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -224,9 +223,11 @@ LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LIXA_CONFIG_BINDIR = @LIXA_CONFIG_BINDIR@
 LIXA_CONFIG_GLIB2_INCLUDEDIR = @LIXA_CONFIG_GLIB2_INCLUDEDIR@
+LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR = @LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR@
 LIXA_CONFIG_INCLUDEDIR = @LIXA_CONFIG_INCLUDEDIR@
 LIXA_CONFIG_LIBDIR = @LIXA_CONFIG_LIBDIR@
 LIXA_CONFIG_LIBXML2_INCLUDEDIR = @LIXA_CONFIG_LIBXML2_INCLUDEDIR@
+LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR = @LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR@
 LIXA_CONFIG_LOCALSTATEDIR = @LIXA_CONFIG_LOCALSTATEDIR@
 LIXA_CONFIG_PREFIX = @LIXA_CONFIG_PREFIX@
 LIXA_CONFIG_SYSCONFDIR = @LIXA_CONFIG_SYSCONFDIR@
@@ -307,6 +308,7 @@ WEBSPHEREMQ_PGMLIB = @WEBSPHEREMQ_PGMLIB@
 WEBSPHEREMQ_SWITCH_TYPE = @WEBSPHEREMQ_SWITCH_TYPE@
 XSLTPROC = @XSLTPROC@
 _RELEASE_DATE = @_RELEASE_DATE@
+_XTA_PREFIX = @_XTA_PREFIX@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@

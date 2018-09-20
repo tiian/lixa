@@ -94,7 +94,6 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_python_devel.m4 \
 	$(top_srcdir)/m4include/ax_pkg_swig.m4 \
 	$(top_srcdir)/m4include/ax_swig_enable_cxx.m4 \
-	$(top_srcdir)/m4include/ax_swig_multi_module_support.m4 \
 	$(top_srcdir)/m4include/ax_swig_python.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -234,7 +233,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = . cpp
+DIST_SUBDIRS = . cpp python
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -332,9 +331,11 @@ LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LIXA_CONFIG_BINDIR = @LIXA_CONFIG_BINDIR@
 LIXA_CONFIG_GLIB2_INCLUDEDIR = @LIXA_CONFIG_GLIB2_INCLUDEDIR@
+LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR = @LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR@
 LIXA_CONFIG_INCLUDEDIR = @LIXA_CONFIG_INCLUDEDIR@
 LIXA_CONFIG_LIBDIR = @LIXA_CONFIG_LIBDIR@
 LIXA_CONFIG_LIBXML2_INCLUDEDIR = @LIXA_CONFIG_LIBXML2_INCLUDEDIR@
+LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR = @LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR@
 LIXA_CONFIG_LOCALSTATEDIR = @LIXA_CONFIG_LOCALSTATEDIR@
 LIXA_CONFIG_PREFIX = @LIXA_CONFIG_PREFIX@
 LIXA_CONFIG_SYSCONFDIR = @LIXA_CONFIG_SYSCONFDIR@
@@ -415,6 +416,7 @@ WEBSPHEREMQ_PGMLIB = @WEBSPHEREMQ_PGMLIB@
 WEBSPHEREMQ_SWITCH_TYPE = @WEBSPHEREMQ_SWITCH_TYPE@
 XSLTPROC = @XSLTPROC@
 _RELEASE_DATE = @_RELEASE_DATE@
+_XTA_PREFIX = @_XTA_PREFIX@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -468,7 +470,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-@COMPILE_XTA_CPP_TRUE@MAYBE_XTA_CPP = cpp
+@COMPILE_XTA_CPP_TRUE@MAYBECPP = cpp
+@COMPILE_XTA_PYTHON_TRUE@MAYBEPYTHON = python
 @COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL_SOURCES = xta_mysql_xa_resource.c
 @COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL_CPPFLAGS = @MYSQL_CPPFLAGS@ \
 @COMPILE_MYSQL_STUFF_TRUE@	-I$(top_srcdir)/src/client/switch/mysql
@@ -479,7 +482,7 @@ top_srcdir = @top_srcdir@
 @COMPILE_POSTGRESQL_STUFF_TRUE@	-I$(top_srcdir)/src/client/switch/postgresql
 
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
-SUBDIRS = . $(MAYBE_XTA_CPP)
+SUBDIRS = . $(MAYBECPP) $(MAYBEPYTHON)
 include_HEADERS = xta.h xta_iface.h xta_init.h xta_transaction.h \
 	xta_transaction_manager.h xta_xid.h \
 	xta_xa_resource.h xta_native_xa_resource.h xta_acquired_xa_resource.h \

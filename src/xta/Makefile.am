@@ -1,5 +1,8 @@
 if COMPILE_XTA_CPP
-  MAYBE_XTA_CPP = cpp
+  MAYBECPP = cpp
+endif
+if COMPILE_XTA_PYTHON
+  MAYBEPYTHON = python
 endif
 if COMPILE_MYSQL_STUFF
   MAYBE_MYSQL_SOURCES = xta_mysql_xa_resource.c
@@ -14,7 +17,7 @@ if COMPILE_POSTGRESQL_STUFF
   MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
 endif
 
-SUBDIRS = . $(MAYBE_XTA_CPP)
+SUBDIRS = . $(MAYBECPP) $(MAYBEPYTHON)
 
 includedir = $(prefix)/include/xta
 include_HEADERS = xta.h xta_iface.h xta_init.h xta_transaction.h \

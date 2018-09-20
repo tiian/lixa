@@ -640,7 +640,9 @@ LIXA_CONFIG_LOCALSTATEDIR
 LIXA_CONFIG_PREFIX
 LIXA_CONFIG_LIBDIR
 LIXA_CONFIG_BINDIR
+LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR
 LIXA_CONFIG_LIBXML2_INCLUDEDIR
+LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR
 LIXA_CONFIG_GLIB2_INCLUDEDIR
 LIXA_CONFIG_INCLUDEDIR
 CPP_COMPILER_AVAILABLE
@@ -665,6 +667,7 @@ LT_LIXAC_AGE
 LT_LIXAC_REVISION
 LT_LIXAC_CURRENT
 _RELEASE_DATE
+_XTA_PREFIX
 HAVE_NETSTAT
 HAVE_DOT_BOOL
 HAVE_DOT
@@ -683,6 +686,8 @@ COMPILE_XTA_CPP_FALSE
 COMPILE_XTA_CPP_TRUE
 COMPILE_XTA_FALSE
 COMPILE_XTA_TRUE
+COMPILE_XTA_PYTHON_FALSE
+COMPILE_XTA_PYTHON_TRUE
 AX_SWIG_PYTHON_CPPFLAGS
 AX_SWIG_PYTHON_OPT
 SWIG_LIB
@@ -4559,6 +4564,7 @@ esac
 
 
 #hardwired configuration
+_XTA_PREFIX="xta"
 _RELEASE_DATE="2018-09-17"
 
 cat >>confdefs.h <<_ACEOF
@@ -18423,82 +18429,8 @@ $as_echo "$as_me: WARNING: cannot determine SWIG version" >&2;}
 
         SWIG="$SWIG -c++"
 
-# =================================================================================
-#  https://www.gnu.org/software/autoconf-archive/ax_swig_multi_module_support.html
-# =================================================================================
-#
-# SYNOPSIS
-#
-#   AX_SWIG_MULTI_MODULE_SUPPORT
-#
-# DESCRIPTION
-#
-#   Enable support for multiple modules. This effects all invocations of
-#   $(SWIG). You have to link all generated modules against the appropriate
-#   SWIG runtime library. If you want to build Python modules for example,
-#   use the AX_SWIG_PYTHON macro and link the modules against
-#   $(AX_SWIG_PYTHON_LIBS).
-#
-# LICENSE
-#
-#   Copyright (c) 2008 Sebastian Huber <sebastian-huber@web.de>
-#   Copyright (c) 2008 Alan W. Irwin
-#   Copyright (c) 2008 Rafael Laboissiere <rafael@laboissiere.net>
-#   Copyright (c) 2008 Andrew Collier
-#
-#   This program is free software; you can redistribute it and/or modify it
-#   under the terms of the GNU General Public License as published by the
-#   Free Software Foundation; either version 2 of the License, or (at your
-#   option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-#   Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License along
-#   with this program. If not, see <https://www.gnu.org/licenses/>.
-#
-#   As a special exception, the respective Autoconf Macro's copyright owner
-#   gives unlimited permission to copy, distribute and modify the configure
-#   scripts that are the output of Autoconf when processing the Macro. You
-#   need not follow the terms of the GNU General Public License when using
-#   or distributing such scripts, even though portions of the text of the
-#   Macro appear in them. The GNU General Public License (GPL) does govern
-#   all other use of the material that constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the Autoconf
-#   Macro released by the Autoconf Archive. When you make and distribute a
-#   modified version of the Autoconf Macro, you may extend this special
-#   exception to the GPL to apply to your modified version as well.
-
-#serial 11
-
-# This is what autoupdate's m4 run will expand.  It fires
-# the warning (with _au_warn_XXX), outputs it into the
-# updated configure.ac (with AC_DIAGNOSE), and then outputs
-# the replacement expansion.
-
-
-# This is an auxiliary macro that is also run when
-# autoupdate runs m4.  It simply calls m4_warning, but
-# we need a wrapper so that each warning is emitted only
-# once.  We break the quoting in m4_warning's argument in
-# order to expand this macro's arguments, not AU_DEFUN's.
-
-
-# Finally, this is the expansion that is picked up by
-# autoconf.  It tells the user to run autoupdate, and
-# then outputs the replacement expansion.  We do not care
-# about autoupdate's warning because that contains
-# information on what to do *after* running autoupdate.
-
-
-
-
-
-        SWIG="$SWIG -noruntime"
-
+#m4_include(m4include/ax_swig_multi_module_support.m4)
+#AX_SWIG_MULTI_MODULE_SUPPORT
 # ===========================================================================
 #      https://www.gnu.org/software/autoconf-archive/ax_swig_python.html
 # ===========================================================================
@@ -18584,6 +18516,15 @@ $as_echo "$as_me: WARNING: cannot determine SWIG version" >&2;}
 
         AX_SWIG_PYTHON_CPPFLAGS=$PYTHON_CPPFLAGS
 
+
+
+ if test "z$SWIG" != "z" -a "z$PYTHON" != "z"; then
+  COMPILE_XTA_PYTHON_TRUE=
+  COMPILE_XTA_PYTHON_FALSE='#'
+else
+  COMPILE_XTA_PYTHON_TRUE='#'
+  COMPILE_XTA_PYTHON_FALSE=
+fi
 
 
 #
@@ -18886,8 +18827,12 @@ fi
 # Vars useful for lixa-config utility program
 #eval "LIXA_CONFIG_INCLUDEDIR=$includedir $($PKG_CONFIG --cflags glib-2.0) $($PKG_CONFIG --cflags gmodule-no-export-2.0)"
 eval "LIXA_CONFIG_INCLUDEDIR=$includedir"
-LIXA_CONFIG_GLIB2_INCLUDEDIR=$($PKG_CONFIG --cflags glib-2.0)
-LIXA_CONFIG_LIBXML2_INCLUDEDIR=$($PKG_CONFIG --cflags libxml-2.0)
+LIXA_CONFIG_GLIB2_INCLUDEDIR=$($PKG_CONFIG --cflags-only-I glib-2.0)
+LIXA_CONFIG_LIBXML2_INCLUDEDIR=$($PKG_CONFIG --cflags-only-I libxml-2.0)
+# this is pure hacking, no better known way to get the list of headers without
+# -I prefix for setup.py
+LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR=$($PKG_CONFIG --cflags-only-I glib-2.0 | sed 's/-I//' | sed "s/ -I/', '/g" | sed 's/ *$//')
+LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR=$($PKG_CONFIG --cflags-only-I libxml-2.0 | sed 's/-I//' | sed "s/ -I/', '/g" | sed 's/ *$//')
 eval "LIXA_CONFIG_BINDIR=$bindir"
 eval "LIXA_CONFIG_LIBDIR=$libdir"
 eval "LIXA_CONFIG_PREFIX=$prefix"
@@ -20323,6 +20268,9 @@ done
 
 
 
+
+
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -20498,6 +20446,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COMPILE_DOCBOOK_STUFF_TRUE}" && test -z "${COMPILE_DOCBOOK_STUFF_FALSE}"; then
   as_fn_error $? "conditional \"COMPILE_DOCBOOK_STUFF\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${COMPILE_XTA_PYTHON_TRUE}" && test -z "${COMPILE_XTA_PYTHON_FALSE}"; then
+  as_fn_error $? "conditional \"COMPILE_XTA_PYTHON\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COMPILE_XTA_TRUE}" && test -z "${COMPILE_XTA_FALSE}"; then
