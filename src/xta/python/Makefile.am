@@ -14,6 +14,7 @@ setup.py:	setup.py.i ../../../config.status
 	-e 's|@PACKAGE_NAME[@]|$(PACKAGE_NAME)|g' \
 	-e 's|@PACKAGE_STRING[@]|$(PACKAGE_STRING)|g' \
 	-e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+	-e 's|@PYTHON[@]|$(PYTHON)|g' \
 	-e "s|@LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR[@]|$(LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR)|g" \
 	-e "s|@LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR[@]|$(LIXA_CONFIG_LIBXML2_PYTHON_INCLUDEDIR)|g" \
 	-e "s|@MYSQL_INCLUDE_DIR[@]|$(MYSQL_INCLUDE_DIR)|g" \
@@ -22,14 +23,14 @@ setup.py:	setup.py.i ../../../config.status
 
 # Build Python module extension
 all-local:	xta_wrap.cpp setup.py
-	python setup.py build_ext --inplace
+	$(PYTHON) setup.py build_ext --inplace
 
 clean-local:
 	rm -f xta_wrap.cpp _xta.so xta.py setup.py
 
 # Install Python module extension
 install-exec-local:
-	python setup.py install --record installed_files.txt
+	$(PYTHON) setup.py install --record installed_files.txt
 
 # Uninstall Python module extension
 uninstall-local:

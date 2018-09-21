@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env @PYTHON@
 
 """
 setup.py file for SWIG generated module
