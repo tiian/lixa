@@ -1,6 +1,7 @@
 Implememt XTA for Python
  - copy SWIG stuff from FLoM configure.ac to LIXA
  - Makefile for Python, initially only Xta class...
+ - Makefile.am for XTA Python examples
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation
 
