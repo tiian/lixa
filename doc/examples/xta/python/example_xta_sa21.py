@@ -66,3 +66,36 @@ rm1 = psycopg2.connect("dbname=testdb")
 # Note: using MySQLdb functions
 rm2 = MySQLdb.connect("localhost", "lixa", "", "lixa")
 
+# create a new XTA Transaction Manager object
+tm = TransactionManager()
+
+# create an XA resource for PostgreSQL
+# second parameter "PostgreSQL" is descriptive
+# third parameter "dbname=testdb" identifies the specific database
+#
+# how to retrieve PGconn * from rm1?!
+xar1 = PostgresqlXaResource(rm1.conn, "PostgreSQL", "dbname=testdb")
+
+# Execute PostgreSQL statement
+sys.stdout.write("PostgreSQL, executing >" + postgresql_stmt + "<\n")
+cur1 = rm1.cursor()
+cur1.execute(postgresql_stmt)
+
+# Execute MySQL statement
+sys.stdout.write("MySQL, executing >" + mysql_stmt + "<\n")
+cur2 = rm2.cursor()
+cur2.execute(mysql_stmt)
+
+# commit or rollback the transaction
+if commit:
+	rm1.commit()
+	rm2.commit()
+else:
+	rm1.rollback()
+	rm2.rollback()
+
+# Close the PostgreSQL connection
+cur1.close()
+
+# Close the MySQL connection
+cur2.close()
