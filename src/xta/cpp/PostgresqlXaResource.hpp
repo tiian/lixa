@@ -48,6 +48,20 @@ namespace xta {
          */
         PostgresqlXaResource(PGconn *connection, std::string const& name,
                              std::string const& open_info);
+        /**
+         * Create a new PostgreSQL resource: this bizzarre method is useful
+         * only for SWIG generated wrappers, sometimes it's easier to get a
+         * string representation of a pointer instead of a real pointer
+         * @param[in] connection : string with hex representation of a pointer
+         *            that's a connection to PostgreSQL already opened by the
+         *                application program
+         * @param[in] name : unique identifier of the resource
+         * @param[in] open_info : unique description of the connection
+         *                        properties like network name/IP address,
+         *                        port, user/schema, etc.
+         */
+        PostgresqlXaResource(const char *connection, const char *name,
+                             const char *open_info);
         ~PostgresqlXaResource();
         /**
          * Return a pointer to the C base XA resource object

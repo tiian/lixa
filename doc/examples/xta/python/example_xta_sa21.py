@@ -38,6 +38,26 @@ import psycopg2
 import MySQLdb
 from xta import *
 
+# This hack has been documented here
+# https://gist.github.com/dvarrazzo/b7c8f050bbd39dd2c104
+def getpqconn(conn):
+	"""
+	Return the address of the libpq connection string from a
+	psycopg connection
+	"""
+	from ctypes import string_at
+	from sys import getsizeof
+	from socket import ntohl, htonl
+	from binascii import hexlify
+
+	hver = "%08x" % ntohl(conn.server_version)
+	mem = hexlify(string_at(id(conn), getsizeof(conn)))
+	ver_off = mem.find(hver)
+	assert ver_off > 0
+	assert mem.find(hver, ver_off + 8) == -1, "there should be only one"
+	pqconn = "0x" + mem[ver_off + 8:ver_off + 16]
+	return pqconn
+
 # Check command line parameters
 if len(sys.argv) < 3:
 	sys.stderr.write("This program requires two boolean parameters: " +
@@ -73,8 +93,9 @@ tm = TransactionManager()
 # second parameter "PostgreSQL" is descriptive
 # third parameter "dbname=testdb" identifies the specific database
 #
-# how to retrieve PGconn * from rm1?!
-xar1 = PostgresqlXaResource(rm1.conn, "PostgreSQL", "dbname=testdb")
+# PGconn is retrieved from rm1 using an hack as explained here:
+# https://gist.github.com/dvarrazzo/b7c8f050bbd39dd2c104
+xar1 = PostgresqlXaResource(getpqconn(rm1), "PostgreSQL", "dbname=testdb")
 
 # Execute PostgreSQL statement
 sys.stdout.write("PostgreSQL, executing >" + postgresql_stmt + "<\n")
@@ -99,3 +120,6 @@ cur1.close()
 
 # Close the MySQL connection
 cur2.close()
+
+
+

@@ -2,7 +2,7 @@ dist_noinst_DATA = xta.i setup.py.i
 
 # Produce XTA wrapper using SWIG (C++)
 
-xta_wrap.cpp: xta.i ../cpp/Xta.hpp
+xta_wrap.cpp: xta.i ../cpp/*.hpp
 	$(SWIG) -python -I../cpp -o $@ xta.i
 
 setup.py:	setup.py.i ../../../config.status
