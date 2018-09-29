@@ -47,13 +47,12 @@ namespace xta {
             throw Exception(LIXA_RC_NULL_OBJECT,
                             "xta_postgresql_xa_resource_new");
     };
-    
-    PostgresqlXaResource::PostgresqlXaResource(const char *connection,
+
+    PostgresqlXaResource::PostgresqlXaResource(unsigned long long connection,
                                                const char *name,
                                                const char *open_info)
     {
-        unsigned long long int tmp = strtoull(connection, NULL, 16);
-        PGconn *pointer = (PGconn *)tmp;
+        PGconn *pointer = (PGconn *)connection;
         if (NULL == (pxar = xta_postgresql_xa_resource_new(
                          pointer, name, open_info)))
             throw Exception(LIXA_RC_NULL_OBJECT,

@@ -38,26 +38,6 @@ import psycopg2
 import MySQLdb
 from xta import *
 
-# This hack has been documented here
-# https://gist.github.com/dvarrazzo/b7c8f050bbd39dd2c104
-def getpqconn(conn):
-	"""
-	Return the address of the libpq connection string from a
-	psycopg connection
-	"""
-	from ctypes import string_at
-	from sys import getsizeof
-	from socket import ntohl, htonl
-	from binascii import hexlify
-
-	hver = "%08x" % ntohl(conn.server_version)
-	mem = hexlify(string_at(id(conn), getsizeof(conn)))
-	ver_off = mem.find(hver)
-	assert ver_off > 0
-	assert mem.find(hver, ver_off + 8) == -1, "there should be only one"
-	pqconn = "0x" + mem[ver_off + 8:ver_off + 16]
-	return pqconn
-
 # Check command line parameters
 if len(sys.argv) < 3:
 	sys.stderr.write("This program requires two boolean parameters: " +
@@ -84,7 +64,7 @@ rm1 = psycopg2.connect("dbname=testdb")
 
 # create a new MySQL connection
 # Note: using MySQLdb functions
-rm2 = MySQLdb.connect("localhost", "lixa", "", "lixa")
+#rm2 = MySQLdb.connect("localhost", "lixa", "", "lixa")
 
 # create a new XTA Transaction Manager object
 tm = TransactionManager()
@@ -95,7 +75,19 @@ tm = TransactionManager()
 #
 # PGconn is retrieved from rm1 using an hack as explained here:
 # https://gist.github.com/dvarrazzo/b7c8f050bbd39dd2c104
-xar1 = PostgresqlXaResource(getpqconn(rm1), "PostgreSQL", "dbname=testdb")
+xar1 = PostgresqlXaResource(get_pgconn(rm1), "PostgreSQL", "dbname=testdb")
+
+# Create a new XA global transaction and retrieve a reference from
+# the TransactionManager object
+tx = tm.CreateTransaction();
+
+# Enlist PostgreSQL resource to transaction
+tx.EnlistResource(xar1);
+
+# Open all resources enlisted by tx Transaction
+tx.Open();
+# Start a new XA global transaction with a single branch
+tx.Start();
 
 # Execute PostgreSQL statement
 sys.stdout.write("PostgreSQL, executing >" + postgresql_stmt + "<\n")
@@ -103,23 +95,23 @@ cur1 = rm1.cursor()
 cur1.execute(postgresql_stmt)
 
 # Execute MySQL statement
-sys.stdout.write("MySQL, executing >" + mysql_stmt + "<\n")
-cur2 = rm2.cursor()
-cur2.execute(mysql_stmt)
+#sys.stdout.write("MySQL, executing >" + mysql_stmt + "<\n")
+#cur2 = rm2.cursor()
+#cur2.execute(mysql_stmt)
 
 # commit or rollback the transaction
 if commit:
-	rm1.commit()
-	rm2.commit()
+	tx.Commit()
+#	rm2.commit()
 else:
-	rm1.rollback()
-	rm2.rollback()
+	tx.Rollback()
+#	rm2.rollback()
 
 # Close the PostgreSQL connection
 cur1.close()
 
 # Close the MySQL connection
-cur2.close()
+#cur2.close()
 
 
 

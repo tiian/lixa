@@ -60,7 +60,7 @@ namespace xta {
          *                        properties like network name/IP address,
          *                        port, user/schema, etc.
          */
-        PostgresqlXaResource(const char *connection, const char *name,
+        PostgresqlXaResource(unsigned long long connection, const char *name,
                              const char *open_info);
         ~PostgresqlXaResource();
         /**
