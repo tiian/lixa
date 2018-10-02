@@ -48,6 +48,8 @@ namespace xta {
          */
         PostgresqlXaResource(PGconn *connection, std::string const& name,
                              std::string const& open_info);
+        PostgresqlXaResource(PGconn *connection, const char *name,
+                             const char *open_info);
         /**
          * Create a new PostgreSQL resource: this bizzarre method is useful
          * only for SWIG generated wrappers, sometimes it's easier to get a

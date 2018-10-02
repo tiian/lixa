@@ -18,8 +18,13 @@
 %include "AcquiredXaResource.hpp"
 %include "MysqlXaResource.hpp"
 
-%ignore  PostgresqlXaResource(PGconn *connection, std::string const& name,
-                              std::string const& open_info);
+%typemap(in) PGconn * {
+  $1 = (PGconn *) PyCapsule_GetPointer($input, "psycopg2.connection._raw_pgconn");
+}
+
+%ignore  PostgresqlXaResource(unsigned long long, char const*, char const*);
+%ignore  PostgresqlXaResource(PGconn *,std::string const &,std::string const &);
+
 %include "PostgresqlXaResource.hpp"
 %include "Xid.hpp"
 %include "Transaction.hpp"

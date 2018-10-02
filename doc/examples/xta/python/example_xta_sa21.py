@@ -75,7 +75,11 @@ tm = TransactionManager()
 #
 # PGconn is retrieved from rm1 using an hack as explained here:
 # https://gist.github.com/dvarrazzo/b7c8f050bbd39dd2c104
-xar1 = PostgresqlXaResource(get_pgconn(rm1), "PostgreSQL", "dbname=testdb")
+# xar1 = PostgresqlXaResource(get_pgconn(rm1), "PostgreSQL", "dbname=testdb")
+
+# using PyCapsule instead of the hack
+# https://github.com/fogzot/psycopg2/tree/feature-expose-pgconn
+xar1 = PostgresqlXaResource(rm1._raw_pgconn, "PostgreSQL", "dbname=testdb")
 
 # Create a new XA global transaction and retrieve a reference from
 # the TransactionManager object
