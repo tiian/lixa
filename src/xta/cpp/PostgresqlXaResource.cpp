@@ -58,8 +58,12 @@ namespace xta {
                             "xta_postgresql_xa_resource_new");
     };
 
-    PostgresqlXaResource::PostgresqlXaResource(unsigned long long connection,
-                                               const char *name,
+    /*
+      @@@ This is only an hack, it should be removed with Psycopg 2.8
+      PostgresqlXaResource(unsigned long long connection, const char *name,
+      const char *open_info);
+      PostgresqlXaResource::PostgresqlXaResource(unsigned long long connection,
+      const char *name,
                                                const char *open_info)
     {
         PGconn *pointer = (PGconn *)connection;
@@ -68,7 +72,7 @@ namespace xta {
             throw Exception(LIXA_RC_NULL_OBJECT,
                             "xta_postgresql_xa_resource_new");
     };
-    
+    */
     PostgresqlXaResource::~PostgresqlXaResource()
     {
         xta_postgresql_xa_resource_delete(pxar);

@@ -79,19 +79,20 @@ tm = TransactionManager()
 
 # using PyCapsule instead of the hack
 # https://github.com/fogzot/psycopg2/tree/feature-expose-pgconn
+# it should be available in Psycopg2
 xar1 = PostgresqlXaResource(rm1._raw_pgconn, "PostgreSQL", "dbname=testdb")
 
 # Create a new XA global transaction and retrieve a reference from
 # the TransactionManager object
-tx = tm.CreateTransaction();
+tx = tm.CreateTransaction()
 
 # Enlist PostgreSQL resource to transaction
-tx.EnlistResource(xar1);
+tx.EnlistResource(xar1)
 
 # Open all resources enlisted by tx Transaction
-tx.Open();
+tx.Open()
 # Start a new XA global transaction with a single branch
-tx.Start();
+tx.Start()
 
 # Execute PostgreSQL statement
 sys.stdout.write("PostgreSQL, executing >" + postgresql_stmt + "<\n")
@@ -106,10 +107,8 @@ cur1.execute(postgresql_stmt)
 # commit or rollback the transaction
 if commit:
 	tx.Commit()
-#	rm2.commit()
 else:
 	tx.Rollback()
-#	rm2.rollback()
 
 # Close the PostgreSQL connection
 cur1.close()
