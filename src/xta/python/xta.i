@@ -22,19 +22,22 @@
         }
 }
 
+%typemap(in) PGconn * {
+  $1 = (PGconn *) PyCapsule_GetPointer($input, "psycopg2.connection.native_connection");
+}
+%ignore  PostgresqlXaResource(PGconn *,std::string const &,std::string const &);
+
+%typemap(in) MYSQL * {
+  $1 = (MYSQL *) PyCapsule_GetPointer($input, "_mysql.connection.native_connection");
+}
+%ignore MysqlXaResource(MYSQL *,std::string const &,std::string const &);
+
 %include "Xta.hpp"
 %include "XaResource.hpp"
 %include "NativeXaResource.hpp"
 %include "AcquiredXaResource.hpp"
-%include "MysqlXaResource.hpp"
-
-%typemap(in) PGconn * {
-  $1 = (PGconn *) PyCapsule_GetPointer($input, "psycopg2.connection._raw_pgconn");
-}
-
-%ignore  PostgresqlXaResource(PGconn *,std::string const &,std::string const &);
-
 %include "PostgresqlXaResource.hpp"
+%include "MysqlXaResource.hpp"
 %include "Xid.hpp"
 %include "Transaction.hpp"
 %include "TransactionManager.hpp"

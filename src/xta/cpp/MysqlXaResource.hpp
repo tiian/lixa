@@ -48,6 +48,8 @@ namespace xta {
          */
         MysqlXaResource(MYSQL *connection, std::string const& name,
                         std::string const& open_info);
+        MysqlXaResource(MYSQL *connection, const char *name,
+                        const char *open_info);
         ~MysqlXaResource();
         /**
          * Return a pointer to the C base XA resource object

@@ -64,7 +64,7 @@ rm1 = psycopg2.connect("dbname=testdb")
 
 # create a new MySQL connection
 # Note: using MySQLdb functions
-#rm2 = MySQLdb.connect("localhost", "lixa", "", "lixa")
+rm2 = MySQLdb.connect(host="localhost", user="lixa", db="lixa")
 
 # create a new XTA Transaction Manager object
 tm = TransactionManager()
@@ -79,8 +79,11 @@ tm = TransactionManager()
 
 # using PyCapsule instead of the hack
 # https://github.com/fogzot/psycopg2/tree/feature-expose-pgconn
-# it should be available in Psycopg2
-xar1 = PostgresqlXaResource(rm1._raw_pgconn, "PostgreSQL", "dbname=testdb")
+# it should be available in Psycopg2 2.8
+#xar1 = PostgresqlXaResource(rm1._raw_pgconn, "PostgreSQL", "dbname=testdb")
+xar1 = PostgresqlXaResource(rm1.get_native_connection(), "PostgreSQL", "dbname=testdb")
+
+xar2 = MysqlXaResource(rm2.get_native_connection(), "MySQL", "localhost,0,lixa,,lixa")
 
 # Create a new XA global transaction and retrieve a reference from
 # the TransactionManager object
@@ -88,6 +91,9 @@ tx = tm.CreateTransaction()
 
 # Enlist PostgreSQL resource to transaction
 tx.EnlistResource(xar1)
+
+# Enlist MySQL resource to transaction
+tx.EnlistResource(xar2)
 
 # Open all resources enlisted by tx Transaction
 tx.Open()
@@ -100,9 +106,9 @@ cur1 = rm1.cursor()
 cur1.execute(postgresql_stmt)
 
 # Execute MySQL statement
-#sys.stdout.write("MySQL, executing >" + mysql_stmt + "<\n")
-#cur2 = rm2.cursor()
-#cur2.execute(mysql_stmt)
+sys.stdout.write("MySQL, executing >" + mysql_stmt + "<\n")
+cur2 = rm2.cursor()
+cur2.execute(mysql_stmt)
 
 # commit or rollback the transaction
 if commit:
@@ -114,7 +120,4 @@ else:
 cur1.close()
 
 # Close the MySQL connection
-#cur2.close()
-
-
-
+cur2.close()
