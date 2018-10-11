@@ -1,7 +1,4 @@
 Implememt XTA for Python
-- exceptions
-- PyCapsule
-- MySQL
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation
 

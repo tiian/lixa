@@ -360,7 +360,7 @@ const char *lixa_strerror(int ret_cod)
                 "committed and partially rolled back (like TX_HAZARD in TX "
                 "transaction demarcation specification)";
         case LIXA_RC_NON_BRANCHABLE_TX:
-            return "ERROR: the XA transaction can be branched because it "
+            return "ERROR: the XA transaction can not  be branched because it "
                 "has been create as non branchable";
         default:
             return "ERROR: unknown error";

@@ -35,7 +35,7 @@ namespace xta {
         /**
          * Convert the transaction ID to an ASCII string
          */
-        string toString();
+        std::string toString();
         
         private:
         const xta_xid_t    *xid;

@@ -47,16 +47,6 @@ namespace xta {
             throw Exception(LIXA_RC_NULL_OBJECT,
                             "xta_mysql_xa_resource_new");
     };
-    
-    MysqlXaResource::MysqlXaResource(MYSQL *connection, const char *name,
-                                     const char *open_info)
-    {
-        if (NULL == (mxar = xta_mysql_xa_resource_new(
-                         connection, name, open_info)))
-            throw Exception(LIXA_RC_NULL_OBJECT,
-                            "xta_mysql_xa_resource_new");
-    };
-    
     MysqlXaResource::~MysqlXaResource()
     {
         xta_mysql_xa_resource_delete(mxar);

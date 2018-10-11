@@ -34,95 +34,99 @@
 #
 
 import sys
-import psycopg2
 import MySQLdb
 from xta import *
 
 # Check command line parameters
-if len(sys.argv) < 3:
+if len(sys.argv) < 5:
 	sys.stderr.write("This program requires two boolean parameters: " +
-	"'commit' and 'insert'\n")
+                         "'commit' and 'insert' and two strings: " +
+                         "'Superior2SubordinateFIFOname', " +
+                         "'Subordinate2SuperiorFIFOname'\n")
 	sys.exit(1)
 
 commit = int(sys.argv[1])
 insert = int(sys.argv[2])
+sup2sub_fifoname = sys.argv[3]
+sub2sup_fifoname = sys.argv[4]
 
 # Prepare SQL statements in accordance with "insert" command line parameter
 if insert:
-	postgresql_stmt = "INSERT INTO authors VALUES(1921, 'Rigoni Stern', 'Mario')"
 	mysql_stmt = "INSERT INTO authors VALUES(1919, 'Levi', 'Primo')"
 else:
-	postgresql_stmt = "DELETE FROM authors WHERE id=1921"
 	mysql_stmt = "DELETE FROM authors WHERE id=1919"
 
 # initialize XTA environment
 Xta_Init()
 
-# create a new PostgreSQL connection
-# Note: using PostgreSQL Psycopg2 functions
-rm1 = psycopg2.connect("dbname=testdb")
-
 # create a new MySQL connection
 # Note: using MySQLdb functions
-rm2 = MySQLdb.connect(host="localhost", user="lixa", db="lixa")
+rm = MySQLdb.connect(host="localhost", user="lixa", db="lixa")
 
 # create a new XTA Transaction Manager object
 tm = TransactionManager()
 
-# create an XA resource for PostgreSQL
-# second parameter "PostgreSQL" is descriptive
-# third parameter "dbname=testdb" identifies the specific database
-#
-# PostgreSQL driver is available here:
-# https://github.com/fogzot/psycopg2/tree/feature-expose-pgconn
-# it should be available in Psycopg2 2.8
-xar1 = PostgresqlXaResource(rm1.get_native_connection(), "PostgreSQL", "dbname=testdb")
-
 # create an XA resource for MySQL
-# second parameter "MySQL" is descriptive
+# second parameter "PostgreSQL" is descriptive
 # third parameter "localhost,0,lixa,,lixa" identifies the specific database
 #
 # MySQL driver is available here:
 # https://github.com/tiian/mysqlclient-python/tree/get_native_connection
 # it should be merged in the master tree
-xar2 = MysqlXaResource(rm2._get_native_connection(), "MySQL", "localhost,0,lixa,,lixa")
+xar = MysqlXaResource(rm._get_native_connection(), "MySQL", "localhost,0,lixa,,lixa")
 
 # Create a new XA global transaction and retrieve a reference from
 # the TransactionManager object
 tx = tm.CreateTransaction()
 
-# Enlist PostgreSQL resource to transaction
-tx.EnlistResource(xar1)
-
 # Enlist MySQL resource to transaction
-tx.EnlistResource(xar2)
+tx.EnlistResource(xar)
 
 # Open all resources enlisted by tx Transaction
 tx.Open()
 # Start a new XA global transaction with a single branch
-tx.Start()
+# Note: argument ("MultipleBranch") has true value because the
+#       transaction will be branched by the subordinate Application
+#       Program
+tx.Start(True)
 
-# Execute PostgreSQL statement
-sys.stdout.write("PostgreSQL, executing >" + postgresql_stmt + "<\n")
-cur1 = rm1.cursor()
-cur1.execute(postgresql_stmt)
+# Retrieve the Transaction ID (XID) associated to the transaction
+# that has been started in the previous step
+xidString = tx.getXid().toString()
+
+# open the pipe for write operation
+sup2subFifo = open(sup2sub_fifoname, 'w')
+# write the message
+sup2subFifo.write(xidString)
+sup2subFifo.close()
+sys.stdout.write("Superior AP has sent XID '" + xidString + "' to subordinate AP\n")
+# open the pipe for read operation
+sub2supFifo = open(sub2sup_fifoname, 'r')
+reply = sub2supFifo.read()
+sub2supFifo.close()
+sys.stdout.write("Superior AP has received '" + reply + "' reply from subordinate AP\n")
+
+# *** NOTE: ***
+# at this point the subordinate Application Program has branched the
+# transaction and this (superior) Application Program can go on with
+# the main branch created by xta::Transaction.Start() indipendently
+# from the subordinate AP
 
 # Execute MySQL statement
 sys.stdout.write("MySQL, executing >" + mysql_stmt + "<\n")
-cur2 = rm2.cursor()
-cur2.execute(mysql_stmt)
+cur = rm.cursor()
+cur.execute(mysql_stmt)
 
 # commit or rollback the transaction
 if commit:
 	tx.Commit()
+        sys.stdout.write("Superior AP has committed its branch\n")
 else:
 	tx.Rollback()
+        sys.stdout.write("Subordinate AP has committed its branch\n")
 
-# Close all resources enlisted by tx Transaction
+# Close all resources enlisted by the Transaction
 tx.Close()
 
-# Close the PostgreSQL connection
-cur1.close()
-
 # Close the MySQL connection
-cur2.close()
+cur.close()
