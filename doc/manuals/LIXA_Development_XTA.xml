@@ -222,9 +222,7 @@
 		<entry>PHP<footnote>
 		<para>Planned a SWIG wrapper, not yet implemented
 		</para></footnote></entry>
-		<entry>Python<footnote>
-		<para>Planned a SWIG wrapper, not yet implemented
-		</para></footnote></entry>
+		<entry>Python</entry>
 	      </row>
 	    </thead>
 	    <tbody align="center">
@@ -239,7 +237,13 @@
 		<entry>Y</entry>
 		<entry>-</entry>
 		<entry>-</entry>
-		<entry>-</entry>
+		<entry>Y<footnote>
+		<para>MySQLdb driver provided by mysqlclient-python project
+		must be used. A patched version of the source code is available
+		<link xlink:href="https://github.com/tiian/mysqlclient-python/tree/get_native_connection">here</link>.
+		A <link xlink:href="https://github.com/PyMySQL/mysqlclient-python/pull/269">pull request</link> of the patch has been asked to project 
+		maintainers.
+		</para></footnote></entry>
 	      </row>
 	      <row>
 		<entry>Oracle DBMS</entry>
@@ -266,7 +270,13 @@
 		<entry>Y</entry>
 		<entry>-</entry>
 		<entry>-</entry>
-		<entry>-</entry>
+		<entry>Y<footnote>
+		<para>Psycopg2 driver must be used. A patched version of the
+		source code is available
+		<link xlink:href="https://github.com/fogzot/psycopg2/commit/81addddaee2c690e925bb8f381e7bcb02ca97687">here</link>. It should be part of
+		Psycopg 2.8
+		</para></footnote>
+		</entry>
 	      </row>
 	    </tbody>
 	  </tgroup>

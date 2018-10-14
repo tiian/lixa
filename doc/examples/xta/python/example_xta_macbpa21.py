@@ -34,7 +34,8 @@
 #
 
 import sys
-import psycopg2
+import MySQLdb
+# This module is necessary for all the XTA related stuff
 from xta import *
 
 # Check command line parameters
@@ -52,87 +53,84 @@ sub2sup_fifoname = sys.argv[4]
 
 # Prepare SQL statements in accordance with "insert" command line parameter
 if insert:
-	postgresql_stmt = "INSERT INTO authors VALUES(1921, 'Rigoni Stern', 'Mario')"
+	mysql_stmt = "INSERT INTO authors VALUES(1919, 'Levi', 'Primo')"
 else:
-	postgresql_stmt = "DELETE FROM authors WHERE id=1921"
+	mysql_stmt = "DELETE FROM authors WHERE id=1919"
 
 # initialize XTA environment
 Xta_Init()
 
-# create a new PostgreSQL connection
-# Note: using PostgreSQL Psycopg2 functions
-rm = psycopg2.connect("dbname=testdb")
+# create a new MySQL connection
+# Note: using MySQLdb functions
+rm = MySQLdb.connect(host="localhost", user="lixa", db="lixa")
 
 # create a new XTA Transaction Manager object
 tm = TransactionManager()
 
-# create an XA resource for PostgreSQL
-# second parameter "PostgreSQL" is descriptive
-# third parameter "dbname=testdb" identifies the specific database
+# create an XA resource for MySQL
+# second parameter "MySQL" is descriptive
+# third parameter "localhost,0,lixa,,lixa" identifies the specific database
 #
-# PostgreSQL driver is available here:
-# https://github.com/fogzot/psycopg2/tree/feature-expose-pgconn
-# it should be available in Psycopg2 2.8
-xar = PostgresqlXaResource(rm.get_native_connection(), "PostgreSQL", "dbname=testdb")
+# MySQL driver is available here:
+# https://github.com/tiian/mysqlclient-python/tree/get_native_connection
+# it should be merged in the master tree in the future
+xar = MysqlXaResource(rm._get_native_connection(), "MySQL", "localhost,0,lixa,,lixa")
 
 # Create a new XA global transaction and retrieve a reference from
 # the TransactionManager object
 tx = tm.CreateTransaction()
 
-# Enlist PostgreSQL resource to transaction
+# Enlist MySQL resource to transaction
 tx.EnlistResource(xar)
 
 # Open all resources enlisted by tx Transaction
 tx.Open()
 
-# *** NOTE: ***
-# at this point, subordinate Application Program must wait until
-# superior Application Program has started the transaction.
-# Here the synchronization is implemented with
-# a synchronous message passing using a named pipe (FIFO)
+# Start a new XA global transaction for multiple branches
+# Note: argument ("MultipleBranch") has true value because the
+#       transaction will be branched by the subordinate Application
+#       Program
+tx.Start(True)
 
-# open the pipe for read operation
-sup2subFifo = open(sup2sub_fifoname, 'r')
-xidString = sup2subFifo.read()
-sys.stdout.write("Subordinate AP has received XID '" + xidString + "' from superior AP\n")
-sup2subFifo.close()
-
-# create a new branch in the same global transaction
-tx.Branch(xidString);
-
-# the branch has the same global identifier, but a different branch id
-branchXidString = tx.getXid().toString();
-sys.stdout.write("Subordinate AP has created a branch with XID '" + branchXidString + "'\n")
+# Retrieve the Transaction ID (XID) associated to the transaction
+# that has been started in the previous step
+xidString = tx.getXid().toString()
 
 # *** NOTE: ***
-# subordinate Application Program (this one) has branched the
-# transaction and must send a message to the superior Application
-# Program that can proceed with it's own operations
-
+# a synchronization message must be sent to the subordinate Application
+# Program: the global transaction has been started and the subordinate AP
+# can branch it. The synchronization is implemented
+# with a synchronous message passing using a named pipe (FIFO)
+#
 # open the pipe for write operation
-sub2supFifo = open(sub2sup_fifoname, 'w')
+sup2subFifo = open(sup2sub_fifoname, 'w')
 # write the message
-sub2supFifo.write(branchXidString)
-sys.stdout.write("Subordinate AP has returned '" + branchXidString + "' to superior AP\n")
+sup2subFifo.write(xidString)
+sup2subFifo.close()
+sys.stdout.write("Superior AP has sent XID '" + xidString + "' to subordinate AP\n")
+# open the pipe for read operation
+sub2supFifo = open(sub2sup_fifoname, 'r')
+reply = sub2supFifo.read()
 sub2supFifo.close()
+sys.stdout.write("Superior AP has received '" + reply + "' reply from subordinate AP\n")
 
 # *** NOTE: ***
-# at this point the subordinate Application Program (this one) can
-# go on with its own operations indipendently from the superior AP
+# at this point the subordinate Application Program has branched the
+# transaction and this (superior) Application Program can go on with
+# the main branch created by tx.Start() indipendently from the subordinate AP
 
-# Execute PostgreSQL statement
-sys.stdout.write("PostgreSQL, executing >" + postgresql_stmt + "<\n")
+# Execute MySQL statement
+sys.stdout.write("MySQL, executing >" + mysql_stmt + "<\n")
 cur = rm.cursor()
-cur.execute(postgresql_stmt)
-
+cur.execute(mysql_stmt)
 
 # commit or rollback the transaction
 if commit:
 	tx.Commit()
-        sys.stdout.write("Subordinate AP has committed its branch\n")
+        sys.stdout.write("Superior AP has committed its branch\n")
 else:
 	tx.Rollback()
-        sys.stdout.write("Subordinate AP has rolled back its branch\n")
+        sys.stdout.write("Superior AP has rolled back its branch\n")
 
 # Close all resources enlisted by the Transaction
 tx.Close()

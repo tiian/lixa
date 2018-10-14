@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
          */
         rc = xta_transaction_commit(tx, FALSE);
         if (rc != LIXA_RC_OK) {
-            fprintf(stderr, "xta_transaction_rollback: returned %d (%s)\n",
+            fprintf(stderr, "xta_transaction_commit: returned %d (%s)\n",
                     rc, lixa_strerror(rc));
             return 1;
         }

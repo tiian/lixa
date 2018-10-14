@@ -108,6 +108,9 @@ int main(int argc, char *argv[])
     xta_init();
     /*
      * create a new MySQL connection (if subordinate Application Program)
+     * second parameter "MySQL" is descriptive
+     * third parameter "localhost,0,lixa,,lixa" identifies the specific
+     * database
      */
     rm = mysql_init(NULL);
     if (rm == NULL) {
@@ -164,7 +167,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * Start a new XA global transaction with a single branch
+     * Start a new XA global transaction for multiple branches
      * Note: second argument ("multiple_branch") has TRUE value because the
      *       transaction will be branched by the subordinate Application
      *       Program
@@ -177,7 +180,7 @@ int main(int argc, char *argv[])
     }
     /*
      * Retrieve the Transaction ID (XID) associated to the transaction that
-     * has been created in the previous step
+     * has been started in the previous step
      */
     xid_string = xta_xid_to_string(xta_transaction_get_xid(tx));
     if (xid_string == NULL) {
