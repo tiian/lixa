@@ -1,7 +1,14 @@
 # XTA example Application Programs for C language #
 
 This directory contains examples related to the usage of XTA: XA Transactional
-API.
+API. Non C language examples are hosted by specific directories: XTA for C++
+is in directory "cpp", XTA for Python is in directory "python" and so on...
+
+Examples for "multiple applications, concurrent branches" are provided with
+couples of programs, for ...macbpa01.c and ...macbpa02.c
+Due to the polyglot nature of XTA you can test couples with different
+languages like for examples ...macbpa01.c and ...macbpa12.cpp or
+...macbpa11.cpp and ...macbpa22.py and so on...
 
 All the examples require the availability of LIXA state server: a lixad daemon
 must be up and running.

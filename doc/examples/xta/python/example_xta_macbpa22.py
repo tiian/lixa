@@ -41,9 +41,9 @@ from xta import *
 # Check command line parameters
 if len(sys.argv) < 5:
 	sys.stderr.write("This program requires two boolean parameters: " +
-                         "'commit' and 'insert' and two strings: " +
-                         "'Superior2SubordinateFIFOname', " +
-                         "'Subordinate2SuperiorFIFOname'\n")
+			"'commit' and 'insert' and two strings: " +
+			"'Superior2SubordinateFIFOname', " +
+			"'Subordinate2SuperiorFIFOname'\n")
 	sys.exit(1)
 
 commit = int(sys.argv[1])
@@ -129,10 +129,10 @@ cur.execute(postgresql_stmt)
 # commit or rollback the transaction
 if commit:
 	tx.Commit()
-        sys.stdout.write("Subordinate AP has committed its branch\n")
+	sys.stdout.write("Subordinate AP has committed its branch\n")
 else:
 	tx.Rollback()
-        sys.stdout.write("Subordinate AP has rolled back its branch\n")
+	sys.stdout.write("Subordinate AP has rolled back its branch\n")
 
 # Close all resources enlisted by the Transaction
 tx.Close()

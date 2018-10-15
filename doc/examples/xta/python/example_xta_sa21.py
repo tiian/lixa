@@ -43,7 +43,7 @@ from xta import *
 # Check command line parameters
 if len(sys.argv) < 3:
 	sys.stderr.write("This program requires two boolean parameters: " +
-	"'commit' and 'insert'\n")
+			"'commit' and 'insert'\n")
 	sys.exit(1)
 
 commit = int(sys.argv[1])

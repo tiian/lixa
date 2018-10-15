@@ -195,7 +195,7 @@
 	</para>
       </important>
     </section>
-    <section>
+    <section xml:id="XTA_Technology_Matrix">
       <title>XTA Technology Matrix</title>
       <para>
 	XTA strongly depends from the type of XA support provided by the
@@ -238,7 +238,7 @@
 		<entry>-</entry>
 		<entry>-</entry>
 		<entry>Y<footnote>
-		<para>MySQLdb driver provided by mysqlclient-python project
+		<para>The MySQLdb driver provided by mysqlclient-python project
 		must be used. A patched version of the source code is available
 		<link xlink:href="https://github.com/tiian/mysqlclient-python/tree/get_native_connection">here</link>.
 		A <link xlink:href="https://github.com/PyMySQL/mysqlclient-python/pull/269">pull request</link> of the patch has been asked to project 
@@ -521,6 +521,11 @@
 	    C++ language:
 	    <link xlink:href="http://www.tiian.org/lixa/manuals/xta/CPP/">
 	    http://www.tiian.org/lixa/manuals/xta/CPP/</link>
+	  </para></listitem>
+	  <listitem><para>
+	    Python language: the client binding is produced by 
+	    <link xlink:href="http://www.swig.org/">SWIG</link> from the C++
+	    interface; please look at C++ interface
 	  </para></listitem>
 	</itemizedlist>
       </para>
@@ -1180,10 +1185,254 @@ mysql>
       <section>
 	<title>Source Code</title>
 	<para>
-	  Source code for program <filename>example_xta_sa11.c</filename> is
+	  Source code for program <filename>example_xta_sa11.cpp</filename> is
 	  installed in directory
 	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/cpp</filename> and
 	  is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/cpp/example_xta_sa11.cpp">GitHub</link>.
+	  Source code is fully commented for readability.
+	</para>
+      </section>
+    </section>
+    <section>
+      <title>Example using Python language</title>
+      <para>
+	The supplied example (<filename>example_xta_sa21.py</filename>) uses
+	PostgreSQL in the role of <quote>Resource Manager 1</quote> and MySQL
+	(or MariaDB) in the role of <quote>Resource Manager 2</quote>; please
+	refer to the instructions explained :
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	    in <xref linkend="XTA_Technology_Matrix"/>
+	    to build and install the Python database drivers that can be used
+	    with XTA
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_MySQL"/>
+	    to set-up a running environment for MySQL server
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_PostgreSQL"/>
+	    to set-up a running environment for PostgreSQL server
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="Starting_the_state_server"/>
+	    to start up the LIXA state server
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Create a working directory in a place you are comfortable with:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ cd
+tiian@ubuntu1404-64:~$ mkdir tmp
+tiian@ubuntu1404-64:~$ cd tmp
+tiian@ubuntu1404-64:~/tmp$ 
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	Copy file <filename>example_xta_sa21.py</filename> in your working
+	dir:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/python/example_xta_sa21.py .
+	  </screen></td></tr></tbody>
+	</table>
+	Substitute <quote>X.Y.Z</quote> with the actual version of
+	the software you installed.
+      </para>
+      <para>
+	The example program accepts two arguments:
+	<itemizedlist mark="bullet">
+          <listitem><para>
+	    commit (or rollback): use <quote>1</quote> if you want to perform
+	    a global commit or <quote>0</quote> if you want to perform a global
+	    rollback
+	  </para></listitem>
+          <listitem><para>
+	    insert (or delete): use <quote>1</quote> if you want to insert rows
+	    in databases or <quote>0</quote> if you want to delete rows from
+	    databases
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Open three terminal sessions: one for example execution,
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -la
+total 12
+drwxrwxr-x  2 tiian tiian 4096 ott 15 22:08 .
+drwxr-xr-x 16 tiian tiian 4096 ott 15 22:06 ..
+-rw-r--r--  1 tiian tiian 3980 ott 15 22:08 example_xta_sa21.py
+	  </screen></td></tr></tbody>
+	</table>
+	one for PostgreSQL queries
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ psql testdb
+psql (9.3.24)
+Type "help" for help.
+
+testdb=>
+	  </screen></td></tr></tbody>
+	</table>
+	and one for MySQL queries
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ mysql -h localhost -u lixa lixa
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 44
+Server version: 5.5.61-0ubuntu0.14.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
+	  </screen></td></tr></tbody>
+	</table>
+	set <varname>LIXA_PROFILE</varname> environment variable to
+	<constant>XTA_DYN</constant>
+	a profile without static Resource Managers defined in
+	<filename>lixac_conf.xml</filename>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	insert rows in tables and commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_sa21.py 1 1
+PostgreSQL, executing &gt;INSERT INTO authors VALUES(1921, 'Rigoni Stern', 'Mario')&lt;
+MySQL, executing &gt;INSERT INTO authors VALUES(1919, 'Levi', 'Primo')&lt;
+tiian@ubuntu1404-64:~/tmp$
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=&gt; select * from authors;
+  id  |  last_name   | first_name 
+------+--------------+------------
+ 1921 | Rigoni Stern | Mario
+(1 row)
+
+testdb=&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql&gt; select * from authors;
++------+-----------+------------+
+| id   | last_name | first_name |
++------+-----------+------------+
+| 1919 | Levi      | Primo      |
++------+-----------+------------+
+1 row in set (0.00 sec)
+
+mysql&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	delete rows from tables, but rollback:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_sa21.py 0 0
+PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
+MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
+tiian@ubuntu1404-64:~/tmp$
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=&gt; select * from authors;
+  id  |  last_name   | first_name 
+------+--------------+------------
+ 1921 | Rigoni Stern | Mario
+(1 row)
+
+testdb=&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> select * from authors;
++------+-----------+------------+
+| id   | last_name | first_name |
++------+-----------+------------+
+| 1919 | Levi      | Primo      |
++------+-----------+------------+
+1 row in set (0.00 sec)
+
+mysql>
+	  </screen></td></tr></tbody>
+	</table>
+	delete rows and commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_sa21.py 1 0
+PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
+MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
+tiian@ubuntu1404-64:~/tmp$
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from authors;
+ id | last_name | first_name 
+----+-----------+------------
+(0 rows)
+
+testdb=>
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> select * from authors;
+Empty set (0.00 sec)
+
+mysql>
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <section>
+	<title>Source Code</title>
+	<para>
+	  Source code for program <filename>example_xta_sa21.py</filename> is
+	  installed in directory
+	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/python</filename> and
+	  is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/python/example_xta_sa21.py">GitHub</link>.
 	  Source code is fully commented for readability.
 	</para>
       </section>
@@ -2796,15 +3045,15 @@ total 80
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ls -l example_xta_macbps01
--rwxrwxr-x 1 tiian tiian 18499 apr  8 22:08 example_xta_macbps01
+tiian@ubuntu1404-64:~/tmp$ ls -l example_xta_macbps11
+-rwxrwxr-x 1 tiian tiian 18499 apr  8 22:08 example_xta_macbps11
 	  </screen></td></tr></tbody>
 	</table>
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ls -l example_xta_macbps02
--rwxrwxr-x 1 tiian tiian 18319 apr  8 22:08 example_xta_macbps02
+tiian@ubuntu1404-64:~/tmp$ ls -l example_xta_macbps12
+-rwxrwxr-x 1 tiian tiian 18319 apr  8 22:08 example_xta_macbps12
 	  </screen></td></tr></tbody>
 	</table>
 	one for MySQL queries,
@@ -3044,6 +3293,347 @@ testdb=&gt;
 	  installed in directory
 	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/cpp</filename> and
 	  are available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/cpp">GitHub</link>. Source code is fully
+	  commented for readability.
+	</para>
+      </section>
+    </section>
+    <section>
+      <title>Example using Python language</title>
+      <para>
+	The supplied examples (<filename>example_xta_macbps21.py</filename>
+	and <filename>example_xta_macbps22.py</filename>) use
+	PostgreSQL in the role of <quote>Resource Manager 2</quote> and MySQL
+	(or MariaDB) in the role of <quote>Resource Manager 1</quote>; please
+	refer to the instructions explained:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	    in <xref linkend="XTA_Technology_Matrix"/>
+	    to build and install the Python database drivers that can be used
+	    with XTA
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_MySQL"/>
+	    to set-up a running environment for MySQL server
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_PostgreSQL"/>
+	    to set-up a running environment for PostgreSQL server
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="Starting_the_state_server"/>
+	    to start up the LIXA state server.
+	  </para></listitem>
+	</itemizedlist>
+	Both programs must be used to execute the example: 
+	<filename>example_xta_macbps21.py</filename> in the role of the
+	superior Application Program (first AP) and
+	<filename>example_xta_macbps22.py</filename> in the role of the
+	subordinate Application Program (second AP).
+      </para>
+      <para>
+	Create a working directory in a place you are comfortable with:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ cd
+tiian@ubuntu1404-64:~$ mkdir tmp
+tiian@ubuntu1404-64:~$ cd tmp
+tiian@ubuntu1404-64:~/tmp$ 
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	Copy files <filename>example_xta_macbps21.py</filename> and 
+	<filename>example_xta_macbps22.py</filename> in your working dir:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/python/example_xta_macbps21.py .
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/python/example_xta_macbps22.py .
+	  </screen></td></tr></tbody>
+	</table>
+	Substitute <quote>X.Y.Z</quote> with the actual version of
+	the software you installed.
+      </para>
+      <para>
+	The example programs accept four arguments:
+	<itemizedlist mark="bullet">
+          <listitem><para>
+	    commit (or rollback): use <quote>1</quote> if you want to perform
+	    a global commit or <quote>0</quote> if you want to perform a global
+	    rollback
+	  </para></listitem>
+          <listitem><para>
+	    insert (or delete): use <quote>1</quote> if you want to insert rows
+	    in databases or <quote>0</quote> if you want to delete rows from
+	    databases
+	  </para></listitem>
+          <listitem><para>
+	    name of the FIFO (named pipe) that will be used to send messages
+	    from the superior AP to the subordinate AP
+	  </para></listitem>
+          <listitem><para>
+	    name of the FIFO (named pipe) that will be used to return messages
+	    from the subordinate AP to the superior AP
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Open four terminal sessions: two for the example programs execution,
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -l example_xta_macbps21.py 
+-rw-r--r-- 1 tiian tiian 4701 ott 15 22:28 example_xta_macbps21.py
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -l example_xta_macbps22.py 
+-rw-r--r-- 1 tiian tiian 5266 ott 15 22:28 example_xta_macbps22.py
+	  </screen></td></tr></tbody>
+	</table>
+	one for MySQL queries,
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ mysql -h localhost -u lixa lixa
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 36
+Server version: 5.5.61-0ubuntu0.14.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> 
+	  </screen></td></tr></tbody>
+	</table>
+	and one for PostgreSQL queries
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ psql testdb
+psql (9.3.24)
+Type "help" for help.
+
+testdb=>
+	  </screen></td></tr></tbody>
+	</table>
+	Set <varname>LIXA_PROFILE</varname> environment variable to
+	<constant>XTA_DYN</constant>,
+	a profile without static Resource Managers defined in
+	<filename>lixac_conf.xml</filename>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	create two named pipes (FIFO) to support communication between
+	superior and subordinate Application Programs
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ mkfifo sup2sub
+tiian@ubuntu1404-64:~/tmp$ mkfifo sub2sup
+tiian@ubuntu1404-64:~/tmp$ ls -l su*
+prw-rw-r-- 1 tiian tiian 0 ott 15 22:35 sub2sup
+prw-rw-r-- 1 tiian tiian 0 ott 15 22:35 sup2sub
+	  </screen></td></tr></tbody>
+	</table>
+	execute both the example programs to insert rows in tables and commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_macbps21.py 1 1 sup2sub sub2sup
+MySQL, executing &gt;INSERT INTO authors VALUES(1919, 'Levi', 'Primo')&lt;
+Superior AP has sent XID '1279875137.9d22af42e46f4111b23ba3630479c6b9.e107cfeee0661d23da9322f1ee73faba' to subordinate AP
+Superior AP has received 'PREPARED_for_COMMIT' reply from subordinate AP
+MySQL, executing &gt;INSERT INTO authors VALUES(1898, 'Remarque', 'Erich Maria')&lt;
+Superior AP has committed its branch
+tiian@ubuntu1404-64:~/tmp$
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_macbps22.py 1 1 sup2sub sub2sup 
+Subordinate AP has received XID '1279875137.9d22af42e46f4111b23ba3630479c6b9.e107cfeee0661d23da9322f1ee73faba' from superior AP
+Subordinate AP has created a branch with XID '1279875137.9d22af42e46f4111b23ba3630479c6b9.e107cfeee0661d23feeb9fdbaca14974'
+PostgreSQL, executing &gt;INSERT INTO authors VALUES(1921, 'Rigoni Stern', 'Mario')&lt;
+Subordinate AP has returned 'PREPARED_for_COMMIT' to superior AP
+tiian@ubuntu1404-64:~/tmp$
+	  </screen></td></tr></tbody>
+	</table>
+	<note>
+	  <para>
+	    The first (superior) Application Program suspends and waits the
+	    return value from the second (subordinate) Application Program.
+	  </para>
+	  <para>
+	    The XID generated by the subordinate AP differs from the XID
+	    generated by the superior AP in the last 16 hexadecimal symbols
+	    of the <quote>branch qualifier</quote>; the first 16 hexadecimal
+	    symbols are the same: this is not required by XA specification but
+	    can be useful for troubleshooting purposes.
+	  </para>
+	</note>
+	Check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql&gt; select * from authors;
++------+-----------+-------------+
+| id   | last_name | first_name  |
++------+-----------+-------------+
+| 1898 | Remarque  | Erich Maria |
+| 1919 | Levi      | Primo       |
++------+-----------+-------------+
+2 rows in set (0.00 sec)
+
+mysql&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=&gt; select * from authors;
+  id  |  last_name   | first_name 
+------+--------------+------------
+ 1921 | Rigoni Stern | Mario
+(1 row)
+
+testdb=&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	delete rows from tables, but rollback:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_macbps21.py 0 0 sup2sub sub2sup 
+MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
+Superior AP has sent XID '1279875137.84ab3fdb762742a096a8181043938232.e107cfeee0661d23da9322f1ee73faba' to subordinate AP
+Superior AP has received 'ROLLBACK' reply from subordinate AP
+MySQL, executing &gt;DELETE FROM authors WHERE id=1898&lt;
+Superior AP has rolled back its branch
+tiian@ubuntu1404-64:~/tmp$
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_macbps22.py 0 0 sup2sub sub2sup 
+Subordinate AP has received XID '1279875137.84ab3fdb762742a096a8181043938232.e107cfeee0661d23da9322f1ee73faba' from superior AP
+Subordinate AP has created a branch with XID '1279875137.84ab3fdb762742a096a8181043938232.e107cfeee0661d2397f7336b2f6449f2'
+PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
+Subordinate AP has returned 'ROLLBACK' to superior AP
+tiian@ubuntu1404-64:~/tmp$ 
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql&gt; select * from authors;
++------+-----------+-------------+
+| id   | last_name | first_name  |
++------+-----------+-------------+
+| 1898 | Remarque  | Erich Maria |
+| 1919 | Levi      | Primo       |
++------+-----------+-------------+
+2 rows in set (0.00 sec)
+
+mysql&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=&gt; select * from authors;
+  id  |  last_name   | first_name 
+------+--------------+------------
+ 1921 | Rigoni Stern | Mario
+(1 row)
+
+testdb=&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	delete rows and commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_macbps21.py 1 0 sup2sub sub2sup 
+MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
+Superior AP has sent XID '1279875137.284ca606ec594b94a98a26a0e2e6730a.e107cfeee0661d23da9322f1ee73faba' to subordinate AP
+Superior AP has received 'PREPARED_for_COMMIT' reply from subordinate AP
+MySQL, executing &gt;DELETE FROM authors WHERE id=1898&lt;
+Superior AP has committed its branch
+tiian@ubuntu1404-64:~/tmp$ 
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_macbps22.py 1 0 sup2sub sub2sup 
+Subordinate AP has received XID '1279875137.284ca606ec594b94a98a26a0e2e6730a.e107cfeee0661d23da9322f1ee73faba' from superior AP
+Subordinate AP has created a branch with XID '1279875137.284ca606ec594b94a98a26a0e2e6730a.e107cfeee0661d23759dd6e4f8ad4afc'
+PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
+Subordinate AP has returned 'PREPARED_for_COMMIT' to superior AP
+tiian@ubuntu1404-64:~/tmp$ 
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql&gt; select * from authors;
+Empty set (0.00 sec)
+
+mysql&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=&gt; select * from authors;
+  id  |  last_name   | first_name 
+------+--------------+------------
+(0 rows)
+
+testdb=&gt;
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <section>
+	<title>Source Code</title>
+	<para>
+	  Source code for programs <filename>example_xta_macbps21.py</filename> 
+	  and <filename>example_xta_macbps22.py</filename> are
+	  installed in directory
+	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/python</filename> and
+	  are available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/python">GitHub</link>. Source code is fully
 	  commented for readability.
 	</para>
       </section>
@@ -3920,6 +4510,339 @@ testdb=&gt;
 	  installed in directory
 	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/cpp</filename>
 	  and are available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/cpp/">GitHub</link>. Source code is fully
+	  commented for readability.
+	</para>
+      </section>
+    </section>
+    <section>
+      <title>Example using Python language</title>
+      <para>
+	The supplied examples (<filename>example_xta_macbpa21.py</filename>
+	and <filename>example_xta_macbpa22.py</filename>) use
+	PostgreSQL in the role of <quote>Resource Manager 2</quote> and MySQL
+	(or MariaDB) in the role of <quote>Resource Manager 1</quote>; please
+	refer to the instructions explained:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	    in <xref linkend="XTA_Technology_Matrix"/>
+	    to build and install the Python database drivers that can be used
+	    with XTA
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_MySQL"/>
+	    to set-up a running environment for MySQL server
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_PostgreSQL"/>
+	    to set-up a running environment for PostgreSQL server
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="Starting_the_state_server"/>
+	    to start up the LIXA state server.
+	  </para></listitem>
+	</itemizedlist>
+	Both programs must be used to execute the example: 
+	<filename>example_xta_macbpa21.py</filename> in the role of the 
+	superior Application Program (first AP) and
+	<filename>example_xta_macbpa22.py</filename> in the role of the
+	subordinate Application Program (second AP).
+      </para>
+      <para>
+	Create a working directory in a place you are comfortable with:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ cd
+tiian@ubuntu1404-64:~$ mkdir tmp
+tiian@ubuntu1404-64:~$ cd tmp
+tiian@ubuntu1404-64:~/tmp$ 
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	Copy files <filename>example_xta_macbas21.py</filename> and 
+	<filename>example_xta_macbpa22.py</filename> in your working dir:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/python/example_xta_macbpa21.py .
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/python/example_xta_macbpa22.py .
+	  </screen></td></tr></tbody>
+	</table>
+	Substitute <quote>X.Y.Z</quote> with the actual version of
+	the software you installed.
+      </para>
+      <para>
+	The example programs accept four arguments:
+	<itemizedlist mark="bullet">
+          <listitem><para>
+	    commit (or rollback): use <quote>1</quote> if you want to perform
+	    a global commit or <quote>0</quote> if you want to perform a global
+	    rollback
+	  </para></listitem>
+          <listitem><para>
+	    insert (or delete): use <quote>1</quote> if you want to insert rows
+	    in databases or <quote>0</quote> if you want to delete rows from
+	    databases
+	  </para></listitem>
+          <listitem><para>
+	    name of the FIFO (named pipe) that will be used to send messages
+	    from the superior AP to the subordinate AP
+	  </para></listitem>
+          <listitem><para>
+	    name of the FIFO (named pipe) that will be used to return messages
+	    from the subordinate AP to the superior AP
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Open four terminal sessions: two for the example programs execution,
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -l example_xta_macbpa21.py 
+-rw-r--r-- 1 tiian tiian 4595 ott 15 22:51 example_xta_macbpa21.py
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -l example_xta_macbpa22.py 
+-rw-r--r-- 1 tiian tiian 4643 ott 15 22:52 example_xta_macbpa22.py
+	  </screen></td></tr></tbody>
+	</table>
+	one for MySQL queries,
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ mysql -h localhost -u lixa lixa
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 36
+Server version: 5.5.61-0ubuntu0.14.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
+	  </screen></td></tr></tbody>
+	</table>
+	and one for PostgreSQL queries
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ psql testdb
+psql (9.3.24)
+Type "help" for help.
+
+testdb=>
+	  </screen></td></tr></tbody>
+	</table>
+	Set <varname>LIXA_PROFILE</varname> environment variable to
+	<constant>XTA_DYN</constant>,
+	a profile without static Resource Managers defined in
+	<filename>lixac_conf.xml</filename>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	create two named pipes (FIFO) to support communication between
+	superior and subordinate Application Programs
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ mkfifo sub2sup
+tiian@ubuntu1404-64:~/tmp$ mkfifo sup2sub
+tiian@ubuntu1404-64:~/tmp$ ls -l su*
+prw-rw-r-- 1 tiian tiian 0 ott 15 22:54 sub2sup
+prw-rw-r-- 1 tiian tiian 0 ott 15 22:54 sup2sub
+	  </screen></td></tr></tbody>
+	</table>
+	execute both the example programs to insert rows in tables and commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_macbpa21.py 1 1 sup2sub sub2sup
+Superior AP has sent XID '1279875137.60142b5fab4b4f2ea4524778a3f983d8.e107cfeee0661d23da9322f1ee73faba' to subordinate AP
+Superior AP has received '1279875137.60142b5fab4b4f2ea4524778a3f983d8.e107cfeee0661d23c14e2bfc4bc9495b' reply from subordinate AP
+MySQL, executing &gt;INSERT INTO authors VALUES(1919, 'Levi', 'Primo')&lt;
+Superior AP has committed its branch
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_macbpa22.py 1 1 sup2sub sub2sup 
+Subordinate AP has received XID '1279875137.60142b5fab4b4f2ea4524778a3f983d8.e107cfeee0661d23da9322f1ee73faba' from superior AP
+Subordinate AP has created a branch with XID '1279875137.60142b5fab4b4f2ea4524778a3f983d8.e107cfeee0661d23c14e2bfc4bc9495b'
+Subordinate AP has returned '1279875137.60142b5fab4b4f2ea4524778a3f983d8.e107cfeee0661d23c14e2bfc4bc9495b' to superior AP
+PostgreSQL, executing &gt;INSERT INTO authors VALUES(1921, 'Rigoni Stern', 'Mario')&lt;
+Subordinate AP has committed its branch
+	  </screen></td></tr></tbody>
+	</table>
+	<note>
+	  <para>
+	    The first (superior) Application Program suspends and waits the
+	    return value from the second (subordinate) Application Program.
+	  </para>
+	  <para>
+	    The XID generated by the subordinate AP differs from the XID
+	    generated by the superior AP in the last 16 hexadecimal symbols
+	    of the <quote>branch qualifier</quote>; the first 16 hexadecimal
+	    symbols are the same: this is not required by XA specification but
+	    can be useful for troubleshooting purposes.
+	  </para>
+	</note>
+	Check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql&gt; select * from authors;
++------+-----------+-------------+
+| id   | last_name | first_name  |
++------+-----------+-------------+
+| 1919 | Levi      | Primo       |
++------+-----------+-------------+
+1 row in set (0.00 sec)
+
+mysql&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=&gt; select * from authors;
+  id  |  last_name   | first_name 
+------+--------------+------------
+ 1921 | Rigoni Stern | Mario
+(1 row)
+
+testdb=&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	delete rows from tables, but rollback:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_macbpa21.py 0 0 sup2sub sub2sup
+Superior AP has sent XID '1279875137.ef2a359d5fd048de872d9300f2ce3db9.e107cfeee0661d23da9322f1ee73faba' to subordinate AP
+Superior AP has received '1279875137.ef2a359d5fd048de872d9300f2ce3db9.e107cfeee0661d233fda43cfc67242ec' reply from subordinate AP
+MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
+Superior AP has rolled back its branch
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_macbpa22.py 0 0 sup2sub sub2sup 
+Subordinate AP has received XID '1279875137.ef2a359d5fd048de872d9300f2ce3db9.e107cfeee0661d23da9322f1ee73faba' from superior AP
+Subordinate AP has created a branch with XID '1279875137.ef2a359d5fd048de872d9300f2ce3db9.e107cfeee0661d233fda43cfc67242ec'
+Subordinate AP has returned '1279875137.ef2a359d5fd048de872d9300f2ce3db9.e107cfeee0661d233fda43cfc67242ec' to superior AP
+PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
+Subordinate AP has rolled back its branch
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql&gt; select * from authors;
++------+-----------+-------------+
+| id   | last_name | first_name  |
++------+-----------+-------------+
+| 1919 | Levi      | Primo       |
++------+-----------+-------------+
+1 row in set (0.00 sec)
+
+mysql&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=&gt; select * from authors;
+  id  |  last_name   | first_name 
+------+--------------+------------
+ 1921 | Rigoni Stern | Mario
+(1 row)
+
+testdb=&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	delete rows and commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_macbpa21.py 1 0 sup2sub sub2sup
+Superior AP has sent XID '1279875137.8993e8485b5e4036ad5c536d1555f5a7.e107cfeee0661d23da9322f1ee73faba' to subordinate AP
+Superior AP has received '1279875137.8993e8485b5e4036ad5c536d1555f5a7.e107cfeee0661d231e54035544b74771' reply from subordinate AP
+MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
+Superior AP has committed its branch
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ python example_xta_macbpa22.py 1 0 sup2sub sub2sup 
+Subordinate AP has received XID '1279875137.8993e8485b5e4036ad5c536d1555f5a7.e107cfeee0661d23da9322f1ee73faba' from superior AP
+Subordinate AP has created a branch with XID '1279875137.8993e8485b5e4036ad5c536d1555f5a7.e107cfeee0661d231e54035544b74771'
+Subordinate AP has returned '1279875137.8993e8485b5e4036ad5c536d1555f5a7.e107cfeee0661d231e54035544b74771' to superior AP
+PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
+Subordinate AP has committed its branch
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql&gt; select * from authors;
+Empty set (0.00 sec)
+
+mysql&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=&gt; select * from authors;
+  id  |  last_name   | first_name 
+------+--------------+------------
+(0 rows)
+
+testdb=&gt;
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <section>
+	<title>Source Code</title>
+	<para>
+	  Source code for programs <filename>example_xta_macbpa21.py</filename> 
+	  and <filename>example_xta_macbpa22.py</filename> are
+	  installed in directory
+	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/python</filename>
+	  and are available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/python/">GitHub</link>. Source code is fully
 	  commented for readability.
 	</para>
       </section>

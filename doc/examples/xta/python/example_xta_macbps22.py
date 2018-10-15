@@ -41,9 +41,9 @@ from xta import *
 # Check command line parameters
 if len(sys.argv) < 5:
 	sys.stderr.write("This program requires two boolean parameters: " +
-                         "'commit' and 'insert' and two strings: " +
-                         "'Superior2SubordinateFIFOname', " +
-                         "'Subordinate2SuperiorFIFOname'\n")
+			"'commit' and 'insert' and two strings: " +
+			"'Superior2SubordinateFIFOname', " +
+			"'Subordinate2SuperiorFIFOname'\n")
 	sys.exit(1)
 
 commit = int(sys.argv[1])
@@ -112,21 +112,21 @@ cur.execute(postgresql_stmt)
 
 # commit or rollback the transaction
 if commit:
-        # *** NOTE: ***
-        # commit MUST be performed in two step:
-        # 1. in first step, the branch is only "prepared" (as in XA
-        #    specification) and control can be returned to the superior AP
-        #    that has to start its commit
-        # 2. in the second step, the branch is definitely "committed", but
-        #    the operation will block the caller because the subordinate AP
-        #    must wait the "prepared" state of the superior AP before
-        #    committing
-        #
-        # commit is performed with "nonBlocking" flag set to TRUE: this is
-        # necessary to allow the superior branch to commit */
-        tx.Commit(True)
+	# *** NOTE: ***
+	# commit MUST be performed in two step:
+	# 1. in first step, the branch is only "prepared" (as in XA
+	#    specification) and control can be returned to the superior AP
+	#    that has to start its commit
+	# 2. in the second step, the branch is definitely "committed", but
+	#    the operation will block the caller because the subordinate AP
+	#    must wait the "prepared" state of the superior AP before
+	#    committing
+	#
+	# commit is performed with "nonBlocking" flag set to TRUE: this is
+	# necessary to allow the superior branch to commit */
+	tx.Commit(True)
 else:
-        tx.Rollback()
+	tx.Rollback()
 
 # *** NOTE: ***
 # at this point the subordinate Application Program (this one) has to
@@ -137,9 +137,9 @@ else:
 sub2supFifo = open(sub2sup_fifoname, 'w')
 # prepare the reply message
 if commit:
-        reply_msg = "PREPARED_for_COMMIT"
+	reply_msg = "PREPARED_for_COMMIT"
 else:
-        reply_msg = "ROLLBACK"
+	reply_msg = "ROLLBACK"
 # write the message
 sub2supFifo.write(reply_msg)
 
@@ -147,8 +147,8 @@ sys.stdout.write("Subordinate AP has returned '" + reply_msg + "' to superior AP
 sub2supFifo.close()
 
 if commit:
-        # Complete the second phase of the commit with "nonBlocking" flag set
-        # to FALSE: this is necessary to wait the superior AP prepare phase
+	# Complete the second phase of the commit with "nonBlocking" flag set
+	# to FALSE: this is necessary to wait the superior AP prepare phase
 	tx.Commit(False)
 
 # Close all resources enlisted by the Transaction

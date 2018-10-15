@@ -361,8 +361,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-doc_DATA = README.md example_xta_sa21.py example_xta_macbpa21.py \
-	example_xta_macbpa22.py
+doc_DATA = README.md example_xta_sa21.py \
+	example_xta_macbpa21.py example_xta_macbpa22.py \
+	example_xta_macbps21.py example_xta_macbps22.py
 
 EXTRA_DIST = $(doc_DATA)
 all: all-am

@@ -41,9 +41,9 @@ from xta import *
 # Check command line parameters
 if len(sys.argv) < 5:
 	sys.stderr.write("This program requires two boolean parameters: " +
-                         "'commit' and 'insert' and two strings: " +
-                         "'Superior2SubordinateFIFOname', " +
-                         "'Subordinate2SuperiorFIFOname'\n")
+			"'commit' and 'insert' and two strings: " +
+			"'Superior2SubordinateFIFOname', " +
+			"'Subordinate2SuperiorFIFOname'\n")
 	sys.exit(1)
 
 commit = int(sys.argv[1])
@@ -54,10 +54,10 @@ sub2sup_fifoname = sys.argv[4]
 # Prepare SQL statements in accordance with "insert" command line parameter
 if insert:
 	mysql_stmt = "INSERT INTO authors VALUES(1919, 'Levi', 'Primo')"
-        mysql_stmt2 = "INSERT INTO authors VALUES(1898, 'Remarque', 'Erich Maria')"
+	mysql_stmt2 = "INSERT INTO authors VALUES(1898, 'Remarque', 'Erich Maria')"
 else:
 	mysql_stmt = "DELETE FROM authors WHERE id=1919"
-        mysql_stmt2 = "DELETE FROM authors WHERE id=1898"
+	mysql_stmt2 = "DELETE FROM authors WHERE id=1898"
 
 # initialize XTA environment
 Xta_Init()
@@ -131,10 +131,10 @@ cur.execute(mysql_stmt2)
 # commit or rollback the transaction
 if commit:
 	tx.Commit()
-        sys.stdout.write("Superior AP has committed its branch\n")
+	sys.stdout.write("Superior AP has committed its branch\n")
 else:
 	tx.Rollback()
-        sys.stdout.write("Superior AP has rolled back its branch\n")
+	sys.stdout.write("Superior AP has rolled back its branch\n")
 
 # Close all resources enlisted by the Transaction
 tx.Close()
