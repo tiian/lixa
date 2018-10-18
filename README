@@ -102,7 +102,7 @@ CentOS		PostgreSQL	postgresql postgresql-server postgresql-devel
 RHEL 7.3	Basic		gcc glib2-devel libxml2-devel libuuid-devel
 				autoconf net-tools libtool
 Ubuntu		Python		swig python-dev python-psycopg2 python-mysqldb
-Ubuntu 16.04	Python3		swig python3-dev python3-psycopg2 python3-mysqldb
+Ubuntu		Python3		swig python3-dev python3-psycopg2 python3-mysqldb
 
 Optional packages:
 O.S.		Feature		Packages

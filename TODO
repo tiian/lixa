@@ -1,4 +1,5 @@
 Implememt XTA for Python
+- go on with tests in RHEL 7.x
 - release
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation

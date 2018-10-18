@@ -1219,6 +1219,7 @@ mysql>
 	    to start up the LIXA state server
 	  </para></listitem>
 	</itemizedlist>
+	The example can be used with Python 2 and Python 3.
       </para>
       <para>
 	Create a working directory in a place you are comfortable with:
@@ -3329,6 +3330,8 @@ testdb=&gt;
 	superior Application Program (first AP) and
 	<filename>example_xta_macbps22.py</filename> in the role of the
 	subordinate Application Program (second AP).
+	Python 2 and Python 3 can be used even mixing them: one for the first
+	AP and one for the second AP.
       </para>
       <para>
 	Create a working directory in a place you are comfortable with:
@@ -4546,6 +4549,8 @@ testdb=&gt;
 	superior Application Program (first AP) and
 	<filename>example_xta_macbpa22.py</filename> in the role of the
 	subordinate Application Program (second AP).
+	Python 2 and Python 3 can be used even mixing them: one for the first
+	AP and one for the second AP.
       </para>
       <para>
 	Create a working directory in a place you are comfortable with:

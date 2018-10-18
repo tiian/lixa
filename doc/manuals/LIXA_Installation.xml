@@ -36,11 +36,6 @@
 	you install from the original tarball.
       </para>
       <para>
-	If you are interested in COBOL, LIXA supports only Gnu COBOL 1.1 or
-	upper; COBOL development and testing is currently performed on
-	Ubuntu 14.04 with default COBOL version: 1.1
-      </para>
-      <para>
 	Some <emphasis>libraries (run time and development stuff)</emphasis> 
 	are necessary too:
 	<itemizedlist mark='bullet'>
@@ -58,6 +53,70 @@
 	<command>pkg-config</command> command, while the others must be in
 	standard include <envar>PATH</envar>.
       </para>
+      <section>
+	<title>Client libraries for other languages</title>
+	<para>
+	  LIXA and XTA sources are developed using ANSI C: a standard and
+	  complete C build tool set is necessary to compile and link them.
+	  Client libraries for other languages are automatically built and
+	  installed if <filename>configure</filename> discover the proper tool
+	  at config time.
+	</para>
+	<section>
+	  <title>C++</title>
+	  <para>
+	    C++ is available only for XTA: the legacy TX Transaction
+	    Demarcation standard interface is a pure C API and it does not
+	    make sense to wrap it as a set of C++ classes. Anyway, you should
+	    be able to use the ANSI C standard API inside a C++ program.
+	  </para>
+	</section>
+	<section>
+	  <title>COBOL</title>
+	  <para>
+	    If you are interested in COBOL, LIXA supports only Gnu COBOL 1.1 or
+	    upper; COBOL development and testing is currently performed on
+	    Ubuntu 14.04 with default COBOL version: 1.1
+	  </para>
+	  <para>
+	    COBOL is actually supported only by the legacy TX Transaction
+	    Demarcation standard interface. XTA for COBOL is not available, but
+	    it could be implemented on users' request.
+	  </para>
+	</section>
+	<section>
+	  <title>Python</title>
+	  <para>
+	    Python is available only for XTA: implementing it for the legacy
+	    TX Transaction Demarcation standard interface would require a lot
+	    changes in Python specific resource (database) drivers.
+	  </para>
+	  <para>
+	    XTA for Python works with Python 2 and Python 3, but the build
+	    procedure compiles and links just one version at a time.
+	    If your system uses Python 2 as the default Python version as in
+	    the following example:
+	    <table frame="box">
+	      <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/lixa$ python --version
+Python 2.7.6
+	      </screen></td></tr></tbody>
+	    </table>
+	    you configure XTA for Python 2 with a command like this one:
+	    <table frame="box">
+	      <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/lixa$ ./configure --with-mysql --with-postgresql
+	      </screen></td></tr></tbody>
+	    </table>
+	    and you configure XTA for Python 3 with a command like this one:
+	    <table frame="box">
+	      <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/lixa$ PYTHON_VERSION=3 ./configure --with-mysql --with-postgresql
+	      </screen></td></tr></tbody>
+	    </table>
+	  </para>
+	</section>
+      </section>
       <section>
 	<title>Packages for Linux Ubuntu</title>
 	<para>
@@ -90,9 +149,10 @@
 	<section>
 	  <title>CentOS, RHEL and derivative notes</title>
 	  <para>
-	    Version 6 of CentOS, RHEL and derivative linux distributions ships
+	    Version 6 of CentOS, RHEL and derivative Linux distributions ships
 	    a very old glib version and can't be used to compile LIXA source
-	    code since LIXA 1.3.2
+	    code since LIXA 1.3.2 . Use a newer Linux version or an older
+	    LIXA version.
 	  </para>
 	</section>
       </section>

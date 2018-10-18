@@ -1,10 +1,9 @@
-dist_noinst_DATA = xta.i setup.py.i get_pgconn.py
+dist_noinst_DATA = xta.i setup.py.i
 
 # Produce XTA wrapper using SWIG (C++)
 
 xta_wrap.cpp: xta.i ../cpp/*.hpp
 	$(SWIG) -python -I../cpp -o $@ xta.i
-	cat get_pgconn.py >> xta.py
 
 setup.py:	setup.py.i ../../../config.status
 	sed \

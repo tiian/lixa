@@ -131,8 +131,13 @@
       <para>
 	The LIXA project implements a distributed Transaction Manager that your
 	Application Programs can use to coordinate a distributed transaction
-	among two or more Application Programs in execution on different
-	systems. See <xref linkend="Development_XTA"/> for more information
+	among two or more Application Programs running on different
+	systems.
+      </para>
+      <para>
+	XTA has been designed to support polyglot use cases in distributed
+	environments and it can potentially support many programming
+	languages. See <xref linkend="Development_XTA"/> for more information
 	about XTA.
       </para>
     </section>
@@ -143,14 +148,8 @@
 	The LIXA project implements a stand-alone Transaction Manager that your
 	Application Program can use in many different ways:
 	<itemizedlist mark='bullet'>
-	  <listitem><para>from a C application launched from shell or via CGI
-	  inside a web server</para></listitem>
-	  <listitem><para>from a COBOL application launched from shell</para></listitem>
-	  <listitem>
-	    <para>from a scripting language application<footnote>
-	    <para>You must wrap the TX C API to be able to use it from Perl,
-	    PHP, Python, Ruby...</para></footnote>.</para>
-	  </listitem>
+	  <listitem><para>from a C application launched from shell or something else</para></listitem>
+	  <listitem><para>from a COBOL application launched from shell or something else</para></listitem>
 	</itemizedlist>
 	With the aid of the LIXA Transaction Manager potentially any web server
 	can be converted in an Application Server with two phase commit
