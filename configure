@@ -18401,7 +18401,7 @@ $as_echo "$as_me: WARNING: cannot determine SWIG version" >&2;}
 #   modified version of the Autoconf Macro, you may extend this special
 #   exception to the GPL to apply to your modified version as well.
 
-#serial 10
+#serial 11
 
 # This is what autoupdate's m4 run will expand.  It fires
 # the warning (with _au_warn_XXX), outputs it into the
@@ -18427,7 +18427,7 @@ $as_echo "$as_me: WARNING: cannot determine SWIG version" >&2;}
 
 
 
-        if test "z$SWIG" != "z"; then
+        if test "z$SWIG" != "z" -a "z$CXX" != "z" ; then
                 SWIG="$SWIG -c++"
         fi
 

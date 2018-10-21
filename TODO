@@ -1,5 +1,5 @@
 Implememt XTA for Python
-- go on with tests in RHEL 7.x
+- rename get_native_connection with _get_native_connection for PostgreSQL
 - release
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation

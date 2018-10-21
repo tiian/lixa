@@ -2,6 +2,16 @@ LOG:
 
 2018-10-   1.7.1 Python API for XTA
 		 Both Python 2 and Python 3 can be used with XTA for Python.
+		 Examples in doc/examples/xta/python tested with:
+		 - Ubuntu 14.04
+		   - MySQL      5.5.61
+		   - PostgreSQL 9.3.24
+		   - Python2    2.7.6
+		   - Python3    3.4.3
+		 - RHEL 7.5
+		   - MariaDB    5.5.60
+		   - PostgreSQL 9.2.4
+		   - Python2    2.7.5
 
 2018-09-17 1.7.0 C++ API for XTA
 

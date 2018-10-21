@@ -8,14 +8,16 @@ must be up and running.
 
 See [LIXA Reference Guide Manual](http://www.tiian.org/lixa/manuals/html/index.html), chapter "Developing Application Programs using XTA (XA Transaction API) interface", for detailed instructions.
 
-For PostgreSQL, use driver psycopg2 version 2.8 or higher.
+For PostgreSQL, use driver psycopg2 at git commit
+81addddaee2c690e925bb8f381e7bcb02ca97687
+https://github.com/fogzot/psycopg2/commit/81addddaee2c690e925bb8f381e7bcb02ca97687
+and checkout branch "feature-expose-pgconn".
+The feature should be merged in Psycopg2 2.8 official version
 
-For MySQL/MariaDB, use driver mysqlclient-python with pull request
-"get_native_connection":
-
-* https://github.com/PyMySQL/mysqlclient-python/pull/269
-* https://github.com/tiian/mysqlclient-python/tree/get_native_connection
-
+For MySQL/MariaDB, use driver mysqlclient-python at git commit
+54c69436f45f2c78b3ace754780a1a265e60d430
+https://github.com/PyMySQL/mysqlclient-python/commit/54c69436f45f2c78b3ace754780a1a265e60d430
+or later
 
 ## "Single Application" Pattern ##
 

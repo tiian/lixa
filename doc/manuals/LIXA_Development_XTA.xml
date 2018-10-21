@@ -239,10 +239,9 @@
 		<entry>-</entry>
 		<entry>Y<footnote>
 		<para>The MySQLdb driver provided by mysqlclient-python project
-		must be used. A patched version of the source code is available
-		<link xlink:href="https://github.com/tiian/mysqlclient-python/tree/get_native_connection">here</link>.
-		A <link xlink:href="https://github.com/PyMySQL/mysqlclient-python/pull/269">pull request</link> of the patch has been asked to project 
-		maintainers.
+		must be used: the first version that support XTA is provided
+		by commit 
+		<link xlink:href="https://github.com/PyMySQL/mysqlclient-python/commit/54c69436f45f2c78b3ace754780a1a265e60d430">54c69436f45f2c78b3ace754780a1a265e60d430</link>.
 		</para></footnote></entry>
 	      </row>
 	      <row>
