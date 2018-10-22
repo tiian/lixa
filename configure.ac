@@ -64,6 +64,7 @@ AC_CONFIG_FILES([
   tests/src/Makefile
   tests/src/cobol/Makefile
   tests/src/cpp/Makefile
+  tests/src/python/Makefile
   utils/Makefile
   var/Makefile
 ])

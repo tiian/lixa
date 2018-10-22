@@ -54,11 +54,11 @@ case "$2" in
 	;;
 esac
 
-if test -x "$3"
-then
-	echo "No program to test, exiting with error"
-	exit 1
-fi
+#if test -x $3
+#then
+#	echo ">$3< is not executable, exiting with error"
+#	exit 1
+#fi
 
 shift 2
 

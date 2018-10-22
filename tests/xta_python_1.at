@@ -1,0 +1,67 @@
+AT_BANNER([XTA Python API])
+
+AT_SETUP([XTA/Python/1.0 Simple Application Pattern])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "z$PYTHON" = "z"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027; lixa_test_exec.sh reset start case3100.py 1 1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027; lixa_test_exec.sh noreset none case3100.py 0 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027; lixa_test_exec.sh noreset none case3100.py 1 0 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/Python/3.0 Mult. Appl. Conc. Br. Ps. Synch.])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "z$PYTHON" = "z"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([mkfifo sup2sub], [0], [ignore], [ignore])
+AT_CHECK([mkfifo sub2sup], [0], [ignore], [ignore])
+AT_DATA([ins_commit],
+[[timeout 3 lixa_test_exec.sh noreset none case3106.py 1 1 sup2sub sub2sup
+timeout 3 lixa_test_exec.sh noreset none case3107.py 1 1 sup2sub sub2sup
+]])
+AT_DATA([del_rollback],
+[[timeout 3 lixa_test_exec.sh noreset none case3106.py 0 0 sup2sub sub2sup
+timeout 3 lixa_test_exec.sh noreset none case3107.py 0 0 sup2sub sub2sup
+]])
+AT_DATA([del_commit],
+[[timeout 3 lixa_test_exec.sh noreset none case3106.py 1 0 sup2sub sub2sup
+timeout 3 lixa_test_exec.sh noreset none case3107.py 1 0 sup2sub sub2sup
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh ins_commit], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh del_rollback], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh del_commit], [0], [ignore], [ignore])
+AT_CHECK([rm sup2sub], [0], [ignore], [ignore])
+AT_CHECK([rm sub2sup], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/C++/4.0 Mult. Appl. Conc. Br. Ps. Asynch.])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "z$PYTHON" = "z"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no"; then exit 77; fi])
+AT_CHECK([mkfifo sup2sub], [0], [ignore], [ignore])
+AT_CHECK([mkfifo sub2sup], [0], [ignore], [ignore])
+AT_DATA([ins_commit],
+[[timeout 3 lixa_test_exec.sh noreset none case3104.py 1 1 sup2sub sub2sup
+timeout 3 lixa_test_exec.sh noreset none case3105.py 1 1 sup2sub sub2sup
+]])
+AT_DATA([del_rollback],
+[[timeout 3 lixa_test_exec.sh noreset none case3104.py 0 0 sup2sub sub2sup
+timeout 3 lixa_test_exec.sh noreset none case3105.py 0 0 sup2sub sub2sup
+]])
+AT_DATA([del_commit],
+[[timeout 3 lixa_test_exec.sh noreset none case3104.py 1 0 sup2sub sub2sup
+timeout 3 lixa_test_exec.sh noreset none case3105.py 1 0 sup2sub sub2sup
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh ins_commit], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh del_rollback], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh del_commit], [0], [ignore], [ignore])
+AT_CHECK([rm sup2sub], [0], [ignore], [ignore])
+AT_CHECK([rm sub2sup], [0], [ignore], [ignore])
+AT_CHECK([lixa_test_exec.sh none stop true], [0], [ignore], [ignore])
+AT_CLEANUP
+
+#AT_SETUP([exit with error])
+#AT_CHECK([/bin/false], [0], [ignore], [ignore])
+#AT_CLEANUP
+
+
