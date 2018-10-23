@@ -101,8 +101,9 @@ CentOS		MySQL		mysql-server/mariadb-server mysql-devel/mariadb-devel
 CentOS		PostgreSQL	postgresql postgresql-server postgresql-devel
 RHEL 7.3	Basic		gcc glib2-devel libxml2-devel libuuid-devel
 				autoconf net-tools libtool
-Ubuntu		Python		swig python-dev python-psycopg2 python-mysqldb
-Ubuntu		Python3		swig python3-dev python3-psycopg2 python3-mysqldb
+Ubuntu		Python		swig python-dev
+Ubuntu		Python3		swig python3-dev
+RHEL 7.5i	Python		swig python-devel 
 
 Optional packages:
 O.S.		Feature		Packages

@@ -34,7 +34,7 @@ AT_CHECK([rm sup2sub], [0], [ignore], [ignore])
 AT_CHECK([rm sub2sup], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/C++/4.0 Mult. Appl. Conc. Br. Ps. Asynch.])
+AT_SETUP([XTA/Python/4.0 Mult. Appl. Conc. Br. Ps. Asynch.])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "z$PYTHON" = "z"; then exit 77; fi])
 AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no"; then exit 77; fi])
