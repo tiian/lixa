@@ -233,7 +233,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = . cpp python
+DIST_SUBDIRS = . cpp python php
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -383,6 +383,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PHP_CONFIG = @PHP_CONFIG@
 PKG_CONFIG = @PKG_CONFIG@
 POSTGRESQL_CONFIG = @POSTGRESQL_CONFIG@
 POSTGRESQL_CPPFLAGS = @POSTGRESQL_CPPFLAGS@
@@ -471,6 +472,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @COMPILE_XTA_CPP_TRUE@MAYBECPP = cpp
+@COMPILE_XTA_PHP_TRUE@MAYBEPHP = php
 @COMPILE_XTA_PYTHON_TRUE@MAYBEPYTHON = python
 @COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL_SOURCES = xta_mysql_xa_resource.c
 @COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL_CPPFLAGS = @MYSQL_CPPFLAGS@ \
@@ -482,7 +484,7 @@ top_srcdir = @top_srcdir@
 @COMPILE_POSTGRESQL_STUFF_TRUE@	-I$(top_srcdir)/src/client/switch/postgresql
 
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
-SUBDIRS = . $(MAYBECPP) $(MAYBEPYTHON)
+SUBDIRS = . $(MAYBECPP) $(MAYBEPYTHON) $(MAYBEPHP)
 include_HEADERS = xta.h xta_iface.h xta_init.h xta_transaction.h \
 	xta_transaction_manager.h xta_xid.h \
 	xta_xa_resource.h xta_native_xa_resource.h xta_acquired_xa_resource.h \

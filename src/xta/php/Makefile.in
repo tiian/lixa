@@ -78,7 +78,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = src/xta/python
+subdir = src/xta/php
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(dist_noinst_DATA)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -348,9 +348,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/xta/python/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/xta/php/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu src/xta/python/Makefile
+	  $(AUTOMAKE) --gnu src/xta/php/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -528,10 +528,10 @@ uninstall-am: uninstall-local
 	tags-am uninstall uninstall-am uninstall-local
 
 
-# Produce XTA wrapper using SWIG (C++)
+# Produce XTA wrapper for PHP using SWIG (C++)
 
 xta_wrap.cpp: xta.i ../cpp/*.hpp
-	$(SWIG) -python -I../cpp -o $@ xta.i
+	$(SWIG) -php -I../cpp -o $@ xta.i
 
 setup.py:	setup.py.i ../../../config.status
 	sed \

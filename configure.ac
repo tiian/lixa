@@ -52,6 +52,7 @@ AC_CONFIG_FILES([
   src/server/Makefile
   src/xta/Makefile
   src/xta/cpp/Makefile
+  src/xta/php/Makefile
   src/xta/python/Makefile
   tests/Makefile
   tests/atlocal
@@ -116,6 +117,24 @@ m4_include(m4include/ax_swig_python.m4)
 AX_SWIG_PYTHON
 
 AM_CONDITIONAL([COMPILE_XTA_PYTHON], [test "z$SWIG" != "z" -a "z$PYTHON" != "z"])
+
+# Check PHP availability
+AC_CHECK_PROGS(PHP_CONFIG, [php-config], [])
+if test "z$PHP_CONFIG" != "z"
+then
+	AC_MSG_CHECKING([for PHP7])
+	PHP_VERNUM=$($PHP_CONFIG --vernum)
+	PHP_INCLUDES=$($PHP_CONFIG --includes)
+	PHP_INSTALL_PATH=$($PHP_CONFIG --extension-dir)
+	if test $PHP_VERNUM -ge 70000
+	then
+		AC_MSG_RESULT([yes])
+	else
+		AC_MSG_RESULT([no])
+	fi
+fi
+AM_CONDITIONAL([COND_PHP7], [test $PHP_VERNUM -ge 70000])
+AM_CONDITIONAL([COMPILE_XTA_PHP], [test "z$SWIG" != "z" -a "z$PHP_CONFIG" != "z"])
 
 #
 # From libtool manual:
