@@ -1,10 +1,11 @@
 AM_CFLAGS =
-AM_CPPFLAGS = @PHP_INCLUDES@ -I ..
-#AM_LDFLAGS = -module -Wl,--no-as-needed -Wl,-lglib-2.0 -Wl,--as-needed
+AM_CPPFLAGS = @PHP_CPPFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@ \
+	-I../cpp -I../../common
+AM_LDFLAGS = -module -Wl,--no-as-needed -Wl,-lglib-2.0 -Wl,--as-needed
 dist_noinst_DATA = xta.i
 # Unsure if it's better to use flom_php_module_la_LIBADD or 
 # flom_php_module_la_LDADD
-xta_php_module_la_LIBADD = @GLIB2_LIBS@ ../cpp/libxtapp.la
+xta_php_module_la_LIBADD = ../cpp/liblixtapp.la
 # PHP version to use
 if COND_PHP7
  PHP_VERSION=-php7
@@ -12,7 +13,7 @@ else
  PHP_VERSION=-php
 endif
 xta_wrap.cpp: xta.i
-	$(SWIG) $(PHP_VERSION) -I.. -o $@ $<
+	$(SWIG) $(PHP_VERSION) -I../cpp -o $@ $<
 
 nodist_xta_php_module_la_SOURCES = xta_wrap.cpp
 

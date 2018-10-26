@@ -25,6 +25,7 @@
         }
 }
 
+/*
 %typemap(in) PGconn * {
   $1 = (PGconn *) PyCapsule_GetPointer($input, "psycopg2.connection.native_connection");
 }
@@ -32,6 +33,7 @@
 %typemap(in) MYSQL * {
   $1 = (MYSQL *) PyCapsule_GetPointer($input, "_mysql.connection.native_connection");
 }
+*/
 
 %include "Xta.hpp"
 %include "XaResource.hpp"

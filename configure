@@ -645,6 +645,9 @@ LIXA_CONFIG_LIBXML2_INCLUDEDIR
 LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR
 LIXA_CONFIG_GLIB2_INCLUDEDIR
 LIXA_CONFIG_INCLUDEDIR
+PHP_INSTALL_PATH
+PHP_CPPFLAGS
+PHP_VERNUM
 CPP_COMPILER_AVAILABLE
 LIXA_XTA
 LIXA_CRASH
@@ -18582,6 +18585,8 @@ then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for PHP7" >&5
 $as_echo_n "checking for PHP7... " >&6; }
 	PHP_VERNUM=$($PHP_CONFIG --vernum)
+	PHP_CPPFLAGS=$($PHP_CONFIG --includes)
+	PHP_INSTALL_PATH=$($PHP_CONFIG --extension-dir)
 	if test $PHP_VERNUM -ge 70000
 	then
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -20310,6 +20315,9 @@ _ACEOF
 
 fi
 done
+
+
+
 
 
 

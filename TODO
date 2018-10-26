@@ -4,6 +4,9 @@ Implememt XTA for Python
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation
 
+Remove build error if ./configure without MySQL and PostgreSQL is used (just
+because XaResource* are compiled anyway)
+
 Implement XTA for Java
 
 Put all configuration in XTA without necessity to load lixac_conf.xml file

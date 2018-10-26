@@ -26,8 +26,12 @@
 /* include all XTA C++ header files */
 #include "Exception.hpp"
 #include "NativeXaResource.hpp"
-#include "MysqlXaResource.hpp"
-#include "PostgresqlXaResource.hpp"
+#ifdef HAVE_MYSQL
+# include "MysqlXaResource.hpp"
+#endif
+#ifdef HAVE_POSTGRESQL
+# include "PostgresqlXaResource.hpp"
+#endif
 #include "Transaction.hpp"
 #include "TransactionManager.hpp"
 
