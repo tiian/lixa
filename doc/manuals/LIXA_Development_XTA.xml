@@ -271,9 +271,8 @@
 		<entry>-</entry>
 		<entry>Y<footnote>
 		<para>Psycopg2 driver must be used. A patched version of the
-		source code is available
-		<link xlink:href="https://github.com/fogzot/psycopg2/commit/81addddaee2c690e925bb8f381e7bcb02ca97687">here</link>. It should be part of
-		Psycopg 2.8
+		source code is available in this
+		<link xlink:href="https://github.com/tiian/psycopg2/tree/get-native-connection">github fork</link>. It should be part of Psycopg 2.8
 		</para></footnote>
 		</entry>
 	      </row>

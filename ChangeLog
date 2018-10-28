@@ -1,6 +1,6 @@
 LOG:
 
-2018-10-   1.7.1 Python API for XTA
+2018-10-28 1.7.1 Python API for XTA
 		 Both Python 2 and Python 3 can be used with XTA for Python.
 		 Examples in doc/examples/xta/python tested with:
 		 - Ubuntu 14.04

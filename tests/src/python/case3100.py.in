@@ -77,17 +77,17 @@ tm = TransactionManager()
 # third parameter "dbname=testdb" identifies the specific database
 #
 # PostgreSQL driver is available here:
-# https://github.com/fogzot/psycopg2/tree/feature-expose-pgconn
+# https://github.com/tiian/psycopg2/tree/get-native-connection
 # it should be available in Psycopg2 2.8
-xar1 = PostgresqlXaResource(rm1.get_native_connection(), "PostgreSQL", "dbname=testdb")
+xar1 = PostgresqlXaResource(rm1._get_native_connection(), "PostgreSQL", "dbname=testdb")
 
 # create an XA resource for MySQL
 # second parameter "MySQL" is descriptive
 # third parameter "localhost,0,lixa,,lixa" identifies the specific database
 #
-# MySQL driver is available here:
-# https://github.com/tiian/mysqlclient-python/tree/get_native_connection
-# it should be merged in the master tree
+# MySQL driver support is available since
+# commit 54c69436f45f2c78b3ace754780a1a265e60d430:
+# https://github.com/PyMySQL/mysqlclient-python/commit/54c69436f45f2c78b3ace754780a1a265e60d430
 xar2 = MysqlXaResource(rm2._get_native_connection(), "MySQL", "localhost,0,lixa,,lixa")
 
 # Create a new XA global transaction and retrieve a reference from
