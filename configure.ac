@@ -1,10 +1,10 @@
-AC_INIT([lixa], [1.7.1], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
+AC_INIT([lixa], [1.7.2-dev], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 #hardwired configuration
 _XTA_PREFIX="xta"
-_RELEASE_DATE="2018-09-17"
+_RELEASE_DATE="2018-10-29"
 AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 LT_INIT
 AC_PROG_LIBTOOL
@@ -12,6 +12,7 @@ AM_PROG_LIBTOOL
 
 AC_PROG_CC
 AC_PROG_CXX
+AC_PROG_AWK
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_HEADER([src/client/lixa.h])
 AC_CONFIG_HEADER([src/xta/xta.h])
@@ -52,6 +53,7 @@ AC_CONFIG_FILES([
   src/server/Makefile
   src/xta/Makefile
   src/xta/cpp/Makefile
+  src/xta/java/Makefile
   src/xta/python/Makefile
   tests/Makefile
   tests/atlocal
@@ -100,22 +102,6 @@ AM_CONDITIONAL([COMPILE_WEBSPHEREMQ_STUFF], [test "$HAVE_WEBSPHEREMQ" = "yes"])
 m4_include(m4include/ax_docbook.m4)
 AX_DOCBOOK
 AM_CONDITIONAL([COMPILE_DOCBOOK_STUFF], [test "$HAVE_DOCBOOK" = "yes"])
-
-# Check Python availability
-m4_include(m4include/ax_python_devel.m4)
-AX_PYTHON_DEVEL([>= '2.7'])
-
-# Check SWIG availability
-m4_include(m4include/ax_pkg_swig.m4)
-AX_PKG_SWIG([2.0])
-m4_include(m4include/ax_swig_enable_cxx.m4)
-AX_SWIG_ENABLE_CXX
-#m4_include(m4include/ax_swig_multi_module_support.m4)
-#AX_SWIG_MULTI_MODULE_SUPPORT
-m4_include(m4include/ax_swig_python.m4)
-AX_SWIG_PYTHON
-
-AM_CONDITIONAL([COMPILE_XTA_PYTHON], [test "z$SWIG" != "z" -a "z$PYTHON" != "z"])
 
 #
 # From libtool manual:
@@ -178,12 +164,53 @@ AM_PROG_CC_C_O
 # Checking if C++ compiler is available
 AC_MSG_CHECKING([if C++ compiler is available])
 CPP_COMPILER_AVAILABLE="no"
-AM_CONDITIONAL([COMPILE_XTA_CPP], [test "x$CXX" != "x"])
+AM_CONDITIONAL([COMPILE_XTA_CPP], [test "$LIXA_XTA" = "yes" -a "x$CXX" != "x"])
 if test "x$CXX" != "x"
 then
 	AC_MSG_RESULT([yes])
 	CPP_COMPILER_AVAILABLE="yes"
 fi
+
+# Checking if Java is available
+m4_include(m4include/ax_check_classpath.m4)
+AX_CHECK_CLASSPATH
+m4_include(m4include/ax_prog_javac.m4)
+m4_include(m4include/ax_prog_javac_works.m4)
+AX_PROG_JAVAC
+m4_include(m4include/ax_prog_java.m4)
+m4_include(m4include/ax_prog_java_works.m4)
+AX_PROG_JAVA
+m4_include(m4include/ax_check_java_home.m4)
+AX_CHECK_JAVA_HOME
+m4_include(m4include/ax_prog_javah.m4)
+AX_PROG_JAVAH
+m4_include(m4include/ax_prog_jar.m4)
+AX_PROG_JAR
+m4_include(m4include/ax_prog_javadoc.m4)
+AX_PROG_JAVADOC
+
+AM_CONDITIONAL([COMPILE_XTA_JAVA], [test "$LIXA_XTA" = "yes" -a "z$JAVA" != "z" -a "z$JAVAC" != "z" -a "z$JAR" != "z"])
+AM_CONDITIONAL([COND_HAVE_JAVAH], [test "z$JAVAH" != "z"])
+if test "z$JAVAH" = "z" -a "z$JAVA" != "z"
+then
+	AC_MSG_NOTICE([javah not found, assuming Java 9 or higher])
+fi
+
+# Check Python availability
+m4_include(m4include/ax_python_devel.m4)
+AX_PYTHON_DEVEL([>= '2.7'])
+
+# Check SWIG availability
+m4_include(m4include/ax_pkg_swig.m4)
+AX_PKG_SWIG([2.0])
+m4_include(m4include/ax_swig_enable_cxx.m4)
+AX_SWIG_ENABLE_CXX
+#m4_include(m4include/ax_swig_multi_module_support.m4)
+#AX_SWIG_MULTI_MODULE_SUPPORT
+m4_include(m4include/ax_swig_python.m4)
+AX_SWIG_PYTHON
+
+AM_CONDITIONAL([COMPILE_XTA_PYTHON], [test "$LIXA_XTA" = "yes" -a "z$SWIG" != "z" -a "z$PYTHON" != "z"])
 
 # Checking pkg-config is available
 AC_CHECK_PROGS(PKG_CONFIG, [pkg-config], [])
