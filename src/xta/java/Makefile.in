@@ -142,7 +142,7 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(javadir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixta_java_la_DEPENDENCIES = ../liblixta.la
-am_liblixta_java_la_OBJECTS = xta_java.lo
+am_liblixta_java_la_OBJECTS = liblixta_java_la-xta_java.lo
 liblixta_java_la_OBJECTS = $(am_liblixta_java_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -427,18 +427,24 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 JAVA_PKGDIR = org/tiian/lixa/xta
+liblixta_java_la_CPPFLAGS = -I$(top_srcdir)/src/common \
+	-I$(top_srcdir)/src/client -I$(top_srcdir)/src/xta
+
 liblixta_java_la_LIBADD = ../liblixta.la
 liblixta_java_la_SOURCES = xta_java.c
 
 #dist_noinst_HEADERS = org_tiian_lixa_xta_TransactionManager.h
-dist_noinst_DATA = LixaErrorCodes.awk
+dist_noinst_DATA = LixaErrorCodes.awk \
+	$(JAVA_PKGDIR)/Xta.java $(JAVA_PKGDIR)/XtaException.java \
+	$(JAVA_PKGDIR)/TransactionManager.java
+
 javadir = $(datadir)/$(PACKAGE)/java
 dist_java_DATA = xta.jar
 lib_LTLIBRARIES = liblixta_java.la
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .class .java .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -514,7 +520,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xta_java.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-xta_java.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -536,6 +542,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+liblixta_java_la-xta_java.lo: xta_java.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_java_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixta_java_la-xta_java.lo -MD -MP -MF $(DEPDIR)/liblixta_java_la-xta_java.Tpo -c -o liblixta_java_la-xta_java.lo `test -f 'xta_java.c' || echo '$(srcdir)/'`xta_java.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixta_java_la-xta_java.Tpo $(DEPDIR)/liblixta_java_la-xta_java.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xta_java.c' object='liblixta_java_la-xta_java.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_java_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_java_la-xta_java.lo `test -f 'xta_java.c' || echo '$(srcdir)/'`xta_java.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -774,15 +787,33 @@ uninstall-am: uninstall-dist_javaDATA uninstall-libLTLIBRARIES
 	uninstall-hook uninstall-libLTLIBRARIES
 
 
+SUFFIXES: .java .class
+
 $(JAVA_PKGDIR)/ErrorCodes.java:	LixaErrorCodes.awk ../../common/lixa_errors.h
 	mkdir -p $(JAVA_PKGDIR)
 	$(AWK) -f $^ > $@
 
-$(JAVA_PKGDIR)/ErrorCodes.class:	$(JAVA_PKGDIR)/ErrorCodes.java
+#$(JAVA_PKGDIR)/ErrorCodes.class:	$(JAVA_PKGDIR)/ErrorCodes.java
+#if COND_HAVE_JAVAH
+#	$(JAVAC) $<
+#else
+#	$(JAVAC) -h . $<
+#endif
+
+.java.class:
 @COND_HAVE_JAVAH_TRUE@	$(JAVAC) $<
 @COND_HAVE_JAVAH_FALSE@	$(JAVAC) -h . $<
 
-xta.jar:	$(JAVA_PKGDIR)/ErrorCodes.class
+#$(JAVA_PKGDIR)/TransactionManager.class:	$(JAVA_PKGDIR)/TransactionManager.java
+#if COND_HAVE_JAVAH
+#	$(JAVAC) $<
+#else
+#	$(JAVAC) -h . $<
+#endif
+
+xta.jar:	$(JAVA_PKGDIR)/ErrorCodes.class \
+	$(JAVA_PKGDIR)/Xta.class $(JAVA_PKGDIR)/XtaException.class \
+	$(JAVA_PKGDIR)/TransactionManager.class
 	$(JAR) cf $@ $^
 
 uninstall-hook:

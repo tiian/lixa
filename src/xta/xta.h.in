@@ -55,11 +55,15 @@
 #include <xta_xa_resource.h>
 #include <xta_acquired_xa_resource.h>
 #include <xta_native_xa_resource.h>
-#ifdef HAVE_MYSQL
-# include <xta_mysql_xa_resource.h>
-#endif
-#ifdef HAVE_POSTGRESQL
-# include <xta_postgresql_xa_resource.h>
+#ifndef XTA_FOR_JAVA
+/* native resource headers must NOT be included when compiling the JNI part
+   of XTA for JAVA */
+# ifdef HAVE_MYSQL
+#  include <xta_mysql_xa_resource.h>
+# endif
+# ifdef HAVE_POSTGRESQL
+#  include <xta_postgresql_xa_resource.h>
+# endif
 #endif
 #include <xta_transaction.h>
 #include <xta_transaction_manager.h>

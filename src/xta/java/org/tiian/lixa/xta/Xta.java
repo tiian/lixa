@@ -16,37 +16,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "config.h"
+package org.tiian.lixa.xta;
 
 
 
-/* set module trace flag */
-#ifdef LIXA_TRACE_MODULE
-# undef LIXA_TRACE_MODULE
-#endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_XTA
-
-
-
-#include <jni.h>
-
-
-/* This macro is necessary to avoid header files related to native resources:
-   they are not used by XTA for Java */
-#define XTA_FOR_JAVA
-#include "xta.h"
-
-
-
-JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Xta_initJNI(JNIEnv *env)
-{
-    xta_init();
-}
-
-
-
-JNIEXPORT jstring JNICALL Java_org_tiian_lixa_xta_ErrorCodes_getText
-(JNIEnv *env, jclass this_obj, jint code)
-{
-    return (*env)->NewStringUTF(env, lixa_strerror(code));
+/**
+ * This class is used only to initialize the native C library; it's not public
+ * and it's statically called by all the XTA classes that requires
+ * environment set-up
+ */
+class Xta {
+    static {
+        System.loadLibrary("lixta_java");
+    }
+    static private boolean hasInitialized = false;
+    /**
+     * Initialize XTA environment at the C level
+     */
+    static private native void initJNI();
+    /**
+     * Call C level XTA environment initialization
+     */
+    static void init() {
+        if (!hasInitialized) {
+            hasInitialized = true;
+            initJNI();
+        }
+    }
 }
