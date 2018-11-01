@@ -30,6 +30,7 @@
 #endif /* HAVE_STDIO_H */
 
 
+#include <errno.h>
 #include <lixa_defines.h>
 
 

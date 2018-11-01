@@ -632,7 +632,7 @@ int xta_transaction_start(xta_transaction_t *transact, int multiple_branches)
             next_txstate = TX_STATE_S3;
         /* create a new xid */
         if (NULL == (transact->xid = xta_xid_new(local_ccc->config_digest,
-                                             multiple_branches)))
+                                                 multiple_branches)))
             THROW(NULL_OBJECT2);
         /* start the transaction in all the XA Resource Managers */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(

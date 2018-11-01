@@ -218,15 +218,15 @@ int xta_native_xa_resource_init(
                          xmlCharStrdup(switch_file)))
                 THROW(XML_STRDUP_ERROR2);
             /* copy open_info */
-            strncpy(xa_resource->xa_resource.rsrmgr_config.xa_open_info, open_info,
-                    MAXINFOSIZE);
-            xa_resource->xa_resource.rsrmgr_config.xa_open_info[MAXINFOSIZE-1] =
-                '\0';
+            strncpy(xa_resource->xa_resource.rsrmgr_config.xa_open_info,
+                    open_info, MAXINFOSIZE);
+            xa_resource->xa_resource.rsrmgr_config.xa_open_info[
+                MAXINFOSIZE-1] = '\0';
             /* copy close_info */
-            strncpy(xa_resource->xa_resource.rsrmgr_config.xa_close_info, close_info,
-                    MAXINFOSIZE);
-            xa_resource->xa_resource.rsrmgr_config.xa_close_info[MAXINFOSIZE-1] =
-                '\0';
+            strncpy(xa_resource->xa_resource.rsrmgr_config.xa_close_info,
+                    close_info, MAXINFOSIZE);
+            xa_resource->xa_resource.rsrmgr_config.xa_close_info[
+                MAXINFOSIZE-1] = '\0';
             /* load the switch file for the resource manager */
             if (LIXA_RC_OK != (ret_cod = client_config_load_switch_file(
                                    &xa_resource->xa_resource.act_rsrmgr_config,

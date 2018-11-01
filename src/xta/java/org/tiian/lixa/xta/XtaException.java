@@ -32,15 +32,13 @@ public class XtaException extends Exception {
      * condition to the JNI wrapper method
      */
     private int ReturnCode;
-    private String Function;
     /**
      * Build a new XTA excpetion object
      * @param returnCode is the value returned by the native C function
      */
-    public XtaException(int returnCode, String function) {
+    public XtaException(int returnCode) {
         super(ErrorCodes.getText(returnCode));
         ReturnCode = returnCode;
-        Function = function;
     }
     /**
      * Get the return code of the native C function that returned an error
@@ -48,5 +46,4 @@ public class XtaException extends Exception {
      * @return the return code associated to the exception
      */
     public int getReturnCode() { return ReturnCode; }
-    public String where() { return Function; }
 }

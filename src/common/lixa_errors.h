@@ -583,6 +583,22 @@ define LIXA_RC_UNLINK_ERROR                  -129
 #define LIXA_RC_NON_BRANCHABLE_TX              -505
 
 
+/* JNI related errors; JNI is used in XTA for Java */
+
+/**
+ * JNI "GetFieldID" function error
+ */
+#define LIXA_RC_GET_FIELD_ID_ERROR             -510
+/**
+ * JNI "GetObjectClass" function error
+ */
+#define LIXA_RC_GET_OBJECT_CLASS_ERROR         -511
+/**
+ * JNI "NewDirectByteBuffer" function error
+ */
+#define LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR   -512
+
+
 
 #ifdef __cplusplus
 extern "C" {
