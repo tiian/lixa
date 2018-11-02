@@ -20,6 +20,19 @@
 
 // import XTA package from LIXA project
 import org.tiian.lixa.xta.*;
+// import SQL
+import java.sql.Connection;
+import java.sql.Statement;
+// import Java XA
+import javax.sql.XAConnection;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.XAException;
+// import MySQL packages
+import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
+import com.mysql.jdbc.jdbc2.optional.MysqlXid;
+// import PostgreSQL packages
+import org.postgresql.xa.PGXADataSource;
+
 
 public class ExampleXtaSA31 {
     public static void main(String[] args) {
@@ -48,6 +61,57 @@ public class ExampleXtaSA31 {
          } else {
              postgresqlStmt = "DELETE FROM authors WHERE id=1921";
              mysqlStmt = "DELETE FROM authors WHERE id=1919";
+         }
+         /*
+          * MySQL driver
+          */
+         try {
+             PGXADataSource xads1 = new PGXADataSource();
+             // xads1.setUrl("jdbc:mysql://localhost/testdb?user=tiian&password=passw0rd");
+             xads1.setServerName("localhost");
+             xads1.setDatabaseName("testdb");
+             xads1.setUser("tiian");
+             xads1.setPassword("passw0rd");
+             MysqlXADataSource xads2 = new MysqlXADataSource();
+             xads2.setUrl("jdbc:mysql://localhost/lixa?user=lixa&password=");
+             XAConnection xac1 = xads1.getXAConnection();
+             XAConnection xac2 = xads2.getXAConnection();
+             XAResource xar1 = xac1.getXAResource();
+             XAResource xar2 = xac2.getXAResource();
+             Connection conn1 = xac1.getConnection(); 
+             Connection conn2 = xac2.getConnection(); 
+             Statement stmt1 = conn1.createStatement();
+             Statement stmt2 = conn2.createStatement();
+             MysqlXid xid = new MysqlXid("2".getBytes(), "2".getBytes(), 1);
+             try {
+                 xar1.start(xid, XAResource.TMNOFLAGS);
+                 xar2.start(xid, XAResource.TMNOFLAGS);
+                 stmt1.executeUpdate(postgresqlStmt);
+                 stmt2.executeUpdate(mysqlStmt);
+                 xar1.end(xid, XAResource.TMSUCCESS);
+                 xar2.end(xid, XAResource.TMSUCCESS);
+                 int ret1, ret2;
+                 ret1 = xar1.prepare(xid);
+                 ret2 = xar2.prepare(xid);
+                 if (ret1 == XAResource.XA_OK && ret2 == XAResource.XA_OK) {
+                     xar1.commit(xid, false);
+                     xar2.commit(xid, false);
+                 } else {
+                     xar1.rollback(xid);
+                     xar2.rollback(xid);
+                 }
+             } catch (XAException e) {
+                 e.printStackTrace();
+             } finally {
+                 stmt1.close();
+                 conn1.close();
+                 xac1.close();
+                 stmt2.close();
+                 conn2.close();
+                 xac2.close();
+             }
+         } catch (Exception ex) {
+             throw new IllegalStateException("MySQL...", ex);
          }
          try {
              TransactionManager tm = new TransactionManager();

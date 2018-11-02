@@ -1039,6 +1039,30 @@ postgres@ubuntu1204-64:~$ exit
 logout
 	    </screen></td></tr></tbody>
 	  </table>
+	  Even if most of the examples use local connection, for JDBC it's
+	  necessary even a host connection; verify that config file
+	  <filename>pg_hba.conf</filename> contains a row like the following
+	  one:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+host    all             all             ::1/128                 md5
+	    </screen></td></tr></tbody>
+	  </table>
+	  and assign your user a password inside PostgreSQL database:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/lixa$ sudo su - postgres
+postgres@ubuntu1404-64:~$ psql
+psql (9.3.24)
+Type "help" for help.
+
+postgres=# ALTER USER tiian WITH PASSWORD 'passw0rd';
+ALTER ROLE
+postgres=# \q
+	    </screen></td></tr></tbody>
+	  </table>
 	  Create a new database and a table necessary to store some data:
 	  <table frame="box">
 	    <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
