@@ -42,6 +42,8 @@ public class ExampleXtaSA31 {
                                "parameters: 'commit' and 'insert'\n");
             System.exit(1);
         }
+        TransactionManager tm;
+        Transaction tx;
         // First parameter: commit transaction
         boolean commit = Integer.parseInt(args[0]) > 0 ? true : false;
         // Second parameter: insert data in databases
@@ -50,6 +52,19 @@ public class ExampleXtaSA31 {
         String postgresqlStmt;
         // variable for MySQL statement to execute
         String mysqlStmt;
+
+        PGXADataSource xads1 = null;
+        XAConnection xac1 = null;
+        XAResource xar1 = null;
+        Connection conn1 = null; 
+        Statement stmt1 = null;
+        
+        MysqlXADataSource xads2 = null;
+        XAConnection xac2 = null;
+        XAResource xar2 = null;
+        Connection conn2 = null;
+        Statement stmt2 = null;
+             
         /*
          * Prepare SQL statements in accordance with "insert" command line
          * parameter
@@ -62,63 +77,80 @@ public class ExampleXtaSA31 {
              postgresqlStmt = "DELETE FROM authors WHERE id=1921";
              mysqlStmt = "DELETE FROM authors WHERE id=1919";
          }
-         /*
-          * MySQL driver
-          */
          try {
-             PGXADataSource xads1 = new PGXADataSource();
-             // xads1.setUrl("jdbc:mysql://localhost/testdb?user=tiian&password=passw0rd");
+             /*
+              * A bit of scaffolding for PostgreSQL
+              */
+             xads1 = new PGXADataSource();
              xads1.setServerName("localhost");
              xads1.setDatabaseName("testdb");
              xads1.setUser("tiian");
              xads1.setPassword("passw0rd");
-             MysqlXADataSource xads2 = new MysqlXADataSource();
+             xac1 = xads1.getXAConnection();
+             xar1 = xac1.getXAResource();
+             conn1 = xac1.getConnection(); 
+             stmt1 = conn1.createStatement();
+             /*
+              * MySQL driver
+              */
+             xads2 = new MysqlXADataSource();
              xads2.setUrl("jdbc:mysql://localhost/lixa?user=lixa&password=");
-             XAConnection xac1 = xads1.getXAConnection();
-             XAConnection xac2 = xads2.getXAConnection();
-             XAResource xar1 = xac1.getXAResource();
-             XAResource xar2 = xac2.getXAResource();
-             Connection conn1 = xac1.getConnection(); 
-             Connection conn2 = xac2.getConnection(); 
-             Statement stmt1 = conn1.createStatement();
-             Statement stmt2 = conn2.createStatement();
-             MysqlXid xid = new MysqlXid("2".getBytes(), "2".getBytes(), 1);
+             xac2 = xads2.getXAConnection();
+             xar2 = xac2.getXAResource();
+             conn2 = xac2.getConnection(); 
+             stmt2 = conn2.createStatement();
+             
              try {
-                 xar1.start(xid, XAResource.TMNOFLAGS);
-                 xar2.start(xid, XAResource.TMNOFLAGS);
-                 stmt1.executeUpdate(postgresqlStmt);
-                 stmt2.executeUpdate(mysqlStmt);
-                 xar1.end(xid, XAResource.TMSUCCESS);
-                 xar2.end(xid, XAResource.TMSUCCESS);
-                 int ret1, ret2;
-                 ret1 = xar1.prepare(xid);
-                 ret2 = xar2.prepare(xid);
-                 if (ret1 == XAResource.XA_OK && ret2 == XAResource.XA_OK) {
-                     xar1.commit(xid, false);
-                     xar2.commit(xid, false);
-                 } else {
-                     xar1.rollback(xid);
-                     xar2.rollback(xid);
-                 }
-             } catch (XAException e) {
+                 // Create a mew XTA Transaction Manager
+                 tm = new TransactionManager();
+                 // Create a new XA global transaction using the Transaction
+                 // Manager as a factory
+                 tx = tm.createTransaction();
+                 // Enlist PostgreSQL resource to transaction
+                 tx.enlistResource(xar1);
+                 // Enlist MySQL resource to Transaction
+                 tx.enlistResource(xar2);
+                 // Open all resources enlisted by tx Transaction
+             } catch (XtaException e) {
+                 System.err.println("XtaException: LIXA ReturnCode=" +
+                                    e.getReturnCode() + " ('" +
+                                    e.getMessage() + "')");
                  e.printStackTrace();
-             } finally {
+                 System.exit(1);
+             }
+             
+             MysqlXid xid = new MysqlXid("2".getBytes(), "2".getBytes(), 1);
+             xar1.start(xid, XAResource.TMNOFLAGS);
+             xar2.start(xid, XAResource.TMNOFLAGS);
+             stmt1.executeUpdate(postgresqlStmt);
+             stmt2.executeUpdate(mysqlStmt);
+             xar1.end(xid, XAResource.TMSUCCESS);
+             xar2.end(xid, XAResource.TMSUCCESS);
+             int ret1, ret2;
+             ret1 = xar1.prepare(xid);
+             ret2 = xar2.prepare(xid);
+             if (ret1 == XAResource.XA_OK && ret2 == XAResource.XA_OK) {
+                 xar1.commit(xid, false);
+                 xar2.commit(xid, false);
+             } else {
+                 xar1.rollback(xid);
+                 xar2.rollback(xid);
+             }
+         } catch (Exception e) {
+             e.printStackTrace();
+             System.exit(1);
+         } finally {
+             try {
                  stmt1.close();
                  conn1.close();
                  xac1.close();
                  stmt2.close();
                  conn2.close();
                  xac2.close();
+             } catch (Exception e) {
+                 e.printStackTrace();
+                 System.exit(1);
              }
-         } catch (Exception ex) {
-             throw new IllegalStateException("MySQL...", ex);
-         }
-         try {
-             TransactionManager tm = new TransactionManager();
-         } catch (XtaException e) {
-             System.err.println("XtaException: LIXA ReturnCode=" +
-                                e.getReturnCode() + " ('" +
-                                e.getMessage() + "')");
          }
          /* @@@ remove me
         if (commit)
@@ -226,14 +258,8 @@ int main(int argc, char *argv[])
         // database
         xar2 = new xta::MysqlXaResource(
             rm2, "MySQL", "localhost,0,lixa,,lixa");
-        // Create a new XA global transaction and retrieve a reference from
-        // the TransactionManager object
-        xta::Transaction tx = tm->CreateTransaction();
-        // Enlist PostgreSQL resource to transaction
-        tx.EnlistResource(xar1);
-        // Enlist MySQL resource to Transaction
-        tx.EnlistResource(xar2);
-        // Open all resources enlisted by tx Transaction
+
+
         tx.Open();
         // Start a new XA global transaction with a single branch
         tx.Start();

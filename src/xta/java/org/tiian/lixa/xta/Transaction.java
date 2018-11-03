@@ -21,13 +21,14 @@ package org.tiian.lixa.xta;
 
 
 import java.nio.ByteBuffer;
+import javax.transaction.xa.XAResource;
 
 
 
 /*
- * XTA Transaction Manager
+ * XTA Transaction
  */
-public class TransactionManager {
+public class Transaction {
     static {
         org.tiian.lixa.xta.Xta.init();
     }
@@ -44,8 +45,7 @@ public class TransactionManager {
             throw new XtaException(ErrorCodes.LIXA_RC_OBJ_CORRUPTED);
     }
     /*
-     * Create a new native xta_transaction_manager_t object and set
-     * NativeObject
+     * Create a new native xta_transaction_t object and set NativeObject
      * Called by class constructor
      */
     private native int newJNI();
@@ -54,13 +54,13 @@ public class TransactionManager {
      * @throws XtaException if the underlying native C function returns
      * an error condition
      */
-    public TransactionManager() throws XtaException {
+    public Transaction() throws XtaException {
         int ReturnCode = newJNI();
         if (ErrorCodes.LIXA_RC_OK != ReturnCode)
             throw new XtaException(ReturnCode);
     }
     /*
-     * Delete the native xta_transaction_manager_t object.
+     * Delete the native xta_transaction_t object.
      * Called by finalize method
      */
     private native void deleteJNI();
@@ -73,7 +73,8 @@ public class TransactionManager {
             NativeObject = null;
         }
     }
-    public Transaction createTransaction() throws XtaException {
-        return new Transaction();
+    public boolean enlistResource(XAResource xaRes) throws XtaException {
+        XAResource dummy = xaRes;
+        return true;
     }
 }

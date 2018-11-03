@@ -43,21 +43,6 @@
 
 
 
-JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Xta_initJNI(JNIEnv *env)
-{
-    xta_init();
-}
-
-
-
-JNIEXPORT jstring JNICALL Java_org_tiian_lixa_xta_ErrorCodes_getText
-(JNIEnv *env, jclass this_obj, jint code)
-{
-    return (*env)->NewStringUTF(env, lixa_strerror(code));
-}
-
-
-
 /* Allocate a new TransactionManager (C native object) */
 JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_TransactionManager_newJNI(
     JNIEnv *env, jobject this_obj)
@@ -189,5 +174,6 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_TransactionManager_deleteJNI(
 {
     LIXA_TRACE(("Java_org_tiian_lixa_xta_TransactionManager_deleteJNI\n"));
     xta_transaction_manager_delete(
-        Java_org_tiian_lixa_xta_getNativeHandle(env, this_obj));
+        Java_org_tiian_lixa_xta_TransactionManager_getNativeObject(
+            env, this_obj));
 }
