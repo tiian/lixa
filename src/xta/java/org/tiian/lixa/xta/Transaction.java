@@ -44,21 +44,14 @@ public class Transaction {
         if (null == NativeObject)
             throw new XtaException(ErrorCodes.LIXA_RC_OBJ_CORRUPTED);
     }
-    /*
-     * Create a new native xta_transaction_t object and set NativeObject
-     * Called by class constructor
-     */
-    private native int newJNI();
     /**
-     * Create a new object calling the native interface
-     * @throws XtaException if the underlying native C function returns
-     * an error condition
+     * This class does not have a public constructor because it's factory is
+     * TransactionManager.createTransaction() and there's no usage of a
+     * Transaction object that has not been created by a Transaction Manager
+     * factory. This constructor is necessary only to allocate the Java object,
+     * but the content is populate by a JNI function called by the factory.
      */
-    public Transaction() throws XtaException {
-        int ReturnCode = newJNI();
-        if (ErrorCodes.LIXA_RC_OK != ReturnCode)
-            throw new XtaException(ReturnCode);
-    }
+    Transaction() { return; }
     /*
      * Delete the native xta_transaction_t object.
      * Called by finalize method

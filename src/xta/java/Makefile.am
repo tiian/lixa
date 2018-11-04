@@ -10,6 +10,7 @@ dist_noinst_DATA = LixaErrorCodes.awk \
 	$(JAVA_PKGDIR)/Xta.java $(JAVA_PKGDIR)/XtaException.java \
 	$(JAVA_PKGDIR)/Transaction.java \
 	$(JAVA_PKGDIR)/TransactionManager.java
+dist_noinst_HEADERS = transaction_jni.h
 
 javadir = $(datadir)/$(PACKAGE)/java
 dist_java_DATA = xta.jar

@@ -48,16 +48,14 @@ public class TransactionManager {
      * NativeObject
      * Called by class constructor
      */
-    private native int newJNI();
+    private native void newJNI();
     /**
      * Create a new object calling the native interface
      * @throws XtaException if the underlying native C function returns
      * an error condition
      */
     public TransactionManager() throws XtaException {
-        int ReturnCode = newJNI();
-        if (ErrorCodes.LIXA_RC_OK != ReturnCode)
-            throw new XtaException(ReturnCode);
+        newJNI();
     }
     /*
      * Delete the native xta_transaction_manager_t object.
@@ -73,7 +71,18 @@ public class TransactionManager {
             NativeObject = null;
         }
     }
+    /*
+     * Create a native xta_transaction_t from xta_transacion_manager_t
+     */
+    private native Transaction createTransactionJNI();
+    /**
+     * Create a new Transaction object associated with the current Transaction
+     * Manager. It's call the native C interface and it's the factory that
+     * MUST be used to crete Transacton objects.
+     * @throws XtaException if the underlying native C function returns
+     * an error condition
+     */
     public Transaction createTransaction() throws XtaException {
-        return new Transaction();
+        return createTransactionJNI();
     }
 }
