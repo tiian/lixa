@@ -147,7 +147,8 @@ liblixta_java_la_DEPENDENCIES = ../liblixta.la
 am_liblixta_java_la_OBJECTS = liblixta_java_la-error_codes_jni.lo \
 	liblixta_java_la-transaction_manager_jni.lo \
 	liblixta_java_la-transaction_jni.lo \
-	liblixta_java_la-xta_jni.lo
+	liblixta_java_la-xta_jni.lo \
+	liblixta_java_la-xta_java_xa_resource.lo
 liblixta_java_la_OBJECTS = $(am_liblixta_java_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -438,14 +439,14 @@ liblixta_java_la_CPPFLAGS = -I$(top_srcdir)/src/common \
 
 liblixta_java_la_LIBADD = ../liblixta.la
 liblixta_java_la_SOURCES = error_codes_jni.c transaction_manager_jni.c \
-	transaction_jni.c xta_jni.c
+	transaction_jni.c xta_jni.c xta_java_xa_resource.c
 
 dist_noinst_DATA = LixaErrorCodes.awk \
 	$(JAVA_PKGDIR)/Xta.java $(JAVA_PKGDIR)/XtaException.java \
 	$(JAVA_PKGDIR)/Transaction.java \
 	$(JAVA_PKGDIR)/TransactionManager.java
 
-dist_noinst_HEADERS = transaction_jni.h
+dist_noinst_HEADERS = transaction_jni.h xta_java_xa_resource.h
 javadir = $(datadir)/$(PACKAGE)/java
 dist_java_DATA = xta.jar
 lib_LTLIBRARIES = liblixta_java.la
@@ -531,6 +532,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-error_codes_jni.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-transaction_jni.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-transaction_manager_jni.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-xta_java_xa_resource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-xta_jni.Plo@am__quote@
 
 .c.o:
@@ -581,6 +583,13 @@ liblixta_java_la-xta_jni.lo: xta_jni.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xta_jni.c' object='liblixta_java_la-xta_jni.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_java_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_java_la-xta_jni.lo `test -f 'xta_jni.c' || echo '$(srcdir)/'`xta_jni.c
+
+liblixta_java_la-xta_java_xa_resource.lo: xta_java_xa_resource.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_java_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixta_java_la-xta_java_xa_resource.lo -MD -MP -MF $(DEPDIR)/liblixta_java_la-xta_java_xa_resource.Tpo -c -o liblixta_java_la-xta_java_xa_resource.lo `test -f 'xta_java_xa_resource.c' || echo '$(srcdir)/'`xta_java_xa_resource.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixta_java_la-xta_java_xa_resource.Tpo $(DEPDIR)/liblixta_java_la-xta_java_xa_resource.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xta_java_xa_resource.c' object='liblixta_java_la-xta_java_xa_resource.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_java_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_java_la-xta_java_xa_resource.lo `test -f 'xta_java_xa_resource.c' || echo '$(srcdir)/'`xta_java_xa_resource.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

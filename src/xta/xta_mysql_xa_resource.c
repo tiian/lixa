@@ -160,8 +160,9 @@ int xta_mysql_xa_resource_init(xta_mysql_xa_resource_t *xa_resource,
         /* set connection */
         xa_resource->connection = connection;
         /* set resource interface */
-        lixa_iface_set_xta(&xa_resource->xa_resource.act_rsrmgr_config.lixa_iface,
-                           &xta_mysql_iface, (xta_xa_resource_t *)xa_resource);
+        lixa_iface_set_xta(
+            &xa_resource->xa_resource.act_rsrmgr_config.lixa_iface,
+            &xta_mysql_iface, (xta_xa_resource_t *)xa_resource);
         /* reset status */
         memset(&xa_resource->lssr, 0, sizeof(struct lixa_sw_status_rm_s));
         

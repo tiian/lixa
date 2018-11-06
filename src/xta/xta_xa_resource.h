@@ -70,7 +70,7 @@ typedef struct xta_xa_resource_s {
     /**
      * The object refers to an XA Resource that has been created
      * dynamically: it has not been loaded statically at startup (it's not
-     * described inside lixac.conf file
+     * described inside lixac.conf file)
      */
     int                              dynamic;
     /**

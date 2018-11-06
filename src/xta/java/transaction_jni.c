@@ -168,10 +168,28 @@ Java_org_tiian_lixa_xta_Transaction_getNativeObject(
 
 
 
+/*
+ * Class:     org_tiian_lixa_xta_Transaction
+ * Method:    deleteJNI
+ * Signature: ()V
+ */
 JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_deleteJNI(
     JNIEnv *env, jobject this_obj)
 {
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_deleteJNI\n"));
     xta_transaction_delete(
         Java_org_tiian_lixa_xta_Transaction_getNativeObject(env, this_obj));
+}
+
+
+
+/*
+ * Class:     org_tiian_lixa_xta_Transaction
+ * Method:    enlistResourceJNI
+ * Signature: (Ljavax/transaction/xa/XAResource;)V
+ */
+JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
+    JNIEnv *env, jobject this_object, jobject xa_resource)
+{
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI\n"));
 }

@@ -66,8 +66,16 @@ public class Transaction {
             NativeObject = null;
         }
     }
+    /*
+     * Link a Java XAResource to a C xta_java_xa_resource_t
+     */
+    private native void enlistResourceJNI(XAResource xaRes);
+    /**
+     * Enlist the resource specified with the transaction associated with the
+     * target Transaction object.
+     */
     public boolean enlistResource(XAResource xaRes) throws XtaException {
-        XAResource dummy = xaRes;
+        enlistResourceJNI(xaRes);
         return true;
     }
 }
