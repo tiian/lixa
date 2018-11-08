@@ -38,12 +38,22 @@ public class Transaction {
      */
     private ByteBuffer NativeObject;
     /**
+     * This is the opaque wrapper of a xta_transaction_manager_t object used
+     * by the native library
+     */
+    private ByteBuffer NativeResources;
+    /**
      * Verifies that the current object is not corrupted
      */
     private void nullCheck() throws XtaException {
         if (null == NativeObject)
             throw new XtaException(ErrorCodes.LIXA_RC_OBJ_CORRUPTED);
     }
+    /*
+     * Allocate a C list to collect the C native resources that will be
+     * enlisted
+     */
+    private native void newJNI();
     /**
      * This class does not have a public constructor because it's factory is
      * TransactionManager.createTransaction() and there's no usage of a
@@ -51,9 +61,11 @@ public class Transaction {
      * factory. This constructor is necessary only to allocate the Java object,
      * but the content is populate by a JNI function called by the factory.
      */
-    Transaction() { return; }
+    Transaction() {
+        return;
+    }
     /*
-     * Delete the native xta_transaction_t object.
+     * Delete the native xta_transaction_t object and the native C XA resources
      * Called by finalize method
      */
     private native void deleteJNI();
@@ -61,9 +73,10 @@ public class Transaction {
      * Release the C native object when finalization is executed
      */
     protected void finalize() {
-        if (null != NativeObject) {
+        if (null != NativeResources) {
             deleteJNI();
             NativeObject = null;
+            NativeResources = null;
         }
     }
     /*

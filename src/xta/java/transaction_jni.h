@@ -36,5 +36,5 @@
 
 
 /* This is an helper function, is not directly called by JNI */
-int Java_org_tiian_lixa_xta_Transaction_set_native_object(
+int Java_org_tiian_lixa_xta_Transaction_set_newJNI(
     JNIEnv *env, jobject this_obj, xta_transaction_t *tx);

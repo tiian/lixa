@@ -151,7 +151,7 @@ int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
         /* initialize "base class" (xta_acquired_xa_resource_t) properties */
         if (LIXA_RC_OK != (ret_cod = xta_acquired_xa_resource_init(
                                (xta_acquired_xa_resource_t *)xa_resource,
-                               &xta_java_iface, name, "")))
+                               &xta_java_iface, name, "dummy")))
             THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
         /* set connection */
         xa_resource->java_xa_resource = java_xa_resource;
