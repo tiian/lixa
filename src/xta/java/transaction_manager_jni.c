@@ -104,6 +104,13 @@ xta_transaction_manager_t*
 Java_org_tiian_lixa_xta_TransactionManager_getNativeObject(
     JNIEnv *env, jobject this_obj)
 {
+    enum Exception { GET_OBJECT_CLASS_ERROR
+                     , GET_FIELD_ID_ERROR
+                     , GET_OBJECT_FIELD_ERROR
+                     , GET_DIRECT_BUFFER_ADDRESS_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
     jclass this_class;
     jfieldID field_id;
     jobject byte_buffer;
@@ -111,38 +118,75 @@ Java_org_tiian_lixa_xta_TransactionManager_getNativeObject(
 
     LIXA_TRACE(("Java_org_tiian_lixa_xta_TransactionManager_"
                 "getNativeObject\n"));
+    TRY {
+        /* get a reference to this object's class */
+        if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
+            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+            (*env)->ThrowNew(
+                env, Exception,
+                "JNI/Java_org_tiian_lixa_xta_TransactionManager_"
+                "getNativeObject/GetObjectClass returned NULL");
+            THROW(GET_OBJECT_CLASS_ERROR);
+        }
 
-    /* get a reference to this object's class */
-    if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
-        jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-        (*env)->ThrowNew(
-            env, Exception,
-            "JNI/Java_org_tiian_lixa_xta_TransactionManager_getNativeObject/"
-            "GetObjectClass returned NULL");
-    }
-
-    /* get the field identificator */
-    if (NULL == (field_id = (*env)->GetFieldID(
-                     env, this_class, "NativeObject",
-                     "Ljava/nio/ByteBuffer;"))) {
-        jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-        (*env)->ThrowNew(
-            env, Exception,
-                        "JNI/Java_org_tiian_lixa_xta_TransactionManager"
-            "_getNativeObject/GetFieldID returned NULL");
-    }
-    /* get ByteBuffer reference */
-    byte_buffer = (*env)->GetObjectField(env, this_obj, field_id);
-    /* cast to xta_transaction_manager_t */
-    if (NULL == (tm = (xta_transaction_manager_t *)
-                 (*env)->GetDirectBufferAddress(
-                     env, byte_buffer))) {
-        jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-        (*env)->ThrowNew(
-            env, Exception,
-            "JNI/Java_org_tiian_lixa_xta_TransactionManager_"
-            "getNativeObject/GetDirectBufferAddress returned NULL");
-    }
+        /* get the field identificator */
+        if (NULL == (field_id = (*env)->GetFieldID(
+                         env, this_class, "NativeObject",
+                         "Ljava/nio/ByteBuffer;"))) {
+            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+            (*env)->ThrowNew(
+                env, Exception,
+                "JNI/Java_org_tiian_lixa_xta_TransactionManager"
+                "_getNativeObject/GetFieldID returned NULL");
+            THROW(GET_FIELD_ID_ERROR);
+        }
+        /* get ByteBuffer reference */
+        if (NULL == (byte_buffer = (*env)->GetObjectField(
+                         env, this_obj, field_id))) {
+            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+            (*env)->ThrowNew(
+                env, Exception,
+                "JNI/Java_org_tiian_lixa_xta_TransactionManager"
+                "_getNativeObject/GetObjectField returned NULL");
+            THROW(GET_OBJECT_FIELD_ERROR);
+        }
+        /* cast to xta_transaction_manager_t */
+        if (NULL == (tm = (xta_transaction_manager_t *)
+                     (*env)->GetDirectBufferAddress(
+                         env, byte_buffer))) {
+            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+            (*env)->ThrowNew(
+                env, Exception,
+                "JNI/Java_org_tiian_lixa_xta_TransactionManager_"
+                "getNativeObject/GetDirectBufferAddress returned NULL");
+            THROW(GET_DIRECT_BUFFER_ADDRESS_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GET_OBJECT_CLASS_ERROR:
+                ret_cod = LIXA_RC_GET_OBJECT_CLASS_ERROR;
+                break;
+            case GET_FIELD_ID_ERROR:
+                ret_cod = LIXA_RC_GET_FIELD_ID_ERROR;
+                break;
+            case GET_OBJECT_FIELD_ERROR:
+                ret_cod = LIXA_RC_GET_OBJECT_FIELD_ERROR;
+                break;
+            case GET_DIRECT_BUFFER_ADDRESS_ERROR:
+                ret_cod = LIXA_RC_GET_DIRECT_BUFFER_ADDRESS_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_TransactionManager_"
+                "getNativeObject/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return tm;
 }
 

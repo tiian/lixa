@@ -350,6 +350,8 @@ const char *lixa_strerror(int ret_cod)
                 "NULL pointer";
         case LIXA_RC_GET_FIELD_ID_ERROR:
             return "ERROR: 'JNI GetFieldID' function returned NULL pointer";
+        case LIXA_RC_GET_METHOD_ID_ERROR:
+            return "ERROR: 'JNI GetMethodID' function returned NULL pointer";
         case LIXA_RC_GET_OBJECT_CLASS_ERROR:
             return "ERROR: 'JNI GetObjectClass' function returned NULL "
                 "pointer";

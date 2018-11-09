@@ -1,4 +1,6 @@
-Go on with resource enlistment
+Go on with resource enlistment:
+- implement XtaXid in Java
+- call start method for a XAResource
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation
 

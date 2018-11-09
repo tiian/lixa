@@ -227,7 +227,8 @@ int xta_mysql_xa_open(xta_xa_resource_t *context, char *xa_info,
     
     LIXA_TRACE(("xta_mysql_xa_open\n"));
     TRY {
-        xta_mysql_xa_resource_t *xa_resource = (xta_mysql_xa_resource_t *)context;
+        xta_mysql_xa_resource_t *xa_resource =
+            (xta_mysql_xa_resource_t *)context;
         if (NULL != xa_resource->connection) {
             LIXA_TRACE(("xta_mysql_xa_open: MySQL connection is already open "
                         "(%p)\n", xa_resource->connection));

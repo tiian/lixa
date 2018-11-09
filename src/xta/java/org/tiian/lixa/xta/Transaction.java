@@ -91,4 +91,12 @@ public class Transaction {
         enlistResourceJNI(xaRes);
         return true;
     }
+    private native void openJNI();
+    /**
+     * Open all the Resource Managers associated to enlisted resources; this is
+     * a dummy method because XAResource does not require open()
+     */
+    public void open() {
+        return;
+    }
 }

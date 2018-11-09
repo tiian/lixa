@@ -234,6 +234,10 @@ int xta_java_xa_start(xta_xa_resource_t *context,
                       const XID *xid, int rmid, long flags)
 {
     LIXA_TRACE(("xta_java_xa_start: dummy method\n"));
+    /* create a XtaXid Java object from xid*/
+
+    /* call Java start method using context */
+    
     return XA_OK;
 }
 

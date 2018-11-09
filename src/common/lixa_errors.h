@@ -594,17 +594,21 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_GET_FIELD_ID_ERROR              -511
 /**
+ * JNI "GetMethodID" function error
+ */
+#define LIXA_RC_GET_METHOD_ID_ERROR             -512
+/**
  * JNI "GetObjectClass" function error
  */
-#define LIXA_RC_GET_OBJECT_CLASS_ERROR          -512
+#define LIXA_RC_GET_OBJECT_CLASS_ERROR          -513
 /**
  * JNI "GetObjectField" function error
  */
-#define LIXA_RC_GET_OBJECT_FIELD_ERROR          -513
+#define LIXA_RC_GET_OBJECT_FIELD_ERROR          -514
 /**
  * JNI "NewDirectByteBuffer" function error
  */
-#define LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR    -514
+#define LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR    -515
 
 
 
