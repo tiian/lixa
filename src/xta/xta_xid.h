@@ -149,6 +149,21 @@ extern "C" {
     void xta_xid_reset(xta_xid_t *xid);
 
 
+
+    /**
+     * This is just a wrapper of lixa_xid_get_gtrid
+     */
+    long xta_xid_get_gtrid(const xta_xid_t *xid, char *gtrid);
+    /**
+     * This is just a wrapper of lixa_xid_get_bqual
+     */
+    long xta_xid_get_bqual(const xta_xid_t *xid, char *bqual);
+    /**
+     * This is just a wrapper of lixa_xid_get_formatID
+     */
+    long xta_xid_get_formatID(const xta_xid_t *xid);
+
+
     
 #ifdef __cplusplus
 }

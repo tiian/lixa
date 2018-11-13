@@ -168,7 +168,7 @@ extern "C" {
     char *lixa_xid_get_gtrid_ascii(const XID *xid);
 
 
-    
+
     /**
      * Retrieve an ASCII string with the human readable version of the bqual
      * (Branch QUALifier).
@@ -177,6 +177,40 @@ extern "C" {
      *         NULL if an error happens
      */
     char *lixa_xid_get_bqual_ascii(const XID *xid);
+
+
+    
+    /**
+     * Retrieve the raw version of GTRID (Global TRansaction ID).
+     * NOTE: output buffer is filled with 0 at the end
+     * @param[in] xid unique transaction id
+     * @param[out] gtrid is a buffer allocated by the caller with at least
+     *             XIDDATASIZE bytes
+     * @return the number of bytes copied in gtrid
+     */
+    long lixa_xid_get_gtrid(const XID *xid, char *gtrid);
+
+    
+    
+    /**
+     * Retrieve the raw version of BQUAL (Branch QUALifier).
+     * NOTE: output buffer is filled with 0 at the end
+     * @param[in] xid unique transaction id
+     * @param[out] bqual is a buffer allocated by the caller with at least
+     *             XIDDATASIZE bytes
+     * @return the number of bytes copied in bqual
+     */
+    long lixa_xid_get_bqual(const XID *xid, char *bqual);
+
+    
+
+    /**
+     * Retrieve the formatID
+     * @param[in] xid unique transaction id
+     * @return formatID as a native long
+     */
+    static inline long lixa_xid_get_formatID(const XID *xid) {
+        return xid->formatID; }
 
 
     

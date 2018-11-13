@@ -8,7 +8,7 @@ liblixta_java_la_SOURCES = error_codes_jni.c transaction_manager_jni.c \
 
 dist_noinst_DATA = LixaErrorCodes.awk \
 	$(JAVA_PKGDIR)/Xta.java $(JAVA_PKGDIR)/XtaException.java \
-	$(JAVA_PKGDIR)/Transaction.java \
+	$(JAVA_PKGDIR)/XtaXid.java $(JAVA_PKGDIR)/Transaction.java \
 	$(JAVA_PKGDIR)/TransactionManager.java
 dist_noinst_HEADERS = transaction_jni.h xta_java_xa_resource.h
 
@@ -27,7 +27,7 @@ $(JAVA_PKGDIR)/ErrorCodes.java:	LixaErrorCodes.awk ../../common/lixa_errors.h
 
 xta.jar:	$(JAVA_PKGDIR)/ErrorCodes.class \
 	$(JAVA_PKGDIR)/Xta.class $(JAVA_PKGDIR)/XtaException.class \
-	$(JAVA_PKGDIR)/Transaction.class \
+	$(JAVA_PKGDIR)/XtaXid.class $(JAVA_PKGDIR)/Transaction.class \
 	$(JAVA_PKGDIR)/TransactionManager.class
 	$(JAR) cf $@ $^
 

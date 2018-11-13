@@ -497,3 +497,18 @@ void xta_xid_reset(xta_xid_t *xid)
 
 
 
+long xta_xid_get_gtrid(const xta_xid_t *xid, char *gtrid) {
+    return lixa_xid_get_gtrid(&xid->xa_xid, gtrid);
+}
+
+
+
+long xta_xid_get_bqual(const xta_xid_t *xid, char *bqual) {
+    return lixa_xid_get_bqual(&xid->xa_xid, bqual);
+}
+
+
+
+long xta_xid_get_formatID(const xta_xid_t *xid) {
+    return lixa_xid_get_formatID(&xid->xa_xid);
+}

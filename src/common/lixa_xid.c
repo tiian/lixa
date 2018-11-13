@@ -237,6 +237,29 @@ void lixa_xid_formatid(lixa_ser_xid_t lsx)
 
 
 
+long lixa_xid_get_bqual(const XID *xid, char *bqual)
+{
+    /* reset the buffer */
+    memset(bqual, 0, XIDDATASIZE);
+    /* copy the meaningful bytes */
+    memcpy(bqual, &(xid->data[xid->gtrid_length]), xid->bqual_length);
+    return xid->bqual_length;           
+}
+
+
+
+long lixa_xid_get_gtrid(const XID *xid, char *gtrid)
+{
+    /* reset the buffer */
+    memset(gtrid, 0, XIDDATASIZE);
+    /* copy the meaningful bytes */
+    memcpy(gtrid, &(xid->data[0]), xid->gtrid_length);
+    return xid->gtrid_length;
+           
+}
+
+
+
 int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx)
 {
     int i = 0, j = 0;
