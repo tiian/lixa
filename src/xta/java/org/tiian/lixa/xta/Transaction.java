@@ -99,4 +99,18 @@ public class Transaction {
     public void open() {
         return;
     }
+    /*
+     * Create a native xta_xid_t from xta_transaction_t
+     */
+    private native XtaXid getXidJNI();
+    /**
+     * Return the XID associated to the current transaction. It calls the
+     * C native interface and it's the factory that MUST be used to create
+     * XtaXid objects.
+     * @throws XtaException if the underlying native C functions returns an
+     * error condition
+     */
+    public XtaXid getXid() throws XtaException {
+        return getXidJNI();
+    }
 }

@@ -392,12 +392,12 @@ void xta_xid_delete(xta_xid_t *xid)
 
 
 
-const XID *xta_xid_get_xa_xid(xta_xid_t *xid)
+const XID *xta_xid_get_xa_xid(const xta_xid_t *xid)
 {
     enum Exception { NULL_OBJECT
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    XID *xa_xid = NULL;
+    const XID *xa_xid = NULL;
     
     LIXA_TRACE(("xta_xid_get_xa_xid\n"));
     TRY {

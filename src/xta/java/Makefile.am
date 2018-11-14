@@ -4,7 +4,7 @@ liblixta_java_la_CPPFLAGS = -I$(top_srcdir)/src/common \
 	-I$(top_srcdir)/src/client -I$(top_srcdir)/src/xta
 liblixta_java_la_LIBADD = ../liblixta.la
 liblixta_java_la_SOURCES = error_codes_jni.c transaction_manager_jni.c \
-	transaction_jni.c xta_jni.c xta_java_xa_resource.c
+	transaction_jni.c xta_jni.c xta_java_xa_resource.c xtaxid_jni.c
 
 dist_noinst_DATA = LixaErrorCodes.awk \
 	$(JAVA_PKGDIR)/Xta.java $(JAVA_PKGDIR)/XtaException.java \

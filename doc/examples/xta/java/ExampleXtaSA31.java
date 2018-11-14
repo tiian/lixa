@@ -114,6 +114,7 @@ public class ExampleXtaSA31 {
                  tx.open();
                  // Start a new XA global transaction with a single branch
                  // tx.start();
+                 XtaXid xid = tx.getXid();
              } catch (XtaException e) {
                  System.err.println("XtaException: LIXA ReturnCode=" +
                                     e.getReturnCode() + " ('" +

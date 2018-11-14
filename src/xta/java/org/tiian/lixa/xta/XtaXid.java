@@ -21,18 +21,23 @@ package org.tiian.lixa.xta;
 
 
 import java.nio.ByteBuffer;
+import javax.transaction.xa.Xid;
 
 
 
 /*
- * XTA Transaction Manager
+ * XTA XID
  */
-public class TransactionManager {
+/*
+  see here for returning bytearray[] from JNI
+  https://community.oracle.com/thread/1552704
+*/
+public class XtaXid /* @@@ implements Xid */ {
     static {
         org.tiian.lixa.xta.Xta.init();
     }
     /**
-     * This is the opaque wrapper of a xta_transaction_manager_t object used
+     * This is the opaque wrapper of a xta_xid_t object used
      * by the native library
      */
     private ByteBuffer NativeObject;
@@ -44,21 +49,21 @@ public class TransactionManager {
             throw new XtaException(ErrorCodes.LIXA_RC_OBJ_CORRUPTED);
     }
     /*
-     * Create a new native xta_transaction_manager_t object and set
-     * NativeObject
-     * Called by class constructor
+     * Allocate a C native object xta_xid_t
      */
     private native void newJNI();
     /**
-     * Create a new object calling the native interface
-     * @throws XtaException if the underlying native C function returns
-     * an error condition
+     * This class does not have a public constructor because it's factory is
+     * Transaction.getXid() and there's no usage of a
+     * Xid object that has not been created by a Transaction factory.
+     * This constructor is necessary only to allocate the Java object,
+     * but the content is populated by a JNI function called by the factory.
      */
-    public TransactionManager() throws XtaException {
-        newJNI();
+    XtaXid() {
+        return;
     }
     /*
-     * Delete the native xta_transaction_manager_t object.
+     * Delete the native xta_xid_t object and the native C XA resources
      * Called by finalize method
      */
     private native void deleteJNI();
@@ -70,19 +75,5 @@ public class TransactionManager {
             deleteJNI();
             NativeObject = null;
         }
-    }
-    /*
-     * Create a native xta_transaction_t from xta_transacion_manager_t
-     */
-    private native Transaction createTransactionJNI();
-    /**
-     * Create a new Transaction object associated with the current Transaction
-     * Manager. It calls the native C interface and it's the factory that
-     * MUST be used to create Transacton objects.
-     * @throws XtaException if the underlying native C function returns
-     * an error condition
-     */
-    public Transaction createTransaction() throws XtaException {
-        return createTransactionJNI();
     }
 }

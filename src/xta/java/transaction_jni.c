@@ -47,7 +47,9 @@
 
 
 
-/* Allocate a list for XA C resources */
+/*
+ * Create a reference to C native object and allocate a list for XA C resources
+ */
 JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_newJNI(
     JNIEnv *env, jobject this_obj, xta_transaction_t *tx)
 {
@@ -101,6 +103,9 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_newJNI(
             THROW(NEW_DIRECT_BYTE_BUFFER_ERROR1);
         }
         
+        /* set ByteBuffer reference */
+        (*env)->SetObjectField(env, this_obj, field_id, byte_buffer);
+        
         /* create an array to store the resources that will be enlisted */
         if (NULL == (array = g_ptr_array_new())) {
             jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
@@ -111,7 +116,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_newJNI(
             THROW(G_PTR_ARRAY_NEW_ERROR);
         }
 
-        /* get the field identificator for NativeObjcet */
+        /* get the field identificator for NativeResources */
         if (NULL == (field_id = (*env)->GetFieldID(
                          env, this_class, "NativeResources",
                          "Ljava/nio/ByteBuffer;"))) {
@@ -490,3 +495,88 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
 
 
 
+JNIEXPORT jobject JNICALL
+Java_org_tiian_lixa_xta_Transaction_getXidJNI
+(JNIEnv *env, jobject this_obj)
+{
+    enum Exception { NULL_OBJECT
+                     , FIND_CLASS_ERROR
+                     , GET_METHOD_ID_ERROR
+                     , NEW_OBJECT_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    xta_transaction_t *tx = NULL;
+    xta_xid_t *xid = NULL;
+    jobject jxid = NULL;
+    jclass class = NULL;
+    jmethodID constructor = NULL;
+    
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getXidJNI\n"));
+    TRY {        
+        /* retrieve the current Transaction object */
+        tx = Java_org_tiian_lixa_xta_Transaction_getNativeObject(
+            env, this_obj);
+        /* create a new native C XID object */
+        
+        if (NULL == (xid = xta_xid_new_from_XID(
+                         xta_xid_get_xa_xid(
+                             xta_transaction_get_xid(tx))))) {
+            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+            (*env)->ThrowNew(
+                env, Exception,
+                "JNI/Java_org_tiian_lixa_xta_Transaction_getXidJNI/"
+                "xta_xid_new_from_XID returned NULL");
+            THROW(NULL_OBJECT);
+        }
+        /* retrieve Java XtaXid class */
+        if (NULL == (class = (*env)->FindClass(
+                         env, "org/tiian/lixa/xta/XtaXid"))) {
+            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+            (*env)->ThrowNew(
+                env, Exception,
+                "JNI/Java_org_tiian_lixa_xta_Transaction_getXidJNI/"
+                "FindClass() returned NULL");
+            THROW(FIND_CLASS_ERROR);
+        }
+        /* retrieve XtaXid constructor */
+        if (NULL == (constructor = (*env)->GetMethodID(
+                         env, class, "<init>", "()V"))) {
+            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+            (*env)->ThrowNew(
+                env, Exception,
+                "JNI/Java_org_tiian_lixa_xta_Transaction_getXidJNI/"
+                "GetMethodID() returned NULL");
+            THROW(GET_METHOD_ID_ERROR);
+        }
+        /* create a new XtaXid object */
+        if (NULL == (jxid = (*env)->NewObject(env, class, constructor))) {
+            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+            (*env)->ThrowNew(
+                env, Exception,
+                "JNI/Java_org_tiian_lixa_xta_Transaction_getXidJNI/"
+                "NewObject() returned NULL");
+            THROW(NEW_OBJECT_ERROR);
+        }
+        /* populate Java object with tx native C Transaction */
+        Java_org_tiian_lixa_xta_XtaXid_newJNI(env, jxid, xid);
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+            case FIND_CLASS_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+        
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getXidJNI/"
+                "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    /* return the Java object */
+    return jxid;
+}

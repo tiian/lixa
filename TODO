@@ -1,5 +1,5 @@
 Go on with resource enlistment:
-- implement XtaXid in Java: restart from @@@ implements Xid
+- implement XtaXid in Java: look at dump, restart from @@@ implements Xid
 - call start method for a XAResource
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation

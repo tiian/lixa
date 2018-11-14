@@ -128,7 +128,7 @@ extern "C" {
      * @param[in] xid object
      * @return a reference to the XA representation of the transaction id
      */
-    const XID *xta_xid_get_xa_xid(xta_xid_t *xid);
+    const XID *xta_xid_get_xa_xid(const xta_xid_t *xid);
 
 
 
