@@ -499,7 +499,8 @@ JNIEXPORT jobject JNICALL
 Java_org_tiian_lixa_xta_Transaction_getXidJNI
 (JNIEnv *env, jobject this_obj)
 {
-    enum Exception { NULL_OBJECT
+    enum Exception { NULL_OBJECT1
+                     , NULL_OBJECT2
                      , FIND_CLASS_ERROR
                      , GET_METHOD_ID_ERROR
                      , NEW_OBJECT_ERROR
@@ -515,10 +516,11 @@ Java_org_tiian_lixa_xta_Transaction_getXidJNI
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getXidJNI\n"));
     TRY {        
         /* retrieve the current Transaction object */
-        tx = Java_org_tiian_lixa_xta_Transaction_getNativeObject(
-            env, this_obj);
-        /* create a new native C XID object */
+        if (NULL == (tx = Java_org_tiian_lixa_xta_Transaction_getNativeObject(
+                         env, this_obj)))
+            THROW(NULL_OBJECT1);
         
+        /* create a new native C XID object */
         if (NULL == (xid = xta_xid_new_from_XID(
                          xta_xid_get_xa_xid(
                              xta_transaction_get_xid(tx))))) {
@@ -527,7 +529,7 @@ Java_org_tiian_lixa_xta_Transaction_getXidJNI
                 env, Exception,
                 "JNI/Java_org_tiian_lixa_xta_Transaction_getXidJNI/"
                 "xta_xid_new_from_XID returned NULL");
-            THROW(NULL_OBJECT);
+            THROW(NULL_OBJECT2);
         }
         /* retrieve Java XtaXid class */
         if (NULL == (class = (*env)->FindClass(
@@ -564,7 +566,8 @@ Java_org_tiian_lixa_xta_Transaction_getXidJNI
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case NULL_OBJECT:
+            case NULL_OBJECT1:
+            case NULL_OBJECT2:
             case FIND_CLASS_ERROR:
                 break;
             case NONE:
@@ -580,3 +583,52 @@ Java_org_tiian_lixa_xta_Transaction_getXidJNI
     /* return the Java object */
     return jxid;
 }
+
+
+
+/*
+ * Class:     org_tiian_lixa_xta_Transaction
+ * Method:    start
+ * Signature: (Z)V
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_startJNI
+(JNIEnv *env, jobject this_obj, jboolean multiple_branches)
+{
+    enum Exception { NULL_OBJECT
+                     , TRANSACTION_START_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_start\n"));
+    TRY {
+        xta_transaction_t * tx = NULL;
+        /* retrieve the current Transaction object */
+        if (NULL == (tx = Java_org_tiian_lixa_xta_Transaction_getNativeObject(
+                         env, this_obj)))
+            THROW(NULL_OBJECT);
+        /* call native method */
+        if (LIXA_RC_OK != (ret_cod = xta_transaction_start(
+                               tx, (int)multiple_branches))) {
+            THROW(TRANSACTION_START_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case TRANSACTION_START_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_start/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

@@ -32,7 +32,7 @@ import javax.transaction.xa.Xid;
   see here for returning bytearray[] from JNI
   https://community.oracle.com/thread/1552704
 */
-public class XtaXid /* @@@ implements Xid */ {
+public class XtaXid implements Xid {
     static {
         org.tiian.lixa.xta.Xta.init();
     }
@@ -76,4 +76,7 @@ public class XtaXid /* @@@ implements Xid */ {
             NativeObject = null;
         }
     }
+    public native byte[] getBranchQualifier();
+    public native int getFormatId();
+    public native byte[] getGlobalTransactionId();
 }

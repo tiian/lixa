@@ -327,13 +327,17 @@ xta_xid_t *xta_xid_new_from_string(const char *xid_string)
 
 xta_xid_t *xta_xid_new_from_XID(const XID *xid)
 {
-    enum Exception { G_TRY_MALLOC_ERROR
+    enum Exception { NULL_OBJECT
+                     , G_TRY_MALLOC_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     xta_xid_t *this = NULL;
     
     LIXA_TRACE(("xta_xid_new_from_XID\n"));
     TRY {
+        /* check the passed xid */
+        if (NULL == xid)
+            THROW(NULL_OBJECT);
         /* allocate the object */
         if (NULL == (this = (xta_xid_t *)
                      g_try_malloc0(sizeof(xta_xid_t))))
@@ -344,6 +348,9 @@ xta_xid_t *xta_xid_new_from_XID(const XID *xid)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case G_TRY_MALLOC_ERROR:
                 ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
                 break;

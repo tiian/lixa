@@ -113,4 +113,25 @@ public class Transaction {
     public XtaXid getXid() throws XtaException {
         return getXidJNI();
     }
+    /*
+     * Native method wrapper for start
+     */
+    private native int startJNI(boolean multipleBranches);
+    /**
+     * Start a new Transaction
+     * @param multipleBranches must be true only for transactions that will
+     * span more applications and it will be followed by branch method
+     */
+    public void start(boolean multipleBranches) throws XtaException {
+        int RetCod;
+        if (ErrorCodes.LIXA_RC_OK != (RetCod = startJNI(multipleBranches)))
+            throw new XtaException(RetCod);
+        
+    }
+    /**
+     * Start a new Transaction
+     */
+    public void start() throws XtaException {
+        start(false);
+    }
 }
