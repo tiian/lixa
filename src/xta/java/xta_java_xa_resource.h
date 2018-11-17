@@ -36,10 +36,15 @@ typedef struct {
         xta_xa_resource_t           xa_resource;
         xta_acquired_xa_resource_t  acquired_xa_resource;
     };
+    JNIEnv                         *java_env;
     /**
-     * Java XAResource reference
+     * Java XA Resource reference
      */
-    jobject                         java_xa_resource;
+    jobject                         java_object;
+    /**
+     * Java start method reference
+     */
+    jmethodID                       java_method_start;
 } xta_java_xa_resource_t;
 
 
@@ -52,12 +57,15 @@ extern "C" {
 
     /**
      * Create a new object to represent a Java XA resource
-     * @param[in] java_xa_resource is the reference to XAResource
      * @param[in] name : unique identifier of the resource
+     * @param[in] env : JNI environment
+     * @param[in] java_object : reference to Java XAResource object
+     * @param[in] start : Java XAResource method
      * @return a new object or NULL in the event of error
      */
     xta_java_xa_resource_t *xta_java_xa_resource_new(
-        jobject java_xa_resource, const char *name);
+        const char *name,
+        JNIEnv *env, jobject java_object, jmethodID start);
 
     
 
@@ -72,12 +80,16 @@ extern "C" {
     /**
      * Initialize the propeties of a Java XA resource
      * @param[in,out] xa_resource : Java XA Resource object
-     * @param[in] java_xa_resource : Java XAResource reference
      * @param[in] name : unique identifier of the resource
+     * @param[in] env : JNI environment
+     * @param[in] java_object : reference to Java XAResource object
+     * @param[in] start : Java XAResource method
      * @return a reason code
      */
     int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
-                                  jobject java_xa_resource, const char *name);
+                                  const char *name,
+                                  JNIEnv *env, jobject java_object,
+                                  jmethodID start);
 
 
 

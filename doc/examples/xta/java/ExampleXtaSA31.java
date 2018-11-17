@@ -110,8 +110,6 @@ public class ExampleXtaSA31 {
                  tx.enlistResource(xar1);
                  // Enlist MySQL resource to Transaction
                  tx.enlistResource(xar2);
-                 // Open all resources enlisted by tx Transaction
-                 tx.open();
                  // Start a new XA global transaction with a single branch
                  tx.start();
                  // XtaXid xid = tx.getXid();

@@ -149,7 +149,8 @@ am_liblixta_java_la_OBJECTS = liblixta_java_la-error_codes_jni.lo \
 	liblixta_java_la-transaction_jni.lo \
 	liblixta_java_la-xta_jni.lo \
 	liblixta_java_la-xta_java_xa_resource.lo \
-	liblixta_java_la-xtaxid_jni.lo
+	liblixta_java_la-xtaxid_jni.lo \
+	liblixta_java_la-xtaexception_jni.lo
 liblixta_java_la_OBJECTS = $(am_liblixta_java_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -440,14 +441,17 @@ liblixta_java_la_CPPFLAGS = -I$(top_srcdir)/src/common \
 
 liblixta_java_la_LIBADD = ../liblixta.la
 liblixta_java_la_SOURCES = error_codes_jni.c transaction_manager_jni.c \
-	transaction_jni.c xta_jni.c xta_java_xa_resource.c xtaxid_jni.c
+	transaction_jni.c xta_jni.c xta_java_xa_resource.c xtaxid_jni.c \
+	xtaexception_jni.c
 
 dist_noinst_DATA = LixaErrorCodes.awk \
 	$(JAVA_PKGDIR)/Xta.java $(JAVA_PKGDIR)/XtaException.java \
 	$(JAVA_PKGDIR)/XtaXid.java $(JAVA_PKGDIR)/Transaction.java \
 	$(JAVA_PKGDIR)/TransactionManager.java
 
-dist_noinst_HEADERS = transaction_jni.h xta_java_xa_resource.h
+dist_noinst_HEADERS = transaction_jni.h xta_java_xa_resource.h \
+	xtaexception_jni.h
+
 javadir = $(datadir)/$(PACKAGE)/java
 dist_java_DATA = xta.jar
 lib_LTLIBRARIES = liblixta_java.la
@@ -535,6 +539,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-transaction_manager_jni.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-xta_java_xa_resource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-xta_jni.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-xtaexception_jni.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-xtaxid_jni.Plo@am__quote@
 
 .c.o:
@@ -599,6 +604,13 @@ liblixta_java_la-xtaxid_jni.lo: xtaxid_jni.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xtaxid_jni.c' object='liblixta_java_la-xtaxid_jni.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_java_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_java_la-xtaxid_jni.lo `test -f 'xtaxid_jni.c' || echo '$(srcdir)/'`xtaxid_jni.c
+
+liblixta_java_la-xtaexception_jni.lo: xtaexception_jni.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_java_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixta_java_la-xtaexception_jni.lo -MD -MP -MF $(DEPDIR)/liblixta_java_la-xtaexception_jni.Tpo -c -o liblixta_java_la-xtaexception_jni.lo `test -f 'xtaexception_jni.c' || echo '$(srcdir)/'`xtaexception_jni.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixta_java_la-xtaexception_jni.Tpo $(DEPDIR)/liblixta_java_la-xtaexception_jni.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xtaexception_jni.c' object='liblixta_java_la-xtaexception_jni.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_java_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_java_la-xtaexception_jni.lo `test -f 'xtaexception_jni.c' || echo '$(srcdir)/'`xtaexception_jni.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

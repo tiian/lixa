@@ -38,6 +38,11 @@ public class Transaction {
      */
     private ByteBuffer NativeObject;
     /**
+     * Java XA Resources do not use the "open" method, but the LIXA underlying
+     * logic requires it. This is a flag.
+     */
+    private boolean AlreadyOpened;
+    /**
      * This is the opaque wrapper of a xta_transaction_manager_t object used
      * by the native library
      */
@@ -62,19 +67,21 @@ public class Transaction {
      * but the content is populate by a JNI function called by the factory.
      */
     Transaction() {
+        AlreadyOpened = false;
         return;
     }
     /*
      * Delete the native xta_transaction_t object and the native C XA resources
      * Called by finalize method
      */
-    private native void deleteJNI();
+    private native void deleteJNI(boolean AlreadyOpened);
     /**
      * Release the C native object when finalization is executed
      */
     protected void finalize() {
         if (null != NativeResources) {
-            deleteJNI();
+            deleteJNI(AlreadyOpened);
+            AlreadyOpened = false;
             NativeObject = null;
             NativeResources = null;
         }
@@ -82,7 +89,8 @@ public class Transaction {
     /*
      * Link a Java XAResource to a C xta_java_xa_resource_t
      */
-    private native void enlistResourceJNI(XAResource xaRes);
+    private native void enlistResourceJNI(XAResource xaRes)
+        throws XtaException;
     /**
      * Enlist the resource specified with the transaction associated with the
      * target Transaction object.
@@ -90,14 +98,6 @@ public class Transaction {
     public boolean enlistResource(XAResource xaRes) throws XtaException {
         enlistResourceJNI(xaRes);
         return true;
-    }
-    private native void openJNI();
-    /**
-     * Open all the Resource Managers associated to enlisted resources; this is
-     * a dummy method because XAResource does not require open()
-     */
-    public void open() {
-        return;
     }
     /*
      * Create a native xta_xid_t from xta_transaction_t
@@ -116,7 +116,8 @@ public class Transaction {
     /*
      * Native method wrapper for start
      */
-    private native int startJNI(boolean multipleBranches);
+    private native int startJNI(boolean multipleBranches,
+                                boolean alreadyOpened);
     /**
      * Start a new Transaction
      * @param multipleBranches must be true only for transactions that will
@@ -124,9 +125,10 @@ public class Transaction {
      */
     public void start(boolean multipleBranches) throws XtaException {
         int RetCod;
-        if (ErrorCodes.LIXA_RC_OK != (RetCod = startJNI(multipleBranches)))
+        if (ErrorCodes.LIXA_RC_OK != (RetCod = startJNI(
+                                          multipleBranches, AlreadyOpened)))
             throw new XtaException(RetCod);
-        
+        AlreadyOpened = true;
     }
     /**
      * Start a new Transaction

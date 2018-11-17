@@ -20,6 +20,7 @@
 
 
 
+#include <jni.h>
 #ifdef HAVE_ERRNO_H
 # include <errno.h>
 #endif
@@ -65,8 +66,9 @@ const static struct xta_iface_s xta_java_iface = {
 
 
 
-xta_java_xa_resource_t *xta_java_xa_resource_new(jobject java_xa_resource,
-                                                 const char *name)
+xta_java_xa_resource_t *xta_java_xa_resource_new(
+    const char *name,
+    JNIEnv *env, jobject xa_resource, jmethodID start)
 {
     enum Exception { G_TRY_MALLOC_ERROR
                      , XTA_JAVA_XA_RESOURCE_INIT_ERROR
@@ -82,7 +84,7 @@ xta_java_xa_resource_t *xta_java_xa_resource_new(jobject java_xa_resource,
             THROW(G_TRY_MALLOC_ERROR);
         /* initialize "class" properties */
         if (LIXA_RC_OK != (ret_cod = xta_java_xa_resource_init(
-                               this, java_xa_resource, name)))
+                               this, name, env, xa_resource, start)))
             THROW(XTA_JAVA_XA_RESOURCE_INIT_ERROR);
         
         THROW(NONE);
@@ -137,7 +139,9 @@ void xta_java_xa_resource_delete(xta_java_xa_resource_t *xa_resource)
 
 
 int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
-                              jobject java_xa_resource, const char *name)
+                              const char *name,
+                              JNIEnv *env, jobject java_object,
+                              jmethodID start)
 {
     enum Exception { NULL_OBJECT
                      , XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR
@@ -153,8 +157,10 @@ int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
                                (xta_acquired_xa_resource_t *)xa_resource,
                                &xta_java_iface, name, "dummy")))
             THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
-        /* set connection */
-        xa_resource->java_xa_resource = java_xa_resource;
+        /* set references to Java XAResource */
+        xa_resource->java_env = env;
+        xa_resource->java_object = java_object;
+        xa_resource->java_method_start = start;
         /* set resource interface */
         lixa_iface_set_xta(
             &xa_resource->xa_resource.act_rsrmgr_config.lixa_iface,
@@ -233,10 +239,14 @@ int xta_java_xa_close(xta_xa_resource_t *context, char *xa_info,
 int xta_java_xa_start(xta_xa_resource_t *context,
                       const XID *xid, int rmid, long flags)
 {
-    LIXA_TRACE(("xta_java_xa_start: dummy method\n"));
+    LIXA_TRACE(("xta_java_xa_start\n"));
+    /* @@@ */
     /* create a XtaXid Java object from xid*/
-
     /* call Java start method using context */
+    /* 
+    CallVoidMethod(context->java_env, context->java_object,
+    context->java_method_start, arg1, arg2...);
+    */
     
     return XA_OK;
 }

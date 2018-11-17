@@ -586,29 +586,41 @@ define LIXA_RC_UNLINK_ERROR                  -129
 /* JNI related errors; JNI is used in XTA for Java */
 
 /**
+ * JNI "FindClass" function error
+ */
+#define LIXA_RC_FIND_CLASS_ERROR                -510
+/**
  * JNI "GetDirectBufferAddress" function error
  */
-#define LIXA_RC_GET_DIRECT_BUFFER_ADDRESS_ERROR -510
+#define LIXA_RC_GET_DIRECT_BUFFER_ADDRESS_ERROR -511
 /**
  * JNI "GetFieldID" function error
  */
-#define LIXA_RC_GET_FIELD_ID_ERROR              -511
+#define LIXA_RC_GET_FIELD_ID_ERROR              -512
 /**
  * JNI "GetMethodID" function error
  */
-#define LIXA_RC_GET_METHOD_ID_ERROR             -512
+#define LIXA_RC_GET_METHOD_ID_ERROR             -513
 /**
  * JNI "GetObjectClass" function error
  */
-#define LIXA_RC_GET_OBJECT_CLASS_ERROR          -513
+#define LIXA_RC_GET_OBJECT_CLASS_ERROR          -514
 /**
  * JNI "GetObjectField" function error
  */
-#define LIXA_RC_GET_OBJECT_FIELD_ERROR          -514
+#define LIXA_RC_GET_OBJECT_FIELD_ERROR          -515
 /**
  * JNI "NewDirectByteBuffer" function error
  */
-#define LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR    -515
+#define LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR    -516
+/**
+ * JNI "NewObject" function error
+ */
+#define LIXA_RC_NEW_OBJECT_ERROR                -517
+/**
+ * JNI "SetObjectFieldError" function error
+ */
+#define LIXA_RC_SET_OBJECT_FIELD_ERROR          -518
 
 
 

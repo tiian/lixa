@@ -15,3 +15,5 @@ To retrieve the signature of Java methods, as required from JNI for class
 XtaException, use:
 
 javap -s org.tiian.lixa.xta.XtaException
+
+Best practices for using the Java Native Interface: https://www.ibm.com/developerworks/library/j-jni/index.html

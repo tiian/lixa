@@ -345,6 +345,8 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_G_TRY_MALLOC_ERROR:
             return "ERROR: 'g_try_malloc'/'g_try_malloc0' function returned "
                 "an error condition";
+        case LIXA_RC_FIND_CLASS_ERROR:
+            return "ERROR: 'JNI FindClass' function returned NULL pointer";
         case LIXA_RC_GET_DIRECT_BUFFER_ADDRESS_ERROR:
             return "ERROR: 'JNI GetDirectBufferAddress' function returned "
                 "NULL pointer";
@@ -360,6 +362,11 @@ const char *lixa_strerror(int ret_cod)
                 "pointer";
         case LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR:
             return "ERROR: 'JNI NewDirectByteBuffer' function returned NULL "
+                "pointer";
+        case LIXA_RC_NEW_OBJECT_ERROR:
+            return "ERROR: 'JNI NewObject' function returned NULL pointer";
+        case LIXA_RC_SET_OBJECT_FIELD_ERROR:
+            return "ERROR: 'JNI SetObjectField' function returned NULL "
                 "pointer";
         case LIXA_RC_RESOURCE_ALREADY_REGISTERED:
             return "ERROR: the XA Resource has been already registered to a "

@@ -33,7 +33,7 @@ public class XtaException extends Exception {
      */
     private int ReturnCode;
     /**
-     * Build a new XTA excpetion object
+     * Build a new XTA exception object
      * @param returnCode is the value returned by the native C function
      */
     public XtaException(int returnCode) {

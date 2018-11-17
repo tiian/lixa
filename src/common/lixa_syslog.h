@@ -131,7 +131,7 @@
 #define LIXA_SYSLOG_LXC031E "LXC031E transaction with xid='%s' can't be " \
     "used to create a subordinate branch because bqual='%s' is related to " \
     "a non branchable transaction"
-    
+#define LIXA_SYSLOG_LXC032E "LXC032E nested exception in XTA for Java: XtaException_throw method is not able to throw exception for ret_cod=%d ('%s')"    
 
 
 
