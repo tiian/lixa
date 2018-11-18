@@ -17,3 +17,12 @@ XtaException, use:
 javap -s org.tiian.lixa.xta.XtaException
 
 Best practices for using the Java Native Interface: https://www.ibm.com/developerworks/library/j-jni/index.html
+
+https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/functions.html
+
+https://www.ibm.com/support/knowledgecenter/en/SSYKE2_7.1.0/com.ibm.java.aix.71.doc/user/packed_jni_interface.html
+
+https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/invocation.html
+
+https://docs.oracle.com/javase/9/docs/specs/jni/functions.html#version-information
+

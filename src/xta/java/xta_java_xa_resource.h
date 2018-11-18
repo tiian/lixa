@@ -36,7 +36,14 @@ typedef struct {
         xta_xa_resource_t           xa_resource;
         xta_acquired_xa_resource_t  acquired_xa_resource;
     };
-    JNIEnv                         *java_env;
+    /**
+     * Java Virtual Machine object
+     */
+    JavaVM                         *java_vm;
+    /**
+     * Java JNI version
+     */
+    jint                            java_jni_version;
     /**
      * Java XA Resource reference
      */
@@ -58,14 +65,15 @@ extern "C" {
     /**
      * Create a new object to represent a Java XA resource
      * @param[in] name : unique identifier of the resource
-     * @param[in] env : JNI environment
+     * @param[in] java_vm : Java Virtual Machine
+     * @param[in] java_jni_version : JNI version
      * @param[in] java_object : reference to Java XAResource object
      * @param[in] start : Java XAResource method
      * @return a new object or NULL in the event of error
      */
     xta_java_xa_resource_t *xta_java_xa_resource_new(
-        const char *name,
-        JNIEnv *env, jobject java_object, jmethodID start);
+        const char *name, JavaVM *java_vm, jint java_jni_version,
+        jobject java_object, jmethodID start);
 
     
 
@@ -81,15 +89,16 @@ extern "C" {
      * Initialize the propeties of a Java XA resource
      * @param[in,out] xa_resource : Java XA Resource object
      * @param[in] name : unique identifier of the resource
-     * @param[in] env : JNI environment
+     * @param[in] java_vm : Java Virtual Machine
+     * @param[in] java_jni_version : JNI version
      * @param[in] java_object : reference to Java XAResource object
      * @param[in] start : Java XAResource method
      * @return a reason code
      */
     int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
                                   const char *name,
-                                  JNIEnv *env, jobject java_object,
-                                  jmethodID start);
+                                  JavaVM *java_vm, jint java_jni_version,
+                                  jobject java_object, jmethodID start);
 
 
 

@@ -352,6 +352,8 @@ const char *lixa_strerror(int ret_cod)
                 "NULL pointer";
         case LIXA_RC_GET_FIELD_ID_ERROR:
             return "ERROR: 'JNI GetFieldID' function returned NULL pointer";
+        case LIXA_RC_GET_JAVA_VM_ERROR:
+            return "ERROR: 'JNI GetJavaVM' function returned NULL pointer";
         case LIXA_RC_GET_METHOD_ID_ERROR:
             return "ERROR: 'JNI GetMethodID' function returned NULL pointer";
         case LIXA_RC_GET_OBJECT_CLASS_ERROR:
@@ -360,6 +362,8 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_GET_OBJECT_FIELD_ERROR:
             return "ERROR: 'JNI GetObjectField' function returned NULL "
                 "pointer";
+        case LIXA_RC_GET_VERSION_ERROR:
+            return "ERROR: 'JNI GetVersion' function returned an error";
         case LIXA_RC_NEW_BYTE_ARRAY_ERROR:
             return "ERROR: 'JNI NewByteArray' function returned NULL "
                 "pointer";

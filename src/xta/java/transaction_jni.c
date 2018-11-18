@@ -359,7 +359,9 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_deleteJNI(
 JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
     JNIEnv *env, jobject this_object, jobject xa_resource)
 {
-    enum Exception { GET_OBJECT_CLASS_ERROR
+    enum Exception { GET_JAVA_VM_ERROR
+                     , GET_VERSION_ERROR
+                     , GET_OBJECT_CLASS_ERROR
                      , GET_METHOD_ID_ERROR1
                      , NULL_OBJECT1
                      , GET_NATIVE_RESOURCE_ERROR
@@ -371,11 +373,21 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
     xta_java_xa_resource_t *xjxr = NULL;
     xta_transaction_t *tx = NULL;
     GPtrArray *array = NULL;
+    JavaVM *java_vm = NULL;
+    jint java_jni_version;
     jclass class = NULL;
     jmethodID start_method = NULL;
     
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI\n"));
     TRY {
+        /* retrieve the current Java Virtual Machine */
+        if (0 != (*env)->GetJavaVM(env, &java_vm) ||
+            (*env)->ExceptionCheck(env))
+            THROW(GET_JAVA_VM_ERROR);
+        /* retrieve the JNI version */
+        java_jni_version = (*env)->GetVersion(env);
+        if ((*env)->ExceptionCheck(env))
+            THROW(GET_VERSION_ERROR);
         /* retrieve the class of object xa_resource (XAResource or subclass) */
         if (NULL == (class = (*env)->GetObjectClass(env, xa_resource)) ||
             (*env)->ExceptionCheck(env))
@@ -388,8 +400,8 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
             THROW(GET_METHOD_ID_ERROR1);
         /* create a new native XA Java resource */
         if (NULL == (xjxr = xta_java_xa_resource_new(
-                         "Java XA Resource", env, xa_resource,
-                         start_method)))
+                         "Java XA Resource", java_vm, java_jni_version,
+                         xa_resource, start_method)))
             THROW(NULL_OBJECT1);
         /* add the resource to array of native resources */
         if (NULL == (array =
@@ -410,6 +422,12 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case GET_JAVA_VM_ERROR:
+                ret_cod = LIXA_RC_GET_JAVA_VM_ERROR;
+                break;
+            case GET_VERSION_ERROR:
+                ret_cod = LIXA_RC_GET_VERSION_ERROR;
+                break;
             case GET_OBJECT_CLASS_ERROR:
                 ret_cod = LIXA_RC_GET_OBJECT_CLASS_ERROR;
                 break;

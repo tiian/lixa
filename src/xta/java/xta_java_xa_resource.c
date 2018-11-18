@@ -67,8 +67,8 @@ const static struct xta_iface_s xta_java_iface = {
 
 
 xta_java_xa_resource_t *xta_java_xa_resource_new(
-    const char *name,
-    JNIEnv *env, jobject xa_resource, jmethodID start)
+    const char *name, JavaVM *java_vm, jint java_jni_version,
+    jobject java_object, jmethodID start)
 {
     enum Exception { G_TRY_MALLOC_ERROR
                      , XTA_JAVA_XA_RESOURCE_INIT_ERROR
@@ -84,7 +84,8 @@ xta_java_xa_resource_t *xta_java_xa_resource_new(
             THROW(G_TRY_MALLOC_ERROR);
         /* initialize "class" properties */
         if (LIXA_RC_OK != (ret_cod = xta_java_xa_resource_init(
-                               this, name, env, xa_resource, start)))
+                               this, name, java_vm, java_jni_version,
+                               java_object, start)))
             THROW(XTA_JAVA_XA_RESOURCE_INIT_ERROR);
         
         THROW(NONE);
@@ -140,8 +141,8 @@ void xta_java_xa_resource_delete(xta_java_xa_resource_t *xa_resource)
 
 int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
                               const char *name,
-                              JNIEnv *env, jobject java_object,
-                              jmethodID start)
+                              JavaVM *java_vm, jint java_jni_version,
+                              jobject java_object, jmethodID start)
 {
     enum Exception { NULL_OBJECT
                      , XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR
@@ -158,7 +159,8 @@ int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
                                &xta_java_iface, name, "dummy")))
             THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
         /* set references to Java XAResource */
-        xa_resource->java_env = env;
+        xa_resource->java_vm = java_vm;
+        xa_resource->java_jni_version = java_jni_version;
         xa_resource->java_object = java_object;
         xa_resource->java_method_start = start;
         /* set resource interface */
@@ -239,7 +241,19 @@ int xta_java_xa_close(xta_xa_resource_t *context, char *xa_info,
 int xta_java_xa_start(xta_xa_resource_t *context,
                       const XID *xid, int rmid, long flags)
 {
+    enum Exception { GET_ENV_ERROR
+                     , NONE } excp;
+    int ret_cod = XAER_RMERR;
+    
     LIXA_TRACE(("xta_java_xa_start\n"));
+    TRY {
+        JNIEnv *env;
+        xta_java_xa_resource_t *res = (xta_java_xa_resource_t *)context;
+        /* retrieve Java environement for this thread */
+        if (JNI_OK != (*(res->java_vm))->GetEnv(
+                res->java_vm, (void **)&env, res->java_jni_version))
+            THROW(GET_ENV_ERROR);
+            
     /* @@@ */
     /* create a XtaXid Java object from xid*/
     /* call Java start method using context */
@@ -248,7 +262,22 @@ int xta_java_xa_start(xta_xa_resource_t *context,
     context->java_method_start, arg1, arg2...);
     */
     
-    return XA_OK;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GET_ENV_ERROR:
+                break;
+            case NONE:
+                ret_cod = XA_OK;
+                break;
+            default:
+                ret_cod = XAER_RMERR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_java_xa_start/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 
