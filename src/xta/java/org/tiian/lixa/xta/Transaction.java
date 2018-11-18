@@ -58,7 +58,7 @@ public class Transaction {
      * Allocate a C list to collect the C native resources that will be
      * enlisted
      */
-    private native void newJNI();
+    private native void newJNI() throws XtaException;
     /**
      * This class does not have a public constructor because it's factory is
      * TransactionManager.createTransaction() and there's no usage of a
@@ -102,7 +102,7 @@ public class Transaction {
     /*
      * Create a native xta_xid_t from xta_transaction_t
      */
-    private native XtaXid getXidJNI();
+    private native XtaXid getXidJNI() throws XtaException;
     /**
      * Return the XID associated to the current transaction. It calls the
      * C native interface and it's the factory that MUST be used to create
@@ -117,7 +117,7 @@ public class Transaction {
      * Native method wrapper for start
      */
     private native int startJNI(boolean multipleBranches,
-                                boolean alreadyOpened);
+                                boolean alreadyOpened) throws XtaException;
     /**
      * Start a new Transaction
      * @param multipleBranches must be true only for transactions that will
@@ -125,9 +125,7 @@ public class Transaction {
      */
     public void start(boolean multipleBranches) throws XtaException {
         int RetCod;
-        if (ErrorCodes.LIXA_RC_OK != (RetCod = startJNI(
-                                          multipleBranches, AlreadyOpened)))
-            throw new XtaException(RetCod);
+        startJNI(multipleBranches, AlreadyOpened);
         AlreadyOpened = true;
     }
     /**

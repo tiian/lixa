@@ -1,6 +1,8 @@
 Go on with resource enlistment:
 - replace Exception with XtaException in the jni code of Xta using
   Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
+- cache jvm, retrieve env from every start/end/... method due to a possible 
+  different thread
 - call start method for a XAResource
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation

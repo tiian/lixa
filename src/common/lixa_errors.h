@@ -610,17 +610,25 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_GET_OBJECT_FIELD_ERROR          -515
 /**
+ * JNI "NewByteArray" function error
+ */
+#define LIXA_RC_NEW_BYTE_ARRAY_ERROR            -516
+/**
  * JNI "NewDirectByteBuffer" function error
  */
-#define LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR    -516
+#define LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR    -517
 /**
  * JNI "NewObject" function error
  */
-#define LIXA_RC_NEW_OBJECT_ERROR                -517
+#define LIXA_RC_NEW_OBJECT_ERROR                -518
 /**
- * JNI "SetObjectFieldError" function error
+ * JNI "SetByteArrayRegion" function error
  */
-#define LIXA_RC_SET_OBJECT_FIELD_ERROR          -518
+#define LIXA_RC_SET_BYTE_ARRAY_REGION_ERROR     -519
+/**
+ * JNI "SetObjectField" function error
+ */
+#define LIXA_RC_SET_OBJECT_FIELD_ERROR          -520
 
 
 

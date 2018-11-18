@@ -74,50 +74,37 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_newJNI(
     TRY {
         /* get a reference to this object's class */
         if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj)) ||
-            (*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionCheck(env))
             THROW(GET_OBJECT_CLASS_ERROR);
-        }
-        
         /* get the field identificator for NativeObjcet */
         if (NULL == (field_id = (*env)->GetFieldID(
                          env, this_class, "NativeObject",
                          "Ljava/nio/ByteBuffer;")) ||
-            (*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionCheck(env))
             THROW(GET_FIELD_ID_ERROR1);
-        }
-
         /* create ByteBuffer */
         if (NULL == (byte_buffer = (*env)->NewDirectByteBuffer(
                          env, (void *)tx, sizeof(xta_transaction_t))) ||
-            (*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionCheck(env))
             THROW(NEW_DIRECT_BYTE_BUFFER_ERROR1);
-        }
-        
         /* set ByteBuffer reference */
         (*env)->SetObjectField(env, this_obj, field_id, byte_buffer);
         if ((*env)->ExceptionCheck(env))
-            THROW(SET_OBJECT_FIELD_ERROR1);
-        
+            THROW(SET_OBJECT_FIELD_ERROR1);        
         /* create an array to store the resources that will be enlisted */
-        if (NULL == (array = g_ptr_array_new())) {
+        if (NULL == (array = g_ptr_array_new()))
             THROW(G_PTR_ARRAY_NEW_ERROR);
-        }
-
         /* get the field identificator for NativeResources */
         if (NULL == (field_id = (*env)->GetFieldID(
                          env, this_class, "NativeResources",
                          "Ljava/nio/ByteBuffer;")) ||
-            (*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionCheck(env))
             THROW(GET_FIELD_ID_ERROR2);
-        }
-
         /* create ByteBuffer */
         if (NULL == (byte_buffer = (*env)->NewDirectByteBuffer(
                          env, (void *)array, sizeof(GPtrArray))) ||
-            (*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionCheck(env))
             THROW(NEW_DIRECT_BYTE_BUFFER_ERROR2);
-        }
-        
         /* set ByteBuffer reference */
         (*env)->SetObjectField(env, this_obj, field_id, byte_buffer);
         if ((*env)->ExceptionCheck(env))
@@ -150,6 +137,9 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_newJNI(
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* throw Java exception */
+        if (LIXA_RC_OK != ret_cod)
+            Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
     /* recover memory if necessary */
     if (NONE != excp && NULL != array)
@@ -183,49 +173,26 @@ Java_org_tiian_lixa_xta_Transaction_getNativeObject(
 
     TRY {
         /* get a reference to this object's class */
-        if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
-            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-            (*env)->ThrowNew(
-                env, Exception,
-                "JNI/Java_org_tiian_lixa_xta_Transaction_getNativeObject/"
-                "GetObjectClass returned NULL");
+        if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj)) ||
+            (*env)->ExceptionCheck(env))
             THROW(GET_OBJECT_CLASS_ERROR);
-        }
-
         /* get the field identificator */
         if (NULL == (field_id = (*env)->GetFieldID(
                          env, this_class, "NativeObject",
-                         "Ljava/nio/ByteBuffer;"))) {
-            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-            (*env)->ThrowNew(
-                env, Exception,
-                "JNI/Java_org_tiian_lixa_xta_Transaction"
-                "_getNativeObject/GetFieldID returned NULL");
+                         "Ljava/nio/ByteBuffer;")) ||
+            (*env)->ExceptionCheck(env))
             THROW(GET_FIELD_ID_ERROR);
-        }
-        
         /* get ByteBuffer reference */
         if (NULL == (byte_buffer = (*env)->GetObjectField(
-                         env, this_obj, field_id))) {
-            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-            (*env)->ThrowNew(
-                env, Exception,
-                "JNI/Java_org_tiian_lixa_xta_Transaction_"
-                "getNativeObject/GetObjectField returned NULL");
+                         env, this_obj, field_id)) ||
+            (*env)->ExceptionCheck(env))
             THROW(GET_OBJECT_FIELD_ERROR);
-        }
-        
         /* cast to xta_transaction_t */
         if (NULL == (tx = (xta_transaction_t *)
                      (*env)->GetDirectBufferAddress(
-                         env, byte_buffer))) {
-            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-            (*env)->ThrowNew(
-                env, Exception,
-                "JNI/Java_org_tiian_lixa_xta_Transaction_"
-                "getNativeObject/GetDirectBufferAddress returned NULL");
+                         env, byte_buffer)) ||
+            (*env)->ExceptionCheck(env))
             THROW(GET_DIRECT_BUFFER_ADDRESS_ERROR);
-        }
         
         THROW(NONE);
     } CATCH {
@@ -248,6 +215,9 @@ Java_org_tiian_lixa_xta_Transaction_getNativeObject(
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* throw Java exception */
+        if (LIXA_RC_OK != ret_cod)
+            Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
     return tx;
 }
@@ -275,49 +245,25 @@ GPtrArray* Java_org_tiian_lixa_xta_Transaction_getNativeResources(
 
     TRY {
         /* get a reference to this object's class */
-        if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
-            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-            (*env)->ThrowNew(
-                env, Exception,
-                "JNI/Java_org_tiian_lixa_xta_Transaction_getNativeResources/"
-                "GetObjectClass returned NULL");
+        if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj)) ||
+            (*env)->ExceptionCheck(env))
             THROW(GET_OBJECT_CLASS_ERROR);
-        }
-
         /* get the field identificator */
         if (NULL == (field_id = (*env)->GetFieldID(
                          env, this_class, "NativeResources",
-                         "Ljava/nio/ByteBuffer;"))) {
-            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-            (*env)->ThrowNew(
-                env, Exception,
-                "JNI/Java_org_tiian_lixa_xta_Transaction"
-                "_getNativeResources/GetFieldID returned NULL");
+                         "Ljava/nio/ByteBuffer;")) ||
+            (*env)->ExceptionCheck(env))
             THROW(GET_FIELD_ID_ERROR);
-        }
-        
         /* get ByteBuffer reference */
         if (NULL == (byte_buffer = (*env)->GetObjectField(
-                         env, this_obj, field_id))) {
-            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-            (*env)->ThrowNew(
-                env, Exception,
-                "JNI/Java_org_tiian_lixa_xta_Transaction_"
-                "getNativeResources/GetObjectField returned NULL");
+                         env, this_obj, field_id)))
             THROW(GET_OBJECT_FIELD_ERROR);
-        }
-        
         /* cast to xta_transaction_t */
         if (NULL == (array = (GPtrArray *)
                      (*env)->GetDirectBufferAddress(
-                         env, byte_buffer))) {
-            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-            (*env)->ThrowNew(
-                env, Exception,
-                "JNI/Java_org_tiian_lixa_xta_Transaction_"
-                "getNativeResources/GetDirectBufferAddress returned NULL");
+                         env, byte_buffer)) ||
+            (*env)->ExceptionCheck(env))
             THROW(GET_DIRECT_BUFFER_ADDRESS_ERROR);
-        }
         
         THROW(NONE);
     } CATCH {
@@ -340,6 +286,9 @@ GPtrArray* Java_org_tiian_lixa_xta_Transaction_getNativeResources(
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* throw Java exception */
+        if (LIXA_RC_OK != ret_cod)
+            Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getNativeResources/"
                 "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -428,21 +377,20 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI\n"));
     TRY {
         /* retrieve the class of object xa_resource (XAResource or subclass) */
-        if (NULL == (class = (*env)->GetObjectClass(env, xa_resource))) {
+        if (NULL == (class = (*env)->GetObjectClass(env, xa_resource)) ||
+            (*env)->ExceptionCheck(env))
             THROW(GET_OBJECT_CLASS_ERROR);
-        }
         /* retrieve start method */
         if (NULL == (start_method = (*env)->GetMethodID(
                          env, class, "start",
-                         "(Ljavax/transaction/xa/Xid;I)V"))) {
+                         "(Ljavax/transaction/xa/Xid;I)V")) ||
+            (*env)->ExceptionCheck(env))
             THROW(GET_METHOD_ID_ERROR1);
-        }
         /* create a new native XA Java resource */
         if (NULL == (xjxr = xta_java_xa_resource_new(
                          "Java XA Resource", env, xa_resource,
-                         start_method))) {
+                         start_method)))
             THROW(NULL_OBJECT1);
-        }
         /* add the resource to array of native resources */
         if (NULL == (array =
                      Java_org_tiian_lixa_xta_Transaction_getNativeResources(
@@ -454,9 +402,8 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
             THROW(NULL_OBJECT2);
         /* enlist the resource in the native library */
         if (LIXA_RC_OK != (ret_cod = xta_transaction_enlist_resource(
-                               tx, (xta_xa_resource_t *)xjxr))) {
+                               tx, (xta_xa_resource_t *)xjxr)))
             THROW(TRANSACTION_ENLIST_RESOURCE_ERROR);
-        }
         
         g_ptr_array_add(array, (gpointer)xjxr);
         
@@ -526,43 +473,22 @@ Java_org_tiian_lixa_xta_Transaction_getXidJNI
         /* create a new native C XID object */
         if (NULL == (xid = xta_xid_new_from_XID(
                          xta_xid_get_xa_xid(
-                             xta_transaction_get_xid(tx))))) {
-            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-            (*env)->ThrowNew(
-                env, Exception,
-                "JNI/Java_org_tiian_lixa_xta_Transaction_getXidJNI/"
-                "xta_xid_new_from_XID returned NULL");
+                             xta_transaction_get_xid(tx)))))
             THROW(NULL_OBJECT2);
-        }
         /* retrieve Java XtaXid class */
         if (NULL == (class = (*env)->FindClass(
-                         env, "org/tiian/lixa/xta/XtaXid"))) {
-            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-            (*env)->ThrowNew(
-                env, Exception,
-                "JNI/Java_org_tiian_lixa_xta_Transaction_getXidJNI/"
-                "FindClass() returned NULL");
+                         env, "org/tiian/lixa/xta/XtaXid")) ||
+            (*env)->ExceptionCheck(env))
             THROW(FIND_CLASS_ERROR);
-        }
         /* retrieve XtaXid constructor */
         if (NULL == (constructor = (*env)->GetMethodID(
-                         env, class, "<init>", "()V"))) {
-            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-            (*env)->ThrowNew(
-                env, Exception,
-                "JNI/Java_org_tiian_lixa_xta_Transaction_getXidJNI/"
-                "GetMethodID() returned NULL");
+                         env, class, "<init>", "()V")) ||
+            (*env)->ExceptionCheck(env))
             THROW(GET_METHOD_ID_ERROR);
-        }
         /* create a new XtaXid object */
-        if (NULL == (jxid = (*env)->NewObject(env, class, constructor))) {
-            jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-            (*env)->ThrowNew(
-                env, Exception,
-                "JNI/Java_org_tiian_lixa_xta_Transaction_getXidJNI/"
-                "NewObject() returned NULL");
+        if (NULL == (jxid = (*env)->NewObject(env, class, constructor)) ||
+            (*env)->ExceptionCheck(env))
             THROW(NEW_OBJECT_ERROR);
-        }
         /* populate Java object with tx native C Transaction */
         Java_org_tiian_lixa_xta_XtaXid_newJNI(env, jxid, xid);
 
@@ -571,7 +497,16 @@ Java_org_tiian_lixa_xta_Transaction_getXidJNI
         switch (excp) {
             case NULL_OBJECT1:
             case NULL_OBJECT2:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case FIND_CLASS_ERROR:
+                ret_cod = LIXA_RC_FIND_CLASS_ERROR;
+                break;
+            case GET_METHOD_ID_ERROR:
+                ret_cod = LIXA_RC_GET_METHOD_ID_ERROR;
+                break;
+            case NEW_OBJECT_ERROR:
+                ret_cod = LIXA_RC_NEW_OBJECT_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -579,6 +514,9 @@ Java_org_tiian_lixa_xta_Transaction_getXidJNI
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* throw Java exception */
+        if (LIXA_RC_OK != ret_cod)
+            Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
         
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getXidJNI/"
@@ -617,9 +555,8 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_startJNI
             THROW(TRANSACTION_OPEN_ERROR);
         /* call native method */
         if (LIXA_RC_OK != (ret_cod = xta_transaction_start(
-                               tx, (int)multiple_branches))) {
+                               tx, (int)multiple_branches)))
             THROW(TRANSACTION_START_ERROR);
-        }
         
         THROW(NONE);
     } CATCH {
@@ -636,6 +573,9 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_startJNI
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* throw Java exception */
+        if (LIXA_RC_OK != ret_cod)
+            Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

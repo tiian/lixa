@@ -360,11 +360,17 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_GET_OBJECT_FIELD_ERROR:
             return "ERROR: 'JNI GetObjectField' function returned NULL "
                 "pointer";
+        case LIXA_RC_NEW_BYTE_ARRAY_ERROR:
+            return "ERROR: 'JNI NewByteArray' function returned NULL "
+                "pointer";
         case LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR:
             return "ERROR: 'JNI NewDirectByteBuffer' function returned NULL "
                 "pointer";
         case LIXA_RC_NEW_OBJECT_ERROR:
             return "ERROR: 'JNI NewObject' function returned NULL pointer";
+        case LIXA_RC_SET_BYTE_ARRAY_REGION_ERROR:
+            return "ERROR: 'JNI SetByteArrayRegion' function returned NULL "
+                "pointer";
         case LIXA_RC_SET_OBJECT_FIELD_ERROR:
             return "ERROR: 'JNI SetObjectField' function returned NULL "
                 "pointer";

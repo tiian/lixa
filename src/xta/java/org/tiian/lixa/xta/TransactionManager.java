@@ -48,7 +48,7 @@ public class TransactionManager {
      * NativeObject
      * Called by class constructor
      */
-    private native void newJNI();
+    private native void newJNI() throws XtaException;
     /**
      * Create a new object calling the native interface
      * @throws XtaException if the underlying native C function returns
@@ -74,7 +74,7 @@ public class TransactionManager {
     /*
      * Create a native xta_transaction_t from xta_transacion_manager_t
      */
-    private native Transaction createTransactionJNI();
+    private native Transaction createTransactionJNI() throws XtaException;
     /**
      * Create a new Transaction object associated with the current Transaction
      * Manager. It calls the native C interface and it's the factory that

@@ -51,7 +51,7 @@ public class XtaXid implements Xid {
     /*
      * Allocate a C native object xta_xid_t
      */
-    private native void newJNI();
+    private native void newJNI() throws XtaException;
     /**
      * This class does not have a public constructor because it's factory is
      * Transaction.getXid() and there's no usage of a
