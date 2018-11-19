@@ -363,6 +363,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
                      , GET_VERSION_ERROR
                      , GET_OBJECT_CLASS_ERROR
                      , GET_METHOD_ID_ERROR1
+                     , NEW_GLOBAL_REF_ERROR
                      , NULL_OBJECT1
                      , GET_NATIVE_RESOURCE_ERROR
                      , NULL_OBJECT2
@@ -377,6 +378,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
     jint java_jni_version;
     jclass class = NULL;
     jmethodID start_method = NULL;
+    jobject global_res = NULL;
     
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI\n"));
     TRY {
@@ -398,10 +400,13 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
                          "(Ljavax/transaction/xa/Xid;I)V")) ||
             (*env)->ExceptionCheck(env))
             THROW(GET_METHOD_ID_ERROR1);
+        /* create a global reference for the XA Resource */
+        if (NULL == (global_res = (*env)->NewGlobalRef(env, xa_resource)))
+            THROW(NEW_GLOBAL_REF_ERROR);
         /* create a new native XA Java resource */
         if (NULL == (xjxr = xta_java_xa_resource_new(
                          "Java XA Resource", java_vm, java_jni_version,
-                         xa_resource, start_method)))
+                         global_res, start_method)))
             THROW(NULL_OBJECT1);
         /* add the resource to array of native resources */
         if (NULL == (array =
@@ -437,6 +442,9 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
                 break;
             case GET_METHOD_ID_ERROR1:
                 ret_cod = LIXA_RC_GET_METHOD_ID_ERROR;
+                break;
+            case NEW_GLOBAL_REF_ERROR:
+                ret_cod = LIXA_RC_NEW_GLOBAL_REF_ERROR;
                 break;
             case GET_NATIVE_RESOURCE_ERROR:
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
@@ -591,8 +599,8 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_startJNI
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        /* throw Java exception */
-        if (LIXA_RC_OK != ret_cod)
+        /* generate a new Java exception if not already thrown */
+        if (LIXA_RC_OK != ret_cod && !(*env)->ExceptionCheck(env))
             Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_start/excp=%d/"

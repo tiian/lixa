@@ -22,6 +22,7 @@ package org.tiian.lixa.xta;
 
 import java.nio.ByteBuffer;
 import javax.transaction.xa.XAResource;
+import javax.transaction.xa.XAException;
 
 
 
@@ -116,14 +117,16 @@ public class Transaction {
     /*
      * Native method wrapper for start
      */
-    private native int startJNI(boolean multipleBranches,
-                                boolean alreadyOpened) throws XtaException;
+    private native int startJNI(
+        boolean multipleBranches, boolean alreadyOpened)
+        throws XtaException, XAException;
     /**
      * Start a new Transaction
      * @param multipleBranches must be true only for transactions that will
      * span more applications and it will be followed by branch method
      */
-    public void start(boolean multipleBranches) throws XtaException {
+    public void start(boolean multipleBranches)
+        throws XtaException, XAException {
         int RetCod;
         startJNI(multipleBranches, AlreadyOpened);
         AlreadyOpened = true;
@@ -131,7 +134,7 @@ public class Transaction {
     /**
      * Start a new Transaction
      */
-    public void start() throws XtaException {
+    public void start() throws XtaException, XAException {
         start(false);
     }
 }

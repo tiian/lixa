@@ -370,6 +370,8 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR:
             return "ERROR: 'JNI NewDirectByteBuffer' function returned NULL "
                 "pointer";
+        case LIXA_RC_NEW_GLOBAL_REF_ERROR:
+            return "ERROR: 'JNI NewGlobalRef' function returned NULL pointer";
         case LIXA_RC_NEW_OBJECT_ERROR:
             return "ERROR: 'JNI NewObject' function returned NULL pointer";
         case LIXA_RC_SET_BYTE_ARRAY_REGION_ERROR:

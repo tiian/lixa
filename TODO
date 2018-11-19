@@ -1,5 +1,7 @@
 Go on with resource enlistment:
-- call start method for a XAResource
+- use DeleteGlobalRef to remove the global reference from 
+  xta_java_xa_resource_t.java_object when it's no more necessary (when?!)
+- fix exception raised from MySQL and PostgreSQL
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation
 

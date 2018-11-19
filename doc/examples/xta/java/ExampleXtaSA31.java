@@ -109,7 +109,7 @@ public class ExampleXtaSA31 {
                  // Enlist PostgreSQL resource to transaction
                  tx.enlistResource(xar1);
                  // Enlist MySQL resource to Transaction
-                 tx.enlistResource(xar2);
+                 // tx.enlistResource(xar2);
                  // Start a new XA global transaction with a single branch
                  tx.start();
                  // XtaXid xid = tx.getXid();
@@ -117,6 +117,9 @@ public class ExampleXtaSA31 {
                  System.err.println("XtaException: LIXA ReturnCode=" +
                                     e.getReturnCode() + " ('" +
                                     e.getMessage() + "')");
+                 e.printStackTrace();
+                 System.exit(1);
+             } catch (XAException e) {
                  e.printStackTrace();
                  System.exit(1);
              }
