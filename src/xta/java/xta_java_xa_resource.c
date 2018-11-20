@@ -112,11 +112,21 @@ xta_java_xa_resource_t *xta_java_xa_resource_new(
 
 void xta_java_xa_resource_delete(xta_java_xa_resource_t *xa_resource)
 {
-    enum Exception { NONE } excp;
+    enum Exception { GET_ENV_ERROR
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    JNIEnv *env = NULL;
     
     LIXA_TRACE(("xta_java_xa_resource_delete\n"));
     TRY {
+        /* retrieve Java environement for this thread */
+        if (JNI_OK != (*(xa_resource->java_vm))->GetEnv(
+                xa_resource->java_vm, (void **)&env,
+                xa_resource->java_jni_version))
+            THROW(GET_ENV_ERROR);
+        /* release the Global Reference acquired by _init() */
+        (*env)->DeleteGlobalRef(env, xa_resource->java_object);
         /* clean the object before releasing */
         xta_java_xa_resource_clean(xa_resource);
         /* release memory allocated for the object */
@@ -125,6 +135,9 @@ void xta_java_xa_resource_delete(xta_java_xa_resource_t *xa_resource)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case GET_ENV_ERROR:
+                ret_cod = LIXA_RC_GET_ENV_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -145,9 +158,14 @@ int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
                               jobject java_object, jmethodID start)
 {
     enum Exception { NULL_OBJECT
+                     , GET_ENV_ERROR
+                     , NEW_GLOBAL_REF_ERROR
                      , XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    JNIEnv *env = NULL;
+    jobject global_res = NULL;
     
     LIXA_TRACE(("xta_java_xa_resource_init\n"));
     TRY {
@@ -158,10 +176,17 @@ int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
                                (xta_acquired_xa_resource_t *)xa_resource,
                                &xta_java_iface, name, "dummy")))
             THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
+        /* retrieve Java environement for this thread */
+        if (JNI_OK != (*(java_vm))->GetEnv(
+                java_vm, (void **)&env, java_jni_version))
+            THROW(GET_ENV_ERROR);
+        /* create a global reference for the XA Resource */
+        if (NULL == (global_res = (*env)->NewGlobalRef(env, java_object)))
+            THROW(NEW_GLOBAL_REF_ERROR);
         /* set references to Java XAResource */
         xa_resource->java_vm = java_vm;
         xa_resource->java_jni_version = java_jni_version;
-        xa_resource->java_object = java_object;
+        xa_resource->java_object = global_res;
         xa_resource->java_method_start = start;
         LIXA_TRACE(("xta_java_xa_resource_init: java_vm=%p, "
                     "java_jni_version=%d, java_object=%p, "
@@ -178,6 +203,12 @@ int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case GET_ENV_ERROR:
+                ret_cod = LIXA_RC_GET_ENV_ERROR;
+                break;
+            case NEW_GLOBAL_REF_ERROR:
+                ret_cod = LIXA_RC_NEW_GLOBAL_REF_ERROR;
                 break;
             case XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR:
                 break;

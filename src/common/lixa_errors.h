@@ -594,53 +594,57 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_GET_DIRECT_BUFFER_ADDRESS_ERROR -511
 /**
+ * JNI "GetEnv" function error
+ */
+#define LIXA_RC_GET_ENV_ERROR                   -512
+/**
  * JNI "GetFieldID" function error
  */
-#define LIXA_RC_GET_FIELD_ID_ERROR              -512
+#define LIXA_RC_GET_FIELD_ID_ERROR              -513
 /**
  * JNI "GetJavaVM" function error
  */
-#define LIXA_RC_GET_JAVA_VM_ERROR               -513
+#define LIXA_RC_GET_JAVA_VM_ERROR               -514
 /**
  * JNI "GetMethodID" function error
  */
-#define LIXA_RC_GET_METHOD_ID_ERROR             -514
+#define LIXA_RC_GET_METHOD_ID_ERROR             -515
 /**
  * JNI "GetObjectClass" function error
  */
-#define LIXA_RC_GET_OBJECT_CLASS_ERROR          -515
+#define LIXA_RC_GET_OBJECT_CLASS_ERROR          -516
 /**
  * JNI "GetObjectField" function error
  */
-#define LIXA_RC_GET_OBJECT_FIELD_ERROR          -516
+#define LIXA_RC_GET_OBJECT_FIELD_ERROR          -517
 /**
  * JNI "GetVersion" function error
  */
-#define LIXA_RC_GET_VERSION_ERROR               -517
+#define LIXA_RC_GET_VERSION_ERROR               -518
 /**
  * JNI "NewByteArray" function error
  */
-#define LIXA_RC_NEW_BYTE_ARRAY_ERROR            -518
+#define LIXA_RC_NEW_BYTE_ARRAY_ERROR            -519
 /**
  * JNI "NewDirectByteBuffer" function error
  */
-#define LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR    -519
+#define LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR    -520
 /**
  * JNI "NewGlobalRef" function error
  */
-#define LIXA_RC_NEW_GLOBAL_REF_ERROR            -520
+#define LIXA_RC_NEW_GLOBAL_REF_ERROR            -521
 /**
  * JNI "NewObject" function error
  */
-#define LIXA_RC_NEW_OBJECT_ERROR                -521
+#define LIXA_RC_NEW_OBJECT_ERROR                -522
 /**
  * JNI "SetByteArrayRegion" function error
  */
-#define LIXA_RC_SET_BYTE_ARRAY_REGION_ERROR     -522
+#define LIXA_RC_SET_BYTE_ARRAY_REGION_ERROR     -523
 /**
  * JNI "SetObjectField" function error
  */
-#define LIXA_RC_SET_OBJECT_FIELD_ERROR          -523
+#define LIXA_RC_SET_OBJECT_FIELD_ERROR          -524
 
 
 

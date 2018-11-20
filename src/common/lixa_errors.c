@@ -350,6 +350,8 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_GET_DIRECT_BUFFER_ADDRESS_ERROR:
             return "ERROR: 'JNI GetDirectBufferAddress' function returned "
                 "NULL pointer";
+        case LIXA_RC_GET_ENV_ERROR:
+            return "ERROR: 'JNI GetEnv' function returned NULL pointer";
         case LIXA_RC_GET_FIELD_ID_ERROR:
             return "ERROR: 'JNI GetFieldID' function returned NULL pointer";
         case LIXA_RC_GET_JAVA_VM_ERROR:

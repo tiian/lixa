@@ -113,6 +113,12 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_XtaXid_newJNI(
 }
 
 
+/* This is an helper internal function, it's not seen by JNI */
+/* @@@
+jobject Java_org_tiian_lixa_xta_XtaXid_new_from_native(
+    JNIEnv *env, 
+{
+*/
 
 /* This is an helper internal function, it's not seen by JNI */
 xta_xid_t*

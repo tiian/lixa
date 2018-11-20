@@ -127,7 +127,6 @@ public class Transaction {
      */
     public void start(boolean multipleBranches)
         throws XtaException, XAException {
-        int RetCod;
         startJNI(multipleBranches, AlreadyOpened);
         AlreadyOpened = true;
     }
@@ -137,4 +136,24 @@ public class Transaction {
     public void start() throws XtaException, XAException {
         start(false);
     }
+    /*
+     * Native method wrapper for commit
+     */
+    private native int commitJNI(boolean nonBlocking)
+        throws XtaException, XAException;
+    /**
+     * Commit a Transacton
+     * @param nonBlocking boolean value: true = xa_prepare will not block the
+     *        caller, false = xa_prepare will block the caller; the option is
+     *        used only for multiple branch transactions
+     */
+    public void commit(boolean nonBlocking)
+        throws XtaException, XAException {
+        commitJNI(nonBlocking);
+    }
+    public void commit() throws XtaException, XAException {
+        commit(false);
+    }
+
+    
 }

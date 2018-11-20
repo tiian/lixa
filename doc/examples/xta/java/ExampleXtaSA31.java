@@ -109,10 +109,16 @@ public class ExampleXtaSA31 {
                  // Enlist PostgreSQL resource to transaction
                  tx.enlistResource(xar1);
                  // Enlist MySQL resource to Transaction
-                 // tx.enlistResource(xar2);
+                 tx.enlistResource(xar2);
                  // Start a new XA global transaction with a single branch
                  tx.start();
-                 // XtaXid xid = tx.getXid();
+                 // Execute SQL statements
+                 stmt1.executeUpdate(postgresqlStmt);
+                 stmt2.executeUpdate(mysqlStmt);
+                 // commit or rollback
+                 if (commit)
+                     tx.commit();
+                 
              } catch (XtaException e) {
                  System.err.println("XtaException: LIXA ReturnCode=" +
                                     e.getReturnCode() + " ('" +
@@ -123,12 +129,11 @@ public class ExampleXtaSA31 {
                  e.printStackTrace();
                  System.exit(1);
              }
-             
+
+             /*
              MysqlXid xid = new MysqlXid("2".getBytes(), "2".getBytes(), 1);
              xar1.start(xid, XAResource.TMNOFLAGS);
              xar2.start(xid, XAResource.TMNOFLAGS);
-             stmt1.executeUpdate(postgresqlStmt);
-             stmt2.executeUpdate(mysqlStmt);
              xar1.end(xid, XAResource.TMSUCCESS);
              xar2.end(xid, XAResource.TMSUCCESS);
              int ret1, ret2;
@@ -141,6 +146,7 @@ public class ExampleXtaSA31 {
                  xar1.rollback(xid);
                  xar2.rollback(xid);
              }
+             */
          } catch (Exception e) {
              e.printStackTrace();
              System.exit(1);

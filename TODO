@@ -1,7 +1,15 @@
-Go on with resource enlistment:
-- use DeleteGlobalRef to remove the global reference from 
-  xta_java_xa_resource_t.java_object when it's no more necessary (when?!)
-- fix exception raised from MySQL and PostgreSQL
+Implement XTA for Java:
+- xta_java_xa_start receives XID parameters and it passes it to 
+  Java_org_tiian_lixa_xta_XtaXid_newJNI, but
+  Java_org_tiian_lixa_xta_XtaXid_newJNI should receive xta_xid_t that must be
+  created with xta_xid_new_from_XID and then freed with xta_xid_delete
+- split xta_java_xa_start in reusable functions:
+  1. GetEnv
+  2. Create java object for XtaXid  <== reuse me!!
+  3. CallVoidMethos
+- implement prepare and commit, try the first commit!
+
+Fix Javadoc for XTA for Java
 
 Implement XTA for PHP, remove "ext" legacy code, update documentation
 
