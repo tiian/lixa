@@ -363,6 +363,11 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
                      , GET_VERSION_ERROR
                      , GET_OBJECT_CLASS_ERROR
                      , GET_METHOD_ID_ERROR1
+                     , GET_METHOD_ID_ERROR2
+                     , GET_METHOD_ID_ERROR3
+                     , GET_METHOD_ID_ERROR4
+                     , GET_METHOD_ID_ERROR5
+                     , GET_METHOD_ID_ERROR6
                      , NULL_OBJECT1
                      , GET_NATIVE_RESOURCE_ERROR
                      , NULL_OBJECT2
@@ -377,6 +382,11 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
     jint java_jni_version;
     jclass class = NULL;
     jmethodID start_method = NULL;
+    jmethodID end_method = NULL;
+    jmethodID prepare_method = NULL;
+    jmethodID commit_method = NULL;
+    jmethodID rollback_method = NULL;
+    jmethodID forget_method = NULL;
     
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI\n"));
     TRY {
@@ -398,10 +408,41 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
                          "(Ljavax/transaction/xa/Xid;I)V")) ||
             (*env)->ExceptionCheck(env))
             THROW(GET_METHOD_ID_ERROR1);
+        /* retrieve end method */
+        if (NULL == (end_method = (*env)->GetMethodID(
+                         env, class, "end",
+                         "(Ljavax/transaction/xa/Xid;I)V")) ||
+            (*env)->ExceptionCheck(env))
+            THROW(GET_METHOD_ID_ERROR2);
+        /* retrieve prepare method */
+        if (NULL == (prepare_method = (*env)->GetMethodID(
+                         env, class, "prepare",
+                         "(Ljavax/transaction/xa/Xid;)I")) ||
+            (*env)->ExceptionCheck(env))
+            THROW(GET_METHOD_ID_ERROR3);
+        /* retrieve commit method */
+        if (NULL == (commit_method = (*env)->GetMethodID(
+                         env, class, "commit",
+                         "(Ljavax/transaction/xa/Xid;Z)V")) ||
+            (*env)->ExceptionCheck(env))
+            THROW(GET_METHOD_ID_ERROR4);
+        /* retrieve rollback method */
+        if (NULL == (rollback_method = (*env)->GetMethodID(
+                         env, class, "rollback",
+                         "(Ljavax/transaction/xa/Xid;)V")) ||
+            (*env)->ExceptionCheck(env))
+            THROW(GET_METHOD_ID_ERROR5);
+        /* retrieve forget method */
+        if (NULL == (forget_method = (*env)->GetMethodID(
+                         env, class, "forget",
+                         "(Ljavax/transaction/xa/Xid;)V")) ||
+            (*env)->ExceptionCheck(env))
+            THROW(GET_METHOD_ID_ERROR6);
         /* create a new native XA Java resource */
         if (NULL == (xjxr = xta_java_xa_resource_new(
                          "Java XA Resource", java_vm, java_jni_version,
-                         xa_resource, start_method)))
+                         xa_resource, start_method, end_method, prepare_method,
+                         commit_method, rollback_method, forget_method)))
             THROW(NULL_OBJECT1);
         /* add the resource to array of native resources */
         if (NULL == (array =
@@ -436,6 +477,11 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case GET_METHOD_ID_ERROR1:
+            case GET_METHOD_ID_ERROR2:
+            case GET_METHOD_ID_ERROR3:
+            case GET_METHOD_ID_ERROR4:
+            case GET_METHOD_ID_ERROR5:
+            case GET_METHOD_ID_ERROR6:
                 ret_cod = LIXA_RC_GET_METHOD_ID_ERROR;
                 break;
             case GET_NATIVE_RESOURCE_ERROR:
@@ -646,3 +692,51 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_commitJNI
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+/*
+ * Class:     org_tiian_lixa_xta_Transaction
+ * Method:    rollbackJNI
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_rollbackJNI
+(JNIEnv *env, jobject this_obj)
+{
+    enum Exception { NULL_OBJECT
+                     , TRANSACTION_ROLLBACK_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_rollbackJNI\n"));
+    TRY {
+        xta_transaction_t * tx = NULL;
+        /* retrieve the current Transaction object */
+        if (NULL == (tx = Java_org_tiian_lixa_xta_Transaction_getNativeObject(
+                         env, this_obj)))
+            THROW(NULL_OBJECT);
+        /* call native method */
+        if (LIXA_RC_OK != (ret_cod = xta_transaction_rollback(tx)))
+            THROW(TRANSACTION_ROLLBACK_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case TRANSACTION_ROLLBACK_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_rollbackJNI/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+

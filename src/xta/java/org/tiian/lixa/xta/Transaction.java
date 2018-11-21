@@ -154,6 +154,14 @@ public class Transaction {
     public void commit() throws XtaException, XAException {
         commit(false);
     }
-
-    
+    /*
+     * Native method wrapper for rollback
+     */
+    private native int rollbackJNI() throws XtaException, XAException;
+    /**
+     * Rollback a Transacton
+     */
+    public void rollback() throws XtaException, XAException {
+        rollbackJNI();
+    }
 }

@@ -116,6 +116,17 @@ extern "C" {
     
 
     /**
+     * Create a new Transaction Identifier object duplicating the passed one
+     * @param[in] xid is the transaction identifier that must be duplicated
+     * @return a new transaction identifier object or NULL in the event of an
+     *         error occurred
+     */
+    xta_xid_t *xta_xid_dup(const xta_xid_t *xid);
+
+
+    
+    
+    /**
      * Delete a Transaction Identifier object
      * @param[in] xid object to delete
      */

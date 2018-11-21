@@ -118,6 +118,8 @@ public class ExampleXtaSA31 {
                  // commit or rollback
                  if (commit)
                      tx.commit();
+                 else
+                     tx.rollback();
                  
              } catch (XtaException e) {
                  System.err.println("XtaException: LIXA ReturnCode=" +

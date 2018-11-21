@@ -45,13 +45,46 @@ typedef struct {
      */
     jint                            java_jni_version;
     /**
-     * Java XA Resource reference
+     * Java XA Resource Global Reference
      */
     jobject                         java_object;
     /**
-     * Java start method reference
+     * Java Xid Global Reference
+     * Unfortunately it must be cached because some Resource Managers, for
+     * example pgjdbc (PostgreSQL JDBC) check the Xid object, not the content
+     * of the Xid object in the calls that follow "start"; if XTA creates a new
+     * Xid object on the fly, such Resource Managers complains it's a "new one"
+     */
+    jobject                         java_xid;
+    /**
+     * This XTA Xid native object is necessary as the underlying object for the
+     * above Java Xid object
+     */
+    xta_xid_t                      *xta_xid;
+    /**
+     * Java "start" method reference
      */
     jmethodID                       java_method_start;
+    /**
+     * Java "end" method reference
+     */
+    jmethodID                       java_method_end;
+    /**
+     * Java "prepare" method reference
+     */
+    jmethodID                       java_method_prepare;
+    /**
+     * Java "commit" method reference
+     */
+    jmethodID                       java_method_commit;
+    /**
+     * Java "rollback" method reference
+     */
+    jmethodID                       java_method_rollback;
+    /**
+     * Java "forget" method reference
+     */
+    jmethodID                       java_method_forget;
 } xta_java_xa_resource_t;
 
 
@@ -69,11 +102,17 @@ extern "C" {
      * @param[in] java_jni_version : JNI version
      * @param[in] java_object : reference to Java XAResource object
      * @param[in] start : Java XAResource method
+     * @param[in] end : Java XAResource method
+     * @param[in] prepare : Java XAResource method
+     * @param[in] commit : Java XAResource method
+     * @param[in] rollback : Java XAResource method
+     * @param[in] forget : Java XAResource method
      * @return a new object or NULL in the event of error
      */
     xta_java_xa_resource_t *xta_java_xa_resource_new(
         const char *name, JavaVM *java_vm, jint java_jni_version,
-        jobject java_object, jmethodID start);
+        jobject java_object, jmethodID start, jmethodID end, jmethodID prepare,
+        jmethodID commit, jmethodID rollback, jmethodID forget);
 
     
 
@@ -93,12 +132,20 @@ extern "C" {
      * @param[in] java_jni_version : JNI version
      * @param[in] java_object : reference to Java XAResource object
      * @param[in] start : Java XAResource method
+     * @param[in] end : Java XAResource method
+     * @param[in] prepare : Java XAResource method
+     * @param[in] commit : Java XAResource method
+     * @param[in] rollback : Java XAResource method
+     * @param[in] forget : Java XAResource method
      * @return a reason code
      */
     int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
                                   const char *name,
                                   JavaVM *java_vm, jint java_jni_version,
-                                  jobject java_object, jmethodID start);
+                                  jobject java_object, jmethodID start,
+                                  jmethodID end, jmethodID prepare,
+                                  jmethodID commit, jmethodID rollback,
+                                  jmethodID forget);
 
 
 

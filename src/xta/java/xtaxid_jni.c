@@ -32,6 +32,7 @@
 #include "lixa_trace.h"
 /* XTA includes */
 #include "xta.h"
+#include "xtaxid_jni.h"
 
 
 
@@ -44,7 +45,7 @@
 
 
 /*
- * Create a reference to C native object and allocate a list for XA C resources
+ * Create a reference to C native object
  */
 JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_XtaXid_newJNI(
     JNIEnv *env, jobject this_obj, xta_xid_t *xid)
@@ -114,11 +115,55 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_XtaXid_newJNI(
 
 
 /* This is an helper internal function, it's not seen by JNI */
-/* @@@
-jobject Java_org_tiian_lixa_xta_XtaXid_new_from_native(
-    JNIEnv *env, 
+jobject JNICALL Java_org_tiian_lixa_xta_XtaXid_new(JNIEnv *env)
 {
-*/
+    enum Exception { FIND_CLASS_ERROR
+                     , GET_METHOD_ID_ERROR
+                     , NEW_OBJECT_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    jclass class = NULL;
+    jmethodID constructor = NULL;
+    jobject jxid = NULL;
+    
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_new\n"));
+    TRY {
+        /* retrieve Java XtaXid class */
+        if (NULL == (class = (*env)->FindClass(
+                         env, "org/tiian/lixa/xta/XtaXid")) ||
+            (*env)->ExceptionCheck(env))
+            THROW(FIND_CLASS_ERROR);
+        /* retrieve XtaXid constructor */
+        if (NULL == (constructor = (*env)->GetMethodID(
+                         env, class, "<init>", "()V")) ||
+            (*env)->ExceptionCheck(env))
+            THROW(GET_METHOD_ID_ERROR);
+        /* create a new XtaXid object */
+        if (NULL == (jxid = (*env)->NewObject(env, class, constructor)) ||
+            (*env)->ExceptionCheck(env))
+            THROW(NEW_OBJECT_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case FIND_CLASS_ERROR:
+            case GET_METHOD_ID_ERROR:
+            case NEW_OBJECT_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_new/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return jxid;
+}
+
+
 
 /* This is an helper internal function, it's not seen by JNI */
 xta_xid_t*

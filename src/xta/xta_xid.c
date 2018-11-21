@@ -360,13 +360,60 @@ xta_xid_t *xta_xid_new_from_XID(const XID *xid)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* clean-up memory in the event of an error */
+        if (NONE != excp) {
+            g_free(this);
+            this = NULL;
+        }   
     } /* TRY-CATCH */
-    /* clean-up memory in the event of an error */
-    if (NONE != excp) {
-        g_free(this);
-        this = NULL;
-    }   
     LIXA_TRACE(("xta_xid_new_from_XID/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return this;
+}
+
+
+
+xta_xid_t *xta_xid_dup(const xta_xid_t *xid)
+{
+    enum Exception { NULL_OBJECT
+                     , G_TRY_MALLOC_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    xta_xid_t *this = NULL;
+    
+    LIXA_TRACE(("xta_xid_dup\n"));
+    TRY {
+        if (NULL == xid)
+            THROW(NULL_OBJECT);
+        /* allocate the object */
+        if (NULL == (this = (xta_xid_t *)
+                     g_try_malloc0(sizeof(xta_xid_t))))
+            THROW(G_TRY_MALLOC_ERROR);
+        /* copy da field */
+        this->xa_xid = xid->xa_xid;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = LIXA_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* clean-up memory in the event of an error */
+        if (NONE != excp) {
+            g_free(this);
+            this = NULL;
+        }   
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_xid_dup/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return this;
 }
