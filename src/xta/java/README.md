@@ -26,3 +26,5 @@ https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/invocation.html
 
 https://docs.oracle.com/javase/9/docs/specs/jni/functions.html#version-information
 
+A code example that shows XA Java usage: https://www.programcreek.com/java-api-examples/?code=bragex/the-vigilantes/the-vigilantes-master/Is-202/Sprint_1/Last%20ned%20denne/mysql-connector-java-5.1.44/src/testsuite/regression/ConnectionRegressionTest.java
+

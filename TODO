@@ -1,6 +1,9 @@
 Implement XTA for Java:
 
-Implement something to guarantee uniqueness of job id
+Implement something to guarantee uniqueness of job id:
+- pass 2 additional arguments to Transaction.enlistResource and populate
+  "name" and "open_info" accordingly
+- change xta_java_xa_resource_init to get both the additional parameters
 
 Go on with use cases
 

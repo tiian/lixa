@@ -18,6 +18,25 @@
  */
 
 
+
+/*
+ * This program is an example implementation of the
+ * "Single Application" Pattern
+ * as documented in LIXA manual:
+ * http://www.tiian.org/lixa/manuals/html/index.html
+ *
+ * This program accepts exactly two parameters on the command line:
+ * first parameter:  "commit", boolean value (if FALSE, "rollback")
+ * second parameter: "insert", boolean value (if FALSE, "delete")
+ *
+ * Programming Style note:
+ * the purpose of this small program is not to explain Java development
+ * techniques or good style, but simply to show XTA for Java using the easiest
+ * approach.
+ */
+
+
+
 // import XTA package from LIXA project
 import org.tiian.lixa.xta.*;
 // import SQL
@@ -27,11 +46,11 @@ import java.sql.Statement;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.XAException;
-// import MySQL packages
-import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
-import com.mysql.jdbc.jdbc2.optional.MysqlXid;
-// import PostgreSQL packages
+// import PostgreSQL package for XA Data Source
 import org.postgresql.xa.PGXADataSource;
+// import MySQL package for XA Data Source
+import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
+
 
 
 public class ExampleXtaSA31 {
@@ -39,11 +58,9 @@ public class ExampleXtaSA31 {
         // Check command line parameters
         if (args.length < 2) {
             System.err.println("This program requires two boolean " +
-                               "parameters: 'commit' and 'insert'\n");
+                               "parameters: 'commit' and 'insert'");
             System.exit(1);
         }
-        TransactionManager tm;
-        Transaction tx;
         // First parameter: commit transaction
         boolean commit = Integer.parseInt(args[0]) > 0 ? true : false;
         // Second parameter: insert data in databases
@@ -53,12 +70,19 @@ public class ExampleXtaSA31 {
         // variable for MySQL statement to execute
         String mysqlStmt;
 
+        // XTA Transaction Manager
+        TransactionManager tm;
+        // XTA Transaction
+        Transaction tx;
+        
+        // XA Resource for PostgreSQL
         PGXADataSource xads1 = null;
         XAConnection xac1 = null;
         XAResource xar1 = null;
         Connection conn1 = null; 
         Statement stmt1 = null;
         
+        // XA Resource for MySQL
         MysqlXADataSource xads2 = null;
         XAConnection xac2 = null;
         XAResource xar2 = null;
@@ -77,30 +101,43 @@ public class ExampleXtaSA31 {
              postgresqlStmt = "DELETE FROM authors WHERE id=1921";
              mysqlStmt = "DELETE FROM authors WHERE id=1919";
          }
+         
          try {
-             /*
-              * A bit of scaffolding for PostgreSQL
-              */
+             //
+             // A bit of scaffolding for PostgreSQL:
+             //
+             // 1. create an XA Data Source
              xads1 = new PGXADataSource();
+             // 2. set connection parameters (one property at a time)
              xads1.setServerName("localhost");
              xads1.setDatabaseName("testdb");
              xads1.setUser("tiian");
              xads1.setPassword("passw0rd");
+             // 3. get an XA Connection from the XA Data Source
              xac1 = xads1.getXAConnection();
+             // 4. get an XA Resource from the XA Connection
              xar1 = xac1.getXAResource();
-             conn1 = xac1.getConnection(); 
-             stmt1 = conn1.createStatement();
-             /*
-              * MySQL driver
-              */
+             // 5. get an SQL Connection from the XA Connection
+             conn1 = xac1.getConnection();
+             //
+             // A bit of scaffolding for MySQL/MariaDB
+             //
+             // 1. create an XA Data Source             
              xads2 = new MysqlXADataSource();
+             // 2. set connection parameters using a connection URL
              xads2.setUrl("jdbc:mysql://localhost/lixa?user=lixa&password=");
+             // 3. get an XA Connection from the XA Data Source
              xac2 = xads2.getXAConnection();
+             // 4. get an XA Resource from the XA Connection
              xar2 = xac2.getXAResource();
+             // 5. get an SQL Connection from the XA Connection
              conn2 = xac2.getConnection(); 
-             stmt2 = conn2.createStatement();
              
              try {
+                 //
+                 // Create the XTA objects that are necessary to manage the
+                 // distributed transaction
+                 //
                  // Create a mew XTA Transaction Manager
                  tm = new TransactionManager();
                  // Create a new XA global transaction using the Transaction
@@ -112,8 +149,26 @@ public class ExampleXtaSA31 {
                  tx.enlistResource(xar2);
                  // Start a new XA global transaction with a single branch
                  tx.start();
-                 // Execute SQL statements
+
+                 //
+                 // At this point, it's time to do something with the
+                 // Resource Managers (PostgreSQL and MySQL/MariaDB)
+                 //
+                 // Create and Execute PostgreSQL statement
+                 //
+                 System.out.println("PostgreSQL, executing >" +
+                                    postgresqlStmt + "<");
+                 // create a Statement object for PostgreSQL
+                 stmt1 = conn1.createStatement();
+                 // Execute PostgreSQL statements 
                  stmt1.executeUpdate(postgresqlStmt);
+                 //
+                 // Create and Execute MySQL/MariaDB statement
+                 //
+                 System.out.println("MySQL, executing >" + mysqlStmt + "<");
+                 // create a Statement object for MySQL/MariaDB
+                 stmt2 = conn2.createStatement();
+                 // Execute MySQL statements 
                  stmt2.executeUpdate(mysqlStmt);
                  // commit or rollback
                  if (commit)
@@ -132,31 +187,18 @@ public class ExampleXtaSA31 {
                  System.exit(1);
              }
 
-             /*
-             MysqlXid xid = new MysqlXid("2".getBytes(), "2".getBytes(), 1);
-             xar1.start(xid, XAResource.TMNOFLAGS);
-             xar2.start(xid, XAResource.TMNOFLAGS);
-             xar1.end(xid, XAResource.TMSUCCESS);
-             xar2.end(xid, XAResource.TMSUCCESS);
-             int ret1, ret2;
-             ret1 = xar1.prepare(xid);
-             ret2 = xar2.prepare(xid);
-             if (ret1 == XAResource.XA_OK && ret2 == XAResource.XA_OK) {
-                 xar1.commit(xid, false);
-                 xar2.commit(xid, false);
-             } else {
-                 xar1.rollback(xid);
-                 xar2.rollback(xid);
-             }
-             */
          } catch (Exception e) {
              e.printStackTrace();
              System.exit(1);
          } finally {
              try {
+                 // Close Statement, SQL Connection and XA Connection for
+                 // PostgreSQL
                  stmt1.close();
                  conn1.close();
                  xac1.close();
+                 // Close Statement, SQL Connection and XA Connection for
+                 // MySQL
                  stmt2.close();
                  conn2.close();
                  xac2.close();
@@ -165,188 +207,5 @@ public class ExampleXtaSA31 {
                  System.exit(1);
              }
          }
-         /* @@@ remove me
-        if (commit)
-            System.out.println("Commit");
-        else
-            System.out.println("Rollback");
-        if (insert)
-            System.out.println("Insert");
-        else
-            System.out.println("Delete");
-        */
     }
 }
-
-
-/*
- * This program is an example implementation of the
- * "Single Application" Pattern
- * as documented in LIXA manual:
- * http://www.tiian.org/lixa/manuals/html/index.html
- *
- * This program accepts exactly two parameters on the command line:
- * first parameter:  "commit", boolean value (if FALSE, "rollback")
- * second parameter: "insert", boolean value (if FALSE, "delete")
- *
- * Programming Style note:
- * the purpose of this small program is not to explain C++ development
- * techniques or good style, but simply to show XTA for C++ using the easiest
- * approach.
- * "xta" namespace is explicitly put in every statement (see "xta::") but it
- * can be avoided with "using namespace xta;"
- */
-
-
-/*
-// Standard headers
-#include <iostream>
-// This header is necessary for all the stuff related to XTA
-#include <xta/cpp/Xta.hpp>
-*/
-
-
-/*
-int main(int argc, char *argv[])
-{
-    /* native PostgreSQL connection handler
-    PGconn                       *rm1 = NULL;
-    /* PostgreSQL result
-    PGresult                     *pg_res;
-    /* XTA Resource for PostgreSQL
-    xta::PostgresqlXaResource    *xar1 = NULL;
-    /* native MySQL connection handler *
-    MYSQL                        *rm2 = NULL;
-    /* XTA Resource for MySQL
-    xta::MysqlXaResource         *xar2 = NULL;
-    /* XTA Transaction Manager object reference
-    xta::TransactionManager      *tm = NULL;
-
-    /*
-     * initialize XTA environment
-     *
-    xta::Xta::Init();
-    /*
-     * create a new PostgreSQL connection
-     * Note: using PostgreSQL C API and C standard functions
-     *
-    rm1 = PQconnectdb("dbname=testdb");
-    if (PQstatus(rm1) != CONNECTION_OK) {
-        fprintf(stderr, "PQconnectdb: returned error %s\n",
-                PQerrorMessage(rm1));
-        PQfinish(rm1);
-        return 1;
-    }
-    /*
-     * create a new MySQL connection
-     * Note: using MySQL C API and C standard functions
-     *
-    rm2 = mysql_init(NULL);
-    if (rm2 == NULL) {
-        fprintf(stderr, "mysql_init: returned NULL\n");
-        return 1;
-    }
-    if (mysql_real_connect(rm2, "localhost", "lixa", "",
-                           "lixa", 0, NULL, 0) == NULL) {
-        fprintf(stderr, "mysql_real_connect: returned error: %u, %s\n",
-                mysql_errno(rm2), mysql_error(rm2));
-        return 1;
-    }
-    /*
-     * create XTA objects necessary to start a transaction
-     *
-    try {
-        // create a new XTA Transaction Manager object
-        tm = new xta::TransactionManager();
-        /*
-         * create an XA resource for PostgreSQL
-         * second parameter "PostgreSQL" is descriptive
-         * third parameter "dbname=testdb" identifies the specific database
-         *
-        xar1 = new xta::PostgresqlXaResource(
-            rm1, "PostgreSQL", "dbname=testdb");
-        // create an XA resource for MySQL
-        // second parameter "MySQL" is descriptive
-        // third parameter "localhost,0,lixa,,lixa" identifies the specific
-        // database
-        xar2 = new xta::MysqlXaResource(
-            rm2, "MySQL", "localhost,0,lixa,,lixa");
-
-
-        /*
-         * At this point, it's time to do something with the Resource Managers
-         * (PostgreSQL and MySQL)
-         *
-         * Execute PostgreSQL statement
-         *
-        printf("PostgreSQL, executing >%s<\n", postgresql_stmt);
-        pg_res = PQexec(rm1, postgresql_stmt);
-        if (PQresultStatus(pg_res) != PGRES_COMMAND_OK) {
-            fprintf(stderr, "PostgreSQL, error while executing >%s<: %s\n",
-                    postgresql_stmt, PQerrorMessage(rm1));
-            PQclear(pg_res);
-            PQfinish(rm1);
-            return 1;
-        }
-        PQclear(pg_res);
-        /*
-         * Execute MySQL statement
-         *
-        printf("MySQL, executing >%s<\n", mysql_stmt);
-        if (mysql_query(rm2, mysql_stmt)) {
-            fprintf(stderr, "MySQL, error while executing >%s<: %u/%s\n",
-                    mysql_stmt, mysql_errno(rm2), mysql_error(rm2));
-            mysql_close(rm2);
-            return 1;
-        }
-        /*
-         * commit or rollback the transaction
-         *
-        if (commit) {
-            tx.Commit();
-        } else {
-            tx.Rollback();
-        }
-        /*
-         * Close all resources enlisted by tx Transaction
-         *
-        tx.Close();
-        /*
-         * Delete PostgreSQL native and XA resource
-         *
-        delete xar1;
-        /*
-         * Close the PostgreSQL connection
-         *
-        PQfinish(rm1);
-        /*
-         * Delete MySQL native and XA resource
-         *
-        delete xar2;
-        /*
-         * Close the MySQL connection
-         *
-        mysql_close(rm2);
-        /*
-         * Delete Transaction Manager object
-         *
-        delete tm;
-        
-    } catch (xta::Exception e) {
-        /*
-         * what() is a standard method that describes the exception
-         * where() is a method provided by XTA to describe the XTA C function
-         *         that raised the exception
-         * getReturnCode() is a method provided by XTA to retrieve the
-         *                 integer reason code returned by XTA C function
-         *                 (see file lixa_errors.h)
-         *
-        cerr << "Exception in function '" << e.where() <<
-            "', return code description: '" << e.what() << "', " <<
-            "return code: " << e.getReturnCode() << endl;
-        return 1;
-    }
-    
-    return 0;
-}
-*/
