@@ -182,19 +182,13 @@ m4_include(m4include/ax_prog_java_works.m4)
 AX_PROG_JAVA
 m4_include(m4include/ax_check_java_home.m4)
 AX_CHECK_JAVA_HOME
-m4_include(m4include/ax_prog_javah.m4)
-AX_PROG_JAVAH
 m4_include(m4include/ax_prog_jar.m4)
 AX_PROG_JAR
 m4_include(m4include/ax_prog_javadoc.m4)
 AX_PROG_JAVADOC
+AM_CONDITIONAL([COND_JAVADOC], [test "z$JAVADOC" != "z"])
 
 AM_CONDITIONAL([COMPILE_XTA_JAVA], [test "$LIXA_XTA" = "yes" -a "z$JAVA" != "z" -a "z$JAVAC" != "z" -a "z$JAR" != "z"])
-AM_CONDITIONAL([COND_HAVE_JAVAH], [test "z$JAVAH" != "z"])
-if test "z$JAVAH" = "z" -a "z$JAVA" != "z"
-then
-	AC_MSG_NOTICE([javah not found, assuming Java 9 or higher])
-fi
 
 # Check Python availability
 m4_include(m4include/ax_python_devel.m4)

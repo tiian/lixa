@@ -26,8 +26,15 @@ import javax.transaction.xa.XAException;
 
 
 
-/*
- * XTA Transaction
+/**
+ * The Transaction class implements the methods necessary to manage XTA
+ * transactions, like {@link Transaction#commit commit} and
+ * {@link Transaction#rollback rollback}.
+ * This class does not have a public constructor because it's factory is
+ * {@link TransactionManager#createTransaction createTransaction} and there
+ * would be no usage of a Transaction object that has not been created by a
+ * Transaction Manager factory.
+ * @author Christian Ferrari
  */
 public class Transaction {
     static {
@@ -51,10 +58,6 @@ public class Transaction {
     /**
      * Verifies that the current object is not corrupted
      */
-    private void nullCheck() throws XtaException {
-        if (null == NativeObject)
-            throw new XtaException(ErrorCodes.LIXA_RC_OBJ_CORRUPTED);
-    }
     /*
      * Allocate a C list to collect the C native resources that will be
      * enlisted
@@ -77,7 +80,7 @@ public class Transaction {
      */
     private native void deleteJNI(boolean AlreadyOpened);
     /**
-     * Release the C native object when finalization is executed
+     * Release the C native object when Java object finalization is executed
      */
     protected void finalize() {
         if (null != NativeResources) {
@@ -87,21 +90,19 @@ public class Transaction {
             NativeResources = null;
         }
     }
-    /*
-     * Link a Java XAResource to a C xta_java_xa_resource_t
-    private native void enlistResourceJNI(XAResource xaRes, String name,
-                                          String identifier)
-        throws XtaException;
-     */
     /**
      * Enlist the resource specified with the transaction associated with the
      * target Transaction object.
-     * @param xaRes XXX
-     * @param name XXX
-     * @param identifier YYY
+     * @param xaRes The XAResource object associated with the Resource Manager
+     * @param name The name of the Resource Manager associated to the
+     *        XAResource, for example "PostgreSQL"
+     * @param identifier A string to distinguish the specific Resource Manager
+     *        instance
      */
     public native void enlistResource(XAResource xaRes,
-                                      String name, String identifier);
+                                      String name,
+                                      String identifier)
+        throws XtaException;
     /*
      * Create a native xta_xid_t from xta_transaction_t
      */

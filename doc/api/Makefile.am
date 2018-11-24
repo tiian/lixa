@@ -5,9 +5,13 @@ if COMPILE_XTA
 if COMPILE_XTA_CPP
       MAYBE_XTA_CPP = xta/CPP/html/index.html
 endif
+if COMPILE_XTA_JAVA
+      MAYBE_XTAJAVA = xta/Java/html/index.html
+      JAVA_PKGDIR = org/tiian/lixa/xta
 endif
 endif
-EXTRA_DIST = $(MAYBE_API) $(MAYBE_XTA) $(MAYBE_XTA_CPP) \
+endif
+EXTRA_DIST = $(MAYBE_API) $(MAYBE_XTA) $(MAYBE_XTA_CPP) $(MAYBE_XTAJAVA) \
 	doxygen_footer.html doxygen_header_lixa.html \
 	doxygen_header_xta.html doxygen_header_xta-cpp.html
 dist_noinst_DATA = doxygen.xta.in doxygen.xta-cpp.in doxygen.lixa.in
@@ -30,7 +34,7 @@ doxygen.lixa:   doxygen.lixa.in
         -e 's|@HAVE_DOT_BOOL[@]|$(HAVE_DOT_BOOL)|g' \
         $< >$@
 
-all:	$(MAYBE_API) $(MAYBE_XTA) $(MAYBE_XTA_CPP)
+all:	$(MAYBE_API) $(MAYBE_XTA) $(MAYBE_XTA_CPP) $(MAYBE_XTAJAVA)
 
 if COND_DOXYGEN
 xta/C/html/index.html:	doxygen.xta \
@@ -60,3 +64,11 @@ lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 	@echo "LIXA source code documentation skipped because doxygen is not available"
 endif
 
+if COND_JAVADOC
+$(MAYBE_XTAJAVA):	$(top_srcdir)/src/xta/java/$(JAVA_PKGDIR)/*.java
+	$(JAVADOC) org.tiian.lixa.xta -d $(top_srcdir)/doc/api/xta/Java/html \
+	-sourcepath $(top_srcdir)/src/xta/java
+else
+$(MAYBE_XTAJAVA):	$(top_srcdir)/src/xta/java/$(JAVA_PKGDIR)/*.java
+	@echo "XTA Java API documentation skipped because javadoc is not available"
+endif
