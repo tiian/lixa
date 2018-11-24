@@ -89,17 +89,19 @@ public class Transaction {
     }
     /*
      * Link a Java XAResource to a C xta_java_xa_resource_t
-     */
-    private native void enlistResourceJNI(XAResource xaRes)
+    private native void enlistResourceJNI(XAResource xaRes, String name,
+                                          String identifier)
         throws XtaException;
+     */
     /**
      * Enlist the resource specified with the transaction associated with the
      * target Transaction object.
+     * @param xaRes XXX
+     * @param name XXX
+     * @param identifier YYY
      */
-    public boolean enlistResource(XAResource xaRes) throws XtaException {
-        enlistResourceJNI(xaRes);
-        return true;
-    }
+    public native void enlistResource(XAResource xaRes,
+                                      String name, String identifier);
     /*
      * Create a native xta_xid_t from xta_transaction_t
      */

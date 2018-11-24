@@ -364,6 +364,8 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_GET_OBJECT_FIELD_ERROR:
             return "ERROR: 'JNI GetObjectField' function returned NULL "
                 "pointer";
+        case LIXA_RC_GET_STRING_UTF_CHARS_ERROR:
+            return "ERROR: 'JNI GetStringUTFChars' function returned an error";
         case LIXA_RC_GET_VERSION_ERROR:
             return "ERROR: 'JNI GetVersion' function returned an error";
         case LIXA_RC_NEW_BYTE_ARRAY_ERROR:

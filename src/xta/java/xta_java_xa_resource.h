@@ -97,7 +97,9 @@ extern "C" {
 
     /**
      * Create a new object to represent a Java XA resource
-     * @param[in] name : unique identifier of the resource
+     * @param[in] name : of the Resource Manager, for example "PostgreSQL"
+     * @param[in] identifier : a string to distinguish a specific Resource
+     *            Manger instance
      * @param[in] java_vm : Java Virtual Machine
      * @param[in] java_jni_version : JNI version
      * @param[in] java_object : reference to Java XAResource object
@@ -110,7 +112,8 @@ extern "C" {
      * @return a new object or NULL in the event of error
      */
     xta_java_xa_resource_t *xta_java_xa_resource_new(
-        const char *name, JavaVM *java_vm, jint java_jni_version,
+        const char *name, const char *identifier,
+        JavaVM *java_vm, jint java_jni_version,
         jobject java_object, jmethodID start, jmethodID end, jmethodID prepare,
         jmethodID commit, jmethodID rollback, jmethodID forget);
 
@@ -127,7 +130,9 @@ extern "C" {
     /**
      * Initialize the propeties of a Java XA resource
      * @param[in,out] xa_resource : Java XA Resource object
-     * @param[in] name : unique identifier of the resource
+     * @param[in] name : of the Resource Manager, for example "PostgreSQL"
+     * @param[in] identifier : a string to distinguish a specific Resource
+     *            Manger instance
      * @param[in] java_vm : Java Virtual Machine
      * @param[in] java_jni_version : JNI version
      * @param[in] java_object : reference to Java XAResource object
@@ -140,7 +145,7 @@ extern "C" {
      * @return a reason code
      */
     int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
-                                  const char *name,
+                                  const char *name, const char *identifier,
                                   JavaVM *java_vm, jint java_jni_version,
                                   jobject java_object, jmethodID start,
                                   jmethodID end, jmethodID prepare,

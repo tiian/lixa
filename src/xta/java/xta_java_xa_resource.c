@@ -68,7 +68,8 @@ const static struct xta_iface_s xta_java_iface = {
 
 
 xta_java_xa_resource_t *xta_java_xa_resource_new(
-    const char *name, JavaVM *java_vm, jint java_jni_version,
+    const char *name, const char *identifier,
+    JavaVM *java_vm, jint java_jni_version,
     jobject java_object, jmethodID start, jmethodID end, jmethodID prepare,
     jmethodID commit, jmethodID rollback, jmethodID forget)
 {
@@ -86,7 +87,8 @@ xta_java_xa_resource_t *xta_java_xa_resource_new(
             THROW(G_TRY_MALLOC_ERROR);
         /* initialize "class" properties */
         if (LIXA_RC_OK != (ret_cod = xta_java_xa_resource_init(
-                               this, name, java_vm, java_jni_version,
+                               this, name, identifier,
+                               java_vm, java_jni_version,
                                java_object, start, end, prepare, commit,
                                rollback, forget)))
             THROW(XTA_JAVA_XA_RESOURCE_INIT_ERROR);
@@ -165,7 +167,7 @@ void xta_java_xa_resource_delete(xta_java_xa_resource_t *xa_resource)
 
 
 int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
-                              const char *name,
+                              const char *name, const char *identifier,
                               JavaVM *java_vm, jint java_jni_version,
                               jobject java_object, jmethodID start,
                               jmethodID end, jmethodID prepare,
@@ -189,7 +191,7 @@ int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
         /* initialize "base class" (xta_acquired_xa_resource_t) properties */
         if (LIXA_RC_OK != (ret_cod = xta_acquired_xa_resource_init(
                                (xta_acquired_xa_resource_t *)xa_resource,
-                               &xta_java_iface, name, "dummy")))
+                               &xta_java_iface, name, identifier)))
             THROW(XTA_ACQUIRED_XA_RESOURCE_INIT_ERROR);
         /* retrieve Java environement for this thread */
         if (JNI_OK != (*(java_vm))->GetEnv(

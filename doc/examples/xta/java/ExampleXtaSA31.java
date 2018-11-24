@@ -144,9 +144,12 @@ public class ExampleXtaSA31 {
                  // Manager as a factory
                  tx = tm.createTransaction();
                  // Enlist PostgreSQL resource to transaction
-                 tx.enlistResource(xar1);
+                 tx.enlistResource(xar1, "PostgreSQL",
+                                   "localhost/testdb/tiian/passw0rd");
                  // Enlist MySQL resource to Transaction
-                 tx.enlistResource(xar2);
+                 tx.enlistResource(
+                     xar2, "MySQL",
+                     "jdbc:mysql://localhost/lixa?user=lixa/password=");
                  // Start a new XA global transaction with a single branch
                  tx.start();
 

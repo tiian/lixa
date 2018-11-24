@@ -353,11 +353,12 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_deleteJNI(
 
 /*
  * Class:     org_tiian_lixa_xta_Transaction
- * Method:    enlistResourceJNI
- * Signature: (Ljavax/transaction/xa/XAResource;)V
+ * Method:    enlistResource
+ * Signature: (Ljavax/transaction/xa/XAResource;Ljava/lang/String;Ljava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
-    JNIEnv *env, jobject this_object, jobject xa_resource)
+JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResource(
+    JNIEnv *env, jobject this_object, jobject xa_resource, jstring name,
+    jstring identifier)
 {
     enum Exception { GET_JAVA_VM_ERROR
                      , GET_VERSION_ERROR
@@ -368,6 +369,8 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
                      , GET_METHOD_ID_ERROR4
                      , GET_METHOD_ID_ERROR5
                      , GET_METHOD_ID_ERROR6
+                     , GET_STRING_UTF_CHARS_ERROR1
+                     , GET_STRING_UTF_CHARS_ERROR2
                      , NULL_OBJECT1
                      , GET_NATIVE_RESOURCE_ERROR
                      , NULL_OBJECT2
@@ -376,6 +379,8 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     xta_java_xa_resource_t *xjxr = NULL;
+    const char *resource_name = NULL;
+    const char *resource_identifier = NULL;
     xta_transaction_t *tx = NULL;
     GPtrArray *array = NULL;
     JavaVM *java_vm = NULL;
@@ -388,7 +393,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
     jmethodID rollback_method = NULL;
     jmethodID forget_method = NULL;
     
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI\n"));
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_enlistResource\n"));
     TRY {
         /* retrieve the current Java Virtual Machine */
         if (0 != (*env)->GetJavaVM(env, &java_vm) ||
@@ -438,9 +443,18 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
                          "(Ljavax/transaction/xa/Xid;)V")) ||
             (*env)->ExceptionCheck(env))
             THROW(GET_METHOD_ID_ERROR6);
+        /* convert resource name from Java to C */
+        if (NULL == (resource_name = (*env)->GetStringUTFChars(
+                         env, name, 0)))
+            THROW(GET_STRING_UTF_CHARS_ERROR1);
+        /* convert resource identifier from Java to C */
+        if (NULL == (resource_identifier = (*env)->GetStringUTFChars(
+                         env, identifier, 0)))
+            THROW(GET_STRING_UTF_CHARS_ERROR2);
         /* create a new native XA Java resource */
         if (NULL == (xjxr = xta_java_xa_resource_new(
-                         "Java XA Resource", java_vm, java_jni_version,
+                         resource_name, resource_identifier,
+                         java_vm, java_jni_version,
                          xa_resource, start_method, end_method, prepare_method,
                          commit_method, rollback_method, forget_method)))
             THROW(NULL_OBJECT1);
@@ -484,6 +498,10 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
             case GET_METHOD_ID_ERROR6:
                 ret_cod = LIXA_RC_GET_METHOD_ID_ERROR;
                 break;
+            case GET_STRING_UTF_CHARS_ERROR1:
+            case GET_STRING_UTF_CHARS_ERROR2:
+                ret_cod = LIXA_RC_GET_STRING_UTF_CHARS_ERROR;
+                break;
             case GET_NATIVE_RESOURCE_ERROR:
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
                 break;
@@ -502,7 +520,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI(
     /* recover memory if necessary */
     if (NONE != excp && NULL != xjxr)
         xta_java_xa_resource_delete(xjxr);
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_enlistResourceJNI"
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_enlistResource"
                 "/excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return;
 }

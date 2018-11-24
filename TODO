@@ -1,23 +1,27 @@
 Implement XTA for Java:
 
-Implement something to guarantee uniqueness of job id:
-- pass 2 additional arguments to Transaction.enlistResource and populate
-  "name" and "open_info" accordingly
-- change xta_java_xa_resource_init to get both the additional parameters
+Fix Javadoc for XTA for Java
 
 Go on with use cases
-
-implement xa_recover:
-- an example of receiving arrays of objects from Java to JNI: CallObjectMethod    https://github.com/joeferner/node-java/blob/master/src/utils.cpp
-- how xid is implemented by pgjdbc :( https://github.com/pgjdbc/pgjdbc/blob/master/pgjdbc/src/main/java/org/postgresql/xa/RecoveredXid.java
--  
 
 Implement test cases
 
 test xa_forget
 test xa_recover
 
-Fix Javadoc for XTA for Java
+this string 
+"jdbc:mysql://localhost/lixa?user=lixa&password="
+passed as resourceIdentifier to Transaction.enlistResource
+exploits an XML parsing error in LIXA state server as below:
+buffer.xml:1: parser error : EntityRef: expecting ';'
+state="1"/><xa_open_exec xa_info="jdbc:mysql://localhost/lixa?user=lixa&password
+                                                                               ^
+THE BUG is exploited by the ampersand (&) in the string
+
+implement xa_recover:
+- an example of receiving arrays of objects from Java to JNI: CallObjectMethod    https://github.com/joeferner/node-java/blob/master/src/utils.cpp
+- how xid is implemented by pgjdbc :( https://github.com/pgjdbc/pgjdbc/blob/master/pgjdbc/src/main/java/org/postgresql/xa/RecoveredXid.java
+-  
 
 **********
 
