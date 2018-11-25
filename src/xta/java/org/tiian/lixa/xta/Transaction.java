@@ -97,16 +97,14 @@ public class Transaction {
      * @param name The name of the Resource Manager associated to the
      *        XAResource, for example "PostgreSQL"
      * @param identifier A string to distinguish the specific Resource Manager
-     *        instance
+     *        instance. Use distinct identifier for different Resource Manager
+     *        instances, schema owners and so on: uniqueness is essential to
+     *        avoid undesired and/or wrong automatic recoveries
      */
     public native void enlistResource(XAResource xaRes,
                                       String name,
                                       String identifier)
         throws XtaException;
-    /*
-     * Create a native xta_xid_t from xta_transaction_t
-     */
-    private native XtaXid getXidJNI() throws XtaException;
     /**
      * Return the XID associated to the current transaction. It calls the
      * C native interface and it's the factory that MUST be used to create
@@ -114,9 +112,7 @@ public class Transaction {
      * @throws XtaException if the underlying native C functions returns an
      * error condition
      */
-    public XtaXid getXid() throws XtaException {
-        return getXidJNI();
-    }
+    public native XtaXid getXid() throws XtaException;
     /*
      * Native method wrapper for start
      */
@@ -124,9 +120,13 @@ public class Transaction {
         boolean multipleBranches, boolean alreadyOpened)
         throws XtaException, XAException;
     /**
-     * Start a new Transaction
+     * Start a new 2 phase commit transaction: this version of start method
+     * is necessary only if the transaction will be branched by other
+     * applications by mean of calling branch method. For single applications,
+     * use the version without parameters.
      * @param multipleBranches must be true only for transactions that will
-     * span more applications and it will be followed by branch method
+     * span more applications and it will be followed by a call to branch
+     * method
      */
     public void start(boolean multipleBranches)
         throws XtaException, XAException {
@@ -134,37 +134,33 @@ public class Transaction {
         AlreadyOpened = true;
     }
     /**
-     * Start a new Transaction
+     * Start a new 2 phase commit transaction: this version of start method can
+     * be used only if the transaction is not branched by 2 or more
+     * applications
      */
     public void start() throws XtaException, XAException {
         start(false);
     }
-    /*
-     * Native method wrapper for commit
-     */
-    private native int commitJNI(boolean nonBlocking)
-        throws XtaException, XAException;
     /**
-     * Commit a Transacton
+     * Commit the current transaction; this version of commit method is
+     * used to implement the Multiple Applications Concurrent Branches Pseudo
+     * Synchronous pattern. For all the other use cases, the method without
+     * non Blocking argument is suggested.
      * @param nonBlocking boolean value: true = xa_prepare will not block the
      *        caller, false = xa_prepare will block the caller; the option is
      *        used only for multiple branch transactions
+     * @see <a href="http://www.tiian.org/lixa/manuals/html/">LIXA Reference Guide / Developing Application Programs using XTA</a>
      */
-    public void commit(boolean nonBlocking)
-        throws XtaException, XAException {
-        commitJNI(nonBlocking);
-    }
+    public native void commit(boolean nonBlocking)
+        throws XtaException, XAException;
+    /**
+     * Commit the current transaction
+     */
     public void commit() throws XtaException, XAException {
         commit(false);
     }
-    /*
-     * Native method wrapper for rollback
-     */
-    private native int rollbackJNI() throws XtaException, XAException;
     /**
-     * Rollback a Transacton
+     * Rollback the current transaction
      */
-    public void rollback() throws XtaException, XAException {
-        rollbackJNI();
-    }
+    public native void rollback() throws XtaException, XAException;
 }

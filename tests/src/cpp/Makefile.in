@@ -95,6 +95,7 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_prog_java.m4 \
 	$(top_srcdir)/m4include/ax_prog_java_works.m4 \
 	$(top_srcdir)/m4include/ax_check_java_home.m4 \
+	$(top_srcdir)/m4include/ax_prog_javah.m4 \
 	$(top_srcdir)/m4include/ax_prog_jar.m4 \
 	$(top_srcdir)/m4include/ax_prog_javadoc.m4 \
 	$(top_srcdir)/m4include/ax_python_devel.m4 \
@@ -282,6 +283,7 @@ JAR = @JAR@
 JAVA = @JAVA@
 JAVAC = @JAVAC@
 JAVADOC = @JAVADOC@
+JAVAH = @JAVAH@
 JAVA_PATH_NAME = @JAVA_PATH_NAME@
 LD = @LD@
 LDFLAGS = @LDFLAGS@

@@ -527,8 +527,13 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResource(
 
 
 
+/*
+ * Class:     org_tiian_lixa_xta_Transaction
+ * Method:    getXidJNI
+ * Signature: ()Lorg/tiian/lixa/xta/XtaXid;
+ */
 JNIEXPORT jobject JNICALL
-Java_org_tiian_lixa_xta_Transaction_getXidJNI
+Java_org_tiian_lixa_xta_Transaction_getXid
 (JNIEnv *env, jobject this_obj)
 {
     enum Exception { NULL_OBJECT1
@@ -545,7 +550,7 @@ Java_org_tiian_lixa_xta_Transaction_getXidJNI
     jclass class = NULL;
     jmethodID constructor = NULL;
     
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getXidJNI\n"));
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getXid\n"));
     TRY {        
         /* retrieve the current Transaction object */
         if (NULL == (tx = Java_org_tiian_lixa_xta_Transaction_getNativeObject(
@@ -601,7 +606,7 @@ Java_org_tiian_lixa_xta_Transaction_getXidJNI
             Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
         
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getXidJNI/"
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getXid/"
                 "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     /* return the Java object */
     return jxid;
@@ -668,10 +673,10 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_startJNI
 
 /*
  * Class:     org_tiian_lixa_xta_Transaction
- * Method:    commitJNI
+ * Method:    commit
  * Signature: (Z)I
  */
-JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_commitJNI
+JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_commit
 (JNIEnv *env, jobject this_obj, jboolean non_blocking)
 {
     enum Exception { NULL_OBJECT
@@ -679,7 +684,7 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_commitJNI
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_commitJNI\n"));
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_commit\n"));
     TRY {
         xta_transaction_t * tx = NULL;
         /* retrieve the current Transaction object */
@@ -706,7 +711,7 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_commitJNI
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_commitJNI/excp=%d/"
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -715,10 +720,10 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_commitJNI
 
 /*
  * Class:     org_tiian_lixa_xta_Transaction
- * Method:    rollbackJNI
- * Signature: ()I
+ * Method:    rollback
+ * Signature: ()V
  */
-JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_rollbackJNI
+JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_rollback
 (JNIEnv *env, jobject this_obj)
 {
     enum Exception { NULL_OBJECT
@@ -726,7 +731,7 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_rollbackJNI
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_rollbackJNI\n"));
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_rollback\n"));
     TRY {
         xta_transaction_t * tx = NULL;
         /* retrieve the current Transaction object */
@@ -752,9 +757,9 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_rollbackJNI
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_rollbackJNI/excp=%d/"
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
+    return;
 }
 
 

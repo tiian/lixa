@@ -210,8 +210,13 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_TransactionManager_deleteJNI(
 
 
 
+/*
+ * Class:     org_tiian_lixa_xta_TransactionManager
+ * Method:    createTransaction
+ * Signature: ()Lorg/tiian/lixa/xta/Transaction;
+ */
 JNIEXPORT jobject JNICALL
-Java_org_tiian_lixa_xta_TransactionManager_createTransactionJNI
+Java_org_tiian_lixa_xta_TransactionManager_createTransaction
 (JNIEnv *env, jobject this_obj)
 {
     enum Exception { NULL_OBJECT1
@@ -229,7 +234,7 @@ Java_org_tiian_lixa_xta_TransactionManager_createTransactionJNI
     jmethodID constructor = NULL;
     
     LIXA_TRACE(("Java_org_tiian_lixa_xta_TransactionManager_"
-                "createTransactionJNI\n"));
+                "createTransaction\n"));
     TRY {        
         /* retrieve the current Transaction Manager object */
         if (NULL == (tm =
@@ -283,7 +288,7 @@ Java_org_tiian_lixa_xta_TransactionManager_createTransactionJNI
             Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */        
     LIXA_TRACE(("Java_org_tiian_lixa_xta_TransactionManager_"
-                "createTransactionJNI/excp=%d/"
+                "createTransaction/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     /* return the Java object */
     return jtx;

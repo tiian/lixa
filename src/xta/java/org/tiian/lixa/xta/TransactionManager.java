@@ -24,8 +24,10 @@ import java.nio.ByteBuffer;
 
 
 
-/*
- * XTA Transaction Manager
+/**
+ * TransactionManager class provides the factory to create
+ * {@link Transaction Transaction} objects. During its initialization, LIXA
+ * configurations for the underlying C libraries are loaded.
  */
 public class TransactionManager {
     static {
@@ -71,18 +73,12 @@ public class TransactionManager {
             NativeObject = null;
         }
     }
-    /*
-     * Create a native xta_transaction_t from xta_transacion_manager_t
-     */
-    private native Transaction createTransactionJNI() throws XtaException;
     /**
      * Create a new Transaction object associated with the current Transaction
-     * Manager. It calls the native C interface and it's the factory that
-     * MUST be used to create Transacton objects.
+     * Manager. It calls the native C interface and it's the factory for
+     * {@link Transaction Transacton} objects.
      * @throws XtaException if the underlying native C function returns
      * an error condition
      */
-    public Transaction createTransaction() throws XtaException {
-        return createTransactionJNI();
-    }
+    public native Transaction createTransaction() throws XtaException;
 }

@@ -20,8 +20,10 @@ package org.tiian.lixa.xta;
 
 
 
-/*
- * XTA Exception
+/**
+ * XtaException class extends standard Java Exception class and adds a method
+ * to retrieve the native LIXA return code that's the root cause of the
+ * exception
  */
 public class XtaException extends Exception {
     static {
@@ -34,16 +36,19 @@ public class XtaException extends Exception {
     private int ReturnCode;
     /**
      * Build a new XTA exception object
-     * @param returnCode is the value returned by the native C function
+     * @param returnCode is the value returned by the native C function: it's
+     *        defined in native C file lixa_errors.h and for the Java
+     *        developers' convenience even inside {@link ErrorCodes ErrorCodes}
+     *        class
      */
     public XtaException(int returnCode) {
         super(ErrorCodes.getText(returnCode));
         ReturnCode = returnCode;
     }
     /**
-     * Get the return code of the native C function that returned an error
-     * condition to the JNI wrapper method
-     * @return the return code associated to the exception
+     * Get the return code of the native LIXA C function that returned an error
+     * condition inside the JNI wrapper method
+     * @return the {@link ErrorCodes return code} associated to the exception
      */
     public int getReturnCode() { return ReturnCode; }
 }
