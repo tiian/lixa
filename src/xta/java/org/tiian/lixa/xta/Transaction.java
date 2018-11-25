@@ -30,11 +30,10 @@ import javax.transaction.xa.XAException;
  * The Transaction class implements the methods necessary to manage XTA
  * transactions, like {@link Transaction#commit commit} and
  * {@link Transaction#rollback rollback}.
- * This class does not have a public constructor because it's factory is
+ * This class does not have a public constructor because its factory is
  * {@link TransactionManager#createTransaction createTransaction} and there
  * would be no usage of a Transaction object that has not been created by a
  * Transaction Manager factory.
- * @author Christian Ferrari
  */
 public class Transaction {
     static {

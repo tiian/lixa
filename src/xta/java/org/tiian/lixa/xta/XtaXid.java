@@ -25,13 +25,16 @@ import javax.transaction.xa.Xid;
 
 
 
-/*
- * XTA XID
+/**
+ * The XtaXid class implements the Xid interface provided by the JTA standard.
+ * As explained in JTA documentation, it's a Java mapping of the X/Open
+ * transaction identifier XID structure and it specifies three accessor
+ * methods to retrieve a global transaction's format ID, global transaction ID,
+ * and branch qualifier.
+ * This class does not have a public constructor because its factory is
+ * {@link Transaction#getXid getXid} and there would be no usage of a Xid
+ * object that has been created outside a Transaction context.
  */
-/*
-  see here for returning bytearray[] from JNI
-  https://community.oracle.com/thread/1552704
-*/
 public class XtaXid implements Xid {
     static {
         org.tiian.lixa.xta.Xta.init();
@@ -41,13 +44,6 @@ public class XtaXid implements Xid {
      * by the native library
      */
     private ByteBuffer NativeObject;
-    /**
-     * Verifies that the current object is not corrupted
-     */
-    private void nullCheck() throws XtaException {
-        if (null == NativeObject)
-            throw new XtaException(ErrorCodes.LIXA_RC_OBJ_CORRUPTED);
-    }
     /*
      * Allocate a C native object xta_xid_t
      */
@@ -76,7 +72,18 @@ public class XtaXid implements Xid {
             NativeObject = null;
         }
     }
+    /**
+     * Obtain the transaction branch identifier part of XID as an array of
+     * bytes.
+     */
     public native byte[] getBranchQualifier();
+    /**
+     * Obtain the format identifier part of the XID.
+     */
     public native int getFormatId();
+    /**
+     * Obtain the global transaction identifier part of XID as an array of
+     * bytes.
+     */
     public native byte[] getGlobalTransactionId();
 }

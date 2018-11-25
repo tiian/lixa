@@ -46,8 +46,8 @@ public class XtaException extends Exception {
         ReturnCode = returnCode;
     }
     /**
-     * Get the return code of the native LIXA C function that returned an error
-     * condition inside the JNI wrapper method
+     * Code returned by the native LIXA C function that was called by the JNI
+     * wrapper method
      * @return the {@link ErrorCodes return code} associated to the exception
      */
     public int getReturnCode() { return ReturnCode; }

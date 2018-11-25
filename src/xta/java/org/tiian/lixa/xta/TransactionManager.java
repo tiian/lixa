@@ -38,13 +38,6 @@ public class TransactionManager {
      * by the native library
      */
     private ByteBuffer NativeObject;
-    /**
-     * Verifies that the current object is not corrupted
-     */
-    private void nullCheck() throws XtaException {
-        if (null == NativeObject)
-            throw new XtaException(ErrorCodes.LIXA_RC_OBJ_CORRUPTED);
-    }
     /*
      * Create a new native xta_transaction_manager_t object and set
      * NativeObject

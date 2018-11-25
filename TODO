@@ -1,7 +1,5 @@
 Implement XTA for Java:
 
-Fix Javadoc for XTA for Java, restart from XtaXid
-
 Go on with use cases
 
 Implement test cases
@@ -17,6 +15,16 @@ buffer.xml:1: parser error : EntityRef: expecting ';'
 state="1"/><xa_open_exec xa_info="jdbc:mysql://localhost/lixa?user=lixa&password
                                                                                ^
 THE BUG is exploited by the ampersand (&) in the string
+Replacing "&" with "&amp;" solve the XML parsing issue.
+The same bug happens even if "<" is in the string; it could be replaced by
+"&lt;". The ">" does not produce the same bug, but why not replacing with
+"&gt;" even it?!
+
+create an utility function to sanitize XML offending chars: '&', '<', '>', 
+apostrophe and quote.
+Apply it to resource name and open_info for serialization/deserialization.
+Function lixa_str_replace in lixa_utils.h should help.
+
 
 implement xa_recover:
 - an example of receiving arrays of objects from Java to JNI: CallObjectMethod    https://github.com/joeferner/node-java/blob/master/src/utils.cpp
