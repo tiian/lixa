@@ -49,9 +49,14 @@ import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.XAException;
 // import Oracle package for XA Data Source
+/*
 import oracle.ucp.jdbc.PoolDataSourceFactory;
 import oracle.ucp.jdbc.PoolXADataSource;
-import oracle.jdbc.xa.client.OracleXADataSource;
+*/
+import oracle.jdbc.xa.OracleXid;
+import oracle.jdbc.xa.OracleXAException;
+import oracle.jdbc.pool.*;
+import oracle.jdbc.xa.client.*;
 
 
 
@@ -78,7 +83,7 @@ public class ExampleXtaMACC31 {
         Transaction tx;
         
         // XA Resource for Oracle DBMS
-        PoolXADataSource pds = null;
+        // PoolXADataSource pds = null;
         OracleXADataSource xads1 = null;
         XAConnection xac1 = null;
         XAResource xar1 = null;
@@ -110,6 +115,7 @@ public class ExampleXtaMACC31 {
              // A bit of scaffolding for PostgreSQL:
              //
              // 0. create a Pool (UCP)
+             /*
              pds = PoolDataSourceFactory.getPoolXADataSource();
              pds.setConnectionFactoryClassName("oracle.jdbc.xa.client.OracleXADataSource");
              pds.setURL("jdbc:oracle:thin:@" +
@@ -120,23 +126,21 @@ public class ExampleXtaMACC31 {
                         "(SERVICE_NAME=orcl.brenta.org)))");
              pds.setUser("hr");
              pds.setPassword("hr");
-             
+             */
              // 1. create an XA Data Source
-             // xads1 = new OracleXADataSource();
+             xads1 = new OracleXADataSource();
              // 2. set connection parameters (one property at a time)
-             /*
-             xads1.setUser("hr");
-             xads1.setPassword("hr");
-             // xads1.setURL("jdbc:oracle:thin:@centos7-oracle12.brenta.org:1521:orcl");
              xads1.setURL("jdbc:oracle:thin:@" +
                           "(DESCRIPTION=" +
                           "(ADDRESS=(PROTOCOL=tcp)" +
                           "(HOST=centos7-oracle12.brenta.org)(PORT=1521))" +
                           "(CONNECT_DATA=" +
                           "(SERVICE_NAME=orcl.brenta.org)))");
-             */
+             //xads1.setURL("jdbc:oracle:thin:@centos7-oracle12.brenta.org:1521:orcl");
+             xads1.setUser("HR");
+             xads1.setPassword("hr");
              // 3. get an XA Connection from the XA Data Source
-             xac1 = pds.getXAConnection();
+             xac1 = xads1.getXAConnection();
              System.out.println("###");
              // 4. get an XA Resource from the XA Connection
              xar1 = xac1.getXAResource();

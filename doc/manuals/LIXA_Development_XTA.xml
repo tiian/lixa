@@ -1775,7 +1775,6 @@ SQL&gt;
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ mkfifo xid.fifo
 tiian@ubuntu1404-64:~/tmp$ ls -la
 total 44
 drwxrwxr-x  2 tiian tiian  4096 mar 27 22:10 .
@@ -2055,7 +2054,7 @@ tiian@ubuntu1404-64:~/tmp$
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	  <tbody><tr><td><screen>
-	    tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/example_xta_macc11.cpp .
+	    tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/cpp/example_xta_macc11.cpp .
 	  </screen></td></tr></tbody>
 	</table>
 	Substitute <quote>X.Y.Z</quote> with the actual version of
@@ -2164,6 +2163,7 @@ SQL&gt;
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ mkfifo xid.fifo
 tiian@ubuntu1404-64:~/tmp$ ls -la
 total 48
 drwxrwxr-x  2 tiian tiian  4096 ago 26 11:58 .
