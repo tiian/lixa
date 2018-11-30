@@ -86,4 +86,8 @@ public class XtaXid implements Xid {
      * bytes.
      */
     public native byte[] getGlobalTransactionId();
+    /**
+     * Convert the transaction ID to a string
+     */
+    public native String toString();
 }

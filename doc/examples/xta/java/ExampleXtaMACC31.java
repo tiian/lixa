@@ -49,23 +49,22 @@ import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.XAException;
 // import Oracle package for XA Data Source
-/*
-import oracle.ucp.jdbc.PoolDataSourceFactory;
-import oracle.ucp.jdbc.PoolXADataSource;
-*/
 import oracle.jdbc.xa.OracleXid;
 import oracle.jdbc.xa.OracleXAException;
 import oracle.jdbc.pool.*;
 import oracle.jdbc.xa.client.*;
+// import Java io
+import java.io.*;
 
 
 
 public class ExampleXtaMACC31 {
     public static void main(String[] args) {
         // Check command line parameters
-        if (args.length < 3) {
+        if (args.length < 4) {
             System.err.println("This program requires three boolean " +
-                               "parameters: 'commit', 'insert', 'superior'");
+                               "parameters: 'commit', 'insert', 'superior', " +
+                               "'XID filename'");
             System.exit(1);
         }
         // First parameter: commit transaction
@@ -74,6 +73,8 @@ public class ExampleXtaMACC31 {
         boolean insert = Integer.parseInt(args[1]) > 0 ? true : false;
         // Third parameter: superior application program
         boolean superior = Integer.parseInt(args[2]) > 0 ? true : false;
+        // Fourth parameter: XID filename
+        String xidFileName = args[3];
         // variable for SQL statement to execute
         String sqlStmt;
 
@@ -114,19 +115,6 @@ public class ExampleXtaMACC31 {
              //
              // A bit of scaffolding for PostgreSQL:
              //
-             // 0. create a Pool (UCP)
-             /*
-             pds = PoolDataSourceFactory.getPoolXADataSource();
-             pds.setConnectionFactoryClassName("oracle.jdbc.xa.client.OracleXADataSource");
-             pds.setURL("jdbc:oracle:thin:@" +
-                        "(DESCRIPTION=" +
-                        "(ADDRESS=(PROTOCOL=tcp)" +
-                        "(HOST=centos7-oracle12.brenta.org)(PORT=1521))" +
-                        "(CONNECT_DATA=" +
-                        "(SERVICE_NAME=orcl.brenta.org)))");
-             pds.setUser("hr");
-             pds.setPassword("hr");
-             */
              // 1. create an XA Data Source
              xads1 = new OracleXADataSource();
              // 2. set connection parameters (one property at a time)
@@ -136,12 +124,10 @@ public class ExampleXtaMACC31 {
                           "(HOST=centos7-oracle12.brenta.org)(PORT=1521))" +
                           "(CONNECT_DATA=" +
                           "(SERVICE_NAME=orcl.brenta.org)))");
-             //xads1.setURL("jdbc:oracle:thin:@centos7-oracle12.brenta.org:1521:orcl");
-             xads1.setUser("HR");
+             xads1.setUser("hr");
              xads1.setPassword("hr");
              // 3. get an XA Connection from the XA Data Source
              xac1 = xads1.getXAConnection();
-             System.out.println("###");
              // 4. get an XA Resource from the XA Connection
              xar1 = xac1.getXAResource();
              // 5. get an SQL Connection from the XA Connection
@@ -159,9 +145,35 @@ public class ExampleXtaMACC31 {
                  tx = tm.createTransaction();
                  // Enlist Oracle DBMS resource to transaction
                  tx.enlistResource(xar1, "Oracle", "hr/hr");
-                 // Start a new XA global transaction with a single branch
-                 tx.start();
-
+                 /*
+                  * *NOTE:*
+                  * The following block of code contains the first key concept
+                  * of the "Multiple Applications, Consecutive Calls" Pattern:
+                  *
+                  * if the program is running with the role of "superior", it
+                  * starts a new global transaction
+                  *
+                  * if the program is running with the role of "subordinate",
+                  * it reads from file the XID (Transaction ID) saved by
+                  * another program executed with the role of "superior" and
+                  * then it resumes the same global transaction.
+                  */
+                 if (superior) {
+                     // Start a new XA global transaction with a single branch
+                     tx.start();
+                 } else {
+                     // read XID from file
+                     BufferedReader input = new BufferedReader(
+                         new FileReader(xidFileName));
+                     String xidString = input.readLine();
+                     System.out.println("XID='" + xidString + "'has been " +
+                                        "read from file '" + xidFileName +
+                                        "'");
+                     input.close();
+                     // Resume the global transaction started by a superior
+                     // program
+                     tx.resume(xidString);
+                 }
                  //
                  // At this point, it's time to do something with the
                  // Resource Manager
@@ -174,6 +186,29 @@ public class ExampleXtaMACC31 {
                  stmt1 = conn1.createStatement();
                  // Execute the statement
                  stmt1.executeUpdate(sqlStmt);
+                 /*
+                  * *NOTE:*
+                  * The following block of code contains the second key
+                  * concept of the "Multiple Applications, Consecutive Calls"
+                  * Pattern:
+                  *
+                  * if the program is running with the role of "superior", it
+                  * suspends the global transaction and it passes the XID
+                  * (Transaction ID) in a file (fifo) for future reading
+                  * (subordinate application program will read it)
+                  *
+                  * if the program is running with the role of "subordinate",
+                  * it commits or rollback the global transaction.
+                  */
+                 if (superior) {
+                     // Suspend the XA global transaction
+                     tx.suspend();
+                     // Retrieve the Transaction ID (XID) associated to the
+                     // transaction that has been created in the previous step
+                 } else {
+                     ;
+                 }
+                 
                  // commit or rollback
                  if (commit)
                      tx.commit();
@@ -190,7 +225,6 @@ public class ExampleXtaMACC31 {
                  e.printStackTrace();
                  System.exit(1);
              }
-
          } catch (Exception e) {
              e.printStackTrace();
              System.exit(1);

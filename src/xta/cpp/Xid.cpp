@@ -50,6 +50,12 @@ namespace xta {
 
     string Xid::toString()
     {
-        return string(xta_xid_to_string(xid));
+        // retrieve an ASCII string, heap allocated
+        char *tmp = xta_xid_to_string(xid);
+        // create a C++ string
+        string result(tmp);
+        // memory allocated by xta_xid_to_string must be released
+        free(tmp);
+        return result;
     }
 }

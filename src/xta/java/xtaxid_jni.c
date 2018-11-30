@@ -105,7 +105,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_XtaXid_newJNI(
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* throw Java exception */
-        if (LIXA_RC_OK != ret_cod)
+        if (LIXA_RC_OK != ret_cod && !(*env)->ExceptionCheck(env))
             Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_newJNI/excp=%d/"
@@ -157,6 +157,8 @@ jobject JNICALL Java_org_tiian_lixa_xta_XtaXid_new(JNIEnv *env)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (LIXA_RC_OK != ret_cod && !(*env)->ExceptionCheck(env))
+            Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -227,7 +229,7 @@ Java_org_tiian_lixa_xta_XtaXid_getNativeObject(JNIEnv *env, jobject this_obj)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* throw Java exception */
-        if (LIXA_RC_OK != ret_cod)
+        if (LIXA_RC_OK != ret_cod && !(*env)->ExceptionCheck(env))
             Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_"
@@ -295,7 +297,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_tiian_lixa_xta_XtaXid_getBranchQualifier
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* throw Java exception */
-        if (LIXA_RC_OK != ret_cod)
+        if (LIXA_RC_OK != ret_cod && !(*env)->ExceptionCheck(env))
             Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_getBranchQualifier/excp=%d/"
@@ -341,7 +343,7 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_XtaXid_getFormatId
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* throw Java exception */
-        if (LIXA_RC_OK != ret_cod)
+        if (LIXA_RC_OK != ret_cod && !(*env)->ExceptionCheck(env))
             Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_getFormatId/excp=%d/"
@@ -409,10 +411,76 @@ Java_org_tiian_lixa_xta_XtaXid_getGlobalTransactionId
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* throw Java exception */
-        if (LIXA_RC_OK != ret_cod)
+        if (LIXA_RC_OK != ret_cod && !(*env)->ExceptionCheck(env))
             Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_getGlobalTransactionId/"
                 "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret;
 }
+
+
+
+/*
+ * Class:     org_tiian_lixa_xta_XtaXid
+ * Method:    toString
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_tiian_lixa_xta_XtaXid_toString
+(JNIEnv *env, jobject this_obj)
+{
+    enum Exception { NULL_OBJECT1
+                     , NULL_OBJECT2
+                     , NEW_STRING_UTF_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    jstring xid_string = NULL;
+    char *tmp_string = NULL;
+    
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_toString\n"));
+    TRY {
+        xta_xid_t *xid = NULL;
+        
+        /* retrieve the native xta_xid_t C object */
+        if (NULL == (xid = Java_org_tiian_lixa_xta_XtaXid_getNativeObject(
+                         env, this_obj)))
+            THROW(NULL_OBJECT1);
+        /* retrieve the XID as a string */
+        if (NULL == (tmp_string = xta_xid_to_string(xid)))
+            THROW(NULL_OBJECT2);
+        /* create the java string object */
+        if (NULL == (xid_string = (*env)->NewStringUTF(env, tmp_string)) ||
+            (*env)->ExceptionCheck(env))
+            THROW(NEW_STRING_UTF_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT1:
+            case NULL_OBJECT2:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NEW_STRING_UTF_ERROR:
+                ret_cod = LIXA_RC_NEW_STRING_UTF_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* recover memory */
+        if (NULL != tmp_string) {
+            free(tmp_string);
+            tmp_string = NULL;
+        }
+        /* throw Java exception */
+        if (LIXA_RC_OK != ret_cod && !(*env)->ExceptionCheck(env))
+            Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_toString/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return xid_string;
+}
+

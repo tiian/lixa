@@ -378,6 +378,8 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: 'JNI NewGlobalRef' function returned NULL pointer";
         case LIXA_RC_NEW_OBJECT_ERROR:
             return "ERROR: 'JNI NewObject' function returned NULL pointer";
+        case LIXA_RC_NEW_STRING_UTF_ERROR:
+            return "ERROR: 'JNI NewStringUTF' function returned NULL pointer";
         case LIXA_RC_SET_BYTE_ARRAY_REGION_ERROR:
             return "ERROR: 'JNI SetByteArrayRegion' function returned NULL "
                 "pointer";
