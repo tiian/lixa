@@ -83,18 +83,16 @@ public class ExampleXtaMACC31 {
         // XTA Transaction
         Transaction tx;
         
-        // XA Resource for Oracle DBMS
-        // PoolXADataSource pds = null;
+        // XAResource for Oracle DBMS and some boilerplate objects related to
+        // JDBC
         OracleXADataSource xads1 = null;
         XAConnection xac1 = null;
         XAResource xar1 = null;
         Connection conn1 = null; 
         Statement stmt1 = null;
         
-        /*
-         * Prepare SQL statements in accordance with "insert" command line
-         * parameter
-         */
+        // Prepare SQL statements in accordance with "insert" command line
+        // parameter
          if (insert) {
              // SQL INSERT
              if (superior)
@@ -113,11 +111,11 @@ public class ExampleXtaMACC31 {
          
          try {
              //
-             // A bit of scaffolding for PostgreSQL:
+             // A bit of boilerplate for Oracle JDBC & XA
              //
              // 1. create an XA Data Source
              xads1 = new OracleXADataSource();
-             // 2. set connection parameters (one property at a time)
+             // 2. set connection URL (JDBC thin driver), user and password
              xads1.setURL("jdbc:oracle:thin:@" +
                           "(DESCRIPTION=" +
                           "(ADDRESS=(PROTOCOL=tcp)" +
@@ -175,13 +173,12 @@ public class ExampleXtaMACC31 {
                      tx.resume(xidString);
                  }
                  //
-                 // At this point, it's time to do something with the
+                 // At this point, it's time to do something useful with the
                  // Resource Manager
                  //
-                 // Create and Execute Oracle DBMS statement
+                 // Create and Execute a JDBC statement
                  //
-                 System.out.println("Oracle, executing >" +
-                                    sqlStmt + "<");
+                 System.out.println("Oracle, executing >" + sqlStmt + "<");
                  // create a Statement object
                  stmt1 = conn1.createStatement();
                  // Execute the statement
@@ -205,16 +202,23 @@ public class ExampleXtaMACC31 {
                      tx.suspend();
                      // Retrieve the Transaction ID (XID) associated to the
                      // transaction that has been created in the previous step
+                     String xidString = tx.getXid().toString();
+                     // Write XID to the file and pass it to superior
+                     // to subordinate
+                     BufferedWriter output = new BufferedWriter(
+                         new FileWriter(xidFileName));
+                     output.write(xidString);
+                     System.out.println("XID='" + xidString + "'has been " +
+                                        "written to file '" + xidFileName +
+                                        "'");
+                     output.close();
                  } else {
-                     ;
+                     // commit or rollback
+                     if (commit)
+                         tx.commit();
+                     else
+                         tx.rollback();
                  }
-                 
-                 // commit or rollback
-                 if (commit)
-                     tx.commit();
-                 else
-                     tx.rollback();
-                 
              } catch (XtaException e) {
                  System.err.println("XtaException: LIXA ReturnCode=" +
                                     e.getReturnCode() + " ('" +

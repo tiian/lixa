@@ -112,9 +112,7 @@ public class Transaction {
      * error condition
      */
     public native XtaXid getXid() throws XtaException;
-    /*
-     * Native method wrapper for start
-     */
+    // Native method wrapper for start
     private native int startJNI(
         boolean multipleBranches, boolean alreadyOpened)
         throws XtaException, XAException;
@@ -162,44 +160,25 @@ public class Transaction {
      * Rollback the current transaction
      */
     public native void rollback() throws XtaException, XAException;
-    /**
-     * Resume the transaction represented by xid in this transaction object;
-     * the transaction has been previously suspended with
-     * {@link Transaction#suspend suspend}
-     * @param xidString serialized identifier of the transaction that must
-     *        be resumed
-     * @param flags can be XAResource.TMRESUME if the transaction has been
-     *        suspended using XAResource.TMMIGRATE or XAResource.TMJOIN if the
-     *        transaction has been suspended using XAResource.TMNOFLAGS
-     */
-    public native void resume(String xidString, int flags)
+    // Native method wrapper for resume
+    private native void resumeJNI(String xidString, boolean alreadyOpened)
         throws XtaException, XAException;
     /**
-     * Resume the transaction represented by xid in this transaction object;
-     * the transaction has been previously suspended with
+     * Resume the transaction represented by xidString in this transaction
+     * object; the transaction has been previously suspended with
      * {@link Transaction#suspend suspend}
      * @param xidString serialized identifier of the transaction that must
      *        be resumed
      */
     public void resume(String xidString) throws XtaException, XAException {
-        resume(xidString, XAResource.TMRESUME);
+        resumeJNI(xidString, AlreadyOpened);
+        AlreadyOpened = true;
     }
     /**
      * Suspend the transaction represented by this transaction object; the
      * transaction can be resumed with
      * {@link Transaction#resume resume} at a later time 
-     * @param flags can be XAResource.TMMIGRATE if the Resource Manager
-     *        supports transaction migration and XAResource.TMNOFLAGS
-     *        otherwise 
      */
-    public native void suspend(int flags)
+    public native void suspend()
         throws XtaException, XAException;
-    /**
-     * Suspend the transaction represented by this transaction object; the
-     * transaction can be resumed with
-     * {@link Transaction#resume resume} at a later time 
-     */
-    public void suspend() throws XtaException, XAException {
-        suspend(XAResource.TMNOFLAGS);
-    }
 }

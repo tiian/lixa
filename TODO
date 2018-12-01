@@ -1,8 +1,4 @@
 Implement XTA for Java:
-ExampeXtaMACC31.java
-
-Remove flags from suspend and resume because XAResource does not support
-TMMIGRATE
 
 Go on with use cases
 
@@ -10,6 +6,13 @@ Implement test cases
 
 test xa_forget
 test xa_recover
+
+Remove tx.open() and tx.close() by C++ API: they are basically useless and
+they can be merged as below:
+tx.open() -> tx.start(), tx.resume(), tx.branch()
+tx.close() -> tx destructor
+in this way C++ will have a semantic more similar to Java than C: copy the
+logic from Java using alreadyOpened boolean flag
 
 this string 
 "jdbc:mysql://localhost/lixa?user=lixa&password="
