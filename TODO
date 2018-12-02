@@ -1,4 +1,5 @@
 Implement XTA for Java:
+implement tx.branch(xidString)
 
 Go on with use cases
 
@@ -12,7 +13,8 @@ they can be merged as below:
 tx.open() -> tx.start(), tx.resume(), tx.branch()
 tx.close() -> tx destructor
 in this way C++ will have a semantic more similar to Java than C: copy the
-logic from Java using alreadyOpened boolean flag
+logic from Java using alreadyOpened boolean flag.
+Use lower case for the first char in C++ method: upper case is just a mistake!
 
 this string 
 "jdbc:mysql://localhost/lixa?user=lixa&password="

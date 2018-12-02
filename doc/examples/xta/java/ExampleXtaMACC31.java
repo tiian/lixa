@@ -63,8 +63,8 @@ public class ExampleXtaMACC31 {
         // Check command line parameters
         if (args.length < 4) {
             System.err.println("This program requires three boolean " +
-                               "parameters: 'commit', 'insert', 'superior', " +
-                               "'XID filename'");
+                               "parameters: 'commit', 'insert', 'superior' " +
+                               "and one string: 'XIDfilename'");
             System.exit(1);
         }
         // First parameter: commit transaction
@@ -164,7 +164,7 @@ public class ExampleXtaMACC31 {
                      BufferedReader input = new BufferedReader(
                          new FileReader(xidFileName));
                      String xidString = input.readLine();
-                     System.out.println("XID='" + xidString + "'has been " +
+                     System.out.println("XID='" + xidString + "' has been " +
                                         "read from file '" + xidFileName +
                                         "'");
                      input.close();
@@ -203,12 +203,12 @@ public class ExampleXtaMACC31 {
                      // Retrieve the Transaction ID (XID) associated to the
                      // transaction that has been created in the previous step
                      String xidString = tx.getXid().toString();
-                     // Write XID to the file and pass it to superior
-                     // to subordinate
+                     // Write XID to the file and pass it from Superior
+                     // to Subordinate
                      BufferedWriter output = new BufferedWriter(
                          new FileWriter(xidFileName));
                      output.write(xidString);
-                     System.out.println("XID='" + xidString + "'has been " +
+                     System.out.println("XID='" + xidString + "' has been " +
                                         "written to file '" + xidFileName +
                                         "'");
                      output.close();
