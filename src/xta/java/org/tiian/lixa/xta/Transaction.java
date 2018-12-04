@@ -181,4 +181,17 @@ public class Transaction {
      */
     public native void suspend()
         throws XtaException, XAException;
+    // Native method wrapper for branch
+    private native void branchJNI(String xidString, boolean alreadyOpened)
+        throws XtaException, XAException;
+    /**
+     * Create a new branch of the transaction represented by xid in this
+     * transaction object; the global transaction has been previously started
+     * @param xidString serialized identifier of the transaction that must
+     *        be resumed
+     */
+    public void branch(String xidString) throws XtaException, XAException {
+        branchJNI(xidString, AlreadyOpened);
+        AlreadyOpened = true;
+    }
 }

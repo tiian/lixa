@@ -5,16 +5,18 @@ java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/us
 # Without UCP
 javac -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar ExampleXtaMACC31.java
 # if rngd is not running use this
-java -Djava.library.path=/opt/lixa/lib -Djava.security.egd=file:/dev/./urandom -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACC31 1 0 1
+java -Djava.library.path=/opt/lixa/lib -Djava.security.egd=file:/dev/./urandom -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACC31 1 1 1 xid.fifo
+java -Djava.library.path=/opt/lixa/lib -Djava.security.egd=file:/dev/./urandom -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACC31 1 1 0 xid.fifo
 # if rngd is RUNNING use this
-java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACC31 1 0 1
+java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACC31 1 1 1 xid.fifo
+java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACC31 1 1 0 xid.fifo
 
 
 javac -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar ExampleXtaMACBPS31.java
 javac -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/postgresql.jar ExampleXtaMACBPS32.java
 
 java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:. ExampleXtaMACBPS31 1 1 sup2sub sub2sup
-java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACBPS32 1 1 sup2sub sub2sup
+java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/postgresql.jar:. ExampleXtaMACBPS32 1 1 sup2sub sub2sup
 
 https://docs.oracle.com/cd/E11882_01/java.112/e12265/connect.htm#CHDDCICA
 

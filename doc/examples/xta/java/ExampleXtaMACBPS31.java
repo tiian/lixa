@@ -123,89 +123,87 @@ public class ExampleXtaMACBPS31 {
              // 5. get an SQL Connection from the XA Connection
              conn = xac.getConnection(); 
              
-             try {
-                 //
-                 // Create the XTA objects that are necessary to manage the
-                 // distributed transaction
-                 //
-                 // Create a mew XTA Transaction Manager
-                 tm = new TransactionManager();
-                 // Create a new XA global transaction using the Transaction
-                 // Manager as a factory
-                 tx = tm.createTransaction();
-                 // Enlist MySQL/MariaDB resource to transaction
-                 tx.enlistResource(
-                     xar, "MySQL",
-                     "jdbc:mysql://localhost/lixa?user=lixa/password=");
-                 /*
-                  * Start a new XA global transaction with multiple branches
-                  * Note: argument ("MultipleBranch") has true value because
-                  *       the transaction will be branched by the subordinate
-                  *       Application Program
-                  */
-                 tx.start(true);
-                 //
-                 // Create and Execute a JDBC statement
-                 //
-                 System.out.println("MySQL, executing >" + sqlStmt + "<");
-                 // create a Statement object
-                 stmt = conn.createStatement();
-                 // Execute the statement
-                 stmt.executeUpdate(sqlStmt);
-                 // Retrieve the Transaction ID (XID) associated to the
-                 // transaction that has been created in the previous step
-                 String xidString = tx.getXid().toString();
-                 /*
-                  * *** NOTE: ***
-                  * a Remote Procedure Call (RPC) or a Web Service (WS) or a
-                  * REST API is emulated by a synchronous message passing
-                  * using a named pipe (FIFO)
-                  */ 
-                 // Write XID to the FIFO, pass it from Superior to Subordinate
-                 BufferedWriter output = new BufferedWriter(
-                     new FileWriter(sup2subFifoname));
-                 output.write(xidString);
-                 System.out.println("Superior AP has sent XID '" + xidString +
-                                    "' to subordinate AP");
-                 output.close();
-                 // read answer from FIFO
-                 BufferedReader input = new BufferedReader(
-                     new FileReader(sub2supFifoname));
-                 String reply = input.readLine();
-                 System.out.println("Superior AP has received '" + reply +
-                                    "' reply from subordinate AP");
-                 input.close();
-                 /*
-                  * *** NOTE: ***
-                  * at this point the RPC/WS/REST API emulation terminates: the
-                  * subordinate Application Program has been called and this
-                  * (superior) Application Program can go on with the branch
-                  * created by tx.Start()
-                  */
-                 //
-                 // Execute another MySQL JDBC statement
-                 //
-                 System.out.println("MySQL, executing >" + sqlStmt2 + "<");
-                 // create a Statement object
-                 stmt = conn.createStatement();
-                 // Execute the statement
-                 stmt.executeUpdate(sqlStmt2);
-                 // commit or rollback
-                 if (commit)
-                     tx.commit();
-                 else
-                     tx.rollback();
-                 
-             } catch (XtaException e) {
-                 System.err.println("XtaException: LIXA ReturnCode=" +
-                                    e.getReturnCode() + " ('" +
-                                    e.getMessage() + "')");
-                 e.printStackTrace();
-                 System.exit(1);
-             } catch (XAException e) {
-                 e.printStackTrace();
-                 System.exit(1);
-             }
+             //
+             // Create the XTA objects that are necessary to manage the
+             // distributed transaction
+             //
+             // Create a mew XTA Transaction Manager
+             tm = new TransactionManager();
+             // Create a new XA global transaction using the Transaction
+             // Manager as a factory
+             tx = tm.createTransaction();
+             // Enlist MySQL/MariaDB resource to transaction
+             tx.enlistResource(
+                 xar, "MySQL",
+                 "jdbc:mysql://localhost/lixa?user=lixa/password=");
+             /*
+              * Start a new XA global transaction with multiple branches
+              * Note: argument ("MultipleBranch") has true value because
+              *       the transaction will be branched by the subordinate
+              *       Application Program
+              */
+             tx.start(true);
+             //
+             // Create and Execute a JDBC statement
+             //
+             System.out.println("MySQL, executing >" + sqlStmt + "<");
+             // create a Statement object
+             stmt = conn.createStatement();
+             // Execute the statement
+             stmt.executeUpdate(sqlStmt);
+             // Retrieve the Transaction ID (XID) associated to the
+             // transaction that has been created in the previous step
+             String xidString = tx.getXid().toString();
+             /*
+              * *** NOTE: ***
+              * a Remote Procedure Call (RPC) or a Web Service (WS) or a
+              * REST API is emulated by a synchronous message passing
+              * using a named pipe (FIFO)
+              */ 
+             // Write XID to the FIFO, pass it from Superior to Subordinate
+             BufferedWriter output = new BufferedWriter(
+                 new FileWriter(sup2subFifoname));
+             output.write(xidString);
+             System.out.println("Superior AP has sent XID '" + xidString +
+                                "' to subordinate AP");
+             output.close();
+             // read answer from FIFO
+             BufferedReader input = new BufferedReader(
+                 new FileReader(sub2supFifoname));
+             String reply = input.readLine();
+             System.out.println("Superior AP has received '" + reply +
+                                "' reply from subordinate AP");
+             input.close();
+             /*
+              * *** NOTE: ***
+              * at this point the RPC/WS/REST API emulation terminates: the
+              * subordinate Application Program has been called and this
+              * (superior) Application Program can go on with the branch
+              * created by tx.Start()
+              */
+             //
+             // Execute another MySQL JDBC statement
+             //
+             System.out.println("MySQL, executing >" + sqlStmt2 + "<");
+             // create a Statement object
+             stmt = conn.createStatement();
+             // Execute the statement
+             stmt.executeUpdate(sqlStmt2);
+             // commit or rollback
+             if (commit)
+                 tx.commit();
+             else
+                 tx.rollback();
+             
+         } catch (XtaException e) {
+             System.err.println("XtaException: LIXA ReturnCode=" +
+                                e.getReturnCode() + " ('" +
+                                e.getMessage() + "')");
+             e.printStackTrace();
+             System.exit(1);
+         } catch (XAException e) {
+             e.printStackTrace();
+             System.exit(1);
          } catch (Exception e) {
              e.printStackTrace();
              System.exit(1);

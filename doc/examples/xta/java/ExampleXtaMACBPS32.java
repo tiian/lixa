@@ -119,120 +119,119 @@ public class ExampleXtaMACBPS32 {
              // 5. get an SQL Connection from the XA Connection
              conn = xac.getConnection();
              
-             try {
-                 //
-                 // Create the XTA objects that are necessary to manage the
-                 // distributed transaction
-                 //
-                 // Create a mew XTA Transaction Manager
-                 tm = new TransactionManager();
-                 // Create a new XA global transaction using the Transaction
-                 // Manager as a factory
-                 tx = tm.createTransaction();
-                 // Enlist PostgreSQL resource to transaction
-                 tx.enlistResource(xar, "PostgreSQL",
-                                   "localhost/testdb/tiian/passw0rd");
+             //
+             // Create the XTA objects that are necessary to manage the
+             // distributed transaction
+             //
+             // Create a mew XTA Transaction Manager
+             tm = new TransactionManager();
+             // Create a new XA global transaction using the Transaction
+             // Manager as a factory
+             tx = tm.createTransaction();
+             // Enlist PostgreSQL resource to transaction
+             tx.enlistResource(xar, "PostgreSQL",
+                               "localhost/testdb/tiian/passw0rd");
+             /*
+              * *** NOTE: ***
+              * at this point, subordinate Application Program must wait a
+              * Remote Procedure Call (RPC) or a Web Service (WS) or a REST
+              * API invocation from superior Application Program. Here the
+              * incoming call is emulated with a synchronous message
+              * passing using a named pipe (FIFO)
+              */
+             // read message from FIFO to get XID
+             BufferedReader input = new BufferedReader(
+                 new FileReader(sup2subFifoname));
+             String xidString = input.readLine();
+             System.out.println("Subordinate AP has received XID '" +
+                                xidString + "' from superior AP");
+             input.close();
+             /*
+              * *** NOTE: ***
+              * at this point the subordinate Application Program (this
+              * one) has been called by the superior A.P. that's waiting a
+              * reply. Now this program can branch the global transaction
+              * previously started by the superior A.P.
+              */
+             // create a new branch in the same global transaction
+             tx.branch(xidString);
+             /*
+              * the branch has the same global identifier, but a different
+              * branch id; the following statement is for the sake of
+              * debugging only
+              */
+             String branchXidString = tx.getXid().toString();
+             System.out.println("Subordinate AP has created a branch " +
+                                "with XID '" + branchXidString + "'");
+             //
+             // Create and Execute a JDBC statement for PostgreSQL
+             //
+             System.out.println("PostgreSQL, executing >" + sqlStmt + "<");
+             // create a Statement object
+             stmt = conn.createStatement();
+             // Execute the statement
+             stmt.executeUpdate(sqlStmt);
+             System.out.println("ZZZZZ");
+             // commit or rollback the transaction
+             if (commit) {
                  /*
                   * *** NOTE: ***
-                  * at this point, subordinate Application Program must wait a
-                  * Remote Procedure Call (RPC) or a Web Service (WS) or a REST
-                  * API invocation from superior Application Program. Here the
-                  * incoming call is emulated with a synchronous message
-                  * passing using a named pipe (FIFO)
+                  * commit MUST be performed in two step:
+                  * 1. in first step, the branch is only "prepared" (as in
+                  *    XA specification) and control can be returned to the
+                  *    superior AP that has to start its commit
+                  * 2. in the second step, the branch is definitely
+                  *    "committed", but the operation will block the
+                  *    caller because the subordinate AP must wait the
+                  *    "prepared" state of the superior AP before
+                  *    committing
                   */
-                 // read message from FIFO to get XID
-                 BufferedReader input = new BufferedReader(
-                     new FileReader(sup2subFifoname));
-                 String xidString = input.readLine();
-                 System.out.println("Subordinate AP has received XID '" +
-                                    xidString + "' from superior AP");
-                 input.close();
-                 /*
-                  * *** NOTE: ***
-                  * at this point the subordinate Application Program (this
-                  * one) has been called by the superior A.P. that's waiting a
-                  * reply. Now this program can branch the global transaction
-                  * previously started by the superior A.P.
-                  */
-                 // create a new branch in the same global transaction
-                 tx.branch(xidString);
-                 /*
-                  * the branch has the same global identifier, but a different
-                  * branch id; the following statement is for the sake of
-                  * debugging only
-                  */
-                 String branchXidString = tx.getXid().toString();
-                 System.out.println("Subordinate AP has created a branch " +
-                                    "with XID '" + branchXidString + "'");
-                 //
-                 // Create and Execute a JDBC statement for PostgreSQL
-                 //
-                 System.out.println("PostgreSQL, executing >" + sqlStmt + "<");
-                 // create a Statement object
-                 stmt = conn.createStatement();
-                 // Execute the statement
-                 stmt.executeUpdate(sqlStmt);
-                 // commit or rollback the transaction
-                 if (commit) {
-                     /*
-                      * *** NOTE: ***
-                      * commit MUST be performed in two step:
-                      * 1. in first step, the branch is only "prepared" (as in
-                      *    XA specification) and control can be returned to the
-                      *    superior AP that has to start its commit
-                      * 2. in the second step, the branch is definitely
-                      *    "committed", but the operation will block the
-                      *    caller because the subordinate AP must wait the
-                      *    "prepared" state of the superior AP before
-                      *    committing
-                      */
-                     // commit is performed with "NonBlocking" flag set to
-                     // true: this is necessary to allow the superior branch
-                     // to start commit */
-                     tx.commit(true);
-                 } else {
-                     tx.rollback();
-                 }
-                 /*
-                  * *** NOTE: ***
-                  * at this point the subordinate Application Program (this
-                  * one) has to reply to the superior A.P. that's waiting.
-                  * Here the reply is emulated with a synchronous message
-                  * passing using a named pipe (FIFO)
-                  */
-                 // open the pipe for write operation
-                 BufferedWriter output = new BufferedWriter(
-                     new FileWriter(sup2subFifoname));
-                 // prepare the reply message
-                 String reply;
-                 if (commit)
-                     reply = "PREPARED_for_COMMIT";
-                 else
-                     reply = "ROLLBACK";
-                 // write the message
-                 output.write(xidString);
-                 System.out.println("Subordinate AP has returned '" + reply +
-                                    "' to superior AP");
-                 output.close();
-                 if (commit) {
-                     /*
-                      * Complete the second phase of the commit with
-                      * "NonBlocking" flag set to false: this is necessary to
-                      * wait the superior AP prepare phase
-                      */
-                     tx.commit(false);
-                 }
-
-             } catch (XtaException e) {
-                 System.err.println("XtaException: LIXA ReturnCode=" +
-                                    e.getReturnCode() + " ('" +
-                                    e.getMessage() + "')");
-                 e.printStackTrace();
-                 System.exit(1);
-             } catch (XAException e) {
-                 e.printStackTrace();
-                 System.exit(1);
+                 // commit is performed with "NonBlocking" flag set to
+                 // true: this is necessary to allow the superior branch
+                 // to start commit */
+                 tx.commit(true);
+             } else {
+                 tx.rollback();
              }
+             /*
+              * *** NOTE: ***
+              * at this point the subordinate Application Program (this
+              * one) has to reply to the superior A.P. that's waiting.
+              * Here the reply is emulated with a synchronous message
+              * passing using a named pipe (FIFO)
+              */
+             // open the pipe for write operation
+             BufferedWriter output = new BufferedWriter(
+                 new FileWriter(sub2supFifoname));
+             // prepare the reply message
+             String reply;
+             if (commit)
+                 reply = "PREPARED_for_COMMIT";
+             else
+                 reply = "ROLLBACK";
+             // write the message
+             output.write(xidString);
+             System.out.println("Subordinate AP has returned '" + reply +
+                                "' to superior AP");
+             output.close();
+             if (commit) {
+                 /*
+                  * Complete the second phase of the commit with
+                  * "NonBlocking" flag set to false: this is necessary to
+                  * wait the superior AP prepare phase
+                  */
+                 tx.commit(false);
+             }
+             
+         } catch (XtaException e) {
+             System.err.println("XtaException: LIXA ReturnCode=" +
+                                e.getReturnCode() + " ('" +
+                                e.getMessage() + "')");
+             e.printStackTrace();
+             System.exit(1);
+         } catch (XAException e) {
+             e.printStackTrace();
+             System.exit(1);
          } catch (Exception e) {
              e.printStackTrace();
              System.exit(1);

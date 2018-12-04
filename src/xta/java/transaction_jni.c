@@ -696,8 +696,10 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_commit
                          env, this_obj)))
             THROW(NULL_OBJECT);
         /* call native method */
-        if (LIXA_RC_OK != (ret_cod = xta_transaction_commit(
-                               tx, (int)non_blocking)))
+        ret_cod = xta_transaction_commit(tx, (int)non_blocking);
+        if (non_blocking && LIXA_RC_WOULD_BLOCK == ret_cod)
+            ; // this is OK
+        else if (LIXA_RC_OK != ret_cod)
             THROW(TRANSACTION_COMMIT_ERROR);
         
         THROW(NONE);
@@ -887,6 +889,75 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_suspend
             Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_suspend/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return;
+}
+
+
+
+/*
+ * Class:     org_tiian_lixa_xta_Transaction
+ * Method:    branchJNI
+ * Signature: (Ljava/lang/String;Z)V
+ */
+JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_branchJNI
+(JNIEnv *env, jobject this_obj, jstring xid_string, jboolean already_opened)
+{
+    enum Exception { NULL_OBJECT
+                     , TRANSACTION_OPEN_ERROR
+                     , GET_STRING_UTF_CHARS_ERROR
+                     , TRANSACTION_BRANCH_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    const char *xid = NULL;
+    
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_branchJNI\n"));
+    TRY {
+        xta_transaction_t * tx = NULL;
+        /* retrieve the current Transaction object */
+        if (NULL == (tx = Java_org_tiian_lixa_xta_Transaction_getNativeObject(
+                         env, this_obj)))
+            THROW(NULL_OBJECT);
+        /* call open if necessary */
+        if (!already_opened &&
+            LIXA_RC_OK != (ret_cod = xta_transaction_open(tx)))
+            THROW(TRANSACTION_OPEN_ERROR);
+        /* convert resource name from Java to C */
+        if (NULL == (xid = (*env)->GetStringUTFChars(
+                         env, xid_string, 0)))
+            THROW(GET_STRING_UTF_CHARS_ERROR);
+        /* call resume native method */
+        if (LIXA_RC_OK != (ret_cod = xta_transaction_branch(tx, xid)))
+            THROW(TRANSACTION_BRANCH_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case TRANSACTION_OPEN_ERROR:
+                break;
+            case GET_STRING_UTF_CHARS_ERROR:
+                ret_cod = LIXA_RC_GET_STRING_UTF_CHARS_ERROR;
+                break;
+            case TRANSACTION_BRANCH_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* generate a new Java exception if not already thrown */
+        if (LIXA_RC_OK != ret_cod && !(*env)->ExceptionCheck(env))
+            Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
+        /* recovery memory */
+        if (NULL != xid)
+            (*env)->ReleaseStringUTFChars(env, xid_string, xid);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_branchJNI/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return;
 }

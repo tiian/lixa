@@ -133,63 +133,60 @@ public class ExampleXtaSA31 {
              // 5. get an SQL Connection from the XA Connection
              conn2 = xac2.getConnection(); 
              
-             try {
-                 //
-                 // Create the XTA objects that are necessary to manage the
-                 // distributed transaction
-                 //
-                 // Create a mew XTA Transaction Manager
-                 tm = new TransactionManager();
-                 // Create a new XA global transaction using the Transaction
-                 // Manager as a factory
-                 tx = tm.createTransaction();
-                 // Enlist PostgreSQL resource to transaction
-                 tx.enlistResource(xar1, "PostgreSQL",
-                                   "localhost/testdb/tiian/passw0rd");
-                 // Enlist MySQL resource to Transaction
-                 tx.enlistResource(
-                     xar2, "MySQL",
-                     "jdbc:mysql://localhost/lixa?user=lixa/password=");
-                 // Start a new XA global transaction with a single branch
-                 tx.start();
-
-                 //
-                 // At this point, it's time to do something with the
-                 // Resource Managers (PostgreSQL and MySQL/MariaDB)
-                 //
-                 // Create and Execute PostgreSQL statement
-                 //
-                 System.out.println("PostgreSQL, executing >" +
-                                    postgresqlStmt + "<");
-                 // create a Statement object for PostgreSQL
-                 stmt1 = conn1.createStatement();
-                 // Execute PostgreSQL statements 
-                 stmt1.executeUpdate(postgresqlStmt);
-                 //
-                 // Create and Execute MySQL/MariaDB statement
-                 //
-                 System.out.println("MySQL, executing >" + mysqlStmt + "<");
-                 // create a Statement object for MySQL/MariaDB
-                 stmt2 = conn2.createStatement();
-                 // Execute MySQL statements 
-                 stmt2.executeUpdate(mysqlStmt);
-                 // commit or rollback
-                 if (commit)
-                     tx.commit();
-                 else
-                     tx.rollback();
-                 
-             } catch (XtaException e) {
-                 System.err.println("XtaException: LIXA ReturnCode=" +
-                                    e.getReturnCode() + " ('" +
-                                    e.getMessage() + "')");
-                 e.printStackTrace();
+             //
+             // Create the XTA objects that are necessary to manage the
+             // distributed transaction
+             //
+             // Create a mew XTA Transaction Manager
+             tm = new TransactionManager();
+             // Create a new XA global transaction using the Transaction
+             // Manager as a factory
+             tx = tm.createTransaction();
+             // Enlist PostgreSQL resource to transaction
+             tx.enlistResource(xar1, "PostgreSQL",
+                               "localhost/testdb/tiian/passw0rd");
+             // Enlist MySQL resource to Transaction
+             tx.enlistResource(
+                 xar2, "MySQL",
+                 "jdbc:mysql://localhost/lixa?user=lixa/password=");
+             // Start a new XA global transaction with a single branch
+             tx.start();
+             
+             //
+             // At this point, it's time to do something with the
+             // Resource Managers (PostgreSQL and MySQL/MariaDB)
+             //
+             // Create and Execute PostgreSQL statement
+             //
+             System.out.println("PostgreSQL, executing >" +
+                                postgresqlStmt + "<");
+             // create a Statement object for PostgreSQL
+             stmt1 = conn1.createStatement();
+             // Execute PostgreSQL statements 
+             stmt1.executeUpdate(postgresqlStmt);
+             //
+             // Create and Execute MySQL/MariaDB statement
+             //
+             System.out.println("MySQL, executing >" + mysqlStmt + "<");
+             // create a Statement object for MySQL/MariaDB
+             stmt2 = conn2.createStatement();
+             // Execute MySQL statements 
+             stmt2.executeUpdate(mysqlStmt);
+             // commit or rollback
+             if (commit)
+                 tx.commit();
+             else
+                 tx.rollback();
+             
+         } catch (XtaException e) {
+             System.err.println("XtaException: LIXA ReturnCode=" +
+                                e.getReturnCode() + " ('" +
+                                e.getMessage() + "')");
+             e.printStackTrace();
+             System.exit(1);
+         } catch (XAException e) {
+             e.printStackTrace();
                  System.exit(1);
-             } catch (XAException e) {
-                 e.printStackTrace();
-                 System.exit(1);
-             }
-
          } catch (Exception e) {
              e.printStackTrace();
              System.exit(1);

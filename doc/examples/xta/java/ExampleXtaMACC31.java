@@ -85,164 +85,162 @@ public class ExampleXtaMACC31 {
         
         // XAResource for Oracle DBMS and some boilerplate objects related to
         // JDBC
-        OracleXADataSource xads1 = null;
-        XAConnection xac1 = null;
-        XAResource xar1 = null;
-        Connection conn1 = null; 
-        Statement stmt1 = null;
+        OracleXADataSource xads = null;
+        XAConnection xac = null;
+        XAResource xar = null;
+        Connection conn = null; 
+        Statement stmt = null;
         
         // Prepare SQL statements in accordance with "insert" command line
         // parameter
-         if (insert) {
-             // SQL INSERT
-             if (superior)
-                 sqlStmt = "INSERT INTO authors VALUES(1930, " +
-                     "'Bonatti', 'Walter')";
-             else
-                 sqlStmt = "INSERT INTO authors VALUES(1948, " +
-                     "'Casarotto', 'Renato')";
-         } else {
-             // SQL DELETE
-             if (superior)
-                 sqlStmt = "DELETE FROM authors WHERE id=1930";
-             else
-                 sqlStmt = "DELETE FROM authors WHERE id=1948";
-         }
-         
-         try {
-             //
-             // A bit of boilerplate for Oracle JDBC & XA
-             //
-             // 1. create an XA Data Source
-             xads1 = new OracleXADataSource();
-             // 2. set connection URL (JDBC thin driver), user and password
-             xads1.setURL("jdbc:oracle:thin:@" +
-                          "(DESCRIPTION=" +
-                          "(ADDRESS=(PROTOCOL=tcp)" +
-                          "(HOST=centos7-oracle12.brenta.org)(PORT=1521))" +
-                          "(CONNECT_DATA=" +
-                          "(SERVICE_NAME=orcl.brenta.org)))");
-             xads1.setUser("hr");
-             xads1.setPassword("hr");
-             // 3. get an XA Connection from the XA Data Source
-             xac1 = xads1.getXAConnection();
-             // 4. get an XA Resource from the XA Connection
-             xar1 = xac1.getXAResource();
-             // 5. get an SQL Connection from the XA Connection
-             conn1 = xac1.getConnection();
-             
-             try {
-                 //
-                 // Create the XTA objects that are necessary to manage the
-                 // distributed transaction
-                 //
-                 // Create a mew XTA Transaction Manager
-                 tm = new TransactionManager();
-                 // Create a new XA global transaction using the Transaction
-                 // Manager as a factory
-                 tx = tm.createTransaction();
-                 // Enlist Oracle DBMS resource to transaction
-                 tx.enlistResource(xar1, "Oracle", "hr/hr");
-                 /*
-                  * *NOTE:*
-                  * The following block of code contains the first key concept
-                  * of the "Multiple Applications, Consecutive Calls" Pattern:
-                  *
-                  * if the program is running with the role of "superior", it
-                  * starts a new global transaction
-                  *
-                  * if the program is running with the role of "subordinate",
-                  * it reads from file the XID (Transaction ID) saved by
-                  * another program executed with the role of "superior" and
-                  * then it resumes the same global transaction.
-                  */
-                 if (superior) {
-                     // Start a new XA global transaction with a single branch
-                     tx.start();
-                 } else {
-                     // read XID from file
-                     BufferedReader input = new BufferedReader(
-                         new FileReader(xidFileName));
-                     String xidString = input.readLine();
-                     System.out.println("XID='" + xidString + "' has been " +
-                                        "read from file '" + xidFileName +
-                                        "'");
-                     input.close();
-                     // Resume the global transaction started by a superior
-                     // program
-                     tx.resume(xidString);
-                 }
-                 //
-                 // At this point, it's time to do something useful with the
-                 // Resource Manager
-                 //
-                 // Create and Execute a JDBC statement
-                 //
-                 System.out.println("Oracle, executing >" + sqlStmt + "<");
-                 // create a Statement object
-                 stmt1 = conn1.createStatement();
-                 // Execute the statement
-                 stmt1.executeUpdate(sqlStmt);
-                 /*
-                  * *NOTE:*
-                  * The following block of code contains the second key
-                  * concept of the "Multiple Applications, Consecutive Calls"
-                  * Pattern:
-                  *
-                  * if the program is running with the role of "superior", it
-                  * suspends the global transaction and it passes the XID
-                  * (Transaction ID) in a file (fifo) for future reading
-                  * (subordinate application program will read it)
-                  *
-                  * if the program is running with the role of "subordinate",
-                  * it commits or rollback the global transaction.
-                  */
-                 if (superior) {
-                     // Suspend the XA global transaction
-                     tx.suspend();
-                     // Retrieve the Transaction ID (XID) associated to the
-                     // transaction that has been created in the previous step
-                     String xidString = tx.getXid().toString();
-                     // Write XID to the file and pass it from Superior
-                     // to Subordinate
-                     BufferedWriter output = new BufferedWriter(
-                         new FileWriter(xidFileName));
-                     output.write(xidString);
-                     System.out.println("XID='" + xidString + "' has been " +
-                                        "written to file '" + xidFileName +
-                                        "'");
-                     output.close();
-                 } else {
-                     // commit or rollback
-                     if (commit)
-                         tx.commit();
-                     else
-                         tx.rollback();
-                 }
-             } catch (XtaException e) {
-                 System.err.println("XtaException: LIXA ReturnCode=" +
-                                    e.getReturnCode() + " ('" +
-                                    e.getMessage() + "')");
-                 e.printStackTrace();
-                 System.exit(1);
-             } catch (XAException e) {
-                 e.printStackTrace();
-                 System.exit(1);
-             }
-         } catch (Exception e) {
-             e.printStackTrace();
-             System.exit(1);
-         } finally {
-             try {
-                 // Close Statement, SQL Connection and XA Connection for
-                 // PostgreSQL
-                 stmt1.close();
-                 conn1.close();
-                 xac1.close();
-             } catch (Exception e) {
-                 e.printStackTrace();
-                 System.exit(1);
-             }
+        if (insert) {
+            // SQL INSERT
+            if (superior)
+                sqlStmt = "INSERT INTO authors VALUES(1930, " +
+                    "'Bonatti', 'Walter')";
+            else
+                sqlStmt = "INSERT INTO authors VALUES(1948, " +
+                    "'Casarotto', 'Renato')";
+        } else {
+            // SQL DELETE
+            if (superior)
+                sqlStmt = "DELETE FROM authors WHERE id=1930";
+            else
+                sqlStmt = "DELETE FROM authors WHERE id=1948";
+        }
+        
+        try {
+            //
+            // A bit of boilerplate for Oracle JDBC & XA
+            //
+            // 1. create an XA Data Source
+            xads = new OracleXADataSource();
+            // 2. set connection URL (JDBC thin driver), user and password
+            xads.setURL("jdbc:oracle:thin:@" +
+                         "(DESCRIPTION=" +
+                         "(ADDRESS=(PROTOCOL=tcp)" +
+                         "(HOST=centos7-oracle12.brenta.org)(PORT=1521))" +
+                         "(CONNECT_DATA=" +
+                         "(SERVICE_NAME=orcl.brenta.org)))");
+            xads.setUser("hr");
+            xads.setPassword("hr");
+            // 3. get an XA Connection from the XA Data Source
+            xac = xads.getXAConnection();
+            // 4. get an XA Resource from the XA Connection
+            xar = xac.getXAResource();
+            // 5. get an SQL Connection from the XA Connection
+            conn = xac.getConnection();
+            
+            //
+            // Create the XTA objects that are necessary to manage the
+            // distributed transaction
+            //
+            // Create a mew XTA Transaction Manager
+            tm = new TransactionManager();
+            // Create a new XA global transaction using the Transaction
+            // Manager as a factory
+            tx = tm.createTransaction();
+            // Enlist Oracle DBMS resource to transaction
+            tx.enlistResource(xar, "Oracle", "hr/hr");
+            /*
+             * *NOTE:*
+             * The following block of code contains the first key concept
+             * of the "Multiple Applications, Consecutive Calls" Pattern:
+             *
+             * if the program is running with the role of "superior", it
+             * starts a new global transaction
+             *
+             * if the program is running with the role of "subordinate",
+             * it reads from file the XID (Transaction ID) saved by
+             * another program executed with the role of "superior" and
+             * then it resumes the same global transaction.
+             */
+            if (superior) {
+                // Start a new XA global transaction with a single branch
+                tx.start();
+            } else {
+                // read XID from file
+                BufferedReader input = new BufferedReader(
+                    new FileReader(xidFileName));
+                String xidString = input.readLine();
+                System.out.println("XID='" + xidString + "' has been " +
+                                   "read from file '" + xidFileName +
+                                   "'");
+                input.close();
+                // Resume the global transaction started by a superior
+                // program
+                tx.resume(xidString);
+            }
+            //
+            // At this point, it's time to do something useful with the
+            // Resource Manager
+            //
+            // Create and Execute a JDBC statement
+            //
+            System.out.println("Oracle, executing >" + sqlStmt + "<");
+            // create a Statement object
+            stmt = conn.createStatement();
+            // Execute the statement
+            stmt.executeUpdate(sqlStmt);
+            /*
+             * *NOTE:*
+             * The following block of code contains the second key
+             * concept of the "Multiple Applications, Consecutive Calls"
+             * Pattern:
+             *
+             * if the program is running with the role of "superior", it
+             * suspends the global transaction and it passes the XID
+             * (Transaction ID) in a file (fifo) for future reading
+             * (subordinate application program will read it)
+             *
+             * if the program is running with the role of "subordinate",
+             * it commits or rollback the global transaction.
+             */
+            if (superior) {
+                // Suspend the XA global transaction
+                tx.suspend();
+                // Retrieve the Transaction ID (XID) associated to the
+                // transaction that has been created in the previous step
+                String xidString = tx.getXid().toString();
+                // Write XID to the file and pass it from Superior
+                // to Subordinate
+                BufferedWriter output = new BufferedWriter(
+                    new FileWriter(xidFileName));
+                output.write(xidString);
+                System.out.println("XID='" + xidString + "' has been " +
+                                   "written to file '" + xidFileName +
+                                   "'");
+                output.close();
+            } else {
+                // commit or rollback
+                if (commit)
+                    tx.commit();
+                else
+                    tx.rollback();
+            }
+        } catch (XtaException e) {
+            System.err.println("XtaException: LIXA ReturnCode=" +
+                               e.getReturnCode() + " ('" +
+                               e.getMessage() + "')");
+            e.printStackTrace();
+            System.exit(1);
+        } catch (XAException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        } finally {
+            try {
+                // Close Statement, SQL Connection and XA Connection for
+                // PostgreSQL
+                stmt.close();
+                conn.close();
+                xac.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
          }
     }
 }
