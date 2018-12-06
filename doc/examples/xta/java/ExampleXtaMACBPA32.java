@@ -21,7 +21,7 @@
 
 /*
  * This program is an example implementation of the
- * "Multiple Applications, Concurrent Branches/Pseudo Synchronous" Pattern
+ * "Multiple Applications, Concurrent Branches/Pseudo Asynchronous" Pattern
  * as documented in LIXA manual:
  * http://www.tiian.org/lixa/manuals/html/index.html
  *
@@ -59,7 +59,7 @@ import java.io.*;
 
 
 
-public class ExampleXtaMACBPS32 {
+public class ExampleXtaMACBPA32 {
     public static void main(String[] args) {
         // Check command line parameters
         if (args.length < 4) {
@@ -137,11 +137,10 @@ public class ExampleXtaMACBPS32 {
                                "localhost/testdb/tiian/passw0rd");
              /*
               * *** NOTE: ***
-              * at this point, subordinate Application Program must wait a
-              * Remote Procedure Call (RPC) or a Web Service (WS) or a REST
-              * API invocation from superior Application Program. Here the
-              * incoming call is emulated with a synchronous message
-              * passing using a named pipe (FIFO)
+              * at this point, subordinate Application Program must wait until
+              * superior Application Program has started the transaction.
+              * Here the synchronization is implemented with
+              * a synchronous message passing using a named pipe (FIFO)
               */
              // read message from FIFO to get XID
              BufferedReader input = new BufferedReader(
@@ -150,13 +149,6 @@ public class ExampleXtaMACBPS32 {
              System.out.println("Subordinate AP has received XID '" +
                                 xidString + "' from superior AP");
              input.close();
-             /*
-              * *** NOTE: ***
-              * at this point the subordinate Application Program (this
-              * one) has been called by the superior A.P. that's waiting a
-              * reply. Now this program can branch the global transaction
-              * previously started by the superior A.P.
-              */
              // create a new branch in the same global transaction
              tx.branch(xidString);
              /*
@@ -167,6 +159,26 @@ public class ExampleXtaMACBPS32 {
              String branchXidString = tx.getXid().toString();
              System.out.println("Subordinate AP has created a branch " +
                                 "with XID '" + branchXidString + "'");
+             /*
+              * *** NOTE: ***
+              * subordinate Application Program (this one) has branched the
+              * transaction and must send a message to the superior Application
+              * Program that can proceed with it's own operations
+              */
+             // open the pipe for write operation
+             BufferedWriter output = new BufferedWriter(
+                 new FileWriter(sub2supFifoname));
+             // write the message
+             output.write(branchXidString);
+             System.out.println("Subordinate AP has returned '" +
+                                branchXidString + "' to superior AP");
+             output.close();
+             /*
+              * *** NOTE: ***
+              * at this point the subordinate Application Program (this one)
+              * can go on with its own operations indipendently from the
+              * superior AP
+              */ 
              //
              // Create and Execute a JDBC statement for PostgreSQL
              //
@@ -177,55 +189,13 @@ public class ExampleXtaMACBPS32 {
              stmt.executeUpdate(sqlStmt);
              // commit or rollback the transaction
              if (commit) {
-                 /*
-                  * *** NOTE: ***
-                  * commit MUST be performed in two step:
-                  * 1. in first step, the branch is only "prepared" (as in
-                  *    XA specification) and control can be returned to the
-                  *    superior AP that has to start its commit
-                  * 2. in the second step, the branch is definitely
-                  *    "committed", but the operation will block the
-                  *    caller because the subordinate AP must wait the
-                  *    "prepared" state of the superior AP before
-                  *    committing
-                  */
-                 // commit is performed with "NonBlocking" flag set to
-                 // true: this is necessary to allow the superior branch
-                 // to start commit */
-                 tx.commit(true);
+                 tx.commit();
+                 System.out.println("Subordinate AP has committed its branch");
              } else {
                  tx.rollback();
+                 System.out.println(
+                     "Subordinate AP has rolled back its branch");
              }
-             /*
-              * *** NOTE: ***
-              * at this point the subordinate Application Program (this
-              * one) has to reply to the superior A.P. that's waiting.
-              * Here the reply is emulated with a synchronous message
-              * passing using a named pipe (FIFO)
-              */
-             // open the pipe for write operation
-             BufferedWriter output = new BufferedWriter(
-                 new FileWriter(sub2supFifoname));
-             // prepare the reply message
-             String reply;
-             if (commit)
-                 reply = "PREPARED_for_COMMIT";
-             else
-                 reply = "ROLLBACK";
-             // write the message
-             output.write(reply);
-             System.out.println("Subordinate AP has returned '" + reply +
-                                "' to superior AP");
-             output.close();
-             if (commit) {
-                 /*
-                  * Complete the second phase of the commit with
-                  * "NonBlocking" flag set to false: this is necessary to
-                  * wait the superior AP prepare phase
-                  */
-                 tx.commit(false);
-             }
-             
          } catch (XtaException e) {
              System.err.println("XtaException: LIXA ReturnCode=" +
                                 e.getReturnCode() + " ('" +

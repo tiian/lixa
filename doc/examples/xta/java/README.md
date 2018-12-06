@@ -18,6 +18,13 @@ javac -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/postgresql.jar Examp
 java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:. ExampleXtaMACBPS31 1 1 sup2sub sub2sup
 java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/postgresql.jar:. ExampleXtaMACBPS32 1 1 sup2sub sub2sup
 
+
+javac -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar ExampleXtaMACBPA31.java
+javac -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/postgresql.jar ExampleXtaMACBPA32.java
+
+java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:. ExampleXtaMACBPA31 1 1 sup2sub sub2sup
+java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/postgresql.jar:. ExampleXtaMACBPA32 1 1 sup2sub sub2sup
+
 https://docs.oracle.com/cd/E11882_01/java.112/e12265/connect.htm#CHDDCICA
 
 https://docs.oracle.com/database/121/JJDBC/xadistra.htm#JJDBC28878

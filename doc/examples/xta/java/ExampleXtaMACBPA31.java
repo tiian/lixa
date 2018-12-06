@@ -21,7 +21,7 @@
 
 /*
  * This program is an example implementation of the
- * "Multiple Applications, Concurrent Branches/Pseudo Synchronous" Pattern
+ * "Multiple Applications, Concurrent Branches/Pseudo Asynchronous" Pattern
  * as documented in LIXA manual:
  * http://www.tiian.org/lixa/manuals/html/index.html
  *
@@ -52,14 +52,14 @@ import java.sql.Statement;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.XAException;
-// import PostgreSQL package for XA Data Source
-import org.postgresql.xa.PGXADataSource;
+// import MySQL package for XA Data Source
+import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
 // import Java io
 import java.io.*;
 
 
 
-public class ExampleXtaMACBPS32 {
+public class ExampleXtaMACBPA31 {
     public static void main(String[] args) {
         // Check command line parameters
         if (args.length < 4) {
@@ -88,40 +88,36 @@ public class ExampleXtaMACBPS32 {
         // XTA Transaction
         Transaction tx;
         
-        // XA Resource for PostgreSQL
-        PGXADataSource xads = null;
+        // XA Resource for MySQL
+        MysqlXADataSource xads = null;
         XAConnection xac = null;
         XAResource xar = null;
-        Connection conn = null; 
+        Connection conn = null;
         Statement stmt = null;
-        
+             
         // Prepare SQL statements in accordance with "insert" command line
         // parameter
          if (insert)
              // SQL INSERT
-             sqlStmt = "INSERT INTO authors " +
-                 "VALUES(1921, 'Rigoni Stern', 'Mario')";
+             sqlStmt = "INSERT INTO authors VALUES(1919, 'Levi', 'Primo')";
          else
              // SQL DELETE
-             sqlStmt = "DELETE FROM authors WHERE id=1921";
+             sqlStmt = "DELETE FROM authors WHERE id=1919";
          
          try {
              //
-             // A bit of scaffolding for PostgreSQL:
+             // A bit of scaffolding for MySQL/MariaDB
              //
-             // 1. create an XA Data Source
-             xads = new PGXADataSource();
-             // 2. set connection parameters (one property at a time)
-             xads.setServerName("localhost");
-             xads.setDatabaseName("testdb");
-             xads.setUser("tiian");
-             xads.setPassword("passw0rd");
+             // 1. create an XA Data Source             
+             xads = new MysqlXADataSource();
+             // 2. set connection parameters using a connection URL
+             xads.setUrl("jdbc:mysql://localhost/lixa?user=lixa&password=");
              // 3. get an XA Connection from the XA Data Source
              xac = xads.getXAConnection();
              // 4. get an XA Resource from the XA Connection
              xar = xac.getXAResource();
              // 5. get an SQL Connection from the XA Connection
-             conn = xac.getConnection();
+             conn = xac.getConnection(); 
              
              //
              // Create the XTA objects that are necessary to manage the
@@ -132,98 +128,62 @@ public class ExampleXtaMACBPS32 {
              // Create a new XA global transaction using the Transaction
              // Manager as a factory
              tx = tm.createTransaction();
-             // Enlist PostgreSQL resource to transaction
-             tx.enlistResource(xar, "PostgreSQL",
-                               "localhost/testdb/tiian/passw0rd");
+             // Enlist MySQL/MariaDB resource to transaction
+             tx.enlistResource(
+                 xar, "MySQL",
+                 "jdbc:mysql://localhost/lixa?user=lixa/password=");
+             /*
+              * Start a new XA global transaction with multiple branches
+              * Note: argument ("MultipleBranch") has true value because
+              *       the transaction will be branched by the subordinate
+              *       Application Program
+              */
+             tx.start(true);
+             // Retrieve the Transaction ID (XID) associated to the
+             // transaction that has been created in the previous step
+             String xidString = tx.getXid().toString();
              /*
               * *** NOTE: ***
-              * at this point, subordinate Application Program must wait a
-              * Remote Procedure Call (RPC) or a Web Service (WS) or a REST
-              * API invocation from superior Application Program. Here the
-              * incoming call is emulated with a synchronous message
-              * passing using a named pipe (FIFO)
-              */
-             // read message from FIFO to get XID
+              * a Remote Procedure Call (RPC) or a Web Service (WS) or a
+              * REST API is emulated by a synchronous message passing
+              * using a named pipe (FIFO)
+              */ 
+             // Write XID to the FIFO, pass it from Superior to Subordinate
+             BufferedWriter output = new BufferedWriter(
+                 new FileWriter(sup2subFifoname));
+             output.write(xidString);
+             System.out.println("Superior AP has sent XID '" + xidString +
+                                "' to subordinate AP");
+             output.close();
+             // read answer from FIFO
              BufferedReader input = new BufferedReader(
-                 new FileReader(sup2subFifoname));
-             String xidString = input.readLine();
-             System.out.println("Subordinate AP has received XID '" +
-                                xidString + "' from superior AP");
+                 new FileReader(sub2supFifoname));
+             String reply = input.readLine();
+             System.out.println("Superior AP has received '" + reply +
+                                "' reply from subordinate AP");
              input.close();
              /*
               * *** NOTE: ***
-              * at this point the subordinate Application Program (this
-              * one) has been called by the superior A.P. that's waiting a
-              * reply. Now this program can branch the global transaction
-              * previously started by the superior A.P.
-              */
-             // create a new branch in the same global transaction
-             tx.branch(xidString);
-             /*
-              * the branch has the same global identifier, but a different
-              * branch id; the following statement is for the sake of
-              * debugging only
-              */
-             String branchXidString = tx.getXid().toString();
-             System.out.println("Subordinate AP has created a branch " +
-                                "with XID '" + branchXidString + "'");
+              * at this point the subordinate Application Program has branched
+              * the transaction and this (superior) Application Program can go
+              * on with the main branch created by Transaction.start()
+              * indipendently from the subordinate AP
+              */ 
              //
-             // Create and Execute a JDBC statement for PostgreSQL
+             // Create and Execute a JDBC statement
              //
-             System.out.println("PostgreSQL, executing >" + sqlStmt + "<");
+             System.out.println("MySQL, executing >" + sqlStmt + "<");
              // create a Statement object
              stmt = conn.createStatement();
              // Execute the statement
              stmt.executeUpdate(sqlStmt);
-             // commit or rollback the transaction
+             // commit or rollback
              if (commit) {
-                 /*
-                  * *** NOTE: ***
-                  * commit MUST be performed in two step:
-                  * 1. in first step, the branch is only "prepared" (as in
-                  *    XA specification) and control can be returned to the
-                  *    superior AP that has to start its commit
-                  * 2. in the second step, the branch is definitely
-                  *    "committed", but the operation will block the
-                  *    caller because the subordinate AP must wait the
-                  *    "prepared" state of the superior AP before
-                  *    committing
-                  */
-                 // commit is performed with "NonBlocking" flag set to
-                 // true: this is necessary to allow the superior branch
-                 // to start commit */
-                 tx.commit(true);
+                 tx.commit();
+                 System.out.println("Superior AP has committed its branch");
              } else {
                  tx.rollback();
-             }
-             /*
-              * *** NOTE: ***
-              * at this point the subordinate Application Program (this
-              * one) has to reply to the superior A.P. that's waiting.
-              * Here the reply is emulated with a synchronous message
-              * passing using a named pipe (FIFO)
-              */
-             // open the pipe for write operation
-             BufferedWriter output = new BufferedWriter(
-                 new FileWriter(sub2supFifoname));
-             // prepare the reply message
-             String reply;
-             if (commit)
-                 reply = "PREPARED_for_COMMIT";
-             else
-                 reply = "ROLLBACK";
-             // write the message
-             output.write(reply);
-             System.out.println("Subordinate AP has returned '" + reply +
-                                "' to superior AP");
-             output.close();
-             if (commit) {
-                 /*
-                  * Complete the second phase of the commit with
-                  * "NonBlocking" flag set to false: this is necessary to
-                  * wait the superior AP prepare phase
-                  */
-                 tx.commit(false);
+                 System.out.println("Superior AP has rolled back its branch");
              }
              
          } catch (XtaException e) {

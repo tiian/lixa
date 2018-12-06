@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
         // Open all resources enlisted by the Transaction
         tx.Open();
         /*
-         * Start a new XA global transaction with a single branch
+         * Start a new XA global transaction with multiple branches
          * Note: argument ("MultipleBranch") has true value because the
          *       transaction will be branched by the subordinate Application
          *       Program
