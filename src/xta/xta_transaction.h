@@ -57,6 +57,11 @@ typedef struct xta_xa_resource_s xta_xa_resource_t;
  */
 typedef struct xta_transaction_s {
     /**
+     * Boolean value used to store if the open method has been already called
+     * or not
+     */
+    int                              already_opened;
+    /**
      * LIXA client status
      */
     xta_transaction_client_status_t *client_status;
@@ -126,27 +131,47 @@ extern "C" {
                                         xta_xa_resource_t *xa_res);
     
 
-    
     /**
+     * @deprecated
+     */
+    int xta_transaction_open(xta_transaction_t *transact) DEPRECATED ;
+    /*
      * Prepare the XA Resource Managers and the XA Transaction Manager for a
      * new transactional Unit of Work. From the XA specification point of view,
      * it calls xa_open (for the Native XA Resource Managers)
      * @param[in,out] transact : transaction object
      * @return a reason code
      */
-    int xta_transaction_open(xta_transaction_t *transact);
+    int xta_transaction_open_internal(xta_transaction_t *transact);
 
 
     
     /**
+     * @deprecated
+     */
+    int xta_transaction_close(xta_transaction_t *transact) DEPRECATED ;
+    /*
      * Shut down the XA Resource Managers and the XA Transaction Manager after
      * transactional Unit of Work completion. From the XA specification point
      * of view, it calls xa_close (for the Native XA Resource Managers)
      * @param[in,out] transact : transaction object
      * @return a reason code
      */
-    int xta_transaction_close(xta_transaction_t *transact);
+    int xta_transaction_close_internal(xta_transaction_t *transact);
     
+    
+
+    /**
+     * Explicitly open and close all the enlisted resource to look for
+     * recovery pending transaction in the LIXA state server. In normal
+     * condition, this is not necessary, because the same happens when
+     * @ref xta_transaction_start, @ref xta_transaction_resume and
+     * @ref xta_transaction_branch are called
+     * @param[in,out] transact : transaction object
+     * @return a reason code
+     */
+    int xta_transaction_recover(xta_transaction_t *transact);
+
     
     
     /**

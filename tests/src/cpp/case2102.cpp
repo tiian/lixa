@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
     }
 
     // initialize XTA environment
-    xta::Xta::Init();
+    xta::Xta::init();
     try {
         // dynamically create a native XA resource for Oracle DBMS
         xar = new xta::NativeXaResource(
@@ -123,11 +123,9 @@ int main(int argc, char *argv[])
         tm = new xta::TransactionManager();
         // Create a new XA global transaction and retrieve a reference from
         // the TransactionManager object
-        xta::Transaction tx = tm->CreateTransaction();
+        xta::Transaction tx = tm->createTransaction();
         // Enlist Oracle DMBS resource to transaction
-        tx.EnlistResource(xar);
-        // Open all resources enlisted by tx Transaction
-        tx.Open();
+        tx.enlistResource(xar);
         /*
          * *NOTE:*
          * The following block of code contains the first key concept of the
@@ -143,7 +141,7 @@ int main(int argc, char *argv[])
          */
         if (superior) {
             // Start a new XA global transaction with a single branch
-            tx.Start();
+            tx.start();
         } else {
             string xidString;
             // Open, read and close the file to retrieve xidString from
@@ -158,7 +156,7 @@ int main(int argc, char *argv[])
             cout << "XID='" << xidString << "' has been read from file '" <<
                 xid_filename << "'" << endl;
             // Resume the global transaction started by a superior program
-            tx.Resume(xidString);
+            tx.resume(xidString);
         }
         /*
          * This part is boilerplate code related to Oracle OCI for XA: no
@@ -227,7 +225,7 @@ int main(int argc, char *argv[])
             /*
              * Suspend the XA global transaction
              */
-            tx.Suspend();
+            tx.suspend();
             /*
              * Retrieve the Transaction ID (XID) associated to the transaction
              * that has been created in the previous step
@@ -249,14 +247,12 @@ int main(int argc, char *argv[])
         } else {
             if (commit) {
                 // Commit the global transaction
-                tx.Commit();
+                tx.commit();
             } else {
                 // Rollback the global transaction
-                tx.Rollback();
+                tx.rollback();
             }
         }
-        // Close all resources enlisted by tx Transaction
-        tx.Close();
         // Delete Transaction Manager object
         delete tm;
         // Delete MySQL native and XA resource

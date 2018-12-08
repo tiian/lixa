@@ -109,12 +109,6 @@ int main(int argc, char *argv[])
                "reference is %p\n", pgm, tx);
     }
 
-    /* open all the resources for Distributed Transactions */
-    if (LIXA_RC_OK != (rc = xta_transaction_open(tx))) {
-        printf("%s| xta_transaction_open: returned %d\n", pgm, rc);
-        return 1;
-    }
-
     /* start a Distributed Transaction */
     if (LIXA_RC_OK != (rc = xta_transaction_start(tx, FALSE))) {
         printf("%s| xta_transaction_start: returned %d\n", pgm, rc);
@@ -138,11 +132,6 @@ int main(int argc, char *argv[])
         printf("%s| XTA rollback performed\n", pgm);
     }
     
-    /* close all the resources for Distributed Transactions */
-    if (LIXA_RC_OK != (rc = xta_transaction_close(tx))) {
-        printf("%s| xta_transaction_close: returned %d\n", pgm, rc);
-        return 1;
-    }
     /*
      * delete Transaction Manager object
      */

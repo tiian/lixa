@@ -68,15 +68,15 @@
  *                                                                     *
  ***********************************************************************/
 #ifndef TRY
-#define TRY
+# define TRY
 #endif /* TRY */
         
 #ifndef CATCH
-#define CATCH ExcpHand:
+# define CATCH ExcpHand:
 #endif /* CATCH */
 
 #ifndef THROW
-#define THROW(e) { excp = e; goto ExcpHand; }
+# define THROW(e) { excp = e; goto ExcpHand; }
 #endif /* THROW */
 
 

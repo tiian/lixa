@@ -46,22 +46,15 @@ namespace xta {
         this->tx = NULL;
     };
 
-    void Transaction::EnlistResource(XaResource *xaRes)
+    void Transaction::enlistResource(XaResource *xaRes)
     {
         int rc;
         if (LIXA_RC_OK != (rc = xta_transaction_enlist_resource(
                                tx, xaRes->getCBaseXaResource())))
             throw Exception(rc, "xta_transaction_enlist_resource");
     }
-
-    void Transaction::Open(void)
-    {
-        int rc;
-        if (LIXA_RC_OK != (rc = xta_transaction_open(tx)))
-            throw Exception(rc, "xta_transaction_open");
-    }
-
-    void Transaction::Start(bool MultipleBranches)
+    
+    void Transaction::start(bool MultipleBranches)
     {
         int rc;
         if (LIXA_RC_OK != (rc = xta_transaction_start(
@@ -69,7 +62,7 @@ namespace xta {
             throw Exception(rc, "xta_transaction_start");
     }
     
-    void Transaction::Commit(bool NonBlocking)
+    void Transaction::commit(bool NonBlocking)
     {
         int rc = xta_transaction_commit(tx, NonBlocking);
         if ((NonBlocking && LIXA_RC_WOULD_BLOCK != rc) ||
@@ -77,21 +70,21 @@ namespace xta {
             throw Exception(rc, "xta_transaction_commit");
     }
     
-    void Transaction::Rollback(void)
+    void Transaction::rollback(void)
     {
         int rc;
         if (LIXA_RC_OK != (rc = xta_transaction_rollback(tx)))
             throw Exception(rc, "xta_transaction_rollback");
     }
     
-    void Transaction::Suspend(long Flags)
+    void Transaction::suspend(long Flags)
     {
         int rc;
         if (LIXA_RC_OK != (rc = xta_transaction_suspend(tx, Flags)))
             throw Exception(rc, "xta_transaction_suspend");
     }
 
-    void Transaction::Resume(const string& XidString, long Flags)
+    void Transaction::resume(const string& XidString, long Flags)
     {
         int rc;
         if (LIXA_RC_OK != (rc = xta_transaction_resume(
@@ -99,14 +92,14 @@ namespace xta {
             throw Exception(rc, "xta_transaction_resume");
     }
     
-    void Transaction::Close(void)
+    void Transaction::recover(void)
     {
         int rc;
-        if (LIXA_RC_OK != (rc = xta_transaction_close(tx)))
-            throw Exception(rc, "xta_transaction_close");
+        if (LIXA_RC_OK != (rc = xta_transaction_recover(tx)))
+            throw Exception(rc, "xta_transaction_recover");
     }
 
-    void Transaction::Branch(const string& XidString)
+    void Transaction::branch(const string& XidString)
     {
         int rc;
         if (LIXA_RC_OK != (rc = xta_transaction_branch(tx, XidString.c_str())))

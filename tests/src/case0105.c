@@ -147,12 +147,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    /* open all the resources for Distributed Transactions */
-    if (LIXA_RC_OK != (rc = xta_transaction_open(tx))) {
-        fprintf(stderr, "%s| xta_transaction_open: returned %d\n", pgm, rc);
-        return 1;
-    }
-
     if (SUPERIOR == phase || NO_PHASE == phase) {
         /* start a Distributed Transaction */
         if (LIXA_RC_OK != (rc = xta_transaction_start(
@@ -230,11 +224,6 @@ int main(int argc, char *argv[])
                 pgm, rc);
     }
     
-    /* close all the resources for Distributed Transactions */
-    if (LIXA_RC_OK != (rc = xta_transaction_close(tx))) {
-        fprintf(stderr, "%s| xta_transaction_close: returned %d\n", pgm, rc);
-        return 1;
-    }
     /*
      * delete Transaction Manager object
      */

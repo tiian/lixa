@@ -33,7 +33,7 @@
 
 namespace xta {
     
-    void Xta::Init(void) {
+    void Xta::init(void) {
         xta_init();
     };
     

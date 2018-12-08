@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     /*
      * initialize XTA environment
      */
-    xta::Xta::Init();
+    xta::Xta::init();
     /*
      * create a new PostgreSQL connection
      * Note: using PostgreSQL C API and C standard functions
@@ -142,15 +142,13 @@ int main(int argc, char *argv[])
             rm2, "MySQL", "localhost,0,lixa,,lixa");
         // Create a new XA global transaction and retrieve a reference from
         // the TransactionManager object
-        xta::Transaction tx = tm->CreateTransaction();
+        xta::Transaction tx = tm->createTransaction();
         // Enlist PostgreSQL resource to transaction
-        tx.EnlistResource(xar1);
+        tx.enlistResource(xar1);
         // Enlist MySQL resource to Transaction
-        tx.EnlistResource(xar2);
-        // Open all resources enlisted by tx Transaction
-        tx.Open();
+        tx.enlistResource(xar2);
         // Start a new XA global transaction with a single branch
-        tx.Start();
+        tx.start();
         /*
          * At this point, it's time to do something with the Resource Managers
          * (PostgreSQL and MySQL)
@@ -181,14 +179,10 @@ int main(int argc, char *argv[])
          * commit or rollback the transaction
          */
         if (commit) {
-            tx.Commit();
+            tx.commit();
         } else {
-            tx.Rollback();
+            tx.rollback();
         }
-        /*
-         * Close all resources enlisted by tx Transaction
-         */
-        tx.Close();
         /*
          * Delete PostgreSQL native and XA resource
          */

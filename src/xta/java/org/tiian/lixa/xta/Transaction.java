@@ -45,11 +45,6 @@ public class Transaction {
      */
     private ByteBuffer NativeObject;
     /**
-     * Java XA Resources do not use the "open" method, but the LIXA underlying
-     * logic requires it. This is a flag.
-     */
-    private boolean AlreadyOpened;
-    /**
      * This is the opaque wrapper of a xta_transaction_manager_t object used
      * by the native library
      */
@@ -70,21 +65,19 @@ public class Transaction {
      * but the content is populate by a JNI function called by the factory.
      */
     Transaction() {
-        AlreadyOpened = false;
         return;
     }
     /*
      * Delete the native xta_transaction_t object and the native C XA resources
      * Called by finalize method
      */
-    private native void deleteJNI(boolean AlreadyOpened);
+    private native void delete();
     /**
      * Release the C native object when Java object finalization is executed
      */
     protected void finalize() {
         if (null != NativeResources) {
-            deleteJNI(AlreadyOpened);
-            AlreadyOpened = false;
+            delete();
             NativeObject = null;
             NativeResources = null;
         }
@@ -112,10 +105,6 @@ public class Transaction {
      * error condition
      */
     public native XtaXid getXid() throws XtaException;
-    // Native method wrapper for start
-    private native int startJNI(
-        boolean multipleBranches, boolean alreadyOpened)
-        throws XtaException, XAException;
     /**
      * Start a new 2 phase commit transaction: this version of start method
      * is necessary only if the transaction will be branched by other
@@ -125,11 +114,8 @@ public class Transaction {
      * span more applications and it will be followed by a call to branch
      * method
      */
-    public void start(boolean multipleBranches)
-        throws XtaException, XAException {
-        startJNI(multipleBranches, AlreadyOpened);
-        AlreadyOpened = true;
-    }
+    public native void start(boolean multipleBranches)
+        throws XtaException, XAException;
     /**
      * Start a new 2 phase commit transaction: this version of start method can
      * be used only if the transaction is not branched by 2 or more
@@ -160,9 +146,6 @@ public class Transaction {
      * Rollback the current transaction
      */
     public native void rollback() throws XtaException, XAException;
-    // Native method wrapper for resume
-    private native void resumeJNI(String xidString, boolean alreadyOpened)
-        throws XtaException, XAException;
     /**
      * Resume the transaction represented by xidString in this transaction
      * object; the transaction has been previously suspended with
@@ -170,28 +153,28 @@ public class Transaction {
      * @param xidString serialized identifier of the transaction that must
      *        be resumed
      */
-    public void resume(String xidString) throws XtaException, XAException {
-        resumeJNI(xidString, AlreadyOpened);
-        AlreadyOpened = true;
-    }
+    public native void resume(String xidString)
+        throws XtaException, XAException;
     /**
      * Suspend the transaction represented by this transaction object; the
      * transaction can be resumed with
      * {@link Transaction#resume resume} at a later time 
      */
-    public native void suspend()
-        throws XtaException, XAException;
-    // Native method wrapper for branch
-    private native void branchJNI(String xidString, boolean alreadyOpened)
-        throws XtaException, XAException;
+    public native void suspend() throws XtaException, XAException;
     /**
      * Create a new branch of the transaction represented by xid in this
      * transaction object; the global transaction has been previously started
      * @param xidString serialized identifier of the transaction that must
      *        be resumed
      */
-    public void branch(String xidString) throws XtaException, XAException {
-        branchJNI(xidString, AlreadyOpened);
-        AlreadyOpened = true;
-    }
+    public native void branch(String xidString)
+        throws XtaException, XAException;    
+    /**
+     * Explicitly open and close all the enlisted resource to look for
+     * recovery pending transaction in the LIXA state server. In normal
+     * condition, this is not necessary, because the same happens when
+     * {@link Transaction#start start}, {@link Transaction#resume resume} and
+     * {@link Transaction#branch branch} are called
+     */
+    public native void recover() throws XtaException, XAException;
 }

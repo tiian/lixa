@@ -1,5 +1,21 @@
 LOG:
 
+	   1.7.2 Java API for XTA
+		 These functions/methods are now deprecated because useless:
+		 - xta_transaction_open
+		 - xta_transaction_close
+		 they will be removed in the near future.
+		 Renamed to lowercase C++ API methods
+		 Removed xta::Transaction.Open
+		 Removed xta::Transaction.Close
+		 Renamed to lowercase Python API methods
+		 Removed Transaction.Open
+		 Removed Transaction.Close
+		 *** WARNING: ***
+		 This release breaks compatibility with previous versions of
+		 C++ and Python XTA API: the first char of the method names
+		 must be changed from Uppercase to lowercase
+
 2018-10-28 1.7.1 Python API for XTA
 		 Both Python 2 and Python 3 can be used with XTA for Python.
 		 Examples in doc/examples/xta/python tested with:

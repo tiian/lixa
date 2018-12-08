@@ -47,7 +47,7 @@ namespace xta {
         tm = NULL;
     };
     
-    Transaction TransactionManager::CreateTransaction()
+    Transaction TransactionManager::createTransaction()
     {
         xta_transaction_t *tx = NULL;
         if (NULL == (tx = xta_transaction_manager_create_transaction(tm)))

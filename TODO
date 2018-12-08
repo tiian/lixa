@@ -1,22 +1,9 @@
-Implement XTA for Java:
+Review C, C++ and Python examples after API change
 
-Implement test cases
+Implement test cases of XTA for Java
 
 test xa_forget
 test xa_recover
-
-Remove tx.open() and tx.close() by C++ API: they are basically useless and
-they can be merged as below:
-tx.open() -> tx.start(), tx.resume(), tx.branch()
-tx.close() -> tx destructor
-in this way C++ will have a semantic more similar to Java than C: copy the
-logic from Java using alreadyOpened boolean flag.
-Use lower case for the first char in C++ method: upper case is just a mistake!
-Probably open() and close() are pedantic even for C because there are
-_new() and _delete() that might do open and close... If they can be removed and
-they become automatic routine inside new() and delete(), remove from Java the
-alreadyOpened flag and the useless double wrapper methods (*JNI that would be
-no more necessary)
 
 this string 
 "jdbc:mysql://localhost/lixa?user=lixa&password="

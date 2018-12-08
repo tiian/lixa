@@ -87,10 +87,8 @@ void create_dynamic_native_xa_resources();
 void create_a_new_transaction_manager(void);
 void create_a_new_transaction(void);
 void enlist_resources_to_transaction(void);
-void open_all_the_resources(void);
 void use_xa_resources(void);
 void reply_to_superior(const char *msg);
-void close_all_the_resources(void);
 void delete_transaction_manager(void);
 void delete_all_xa_resources(void);
 
@@ -243,7 +241,6 @@ void superior(void)
     create_a_new_transaction_manager();
     create_a_new_transaction();
     enlist_resources_to_transaction();
-    open_all_the_resources();
     /*
      * interesting code for XTA branching
      */
@@ -308,7 +305,6 @@ void superior(void)
         }
     }
     /* final boilerplate code */
-    close_all_the_resources();
     delete_transaction_manager();    
     delete_all_xa_resources();
 }
@@ -324,7 +320,6 @@ void subordinate(void)
     create_a_new_transaction_manager();
     create_a_new_transaction();
     enlist_resources_to_transaction();
-    open_all_the_resources();
     /*
      * interesting code for XTA branching
      */
@@ -390,7 +385,6 @@ void subordinate(void)
         reply_to_superior("ROLLBACK");
     }
     /* final boilerplate code */
-    close_all_the_resources();
     delete_transaction_manager();    
     delete_all_xa_resources();
 }
@@ -601,19 +595,6 @@ void enlist_resources_to_transaction(void)
 
 
 
-void open_all_the_resources(void)
-{
-    /* open all the resources for Distributed Transactions */
-    rc = xta_transaction_open(tx);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "%s/%u| xta_transaction_open: returned %d\n",
-                pgm, pid, rc);
-        exit(1);
-    }
-}
-
-
-
 void use_xa_resources(void)
 {
 #ifdef HAVE_MYSQL
@@ -761,19 +742,6 @@ void reply_to_superior(const char *msg)
                 pgm, pid);
         exit(1);
     }        
-}
-
-
-
-void close_all_the_resources(void)
-{
-    /* close all the resources for Distributed Transactions */
-    rc = xta_transaction_close(tx);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "%s/%u| xta_transaction_close: returned %d\n",
-                pgm, pid, rc);
-        exit(14);
-    }
 }
 
 

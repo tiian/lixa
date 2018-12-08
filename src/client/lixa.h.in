@@ -61,6 +61,14 @@
 
 
 
+#ifdef __GNUC__
+# define DEPRECATED __attribute__ ((deprecated))
+#else
+# define DEPRECATED
+#endif
+
+
+
 /**
  * It contains the configuration of a resource manager (how to reach and
  * use it)

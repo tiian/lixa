@@ -70,6 +70,8 @@ xta_transaction_t *xta_transaction_new(void)
         if (NULL == (this = (xta_transaction_t *)
                      g_try_malloc0(sizeof(xta_transaction_t))))
             THROW(G_TRY_MALLOC_ERROR1);
+        /* reset already_open flag */
+        this->already_opened = FALSE;
         /* allocate a client_status object */
         if (NULL == (this->client_status =
                      g_try_malloc0(sizeof(client_status_t))))
@@ -185,6 +187,14 @@ void xta_transaction_delete(xta_transaction_t *transact)
     
     LIXA_TRACE(("xta_transaction_delete: destroying %p...\n", transact));
     TRY {
+        /* call open if not already done */
+        if (transact->already_opened)
+            if (LIXA_RC_OK != (ret_cod = xta_transaction_close_internal(
+                                   transact))) {
+                LIXA_TRACE(("xta_transaction_delete/"
+                            "xta_transaction_close_internal: ret_cod=%d\n",
+                            ret_cod));
+            }
         /* unconfigure and release the memory related to client configuration
            collection */
         if (LIXA_RC_OK != (ret_cod = client_unconfig(
@@ -465,10 +475,17 @@ int xta_transaction_redigest(xta_transaction_t *transact,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
-    
+
 
 
 int xta_transaction_open(xta_transaction_t *transact)
+{
+    return xta_transaction_open_internal(transact);
+}
+
+
+
+int xta_transaction_open_internal(xta_transaction_t *transact)
 {
     enum Exception { NULL_OBJECT
                      , INVALID_STATUS
@@ -477,7 +494,7 @@ int xta_transaction_open(xta_transaction_t *transact)
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("xta_transaction_open\n"));
+    LIXA_TRACE(("xta_transaction_open_internal\n"));
     TRY {
         int next_txstate, txrc;
         
@@ -487,8 +504,8 @@ int xta_transaction_open(xta_transaction_t *transact)
         /* check transaction state before going on */
         if (TX_STATE_S0 != client_status_get_txstate(
                 transact->client_status)) {
-            LIXA_TRACE(("xta_transaction_open: expected client status %d, "
-                        "current client status %d\n", TX_STATE_S0,
+            LIXA_TRACE(("xta_transaction_open_internal: expected client "
+                        "status %d, current client status %d\n", TX_STATE_S0,
                         client_status_get_txstate(transact->client_status)));
             THROW(INVALID_STATUS);
         }
@@ -498,6 +515,7 @@ int xta_transaction_open(xta_transaction_t *transact)
                                transact->local_ccc, transact->client_status,
                                &txrc, next_txstate, FALSE)))
             THROW(LIXA_XA_OPEN_ERROR);
+        transact->already_opened = TRUE;
         /* set new state after RMs are open... */
         client_status_set_txstate(transact->client_status, next_txstate);
         
@@ -526,7 +544,7 @@ int xta_transaction_open(xta_transaction_t *transact)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_transaction_open/excp=%d/"
+    LIXA_TRACE(("xta_transaction_open_internal/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -535,14 +553,22 @@ int xta_transaction_open(xta_transaction_t *transact)
 
 int xta_transaction_close(xta_transaction_t *transact)
 {
+    return xta_transaction_close_internal(transact);
+}
+
+
+
+int xta_transaction_close_internal(xta_transaction_t *transact)
+{
     enum Exception { NULL_OBJECT
+                     , ALREADY_CLOSED
                      , PROTOCOL_ERROR
                      , INVALID_STATUS
                      , LIXA_XA_CLOSE_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("xta_transaction_close\n"));
+    LIXA_TRACE(("xta_transaction_close_internal\n"));
     TRY {
         int txstate, next_txstate, txrc;
         
@@ -553,6 +579,9 @@ int xta_transaction_close(xta_transaction_t *transact)
         txstate = client_status_get_txstate(transact->client_status);
         switch (txstate) {
             case TX_STATE_S0:
+                LIXA_TRACE(("xta_transaction_close_internal: already "
+                            "close, skipping...\n"));
+                THROW(ALREADY_CLOSED);
             case TX_STATE_S1:
                 break;
             case TX_STATE_S3:
@@ -563,22 +592,25 @@ int xta_transaction_close(xta_transaction_t *transact)
                 THROW(INVALID_STATUS);
         }
 
-        next_txstate = TX_STATE_S1;
+        next_txstate = TX_STATE_S0;
         /* close statically defined XA Resource Managers */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_close(
                                transact->local_ccc, transact->client_status,
                                &txrc)))
             THROW(LIXA_XA_CLOSE_ERROR);
+        /* reset already_opened flag */
+        transact->already_opened = FALSE;
         /* set new state after RMs are open... */
         client_status_set_txstate(transact->client_status, next_txstate);
-        txstate = next_txstate;
-        next_txstate = TX_STATE_S3;
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case ALREADY_CLOSED:
+                ret_cod = LIXA_RC_OK;
                 break;
             case PROTOCOL_ERROR:
                 ret_cod = LIXA_RC_PROTOCOL_ERROR;
@@ -595,7 +627,50 @@ int xta_transaction_close(xta_transaction_t *transact)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("xta_transaction_close/excp=%d/"
+    LIXA_TRACE(("xta_transaction_close_internal/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_transaction_recover(xta_transaction_t *transact)
+{
+    enum Exception { NULL_OBJECT
+                     , OPEN_INTERNAL
+                     , CLOSE_INTERNAL
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("xta_transaction_recover\n"));
+    TRY {
+        /* check object */
+        if (NULL == transact)
+            THROW(NULL_OBJECT);
+        /* open enlisted resources */
+        if (LIXA_RC_OK != (ret_cod = xta_transaction_open_internal(transact)))
+            THROW(OPEN_INTERNAL);
+        /* close enlisted resources */
+        if (LIXA_RC_OK != (ret_cod = xta_transaction_close_internal(transact)))
+            THROW(CLOSE_INTERNAL);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case OPEN_INTERNAL:
+            case CLOSE_INTERNAL:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_recover/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -605,6 +680,7 @@ int xta_transaction_close(xta_transaction_t *transact)
 int xta_transaction_start(xta_transaction_t *transact, int multiple_branches)
 {
     enum Exception { NULL_OBJECT1
+                     , OPEN_INTERNAL_ERROR
                      , INVALID_STATUS
                      , NULL_OBJECT2
                      , LIXA_XA_START_ERROR
@@ -621,7 +697,11 @@ int xta_transaction_start(xta_transaction_t *transact, int multiple_branches)
         if (NULL == transact)
             THROW(NULL_OBJECT1);
         local_ccc = (client_config_coll_t *)transact->local_ccc;
-        
+        /* call open if not already done */
+        if (!transact->already_opened)
+            if (LIXA_RC_OK != (ret_cod = xta_transaction_open_internal(
+                                   transact)))
+                THROW(OPEN_INTERNAL_ERROR);
         /* check TX state */
         txstate = client_status_get_txstate(transact->client_status);
         if (TX_STATE_S1 != txstate) {
@@ -649,6 +729,8 @@ int xta_transaction_start(xta_transaction_t *transact, int multiple_branches)
         switch (excp) {
             case NULL_OBJECT1:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case OPEN_INTERNAL_ERROR:
                 break;
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
@@ -1128,6 +1210,7 @@ int xta_transaction_resume(xta_transaction_t *transact,
 {
     enum Exception { NULL_OBJECT1
                      , INVALID_STATUS
+                     , OPEN_INTERNAL_ERROR
                      , PROTOCOL_ERROR
                      , INVALID_FLAGS
                      , NULL_OBJECT2
@@ -1146,6 +1229,11 @@ int xta_transaction_resume(xta_transaction_t *transact,
         /* check current XID is not set */
         if (NULL != transact->xid)
             THROW(INVALID_STATUS);
+        /* call open if not already done */
+        if (!transact->already_opened)
+            if (LIXA_RC_OK != (ret_cod = xta_transaction_open_internal(
+                                   transact)))
+                THROW(OPEN_INTERNAL_ERROR);
         /* check transaction state before going on */
         txstate = client_status_get_txstate(transact->client_status);
         switch (txstate) {
@@ -1190,6 +1278,8 @@ int xta_transaction_resume(xta_transaction_t *transact,
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
+            case OPEN_INTERNAL_ERROR:
+                break;
             case PROTOCOL_ERROR:
                 ret_cod = LIXA_RC_PROTOCOL_ERROR;
                 break;
@@ -1218,6 +1308,7 @@ int xta_transaction_resume(xta_transaction_t *transact,
 int xta_transaction_branch(xta_transaction_t *transact, const char *xid_string)
 {
     enum Exception { NULL_OBJECT1
+                     , OPEN_INTERNAL_ERROR
                      , INVALID_STATUS
                      , XID_DESERIALIZE
                      , GET_BQUAL_ASCII
@@ -1240,7 +1331,11 @@ int xta_transaction_branch(xta_transaction_t *transact, const char *xid_string)
         /* check object */
         if (NULL == transact)
             THROW(NULL_OBJECT1);
-        
+        /* call open if not already done */
+        if (!transact->already_opened)
+            if (LIXA_RC_OK != (ret_cod = xta_transaction_open_internal(
+                                   transact)))
+                THROW(OPEN_INTERNAL_ERROR);        
         /* check TX state */
         txstate = client_status_get_txstate(transact->client_status);
         if (TX_STATE_S1 != txstate) {
@@ -1305,6 +1400,8 @@ int xta_transaction_branch(xta_transaction_t *transact, const char *xid_string)
         switch (excp) {
             case NULL_OBJECT1:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case OPEN_INTERNAL_ERROR:
                 break;
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;

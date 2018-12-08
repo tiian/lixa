@@ -299,32 +299,20 @@ GPtrArray* Java_org_tiian_lixa_xta_Transaction_getNativeResources(
 
 /*
  * Class:     org_tiian_lixa_xta_Transaction
- * Method:    deleteJNI
+ * Method:    delete
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_deleteJNI(
-    JNIEnv *env, jobject this_obj, jboolean already_opened)
+JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_delete(
+    JNIEnv *env, jobject this_obj)
 {
     enum Exception { NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_deleteJNI\n"));
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_delete\n"));
     
     TRY {
         GPtrArray *array = NULL;
-        xta_transaction_t * tx = NULL;
         
-        /* retrieve the current Transaction object */
-        /* close LIXA transaction is opened */
-        if (already_opened) {
-            tx = Java_org_tiian_lixa_xta_Transaction_getNativeObject(
-                env, this_obj);
-            if (NULL != tx &&
-                LIXA_RC_OK != (ret_cod = xta_transaction_close(tx)))
-                LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_"
-                            "deleteJNI/xta_transaction_close: ret_cod=%d\n",
-                            ret_cod));
-        }
         /* delete native xta_transaction_t object */
         xta_transaction_delete(
             Java_org_tiian_lixa_xta_Transaction_getNativeObject(
@@ -344,7 +332,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_deleteJNI(
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_deleteJNI/excp=%d/"
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return;
 }
@@ -623,27 +611,21 @@ Java_org_tiian_lixa_xta_Transaction_getXid
  * Method:    start
  * Signature: (Z)V
  */
-JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_startJNI
-(JNIEnv *env, jobject this_obj, jboolean multiple_branches,
- jboolean already_opened)
+JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_start
+(JNIEnv *env, jobject this_obj, jboolean multiple_branches)
 {
     enum Exception { NULL_OBJECT
-                     , TRANSACTION_OPEN_ERROR
                      , TRANSACTION_START_ERROR
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_startJNI\n"));
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_start\n"));
     TRY {
-        xta_transaction_t * tx = NULL;
+        xta_transaction_t *tx = NULL;
         /* retrieve the current Transaction object */
         if (NULL == (tx = Java_org_tiian_lixa_xta_Transaction_getNativeObject(
                          env, this_obj)))
             THROW(NULL_OBJECT);
-        /* call open if necessary */
-        if (!already_opened &&
-            LIXA_RC_OK != (ret_cod = xta_transaction_open(tx)))
-            THROW(TRANSACTION_OPEN_ERROR);
         /* call native method */
         if (LIXA_RC_OK != (ret_cod = xta_transaction_start(
                                tx, (int)multiple_branches)))
@@ -655,7 +637,6 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_startJNI
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
-            case TRANSACTION_OPEN_ERROR:
             case TRANSACTION_START_ERROR:
                 break;
             case NONE:
@@ -668,9 +649,9 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_startJNI
         if (LIXA_RC_OK != ret_cod && !(*env)->ExceptionCheck(env))
             Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_startJNI/excp=%d/"
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
+    return;
 }
 
 
@@ -779,13 +760,12 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_rollback
 /*
  * Class:     org_tiian_lixa_xta_Transaction
  * Method:    resumeJNI
- * Signature: (Ljava/lang/String;Z)V
+ * Signature: (Ljava/lang/String)V
  */
-JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_resumeJNI
-(JNIEnv *env, jobject this_obj, jstring xid_string, jboolean already_opened)
+JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_resume
+(JNIEnv *env, jobject this_obj, jstring xid_string)
 {
     enum Exception { NULL_OBJECT
-                     , TRANSACTION_OPEN_ERROR
                      , GET_STRING_UTF_CHARS_ERROR
                      , TRANSACTION_RESUME_ERROR
                      , NONE } excp;
@@ -793,17 +773,14 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_resumeJNI
 
     const char *xid = NULL;
     
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_resumeJNI\n"));
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_resume\n"));
     TRY {
-        xta_transaction_t * tx = NULL;
+        xta_transaction_t *tx = NULL;
+        
         /* retrieve the current Transaction object */
         if (NULL == (tx = Java_org_tiian_lixa_xta_Transaction_getNativeObject(
                          env, this_obj)))
             THROW(NULL_OBJECT);
-        /* call open if necessary */
-        if (!already_opened &&
-            LIXA_RC_OK != (ret_cod = xta_transaction_open(tx)))
-            THROW(TRANSACTION_OPEN_ERROR);
         /* convert resource name from Java to C */
         if (NULL == (xid = (*env)->GetStringUTFChars(
                          env, xid_string, 0)))
@@ -818,8 +795,6 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_resumeJNI
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
-                break;
-            case TRANSACTION_OPEN_ERROR:
                 break;
             case GET_STRING_UTF_CHARS_ERROR:
                 ret_cod = LIXA_RC_GET_STRING_UTF_CHARS_ERROR;
@@ -839,7 +814,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_resumeJNI
         if (NULL != xid)
             (*env)->ReleaseStringUTFChars(env, xid_string, xid);
     } /* TRY-CATCH */
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_resumeJNI/excp=%d/"
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_resume/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return;
 }
@@ -898,13 +873,12 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_suspend
 /*
  * Class:     org_tiian_lixa_xta_Transaction
  * Method:    branchJNI
- * Signature: (Ljava/lang/String;Z)V
+ * Signature: (Ljava/lang/String)V
  */
-JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_branchJNI
-(JNIEnv *env, jobject this_obj, jstring xid_string, jboolean already_opened)
+JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_branch
+(JNIEnv *env, jobject this_obj, jstring xid_string)
 {
     enum Exception { NULL_OBJECT
-                     , TRANSACTION_OPEN_ERROR
                      , GET_STRING_UTF_CHARS_ERROR
                      , TRANSACTION_BRANCH_ERROR
                      , NONE } excp;
@@ -912,17 +886,14 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_branchJNI
 
     const char *xid = NULL;
     
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_branchJNI\n"));
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_branch\n"));
     TRY {
-        xta_transaction_t * tx = NULL;
+        xta_transaction_t *tx = NULL;
+        
         /* retrieve the current Transaction object */
         if (NULL == (tx = Java_org_tiian_lixa_xta_Transaction_getNativeObject(
                          env, this_obj)))
             THROW(NULL_OBJECT);
-        /* call open if necessary */
-        if (!already_opened &&
-            LIXA_RC_OK != (ret_cod = xta_transaction_open(tx)))
-            THROW(TRANSACTION_OPEN_ERROR);
         /* convert resource name from Java to C */
         if (NULL == (xid = (*env)->GetStringUTFChars(
                          env, xid_string, 0)))
@@ -936,8 +907,6 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_branchJNI
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
-                break;
-            case TRANSACTION_OPEN_ERROR:
                 break;
             case GET_STRING_UTF_CHARS_ERROR:
                 ret_cod = LIXA_RC_GET_STRING_UTF_CHARS_ERROR;
@@ -957,7 +926,59 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_branchJNI
         if (NULL != xid)
             (*env)->ReleaseStringUTFChars(env, xid_string, xid);
     } /* TRY-CATCH */
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_branchJNI/excp=%d/"
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_branch/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return;
+}
+
+
+
+/*
+ * Class:     org_tiian_lixa_xta_Transaction
+ * Method:    recover
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_recover
+(JNIEnv *env, jobject this_obj)
+{
+    enum Exception { NULL_OBJECT
+                     , TRANSACTION_RECOVER_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    const char *xid = NULL;
+    
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_recover\n"));
+    TRY {
+        xta_transaction_t *tx = NULL;
+        
+        /* retrieve the current Transaction object */
+        if (NULL == (tx = Java_org_tiian_lixa_xta_Transaction_getNativeObject(
+                         env, this_obj)))
+            THROW(NULL_OBJECT);
+        /* call resume native method */
+        if (LIXA_RC_OK != (ret_cod = xta_transaction_recover(tx)))
+            THROW(TRANSACTION_RECOVER_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case TRANSACTION_RECOVER_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* generate a new Java exception if not already thrown */
+        if (LIXA_RC_OK != ret_cod && !(*env)->ExceptionCheck(env))
+            Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_recover/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return;
 }

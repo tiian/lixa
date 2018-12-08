@@ -53,13 +53,7 @@ namespace xta {
          * the Transaction object
          * @param[in] xaRes : resource to associate
          */
-        void EnlistResource(XaResource *xaRes);
-        /**
-         * Prepare the XA Resource Managers and the XA Transaction Manager for
-         * a new transactional Unit of Work. From the XA specification point of
-         * view, it calls xa_open (for the Native XA Resource Managers)
-         */
-        void Open(void);
+        void enlistResource(XaResource *xaRes);
         /**
          * Start a new XA Transaction. From the XA specification point of
          * view, it calls xa_start (for the Native XA Resource Managers)
@@ -71,7 +65,7 @@ namespace xta {
          *                   applications and @ref Branch will
          *                   not be called for this transaction <br>
          */
-        void Start(bool MultipleBranches=false);
+        void start(bool MultipleBranches=false);
         /**
          * Commit the transaction represented by this transaction object
          * @param[in] NonBlocking boolean value: <br>
@@ -79,37 +73,37 @@ namespace xta {
          *            false = xa_prepare will block the caller <br>
          *            the option is used only for multiple branch transactions
          */
-        void Commit(bool NonBlocking=false);
+        void commit(bool NonBlocking=false);
         /**
          * Rollback the transaction represented by this transaction object
          */
-        void Rollback(void);
+        void rollback(void);
         /**
          * Suspend the transaction represented by this transaction object; the
-         * transaction can be resumed with @ref Resume at a later time
+         * transaction can be resumed with @ref resume at a later time
          * @param[in] Flags can be @ref TMMIGRATE if the Resource Manager
          *            supports transaction migration and @ref TMNOFLAGS
          *            otherwise
          */
-        void Suspend(long Flags=TMMIGRATE);
+        void suspend(long Flags=TMMIGRATE);
         /**
          * Resume the transaction represented by xid in this transaction
          * object; the transaction has been previously suspended with
-         * @ref Suspend
+         * @ref suspend
          * @param[in] XidString serialized identifier of the transaction that
          *            must be resumed
          * @param[in] Flags can be @ref TMRESUME if the transaction has been
          *            suspended using @ref TMMIGRATE or @ref TMJOIN if the
          *            transaction has been suspended using @ref TMNOFLAGS
          */
-        void Resume(const string& XidString, long Flags=TMRESUME);
+        void resume(const string& XidString, long Flags=TMRESUME);
         /**
-         * Shut down the XA Resource Managers and the XA Transaction Manager
-         * after transactional Unit of Work completion. From the XA
-         * specification point of view, it calls xa_close (for the Native XA
-         * Resource Managers)
+         * Explicitly open and close all the enlisted resource to look for
+         * recovery pending transaction in the LIXA state server. In normal
+         * condition, this is not necessary, because the same happens when
+         * @ref start, @ref resume and @ref branch are called
          */
-        void Close(void);
+        void recover(void);
         /**
          * Create a new branch of the transaction represented by xid in this
          * transaction object; the global transaction has been previously
@@ -117,7 +111,7 @@ namespace xta {
          * @param[in] XidString serialized identifier of the global transaction
          *            that must be branched
          */
-        void Branch(const string& XidString);
+        void branch(const string& XidString);
 
         Xid getXid();
         private:

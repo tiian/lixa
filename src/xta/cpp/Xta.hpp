@@ -36,7 +36,11 @@
 namespace xta {
     class Xta {
         public:
-        static void Init(void);
+        /**
+         * Initialize XTA environment: it must be call by the main program
+         * before calling other XTA methods
+         */
+        static void init(void);
     };
 };
 
