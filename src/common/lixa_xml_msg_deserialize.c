@@ -795,17 +795,24 @@ int lixa_msg_deserialize_forget_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 
 int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
-    enum Exception { JOB_NOT_FOUND,
-                     CONFIG_DIGEST_NOT_FOUND,
-                     MAINT_NOT_FOUND,
-                     RMID_NOT_FOUND,
-                     DYNAMIC_NOT_FOUND,
-                     NAME_NOT_FOUND,
-                     XA_NAME_NOT_FOUND,
-                     XML_UNRECOGNIZED_TAG,
-                     NONE } excp;
+    enum Exception { JOB_NOT_FOUND
+                     , CONFIG_DIGEST_NOT_FOUND
+                     , MAINT_NOT_FOUND
+                     , RMID_NOT_FOUND
+                     , DYNAMIC_NOT_FOUND
+                     , NAME_NOT_FOUND
+                     , G_BASE64_DECODE_ERROR1
+                     , BUFFER_OVERFLOW1
+                     , G_BASE64_DECODE_ERROR2
+                     , BUFFER_OVERFLOW2
+                     , XA_NAME_NOT_FOUND
+                     , XML_UNRECOGNIZED_TAG
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
+    guchar *name_base64 = NULL;
+    guchar *xa_name_base64 = NULL;
+    
     LIXA_TRACE(("lixa_msg_deserialize_open_8\n"));
     TRY {
         while (NULL != cur) {
@@ -839,6 +846,7 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
                     LIXA_MSG_XML_DEFAULT_RSRMGRS);
                 /* retrieve resource managers */
                 while (NULL != cur2) {
+                    gsize out_len;
                     if (!xmlStrcmp(cur2->name, LIXA_XML_MSG_TAG_RSRMGR)) {
                         xmlChar *tmp;
                         struct lixa_msg_body_open_8_rsrmgr_s rsrmgr;
@@ -858,12 +866,30 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
                         if (NULL == (tmp = xmlGetProp(
                                          cur2, LIXA_XML_MSG_PROP_NAME)))
                             THROW(NAME_NOT_FOUND);
-                        rsrmgr.name = tmp;
+                        /* decode the content */
+                        if (NULL == (name_base64 = g_base64_decode(
+                                         (const gchar *)tmp, &out_len)))
+                            THROW(G_BASE64_DECODE_ERROR1);
+                        if (out_len != (gsize)strlen(
+                                (const char *)name_base64))
+                            THROW(BUFFER_OVERFLOW1);
+                        rsrmgr.name = (xmlChar *)name_base64;
+                        name_base64 = NULL;
+                        xmlFree(tmp);
                         /* retrieve xa_name */
                         if (NULL == (tmp = xmlGetProp(
                                          cur2, LIXA_XML_MSG_PROP_XA_NAME)))
                             THROW(XA_NAME_NOT_FOUND);
-                        rsrmgr.xa_name = tmp;
+                        /* decode the content */
+                        if (NULL == (xa_name_base64 = g_base64_decode(
+                                         (const gchar *)tmp, &out_len)))
+                            THROW(G_BASE64_DECODE_ERROR2);
+                        if (out_len != (gsize)strlen(
+                                (const char *)xa_name_base64))
+                            THROW(BUFFER_OVERFLOW2);
+                        rsrmgr.xa_name = (xmlChar *)xa_name_base64;
+                        xa_name_base64 = NULL;
+                        xmlFree(tmp);
                         g_array_append_val(msg->body.open_8.rsrmgrs, rsrmgr);
                     }
                     cur2 = cur2->next;
@@ -885,6 +911,14 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
             case XA_NAME_NOT_FOUND:
                 ret_cod = LIXA_RC_MALFORMED_XML_MSG;
                 break;
+            case G_BASE64_DECODE_ERROR1:
+            case G_BASE64_DECODE_ERROR2:
+                ret_cod = LIXA_RC_G_BASE64_DECODE_ERROR;
+                break;
+            case BUFFER_OVERFLOW1:
+            case BUFFER_OVERFLOW2:
+                ret_cod = LIXA_RC_BUFFER_OVERFLOW;
+                break;
             case XML_UNRECOGNIZED_TAG:
                 ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
                 break;
@@ -894,6 +928,15 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* recovery memory if necessary */
+        if (NULL != name_base64) {
+            g_free(name_base64);
+            name_base64 = NULL;
+        }
+        if (NULL != xa_name_base64) {
+            g_free(xa_name_base64);
+            xa_name_base64 = NULL;
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_open_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -920,6 +963,8 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
     enum Exception { CONTHR_NOT_FOUND,
                      XA_INFO_NOT_FOUND,
+                     G_BASE64_DECODE_ERROR,
+                     BUFFER_OVERFLOW,
                      RMID_NOT_FOUND,
                      FLAGS_NOT_FOUND,
                      RC_NOT_FOUND,
@@ -928,6 +973,8 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
+    guchar *xa_info_base64 = NULL;
+    
     LIXA_TRACE(("lixa_msg_deserialize_open_24\n"));
     TRY {
         while (NULL != cur) {
@@ -950,6 +997,7 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
                     LIXA_MSG_XML_DEFAULT_RSRMGRS);
                 /* retrieve resource managers */
                 while (NULL != cur2) {
+                    gsize out_len;
                     if (!xmlStrcmp(cur2->name,
                                    LIXA_XML_MSG_TAG_XA_OPEN_EXEC)) {
                         struct lixa_msg_body_open_24_xa_open_execs_s
@@ -958,7 +1006,16 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
                         if (NULL == (tmp = xmlGetProp(
                                          cur2, LIXA_XML_MSG_PROP_XA_INFO)))
                             THROW(XA_INFO_NOT_FOUND);
-                        xa_open_exec.xa_info = tmp;
+                        /* decode the content */
+                        if (NULL == (xa_info_base64 = g_base64_decode(
+                                         (const gchar *)tmp, &out_len)))
+                            THROW(G_BASE64_DECODE_ERROR);
+                        if (out_len != (gsize)strlen(
+                                (const char *)xa_info_base64))
+                            THROW(BUFFER_OVERFLOW);
+                        xa_open_exec.xa_info = (xmlChar *)xa_info_base64;
+                        xa_info_base64 = NULL;
+                        xmlFree(tmp);
                         /* retrieve rmid */
                         if (NULL == (tmp = xmlGetProp(
                                          cur2, LIXA_XML_MSG_PROP_RMID)))
@@ -1005,6 +1062,12 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
             case STATE_NOT_FOUND:
                 ret_cod = LIXA_RC_MALFORMED_XML_MSG;
                 break;
+            case G_BASE64_DECODE_ERROR:
+                ret_cod = LIXA_RC_G_BASE64_DECODE_ERROR;
+                break;
+            case BUFFER_OVERFLOW:
+                ret_cod = LIXA_RC_BUFFER_OVERFLOW;
+                break;
             case XML_UNRECOGNIZED_TAG:
                 ret_cod = LIXA_RC_XML_UNRECOGNIZED_TAG;
                 break;
@@ -1014,6 +1077,11 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* recovery memory if necessary */
+        if (NULL != xa_info_base64) {
+            g_free(xa_info_base64);
+            xa_info_base64 = NULL;
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_open_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

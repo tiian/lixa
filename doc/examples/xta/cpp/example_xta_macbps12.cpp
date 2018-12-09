@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     else
         postgresql_stmt = "DELETE FROM authors WHERE id=1921";
     // initialize XTA environment
-    xta::Xta::Init();
+    xta::Xta::init();
     // create a new PostgreSQL connection
     rm = PQconnectdb("dbname=testdb");
     if (PQstatus(rm) != CONNECTION_OK) {
@@ -120,11 +120,9 @@ int main(int argc, char *argv[])
         xar = new xta::PostgresqlXaResource(rm, "PostgreSQL", "dbname=testdb");
         // Create a new XA global transaction and retrieve a reference from
         // the TransactionManager object
-        xta::Transaction tx = tm->CreateTransaction();
+        xta::Transaction tx = tm->createTransaction();
         // Enlist PostgreSQL resource to transaction
-        tx.EnlistResource(xar);
-        // Open all resources enlisted by tx Transaction
-        tx.Open();
+        tx.enlistResource(xar);
         /*
          * *** NOTE: ***
          * at this point, subordinate Application Program must wait a Remote
@@ -155,7 +153,7 @@ int main(int argc, char *argv[])
          */
         
         // create a new branch in the same global transaction
-        tx.Branch(xidString);
+        tx.branch(xidString);
         /*
          * the branch has the same global identifier, but a different branch
          * id; the following statement is for the sake of debugging only
@@ -189,9 +187,9 @@ int main(int argc, char *argv[])
              */
             /* commit is performed with "NonBlocking" flag set to true: this is
                necessary to allow the superior branch to start commit */
-            tx.Commit(true);
+            tx.commit(true);
         } else {
-            tx.Rollback();
+            tx.rollback();
         }
         /*
          * *** NOTE: ***
@@ -224,10 +222,8 @@ int main(int argc, char *argv[])
              * set to false: this is necessary to wait the superior AP
              * prepare phase
              */
-            tx.Commit(false);
+            tx.commit(false);
         }
-        // Close all resources enlisted by tx Transaction
-        tx.Close();
         // Delete PostgreSQL native and XA resource
         delete xar;
         // Close the PostgreSQL connection

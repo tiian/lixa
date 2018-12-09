@@ -58,7 +58,7 @@ else:
 	mysql_stmt = "DELETE FROM authors WHERE id=1919"
 
 # initialize XTA environment
-Xta_Init()
+Xta_init()
 
 # create a new PostgreSQL connection
 # Note: using PostgreSQL Psycopg2 functions
@@ -91,18 +91,16 @@ xar2 = MysqlXaResource(rm2._get_native_connection(), "MySQL", "localhost,0,lixa,
 
 # Create a new XA global transaction and retrieve a reference from
 # the TransactionManager object
-tx = tm.CreateTransaction()
+tx = tm.createTransaction()
 
 # Enlist PostgreSQL resource to transaction
-tx.EnlistResource(xar1)
+tx.enlistResource(xar1)
 
 # Enlist MySQL resource to transaction
-tx.EnlistResource(xar2)
+tx.enlistResource(xar2)
 
-# Open all resources enlisted by tx Transaction
-tx.Open()
 # Start a new XA global transaction with a single branch
-tx.Start()
+tx.start()
 
 # Execute PostgreSQL statement
 sys.stdout.write("PostgreSQL, executing >" + postgresql_stmt + "<\n")
@@ -116,12 +114,9 @@ cur2.execute(mysql_stmt)
 
 # commit or rollback the transaction
 if commit:
-	tx.Commit()
+	tx.commit()
 else:
-	tx.Rollback()
-
-# Close all resources enlisted by tx Transaction
-tx.Close()
+	tx.rollback()
 
 # Close the PostgreSQL connection
 cur1.close()

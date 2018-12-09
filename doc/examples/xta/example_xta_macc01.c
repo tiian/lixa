@@ -30,6 +30,11 @@
  * second parameter: "insert", boolean value (if FALSE, "delete")
  * third parameter:  "superior", boolean value (if FALSE, "subordinate")
  * fourth parameter: "XIDfilename", a string for a filename
+ *
+ * Programming Style note:
+ * the purpose of this small program is not to explain C development
+ * techniques or good style, but simply to show XTA for C using the easiest
+ * approach.
  */ 
 
 
@@ -159,15 +164,15 @@ int main(int argc, char *argv[])
                "PostgreSQL XA resource\n", rc, lixa_strerror(rc));
         return 1;
     }
-    /*
+    /* @@@
      * Open all resources enlisted by tx Transaction
-     */
     rc = xta_transaction_open(tx);
     if (rc != LIXA_RC_OK) {
         fprintf(stderr, "xta_transaction_open: returned %d (%s)\n",
                 rc, lixa_strerror(rc));
         return 1;
     }
+     */
     /*
      * *NOTE:*
      * The following block of code contains the first key concept of the
@@ -347,15 +352,15 @@ int main(int argc, char *argv[])
             }
         }
     }
-    /*
+    /* @@@
      * Close all resources enlisted by tx Transaction
-     */
     rc = xta_transaction_close(tx);
     if (rc != LIXA_RC_OK) {
         fprintf(stderr, "xta_transaction_close: returned %d (%s)\n",
                 rc, lixa_strerror(rc));
         return 1;
     }
+     */
     /*
      * Delete Transaction Manager object
      */

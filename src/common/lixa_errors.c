@@ -307,6 +307,12 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_G_ARRAY_NEW_ERROR:
             return "ERROR: 'g_array_new' function returned an "
                 "error condition";
+        case LIXA_RC_G_BASE64_DECODE_ERROR:
+            return "ERROR: 'g_base64_decode' function returned an "
+                "error condition";
+        case LIXA_RC_G_BASE64_ENCODE_ERROR:
+            return "ERROR: 'g_base64_encode' function returned an "
+                "error condition";
         case LIXA_RC_G_COMPUTE_CHECKSUM_FOR_DATA:
             return "ERROR: 'g_compute_checksum_for_data' function returned "
                 "an error condition";

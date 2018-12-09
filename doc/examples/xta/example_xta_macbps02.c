@@ -34,6 +34,11 @@
  * fourth parameter: "sub2sup_filename", a string with the name of the FIFO
  *                   (named pipe) that must be used for subordinate->superior
  *                   communication
+ *
+ * Programming Style note:
+ * the purpose of this small program is not to explain C development
+ * techniques or good style, but simply to show XTA for C using the easiest
+ * approach.
  */
 
 
@@ -153,15 +158,6 @@ int main(int argc, char *argv[])
     if (rc != LIXA_RC_OK) {
         fprintf(stderr, "xta_transaction_enlist_resource returned %d (%s) for "
                "PostgreSQL XA resource\n", rc, lixa_strerror(rc));
-        return 1;
-    }
-    /*
-     * Open all resources enlisted by tx Transaction
-     */
-    rc = xta_transaction_open(tx);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "xta_transaction_open: returned %d (%s)\n",
-                rc, lixa_strerror(rc));
         return 1;
     }
     /*
@@ -303,15 +299,6 @@ int main(int argc, char *argv[])
                     rc, lixa_strerror(rc));
             return 1;
         }
-    }
-    /*
-     * Close all resources enlisted by tx Transaction
-     */
-    rc = xta_transaction_close(tx);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "xta_transaction_close: returned %d (%s)\n",
-                rc, lixa_strerror(rc));
-        return 1;
     }
     /*
      * Delete Transaction Manager object

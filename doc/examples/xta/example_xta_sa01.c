@@ -28,6 +28,11 @@
  * This program accepts exactly two parameters on the command line:
  * first parameter:  "commit", boolean value (if FALSE, "rollback")
  * second parameter: "insert", boolean value (if FALSE, "delete")
+ *
+ * Programming Style note:
+ * the purpose of this small program is not to explain C development
+ * techniques or good style, but simply to show XTA for C using the easiest
+ * approach.
  */
 
 
@@ -174,15 +179,6 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * Open all resources enlisted by tx Transaction
-     */
-    rc = xta_transaction_open(tx);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "xta_transaction_open: returned %d (%s)\n",
-                rc, lixa_strerror(rc));
-        return 1;
-    }
-    /*
      * Start a new XA global transaction with a single branch
      * Note: second argument ("multiple_branch") has FALSE value
      */
@@ -235,15 +231,6 @@ int main(int argc, char *argv[])
                     rc, lixa_strerror(rc));
             return 1;
         }
-    }
-    /*
-     * Close all resources enlisted by tx Transaction
-     */
-    rc = xta_transaction_close(tx);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "xta_transaction_close: returned %d (%s)\n",
-                rc, lixa_strerror(rc));
-        return 1;
     }
     /*
      * Delete Transaction Manager object

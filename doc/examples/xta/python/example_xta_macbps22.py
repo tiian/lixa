@@ -58,7 +58,7 @@ else:
 	postgresql_stmt = "DELETE FROM authors WHERE id=1921"
 
 # initialize XTA environment
-Xta_Init()
+Xta_init()
 
 # create a new PostgreSQL connection
 # Note: using PostgreSQL Psycopg2 functions
@@ -78,13 +78,10 @@ xar = PostgresqlXaResource(rm._get_native_connection(), "PostgreSQL", "dbname=te
 
 # Create a new XA global transaction and retrieve a reference from
 # the TransactionManager object
-tx = tm.CreateTransaction()
+tx = tm.createTransaction()
 
 # Enlist PostgreSQL resource to transaction
-tx.EnlistResource(xar)
-
-# Open all resources enlisted by tx Transaction
-tx.Open()
+tx.enlistResource(xar)
 
 # *** NOTE: ***
 # at this point, subordinate Application Program must wait a Remote
@@ -99,7 +96,7 @@ sys.stdout.write("Subordinate AP has received XID '" + xidString + "' from super
 sup2subFifo.close()
 
 # create a new branch in the same global transaction
-tx.Branch(xidString);
+tx.branch(xidString);
 
 # the branch has the same global identifier, but a different branch id
 branchXidString = tx.getXid().toString();
@@ -124,9 +121,9 @@ if commit:
 	#
 	# commit is performed with "nonBlocking" flag set to TRUE: this is
 	# necessary to allow the superior branch to commit */
-	tx.Commit(True)
+	tx.commit(True)
 else:
-	tx.Rollback()
+	tx.rollback()
 
 # *** NOTE: ***
 # at this point the subordinate Application Program (this one) has to
@@ -149,10 +146,7 @@ sub2supFifo.close()
 if commit:
 	# Complete the second phase of the commit with "nonBlocking" flag set
 	# to FALSE: this is necessary to wait the superior AP prepare phase
-	tx.Commit(False)
-
-# Close all resources enlisted by the Transaction
-tx.Close()
+	tx.commit(False)
 
 # Close the PostgreSQL connection
 cur.close()

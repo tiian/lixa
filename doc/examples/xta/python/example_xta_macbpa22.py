@@ -58,7 +58,7 @@ else:
 	postgresql_stmt = "DELETE FROM authors WHERE id=1921"
 
 # initialize XTA environment
-Xta_Init()
+Xta_init()
 
 # create a new PostgreSQL connection
 # Note: using PostgreSQL Psycopg2 functions
@@ -78,13 +78,10 @@ xar = PostgresqlXaResource(rm._get_native_connection(), "PostgreSQL", "dbname=te
 
 # Create a new XA global transaction and retrieve a reference from
 # the TransactionManager object
-tx = tm.CreateTransaction()
+tx = tm.createTransaction()
 
 # Enlist PostgreSQL resource to transaction
-tx.EnlistResource(xar)
-
-# Open all resources enlisted by tx Transaction
-tx.Open()
+tx.enlistResource(xar)
 
 # *** NOTE: ***
 # at this point, subordinate Application Program must wait until
@@ -99,7 +96,7 @@ sys.stdout.write("Subordinate AP has received XID '" + xidString + "' from super
 sup2subFifo.close()
 
 # create a new branch in the same global transaction
-tx.Branch(xidString);
+tx.branch(xidString);
 
 # the branch has the same global identifier, but a different branch id
 branchXidString = tx.getXid().toString();
@@ -128,14 +125,11 @@ cur.execute(postgresql_stmt)
 
 # commit or rollback the transaction
 if commit:
-	tx.Commit()
+	tx.commit()
 	sys.stdout.write("Subordinate AP has committed its branch\n")
 else:
-	tx.Rollback()
+	tx.rollback()
 	sys.stdout.write("Subordinate AP has rolled back its branch\n")
-
-# Close all resources enlisted by the Transaction
-tx.Close()
 
 # Close the PostgreSQL connection
 cur.close()

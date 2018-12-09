@@ -148,9 +148,10 @@ int main(int argc, char *argv[])
     }
     /*
      * create a MySQL XA resource object
+     * &<> are introduced to check a possible bug in XML serialization
      */
     if (NULL == (mysql_xa_res = xta_mysql_xa_resource_new(
-                     mysql_conn, "MySQL", "localhost,0,lixa,,lixa"))) {
+                     mysql_conn, "MySQL&<>", "localhost,0,lixa,,lixa&<>"))) {
         printf("%s| xta_mysql_xa_resource_new: returned NULL\n", pgm);
         return 1;
     }
@@ -168,10 +169,11 @@ int main(int argc, char *argv[])
     }
     /*
      * create a PostgreSQL XA resource object
+     * &<> are introduced to check a possible bug in XML serialization
      */
     if (NULL == (postgresql_xa_res = xta_postgresql_xa_resource_new(
-                     postgres_conn, "PostgreSQL",
-                     "dbname=testdb"))) {
+                     postgres_conn, "PostgreSQL&<>",
+                     "dbname=testdb&<>"))) {
         printf("%s| xta_postgresql_xa_resource_new: returned NULL\n", pgm);
         return 1;
     }

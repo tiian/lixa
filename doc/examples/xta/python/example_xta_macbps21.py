@@ -60,7 +60,7 @@ else:
 	mysql_stmt2 = "DELETE FROM authors WHERE id=1898"
 
 # initialize XTA environment
-Xta_Init()
+Xta_init()
 
 # create a new MySQL connection
 # Note: using MySQLdb functions
@@ -80,19 +80,16 @@ xar = MysqlXaResource(rm._get_native_connection(), "MySQL", "localhost,0,lixa,,l
 
 # Create a new XA global transaction and retrieve a reference from
 # the TransactionManager object
-tx = tm.CreateTransaction()
+tx = tm.createTransaction()
 
 # Enlist MySQL resource to transaction
-tx.EnlistResource(xar)
-
-# Open all resources enlisted by tx Transaction
-tx.Open()
+tx.enlistResource(xar)
 
 # Start a new XA global transaction for multiple branches
 # Note: argument ("MultipleBranch") has true value because the
 #       transaction will be branched by the subordinate Application
 #       Program
-tx.Start(True)
+tx.start(True)
 
 # Execute MySQL statement
 sys.stdout.write("MySQL, executing >" + mysql_stmt + "<\n")
@@ -130,14 +127,11 @@ cur.execute(mysql_stmt2)
 
 # commit or rollback the transaction
 if commit:
-	tx.Commit()
+	tx.commit()
 	sys.stdout.write("Superior AP has committed its branch\n")
 else:
-	tx.Rollback()
+	tx.rollback()
 	sys.stdout.write("Superior AP has rolled back its branch\n")
-
-# Close all resources enlisted by the Transaction
-tx.Close()
 
 # Close the MySQL connection
 cur.close()

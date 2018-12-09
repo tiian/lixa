@@ -1,10 +1,11 @@
-Review C, C++ and Python examples after API change
-
 Implement test cases of XTA for Java
 
 test xa_forget
 test xa_recover
 
+Document XTA for Java
+
+Check it should no happen any more!
 this string 
 "jdbc:mysql://localhost/lixa?user=lixa&password="
 passed as resourceIdentifier to Transaction.enlistResource

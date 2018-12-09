@@ -29,6 +29,9 @@
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 
 
 
@@ -903,13 +906,18 @@ int lixa_msg_serialize_forget_8(const struct lixa_msg_s *msg,
 int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg, char *buffer,
                               size_t *offset, size_t *free_chars)
 {
-    enum Exception { BUFFER_TOO_SHORT1,
-                     BUFFER_TOO_SHORT2,
-                     BUFFER_TOO_SHORT3,
-                     BUFFER_TOO_SHORT4,
-                     NONE } excp;
+    enum Exception { BUFFER_TOO_SHORT1
+                     , BUFFER_TOO_SHORT2
+                     , G_BASE64_ENCODE_ERROR1
+                     , G_BASE64_ENCODE_ERROR2
+                     , BUFFER_TOO_SHORT3
+                     , BUFFER_TOO_SHORT4
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
+    gchar *name_base64 = NULL;
+    gchar *xa_name_base64 = NULL;
+    
     LIXA_TRACE(("lixa_msg_serialize_open_8\n"));
     TRY {
         int used_chars;
@@ -943,6 +951,14 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg, char *buffer,
             rsrmgr = &g_array_index(
                 msg->body.open_8.rsrmgrs,
                 struct lixa_msg_body_open_8_rsrmgr_s, i);
+            if (NULL == (name_base64 = g_base64_encode(
+                             rsrmgr->name,
+                             strlen((const char *)rsrmgr->name))))
+                THROW(G_BASE64_ENCODE_ERROR1);
+            if (NULL == (xa_name_base64 = g_base64_encode(
+                             rsrmgr->xa_name,
+                             strlen((const char *)rsrmgr->xa_name))))
+                THROW(G_BASE64_ENCODE_ERROR2);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%d\" %s=\"%d\" %s=\"%s\" "
                                   "%s=\"%s\"/>",
@@ -952,9 +968,13 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg, char *buffer,
                                   LIXA_XML_MSG_PROP_DYNAMIC,
                                   rsrmgr->dynamic,
                                   LIXA_XML_MSG_PROP_NAME,
-                                  rsrmgr->name,
+                                  name_base64,
                                   LIXA_XML_MSG_PROP_XA_NAME,
-                                  rsrmgr->xa_name);
+                                  xa_name_base64);
+            g_free(name_base64);
+            name_base64 = NULL;
+            g_free(xa_name_base64);
+            xa_name_base64 = NULL;
             if (used_chars >= *free_chars)
                 THROW(BUFFER_TOO_SHORT3);
             *free_chars -= used_chars;
@@ -978,12 +998,25 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg, char *buffer,
             case BUFFER_TOO_SHORT4:
                 ret_cod = LIXA_RC_CONTAINER_FULL;
                 break;
+            case G_BASE64_ENCODE_ERROR1:
+            case G_BASE64_ENCODE_ERROR2:
+                ret_cod = LIXA_RC_G_BASE64_ENCODE_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* recover memory if necessary */
+        if (NULL != name_base64) {
+            g_free(name_base64);
+            name_base64 = NULL;
+        }
+        if (NULL != xa_name_base64) {
+            g_free(xa_name_base64);
+            xa_name_base64 = NULL;
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_open_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -1041,10 +1074,13 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
     enum Exception { BUFFER_TOO_SHORT1,
                      BUFFER_TOO_SHORT2,
                      BUFFER_TOO_SHORT3,
+                     G_BASE64_ENCODE_ERROR,
                      BUFFER_TOO_SHORT4,
                      NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
+    gchar *xa_info_base64 = NULL;
+    
     LIXA_TRACE(("lixa_msg_serialize_open_24\n"));
     TRY {
         int used_chars;
@@ -1074,12 +1110,16 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
             xa_open_exec = &g_array_index(
                 msg->body.open_24.xa_open_execs,
                 struct lixa_msg_body_open_24_xa_open_execs_s, i);
+            if (NULL == (xa_info_base64 = g_base64_encode(
+                             xa_open_exec->xa_info,
+                             strlen(xa_open_exec->xa_info))))
+                THROW(G_BASE64_ENCODE_ERROR);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%s\" %s=\"%d\" %s=\"0x%lx\" "
                                   "%s=\"%d\" %s=\"%d\"/>",
                                   LIXA_XML_MSG_TAG_XA_OPEN_EXEC,
                                   LIXA_XML_MSG_PROP_XA_INFO,
-                                  (char *) xa_open_exec->xa_info,
+                                  xa_info_base64,
                                   LIXA_XML_MSG_PROP_RMID,
                                   xa_open_exec->rmid,
                                   LIXA_XML_MSG_PROP_FLAGS,
@@ -1088,6 +1128,8 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
                                   xa_open_exec->rc,
                                   LIXA_XML_MSG_PROP_R_STATE,
                                   xa_open_exec->r_state);
+            g_free(xa_info_base64);
+            xa_info_base64 = NULL;
             if (used_chars >= *free_chars)
                 THROW(BUFFER_TOO_SHORT3);
             *free_chars -= used_chars;
@@ -1111,12 +1153,19 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
             case BUFFER_TOO_SHORT4:
                 ret_cod = LIXA_RC_CONTAINER_FULL;
                 break;
+            case G_BASE64_ENCODE_ERROR:
+                ret_cod = LIXA_RC_G_BASE64_ENCODE_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (NULL != xa_info_base64) {
+            g_free(xa_info_base64);
+            xa_info_base64 = NULL;
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_open_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

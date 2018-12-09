@@ -314,9 +314,9 @@ int lixa_msg_free(struct lixa_msg_s *msg)
                                         struct lixa_msg_body_open_8_rsrmgr_s,
                                         i);
                                 if (NULL != rsrmgr->name)
-                                    xmlFree(rsrmgr->name);
+                                    g_free(rsrmgr->name);
                                 if (NULL != rsrmgr->xa_name)
-                                    xmlFree(rsrmgr->xa_name);
+                                    g_free(rsrmgr->xa_name);
                             }
                             g_array_free(msg->body.open_8.rsrmgrs, TRUE);
                             msg->body.open_8.rsrmgrs = NULL;

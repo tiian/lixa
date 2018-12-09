@@ -1775,6 +1775,7 @@ SQL&gt;
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ mkfifo xid.fifo
 tiian@ubuntu1404-64:~/tmp$ ls -la
 total 44
 drwxrwxr-x  2 tiian tiian  4096 mar 27 22:10 .
@@ -1842,21 +1843,23 @@ ID         LAST_NAME            FIRST_NAME
 
 	  </screen></td></tr></tbody>
 	</table>
-	use a regular file to perform a <command>SQL DELETE</command> followed
-	by a rollback:
+	if you start the superior and subordinate Application Program in the
+	right order you can use even a regular file instead of the named FIFO
+	(pipe); try to perform a <command>SQL DELETE</command> followed
+	by a rollback using the name of a temporary file to use:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 0 0 1 xid.fifo
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 0 0 1 xid2.fifo
 OCI statement &gt;DELETE FROM authors WHERE ID=1930&lt; completed
-XID='1279875137.1f31836dab1a4081b488a9b3565faaa4.7b4180ecb8fee8c12cbc13637ab4eabb' has been written in file 'xid.fifo'
+XID='1279875137.1f31836dab1a4081b488a9b3565faaa4.7b4180ecb8fee8c12cbc13637ab4eabb' has been written in file 'xid2.fifo'
 	  </screen></td></tr></tbody>
 	</table>
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 0 0 0 xid.fifo
-XID='1279875137.1f31836dab1a4081b488a9b3565faaa4.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid.fifo'
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc01 0 0 0 xid2.fifo
+XID='1279875137.1f31836dab1a4081b488a9b3565faaa4.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid2.fifo'
 OCI statement &gt;DELETE FROM authors WHERE ID=1948&lt; completed
 	  </screen></td></tr></tbody>
 	</table>
@@ -1917,8 +1920,8 @@ OCIServerDetach: Succeeded
 xaoclose: rtn 0
 	  </screen></td></tr></tbody>
 	</table>
-	to complete the exercise, use a regular file to perform a
-	<command>SQL DELETE</command> followed by a commit:
+	to complete the exercise, perform a <command>SQL DELETE</command>
+	followed by a commit:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
@@ -2231,21 +2234,23 @@ ID         LAST_NAME            FIRST_NAME
 
 	  </screen></td></tr></tbody>
 	</table>
-	use a regular file to perform a <command>SQL DELETE</command> followed
-	by a rollback:
+	if you start the superior and subordinate Application Program in the
+	right order you can use even a regular file instead of the named FIFO
+	(pipe); try to perform a <command>SQL DELETE</command> followed
+	by a rollback using the name of a temporary file to use:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc11 0 0 1 xid.fifo
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc11 0 0 1 xid2.fifo
 OCI statement &gt;DELETE FROM authors WHERE ID=1930&lt; completed
-XID='1279875137.f54399449c1d409c999dc8010e7d6e9f.7b4180ecb8fee8c12cbc13637ab4eabb' has been written to file 'xid.fifo'
+XID='1279875137.f54399449c1d409c999dc8010e7d6e9f.7b4180ecb8fee8c12cbc13637ab4eabb' has been written to file 'xid2.fifo'
 	  </screen></td></tr></tbody>
 	</table>
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
 	  <tbody><tr><td><screen>
-tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc11 0 0 0 xid.fifo
-XID='1279875137.f54399449c1d409c999dc8010e7d6e9f.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid.fifo'
+tiian@ubuntu1404-64:~/tmp$ ./example_xta_macc11 0 0 0 xid2.fifo
+XID='1279875137.f54399449c1d409c999dc8010e7d6e9f.7b4180ecb8fee8c12cbc13637ab4eabb' has been read from file 'xid2.fifo'
 OCI statement &gt;DELETE FROM authors WHERE ID=1948&lt; completed
 	  </screen></td></tr></tbody>
 	</table>
@@ -2306,8 +2311,8 @@ OCIServerDetach: Succeeded
 xaoclose: rtn 0
 	  </screen></td></tr></tbody>
 	</table>
-	to complete the exercise, use a regular file to perform a
-	<command>SQL DELETE</command> followed by a commit:
+	to complete the exercise, perform a <command>SQL DELETE</command>
+	followed by a commit:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>

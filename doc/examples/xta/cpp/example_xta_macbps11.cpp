@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
         mysql_stmt2 = "DELETE FROM authors WHERE id=1898";
     }
     // initialize XTA environment
-    xta::Xta::Init();
+    xta::Xta::init();
     // create a new MySQL connection (if subordinate Application Program)
     rm = mysql_init(NULL);
     if (rm == NULL) {
@@ -123,18 +123,16 @@ int main(int argc, char *argv[])
         xar = new xta::MysqlXaResource(rm, "MySQL", "localhost,0,lixa,,lixa");
         // Create a new XA global transaction and retrieve a reference from
         // the TransactionManager object
-        xta::Transaction tx = tm->CreateTransaction();
+        xta::Transaction tx = tm->createTransaction();
         // Enlist MySQL resource to Transaction
-        tx.EnlistResource(xar);
-        // Open all resources enlisted by the Transaction
-        tx.Open();
+        tx.enlistResource(xar);
         /*
          * Start a new XA global transaction with multiple branches
          * Note: argument ("MultipleBranch") has true value because the
          *       transaction will be branched by the subordinate Application
          *       Program
          */
-        tx.Start(true);
+        tx.start(true);
         /*
          * Execute MySQL statement
          */
@@ -196,12 +194,10 @@ int main(int argc, char *argv[])
         }
         // commit or rollback the transaction
         if (commit) {
-            tx.Commit();
+            tx.commit();
         } else {
-            tx.Rollback();
+            tx.rollback();
         }
-        // Close all resources enlisted by tx Transaction
-        tx.Close();
         // Delete MySQL native and XA resource
         delete xar;
         // Close the MySQL connection

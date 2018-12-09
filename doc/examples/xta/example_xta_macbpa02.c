@@ -34,6 +34,11 @@
  * fourth parameter: "sub2sup_filename", a string with the name of the FIFO
  *                   (named pipe) that must be used for subordinate->superior
  *                   communication
+ *
+ * Programming Style note:
+ * the purpose of this small program is not to explain C development
+ * techniques or good style, but simply to show XTA for C using the easiest
+ * approach.
  */
 
 
@@ -156,15 +161,6 @@ int main(int argc, char *argv[])
         return 1;
     }
     /*
-     * Open all resources enlisted by the Transaction
-     */
-    rc = xta_transaction_open(tx);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "xta_transaction_open: returned %d (%s)\n",
-                rc, lixa_strerror(rc));
-        return 1;
-    }
-    /*
      * *** NOTE: ***
      * at this point, subordinate Application Program must wait until
      * superior Application Program has started the transaction.
@@ -270,15 +266,6 @@ int main(int argc, char *argv[])
             return 1;
         } else
             printf("Subordinate AP has rolled back its branch\n");
-    }
-    /*
-     * Close all resources enlisted by the Transaction
-     */
-    rc = xta_transaction_close(tx);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "xta_transaction_close: returned %d (%s)\n",
-                rc, lixa_strerror(rc));
-        return 1;
     }
     /*
      * Delete Transaction Manager object

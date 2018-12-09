@@ -496,58 +496,66 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_G_ARRAY_NEW_ERROR              -300
 /**
+ * "g_base64_decode" function error
+ */
+#define LIXA_RC_G_BASE64_DECODE_ERROR          -301
+/**
+ * "g_base64_encode" function error
+ */
+#define LIXA_RC_G_BASE64_ENCODE_ERROR          -302
+/**
  * "g_checksum_get_string" function error
  */
-#define LIXA_RC_G_CHECKSUM_GET_STRING_ERROR    -301
+#define LIXA_RC_G_CHECKSUM_GET_STRING_ERROR    -303
 /**
  * "g_checksum_new" function error
  */
-#define LIXA_RC_G_CHECKSUM_NEW_ERROR           -302
+#define LIXA_RC_G_CHECKSUM_NEW_ERROR           -304
 /**
  * "g_compute_checksum_for_data" function error
  */
-#define LIXA_RC_G_COMPUTE_CHECKSUM_FOR_DATA    -303
+#define LIXA_RC_G_COMPUTE_CHECKSUM_FOR_DATA    -305
 /**
  * "g_hash_table_new" function error
  */
-#define LIXA_RC_G_HASH_TABLE_NEW_ERROR         -304
+#define LIXA_RC_G_HASH_TABLE_NEW_ERROR         -306
 /**
  * "g_module_close" function error
  */
-#define LIXA_RC_G_MODULE_CLOSE_ERROR           -305
+#define LIXA_RC_G_MODULE_CLOSE_ERROR           -307
 /**
  * "g_module_open" function error
  */
-#define LIXA_RC_G_MODULE_OPEN_ERROR            -306
+#define LIXA_RC_G_MODULE_OPEN_ERROR            -308
 /**
  * "g_module_symbol" function error
  */
-#define LIXA_RC_G_MODULE_SYMBOL_ERROR          -307
+#define LIXA_RC_G_MODULE_SYMBOL_ERROR          -309
 /**
  * "g_ptr_array_new" function error
  */
-#define LIXA_RC_G_PTR_ARRAY_NEW_ERROR          -308
+#define LIXA_RC_G_PTR_ARRAY_NEW_ERROR          -310
 /**
  * A glib function returned a NULL pointer; the function is not documented as
  * returnig NULL. This is basically an internal error
  */
-#define LIXA_RC_G_RETURNED_NULL                -309
+#define LIXA_RC_G_RETURNED_NULL                -311
 /**
  * "g_strconcat" function error
  */
-#define LIXA_RC_G_STRCONCAT_ERROR              -310
+#define LIXA_RC_G_STRCONCAT_ERROR              -312
 /**
  * "g_strdup" function error
  */
-#define LIXA_RC_G_STRDUP_ERROR                 -311
+#define LIXA_RC_G_STRDUP_ERROR                 -313
 /**
  * "g_thread_create" function error
  */
-#define LIXA_RC_G_THREAD_CREATE_ERROR          -312
+#define LIXA_RC_G_THREAD_CREATE_ERROR          -314
 /**
  * "g_try_malloc"/"g_try_malloc0" function error
  */
-#define LIXA_RC_G_TRY_MALLOC_ERROR             -313
+#define LIXA_RC_G_TRY_MALLOC_ERROR             -315
 
 
 
