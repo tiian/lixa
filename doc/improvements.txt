@@ -63,6 +63,24 @@ journals. 3 snapshots (with msync like now) + 3 journals (with fdatasync) and
 a background thread used to avoid pauses during snapshotting (snapshots must be
 captured by the "just closed" state file, integrity is guaranteed by the
 journals).
+2018-12-13 A completely different approach would be the usage of a key/value
+embeddable database like
+leveldb
+  https://github.com/google/leveldb
+  http://www.lmdb.tech/bench/microbench/benchmark.html
+or 
+rocksdb
+  https://rocksdb.org/
+  http://rocksdb.blogspot.com/2013/11/the-history-of-rocksdb.html
+even if a general purpose key/value could provide additional values and benefits
+two points must be considered:
+- from the published papers, they are not optimized for sync writes: the 
+  impressive write performance they can reach requires async writes
+- LIXA state server would require a major review because the current 
+  implementation use a memory mapped file to obtain full in memory (read)
+  access; accessing the data is just a matter of pointer dereferencing.
+In the end, the key/value db is an idea, but only additional requires will
+justify such a change.
 
 
 
@@ -94,6 +112,14 @@ Architecture minus:
 - it genetates "a lot of" client/server network traffic (but it does not
   generate server/server traffic), so basically no a big issue inside the same
   datacenter
+
+
+
+*** Monitoring & Metering ***
+Prometheus is becoming more and more popular.
+Creating a /meter url published by a library like 
+https://www.libhttp.org/
+could be effective, practical, easy and very nice to monitor with Grafana.
 
 
 

@@ -89,7 +89,7 @@
  * Current protocol level; it's used to recognize incompatible client/server
  * configuration at run-time
  */
-#define LIXA_MSG_LEVEL          2
+#define LIXA_MSG_LEVEL          3
 /**
  * Id reserved for a null message: do NOT change this value because it
  * would break the @ref lixa_msg_init behavior

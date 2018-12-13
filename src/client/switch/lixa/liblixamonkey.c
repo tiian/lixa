@@ -99,7 +99,7 @@ void monkey_status_destroy2(gpointer data) {
 
 
 int lixa_monkeyrm_get_rc(struct monkey_status_s *mss, 
-                        enum monkey_status_verb_e verb, int *rc)
+                         enum monkey_status_verb_e verb, int *rc)
 {
     enum Exception { OUT_OF_RANGE
                      , INVALID_OPTION
