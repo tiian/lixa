@@ -1,4 +1,5 @@
 Implement test cases of XTA for Java:
+test case xta_java_1.at
 implement a program like case0101 in java and use LixaMonkeyXAResource
 
 test xa_forget

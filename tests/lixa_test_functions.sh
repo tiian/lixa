@@ -126,7 +126,7 @@ stop_server() {
 }
 
 exec_test() {
-	echo "Starting case test $1"
+	echo "Starting test case $1"
 	# check lixar link
 	echo "PATH=$PATH"
 	echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
@@ -188,3 +188,17 @@ exec_test() {
 	rc=$?
 	return $rc
 }
+
+
+
+exec_java_test() {
+	echo "Starting Java test case $1"
+	pwd
+	echo "java -Djava.library.path=$XTA_DIR/java/.libs -cp $XTA_DIR/java/xta.jar:$TESTS_SRC_DIR/java $*"
+	java -Djava.library.path=$XTA_DIR/java/.libs -cp $XTA_DIR/java/xta.jar:$TESTS_SRC_DIR/java $*
+	rc=$?
+	return $rc
+}
+
+
+

@@ -1,13 +1,16 @@
 if COMPILE_XTA_CPP
   MAYBE_XTACPP = cpp
 endif
+if COMPILE_XTA_JAVA
+  MAYBEJAVA = java
+endif
 if COMPILE_XTA_PYTHON
   MAYBE_XTAPYTHON = python
 endif
 if COND_COBOLAPI
   MAYBE_COBOLAPI = cobol
 endif
-SUBDIRS = . $(MAYBE_XTACPP) $(MAYBE_XTAPYTHON) $(MAYBE_COBOLAPI)
+SUBDIRS = . $(MAYBE_XTACPP) $(MAYBEJAVA) $(MAYBE_XTAPYTHON) $(MAYBE_COBOLAPI)
 noinst_HEADERS = case_test_functions.h
 
 #AM_CPPFLAGS = -DLIXA_MULTITHREAD=0 -I../../src/client -I../../src/common \

@@ -71,8 +71,19 @@ if test "x$1" = "xtrue"
 then
 	echo "true is not a case test, just a dummy step, skipping..."
 else
-	exec_test $*
-	rc=$?
+	# check if the program is a Java class; all Java tests start with 
+	# case4
+	jc=$(expr "$1" : "case4...")
+	if test $jc -ne 8
+	then
+		# native program
+		exec_test $*
+		rc=$?
+	else
+		# Java class
+		exec_java_test $*
+		rc=$?
+	fi
 fi
 
 if test "$STOP_SERVER" = "YES"
