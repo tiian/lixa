@@ -863,8 +863,12 @@ $(JAVA_PKGDIR)/ErrorCodes.java:	LixaErrorCodes.awk ../../common/lixa_errors.h
 xta.jar:	$(JAVA_PKGDIR)/ErrorCodes.class \
 	$(JAVA_PKGDIR)/Xta.class $(JAVA_PKGDIR)/XtaException.class \
 	$(JAVA_PKGDIR)/XtaXid.class $(JAVA_PKGDIR)/Transaction.class \
-	$(JAVA_PKGDIR)/TransactionManager.class
-	$(JAR) cf $@ $^
+	$(JAVA_PKGDIR)/TransactionManager.class \
+	$(JAVA_PKGDIR)/LixaDummyXAResource.class \
+	$(JAVA_PKGDIR)/LixaMonkeyXAResource.class
+	$(JAR) cf $@ $^ \
+		$(JAVA_PKGDIR)/LixaMonkeyXAResource\$$Record.class \
+		$(JAVA_PKGDIR)/LixaMonkeyXAResource\$$StatusVerb.class
 
 uninstall-hook:
 	if test -d ${pkgdatadir}/java; then rmdir ${pkgdatadir}/java; fi

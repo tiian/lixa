@@ -23,7 +23,7 @@
 import org.tiian.lixa.xta.*;
 // import Java XA
 //import javax.transaction.xa.XAResource;
-//import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAException;
 
 
 
@@ -44,9 +44,32 @@ public class case4101 {
         }
 
         // XTA Transaction Manager
-        TransactionManager tm;
+        TransactionManager tm = null;
         // XTA Transaction
-        Transaction tx;
-        
+        Transaction tx = null;
+        // XA Resources
+        LixaMonkeyXAResource xares1 = null;
+        LixaMonkeyXAResource xares2 = null;
+
+        try {
+            // Create a first LixaMonkery RM
+            xares1 = new LixaMonkeyXAResource("monkey1s.conf");
+            // create a second RM
+            if (numberOfResources == 2)
+                xares2 = new LixaMonkeyXAResource("monkey1s.conf");
+            
+        } catch (XtaException e) {
+            System.err.println("XtaException: LIXA ReturnCode=" +
+                               e.getReturnCode() + " ('" +
+                               e.getMessage() + "')");
+            e.printStackTrace();
+            System.exit(1);
+        } catch (XAException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 }

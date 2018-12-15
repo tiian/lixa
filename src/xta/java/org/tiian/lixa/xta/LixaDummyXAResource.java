@@ -42,12 +42,12 @@ public class LixaDummyXAResource implements XAResource {
     public void commit(Xid xid, boolean onePhase) { return; }
     public void end(Xid xid, int flags) { return; }
     public void forget(Xid xid) { return; }
-    public int getTransactionTimeour() { return timeout; }
+    public int getTransactionTimeout() { return timeout; }
     public boolean isSameRM(XAResource xares) { return false; }
-    public void prepare(Xid xid) { return ; }
+    public int prepare(Xid xid) { return XA_OK; }
     public Xid[] recover(int flag) { return new Xid[0]; }
     public void rollback(Xid xid) { return; }
-    boolean setTransactionTimeout(int seconds) {
+    public boolean setTransactionTimeout(int seconds) {
         timeout = seconds;
         return true;
     }
