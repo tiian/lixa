@@ -348,7 +348,8 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResource(
     JNIEnv *env, jobject this_object, jobject xa_resource, jstring name,
     jstring identifier)
 {
-    enum Exception { GET_JAVA_VM_ERROR
+    enum Exception { NULL_OBJECT0
+                     , GET_JAVA_VM_ERROR
                      , GET_VERSION_ERROR
                      , GET_OBJECT_CLASS_ERROR
                      , GET_METHOD_ID_ERROR1
@@ -383,6 +384,9 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResource(
     
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_enlistResource\n"));
     TRY {
+        /* check xa_resource */
+        if (NULL == xa_resource)
+            THROW(NULL_OBJECT0);
         /* retrieve the current Java Virtual Machine */
         if (0 != (*env)->GetJavaVM(env, &java_vm) ||
             (*env)->ExceptionCheck(env))
@@ -474,6 +478,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResource(
             case GET_OBJECT_CLASS_ERROR:
                 ret_cod = LIXA_RC_GET_OBJECT_CLASS_ERROR;
                 break;
+            case NULL_OBJECT0:
             case NULL_OBJECT1:
             case NULL_OBJECT2:
                 ret_cod = LIXA_RC_NULL_OBJECT;

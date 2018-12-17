@@ -64,7 +64,7 @@ public class LixaMonkeyXAResource implements XAResource {
             // index of slash
             int index = line.indexOf("/");
             // extract value after slash
-            int value = Integer.parseInt(line.substring(index+1));
+            int rc = Integer.parseInt(line.substring(index+1));
             // extract verb before slash
             String verbString = line.substring(0, index);
             StatusVerb verb = StatusVerb.DUMMY;
@@ -92,10 +92,10 @@ public class LixaMonkeyXAResource implements XAResource {
                 verb = StatusVerb.XA_COMPLETE;
             else throw new Exception("Invalid verb found in Monkey config");
             // create a new record            
-            Record record = new Record(verb, value);
+            Record record = new Record(verb, rc);
             // add to array
             records.addElement(record);
-            System.out.println(verb);
+            System.err.println(record.verb + "/" + record.rc);
         }
         br.close();
     }

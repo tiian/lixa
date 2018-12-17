@@ -646,6 +646,7 @@ LIXA_CONFIG_GLIB2_PYTHON_INCLUDEDIR
 LIXA_CONFIG_GLIB2_INCLUDEDIR
 LIXA_CONFIG_INCLUDEDIR
 CPP_COMPILER_AVAILABLE
+LIXA_XTA_JAVA
 LIXA_XTA
 LIXA_CRASH
 EXPANDED_LIBDIR
@@ -18216,7 +18217,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18219 "configure" */
+/* #line 18220 "configure" */
 public class Test {
 }
 EOF
@@ -18629,7 +18630,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18632 "configure" */
+/* #line 18633 "configure" */
 public class Test {
 }
 EOF
@@ -18663,7 +18664,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 18666 "configure" */
+/* [#]line 18667 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);
@@ -19343,7 +19344,13 @@ else
 fi
 
 
- if test "$LIXA_XTA" = "yes" -a "z$JAVA" != "z" -a "z$JAVAC" != "z" -a "z$JAR" != "z"; then
+if test "$LIXA_XTA" = "yes" -a "z$JAVA" != "z" -a "z$JAVAC" != "z" -a "z$JAR" != "z"
+then
+	LIXA_XTA_JAVA="yes"
+else
+	LIXA_XTA_JAVA="no"
+fi
+ if test "$LIXA_XTA_JAVA" = "yes"; then
   COMPILE_XTA_JAVA_TRUE=
   COMPILE_XTA_JAVA_FALSE='#'
 else
@@ -21760,6 +21767,7 @@ _ACEOF
 
 fi
 done
+
 
 
 

@@ -191,7 +191,13 @@ m4_include(m4include/ax_prog_javadoc.m4)
 AX_PROG_JAVADOC
 AM_CONDITIONAL([COND_JAVADOC], [test "z$JAVADOC" != "z"])
 
-AM_CONDITIONAL([COMPILE_XTA_JAVA], [test "$LIXA_XTA" = "yes" -a "z$JAVA" != "z" -a "z$JAVAC" != "z" -a "z$JAR" != "z"])
+if test "$LIXA_XTA" = "yes" -a "z$JAVA" != "z" -a "z$JAVAC" != "z" -a "z$JAR" != "z"
+then
+	LIXA_XTA_JAVA="yes"
+else
+	LIXA_XTA_JAVA="no"
+fi
+AM_CONDITIONAL([COMPILE_XTA_JAVA], [test "$LIXA_XTA_JAVA" = "yes"])
 
 # Check Python availability
 m4_include(m4include/ax_python_devel.m4)
@@ -394,6 +400,7 @@ AC_SUBST(EXPANDED_LOCALSTATEDIR)
 AC_SUBST(EXPANDED_LIBDIR)
 AC_SUBST(LIXA_CRASH)
 AC_SUBST(LIXA_XTA)
+AC_SUBST(LIXA_XTA_JAVA)
 AC_SUBST(CPP_COMPILER_AVAILABLE)
 AC_SUBST(PYTHON)
 AC_SUBST(XSLTPROC)

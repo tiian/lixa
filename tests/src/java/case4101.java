@@ -38,8 +38,8 @@ public class case4101 {
         int testRc = Integer.parseInt(args[1]);
         int numberOfResources = Integer.parseInt(args[2]);
 
-        if (numberOfResources < 1 || numberOfResources > 2) {
-            System.err.println("Number of resources must be 1 or 2");
+        if (numberOfResources < 1 || numberOfResources > 3) {
+            System.err.println("Number of resources must be 1, 2 or 3");
             System.exit(1);
         }
 
@@ -50,13 +50,17 @@ public class case4101 {
         // XA Resources
         LixaMonkeyXAResource xares1 = null;
         LixaMonkeyXAResource xares2 = null;
+        LixaMonkeyXAResource xares3 = null;
 
         try {
             // Create a first LixaMonkery RM
             xares1 = new LixaMonkeyXAResource("monkey1s.conf");
             // create a second RM
-            if (numberOfResources == 2)
+            if (numberOfResources > 1)
                 xares2 = new LixaMonkeyXAResource("monkey1s.conf");
+            // create a third RM
+            if (numberOfResources > 2)
+                xares3 = new LixaMonkeyXAResource("monkey2s.conf");
             // create a Transaction Manager
             tm = new TransactionManager();
             // create a new Transation
@@ -64,8 +68,11 @@ public class case4101 {
             // enlist first resource
             tx.enlistResource(xares1, "LixaMonkey", "First monkey RM");
             // enlist second resource
-            if (numberOfResources == 2)
+            if (numberOfResources > 1)
                 tx.enlistResource(xares2, "LixaMonkey", "Second monkey RM");
+            // enlist third resource
+            if (numberOfResources > 2)
+                tx.enlistResource(xares3, "LixaMonkey", "Third monkey RM");
             // start transaction
             tx.start();
             // commit or rollback
@@ -77,11 +84,13 @@ public class case4101 {
                 System.out.println("XTA rollback performed");
             }
         } catch (XtaException e) {
-            System.err.println("XtaException: LIXA ReturnCode=" +
-                               e.getReturnCode() + " ('" +
-                               e.getMessage() + "')");
-            e.printStackTrace();
-            System.exit(1);
+            if (e.getReturnCode() != testRc) {
+                System.err.println("XtaException: LIXA ReturnCode=" +
+                                   e.getReturnCode() + " ('" +
+                                   e.getMessage() + "')");
+                e.printStackTrace();
+                System.exit(1);
+            }
         } catch (XAException e) {
             e.printStackTrace();
             System.exit(1);

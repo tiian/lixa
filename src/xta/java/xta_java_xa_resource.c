@@ -368,7 +368,6 @@ int xta_java_xa_start(xta_xa_resource_t *context,
                      , XTAXID_NEW
                      , NULL_OBJECT
                      , XTAXID_NEWJNI
-                     , CALL_VOID_METHOD_ERROR
                      , NEW_GLOBAL_REF_ERROR
                      , NONE } excp;
     int ret_cod = XAER_RMERR;
@@ -422,7 +421,6 @@ int xta_java_xa_start(xta_xa_resource_t *context,
             case XTAXID_NEW:
             case XTAXID_NEWJNI:
             case NEW_GLOBAL_REF_ERROR:
-            case CALL_VOID_METHOD_ERROR:
                 break;
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
@@ -448,7 +446,6 @@ int xta_java_xa_end(xta_xa_resource_t *context, const XID *xid,
                      , XTAXID_NEW
                      , NULL_OBJECT
                      , XTAXID_NEWJNI
-                     , CALL_VOID_METHOD_ERROR
                      , NONE } excp;
     int ret_cod = XAER_RMERR;
 
@@ -471,8 +468,8 @@ int xta_java_xa_end(xta_xa_resource_t *context, const XID *xid,
         /* call Java start method */
         (*env)->CallVoidMethod(env, res->java_object, res->java_method_end,
                                res->java_xid, (jint)flags);
-        if ((*env)->ExceptionCheck(env))
-            THROW(CALL_VOID_METHOD_ERROR);
+        /* retrieve the return code form the Java exception */
+        ret_cod = xta_java_xa_resource_rc(env);
 
         THROW(NONE);
     } CATCH {
@@ -483,13 +480,11 @@ int xta_java_xa_end(xta_xa_resource_t *context, const XID *xid,
             case GET_ENV_ERROR:
             case XTAXID_NEW:
             case XTAXID_NEWJNI:
-            case CALL_VOID_METHOD_ERROR:
                 break;
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case NONE:
-                ret_cod = XA_OK;
                 break;
             default:
                 ret_cod = XAER_RMERR;
@@ -505,12 +500,8 @@ int xta_java_xa_end(xta_xa_resource_t *context, const XID *xid,
 int xta_java_xa_rollback(xta_xa_resource_t *context, const XID *xid,
                          int rmid, long flags)
 {
-    enum Exception { XA_PROTOCOL_ERROR
+    enum Exception { NULL_OBJECT
                      , GET_ENV_ERROR
-                     , XTAXID_NEW
-                     , NULL_OBJECT
-                     , XTAXID_NEWJNI
-                     , CALL_VOID_METHOD_ERROR
                      , NONE } excp;
     int ret_cod = XAER_RMERR;
 
@@ -525,8 +516,11 @@ int xta_java_xa_rollback(xta_xa_resource_t *context, const XID *xid,
                     res->java_object, res->java_method_rollback,
                     res->java_xid));
         /* check Xid is OK */
-        if (NULL == res->java_xid)
-            THROW(XA_PROTOCOL_ERROR);
+        if (NULL == res->java_xid) {
+            /* create an XTA Xid: probably called inside a recovery phase */
+            if (NULL == (res->xta_xid = xta_xid_new_from_XID(xid)))
+                THROW(NULL_OBJECT);
+        }
         /* retrieve Java environement for this thread */
         if (JNI_OK != (*(res->java_vm))->GetEnv(
                 res->java_vm, (void **)&env, res->java_jni_version))
@@ -535,8 +529,8 @@ int xta_java_xa_rollback(xta_xa_resource_t *context, const XID *xid,
         (*env)->CallVoidMethod(env, res->java_object,
                                res->java_method_rollback,
                                res->java_xid);
-        if ((*env)->ExceptionCheck(env))
-            THROW(CALL_VOID_METHOD_ERROR);
+        /* retrieve the return code form the Java exception */
+        ret_cod = xta_java_xa_resource_rc(env);
         /* clean the XTA Xid cached by the resource, now useless! */
         xta_xid_delete(res->xta_xid);
         res->xta_xid = NULL;
@@ -544,19 +538,13 @@ int xta_java_xa_rollback(xta_xa_resource_t *context, const XID *xid,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case XA_PROTOCOL_ERROR:
-                ret_cod = XAER_PROTO;
-                break;
             case GET_ENV_ERROR:
-            case XTAXID_NEW:
-            case XTAXID_NEWJNI:
-            case CALL_VOID_METHOD_ERROR:
+                ret_cod = LIXA_RC_GET_ENV_ERROR;
                 break;
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case NONE:
-                ret_cod = XA_OK;
                 break;
             default:
                 ret_cod = XAER_RMERR;
@@ -577,7 +565,6 @@ int xta_java_xa_prepare(xta_xa_resource_t *context, const XID *xid,
                      , XTAXID_NEW
                      , NULL_OBJECT
                      , XTAXID_NEWJNI
-                     , CALL_VOID_METHOD_ERROR
                      , NONE } excp;
     int ret_cod = XAER_RMERR;
 
@@ -604,9 +591,11 @@ int xta_java_xa_prepare(xta_xa_resource_t *context, const XID *xid,
         xa_rc = (*env)->CallIntMethod(env, res->java_object,
                                       res->java_method_prepare, res->java_xid);
         if ((*env)->ExceptionCheck(env))
-            THROW(CALL_VOID_METHOD_ERROR);
-        /* if anything OK, return what returned by XAResource.prepare() */
-        ret_cod = (int)xa_rc;
+            /* retrieve the return code form the Java exception */
+            ret_cod = xta_java_xa_resource_rc(env);
+        else
+            /* if anything OK, return what returned by XAResource.prepare() */
+            ret_cod = (int)xa_rc;
         
         THROW(NONE);
     } CATCH {
@@ -617,13 +606,11 @@ int xta_java_xa_prepare(xta_xa_resource_t *context, const XID *xid,
             case GET_ENV_ERROR:
             case XTAXID_NEW:
             case XTAXID_NEWJNI:
-            case CALL_VOID_METHOD_ERROR:
                 break;
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case NONE:
-                ret_cod = XA_OK;
                 break;
             default:
                 ret_cod = XAER_RMERR;
@@ -639,12 +626,8 @@ int xta_java_xa_prepare(xta_xa_resource_t *context, const XID *xid,
 int xta_java_xa_commit(xta_xa_resource_t *context, const XID *xid,
                        int rmid, long flags)
 {
-    enum Exception { XA_PROTOCOL_ERROR
+    enum Exception { NULL_OBJECT
                      , GET_ENV_ERROR
-                     , XTAXID_NEW
-                     , NULL_OBJECT
-                     , XTAXID_NEWJNI
-                     , CALL_VOID_METHOD_ERROR
                      , NONE } excp;
     int ret_cod = XAER_RMERR;
 
@@ -660,8 +643,11 @@ int xta_java_xa_commit(xta_xa_resource_t *context, const XID *xid,
                     res->java_vm, res->java_jni_version,
                     res->java_object, res->java_method_commit, res->java_xid));
         /* check Xid is OK */
-        if (NULL == res->java_xid)
-            THROW(XA_PROTOCOL_ERROR);
+        if (NULL == res->java_xid) {
+            /* create an XTA Xid: probably called inside a recovery phase */
+            if (NULL == (res->xta_xid = xta_xid_new_from_XID(xid)))
+                THROW(NULL_OBJECT);
+        }
         /* retrieve Java environement for this thread */
         if (JNI_OK != (*(res->java_vm))->GetEnv(
                 res->java_vm, (void **)&env, res->java_jni_version))
@@ -674,8 +660,8 @@ int xta_java_xa_commit(xta_xa_resource_t *context, const XID *xid,
         /* call Java start method */
         (*env)->CallVoidMethod(env, res->java_object, res->java_method_commit,
                                res->java_xid, one_phase);
-        if ((*env)->ExceptionCheck(env))
-            THROW(CALL_VOID_METHOD_ERROR);
+        /* retrieve the return code form the Java exception */
+        ret_cod = xta_java_xa_resource_rc(env);
         /* clean the XTA Xid cached by the resource, now useless! */
         xta_xid_delete(res->xta_xid);
         res->xta_xid = NULL;
@@ -683,19 +669,13 @@ int xta_java_xa_commit(xta_xa_resource_t *context, const XID *xid,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case XA_PROTOCOL_ERROR:
-                ret_cod = XAER_PROTO;
-                break;
             case GET_ENV_ERROR:
-            case XTAXID_NEW:
-            case XTAXID_NEWJNI:
-            case CALL_VOID_METHOD_ERROR:
+                ret_cod = LIXA_RC_GET_ENV_ERROR;
                 break;
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case NONE:
-                ret_cod = XA_OK;
                 break;
             default:
                 ret_cod = XAER_RMERR;
@@ -724,7 +704,6 @@ int xta_java_xa_forget(xta_xa_resource_t *context, const XID *xid,
                      , XTAXID_NEW
                      , NULL_OBJECT
                      , XTAXID_NEWJNI
-                     , CALL_VOID_METHOD_ERROR
                      , NONE } excp;
     int ret_cod = XAER_RMERR;
 
@@ -758,8 +737,8 @@ int xta_java_xa_forget(xta_xa_resource_t *context, const XID *xid,
         /* call Java forget method */
         (*env)->CallVoidMethod(env, res->java_object, res->java_method_forget,
                                jxid, (jint)flags);
-        if ((*env)->ExceptionCheck(env))
-            THROW(CALL_VOID_METHOD_ERROR);
+        /* retrieve the return code form the Java exception */
+        ret_cod = xta_java_xa_resource_rc(env);
 
         THROW(NONE);
     } CATCH {
@@ -767,13 +746,11 @@ int xta_java_xa_forget(xta_xa_resource_t *context, const XID *xid,
             case GET_ENV_ERROR:
             case XTAXID_NEW:
             case XTAXID_NEWJNI:
-            case CALL_VOID_METHOD_ERROR:
                 break;
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case NONE:
-                ret_cod = XA_OK;
                 break;
             default:
                 ret_cod = XAER_RMERR;
