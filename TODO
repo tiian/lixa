@@ -1,4 +1,6 @@
 Implement test cases of XTA for Java:
+xta_java_xa_resource.c   call xta_java_xa_resource_rc  as in start for all the
+relevant methods
 test case xta_java_1.at
 implement a program like case0101 in java and use LixaMonkeyXAResource
 

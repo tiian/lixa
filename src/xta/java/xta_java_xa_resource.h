@@ -165,6 +165,18 @@ extern "C" {
 
 
     /**
+     * Retrieve the return code returned by the XA Java function: it catches
+     * the XAException that has been thrown by a class that implements the
+     * XAResource interface
+     * @param[in,out] env : JNI environment
+     * @return a standard XA return code (XAException.errorCode in the event
+     *         of exception)
+     */
+    int xta_java_xa_resource_rc(JNIEnv *env);
+
+        
+
+    /**
      * Close a Java XAResource; it's a dummy method because Java XAResource
      * does not need and does not provide such method
      * @param[in,out] context : dummy parameter

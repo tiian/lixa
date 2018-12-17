@@ -34,7 +34,7 @@ public class case4101 {
             System.err.println("This program requires at least 3 options");
             System.exit(1);
         }
-        int commit = Integer.parseInt(args[0]);
+        boolean commit = Integer.parseInt(args[0]) > 0 ? true : false;
         int testRc = Integer.parseInt(args[1]);
         int numberOfResources = Integer.parseInt(args[2]);
 
@@ -57,7 +57,25 @@ public class case4101 {
             // create a second RM
             if (numberOfResources == 2)
                 xares2 = new LixaMonkeyXAResource("monkey1s.conf");
-            
+            // create a Transaction Manager
+            tm = new TransactionManager();
+            // create a new Transation
+            tx = tm.createTransaction();
+            // enlist first resource
+            tx.enlistResource(xares1, "LixaMonkey", "First monkey RM");
+            // enlist second resource
+            if (numberOfResources == 2)
+                tx.enlistResource(xares2, "LixaMonkey", "Second monkey RM");
+            // start transaction
+            tx.start();
+            // commit or rollback
+            if (commit) {
+                tx.commit();
+                System.out.println("XTA commit performed");
+            } else {
+                tx.rollback();
+                System.out.println("XTA rollback performed");
+            }
         } catch (XtaException e) {
             System.err.println("XtaException: LIXA ReturnCode=" +
                                e.getReturnCode() + " ('" +

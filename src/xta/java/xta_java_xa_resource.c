@@ -285,6 +285,63 @@ void xta_java_xa_resource_clean(xta_java_xa_resource_t *xa_resource)
 
 
 
+int xta_java_xa_resource_rc(JNIEnv *env)
+{
+    enum Exception { EXCEPTION_OCCURRED_ERROR
+                     , FIND_CLASS_ERROR
+                     , GET_FIELD_ID_ERROR
+                     , GET_INT_FIELD_ERROR
+                     , NONE } excp;
+    int ret_cod = XAER_RMFAIL;
+    
+    LIXA_TRACE(("xta_java_xa_resource_rc\n"));
+    TRY {
+        jthrowable exception = NULL;
+        jclass class = NULL;
+        jfieldID fieldID = NULL;
+        jint error_code = 0;
+        /* check if an exception occurred */
+        if ((*env)->ExceptionCheck(env)) {
+            LIXA_TRACE(("xta_java_xa_resource_rc: caught Java exception\n"));
+            if (NULL == (exception = (*env)->ExceptionOccurred(env)))
+                THROW(EXCEPTION_OCCURRED_ERROR);
+            if (NULL == (class = (*env)->FindClass(
+                             env, "javax/transaction/xa/XAException")))
+                THROW(FIND_CLASS_ERROR);
+            if (NULL == (fieldID = (*env)->GetFieldID(
+                             env, class, "errorCode", "I")))
+                THROW(GET_FIELD_ID_ERROR);
+            error_code = (*env)->GetIntField(env, exception, fieldID);
+            LIXA_TRACE(("xta_java_xa_resource_rc: XAException.errorCode=%d\n",
+                        error_code));
+            /* reset exception, it must not be propagated */
+            (*env)->ExceptionClear(env);
+            ret_cod = error_code;
+        } else
+            ret_cod = XA_OK;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case EXCEPTION_OCCURRED_ERROR:
+            case FIND_CLASS_ERROR:
+            case GET_FIELD_ID_ERROR:
+            case GET_INT_FIELD_ERROR:
+                ret_cod = XAER_RMFAIL;
+                break;
+            case NONE:
+                break;
+            default:
+                ret_cod = XAER_RMFAIL;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_java_xa_resource_rc/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int xta_java_xa_open(xta_xa_resource_t *context, char *xa_info,
                       int rmid, long flags)
 {
@@ -352,9 +409,9 @@ int xta_java_xa_start(xta_xa_resource_t *context,
         /* call Java start method */
         (*env)->CallVoidMethod(env, res->java_object, res->java_method_start,
                                res->java_xid, (jint)flags);
-        if ((*env)->ExceptionCheck(env))
-            THROW(CALL_VOID_METHOD_ERROR);
-
+        /* retrieve the return code form the Java exception */
+        ret_cod = xta_java_xa_resource_rc(env);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -371,7 +428,6 @@ int xta_java_xa_start(xta_xa_resource_t *context,
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case NONE:
-                ret_cod = XA_OK;
                 break;
             default:
                 ret_cod = XAER_RMERR;

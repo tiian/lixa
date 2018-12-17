@@ -34,8 +34,8 @@ import javax.transaction.xa.Xid;
  */
 public class LixaMonkeyXAResource implements XAResource {
     private int timeout;
-
-    private enum StatusVerb { XA_OPEN, XA_CLOSE, XA_START, XA_END, XA_PREPARE,
+    private int recordIndex;
+    private enum StatusVerb { XA_START, XA_END, XA_PREPARE,
                               XA_COMMIT, XA_ROLLBACK, XA_RECOVER, XA_FORGET,
                               XA_COMPLETE, DUMMY
     };
@@ -55,6 +55,7 @@ public class LixaMonkeyXAResource implements XAResource {
      */
     public LixaMonkeyXAResource(String fileName) throws Exception {
         records = new Vector();
+        recordIndex = 0;
         BufferedReader br = new BufferedReader(new FileReader(fileName));
         for (String line = br.readLine(); line != null; line = br.readLine()) {
             // ignore comments
@@ -68,9 +69,11 @@ public class LixaMonkeyXAResource implements XAResource {
             String verbString = line.substring(0, index);
             StatusVerb verb = StatusVerb.DUMMY;
             if (verbString.startsWith("xa_open"))
-                verb = StatusVerb.XA_OPEN;
+                // ignore it, not supported in Java
+                continue;
             else if (verbString.startsWith("xa_close"))
-                verb = StatusVerb.XA_CLOSE;
+                // ignore it, not supported in Java
+                continue;
             else if (verbString.startsWith("xa_start"))
                 verb = StatusVerb.XA_START;
             else if (verbString.startsWith("xa_end"))
@@ -97,35 +100,88 @@ public class LixaMonkeyXAResource implements XAResource {
         br.close();
     }
     
-    public void commit(Xid xid, boolean onePhase) {
-        ;
+    public void commit(Xid xid, boolean onePhase) throws XAException {
+        Record record = (Record)records.get(recordIndex++);
+        // check the proper order of the XA verb
+        if (StatusVerb.XA_COMMIT != record.verb)
+            throw new XAException(XAException.XAER_PROTO);
+        // if not XA_OK, throw an exception
+        if (ErrorCodes.LIXA_RC_OK != record.rc)
+            throw new XAException(record.rc);
     }
-    public void end(Xid xid, int flags) {
-        ;
+    
+    public void end(Xid xid, int flags) throws XAException {
+        Record record = (Record)records.get(recordIndex++);
+        // check the proper order of the XA verb
+        if (StatusVerb.XA_END != record.verb)
+            throw new XAException(XAException.XAER_PROTO);
+        // if not XA_OK, throw an exception
+        if (XA_OK != record.rc)
+            throw new XAException(record.rc);
     }
-    public void forget(Xid xid) {
-        ;
+    
+    public void forget(Xid xid) throws XAException {  
+        Record record = (Record)records.get(recordIndex++);
+        // check the proper order of the XA verb
+        if (StatusVerb.XA_FORGET != record.verb)
+            throw new XAException(XAException.XAER_PROTO);
+        // if not XA_OK, throw an exception
+        if (XA_OK != record.rc)
+            throw new XAException(record.rc);
     }
+    
     public int getTransactionTimeout() {
         return timeout;
     }
+    
     public boolean isSameRM(XAResource xares) {
         return false;
     }
-    public int prepare(Xid xid) {
-        return XA_OK;
+    
+    public int prepare(Xid xid) throws XAException {
+        Record record = (Record)records.get(recordIndex++);
+        // check the proper order of the XA verb
+        if (StatusVerb.XA_PREPARE != record.verb)
+            throw new XAException(XAException.XAER_PROTO);
+        // if not XA_OK or XA_RDONLY, throw an exception
+        if (XA_OK != record.rc && XA_RDONLY != record.rc)
+            throw new XAException(record.rc);
+        return record.rc;
     }
-    public Xid[] recover(int flag) {
+    
+    public Xid[] recover(int flag) throws XAException {
+        Record record = (Record)records.get(recordIndex++);
+        // check the proper order of the XA verb
+        if (StatusVerb.XA_RECOVER != record.verb)
+            throw new XAException(XAException.XAER_PROTO);
+        // if not XA_OK, throw an exception
+        if (XA_OK != record.rc)
+            throw new XAException(record.rc);
+        // return an empty array
         return new Xid[0];
     }
-    public void rollback(Xid xid) {
-        ;
+    
+    public void rollback(Xid xid) throws XAException {
+        Record record = (Record)records.get(recordIndex++);
+        // check the proper order of the XA verb
+        if (StatusVerb.XA_ROLLBACK != record.verb)
+            throw new XAException(XAException.XAER_PROTO);
+        // if not XA_OK, throw an exception
+        if (XA_OK != record.rc)
+            throw new XAException(record.rc);
     }
+    
     public boolean setTransactionTimeout(int seconds) {
         timeout = seconds;
         return true;
     }
-    public void start(Xid xid, int flags) {
-        ;
+    public void start(Xid xid, int flags) throws XAException {
+        Record record = (Record)records.get(recordIndex++);
+        // check the proper order of the XA verb
+        if (StatusVerb.XA_START != record.verb)
+            throw new XAException(XAException.XAER_PROTO);
+        // if not XA_OK, throw an exception
+        if (XA_OK != record.rc)
+            throw new XAException(record.rc);
     }
 }
