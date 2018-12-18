@@ -95,7 +95,7 @@ public class LixaMonkeyXAResource implements XAResource {
             Record record = new Record(verb, rc);
             // add to array
             records.addElement(record);
-            System.err.println(record.verb + "/" + record.rc);
+            // System.err.println(record.verb + "/" + record.rc);
         }
         br.close();
     }

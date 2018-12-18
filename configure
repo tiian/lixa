@@ -726,6 +726,7 @@ COMPILE_MYSQL_POSTGRESQL_STUFF_FALSE
 COMPILE_MYSQL_POSTGRESQL_STUFF_TRUE
 COMPILE_MYSQL_STUFF_FALSE
 COMPILE_MYSQL_STUFF_TRUE
+MYSQL_JDBC_JAR
 HAVE_MYSQL
 MYSQL_INCLUDE_DIR
 MYSQL_LDADD
@@ -734,6 +735,7 @@ MYSQL_CPPFLAGS
 MYSQL_CONFIG
 COMPILE_POSTGRESQL_STUFF_FALSE
 COMPILE_POSTGRESQL_STUFF_TRUE
+POSTGRESQL_JDBC_JAR
 HAVE_POSTGRESQL
 POSTGRESQL_LDADD
 POSTGRESQL_INCLUDE_DIR
@@ -903,7 +905,9 @@ with_ibmdb2
 with_ibmdb2_include
 with_ibmdb2_lib
 with_postgresql
+with_postgresql_jdbc
 with_mysql
+with_mysql_jdbc
 with_wsmq
 enable_wsmq
 with_docbook
@@ -1586,8 +1590,12 @@ Optional Packages:
   --with-postgresql[=FILE]
                           use PostgreSQL (FILE points to pg_config utility
                           program)
+  --with-postgresql-jdbc[=FILE]
+                          specifies JAR file for PostgreSQL JDBC driver
   --with-mysql[=FILE]     use MySQL (FILE points to mysql_config utility
                           program)
+  --with-mysql-jdbc[=FILE]
+                          specifies JAR file for MySQL/MariaDB JDBC driver
   --with-wsmq=DIR         use WebSphereMQ from given path
   --with-docbook[=DIR]    use Docbook, DIR contains the stylesheets
   --disable-xta           disable XTA (XA Transaction API) support
@@ -17333,6 +17341,33 @@ $as_echo "#define HAVE_POSTGRESQL 1" >>confdefs.h
 
     fi
 
+
+
+
+
+    POSTGRESQL_JDBC_JAR=""
+
+# Check whether --with-postgresql-jdbc was given.
+if test "${with_postgresql_jdbc+set}" = set; then :
+  withval=$with_postgresql_jdbc; HAVE_POSTGRESQL_JDBC="maybe"
+else
+  HAVE_POSTGRESQL_JDBC="no"
+
+fi
+
+    if test "$HAVE_POSTGRESQL_JDBC" != "no"
+    then
+        if test "$withval" != "yes"
+        then
+            POSTGRESQL_JDBC_JAR=$withval
+        fi
+        if ! test -f $POSTGRESQL_JDBC_JAR
+        then
+            as_fn_error $? "cannot find file $POSTGRESQL_JDBC_JAR" "$LINENO" 5
+        fi
+    fi
+
+
  if test "$HAVE_POSTGRESQL" = "yes"; then
   COMPILE_POSTGRESQL_STUFF_TRUE=
   COMPILE_POSTGRESQL_STUFF_FALSE='#'
@@ -17428,6 +17463,33 @@ done
 $as_echo "#define HAVE_MYSQL 1" >>confdefs.h
 
     fi
+
+
+
+
+
+    MYSQL_JDBC_JAR=""
+
+# Check whether --with-mysql-jdbc was given.
+if test "${with_mysql_jdbc+set}" = set; then :
+  withval=$with_mysql_jdbc; HAVE_MYSQL_JDBC="maybe"
+else
+  HAVE_MYSQL_JDBC="no"
+
+fi
+
+    if test "$HAVE_MYSQL_JDBC" != "no"
+    then
+        if test "$withval" != "yes"
+        then
+            MYSQL_JDBC_JAR=$withval
+        fi
+        if ! test -f $MYSQL_JDBC_JAR
+        then
+            as_fn_error $? "cannot find file $MYSQL_JDBC_JAR" "$LINENO" 5
+        fi
+    fi
+
 
  if test "$HAVE_MYSQL" = "yes"; then
   COMPILE_MYSQL_STUFF_TRUE=
@@ -18217,7 +18279,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18220 "configure" */
+/* #line 18282 "configure" */
 public class Test {
 }
 EOF
@@ -18630,7 +18692,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18633 "configure" */
+/* #line 18695 "configure" */
 public class Test {
 }
 EOF
@@ -18664,7 +18726,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 18667 "configure" */
+/* [#]line 18729 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);

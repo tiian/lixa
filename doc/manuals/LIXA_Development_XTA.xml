@@ -215,10 +215,7 @@
 		<entry>Resource Manager</entry>
 		<entry>C</entry>
 		<entry>C++</entry>
-		<entry>Java<footnote>
-		<para>Planned a JNI based wrapper with access to XA native
-		Java classes, not yet implemented
-		</para></footnote></entry>
+		<entry>Java</entry>
 		<entry>PHP<footnote>
 		<para>Planned a SWIG wrapper, not yet implemented
 		</para></footnote></entry>
@@ -235,7 +232,7 @@
 		</para></footnote></entry>
 		<entry>Y</entry>
 		<entry>Y</entry>
-		<entry>-</entry>
+		<entry>Y</entry>
 		<entry>-</entry>
 		<entry>Y<footnote>
 		<para>The MySQLdb driver provided by mysqlclient-python project
@@ -248,7 +245,7 @@
 		<entry>Oracle DBMS</entry>
 		<entry>Y</entry>
 		<entry>Y</entry>
-		<entry>-</entry>
+		<entry>Y</entry>
 		<entry>N<footnote>
 		<para>No known way to re-use a standard OCI connection as an 
 		XA OCI connection
@@ -267,7 +264,7 @@
 		</para></footnote></entry>
 		<entry>Y</entry>
 		<entry>Y</entry>
-		<entry>-</entry>
+		<entry>Y</entry>
 		<entry>-</entry>
 		<entry>Y<footnote>
 		<para>Psycopg2 driver must be used. A patched version of the
@@ -354,8 +351,25 @@
 	  </para></listitem>
 	</itemizedlist>
       </para></important>
+      <note>
+	<para>
+	  XTA is compatible with some interfaces (and classes) defined inside
+	  the JTA (Java Transaction API) Version 1.2. Specifically, XTA
+	  supports the <function>Xid</function> interface, it's compatible with
+	  the <function>XAException</function> class and it's compatible with
+	  classes that implement <function>XAResource</function> interface.
+	</para>
+	<para>
+	  XTA is <emphasis>not</emphasis> an implementation of the JTA standard
+	  and it can't be used to replace a JTA implementation: XTA provides a
+	  different set of functions that are designed to support a different
+	  set of use cases. XTA reuses some interfaces and classes defined by
+	  JTA to leverage the huge amount of available JTA compliant 
+	  <emphasis>Resource Managers</emphasis>.
+	</para>
+      </note>
       <section>
-	<title>XA Design Considerations</title>
+	<title>XA Design Considerations (native C, non Java)</title>
 	<para>
 	  <citation>XAspec</citation> defines the interface that must be
 	  implemented by an <quote>XA standard compliant</quote>
@@ -458,12 +472,18 @@
 	  connection.
 	</para>
 	<para>
+	  <emphasis>XtaJavaXAResource</emphasis> is a shadow class used to
+	  interface Java XAResource classes with XTA C libraries by mean of
+	  JNI (Java Native Interface). It's a type of resource the Application
+	  Program developer will never use.
+	</para>
+	<para>
 	  Further non XA standard <emphasis>Resource Managers</emphasis> will
 	  require specialized <emphasis>somethingXAResource</emphasis>.
 	</para>
       </section>
       <section>
-	<title>XTA Resource Usage</title>
+	<title>XTA Resource Usage (non Java)</title>
 	<para>
 	  Due to the above explanation, the usage of the different XTA
 	  resource types present some differences:
@@ -475,26 +495,34 @@
 	    </para></listitem>
 	    <listitem><para>
 	      statically defined <emphasis>NativeXAResource</emphasis>
-	      must be create (method <function>new</function>) after
+	      must be created (method <function>new</function>) after
 	      <emphasis>Transaction Manager</emphasis> object creation
 	    </para></listitem>
 	    <listitem><para>
 	      dynamically defined <emphasis>NativeXAResource</emphasis>
-	      must be create (method <function>new</function>) before
+	      must be created (method <function>new</function>) before
 	      <emphasis>Transaction Manager</emphasis> object creation
 	    </para></listitem>
 	    <listitem><para>
 	      statically defined <emphasis>NativeXAResource</emphasis> can
-	      be enlisted (method <function>enlist</function>), but it's not
-	      necessary
+	      be enlisted (method <function>enlist_resource</function>), but
+	      it's not necessary
 	    </para></listitem>
 	    <listitem><para>
 	      dynamically defined <emphasis>NativeXAResource</emphasis>
 	      and <emphasis>AcquiredXAResource</emphasis> must be enlisted
-	      (method <function>enlist</function>) to participate in a
+	      (method <function>enlist_resource</function>) to participate in a
 	      distributed <emphasis>Transaction</emphasis>
 	    </para></listitem>
 	  </itemizedlist>
+	</para>
+      </section>
+      <section>
+	<title>XTA Resource Usage (Java)</title>
+	<para>
+	  <emphasis>XAResource</emphasis> must be created as standard
+	  Java XAResource and must be enlisted with method
+	  <function>Transaction.enlistResource()</function>
 	</para>
       </section>
     </section>
@@ -519,6 +547,11 @@
 	    C++ language:
 	    <link xlink:href="http://www.tiian.org/lixa/manuals/xta/CPP/">
 	    http://www.tiian.org/lixa/manuals/xta/CPP/</link>
+	  </para></listitem>
+	  <listitem><para>
+	    Java language:
+	    <link xlink:href="http://www.tiian.org/lixa/manuals/xta/Java/">
+	    http://www.tiian.org/lixa/manuals/xta/Java/</link>
 	  </para></listitem>
 	  <listitem><para>
 	    Python language: the client binding is produced by 

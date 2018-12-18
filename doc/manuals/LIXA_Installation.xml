@@ -674,6 +674,19 @@ make
 	  not necessary to specify the MySQL installation directory because
 	  the <command>mysql_config</command> utility command is used.
 	</para>
+	<para>
+	  If you are interested in XTA for Java (see
+	  <xref linkend="XTA_technology_matrix"/>), you need a JDBC driver
+	  that supports MySQL and JTA standard. Specify the JAR file that
+	  contains the JDBC driver during config phase with something like
+	  this:
+	  <screen>
+./configure --with-mysql --with-mysql-jdbc=/usr/share/java/mysql.jar
+	  </screen>
+	  As a general warning, don't stick to the version provided by your
+	  Linux distribution: sometimes a better one is available in the
+	  vendor's portal.
+	</para>
 	<note><para>
 	    MySQL does not supply an XA standard switch structure, but
 	    only some SQL non standard statements (
@@ -726,6 +739,16 @@ make
 	    + MySQL resource manager + LIXA transaction manager).
 	  </para>
 	</warning>
+      </section>
+      <section>
+	<title>MariaDB</title>
+	<para>
+	  Even if MariaDB is different from MySQL, it can be used with LIXA in
+	  the same way of MySQL: most of the times it's just a matter of
+	  changing some file or directory name.
+	  LIXA does not provide specific options for MariaDB, just use the
+	  options provided for MySQL.
+	</para>
       </section>
       <section>
 	<title>Oracle XE 10.2/11.2 (server)<footnote><para>
@@ -797,6 +820,21 @@ make
 ./configure --with-postgresql-include=/usr/include --with-postgresql-lib=/usr/lib
 	  </screen>
 	  to create a loadable module containing the switch structure.
+	</para>
+	<para>
+	  If you are interested in XTA for Java (see
+	  <xref linkend="XTA_technology_matrix"/>), you need a JDBC driver
+	  that supports PostgreSQL and JTA standard. Specify the JAR file that
+	  contains the JDBC driver during config phase with something like
+	  this:
+	  <screen>
+./configure --with-postgresql --with-postgresql-jdbc=/opt/postgresql/postgresql.jar
+	  </screen>
+	  As a general warning, don't stick to the version provided by your
+	  Linux distribution: sometimes a better one is available in the
+	  project's portal. For instance, version 9.2-1002-1 distributed with
+	  Ubuntu 14.04 does not pass all case tests due a bug related
+	  to XA protocol implementation.
 	</para>
 	<note><para>
 	    PostgreSQL does not supply an XA standard switch structure, but

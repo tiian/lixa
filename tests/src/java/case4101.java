@@ -21,9 +21,17 @@
 
 // import XTA package from LIXA project
 import org.tiian.lixa.xta.*;
+// import SQL
+import java.sql.Connection;
+import java.sql.Statement;
 // import Java XA
-//import javax.transaction.xa.XAResource;
 import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.sql.XAConnection;
+// import PostgreSQL package for XA Data Source
+import org.postgresql.xa.PGXADataSource;
+// import MySQL package for XA Data Source
+import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
 
 
 
@@ -35,46 +43,112 @@ public class case4101 {
             System.exit(1);
         }
         boolean commit = Integer.parseInt(args[0]) > 0 ? true : false;
-        int testRc = Integer.parseInt(args[1]);
-        int numberOfResources = Integer.parseInt(args[2]);
-
-        if (numberOfResources < 1 || numberOfResources > 3) {
-            System.err.println("Number of resources must be 1, 2 or 3");
-            System.exit(1);
-        }
-
+        boolean insert = Integer.parseInt(args[1]) > 0 ? true : false;
+        int testRc = Integer.parseInt(args[2]);
+        // variable for PostgreSQL statement to execute
+        String postgresqlStmt;
+        // variable for MySQL statement to execute
+        String mysqlStmt;
         // XTA Transaction Manager
         TransactionManager tm = null;
         // XTA Transaction
         Transaction tx = null;
-        // XA Resources
-        LixaMonkeyXAResource xares1 = null;
-        LixaMonkeyXAResource xares2 = null;
-        LixaMonkeyXAResource xares3 = null;
+        // XA Resource for PostgreSQL
+        PGXADataSource xads1 = null;
+        XAConnection xac1 = null;
+        XAResource xar1 = null;
+        Connection conn1 = null;
+        Statement stmt1 = null;
+        // XA Resource for MySQL
+        MysqlXADataSource xads2 = null;
+        XAConnection xac2 = null;
+        XAResource xar2 = null;
+        Connection conn2 = null;
+        Statement stmt2 = null;
+        // Lixa XA Resource
+        LixaMonkeyXAResource xar3 = null;
 
+        /*
+         * Prepare SQL statements in accordance with "insert" command line
+         * parameter
+         */
+        if (insert) {
+            postgresqlStmt = "INSERT INTO authors VALUES(1921, " +
+                "'Rigoni Stern', 'Mario')";
+            mysqlStmt = "INSERT INTO authors VALUES(1919, 'Levi', 'Primo')";
+        } else {
+            postgresqlStmt = "DELETE FROM authors WHERE id=1921";
+            mysqlStmt = "DELETE FROM authors WHERE id=1919";
+        }
+        
         try {
-            // Create a first LixaMonkery RM
-            xares1 = new LixaMonkeyXAResource("monkey1s.conf");
-            // create a second RM
-            if (numberOfResources > 1)
-                xares2 = new LixaMonkeyXAResource("monkey1s.conf");
-            // create a third RM
-            if (numberOfResources > 2)
-                xares3 = new LixaMonkeyXAResource("monkey2s.conf");
+            //
+            // A bit of scaffolding for PostgreSQL:
+            //
+            // 1. create an XA Data Source
+            xads1 = new PGXADataSource();
+            // 2. set connection parameters (one property at a time)
+            xads1.setServerName("localhost");
+            xads1.setDatabaseName("testdb");
+            xads1.setUser("tiian");
+            xads1.setPassword("passw0rd");
+            // 3. get an XA Connection from the XA Data Source
+            xac1 = xads1.getXAConnection();
+            // 4. get an XA Resource from the XA Connection
+            xar1 = xac1.getXAResource();
+            // 5. get an SQL Connection from the XA Connection
+            conn1 = xac1.getConnection();
+            //
+            // A bit of scaffolding for MySQL/MariaDB
+            //
+            // 1. create an XA Data Source
+            xads2 = new MysqlXADataSource();
+            // 2. set connection parameters using a connection URL
+            xads2.setUrl("jdbc:mysql://localhost/lixa?user=lixa&password=");
+            // 3. get an XA Connection from the XA Data Source
+            xac2 = xads2.getXAConnection();
+            // 4. get an XA Resource from the XA Connection
+            xar2 = xac2.getXAResource();
+            // 5. get an SQL Connection from the XA Connection
+            conn2 = xac2.getConnection();
+            // Create a LixaMonkery RM
+            xar3 = new LixaMonkeyXAResource("monkey1s.conf");
+            
             // create a Transaction Manager
             tm = new TransactionManager();
             // create a new Transation
             tx = tm.createTransaction();
-            // enlist first resource
-            tx.enlistResource(xares1, "LixaMonkey", "First monkey RM");
-            // enlist second resource
-            if (numberOfResources > 1)
-                tx.enlistResource(xares2, "LixaMonkey", "Second monkey RM");
-            // enlist third resource
-            if (numberOfResources > 2)
-                tx.enlistResource(xares3, "LixaMonkey", "Third monkey RM");
+            // enlist PostgreSQL resource to transaction
+            tx.enlistResource(xar1, "PostgreSQL",
+                              "localhost/testdb/tiian/passw0rd");
+            // enlist MySQL resource to Transaction
+            tx.enlistResource(
+                xar2, "MySQL",
+                "jdbc:mysql://localhost/lixa?user=lixa/password=");
+            // enlist LixaMonkey resource to Transaction
+            tx.enlistResource(xar3, "LixaMonkey", "First monkey RM");
             // start transaction
             tx.start();
+            //
+            // At this point, it's time to do something with the
+            // Resource Managers (PostgreSQL and MySQL/MariaDB)
+            //
+            // Create and Execute PostgreSQL statement
+            //
+            System.out.println("PostgreSQL, executing >" +
+                               postgresqlStmt + "<");
+            // create a Statement object for PostgreSQL
+            stmt1 = conn1.createStatement();
+            // Execute PostgreSQL statements
+            stmt1.executeUpdate(postgresqlStmt);
+            //
+            // Create and Execute MySQL/MariaDB statement
+            //
+            System.out.println("MySQL, executing >" + mysqlStmt + "<");
+            // create a Statement object for MySQL/MariaDB
+            stmt2 = conn2.createStatement();
+            // Execute MySQL statements
+            stmt2.executeUpdate(mysqlStmt);
             // commit or rollback
             if (commit) {
                 tx.commit();

@@ -89,10 +89,14 @@ AM_CONDITIONAL([COMPILE_IBMDB2_STUFF], [test -n "$ibmdb2_home_dir"])
 # Include PostgreSQL test
 m4_include(m4include/ax_lib_postgresql.m4)
 AX_LIB_POSTGRESQL
+m4_include(m4include/ax_lib_postgresql_jdbc.m4)
+AX_LIB_POSTGRESQL_JDBC
 AM_CONDITIONAL([COMPILE_POSTGRESQL_STUFF], [test "$HAVE_POSTGRESQL" = "yes"])
 # Include MySQL test
 m4_include(m4include/ax_lib_mysql.m4)
 AX_LIB_MYSQL
+m4_include(m4include/ax_lib_mysql_jdbc.m4)
+AX_LIB_MYSQL_JDBC
 AM_CONDITIONAL([COMPILE_MYSQL_STUFF], [test "$HAVE_MYSQL" = "yes"])
 AM_CONDITIONAL([COMPILE_MYSQL_POSTGRESQL_STUFF], [test "$HAVE_MYSQL" = "yes" -a "$HAVE_POSTGRESQL" = "yes"])
 # Include WebSphereMQ test

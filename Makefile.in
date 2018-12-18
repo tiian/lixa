@@ -90,7 +90,9 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
 	$(top_srcdir)/m4include/ax_lib_ibmdb2_cli.m4 \
 	$(top_srcdir)/m4include/ax_lib_postgresql.m4 \
+	$(top_srcdir)/m4include/ax_lib_postgresql_jdbc.m4 \
 	$(top_srcdir)/m4include/ax_lib_mysql.m4 \
+	$(top_srcdir)/m4include/ax_lib_mysql_jdbc.m4 \
 	$(top_srcdir)/m4include/ax_lib_webspheremq.m4 \
 	$(top_srcdir)/m4include/ax_docbook.m4 \
 	$(top_srcdir)/m4include/ax_check_classpath.m4 \
@@ -350,6 +352,7 @@ MKDIR_P = @MKDIR_P@
 MYSQL_CONFIG = @MYSQL_CONFIG@
 MYSQL_CPPFLAGS = @MYSQL_CPPFLAGS@
 MYSQL_INCLUDE_DIR = @MYSQL_INCLUDE_DIR@
+MYSQL_JDBC_JAR = @MYSQL_JDBC_JAR@
 MYSQL_LDADD = @MYSQL_LDADD@
 MYSQL_LDFLAGS = @MYSQL_LDFLAGS@
 NM = @NM@
@@ -378,6 +381,7 @@ PKG_CONFIG = @PKG_CONFIG@
 POSTGRESQL_CONFIG = @POSTGRESQL_CONFIG@
 POSTGRESQL_CPPFLAGS = @POSTGRESQL_CPPFLAGS@
 POSTGRESQL_INCLUDE_DIR = @POSTGRESQL_INCLUDE_DIR@
+POSTGRESQL_JDBC_JAR = @POSTGRESQL_JDBC_JAR@
 POSTGRESQL_LDADD = @POSTGRESQL_LDADD@
 POSTGRESQL_LDFLAGS = @POSTGRESQL_LDFLAGS@
 PROC = @PROC@

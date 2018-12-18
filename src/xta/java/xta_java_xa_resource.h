@@ -174,7 +174,19 @@ extern "C" {
      */
     int xta_java_xa_resource_rc(JNIEnv *env);
 
-        
+
+
+    /**
+     * Create a Java Xid object and link it to the resource context
+     * @param[in,out] res : resource context
+     * @param[in] xid : transaction identifier, XA spec
+     * @param[in,out] env : JNI environment
+     * @return a reason code
+     */
+    int xta_java_resource_set_xid(xta_java_xa_resource_t *res,
+                                  const XID *xid, JNIEnv *env);
+
+    
 
     /**
      * Close a Java XAResource; it's a dummy method because Java XAResource

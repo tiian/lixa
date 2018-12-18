@@ -314,8 +314,9 @@ int xta_java_xa_resource_rc(JNIEnv *env)
             error_code = (*env)->GetIntField(env, exception, fieldID);
             LIXA_TRACE(("xta_java_xa_resource_rc: XAException.errorCode=%d\n",
                         error_code));
+            (*env)->ExceptionDescribe(env);
             /* reset exception, it must not be propagated */
-            (*env)->ExceptionClear(env);
+            // (*env)->ExceptionClear(env);
             ret_cod = error_code;
         } else
             ret_cod = XA_OK;
@@ -336,6 +337,62 @@ int xta_java_xa_resource_rc(JNIEnv *env)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_xa_resource_rc/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int xta_java_resource_set_xid(xta_java_xa_resource_t *res,
+                              const XID *xid, JNIEnv *env)
+{
+    enum Exception { XTAXID_NEW
+                     , NULL_OBJECT
+                     , XTAXID_NEWJNI
+                     , NEW_GLOBAL_REF_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    jobject jxid = NULL;
+    
+    LIXA_TRACE(("xta_java_resource_set_xid\n"));
+    TRY {
+        /* create a new Java XtaXid object */
+        if (NULL == (jxid = Java_org_tiian_lixa_xta_XtaXid_new(env)) ||
+            (*env)->ExceptionCheck(env))
+            THROW(XTAXID_NEW);
+        /* create an XTA Xid */
+        if (NULL == (res->xta_xid = xta_xid_new_from_XID(xid)))
+            THROW(NULL_OBJECT);
+        /* populate Java object with tx native C Transaction */
+        Java_org_tiian_lixa_xta_XtaXid_newJNI(env, jxid, res->xta_xid);
+        if ((*env)->ExceptionCheck(env))
+            THROW(XTAXID_NEWJNI);
+        /* create a Global Reference for Xid */
+        if (NULL == (res->java_xid = (*env)->NewGlobalRef(env, jxid)) ||
+            (*env)->ExceptionCheck(env))
+            THROW(NEW_GLOBAL_REF_ERROR);
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case XTAXID_NEW:
+            case XTAXID_NEWJNI:
+                break;
+            case NEW_GLOBAL_REF_ERROR:
+                ret_cod = LIXA_RC_NEW_GLOBAL_REF_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_java_resource_set_xid/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -365,15 +422,10 @@ int xta_java_xa_start(xta_xa_resource_t *context,
 {
     enum Exception { XA_PROTOCOL_ERROR
                      , GET_ENV_ERROR
-                     , XTAXID_NEW
-                     , NULL_OBJECT
-                     , XTAXID_NEWJNI
-                     , NEW_GLOBAL_REF_ERROR
+                     , SET_XID_ERROR
                      , NONE } excp;
     int ret_cod = XAER_RMERR;
 
-    jobject jxid = NULL;
-    
     LIXA_TRACE(("xta_java_xa_start: rmid=%d, flags=%0x\n", rmid, flags));
     TRY {
         JNIEnv *env;
@@ -390,21 +442,9 @@ int xta_java_xa_start(xta_xa_resource_t *context,
         if (JNI_OK != (*(res->java_vm))->GetEnv(
                 res->java_vm, (void **)&env, res->java_jni_version))
             THROW(GET_ENV_ERROR);
-        /* create a new Java XtaXid object */
-        if (NULL == (jxid = Java_org_tiian_lixa_xta_XtaXid_new(env)) ||
-            (*env)->ExceptionCheck(env))
-            THROW(XTAXID_NEW);
-        /* create an XTA Xid */
-        if (NULL == (res->xta_xid = xta_xid_new_from_XID(xid)))
-            THROW(NULL_OBJECT);
-        /* populate Java object with tx native C Transaction */
-        Java_org_tiian_lixa_xta_XtaXid_newJNI(env, jxid, res->xta_xid);
-        if ((*env)->ExceptionCheck(env))
-            THROW(XTAXID_NEWJNI);
-        /* create a Global Reference for Xid */
-        if (NULL == (res->java_xid = (*env)->NewGlobalRef(env, jxid)) ||
-            (*env)->ExceptionCheck(env))
-            THROW(NEW_GLOBAL_REF_ERROR);
+        /* populate XID in resource context */
+        if (LIXA_RC_OK != xta_java_resource_set_xid(res, xid, env))
+            THROW(SET_XID_ERROR);
         /* call Java start method */
         (*env)->CallVoidMethod(env, res->java_object, res->java_method_start,
                                res->java_xid, (jint)flags);
@@ -418,12 +458,10 @@ int xta_java_xa_start(xta_xa_resource_t *context,
                 ret_cod = XAER_PROTO;
                 break;
             case GET_ENV_ERROR:
-            case XTAXID_NEW:
-            case XTAXID_NEWJNI:
-            case NEW_GLOBAL_REF_ERROR:
+                ret_cod = XAER_RMERR;
                 break;
-            case NULL_OBJECT:
-                ret_cod = LIXA_RC_NULL_OBJECT;
+            case SET_XID_ERROR:
+                ret_cod = XAER_INVAL;
                 break;
             case NONE:
                 break;
@@ -500,8 +538,8 @@ int xta_java_xa_end(xta_xa_resource_t *context, const XID *xid,
 int xta_java_xa_rollback(xta_xa_resource_t *context, const XID *xid,
                          int rmid, long flags)
 {
-    enum Exception { NULL_OBJECT
-                     , GET_ENV_ERROR
+    enum Exception { GET_ENV_ERROR
+                     , SET_XID_ERROR
                      , NONE } excp;
     int ret_cod = XAER_RMERR;
 
@@ -515,16 +553,16 @@ int xta_java_xa_rollback(xta_xa_resource_t *context, const XID *xid,
                     res->java_vm, res->java_jni_version,
                     res->java_object, res->java_method_rollback,
                     res->java_xid));
-        /* check Xid is OK */
-        if (NULL == res->java_xid) {
-            /* create an XTA Xid: probably called inside a recovery phase */
-            if (NULL == (res->xta_xid = xta_xid_new_from_XID(xid)))
-                THROW(NULL_OBJECT);
-        }
         /* retrieve Java environement for this thread */
         if (JNI_OK != (*(res->java_vm))->GetEnv(
                 res->java_vm, (void **)&env, res->java_jni_version))
             THROW(GET_ENV_ERROR);
+        /* check Xid is OK */
+        if (NULL == res->java_xid) {
+            /* populate XID in resource context */
+            if (LIXA_RC_OK != xta_java_resource_set_xid(res, xid, env))
+                THROW(SET_XID_ERROR);
+        }
         /* call Java start method */
         (*env)->CallVoidMethod(env, res->java_object,
                                res->java_method_rollback,
@@ -539,10 +577,10 @@ int xta_java_xa_rollback(xta_xa_resource_t *context, const XID *xid,
     } CATCH {
         switch (excp) {
             case GET_ENV_ERROR:
-                ret_cod = LIXA_RC_GET_ENV_ERROR;
+                ret_cod = XAER_RMERR;
                 break;
-            case NULL_OBJECT:
-                ret_cod = LIXA_RC_NULL_OBJECT;
+            case SET_XID_ERROR:
+                ret_cod = XAER_INVAL;
                 break;
             case NONE:
                 break;
@@ -562,9 +600,6 @@ int xta_java_xa_prepare(xta_xa_resource_t *context, const XID *xid,
 {
     enum Exception { XA_PROTOCOL_ERROR
                      , GET_ENV_ERROR
-                     , XTAXID_NEW
-                     , NULL_OBJECT
-                     , XTAXID_NEWJNI
                      , NONE } excp;
     int ret_cod = XAER_RMERR;
 
@@ -604,11 +639,7 @@ int xta_java_xa_prepare(xta_xa_resource_t *context, const XID *xid,
                 ret_cod = XAER_PROTO;
                 break;
             case GET_ENV_ERROR:
-            case XTAXID_NEW:
-            case XTAXID_NEWJNI:
-                break;
-            case NULL_OBJECT:
-                ret_cod = LIXA_RC_NULL_OBJECT;
+                ret_cod = XAER_RMERR;
                 break;
             case NONE:
                 break;
@@ -626,8 +657,8 @@ int xta_java_xa_prepare(xta_xa_resource_t *context, const XID *xid,
 int xta_java_xa_commit(xta_xa_resource_t *context, const XID *xid,
                        int rmid, long flags)
 {
-    enum Exception { NULL_OBJECT
-                     , GET_ENV_ERROR
+    enum Exception { GET_ENV_ERROR
+                     , SET_XID_ERROR
                      , NONE } excp;
     int ret_cod = XAER_RMERR;
 
@@ -642,16 +673,16 @@ int xta_java_xa_commit(xta_xa_resource_t *context, const XID *xid,
                     "java_method_commit=%p, java_xid=%p\n",
                     res->java_vm, res->java_jni_version,
                     res->java_object, res->java_method_commit, res->java_xid));
-        /* check Xid is OK */
-        if (NULL == res->java_xid) {
-            /* create an XTA Xid: probably called inside a recovery phase */
-            if (NULL == (res->xta_xid = xta_xid_new_from_XID(xid)))
-                THROW(NULL_OBJECT);
-        }
         /* retrieve Java environement for this thread */
         if (JNI_OK != (*(res->java_vm))->GetEnv(
                 res->java_vm, (void **)&env, res->java_jni_version))
             THROW(GET_ENV_ERROR);
+        /* check Xid is OK */
+        if (NULL == res->java_xid) {
+            /* populate XID in resource context */
+            if (LIXA_RC_OK != xta_java_resource_set_xid(res, xid, env))
+                THROW(SET_XID_ERROR);
+        }
         /* set onePhase */
         if (TMONEPHASE & flags)
             one_phase = JNI_TRUE;
@@ -670,10 +701,10 @@ int xta_java_xa_commit(xta_xa_resource_t *context, const XID *xid,
     } CATCH {
         switch (excp) {
             case GET_ENV_ERROR:
-                ret_cod = LIXA_RC_GET_ENV_ERROR;
+                ret_cod = XAER_RMERR;
                 break;
-            case NULL_OBJECT:
-                ret_cod = LIXA_RC_NULL_OBJECT;
+            case SET_XID_ERROR:
+                ret_cod = XAER_INVAL;
                 break;
             case NONE:
                 break;

@@ -1,4 +1,6 @@
 Implement test cases of XTA for Java:
+
+document  MariaDB and Postgresql in LIXA_INstallation.xml
 test case xta_java_1.at: create similar test cases with 2 resource managers,
 MySQL & PostgreSQL
 
@@ -6,25 +8,7 @@ test xa_forget
 test xa_recover
 
 Document XTA for Java
-
-Check it should no happen any more!
-this string 
-"jdbc:mysql://localhost/lixa?user=lixa&password="
-passed as resourceIdentifier to Transaction.enlistResource
-exploits an XML parsing error in LIXA state server as below:
-buffer.xml:1: parser error : EntityRef: expecting ';'
-state="1"/><xa_open_exec xa_info="jdbc:mysql://localhost/lixa?user=lixa&password
-                                                                               ^
-THE BUG is exploited by the ampersand (&) in the string
-Replacing "&" with "&amp;" solve the XML parsing issue.
-The same bug happens even if "<" is in the string; it could be replaced by
-"&lt;". The ">" does not produce the same bug, but why not replacing with
-"&gt;" even it?!
-
-create an utility function to sanitize XML offending chars: '&', '<', '>', 
-apostrophe and quote.
-Apply it to resource name and open_info for serialization/deserialization.
-Function lixa_str_replace in lixa_utils.h should help.
+Update API C++ (lowercase) and C if necessary.
 
 
 implement xa_recover:

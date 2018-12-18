@@ -195,7 +195,7 @@ exec_java_test() {
 	echo "Starting Java test case $1"
 	pwd
 	echo "java -Djava.library.path=$XTA_DIR/java/.libs -cp $XTA_DIR/java/xta.jar:$TESTS_SRC_DIR/java $*"
-	java -Djava.library.path=$XTA_DIR/java/.libs -cp $XTA_DIR/java/xta.jar:$TESTS_SRC_DIR/java $*
+	java -Djava.library.path=$XTA_DIR/java/.libs -cp $XTA_DIR/java/xta.jar:$JAVA_CLASSPATH:$TESTS_SRC_DIR/java $*
 	rc=$?
 	return $rc
 }
