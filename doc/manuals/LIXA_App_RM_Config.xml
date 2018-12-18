@@ -595,7 +595,7 @@ SQL> select * from COUNTRIES where COUNTRY_ID = 'RS';
 no rows selected
 
 SQL> CREATE TABLE hr.authors (
-  2  id INTEGER NOT NULL,
+  2  id INTEGER NOT NULL UNIQUE,
   3  last_name VARCHAR2(20),
   4  first_name VARCHAR2(20));
 

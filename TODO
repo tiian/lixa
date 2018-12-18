@@ -1,8 +1,8 @@
 Implement test cases of XTA for Java:
 
-document  MariaDB and Postgresql in LIXA_INstallation.xml
-test case xta_java_1.at: create similar test cases with 2 resource managers,
-MySQL & PostgreSQL
+changed authors table def in Oracle with a unique constraint... some case
+test will require fixing...
+restart from xta_java_2.at
 
 test xa_forget
 test xa_recover

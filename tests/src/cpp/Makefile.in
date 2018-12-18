@@ -84,6 +84,7 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
+	$(top_srcdir)/m4include/ax_lib_oracle_jdbc.m4 \
 	$(top_srcdir)/m4include/ax_lib_ibmdb2_cli.m4 \
 	$(top_srcdir)/m4include/ax_lib_postgresql.m4 \
 	$(top_srcdir)/m4include/ax_lib_postgresql_jdbc.m4 \
@@ -337,6 +338,7 @@ NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 ORACLE_ENV_SH = @ORACLE_ENV_SH@
+ORACLE_JDBC_JAR = @ORACLE_JDBC_JAR@
 ORACLE_OCI_CFLAGS = @ORACLE_OCI_CFLAGS@
 ORACLE_OCI_LDFLAGS = @ORACLE_OCI_LDFLAGS@
 ORACLE_OCI_LIBS = @ORACLE_OCI_LIBS@

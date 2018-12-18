@@ -1,8 +1,8 @@
-dist_noinst_DATA = case4100.java case4101.java
+dist_noinst_DATA = case4100.java case4101.java case4102.java
 
-noinst_DATA = case4100.class case4101.class
+noinst_DATA = case4100.class case4101.class case4102.class
 
 SUFFIXES: .java .class
 
 .java.class:
-	$(JAVAC) -cp $(top_srcdir)/src/xta/java/xta.jar:@MYSQL_JDBC_JAR@:@POSTGRESQL_JDBC_JAR@ $<
+	$(JAVAC) -cp $(top_srcdir)/src/xta/java/xta.jar:@MYSQL_JDBC_JAR@:@POSTGRESQL_JDBC_JAR@:@ORACLE_JDBC_JAR@ $<

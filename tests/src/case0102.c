@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     filename = argv[5];
 
     /* check phase */
-    switch(phase) {
+    switch (phase) {
         case INITIAL:
             fprintf(stderr, "%s| phase=%d (INITIAL)\n", pgm, phase);
             /* open file for write */
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
         default:
             fprintf(stderr, "%s| phase=%d UNKNOWN!\n", pgm, phase);
             break;
-    } /* switch(phase) */
+    } /* switch (phase) */
     
     /*
      * dynamically create an XA native resource object

@@ -81,6 +81,8 @@ test "x$exec_prefix" = "xNONE" -a "x$prefix" != "xNONE" && exec_prefix=$prefix
 # Include Oracle test
 m4_include(m4include/ax_lib_oracle_oci.m4)
 AX_LIB_ORACLE_OCI
+m4_include(m4include/ax_lib_oracle_jdbc.m4)
+AX_LIB_ORACLE_JDBC
 AM_CONDITIONAL([COMPILE_ORACLE_STUFF], [test "$HAVE_ORACLE" = "yes"])
 # Include IBM DB2 test
 m4_include(m4include/ax_lib_ibmdb2_cli.m4)

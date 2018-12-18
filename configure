@@ -749,6 +749,7 @@ IBMDB2_CLI_LDFLAGS
 IBMDB2_CLI_CPPFLAGS
 COMPILE_ORACLE_STUFF_FALSE
 COMPILE_ORACLE_STUFF_TRUE
+ORACLE_JDBC_JAR
 TEST_ORACLE
 HAVE_ORACLE
 ORACLE_RM_TYPE
@@ -901,6 +902,7 @@ enable_libtool_lock
 with_oracle
 with_oracle_include
 with_oracle_lib
+with_oracle_jdbc
 with_ibmdb2
 with_ibmdb2_include
 with_ibmdb2_lib
@@ -1582,6 +1584,8 @@ Optional Packages:
   --with-oracle-include=[DIR]
                           use Oracle OCI API headers from given path
   --with-oracle-lib=[DIR] use Oracle OCI API libraries from given path
+  --with-oracle-jdbc[=FILE]
+                          specifies JAR file for Oracle Database JDBC driver
   --with-ibmdb2=[DIR]     use IBM DB2 CLI API from given path to DB2 home
                           directory
   --with-ibmdb2-include=[DIR]
@@ -17025,6 +17029,33 @@ $as_echo "#define HAVE_ORACLE 1" >>confdefs.h
 
     fi
 
+
+
+
+
+    ORACLE_JDBC_JAR=""
+
+# Check whether --with-oracle-jdbc was given.
+if test "${with_oracle_jdbc+set}" = set; then :
+  withval=$with_oracle_jdbc; HAVE_ORACLE_JDBC="maybe"
+else
+  HAVE_ORACLE_JDBC="no"
+
+fi
+
+    if test "$HAVE_ORACLE_JDBC" != "no"
+    then
+        if test "$withval" != "yes"
+        then
+            ORACLE_JDBC_JAR=$withval
+        fi
+        if ! test -f $ORACLE_JDBC_JAR
+        then
+            as_fn_error $? "cannot find file $ORACLE_JDBC_JAR" "$LINENO" 5
+        fi
+    fi
+
+
  if test "$HAVE_ORACLE" = "yes"; then
   COMPILE_ORACLE_STUFF_TRUE=
   COMPILE_ORACLE_STUFF_FALSE='#'
@@ -18279,7 +18310,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18282 "configure" */
+/* #line 18313 "configure" */
 public class Test {
 }
 EOF
@@ -18692,7 +18723,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18695 "configure" */
+/* #line 18726 "configure" */
 public class Test {
 }
 EOF
@@ -18726,7 +18757,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 18729 "configure" */
+/* [#]line 18760 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);
