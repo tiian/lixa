@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
     enum Phase { INITIAL, INTERMEDIATE, FINAL, NO_PHASE } phase;
     int        commit;
     int        insert;
+    int        stmt_num;
     int        test_rc;
     const char *filename;
 #ifdef HAVE_ORACLE
@@ -85,28 +86,52 @@ int main(int argc, char *argv[])
     OCISvcCtx     *oci_svc_ctx;
     OCIStmt       *oci_stmt_hndl;
     OCIError      *oci_err_hndl;
-    text          *oci_stmt_insert =
-        (text *) "INSERT INTO authors (ID, LAST_NAME, FIRST_NAME) "
-        "VALUES (1886, 'Mallory', 'George')";
-    text          *oci_stmt_delete =
-        (text *) "DELETE FROM authors WHERE ID=1886";
+    text          *oci_stmt_insert = NULL;
+    text          *oci_stmt_delete = NULL;
 #endif
 
     /* turn ON trace for debugging purpose */
     xta_init();
     
     fprintf(stderr, "%s| starting...\n", pgm);
-    if (argc < 6) {
-        fprintf(stderr, "%s: at least five options must be specified\n",
+    if (argc < 7) {
+        fprintf(stderr, "%s: at least six options must be specified\n",
                 argv[0]);
         return 1;
     }
     phase = strtol(argv[1], NULL, 0);
     insert = strtol(argv[2], NULL, 0);
     commit = strtol(argv[3], NULL, 0);
-    test_rc = strtol(argv[4], NULL, 0);
-    filename = argv[5];
+    stmt_num = strtol(argv[4], NULL, 0);
+    test_rc = strtol(argv[5], NULL, 0);
+    filename = argv[6];
 
+#ifdef HAVE_ORACLE
+    /* check stmt_num */
+    switch (stmt_num) {
+        case 0:
+            oci_stmt_insert = (text *)"INSERT INTO authors VALUES "
+                "(1839, 'Prudhomme', 'Sully')";
+            oci_stmt_delete = (text *) "DELETE FROM authors WHERE ID=1839";
+            break;
+        case 1:
+            oci_stmt_insert = (text *)"INSERT INTO authors VALUES "
+                "(1817, 'Mommsen', 'Theodor')";
+            oci_stmt_delete = (text *) "DELETE FROM authors WHERE ID=1817";
+            break;
+        case 2:
+            oci_stmt_insert = (text *)"INSERT INTO authors VALUES "
+                "(1832, 'Bjornson', 'Bjornstjerne')";
+            oci_stmt_delete = (text *) "DELETE FROM authors WHERE ID=1832";
+            break;
+        default:
+            fprintf(stderr, "%s: statement number %d is not valid!\n",
+                    argv[0], stmt_num);
+            return 1;
+    } /* switch (stmt_num) */
+#endif
+    
+    
     /* check phase */
     switch (phase) {
         case INITIAL:

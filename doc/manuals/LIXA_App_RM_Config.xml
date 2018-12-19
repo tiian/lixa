@@ -608,6 +608,53 @@ Disconnected from Oracle Database 10g Express Edition Release 10.2.0.1.0 - Produ
 	  are going to insert.
 	</para>
       </section>
+      <section xml:id="App_RM_Config_Oracle_distributed_lock_timeout">
+	<title>Change the value for DISTRIBUTED_LOCK_TIMEOUT</title>
+	<para>
+	  If you experience this type of error: 
+	  <link xlink:href="http://www.dba-oracle.com/e_ora_02049_timeout_distributed_transaction.htm"><quote>
+	    ORA-02049: time-out: distributed transaction waiting for lock
+	    </quote></link>, especially after a
+	  JDBC thin client used by XTA for Java crashed, you can 
+	  <link xlink:href="https://allf1blog.wordpress.com/2016/04/20/ora-02049/">
+	    change the system parameter</link> to reduce the number of caught
+	    exceptions:
+	  <screen>
+[oracle@centos7-oracle12 ~]$ sqlplus "sys/oracle as sysdba"
+
+SQL*Plus: Release 12.1.0.2.0 Production on Wed Dec 19 16:41:54 2018
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> SELECT name,value FROM v$parameter where NAME='distributed_lock_timeout' ;
+
+NAME
+--------------------------------------------------------------------------------
+VALUE
+--------------------------------------------------------------------------------
+distributed_lock_timeout
+60
+
+
+SQL> ALTER SYSTEM SET distributed_lock_timeout=120 scope=spfile;
+
+System altered.
+
+SQL> commit;
+
+Commit complete.
+	  </screen>
+	  The database instance must be restarted to activate the new value.
+	</para>
+	<warning><para>
+	  The parameter has <emphasis>system</emphasis> wide scope: please 
+	  check official documentation and/or contact support before proceding.
+	</para></warning>
+      </section>
     </section>
     <section xml:id="App_RM_Config_Oracle_Remote">
       <title>Remote configuration (Instant Client) and OCI</title>
