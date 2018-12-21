@@ -1112,7 +1112,7 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
                 struct lixa_msg_body_open_24_xa_open_execs_s, i);
             if (NULL == (xa_info_base64 = g_base64_encode(
                              xa_open_exec->xa_info,
-                             strlen(xa_open_exec->xa_info))))
+                             strlen((const char *)xa_open_exec->xa_info))))
                 THROW(G_BASE64_ENCODE_ERROR);
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%s\" %s=\"%d\" %s=\"0x%lx\" "

@@ -32,13 +32,6 @@
 
 
 
-#ifdef HAVE_ORACLE
-/* Oracle C Interface API header */
-# include <oci.h>
-#endif
-
-
-
 #include "xta/xta.h"
 #include "case_test_functions.h"
 
@@ -46,6 +39,9 @@
 
 /*
  * Pseudo synchronous branch case test for XTA
+ *
+ * This is as much as possible as case0106, but without Oracle DBMS to avoid
+ * some long locks that are not practicals for automatic testing
  *
  * NOTE: this is not a good example to learn the C programming language
  *       because the usage of global variables has been abused and you should
@@ -139,16 +135,6 @@ char  *mysql_stmt_insert2 =
 char  *mysql_stmt_delete2 = "DELETE FROM authors WHERE id=1916";
 char  *mysql_stmt_insert = NULL;
 char  *mysql_stmt_delete = NULL;
-#endif
-/* Oracle variables */
-#ifdef HAVE_ORACLE
-int            oci_rc;
-OCIEnv        *oci_env;
-OCISvcCtx     *oci_svc_ctx;
-OCIStmt       *oci_stmt_hndl;
-OCIError      *oci_err_hndl;
-text          *oci_stmt_insert = NULL;
-text          *oci_stmt_delete = NULL;
 #endif
 /* PostgreSQL variables */
 #ifdef HAVE_POSTGRESQL
@@ -407,103 +393,6 @@ void statements_setup(void)
 #endif
             break;
     } /* switch (statement % 2) */
-    switch (statement) {
-        case 1:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1830, 'Mistral', 'Frederic')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1830";
-#endif
-            break;
-        case 2:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1832, 'Echegaray', 'Jose')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1832";
-#endif
-            break;
-        case 3:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1846, 'Sienkiewicz', 'Henryk')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1846";
-#endif
-            break;
-        case 4:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1835, 'Carducci', 'Giosue')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1835";
-#endif
-            break;
-        case 5:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1865, 'Kipling', 'Rudyard')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1865";
-#endif
-            break;
-        case 6:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1858, 'Lagerlof', 'Selma')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1858";
-#endif
-            break;
-        case 7:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1862, 'Maeterlinck', 'Maurice')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1862";
-#endif
-            break;
-        case 8:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1861, 'Tagore', 'Rabindranath')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1861";
-#endif
-            break;
-        case 9:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1866, 'Rolland', 'Romain')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1866";
-#endif
-            break;
-        case 10:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1859, 'Verner v Heidenstam', 'Carl Gustav')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1859";
-#endif
-            break;
-        case 11:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1857, 'Gjellerup', 'Karl Adolph')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1857";
-#endif
-            break;
-        case 12:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1845, 'Spitteler', 'Carl')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1845";
-#endif
-            break;
-        case 13:
-#ifdef HAVE_ORACLE
-            oci_stmt_insert = (text *)"INSERT INTO authors "
-                "VALUES (1844, 'France', 'Anatole')";
-            oci_stmt_delete = (text *)"DELETE FROM authors WHERE ID=1844";
-#endif
-            break;
-        default:
-            fprintf(stderr, "%s/%u| statement=%d is not valid!\n",
-                    pgm, pid, statement);
-            exit(1);
-    } /* check statement */
 }
 
 
@@ -549,22 +438,6 @@ void create_dynamic_native_xa_resources()
             exit(1);
         }
     } /* if (branch_type == SUPERIOR) */
-#endif
-#ifdef HAVE_ORACLE
-    /*
-     * dynamically create an XA native resource object for Oracle database
-     */
-    dynamic_native_xa_res_ora = xta_native_xa_resource_new(
-        "OracleIC_stareg",
-        "/opt/lixa/lib/switch_oracle_stareg.so",
-        "ORACLE_XA+Acc=P/hr/hr+SesTm=30+LogDir=/tmp+"
-        "threads=true+DbgFl=7+SqlNet=lixa_ora_db+"
-        "Loose_Coupling=true", "");
-    if (dynamic_native_xa_res_ora == NULL) {
-        fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned NULL for "
-                "dynamically creted resource\n", pgm, pid);
-        exit(1);
-    }
 #endif
 #ifdef HAVE_POSTGRESQL
     if (branch_type == SUBORDINATE) {
@@ -646,15 +519,6 @@ void enlist_resources_to_transaction(void)
         }
     } /* if (branch_type == SUPERIOR) */
 #endif    
-#ifdef HAVE_ORACLE
-    rc = xta_transaction_enlist_resource(tx,
-        (xta_xa_resource_t *)dynamic_native_xa_res_ora);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
-                "dynamic_native_xa_res_ora: returned %d\n", pgm, pid, rc);
-        exit(1);
-    }
-#endif
 #ifdef HAVE_POSTGRESQL
     if (branch_type == SUBORDINATE) {
         /* register the PostgreSQL XA Resource to the transaction manager */
@@ -702,97 +566,6 @@ void use_xa_resources(void)
         }
     } /* if (branch_type == SUPERIOR) */
 #endif /* HAVE_MYSQL */
-#ifdef HAVE_ORACLE
-    /* retrieve environment and context */
-    oci_env = xaoEnv(NULL);
-    if (oci_env == NULL) {
-        fprintf(stderr, "%s/%u| xaoEnv returned a NULL pointer\n", pgm, pid);
-        exit(1);
-    }
-    oci_svc_ctx = xaoSvcCtx(NULL);
-    if (oci_svc_ctx == NULL) {
-        fprintf(stderr, "%s/%u| xaoSvcCtx returned a NULL pointer\n",
-                pgm, pid);
-        exit(1);
-    }
-    /* allocate statement and error handles */
-    if (0 != OCIHandleAlloc( (dvoid *)oci_env, (dvoid **)&oci_stmt_hndl,
-                             OCI_HTYPE_STMT, (size_t)0, (dvoid **)0)) {
-        fprintf(stderr, "%s/%u| Unable to allocate OCI statement handle\n",
-                pgm, pid);
-        exit(1);
-    }
-    if (0 != OCIHandleAlloc( (dvoid *)oci_env, (dvoid **)&oci_err_hndl,
-                             OCI_HTYPE_ERROR, (size_t)0, (dvoid **)0)) {
-        fprintf(stderr, "%s/%u| Unable to allocate OCI error handle\n",
-                pgm, pid);
-        exit(1);
-    }
-    /* insert data */
-    if (insert) {
-        fprintf(stderr, "%s/%u| OCI executing statement >%s<\n",
-                pgm, pid, (char *)oci_stmt_insert);
-        if (OCI_SUCCESS != OCIStmtPrepare(
-                oci_stmt_hndl, oci_err_hndl, oci_stmt_insert,
-                (ub4) strlen((char *)oci_stmt_insert),
-                (ub4) OCI_NTV_SYNTAX, (ub4) OCI_DEFAULT)) {
-            fprintf(stderr, "%s/%u| Unable to prepare INSERT OCI statement "
-                    "for execution\n", pgm, pid);
-            exit(1);
-        }
-        oci_rc = OCIStmtExecute(
-            oci_svc_ctx, oci_stmt_hndl, oci_err_hndl,
-            (ub4)1, (ub4)0, (CONST OCISnapshot *)NULL,
-            (OCISnapshot *)NULL, OCI_DEFAULT);
-        if (OCI_SUCCESS != oci_rc && OCI_SUCCESS_WITH_INFO != oci_rc) {
-            text errbuf[1024];
-            sb4 errcode = 0;
-            OCIErrorGet((dvoid *)oci_err_hndl, (ub4)1, (text *)NULL,
-                        &errcode, errbuf, (ub4)sizeof(errbuf),
-                        OCI_HTYPE_ERROR);
-            fprintf(stderr, "%s/%u| Error while executing INSERT statement; "
-                    "ocirc = %d (%.*s)\n", pgm, pid, oci_rc,
-                    (int)sizeof(errbuf), errbuf);
-            exit(oci_rc);
-        }
-        fprintf(stderr, "%s/%u| OCI statement >%s< completed\n",
-                pgm, pid, (char *)oci_stmt_insert);
-    } else {
-        /* delete data */
-        fprintf(stderr, "%s/%u| OCI executing statement >%s<\n",
-                pgm, pid, (char *)oci_stmt_delete);
-        if (OCI_SUCCESS != OCIStmtPrepare(
-                oci_stmt_hndl, oci_err_hndl, oci_stmt_delete,
-                (ub4) strlen((char *)oci_stmt_delete),
-                (ub4) OCI_NTV_SYNTAX, (ub4) OCI_DEFAULT)) {
-            fprintf(stderr, "%s/%u| Unable to prepare DELETE statement for "
-                    "execution\n", pgm, pid);
-            exit(1);
-        }
-        oci_rc = OCIStmtExecute(
-            oci_svc_ctx, oci_stmt_hndl, oci_err_hndl,
-            (ub4)1, (ub4)0, (CONST OCISnapshot *)NULL,
-            (OCISnapshot *)NULL, OCI_DEFAULT);
-        if (OCI_SUCCESS != oci_rc && OCI_SUCCESS_WITH_INFO != oci_rc) {
-            fprintf(stderr, "%s/%u| Error while executing DELETE statement; "
-                    "ocirc = %d\n", pgm, pid, oci_rc);
-            text errbuf[1024];
-            sb4 errcode = 0;
-            OCIErrorGet((dvoid *)oci_err_hndl, (ub4)1, (text *)NULL,
-                        &errcode, errbuf, (ub4)sizeof(errbuf),
-                        OCI_HTYPE_ERROR);
-            fprintf(stderr, "%s/%u| Error while executing INSERT statement; "
-                    "ocirc = %d (%.*s)\n", pgm, pid, oci_rc,
-                    (int)sizeof(errbuf), errbuf);
-            exit(oci_rc);
-        }
-        fprintf(stderr, "%s/%u| OCI statement >%s< completed\n",
-                pgm, pid, (char *)oci_stmt_delete);
-    }
-    /* free the allocated handles */
-    OCIHandleFree((dvoid *)oci_stmt_hndl, (ub4)OCI_HTYPE_STMT);
-    OCIHandleFree((dvoid *)oci_err_hndl, (ub4)OCI_HTYPE_ERROR);
-#endif /* HAVE_ORACLE */
 #ifdef HAVE_POSTGRESQL
     if (branch_type == SUBORDINATE) {
         if (insert) {
@@ -871,12 +644,6 @@ void delete_all_xa_resources(void)
         PQfinish(postgres_conn);
     } /* if (branch_type == SUBORDINATE) */
 #endif    
-#ifdef HAVE_ORACLE
-    /*
-     * delete dynamically created native XA Resource object for Oracle
-     */
-    xta_native_xa_resource_delete(dynamic_native_xa_res_ora);
-#endif 
 #ifdef HAVE_MYSQL
     if (branch_type == SUPERIOR) {
         /*
