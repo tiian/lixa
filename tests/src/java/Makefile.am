@@ -1,6 +1,8 @@
-dist_noinst_DATA = case4100.java case4101.java case4102.java case4103.java
+dist_noinst_DATA = case4100.java case4101.java case4102.java case4103.java \
+	case4105.java
 
-noinst_DATA = case4100.class case4101.class case4102.class case4103.class
+noinst_DATA = case4100.class case4101.class case4102.class case4103.class \
+	case4105.class
 
 SUFFIXES: .java .class
 

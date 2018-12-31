@@ -185,12 +185,15 @@ int main(int argc, char *argv[])
         fclose(xid_file);
         
         /* branch the transaction */
-        if (test_rc != (rc = xta_transaction_branch(
-                               tx, buffer))) {
-            fprintf(stderr, "%s| xta_transaction_branch returned %d\n",
-                    pgm, rc);
-            return 2;
-        }
+        rc = xta_transaction_branch(tx, buffer);
+        if (LIXA_RC_OK != rc) {
+            if (rc != test_rc) {
+                fprintf(stderr, "%s| xta_transaction_branch returned %d\n",
+                        pgm, rc);
+                return 2;
+            } else
+                return 0;
+        } /* if (LIXA_RC_OK != rc) */
 
         /* write to xid_file2 the transaction that will be branched again */
         if (NULL != xid_file2) {

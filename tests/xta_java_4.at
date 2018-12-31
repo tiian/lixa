@@ -1,103 +1,74 @@
-AT_BANNER([XTA: Branch support])
+AT_BANNER([XTA for Java: Branch support])
 
-AT_SETUP([XTA/4.0/0.0 Superior Branch does not exist])
+AT_SETUP([XTA Java/4.0/0.0 Superior Branch does not exist])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # just start the state server
 AT_CHECK([lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
-xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
 ]])
 # create superior branch
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none case0105 0 1 0 $TESTS_TMP_FILE1 1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case4105 0 1 0 $TESTS_TMP_FILE1 1 2>&1], [0], [ignore], [ignore])
 # create subordinate branch: xta_transaction_branch must return 11:
 # #define LIXA_RC_NO_SUPERIOR_BRANCH      +11
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none case0105 1 1 11 $TESTS_TMP_FILE1 1 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case4105 1 1 11 $TESTS_TMP_FILE1 1 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/4.0/0.1 Check multiple branch flag])
+AT_SETUP([XTA Java/4.0/0.1 Check multiple branch flag])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
-xa_open/0
 xa_start/0
 xa_end/0
-xa_prepare/0
 xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
 ]])
 # create superior branch
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none case0105 0 1 0 $TESTS_TMP_FILE1 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case4105 0 1 0 $TESTS_TMP_FILE1 0 2>&1], [0], [ignore], [ignore])
 # create subordinate branch: xta_transaction_branch must return -505:
 #define LIXA_RC_NON_BRANCHABLE_TX              -505
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none case0105 1 1 -505 $TESTS_TMP_FILE1 0 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case4105 1 1 -505 $TESTS_TMP_FILE1 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/4.0/1.0 Async branch and commit])
+AT_SETUP([XTA Java/4.0/1.0 Async branch and commit])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create a FIFO object for communication between superior and subordinate
 # process
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 7 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 7 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 7 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2 monkey3s.conf
+[[timeout 7 lixa_test_exec.sh noreset none case4104 0 1 1 1 0 tmp_fifo1 foo monkey1s.conf
+timeout 7 lixa_test_exec.sh noreset none case4104 1 1 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
+timeout 7 lixa_test_exec.sh noreset none case4104 2 1 3 1 0 foo tmp_fifo2 monkey3s.conf
 ]])
 AT_DATA([delete],
-[[timeout 7 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 foo monkey1s.conf
-timeout 7 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 7 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2 monkey3s.conf
+[[timeout 7 lixa_test_exec.sh noreset none case4104 0 0 1 1 0 tmp_fifo1 foo monkey1s.conf
+timeout 7 lixa_test_exec.sh noreset none case4104 1 0 2 1 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
+timeout 7 lixa_test_exec.sh noreset none case4104 2 0 3 1 0 foo tmp_fifo2 monkey3s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
-xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/0
-xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
-xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/0
-xa_close/0
 ]])
 AT_DATA([monkey3s.conf],
 [[# monkey R.M. config
-xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/0
-xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [0], [ignore], [ignore])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
@@ -105,77 +76,67 @@ AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo2], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/4.0/1.1 Async branch and rollback])
+AT_SETUP([XTA Java/4.0/1.1 Async branch and rollback])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create a FIFO object for communication between superior and subordinate
 # process
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 7 lixa_test_exec.sh noreset none case0104 0 1 1 0 0 tmp_fifo1 foo monkey1s.conf
-timeout 7 lixa_test_exec.sh noreset none case0104 1 1 2 0 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
-timeout 7 lixa_test_exec.sh noreset none case0104 2 1 3 0 0 foo tmp_fifo2 monkey3s.conf
+[[timeout 7 lixa_test_exec.sh noreset none case4104 0 1 1 0 0 tmp_fifo1 foo monkey1s.conf
+timeout 7 lixa_test_exec.sh noreset none case4104 1 1 2 0 0 tmp_fifo2 tmp_fifo1 monkey2s.conf
+timeout 7 lixa_test_exec.sh noreset none case4104 2 1 3 0 0 foo tmp_fifo2 monkey3s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
-xa_open/0
 xa_start/0
 xa_end/0
 xa_rollback/0
-xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
-xa_open/0
 xa_start/0
 xa_end/0
 xa_rollback/0
-xa_close/0
 ]])
 AT_DATA([monkey3s.conf],
 [[# monkey R.M. config
-xa_open/0
 xa_start/0
 xa_end/0
 xa_rollback/0
-xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo2], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/4.0/1.2 Sync branch and commit])
+AT_SETUP([XTA Java/4.0/1.2 Sync branch and commit])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create a FIFO object for communication between superior and subordinate
 # process
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 7 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 7 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 7 lixa_test_exec.sh noreset none case4106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 7 lixa_test_exec.sh noreset none case4106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([delete],
-[[timeout 7 lixa_test_exec.sh noreset none case0106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 7 lixa_test_exec.sh noreset none case0106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+[[timeout 7 lixa_test_exec.sh noreset none case4106 0 0 1 1 fifo_request fifo_reply monkey1s.conf
+timeout 7 lixa_test_exec.sh noreset none case4106 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
-xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/0
-xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
-xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/0
 xa_commit/0
-xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [0], [ignore], [ignore])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
@@ -183,31 +144,27 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([XTA/4.0/1.3 Sync branch and rollback])
+AT_SETUP([XTA Java/4.0/1.3 Sync branch and rollback])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # create a FIFO object for communication between superior and subordinate
 # process
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 5 lixa_test_exec.sh noreset none case0106 0 1 1 0 fifo_request fifo_reply monkey1s.conf
-timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 0 fifo_request fifo_reply monkey2s.conf
+[[timeout 5 lixa_test_exec.sh noreset none case4106 0 1 1 0 fifo_request fifo_reply monkey1s.conf
+timeout 5 lixa_test_exec.sh noreset none case4106 1 1 2 0 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
-xa_open/0
 xa_start/0
 xa_end/0
 xa_rollback/0
-xa_close/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
-xa_open/0
 xa_start/0
 xa_end/0
 xa_rollback/0
-xa_close/0
 ]])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_request], [0], [ignore], [ignore])

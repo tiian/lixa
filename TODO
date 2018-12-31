@@ -1,8 +1,6 @@
 Implement test cases of XTA for Java:
+restart from xta_java_4.at
 
-changed authors table def in Oracle with a unique constraint... some case
-test will require fixing...
-restart from xta_java_2.at
 
 test xa_forget
 test xa_recover
