@@ -356,8 +356,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_noinst_DATA = case4100.java case4101.java case4102.java
-noinst_DATA = case4100.class case4101.class case4102.class
+dist_noinst_DATA = case4100.java case4101.java case4102.java case4103.java
+noinst_DATA = case4100.class case4101.class case4102.class case4103.class
 all: all-am
 
 .SUFFIXES:

@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     filename = argv[4];
 
     /* check phase */
-    switch(phase) {
+    switch (phase) {
         case INITIAL:
             fprintf(stderr, "%s| phase=%d (INITIAL)\n", pgm, phase);
             /* open file for write */

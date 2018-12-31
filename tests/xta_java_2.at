@@ -1,4 +1,4 @@
-AT_BANNER([XTA: Suspend and Resume with Oracle RDBMS])
+AT_BANNER([XTA for Java: Suspend and Resume with Oracle RDBMS])
 
 # This case tests needs Oracle because MySQL and PostgreSQL don't support
 # XA Suspend/Resume

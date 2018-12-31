@@ -21,39 +21,23 @@
 
 // import XTA package from LIXA project
 import org.tiian.lixa.xta.*;
-// import SQL
-import java.sql.Connection;
-import java.sql.Statement;
 // import Java XA
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
-import javax.sql.XAConnection;
-// import Oracle package for XA Data Source
-import oracle.jdbc.xa.OracleXid;
-import oracle.jdbc.xa.OracleXAException;
-//import oracle.jdbc.*;
-import oracle.jdbc.pool.*;
-import oracle.jdbc.xa.client.*;
 // import Java io
 import java.io.*;
 
 
 
-/*
- * EXIT CODES:
- *  0: OK
- *  1: generic error
- *  2: Transaction.resume() error
- *  3: Transaction.commit() error
- */
+// XTA: suspend/resume test cases with LIXA native resource manager (monkey)
 
 
 
-public class case4102 {
+public class case4103 {
     public static void main(String[] args) {
         // Check command line parameters
-        if (args.length < 5) {
-            System.err.println("This program requires at least 6 options");
+        if (args.length < 4) {
+            System.err.println("This program requires at least 4 options");
             System.exit(1);
         }
         // 0: INITIAL
@@ -61,53 +45,12 @@ public class case4102 {
         // 2: FINAL
         // 3: NO_PHASE
         int phase = Integer.parseInt(args[0]);
-        boolean insert = Integer.parseInt(args[1]) > 0 ? true : false;
-        boolean commit = Integer.parseInt(args[2]) > 0 ? true : false;
-        int stmtNum = Integer.parseInt(args[3]);
-        int testRc = Integer.parseInt(args[4]);
-        String filename = args[5];
-        // variable for SQL statement to execute
-        String sqlStmtInsert = null;
-        String sqlStmtDelete = null;
-        String sqlStmt;
-        // XA Resource for Oracle
-        OracleXADataSource xads1 = null;
-        XAConnection xac1 = null;
-        XAResource xar1 = null;
-        Connection conn1 = null;
-        Statement stmt1 = null;
-        // Lixa XA Resource
+        boolean commit = Integer.parseInt(args[1]) > 0 ? true : false;
+        int testRc = Integer.parseInt(args[2]);
+        String filename = args[3];
+        // Lixa XA Resources
+        LixaMonkeyXAResource xar1 = null;
         LixaMonkeyXAResource xar2 = null;
-
-        switch (stmtNum) {
-            case 0:
-                sqlStmtInsert = "INSERT INTO authors (ID, LAST_NAME, " +
-                    "FIRST_NAME) VALUES (1886, 'Mallory', 'George')";
-                sqlStmtDelete = "DELETE FROM authors WHERE id=1886";
-                break;
-            case 1:
-                sqlStmtInsert = "INSERT INTO authors VALUES(1921, " +
-                    "'Rigoni Stern', 'Mario')";
-                sqlStmtDelete = "DELETE FROM authors WHERE id=1921";
-                break;
-            case 2:
-                sqlStmtInsert = "INSERT INTO authors VALUES(1919, 'Levi', " +
-                    "'Primo')";
-                sqlStmtDelete = "DELETE FROM authors WHERE id=1919";
-                break;
-            default:
-                System.err.println("Statenemt number " + stmtNum + " is not " +
-                                   "valid!");
-                System.exit(1);
-                break;
-        } // switch (stmtNum)
-        
-        // Prepare SQL statements in accordance with "insert" command line
-        // parameter
-        if (insert) // SQL INSERT
-            sqlStmt = sqlStmtInsert;
-        else        // SQL DELETE
-            sqlStmt = sqlStmtDelete;
         
         try {
             BufferedWriter output = null;
@@ -133,44 +76,22 @@ public class case4102 {
                     System.err.println("phase=" + phase + " UNKNOWN!");
             } // switch (phase)
 
-            //
-            // A bit of boilerplate for Oracle JDBC & XA
-            //
-            // 1. create an XA Data Source
-            xads1 = new OracleXADataSource();
-            // 2. set connection URL (JDBC thin driver), user and password
-            xads1.setURL("jdbc:oracle:thin:@" +
-                         "(DESCRIPTION=" +
-                         "(ADDRESS=(PROTOCOL=tcp)" +
-                         "(HOST=centos7-oracle12.brenta.org)(PORT=1521))" +
-                         "(CONNECT_DATA=" +
-                         "(SERVICE_NAME=orcl.brenta.org)))");
-            xads1.setUser("hr");
-            xads1.setPassword("hr");
-            // 3. get an XA Connection from the XA Data Source
-            xac1 = xads1.getXAConnection();
-            // 4. get an XA Resource from the XA Connection
-            xar1 = xac1.getXAResource();
-            // 5. get an SQL Connection from the XA Connection
-            conn1 = xac1.getConnection();
-            
             // XTA Transaction Manager
             TransactionManager tm = null;
             // XTA Transaction
             Transaction tx = null;
 
-            // Create a LixaMonkey RM
-            xar2 = new LixaMonkeyXAResource("monkey1s.conf");
+            // Create two LixaMonkey RMs
+            xar1 = new LixaMonkeyXAResource("monkey1s.conf");
+            xar2 = new LixaMonkeyXAResource("monkey2s.conf");
             
             // create a Transaction Manager
             tm = new TransactionManager();
             // create a new Transation
             tx = tm.createTransaction();
-            // enlist PostgreSQL resource to transaction
-            tx.enlistResource(xar1, "Oracle DB",
-                              "orcl.brenta.org/hr/hr");
-            // enlist LixaMonkey resource to Transaction
-            tx.enlistResource(xar2, "LixaMonkey", "First monkey RM");
+            // enlist LixaMonkey resources to Transaction
+            tx.enlistResource(xar1, "LixaMonkey", "First monkey RM");
+            tx.enlistResource(xar2, "LixaMonkey", "Second monkey RM");
             
             if (phase == 0 || phase == 3) { // INITIAL || NO_PHASE
                 // start transaction
@@ -191,14 +112,9 @@ public class case4102 {
                     tx.resume(xidString);
                 } catch (XtaException e) {
                     e.printStackTrace();
-                    System.exit(2);
+                    System.exit(1);
                 }
             }
-            // create a Statement object
-            stmt1 = conn1.createStatement();
-            // Execute the statement
-            stmt1.executeUpdate(sqlStmt);
-            System.out.println("JDBC statement >" + sqlStmt + "< completed");
             
             if (phase == 0 || phase == 1) { // INITIAL || INTERMEDIATE
                 try {
