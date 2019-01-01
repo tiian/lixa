@@ -166,7 +166,7 @@ public class case4102 {
             tm = new TransactionManager();
             // create a new Transation
             tx = tm.createTransaction();
-            // enlist PostgreSQL resource to transaction
+            // enlist Oracle resource to transaction
             tx.enlistResource(xar1, "Oracle DB",
                               "orcl.brenta.org/hr/hr");
             // enlist LixaMonkey resource to Transaction
