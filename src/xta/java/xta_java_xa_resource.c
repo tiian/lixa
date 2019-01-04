@@ -626,7 +626,7 @@ int xta_java_xa_prepare(xta_xa_resource_t *context, const XID *xid,
         xa_rc = (*env)->CallIntMethod(env, res->java_object,
                                       res->java_method_prepare, res->java_xid);
         if ((*env)->ExceptionCheck(env))
-            /* retrieve the return code form the Java exception */
+            /* retrieve the return code from the Java exception */
             ret_cod = xta_java_xa_resource_rc(env);
         else
             /* if anything OK, return what returned by XAResource.prepare() */

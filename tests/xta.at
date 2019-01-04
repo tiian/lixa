@@ -2,7 +2,8 @@
 
 
 # Java API and transaction management
-#m4_include([xta_java_4.at])
+m4_include([xta_4.at])
+m4_include([xta_java_4.at])
 m4_include([xta_java_1.at])
 m4_include([xta_java_2.at])
 m4_include([xta_java_3.at])

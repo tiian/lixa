@@ -1,5 +1,5 @@
 Implement test cases of XTA for Java:
-restart from xta_java_4.at   case4106.java
+restart from xta_java_4.at   case4106.java: Tx.commit() does not return LIXA_RC_WOULD_BLOCK if nonBlocking is set, but silently return...
 
 
 test xa_forget
