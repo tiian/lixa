@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2009-2019, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of LIXA.
@@ -68,7 +68,7 @@
 void lixa_print_version(FILE *stream)
 {
     fprintf(stream, "LIXA: a LIbre XA implementation\n"
-            "Copyright (c) 2009-2018, Christian Ferrari; "
+            "Copyright (c) 2009-2019, Christian Ferrari; "
             "all rights reserved.\n"
             "License: GPL (GNU Public License) version 2\n"
             "Package name: %s; package version: %s\n"
