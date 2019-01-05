@@ -321,6 +321,8 @@ public class case4104 {
                     stmt1 = conn1.createStatement();
                     // Execute MySQL statements
                     stmt1.executeUpdate(mysqlStmt);
+                    // close the statement
+                    stmt1.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.exit(1);
@@ -339,6 +341,8 @@ public class case4104 {
                     stmt2 = conn2.createStatement();
                     // Execute Oracle statement
                     stmt2.executeUpdate(oracleStmt);
+                    // close the statement
+                    stmt2.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.exit(1);
@@ -357,6 +361,8 @@ public class case4104 {
                     stmt3 = conn3.createStatement();
                     // Execute PostgreSQL statements
                     stmt3.executeUpdate(postgresStmt);
+                    // close the statement
+                    stmt3.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.exit(1);

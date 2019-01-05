@@ -343,16 +343,16 @@ public class case4106 {
         try {
             // enlist LIXA Monkey resource to Transaction
             tx.enlistResource(xar0, "LixaMonkey", "First monkey RM");
-            // enlist MySQL resource to Transaction
             if (branchType == 0) { // SUPERIOR
+                // enlist MySQL resource to Transaction
                 tx.enlistResource(
                     xar1, "MySQL",
                     "jdbc:mysql://localhost/lixa?user=lixa/password=");
+                // enlist Oracle resource to transaction
+                tx.enlistResource(xar2, "Oracle DB", "orcl.brenta.org/hr/hr");
             }
-            // enlist Oracle resource to transaction
-            tx.enlistResource(xar2, "Oracle DB", "orcl.brenta.org/hr/hr");
-            // enlist PostgreSQL resource to transaction
             if (branchType == 1) { // SUBORDINATE
+                // enlist PostgreSQL resource to transaction
                 tx.enlistResource(xar3, "PostgreSQL",
                                   "localhost/testdb/tiian/passw0rd");
             }
@@ -376,31 +376,33 @@ public class case4106 {
                 stmt1 = conn1.createStatement();
                 // Execute MySQL statements
                 stmt1.executeUpdate(mysqlStmt);
+                // close the statement
+                stmt1.close();
             } catch (Exception e) {
                 e.printStackTrace();
                 System.exit(1);
             }
             System.out.println("MySQL statement >" + mysqlStmt +
                                "< completed");
-        }
-        String oracleStmt = null;
-        if (insert)
-            oracleStmt = oracleStmtInsert;
-        else
-            oracleStmt = oracleStmtDelete;
-        try {
-            // create a Statement object for Oracle
-            stmt2 = conn2.createStatement();
-            // Execute Oracle statement
-            stmt2.executeUpdate(oracleStmt);
-            // close statemetn
-            stmt2.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-        System.out.println("Oracle statement >" + oracleStmt +
-                           "< completed");
+            String oracleStmt = null;
+            if (insert)
+                oracleStmt = oracleStmtInsert;
+            else
+                oracleStmt = oracleStmtDelete;
+            try {
+                // create a Statement object for Oracle
+                stmt2 = conn2.createStatement();
+                // Execute Oracle statement
+                stmt2.executeUpdate(oracleStmt);
+                // close statement
+                stmt2.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+            System.out.println("Oracle statement >" + oracleStmt +
+                               "< completed");
+        } // if (branchType == 0) { // SUPERIOR
         if (branchType == 1) { // SUBORDINATE
             String postgresStmt = null;
             if (insert)
@@ -412,6 +414,8 @@ public class case4106 {
                 stmt3 = conn3.createStatement();
                 // Execute PostgreSQL statements
                 stmt3.executeUpdate(postgresStmt);
+                // close the statement
+                stmt3.close();
             } catch (Exception e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -440,6 +444,8 @@ public class case4106 {
                 e.printStackTrace();
                 System.exit(2);
             }
+            // update XA resources under the control of XTA
+            useXaResources();
             // retrieve the XID associated to the started transaction
             xidString = tx.getXid().toString();
             System.err.println("calling subordinate task and passing XID '" +
@@ -450,8 +456,6 @@ public class case4106 {
                message passing */
             String reply = msgReceive(fifoReply);
             System.err.println("subordinate task replied '" + reply + "'");
-            // update XA resources under the control of XTA
-            useXaResources();
             // the application can decide to commit or rollback the transaction
             if (commit) {
                 try {

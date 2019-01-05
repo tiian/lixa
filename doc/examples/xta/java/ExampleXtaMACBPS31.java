@@ -151,6 +151,8 @@ public class ExampleXtaMACBPS31 {
              stmt = conn.createStatement();
              // Execute the statement
              stmt.executeUpdate(sqlStmt);
+             // close the statement
+             stmt2.close();
              // Retrieve the Transaction ID (XID) associated to the
              // transaction that has been created in the previous step
              String xidString = tx.getXid().toString();
@@ -189,6 +191,8 @@ public class ExampleXtaMACBPS31 {
              stmt = conn.createStatement();
              // Execute the statement
              stmt.executeUpdate(sqlStmt2);
+             // close the statement
+             stmt.close();
              // commit or rollback
              if (commit)
                  tx.commit();

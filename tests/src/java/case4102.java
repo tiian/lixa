@@ -198,6 +198,8 @@ public class case4102 {
             stmt1 = conn1.createStatement();
             // Execute the statement
             stmt1.executeUpdate(sqlStmt);
+            // close the statement
+            stmt1.close();
             System.out.println("JDBC statement >" + sqlStmt + "< completed");
             
             if (phase == 0 || phase == 1) { // INITIAL || INTERMEDIATE

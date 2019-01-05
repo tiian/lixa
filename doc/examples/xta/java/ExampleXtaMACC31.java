@@ -182,6 +182,8 @@ public class ExampleXtaMACC31 {
             stmt = conn.createStatement();
             // Execute the statement
             stmt.executeUpdate(sqlStmt);
+            // close the statement
+            stmt.close();
             /*
              * *NOTE:*
              * The following block of code contains the second key

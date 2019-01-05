@@ -187,6 +187,8 @@ public class ExampleXtaMACBPA32 {
              stmt = conn.createStatement();
              // Execute the statement
              stmt.executeUpdate(sqlStmt);
+             // close the statement
+             stmt.close();
              // commit or rollback the transaction
              if (commit) {
                  tx.commit();

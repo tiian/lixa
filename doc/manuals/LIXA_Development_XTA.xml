@@ -1665,6 +1665,25 @@ mysql>
       </para></note>
     </section>
     <section>
+      <title>Known limitations</title>
+      <note><para>
+	Not all the Resource Managers have implemented the XA specifications
+	in the same way. This section tracks some limitations that have been
+	reported by the LIXA project.
+      </para></note>
+      <section>
+	<title>MariaDB, MySQL and PostgreSQL support for 
+	<quote>suspend/resume</quote></title>
+	<para>
+	  All the three databases do not support the XA specification part that
+	  describe as a transaction can be suspended and resumed. This pattern
+	  can't be used with those Resource Managers.
+	  The limitation currently applies to all the provided APIs: C, Java,
+	  etc...
+	</para>
+      </section>
+    </section>
+    <section>
       <title>Example using C language</title>
       <para>
 	The supplied example (<filename>example_xta_macc01.c</filename>) uses
@@ -2617,6 +2636,45 @@ xaoclose: rtn 0
 	  </para></listitem>
 	</itemizedlist>
       </para></important>
+    </section>
+    <section>
+      <title>Known limitations</title>
+      <note><para>
+	Not all the Resource Managers have implemented the XA specifications
+	in the same way. This section tracks some limitations that have been
+	reported by the LIXA project.
+      </para></note>
+      <section>
+	<title>Oracle JDBC thin optimizations</title>
+	<para>
+	  As described in Oracle's official documentation
+	  <footnote><para>
+	    <link xlink:href="https://docs.oracle.com/database/121/JJDBC/E49300-05.pdf">Oracle (R) Database, JDBC Developer's Guide, 12c Release 1 (12.1)</link>;
+	    there are analogous documents for different Oracle Database's
+	    versions
+	  </para></footnote>
+	  at paragraph 30-15 <quote>Oracle XA Optimizations</quote>, Oracle
+	  JDBC implements additional logic, in comparison with the XA
+	  specifications, when two ore more branches of the same global
+	  transaction are related to the same Oracle Database instance.
+	</para>
+	<important><para>
+	  In the event that both AP1 and AP2 use the same Oracle Database
+	  instance strange behaviors could be reported. Furthermore, the second
+	  call to <function>rm.doSomething()</function> from AP1 could fail as
+	  described in this
+	  <link xlink:href="https://access.redhat.com/solutions/892813">case</link>
+	  documented by Red hat, with error 
+	  <quote>ORA-02051: another session or branch in same transaction failed or finalized</quote>. A relevant hypotesis described in the case is
+	  <quote>Oracle seems to disallow attempt to execute SQL on a
+	  transaction branch when another branch in the same global transaction
+	  has already prepared its transaction</quote>.
+	</para></important>
+	<para>
+	  On the other hand, no such limitation has been found in the Oracle
+	  OCI interface for C and C++.
+	</para>
+      </section>
     </section>
     <section>
       <title>Example using C language</title>
@@ -3843,6 +3901,45 @@ testdb=&gt;
 	  </para></listitem>
 	</itemizedlist>
       </para></important>
+    </section>
+    <section>
+      <title>Known limitations</title>
+      <note><para>
+	Not all the Resource Managers have implemented the XA specifications
+	in the same way. This section tracks some limitations that have been
+	reported by the LIXA project.
+      </para></note>
+      <section>
+	<title>Oracle JDBC thin optimizations</title>
+	<para>
+	  As described in Oracle's official documentation
+	  <footnote><para>
+	    <link xlink:href="https://docs.oracle.com/database/121/JJDBC/E49300-05.pdf">Oracle (R) Database, JDBC Developer's Guide, 12c Release 1 (12.1)</link>;
+	    there are analogous documents for different Oracle Database's
+	    versions
+	  </para></footnote>
+	  at paragraph 30-15 <quote>Oracle XA Optimizations</quote>, Oracle
+	  JDBC implements additional logic, in comparison with the XA
+	  specifications, when two ore more branches of the same global
+	  transaction are related to the same Oracle Database instance.
+	</para>
+	<important><para>
+	  In the event that both AP1 and AP2 use the same Oracle Database
+	  instance strange behaviors could be reported. Furthermore, one of the
+	  calls to <function>rm.doSomething()</function> from AP1 or AP2 could
+	  fail as described in this
+	  <link xlink:href="https://access.redhat.com/solutions/892813">case</link>
+	  documented by Red hat, with error 
+	  <quote>ORA-02051: another session or branch in same transaction failed or finalized</quote>. A relevant hypotesis described in the case is
+	  <quote>Oracle seems to disallow attempt to execute SQL on a
+	  transaction branch when another branch in the same global transaction
+	  has already prepared its transaction</quote>.
+	</para></important>
+	<para>
+	  On the other hand, no such limitation has been found in the Oracle
+	  OCI interface for C and C++.
+	</para>
+      </section>
     </section>
     <section>
       <title>Example using C language</title>

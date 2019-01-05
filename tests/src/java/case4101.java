@@ -141,6 +141,8 @@ public class case4101 {
             stmt1 = conn1.createStatement();
             // Execute PostgreSQL statements
             stmt1.executeUpdate(postgresqlStmt);
+            // close the statement
+            stmt1.close();
             //
             // Create and Execute MySQL/MariaDB statement
             //
@@ -149,6 +151,8 @@ public class case4101 {
             stmt2 = conn2.createStatement();
             // Execute MySQL statements
             stmt2.executeUpdate(mysqlStmt);
+            // close the statement
+            stmt2.close();
             // commit or rollback
             if (commit) {
                 tx.commit();

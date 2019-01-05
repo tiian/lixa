@@ -241,6 +241,8 @@ void superior(void)
                 pgm, pid, rc);
         exit(2);
     }
+    /* use XA resources under the control of XTA */
+    use_xa_resources();
     /* retrieve the XID associated to the started transaction */
     xid_string = xta_xid_to_string(xta_transaction_get_xid(tx));
     if (xid_string == NULL) {
@@ -267,8 +269,6 @@ void superior(void)
     /* subordinate call succeeded */
     fprintf(stderr, "%s/%u| subordinate task replied '%s'\n",
             pgm, pid, response_buffer);
-    /* use XA resources under the control of XTA */
-    use_xa_resources();
     /* the application can decide to commit or rollback the transaction */
     if (commit) {
         /* commit is performed with "non_block" flag set to FALSE: this is
@@ -647,13 +647,15 @@ void enlist_resources_to_transaction(void)
     } /* if (branch_type == SUPERIOR) */
 #endif    
 #ifdef HAVE_ORACLE
-    rc = xta_transaction_enlist_resource(tx,
-        (xta_xa_resource_t *)dynamic_native_xa_res_ora);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
-                "dynamic_native_xa_res_ora: returned %d\n", pgm, pid, rc);
-        exit(1);
-    }
+    if (branch_type == SUPERIOR) {
+        rc = xta_transaction_enlist_resource(
+            tx, (xta_xa_resource_t *)dynamic_native_xa_res_ora);
+        if (rc != LIXA_RC_OK) {
+            fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
+                    "dynamic_native_xa_res_ora: returned %d\n", pgm, pid, rc);
+            exit(1);
+        }
+    } /* if (branch_type == SUPERIOR) */
 #endif
 #ifdef HAVE_POSTGRESQL
     if (branch_type == SUBORDINATE) {
@@ -703,95 +705,98 @@ void use_xa_resources(void)
     } /* if (branch_type == SUPERIOR) */
 #endif /* HAVE_MYSQL */
 #ifdef HAVE_ORACLE
-    /* retrieve environment and context */
-    oci_env = xaoEnv(NULL);
-    if (oci_env == NULL) {
-        fprintf(stderr, "%s/%u| xaoEnv returned a NULL pointer\n", pgm, pid);
-        exit(1);
-    }
-    oci_svc_ctx = xaoSvcCtx(NULL);
-    if (oci_svc_ctx == NULL) {
-        fprintf(stderr, "%s/%u| xaoSvcCtx returned a NULL pointer\n",
-                pgm, pid);
-        exit(1);
-    }
-    /* allocate statement and error handles */
-    if (0 != OCIHandleAlloc( (dvoid *)oci_env, (dvoid **)&oci_stmt_hndl,
-                             OCI_HTYPE_STMT, (size_t)0, (dvoid **)0)) {
-        fprintf(stderr, "%s/%u| Unable to allocate OCI statement handle\n",
-                pgm, pid);
-        exit(1);
-    }
-    if (0 != OCIHandleAlloc( (dvoid *)oci_env, (dvoid **)&oci_err_hndl,
-                             OCI_HTYPE_ERROR, (size_t)0, (dvoid **)0)) {
-        fprintf(stderr, "%s/%u| Unable to allocate OCI error handle\n",
-                pgm, pid);
-        exit(1);
-    }
-    /* insert data */
-    if (insert) {
-        fprintf(stderr, "%s/%u| OCI executing statement >%s<\n",
-                pgm, pid, (char *)oci_stmt_insert);
-        if (OCI_SUCCESS != OCIStmtPrepare(
-                oci_stmt_hndl, oci_err_hndl, oci_stmt_insert,
-                (ub4) strlen((char *)oci_stmt_insert),
-                (ub4) OCI_NTV_SYNTAX, (ub4) OCI_DEFAULT)) {
-            fprintf(stderr, "%s/%u| Unable to prepare INSERT OCI statement "
-                    "for execution\n", pgm, pid);
+    if (branch_type == SUPERIOR) {
+        /* retrieve environment and context */
+        oci_env = xaoEnv(NULL);
+        if (oci_env == NULL) {
+            fprintf(stderr, "%s/%u| xaoEnv returned a NULL pointer\n",
+                    pgm, pid);
             exit(1);
         }
-        oci_rc = OCIStmtExecute(
-            oci_svc_ctx, oci_stmt_hndl, oci_err_hndl,
-            (ub4)1, (ub4)0, (CONST OCISnapshot *)NULL,
-            (OCISnapshot *)NULL, OCI_DEFAULT);
-        if (OCI_SUCCESS != oci_rc && OCI_SUCCESS_WITH_INFO != oci_rc) {
-            text errbuf[1024];
-            sb4 errcode = 0;
-            OCIErrorGet((dvoid *)oci_err_hndl, (ub4)1, (text *)NULL,
-                        &errcode, errbuf, (ub4)sizeof(errbuf),
-                        OCI_HTYPE_ERROR);
-            fprintf(stderr, "%s/%u| Error while executing INSERT statement; "
-                    "ocirc = %d (%.*s)\n", pgm, pid, oci_rc,
-                    (int)sizeof(errbuf), errbuf);
-            exit(oci_rc);
-        }
-        fprintf(stderr, "%s/%u| OCI statement >%s< completed\n",
-                pgm, pid, (char *)oci_stmt_insert);
-    } else {
-        /* delete data */
-        fprintf(stderr, "%s/%u| OCI executing statement >%s<\n",
-                pgm, pid, (char *)oci_stmt_delete);
-        if (OCI_SUCCESS != OCIStmtPrepare(
-                oci_stmt_hndl, oci_err_hndl, oci_stmt_delete,
-                (ub4) strlen((char *)oci_stmt_delete),
-                (ub4) OCI_NTV_SYNTAX, (ub4) OCI_DEFAULT)) {
-            fprintf(stderr, "%s/%u| Unable to prepare DELETE statement for "
-                    "execution\n", pgm, pid);
+        oci_svc_ctx = xaoSvcCtx(NULL);
+        if (oci_svc_ctx == NULL) {
+            fprintf(stderr, "%s/%u| xaoSvcCtx returned a NULL pointer\n",
+                    pgm, pid);
             exit(1);
         }
-        oci_rc = OCIStmtExecute(
-            oci_svc_ctx, oci_stmt_hndl, oci_err_hndl,
-            (ub4)1, (ub4)0, (CONST OCISnapshot *)NULL,
-            (OCISnapshot *)NULL, OCI_DEFAULT);
-        if (OCI_SUCCESS != oci_rc && OCI_SUCCESS_WITH_INFO != oci_rc) {
-            fprintf(stderr, "%s/%u| Error while executing DELETE statement; "
-                    "ocirc = %d\n", pgm, pid, oci_rc);
-            text errbuf[1024];
-            sb4 errcode = 0;
-            OCIErrorGet((dvoid *)oci_err_hndl, (ub4)1, (text *)NULL,
-                        &errcode, errbuf, (ub4)sizeof(errbuf),
-                        OCI_HTYPE_ERROR);
-            fprintf(stderr, "%s/%u| Error while executing INSERT statement; "
-                    "ocirc = %d (%.*s)\n", pgm, pid, oci_rc,
-                    (int)sizeof(errbuf), errbuf);
-            exit(oci_rc);
+        /* allocate statement and error handles */
+        if (0 != OCIHandleAlloc( (dvoid *)oci_env, (dvoid **)&oci_stmt_hndl,
+                                 OCI_HTYPE_STMT, (size_t)0, (dvoid **)0)) {
+            fprintf(stderr, "%s/%u| Unable to allocate OCI statement handle\n",
+                    pgm, pid);
+            exit(1);
         }
-        fprintf(stderr, "%s/%u| OCI statement >%s< completed\n",
-                pgm, pid, (char *)oci_stmt_delete);
-    }
-    /* free the allocated handles */
-    OCIHandleFree((dvoid *)oci_stmt_hndl, (ub4)OCI_HTYPE_STMT);
-    OCIHandleFree((dvoid *)oci_err_hndl, (ub4)OCI_HTYPE_ERROR);
+        if (0 != OCIHandleAlloc( (dvoid *)oci_env, (dvoid **)&oci_err_hndl,
+                                 OCI_HTYPE_ERROR, (size_t)0, (dvoid **)0)) {
+            fprintf(stderr, "%s/%u| Unable to allocate OCI error handle\n",
+                    pgm, pid);
+            exit(1);
+        }
+        /* insert data */
+        if (insert) {
+            fprintf(stderr, "%s/%u| OCI executing statement >%s<\n",
+                    pgm, pid, (char *)oci_stmt_insert);
+            if (OCI_SUCCESS != OCIStmtPrepare(
+                    oci_stmt_hndl, oci_err_hndl, oci_stmt_insert,
+                    (ub4) strlen((char *)oci_stmt_insert),
+                    (ub4) OCI_NTV_SYNTAX, (ub4) OCI_DEFAULT)) {
+                fprintf(stderr, "%s/%u| Unable to prepare INSERT OCI "
+                        "statement for execution\n", pgm, pid);
+                exit(1);
+            }
+            oci_rc = OCIStmtExecute(
+                oci_svc_ctx, oci_stmt_hndl, oci_err_hndl,
+                (ub4)1, (ub4)0, (CONST OCISnapshot *)NULL,
+                (OCISnapshot *)NULL, OCI_DEFAULT);
+            if (OCI_SUCCESS != oci_rc && OCI_SUCCESS_WITH_INFO != oci_rc) {
+                text errbuf[1024];
+                sb4 errcode = 0;
+                OCIErrorGet((dvoid *)oci_err_hndl, (ub4)1, (text *)NULL,
+                            &errcode, errbuf, (ub4)sizeof(errbuf),
+                            OCI_HTYPE_ERROR);
+                fprintf(stderr, "%s/%u| Error while executing INSERT "
+                        "statement; ocirc = %d (%.*s)\n", pgm, pid, oci_rc,
+                        (int)sizeof(errbuf), errbuf);
+                exit(oci_rc);
+            }
+            fprintf(stderr, "%s/%u| OCI statement >%s< completed\n",
+                    pgm, pid, (char *)oci_stmt_insert);
+        } else {
+            /* delete data */
+            fprintf(stderr, "%s/%u| OCI executing statement >%s<\n",
+                    pgm, pid, (char *)oci_stmt_delete);
+            if (OCI_SUCCESS != OCIStmtPrepare(
+                    oci_stmt_hndl, oci_err_hndl, oci_stmt_delete,
+                    (ub4) strlen((char *)oci_stmt_delete),
+                    (ub4) OCI_NTV_SYNTAX, (ub4) OCI_DEFAULT)) {
+                fprintf(stderr, "%s/%u| Unable to prepare DELETE statement "
+                        "for execution\n", pgm, pid);
+                exit(1);
+            }
+            oci_rc = OCIStmtExecute(
+                oci_svc_ctx, oci_stmt_hndl, oci_err_hndl,
+                (ub4)1, (ub4)0, (CONST OCISnapshot *)NULL,
+                (OCISnapshot *)NULL, OCI_DEFAULT);
+            if (OCI_SUCCESS != oci_rc && OCI_SUCCESS_WITH_INFO != oci_rc) {
+                fprintf(stderr, "%s/%u| Error while executing DELETE "
+                        "statement; ocirc = %d\n", pgm, pid, oci_rc);
+                text errbuf[1024];
+                sb4 errcode = 0;
+                OCIErrorGet((dvoid *)oci_err_hndl, (ub4)1, (text *)NULL,
+                            &errcode, errbuf, (ub4)sizeof(errbuf),
+                            OCI_HTYPE_ERROR);
+                fprintf(stderr, "%s/%u| Error while executing INSERT "
+                        "statement; ocirc = %d (%.*s)\n", pgm, pid, oci_rc,
+                        (int)sizeof(errbuf), errbuf);
+                exit(oci_rc);
+            }
+            fprintf(stderr, "%s/%u| OCI statement >%s< completed\n",
+                    pgm, pid, (char *)oci_stmt_delete);
+        }
+        /* free the allocated handles */
+        OCIHandleFree((dvoid *)oci_stmt_hndl, (ub4)OCI_HTYPE_STMT);
+        OCIHandleFree((dvoid *)oci_err_hndl, (ub4)OCI_HTYPE_ERROR);
+    } /* if (branch_type == SUPERIOR) */
 #endif /* HAVE_ORACLE */
 #ifdef HAVE_POSTGRESQL
     if (branch_type == SUBORDINATE) {
