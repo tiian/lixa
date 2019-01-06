@@ -314,9 +314,11 @@ int xta_java_xa_resource_rc(JNIEnv *env)
             error_code = (*env)->GetIntField(env, exception, fieldID);
             LIXA_TRACE(("xta_java_xa_resource_rc: XAException.errorCode=%d\n",
                         error_code));
+            /* this row is to have Java stacktrace on stderr
             (*env)->ExceptionDescribe(env);
+            */
             /* reset exception, it must not be propagated */
-            // (*env)->ExceptionClear(env);
+            (*env)->ExceptionClear(env);
             ret_cod = error_code;
         } else
             ret_cod = XA_OK;

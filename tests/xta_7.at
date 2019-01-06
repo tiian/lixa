@@ -10,7 +10,7 @@ AT_CHECK([lixa_test_exec.sh reset start true], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 5 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1
+[[timeout 5 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 bar
 timeout 5 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
 timeout 5 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
 ]])
@@ -18,9 +18,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; export LIXA_CRASH_POINT=11 ; lixa
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -43,9 +43,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [igno
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -68,9 +68,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [igno
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -93,9 +93,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [igno
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -118,9 +118,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; export LIXA_CRASH_POINT=12 ; lixa
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -143,9 +143,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [igno
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -168,9 +168,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [igno
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -193,9 +193,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [igno
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -218,9 +218,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; export LIXA_CRASH_POINT=14 ; lixa
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -260,9 +260,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [igno
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -302,9 +302,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [igno
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -344,9 +344,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [igno
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -386,9 +386,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; export LIXA_CRASH_POINT=15 ; lixa
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -403,7 +403,7 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([delete],
-[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1
+[[timeout 3 lixa_test_exec.sh noreset none case0104 0 0 1 1 0 tmp_fifo1 bar
 timeout 3 lixa_test_exec.sh noreset none case0104 1 0 2 1 0 tmp_fifo2 tmp_fifo1
 timeout 3 lixa_test_exec.sh noreset none case0104 2 0 3 1 0 foo tmp_fifo2
 ]])
@@ -428,9 +428,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [igno
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -470,9 +470,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [igno
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
@@ -512,9 +512,9 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [igno
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1], [0], [ignore], [ignore])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 10 1 1 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 11 1 2 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case0104 12 1 3 1 0 tmp_fifo1 bar], [0], [ignore], [ignore])
 # check database consistency
 AT_CHECK([db_consist_check.sh], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])

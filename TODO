@@ -1,12 +1,11 @@
-Implement test cases of XTA for Java:
-restart from xta_java_5_5.at
+Investigate suspected timining issue related to XTA for Java:
+XTA Java/7.0/2.0 ALL crash in the middle of xa_prepare
+XTA Java/7.0/3.0 ALL crash after xa_prepare
 
-test xa_forget
-test xa_recover
+XTA for Java fails if 2 transactions must be recovered instead just one:
+create a case test that recovers 2 distinct transactions (XTA and XTA Java)
 
 Document XTA for Java
-Update API C++ (lowercase) and C if necessary.
-
 
 implement xa_recover:
 - an example of receiving arrays of objects from Java to JNI: CallObjectMethod    https://github.com/joeferner/node-java/blob/master/src/utils.cpp

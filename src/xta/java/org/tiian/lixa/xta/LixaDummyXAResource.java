@@ -34,10 +34,7 @@ import javax.transaction.xa.Xid;
 public class LixaDummyXAResource implements XAResource {
     private int timeout;
 
-    /**
-     * @param fileName name of the file containing the monkey's behavior
-     */
-    public LixaDummyXAResource(String fileName) { timeout = 0; return; }
+    public LixaDummyXAResource() { timeout = 0; return; }
     
     public void commit(Xid xid, boolean onePhase) { return; }
     public void end(Xid xid, int flags) { return; }

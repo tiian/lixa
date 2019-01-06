@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     /* parse command line parameters */
     pgm = argv[0];
     fprintf(stderr, "%s/%u| starting...\n", pgm, pid);
-    if (argc < 7) {
+    if (argc < 8) {
         fprintf(stderr, "%s/%u: at least seven options must be specified\n",
                 argv[0], pid);
         return 1;
@@ -538,7 +538,7 @@ void create_dynamic_native_xa_resources()
      * Dummy Resource Manager (test & debugging tool)
      */
     dynamic_native_xa_res_dummy = xta_native_xa_resource_new(
-        "LIXA Dummy RM (static)",
+        "LIXA Dummy RM (dynamic)",
         "/opt/lixa/lib/switch_lixa_dummyrm.so", "", "");
     if (dynamic_native_xa_res_dummy == NULL) {
         fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned NULL for "

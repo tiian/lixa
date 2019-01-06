@@ -89,6 +89,8 @@ public class case4104 {
     private static TransactionManager tm = null;
     // XTA Transaction
     private static Transaction tx = null;
+    // XA LIXA dummy resource
+    private static LixaDummyXAResource xar0 = null;
     // XA Resource for MySQL
     private static MysqlXADataSource xads1 = null;
     private static XAConnection xac1 = null;
@@ -211,55 +213,63 @@ public class case4104 {
     }
     private static void createXaResources() {
         try {
-            //
-            // A bit of scaffolding for MySQL/MariaDB
-            //
-            // 1. create an XA Data Source
-            xads1 = new MysqlXADataSource();
-            // 2. set connection parameters using a connection URL
-            xads1.setUrl("jdbc:mysql://localhost/lixa?user=lixa&password=");
-            // 3. get an XA Connection from the XA Data Source
-            xac1 = xads1.getXAConnection();
-            // 4. get an XA Resource from the XA Connection
-            xar1 = xac1.getXAResource();
-            // 5. get an SQL Connection from the XA Connection
-            conn1 = xac1.getConnection();
-            //
-            // A bit of boilerplate for Oracle JDBC & XA
-            //
-            // 1. create an XA Data Source
-            xads2 = new OracleXADataSource();
-            // 2. set connection URL (JDBC thin driver), user and password
-            xads2.setURL("jdbc:oracle:thin:@" +
-                         "(DESCRIPTION=" +
-                         "(ADDRESS=(PROTOCOL=tcp)" +
-                         "(HOST=centos7-oracle12.brenta.org)(PORT=1521))" +
-                         "(CONNECT_DATA=" +
-                         "(SERVICE_NAME=orcl.brenta.org)))");
-            xads2.setUser("hr");
-            xads2.setPassword("hr");
-            // 3. get an XA Connection from the XA Data Source
-            xac2 = xads2.getXAConnection();
-            // 4. get an XA Resource from the XA Connection
-            xar2 = xac2.getXAResource();
-            // 5. get an SQL Connection from the XA Connection
-            conn2 = xac2.getConnection();
-            //
-            // A bit of scaffolding for PostgreSQL:
-            //
-            // 1. create an XA Data Source
-            xads3 = new PGXADataSource();
-            // 2. set connection parameters (one property at a time)
-            xads3.setServerName("localhost");
-            xads3.setDatabaseName("testdb");
-            xads3.setUser("tiian");
-            xads3.setPassword("passw0rd");
-            // 3. get an XA Connection from the XA Data Source
-            xac3 = xads3.getXAConnection();
-            // 4. get an XA Resource from the XA Connection
-            xar3 = xac3.getXAResource();
-            // 5. get an SQL Connection from the XA Connection
-            conn3 = xac3.getConnection();
+            // Create a dummy resource
+            xar0 = new LixaDummyXAResource();
+            if (branchType == 0) { // SUPERIOR
+                //
+                // A bit of scaffolding for MySQL/MariaDB
+                //
+                // 1. create an XA Data Source
+                xads1 = new MysqlXADataSource();
+                // 2. set connection parameters using a connection URL
+                xads1.setUrl("jdbc:mysql://localhost/lixa?user=lixa&password=");
+                // 3. get an XA Connection from the XA Data Source
+                xac1 = xads1.getXAConnection();
+                // 4. get an XA Resource from the XA Connection
+                xar1 = xac1.getXAResource();
+                // 5. get an SQL Connection from the XA Connection
+                conn1 = xac1.getConnection();
+            }
+            if (branchType == 1) { // INTERMEDIATE
+                //
+                // A bit of boilerplate for Oracle JDBC & XA
+                //
+                // 1. create an XA Data Source
+                xads2 = new OracleXADataSource();
+                // 2. set connection URL (JDBC thin driver), user and password
+                xads2.setURL("jdbc:oracle:thin:@" +
+                             "(DESCRIPTION=" +
+                             "(ADDRESS=(PROTOCOL=tcp)" +
+                             "(HOST=centos7-oracle12.brenta.org)(PORT=1521))" +
+                             "(CONNECT_DATA=" +
+                             "(SERVICE_NAME=orcl.brenta.org)))");
+                xads2.setUser("hr");
+                xads2.setPassword("hr");
+                // 3. get an XA Connection from the XA Data Source
+                xac2 = xads2.getXAConnection();
+                // 4. get an XA Resource from the XA Connection
+                xar2 = xac2.getXAResource();
+                // 5. get an SQL Connection from the XA Connection
+                conn2 = xac2.getConnection();
+            }
+            if (branchType == 2) { // SUBORDINATE
+                //
+                // A bit of scaffolding for PostgreSQL:
+                //
+                // 1. create an XA Data Source
+                xads3 = new PGXADataSource();
+                // 2. set connection parameters (one property at a time)
+                xads3.setServerName("localhost");
+                xads3.setDatabaseName("testdb");
+                xads3.setUser("tiian");
+                xads3.setPassword("passw0rd");
+                // 3. get an XA Connection from the XA Data Source
+                xac3 = xads3.getXAConnection();
+                // 4. get an XA Resource from the XA Connection
+                xar3 = xac3.getXAResource();
+                // 5. get an SQL Connection from the XA Connection
+                conn3 = xac3.getConnection();
+            }
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
@@ -291,15 +301,23 @@ public class case4104 {
     }
     private static void enlistResourcesToTransaction() {
         try {
-            // enlist MySQL resource to Transaction
-            tx.enlistResource(
-                xar1, "MySQL",
-                "jdbc:mysql://localhost/lixa?user=lixa/password=");
-            // enlist Oracle resource to transaction
-            tx.enlistResource(xar2, "Oracle DB", "orcl.brenta.org/hr/hr");
-            // enlist PostgreSQL resource to transaction
-            tx.enlistResource(xar3, "PostgreSQL",
-                              "localhost/testdb/tiian/passw0rd");
+            // enlist Lixa Dummy resource
+            tx.enlistResource(xar0, "LixaDummy", "LixaDummy");
+            if (branchType == 0) { // SUPERIOR
+                // enlist MySQL resource to Transaction
+                tx.enlistResource(
+                    xar1, "MySQL",
+                    "jdbc:mysql://localhost/lixa?user=lixa/password=");
+            }
+            if (branchType == 1) { // INTERMEDIATE
+                // enlist Oracle resource to transaction
+                tx.enlistResource(xar2, "Oracle DB", "orcl.brenta.org/hr/hr");
+            }
+            if (branchType == 2) { // SUBORDINATE
+                // enlist PostgreSQL resource to transaction
+                tx.enlistResource(xar3, "PostgreSQL",
+                                  "localhost/testdb/tiian/passw0rd");
+            }
         } catch  (XtaException e) {
             System.err.println("XtaException: LIXA ReturnCode=" +
                                e.getReturnCode() + " ('" +

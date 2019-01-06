@@ -358,7 +358,6 @@ int xta_mysql_xa_end(xta_xa_resource_t *context, const XID *xid,
             case OBJ_CORRUPTED:
                 break;
             case NONE:
-                ret_cod = XA_OK;
                 break;
             default:
                 ret_cod = XAER_RMERR;
@@ -395,7 +394,6 @@ int xta_mysql_xa_rollback(xta_xa_resource_t *context, const XID *xid,
             case OBJ_CORRUPTED:
                 break;
             case NONE:
-                ret_cod = XA_OK;
                 break;
             default:
                 ret_cod = XAER_RMERR;
@@ -431,7 +429,6 @@ int xta_mysql_xa_prepare(xta_xa_resource_t *context, const XID *xid,
             case OBJ_CORRUPTED:
                 break;
             case NONE:
-                ret_cod = XA_OK;
                 break;
             default:
                 ret_cod = XAER_RMERR;
@@ -467,7 +464,6 @@ int xta_mysql_xa_commit(xta_xa_resource_t *context, const XID *xid,
             case OBJ_CORRUPTED:
                 break;
             case NONE:
-                ret_cod = XA_OK;
                 break;
             default:
                 ret_cod = XAER_RMERR;
@@ -503,7 +499,6 @@ int xta_mysql_xa_recover(xta_xa_resource_t *context,
             case OBJ_CORRUPTED:
                 break;
             case NONE:
-                ret_cod = XA_OK;
                 break;
             default:
                 ret_cod = XAER_RMERR;
@@ -539,7 +534,6 @@ int xta_mysql_xa_forget(xta_xa_resource_t *context, const XID *xid,
             case OBJ_CORRUPTED:
                 break;
             case NONE:
-                ret_cod = XA_OK;
                 break;
             default:
                 ret_cod = XAER_RMERR;
