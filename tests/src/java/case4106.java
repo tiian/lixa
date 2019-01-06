@@ -515,8 +515,16 @@ public class case4106 {
         String xidString = msgReceive(fifoRequest);
         // interesting code for XTA branching
         try {
-            // start a new Distributed Transaction
-            tx.branch(xidString);
+            try {
+                // start a new Distributed Transaction
+                tx.branch(xidString);
+            } catch (XtaException e1) {
+                System.err.println(
+                    "Tx.branch() returned " + e1.getReturnCode() + "(" +
+                    e1.getMessage() + ")");
+                e1.printStackTrace();
+                System.exit(3);
+            }
             // retrieve the XID associated to the branched transaction
             String xidString2 = tx.getXid().toString();
             System.err.println("subordinate branched XID is '" +

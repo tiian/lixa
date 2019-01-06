@@ -1,5 +1,5 @@
 Implement test cases of XTA for Java:
-restart from xta_java_5*
+restart from xta_java_5_5.at
 
 test xa_forget
 test xa_recover

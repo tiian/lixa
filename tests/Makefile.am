@@ -47,6 +47,7 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
 	xta_8_0.at xta_8_1.at xta_8_2.at \
 	xta_cpp_1.at xta_python_1.at \
 	xta_java_1.at xta_java_2.at xta_java_3.at xta_java_4.at \
+	xta_java_5_0.at xta_java_5_5.at \
 	lixa_test_group.sh lixa_test_exec.sh lixa_test_functions.sh \
 	db_consist_check.sh \
 	lixac.supp lixad.supp \
@@ -139,6 +140,7 @@ $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/xta_cpp_1.at $(srcdir)/xta_python_1.at \
 		$(srcdir)/xta_java_1.at $(srcdir)/xta_java_2.at \
 		$(srcdir)/xta_java_3.at $(srcdir)/xta_java_4.at \
+		$(srcdir)/xta_java_5_0.at $(srcdir)/xta_java_5_5.at \
 		$(srcdir)/package.m4
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@
