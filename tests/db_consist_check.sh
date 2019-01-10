@@ -32,11 +32,13 @@ echo "HAVE_POSTGRESQL=$HAVE_POSTGRESQL"
 
 if test "$HAVE_MYSQL" = "yes"
 then
-	echo "Checking if MySQL/MariaDB is probably affected by bug 12161..."
-	grep -E '.*lixa_my_commit_core.*is not available$' testsuite.log
-	if test $? -eq 0 
+	# retrieving MySQL/MariaDB version
+	MYSQL_VERSION=$(mysql --version|awk '{ print $5 }'|awk -F\, '{ print $1 }')
+	echo "MySQL/MariaDB server version is: $MYSQL_VERSION"
+	(echo "$MYSQL_VERSION" | grep -Eq  ^5\.7.*$\|^8\.[0-9].*$)
+	if test $? -ne 0 
 	then
-		echo "There's a chance the installed version is less than 5.7,"
+		echo "This version is probably affected by bug 12161."
 		echo "MySQL consistency behavior will not be checked!"
 		export HAVE_MYSQL=no
 	else

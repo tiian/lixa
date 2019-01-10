@@ -1,6 +1,4 @@
-Investigate suspected timining issue related to XTA for Java:
-XTA Java/7.0/2.0 ALL crash in the middle of xa_prepare
-XTA Java/7.0/3.0 ALL crash after xa_prepare
+Implement tests xta_java_8
 
 XTA for Java fails if 2 transactions must be recovered instead just one:
 create a case test that recovers 2 distinct transactions (XTA and XTA Java)

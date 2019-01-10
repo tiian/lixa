@@ -485,6 +485,8 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 # process
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
 AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+# wait 1 second to avoid the query for recovery pending is activated too early
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # first case test require a high timeout because the resource managers can be
 # "sleeping"
 AT_DATA([delete],
