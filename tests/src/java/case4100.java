@@ -73,11 +73,29 @@ public class case4100 {
             // enlist third resource
             if (numberOfResources > 2)
                 tx.enlistResource(xares3, "LixaMonkey", "Third monkey RM");
-            // start transaction
-            tx.start();
+            try {
+                // start transaction
+                tx.start();
+            } catch (XtaException e) {
+                System.err.println("XtaException: LIXA ReturnCode=" +
+                                   e.getReturnCode() + " ('" +
+                                   e.getMessage() + "')");
+                e.printStackTrace();
+                System.exit(3);
+            } 
             // commit or rollback
             if (commit) {
-                tx.commit();
+                try {
+                    tx.commit();
+                } catch (XtaException e) {
+                    if (e.getReturnCode() != testRc) {
+                        System.err.println("XtaException: LIXA ReturnCode=" +
+                                           e.getReturnCode() + " ('" +
+                                           e.getMessage() + "')");
+                        e.printStackTrace();
+                        System.exit(4);
+                    }
+                } 
                 System.out.println("XTA commit performed");
             } else {
                 tx.rollback();

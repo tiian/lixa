@@ -81,8 +81,8 @@ public class case4102 {
 
         switch (stmtNum) {
             case 0:
-                sqlStmtInsert = "INSERT INTO authors (ID, LAST_NAME, " +
-                    "FIRST_NAME) VALUES (1886, 'Mallory', 'George')";
+                sqlStmtInsert = "INSERT INTO authors VALUES (1886, " +
+                    "'Mallory', 'George')";
                 sqlStmtDelete = "DELETE FROM authors WHERE id=1886";
                 break;
             case 1:
@@ -212,17 +212,20 @@ public class case4102 {
             } // INITIAL || INTERMEDIATE
             
             if (phase == 2 || phase == 3) { // FINAL || NO_PHASE
-                try {
-                    if (commit)
+                if (commit)
+                    try {
                         tx.commit();
-                    else
-                        tx.rollback();
                 } catch (XtaException e) {
-                    if (e.getReturnCode() != testRc)
-                        throw e;
-                    System.err.println("commit/rollback returned " +
-                                       e.getReturnCode() + " as expected");
-                }
+                        if (e.getReturnCode() != testRc) {
+                            System.err.println("XtaException: LIXA ReturnCode=" +
+                                               e.getReturnCode() + " ('" +
+                                               e.getMessage() + "')");
+                            e.printStackTrace();
+                            System.exit(3);
+                        }
+                    }
+                else
+                    tx.rollback();
             } // FINAL || NO_PHASE
         } catch (XtaException e) {
             if (e.getReturnCode() != testRc) {
