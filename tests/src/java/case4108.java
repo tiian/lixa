@@ -1,0 +1,618 @@
+/*
+ * Copyright (c) 2009-2019, Christian Ferrari <tiian@users.sourceforge.net>
+ * All rights reserved.
+ *
+ * This file is part of LIXA.
+ *
+ * LIXA is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * LIXA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+
+// import XTA package from LIXA project
+import org.tiian.lixa.xta.*;
+// import Java XA
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.sql.XAConnection;
+// import Java useful stuff
+import java.io.*;
+// import SQL
+import java.sql.Connection;
+import java.sql.Statement;
+// import MySQL package for XA Data Source
+import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
+// import Oracle package for XA Data Source
+import oracle.jdbc.xa.OracleXid;
+import oracle.jdbc.xa.OracleXAException;
+//import oracle.jdbc.*;
+import oracle.jdbc.pool.*;
+import oracle.jdbc.xa.client.*;
+// import PostgreSQL package for XA Data Source
+import org.postgresql.xa.PGXADataSource;
+
+
+
+/*
+ * Pseudo synchronous branch case test for XTA
+ *
+ * NOTE: this is not a good example to learn the Java programming language
+ *       because the usage of static variables has been abused and you should
+ *       not write software as this one. This piece of Java code mimics as much
+ *       as possible case0104.c to guarantee the same behavior.
+ *       A huge amount of global variables has been used to avoid parameters
+ *       for boilerplate functions: the meaning of the flow should be more
+ *       evident without useless details.
+ *
+ * NOTE: this is very similar to case4106, but it uses the same resources both
+ *       in superior and in subordinate to produce a double transaction (double
+ *       branch) to recover
+ */
+
+
+
+/*
+ * EXIT CODES:
+ *  0:   OK
+ *  1:   generic error
+ *  2:   superior branch / xta_transaction_start() error
+ *  3:   subordinate branch / xta_transaction_branch() error
+ *  4:   superior branch / xta_transaction_commit() generic error
+ *  5:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
+ *  6:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
+ *  7:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_MIXED
+ *  8:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_MIXED
+ *  9:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_HAZARD
+ * 10:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_HAZARD
+ * 11:   superior branch / xta_transaction_rollback() generic error
+ * 12:   subordinate branch / xta_transaction_rollback() generic error
+ * 13:   subordinate branch / xta_transaction_commit() generic error
+ * 14:   xta_transaction_close() generic error
+ */
+
+
+
+public class case4108 {
+    // parsed command line arguments
+    private static int branchType;
+    private static boolean insert;
+    private static int statement;
+    private static boolean commit;
+    private static int testRc;
+    private static String fifoRequest;
+    private static String fifoReply;
+    private static String monkeyRmConfig;
+    // strings for SQL statements
+    private static String mysqlStmtInsert;
+    private static String mysqlStmtDelete;
+    private static String oracleStmtInsert;
+    private static String oracleStmtDelete;
+    private static String postgresStmtInsert;
+    private static String postgresStmtDelete;
+    // XTA Transaction Manager
+    private static TransactionManager tm = null;
+    // XTA Transaction
+    private static Transaction tx = null;
+    // XA Resource for LIXA Monkey
+    private static LixaMonkeyXAResource xar0 = null;
+    // XA Resource for MySQL
+    private static MysqlXADataSource xads1 = null;
+    private static XAConnection xac1 = null;
+    private static XAResource xar1 = null;
+    private static Connection conn1 = null;
+    private static Statement stmt1 = null;
+    // XA Resource for Oracle
+    private static OracleXADataSource xads2 = null;
+    private static XAConnection xac2 = null;
+    private static XAResource xar2 = null;
+    private static Connection conn2 = null;
+    private static Statement stmt2 = null;
+    // XA Resource for PostgreSQL
+    private static PGXADataSource xads3 = null;
+    private static XAConnection xac3 = null;
+    private static XAResource xar3 = null;
+    private static Connection conn3 = null;
+    private static Statement stmt3 = null;
+    
+    public static void main(String[] args) {
+        // Check command line parameters
+        if (args.length < 7) {
+            System.err.println("This program requires at least 7 options");
+            System.exit(1);
+        }
+        // 0: SUPERIOR
+        // 1: SUBORDINATE
+        // 2: NO_BRANCH_TYPE
+        branchType = Integer.parseInt(args[0]);
+        insert = Integer.parseInt(args[1]) > 0 ? true : false;
+        statement = Integer.parseInt(args[2]);
+        commit = Integer.parseInt(args[3]) > 0 ? true : false;
+        fifoRequest = args[4];
+        fifoReply = args[5];
+        monkeyRmConfig = args[6];
+
+        // choose the SQL statements that must be executed by this branch
+        statementSetup();
+
+        // check branchType
+        switch (branchType) {
+            case 0: // SUPERIOR
+                    /* this is the superior task: it passes the transactional
+                     * context to intermediate */
+                superior();
+                break;
+            case 1: // SUBORDINATE
+                    /* this is the subordinate task: it receives the
+                     * transactional context by intermediate */
+                subordinate();
+                break;
+            default:
+                System.err.println("branchType=" + branchType +
+                                   "UNKNOWN");
+                System.exit(1);
+        }
+    }
+    private static void statementSetup() {
+        switch (statement % 2) {
+            case 0:
+                mysqlStmtInsert    = "INSERT INTO authors VALUES(1916, 'Giorgio', 'Saviane')";
+                mysqlStmtDelete    = "DELETE FROM authors WHERE id=1916";
+                postgresStmtInsert = "INSERT INTO authors VALUES(1952, 'Jostein', 'Gaarder');";
+                postgresStmtDelete = "DELETE FROM authors WHERE id=1952;";
+                break;
+            case 1:
+                mysqlStmtInsert    = "INSERT INTO authors VALUES(1899, 'Ernest', 'Hemingway')";
+                mysqlStmtDelete    = "DELETE FROM authors WHERE id=1899";
+                postgresStmtInsert = "INSERT INTO authors VALUES(1929, 'Milan', 'Kundera');";
+                postgresStmtDelete = "DELETE FROM authors WHERE id=1929;";
+                break;
+        } // switch (statement % 2)
+        switch (statement) {
+            case 1:
+                oracleStmtInsert   = "INSERT INTO authors VALUES (1830, 'Mistral', 'Frederic')";
+                oracleStmtDelete   = "DELETE FROM authors WHERE ID = 1830";
+                break;
+            case 2:
+                oracleStmtInsert   = "INSERT INTO authors VALUES (1832, 'Echegaray', 'Jose')";
+                oracleStmtDelete   = "DELETE FROM authors WHERE ID = 1832";
+                break;
+            case 3:
+                oracleStmtInsert   = "INSERT INTO authors VALUES (1846, 'Sienkiewicz', 'Henryk')";
+                oracleStmtDelete   = "DELETE FROM authors WHERE ID = 1846";
+                break;
+            case 4:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1835, 'Carducci', 'Giosue')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1835";
+                break;
+            case 5:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1865, 'Kipling', 'Rudyard')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1865";
+                break;
+            case 6:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1858, 'Lagerlof', 'Selma')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1858";
+                break;
+            case 7:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1862, 'Maeterlinck', 'Maurice')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1862";
+                break;
+            case 8:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1861, 'Tagore', 'Rabindranath')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1861";
+                break;
+            case 9:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1866, 'Rolland', 'Romain')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1866";
+                break;
+            case 10:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1859, 'Verner v Heidenstam', 'Carl Gustav')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1859";
+                break;
+            case 11:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1857, 'Gjellerup', 'Karl Adolph')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1857";
+                break;
+            case 12:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1845, 'Spitteler', 'Carl')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1845";
+                break;
+            case 13:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1844, 'France', 'Anatole')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1844";
+                break;
+            default:
+                System.err.println("Statement=" + statement +
+                                   " is not valid!");
+                System.exit(1);
+        } // switch (statement)
+    }
+    private static void recovery() {
+        System.err.println("branchType=" + branchType + " (RECOVERY");
+        // initial boilerplate code
+        createXaResources();
+        createTransactionManager();
+        createTransaction();
+        enlistResourcesToTransaction();
+        // force transaction recovery
+        try {
+            tx.recover();
+        } catch  (XtaException e) {
+            System.err.println("XtaException: LIXA ReturnCode=" +
+                               e.getReturnCode() + " ('" +
+                               e.getMessage() + "')");
+            e.printStackTrace();
+            System.exit(1);
+        } catch (XAException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+    private static void createXaResources() {
+        try {
+            // Create LIXA Monkey RM
+            xar0 = new LixaMonkeyXAResource(monkeyRmConfig);
+            //
+            // A bit of scaffolding for MySQL/MariaDB
+            //
+            // 1. create an XA Data Source
+            xads1 = new MysqlXADataSource();
+            // 2. set connection parameters using a connection URL
+            xads1.setUrl("jdbc:mysql://localhost/lixa?user=lixa&password=");
+            // 3. get an XA Connection from the XA Data Source
+            xac1 = xads1.getXAConnection();
+            // 4. get an XA Resource from the XA Connection
+            xar1 = xac1.getXAResource();
+            // 5. get an SQL Connection from the XA Connection
+            conn1 = xac1.getConnection();
+            //
+            // A bit of boilerplate for Oracle JDBC & XA
+            //
+            // 1. create an XA Data Source
+            xads2 = new OracleXADataSource();
+            // 2. set connection URL (JDBC thin driver), user and password
+            xads2.setURL("jdbc:oracle:thin:@" +
+                         "(DESCRIPTION=" +
+                         "(ADDRESS=(PROTOCOL=tcp)" +
+                         "(HOST=centos7-oracle12.brenta.org)(PORT=1521))" +
+                         "(CONNECT_DATA=" +
+                         "(SERVICE_NAME=orcl.brenta.org)))");
+            xads2.setUser("hr");
+            xads2.setPassword("hr");
+            // 3. get an XA Connection from the XA Data Source
+            xac2 = xads2.getXAConnection();
+            // 4. get an XA Resource from the XA Connection
+            xar2 = xac2.getXAResource();
+            // 5. get an SQL Connection from the XA Connection
+            conn2 = xac2.getConnection();
+            //
+            // A bit of scaffolding for PostgreSQL:
+            //
+            // 1. create an XA Data Source
+            xads3 = new PGXADataSource();
+            // 2. set connection parameters (one property at a time)
+            xads3.setServerName("localhost");
+            xads3.setDatabaseName("testdb");
+            xads3.setUser("tiian");
+            xads3.setPassword("passw0rd");
+            // 3. get an XA Connection from the XA Data Source
+            xac3 = xads3.getXAConnection();
+            // 4. get an XA Resource from the XA Connection
+            xar3 = xac3.getXAResource();
+            // 5. get an SQL Connection from the XA Connection
+            conn3 = xac3.getConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+    private static void createTransactionManager() {
+        try {
+            // create a Transaction Manager
+            tm = new TransactionManager();
+        } catch  (XtaException e) {
+            System.err.println("XtaException: LIXA ReturnCode=" +
+                               e.getReturnCode() + " ('" +
+                               e.getMessage() + "')");
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+    private static void createTransaction() {
+        try {
+            // create a new Transation
+            tx = tm.createTransaction();
+        } catch  (XtaException e) {
+            System.err.println("XtaException: LIXA ReturnCode=" +
+                               e.getReturnCode() + " ('" +
+                               e.getMessage() + "')");
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+    private static void enlistResourcesToTransaction() {
+        try {
+            // enlist LIXA Monkey resource to Transaction
+            tx.enlistResource(xar0, "LixaMonkey", "First monkey RM");
+            // enlist MySQL resource to Transaction
+            tx.enlistResource(
+                xar1, "MySQL",
+                "jdbc:mysql://localhost/lixa?user=lixa/password=");
+            // enlist Oracle resource to transaction
+            tx.enlistResource(xar2, "Oracle DB", "orcl.brenta.org/hr/hr");
+            // enlist PostgreSQL resource to transaction
+            tx.enlistResource(xar3, "PostgreSQL",
+                              "localhost/testdb/tiian/passw0rd");
+        } catch  (XtaException e) {
+            System.err.println("XtaException: LIXA ReturnCode=" +
+                               e.getReturnCode() + " ('" +
+                               e.getMessage() + "')");
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+    private static void useXaResources() {
+        String mysqlStmt = null;
+        if (insert)
+            mysqlStmt = mysqlStmtInsert;
+        else
+            mysqlStmt = mysqlStmtDelete;
+        try {
+            // create a Statement object for MySQL/MariaDB
+            stmt1 = conn1.createStatement();
+            // Execute MySQL statements
+            stmt1.executeUpdate(mysqlStmt);
+            // close the statement
+            stmt1.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        System.out.println("MySQL statement >" + mysqlStmt +
+                           "< completed");
+        String oracleStmt = null;
+        if (insert)
+            oracleStmt = oracleStmtInsert;
+        else
+            oracleStmt = oracleStmtDelete;
+        try {
+            // create a Statement object for Oracle
+            stmt2 = conn2.createStatement();
+            // Execute Oracle statement
+            stmt2.executeUpdate(oracleStmt);
+            // close statement
+            stmt2.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        System.out.println("Oracle statement >" + oracleStmt +
+                           "< completed");
+        String postgresStmt = null;
+        if (insert)
+            postgresStmt = postgresStmtInsert;
+        else
+            postgresStmt = postgresStmtDelete;
+        try {
+            // create a Statement object for PostgreSQL
+            stmt3 = conn3.createStatement();
+            // Execute PostgreSQL statements
+            stmt3.executeUpdate(postgresStmt);
+            // close the statement
+            stmt3.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        System.out.println("PostgreSQL statement >" + postgresStmt +
+                           "< completed");
+    }
+    private static void superior() {
+        String xidString = null;
+        System.err.println("branchType=" + branchType + " (SUPERIOR)");
+        // initial boilerplate code
+        createXaResources();
+        createTransactionManager();
+        createTransaction();
+        enlistResourcesToTransaction();
+        // interesting code for XTA branching
+        try {
+            try {
+                // start a new (branchable) Distributed Transaction
+                tx.start(true);
+            } catch (XtaException e) {
+                System.err.println("XtaException: LIXA ReturnCode=" +
+                                   e.getReturnCode() + " ('" +
+                                   e.getMessage() + "')");
+                e.printStackTrace();
+                System.exit(2);
+            }
+            // update XA resources under the control of XTA
+            useXaResources();
+            // retrieve the XID associated to the started transaction
+            xidString = tx.getXid().toString();
+            System.err.println("calling subordinate task and passing XID '" +
+                               xidString + "'");
+            // passing string to intermediate application program
+            msgSend(fifoRequest, xidString);
+            /* a typical Remote Procedure Call is emulated with a synchronous
+               message passing */
+            String reply = msgReceive(fifoReply);
+            System.err.println("subordinate task replied '" + reply + "'");
+            // the application can decide to commit or rollback the transaction
+            if (commit) {
+                try {
+                    // commit is performed with "nonBlocking" flag set to
+                    // false: this is necessary to synchronize with the
+                    // subordinate branch
+                    tx.commit(false);
+                } catch (XtaException e) {
+                    System.err.println("Tx.commit() returned " +
+                                       reply + e.getReturnCode() + "(" +
+                                       e.getMessage() + ")");
+                    e.printStackTrace();
+                    switch (e.getReturnCode()) {
+                        case ErrorCodes.LIXA_RC_TX_ROLLBACK:
+                            System.exit(5);
+                            break;
+                        case ErrorCodes.LIXA_RC_TX_MIXED:
+                            System.exit(7);
+                            break;
+                        case ErrorCodes.LIXA_RC_TX_HAZARD:
+                            System.exit(9);
+                            break;
+                        default:
+                            System.exit(4);
+                    } // switch (e.getReturnCode())
+                }
+            } else {
+                try {
+                    tx.rollback();
+                } catch (XtaException e) {
+                    System.err.println("Tx.rollback() returned " +
+                                       reply + e.getReturnCode() + "(" +
+                                       e.getMessage() + ")");
+                    e.printStackTrace();
+                    System.exit(11);
+                }
+            }
+        } catch (XtaException e) {
+            System.err.println("XtaException: LIXA ReturnCode=" +
+                               e.getReturnCode() + " ('" +
+                               e.getMessage() + "')");
+            e.printStackTrace();
+            System.exit(1);
+        } catch (XAException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+    private static void subordinate() {
+        System.err.println("branchType=" + branchType + " (SUBORDINATE)");
+        // initial boilerplate code
+        createXaResources();
+        createTransactionManager();
+        createTransaction();
+        enlistResourcesToTransaction();
+        // receiving XID (transactional context) from superior branch
+        String xidString = msgReceive(fifoRequest);
+        // interesting code for XTA branching
+        try {
+            try {
+                // start a new Distributed Transaction
+                tx.branch(xidString);
+            } catch (XtaException e1) {
+                System.err.println(
+                    "Tx.branch() returned " + e1.getReturnCode() + "(" +
+                    e1.getMessage() + ")");
+                e1.printStackTrace();
+                System.exit(3);
+            }
+            // retrieve the XID associated to the branched transaction
+            String xidString2 = tx.getXid().toString();
+            System.err.println("subordinate branched XID is '" +
+                               xidString2 + "'");
+            // update XA resources under the control of XTA
+            useXaResources();
+            if (commit) {
+                // commit is performed with "nonBlocking" flag set to true:
+                // this is necessary to allow the superior branch to commit
+                try {
+                    tx.commit(true);
+                } catch (XtaException e1) {
+                    System.err.println(
+                            "Tx.commit() (first phase) returned " +
+                            e1.getReturnCode() + "(" +
+                            e1.getMessage() + ")");
+                    e1.printStackTrace();
+                    if (e1.getReturnCode() == ErrorCodes.LIXA_RC_TX_ROLLBACK)
+                        System.exit(6);
+                    else
+                        System.exit(1);
+                }
+                // at this point the branch has been prepared and the
+                // caller can be informed to start commit itself
+                replyToSuperior("PREPARED for COMMIT");
+                try {
+                    // now the commit can be completed
+                    tx.commit(false);
+                } catch (XtaException e1) {
+                    System.err.println(
+                        "Tx.commit() (second phase) returned " +
+                        e1.getReturnCode() + "(" +
+                        e1.getMessage() + ")");
+                    e1.printStackTrace();
+                    switch (e1.getReturnCode()) {
+                        case ErrorCodes.LIXA_RC_TX_ROLLBACK:
+                            System.exit(6);
+                            break;
+                        case ErrorCodes.LIXA_RC_TX_MIXED:
+                            System.exit(8);
+                            break;
+                        case ErrorCodes.LIXA_RC_TX_HAZARD:
+                            System.exit(10);
+                            break;
+                        default:
+                            System.exit(13);
+                    } // switch (e1.getReturnCode())
+                } // catch
+            } else {
+                try {
+                    tx.rollback();
+                } catch (XtaException e1) {
+                    System.err.println("Tx.rollback() returned " +
+                                       e1.getReturnCode() + "(" +
+                                       e1.getMessage() + ")");
+                    e1.printStackTrace();
+                    System.exit(12);
+                }
+                replyToSuperior("ROLLBACK");
+            }
+        } catch (XtaException e) {
+            System.err.println("XtaException: LIXA ReturnCode=" +
+                               e.getReturnCode() + " ('" +
+                               e.getMessage() + "')");
+            e.printStackTrace();
+            System.exit(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+    private static String msgReceive(String fifoName) {
+        String buffer = null;
+        try {
+            BufferedReader input =
+                new BufferedReader(new FileReader(fifoName));
+            buffer = input.readLine();
+            input.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        return buffer;
+    }
+    private static void msgSend(String fifoName, String buffer) {
+        try {
+            BufferedWriter output =
+                new BufferedWriter(new FileWriter(fifoName));
+            output.write(buffer);
+            output.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+    private static void replyToSuperior(String msg) {
+        msgSend(fifoReply, msg);
+    }
+}

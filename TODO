@@ -1,4 +1,4 @@
-Implement tests xta_java_8_2
+Debug xta_java_6.at and do the same for xta_6.at
 
 XTA for Java fails if 2 transactions must be recovered instead just one:
 create a case test that recovers 2 distinct transactions (XTA and XTA Java)

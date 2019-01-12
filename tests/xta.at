@@ -1,7 +1,6 @@
 # XTA (XA Transaction API) case tests
 
-#m4_include([xta_8_1.at])
-m4_include([xta_java_8_1.at])
+m4_include([xta_java_6.at])
 
 # Java API and transaction management
 m4_include([xta_java_1.at])
@@ -13,6 +12,8 @@ m4_include([xta_java_5_5.at])
 m4_include([xta_java_6.at])
 m4_include([xta_java_7.at])
 m4_include([xta_java_8_0.at])
+m4_include([xta_java_8_1.at])
+m4_include([xta_java_8_2.at])
 
 # C API and transaction management
 m4_include([xta_1.at])
