@@ -182,10 +182,11 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # "sleeping"
 AT_DATA([delete],
 [[timeout 5 lixa_test_exec.sh noreset none case4108 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 5 lixa_test_exec.sh noreset none case4108 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+sleep 1 && timeout 5 lixa_test_exec.sh noreset none case4108 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
+xa_rollback/0
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -193,7 +194,6 @@ xa_commit/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -384,10 +384,11 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # "sleeping"
 AT_DATA([delete],
 [[timeout 5 lixa_test_exec.sh noreset none case4108 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 5 lixa_test_exec.sh noreset none case4108 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+sleep 1 && timeout 5 lixa_test_exec.sh noreset none case4108 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
+xa_rollback/0
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -395,7 +396,6 @@ xa_commit/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -585,10 +585,11 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # "sleeping"
 AT_DATA([delete],
 [[timeout 5 lixa_test_exec.sh noreset none case4108 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 5 lixa_test_exec.sh noreset none case4108 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+sleep 1 && timeout 5 lixa_test_exec.sh noreset none case4108 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
+xa_rollback/0
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -596,7 +597,6 @@ xa_commit/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -741,8 +741,6 @@ xa_commit/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
-# just stop the state server
-AT_CHECK([lixa_test_exec.sh none stop true], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([XTA Java/6.0/3.4 ALL Crash after xa_prepare])
@@ -790,10 +788,11 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # "sleeping"
 AT_DATA([delete],
 [[timeout 5 lixa_test_exec.sh noreset none case4108 0 0 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 5 lixa_test_exec.sh noreset none case4108 1 0 2 1 fifo_request fifo_reply monkey2s.conf
+sleep 1 && timeout 5 lixa_test_exec.sh noreset none case4108 1 0 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
+xa_rollback/0
 xa_start/0
 xa_end/0
 xa_prepare/0
@@ -801,7 +800,6 @@ xa_commit/0
 ]])
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
-xa_rollback/0
 xa_start/0
 xa_end/0
 xa_prepare/0

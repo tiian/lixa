@@ -407,6 +407,8 @@ int xta_transaction_redigest(xta_transaction_t *transact,
         /* retrieve the serialized version of the configuration */
         if (NULL == (config_tostring = client_config_tostring_rsrmgr(xrc)))
             THROW(NULL_OBJECT3);
+        LIXA_TRACE(("xta_transaction_redigest: config_tostring = '%s'\n",
+                    config_tostring));
         /* trace old values */
         LIXA_TRACE(("xta_transaction_redigest: old digest is '%s'\n",
                     local_ccc->config_digest));

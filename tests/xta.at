@@ -1,20 +1,5 @@
 # XTA (XA Transaction API) case tests
 
-m4_include([xta_java_6.at])
-
-# Java API and transaction management
-m4_include([xta_java_1.at])
-m4_include([xta_java_2.at])
-m4_include([xta_java_3.at])
-m4_include([xta_java_4.at])
-m4_include([xta_java_5_0.at])
-m4_include([xta_java_5_5.at])
-m4_include([xta_java_6.at])
-m4_include([xta_java_7.at])
-m4_include([xta_java_8_0.at])
-m4_include([xta_java_8_1.at])
-m4_include([xta_java_8_2.at])
-
 # C API and transaction management
 m4_include([xta_1.at])
 m4_include([xta_2.at])
@@ -33,6 +18,19 @@ m4_include([xta_cpp_1.at])
 
 # Python API
 m4_include([xta_python_1.at])
+
+# Java API and transaction management
+m4_include([xta_java_1.at])
+m4_include([xta_java_2.at])
+m4_include([xta_java_3.at])
+m4_include([xta_java_4.at])
+m4_include([xta_java_5_0.at])
+m4_include([xta_java_5_5.at])
+m4_include([xta_java_6.at])
+m4_include([xta_java_7.at])
+m4_include([xta_java_8_0.at])
+m4_include([xta_java_8_1.at])
+m4_include([xta_java_8_2.at])
 
 #AT_SETUP([exit with error])
 #AT_CHECK([/bin/false], [0], [ignore], [ignore])

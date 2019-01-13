@@ -933,7 +933,7 @@ Oracle DELETE statement executed!
       </para>
       <para>
 	To create a <quote>recovery pending</quote> transaction, we are
-	going to forcea crash after <function>xa_prepare()</function>
+	going to force a crash after <function>xa_prepare()</function>
 	functions completed successfully:
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
@@ -1615,5 +1615,23 @@ tx_close(): 0
 	(it does not contain ASCII data).
       </para>
     </section>
+  </section>
+  <section>
+    <title>Considerations related to XTA API</title>
+    <para>
+      Utility <command>lixar</command> has been designed to operate in an
+      environment of statically defined Resource Managers: this was typical
+      for TX Demarcation Specification. XTA API provides a lot of flexibility
+      in comparison with TX: Resource Managers can be defined at run time;
+      furthermore, XTA for Java, allows the usage of every Resource Manager
+      that implement the <function>javax.transaction.xa.XAResource</function>
+      interface.
+    </para>
+    <para>
+      Under some conditions, when a standard XA Resource Manager and its
+      switch load file exists, <command>lixar</command> can be used even to
+      recover transactions managed by the XTA API, but there's actually no an
+      alternative tool dedicated to XTA and XTA for Java.
+    </para>
   </section>
 </chapter>
