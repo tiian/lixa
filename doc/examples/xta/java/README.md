@@ -15,11 +15,11 @@ work.
 After proper installation of LIXA, you can compile the program with the
 following command (jar classpath must be changed as necessary):
 
-`javac -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:/usr/share/java/postgresql.jar ExampleXtaSA31.java`
+`javac -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:/opt/postgresql/postgresql.jar ExampleXtaSA31.java`
 
 and execute it with this command:
 
-`java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:/usr/share/java/postgresql.jar:. ExampleXtaSA31 1 1`
+`java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:/opt/postgresql/postgresql.jar:. ExampleXtaSA31 1 1`
 
 ## "Multiple Applications, Consecutive Calls" Pattern ##
 

@@ -1,4 +1,6 @@
-Document XTA for Java
+Document XTA for Java:
+- introduce details about config/build and drivers (use fresh jars, not 
+distribution default)
 
 implement xa_recover:
 - an example of receiving arrays of objects from Java to JNI: CallObjectMethod    https://github.com/joeferner/node-java/blob/master/src/utils.cpp

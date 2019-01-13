@@ -2,59 +2,75 @@
 	 xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Developing Application Programs using XTA (XA Transaction API) interface</title>
   <para>
-    This chapter explains what XTA is and how you can develop applications
-    that use XTA interface.
+    This chapter explains what XTA is and how it can be used to develop
+    applications that require to perform two phase commit ACID transactions.
   </para>
   <section>
-    <title>XTA Introduction</title>
-    <para>
-      This section introduces some basic concepts for a better comprehension of
-      XTA topic.
-    </para>
+    <title>Introduction</title>
     <section>
       <title>Why XTA?</title>
       <para>
-	The TX Transaction Demarcation Specification
-	<citation>TXspec</citation>, published in 1995 by
-	X/Open is a programming interface that has been designed for:
-	<itemizedlist mark='bullet'>
-	  <listitem><para>
-	    C and COBOL programming languages
-	  </para></listitem>
-	  <listitem><para>
-	    single thread applications
-	  </para></listitem>
-	  <listitem><para>
-	    applications executed under the control of TP Monitors
-	  </para></listitem>
-	  <listitem><para>
-	    implicit (static) transactional context
-	  </para></listitem>
-	</itemizedlist>
+	XTA is a modern Application Programming Interface that has been
+	specifically designed to enable two phase commit ACID transactions for
+	polyglot microservice oriented applications.
       </para>
       <para>
-	The DTP Reference Model Version 3
-	<citation>RefModel</citation>, published in 1996 by X/Open is a
-	programming model that has been designed for:
-	<itemizedlist mark='bullet'>
-	  <listitem><para>
-	    applications executed under the control of TP Monitors
-	  </para></listitem>
-	  <listitem><para>
-	    TP Monitors with integrated Transaction Managers
-	  </para></listitem>
-	  <listitem><para>
-	    tight coupling between couples of Transaction Managers to propagate
-	    transactional contexts and to coordinated distributed transactions
-	    among different systems
-	  </para></listitem>
-	</itemizedlist>
+	Some interfaces, like TX Transaction Demarcation Specification
+	<footnote>  
+	  <para>
+	    In the past, TX Transaction Demarcation Specification
+	    <citation>TXspec</citation>, published in 1995 by
+	    X/Open, was designed for:
+	    <itemizedlist mark='bullet'>
+	      <listitem><para>
+		C and COBOL programming languages
+	      </para></listitem>
+	      <listitem><para>
+		single thread applications
+	      </para></listitem>
+	      <listitem><para>
+		applications executed under the control of TP Monitors
+	      </para></listitem>
+	      <listitem><para>
+		implicit (static) transactional context
+	      </para></listitem>
+	    </itemizedlist>
+	    Furthermore, TX conceptually relates to the DTP Reference Model
+	    Version 3
+	    <citation>RefModel</citation>, published in 1996 by X/Open,
+	    that was defined for:
+	    <itemizedlist mark='bullet'>
+	      <listitem><para>
+		applications executed under the control of TP Monitors
+	      </para></listitem>
+	      <listitem><para>
+		TP Monitors with integrated Transaction Managers
+	      </para></listitem>
+	      <listitem><para>
+		tight coupling between couples of Transaction Managers to
+		propagate transactional contexts and to coordinated distributed
+		transactions among different systems
+	      </para></listitem>
+	    </itemizedlist>
+	  </para>
+	</footnote>, are today relegated to legacy
+	applications and legacy use cases.
       </para>
       <para>
-	All the above assumptions are no more up-to-date in the cloud native
-	programming models like CaaS (Container as a Service), 
-	PaaS (Platform as a Service) and FaaS (Function as a Service).
+	Other interfaces, like JTA Java Transaction API
+	<footnote>
+	  <para>
+	    Under some circumstances, XTA can be used instead of JTA (Java
+	    Transaction API): it's not intended to be a JTA implementation or a
+	    JTA replacement, but it can be used as an alternative for some
+	    relevant use cases.
+	  </para>
+	</footnote>, are specific to a
+	single language and/or a single runtime environment (Java/JRE).
       </para>
+    </section>
+    <section>
+      <title>Two Phase Commit: reloaded</title>
       <para>
 	XTA aims to provide TXaaS (Transaction as a Service) backend services
 	that can be used by cloud native applications that, for one reason or
@@ -131,9 +147,8 @@
       </para>
       <note>
 	<para>
-	  <emphasis>XTA</emphasis>, in comparison with the standard TX
-	  interface, implements the logic necessary to distribute a
-	  global transaction between two or more
+	  <emphasis>XTA</emphasis> implements the logic necessary to
+	  distribute a global transaction between two or more
 	  <emphasis>Application Programs</emphasis> but it does not provide
 	  the communication protocol between them. Using the above picture as
 	  an example, it's in charge of
@@ -174,7 +189,7 @@
 	    <listitem><para>
 	      <emphasis>Application Programs</emphasis> can use any sort of
 	      communication channel to transfer the transaction identifier 
-	      (XID): it can be a REST over HTTP, it can be a message queing
+	      (XID): it can be REST over HTTP, it can be a message queueing
 	      system, it can be a POSIX pipe and so on. Any communication
 	      channel that can send an ASCII string is eligible for passing
 	      the transaction identifier (XID)
@@ -248,11 +263,11 @@
 		<entry>Y</entry>
 		<entry>N<footnote>
 		<para>No known way to re-use a standard OCI connection as an 
-		XA OCI connection
+		XA OCI connection; possibly not implementable
 		</para></footnote></entry>
 		<entry>N<footnote>
 		<para>No known way to re-use a standard OCI connection as an 
-		XA OCI connection
+		XA OCI connection; possibly not implementable
 		</para></footnote></entry>
 	      </row>
 	      <row>
@@ -522,7 +537,10 @@
 	<para>
 	  <emphasis>XAResource</emphasis> must be created as standard
 	  Java XAResource and must be enlisted with method
-	  <function>Transaction.enlistResource()</function>
+	  <function>Transaction.enlistResource()</function>.
+	  Java resources must be explicitly imported by the Application Program
+	  and the necessary <filename>jar</filename> files must be put in
+	  <function>classpath</function> as usual.
 	</para>
       </section>
     </section>
@@ -968,7 +986,7 @@ mysql>
 	The supplied example (<filename>example_xta_sa11.cpp</filename>) uses
 	PostgreSQL in the role of <quote>Resource Manager 1</quote> and MySQL
 	(or MariaDB) in the role of <quote>Resource Manager 2</quote>; please
-	refer to the instructions explained :
+	refer to the instructions explained:
 	<itemizedlist mark="bullet">
 	  <listitem><para>
 	    in <xref linkend="App_RM_Config_MySQL"/>
@@ -1220,6 +1238,268 @@ mysql>
 	  installed in directory
 	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/cpp</filename> and
 	  is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/cpp/example_xta_sa11.cpp">GitHub</link>.
+	  Source code is fully commented for readability.
+	</para>
+      </section>
+    </section>
+    <section>
+      <title>Example using Java language</title>
+      <para>
+	The supplied example (<filename>ExampleXtaSA31.java</filename>) uses
+	PostgreSQL in the role of <quote>Resource Manager 1</quote> and MySQL
+	(or MariaDB) in the role of <quote>Resource Manager 2</quote>; please
+	refer to the instructions explained:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_MySQL"/>
+	    to set-up a running environment for MySQL server
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_PostgreSQL"/>
+	    to set-up a running environment for PostgreSQL server
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="Starting_the_state_server"/>
+	    to start up the LIXA state server
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Create a working directory in a place you are comfortable with:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ cd
+tiian@ubuntu1404-64:~$ mkdir tmp
+tiian@ubuntu1404-64:~$ cd tmp
+tiian@ubuntu1404-64:~/tmp$ 
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	Copy file <filename>ExampleXtaSA31.java</filename> in your working
+	dir:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/java/ExampleXtaSA31.java .
+	  </screen></td></tr></tbody>
+	</table>
+	Substitute <quote>X.Y.Z</quote> with the actual version of
+	the software you installed.
+      </para>
+      <para>
+	Use the proper paths for MySQL and PostgreSQL jars, then compile the
+	Java example program with something like:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ javac -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:/opt/postgresql/postgresql.jar ExampleXtaSA31.java
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	If the previous steps worked for you, you should have a class 
+	file of name <filename>ExampleXtaSA31.class</filename> in your current 
+	directory:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -l
+total 16
+-rw-rw-r-- 1 tiian tiian 4169 gen 13 22:24 ExampleXtaSA31.class
+-rw-r--r-- 1 tiian tiian 8065 gen 13 22:22 ExampleXtaSA31.java
+	  </screen></td></tr></tbody>
+	</table>
+	The example program accepts two arguments:
+	<itemizedlist mark="bullet">
+          <listitem><para>
+	    commit (or rollback): use <quote>1</quote> if you want to perform
+	    a global commit or <quote>0</quote> if you want to perform a global
+	    rollback
+	  </para></listitem>
+          <listitem><para>
+	    insert (or delete): use <quote>1</quote> if you want to insert rows
+	    in databases or <quote>0</quote> if you want to delete rows from
+	    databases
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Open three terminal sessions: one for example execution,
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -la
+total 24
+drwxrwxr-x  2 tiian tiian 4096 gen 13 22:24 .
+drwxr-xr-x 17 tiian tiian 4096 gen 13 22:23 ..
+-rw-rw-r--  1 tiian tiian 4169 gen 13 22:24 ExampleXtaSA31.class
+-rw-r--r--  1 tiian tiian 8065 gen 13 22:22 ExampleXtaSA31.java
+	  </screen></td></tr></tbody>
+	</table>
+	one for PostgreSQL queries
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ psql testdb
+psql (9.3.24)
+Type "help" for help.
+
+testdb=>
+	  </screen></td></tr></tbody>
+	</table>
+	and one for MySQL queries
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ mysql -h localhost -u lixa lixa
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 44
+Server version: 5.5.62-0ubuntu0.14.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
+	  </screen></td></tr></tbody>
+	</table>
+	set <varname>LIXA_PROFILE</varname> environment variable to
+	<constant>XTA_DYN</constant>
+	a profile without static Resource Managers defined in
+	<filename>lixac_conf.xml</filename>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	insert rows in tables and commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:/opt/postgresql/postgresql.jar:. ExampleXtaSA31 1 1
+PostgreSQL, executing &gt;INSERT INTO authors VALUES(1921, 'Rigoni Stern', 'Mario')&lt;
+MySQL, executing &gt;INSERT INTO authors VALUES(1919, 'Levi', 'Primo')&lt;
+tiian@ubuntu1404-64:~/tmp$
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=&gt; select * from authors;
+  id  |  last_name   | first_name 
+------+--------------+------------
+ 1921 | Rigoni Stern | Mario
+(1 row)
+
+testdb=&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql&gt; select * from authors;
++------+-----------+------------+
+| id   | last_name | first_name |
++------+-----------+------------+
+| 1919 | Levi      | Primo      |
++------+-----------+------------+
+1 row in set (0.00 sec)
+
+mysql&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	delete rows from tables, but rollback:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:/opt/postgresql/postgresql.jar:. ExampleXtaSA31 0 0
+PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
+MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
+tiian@ubuntu1404-64:~/tmp$
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=&gt; select * from authors;
+  id  |  last_name   | first_name 
+------+--------------+------------
+ 1921 | Rigoni Stern | Mario
+(1 row)
+
+testdb=&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> select * from authors;
++------+-----------+------------+
+| id   | last_name | first_name |
++------+-----------+------------+
+| 1919 | Levi      | Primo      |
++------+-----------+------------+
+1 row in set (0.00 sec)
+
+mysql>
+	  </screen></td></tr></tbody>
+	</table>
+	delete rows and commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:/opt/postgresql/postgresql.jar:. ExampleXtaSA31 1 0
+PostgreSQL, executing &gt;DELETE FROM authors WHERE id=1921&lt;
+MySQL, executing &gt;DELETE FROM authors WHERE id=1919&lt;
+tiian@ubuntu1404-64:~/tmp$
+	  </screen></td></tr></tbody>
+	</table>
+	check PostgreSQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - PostgreSQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+testdb=> select * from authors;
+ id | last_name | first_name 
+----+-----------+------------
+(0 rows)
+
+testdb=>
+	  </screen></td></tr></tbody>
+	</table>
+	check MySQL table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - MySQL]</td></tr></thead>
+	  <tbody><tr><td><screen>
+mysql> select * from authors;
+Empty set (0.00 sec)
+
+mysql>
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <section>
+	<title>Source Code</title>
+	<para>
+	  Source code for program <filename>ExampleXtaSA31.java</filename> is
+	  installed in directory
+	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/java</filename> and
+	  is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/java/ExampleXtaSA31.java">GitHub</link>.
 	  Source code is fully commented for readability.
 	</para>
       </section>
