@@ -230,7 +230,15 @@
 		<entry>Resource Manager</entry>
 		<entry>C</entry>
 		<entry>C++</entry>
-		<entry>Java</entry>
+		<entry>Java
+		<footnote><para>
+		  Every Resource Manager that supplies a proper
+		  implementation of the
+		  <function>javax.transaction.xa.XAResource</function>, as
+		  defined by the JTA (Java Transaction API) standard, should
+		  work with XTA for Java
+		</para></footnote>
+		</entry>
 		<entry>PHP<footnote>
 		<para>Planned a SWIG wrapper, not yet implemented
 		</para></footnote></entry>
@@ -541,6 +549,11 @@
 	  Java resources must be explicitly imported by the Application Program
 	  and the necessary <filename>jar</filename> files must be put in
 	  <function>classpath</function> as usual.
+	</para>
+	<para>
+	  See <xref linkend="Configuring_Resource_Managers_for_XTA_Java"/>
+	  for additional information related to XTA for Java and Resource
+	  Managers.
 	</para>
       </section>
     </section>

@@ -886,6 +886,40 @@ make
 	</para>
       </section>
     </section>
+    <section xml:id="Configuring_Resource_Managers_for_XTA_Java">
+      <title>Configuring Resource Managers for XTA Java</title>
+      <para>
+	To build the XTA for Java component, it's not strictly necessary to
+	specify at configure time the classpath of all the Resource Managers
+	that will be linked by the Application Programs.
+	Anyway, if you want to check you build, you have to specify all the
+	jar files related to the Resource Managers used by the tests.
+	The following <command>configure</command> command, for example,
+	configure 3 Java Resource Managers: MySQL, PostgreSQL and Oracle 
+	Database server:
+	<screen>
+./configure --with-mysql --with-mysql-jdbc=/usr/share/java/mysql.jar \
+&gt; --with-postgresql --with-postgresql-jdbc=/opt/postgresql/postgresql.jar \
+&gt; --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_12_1/ --with-oracle-jdbc=/opt/oracle/OJDBC-Full/ojdbc7.jar
+	</screen>
+	Notice the parameters related to JDBC drivers:
+	<parameter class='command'>--with-mysql-jdbc=/usr/share/java/mysql.jar</parameter>,
+	<parameter class='command'>--with-postgresql-jdbc=/opt/postgresql/postgresql.jar</parameter>,
+	<parameter class='command'>--with-oracle-jdbc=/opt/oracle/OJDBC-Full/ojdbc7.jar</parameter>.
+	Other parameters like 
+	<parameter class='command'>--with-mysql</parameter> refer to the C
+	driver used by other languages: C, C++, Python...
+      </para>
+      <note>
+	<para>
+	  JDBC drivers available inside Linux distributions are sometimes old
+	  in comparison with the drivers that can be downloaded directly from
+	  the project or product site: if possible, try to use the latest
+	  available JDBC driver that's compatible with your (database) server
+	  and with your Java Runtime Environment.
+	</para>
+      </note>
+    </section>
     <section>
       <title>Summary</title>
       <para>
