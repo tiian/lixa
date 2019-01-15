@@ -2758,7 +2758,312 @@ xaoclose: rtn 0
 	</para>
       </section>
     </section>
+    <section>
+      <title>Example using Java language</title>
+      <para>
+	The supplied example (<filename>ExampleXtaMACC31.java</filename>) uses
+	Oracle in the role of <quote>Resource Manager 1</quote>; please
+	refer to the instructions explained:
+	<itemizedlist mark="bullet">
+	  <listitem><para>
+	    in <xref linkend="App_RM_Config_Oracle_Remote"/> 
+	    to set-up the correct client/server configuration for Oracle
+	  </para></listitem>
+	  <listitem><para>
+	    in <xref linkend="Starting_the_state_server"/>
+	    to start up the LIXA state server
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Create a working directory in a place you are comfortable with:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ cd
+tiian@ubuntu1404-64:~$ mkdir tmp
+tiian@ubuntu1404-64:~$ cd tmp
+tiian@ubuntu1404-64:~/tmp$ 
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	Copy file <filename>ExampleXtaMACC31.java</filename> in your working
+	dir:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu:~/tmp$ cp /opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/java/ExampleXtaMACC31.java .
+	  </screen></td></tr></tbody>
+	</table>
+	Substitute <quote>X.Y.Z</quote> with the actual version of
+	the software you installed.
+      </para>
+      <para>
+	Use the proper path for the Oracle Database jar file, then compile
+	the Java example program with something like: 
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ javac -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar ExampleXtaMACC31.java
+	  </screen></td></tr></tbody>
+	</table>
+      </para>
+      <para>
+	If the previous steps worked for you, you should have a class file of
+	name <filename>ExampleXtaMACC31.class</filename> in your current
+	directory: 
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -l
+total 20
+-rw-rw-r-- 1 tiian tiian 4361 gen 15 22:00 ExampleXtaMACC31.class
+-rw-r--r-- 1 tiian tiian 9655 gen 15 21:57 ExampleXtaMACC31.java
+	  </screen></td></tr></tbody>
+	</table>
+	The example program accepts four arguments:
+	<itemizedlist mark="bullet">
+          <listitem><para>
+	    commit (or rollback): use <quote>1</quote> if you want to perform
+	    a global commit or <quote>0</quote> if you want to perform a global
+	    rollback
+	  </para></listitem>
+          <listitem><para>
+	    insert (or delete): use <quote>1</quote> if you want to insert rows
+	    in databases or <quote>0</quote> if you want to delete rows from
+	    databases
+	  </para></listitem>
+          <listitem><para>
+	    superior (or subordinate): use <quote>1</quote> if you want to
+	    execute the <quote>superior</quote> part depicted in the
+	    sequence diagram (<quote>Application Program 1</quote>) or
+	    <quote>0</quote> if you want to execute the
+	    <quote>subordinate</quote> part depicted in the sequence diagram
+	    (<quote>Application Program 2</quote>)
+	  </para></listitem>
+          <listitem><para>
+	    XIDfilename: a valid name for a file that must be used to transfer
+	    XID (Transaction ID) from <quote>Application Program 1</quote> to
+	    <quote>Application Program 2</quote>; XIDfilename can be the name
+	    of a regular file or of a FIFO (named pipe)
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+      <para>
+	Open three terminal sessions: one for Application Program 1
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -la
+total 28
+drwxrwxr-x  2 tiian tiian 4096 gen 15 21:59 .
+drwxr-xr-x 17 tiian tiian 4096 gen 15 21:52 ..
+-rw-rw-r--  1 tiian tiian 4361 gen 15 22:00 ExampleXtaMACC31.class
+-rw-r--r--  1 tiian tiian 9655 gen 15 21:57 ExampleXtaMACC31.java
+	  </screen></td></tr></tbody>
+	</table>
+	another one for Application Program 2
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -la
+total 28
+drwxrwxr-x  2 tiian tiian 4096 gen 15 21:59 .
+drwxr-xr-x 17 tiian tiian 4096 gen 15 21:52 ..
+-rw-rw-r--  1 tiian tiian 4361 gen 15 22:00 ExampleXtaMACC31.class
+-rw-r--r--  1 tiian tiian 9655 gen 15 21:57 ExampleXtaMACC31.java
+	  </screen></td></tr></tbody>
+	</table>
+	and the last one for Oracle <command>sqlplus</command> client
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - Oracle]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~$ . ./oracle_env.sh 
+tiian@ubuntu1404-64:~$ sqlplus hr/hr@lixa_ora_db
 
+SQL*Plus: Release 12.1.0.2.0 Production on Tue Mar 27 22:08:39 2018
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Last Successful login time: Sun Aug 26 2018 11:42:15 +02:00
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL&gt;
+	  </screen></td></tr></tbody>
+	</table>
+	create a FIFO (named pipe) in current directory:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ ls -la
+total 28
+drwxrwxr-x  2 tiian tiian 4096 gen 15 22:06 .
+drwxr-xr-x 17 tiian tiian 4096 gen 15 21:52 ..
+-rw-rw-r--  1 tiian tiian 4361 gen 15 22:00 ExampleXtaMACC31.class
+-rw-r--r--  1 tiian tiian 9655 gen 15 21:57 ExampleXtaMACC31.java
+prw-rw-r--  1 tiian tiian    0 gen 15 22:06 xid.fifo
+	  </screen></td></tr></tbody>
+	</table>
+	set <varname>LIXA_PROFILE</varname> environment variable to
+	<constant>XTA_DYN</constant> a profile without static 
+	Resource Managers defined in
+	<filename>lixac_conf.xml</filename>:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ export LIXA_PROFILE=XTA_DYN
+tiian@ubuntu1404-64:~/tmp$ echo $LIXA_PROFILE
+XTA_DYN
+	  </screen></td></tr></tbody>
+	</table>
+	<warning>
+	  Oracle JDBC client requires an entropy generator as explained
+	  <link xlink:href="http://www.usn-it.de/index.php/2009/02/20/oracle-11g-jdbc-driver-hangs-blocked-by-devrandom-entropy-pool-empty/">here</link>; at
+	  least two options are available:
+	  <itemizedlist mark="bullet">
+            <listitem><para>
+	      the parameter
+	      <parameter class='command'>-Djava.security.egd=file:/dev/./urandom
+	      </parameter>
+	      can be added to the command line
+	    </para></listitem>
+            <listitem><para>
+	      an entropy generator, like <command>rngd</command> has been
+	      properly configured and it's up and running
+	    </para></listitem>
+	  </itemizedlist>
+	</warning>
+	Supposing that <command>rngs</command> is running,
+	in the first terminal session, start
+	<command>ExampleXtaMACC31</command> in the role of AP1 and in the
+	second terminal session, start <command>ExampleXtaMACC31</command>
+	in the role of AP2
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACC31 1 1 1 xid.fifo
+Oracle, executing &gt;INSERT INTO authors VALUES(1930, 'Bonatti', 'Walter')&lt;
+XID='1279875137.320838774dc24d13a34a70675c1b4f72.308b817e7df229ddc410d4062b9a99cb' has been written to file 'xid.fifo'
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACC31 1 1 0 xid.fifo
+XID='1279875137.320838774dc24d13a34a70675c1b4f72.308b817e7df229ddc410d4062b9a99cb' has been read from file 'xid.fifo'
+Oracle, executing &gt;INSERT INTO authors VALUES(1948, 'Casarotto', 'Renato')&lt;
+	  </screen></td></tr></tbody>
+	</table>
+	<note><para>
+	  Application Program 1 suspends its execution and waits 
+	  Application Program 2 start: this is a consequence of the FIFO
+	  behavior
+	</para></note>
+	check Oracle table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - Oracle]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL&gt; select * from authors;
+
+        ID LAST_NAME            FIRST_NAME
+---------- -------------------- --------------------
+      1948 Casarotto            Renato
+      1930 Bonatti              Walter
+
+	  </screen></td></tr></tbody>
+	</table>
+	if you start the superior and subordinate Application Program in the
+	right order you can use even a regular file instead of the named FIFO
+	(pipe); try to perform a <command>SQL DELETE</command> followed
+	by a rollback using the name of a temporary file to use:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACC31 0 0 1 xid2.fifo
+Oracle, executing &gt;DELETE FROM authors WHERE id=1930&lt;
+XID='1279875137.eab32ba6aecc45e7924ac51b4e970321.308b817e7df229ddc410d4062b9a99cb' has been written to file 'xid2.fifo'
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACC31 0 0 0 xid2.fifo
+XID='1279875137.eab32ba6aecc45e7924ac51b4e970321.308b817e7df229ddc410d4062b9a99cb' has been read from file 'xid2.fifo'
+Oracle, executing &gt;DELETE FROM authors WHERE id=1948&lt;
+	  </screen></td></tr></tbody>
+	</table>
+	<note><para>
+	  Application Program 1 ends its execution without waiting for
+	  Application Program 2 start: this is a consequence of the regular
+	  file behavior
+	</para></note>
+	check Oracle table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - Oracle]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL&gt; select * from authors;
+
+        ID LAST_NAME            FIRST_NAME
+---------- -------------------- --------------------
+      1948 Casarotto            Renato
+      1930 Bonatti              Walter
+
+	  </screen></td></tr></tbody>
+	</table>
+	as expected, the two rows are still in the table because the XA global
+	transaction has been rolled back by Application Program 2.
+	To complete the exercise, perform a <command>SQL DELETE</command>
+	followed by a commit:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACC31 1 0 1 xid.fifo
+Oracle, executing &gt;DELETE FROM authors WHERE id=1930&lt;
+XID='1279875137.1015009fb4714fdb9a2545d76b369f48.308b817e7df229ddc410d4062b9a99cb' has been written to file 'xid.fifo'
+	  </screen></td></tr></tbody>
+	</table>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - AP2]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/opt/oracle/OJDBC-Full/ojdbc7.jar:. ExampleXtaMACC31 1 0 0 xid.fifo
+XID='1279875137.1015009fb4714fdb9a2545d76b369f48.308b817e7df229ddc410d4062b9a99cb' has been read from file 'xid.fifo'
+Oracle, executing &gt;DELETE FROM authors WHERE id=1948&lt;
+	  </screen></td></tr></tbody>
+	</table>
+	check Oracle table content:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session - Oracle]</td></tr></thead>
+	  <tbody><tr><td><screen>
+SQL&gt; select * from authors;
+
+no rows selected
+
+	  </screen></td></tr></tbody>
+	</table>
+	The table is now empty.
+      </para>
+      <section>
+	<title>Source Code</title>
+	<para>
+	  Source code for program <filename>ExampleXtaMACC31.java</filename>
+	  is installed in directory
+	  <filename>/opt/lixa/share/doc/lixa-X.Y.Z/examples/xta/java</filename>
+	  and is available on <link xlink:href="https://github.com/tiian/lixa/blob/master/doc/examples/xta/java/ExampleXtaMACC31.java">GitHub</link>.
+	  Source code is fully commented for readability.
+	</para>
+      </section>
+    </section>
   </section>
   <section xml:id="xta_macbps">
     <title>The
