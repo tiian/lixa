@@ -69,15 +69,13 @@ and execute them with these commands:
 `java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:. ExampleXtaMACBPA31 1 1 sup2sub sub2sup`
 `java -Djava.library.path=/opt/lixa/lib -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/postgresql.jar:. ExampleXtaMACBPA32 1 1 sup2sub sub2sup`
 
-### These links are useful to debug Oracle JDBC thin client behavior ###
+### The following links are useful to debug Oracle JDBC thin client behavior ###
 
 https://docs.oracle.com/cd/E11882_01/java.112/e12265/connect.htm#CHDDCICA
 
 https://docs.oracle.com/database/121/JJDBC/xadistra.htm#JJDBC28878
 
-https://docs.oracle.com/cd/A97335_02/apps.102/a83724/xadistr4.htm
-
-here is a sample file that can be used for logging:
+Here is a sample file that can be used for logging:
 
 .level=SEVERE
 oracle.jdbc.level=ALL
