@@ -20,6 +20,10 @@ LOG:
 		 mix 1.7.2 and previous versions in the same environment
 		 (message LXC030E will be logged in the event of level
 		 mismatch); LIXA_MSG_LEVEL=3.
+		 *** NOTE: ***
+		 This release uses function get_native_connection() instead of
+		 _get_native_connection() as it's provided by psycopg2 2.8
+		 (next release, already in git master tree)
 
 2018-10-28 1.7.1 Python API for XTA
 		 Both Python 2 and Python 3 can be used with XTA for Python.

@@ -659,8 +659,8 @@ make
 	      These are the necessary packages on CentOS: 
 	      mysql.i686 mysql-devel.i686 mysql-server.i686
 	  </para></footnote>
-	  as a Resource
-	  Manager coordinated by LIXA; only versions 5.0, 5.1, 5.5 and 5.6 have been
+	  as a Resource Manager coordinated by LIXA; only versions 5.0, 5.1,
+	  5.5 and 5.6 have been
 	  tested, but there should not be relevant differences with a
 	  different version. Use something like this:
 	  <screen>
@@ -674,19 +674,45 @@ make
 	  not necessary to specify the MySQL installation directory because
 	  the <command>mysql_config</command> utility command is used.
 	</para>
-	<para>
-	  If you are interested in XTA for Java (see
-	  <xref linkend="XTA_technology_matrix"/>), you need a JDBC driver
-	  that supports MySQL and JTA standard. Specify the JAR file that
-	  contains the JDBC driver during config phase with something like
-	  this:
-	  <screen>
+	<section xml:id="Mysql_XTA_for_Python">
+	  <title>XTA for Python</title>
+	  <para>
+	    If you want to use XTA for Python (see
+	    <xref linkend="XTA_technology_matrix"/>), you need the
+	    <quote>mysqlclient-python</quote> driver
+	    with function <function>_get_native_connection</function> enabled:
+	    at the time of this writing, it's not yet available in a stable
+	    version, but it's ready to use in the git master branch. These
+	    commands should help you to install it from the source code:
+	    <screen>
+git clone https://github.com/PyMySQL/mysqlclient-python.git
+
+cd mysqlclient-python
+
+python setup.py build
+
+sudo python setup.py install
+	    </screen>
+	    The required feature should be available in next 
+	    mysqlclient-python version (1.4.0).
+	  </para>
+	</section>
+	<section>
+	  <title>XTA for Java</title>
+	  <para>
+	    If you want to use XTA for Java (see
+	    <xref linkend="XTA_technology_matrix"/>), you need a JDBC driver
+	    that supports MySQL and JTA standard. Specify the JAR file that
+	    contains the JDBC driver during config phase with something like
+	    this:
+	    <screen>
 ./configure --with-mysql --with-mysql-jdbc=/usr/share/java/mysql.jar
-	  </screen>
-	  As a general warning, don't stick to the version provided by your
-	  Linux distribution: sometimes a better one is available in the
-	  vendor's portal.
-	</para>
+	    </screen>
+	    As a general warning, don't stick to the version provided by your
+	    Linux distribution: sometimes a better one is available in the
+	    vendor's portal.
+	  </para>
+	</section>
 	<note><para>
 	    MySQL does not supply an XA standard switch structure, but
 	    only some SQL non standard statements (
@@ -798,7 +824,7 @@ make
 	</para>
       </section>
       <section>
-	<title>PostgreSQL 8.3, 8.4, 9.2, 9.3<footnote><para>
+	<title>PostgreSQL 8.3, 8.4, 9.2, 9.3, 9.5, 10<footnote><para>
 	      The Trademark Policy of PostgreSQL is available at this link:
 	      <link xlink:href="http://wiki.postgresql.org/wiki/Trademark_Policy">
 		http://wiki.postgresql.org/wiki/Trademark_Policy</link>
@@ -821,21 +847,47 @@ make
 	  </screen>
 	  to create a loadable module containing the switch structure.
 	</para>
-	<para>
-	  If you are interested in XTA for Java (see
-	  <xref linkend="XTA_technology_matrix"/>), you need a JDBC driver
-	  that supports PostgreSQL and JTA standard. Specify the JAR file that
-	  contains the JDBC driver during config phase with something like
-	  this:
-	  <screen>
+	<section xml:id="Postgresql_XTA_for_Python">
+	  <title>XTA for Python</title>
+	  <para>
+	    If you want to use XTA for Python (see
+	    <xref linkend="XTA_technology_matrix"/>), you need the
+	    <quote>psycopg2</quote> driver
+	    with function <function>get_native_connection</function> enabled:
+	    at the time of this writing, it's not yet available in a stable
+	    version, but it's ready to use in the git master branch. These
+	    commands should help you to install it from the source code:
+	    <screen>
+git clone https://github.com/psycopg/psycopg2.git
+
+cd psycopg2
+
+python setup.py build
+
+sudo python setup.py install
+	    </screen>
+	    The required feature should be available in next psycopg2 version 
+	    (2.8).
+	  </para>
+	</section>
+	<section>
+	  <title>XTA for Java</title>
+	  <para>
+	    If you want to use XTA for Java (see
+	    <xref linkend="XTA_technology_matrix"/>), you need a JDBC driver
+	    that supports PostgreSQL and JTA standard. Specify the JAR file that
+	    contains the JDBC driver during config phase with something like
+	    this:
+	    <screen>
 ./configure --with-postgresql --with-postgresql-jdbc=/opt/postgresql/postgresql.jar
-	  </screen>
-	  As a general warning, don't stick to the version provided by your
-	  Linux distribution: sometimes a better one is available in the
-	  project's portal. For instance, version 9.2-1002-1 distributed with
-	  Ubuntu 14.04 does not pass all case tests due a bug related
-	  to XA protocol implementation.
-	</para>
+	    </screen>
+	    As a general warning, don't stick to the version provided by your
+	    Linux distribution: sometimes a better one is available in the
+	    project's portal. For instance, version 9.2-1002-1 distributed with
+	    Ubuntu 14.04 does not pass all case tests due a bug related
+	    to XA protocol implementation.
+	  </para>
+	</section>
 	<note><para>
 	    PostgreSQL does not supply an XA standard switch structure, but
 	    only some SQL non standard statements (

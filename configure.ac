@@ -4,7 +4,7 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 #hardwired configuration
 _XTA_PREFIX="xta"
-_RELEASE_DATE="2019-01-15"
+_RELEASE_DATE="2019-01-17"
 AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 LT_INIT
 AC_PROG_LIBTOOL

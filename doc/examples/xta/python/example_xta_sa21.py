@@ -78,7 +78,7 @@ tm = TransactionManager()
 # PostgreSQL driver is available here:
 # https://github.com/tiian/psycopg2/tree/get-native-connection
 # it should be available in Psycopg2 2.8
-xar1 = PostgresqlXaResource(rm1._get_native_connection(), "PostgreSQL", "dbname=testdb")
+xar1 = PostgresqlXaResource(rm1.get_native_connection(), "PostgreSQL", "dbname=testdb")
 
 # create an XA resource for MySQL
 # second parameter "MySQL" is descriptive

@@ -258,11 +258,8 @@
 		<entry>Y</entry>
 		<entry>-</entry>
 		<entry>Y<footnote>
-		<para>The MySQLdb driver provided by mysqlclient-python project
-		must be used: the first version that support XTA is provided
-		by commit 
-		<link xlink:href="https://github.com/PyMySQL/mysqlclient-python/commit/54c69436f45f2c78b3ace754780a1a265e60d430">54c69436f45f2c78b3ace754780a1a265e60d430</link>.
-		</para></footnote></entry>
+		<para>See <xref linkend="Mysql_XTA_for_Python"/>.</para>
+		</footnote></entry>
 	      </row>
 	      <row>
 		<entry>Oracle DBMS</entry>
@@ -290,10 +287,8 @@
 		<entry>Y</entry>
 		<entry>-</entry>
 		<entry>Y<footnote>
-		<para>Psycopg2 driver must be used. A patched version of the
-		source code is available in this
-		<link xlink:href="https://github.com/tiian/psycopg2/tree/get-native-connection">github fork</link>. It should be part of Psycopg 2.8
-		</para></footnote>
+		<para>See <xref linkend="Postgresql_XTA_for_Python"/>.</para>
+	      </footnote>
 		</entry>
 	      </row>
 	    </tbody>

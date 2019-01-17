@@ -4588,7 +4588,7 @@ esac
 
 #hardwired configuration
 _XTA_PREFIX="xta"
-_RELEASE_DATE="2019-01-15"
+_RELEASE_DATE="2019-01-17"
 
 cat >>confdefs.h <<_ACEOF
 #define _RELEASE_DATE "$_RELEASE_DATE"

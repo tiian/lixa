@@ -74,7 +74,7 @@ tm = TransactionManager()
 # PostgreSQL driver is available here:
 # https://github.com/tiian/psycopg2/tree/get-native-connection
 # it should be available in Psycopg2 2.8
-xar = PostgresqlXaResource(rm._get_native_connection(), "PostgreSQL", "dbname=testdb")
+xar = PostgresqlXaResource(rm.get_native_connection(), "PostgreSQL", "dbname=testdb")
 
 # Create a new XA global transaction and retrieve a reference from
 # the TransactionManager object
