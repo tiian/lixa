@@ -36,6 +36,9 @@
 /* XTA includes */
 #include "xta.h"
 #include "xta_java_xa_resource.h"
+/* other JNI function includes */
+#include "xtaexception_jni.h"
+#include "xtaxid_jni.h"
 
 
 
@@ -166,7 +169,7 @@ Java_org_tiian_lixa_xta_Transaction_getNativeObject(
     jclass this_class;
     jfieldID field_id;
     jobject byte_buffer;
-    xta_transaction_t *tx;
+    xta_transaction_t *tx = NULL;
 
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_"
                 "getNativeObject\n"));
@@ -293,48 +296,6 @@ GPtrArray* Java_org_tiian_lixa_xta_Transaction_getNativeResources(
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getNativeResources/"
                 "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return array;
-}
-
-
-
-/*
- * Class:     org_tiian_lixa_xta_Transaction
- * Method:    delete
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_delete(
-    JNIEnv *env, jobject this_obj)
-{
-    enum Exception { NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_delete\n"));
-    
-    TRY {
-        GPtrArray *array = NULL;
-        
-        /* delete native xta_transaction_t object */
-        xta_transaction_delete(
-            Java_org_tiian_lixa_xta_Transaction_getNativeObject(
-                env, this_obj));
-        /* remove all XA resources */
-        g_ptr_array_foreach(array, (GFunc)xta_java_xa_resource_delete, NULL);
-        /* remove the array */
-        g_ptr_array_free(array, TRUE);
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_delete/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return;
 }
 
 
@@ -616,7 +577,7 @@ Java_org_tiian_lixa_xta_Transaction_getXid
  * Method:    start
  * Signature: (Z)V
  */
-JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_start
+JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_start
 (JNIEnv *env, jobject this_obj, jboolean multiple_branches)
 {
     enum Exception { NULL_OBJECT
@@ -951,8 +912,6 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_recover
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
-    const char *xid = NULL;
-    
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_recover\n"));
     TRY {
         xta_transaction_t *tx = NULL;

@@ -47,6 +47,11 @@ namespace xta {
          * implementation)
          */
         Transaction(xta_transaction_t *tx);
+        /**
+         * Destructor must be called only by the @ref TransactionManager
+         * class; if called directly by the customer program, it will just
+         * nullify the pointer to the underlaying C object
+         */
         ~Transaction();
         /**
          * Enlist the resource specified with the Transaction associated with

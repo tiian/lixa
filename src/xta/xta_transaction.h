@@ -104,8 +104,11 @@ extern "C" {
     /**
      * Delete a Transaction object
      * @param[in] transact : transaction object to delete
+     * @deprecated only @ref xta_transaction_manager_delete should call this
+     *             function. If arbitrarily called, segmentation fault due to
+     *             double free of the same pointer can happen.
      */
-    void xta_transaction_delete(xta_transaction_t *transact);
+    void xta_transaction_delete(xta_transaction_t *transact) DEPRECATED;
 
 
 

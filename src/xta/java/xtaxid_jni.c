@@ -33,6 +33,7 @@
 /* XTA includes */
 #include "xta.h"
 #include "xtaxid_jni.h"
+#include "xtaexception_jni.h"
 
 
 
@@ -266,7 +267,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_tiian_lixa_xta_XtaXid_getBranchQualifier
         if (NULL == (xid = Java_org_tiian_lixa_xta_XtaXid_getNativeObject(
                          env, this_obj)))
             THROW(NULL_OBJECT);
-        if (0 >= (len = xta_xid_get_bqual(xid, data)))
+        if (0 >= (len = xta_xid_get_bqual(xid, (char *)data)))
             THROW(OBJ_CORRUPTED);
         ret = (*env)->NewByteArray(env, len);
         if ((*env)->ExceptionCheck(env))
@@ -380,7 +381,7 @@ Java_org_tiian_lixa_xta_XtaXid_getGlobalTransactionId
         if (NULL == (xid = Java_org_tiian_lixa_xta_XtaXid_getNativeObject(
                          env, this_obj)))
             THROW(NULL_OBJECT);
-        if (0 >= (len = xta_xid_get_gtrid(xid, data)))
+        if (0 >= (len = xta_xid_get_gtrid(xid, (char *)data)))
             THROW(OBJ_CORRUPTED);
         ret = (*env)->NewByteArray(env, len);
         if ((*env)->ExceptionCheck(env))

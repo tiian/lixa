@@ -34,6 +34,7 @@
 #include "xta.h"
 /* other JNI function includes */
 #include "transaction_jni.h"
+#include "xtaexception_jni.h"
 
 
 
@@ -59,7 +60,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_TransactionManager_newJNI(
     
     jclass this_class;
     jfieldID field_id;
-    jobject byte_buffer;
+    jobject byte_buffer = NULL;
     xta_transaction_manager_t *tm = NULL;
     
     LIXA_TRACE(("Java_org_tiian_lixa_xta_TransactionManager_newJNI\n"));

@@ -131,6 +131,13 @@ xta_transaction_manager_get_config(void) {
 
 
 
+/*
+ * -Wdeprecated-declarations is disabled because this function is allowed to
+ * call xta_transaction_delete()
+ */
+#ifdef __GNUC__
+# pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 xta_transaction_t *
 xta_transaction_manager_create_transaction(xta_transaction_manager_t *tm)
 {
@@ -218,3 +225,6 @@ xta_transaction_manager_create_transaction(xta_transaction_manager_t *tm)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return tx;
 }
+#ifdef __GNUC__
+# pragma GCC diagnostic warning "-Wdeprecated-declarations"
+#endif

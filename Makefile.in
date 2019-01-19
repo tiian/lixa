@@ -467,7 +467,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = etc src var tests doc ext utils
+SUBDIRS = etc src var tests doc utils ext
 dist_doc_DATA = README COPYING TestLog lgpl-2.1.txt
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive

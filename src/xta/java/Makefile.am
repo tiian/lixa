@@ -1,5 +1,6 @@
 JAVA_PKGDIR = org/tiian/lixa/xta
 
+AM_CFLAGS = -Wall -fno-strict-aliasing
 liblixta_java_la_CPPFLAGS = -I$(top_srcdir)/src/common \
 	-I$(top_srcdir)/src/client -I$(top_srcdir)/src/xta
 liblixta_java_la_LIBADD = ../liblixta.la

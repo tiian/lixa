@@ -1,21 +1,10 @@
-Final release tests
-  ubuntu 1604:
-
- 37: XTA Java/2.0/0.1 Resume and Delete             *** Error in `java': double free or corruption (out): 0x00007f56e05ea730 ***
-======= Backtrace: =========
-/lib/x86_64-linux-gnu/libc.so.6(+0x777e5)[0x7f56e73ca7e5]
-/lib/x86_64-linux-gnu/libc.so.6(+0x8037a)[0x7f56e73d337a]
-/lib/x86_64-linux-gnu/libc.so.6(cfree+0x4c)[0x7f56e73d753c]
-/tmp/lixa-1.7.2-rc/src/xta/.libs/liblixta.so.1(xta_transaction_delete+0x81)[0x7f56a79eb5e1]
-/lib/x86_64-linux-gnu/libglib-2.0.so.0(+0x381ba)[0x7f56a6ebe1ba]
-/lib/x86_64-linux-gnu/libglib-2.0.so.0(g_hash_table_remove_all+0x63)[0x7f56a6ebf103]
-/lib/x86_64-linux-gnu/libglib-2.0.so.0(g_hash_table_destroy+0xe)[0x7f56a6ebf13e]
-/tmp/lixa-1.7.2-rc/src/xta/.libs/liblixta.so.1(xta_transaction_manager_delete+0x42)[0x7f56a79eca22]
-[0x7f56d1018407]
+Final release tests: restart from ubuntu 1604
 
 
 
 **********
+
+Remove ext subdir for PHP old stuff
 
 Implementation of xa_recover (useful for the future javarj):
 - an example of receiving arrays of objects from Java to JNI: CallObjectMethod    https://github.com/joeferner/node-java/blob/master/src/utils.cpp

@@ -67,17 +67,11 @@ public class Transaction {
     Transaction() {
         return;
     }
-    /*
-     * Delete the native xta_transaction_t object and the native C XA resources
-     * Called by finalize method
-     */
-    private native void delete();
     /**
      * Release the C native object when Java object finalization is executed
      */
     protected void finalize() {
         if (null != NativeResources) {
-            delete();
             NativeObject = null;
             NativeResources = null;
         }
