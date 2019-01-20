@@ -92,13 +92,13 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_mysql_jdbc.m4 \
 	$(top_srcdir)/m4include/ax_lib_webspheremq.m4 \
 	$(top_srcdir)/m4include/ax_docbook.m4 \
+	$(top_srcdir)/m4include/ax_jni_include_dir.m4 \
 	$(top_srcdir)/m4include/ax_check_classpath.m4 \
 	$(top_srcdir)/m4include/ax_prog_javac.m4 \
 	$(top_srcdir)/m4include/ax_prog_javac_works.m4 \
 	$(top_srcdir)/m4include/ax_prog_java.m4 \
 	$(top_srcdir)/m4include/ax_prog_java_works.m4 \
 	$(top_srcdir)/m4include/ax_check_java_home.m4 \
-	$(top_srcdir)/m4include/ax_prog_javah.m4 \
 	$(top_srcdir)/m4include/ax_prog_jar.m4 \
 	$(top_srcdir)/m4include/ax_prog_javadoc.m4 \
 	$(top_srcdir)/m4include/ax_python_devel.m4 \
@@ -278,7 +278,6 @@ JAR = @JAR@
 JAVA = @JAVA@
 JAVAC = @JAVAC@
 JAVADOC = @JAVADOC@
-JAVAH = @JAVAH@
 JAVA_PATH_NAME = @JAVA_PATH_NAME@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
@@ -381,6 +380,7 @@ WEBSPHEREMQ_PATH = @WEBSPHEREMQ_PATH@
 WEBSPHEREMQ_PGMLIB = @WEBSPHEREMQ_PGMLIB@
 WEBSPHEREMQ_SWITCH_TYPE = @WEBSPHEREMQ_SWITCH_TYPE@
 XSLTPROC = @XSLTPROC@
+_ACJNI_JAVAC = @_ACJNI_JAVAC@
 _RELEASE_DATE = @_RELEASE_DATE@
 _XTA_PREFIX = @_XTA_PREFIX@
 abs_builddir = @abs_builddir@

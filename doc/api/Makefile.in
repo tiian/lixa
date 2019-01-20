@@ -92,13 +92,13 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_mysql_jdbc.m4 \
 	$(top_srcdir)/m4include/ax_lib_webspheremq.m4 \
 	$(top_srcdir)/m4include/ax_docbook.m4 \
+	$(top_srcdir)/m4include/ax_jni_include_dir.m4 \
 	$(top_srcdir)/m4include/ax_check_classpath.m4 \
 	$(top_srcdir)/m4include/ax_prog_javac.m4 \
 	$(top_srcdir)/m4include/ax_prog_javac_works.m4 \
 	$(top_srcdir)/m4include/ax_prog_java.m4 \
 	$(top_srcdir)/m4include/ax_prog_java_works.m4 \
 	$(top_srcdir)/m4include/ax_check_java_home.m4 \
-	$(top_srcdir)/m4include/ax_prog_javah.m4 \
 	$(top_srcdir)/m4include/ax_prog_jar.m4 \
 	$(top_srcdir)/m4include/ax_prog_javadoc.m4 \
 	$(top_srcdir)/m4include/ax_python_devel.m4 \
@@ -198,7 +198,6 @@ JAR = @JAR@
 JAVA = @JAVA@
 JAVAC = @JAVAC@
 JAVADOC = @JAVADOC@
-JAVAH = @JAVAH@
 JAVA_PATH_NAME = @JAVA_PATH_NAME@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
@@ -301,6 +300,7 @@ WEBSPHEREMQ_PATH = @WEBSPHEREMQ_PATH@
 WEBSPHEREMQ_PGMLIB = @WEBSPHEREMQ_PGMLIB@
 WEBSPHEREMQ_SWITCH_TYPE = @WEBSPHEREMQ_SWITCH_TYPE@
 XSLTPROC = @XSLTPROC@
+_ACJNI_JAVAC = @_ACJNI_JAVAC@
 _RELEASE_DATE = @_RELEASE_DATE@
 _XTA_PREFIX = @_XTA_PREFIX@
 abs_builddir = @abs_builddir@
@@ -581,11 +581,13 @@ all:	$(MAYBE_API) $(MAYBE_XTA) $(MAYBE_XTA_CPP) $(MAYBE_XTAJAVA)
 @COND_DOXYGEN_TRUE@	$(top_srcdir)/src/xta/*.h \
 @COND_DOXYGEN_TRUE@	$(top_srcdir)/src/xta/*.c \
 @COND_DOXYGEN_TRUE@	doxygen_footer.html doxygen_header_xta.html
+@COND_DOXYGEN_TRUE@	$(MKDIR_P) xta/C
 @COND_DOXYGEN_TRUE@	doxygen doxygen.xta
 @COND_DOXYGEN_TRUE@xta/CPP/html/index.html:	doxygen.xta-cpp \
 @COND_DOXYGEN_TRUE@	$(top_srcdir)/src/xta/cpp/*.hpp \
 @COND_DOXYGEN_TRUE@	$(top_srcdir)/src/xta/cpp/*.cpp \
 @COND_DOXYGEN_TRUE@	doxygen_footer.html doxygen_header_xta-cpp.html
+@COND_DOXYGEN_TRUE@	$(MKDIR_P) xta/CPP
 @COND_DOXYGEN_TRUE@	doxygen doxygen.xta-cpp
 @COND_DOXYGEN_TRUE@lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 @COND_DOXYGEN_TRUE@	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h \

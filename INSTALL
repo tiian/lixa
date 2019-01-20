@@ -50,6 +50,16 @@ The simplest way to compile this package is:
      Running `configure' takes awhile.  While running, it prints some
      messages telling which features it is checking for.
 
+  1b. Use this command
+	touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
+     or this one
+	autoreconf -v -f -i
+     in the event that an error like the following one appears:
+	WARNING: 'aclocal-1.14' is missing on your system.
+        	 You should only need it if you modified 'acinclude.m4' or
+	         'configure.ac' or m4 files included by 'configure.ac'.
+        	 The 'aclocal' program is part of the GNU Automake package:
+
   2. Type `make' to compile the package.
 
   3. Optionally, type `make check' to run any self-tests that come with

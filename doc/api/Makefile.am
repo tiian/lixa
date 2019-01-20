@@ -41,11 +41,13 @@ xta/C/html/index.html:	doxygen.xta \
 	$(top_srcdir)/src/xta/*.h \
 	$(top_srcdir)/src/xta/*.c \
 	doxygen_footer.html doxygen_header_xta.html
+	$(MKDIR_P) xta/C
 	doxygen doxygen.xta
 xta/CPP/html/index.html:	doxygen.xta-cpp \
 	$(top_srcdir)/src/xta/cpp/*.hpp \
 	$(top_srcdir)/src/xta/cpp/*.cpp \
 	doxygen_footer.html doxygen_header_xta-cpp.html
+	$(MKDIR_P) xta/CPP
 	doxygen doxygen.xta-cpp
 lixa/html/index.html:	doxygen.lixa $(top_srcdir)/src/client/*.h \
 	$(top_srcdir)/src/common/*.h $(top_srcdir)/src/server/*.h \

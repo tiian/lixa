@@ -105,7 +105,9 @@ Ubuntu		Python		swig python-dev python-setuptools
 Ubuntu		Python3		swig python3-dev python3-setuptools
 RHEL 7.5	Python		swig python-devel 
 
-Ubuntu		Java		default-jdk rng-tools
+Ubuntu		Java		default-jdk rng-tools libmysql-java
+CentOS 7.x	Java		API java-1.8.0-openjdk* rng-tools
+				mysql-connector-java
 
 Optional packages:
 O.S.		Feature		Packages

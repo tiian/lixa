@@ -1,16 +1,16 @@
 LOG:
 
-	   1.7.2 Java API for XTA
+2019-01-20 1.7.2 Java API for XTA
 		 These functions/methods are now deprecated because useless:
 		 - xta_transaction_open
 		 - xta_transaction_close
 		 they will be removed in the near future.
 		 Renamed to lowercase C++ API methods
-		 Removed xta::Transaction.Open
-		 Removed xta::Transaction.Close
+		 	Removed xta::Transaction.Open
+		 	Removed xta::Transaction.Close
 		 Renamed to lowercase Python API methods
-		 Removed Transaction.Open
-		 Removed Transaction.Close
+		 	Removed Transaction.Open
+		 	Removed Transaction.Close
 		 *** WARNING: ***
 		 This release breaks compatibility with previous versions of
 		 C++ and Python XTA API: the first char of the method names

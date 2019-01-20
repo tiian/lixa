@@ -1,10 +1,10 @@
-AC_INIT([lixa], [1.7.2-rc], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
+AC_INIT([lixa], [1.7.2], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 #hardwired configuration
 _XTA_PREFIX="xta"
-_RELEASE_DATE="2019-01-17"
+_RELEASE_DATE="2019-01-20"
 AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 LT_INIT
 AC_PROG_LIBTOOL
@@ -179,6 +179,14 @@ then
 	CPP_COMPILER_AVAILABLE="yes"
 fi
 
+# Checking jni.h header file
+m4_include(m4include/ax_jni_include_dir.m4)
+AX_JNI_INCLUDE_DIR
+echo "JNI_INCLUDE_DIRS: $JNI_INCLUDE_DIRS"
+for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
+do
+	CPPFLAGS="$CPPFLAGS -I$JNI_INCLUDE_DIR"
+done
 # Checking if Java is available
 m4_include(m4include/ax_check_classpath.m4)
 AX_CHECK_CLASSPATH
@@ -190,8 +198,6 @@ m4_include(m4include/ax_prog_java_works.m4)
 AX_PROG_JAVA
 m4_include(m4include/ax_check_java_home.m4)
 AX_CHECK_JAVA_HOME
-m4_include(m4include/ax_prog_javah.m4)
-AX_PROG_JAVAH
 m4_include(m4include/ax_prog_jar.m4)
 AX_PROG_JAR
 m4_include(m4include/ax_prog_javadoc.m4)
