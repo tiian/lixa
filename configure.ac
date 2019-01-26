@@ -1,10 +1,10 @@
-AC_INIT([lixa], [1.7.2], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
+AC_INIT([lixa], [1.7.3-dev], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 #hardwired configuration
 _XTA_PREFIX="xta"
-_RELEASE_DATE="2019-01-20"
+_RELEASE_DATE="2019-01-26"
 AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 LT_INIT
 AC_PROG_LIBTOOL
@@ -152,6 +152,14 @@ AC_ARG_ENABLE([xta],
 		[disable XTA (XA Transaction API) support]),
 	[LIXA_XTA="no" ], [LIXA_XTA="yes" ])
 AM_CONDITIONAL([COMPILE_XTA], [test "$LIXA_XTA" = "yes"])
+AC_ARG_ENABLE([xta-java],
+	AS_HELP_STRING([--disable-xta-java],
+		[disable XTA (XA Transaction API) for Java support]),
+	[LIXA_XTA_JAVA="no" ], [LIXA_XTA_JAVA="yes" ])
+AC_ARG_ENABLE([xta-python],
+	AS_HELP_STRING([--disable-xta-python],
+		[disable XTA (XA Transaction API) for Python support]),
+	[LIXA_XTA_PYTHON="no" ], [LIXA_XTA_PYTHON="yes" ])
 AC_ARG_ENABLE([debug],
         AS_HELP_STRING([--enable-debug],
                 [enable debug code (assert statements)]),
@@ -179,54 +187,65 @@ then
 	CPP_COMPILER_AVAILABLE="yes"
 fi
 
-# Checking jni.h header file
-m4_include(m4include/ax_jni_include_dir.m4)
-AX_JNI_INCLUDE_DIR
-echo "JNI_INCLUDE_DIRS: $JNI_INCLUDE_DIRS"
-for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
-do
-	CPPFLAGS="$CPPFLAGS -I$JNI_INCLUDE_DIR"
-done
-# Checking if Java is available
-m4_include(m4include/ax_check_classpath.m4)
-AX_CHECK_CLASSPATH
-m4_include(m4include/ax_prog_javac.m4)
-m4_include(m4include/ax_prog_javac_works.m4)
-AX_PROG_JAVAC
-m4_include(m4include/ax_prog_java.m4)
-m4_include(m4include/ax_prog_java_works.m4)
-AX_PROG_JAVA
-m4_include(m4include/ax_check_java_home.m4)
-AX_CHECK_JAVA_HOME
-m4_include(m4include/ax_prog_jar.m4)
-AX_PROG_JAR
-m4_include(m4include/ax_prog_javadoc.m4)
-AX_PROG_JAVADOC
-AM_CONDITIONAL([COND_JAVADOC], [test "z$JAVADOC" != "z"])
-
-if test "$LIXA_XTA" = "yes" -a "z$JAVA" != "z" -a "z$JAVAC" != "z" -a "z$JAR" != "z"
+# Check if XTA for Java must be built
+if test "$LIXA_XTA_JAVA" = "yes"
 then
-	LIXA_XTA_JAVA="yes"
+	# Checking jni.h header file
+	m4_include(m4include/ax_jni_include_dir.m4)
+	AX_JNI_INCLUDE_DIR
+	echo "JNI_INCLUDE_DIRS: $JNI_INCLUDE_DIRS"
+	for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
+	do
+		CPPFLAGS="$CPPFLAGS -I$JNI_INCLUDE_DIR"
+	done
+	# Checking if Java is available
+	m4_include(m4include/ax_check_classpath.m4)
+	AX_CHECK_CLASSPATH
+	m4_include(m4include/ax_prog_javac.m4)
+	m4_include(m4include/ax_prog_javac_works.m4)
+	AX_PROG_JAVAC
+	m4_include(m4include/ax_prog_java.m4)
+	m4_include(m4include/ax_prog_java_works.m4)
+	AX_PROG_JAVA
+	m4_include(m4include/ax_check_java_home.m4)
+	AX_CHECK_JAVA_HOME
+	m4_include(m4include/ax_prog_jar.m4)
+	AX_PROG_JAR
+	m4_include(m4include/ax_prog_javadoc.m4)
+	AX_PROG_JAVADOC
+	AM_CONDITIONAL([COND_JAVADOC], [test "z$JAVADOC" != "z"])
+
+	if "z$JAVA" != "z" -a "z$JAVAC" != "z" -a "z$JAR" != "z"
+	then
+		LIXA_XTA_JAVA="yes"
+	else
+		LIXA_XTA_JAVA="no"
+	fi
+	AM_CONDITIONAL([COMPILE_XTA_JAVA], [test "$LIXA_XTA_JAVA" = "yes"])
 else
-	LIXA_XTA_JAVA="no"
+	AM_CONDITIONAL([COND_JAVADOC], [/bin/false])
+	AM_CONDITIONAL([COMPILE_XTA_JAVA], [/bin/false])
 fi
-AM_CONDITIONAL([COMPILE_XTA_JAVA], [test "$LIXA_XTA_JAVA" = "yes"])
 
-# Check Python availability
-m4_include(m4include/ax_python_devel.m4)
-AX_PYTHON_DEVEL([>= '2.7'])
+# Check if XTA for Python must be built
+if test "$LIXA_XTA_PYTHON" = "yes"
+then
+	# Check Python availability
+	m4_include(m4include/ax_python_devel.m4)
+	AX_PYTHON_DEVEL([>= '2.7'])
 
-# Check SWIG availability
-m4_include(m4include/ax_pkg_swig.m4)
-AX_PKG_SWIG([2.0])
-m4_include(m4include/ax_swig_enable_cxx.m4)
-AX_SWIG_ENABLE_CXX
-#m4_include(m4include/ax_swig_multi_module_support.m4)
-#AX_SWIG_MULTI_MODULE_SUPPORT
-m4_include(m4include/ax_swig_python.m4)
-AX_SWIG_PYTHON
+	# Check SWIG availability
+	m4_include(m4include/ax_pkg_swig.m4)
+	AX_PKG_SWIG([2.0])
+	m4_include(m4include/ax_swig_enable_cxx.m4)
+	AX_SWIG_ENABLE_CXX
+	m4_include(m4include/ax_swig_python.m4)
+	AX_SWIG_PYTHON
 
-AM_CONDITIONAL([COMPILE_XTA_PYTHON], [test "$LIXA_XTA" = "yes" -a "z$SWIG" != "z" -a "z$PYTHON" != "z"])
+	AM_CONDITIONAL([COMPILE_XTA_PYTHON], [test "$LIXA_XTA" = "yes" -a "z$SWIG" != "z" -a "z$PYTHON" != "z"])
+else
+	AM_CONDITIONAL([COMPILE_XTA_PYTHON], [/bin/false])
+fi
 
 # Checking pkg-config is available
 AC_CHECK_PROGS(PKG_CONFIG, [pkg-config], [])
