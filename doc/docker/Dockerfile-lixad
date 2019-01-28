@@ -2,29 +2,32 @@
 FROM ubuntu:18.04
 # Update Ubuntu Software repository
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update
 # Install generic pre-requisites
-RUN apt-get install -y apt-utils
+RUN apt-get update && apt-get install -y apt-utils
 # Install run-time pre-requisites
 RUN apt-get install -y libxml2 libglib2.0 uuid-runtime
-# Install build pre-requisites
-#RUN apt-get install -y make gcc libglib2.0-dev libxml2-dev uuid-dev pkg-config automake
-RUN apt-get install -y make gcc pkg-config libxml2-dev libglib2.0-dev uuid-dev
-# get LIXA official tar
-# download directly from SourceForge:
-#ADD https://sourceforge.net/projects/lixa/files/latest/download /lixa.tar.gz
-# copy from local directory
-ADD lixa-1.7.3-dev.tar.gz /
-# expand the tar and remove it
-#RUN tar xzf lixa.tar.gz && rm lixa.tar.gz
-# configure
-RUN cd lixa-*.*.* && ./configure --disable-xta --disable-xta-java --disable-xta-python
-# build and install
-RUN cd lixa-*.*.* && make && make install
-# remove documentation
-RUN rm -rf /opt/lixa/share
-# remove build packages
-RUN apt-get remove -y make gcc pkg-config libxml2-dev libglib2.0-dev uuid-dev
-RUN apt-get autoremove -y
-RUN apt-get clean
+# build LIXA
+ENV LIXA_DOWNLOAD_URL https://sourceforge.net/projects/lixa/files/latest/download
+# @@@ temp
+COPY lixa-1.7.3-dev.tar.gz /
+# @@@ end temp
+RUN buildDeps='curl make gcc pkg-config libxml2-dev libglib2.0-dev uuid-dev' \
+	&& set -x \
+	&& apt-get install -y $buildDeps --no-install-recommends \
+	&& mkdir -p /lixa \
+#	&& curl -sSL "$LIXA_DOWNLOAD_URL" -o lixa.tar.gz \
+#	&& tar -xzf lixa.tar.gz -C /lixa \
+# @@@ temp
+	&& tar -xzf lixa-1.7.3-dev.tar.gz -C /lixa \
+	&& rm /lixa-1.7.3-dev.tar.gz \
+# @@@ end temp
+#	&& rm lixa.tar.gz 
+	&& cd /lixa/lixa-* \
+	&& ./configure --disable-xta --disable-xta-java --disable-xta-python \
+	&& make && make install \
+	&& rm -rf /opt/lixa/share \
+	&& rm -r /lixa \
+	&& apt-get purge -y --auto-remove $buildDeps \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/*
 
