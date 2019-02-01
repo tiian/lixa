@@ -1,5 +1,7 @@
 Provide docker images to have an easier microservice approach
 
+Implement --disable-client
+
 **********
 
 Remove ext subdir for PHP old stuff

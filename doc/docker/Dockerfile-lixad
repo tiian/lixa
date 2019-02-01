@@ -1,3 +1,8 @@
+# Build with
+#	docker build -t tiian/lixa-lixad:1.7.3 .
+# Execute with
+#	docker run --rm -p 2345:2345 -d tiian/lixa-lixad:1.7.3
+
 #Download base image ubuntu 18.04
 FROM ubuntu:18.04
 # Update Ubuntu Software repository
@@ -5,6 +10,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Install generic pre-requisites
 RUN apt-get update && apt-get install -y apt-utils
 # Install run-time pre-requisites
+#RUN apt-get install -y libxml2 libglib2.0 uuid-runtime --no-install-recommends --fix-missing
 RUN apt-get install -y libxml2 libglib2.0 uuid-runtime
 # build LIXA
 ENV LIXA_DOWNLOAD_URL https://sourceforge.net/projects/lixa/files/latest/download
@@ -21,13 +27,31 @@ RUN buildDeps='curl make gcc pkg-config libxml2-dev libglib2.0-dev uuid-dev' \
 	&& tar -xzf lixa-1.7.3-dev.tar.gz -C /lixa \
 	&& rm /lixa-1.7.3-dev.tar.gz \
 # @@@ end temp
-#	&& rm lixa.tar.gz 
+#	&& rm lixa.tar.gz \
 	&& cd /lixa/lixa-* \
 	&& ./configure --disable-xta --disable-xta-java --disable-xta-python \
 	&& make && make install \
-	&& rm -rf /opt/lixa/share \
+	&& rm -rf /opt/lixa/share /opt/lixa/bin /opt/lixa/include \
 	&& rm -r /lixa \
 	&& apt-get purge -y --auto-remove $buildDeps \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
+
+RUN	rm -rf /var/log/*
+# security hardening: LIXA state server will run using non root privileges
+RUN addgroup --system lixa \
+	&& adduser --system --ingroup lixa --shell /bin/bash lixa \
+	&& chown -R lixa:lixa /opt/lixa/etc/ /opt/lixa/var/
+# create an entry point
+COPY 	lixad-entrypoint.sh /home/lixa/
+RUN	chmod 540 /home/lixa/lixad-entrypoint.sh \
+	&& chown lixa:lixa /home/lixa/lixad-entrypoint.sh
+# publish port 2345
+EXPOSE 2345
+# basic trace messages: only MOD_SERVER and MOD_SERVER_LISTENER; see file
+# src/common/lixa_trace.h for more available values
+ENV LIXA_TRACE_MASK 0x5
+# start LIXA state server
+ENTRYPOINT ["/home/lixa/lixad-entrypoint.sh"]
+CMD ["lixad"]
 
