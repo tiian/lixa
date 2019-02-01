@@ -4,7 +4,7 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 #hardwired configuration
 _XTA_PREFIX="xta"
-_RELEASE_DATE="2019-01-26"
+_RELEASE_DATE="2019-02-01"
 AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 LT_INIT
 AC_PROG_LIBTOOL
@@ -29,7 +29,6 @@ AC_CONFIG_FILES([
   doc/images/Makefile
   doc/manuals/LIXA.xml
   doc/manuals/Makefile
-  etc/lixad_conf.xml
   etc/Makefile
   etc/lixavsr/Makefile
   ext/Makefile
@@ -147,19 +146,62 @@ EXPANDED_LOCALSTATEDIR=$(eval echo $localstatedir)
 EXPANDED_LIBDIR=$(eval echo $libdir)
 
 AC_PRESERVE_HELP_ORDER
+
+AC_ARG_ENABLE([client],
+	AS_HELP_STRING([--disable-client],
+		[disable LIXA (and XTA) client support: build only LIXA state server (lixad)]),
+	[LIXA_CLIENT="no"], [LIXA_CLIENT="yes"])
+if test "$LIXA_CLIENT" = "no"
+then
+	AC_MSG_NOTICE([LIXA client will not be compiled])
+fi
+AM_CONDITIONAL([COMPILE_CLIENT], [test "$LIXA_CLIENT" = "yes"])
+
 AC_ARG_ENABLE([xta],
 	AS_HELP_STRING([--disable-xta],
 		[disable XTA (XA Transaction API) support]),
 	[LIXA_XTA="no" ], [LIXA_XTA="yes" ])
+# LIXA_XTA requires LIXA_CLIENT
+if test "$LIXA_XTA" = "yes" -a "$LIXA_CLIENT" = "no"
+then
+	LIXA_XTA="no"
+	AC_MSG_WARN([XTA can not be compiled because LIXA client is disabled])
+fi
 AM_CONDITIONAL([COMPILE_XTA], [test "$LIXA_XTA" = "yes"])
+
+AC_ARG_ENABLE([xta-cpp],
+	AS_HELP_STRING([--disable-xta-cpp],
+		[disable XTA (XA Transaction API) for C++ support]),
+	[LIXA_XTA_CXX="no" ], [LIXA_XTA_CXX="yes" ])
+# LIXA_XTA_CXX requires LIXA_XTA
+if test "$LIXA_XTA_CXX" = "yes" -a "$LIXA_XTA" = "no"
+then
+	LIXA_XTA_CXX="no"
+	AC_MSG_WARN([XTA for C++ can not be compiled because XTA is disabled])
+fi
+
 AC_ARG_ENABLE([xta-java],
 	AS_HELP_STRING([--disable-xta-java],
 		[disable XTA (XA Transaction API) for Java support]),
 	[LIXA_XTA_JAVA="no" ], [LIXA_XTA_JAVA="yes" ])
+# LIXA_XTA_JAVA requires LIXA_XTA
+if test "$LIXA_XTA_JAVA" = "yes" -a "$LIXA_XTA" = "no"
+then
+	LIXA_XTA_JAVA="no"
+	AC_MSG_WARN([XTA for Java can not be compiled because XTA is disabled])
+fi
+
 AC_ARG_ENABLE([xta-python],
 	AS_HELP_STRING([--disable-xta-python],
 		[disable XTA (XA Transaction API) for Python support]),
 	[LIXA_XTA_PYTHON="no" ], [LIXA_XTA_PYTHON="yes" ])
+# LIXA_XTA_PYTHON requires LIXA_XTA_CXX
+if test "$LIXA_XTA_PYTHON" = "yes" -a "$LIXA_XTA_CXX" = "no"
+then
+	LIXA_XTA_PYTHON="no"
+	AC_MSG_WARN([XTA for Python can not be compiled because XTA for C++ is disabled])
+fi
+
 AC_ARG_ENABLE([debug],
         AS_HELP_STRING([--enable-debug],
                 [enable debug code (assert statements)]),
@@ -180,7 +222,7 @@ AM_PROG_CC_C_O
 # Checking if C++ compiler is available
 AC_MSG_CHECKING([if C++ compiler is available])
 CPP_COMPILER_AVAILABLE="no"
-AM_CONDITIONAL([COMPILE_XTA_CPP], [test "$LIXA_XTA" = "yes" -a "x$CXX" != "x"])
+AM_CONDITIONAL([COMPILE_XTA_CPP], [test "$LIXA_XTA_CXX" = "yes" -a "x$CXX" != "x"])
 if test "x$CXX" != "x"
 then
 	AC_MSG_RESULT([yes])
@@ -215,7 +257,7 @@ then
 	AX_PROG_JAVADOC
 	AM_CONDITIONAL([COND_JAVADOC], [test "z$JAVADOC" != "z"])
 
-	if "z$JAVA" != "z" -a "z$JAVAC" != "z" -a "z$JAR" != "z"
+	if test "z$JAVA" != "z" -a "z$JAVAC" != "z" -a "z$JAR" != "z"
 	then
 		LIXA_XTA_JAVA="yes"
 	else

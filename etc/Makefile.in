@@ -80,8 +80,7 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = etc
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(srcdir)/lixad_conf.xml.in $(dist_etc_DATA) \
-	$(dist_noinst_DATA)
+	$(dist_etc_DATA) $(dist_noinst_DATA)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -113,7 +112,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h \
 	$(top_builddir)/src/client/lixa.h \
 	$(top_builddir)/src/xta/xta.h
-CONFIG_CLEAN_FILES = lixad_conf.xml
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -447,8 +446,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = lixavsr
 etcdir = $(sysconfdir)
-dist_etc_DATA = lixac_conf.xml lixad_conf.xml
-dist_noinst_DATA = lixac_conf.xml.in lixad_conf.xml.in
+dist_etc_DATA = lixac_conf.xml lixad_conf.xml lixad1_conf.xml
+dist_noinst_DATA = lixac_conf.xml.in lixad_conf.xml.in lixad1_conf.xml.in
 all: all-recursive
 
 .SUFFIXES:
@@ -482,8 +481,6 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-lixad_conf.xml: $(top_builddir)/config.status $(srcdir)/lixad_conf.xml.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -792,6 +789,16 @@ lixac_conf.xml:	lixac_conf.xml.in
 	-e 's|@EXPANDED_LIBDIR[@]|$(EXPANDED_LIBDIR)|g' \
 	-e 's|@ORACLE_SQL_NET[@]|$(ORACLE_SQL_NET)|g' \
 	-e 's|@ORACLE_RM_TYPE[@]|$(ORACLE_RM_TYPE)|g' \
+	$< >$@
+
+lixad_conf.xml:	lixad_conf.xml.in
+	sed \
+	-e 's|@EXPANDED_LOCALSTATEDIR\[@]|$(EXPANDED_LOCALSTATEDIR)|g' \
+	$< >$@
+
+lixad1_conf.xml:	lixad1_conf.xml.in
+	sed \
+	-e 's|@EXPANDED_LOCALSTATEDIR[@]|$(EXPANDED_LOCALSTATEDIR)|g' \
 	$< >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

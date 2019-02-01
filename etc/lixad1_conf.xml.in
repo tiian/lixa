@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<server 
+  pid_file="@EXPANDED_LOCALSTATEDIR@/run.pid"
+  min_elapsed_sync_time="0" max_elapsed_sync_time="0">
+  <listeners>
+    <listener domain="AF_INET" address="0.0.0.0" port="2345"/>
+  </listeners>
+  <managers>
+    <manager status_file="@EXPANDED_LOCALSTATEDIR@/lixad_status1"/>
+    <manager status_file="@EXPANDED_LOCALSTATEDIR@/lixad_status2"/>
+    <manager status_file="@EXPANDED_LOCALSTATEDIR@/lixad_status3"/>
+  </managers>
+</server>

@@ -710,6 +710,8 @@ COMPILE_XTA_CPP_FALSE
 COMPILE_XTA_CPP_TRUE
 COMPILE_XTA_FALSE
 COMPILE_XTA_TRUE
+COMPILE_CLIENT_FALSE
+COMPILE_CLIENT_TRUE
 COMPILE_DOCBOOK_STUFF_FALSE
 COMPILE_DOCBOOK_STUFF_TRUE
 STYLESHEETS_DIR
@@ -913,7 +915,9 @@ with_mysql_jdbc
 with_wsmq
 enable_wsmq
 with_docbook
+enable_client
 enable_xta
+enable_xta_cpp
 enable_xta_java
 enable_xta_python
 enable_debug
@@ -1604,7 +1608,10 @@ Optional Packages:
                           specifies JAR file for MySQL/MariaDB JDBC driver
   --with-wsmq=DIR         use WebSphereMQ from given path
   --with-docbook[=DIR]    use Docbook, DIR contains the stylesheets
+  --disable-client        disable LIXA (and XTA) client support: build only
+                          LIXA state server (lixad)
   --disable-xta           disable XTA (XA Transaction API) support
+  --disable-xta-cpp       disable XTA (XA Transaction API) for C++ support
   --disable-xta-java      disable XTA (XA Transaction API) for Java support
   --disable-xta-python    disable XTA (XA Transaction API) for Python support
   --enable-debug          enable debug code (assert statements)
@@ -4592,7 +4599,7 @@ esac
 
 #hardwired configuration
 _XTA_PREFIX="xta"
-_RELEASE_DATE="2019-01-26"
+_RELEASE_DATE="2019-02-01"
 
 cat >>confdefs.h <<_ACEOF
 #define _RELEASE_DATE "$_RELEASE_DATE"
@@ -16552,7 +16559,7 @@ ac_config_headers="$ac_config_headers src/client/lixa.h"
 
 ac_config_headers="$ac_config_headers src/xta/xta.h"
 
-ac_config_files="$ac_config_files Makefile doc/Makefile doc/api/Makefile doc/examples/Makefile doc/examples/cobol/Makefile doc/examples/xta/Makefile doc/examples/xta/cpp/Makefile doc/examples/xta/java/Makefile doc/examples/xta/python/Makefile doc/images/Makefile doc/manuals/LIXA.xml doc/manuals/Makefile etc/lixad_conf.xml etc/Makefile etc/lixavsr/Makefile ext/Makefile ext/doc/Makefile ext/doc/manuals/LIXA_EXT.xml ext/doc/manuals/Makefile ext/php/Makefile ext/php/examples/Makefile ext/php/tests/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/lixa-config.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/ibmdb2/Makefile src/client/switch/oracle/Makefile src/client/switch/postgresql/Makefile src/client/switch/mysql/Makefile src/client/switch/webspheremq/Makefile src/server/Makefile src/xta/Makefile src/xta/cpp/Makefile src/xta/java/Makefile src/xta/python/Makefile tests/Makefile tests/atlocal tests/lixa-config.at tests/etc/lixac_conf.xml tests/etc/lixad_conf.xml tests/etc/lixad_conf2.xml tests/etc/Makefile tests/scripts/Makefile tests/src/Makefile tests/src/cobol/Makefile tests/src/cpp/Makefile tests/src/java/Makefile tests/src/python/Makefile utils/Makefile var/Makefile"
+ac_config_files="$ac_config_files Makefile doc/Makefile doc/api/Makefile doc/examples/Makefile doc/examples/cobol/Makefile doc/examples/xta/Makefile doc/examples/xta/cpp/Makefile doc/examples/xta/java/Makefile doc/examples/xta/python/Makefile doc/images/Makefile doc/manuals/LIXA.xml doc/manuals/Makefile etc/Makefile etc/lixavsr/Makefile ext/Makefile ext/doc/Makefile ext/doc/manuals/LIXA_EXT.xml ext/doc/manuals/Makefile ext/php/Makefile ext/php/examples/Makefile ext/php/tests/Makefile src/Makefile src/common/Makefile src/common/lixa_inst_conf.c src/client/lixa-config.c src/client/Makefile src/client/switch/Makefile src/client/switch/lixa/Makefile src/client/switch/ibmdb2/Makefile src/client/switch/oracle/Makefile src/client/switch/postgresql/Makefile src/client/switch/mysql/Makefile src/client/switch/webspheremq/Makefile src/server/Makefile src/xta/Makefile src/xta/cpp/Makefile src/xta/java/Makefile src/xta/python/Makefile tests/Makefile tests/atlocal tests/lixa-config.at tests/etc/lixac_conf.xml tests/etc/lixad_conf.xml tests/etc/lixad_conf2.xml tests/etc/Makefile tests/scripts/Makefile tests/src/Makefile tests/src/cobol/Makefile tests/src/cpp/Makefile tests/src/java/Makefile tests/src/python/Makefile utils/Makefile var/Makefile"
 
 ac_config_commands="$ac_config_commands tests/atconfig"
 
@@ -17914,6 +17921,28 @@ EXPANDED_LIBDIR=$(eval echo $libdir)
 
 
 
+
+# Check whether --enable-client was given.
+if test "${enable_client+set}" = set; then :
+  enableval=$enable_client; LIXA_CLIENT="no"
+else
+  LIXA_CLIENT="yes"
+fi
+
+if test "$LIXA_CLIENT" = "no"
+then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: LIXA client will not be compiled" >&5
+$as_echo "$as_me: LIXA client will not be compiled" >&6;}
+fi
+ if test "$LIXA_CLIENT" = "yes"; then
+  COMPILE_CLIENT_TRUE=
+  COMPILE_CLIENT_FALSE='#'
+else
+  COMPILE_CLIENT_TRUE='#'
+  COMPILE_CLIENT_FALSE=
+fi
+
+
 # Check whether --enable-xta was given.
 if test "${enable_xta+set}" = set; then :
   enableval=$enable_xta; LIXA_XTA="no"
@@ -17921,12 +17950,35 @@ else
   LIXA_XTA="yes"
 fi
 
+# LIXA_XTA requires LIXA_CLIENT
+if test "$LIXA_XTA" = "yes" -a "$LIXA_CLIENT" = "no"
+then
+	LIXA_XTA="no"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: XTA can not be compiled because LIXA client is disabled" >&5
+$as_echo "$as_me: WARNING: XTA can not be compiled because LIXA client is disabled" >&2;}
+fi
  if test "$LIXA_XTA" = "yes"; then
   COMPILE_XTA_TRUE=
   COMPILE_XTA_FALSE='#'
 else
   COMPILE_XTA_TRUE='#'
   COMPILE_XTA_FALSE=
+fi
+
+
+# Check whether --enable-xta-cpp was given.
+if test "${enable_xta_cpp+set}" = set; then :
+  enableval=$enable_xta_cpp; LIXA_XTA_CXX="no"
+else
+  LIXA_XTA_CXX="yes"
+fi
+
+# LIXA_XTA_CXX requires LIXA_XTA
+if test "$LIXA_XTA_CXX" = "yes" -a "$LIXA_XTA" = "no"
+then
+	LIXA_XTA_CXX="no"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: XTA for C++ can not be compiled because XTA is disabled" >&5
+$as_echo "$as_me: WARNING: XTA for C++ can not be compiled because XTA is disabled" >&2;}
 fi
 
 # Check whether --enable-xta-java was given.
@@ -17936,11 +17988,27 @@ else
   LIXA_XTA_JAVA="yes"
 fi
 
+# LIXA_XTA_JAVA requires LIXA_XTA
+if test "$LIXA_XTA_JAVA" = "yes" -a "$LIXA_XTA" = "no"
+then
+	LIXA_XTA_JAVA="no"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: XTA for Java can not be compiled because XTA is disabled" >&5
+$as_echo "$as_me: WARNING: XTA for Java can not be compiled because XTA is disabled" >&2;}
+fi
+
 # Check whether --enable-xta-python was given.
 if test "${enable_xta_python+set}" = set; then :
   enableval=$enable_xta_python; LIXA_XTA_PYTHON="no"
 else
   LIXA_XTA_PYTHON="yes"
+fi
+
+# LIXA_XTA_PYTHON requires LIXA_XTA_CXX
+if test "$LIXA_XTA_PYTHON" = "yes" -a "$LIXA_XTA_CXX" = "no"
+then
+	LIXA_XTA_PYTHON="no"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: XTA for Python can not be compiled because XTA for C++ is disabled" >&5
+$as_echo "$as_me: WARNING: XTA for Python can not be compiled because XTA for C++ is disabled" >&2;}
 fi
 
 # Check whether --enable-debug was given.
@@ -17972,7 +18040,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if C++ compiler is available" >&5
 $as_echo_n "checking if C++ compiler is available... " >&6; }
 CPP_COMPILER_AVAILABLE="no"
- if test "$LIXA_XTA" = "yes" -a "x$CXX" != "x"; then
+ if test "$LIXA_XTA_CXX" = "yes" -a "x$CXX" != "x"; then
   COMPILE_XTA_CPP_TRUE=
   COMPILE_XTA_CPP_FALSE='#'
 else
@@ -18557,7 +18625,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18560 "configure" */
+/* #line 18628 "configure" */
 public class Test {
 }
 EOF
@@ -18970,7 +19038,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18973 "configure" */
+/* #line 19041 "configure" */
 public class Test {
 }
 EOF
@@ -19004,7 +19072,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 19007 "configure" */
+/* [#]line 19075 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);
@@ -19497,7 +19565,7 @@ else
 fi
 
 
-	if "z$JAVA" != "z" -a "z$JAVAC" != "z" -a "z$JAR" != "z"
+	if test "z$JAVA" != "z" -a "z$JAVAC" != "z" -a "z$JAR" != "z"
 	then
 		LIXA_XTA_JAVA="yes"
 	else
@@ -22170,6 +22238,10 @@ if test -z "${COMPILE_DOCBOOK_STUFF_TRUE}" && test -z "${COMPILE_DOCBOOK_STUFF_F
   as_fn_error $? "conditional \"COMPILE_DOCBOOK_STUFF\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${COMPILE_CLIENT_TRUE}" && test -z "${COMPILE_CLIENT_FALSE}"; then
+  as_fn_error $? "conditional \"COMPILE_CLIENT\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${COMPILE_XTA_TRUE}" && test -z "${COMPILE_XTA_FALSE}"; then
   as_fn_error $? "conditional \"COMPILE_XTA\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -23196,7 +23268,6 @@ do
     "doc/images/Makefile") CONFIG_FILES="$CONFIG_FILES doc/images/Makefile" ;;
     "doc/manuals/LIXA.xml") CONFIG_FILES="$CONFIG_FILES doc/manuals/LIXA.xml" ;;
     "doc/manuals/Makefile") CONFIG_FILES="$CONFIG_FILES doc/manuals/Makefile" ;;
-    "etc/lixad_conf.xml") CONFIG_FILES="$CONFIG_FILES etc/lixad_conf.xml" ;;
     "etc/Makefile") CONFIG_FILES="$CONFIG_FILES etc/Makefile" ;;
     "etc/lixavsr/Makefile") CONFIG_FILES="$CONFIG_FILES etc/lixavsr/Makefile" ;;
     "ext/Makefile") CONFIG_FILES="$CONFIG_FILES ext/Makefile" ;;
