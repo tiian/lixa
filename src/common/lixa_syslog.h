@@ -21,6 +21,16 @@
 
 
 
+#include <config.h>
+
+
+
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
+#endif
+
+
+
 #include <lixa_defines.h>
 
 
@@ -145,7 +155,7 @@
     "premature exit"
 #define LIXA_SYSLOG_LXD005E "LXD005E error (%s) running listener(s), " \
     "premature exit"
-#define LIXA_SYSLOG_LXD006N "LXD006N server terminated activities"
+#define LIXA_SYSLOG_LXD006N "LXD006N server shutdown completed"
 #define LIXA_SYSLOG_LXD007W "LXD007W first status file ('%s') did not pass " \
     "integrity check"
 #define LIXA_SYSLOG_LXD008W "LXD008W second status file ('%s') did not pass " \
@@ -187,7 +197,8 @@
 #define LIXA_SYSLOG_LXD032N "LXD032N client is asking to branch an existing " \
     "global transaction, but anoher branch (xid='%s') of the same global " \
     "transaction has already started the XA prepare phase"
-
+#define LIXA_SYSLOG_LXD033I "LXD033I is accepting a new incoming connection " \
+    "from address '%s', port " IN_PORT_T_FORMAT
 
 
 #define LIXA_SYSLOG_LXR000I "LXR000I LIXA recovery process is starting " \
@@ -197,6 +208,41 @@
 #define LIXA_SYSLOG_LXR003E "LXR003E unable to perform tx_open() (rc=%d)"
 #define LIXA_SYSLOG_LXR004W "LXR004W Resource Manager returned %d while performing cold commit recovery, xa_forget will be issued to clean-up transaction '%s'"
 #define LIXA_SYSLOG_LXR005W "LXR005W Resource Manager returned %d while performing cold rollback recovery, xa_forget will be issued to clean-up transaction '%s'"
+
+
+
+/**
+ * LIXA_SYSLOG macro maps to syslog standard function if LIXA_SYSLOG_DISABLED
+ * is false; elsewhere it maps to lixa_syslog, a lixa_trace wrapper
+ */
+#ifdef LIXA_SYSLOG_DISABLED
+# define LIXA_SYSLOG(a) lixa_syslog a
+#else
+# define LIXA_SYSLOG(a) syslog a
+#endif
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
+
+    /**
+     * Generates a log message that will be sent to syslog or stderr depending
+     * on --disable-syslog configuration option
+     * @param[in] priority is formed by ORing the facility and the level values
+     * @param[in] format as in printf
+     * @param[in] ... any arguments required by the format
+     */
+    void lixa_syslog(int priority, const char *format, ...);
+
+
+    
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 
 

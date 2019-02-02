@@ -793,7 +793,7 @@ lixac_conf.xml:	lixac_conf.xml.in
 
 lixad_conf.xml:	lixad_conf.xml.in
 	sed \
-	-e 's|@EXPANDED_LOCALSTATEDIR\[@]|$(EXPANDED_LOCALSTATEDIR)|g' \
+	-e 's|@EXPANDED_LOCALSTATEDIR[@]|$(EXPANDED_LOCALSTATEDIR)|g' \
 	$< >$@
 
 lixad1_conf.xml:	lixad1_conf.xml.in

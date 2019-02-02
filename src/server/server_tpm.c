@@ -219,8 +219,8 @@ int server_trans_result(struct thread_status_s *ts,
             lixa_xid_serialize(&pld->ph.state.xid, ser_xid);
 
             lmo->body.trans_16.answer.rc = LIXA_RC_LIXAC_CONF_CHANGED;
-            syslog(LOG_WARNING, LIXA_SYSLOG_LXD011W,
-                   lmo->body.trans_16.client.job, ser_xid);
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD011W,
+                         lmo->body.trans_16.client.job, ser_xid));
             LIXA_TRACE(("server_trans_result: job is '%s', past config "
                         "digest is '%s', current config digest is '%s'\n",
                         lmo->body.trans_16.client.job,

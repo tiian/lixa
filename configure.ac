@@ -165,7 +165,7 @@ AC_ARG_ENABLE([xta],
 if test "$LIXA_XTA" = "yes" -a "$LIXA_CLIENT" = "no"
 then
 	LIXA_XTA="no"
-	AC_MSG_WARN([XTA can not be compiled because LIXA client is disabled])
+	AC_MSG_NOTICE([XTA can not be compiled because LIXA client is disabled])
 fi
 AM_CONDITIONAL([COMPILE_XTA], [test "$LIXA_XTA" = "yes"])
 
@@ -177,7 +177,7 @@ AC_ARG_ENABLE([xta-cpp],
 if test "$LIXA_XTA_CXX" = "yes" -a "$LIXA_XTA" = "no"
 then
 	LIXA_XTA_CXX="no"
-	AC_MSG_WARN([XTA for C++ can not be compiled because XTA is disabled])
+	AC_MSG_NOTICE([XTA for C++ can not be compiled because XTA is disabled])
 fi
 
 AC_ARG_ENABLE([xta-java],
@@ -188,7 +188,7 @@ AC_ARG_ENABLE([xta-java],
 if test "$LIXA_XTA_JAVA" = "yes" -a "$LIXA_XTA" = "no"
 then
 	LIXA_XTA_JAVA="no"
-	AC_MSG_WARN([XTA for Java can not be compiled because XTA is disabled])
+	AC_MSG_NOTICE([XTA for Java can not be compiled because XTA is disabled])
 fi
 
 AC_ARG_ENABLE([xta-python],
@@ -199,7 +199,7 @@ AC_ARG_ENABLE([xta-python],
 if test "$LIXA_XTA_PYTHON" = "yes" -a "$LIXA_XTA_CXX" = "no"
 then
 	LIXA_XTA_PYTHON="no"
-	AC_MSG_WARN([XTA for Python can not be compiled because XTA for C++ is disabled])
+	AC_MSG_NOTICE([XTA for Python can not be compiled because XTA for C++ is disabled])
 fi
 
 AC_ARG_ENABLE([debug],
@@ -216,6 +216,15 @@ AC_ARG_ENABLE([trace],
         AS_HELP_STRING([--disable-trace],
                 [disable trace feature (not suggested)]),
         [_TRACE="no"], [_TRACE="yes"; CPPFLAGS="$CPPFLAGS -D_TRACE"] )
+AC_ARG_ENABLE([syslog],
+	AS_HELP_STRING([--disable-syslog],
+		[use stderr instead of syslog (useful for Docker containers)]),
+	[LIXA_SYSLOG_DISABLED="yes"], [LIXA_SYSLOG_DISABLED="no"])
+if test "$LIXA_SYSLOG_DISABLED" = "yes"
+then
+	AC_DEFINE([LIXA_SYSLOG_DISABLED], [1], [Disable syslog and use stderr instead; useful for Docker containers])
+	AC_MSG_NOTICE([syslog disabled, messages will be sent to stderr])
+fi
 
 AM_PROG_CC_C_O
 

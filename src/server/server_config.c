@@ -271,16 +271,16 @@ int server_parse(struct server_config_s *sc,
                     /* retrieve pid_file name */
                     if (NULL == (sc->pid_file = (char *) xmlGetProp(
                                      cur_node, LIXA_XML_CONFIG_SERVER_PID))) {
-                        syslog(LOG_ERR, LIXA_SYSLOG_LXD016E,
-                               LIXA_XML_CONFIG_SERVER_PID,
-                               LIXA_XML_CONFIG_SERVER);
+                        LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD016E,
+                                     LIXA_XML_CONFIG_SERVER_PID,
+                                     LIXA_XML_CONFIG_SERVER));
                         THROW(PID_FILE_ERROR);
                     } else {
                         LIXA_TRACE(("server_parse: pid file is '%s'\n",
                                     sc->pid_file));
-                        syslog(LOG_INFO, LIXA_SYSLOG_LXD027I,
-                               (const char *) LIXA_XML_CONFIG_SERVER_PID,
-                               sc->pid_file);
+                        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD027I,
+                                     (const char *) LIXA_XML_CONFIG_SERVER_PID,
+                                     sc->pid_file));
                     }
                     /* retrieve min_elapsed_sync_time */
                     if (LIXA_RC_OK == (
@@ -293,15 +293,17 @@ int server_parse(struct server_config_s *sc,
                                     sc->min_elapsed_sync_time));
                         /* check and fix the parameter if wrong */
                         if (sc->min_elapsed_sync_time < 0) {
-                            syslog(LOG_NOTICE, LIXA_SYSLOG_LXD028N,
-                                   sc->min_elapsed_sync_time,
-                                   (const char *) LIXA_XML_CONFIG_SERVER_MIN_EST,
-                                   (long) 0);
+                            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD028N,
+                                         sc->min_elapsed_sync_time,
+                                         (const char *)
+                                         LIXA_XML_CONFIG_SERVER_MIN_EST,
+                                         (long) 0));
                             sc->min_elapsed_sync_time = 0;
                         }
-                        syslog(LOG_INFO, LIXA_SYSLOG_LXD026I,
-                               (const char *) LIXA_XML_CONFIG_SERVER_MIN_EST,
-                               sc->min_elapsed_sync_time);
+                        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD026I,
+                                     (const char *)
+                                     LIXA_XML_CONFIG_SERVER_MIN_EST,
+                                     sc->min_elapsed_sync_time));
                     } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
                         THROW(RETRIEVE_MIN_EST_ERROR);
                     /* retrieve max_elapsed_sync_time */
@@ -317,16 +319,18 @@ int server_parse(struct server_config_s *sc,
                         if (sc->max_elapsed_sync_time < 0 ||
                             sc->max_elapsed_sync_time <
                             sc->min_elapsed_sync_time) {
-                            syslog(LOG_NOTICE, LIXA_SYSLOG_LXD028N,
-                                   sc->max_elapsed_sync_time,
-                                   (const char *) LIXA_XML_CONFIG_SERVER_MIN_EST,
-                                   sc->min_elapsed_sync_time);
+                            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD028N,
+                                         sc->max_elapsed_sync_time,
+                                         (const char *)
+                                         LIXA_XML_CONFIG_SERVER_MIN_EST,
+                                         sc->min_elapsed_sync_time));
                             sc->max_elapsed_sync_time =
                                 sc->min_elapsed_sync_time;
                         }
-                        syslog(LOG_INFO, LIXA_SYSLOG_LXD026I,
-                               (const char *) LIXA_XML_CONFIG_SERVER_MAX_EST,
-                               sc->max_elapsed_sync_time);
+                        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD026I,
+                                     (const char *)
+                                     LIXA_XML_CONFIG_SERVER_MAX_EST,
+                                     sc->max_elapsed_sync_time));
                     } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
                         THROW(RETRIEVE_MAX_EST_ERROR);
                 } else if (!xmlStrcmp(cur_node->name,

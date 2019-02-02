@@ -116,8 +116,8 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
         xmlFree(tmp);
         /* check level is compatible with current code */
         if (LIXA_MSG_LEVEL != msg->header.level) {
-            syslog(LOG_ERR, LIXA_SYSLOG_LXC030E, msg->header.level,
-                   LIXA_MSG_LEVEL);
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXC030E, msg->header.level,
+                         LIXA_MSG_LEVEL));
             LIXA_TRACE(("lixa_msg_deserialize: protocol level mismatch: "
                         "message is at level %d, code is at level %d\n",
                         msg->header.level, LIXA_MSG_LEVEL));

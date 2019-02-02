@@ -105,7 +105,8 @@ void Java_org_tiian_lixa_xta_XtaException_throw(JNIEnv *env,
     } /* TRY-CATCH */
     if (LIXA_RC_OK != ret_cod) {
         /* at this point only a syslog message can be produced... */
-        syslog(LOG_ERR, LIXA_SYSLOG_LXC032E, ret_cod, lixa_strerror(ret_cod));
+        LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXC032E, ret_cod,
+                     lixa_strerror(ret_cod)));
     }
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaException_throw/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

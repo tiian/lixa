@@ -1361,7 +1361,7 @@ int xta_transaction_branch(xta_transaction_t *transact, const char *xid_string)
                         "(xid=%s) can't be branched because bqual (%s) is "
                         "related to a non branchable transaction\n",
                         xid_string, bqual));
-            syslog(LOG_ERR, LIXA_SYSLOG_LXC031E, xid_string, bqual);
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXC031E, xid_string, bqual));
             THROW(NON_BRANCHABLE_TX);
         }
         /* generate subordinate XID */

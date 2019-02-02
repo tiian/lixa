@@ -110,7 +110,7 @@ int server_xa_branch_chain(struct thread_status_s *ts,
                                 "another branch (xid='%s') of the same global "
                                 "transaction has already started the XA "
                                 "prepare phase\n", lsx));
-                    syslog(LOG_WARNING, LIXA_SYSLOG_LXD032N, lsx);
+                    LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD032N, lsx));
                 } /* if (lixa_xid_serialize(... */
                 THROW(NOT_CHAINABLE_BRANCH);
             } /* if (!chainable) */

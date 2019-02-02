@@ -1573,7 +1573,7 @@ int server_xa_start_8(struct thread_status_s *ts,
                             "branch an existing global transaction, but "
                             "no other branches have been found for "
                             "xid='%s'\n", sttq.xid));
-                syslog(LOG_WARNING, LIXA_SYSLOG_LXD030N, sttq.xid);
+                LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD030N, sttq.xid));
                 /* set a warning condition */
                 warning = LIXA_RC_NO_SUPERIOR_BRANCH;
             } else if (LIXA_RC_OK != ret_cod) {
@@ -1594,8 +1594,8 @@ int server_xa_start_8(struct thread_status_s *ts,
                                     "transaction %s has been found in two "
                                     "state threads: %u and %u\n",
                                     result->xid, tsid, result->tsid));
-                        syslog(LOG_WARNING, LIXA_SYSLOG_LXD029W,
-                               result->xid, tsid, result->tsid);
+                        LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD029W,
+                                     result->xid, tsid, result->tsid));
                         THROW(BRANCHES_ON_MULTIPLE_THREADS);
                     } /* if (tsid != result->tsid) */
                 } /* for (i=0; i<query_result->len; ++i) */
@@ -1613,8 +1613,8 @@ int server_xa_start_8(struct thread_status_s *ts,
                                 "branch %s that must be managed by state "
                                 "thread id %u (this thread id is %u)\n",
                                 sttq.xid, tss->id, ts->id));
-                    syslog(LOG_INFO, LIXA_SYSLOG_LXD031I,
-                           result->xid, tss->id, ts->id);
+                    LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD031I,
+                                 result->xid, tss->id, ts->id));
                     THROW(THREAD_SWITCH);
                 } else {
                     /* the branch must be chained with the other ones */

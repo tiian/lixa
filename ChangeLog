@@ -1,5 +1,11 @@
 LOG:
 
+	   1.7.3 LIXA for Docker
+		 New build options, dedicated to disable single components and
+		 syslog: they are useful to produce Docker images.
+		 --disable-syslog build option can be used to have messages on
+		 stderr instead of sending them to system logger.
+
 2019-01-20 1.7.2 Java API for XTA
 		 These functions/methods are now deprecated because useless:
 		 - xta_transaction_open

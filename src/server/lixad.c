@@ -146,13 +146,13 @@ int main(int argc, char *argv[])
     LIXA_CRASH_INIT;
 
     openlog("lixad", LOG_PID, LOG_DAEMON);
-    syslog(LOG_NOTICE, LIXA_SYSLOG_LXD000N,
-           LIXA_PACKAGE_NAME, LIXA_PACKAGE_VERSION);
+    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD000N,
+                 LIXA_PACKAGE_NAME, LIXA_PACKAGE_VERSION));
 
     option_context = g_option_context_new("- LIXA server");
     g_option_context_add_main_entries(option_context, entries, NULL);
     if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
-        syslog(LOG_ERR, LIXA_SYSLOG_LXD001E, error->message);
+        LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD001E, error->message));
         g_print("option parsing failed: %s\n", error->message);
         exit(1);
     }
@@ -168,14 +168,14 @@ int main(int argc, char *argv[])
         exit(0);
     }
     if (run_as_daemon && NULL != dump_specs) {
-        syslog(LOG_WARNING, LIXA_SYSLOG_LXD002W);
+        LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD002W));
         LIXA_TRACE(("main: dump option overrides daemon option\n"));
         g_print("Warning: dump option overrides daemon option\n");
         run_as_daemon = FALSE;
     }
 
     if (maintenance)
-        syslog(LOG_WARNING, LIXA_SYSLOG_LXD020N);
+        LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD020N));
 
     /* daemonize the server process */
     if (run_as_daemon)
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
     server_config_init(&sc, &tpa);
     if (LIXA_RC_OK != (rc = server_config(&sc, &tpa, config_file))) {
         LIXA_TRACE(("main/server_config: rc=%d\n", rc));
-        syslog(LOG_ERR, LIXA_SYSLOG_LXD003E, lixa_strerror(rc));
+        LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD003E, lixa_strerror(rc)));
         return rc;
     }
 
@@ -196,8 +196,8 @@ int main(int argc, char *argv[])
     if (!dump_specs) {
         if (-1 == (pid_fd = open(sc.pid_file, O_CREAT | O_WRONLY,
                                  S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)))
-            syslog(LOG_WARNING, LIXA_SYSLOG_LXD015W, sc.pid_file,
-                   errno, strerror(errno));
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD015W, sc.pid_file,
+                         errno, strerror(errno)));
         else {
             char array[100];
             ssize_t written_bytes;
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 
     if (LIXA_RC_OK != (rc = server_pipes_init(&tpa))) {
         LIXA_TRACE(("main/server_pipes_init: rc=%d\n", rc));
-        syslog(LOG_ERR, LIXA_SYSLOG_LXD017E);
+        LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD017E));
         return rc;
     }
 
@@ -223,13 +223,13 @@ int main(int argc, char *argv[])
     }
     tsrs.clean_failed = clean_failed;
     if (tsrs.clean_failed)
-        syslog(LOG_NOTICE, LIXA_SYSLOG_LXD022N);
+        LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD022N));
     LIXA_TRACE(("lixad/main: starting\n"));
     if (LIXA_RC_OK != (rc = server_manager(
                            &sc, &tpa, &tsa, &srt, &stt, &tsds, &tsrs,
                            maintenance))) {
         LIXA_TRACE(("main/server_manager: rc=%d\n", rc));
-        syslog(LOG_ERR, LIXA_SYSLOG_LXD004E, lixa_strerror(rc));
+        LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD004E, lixa_strerror(rc)));
         return rc;
     }
 
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
     if (NULL == dump_specs &&
         LIXA_RC_OK != (rc = server_listener(&sc, &lsa, &tsa))) {
         LIXA_TRACE(("main/server_listener: rc=%d\n", rc));
-        syslog(LOG_ERR, LIXA_SYSLOG_LXD005E, lixa_strerror(rc));
+        LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD005E, lixa_strerror(rc)));
         return rc;
     }
 
@@ -246,8 +246,8 @@ int main(int argc, char *argv[])
         if (0 != (unlink(sc.pid_file))) {
             LIXA_TRACE(("main/unlink: errno=%d ('%s')\n",
                         errno, strerror(errno)));
-            syslog(LOG_NOTICE, LIXA_SYSLOG_LXD024N, sc.pid_file, errno,
-                   strerror(errno));
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD024N, sc.pid_file, errno,
+                         strerror(errno)));
         }
     }
 
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
     server_cleanup(&sc, &tpa, &tsa, &srt, &stt);
 
     /* it's time to exit */
-    syslog(LOG_NOTICE, LIXA_SYSLOG_LXD006N);
+    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD006N));
 
     LIXA_TRACE(("lixad/main: exiting\n"));
     return 0;
@@ -299,7 +299,7 @@ void daemonize(void)
     else
         dummy = freopen("/dev/null", "a", stderr);
 
-    syslog(LOG_NOTICE, LIXA_SYSLOG_LXD014N);
+    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD014N));
 
     LIXA_TRACE(("lixad/daemonize: now daemonized!\n"));
 

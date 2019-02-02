@@ -298,8 +298,8 @@ int server_listener_loop(const struct server_config_s *sc,
                     /* without a working listener, lixad server becomes
                        useless: forcing process termination */
                     strerror_r(errno, buffer, sizeof(buffer));
-                    syslog(LOG_ERR, LIXA_SYSLOG_LXD023E,
-                           ts->poll_array[i].revents, errno, buffer);
+                    LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD023E,
+                                 ts->poll_array[i].revents, errno, buffer));
                     kill(getpid(), SIGQUIT);
                     sleep(3);
                     /* exit anyway after three seconds */
@@ -333,6 +333,9 @@ int server_listener_loop(const struct server_config_s *sc,
                                     IN_PORT_T_FORMAT ", fd = %d\n",
                                     inet_ntoa(cliaddr.sin_addr),
                                     ntohs(cliaddr.sin_port), conn_fd));
+                        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD033I,
+                                     inet_ntoa(cliaddr.sin_addr),
+                                     ntohs(cliaddr.sin_port)));
                         /* choose a manager for this client */
                         if (LIXA_RC_OK != (ret_cod =
                                            server_listener_find_manager(
@@ -488,7 +491,7 @@ void server_listener_signal_action(int signo)
         msg.body.sd.type = SHUTDOWN_FORCE;
         shutdown_type = "force";
     }
-    syslog(LOG_NOTICE, LIXA_SYSLOG_LXD019N, signo, shutdown_type);
+    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD019N, signo, shutdown_type));
     
     for (i=0; i<tpa.n; ++i) {
         if (LIXA_NULL_FD == tpa.array[i].pipefd[1]) {

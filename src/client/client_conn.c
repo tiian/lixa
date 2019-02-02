@@ -99,7 +99,7 @@ int client_connect(client_status_t *cs,
                     IN_PORT_T_FORMAT "\n", out_socket, tc->address, tc->port));
         if (0 != connect(out_socket, (struct sockaddr *)&ccc->serv_addr,
                          sizeof(struct sockaddr_in))) {
-            syslog(LOG_ERR, LIXA_SYSLOG_LXC002E, tc->address, tc->port);
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXC002E, tc->address, tc->port));
             THROW(CONNECT_ERROR);
         }
         /* disable Nagle's algorithm to reduce latency */

@@ -445,8 +445,8 @@ void *server_manager_thread(void *void_ts)
         ts->ret_cod = ret_cod;
         ts->last_errno = errno;
         if (NONE != excp)
-            syslog(LOG_CRIT, LIXA_SYSLOG_LXD018C, ts->id, ts->excp,
-                   ts->ret_cod, ts->last_errno);
+            LIXA_SYSLOG((LOG_CRIT, LIXA_SYSLOG_LXD018C, ts->id, ts->excp,
+                         ts->ret_cod, ts->last_errno));
         /* call clean-up routine */
         server_manager_thread_cleanup(ts);
     } /* TRY-CATCH */
@@ -1053,7 +1053,7 @@ int server_manager_switch_3(struct thread_status_s *ts,
         } else {
             LIXA_TRACE(("server_manager_switch_3: the client can not be "
                         "switched; kept in this thread\n"));
-            syslog(LOG_WARNING, LIXA_SYSLOG_LXD013W);
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD013W));
         }
 
         THROW(NONE);

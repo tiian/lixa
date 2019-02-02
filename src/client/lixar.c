@@ -99,14 +99,14 @@ int main(int argc, char *argv[])
     LIXA_CRASH_INIT;
     LIXA_TRACE(("main: starting\n"));
     openlog("lixar", LOG_PID, LOG_DAEMON);
-    syslog(LOG_NOTICE, LIXA_SYSLOG_LXR000I,
-           LIXA_PACKAGE_NAME, LIXA_PACKAGE_VERSION);
+    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXR000I,
+                 LIXA_PACKAGE_NAME, LIXA_PACKAGE_VERSION));
     
     option_context = g_option_context_new("- LIXA recovery utility");
     g_option_context_add_main_entries(option_context, entries, NULL);
     
     if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
-        syslog(LOG_ERR, LIXA_SYSLOG_LXR001E, error->message);
+        LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXR001E, error->message));
         LIXA_TRACE(("main: option parsing failed: %s\n", error->message));
         fprintf(stderr, "option parsing failed: %s\n", error->message);
         exit(1);
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
             printf("tx_open() returned %d: unable to proceed\n", tx_rc);
     }
     if (TX_OK != tx_rc) {
-        syslog(LOG_ERR, LIXA_SYSLOG_LXR003E, tx_rc);
+        LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXR003E, tx_rc));
         exit_code = 1;
     }
 
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
     LIXA_TRACE(("lixar/tx_close: tx_rc = %d\n", tx_rc));
     
     /* it's time to exit */
-    syslog(LOG_NOTICE, LIXA_SYSLOG_LXR002I);
+    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXR002I));
 
     LIXA_TRACE(("lixar/main: exiting\n"));    
     return exit_code;

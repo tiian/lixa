@@ -487,7 +487,8 @@ int thread_status_load_files(struct thread_status_s *ts,
             THROW(STATUS_RECORD_LOAD_1_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status1))) {
-            syslog(LOG_WARNING, LIXA_SYSLOG_LXD007W, ts->status1_filename);
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD007W,
+                         ts->status1_filename));
         } else
             s1ii = TRUE;
         
@@ -503,13 +504,14 @@ int thread_status_load_files(struct thread_status_s *ts,
             THROW(STATUS_RECORD_LOAD_2_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status2))) {
-            syslog(LOG_WARNING, LIXA_SYSLOG_LXD008W, ts->status2_filename);
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD008W,
+                         ts->status2_filename));
         } else
             s2ii = TRUE;
 
         if (!s1ii && !s2ii) {
             /* two damaged files! */
-            syslog(LOG_ERR, LIXA_SYSLOG_LXD009E);
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD009E));
             THROW(DAMAGED_STATUS_FILES);
         } else if (s1ii && s2ii) {
             /* two integral files, check timestamp */
@@ -722,7 +724,7 @@ int thread_status_clean_failed(struct thread_status_s *ts)
                 ret_cod = payload_chain_release(ts, i);
                 switch (ret_cod) {
                     case LIXA_RC_OK:
-                        syslog(LOG_INFO, LIXA_SYSLOG_LXD021I, ser_xid);
+                        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD021I, ser_xid));
                         break;
                     case LIXA_RC_OBJ_NOT_FOUND:
                         LIXA_TRACE(("thread_status_clean_failed: block # "
@@ -1034,7 +1036,7 @@ int thread_status_sync_files(struct thread_status_s *ts)
         if (0 != memcmp(ts->curr_status, alt_status, curr_status_size)) {
             LIXA_TRACE(("thread_status_sync_files: memory mapped status "
                         "files are different after copy. INTERNAL ERROR\n"));
-            syslog(LOG_CRIT, LIXA_SYSLOG_LXD010C);
+            LIXA_SYSLOG((LOG_CRIT, LIXA_SYSLOG_LXD010C));
             THROW(MEMCMP_ERROR);
         }
 #endif /* LIXA_DEBUG */

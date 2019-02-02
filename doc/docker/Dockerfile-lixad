@@ -28,7 +28,7 @@ RUN BUILD_DEPS='curl make gcc pkg-config libxml2-dev libglib2.0-dev uuid-dev' \
 # @@@ end temp
 #	&& rm lixa.tar.gz \
 	&& cd /lixa/lixa-* \
-	&& ./configure --disable-client \
+	&& ./configure --disable-client --disable-syslog \
 	&& make && make install \
 	&& rm -rf /opt/lixa/share /opt/lixa/bin /opt/lixa/include \
 	&& rm -r /lixa \
@@ -51,9 +51,9 @@ RUN	chmod 540 /home/lixa/lixad-entrypoint.sh \
 EXPOSE 2345
 # basic trace messages: only MOD_SERVER and MOD_SERVER_LISTENER; see file
 # src/common/lixa_trace.h for more available values
-ENV LIXA_TRACE_MASK 0x5
+#ENV LIXA_TRACE_MASK 0x5
 # start LIXA state server
 USER	lixa
 ENTRYPOINT ["/home/lixa/lixad-entrypoint.sh"]
-CMD ["lixad"]
+CMD 	["lixad"]
 

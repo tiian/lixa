@@ -181,6 +181,9 @@
 /* Define to 1 if you are using WebSphere MQ with server binding mode */
 #undef HAVE_WEBSPHEREMQ_SRV
 
+/* Disable syslog and use stderr instead; useful for Docker containers */
+#undef LIXA_SYSLOG_DISABLED
+
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR

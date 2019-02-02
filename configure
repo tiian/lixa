@@ -923,6 +923,7 @@ enable_xta_python
 enable_debug
 enable_crash
 enable_trace
+enable_syslog
 enable_cobol
 '
       ac_precious_vars='build_alias
@@ -1617,6 +1618,8 @@ Optional Packages:
   --enable-debug          enable debug code (assert statements)
   --enable-crash          enable crash simulation code
   --disable-trace         disable trace feature (not suggested)
+  --disable-syslog        use stderr instead of syslog (useful for Docker
+                          containers)
   --disable-cobol         do not create COBOL TX API
 
 Some influential environment variables:
@@ -17954,8 +17957,8 @@ fi
 if test "$LIXA_XTA" = "yes" -a "$LIXA_CLIENT" = "no"
 then
 	LIXA_XTA="no"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: XTA can not be compiled because LIXA client is disabled" >&5
-$as_echo "$as_me: WARNING: XTA can not be compiled because LIXA client is disabled" >&2;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: XTA can not be compiled because LIXA client is disabled" >&5
+$as_echo "$as_me: XTA can not be compiled because LIXA client is disabled" >&6;}
 fi
  if test "$LIXA_XTA" = "yes"; then
   COMPILE_XTA_TRUE=
@@ -17977,8 +17980,8 @@ fi
 if test "$LIXA_XTA_CXX" = "yes" -a "$LIXA_XTA" = "no"
 then
 	LIXA_XTA_CXX="no"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: XTA for C++ can not be compiled because XTA is disabled" >&5
-$as_echo "$as_me: WARNING: XTA for C++ can not be compiled because XTA is disabled" >&2;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: XTA for C++ can not be compiled because XTA is disabled" >&5
+$as_echo "$as_me: XTA for C++ can not be compiled because XTA is disabled" >&6;}
 fi
 
 # Check whether --enable-xta-java was given.
@@ -17992,8 +17995,8 @@ fi
 if test "$LIXA_XTA_JAVA" = "yes" -a "$LIXA_XTA" = "no"
 then
 	LIXA_XTA_JAVA="no"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: XTA for Java can not be compiled because XTA is disabled" >&5
-$as_echo "$as_me: WARNING: XTA for Java can not be compiled because XTA is disabled" >&2;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: XTA for Java can not be compiled because XTA is disabled" >&5
+$as_echo "$as_me: XTA for Java can not be compiled because XTA is disabled" >&6;}
 fi
 
 # Check whether --enable-xta-python was given.
@@ -18007,8 +18010,8 @@ fi
 if test "$LIXA_XTA_PYTHON" = "yes" -a "$LIXA_XTA_CXX" = "no"
 then
 	LIXA_XTA_PYTHON="no"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: XTA for Python can not be compiled because XTA for C++ is disabled" >&5
-$as_echo "$as_me: WARNING: XTA for Python can not be compiled because XTA for C++ is disabled" >&2;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: XTA for Python can not be compiled because XTA for C++ is disabled" >&5
+$as_echo "$as_me: XTA for Python can not be compiled because XTA for C++ is disabled" >&6;}
 fi
 
 # Check whether --enable-debug was given.
@@ -18033,6 +18036,21 @@ else
   _TRACE="yes"; CPPFLAGS="$CPPFLAGS -D_TRACE"
 fi
 
+# Check whether --enable-syslog was given.
+if test "${enable_syslog+set}" = set; then :
+  enableval=$enable_syslog; LIXA_SYSLOG_DISABLED="yes"
+else
+  LIXA_SYSLOG_DISABLED="no"
+fi
+
+if test "$LIXA_SYSLOG_DISABLED" = "yes"
+then
+
+$as_echo "#define LIXA_SYSLOG_DISABLED 1" >>confdefs.h
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: syslog disabled, messages will be sent to stderr" >&5
+$as_echo "$as_me: syslog disabled, messages will be sent to stderr" >&6;}
+fi
 
 
 
@@ -18625,7 +18643,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18628 "configure" */
+/* #line 18646 "configure" */
 public class Test {
 }
 EOF
@@ -19038,7 +19056,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 19041 "configure" */
+/* #line 19059 "configure" */
 public class Test {
 }
 EOF
@@ -19072,7 +19090,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 19075 "configure" */
+/* [#]line 19093 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);

@@ -107,8 +107,8 @@ int lixa_xa_close(client_config_coll_t *ccc, client_status_t *cs, int *txrc)
                     *txrc = TX_FAIL;
                     THROW(ASYNC_NOT_IMPLEMENTED);
                 default:
-                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC019W,
-                           (char *) act_rsrmgr->generic->name, i, rc);
+                    LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC019W,
+                                 (char *) act_rsrmgr->generic->name, i, rc));
                     LIXA_TRACE(("lixa_xa_close: resource manager # %d "
                                 "returned unexpected return code: %d\n",
                                 i, rc));
@@ -338,10 +338,10 @@ int lixa_xa_commit(client_config_coll_t *ccc, client_status_t *cs,
                     csr->common.xa_s_state = XA_STATE_S0;
                     if (!(TMONEPHASE & record.flags)) {
                         lixa_xid_serialize(xid, ser_xid);
-                        syslog(LOG_WARNING, LIXA_SYSLOG_LXC017W,
-                               (char *) act_rsrmgr->generic->name,
-                               record.rmid,
-                               record.rc, NULL != ser_xid ? ser_xid : "");
+                        LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC017W,
+                                     (char *) act_rsrmgr->generic->name,
+                                     record.rmid, record.rc,
+                                     NULL != ser_xid ? ser_xid : ""));
                         LIXA_TRACE(("lixa_xa_commit: xa_commit returned "
                                     "XA_RB* (%d) for rmid=%d,xid='%s' but "
                                     "TMONEPHASE was not used\n",
@@ -361,10 +361,10 @@ int lixa_xa_commit(client_config_coll_t *ccc, client_status_t *cs,
                            Resource Manager behavior */
                         csr->common.xa_s_state = XA_STATE_S0;
                         lixa_xid_serialize(xid, ser_xid);
-                        syslog(LOG_WARNING, LIXA_SYSLOG_LXC026W,
-                               (char *) act_rsrmgr->generic->name,
-                               record.rmid,
-                               record.rc, NULL != ser_xid ? ser_xid : "");
+                        LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC026W,
+                                     (char *) act_rsrmgr->generic->name,
+                                     record.rmid, record.rc,
+                                     NULL != ser_xid ? ser_xid : ""));
                         LIXA_TRACE(("lixa_xa_commit: xa_commit returned "
                                     "XA_RETRY (%d) for rmid=%d,xid='%s' and "
                                     "TMONEPHASE was used\n",
@@ -395,9 +395,9 @@ int lixa_xa_commit(client_config_coll_t *ccc, client_status_t *cs,
 
         if (TX_MIXED == *txrc || TX_HAZARD == *txrc) {
             lixa_xid_serialize(xid, ser_xid);
-            syslog(LOG_WARNING, LIXA_SYSLOG_LXC011W,
-                   NULL != ser_xid ? ser_xid : "",
-                   TX_MIXED == *txrc ? "TX_MIXED" : "TX_HAZARD");
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC011W,
+                         NULL != ser_xid ? ser_xid : "",
+                         TX_MIXED == *txrc ? "TX_MIXED" : "TX_HAZARD"));
         }
 
         switch (*txrc) {
@@ -554,9 +554,10 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
                     tmp_txrc = TX_FAIL;
                     csr->common.xa_td_state = XA_STATE_T0;
                     lixa_xid_serialize(xid, ser_xid);
-                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC015W,
-                           (char *) act_rsrmgr->generic->name, record.rmid,
-                           NULL != ser_xid ? ser_xid : "");
+                    LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC015W,
+                                 (char *) act_rsrmgr->generic->name,
+                                 record.rmid,
+                                 NULL != ser_xid ? ser_xid : ""));
                     LIXA_TRACE(("lixa_xa_end: xa_end returned "
                                 "XA_NOMIGRATE for rmid=%d,xid='%s' and this "
                                 "should NOT happen!\n", record.rmid,
@@ -813,9 +814,10 @@ int lixa_xa_forget(client_config_coll_t *ccc, client_status_t *cs,
                         csr->common.xa_s_state = XA_STATE_S0;
                         break;
                     case XAER_ASYNC:
-                        syslog(LOG_WARNING, LIXA_SYSLOG_LXC020W,
-                               (char *)act_rsrmgr->generic->name, record.rmid,
-                               NULL != ser_xid ? ser_xid : "");
+                        LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC020W,
+                                     (char *)act_rsrmgr->generic->name,
+                                     record.rmid,
+                                     NULL != ser_xid ? ser_xid : ""));
                         LIXA_TRACE(("lixa_xa_forget: xa_forget returned "
                                     "XAER_ASYNC for rmid=%d,xid='%s' but "
                                     "TMASYNC flag was not set\n",
@@ -825,9 +827,10 @@ int lixa_xa_forget(client_config_coll_t *ccc, client_status_t *cs,
                         break;
                     case XAER_RMERR:
                         msg.body.forget_8.conthr.finished = FALSE;
-                        syslog(LOG_NOTICE, LIXA_SYSLOG_LXC021N,
-                               (char *)act_rsrmgr->generic->name, record.rmid,
-                               NULL != ser_xid ? ser_xid : "");
+                        LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC021N,
+                                     (char *)act_rsrmgr->generic->name,
+                                     record.rmid,
+                                     NULL != ser_xid ? ser_xid : ""));
                         LIXA_TRACE(("lixa_xa_forget: resource manager # %d "
                                     "is not able to forget this xid\n",
                                     record.rmid));
@@ -842,9 +845,10 @@ int lixa_xa_forget(client_config_coll_t *ccc, client_status_t *cs,
                         break;
                     case XAER_NOTA:
                         csr->common.xa_s_state = XA_STATE_S0;
-                        syslog(LOG_NOTICE, LIXA_SYSLOG_LXC022N,
-                               (char *)act_rsrmgr->generic->name, record.rmid,
-                               NULL != ser_xid ? ser_xid : "");
+                        LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC022N,
+                                     (char *)act_rsrmgr->generic->name,
+                                     record.rmid,
+                                     NULL != ser_xid ? ser_xid : ""));
                         LIXA_TRACE(("lixa_xa_forget: resource manager # %d "
                                     "does not recognize as 'Heuristically "
                                     "Completed' the transaction...\n",
@@ -1000,10 +1004,10 @@ int lixa_xa_forget_multi(client_status_t *cs, GArray *xida, int finished)
                             csr->common.xa_s_state = XA_STATE_S0;
                             break;
                         case XAER_ASYNC:
-                            syslog(LOG_WARNING, LIXA_SYSLOG_LXC020W,
-                                   (char *) act_rsrmgr->generic->name,
-                                   record.rmid,
-                                   NULL != ser_xid ? ser_xid : "");
+                            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC020W,
+                                         (char *) act_rsrmgr->generic->name,
+                                         record.rmid,
+                                         NULL != ser_xid ? ser_xid : ""));
                             LIXA_TRACE(("lixa_xa_forget_multi: xa_forget "
                                         "returned "
                                         "XAER_ASYNC for rmid=%d,xid='%s' but "
@@ -1014,10 +1018,10 @@ int lixa_xa_forget_multi(client_status_t *cs, GArray *xida, int finished)
                             break;
                         case XAER_RMERR:
                             msg.body.forget_8.conthr.finished = FALSE;
-                            syslog(LOG_NOTICE, LIXA_SYSLOG_LXC021N,
-                                   (char *) act_rsrmgr->generic->name,
-                                   record.rmid,
-                                   NULL != ser_xid ? ser_xid : "");
+                            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC021N,
+                                         (char *) act_rsrmgr->generic->name,
+                                         record.rmid,
+                                         NULL != ser_xid ? ser_xid : ""));
                             LIXA_TRACE(("lixa_xa_forget_multi: resource "
                                         "manager # %d "
                                         "is not able to forget this xid\n",
@@ -1034,10 +1038,10 @@ int lixa_xa_forget_multi(client_status_t *cs, GArray *xida, int finished)
                             break;
                         case XAER_NOTA:
                             csr->common.xa_s_state = XA_STATE_S0;
-                            syslog(LOG_NOTICE, LIXA_SYSLOG_LXC022N,
-                                   (char *) act_rsrmgr->generic->name,
-                                   record.rmid,
-                                   NULL != ser_xid ? ser_xid : "");
+                            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC022N,
+                                         (char *) act_rsrmgr->generic->name,
+                                         record.rmid,
+                                         NULL != ser_xid ? ser_xid : ""));
                             LIXA_TRACE(("lixa_xa_forget_multi: resource "
                                         "manager # %d "
                                         "does not recognize as 'Heuristically "
@@ -1375,7 +1379,7 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
             LIXA_RC_OK != (ret_cod = client_recovery(ccc, cs, &client))) {
             if (LIXA_RC_CONNECTION_CLOSED == ret_cod) {
                 /* the server probably crashed */
-                syslog(LOG_NOTICE, LIXA_SYSLOG_LXC028N);
+                LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC028N));
             }
             *txrc = TX_FAIL;
             THROW(CLIENT_RECOVERY_ERROR);
@@ -2112,9 +2116,9 @@ int lixa_xa_rollback(client_config_coll_t *ccc, client_status_t *cs,
                             record.rmid, csr->common.xa_s_state,
                             csr->prepare_rc));
                 lixa_xid_serialize(xid, ser_xid);
-                syslog(LOG_WARNING, LIXA_SYSLOG_LXC023W,
-                       (char *) act_rsrmgr->generic->name, record.rmid,
-                       NULL != ser_xid ? ser_xid : "");
+                LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC023W,
+                             (char *) act_rsrmgr->generic->name, record.rmid,
+                             NULL != ser_xid ? ser_xid : ""));
                 if (LIXA_RC_OK != (ret_cod = lixa_tx_rc_add(
                                        &ltr, csr->prepare_rc)))
                     THROW(TX_RC_ADD_ERROR4);
@@ -2177,10 +2181,10 @@ int lixa_xa_rollback(client_config_coll_t *ccc, client_status_t *cs,
                             "rollback\n", tx_commit, record.rc,
                             csr->prepare_rc));
                 lixa_xid_serialize(xid, ser_xid);
-                syslog(LOG_WARNING, LIXA_SYSLOG_LXC016W,
-                       (char *) act_rsrmgr->generic->name, record.rmid,
-                       csr->prepare_rc, record.rc,
-                       NULL != ser_xid ? ser_xid : "");
+                LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC016W,
+                             (char *) act_rsrmgr->generic->name, record.rmid,
+                             csr->prepare_rc, record.rc,
+                             NULL != ser_xid ? ser_xid : ""));
                 /* force the return code of xa_rollback() to a different one */
                 record.rc = LIXA_XAER_HAZARD;
             }
@@ -2244,9 +2248,9 @@ int lixa_xa_rollback(client_config_coll_t *ccc, client_status_t *cs,
 
         if (TX_MIXED == *txrc || TX_HAZARD == *txrc) {
             lixa_xid_serialize(xid, ser_xid);
-            syslog(LOG_WARNING, LIXA_SYSLOG_LXC012W,
-                   NULL != ser_xid ? ser_xid : "",
-                   TX_MIXED == *txrc ? "TX_MIXED" : "TX_HAZARD");
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC012W,
+                         NULL != ser_xid ? ser_xid : "",
+                         TX_MIXED == *txrc ? "TX_MIXED" : "TX_HAZARD"));
         }
 
         switch (*txrc) {
@@ -2489,8 +2493,9 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
                                 "XA_RETRY, but the transaction manager does "
                                 "not use TMNOWAIT flag; this is a resource "
                                 "manager wrong behavior!\n"));
-                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC013W,
-                           (char *) act_rsrmgr->generic->name, record.rmid);
+                    LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC013W,
+                                 (char *) act_rsrmgr->generic->name,
+                                 record.rmid));
                     tmp_txrc = TX_ERROR;
                     if (TMJOIN & xa_start_flags || TMRESUME & xa_start_flags) {
                         LIXA_TRACE(("lixa_xa_start: no state change "
@@ -2513,9 +2518,10 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
                         csr->common.xa_td_state = XA_STATE_T0;
                     }
                     lixa_xid_serialize(xid, ser_xid);
-                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC009W,
-                           (char *) act_rsrmgr->generic->name, record.rmid,
-                           NULL != ser_xid ? ser_xid : "");
+                    LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC009W,
+                                 (char *) act_rsrmgr->generic->name,
+                                 record.rmid,
+                                 NULL != ser_xid ? ser_xid : ""));
                     LIXA_TRACE(("lixa_xa_start: xa_start returned XAER_DUPID "
                                 "for rmid=%d,xid='%s' and this should NOT "
                                 "happen!\n", record.rmid, ser_xid));
@@ -2532,9 +2538,10 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
                         tmp_txrc = TX_ERROR;
                     } else {
                         lixa_xid_serialize(xid, ser_xid);
-                        syslog(LOG_WARNING, LIXA_SYSLOG_LXC029W,
-                               (char *) act_rsrmgr->generic->name, record.rmid,
-                               NULL != ser_xid ? ser_xid : "");
+                        LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC029W,
+                                     (char *) act_rsrmgr->generic->name,
+                                     record.rmid,
+                                     NULL != ser_xid ? ser_xid : ""));
                         LIXA_TRACE(("lixa_xa_start: xa_start returned "
                                     "XAER_NOTA "
                                    "for rmid=%d,xid='%s' and this should NOT "
@@ -2548,9 +2555,9 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
                     tmp_txrc = TX_ERROR;
                     csr->common.xa_td_state = XA_STATE_T0;
                     lixa_xid_serialize(xid, ser_xid);
-                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC010W,
-                           (char *) act_rsrmgr->generic->name, record.rmid,
-                           ser_xid);
+                    LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC010W,
+                                 (char *) act_rsrmgr->generic->name,
+                                 record.rmid, ser_xid));
                     LIXA_TRACE(("lixa_xa_start: xa_start returned XAER_PROTO "
                                 "for rmid=%d,xid='%s' and this should NOT "
                                 "happen!\n", record.rmid, ser_xid));
@@ -2575,9 +2582,9 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
                     csr->common.xa_td_state = XA_STATE_T0;
                     break;
                 default:
-                    syslog(LOG_WARNING, LIXA_SYSLOG_LXC014W,
-                           (char *) act_rsrmgr->generic->name, record.rmid,
-                           record.rc);
+                    LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC014W,
+                                 (char *) act_rsrmgr->generic->name,
+                                 record.rmid, record.rc));
                     *txrc = TX_FAIL;
                     THROW(UNEXPECTED_XA_RC);
             }

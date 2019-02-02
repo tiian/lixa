@@ -499,8 +499,8 @@ int status_record_load(status_record_t **sr,
                             "(errno=%d '%s')\n",
                             status_file, errno, strerror(errno));
                 else
-                    syslog(LOG_ERR, LIXA_SYSLOG_LXD025E, status_file, errno,
-                           strerror(errno));
+                    LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD025E, status_file,
+                                 errno, strerror(errno)));
                 ret_cod = LIXA_RC_OPEN_ERROR;
                 break;
             case GETTIMEOFDAY_ERROR:

@@ -274,8 +274,8 @@ int server_recovery_24(struct thread_status_s *ts,
                                      ph->block_array[rsrmgr->rmid],
                                      ph->block_array[rsrmgr->rmid],
                                      ts->updated_records);
-                syslog(LOG_WARNING, LIXA_SYSLOG_LXD012W, ts->id,
-                       recovering_block_id);
+                LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD012W, ts->id,
+                             recovering_block_id));
             }
         }
         /* update the Finite State Machine */
@@ -357,8 +357,8 @@ int server_recovery_result(struct thread_status_s *ts,
             lixa_xid_serialize(&pld->ph.state.xid, ser_xid);
 
             lmo->body.qrcvr_16.answer.rc = LIXA_RC_LIXAC_CONF_CHANGED;
-            syslog(LOG_WARNING, LIXA_SYSLOG_LXD011W,
-                   lmo->body.qrcvr_16.client.job, ser_xid);
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD011W,
+                         lmo->body.qrcvr_16.client.job, ser_xid));
             LIXA_TRACE(("server_recovery_result: job is '%s', past config "
                         "digest is '%s', current config digest is '%s'\n",
                         lmo->body.qrcvr_16.client.job,

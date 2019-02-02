@@ -158,9 +158,9 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
                             "by this client\n",
                             rpl.body.qrcvr_16.client.config_digest,
                             rqst.body.qrcvr_8.client.config_digest));
-                syslog(LOG_ERR, LIXA_SYSLOG_LXC001E, ser_xid,
-                       rpl.body.qrcvr_16.client.config_digest,
-                       rqst.body.qrcvr_8.client.config_digest);
+                LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXC001E, ser_xid,
+                             rpl.body.qrcvr_16.client.config_digest,
+                             rqst.body.qrcvr_8.client.config_digest));
                 THROW(ABORTED_RECOVERY);
             }
 
@@ -187,7 +187,7 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
                     THROW(ROLLBACK_ERROR);
             }
             if (updt.body.qrcvr_24.recovery.failed)
-                syslog(LOG_WARNING, LIXA_SYSLOG_LXC005W, ser_xid);
+                LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC005W, ser_xid));
 
             if (LIXA_RC_OK != (
                     ret_cod = lixa_msg_serialize(
@@ -401,16 +401,16 @@ int client_recovery_commit(client_config_coll_t *ccc,
                 case XA_OK:
                     break;
                 case XA_RDONLY:
-                    syslog(LOG_NOTICE, LIXA_SYSLOG_LXC006N,
-                           act_rsrmgr->generic->name, rc, ser_xid);
+                    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC006N,
+                                 act_rsrmgr->generic->name, rc, ser_xid));
                     break;
                 case XAER_NOTA:
-                    syslog(LOG_INFO, LIXA_SYSLOG_LXC008I,
-                           act_rsrmgr->generic->name, ser_xid);
+                    LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXC008I,
+                                 act_rsrmgr->generic->name, ser_xid));
                     break;
                 default:
-                    syslog(LOG_CRIT, LIXA_SYSLOG_LXC003C,
-                           act_rsrmgr->generic->name, rc, ser_xid);
+                    LIXA_SYSLOG((LOG_CRIT, LIXA_SYSLOG_LXC003C,
+                                 act_rsrmgr->generic->name, rc, ser_xid));
                     failed = TRUE;
             }
             /* prepare record for server update */
@@ -509,18 +509,18 @@ int client_recovery_rollback(client_config_coll_t *ccc,
                 case XA_OK:
                     break;
                 case XA_RDONLY:
-                    syslog(LOG_NOTICE, LIXA_SYSLOG_LXC007N,
-                           lixa_iface_get_name(&act_rsrmgr->lixa_iface),
-                           rc, ser_xid);
+                    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC007N,
+                                 lixa_iface_get_name(&act_rsrmgr->lixa_iface),
+                                 rc, ser_xid));
                     break;
                 case XAER_NOTA:
-                    syslog(LOG_INFO, LIXA_SYSLOG_LXC018I,
-                           act_rsrmgr->generic->name, ser_xid);
+                    LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXC018I,
+                                 act_rsrmgr->generic->name, ser_xid));
                     break;
                 default:
-                    syslog(LOG_CRIT, LIXA_SYSLOG_LXC004C,
-                           lixa_iface_get_name(&act_rsrmgr->lixa_iface),
-                           rc, ser_xid);
+                    LIXA_SYSLOG((LOG_CRIT, LIXA_SYSLOG_LXC004C,
+                                 lixa_iface_get_name(&act_rsrmgr->lixa_iface),
+                                 rc, ser_xid));
                     failed = TRUE;
             }
             /* prepare record for server update */
@@ -587,15 +587,15 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
                 LIXA_TRACE(("client_recovery_scan: rmid=%u, found=%d\n",
                             i, found));
                 if (found < 0) {
-                    syslog(LOG_ERR, LIXA_SYSLOG_LXC024E,
-                           lixa_iface_get_name(&act_rsrmgr->lixa_iface),
-                           i, found, flags, count);
+                    LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXC024E,
+                                 lixa_iface_get_name(&act_rsrmgr->lixa_iface),
+                                 i, found, flags, count));
                     THROW(RECOVER_ERROR1);
                 }
                 if (found > count) {
-                    syslog(LOG_ERR, LIXA_SYSLOG_LXC025C,
-                           lixa_iface_get_name(&act_rsrmgr->lixa_iface),
-                           i, found, flags, count);
+                    LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXC025C,
+                                 lixa_iface_get_name(&act_rsrmgr->lixa_iface),
+                                 i, found, flags, count));
                     THROW(RECOVER_ERROR2);
                 }
                 for (j=0; j<found; ++j) {
@@ -809,7 +809,7 @@ int client_recovery_cold_commit(const client_status_t *cs,
                 LIXA_TRACE(("client_recovery_cold_commit: the resource "
                             "manager returned heuristic completion, calling "
                             "xa_forget...\n"));
-                syslog(LOG_CRIT, LIXA_SYSLOG_LXR004W, xa_rc, ser_xid);
+                LIXA_SYSLOG((LOG_CRIT, LIXA_SYSLOG_LXR004W, xa_rc, ser_xid));
                 xa_rc = lixa_iface_xa_forget(&act_rsrmgr->lixa_iface,
                                              xid, *rmid, flags);
                 LIXA_TRACE(("client_recovery_cold_commit: "
@@ -875,7 +875,7 @@ int client_recovery_cold_rollback(const client_status_t *cs,
                 LIXA_TRACE(("client_recovery_cold_rollback: the resource "
                             "manager returned heuristic completion, calling "
                             "xa_forget...\n"));
-                syslog(LOG_CRIT, LIXA_SYSLOG_LXR005W, xa_rc, ser_xid);
+                LIXA_SYSLOG((LOG_CRIT, LIXA_SYSLOG_LXR005W, xa_rc, ser_xid));
                 xa_rc = lixa_iface_xa_forget(&act_rsrmgr->lixa_iface,
                                              xid, *rmid, flags);
                 LIXA_TRACE(("client_recovery_cold_rollback: "

@@ -24,9 +24,7 @@
 
 
 #ifdef HAVE_STDIO_H
-
 # include <stdio.h>
-
 #endif /* HAVE_STDIO_H */
 
 
@@ -236,41 +234,42 @@ extern unsigned long lixa_trace_mask;
 extern "C" {
 #endif /* __cplusplus */
 
-/**
- * This method MUST be called BEFORE first log call to avoid lock
- * contention in multithread environments
- */
+    /**
+     * This method MUST be called BEFORE first log call to avoid lock
+     * contention in multithread environments
+     */
     void lixa_trace_init(void);
 
 
-/**
- * Send trace record to stderr
- * @param fmt IN record format
- * @param ... IN record data
- */
+    /**
+     * Send trace record to stderr
+     * @param[in] fmt record format
+     * @param[in] ... IN record data
+     */
     void lixa_trace(const char *fmt, ...);
 
+    
 
-/**
- * Dump the content of a piece of memory to a stream (hex format)
- * @param prefix IN trace prefix to print before dump (it is a fixed
- *               prefix, not a format with values)
- * @param data IN pointer to base memory
- * @param size IN number of bytes to dump
- * @param out_stream IN destination standard I/O stream
- */
+    /**
+     * Dump the content of a piece of memory to a stream (hex format)
+     * @param[in] prefix to print before dump (it is a fixed
+     *               prefix, not a format with values)
+     * @param[in] data pointer to base memory
+     * @param[in] size number of bytes to dump
+     * @param[in] out_stream destination standard I/O stream
+     */
     void lixa_trace_hex_data(const char *prefix, const byte_t *data,
                              lixa_word_t size, FILE *out_stream);
 
 
-/**
- * Dump the content of a piece of memory to a stream (text format)
- * @param prefix IN trace prefix to print before dump (it is a fixed
- *               prefix, not a format with values)
- * @param data IN pointer to base memory
- * @param size IN number of bytes to dump
- * @param out_stream IN destination standard I/O stream
- */
+    /**
+     * Dump the content of a piece of memory to a stream (text format)
+     * @param[in] prefix to print before dump (it is a fixed
+     *               prefix, not a format with values)
+     * @param[in] data pointer to base memory
+     * @param[in] size number of bytes to dump
+     * @param[in] out_stream destination standard I/O stream
+     */
     void lixa_trace_text_data(const char *prefix, const byte_t *data,
                               lixa_word_t size, FILE *out_stream);
 

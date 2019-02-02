@@ -230,7 +230,8 @@ int lixa_msg_send(int fd, const char *buf, size_t buf_size)
                     optval, EPIPE, ECONNRESET));
         if (EPIPE == optval || ECONNRESET == optval) {
             int rc = 0;
-            syslog(LOG_NOTICE, LIXA_SYSLOG_LXC027N, getpid(), pthread_self());
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC027N, getpid(),
+                         pthread_self()));
             rc = shutdown(fd, SHUT_RDWR);
             LIXA_TRACE(("lixa_msg_send: socket with fd=%d was shutdown "
                         "(rc=%d,errno=%d)\n", fd, rc, errno));
