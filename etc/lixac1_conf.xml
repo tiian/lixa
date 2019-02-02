@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<client>
+  <sttsrvs>
+    <sttsrv name="local_1" domain="AF_INET" address="@ADDRESS@" port="@PORT@"/>
+  </sttsrvs>
+  <rsrmgrs>
+  </rsrmgrs>
+  <profiles>
+    <profile name="XTA_DYN">
+      <sttsrvs>
+        <sttsrv>local_1</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+      </rsrmgrs>
+    </profile>
+  </profiles>
+</client>

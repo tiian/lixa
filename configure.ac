@@ -4,7 +4,7 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 #hardwired configuration
 _XTA_PREFIX="xta"
-_RELEASE_DATE="2019-02-01"
+_RELEASE_DATE="2019-02-02"
 AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 LT_INIT
 AC_PROG_LIBTOOL
@@ -156,6 +156,16 @@ then
 	AC_MSG_NOTICE([LIXA client will not be compiled])
 fi
 AM_CONDITIONAL([COMPILE_CLIENT], [test "$LIXA_CLIENT" = "yes"])
+
+AC_ARG_ENABLE([server],
+	AS_HELP_STRING([--disable-server],
+		[disable LIXA server support: build only LIXA clients and libraries]),
+	[LIXA_SERVER="no"], [LIXA_SERVER="yes"])
+if test "$LIXA_SERVER" = "no"
+then
+	AC_MSG_NOTICE([LIXA server will not be compiled])
+fi
+AM_CONDITIONAL([COMPILE_SERVER], [test "$LIXA_SERVER" = "yes"])
 
 AC_ARG_ENABLE([xta],
 	AS_HELP_STRING([--disable-xta],

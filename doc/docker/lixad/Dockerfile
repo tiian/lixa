@@ -1,7 +1,8 @@
-FROM debian:8-slim
+# A Docker image for LIXA state server based on Debian Linux
+FROM debian:9-slim
 #
 # Build with
-#	docker build -f Dockerfile-lixad -t tiian/lixa-lixad:1.7.3 .
+#	docker build -t tiian/lixa-lixad:1.7.3 .
 # Execute with
 #	docker run --rm -p 2345:2345 -d tiian/lixa-lixad:1.7.3
 #

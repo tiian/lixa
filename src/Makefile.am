@@ -1,7 +1,10 @@
 if COMPILE_CLIENT
   MAYBE_CLIENT = client
 endif
+if COMPILE_SERVER
+  MAYBE_SERVER = server
+endif
 if COMPILE_XTA
   MAYBE_XTA = xta
 endif
-SUBDIRS = common $(MAYBE_CLIENT) server $(MAYBE_XTA)
+SUBDIRS = common $(MAYBE_CLIENT) $(MAYBE_SERVER) $(MAYBE_XTA)

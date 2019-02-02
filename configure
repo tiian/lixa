@@ -710,6 +710,8 @@ COMPILE_XTA_CPP_FALSE
 COMPILE_XTA_CPP_TRUE
 COMPILE_XTA_FALSE
 COMPILE_XTA_TRUE
+COMPILE_SERVER_FALSE
+COMPILE_SERVER_TRUE
 COMPILE_CLIENT_FALSE
 COMPILE_CLIENT_TRUE
 COMPILE_DOCBOOK_STUFF_FALSE
@@ -916,6 +918,7 @@ with_wsmq
 enable_wsmq
 with_docbook
 enable_client
+enable_server
 enable_xta
 enable_xta_cpp
 enable_xta_java
@@ -1611,6 +1614,8 @@ Optional Packages:
   --with-docbook[=DIR]    use Docbook, DIR contains the stylesheets
   --disable-client        disable LIXA (and XTA) client support: build only
                           LIXA state server (lixad)
+  --disable-server        disable LIXA server support: build only LIXA clients
+                          and libraries
   --disable-xta           disable XTA (XA Transaction API) support
   --disable-xta-cpp       disable XTA (XA Transaction API) for C++ support
   --disable-xta-java      disable XTA (XA Transaction API) for Java support
@@ -4602,7 +4607,7 @@ esac
 
 #hardwired configuration
 _XTA_PREFIX="xta"
-_RELEASE_DATE="2019-02-01"
+_RELEASE_DATE="2019-02-02"
 
 cat >>confdefs.h <<_ACEOF
 #define _RELEASE_DATE "$_RELEASE_DATE"
@@ -17946,6 +17951,27 @@ else
 fi
 
 
+# Check whether --enable-server was given.
+if test "${enable_server+set}" = set; then :
+  enableval=$enable_server; LIXA_SERVER="no"
+else
+  LIXA_SERVER="yes"
+fi
+
+if test "$LIXA_SERVER" = "no"
+then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: LIXA server will not be compiled" >&5
+$as_echo "$as_me: LIXA server will not be compiled" >&6;}
+fi
+ if test "$LIXA_SERVER" = "yes"; then
+  COMPILE_SERVER_TRUE=
+  COMPILE_SERVER_FALSE='#'
+else
+  COMPILE_SERVER_TRUE='#'
+  COMPILE_SERVER_FALSE=
+fi
+
+
 # Check whether --enable-xta was given.
 if test "${enable_xta+set}" = set; then :
   enableval=$enable_xta; LIXA_XTA="no"
@@ -18643,7 +18669,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18646 "configure" */
+/* #line 18672 "configure" */
 public class Test {
 }
 EOF
@@ -19056,7 +19082,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 19059 "configure" */
+/* #line 19085 "configure" */
 public class Test {
 }
 EOF
@@ -19090,7 +19116,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 19093 "configure" */
+/* [#]line 19119 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);
@@ -22258,6 +22284,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COMPILE_CLIENT_TRUE}" && test -z "${COMPILE_CLIENT_FALSE}"; then
   as_fn_error $? "conditional \"COMPILE_CLIENT\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${COMPILE_SERVER_TRUE}" && test -z "${COMPILE_SERVER_FALSE}"; then
+  as_fn_error $? "conditional \"COMPILE_SERVER\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COMPILE_XTA_TRUE}" && test -z "${COMPILE_XTA_FALSE}"; then

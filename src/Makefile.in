@@ -414,8 +414,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @COMPILE_CLIENT_TRUE@MAYBE_CLIENT = client
+@COMPILE_SERVER_TRUE@MAYBE_SERVER = server
 @COMPILE_XTA_TRUE@MAYBE_XTA = xta
-SUBDIRS = common $(MAYBE_CLIENT) server $(MAYBE_XTA)
+SUBDIRS = common $(MAYBE_CLIENT) $(MAYBE_SERVER) $(MAYBE_XTA)
 all: all-recursive
 
 .SUFFIXES:
