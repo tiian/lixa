@@ -1,6 +1,6 @@
 LOG:
 
-	   1.7.3 LIXA for Docker
+2019-02-03 1.7.3 Docker image for LIXA state server: lixad
 		 New build options, dedicated to disable single components and
 		 syslog: they are useful to produce Docker images.
 		 --disable-syslog build option can be used to have messages on
