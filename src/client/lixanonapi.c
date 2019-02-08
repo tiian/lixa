@@ -23,9 +23,6 @@
 #ifdef HAVE_ERRNO_H
 # include <errno.h>
 #endif
-#ifdef HAVE_REGEX_H
-# include <regex.h>
-#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
@@ -45,7 +42,7 @@
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_GENERIC
 
 
-
+/*
 int lixa_nonapi_parse_conn_string(const char *conn_string,
                                   int *use_lixa_conn,
                                   int *use_lixa_rmid,
@@ -63,23 +60,22 @@ int lixa_nonapi_parse_conn_string(const char *conn_string,
     LIXA_TRACE(("lixa_nonapi_parse_conn_string\n"));
     TRY {
         int reg_error;
-        char reg_errbuf[200];
         regmatch_t pmatch[3];
         size_t nmatch = sizeof(pmatch)/sizeof(regmatch_t);
         char match_buf[100];
 
-        /* reset output values */
+        /* reset output values
         *use_lixa_conn = FALSE;
         *use_lixa_rmid = FALSE;
         *use_lixa_id = 0;
         
-        /* check database string, is it "lixa/[rmid-pos]{0-1}/n{0-1}" */
+        /* check database string, is it "lixa/[rmid-pos]{0-1}/n{0-1}"
         if (NULL == conn_string || 0 == strlen(conn_string)) {
             LIXA_TRACE(("lixa_nonapi_parse_conn_string: conn_string is "
                         "not valid\n"));
             THROW(INVALID_CONN_STRING);
         }
-        /* compile regular expression */
+        /* compile regular expression
         reg_error = regcomp(
             &preg, "^lixa\\/(rmid|pos)?\\/([[:digit:]]*)$",
             REG_EXTENDED|REG_ICASE);
@@ -89,7 +85,7 @@ int lixa_nonapi_parse_conn_string(const char *conn_string,
                         "regular expression ('%s')\n", reg_errbuf));
             THROW(REGCOMP_ERROR);
         }
-        /* parsing conn_string with regular expression */
+        /* parsing conn_string with regular expression
         reg_error = regexec(&preg, conn_string, nmatch, pmatch, 0);
         if (REG_NOMATCH == reg_error) {
             regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
@@ -104,10 +100,10 @@ int lixa_nonapi_parse_conn_string(const char *conn_string,
             THROW(REGEXEC_ERROR);
         }
 
-        /* conn_string is a valid string, LIXA connection must be used */
+        /* conn_string is a valid string, LIXA connection must be used
         *use_lixa_conn = TRUE;
         
-        /* rmid/pos detected? */
+        /* rmid/pos detected?
         if (pmatch[1].rm_so > 0 && pmatch[1].rm_eo > 0) {
             size_t len = pmatch[1].rm_eo - pmatch[1].rm_so;
             if (0 < len) {
@@ -118,7 +114,7 @@ int lixa_nonapi_parse_conn_string(const char *conn_string,
             }
         }
         
-        /* id detected? */
+        /* id detected?
         if (pmatch[2].rm_so > 0 && pmatch[2].rm_eo > 0) {
             size_t len = pmatch[2].rm_eo - pmatch[2].rm_so;
             if (0 < len) {
@@ -132,7 +128,7 @@ int lixa_nonapi_parse_conn_string(const char *conn_string,
         
         THROW(NONE);
     } CATCH {
-        /* release memory */
+        /* release memory
         if (REGCOMP_ERROR < excp)
             regfree(&preg);
         switch (excp) {
@@ -153,10 +149,10 @@ int lixa_nonapi_parse_conn_string(const char *conn_string,
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
+        } /* switch (excp)
+    } /* TRY-CATCH
     LIXA_TRACE(("lixa_nonapi_parse_conn_string/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
-
+        */

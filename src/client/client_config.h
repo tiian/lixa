@@ -69,22 +69,29 @@
 
 
 /**
- * Name of the environment variable must be used to specify the profile
+ * Name of the environment variable that must be used to specify the profile
  */
 #define LIXA_PROFILE_ENV_VAR "LIXA_PROFILE"
 
 
 
 /**
- * Name of the environment variable must be uset to specify the client config
- * file name
+ * Name of the environment variable than must be used to specify the client
+ * config file name
  */
 #define LIXA_CONFIG_FILE_ENV_VAR "LIXA_CONFIG_FILE"
 
 
 
 /**
- * Name of the environment variable must be uset to specify the job
+ * Name of the environment variable than must be used to specify state servers
+ */
+#define LIXA_STTSRVS_ENV_VAR "LIXA_STATE_SERVERS"
+
+
+
+/**
+ * Name of the environment variable that must be uset to specify the job
  */
 #define LIXA_JOB_ENV_VAR "LIXA_JOB"
 
@@ -434,8 +441,8 @@ extern "C" {
  
     /**
      * Parse a "sttsrvs" node tree
-     * @param ccc OUT server configuration structure
-     * @param a_node IN the current subtree must be parsed
+     * @param[out] ccc server configuration structure
+     * @param[in] a_node the current subtree that must be parsed
      * @return a standardized return code
      */
     int client_parse_sttsrvs(struct client_config_coll_s *ccc,
@@ -523,6 +530,17 @@ extern "C" {
                                      xmlNode *a_node, GArray *rsrmgrs);
 
 
+    /**
+     * Parse the content of the string and extract the list of the state
+     * servers that are expressed as URIs
+     * @param[out] ccc server configuration structure
+     * @param[in] envvar_str contains the list of the state servers
+     * @return a reason code
+     */
+    int client_parse_sttsrvs_envvar(client_config_coll_t *ccc,
+                                    const char *envvar_str);
+
+    
 
 #ifdef __cplusplus
 }

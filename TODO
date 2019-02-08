@@ -1,3 +1,7 @@
+Remove lixanonapi.h and lixanonapi.c : they are useless...
+
+Make case tests for LIXA_STATE_SERVERS environment variable
+
 Provide docker images to have an easier microservice approach
 
 Go on with lixa-xta Docker image

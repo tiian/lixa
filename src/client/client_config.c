@@ -26,6 +26,9 @@
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
+#ifdef HAVE_REGEX_H
+# include <regex.h>
+#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -72,6 +75,7 @@ int client_config(client_config_coll_t *ccc, int global_config)
     enum Exception { G_HASH_TABLE_NEW_ERROR
                      , G_STRDUP_ERROR
                      , OPEN_CONFIG_ERROR
+                     , STTSRVS_ENVVAR
                      , XML_READ_FILE_ERROR
                      , XML_DOC_GET_ROOT_ELEMENT_ERROR
                      , PARSE_CONFIG_ERROR
@@ -188,6 +192,19 @@ int client_config(client_config_coll_t *ccc, int global_config)
         }
         ccc->lixac_conf_filename = file_name;
 
+        /* checking if available state servers environment variable */
+        if (NULL == (tmp_str = getenv(LIXA_STTSRVS_ENV_VAR))) {
+            LIXA_TRACE(("client_config: '%s' environment variable not found, "
+                        "state servers will be picked up from config file\n",
+                        LIXA_STTSRVS_ENV_VAR));
+        } else {
+            LIXA_TRACE(("client_config: using state servers '%s' for "
+                        "subsequent operations\n", tmp_str));
+            if (LIXA_RC_OK != (ret_cod = client_parse_sttsrvs_envvar(
+                                   ccc, tmp_str)))
+                THROW(STTSRVS_ENVVAR);
+        }        
+        
         /* loading config file */
         LIXA_TRACE(("client_config/xmlReadFile\n"));
         if (NULL == (ccc->lixac_conf = xmlReadFile(file_name, NULL, 0)))
@@ -252,6 +269,8 @@ int client_config(client_config_coll_t *ccc, int global_config)
                 break;
             case OPEN_CONFIG_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case STTSRVS_ENVVAR:
                 break;
             case XML_READ_FILE_ERROR:
                 ret_cod = LIXA_RC_XML_READ_FILE_ERROR;
@@ -1264,9 +1283,11 @@ int client_parse(struct client_config_coll_s *ccc,
                         THROW(CLIENT_PARSE_ERROR);
                 } else if (!xmlStrcmp(cur_node->name,
                                       LIXA_XML_CONFIG_STTSRVS)) {
-                    if (LIXA_RC_OK != (ret_cod = client_parse_sttsrvs(
-                                           ccc, cur_node->children)))
-                        THROW(PARSE_STTSRVS_ERROR);
+                    /* skip if already set by env var */
+                    if (0 == ccc->sttsrvs->len)
+                        if (LIXA_RC_OK != (ret_cod = client_parse_sttsrvs(
+                                               ccc, cur_node->children)))
+                            THROW(PARSE_STTSRVS_ERROR);
                 } else if (!xmlStrcmp(cur_node->name,
                                       LIXA_XML_CONFIG_RSRMGRS)) {
                     if (LIXA_RC_OK != (ret_cod = client_parse_rsrmgrs(
@@ -1818,4 +1839,159 @@ int client_parse_profile_rsrmgrs(struct client_config_coll_s *ccc,
 }
 
 
+
+int client_parse_sttsrvs_envvar(client_config_coll_t *ccc,
+                                const char *envvar_str)
+{
+    enum Exception { REGCOMP_ERROR
+                     , STRDUP_ERROR1
+                     , REGEXEC_NO_MATCH
+                     , REGEXEC_ERROR
+                     , XML_STRDUP_ERROR1
+                     , CONFIG_ERROR1
+                     , STRDUP_ERROR2
+                     , CONFIG_ERROR2
+                     , XML_STRDUP_ERROR2
+                     , CONFIG_ERROR3
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    regex_t preg;
+    char *str = NULL;
+    xmlChar *address = NULL;
+    xmlChar *name = NULL;
+    
+    LIXA_TRACE(("client_parse_sttsrvs_envvar\n"));
+    TRY {
+        char *saveptr = NULL;
+        char *uri = NULL;
+        char *p;
+        int reg_error;
+        char reg_errbuf[500];
+        regmatch_t pmatch[5];
+        size_t nmatch = sizeof(pmatch)/sizeof(regmatch_t);
+        struct sttsrv_config_s record;
+        
+        /* reset new element */
+        record.name = NULL;
+        record.domain = AF_INET; /* tcp:// it's only INET */
+        record.address = NULL;
+        record.port = 0;
+
+        /* compile the regular expression used to match and split the URI */
+        if (0 != (reg_error = regcomp(
+                      &preg, "^tcp:\\/\\/([^:\\/?#]+):([0-9]+)\\/([^\\/?#]*)$",
+                      REG_EXTENDED|REG_ICASE))) {
+            regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
+            LIXA_TRACE(("client_parse_sttsrvs_envvar: error while compiling "
+                        "the regular expression ('%s')\n", reg_errbuf));
+            THROW(REGCOMP_ERROR);            
+        }
+        /* duplicate environment variable because the parameter is read only */
+        if (NULL == (str = strdup(envvar_str)))
+            THROW(STRDUP_ERROR1);
+        
+        p =str;
+        while (NULL != (uri = strtok_r(p, " ", &saveptr))) {
+            LIXA_TRACE(("client_parse_sttsrvs_envvar: uri='%s'\n", uri));
+            p = NULL;
+            /* analyze URI */
+            reg_error = regexec(&preg, uri, nmatch, pmatch, 0);
+            if (REG_NOMATCH == reg_error) {
+                regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
+                LIXA_TRACE(("client_parse_sttsrvs_envvar: URI does "
+                            "not match regular expression ('%s')\n",
+                            reg_errbuf));
+                THROW(REGEXEC_NO_MATCH);
+            }
+            if (0 != reg_error) {
+                regerror(reg_error, &preg, reg_errbuf, sizeof(reg_errbuf));
+                LIXA_TRACE(("client_parse_sttsrvs_envvar: error while "
+                            "matching regular expression ('%s')\n",
+                            reg_errbuf));
+                THROW(REGEXEC_ERROR);
+            }
+            /* address part or the URI */
+            if (pmatch[1].rm_so > 0 && pmatch[1].rm_eo > 0) {
+                if (NULL == (address = xmlCharStrndup(
+                                 uri+pmatch[1].rm_so,
+                                 pmatch[1].rm_eo - pmatch[1].rm_so)))
+                    THROW(XML_STRDUP_ERROR1);
+                record.address = address;
+                address = NULL;
+                LIXA_TRACE(("client_parse_sttsrvs_envvar: address='%s'\n",
+                            record.address));
+            } else
+                THROW(CONFIG_ERROR1);
+            /* port part of the URI */
+            if (pmatch[2].rm_so > 0 && pmatch[2].rm_eo > 0) {
+                char *port_str = NULL;
+                if (NULL == (port_str = strndup(
+                                 uri+pmatch[2].rm_so,
+                                 pmatch[2].rm_eo - pmatch[2].rm_so)))
+                    THROW(STRDUP_ERROR2);
+                record.port = (in_port_t)strtoul(port_str, NULL, 0);
+                LIXA_TRACE(("client_parse_sttsrvs_envvar: port="
+                            IN_PORT_T_FORMAT "\n", record.port));
+            } else
+                THROW(CONFIG_ERROR2);
+            /* name part or the URI */
+            if (pmatch[3].rm_so > 0 && pmatch[3].rm_eo > 0) {
+                name = xmlCharStrndup(uri+pmatch[3].rm_so,
+                                      pmatch[3].rm_eo - pmatch[3].rm_so);
+                record.name = name;
+                name = NULL;
+                LIXA_TRACE(("client_parse_sttsrvs_envvar: name='%s'\n",
+                            record.name));
+            } else
+                THROW(CONFIG_ERROR3);
+            g_array_append_val(ccc->sttsrvs, record);
+        }
+            
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case REGCOMP_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case STRDUP_ERROR1:
+            case STRDUP_ERROR2:
+                ret_cod = LIXA_RC_STRDUP_ERROR;
+                break;
+            case REGEXEC_ERROR:
+                ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case XML_STRDUP_ERROR1:
+            case XML_STRDUP_ERROR2:
+                ret_cod = LIXA_RC_XML_STRDUP_ERROR;
+                break;
+            case REGEXEC_NO_MATCH:
+            case CONFIG_ERROR1:
+            case CONFIG_ERROR2:
+            case CONFIG_ERROR3:
+                LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXC033E,
+                             LIXA_STTSRVS_ENV_VAR, envvar_str));
+                ret_cod = LIXA_RC_CONFIG_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* release memory */
+        if (NULL != str) {
+            free(str);
+            str = NULL;
+        }
+        if (NULL != address)
+            xmlFree(address);
+        if (NULL != name)
+            xmlFree(name);
+        if (excp > REGCOMP_ERROR)
+            regfree(&preg);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_parse_sttsrvs_envvar/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
 
