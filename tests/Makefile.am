@@ -18,7 +18,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	} > $@-t
 	mv $@-t $@
 
-EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at \
+EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at env_var.at \
 	generic.at generic_client.at generic_heur.at generic_norm.at \
 	testsuite.at nonapi.at \
 	tx.at tx_3_2.at tx_3_3.at tx_3_3_1.at tx_3_4.at tx_3_5.at \
@@ -81,8 +81,8 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 # package.m4, configure, etc.
 $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/bug.at \
-		$(srcdir)/bug_2944441.at \
-		$(srcdir)/bug_2983464.at \
+		$(srcdir)/bug_2944441.at $(srcdir)/bug_2983464.at \
+		$(srcdir)/env_var.at \
 		$(srcdir)/generic.at $(srcdir)/nonapi.at \
 		$(srcdir)/generic_client.at \
 		$(srcdir)/generic_heur.at $(srcdir)/generic_norm.at \

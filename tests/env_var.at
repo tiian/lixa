@@ -1,0 +1,24 @@
+AT_BANNER([Environment Variables])
+
+AT_SETUP([EV/0.0 no LIXA_STATE_SERVERS])
+# use config file
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset start lixat], [0], [ignore], [ignore])
+AT_CLEANUP
+# pass the same value using the environment variable
+AT_SETUP([EV/0.1 good LIXA_STATE_SERVERS])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; export LIXA_STATE_SERVERS="tcp://localhost:2345/TestTM" ; lixa_test_exec.sh noreset none lixat], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; export LIXA_STATE_SERVERS="tcp://127.0.0.1:2345/TestTM" ; lixa_test_exec.sh noreset none lixat], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; export LIXA_STATE_SERVERS="tcp://ignore.me:3456/foo tcp://127.0.0.1:2345/TestTM" ; lixa_test_exec.sh noreset none lixat], [0], [ignore], [ignore])
+AT_CLEANUP
+# use invalid values for the environtment variable
+AT_SETUP([EV/0.2 bad LIXA_STATE_SERVERS])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; export LIXA_STATE_SERVERS="localhost:2345/TestTM" ; lixa_test_exec.sh noreset none lixat], [1], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; export LIXA_STATE_SERVERS="tcp://2345/TestTM" ; lixa_test_exec.sh noreset none lixat], [1], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; export LIXA_STATE_SERVERS="tcp://localhost/TestTM" ; lixa_test_exec.sh noreset none lixat], [1], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; export LIXA_STATE_SERVERS="tcp://localhost:2345/" ; lixa_test_exec.sh noreset none lixat], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([EV/1.0 Stop the state server])
+AT_CHECK([lixa_test_exec.sh none stop true], [0], [ignore], [ignore])
+AT_CLEANUP
+

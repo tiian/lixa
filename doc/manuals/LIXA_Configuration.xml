@@ -847,6 +847,46 @@ export LIXA_CONFIG_FILE=/tmp/my_lixac
 	</para>
       </section>
       <section>
+	<title>LIXA_STATE_SERVERS</title>
+	<para>
+	  This environment variable can be used to override the section
+	  <command>&lt;sttsrvs&gt;</command> of the
+	  <filename>etc/lixac_conf.xml</filename> configuration file.
+	  It must contain a blank separated lists of URIs encoded as
+	  <command>tcp:://address:port/name</command>, where:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+	      <command>address</command> is the hostname or the IP address of a
+	      LIXA state server
+	    </para></listitem>
+	    <listitem><para>
+	      <command>port</command> is the port used by the LIXA state server
+	    </para></listitem>
+	    <listitem><para>
+	      <command>name</command> is the name associated to the LIXA state
+	      server and it's referenced by one or more profiles described in
+	      the configuration file <filename>etc/lixac_conf.xml</filename>
+	    </para></listitem>
+	  </itemizedlist>
+	  A typical usage of the environment variable is the following one:
+	  <screen>
+lixa@4944d8bff50d:/$ lixat
+2019-02-09 18:10:18.931258 [8/139695483680640] INFO: LXC000I this process is starting a new LIXA transaction manager (lixa package version is 1.7.4)
+tx_open(): -7
+
+lixa@4944d8bff50d:/$ export LIXA_STATE_SERVERS="tcp://192.168.123.35:2345/default"
+lixa@4944d8bff50d:/$ lixat
+2019-02-09 18:10:59.794849 [9/140591460210560] INFO: LXC000I this process is starting a new LIXA transaction manager (lixa package version is 1.7.4)
+tx_open(): 0
+tx_close(): 0
+	  </screen>
+	  Instead of changing the content of the 
+	  <filename>etc/lixac_conf.xml</filename> configuration file, in some
+	  cases, it can be more practical to override the content using the
+	  LIXA_STATE_SERVERS environment variable.
+	</para>
+      </section>
+      <section>
 	<title>LIXA_TRACE_MASK</title>
 	<para>
 	  This environment variable specifies which internal modules must

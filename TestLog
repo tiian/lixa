@@ -1,3 +1,9 @@
+Release: 1.7.4 (Tester: Tiian; Test purpose: env var LIXA_STATE_SERVERS))
+Date: 2019-02-09
+
+Ubuntu 14.04	|x86_64	|virtual (KVM)	|3 vCPU
+
+------------------------------------------------------------------------------
 Release: 1.7.3 (Tester: Tiian; Test purpose: --disable-syslog))
 Date: 2019-02-02
 

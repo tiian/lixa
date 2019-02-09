@@ -37,20 +37,31 @@ extern "C" {
 
 
     /**
-     * Parse a URI related to a LIXA state server expressed as <BR>
-     * tcp://address:port/name <BR>
-     * and retrieve the values associated to address, port and name.
-     * NOTE: all the returned pointers are inside the passed string
-     * @param[in] sttsrv_string contains the URI of the LIXA state server
-     * @param[out] address IP or DNS mapped
-     * @param[out] port
-     * @param[out] name associated to the state server
-     * @return a reason code
+     * Parse a connection string expressed with syntax <BR>
+     * lixa/[pos|rmid]/[id] <BR>
+     * and retrieve the values
+     * @param[in] conn_string the string to be parsed
+     * @param[out] use_lixa_conn boolean: the parsed string matches and
+     *                          a LIXA connection must be used
+     * @param[out] use_lixa_rmid boolean: meaningful only if
+     *                          use_lixa_conn == TRUE; <BR>
+     *                          use_lixa_rmid == TRUE => id is an rmid; <BR>
+     *                          use_lixa_rmid == FALSE => id is a pos;
+     * @param[out] use_lixa_id integer: meaningful only if
+     *                        use_lixa_conn == TRUE; <BR>
+     *                        it specifies the value to be passed to
+     *                        lixa_my_get_conn_by_pos,
+     *                        lixa_my_get_conn_by_rmid,
+     *                        lixa_pq_get_conn_by_pos,
+     *                        lixa_pq_get_conn_by_rmid
+     * @return 0 if parsing was OK, <BR>
+     *         !0 if an error happened (the error is
+     *           encoded as a LIXA standard return code)
      */
-    int lixa_nonapi_parse_uri_sttsrv(const char *sttsrv_string,
-                                     const char **address,
-                                     const char **port,
-                                     const char **name);
+    int lixa_nonapi_parse_conn_string(const char *conn_string,
+                                      int *use_lixa_conn,
+                                      int *use_lixa_rmid,
+                                      int *use_lixa_id);
 
 
 

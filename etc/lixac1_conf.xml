@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <client>
   <sttsrvs>
-    <sttsrv name="local_1" domain="AF_INET" address="@ADDRESS@" port="@PORT@"/>
+    <sttsrv name="default" domain="AF_INET" address="@ADDRESS@" port="@PORT@"/>
   </sttsrvs>
   <rsrmgrs>
   </rsrmgrs>
   <profiles>
-    <profile name="XTA_DYN">
+    <profile name="DEFAULT">
       <sttsrvs>
-        <sttsrv>local_1</sttsrv>
+        <sttsrv>default</sttsrv>
       </sttsrvs>
       <rsrmgrs>
       </rsrmgrs>
