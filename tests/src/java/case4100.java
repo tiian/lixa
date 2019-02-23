@@ -21,8 +21,7 @@
 
 // import XTA package from LIXA project
 import org.tiian.lixa.xta.*;
-// import Java XA
-//import javax.transaction.xa.XAResource;
+// import Java XA stuff
 import javax.transaction.xa.XAException;
 
 

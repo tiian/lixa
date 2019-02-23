@@ -1,4 +1,7 @@
 LOG:
+           1.7.5 
+		 Fixed a build bug related to tests/src/java directory
+
 2019-02-09 1.7.4 Docker image for LIXA client (command line utilities)
 		 Added environment variable LIXA_STATE_SERVERS
 

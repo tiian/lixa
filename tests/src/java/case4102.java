@@ -31,7 +31,6 @@ import javax.sql.XAConnection;
 // import Oracle package for XA Data Source
 import oracle.jdbc.xa.OracleXid;
 import oracle.jdbc.xa.OracleXAException;
-//import oracle.jdbc.*;
 import oracle.jdbc.pool.*;
 import oracle.jdbc.xa.client.*;
 // import Java io

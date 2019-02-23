@@ -8,5 +8,8 @@
 export PATH=@LIXA_CONFIG_BINDIR@:$PATH
 # Path for LIXA libraries
 export LD_LIBRARY_PATH=@LIXA_CONFIG_LIBDIR@:$LD_LIBRARY_PATH
+# CLASSPATH for Java (XTA only)
+export CLASSPATH=@LIXA_CONFIG_PREFIX@/share/lixa/java/xta.jar
 # Linker options for LIXA COBOL Application Programs
 export COB_LDFLAGS=-Wl,--no-as-needed $COB_LDFLAGS
+

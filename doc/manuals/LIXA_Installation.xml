@@ -693,8 +693,8 @@ python setup.py build
 
 sudo python setup.py install
 	    </screen>
-	    The required feature should be available in next 
-	    mysqlclient-python version (1.4.0).
+	    The required feature is available in mysqlclient-python starting
+	    with version 1.4.0.
 	  </para>
 	</section>
 	<section>
@@ -866,8 +866,8 @@ python setup.py build
 
 sudo python setup.py install
 	    </screen>
-	    The required feature should be available in next psycopg2 version 
-	    (2.8).
+	    The required feature should is available in psycopg2 starting with
+	    version 2.8.
 	  </para>
 	</section>
 	<section>

@@ -1,10 +1,10 @@
-AC_INIT([lixa], [1.7.4], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
+AC_INIT([lixa], [1.7.5-dev], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 #hardwired configuration
 _XTA_PREFIX="xta"
-_RELEASE_DATE="2019-02-09"
+_RELEASE_DATE="2019-02-24"
 AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 LT_INIT
 AC_PROG_LIBTOOL
@@ -293,7 +293,7 @@ if test "$LIXA_XTA_PYTHON" = "yes"
 then
 	# Check Python availability
 	m4_include(m4include/ax_python_devel.m4)
-	AX_PYTHON_DEVEL([>= '2.7'])
+	AX_PYTHON_DEVEL([">= '2.7'"])
 
 	# Check SWIG availability
 	m4_include(m4include/ax_pkg_swig.m4)
