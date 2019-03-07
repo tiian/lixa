@@ -67,6 +67,7 @@ Documentation is available in these places:
 - http://www.tiian.org/lixa/manuals/html/index.html
 - http://www.tiian.org/lixa/manuals/xta/C/index.html
 - http://www.tiian.org/lixa/manuals/xta/CPP/index.html
+- http://www.tiian.org/lixa/manuals/xta/Java/index.html
 
 Some important things you should check in the documentation before going on:
 1. check LIXA dependency looking at "Installation/System requirements"
@@ -86,6 +87,13 @@ destination in your system.
 Use "configure" (see above) to produce "doxygen.conf" file.
 If you installed Graphviz (http://www.graphviz.org/), configure should detect
 it and would produce data and headers dependencies too.
+
+
+
+******************
+DOCKER CONTAINERS:
+Docker images managed by the LIXA project are available in DockerHub:
+https://hub.docker.com/u/lixa
 
 
 

@@ -1,3 +1,11 @@
+Some bugs to be investigated:
+- look at Python program for Docker: it re-used the same tx object for a 
+  second transaction, it seems it does not behave well for pseudo synchronous
+- in resource manager return RMERR (-3) during prepare of pseudo synchronous,
+  the error is deleted at some point (it can be verified with Postgresql
+  driver 9.1-901-1.jdbc4 in Maven repo)
+
+
 Provide docker images to have an easier microservice approach
 
 **********
