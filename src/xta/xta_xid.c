@@ -175,6 +175,9 @@ int xta_xid_branch_qualifier_set_multibranch(char *branch_qualifier)
         case 'A':
             break;
         case 'b':
+            branch_qualifier[0] = 'a';
+            ret_value = TRUE;
+            break;
         case 'B':
             branch_qualifier[0] = 'A';
             ret_value = TRUE;
@@ -183,6 +186,9 @@ int xta_xid_branch_qualifier_set_multibranch(char *branch_qualifier)
         case 'C':
             break;
         case 'd':
+            branch_qualifier[0] = 'c';
+            ret_value = TRUE;
+            break;
         case 'D':
             branch_qualifier[0] = 'C';
             ret_value = TRUE;
@@ -191,6 +197,9 @@ int xta_xid_branch_qualifier_set_multibranch(char *branch_qualifier)
         case 'E':
             break;
         case 'f':
+            branch_qualifier[0] = 'e';
+            ret_value = TRUE;
+            break;
         case 'F':
             branch_qualifier[0] = 'E';
             ret_value = TRUE;

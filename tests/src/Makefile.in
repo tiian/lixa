@@ -1163,14 +1163,9 @@ case0108_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 case0109_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 	@MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 
-#case0109_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
-#	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 case0109_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
 	../../src/xta/liblixta.la
 
-#case0109_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
-#	../../src/xta/liblixta.la $(LDADD_MYSQL) \
-#	$(LDADD_POSTGRESQL) $(LDADD_ORACLE)
 case0109_SOURCES = case0109.c
 all: all-recursive
 
@@ -2173,7 +2168,6 @@ uninstall-am:
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am
 
-#case0109_LDFLAGS = @ORACLE_OCI_LDFLAGS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

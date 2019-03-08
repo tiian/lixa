@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     char *xid_string = NULL;
     /* control variables */
     int        commit;
-    int        test_rc;
+    int        multiple_branches;
 
     /* turn ON trace for debugging purpose */
     xta_init();
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     commit = strtol(argv[1], NULL, 0);
-    test_rc = strtol(argv[2], NULL, 0);
+    multiple_branches = strtol(argv[2], NULL, 0);
     
     /*
      * create a Transaction Manager object
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     }
 
     /* start a Distributed Transaction */
-    if (LIXA_RC_OK != (rc = xta_transaction_start(tx, FALSE))) {
+    if (LIXA_RC_OK != (rc = xta_transaction_start(tx, multiple_branches))) {
         printf("%s| xta_transaction_start: returned %d\n", pgm, rc);
         return 1;
     }
@@ -118,23 +118,23 @@ int main(int argc, char *argv[])
     
     /* commit the Distributed Transaction */
     if (commit) {
-        if (test_rc != (rc = xta_transaction_commit(tx, FALSE))) {
-            fprintf(stderr, "%s| xta_transaction_commit: returned %d instead "
-                    "of %d\n", pgm, rc, test_rc);
+        if (LIXA_RC_OK != (rc = xta_transaction_commit(tx, FALSE))) {
+            fprintf(stderr, "%s| xta_transaction_commit: returned %d\n",
+                    pgm, rc);
             return 1;
         }
         printf("%s| XTA commit performed\n", pgm);
     } else {
-        if (test_rc != (rc = xta_transaction_rollback(tx))) {
-            fprintf(stderr, "%s| xta_transaction_rollback: returned %d "
-                    "instead of %d\n", pgm, rc, test_rc);
+        if (LIXA_RC_OK != (rc = xta_transaction_rollback(tx))) {
+            fprintf(stderr, "%s| xta_transaction_rollback: returned %d\n",
+                    pgm, rc);
             return 1;
         }
         printf("%s| XTA rollback performed\n", pgm);
     }
     
     /* start a Distributed Transaction AGAIN */
-    if (LIXA_RC_OK != (rc = xta_transaction_start(tx, FALSE))) {
+    if (LIXA_RC_OK != (rc = xta_transaction_start(tx, multiple_branches))) {
         printf("%s| xta_transaction_start: returned %d\n", pgm, rc);
         return 1;
     }
@@ -153,23 +153,23 @@ int main(int argc, char *argv[])
     
     /* commit the Distributed Transaction */
     if (commit) {
-        if (test_rc != (rc = xta_transaction_commit(tx, FALSE))) {
-            fprintf(stderr, "%s| xta_transaction_commit: returned %d instead "
-                    "of %d\n", pgm, rc, test_rc);
+        if (LIXA_RC_OK != (rc = xta_transaction_commit(tx, FALSE))) {
+            fprintf(stderr, "%s| xta_transaction_commit: returned %d\n",
+                    pgm, rc);
             return 1;
         }
         printf("%s| XTA commit performed\n", pgm);
     } else {
-        if (test_rc != (rc = xta_transaction_rollback(tx))) {
-            fprintf(stderr, "%s| xta_transaction_rollback: returned %d "
-                    "instead of %d\n", pgm, rc, test_rc);
+        if (LIXA_RC_OK != (rc = xta_transaction_rollback(tx))) {
+            fprintf(stderr, "%s| xta_transaction_rollback: returned %d\n",
+                    pgm, rc);
             return 1;
         }
         printf("%s| XTA rollback performed\n", pgm);
     }
     
     /* start a Distributed Transaction for the third time... */
-    if (LIXA_RC_OK != (rc = xta_transaction_start(tx, FALSE))) {
+    if (LIXA_RC_OK != (rc = xta_transaction_start(tx, multiple_branches))) {
         printf("%s| xta_transaction_start: returned %d\n", pgm, rc);
         return 1;
     }
@@ -188,16 +188,16 @@ int main(int argc, char *argv[])
     
     /* commit the Distributed Transaction */
     if (commit) {
-        if (test_rc != (rc = xta_transaction_commit(tx, FALSE))) {
-            fprintf(stderr, "%s| xta_transaction_commit: returned %d instead "
-                    "of %d\n", pgm, rc, test_rc);
+        if (LIXA_RC_OK != (rc = xta_transaction_commit(tx, FALSE))) {
+            fprintf(stderr, "%s| xta_transaction_commit: returned %d\n",
+                    pgm, rc);
             return 1;
         }
         printf("%s| XTA commit performed\n", pgm);
     } else {
-        if (test_rc != (rc = xta_transaction_rollback(tx))) {
-            fprintf(stderr, "%s| xta_transaction_rollback: returned %d "
-                    "instead of %d\n", pgm, rc, test_rc);
+        if (LIXA_RC_OK != (rc = xta_transaction_rollback(tx))) {
+            fprintf(stderr, "%s| xta_transaction_rollback: returned %d\n",
+                    pgm, rc);
             return 1;
         }
         printf("%s| XTA rollback performed\n", pgm);
