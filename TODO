@@ -2,15 +2,22 @@ Some bugs to be investigated:
 - look at Python program for Docker: it re-used the same tx object for a 
   second transaction, it seems it does not behave well for pseudo synchronous
 
-IT SEEMS xta_transaction_close_internal is necessary at the end of 
-xta_transaction_commit(FALSE) and xta_transaction_rollback to reset 
-client_status structure. The issue is exploited in Java with a server that 
-serves two consecutive calls...
+  Analysis: the lixad state server is confused by a client that re-uses the
+            same session for a second tx.start() and join the second transaction
+	    of a client with the first, still in progress, of the other client
+	    :(
+            An brillant idea is required to avoid messy code!
 
 - in resource manager return RMERR (-3) during prepare of pseudo synchronous,
   the error is deleted at some point (it can be verified with Postgresql
   driver 9.1-901-1.jdbc4 in Maven repo)
 
+sessid differs from client to server if they run in 2 different Docker containers, probably due to different IPs perceived by the peers...
+
+  Analysis: session id is computed hashing the sock_sa structs of the peers,
+            but in a NATted environment, like Docker, two peers have 
+            different vision of the same TCP/IP connection and the hashing
+	    differs :(
 
 Provide docker images to have an easier microservice approach
 

@@ -235,7 +235,7 @@ void lixa_timer_stop(lixa_timer_t *lt) {
 
 
 
-void  lixa_session_reset(lixa_session_t *session)
+void lixa_session_reset(lixa_session_t *session)
 {
     memset(session, 0, sizeof(lixa_session_t));
 }

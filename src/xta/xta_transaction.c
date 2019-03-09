@@ -187,7 +187,7 @@ void xta_transaction_delete(xta_transaction_t *transact)
     
     LIXA_TRACE(("xta_transaction_delete: destroying %p...\n", transact));
     TRY {
-        /* call open if not already done */
+        /* call close if not already done */
         if (transact->already_opened)
             if (LIXA_RC_OK != (ret_cod = xta_transaction_close_internal(
                                    transact))) {
@@ -1002,6 +1002,16 @@ int xta_transaction_commit(xta_transaction_t *transact, int non_blocking)
         free(bqual);
         bqual = NULL;
     }
+    /* indipendently from what happened close the transaction after commit */
+    /* @@@ REMOVE ME 2019-03-09
+    if (!non_blocking) {
+        int rc;
+        LIXA_TRACE(("xta_transaction_commit: closing the transaction\n"));
+        rc = xta_transaction_close_internal(transact);
+        LIXA_TRACE(("xta_transaction_commit/xta_transaction_close_internal: "
+                    "ret_cod=%d\n", rc));
+    }
+    */
     LIXA_TRACE(("xta_transaction_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -1119,6 +1129,16 @@ int xta_transaction_rollback(xta_transaction_t *transact)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* indipendently from what happened close the transaction after rollback */
+    /* @@@ REMOVE ME 2019-03-09
+    {
+        int rc;
+        LIXA_TRACE(("xta_transaction_rollback: closing the transaction\n"));
+        rc = xta_transaction_close_internal(transact);
+        LIXA_TRACE(("xta_transaction_rollback/xta_transaction_close_internal: "
+                    "ret_cod=%d\n", rc));
+    }
+    */
     LIXA_TRACE(("xta_transaction_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
