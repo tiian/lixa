@@ -371,7 +371,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none case0109 1 1 2>&1 |tee $TESTS_TMP_FILE1 ; grep 'XID' $TESTS_TMP_FILE1 | sort --unique | wc -l > $TESTS_TMP_FILE2 ; echo "3" > $TESTS_TMP_FILE1 ; diff $TESTS_TMP_FILE1 $TESTS_TMP_FILE2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset none case0109 1 1 2>&1], [2], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([XTA/1.0/7.2 Multiple start (rollback)])
@@ -437,6 +437,6 @@ xa_end/0
 xa_rollback/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset stop case0109 0 1 2>&1 |tee $TESTS_TMP_FILE1 ; grep 'XID' $TESTS_TMP_FILE1 | sort --unique | wc -l > $TESTS_TMP_FILE2 ; echo "3" > $TESTS_TMP_FILE1 ; diff $TESTS_TMP_FILE1 $TESTS_TMP_FILE2], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0004 ; lixa_test_exec.sh noreset stop case0109 0 1 2>&1], [2], [ignore], [ignore])
 AT_CLEANUP
 

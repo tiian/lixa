@@ -6,7 +6,14 @@ Some bugs to be investigated:
             same session for a second tx.start() and join the second transaction
 	    of a client with the first, still in progress, of the other client
 	    :(
-            An brillant idea is required to avoid messy code!
+            A brillant idea is required to avoid messy code!
+	Introduced LIXA_RC_NON_REUSABLE_TX to avoid the re-use for multiple
+	branches tx.
+	It must be understood if another TX can be created for the same thread
+	without creating a new TM: XA requires uniqueness of thread of control,
+	but creating 2 TMs in the same toc would bypass it... From a conceptual
+	point of view, creating a new TX in the same thread could be
+	acceptable: to be investigated what happens on code...
 
 - in resource manager return RMERR (-3) during prepare of pseudo synchronous,
   the error is deleted at some point (it can be verified with Postgresql

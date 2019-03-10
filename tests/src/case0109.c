@@ -134,7 +134,12 @@ int main(int argc, char *argv[])
     }
     
     /* start a Distributed Transaction AGAIN */
-    if (LIXA_RC_OK != (rc = xta_transaction_start(tx, multiple_branches))) {
+    rc = xta_transaction_start(tx, multiple_branches);
+    if (LIXA_RC_NON_REUSABLE_TX == rc) {
+        printf("%s| xta_transaction_start: returned %d ('%s')\n", pgm, rc,
+               lixa_strerror(rc));
+        return 2;
+    } else if (LIXA_RC_OK != rc) {
         printf("%s| xta_transaction_start: returned %d\n", pgm, rc);
         return 1;
     }

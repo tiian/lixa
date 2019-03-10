@@ -585,10 +585,14 @@ define LIXA_RC_UNLINK_ERROR                  -129
  */
 #define LIXA_RC_TX_HAZARD                      -504
 /**
- * The XA transaction can be branched because it has been create as non
+ * The XA transaction can not be branched because it has been create as non
  * branchable
  */
 #define LIXA_RC_NON_BRANCHABLE_TX              -505
+/**
+ * The XA transaction object can not be reused: a new one must be created
+ */
+#define LIXA_RC_NON_REUSABLE_TX                -506
 
 
 /* JNI related errors; JNI is used in XTA for Java */

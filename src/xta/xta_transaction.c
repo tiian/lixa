@@ -682,6 +682,7 @@ int xta_transaction_recover(xta_transaction_t *transact)
 int xta_transaction_start(xta_transaction_t *transact, int multiple_branches)
 {
     enum Exception { NULL_OBJECT1
+                     , NON_REUSABLE_TX
                      , OPEN_INTERNAL_ERROR
                      , INVALID_STATUS
                      , NULL_OBJECT2
@@ -699,6 +700,9 @@ int xta_transaction_start(xta_transaction_t *transact, int multiple_branches)
         if (NULL == transact)
             THROW(NULL_OBJECT1);
         local_ccc = (client_config_coll_t *)transact->local_ccc;
+        /* multiple branches transaction require a new object */
+        if (transact->already_opened && multiple_branches)
+            THROW(NON_REUSABLE_TX);
         /* call open if not already done */
         if (!transact->already_opened)
             if (LIXA_RC_OK != (ret_cod = xta_transaction_open_internal(
@@ -731,6 +735,9 @@ int xta_transaction_start(xta_transaction_t *transact, int multiple_branches)
         switch (excp) {
             case NULL_OBJECT1:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NON_REUSABLE_TX:
+                ret_cod = LIXA_RC_NON_REUSABLE_TX;
                 break;
             case OPEN_INTERNAL_ERROR:
                 break;
