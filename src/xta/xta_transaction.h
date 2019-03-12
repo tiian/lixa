@@ -62,6 +62,11 @@ typedef struct xta_transaction_s {
      */
     int                              already_opened;
     /**
+     * Boolean value used to store if the start method has been called with
+     * multiple_branches flag
+     */
+    int                              multiple_branches;
+    /**
      * LIXA client status
      */
     xta_transaction_client_status_t *client_status;
@@ -112,6 +117,16 @@ extern "C" {
 
 
 
+    /**
+     * Check if the transaction object can be safely deleted: if there's a
+     * transaction in progress, this method returns FALSE
+     * @param[in] transact : transaction object to delete
+     * @return a boolean value
+     */
+    int xta_transaction_safe_delete(const xta_transaction_t *transact);
+
+
+    
     /**
      * Get the legacy LIXA object that contains the configurations for all the
      * define Resource Managers
@@ -279,6 +294,16 @@ extern "C" {
      * @return a reference to the Transaction Identifier
      */
     const xta_xid_t *xta_transaction_get_xid(
+        const xta_transaction_t *transact);
+
+
+
+    /**
+     * Get the flag multiple_branches
+     * @param[in] transact : transaction object
+     * @return multiple_branches flag
+     */     
+    int xta_transaction_get_multiple_branches(
         const xta_transaction_t *transact);
 
     

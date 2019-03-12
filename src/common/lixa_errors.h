@@ -593,6 +593,11 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * The XA transaction object can not be reused: a new one must be created
  */
 #define LIXA_RC_NON_REUSABLE_TX                -506
+/**
+ * The XA transaction object can not be safely disposed because the transaction
+ * has not yet ended
+ */
+#define LIXA_RC_NON_DISPOSABLE_TX              -507
 
 
 /* JNI related errors; JNI is used in XTA for Java */

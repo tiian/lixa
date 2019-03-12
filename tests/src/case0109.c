@@ -55,18 +55,20 @@ int main(int argc, char *argv[])
     /* control variables */
     int        commit;
     int        multiple_branches;
+    int        re_create;
 
     /* turn ON trace for debugging purpose */
     xta_init();
     
     printf("%s| starting...\n", pgm);
-    if (argc < 3) {
-        fprintf(stderr, "%s: at least two options must be specified\n",
+    if (argc < 4) {
+        fprintf(stderr, "%s: at least three options must be specified\n",
                 argv[0]);
         return 1;
     }
     commit = strtol(argv[1], NULL, 0);
     multiple_branches = strtol(argv[2], NULL, 0);
+    re_create = strtol(argv[3], NULL, 0);
     
     /*
      * create a Transaction Manager object
@@ -133,6 +135,16 @@ int main(int argc, char *argv[])
         printf("%s| XTA rollback performed\n", pgm);
     }
     
+    /* create a new transaction for this thread */
+    if (re_create &&
+        NULL == (tx = xta_transaction_manager_create_transaction(tm))) {
+        printf("%s| xta_transaction_manager_begin: returned NULL\n", pgm);
+        return 1;
+    } else {
+        printf("%s| xta_transaction_manager_get_transaction: transaction "
+               "reference is %p\n", pgm, tx);
+    }
+    
     /* start a Distributed Transaction AGAIN */
     rc = xta_transaction_start(tx, multiple_branches);
     if (LIXA_RC_NON_REUSABLE_TX == rc) {
@@ -171,6 +183,16 @@ int main(int argc, char *argv[])
             return 1;
         }
         printf("%s| XTA rollback performed\n", pgm);
+    }
+    
+    /* create a new transaction for this thread */
+    if (re_create &&
+        NULL == (tx = xta_transaction_manager_create_transaction(tm))) {
+        printf("%s| xta_transaction_manager_begin: returned NULL\n", pgm);
+        return 1;
+    } else {
+        printf("%s| xta_transaction_manager_get_transaction: transaction "
+               "reference is %p\n", pgm, tx);
     }
     
     /* start a Distributed Transaction for the third time... */

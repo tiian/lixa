@@ -143,6 +143,7 @@ xta_transaction_manager_create_transaction(xta_transaction_manager_t *tm)
 {
     enum Exception { NULL_OBJECT1
                      , G_HASH_TABLE_NEW_ERROR
+                     , NON_DISPOSABLE_TX
                      , NULL_OBJECT2
                      , INTERNAL_ERROR
                      , NONE } excp;
@@ -170,11 +171,30 @@ xta_transaction_manager_create_transaction(xta_transaction_manager_t *tm)
         } /* if (NULL == tm->transactions) */
         
         /* look for transaction in hash table */
+        /*
         if (NULL == (tx = g_hash_table_lookup(tm->transactions, self))) {
             LIXA_TRACE(("xta_transaction_manager_create_transaction: there is "
                         "not a started transactions for this thread, "
                         "starting a new one...\n"));
-            /* allocate a new transaction object */
+        */
+        if (NULL != (tx = g_hash_table_lookup(tm->transactions, self))) {
+            /* check if the transaction has been used for multiple branches */
+            if (xta_transaction_get_multiple_branches(tx)) {
+                LIXA_TRACE(("xta_transaction_manager_create_transaction: "
+                            "there is a started transactions for this thread, "
+                            "deleting the old one...\n"));
+                if (!xta_transaction_safe_delete(tx))
+                    THROW(NON_DISPOSABLE_TX);
+                /* xta_transaction_delete is automatically called by glib (see
+                   g_hash_table_new_full above */
+                g_hash_table_remove(tm->transactions, self);
+                /* reset tx to force the creation of a new one below */
+                tx = NULL;
+            }
+        }
+        
+        /* allocate a new transaction object */
+        if (NULL == tx) {
             if (NULL == (tx = xta_transaction_new()))
                 THROW(NULL_OBJECT2);
             
@@ -188,7 +208,7 @@ xta_transaction_manager_create_transaction(xta_transaction_manager_t *tm)
             g_hash_table_insert(tm->transactions, self, tx);
 # endif
 #endif
-        } /* if (NULL == (tx = g_hash_table_lookup */
+        }
         
         THROW(NONE);
     } CATCH {
@@ -198,6 +218,9 @@ xta_transaction_manager_create_transaction(xta_transaction_manager_t *tm)
                 break;
             case G_HASH_TABLE_NEW_ERROR:
                 ret_cod = LIXA_RC_G_HASH_TABLE_NEW_ERROR;
+                break;
+            case NON_DISPOSABLE_TX:
+                ret_cod = LIXA_RC_NON_DISPOSABLE_TX;
                 break;
             case NULL_OBJECT2:
                 ret_cod = LIXA_RC_NULL_OBJECT;

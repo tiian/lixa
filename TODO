@@ -1,21 +1,5 @@
 Some bugs to be investigated:
-- look at Python program for Docker: it re-used the same tx object for a 
-  second transaction, it seems it does not behave well for pseudo synchronous
-
-  Analysis: the lixad state server is confused by a client that re-uses the
-            same session for a second tx.start() and join the second transaction
-	    of a client with the first, still in progress, of the other client
-	    :(
-            A brillant idea is required to avoid messy code!
-	Introduced LIXA_RC_NON_REUSABLE_TX to avoid the re-use for multiple
-	branches tx.
-	It must be understood if another TX can be created for the same thread
-	without creating a new TM: XA requires uniqueness of thread of control,
-	but creating 2 TMs in the same toc would bypass it... From a conceptual
-	point of view, creating a new TX in the same thread could be
-	acceptable: to be investigated what happens on code...
-
-- in resource manager return RMERR (-3) during prepare of pseudo synchronous,
+- if resource manager return RMERR (-3) during prepare of pseudo synchronous,
   the error is deleted at some point (it can be verified with Postgresql
   driver 9.1-901-1.jdbc4 in Maven repo)
 

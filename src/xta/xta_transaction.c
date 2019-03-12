@@ -72,6 +72,8 @@ xta_transaction_t *xta_transaction_new(void)
             THROW(G_TRY_MALLOC_ERROR1);
         /* reset already_open flag */
         this->already_opened = FALSE;
+        /* reset multiple_branches flag */
+        this->multiple_branches = FALSE;
         /* allocate a client_status object */
         if (NULL == (this->client_status =
                      g_try_malloc0(sizeof(client_status_t))))
@@ -229,6 +231,69 @@ void xta_transaction_delete(xta_transaction_t *transact)
     LIXA_TRACE(("xta_transaction_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return;
+}
+
+
+
+int xta_transaction_safe_delete(const xta_transaction_t *transact)
+{
+    enum Exception { NULL_OBJECT
+                     , INVALID_STATUS
+                     , INTERNAL_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int result = FALSE;
+    
+    LIXA_TRACE(("xta_transaction_safe_delete\n"));
+    TRY {
+        int txstate;
+        
+        if (NULL == transact)
+            THROW(NULL_OBJECT);
+        txstate = client_status_get_txstate(transact->client_status);
+        switch (txstate) {
+            /* these states are safe */
+            case TX_STATE_S0:
+            case TX_STATE_S1:
+                result = TRUE;
+                break;
+            /* these states should never be used with XTA */
+            case TX_STATE_S2:
+            case TX_STATE_S4:
+                THROW(INVALID_STATUS);
+                break;
+            /* these states are not safe */
+            case TX_STATE_S3:
+            case TX_STATE_S5:
+                break;
+            default:
+                THROW(INTERNAL_ERROR);
+        } /* switch (txstate) */
+        LIXA_TRACE(("xta_transaction_safe_delete: status=%d, result=%d\n",
+                    txstate, result));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_safe_delete/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return result;
 }
 
 
@@ -720,6 +785,8 @@ int xta_transaction_start(xta_transaction_t *transact, int multiple_branches)
         if (NULL == (transact->xid = xta_xid_new(local_ccc->config_digest,
                                                  multiple_branches)))
             THROW(NULL_OBJECT2);
+        /* set multiple branches */
+        transact->multiple_branches = multiple_branches;
         /* start the transaction in all the XA Resource Managers */
         if (LIXA_RC_OK != (ret_cod = lixa_xa_start(
                                local_ccc, transact->client_status,
@@ -1009,16 +1076,6 @@ int xta_transaction_commit(xta_transaction_t *transact, int non_blocking)
         free(bqual);
         bqual = NULL;
     }
-    /* indipendently from what happened close the transaction after commit */
-    /* @@@ REMOVE ME 2019-03-09
-    if (!non_blocking) {
-        int rc;
-        LIXA_TRACE(("xta_transaction_commit: closing the transaction\n"));
-        rc = xta_transaction_close_internal(transact);
-        LIXA_TRACE(("xta_transaction_commit/xta_transaction_close_internal: "
-                    "ret_cod=%d\n", rc));
-    }
-    */
     LIXA_TRACE(("xta_transaction_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -1136,16 +1193,6 @@ int xta_transaction_rollback(xta_transaction_t *transact)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    /* indipendently from what happened close the transaction after rollback */
-    /* @@@ REMOVE ME 2019-03-09
-    {
-        int rc;
-        LIXA_TRACE(("xta_transaction_rollback: closing the transaction\n"));
-        rc = xta_transaction_close_internal(transact);
-        LIXA_TRACE(("xta_transaction_rollback/xta_transaction_close_internal: "
-                    "ret_cod=%d\n", rc));
-    }
-    */
     LIXA_TRACE(("xta_transaction_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -1496,5 +1543,39 @@ const xta_xid_t *xta_transaction_get_xid(const xta_transaction_t *transact)
     LIXA_TRACE(("xta_transaction_get_xid/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return xid;
+}
+
+
+
+int xta_transaction_get_multiple_branches(
+    const xta_transaction_t *transact)
+{
+    enum Exception { NULL_OBJECT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int result = FALSE;
+    
+    LIXA_TRACE(("xta_transaction_get_multiple_branches\n"));
+    TRY {
+        if (NULL == transact)
+            THROW(NULL_OBJECT);
+        result = transact->multiple_branches;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("xta_transaction_get_multiple_branches/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return result;
 }
 

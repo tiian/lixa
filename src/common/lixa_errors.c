@@ -351,6 +351,30 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_G_TRY_MALLOC_ERROR:
             return "ERROR: 'g_try_malloc'/'g_try_malloc0' function returned "
                 "an error condition";
+        case LIXA_RC_RESOURCE_ALREADY_REGISTERED:
+            return "ERROR: the XA Resource has been already registered to a "
+                "different Transaction Manager";
+        case LIXA_RC_TX_ROLLBACK:
+            return "ERROR: the XA transaction was rolled back (like "
+                "TX_ROLLBACK in TX transaction demarcation specification)";
+        case LIXA_RC_TX_MIXED:
+            return "ERROR: the XA transaction was partially committed and "
+                "partially rolled back (like TX_MIXED in TX transaction "
+                "demarcation specification)";
+        case LIXA_RC_TX_HAZARD:
+            return "ERROR: the XA transaction may have been partially "
+                "committed and partially rolled back (like TX_HAZARD in TX "
+                "transaction demarcation specification)";
+        case LIXA_RC_NON_BRANCHABLE_TX:
+            return "ERROR: the XA transaction can not be branched because it "
+                "has been create as non branchable";
+        case LIXA_RC_NON_REUSABLE_TX:
+            return "ERROR: the XA transaction can not be reused, a new one "
+                "must be created";
+        case LIXA_RC_NON_DISPOSABLE_TX:
+            return "ERROR: the XA transaction object can not be safely "
+                "disposed because the transaction has not yet ended";
+        /* JNI related errors; JNI is used in XTA for Java */
         case LIXA_RC_FIND_CLASS_ERROR:
             return "ERROR: 'JNI FindClass' function returned NULL pointer";
         case LIXA_RC_GET_DIRECT_BUFFER_ADDRESS_ERROR:
@@ -392,26 +416,6 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_SET_OBJECT_FIELD_ERROR:
             return "ERROR: 'JNI SetObjectField' function returned NULL "
                 "pointer";
-        case LIXA_RC_RESOURCE_ALREADY_REGISTERED:
-            return "ERROR: the XA Resource has been already registered to a "
-                "different Transaction Manager";
-        case LIXA_RC_TX_ROLLBACK:
-            return "ERROR: the XA transaction was rolled back (like "
-                "TX_ROLLBACK in TX transaction demarcation specification)";
-        case LIXA_RC_TX_MIXED:
-            return "ERROR: the XA transaction was partially committed and "
-                "partially rolled back (like TX_MIXED in TX transaction "
-                "demarcation specification)";
-        case LIXA_RC_TX_HAZARD:
-            return "ERROR: the XA transaction may have been partially "
-                "committed and partially rolled back (like TX_HAZARD in TX "
-                "transaction demarcation specification)";
-        case LIXA_RC_NON_BRANCHABLE_TX:
-            return "ERROR: the XA transaction can not be branched because it "
-                "has been create as non branchable";
-        case LIXA_RC_NON_REUSABLE_TX:
-            return "ERROR: the XA transaction can not be reused, a new one "
-                "must be created";
         default:
             return "ERROR: unknown error";
     } /* switch (ret_cod) */
