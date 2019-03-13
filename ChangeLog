@@ -1,4 +1,8 @@
 LOG:
+
+	   1.7.6 Fixed a bug related to xta_transaction_start() issued multiple
+		 times on an object used for multiple branches transaction
+
 2019-02-23 1.7.5 Docker images for LIXA (XTA for Java)
 		 Fixed a build bug related to tests/src/java directory
 

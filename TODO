@@ -3,6 +3,11 @@ Some bugs to be investigated:
   the error is deleted at some point (it can be verified with Postgresql
   driver 9.1-901-1.jdbc4 in Maven repo)
 
+The bug has been reproduced with test case:
+	XTA/4.0/2.0 Sync branch and commit
+and it's related to xa_prepare returning -3 , but the value is overrided by
+the +14 returned from the state server due to multiple branch synchronization!
+
 sessid differs from client to server if they run in 2 different Docker containers, probably due to different IPs perceived by the peers...
 
   Analysis: session id is computed hashing the sock_sa structs of the peers,
