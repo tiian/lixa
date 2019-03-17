@@ -371,7 +371,7 @@ xa_end/0
 xa_prepare/100
 xa_rollback/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [11], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [130], [ignore], [ignore])
 AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -433,7 +433,7 @@ xa_end/0
 xa_prepare/-3
 xa_rollback/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [11], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [130], [ignore], [ignore])
 AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP

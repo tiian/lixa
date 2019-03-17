@@ -361,7 +361,6 @@ xa_open/0
 xa_start/0
 xa_end/0
 xa_prepare/100
-### @@@ remove me 2019-03-09
 xa_rollback/0
 xa_close/0
 ]])
@@ -398,7 +397,7 @@ xa_prepare/0
 xa_rollback/0
 xa_close/0
 ]])
-# Superior thread xa_prepare() --> XA_RBROLLBACK
+# Subordinate thread xa_prepare() --> XA_RBROLLBACK
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -409,7 +408,7 @@ xa_prepare/100
 xa_rollback/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [11], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [130], [ignore], [ignore])
 AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -477,7 +476,7 @@ xa_prepare/-3
 xa_rollback/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [11], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [130], [ignore], [ignore])
 AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP

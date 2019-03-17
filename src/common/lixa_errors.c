@@ -145,7 +145,7 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: branches of the same global transaction are "
                 "managed by multiple threads";
         case LIXA_RC_MULTIBRANCH_PREPARE_FAILED:
-            return "ERROR: multiple branches prepare has be failed due to "
+            return "ERROR: multiple branches prepare has been failed due to "
                 "one or more branches";
         case LIXA_RC_LAST_STEP_EXCEEDED:
             return "ERROR: last step for the verb has been already reached";

@@ -369,7 +369,8 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
     enum Exception { OBJ_CORRUPTED1
                      , OBJ_CORRUPTED2
                      , PREPARE_DELAYED
-                     , MULTIBRANCH_PREPARE_FAILED
+                     , MULTIBRANCH_PREPARE_FAILED1
+                     , MULTIBRANCH_PREPARE_FAILED2
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
@@ -435,15 +436,32 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
                     ", #will_rollback=" UINT32_T_FORMAT ", #unknown="
                     UINT32_T_FORMAT ", #global_recovery=" UINT32_T_FORMAT "\n",
                     will_commit, will_rollback, unknown, global_recovery_num));
+        /*
         if (0 < unknown) {
-            /* at least one not prepared branch */
-            THROW(PREPARE_DELAYED);
+            * at least one not prepared branch *
+            if (0 < will_rollback) {
+                THROW(MULTIBRANCH_PREPARE_FAILED);
+            } else {
+                THROW(PREPARE_DELAYED);
+            }
         } else if ((0 < will_rollback || 0 < global_recovery_num) &&
                    0 == unknown) {
-            /* at least one failed branch or a global_recovery condition has
-               been rised, but all the branch has been prepared */
+            * at least one failed branch or a global_recovery condition has
+               been rised, but all the branch has been prepared *
             THROW(MULTIBRANCH_PREPARE_FAILED);
-        } /* if (0 < unknown) */
+        } * if (0 < unknown) *
+              */
+        if (0 < will_rollback) {
+            /* at least one failed branch */
+            THROW(MULTIBRANCH_PREPARE_FAILED1);
+        } else if (0 < global_recovery_num && 0 == unknown) {
+            /* a global_recovery condition has been rised, but all the branch
+               has been prepared */
+            THROW(MULTIBRANCH_PREPARE_FAILED2);
+        } else if (0 < unknown) {
+            /* at least one not prepared branch */
+            THROW(PREPARE_DELAYED);
+        }
         
         THROW(NONE);
     } CATCH {
@@ -455,7 +473,8 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
             case PREPARE_DELAYED:
                 ret_cod = LIXA_RC_OPERATION_POSTPONED;
                 break;
-            case MULTIBRANCH_PREPARE_FAILED:
+            case MULTIBRANCH_PREPARE_FAILED1:
+            case MULTIBRANCH_PREPARE_FAILED2:
                 ret_cod = LIXA_RC_MULTIBRANCH_PREPARE_FAILED;
                 break;
             case NONE:

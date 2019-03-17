@@ -1452,7 +1452,7 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
                      , ERROR_FROM_SERVER
                      , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int warning = LIXA_RC_OK;
+    int report_rc = LIXA_RC_OK;
     
     struct lixa_msg_s msg;
     char *output_buffer = NULL;
@@ -1620,7 +1620,7 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
         /* check the answer from the server */
         if (LIXA_RC_WOULD_BLOCK == msg.body.prepare_16.answer.rc ||
             LIXA_RC_OTHER_BRANCH_ERROR == msg.body.prepare_16.answer.rc)
-            warning = msg.body.prepare_16.answer.rc;
+            report_rc = msg.body.prepare_16.answer.rc;
         else if (LIXA_RC_OK != (ret_cod = msg.body.prepare_16.answer.rc))
             THROW(ERROR_FROM_SERVER);
 
@@ -1645,7 +1645,7 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
                 ret_cod += LIXA_RC_ERROR_FROM_SERVER_OFFSET;
                 break;
             case NONE:
-                ret_cod = warning;
+                ret_cod = report_rc;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;

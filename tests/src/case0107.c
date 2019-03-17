@@ -70,6 +70,7 @@
  * 12:   subordinate branch / xta_transaction_rollback() generic error
  * 13:   subordinate branch / xta_transaction_commit() generic error
  * 14:   xta_transaction_close() generic error
+ * 15:   subordinate branch / xta_transaction_commit() -> LIXA_RC_MULTIBRANCH_PREPARE_FAILED
  */
 
 
@@ -347,6 +348,8 @@ void subordinate(void)
                     pgm, pid, rc, lixa_strerror(rc));
             if (rc == LIXA_RC_TX_ROLLBACK)
                 exit(6);
+            else if (rc == LIXA_RC_MULTIBRANCH_PREPARE_FAILED)
+                exit(15);
             else
                 exit(1);
         }
