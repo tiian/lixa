@@ -797,6 +797,7 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
 {
     enum Exception { JOB_NOT_FOUND
                      , CONFIG_DIGEST_NOT_FOUND
+                     , SESSID_NOT_FOUND
                      , MAINT_NOT_FOUND
                      , RMID_NOT_FOUND
                      , DYNAMIC_NOT_FOUND
@@ -829,6 +830,12 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
                         (char *) tmp, sizeof(md5_digest_hex_t));
                 msg->body.open_8.client.config_digest[
                     MD5_DIGEST_LENGTH * 2] = '\0';
+                xmlFree(tmp);
+                if (NULL == (tmp = xmlGetProp(
+                                 cur, LIXA_XML_MSG_PROP_SESSID)))
+                    THROW(SESSID_NOT_FOUND);
+                lixa_session_set_sid(&(msg->body.open_8.client.session),
+                                     (char *)tmp);
                 xmlFree(tmp);
                 if (NULL == (tmp = xmlGetProp(
                                  cur, LIXA_XML_MSG_PROP_MAINT)))
@@ -904,6 +911,7 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
         switch (excp) {
             case JOB_NOT_FOUND:
             case CONFIG_DIGEST_NOT_FOUND:
+            case SESSID_NOT_FOUND:
             case MAINT_NOT_FOUND:
             case RMID_NOT_FOUND:
             case DYNAMIC_NOT_FOUND:

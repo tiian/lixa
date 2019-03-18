@@ -315,6 +315,41 @@ int lixa_session_init(lixa_session_t *session, int fd, int client)
 
 
 
+int lixa_session_set_sid(lixa_session_t *session, const char *sid)
+{
+    enum Exception { NULL_OBJECT
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_session_set_sid\n"));
+    TRY {
+        if (NULL == sid)
+            THROW(NULL_OBJECT);
+        /* reset the destination, copy the value in a safe way */
+        memset(&(session->sid), 0, LIXA_SESSION_ID_LENGTH);
+        strncpy(session->sid, sid, LIXA_SESSION_ID_LENGTH);
+        session->sid[LIXA_SESSION_ID_LENGTH] = '\0';
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_session_set_sid/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 char *lixa_str_replace(const char *str, const char *from, const char *to)
 {
     /* Increment positions cache size initially by this number. */

@@ -1210,9 +1210,9 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
         strncpy(client.config_digest,
                 ccc->config_digest, sizeof(md5_digest_hex_t));
         client.config_digest[MD5_DIGEST_LENGTH * 2] = '\0';
+        client.session = cs->session;
         client.maint = mmode;
         msg.body.open_8.client = client;
-
         msg.body.open_8.rsrmgrs = g_array_sized_new(
             FALSE, FALSE,
             sizeof(struct lixa_msg_body_open_8_rsrmgr_s),

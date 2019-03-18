@@ -91,7 +91,7 @@ typedef struct lixa_timer_s lixa_timer_t;
  * Number of char necessary for a session id: too many chars are not practical
  * during troubleshooting
  */
-#define LIXA_SESSION_ID_LENGTH      (6+1)
+#define LIXA_SESSION_ID_LENGTH      (7+1)
 
 
 
@@ -227,6 +227,16 @@ extern "C" {
 
     
 
+    /**
+     * Set session ID (sessid) in a session object
+     * @param[in,out] session object
+     * @param[in] sid session id
+     * @return a reason code
+     */
+    int lixa_session_set_sid(lixa_session_t *session, const char *sid);
+
+
+    
     /**
      * Credit: Laird Shaw https://creativeandcritical.net/str-replace-c
      * Replaces in the string str all the occurrences of the source string from

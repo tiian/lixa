@@ -40,6 +40,7 @@
 #include "lixa_config.h"
 #include "xa.h"
 #include "lixa_xid.h"
+#include "lixa_utils.h"
 
 
 
@@ -89,7 +90,7 @@
  * Current protocol level; it's used to recognize incompatible client/server
  * configuration at run-time
  */
-#define LIXA_MSG_LEVEL          3
+#define LIXA_MSG_LEVEL          4
 /**
  * Id reserved for a null message: do NOT change this value because it
  * would break the @ref lixa_msg_init behavior
@@ -221,6 +222,10 @@ extern const xmlChar *LIXA_XML_MSG_PROP_RMID;
  * Label used to specify "r_state" property
  */
 extern const xmlChar *LIXA_XML_MSG_PROP_R_STATE;
+/**
+ * Label used to specify "sessid" property
+ */
+extern const xmlChar *LIXA_XML_MSG_PROP_SESSID;
 /**
  * Label used to specify "s_state" property
  */
@@ -429,9 +434,10 @@ struct lixa_msg_body_answer_s
  */
 struct lixa_msg_body_open_8_client_s
 {
-    xmlChar *job;
+    xmlChar         *job;
     md5_digest_hex_t config_digest;
-    int maint;
+    lixa_session_t   session;
+    int              maint;
 };
 
 /**

@@ -758,12 +758,12 @@ int server_xa_open_8(struct thread_status_s *ts,
                      struct lixa_msg_s *lmo,
                      uint32_t block_id)
 {
-    enum Exception { RSRMGRS_ARRAY_NULL,
-                     MAINTENANCE_MODE,
-                     TOO_MANY_RSRMGRS,
-                     PAYLOAD_CHAIN_ALLOCATE_ERROR,
-                     FSM_SEND_MESSAGE_AND_WAIT,
-                     NONE } excp;
+    enum Exception { RSRMGRS_ARRAY_NULL
+                     , MAINTENANCE_MODE
+                     , TOO_MANY_RSRMGRS
+                     , PAYLOAD_CHAIN_ALLOCATE_ERROR
+                     , FSM_SEND_MESSAGE_AND_WAIT
+                     , NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_xa_open_8\n"));
@@ -771,9 +771,16 @@ int server_xa_open_8(struct thread_status_s *ts,
         uint32_t i;
         struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
+        /* replace session id */
+        memcpy(&(cs->session), &(lmi->body.open_8.client.session),
+               sizeof(lixa_session_t));
+        LIXA_TRACE(("server_xa_open_8: force sessid='%s' using client value\n",
+                    lixa_session_get_sid(&(cs->session))));
+        
 #ifdef LIXA_DEBUG
         /* check the resource manager array is OK */
-        if (NULL == lmi->body.open_8.rsrmgrs) THROW(RSRMGRS_ARRAY_NULL);
+        if (NULL == lmi->body.open_8.rsrmgrs)
+            THROW(RSRMGRS_ARRAY_NULL);
 #endif /* LIXA_DEBUG */
 
         if (ts->mmode && !lmi->body.open_8.client.maint) {

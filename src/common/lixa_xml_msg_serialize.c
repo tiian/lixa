@@ -925,12 +925,15 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg, char *buffer,
 
         /* <client> */
         used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%s\" %s=\"%s\" %s=\"%d\"/>",
+                              "<%s %s=\"%s\" %s=\"%s\" %s=\"%s\" %s=\"%d\"/>",
                               LIXA_XML_MSG_TAG_CLIENT,
                               LIXA_XML_MSG_PROP_JOB,
                               msg->body.open_8.client.job,
                               LIXA_XML_MSG_PROP_CONFIG_DIGEST,
                               msg->body.open_8.client.config_digest,
+                              LIXA_XML_MSG_PROP_SESSID,
+                              lixa_session_get_sid(
+                                  &(msg->body.open_8.client.session)),
                               LIXA_XML_MSG_PROP_MAINT,
                               msg->body.open_8.client.maint);
         if (used_chars >= *free_chars)
