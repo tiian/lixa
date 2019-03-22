@@ -982,6 +982,7 @@ int xta_transaction_commit(xta_transaction_t *transact, int non_blocking)
                             txrc, prepare_txrc));
                 txrc = TX_FAIL;
             }
+            LIXA_TRACE(("xta_transaction_commit: txrc=%d\n", txrc));
             switch (txrc) {
                 case TX_OK:
                 case TX_ROLLBACK:

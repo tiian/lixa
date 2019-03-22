@@ -200,6 +200,7 @@ int lixa_tx_rc_get(lixa_tx_rc_t *ltr)
                 ltr->tx_rc = TX_OK;
             break;
         case XA_HEURHAZ:
+        case LIXA_XAER_HAZARD:
             ltr->tx_rc = TX_HAZARD;
             break;
         case XA_HEURMIX:

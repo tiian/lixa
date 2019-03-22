@@ -93,7 +93,7 @@
     "TMSUSPEND/TMMIGRATE flag: there probably is a bug inside the RM code"
 #define LIXA_SYSLOG_LXC016W "LXC016W Resource Manager '%s' (rmid=%d) " \
     "returned %d to xa_prepare() and %d to xa_rollback(): the Application " \
-    "Program called tx_commit() for this transaction ('%s') and this is " \
+    "Program asked to commit this transaction ('%s') and this is " \
     "an hazard condition"
 #define LIXA_SYSLOG_LXC017W "LXC017W Resource Manager '%s' (rmid=%d) " \
     "returned XA_RB* (%d) for xid '%s', but the Transaction Manager called " \

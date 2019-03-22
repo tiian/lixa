@@ -359,6 +359,13 @@ typedef struct xa_switch_t *(*lixa_get_xa_switch_f)(void);
  * nonstandard value. Please refer to original Oracle documentation
  */
 #define XAER_AFFINITY -10
+/**
+ * This is a special XAER return code used to manage the special situation
+ * of xa_prepare with errors and xa_rollback with errors. This is not an XA
+ * extension, but an internal LIXA implementation dependent value
+ */
+#define LIXA_XAER_HAZARD   -20
+
 
 
 #endif /* ifndef XA_H */

@@ -1,14 +1,4 @@
-sessid differs from client to server if they run in 2 different Docker containers, probably due to different IPs perceived by the peers...
-
-  Analysis: session id is computed hashing the sock_sa structs of the peers,
-            but in a NATted environment, like Docker, two peers have 
-            different vision of the same TCP/IP connection and the hashing
-	    differs :(
-
 Provide docker images to have an easier microservice approach
-
-Create an example with superior or subordinate get an error during prepare;
-subordinate return application code to superior that starts rollback!
 
 **********
 

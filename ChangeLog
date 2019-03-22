@@ -1,9 +1,17 @@
 LOG:
 
-	   1.7.6 Fixed a bug related to xta_transaction_start() issued multiple
+2019-03-22 1.7.6 Fixed a bug related to xta_transaction_start() issued multiple
 		 times on an object used for multiple branches transaction.
 		 Fixed a bug related to XTA multiple branches pseudo synchronous
 		 pattern when the subordinate gets an error during "prepare".
+		 Fixed a bug related LIXA_XAER_HAZARD: this is a strange
+		 condition for XA standard, but it's exploited by an old
+		 JDBC driver for PostgreSQL.
+		 *** WARNING: ***
+		 This release is *NOT* compatible with previous ones: you can't
+		 mix 1.7.6 and previous versions in the same environment
+		 (message LXC030E will be logged in the event of level
+		 mismatch); LIXA_MSG_LEVEL=4.
 
 2019-02-23 1.7.5 Docker images for LIXA (XTA for Java)
 		 Fixed a build bug related to tests/src/java directory

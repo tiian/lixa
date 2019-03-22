@@ -772,6 +772,8 @@ int server_xa_open_8(struct thread_status_s *ts,
         struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* replace session id */
+        LIXA_TRACE(("server_xa_open_8: server generated sessid='%s' ...\n",
+                    lixa_session_get_sid(&(cs->session))));
         memcpy(&(cs->session), &(lmi->body.open_8.client.session),
                sizeof(lixa_session_t));
         LIXA_TRACE(("server_xa_open_8: force sessid='%s' using client value\n",
