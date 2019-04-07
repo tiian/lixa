@@ -1,5 +1,7 @@
 LOG:
 
+2019-04-07 1.7.7 Documentation fix
+
 2019-03-22 1.7.6 Fixed a bug related to xta_transaction_start() issued multiple
 		 times on an object used for multiple branches transaction.
 		 Fixed a bug related to XTA multiple branches pseudo synchronous

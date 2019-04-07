@@ -594,6 +594,16 @@
 	</itemizedlist>
       </para>
     </section>
+    <section>
+      <title>XTA and Docker</title>
+      <para>
+	XTA supplies a set of ready to use Docker images than can be
+	downloaded from 
+	<link xlink:href="https://hub.docker.com/search/?q=lixa&amp;type=image">DockerHub</link>
+	or build from 
+	<link xlink:href="https://github.com/tiian/lixa-docker">source code</link>.
+      </para>
+    </section>
   </section>
   <section xml:id="xta_sa">
     <title>The <quote>Single Application</quote> Pattern</title>
