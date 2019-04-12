@@ -1,4 +1,5 @@
-Provide docker images to have an easier microservice approach
+Use client connection timeout as a new parameter for lixa_msg_retrieve
+Put timeout parameter in lixac_conf.xml : create a new section
 
 **********
 

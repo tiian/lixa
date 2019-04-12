@@ -73,27 +73,38 @@
  */
 #define LIXA_PROFILE_ENV_VAR "LIXA_PROFILE"
 
-
-
 /**
- * Name of the environment variable than must be used to specify the client
+ * Name of the environment variable that must be used to specify the client
  * config file name
  */
 #define LIXA_CONFIG_FILE_ENV_VAR "LIXA_CONFIG_FILE"
 
-
+/**
+ * Name of the environment variable that must be used to specify the timeout
+ * used by lixac library
+ */
+#define LIXA_CLIENT_CONNECTION_TIMEOUT_ENV_VAR "LIXA_CLIENT_CONNECTION_TIMEOUT"
 
 /**
  * Name of the environment variable than must be used to specify state servers
  */
 #define LIXA_STTSRVS_ENV_VAR "LIXA_STATE_SERVERS"
 
-
-
 /**
  * Name of the environment variable that must be uset to specify the job
  */
 #define LIXA_JOB_ENV_VAR "LIXA_JOB"
+
+/**
+ * 0 is not an acceptable value for the client connection timeout because it's
+ * passed to "poll" function
+ */
+#define LIXA_CLIENT_CONNECTION_TIMEOUT_NULL 0
+
+/**
+ * Hard wired default value for client connection timeout: 1000ms (1s)
+ */
+#define LIXA_CLIENT_CONNECTION_TIMEOUT_DEFAULT 1000
 
 
 
@@ -179,7 +190,7 @@ typedef struct client_config_coll_s {
      */
     int                          mutex_cleared;
     /**
-     * Set of thread are "opened" and "configured"
+     * Set of threads that are "opened" and "configured"
      */
     GHashTable                  *config_threads;
     /**
@@ -221,6 +232,11 @@ typedef struct client_config_coll_s {
      * Profiles' configuration
      */
     GArray                      *profiles;
+    /**
+     * Connection timeout used by the client when waiting data from the
+     * state server. Unit = milliseconds, like in poll function
+     */
+    long int                     connection_timeout;
     /**
      * These are the parameters will be used by all the clients of this
      * process to reach the transaction manager.

@@ -204,6 +204,20 @@ int client_config(client_config_coll_t *ccc, int global_config)
                                    ccc, tmp_str)))
                 THROW(STTSRVS_ENVVAR);
         }        
+
+        /* checking if available client timeout environment variable */
+        ccc->connection_timeout = LIXA_CLIENT_CONNECTION_TIMEOUT_NULL;
+        if (NULL == (tmp_str = getenv(
+                         LIXA_CLIENT_CONNECTION_TIMEOUT_ENV_VAR))) {
+            LIXA_TRACE(("client_config: '%s' environment variable not found, "
+                        "state servers will be picked up from config file\n",
+                        LIXA_CLIENT_CONNECTION_TIMEOUT_ENV_VAR));
+        } else {
+            long timeout = strtol(tmp_str, NULL, 10);
+            LIXA_TRACE(("client_config: using client connection timeout %ld "
+                        "for subsequent operations\n", timeout));
+            ccc->connection_timeout = timeout;
+        }        
         
         /* loading config file */
         LIXA_TRACE(("client_config/xmlReadFile\n"));
@@ -249,6 +263,15 @@ int client_config(client_config_coll_t *ccc, int global_config)
         if (0 != getaddrinfo((char *) ccc->actconf.sttsrv->address, NULL,
                              &hints, &res))
             THROW(GETADDRINFO_ERROR);
+        /* fix client connection timeout if necessary */
+        if (LIXA_CLIENT_CONNECTION_TIMEOUT_NULL == ccc->connection_timeout) {
+            ccc->connection_timeout = LIXA_CLIENT_CONNECTION_TIMEOUT_DEFAULT;
+            LIXA_TRACE(("client_config: client connection timeout can not be "
+                        "%d, default value (%d) will be used\n",
+                        LIXA_CLIENT_CONNECTION_TIMEOUT_NULL,
+                        ccc->connection_timeout));
+        }
+        
         /* set port */
         memcpy(&ccc->serv_addr, (struct sockaddr_in *) res->ai_addr,
                sizeof(struct sockaddr_in));
