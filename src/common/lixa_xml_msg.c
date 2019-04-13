@@ -23,6 +23,9 @@
 #ifdef HAVE_ERRNO_H
 # include <errno.h>
 #endif
+#ifdef HAVE_POLL_H
+# include <poll.h>
+#endif
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
@@ -123,11 +126,15 @@ const xmlChar *LIXA_XML_MSG_TAG_TRANS = (xmlChar *) "transactions";
 
 
 
-int lixa_msg_retrieve(int fd,
+int lixa_msg_retrieve(int fd, int timeout,
                       char *buf, size_t buf_size,
                       ssize_t *read_bytes)
 {
-    enum Exception { RECV_ERROR1
+    enum Exception { POLLHUP_POLLERR
+                     , MESSAGE_TIMEOUT_EXPIRED
+                     , POLL_ERROR
+                     , INTERNAL_ERROR
+                     , RECV_ERROR1
                      , CONNECTION_CLOSED
                      , INVALID_PREFIX_SIZE
                      , BUFFER_OVERFLOW
@@ -140,7 +147,34 @@ int lixa_msg_retrieve(int fd,
     TRY {
         char prefix[LIXA_MSG_XML_PREFIX_DIGITS + 1];
         ssize_t to_read = 0;
+        struct pollfd fds[1];
+        int ready_fd;
 
+        /* to avoid indefinite wait, poll is used */
+        fds[0].fd = fd;
+        fds[0].events = POLLIN | POLLHUP | POLLERR;
+        fds[0].revents = 0;
+        ready_fd = poll(fds, 1, timeout);
+        if (1 == ready_fd) {
+            LIXA_TRACE(("lixa_msg_retrieve: poll returned 0x%x for fd %d\n",
+                        fds[0].revents, fds[0].fd));
+            if ((POLLHUP | POLLERR) & fds[0].revents) {
+                LIXA_TRACE(("lixa_msg_retrieve: POLLHUP/POLLERR...\n"));
+                THROW(POLLHUP_POLLERR);
+            }
+        } else if (0 == ready_fd) {
+            LIXA_TRACE(("lixa_msg_retrieve: poll time out (%d ms) exceeded\n",
+                        timeout));
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC034N, timeout,
+                         "lixa_msg_retrieve"));
+            THROW(MESSAGE_TIMEOUT_EXPIRED);
+        } else if (0 > ready_fd) {
+            THROW(POLL_ERROR);
+        } else {
+            /* this should never happen! */
+            THROW(INTERNAL_ERROR);
+        }
+        
         /* read the prefix to determine message size */
         if (0 > (*read_bytes = recv(
                      fd, prefix, LIXA_MSG_XML_PREFIX_DIGITS, 0))) {
@@ -179,6 +213,18 @@ int lixa_msg_retrieve(int fd,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case POLLHUP_POLLERR:
+                ret_cod = LIXA_RC_POLL_ERROR;
+                break;
+            case MESSAGE_TIMEOUT_EXPIRED:
+                ret_cod = LIXA_RC_MESSAGE_TIMEOUT_EXPIRED;
+                break;
+            case POLL_ERROR:
+                ret_cod = LIXA_RC_POLL_ERROR;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
             case RECV_ERROR1:
                 ret_cod = LIXA_RC_RECV_ERROR;
                 break;

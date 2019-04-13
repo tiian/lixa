@@ -242,6 +242,10 @@
  * An invalid state transtion has been requested to a Finite State Machine
  */
 #define LIXA_RC_INVALID_STATE_TRANSITION       -31
+/**
+ * A message has not been received before timeout expiration
+ */
+#define LIXA_RC_MESSAGE_TIMEOUT_EXPIRED        -32
 
 
 

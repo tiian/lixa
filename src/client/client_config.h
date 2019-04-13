@@ -102,9 +102,9 @@
 #define LIXA_CLIENT_CONNECTION_TIMEOUT_NULL 0
 
 /**
- * Hard wired default value for client connection timeout: 1000ms (1s)
+ * Hard wired default value for client connection timeout: 5000ms (1s)
  */
-#define LIXA_CLIENT_CONNECTION_TIMEOUT_DEFAULT 1000
+#define LIXA_CLIENT_CONNECTION_TIMEOUT_DEFAULT 5000
 
 
 
@@ -236,7 +236,7 @@ typedef struct client_config_coll_s {
      * Connection timeout used by the client when waiting data from the
      * state server. Unit = milliseconds, like in poll function
      */
-    long int                     connection_timeout;
+    int                          connection_timeout;
     /**
      * These are the parameters will be used by all the clients of this
      * process to reach the transaction manager.

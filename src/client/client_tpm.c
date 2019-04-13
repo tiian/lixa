@@ -104,7 +104,8 @@ int client_tpm_trans(client_status_t *cs, GTree *xidt, int maint)
         }
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, input_buffer, sizeof(input_buffer) - 1,
+                               fd, global_ccc.connection_timeout,
+                               input_buffer, sizeof(input_buffer) - 1,
                                &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);

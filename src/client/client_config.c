@@ -213,8 +213,8 @@ int client_config(client_config_coll_t *ccc, int global_config)
                         "state servers will be picked up from config file\n",
                         LIXA_CLIENT_CONNECTION_TIMEOUT_ENV_VAR));
         } else {
-            long timeout = strtol(tmp_str, NULL, 10);
-            LIXA_TRACE(("client_config: using client connection timeout %ld "
+            int timeout = (int)strtol(tmp_str, NULL, 10);
+            LIXA_TRACE(("client_config: using client connection timeout %d "
                         "for subsequent operations\n", timeout));
             ccc->connection_timeout = timeout;
         }        
@@ -437,6 +437,9 @@ int client_config_dup(const client_config_coll_t *source,
             g_ptr_array_add(target->rsrmgrs, target_rc);
         } /* for (i=0; i<source->actconf.rsrmgrs->len; ++i) */
         
+        /* copy connection timeout */
+        target->connection_timeout = source->connection_timeout;
+
         THROW(NONE);
     } CATCH {
         switch (excp) {

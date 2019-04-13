@@ -773,103 +773,112 @@ Feb  8 21:38:51 ubuntu lixat[2532]: LXC001E transaction '1279875137.46d1df80428d
       to your needs. Some environment variables applies only to one component,
       others apply to both client and server LIXA components.
     </para>
-      <section>
-	<title>LIXA_CONFIG_FILE</title>
-	<para>
-	  This environment variable can be used to specify an alternate
-	  configuration file for your application. 
-	  Example: if you are trying a new configuration, but you 
-	  wont to modify the default
-	  <filename>etc/lixac_conf.xml</filename>
-	  file, you can export the variable before program execution:
-	  <screen>
+    <section>
+      <title>LIXA_CLIENT_CONNECTION_TIMEOUT</title>
+      <para>
+	This environment variable can be used to specify the maximum time a
+	client can wait for an answer from the state server. The value is
+	expressed in milliseconds, -1 is a special value with "no timeout"
+	meaning and 0 is not an acceptable value.
+      </para>
+    </section>
+    <section>
+      <title>LIXA_CONFIG_FILE</title>
+      <para>
+	This environment variable can be used to specify an alternate
+	configuration file for your application. 
+	Example: if you are trying a new configuration, but you 
+	wont to modify the default
+	<filename>etc/lixac_conf.xml</filename>
+	file, you can export the variable before program execution:
+	<screen>
 export LIXA_CONFIG_FILE=/tmp/my_lixac
 ./myapp
-	  </screen>
-	  <command>myapp</command> will be executed using the configuration
-	  stored inside
-	  <filename>/tmp/my_lixac</filename>
-	  instead of the configuration stored inside the default
-	  <filename>etc/lixac_conf.xml</filename>
-	  client configuration file.
-	</para>
-      </section>
-      <section>
-	<title>LIXA_CRASH_COUNT</title>
-	<para>
-	  This environment variable must be used only in a development
-	  environment: after the program crossed the
-	  <emphasis>crash point</emphasis> as many times as the value of
-	  this variable (default = 1), the process crashes. See
-	  environemt variable
-	  <varname>LIXA_CRASH_POINT</varname> too.
-	</para>
-      </section>
-      <section>
-	<title>LIXA_CRASH_POINT</title>
-	<para>
-	  This environment variable must be used only in a development
-	  environment: it specifies the crash point inside the LIXA
-	  code. The acceptable values for this variable are listed
-	  inside the C header file
-	  <filename>src/common/lixa_crash.h</filename>
-	  LIXA project uses 
-	  the <function>abort()</function> function to simulate a soft crash.
-	</para>
-      </section>
-      <section>
-	<title>LIXA_JOB</title>
-	  <warning><para>
-	      This environment variable may be very useful to deal with some
-	      specific requirements, but it changes how the automatic
-	      recovery process works and the final result could be strange
-	      or "unpredictable" if you didn't understand the whole picture.
-	  </para></warning>
-	<para>
-	  Use this environment variable to associate a specific transactional
-	  job identifier instead of the automatically assigned one. 
-	  See <xref linkend="Automatic_recovery_concepts"/> and
-	  <xref linkend="Workload_balanced_environments"/> 
-	  for more information.
-	</para>
-      </section>
-      <section>
-	<title>LIXA_PROFILE</title>
-	<para>
-	  This environment variable must be used 
-	  to specify the transactional profile associated to the Application 
-	  Program.
-	  If you do not specify a valid transactional profile, the first
-	  profile listed inside 
-	  <filename>etc/lixac_conf.xml</filename>
-	  will be applied.
-	  See <xref linkend="Client_configuration_explanation"/> too.
-	</para>
-      </section>
-      <section>
-	<title>LIXA_STATE_SERVERS</title>
-	<para>
-	  This environment variable can be used to override the section
-	  <command>&lt;sttsrvs&gt;</command> of the
-	  <filename>etc/lixac_conf.xml</filename> configuration file.
-	  It must contain a blank separated lists of URIs encoded as
-	  <command>tcp:://address:port/name</command>, where:
-	  <itemizedlist mark='bullet'>
-	    <listitem><para>
-	      <command>address</command> is the hostname or the IP address of a
-	      LIXA state server
-	    </para></listitem>
-	    <listitem><para>
-	      <command>port</command> is the port used by the LIXA state server
-	    </para></listitem>
-	    <listitem><para>
-	      <command>name</command> is the name associated to the LIXA state
-	      server and it's referenced by one or more profiles described in
-	      the configuration file <filename>etc/lixac_conf.xml</filename>
-	    </para></listitem>
-	  </itemizedlist>
-	  A typical usage of the environment variable is the following one:
-	  <screen>
+	</screen>
+	<command>myapp</command> will be executed using the configuration
+	stored inside
+	<filename>/tmp/my_lixac</filename>
+	instead of the configuration stored inside the default
+	<filename>etc/lixac_conf.xml</filename>
+	client configuration file.
+      </para>
+    </section>
+    <section>
+      <title>LIXA_CRASH_COUNT</title>
+      <para>
+	This environment variable must be used only in a development
+	environment: after the program crossed the
+	<emphasis>crash point</emphasis> as many times as the value of
+	this variable (default = 1), the process crashes. See
+	environemt variable
+	<varname>LIXA_CRASH_POINT</varname> too.
+      </para>
+    </section>
+    <section>
+      <title>LIXA_CRASH_POINT</title>
+      <para>
+	This environment variable must be used only in a development
+	environment: it specifies the crash point inside the LIXA
+	code. The acceptable values for this variable are listed
+	inside the C header file
+	<filename>src/common/lixa_crash.h</filename>
+	LIXA project uses 
+	the <function>abort()</function> function to simulate a soft crash.
+      </para>
+    </section>
+    <section>
+      <title>LIXA_JOB</title>
+      <warning><para>
+	This environment variable may be very useful to deal with some
+	specific requirements, but it changes how the automatic
+	recovery process works and the final result could be strange
+	or "unpredictable" if you didn't understand the whole picture.
+      </para></warning>
+      <para>
+	Use this environment variable to associate a specific transactional
+	job identifier instead of the automatically assigned one. 
+	See <xref linkend="Automatic_recovery_concepts"/> and
+	<xref linkend="Workload_balanced_environments"/> 
+	for more information.
+      </para>
+    </section>
+    <section>
+      <title>LIXA_PROFILE</title>
+      <para>
+	This environment variable must be used 
+	to specify the transactional profile associated to the Application 
+	Program.
+	If you do not specify a valid transactional profile, the first
+	profile listed inside 
+	<filename>etc/lixac_conf.xml</filename>
+	will be applied.
+	See <xref linkend="Client_configuration_explanation"/> too.
+      </para>
+    </section>
+    <section>
+      <title>LIXA_STATE_SERVERS</title>
+      <para>
+	This environment variable can be used to override the section
+	<command>&lt;sttsrvs&gt;</command> of the
+	<filename>etc/lixac_conf.xml</filename> configuration file.
+	It must contain a blank separated lists of URIs encoded as
+	<command>tcp:://address:port/name</command>, where:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	    <command>address</command> is the hostname or the IP address of a
+	    LIXA state server
+	  </para></listitem>
+	  <listitem><para>
+	    <command>port</command> is the port used by the LIXA state server
+	  </para></listitem>
+	  <listitem><para>
+	    <command>name</command> is the name associated to the LIXA state
+	    server and it's referenced by one or more profiles described in
+	    the configuration file <filename>etc/lixac_conf.xml</filename>
+	  </para></listitem>
+	</itemizedlist>
+	A typical usage of the environment variable is the following one:
+	<screen>
 lixa@4944d8bff50d:/$ lixat
 2019-02-09 18:10:18.931258 [8/139695483680640] INFO: LXC000I this process is starting a new LIXA transaction manager (lixa package version is 1.7.4)
 tx_open(): -7
@@ -879,53 +888,53 @@ lixa@4944d8bff50d:/$ lixat
 2019-02-09 18:10:59.794849 [9/140591460210560] INFO: LXC000I this process is starting a new LIXA transaction manager (lixa package version is 1.7.4)
 tx_open(): 0
 tx_close(): 0
-	  </screen>
-	  Instead of changing the content of the 
-	  <filename>etc/lixac_conf.xml</filename> configuration file, in some
-	  cases, it can be more practical to override the content using the
-	  LIXA_STATE_SERVERS environment variable.
-	</para>
-      </section>
-      <section>
-	<title>LIXA_TRACE_MASK</title>
-	<para>
-	  This environment variable specifies which internal modules must
-	  be traced at run-time. 
-	  The C header file
-	  <filename>src/common/lixa_trace.h</filename>
-	  contains the exadecimal value of every internal module; if you 
-	  want to trace two or more modules you have make the logical OR
-	  among all the desired values.
-	</para>
-	<para>
-	  Supposing you are interested in tracing what happens inside 
-	  <emphasis>"server listener"</emphasis>,
-	  <emphasis>"server manager"</emphasis> and
-	  <emphasis>"server status"</emphasis> modules.
-	  Looking at file
-	  <filename>src/common/lixa_trace.h</filename>:
-	  <screen>
+	</screen>
+	Instead of changing the content of the 
+	<filename>etc/lixac_conf.xml</filename> configuration file, in some
+	cases, it can be more practical to override the content using the
+	LIXA_STATE_SERVERS environment variable.
+      </para>
+    </section>
+    <section>
+      <title>LIXA_TRACE_MASK</title>
+      <para>
+	This environment variable specifies which internal modules must
+	be traced at run-time. 
+	The C header file
+	<filename>src/common/lixa_trace.h</filename>
+	contains the exadecimal value of every internal module; if you 
+	want to trace two or more modules you have make the logical OR
+	among all the desired values.
+      </para>
+      <para>
+	Supposing you are interested in tracing what happens inside 
+	<emphasis>"server listener"</emphasis>,
+	<emphasis>"server manager"</emphasis> and
+	<emphasis>"server status"</emphasis> modules.
+	Looking at file
+	<filename>src/common/lixa_trace.h</filename>:
+	<screen>
 #define LIXA_TRACE_MOD_SERVER_LISTENER    0x00000004
 #define LIXA_TRACE_MOD_SERVER_MANAGER     0x00000008
 #define LIXA_TRACE_MOD_SERVER_STATUS      0x00000010
-	  </screen>
-	  the resulting value is 0x0000001C:
-	  <screen>
+	</screen>
+	the resulting value is 0x0000001C:
+	<screen>
 export LIXA_TRACE_MASK=0x00000010
-	  </screen>
-	  The <emphasis>"trace all"</emphasis> value is 0xffffffff:
-	  <screen>
+	</screen>
+	The <emphasis>"trace all"</emphasis> value is 0xffffffff:
+	<screen>
 export LIXA_TRACE_MASK=0xffffffff
-	  </screen>
-	  <warning><para>
-	      Too much tracing is dangerous: it slows down your system and
-	      possibly fills-up your filesystems.
-	  </para></warning>
-	  Establishing the internal modules that must be traced is a typical
-	  troubleshooting task you can acquire working with LIXA project.
-	  In <xref linkend="Tracing"/> you can discover some useful information
-	  related to the usage of this environment variable.
-	</para>
-      </section>
+	</screen>
+	<warning><para>
+	  Too much tracing is dangerous: it slows down your system and
+	  possibly fills-up your filesystems.
+	</para></warning>
+	Establishing the internal modules that must be traced is a typical
+	troubleshooting task you can acquire working with LIXA project.
+	In <xref linkend="Tracing"/> you can discover some useful information
+	related to the usage of this environment variable.
+      </para>
+    </section>
   </section>
 </chapter>

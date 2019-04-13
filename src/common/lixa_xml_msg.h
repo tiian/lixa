@@ -1334,12 +1334,14 @@ extern "C" {
     /**
      * Retrieve the first XML message from a TCP/IP socket (file descriptor)
      * @param[in] fd file descriptor associated to the TCP/IP socket
+     * @param[in] timeout number of milliseconds before timeout expiration
+     *            (use -1 for unlimited)
      * @param[out] buf buffer will be used to store the XML message
      * @param[in] buf_size size of buf
      * @param[out] read_bytes number of bytes read, XML message length
      * @return a reason code
      */
-    int lixa_msg_retrieve(int fd,
+    int lixa_msg_retrieve(int fd, int timeout,
                           char *buf, size_t buf_size,
                           ssize_t *read_bytes);
 

@@ -630,7 +630,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
         char buf[READ_BUFFER_SIZE];
         ssize_t read_bytes;
 
-        ret_cod = lixa_msg_retrieve(ts->poll_array[slot_id].fd,
+        ret_cod = lixa_msg_retrieve(ts->poll_array[slot_id].fd, -1,
                                     buf, sizeof(buf), &read_bytes);
         if (LIXA_RC_CONNECTION_CLOSED == ret_cod) {
             /* client has closed the connection, dropping it */

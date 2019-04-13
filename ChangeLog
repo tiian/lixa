@@ -1,5 +1,14 @@
 LOG:
 
+           1.7.8 Added (client) connection timeout; default value = 5000 ms
+		 A new error message (LXC034N) is sent to the syslog in the
+		 event that the client doesn't get a reply before timeout
+		 expiration. The previous behaviour can be obtained setting a
+		 new environment variable:
+		 export LIXA_CLIENT_CONNECTION_TIMEOUT=-1
+		 A shorter timeouts can be set as well:
+		 export LIXA_CLIENT_CONNECTION_TIMEOUT=1000
+
 2019-04-07 1.7.7 Documentation fix
 
 2019-03-22 1.7.6 Fixed a bug related to xta_transaction_start() issued multiple

@@ -678,7 +678,8 @@ int lixa_xa_end(client_config_coll_t *ccc, client_status_t *cs,
                    client_status_get_crash_count(cs));
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, input_buffer, sizeof(input_buffer) - 1,
+                               fd, ccc->connection_timeout,
+                               input_buffer, sizeof(input_buffer) - 1,
                                &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
@@ -1255,7 +1256,8 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
                    client_status_get_crash_count(cs));
 
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, input_buffer, sizeof(input_buffer) - 1,
+                               fd, ccc->connection_timeout,
+                               input_buffer, sizeof(input_buffer) - 1,
                                &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
@@ -1602,7 +1604,8 @@ int lixa_xa_prepare(client_config_coll_t *ccc, client_status_t *cs,
 
         /* wait server answer */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, input_buffer, sizeof(input_buffer)-1,
+                               fd, ccc->connection_timeout,
+                               input_buffer, sizeof(input_buffer)-1,
                                &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
@@ -1716,7 +1719,8 @@ int lixa_xa_prepare_wait_branches(client_config_coll_t *ccc,
         /* receive a message from state server to get the results of the global
            prepare, for all the branches */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, input_buffer, sizeof(input_buffer)-1,
+                               fd, ccc->connection_timeout,
+                               input_buffer, sizeof(input_buffer)-1,
                                &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
@@ -1937,7 +1941,8 @@ int lixa_xa_prepare_multi(client_status_t *cs,
 
         /* wait server answer */
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, input_buffer, sizeof(input_buffer) - 1,
+                               fd, global_ccc.connection_timeout,
+                               input_buffer, sizeof(input_buffer) - 1,
                                &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
@@ -2410,7 +2415,8 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
                    client_status_get_crash_count(cs));
         
         if (LIXA_RC_OK != (ret_cod = lixa_msg_retrieve(
-                               fd, input_buffer, sizeof(input_buffer) - 1,
+                               fd, ccc->connection_timeout,
+                               input_buffer, sizeof(input_buffer) - 1,
                                &read_bytes))) {
             client_status_check_socket(cs, ret_cod);
             THROW(MSG_RETRIEVE_ERROR);
