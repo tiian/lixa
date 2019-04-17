@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<client>
+<client
+  connection_timeout="5000">
   <sttsrvs>
     <sttsrv name="local_1" domain="AF_INET" address="127.0.0.1" port="2345" />
     <sttsrv name="local_2" domain="AF_INET" address="127.0.0.1" port="3456" />

@@ -477,7 +477,8 @@
 	Below there is a sample configuration file:
 	<screen>
 &lt;?xml version="1.0" encoding="UTF-8" ?&gt;
-&lt;client&gt;
+&lt;client
+  connection_timeout="3000"&gt;
   &lt;sttsrvs&gt;
     &lt;sttsrv name="local_1" domain="AF_INET" address="10.23.45.67" port="2345" /&gt;
     &lt;sttsrv name="local_2" domain="AF_INET" address="10.23.46.91" port="3456" /&gt;
@@ -521,6 +522,12 @@
 	The tags and the
 	properties of the XML file are described below:
 	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	      <varname>connection_timeout</varname>: this property is used to
+	      define the client connection timeout, see
+	      <xref linkend="Connection_Timeout"/> for the corresponding
+	      environment variable and further information
+	  </para></listitem>
 	  <listitem><para>
 	      <varname>sttsrv</varname>: this section is used to describe a
 	      state server (a LIXA server instance) that must be reached by any
@@ -773,7 +780,7 @@ Feb  8 21:38:51 ubuntu lixat[2532]: LXC001E transaction '1279875137.46d1df80428d
       to your needs. Some environment variables applies only to one component,
       others apply to both client and server LIXA components.
     </para>
-    <section>
+    <section xml:id="Connection_Timeout">
       <title>LIXA_CLIENT_CONNECTION_TIMEOUT</title>
       <para>
 	This environment variable can be used to specify the maximum time a

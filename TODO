@@ -1,5 +1,3 @@
-Put timeout parameter in lixac_conf.xml : create a new section
-Document the configuration file section.
 
 Create a specific case test for timeout using XTA branching
 

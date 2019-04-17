@@ -270,6 +270,9 @@ int client_config(client_config_coll_t *ccc, int global_config)
                         "%d, default value (%d) will be used\n",
                         LIXA_CLIENT_CONNECTION_TIMEOUT_NULL,
                         ccc->connection_timeout));
+            LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXC035I,
+                         LIXA_CLIENT_CONNECTION_TIMEOUT_NULL,
+                         ccc->connection_timeout));
         }
         
         /* set port */
@@ -1089,6 +1092,8 @@ int client_config_display(client_config_coll_t *ccc)
         guint i;
 
         /* dump configuration */
+        LIXA_TRACE(("client_config_display: connection_timeout=%d\n",
+                    ccc->connection_timeout));
         for (i = 0; i < ccc->sttsrvs->len; ++i) {
             LIXA_TRACE(("client_config_display: transaction manager # %u, "
                         "name='%s', domain=%d, address='%s', port="
@@ -1286,7 +1291,8 @@ int client_config_rsrmgr_dup(const struct act_rsrmgr_config_s *arc,
 int client_parse(struct client_config_coll_s *ccc,
                  xmlNode *a_node)
 {
-    enum Exception { CLIENT_PARSE_ERROR
+    enum Exception { RETRIEVE_CONNECTION_TIMEOUT
+                     , CLIENT_PARSE_ERROR
                      , PARSE_STTSRVS_ERROR
                      , PARSE_RSRMGRS_ERROR
                      , PARSE_PROFILES_ERROR
@@ -1303,6 +1309,27 @@ int client_parse(struct client_config_coll_s *ccc,
                 LIXA_TRACE(("client_parse/%p: tag %s\n",
                             a_node, cur_node->name));
                 if (!xmlStrcmp(cur_node->name, LIXA_XML_CONFIG_CLIENT)) {
+                    long connection_timeout;
+                    /* retrieve connection_timeout */
+                    if (LIXA_RC_OK == (
+                            ret_cod = lixa_config_retrieve_generic_long(
+                                cur_node,
+                                LIXA_XML_CONFIG_CLIENT_CONNECTION_TIMEOUT,
+                                &connection_timeout))) {
+                        LIXA_TRACE(("client_parse: parameter '%s' is %ld\n",
+                                    (const char *)
+                                    LIXA_XML_CONFIG_CLIENT_CONNECTION_TIMEOUT,
+                                    connection_timeout));
+                        if (LIXA_CLIENT_CONNECTION_TIMEOUT_NULL !=
+                            ccc->connection_timeout) {
+                            LIXA_TRACE(("client_parse: environment var not "
+                                        "set, using value %ld for "
+                                        "connection_timeout parameter\n",
+                                        connection_timeout));
+                            ccc->connection_timeout = connection_timeout;
+                        }
+                    } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
+                        THROW(RETRIEVE_CONNECTION_TIMEOUT);
                     /* parse child */
                     if (LIXA_RC_OK != (ret_cod = client_parse(
                                            ccc, cur_node->children)))
@@ -1332,6 +1359,7 @@ int client_parse(struct client_config_coll_s *ccc,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case RETRIEVE_CONNECTION_TIMEOUT:
             case CLIENT_PARSE_ERROR:
             case PARSE_STTSRVS_ERROR:
             case PARSE_RSRMGRS_ERROR:

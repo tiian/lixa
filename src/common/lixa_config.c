@@ -74,6 +74,7 @@ const char *LIXA_NULL_STRING = "{null}";
 
 const xmlChar *LIXA_XML_CONFIG_LISTENER = (xmlChar *)"listener";
 const xmlChar *LIXA_XML_CONFIG_CLIENT = (xmlChar *)"client";
+const xmlChar *LIXA_XML_CONFIG_CLIENT_CONNECTION_TIMEOUT = (xmlChar *)"connection_timeout";
 const xmlChar *LIXA_XML_CONFIG_SERVER = (xmlChar *)"server";
 const xmlChar *LIXA_XML_CONFIG_SERVER_PID = (xmlChar *)"pid_file";
 const xmlChar *LIXA_XML_CONFIG_SERVER_MIN_EST = (xmlChar *)"min_elapsed_sync_time";

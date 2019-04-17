@@ -94,6 +94,11 @@ extern const xmlChar *LIXA_XML_CONFIG_LISTENER;
 extern const xmlChar *LIXA_XML_CONFIG_CLIENT;
 
 /**
+ * label used to specify "connection_timeout" property in "client" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_CLIENT_CONNECTION_TIMEOUT;
+
+/**
  * Label used to specify "server" tag
  */
 extern const xmlChar *LIXA_XML_CONFIG_SERVER;
