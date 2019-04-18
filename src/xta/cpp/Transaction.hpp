@@ -26,6 +26,7 @@
 
 /* include XTA header file */
 #include "xta.h"
+#include "Config.hpp"
 #include "Xid.hpp"
 #include "XaResource.hpp"
 
@@ -37,7 +38,7 @@ using namespace std;
 
 namespace xta {
     /**
-     * XTA Transaction Manager class
+     * XTA Transaction class
      */
     class Transaction {
         public:
@@ -119,6 +120,8 @@ namespace xta {
         void branch(const string& XidString);
 
         Xid getXid();
+
+        Config getConfig();
         private:
         /**
          * Pointer to the native C object

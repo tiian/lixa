@@ -113,4 +113,12 @@ namespace xta {
             throw Exception(LIXA_RC_NULL_OBJECT, "xta_transaction_get_xid");
         return Xid(xid);
     }
+
+    Config Transaction::getConfig()
+    {
+        xta_config_t *config = NULL;
+        if (NULL == (config = xta_transaction_get_config(tx)))
+            throw Exception(LIXA_RC_NULL_OBJECT, "xta_transaction_get_config");
+        return Config(config);
+    }
 }

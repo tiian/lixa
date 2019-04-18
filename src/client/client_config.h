@@ -397,7 +397,7 @@ extern "C" {
 
     /**
      * Display configuration read from XML config file
-     * @param[in] ccc : the object that will contain the client configuration
+     * @param[in] ccc : the object that contains the client configuration
      * @return a standardized return code
      */
     int client_config_display(client_config_coll_t *ccc);
@@ -443,6 +443,28 @@ extern "C" {
                                  struct act_rsrmgr_config_s *act_rsrmgr);
 
 
+
+    /**
+     * Retrieve connection timeout
+     * @param[in] ccc is the client config object
+     * @return the value of connection timeout
+     */
+    static inline int client_config_get_connection_timeout(
+        const client_config_coll_t *ccc) {
+        return ccc->connection_timeout; }
+
+
+
+    /**
+     * Set a new connection timeout
+     * @param[in,out] ccc is the client config object
+     * @param[in] value is the new value for connection timeout
+     * @return a reason code
+     */
+    int client_config_set_connection_timeout(client_config_coll_t *ccc,
+                                             int value);
+
+    
    
     /**
      * Parse the configuration tree

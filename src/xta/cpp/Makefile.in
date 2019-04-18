@@ -147,13 +147,14 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(docdir)" \
 	"$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixtapp_la_DEPENDENCIES = $(top_srcdir)/src/xta/liblixta.la
-am__liblixtapp_la_SOURCES_DIST = Transaction.cpp \
+am__liblixtapp_la_SOURCES_DIST = Config.cpp Transaction.cpp \
 	TransactionManager.cpp Xta.cpp NativeXaResource.cpp Xid.cpp \
 	MysqlXaResource.cpp PostgresqlXaResource.cpp
 @COMPILE_MYSQL_STUFF_TRUE@am__objects_1 =  \
 @COMPILE_MYSQL_STUFF_TRUE@	liblixtapp_la-MysqlXaResource.lo
 @COMPILE_POSTGRESQL_STUFF_TRUE@am__objects_2 = liblixtapp_la-PostgresqlXaResource.lo
-am_liblixtapp_la_OBJECTS = liblixtapp_la-Transaction.lo \
+am_liblixtapp_la_OBJECTS = liblixtapp_la-Config.lo \
+	liblixtapp_la-Transaction.lo \
 	liblixtapp_la-TransactionManager.lo liblixtapp_la-Xta.lo \
 	liblixtapp_la-NativeXaResource.lo liblixtapp_la-Xid.lo \
 	$(am__objects_1) $(am__objects_2)
@@ -458,14 +459,14 @@ top_srcdir = @top_srcdir@
 @COMPILE_POSTGRESQL_STUFF_TRUE@	-I$(top_srcdir)/src/client/switch/postgresql
 
 dist_doc_DATA = README.md
-include_HEADERS = Xta.hpp AcquiredXaResource.hpp Exception.hpp \
+include_HEADERS = Xta.hpp AcquiredXaResource.hpp Config.hpp Exception.hpp \
 	MysqlXaResource.hpp NativeXaResource.hpp \
 	PostgresqlXaResource.hpp Transaction.hpp TransactionManager.hpp \
 	XaResource.hpp Xid.hpp
 
 lib_LTLIBRARIES = liblixtapp.la
-liblixtapp_la_SOURCES = Transaction.cpp TransactionManager.cpp Xta.cpp \
-	NativeXaResource.cpp Xid.cpp \
+liblixtapp_la_SOURCES = Config.cpp Transaction.cpp TransactionManager.cpp \
+	Xta.cpp NativeXaResource.cpp Xid.cpp \
 	$(MAYBE_MYSQL_SOURCES) $(MAYBE_POSTGRESQL_SOURCES)
 
 AM_CXXFLAGS = -Wall -fno-strict-aliasing
@@ -557,6 +558,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-Config.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-MysqlXaResource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-NativeXaResource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixtapp_la-PostgresqlXaResource.Plo@am__quote@
@@ -585,6 +587,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
+
+liblixtapp_la-Config.lo: Config.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblixtapp_la-Config.lo -MD -MP -MF $(DEPDIR)/liblixtapp_la-Config.Tpo -c -o liblixtapp_la-Config.lo `test -f 'Config.cpp' || echo '$(srcdir)/'`Config.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixtapp_la-Config.Tpo $(DEPDIR)/liblixtapp_la-Config.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='Config.cpp' object='liblixtapp_la-Config.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblixtapp_la-Config.lo `test -f 'Config.cpp' || echo '$(srcdir)/'`Config.cpp
 
 liblixtapp_la-Transaction.lo: Transaction.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixtapp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblixtapp_la-Transaction.lo -MD -MP -MF $(DEPDIR)/liblixtapp_la-Transaction.Tpo -c -o liblixtapp_la-Transaction.lo `test -f 'Transaction.cpp' || echo '$(srcdir)/'`Transaction.cpp

@@ -22,6 +22,7 @@
 
 
 /* XTA includes */
+#include "xta_config.h"
 #include "xta_xa_resource.h"
 
 
@@ -33,13 +34,6 @@
  * pointer
  */
 typedef void xta_transaction_client_status_t;
-/**
- * This typedef are necessary to avoid the inclusion of LIXA internals that
- * are unnecessary for the XTA interface, but necessary for XTA implementation.
- * The real type is client_config_coll_t, by XTA is used only as a
- * pointer
- */
-typedef void xta_transaction_config_t;
 
 
 
@@ -76,7 +70,7 @@ typedef struct xta_transaction_s {
      * "global" instance that's used by legacy LIXA due to TX specification
      * limitation
      */
-    xta_transaction_config_t        *local_ccc;
+    xta_config_t                    *local_ccc;
     /**
      * Transaction ID
      */
@@ -133,8 +127,7 @@ extern "C" {
      * @param[in] transact : Transaction object
      * @return the pointer to the Transaction configuration object
      */
-    xta_transaction_config_t *xta_transaction_get_config(
-        xta_transaction_t *transact);
+    xta_config_t *xta_transaction_get_config(xta_transaction_t *transact);
     
     
 

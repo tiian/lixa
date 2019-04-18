@@ -216,7 +216,7 @@ int client_config(client_config_coll_t *ccc, int global_config)
             int timeout = (int)strtol(tmp_str, NULL, 10);
             LIXA_TRACE(("client_config: using client connection timeout %d "
                         "for subsequent operations\n", timeout));
-            ccc->connection_timeout = timeout;
+            client_config_set_connection_timeout(ccc, timeout);
         }        
         
         /* loading config file */
@@ -264,15 +264,17 @@ int client_config(client_config_coll_t *ccc, int global_config)
                              &hints, &res))
             THROW(GETADDRINFO_ERROR);
         /* fix client connection timeout if necessary */
-        if (LIXA_CLIENT_CONNECTION_TIMEOUT_NULL == ccc->connection_timeout) {
-            ccc->connection_timeout = LIXA_CLIENT_CONNECTION_TIMEOUT_DEFAULT;
+        if (LIXA_CLIENT_CONNECTION_TIMEOUT_NULL ==
+            client_config_get_connection_timeout(ccc)) {
+            client_config_set_connection_timeout(
+                ccc, LIXA_CLIENT_CONNECTION_TIMEOUT_DEFAULT);
             LIXA_TRACE(("client_config: client connection timeout can not be "
                         "%d, default value (%d) will be used\n",
                         LIXA_CLIENT_CONNECTION_TIMEOUT_NULL,
-                        ccc->connection_timeout));
+                        client_config_get_connection_timeout(ccc)));
             LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXC035I,
                          LIXA_CLIENT_CONNECTION_TIMEOUT_NULL,
-                         ccc->connection_timeout));
+                         client_config_get_connection_timeout(ccc)));
         }
         
         /* set port */
@@ -1288,6 +1290,42 @@ int client_config_rsrmgr_dup(const struct act_rsrmgr_config_s *arc,
 
 
 
+int client_config_set_connection_timeout(client_config_coll_t *ccc, int value)
+{
+    enum Exception { INVALID_OPTION
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("client_config_set_connection_timeout\n"));
+    TRY {
+        if (LIXA_CLIENT_CONNECTION_TIMEOUT_NULL == value) {
+            LIXA_TRACE(("client_config_set_connection_timeout: "
+                        "client connection timeout can not be %d\n",
+                        LIXA_CLIENT_CONNECTION_TIMEOUT_NULL));
+            THROW(INVALID_OPTION);
+        } else
+            ccc->connection_timeout = value;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_OPTION:
+                ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("client_config_set_connection_timeout/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int client_parse(struct client_config_coll_s *ccc,
                  xmlNode *a_node)
 {
@@ -1321,12 +1359,13 @@ int client_parse(struct client_config_coll_s *ccc,
                                     LIXA_XML_CONFIG_CLIENT_CONNECTION_TIMEOUT,
                                     connection_timeout));
                         if (LIXA_CLIENT_CONNECTION_TIMEOUT_NULL !=
-                            ccc->connection_timeout) {
+                            client_config_get_connection_timeout(ccc)) {
                             LIXA_TRACE(("client_parse: environment var not "
                                         "set, using value %ld for "
                                         "connection_timeout parameter\n",
                                         connection_timeout));
-                            ccc->connection_timeout = connection_timeout;
+                            client_config_set_connection_timeout(
+                                ccc, connection_timeout);
                         }
                     } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
                         THROW(RETRIEVE_CONNECTION_TIMEOUT);

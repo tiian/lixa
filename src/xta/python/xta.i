@@ -2,6 +2,7 @@
 %{
 #define SWIG_FILE_WITH_INIT
 #include "Xta.hpp"
+#include "Config.hpp"
 #include "XaResource.hpp"
 #include "NativeXaResource.hpp"
 #include "AcquiredXaResource.hpp"
@@ -34,6 +35,7 @@
 }
 
 %include "Xta.hpp"
+%include "Config.hpp"
 %include "XaResource.hpp"
 %include "NativeXaResource.hpp"
 %include "AcquiredXaResource.hpp"

@@ -298,8 +298,7 @@ int xta_transaction_safe_delete(const xta_transaction_t *transact)
 
 
 
-xta_transaction_config_t *xta_transaction_get_config(
-    xta_transaction_t *transact)
+xta_config_t *xta_transaction_get_config(xta_transaction_t *transact)
 {
     enum Exception { NULL_OBJECT
                      , NONE } excp;
