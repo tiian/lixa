@@ -148,6 +148,7 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(javadir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 liblixta_java_la_DEPENDENCIES = ../liblixta.la
 am_liblixta_java_la_OBJECTS = liblixta_java_la-error_codes_jni.lo \
+	liblixta_java_la-config_jni.lo \
 	liblixta_java_la-transaction_manager_jni.lo \
 	liblixta_java_la-transaction_jni.lo \
 	liblixta_java_la-xta_jni.lo \
@@ -448,11 +449,13 @@ liblixta_java_la_CPPFLAGS = -I$(top_srcdir)/src/common \
 	-I$(top_srcdir)/src/client -I$(top_srcdir)/src/xta
 
 liblixta_java_la_LIBADD = ../liblixta.la
-liblixta_java_la_SOURCES = error_codes_jni.c transaction_manager_jni.c \
+liblixta_java_la_SOURCES = error_codes_jni.c config_jni.c \
+	transaction_manager_jni.c \
 	transaction_jni.c xta_jni.c xta_java_xa_resource.c xtaxid_jni.c \
 	xtaexception_jni.c
 
 dist_noinst_DATA = LixaErrorCodes.awk \
+	$(JAVA_PKGDIR)/Config.java \
 	$(JAVA_PKGDIR)/Xta.java $(JAVA_PKGDIR)/XtaException.java \
 	$(JAVA_PKGDIR)/XtaXid.java $(JAVA_PKGDIR)/Transaction.java \
 	$(JAVA_PKGDIR)/TransactionManager.java \
@@ -544,6 +547,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-config_jni.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-error_codes_jni.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-transaction_jni.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblixta_java_la-transaction_manager_jni.Plo@am__quote@
@@ -579,6 +583,13 @@ liblixta_java_la-error_codes_jni.lo: error_codes_jni.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='error_codes_jni.c' object='liblixta_java_la-error_codes_jni.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_java_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_java_la-error_codes_jni.lo `test -f 'error_codes_jni.c' || echo '$(srcdir)/'`error_codes_jni.c
+
+liblixta_java_la-config_jni.lo: config_jni.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_java_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixta_java_la-config_jni.lo -MD -MP -MF $(DEPDIR)/liblixta_java_la-config_jni.Tpo -c -o liblixta_java_la-config_jni.lo `test -f 'config_jni.c' || echo '$(srcdir)/'`config_jni.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblixta_java_la-config_jni.Tpo $(DEPDIR)/liblixta_java_la-config_jni.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config_jni.c' object='liblixta_java_la-config_jni.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_java_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o liblixta_java_la-config_jni.lo `test -f 'config_jni.c' || echo '$(srcdir)/'`config_jni.c
 
 liblixta_java_la-transaction_manager_jni.lo: transaction_manager_jni.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblixta_java_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT liblixta_java_la-transaction_manager_jni.lo -MD -MP -MF $(DEPDIR)/liblixta_java_la-transaction_manager_jni.Tpo -c -o liblixta_java_la-transaction_manager_jni.lo `test -f 'transaction_manager_jni.c' || echo '$(srcdir)/'`transaction_manager_jni.c
@@ -868,7 +879,8 @@ $(JAVA_PKGDIR)/ErrorCodes.java:	LixaErrorCodes.awk ../../common/lixa_errors.h
 .java.class:
 	$(JAVAC) $<
 
-xta.jar:	$(JAVA_PKGDIR)/ErrorCodes.class \
+xta.jar:	$(JAVA_PKGDIR)/Config.class \
+	$(JAVA_PKGDIR)/ErrorCodes.class \
 	$(JAVA_PKGDIR)/Xta.class $(JAVA_PKGDIR)/XtaException.class \
 	$(JAVA_PKGDIR)/XtaXid.class $(JAVA_PKGDIR)/Transaction.class \
 	$(JAVA_PKGDIR)/TransactionManager.class \
