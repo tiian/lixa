@@ -24,6 +24,7 @@
 /* include XTA header file */
 #include "xta.h"
 /* include all XTA C++ header files */
+#include "Config.hpp"
 #include "Exception.hpp"
 #include "NativeXaResource.hpp"
 #include "MysqlXaResource.hpp"

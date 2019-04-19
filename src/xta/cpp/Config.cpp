@@ -33,9 +33,16 @@
 
 
 namespace xta {
+
+    Config::Config(void)
+    {
+        this->config = NULL;
+    };
     
     Config::Config(xta_config_t *config)
     {
+        if (NULL == config)
+            throw Exception(LIXA_RC_NULL_OBJECT, "xta::Config::Config");
         this->config = config;
     };
 
@@ -50,8 +57,21 @@ namespace xta {
     {
         if (NULL == config)
             throw Exception(LIXA_RC_NULL_OBJECT,
-                            "xta_config_get_connection_timeout");
+                            "Config::getConnectionTimeout");
         else
             return xta_config_get_connection_timeout(config);
+    }
+    
+    void Config::setConnectionTimeout(int value)
+    {
+        if (NULL == config)
+            throw Exception(LIXA_RC_NULL_OBJECT,
+                            "Config::setConnectionTimeout");
+        else {
+            int rc;
+            if (LIXA_RC_OK != (rc = xta_config_set_connection_timeout(
+                                   config, value)))
+                throw Exception(rc, "xta_config_set_connection_timeout");
+        }
     }    
 }

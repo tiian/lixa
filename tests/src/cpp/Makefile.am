@@ -1,4 +1,5 @@
 if COMPILE_XTA_CPP
+  MAYBE_XTA_SRC = case2110
 if COMPILE_MYSQL_STUFF
 if COMPILE_POSTGRESQL_STUFF
   MAYBE_XTA_SRC1 = case2100 case2104 case2105 case2106 case2107
@@ -10,7 +11,7 @@ if COMPILE_ORACLE_STUFF
 endif
 endif
 
-check_PROGRAMS = $(MAYBE_XTA_SRC1) $(MAYBE_ORACLE)
+check_PROGRAMS = $(MAYBE_XTA_SRC) $(MAYBE_XTA_SRC1) $(MAYBE_ORACLE)
 case2100_SOURCES = case2100.cpp
 case2100_CPPFLAGS = -I../../../src/client -I../../../src/common \
 	@MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
@@ -48,5 +49,11 @@ case2107_CPPFLAGS = -I../../../src/client -I../../../src/common \
 	@MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 case2107_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
 case2107_LDADD = ../../../src/xta/cpp/liblixtapp.la
+
+case2110_SOURCES = case2110.cpp
+case2110_CPPFLAGS = -I../../../src/client -I../../../src/common \
+	@MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
+case2110_LDFLAGS = @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
+case2110_LDADD = ../../../src/xta/cpp/liblixtapp.la
 
 

@@ -41,12 +41,6 @@ namespace xta {
      */
     class Config {
         public:
-        /**
-         * A Config object can be created only if the base C object has
-         * been already created (this is just a wrapper, not a native C++
-         * implementation)
-         */
-        Config(xta_config_t *config);
         ~Config();
         /**
          * Retrieve connection timeout
@@ -59,6 +53,14 @@ namespace xta {
          */
         void setConnectionTimeout(int value);
         private:
+        /**
+         * A Config object can be created only if the base C object has
+         * been already created (this is just a wrapper, not a native C++
+         * implementation)
+         */
+        Config(void);
+        Config(xta_config_t *config);
+        friend class Transaction;
         /**
          * Pointer to the native C object
          */

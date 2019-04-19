@@ -122,8 +122,8 @@ extern "C" {
 
     
     /**
-     * Get the legacy LIXA object that contains the configurations for all the
-     * define Resource Managers
+     * Get a reference to the configuration that applies to this transaction
+     * object, like all the define Resource Managers
      * @param[in] transact : Transaction object
      * @return the pointer to the Transaction configuration object
      */

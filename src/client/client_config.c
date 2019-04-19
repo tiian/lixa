@@ -215,7 +215,8 @@ int client_config(client_config_coll_t *ccc, int global_config)
         } else {
             int timeout = (int)strtol(tmp_str, NULL, 10);
             LIXA_TRACE(("client_config: using client connection timeout %d "
-                        "for subsequent operations\n", timeout));
+                        "for subsequent operations (env var value)\n",
+                        timeout));
             client_config_set_connection_timeout(ccc, timeout);
         }        
         
@@ -1358,7 +1359,7 @@ int client_parse(struct client_config_coll_s *ccc,
                                     (const char *)
                                     LIXA_XML_CONFIG_CLIENT_CONNECTION_TIMEOUT,
                                     connection_timeout));
-                        if (LIXA_CLIENT_CONNECTION_TIMEOUT_NULL !=
+                        if (LIXA_CLIENT_CONNECTION_TIMEOUT_NULL ==
                             client_config_get_connection_timeout(ccc)) {
                             LIXA_TRACE(("client_parse: environment var not "
                                         "set, using value %ld for "

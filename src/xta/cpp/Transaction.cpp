@@ -37,6 +37,7 @@ namespace xta {
     Transaction::Transaction(xta_transaction_t *tx)
     {
         this->tx = tx;
+        config = Config(xta_transaction_get_config(tx));
     };
 
     Transaction::~Transaction()
@@ -114,11 +115,8 @@ namespace xta {
         return Xid(xid);
     }
 
-    Config Transaction::getConfig()
+    Config &Transaction::getConfig()
     {
-        xta_config_t *config = NULL;
-        if (NULL == (config = xta_transaction_get_config(tx)))
-            throw Exception(LIXA_RC_NULL_OBJECT, "xta_transaction_get_config");
-        return Config(config);
+        return config;
     }
 }

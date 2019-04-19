@@ -1,6 +1,7 @@
 # XTA (XA Transaction API) case tests
 
 # C API and transaction management
+m4_include([xta_config.at])
 m4_include([xta_1.at])
 m4_include([xta_2.at])
 m4_include([xta_3.at])

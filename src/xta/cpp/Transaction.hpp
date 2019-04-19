@@ -66,9 +66,9 @@ namespace xta {
          * @param[in] MultipleBranches : boolean value: <br>
          *            true = the created transaction will span more
          *                   applications,
-         *                   @ref Branch will be called subsequently <br>
+         *                   @ref branch will be called subsequently <br>
          *            false = the created transaction will not span more
-         *                   applications and @ref Branch will
+         *                   applications and @ref branch will
          *                   not be called for this transaction <br>
          */
         void start(bool MultipleBranches=false);
@@ -119,14 +119,29 @@ namespace xta {
          */
         void branch(const string& XidString);
 
+        /**
+         * Retrieve a Xid, transaction identifier object.
+         * NOTE: the object contains a reference (a pointer) to the underlying
+         *       C structure and can NOT be used outside the scope of the
+         *       Transaction object
+         */
         Xid getXid();
 
-        Config getConfig();
+        /**
+         * Retrieve the current configuration of the transaction
+         */
+        Config &getConfig();
         private:
         /**
          * Pointer to the native C object
          */
         xta_transaction_t *tx;
+        /**
+         * Configuration is a local object because it contains a referenct to
+         * the underlying C structure and is returned as reference
+         * by @ref getConfig
+         */
+        Config             config;
     };
 };
 

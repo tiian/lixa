@@ -1,0 +1,36 @@
+AT_BANNER([XTA: Config])
+
+AT_SETUP([XTA/0.0/0.0 Connection Timeout (cfg file)])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008; lixa_test_exec.sh reset start case0110 7000 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/0.0/0.1 Connection Timeout (env var)])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_CLIENT_CONNECTION_TIMEOUT=6666; export LIXA_PROFILE=CASE_PROF_0008; lixa_test_exec.sh none none case0110 6666 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA C++/0.0/1.0 Connection Timeout (cfg file)])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$CPP_COMPILER_AVAILABLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008; lixa_test_exec.sh none none case2110 7000 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA C++/0.0/1.1 Connection Timeout (env var)])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$CPP_COMPILER_AVAILABLE" = "no"; then exit 77; fi])
+AT_CHECK([export LIXA_CLIENT_CONNECTION_TIMEOUT=6666; export LIXA_PROFILE=CASE_PROF_0008; lixa_test_exec.sh none none case2110 6666 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA Python/0.0/2.0 Connection Timeout (cfg file)])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "z$PYTHON" = "z"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008; lixa_test_exec.sh none none case3110.py 7000 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA Python/0.0/2.1 Connection Timeout (env var)])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "z$PYTHON" = "z"; then exit 77; fi])
+AT_CHECK([export LIXA_CLIENT_CONNECTION_TIMEOUT=6666; export LIXA_PROFILE=CASE_PROF_0008; lixa_test_exec.sh none stop case3110.py 6666 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+

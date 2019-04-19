@@ -442,7 +442,7 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at env_var.at \
 	memory.at oracle.at.in ibmdb2.at postgresql.at mysql.at xid.at \
 	package.m4 mysql_postgresql.at webspheremq.at lixa-config.at.in \
 	lixavsr.at.in \
-	xta.at xta_1.at xta_2.at xta_3.at xta_4.at \
+	xta.at xta_config.at xta_1.at xta_2.at xta_3.at xta_4.at \
 	xta_5_0.at xta_5_5.at xta_6.at xta_7.at \
 	xta_8_0.at xta_8_1.at xta_8_2.at \
 	xta_cpp_1.at xta_python_1.at \
@@ -866,7 +866,8 @@ $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/ct_1_8.at $(srcdir)/ct_1_9.at \
 		$(srcdir)/ct_1_10.at $(srcdir)/ct_1_11.at \
 		$(srcdir)/ct_1_12.at $(srcdir)/ct_1_13.at \
-		$(srcdir)/xta.at $(srcdir)/xta_1.at $(srcdir)/xta_2.at \
+		$(srcdir)/xta.at $(srcdir)/xta_config.at \
+		$(srcdir)/xta_1.at $(srcdir)/xta_2.at \
 		$(srcdir)/xta_3.at $(srcdir)/xta_4.at \
 		$(srcdir)/xta_5_0.at $(srcdir)/xta_5_5.at \
 		$(srcdir)/xta_6.at $(srcdir)/xta_7.at \

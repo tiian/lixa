@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<client>
+<client
+  connection_timeout="7000">
   <sttsrvs>
     <sttsrv name="TestTM" domain="AF_INET" address="127.0.0.1" port="2345" />
   </sttsrvs>
