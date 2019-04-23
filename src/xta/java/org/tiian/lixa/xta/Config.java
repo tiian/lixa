@@ -40,32 +40,25 @@ public class Config {
      * by the native library; this pointer does not represent an object, but
      * only a reference
      */
-    private ByteBuffer NativePointer;
-    /*
-     * Allocate a C native object @@@
-     */
-    private native void newJNI() throws XtaException;
+    private ByteBuffer nativePointer;
     /**
      * This class does not have a public constructor because it's factory is
      * This constructor is necessary only to allocate the Java object,
      * but the content is populated by a JNI function called by the factory.
      */
-    Config() {
-        return;
-    }
+    Config() { return; }
     /**
      * Release the C native object when finalization is executed
      */
     protected void finalize() {
-        NativePointer = null;
+        nativePointer = null;
     }
     /**
-     * Obtain the format identifier part of the XID.
+     * Retrieve the connection timeout parameter
      */
     public native int getConnectionTimeout();
     /**
-     * Obtain the global transaction identifier part of XID as an array of
-     * bytes.
+     * Set the connection timeout parameter
      */
     public native void setConnectionTimeout(int value);
 }

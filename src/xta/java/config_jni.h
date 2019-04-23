@@ -36,36 +36,7 @@
 
 
 
-/*
- * Class:     org_tiian_lixa_xta_Config
- * Method:    newJNI
- * Signature: ()V
- */
+/* This is an helper function, is not directly called by JNI */
 JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Config_newJNI
-  (JNIEnv *, jobject);
-
-/*
- * Class:     org_tiian_lixa_xta_Config
- * Method:    deleteJNI
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Config_deleteJNI
-  (JNIEnv *, jobject);
-
-/*
- * Class:     org_tiian_lixa_xta_Config
- * Method:    getConnectionTimeout
- * Signature: ()I
- */
-JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Config_getConnectionTimeout
-  (JNIEnv *, jobject);
-
-/*
- * Class:     org_tiian_lixa_xta_Config
- * Method:    setConnectionTimeout
- * Signature: (I)V
- */
-JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Config_setConnectionTimeout
-  (JNIEnv *, jobject, jint);
-
+(JNIEnv *env, jobject this_obj, xta_config_t *config);
 

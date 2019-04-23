@@ -8,6 +8,7 @@ LOG:
 		 export LIXA_CLIENT_CONNECTION_TIMEOUT=-1
 		 A shorter timeouts can be set as well:
 		 export LIXA_CLIENT_CONNECTION_TIMEOUT=1000
+		 New getConnectionTimeout() and setConnectionTimeout() methods
 
 2019-04-07 1.7.7 Documentation fix
 

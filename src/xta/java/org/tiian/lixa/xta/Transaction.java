@@ -43,20 +43,12 @@ public class Transaction {
      * This is the opaque wrapper of a xta_transaction_manager_t object used
      * by the native library
      */
-    private ByteBuffer NativeObject;
+    private ByteBuffer nativeObject;
     /**
      * This is the opaque wrapper of a xta_transaction_manager_t object used
      * by the native library
      */
-    private ByteBuffer NativeResources;
-    /**
-     * Verifies that the current object is not corrupted
-     */
-    /*
-     * Allocate a C list to collect the C native resources that will be
-     * enlisted
-     */
-    private native void newJNI() throws XtaException;
+    private ByteBuffer nativeResources;
     /**
      * This class does not have a public constructor because it's factory is
      * TransactionManager.createTransaction() and there's no usage of a
@@ -64,16 +56,14 @@ public class Transaction {
      * factory. This constructor is necessary only to allocate the Java object,
      * but the content is populate by a JNI function called by the factory.
      */
-    Transaction() {
-        return;
-    }
+    Transaction() { return; }
     /**
      * Release the C native object when Java object finalization is executed
      */
     protected void finalize() {
-        if (null != NativeResources) {
-            NativeObject = null;
-            NativeResources = null;
+        if (null != nativeResources) {
+            nativeObject = null;
+            nativeResources = null;
         }
     }
     /**
@@ -99,6 +89,10 @@ public class Transaction {
      * error condition
      */
     public native XtaXid getXid() throws XtaException;
+    /**
+     * Return the config associated to the current transaction
+     */
+    public native Config getConfig() throws XtaException;
     /**
      * Start a new 2 phase commit transaction: this version of start method
      * is necessary only if the transaction will be branched by other

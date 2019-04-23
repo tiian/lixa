@@ -46,6 +46,74 @@
 
 
 
+/*
+ * Create a reference to the C native pointer
+ */
+JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Config_newJNI(
+    JNIEnv *env, jobject this_obj, xta_config_t *config)
+{
+    enum Exception { GET_OBJECT_CLASS_ERROR
+                     , GET_FIELD_ID_ERROR
+                     , NEW_DIRECT_BYTE_BUFFER_ERROR
+                     , SET_OBJECT_FIELD_ERROR
+                     , NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    jclass this_class;
+    jfieldID field_id;
+    jobject byte_buffer;
+
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Config_newJNI\n"));
+    TRY {
+        /* get a reference to this object's class */
+        if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj)) ||
+            (*env)->ExceptionCheck(env))
+            THROW(GET_OBJECT_CLASS_ERROR);
+        /* get the field identificator for nativeObject */
+        if (NULL == (field_id = (*env)->GetFieldID(
+                         env, this_class, "nativePointer",
+                         "Ljava/nio/ByteBuffer;")) ||
+            (*env)->ExceptionCheck(env))
+            THROW(GET_FIELD_ID_ERROR);
+        /* create ByteBuffer */
+        if (NULL == (byte_buffer = (*env)->NewDirectByteBuffer(
+                         env, (void *)config, sizeof(xta_config_t))) ||
+            (*env)->ExceptionCheck(env))
+            THROW(NEW_DIRECT_BYTE_BUFFER_ERROR);
+        /* set ByteBuffer reference */
+        (*env)->SetObjectField(env, this_obj, field_id, byte_buffer);
+        if ((*env)->ExceptionCheck(env))
+            THROW(SET_OBJECT_FIELD_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GET_OBJECT_CLASS_ERROR:
+                ret_cod = LIXA_RC_GET_OBJECT_CLASS_ERROR;
+                break;
+            case GET_FIELD_ID_ERROR:
+                ret_cod = LIXA_RC_GET_FIELD_ID_ERROR;
+                break;
+            case NEW_DIRECT_BYTE_BUFFER_ERROR:
+                ret_cod = LIXA_RC_NEW_DIRECT_BYTE_BUFFER_ERROR;
+                break;
+            case SET_OBJECT_FIELD_ERROR:
+                ret_cod = LIXA_RC_SET_OBJECT_FIELD_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* throw Java exception */
+        if (LIXA_RC_OK != ret_cod)
+            Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("Java_org_tiian_lixa_xta_Config_newJNI/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return;
+}
 
 
 
@@ -73,7 +141,7 @@ Java_org_tiian_lixa_xta_Config_getNativePointer(JNIEnv *env, jobject this_obj)
             THROW(GET_OBJECT_CLASS_ERROR);
         /* get the field identificator */
         if (NULL == (field_id = (*env)->GetFieldID(
-                         env, this_class, "NativePointer",
+                         env, this_class, "nativePointer",
                          "Ljava/nio/ByteBuffer;")) ||
             (*env)->ExceptionCheck(env))
             THROW(GET_FIELD_ID_ERROR);

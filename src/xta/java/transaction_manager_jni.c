@@ -238,9 +238,9 @@ Java_org_tiian_lixa_xta_TransactionManager_createTransaction
                 "createTransaction\n"));
     TRY {        
         /* retrieve the current Transaction Manager object */
-        if (NULL == (tm =
-                     Java_org_tiian_lixa_xta_TransactionManager_getNativeObject(
-                         env, this_obj)))
+        if (NULL ==
+            (tm = Java_org_tiian_lixa_xta_TransactionManager_getNativeObject(
+                env, this_obj)))
             THROW(NULL_OBJECT1);
         /* create a new native C Transaction object */
         if (NULL == (tx = xta_transaction_manager_create_transaction(tm)))

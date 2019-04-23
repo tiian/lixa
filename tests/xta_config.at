@@ -31,6 +31,16 @@ AT_CLEANUP
 AT_SETUP([XTA Python/0.0/2.1 Connection Timeout (env var)])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "z$PYTHON" = "z"; then exit 77; fi])
-AT_CHECK([export LIXA_CLIENT_CONNECTION_TIMEOUT=6666; export LIXA_PROFILE=CASE_PROF_0008; lixa_test_exec.sh none stop case3110.py 6666 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_CLIENT_CONNECTION_TIMEOUT=6666; export LIXA_PROFILE=CASE_PROF_0008; lixa_test_exec.sh none none case3110.py 6666 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA Java/0.0/3.0 Connection Timeout (cfg file)])
+AT_CHECK([if test "$LIXA_XTA_JAVA" != "yes"; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008; lixa_test_exec.sh none none case4110 7000 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA Java/0.0/3.1 Connection Timeout (env var)])
+AT_CHECK([if test "$LIXA_XTA_JAVA" != "yes"; then exit 77; fi])
+AT_CHECK([export LIXA_CLIENT_CONNECTION_TIMEOUT=6666; export LIXA_PROFILE=CASE_PROF_0008; lixa_test_exec.sh none stop case4110 6666 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
